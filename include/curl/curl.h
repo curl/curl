@@ -796,16 +796,18 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                         added in 7.52.0 */
 #define CURLPROXY_HTTPS2          3L /* HTTPS and attempt HTTP/2
                                         added in 8.2.0 */
-#define CURLPROXY_SOCKS4          4L /* support added in 7.15.2, enum existed
+#define CURLPROXY_HTTPS3          4L /* HTTPS and attempt HTTP/3
+                                        added in 8.16.0 */
+#define CURLPROXY_SOCKS4          5L /* support added in 7.15.2, enum existed
                                         already in 7.10 */
-#define CURLPROXY_SOCKS5          5L /* added in 7.10 */
-#define CURLPROXY_SOCKS4A         6L /* added in 7.18.0 */
-#define CURLPROXY_SOCKS5_HOSTNAME 7L /* Use the SOCKS5 protocol but pass along
+#define CURLPROXY_SOCKS5          6L /* added in 7.10 */
+#define CURLPROXY_SOCKS4A         7L /* added in 7.18.0 */
+#define CURLPROXY_SOCKS5_HOSTNAME 8L /* Use the SOCKS5 protocol but pass along
                                         the hostname rather than the IP
                                         address. added in 7.18.0 */
 
 typedef enum {
-  CURLPROXY_LAST = 8 /* never use */
+  CURLPROXY_LAST = 9 /* never use */
 } curl_proxytype;  /* this enum was added in 7.10 */
 
 /*
@@ -1491,8 +1493,8 @@ typedef enum {
   CURLOPT(CURLOPT_SHARE, CURLOPTTYPE_OBJECTPOINT, 100),
 
   /* indicates type of proxy. accepted values are CURLPROXY_HTTP (default),
-     CURLPROXY_HTTPS, CURLPROXY_SOCKS4, CURLPROXY_SOCKS4A and
-     CURLPROXY_SOCKS5. */
+     CURLPROXY_HTTPS, CURLPROXY_HTTP2, CURLPROXY_HTTP3, CURLPROXY_SOCKS4,
+     CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5. */
   CURLOPT(CURLOPT_PROXYTYPE, CURLOPTTYPE_VALUES, 101),
 
   /* Set the Accept-Encoding string. Use this to tell a server you would like
@@ -2257,6 +2259,9 @@ typedef enum {
 
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
+
+  /* tunnel non-http operations through an HTTP proxy using UDP tunnel */
+  CURLOPT(CURLOPT_HTTPPROXYUDPTUNNEL, CURLOPTTYPE_LONG, 329),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

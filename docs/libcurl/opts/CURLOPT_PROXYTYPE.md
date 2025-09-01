@@ -41,6 +41,10 @@ HTTPS Proxy using HTTP/1. (Added in 7.52.0 for OpenSSL and GnuTLS. Since
 
 HTTPS Proxy and attempt to speak HTTP/2 over it. (Added in 8.1.0)
 
+## CURLPROXY_HTTPS3
+
+HTTPS Proxy and attempt to speak HTTP/3 over it. (Added in 8.16.0)
+
 ## CURLPROXY_HTTP_1_0
 
 HTTP 1.0 Proxy. This is similar to CURLPROXY_HTTP except it uses HTTP/1.0 for

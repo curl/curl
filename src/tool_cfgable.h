@@ -254,6 +254,7 @@ struct OperationConfig {
   BIT(mail_rcpt_allowfails); /* --mail-rcpt-allowfails */
   BIT(sasl_ir);             /* Enable/disable SASL initial response */
   BIT(proxytunnel);
+  BIT(proxyudptunnel);
   BIT(ftp_append);          /* APPE on ftp */
   BIT(use_ascii);           /* select ASCII or text transfer */
   BIT(autoreferer);         /* automatically set referer */
