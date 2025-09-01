@@ -47,9 +47,9 @@ GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Connection: Upgrade, HTTP2-Settings
 Upgrade: %H2CVER
 HTTP2-Settings: AAMAAABkAAQAAQAAAAIAAAAA
+Connection: Upgrade, HTTP2-Settings
 
 </protocol>
 </verify>

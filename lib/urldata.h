@@ -1177,7 +1177,11 @@ struct UrlState {
                     internal use and the user does not have ownership of the
                     handle. */
   BIT(http_ignorecustom); /* ignore custom method from now */
-  BIT(http_connection_hd_added); /* 'Connection: ' header already added */
+#ifndef CURL_DISABLE_HTTP
+  BIT(http_hd_te); /* Added HTTP header TE: */
+  BIT(http_hd_upgrade); /* Added HTTP header Upgrade: */
+  BIT(http_hd_h2_settings); /* Added HTTP header H2Settings: */
+#endif
 };
 
 /*

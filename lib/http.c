@@ -107,9 +107,6 @@ static CURLcode http_header(struct Curl_easy *data,
                             const char *hd, size_t hdlen);
 static CURLcode http_range(struct Curl_easy *data,
                            Curl_HttpReq httpreq);
-static CURLcode http_req_complete(struct Curl_easy *data,
-                                  struct dynbuf *r, int httpversion,
-                                  Curl_HttpReq httpreq);
 static CURLcode http_req_set_TE(struct Curl_easy *data,
                                 struct dynbuf *req,
                                 int httpversion);
@@ -1704,9 +1701,8 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                  we will force length zero then */
               curlx_str_casecompare(&name, "Content-Length"))
         ;
-      else if(data->state.http_connection_hd_added &&
-              /* when Connection: header has already been added */
-              curlx_str_casecompare(&name, "Connection"))
+      else if(curlx_str_casecompare(&name, "Connection"))
+        /* Normal Connection: header generation takes care of this */
         ;
       else if((httpversion >= 20) &&
               curlx_str_casecompare(&name, "Transfer-Encoding"))
@@ -2320,9 +2316,10 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
   return CURLE_OK;
 }
 
-static CURLcode http_req_complete(struct Curl_easy *data,
-                                  struct dynbuf *r, int httpversion,
-                                  Curl_HttpReq httpreq)
+static CURLcode http_add_content_hds(struct Curl_easy *data,
+                                     struct dynbuf *r,
+                                     int httpversion,
+                                     Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
   curl_off_t req_clen;
@@ -2390,19 +2387,11 @@ static CURLcode http_req_complete(struct Curl_easy *data,
     break;
   }
 
-  /* end of headers */
-  result = curlx_dyn_addn(r, STRCONST("\r\n"));
-  if(!result) {
-    Curl_pgrsSetUploadSize(data, req_clen);
-    if(announced_exp100)
-      result = http_exp100_add_reader(data);
-  }
+  Curl_pgrsSetUploadSize(data, req_clen);
+  if(announced_exp100)
+    result = http_exp100_add_reader(data);
 
 out:
-  if(!result) {
-    /* setup variables for the upcoming transfer */
-    Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
-  }
   return result;
 }
 
@@ -2645,6 +2634,38 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
   return CURLE_OK;
 }
 
+static CURLcode http_add_connection_hd(struct Curl_easy *data,
+                                       struct dynbuf *req)
+{
+  char *custom = Curl_checkheaders(data, STRCONST("Connection"));
+  char *custom_val = custom ? Curl_copy_header_value(custom) : NULL;
+  const char *sep = (custom_val && *custom_val) ? ", " : "Connection: ";
+  CURLcode result = CURLE_OK;
+  size_t rlen = curlx_dyn_len(req);
+
+  if(custom && !custom_val)
+    return CURLE_OUT_OF_MEMORY;
+
+  if(custom_val && *custom_val)
+    result = curlx_dyn_addf(req, "Connection: %s", custom_val);
+  if(!result && data->state.http_hd_te) {
+    result = curlx_dyn_addf(req, "%s%s", sep, "TE");
+    sep = ", ";
+  }
+  if(!result && data->state.http_hd_upgrade) {
+    result = curlx_dyn_addf(req, "%s%s", sep, "Upgrade");
+    sep = ", ";
+  }
+  if(!result && data->state.http_hd_h2_settings) {
+    result = curlx_dyn_addf(req, "%s%s", sep, "HTTP2-Settings");
+  }
+  if(rlen < curlx_dyn_len(req))
+    result = curlx_dyn_addn(req, STRCONST("\r\n"));
+
+  free(custom_val);
+  return result;
+}
+
 /* Header identifier in order we send them by default */
 typedef enum {
   H1_HD_REQUEST,
@@ -2668,19 +2689,19 @@ typedef enum {
 #endif
   H1_HD_UPGRADE,
   H1_HD_COOKIES,
-#ifndef CURL_DISABLE_WEBSOCKETS
-  H1_HD_WEBSOCKET,
-#endif
   H1_HD_CONDITIONALS,
   H1_HD_CUSTOM,
-  H1_HD_LAST  /* not a header, just the last enum value for iterating */
+  H1_HD_CONTENT,
+  H1_HD_CONNECTION,
+  H1_HD_LAST  /* the last, empty header line */
 } http_hd_t;
 
 static CURLcode http_add_hd(struct Curl_easy *data,
                             struct dynbuf *req,
                             http_hd_t id,
                             unsigned char httpversion,
-                            const char *method)
+                            const char *method,
+                            Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
   switch(id) {
@@ -2733,26 +2754,8 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 #ifdef HAVE_LIBZ
     if(!Curl_checkheaders(data, STRCONST("TE")) &&
        data->set.http_transfer_encoding) {
-      /* When we are to insert a TE: header in the request, we must also insert
-         TE in a Connection: header, so we need to merge the custom provided
-         Connection: header and prevent the original to get sent. Note that if
-         the user has inserted his/her own TE: header we do not do this magic
-         but then assume that the user will handle it all! */
-      char *cptr = Curl_checkheaders(data, STRCONST("Connection"));
-      if(cptr) {
-        cptr = Curl_copy_header_value(cptr);
-        if(!cptr)
-          return CURLE_OUT_OF_MEMORY;
-      }
-
-      data->state.http_connection_hd_added = TRUE;
-      if(cptr && *cptr)
-        result = curlx_dyn_addf(req, "Connection: %s, TE\r\nTE: gzip\r\n",
-                                cptr);
-      else
-        result = curlx_dyn_add(req, "Connection: TE\r\nTE: gzip\r\n");
-
-      free(cptr);
+      data->state.http_hd_te = TRUE;
+      result = curlx_dyn_add(req, "TE: gzip\r\n");
     }
 #endif
     break;
@@ -2803,18 +2806,15 @@ static CURLcode http_add_hd(struct Curl_easy *data,
          over SSL */
       result = Curl_http2_request_upgrade(req, data);
     }
+#ifndef CURL_DISABLE_WEBSOCKETS
+    if(!result && data->conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+      result = Curl_ws_request(data, req);
+#endif
     break;
 
   case H1_HD_COOKIES:
     result = http_cookies(data, req);
     break;
-
-#ifndef CURL_DISABLE_WEBSOCKETS
-  case H1_HD_WEBSOCKET:
-    if(data->conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
-      result = Curl_ws_request(data, req);
-    break;
-#endif
 
   case H1_HD_CONDITIONALS:
     result = Curl_add_timecondition(data, req);
@@ -2824,8 +2824,17 @@ static CURLcode http_add_hd(struct Curl_easy *data,
     result = Curl_add_custom_headers(data, FALSE, httpversion, req);
     break;
 
-  default:
-    DEBUGASSERT(0);
+  case H1_HD_CONTENT:
+    result = http_add_content_hds(data, req, httpversion, httpreq);
+    break;
+
+  case H1_HD_CONNECTION: {
+    result = http_add_connection_hd(data, req);
+    break;
+  }
+
+  case H1_HD_LAST:
+    result = curlx_dyn_addn(req, STRCONST("\r\n"));
     break;
   }
   return result;
@@ -2867,7 +2876,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   result = Curl_headers_init(data);
   if(result)
     goto out;
-  data->state.http_connection_hd_added = FALSE;
+
+  data->state.http_hd_te = FALSE;
+  data->state.http_hd_upgrade = FALSE;
+  data->state.http_hd_h2_settings = FALSE;
 
   /* what kind of request do we need to send? */
   Curl_http_method(data, &method, &httpreq);
@@ -2904,17 +2916,15 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   httpversion = http_request_version(data);
   /* Add request line and all headers to `req` */
-  for(hd_id = 0; hd_id < H1_HD_LAST; ++hd_id) {
-    result = http_add_hd(data, &req, (http_hd_t)hd_id, httpversion, method);
+  for(hd_id = 0; hd_id <= H1_HD_LAST; ++hd_id) {
+    result = http_add_hd(data, &req, (http_hd_t)hd_id,
+                         httpversion, method, httpreq);
     if(result)
       goto out;
   }
 
-  /* Add any final headers, including the last, empty line */
-  result = http_req_complete(data, &req, httpversion, httpreq);
-  if(result)
-    goto out;
-
+  /* setup variables for the upcoming transfer and send */
+  Curl_xfer_setup_sendrecv(data, FIRSTSOCKET, -1);
   result = Curl_req_send(data, &req, httpversion);
 
   if((httpversion >= 20) && data->req.upload_chunky)

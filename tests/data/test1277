@@ -183,9 +183,9 @@ GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Connection: TE
 TE: gzip
 Accept-Encoding: xxx
+Connection: TE
 
 </protocol>
 </verify>

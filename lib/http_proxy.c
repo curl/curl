@@ -162,10 +162,6 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
                  we will force length zero then */
               hd_name_eq(name, namelen, STRCONST("Content-Length:")))
         ;
-      else if(data->state.http_connection_hd_added &&
-              /* when Connection: header has already been added */
-              hd_name_eq(name, namelen, STRCONST("Connection:")))
-        ;
       else if((httpversion >= 20) &&
               hd_name_eq(name, namelen, STRCONST("Transfer-Encoding:")))
         /* HTTP/2 and HTTP/3 do not support chunked requests */
