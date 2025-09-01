@@ -2673,7 +2673,7 @@ typedef enum {
 #endif
   H1_HD_CONDITIONALS,
   H1_HD_CUSTOM,
-  H1_HD_LAST, /* not a header, just the last enum value for iterating */
+  H1_HD_LAST  /* not a header, just the last enum value for iterating */
 } http_hd_t;
 
 static CURLcode http_add_hd(struct Curl_easy *data,
