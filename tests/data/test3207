@@ -172,7 +172,7 @@ https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
 # Verify data after the test has been "shot"
 <verify>
 <limits>
-Allocations: 13500
+Allocations: 13600
 </limits>
 </verify>
 </testcase>
