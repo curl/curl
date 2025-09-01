@@ -59,7 +59,7 @@ int main(void)
     if(CURLE_OK == res) {
       curl_off_t filetime;
       res = curl_easy_getinfo(curl, CURLINFO_FILETIME_T, &filetime);
-      if((CURLE_OK == res) && (filetime >= 0)) {
+      if((CURLE_OK == res) && (filetime != -1)) {
         time_t file_time = (time_t)filetime;
         printf("filetime: %s", ctime(&file_time));
       }
