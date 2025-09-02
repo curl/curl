@@ -361,9 +361,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   struct UserDefined *set = &data->set;
   CURLcode result = CURLE_OK;
 
-  set->out = stdout; /* default output to stdout */
+  set->out = stdout;  /* default output to stdout */
   set->in_set = stdin;  /* default input from stdin */
-  set->err  = stderr;  /* default stderr to stderr */
+  set->err = stderr;  /* default stderr to stderr */
 
   /* use fwrite as default function to store output */
   set->fwrite_func = (curl_write_callback)fwrite;

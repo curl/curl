@@ -66,7 +66,7 @@ unsigned int get_terminal_columns(void)
       cols = (int)ts.ws_col;
 #elif defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
     {
-      HANDLE  stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
+      HANDLE stderr_hnd = GetStdHandle(STD_ERROR_HANDLE);
       CONSOLE_SCREEN_BUFFER_INFO console_info;
 
       if((stderr_hnd != INVALID_HANDLE_VALUE) &&

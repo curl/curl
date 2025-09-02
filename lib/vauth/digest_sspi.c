@@ -195,9 +195,9 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   /* Generate our response message */
   status = Curl_pSecFn->InitializeSecurityContext(&credentials, NULL, spn,
-                                               0, 0, 0, &chlg_desc, 0,
-                                               &context, &resp_desc, &attrs,
-                                               &expiry);
+                                                  0, 0, 0, &chlg_desc, 0,
+                                                  &context, &resp_desc, &attrs,
+                                                  &expiry);
 
   if(status == SEC_I_COMPLETE_NEEDED ||
      status == SEC_I_COMPLETE_AND_CONTINUE)
@@ -591,11 +591,11 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
     /* Generate our response message */
     status = Curl_pSecFn->InitializeSecurityContext(&credentials, NULL,
-                                                 spn,
-                                                 ISC_REQ_USE_HTTP_STYLE, 0, 0,
-                                                 &chlg_desc, 0,
-                                                 digest->http_context,
-                                                 &resp_desc, &attrs, &expiry);
+                                                  spn,
+                                                  ISC_REQ_USE_HTTP_STYLE, 0, 0,
+                                                  &chlg_desc, 0,
+                                                  digest->http_context,
+                                                  &resp_desc, &attrs, &expiry);
     curlx_unicodefree(spn);
 
     if(status == SEC_I_COMPLETE_NEEDED ||

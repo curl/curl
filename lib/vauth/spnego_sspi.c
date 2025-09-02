@@ -270,7 +270,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(nego->status == SEC_I_COMPLETE_NEEDED ||
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
     nego->status = (DWORD)Curl_pSecFn->CompleteAuthToken(nego->context,
-                                                      &resp_desc);
+                                                         &resp_desc);
     if(GSS_ERROR(nego->status)) {
       char buffer[STRERROR_LEN];
       failf(data, "CompleteAuthToken failed: %s",
@@ -308,7 +308,7 @@ CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
                                          char **outptr, size_t *outlen)
 {
   /* Base64 encode the already generated response */
-  CURLcode result = curlx_base64_encode((const char *) nego->output_token,
+  CURLcode result = curlx_base64_encode((const char *)nego->output_token,
                                         nego->output_token_length, outptr,
                                         outlen);
   if(!result && (!*outptr || !*outlen)) {

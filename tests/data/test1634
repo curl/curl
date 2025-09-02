@@ -48,7 +48,7 @@ http
 --retry with a 429 response and Retry-After: and --fail
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1  --fail
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1 --fail
 </command>
 </client>
 

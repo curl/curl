@@ -88,7 +88,6 @@ struct GlobalInfo {
   FILE *input;
 };
 
-
 /* Information associated with a specific easy handle */
 struct ConnInfo {
   CURL *easy;
@@ -96,7 +95,6 @@ struct ConnInfo {
   struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
 };
-
 
 /* Information associated with a specific socket */
 struct SockInfo {
@@ -164,7 +162,6 @@ static void mcode_or_die(const char *where, CURLMcode code)
   }
 }
 
-
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(struct GlobalInfo *g)
 {
@@ -190,7 +187,6 @@ static void check_multi_info(struct GlobalInfo *g)
     }
   }
 }
-
 
 /* Called by libevent when we get action on a multi socket */
 static void event_cb(EV_P_ struct ev_io *w, int revents)
@@ -240,7 +236,6 @@ static void remsock(struct SockInfo *f, struct GlobalInfo *g)
   }
 }
 
-
 /* Assign information to a SockInfo structure */
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
@@ -260,7 +255,6 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
   f->evset = 1;
   ev_io_start(g->loop, &f->ev);
 }
-
 
 /* Initialize a new SockInfo structure */
 static void addsock(curl_socket_t s, CURL *easy, int action,
@@ -304,7 +298,6 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   return 0;
 }
 
-
 /* CURLOPT_WRITEFUNCTION */
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -327,7 +320,6 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
           "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
-
 
 /* Create a new easy handle, and add it to the global curl_multi */
 static void new_conn(const char *url, struct GlobalInfo *g)
