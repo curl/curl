@@ -68,7 +68,7 @@ static size_t readcb(char *buf, size_t nitems, size_t buflen, void *p)
     result = curl_ws_start_frame(ctx->easy, CURLWS_TEXT,
                                  (curl_off_t)ctx->blen);
     if(result) {
-      fprintf(stderr, "error staring frame: %d\n", result);
+      fprintf(stderr, "error starting frame: %d\n", result);
       return CURL_READFUNC_ABORT;
     }
   }

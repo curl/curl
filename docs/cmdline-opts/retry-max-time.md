@@ -23,6 +23,6 @@ while performing, it may take longer than this given time period. To limit a
 single request's maximum time, use --max-time. Set this option to zero to not
 timeout retries.
 
-Staring in curl 8.16.0, this option accepts a time as decimal number for parts
+Starting in curl 8.16.0, this option accepts a time as decimal number for parts
 of seconds. The decimal value needs to be provided using a dot (.) as decimal
 separator - not the local version even if it might be using another separator.
