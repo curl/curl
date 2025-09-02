@@ -37,7 +37,7 @@ http
 --retry with a 429 response and Retry-After: and --fail-with-body
 </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1  --fail-with-body
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 1 --fail-with-body
 </command>
 </client>
 
