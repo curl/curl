@@ -924,7 +924,7 @@ static CURLcode smtp_state_servergreet_resp(struct Curl_easy *data,
                                             smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2) {
     failf(data, "Got unexpected smtp-server response: %d", smtpcode);
@@ -943,7 +943,7 @@ static CURLcode smtp_state_starttls_resp(struct Curl_easy *data,
                                          smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   /* Pipelining in response is forbidden. */
   if(smtpc->pp.overflow)
@@ -973,7 +973,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
   const char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2 && smtpcode != 1) {
     if(data->set.use_ssl <= CURLUSESSL_TRY
@@ -1074,7 +1074,7 @@ static CURLcode smtp_state_helo_resp(struct Curl_easy *data,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2) {
     failf(data, "Remote access denied: %d", smtpcode);
@@ -1096,7 +1096,7 @@ static CURLcode smtp_state_auth_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   saslprogress progress;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   result = Curl_sasl_continue(&smtpc->sasl, data, smtpcode, &progress);
   if(!result)
@@ -1126,7 +1126,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
   char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if((smtp->rcpt && smtpcode/100 != 2 && smtpcode != 553 && smtpcode != 1) ||
      (!smtp->rcpt && smtpcode/100 != 2 && smtpcode != 1)) {
@@ -1166,7 +1166,7 @@ static CURLcode smtp_state_mail_resp(struct Curl_easy *data,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2) {
     failf(data, "MAIL failed: %d", smtpcode);
@@ -1190,7 +1190,7 @@ static CURLcode smtp_state_rcpt_resp(struct Curl_easy *data,
   bool is_smtp_err = FALSE;
   bool is_smtp_blocking_err = FALSE;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   is_smtp_err = (smtpcode/100 != 2);
 
@@ -1246,7 +1246,7 @@ static CURLcode smtp_state_data_resp(struct Curl_easy *data,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode != 354) {
     failf(data, "DATA failed: %d", smtpcode);
@@ -1275,7 +1275,7 @@ static CURLcode smtp_state_postdata_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode != 250)
     result = CURLE_WEIRD_SERVER_REPLY;

@@ -811,7 +811,7 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
   const char *line;
   size_t len;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
@@ -866,7 +866,7 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
   const char *line;
   size_t len;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
@@ -954,7 +954,7 @@ static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
 {
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
@@ -987,7 +987,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
   saslprogress progress;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
@@ -1025,7 +1025,7 @@ static CURLcode pop3_state_apop_resp(struct Curl_easy *data, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(pop3code != '+') {
     failf(data, "Authentication failed: %d", pop3code);
@@ -1046,7 +1046,7 @@ static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
@@ -1070,7 +1070,7 @@ static CURLcode pop3_state_pass_resp(struct Curl_easy *data, int pop3code,
                                      pop3state instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(pop3code != '+') {
     failf(data, "Access denied. %c", pop3code);
@@ -1094,7 +1094,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
   struct pop3_conn *pop3c = Curl_conn_meta_get(conn, CURL_META_POP3_CONN);
   struct pingpong *pp;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
   if(!pop3 || !pop3c)
     return CURLE_FAILED_INIT;
 

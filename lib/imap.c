@@ -1005,7 +1005,7 @@ static CURLcode imap_state_servergreet_resp(struct Curl_easy *data,
                                             int imapcode,
                                             imapstate instate)
 {
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(imapcode == IMAP_RESP_PREAUTH) {
     /* PREAUTH */
@@ -1030,7 +1030,7 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   /* Do we have an untagged response? */
   if(imapcode == '*') {
@@ -1111,7 +1111,7 @@ static CURLcode imap_state_starttls_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   /* Pipelining in response is forbidden. */
   if(imapc->pp.overflow)
@@ -1140,7 +1140,7 @@ static CURLcode imap_state_auth_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   saslprogress progress;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   result = Curl_sasl_continue(&imapc->sasl, data, imapcode, &progress);
   if(!result)
@@ -1171,7 +1171,7 @@ static CURLcode imap_state_login_resp(struct Curl_easy *data,
                                       imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(imapcode != IMAP_RESP_OK) {
     failf(data, "Access denied. %c", imapcode);
@@ -1194,7 +1194,7 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
   size_t len = imapc->pp.nfinal;
 
-  (void)instate; /* No use for this yet */
+  (void)instate;
 
   if(imapcode == '*')
     result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
@@ -1217,7 +1217,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(imapcode == '*') {
     /* See if this is an UIDVALIDITY response */
@@ -1279,7 +1279,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
   bool parsed = FALSE;
   curl_off_t size = 0;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(imapcode != '*') {
     Curl_pgrsSetDownloadSize(data, -1);
@@ -1370,7 +1370,7 @@ static CURLcode imap_state_fetch_final_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  (void)instate; /* No use for this yet */
+  (void)instate;
 
   if(imapcode != IMAP_RESP_OK)
     result = CURLE_WEIRD_SERVER_REPLY;
@@ -1388,7 +1388,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data,
                                        imapstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* No use for this yet */
+  (void)instate;
 
   if(imapcode != '+') {
     result = CURLE_UPLOAD_FAILED;
@@ -1415,7 +1415,7 @@ static CURLcode imap_state_append_final_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  (void)instate; /* No use for this yet */
+  (void)instate;
 
   if(imapcode != IMAP_RESP_OK)
     result = CURLE_UPLOAD_FAILED;
