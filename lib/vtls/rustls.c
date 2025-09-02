@@ -393,9 +393,11 @@ out:
 /* A server certificate verify callback for Rustls that always returns
    RUSTLS_RESULT_OK, or in other words disable certificate verification. */
 static uint32_t
-cr_verify_none(void *userdata UNUSED_PARAM,
-               const rustls_verify_server_cert_params *params UNUSED_PARAM)
+cr_verify_none(void *userdata,
+               const rustls_verify_server_cert_params *params)
 {
+  (void)userdata;
+  (void)params;
   return RUSTLS_RESULT_OK;
 }
 
@@ -1295,10 +1297,11 @@ cr_connect(struct Curl_cfilter *cf,
 
 static void *
 cr_get_internals(struct ssl_connect_data *connssl,
-                 CURLINFO info UNUSED_PARAM)
+                 CURLINFO info)
 {
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
+  (void)info;
   DEBUGASSERT(backend);
   return backend->conn;
 }

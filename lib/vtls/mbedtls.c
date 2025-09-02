@@ -1458,7 +1458,7 @@ static bool mbedtls_data_pending(struct Curl_cfilter *cf,
 static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   size_t inputlen,
                                   unsigned char *sha256sum,
-                                  size_t sha256len UNUSED_PARAM)
+                                  size_t sha256len)
 {
   (void)sha256len;
   /* returns 0 on success, otherwise failure */
@@ -1468,7 +1468,7 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
 }
 
 static void *mbedtls_get_internals(struct ssl_connect_data *connssl,
-                                   CURLINFO info UNUSED_PARAM)
+                                   CURLINFO info)
 {
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;

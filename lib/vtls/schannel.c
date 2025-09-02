@@ -2583,7 +2583,7 @@ static size_t schannel_version(char *buffer, size_t size)
   return msnprintf(buffer, size, "Schannel");
 }
 
-static CURLcode schannel_random(struct Curl_easy *data UNUSED_PARAM,
+static CURLcode schannel_random(struct Curl_easy *data,
                                 unsigned char *entropy, size_t length)
 {
   (void)data;
@@ -2725,7 +2725,7 @@ static CURLcode schannel_sha256sum(const unsigned char *input,
 }
 
 static void *schannel_get_internals(struct ssl_connect_data *connssl,
-                                    CURLINFO info UNUSED_PARAM)
+                                    CURLINFO info)
 {
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
