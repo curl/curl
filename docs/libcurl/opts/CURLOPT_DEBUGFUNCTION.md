@@ -149,7 +149,7 @@ int my_trace(CURL *handle, curl_infotype type,
              void *clientp)
 {
   const char *text;
-  (void)handle; /* prevent compiler warning */
+  (void)handle;
   (void)clientp;
 
   switch(type) {
