@@ -273,6 +273,45 @@ struct curl_trc_feat Curl_trc_feat_dns = {
   CURL_LOG_LVL_NONE,
 };
 
+static const char * const Curl_trc_timer_names[]={
+  "100_TIMEOUT",
+  "ASYNC_NAME",
+  "CONNECTTIMEOUT",
+  "DNS_PER_NAME",
+  "DNS_PER_NAME2",
+  "HAPPY_EYEBALLS_DNS",
+  "HAPPY_EYEBALLS",
+  "MULTI_PENDING",
+  "SPEEDCHECK",
+  "TIMEOUT",
+  "TOOFAST",
+  "QUIC",
+  "FTP_ACCEPT",
+  "ALPN_EYEBALLS",
+  "SHUTDOWN",
+};
+
+const char *Curl_trc_timer_name(int tid)
+{
+  if((tid >= 0) && ((size_t)tid < CURL_ARRAYSIZE(Curl_trc_timer_names)))
+    return Curl_trc_timer_names[(size_t)tid];
+  return "UNKNOWN?";
+}
+
+void Curl_trc_multi_timeouts(struct Curl_easy *data)
+{
+  struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
+  if(e) {
+    struct curltime now = curlx_now();
+    while(e) {
+      struct time_node *n = Curl_node_elem(e);
+      e = Curl_node_next(e);
+      CURL_TRC_M(data, "[TIMEOUT] %s expires in %" FMT_TIMEDIFF_T "ns",
+                 CURL_TIMER_NAME(n->eid),
+                 curlx_timediff_us(n->time, now));
+    }
+  }
+}
 
 static const char * const Curl_trc_mstate_names[]={
   "INIT",

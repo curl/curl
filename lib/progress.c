@@ -281,41 +281,40 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
  * to wait to get back under the speed limit.
  */
 timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
-                                  curl_off_t speed_limit,
+                                  curl_off_t bytes_per_sec,
                                   struct curltime now)
 {
-  curl_off_t size = d->cur_size - d->limit.start_size;
-  timediff_t minimum;
-  timediff_t actual;
+  curl_off_t bytes = d->cur_size - d->limit.start_size;
+  timediff_t should_ms;
+  timediff_t took_ms;
 
-  if(!speed_limit || !size)
+  /* no limit or we did not get to any bytes yet */
+  if(!bytes_per_sec || !bytes)
     return 0;
 
-  /*
-   * 'minimum' is the number of milliseconds 'size' should take to download to
-   * stay below 'limit'.
-   */
-  if(size < CURL_OFF_T_MAX/1000)
-    minimum = (timediff_t) (1000 * size / speed_limit);
+  /* The time it took us to have `bytes` */
+  took_ms = curlx_timediff_ceil(now, d->limit.start);
+
+  /* The time it *should* have taken us to have `bytes`
+   * when obeying the bytes_per_sec speed_limit. */
+  if(bytes < CURL_OFF_T_MAX/1000) {
+    /* (1000 * bytes / (bytes / sec)) = 1000 * sec = ms */
+    should_ms = (timediff_t) (1000 * bytes / bytes_per_sec);
+  }
   else {
-    minimum = (timediff_t) (size / speed_limit);
-    if(minimum < TIMEDIFF_T_MAX/1000)
-      minimum *= 1000;
+    /* very large `bytes`, first calc the seconds it should have taken.
+     * if that is small enough, convert to milliseconds. */
+    should_ms = (timediff_t) (bytes / bytes_per_sec);
+    if(should_ms < TIMEDIFF_T_MAX/1000)
+      should_ms *= 1000;
     else
-      minimum = TIMEDIFF_T_MAX;
+      should_ms = TIMEDIFF_T_MAX;
   }
 
-  /*
-   * 'actual' is the time in milliseconds it took to actually download the
-   * last 'size' bytes.
-   */
-  actual = curlx_timediff_ceil(now, d->limit.start);
-  if(actual < minimum) {
-    /* if it downloaded the data faster than the limit, make it wait the
-       difference */
-    return minimum - actual;
+  if(took_ms < should_ms) {
+    /* when gotten to `bytes` too fast, wait the difference */
+    return should_ms - took_ms;
   }
-
   return 0;
 }
 

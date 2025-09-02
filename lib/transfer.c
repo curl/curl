@@ -280,9 +280,10 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
     if(bytestoread && data->set.max_recv_speed > 0) {
       /* In case of speed limit on receiving: if this loop already got
-       * data, break out. If not, limit the amount of bytes to receive.
-       * The overall, timed, speed limiting is done in multi.c */
-      if(total_received)
+       * a quarter of the quota, break out. We want to stutter a bit
+       * to keep in the limit, but too small receives will just cost
+       * cpu unnecessarily. */
+      if(total_received >= (data->set.max_recv_speed / 4))
         break;
       if(data->set.max_recv_speed < (curl_off_t)bytestoread)
         bytestoread = (size_t)data->set.max_recv_speed;
@@ -957,4 +958,16 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
   }
   Curl_conn_ev_data_pause(data, enable);
   return result;
+}
+
+bool Curl_xfer_is_too_fast(struct Curl_easy *data)
+{
+  struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
+  while(e) {
+    struct time_node *n = Curl_node_elem(e);
+    e = Curl_node_next(e);
+    if(n->eid == EXPIRE_TOOFAST)
+      return TRUE;
+  }
+  return FALSE;
 }

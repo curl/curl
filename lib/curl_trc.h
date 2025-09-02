@@ -85,6 +85,9 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
 void Curl_trc_multi(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 const char *Curl_trc_mstate_name(int state);
+const char *Curl_trc_timer_name(int tid);
+void Curl_trc_multi_timeouts(struct Curl_easy *data);
+
 void Curl_trc_write(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_read(struct Curl_easy *data,
@@ -113,12 +116,15 @@ void Curl_trc_ws(struct Curl_easy *data,
                  const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 
+#define CURL_TRC_M_is_verbose(data) \
+  Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)
+
 #if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define infof(data, ...) \
   do { if(Curl_trc_is_verbose(data)) \
          Curl_infof(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_M(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)) \
+  do { if(CURL_TRC_M_is_verbose(data)) \
          Curl_trc_multi(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_CF(data, cf, ...) \
   do { if(Curl_trc_cf_is_verbose(cf, data)) \
@@ -202,6 +208,10 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
             (Curl_trc_is_verbose(data) && \
              (ft)->log_level >= CURL_LOG_LVL_INFO)
 #define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
+#define CURL_TIMER_NAME(t)   Curl_trc_timer_name((int)(t))
+#define CURL_TRC_M_TIMEOUTS(data) \
+  do { if(CURL_TRC_M_is_verbose(data)) \
+         Curl_trc_multi_timeouts(data); } while(0)
 
 #else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
@@ -210,6 +220,8 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
 #define Curl_trc_cf_is_verbose(x,y)   (FALSE)
 #define Curl_trc_ft_is_verbose(x,y)   (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
+#define CURL_TIMER_NAME(x)            ((void)(x), "-")
+#define CURL_TRC_M_TIMEOUTS(x)        Curl_nop_stmt
 
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
