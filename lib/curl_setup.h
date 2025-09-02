@@ -786,12 +786,8 @@
 #if defined(__GNUC__) && ((__GNUC__ >= 3) || \
   ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
 #  define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#elif defined(__IAR_SYSTEMS_ICC__)
-#  if (__VER__ >= 9040001)
-#    define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
-#  else
-#    define WARN_UNUSED_RESULT
-#  endif
+#elif defined(__IAR_SYSTEMS_ICC__) && (__VER__ >= 9040001)
+#  define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
 #else
 #  define WARN_UNUSED_RESULT
 #endif
