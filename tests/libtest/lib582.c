@@ -97,8 +97,8 @@ static int t582_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
 {
   struct t582_ReadWriteSockets *sockets = userp;
 
-  (void)easy; /* unused */
-  (void)socketp; /* unused */
+  (void)easy;
+  (void)socketp;
 
   if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
     t582_addFd(&sockets->read, s, "read");
@@ -121,7 +121,7 @@ static int t582_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
   struct curltime *timeout = userp;
 
-  (void)multi; /* unused */
+  (void)multi;
   if(timeout_ms != -1) {
     *timeout = curlx_now();
     timeout->tv_usec += (int)timeout_ms * 1000;

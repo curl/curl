@@ -91,7 +91,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   char idsbuf[60];
   curl_off_t xfer_id, conn_id;
 
-  (void)handle; /* not used */
+  (void)handle;
   (void)userdata;
 
   if(global->tracetime) {

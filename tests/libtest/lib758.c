@@ -184,7 +184,7 @@ static int t758_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
   struct curltime *timeout = userp;
 
-  (void)multi; /* unused */
+  (void)multi;
   t758_ctx.timer_calls++;
   t758_msg("-> CURLMOPT_TIMERFUNCTION");
   if(t758_ctx.timer_calls == t758_ctx.max_timer_calls) {
@@ -204,7 +204,7 @@ static int t758_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 static int t758_cert_verify_callback(X509_STORE_CTX *ctx, void *arg)
 {
   SSL * ssl;
-  (void)arg; /* unused */
+  (void)arg;
   ssl = (SSL *)X509_STORE_CTX_get_ex_data(ctx,
         SSL_get_ex_data_X509_STORE_CTX_idx());
   t758_ctx.number_of_cert_verify_callbacks++;
@@ -227,7 +227,7 @@ static CURLcode
 t758_set_ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *clientp)
 {
   SSL_CTX *ctx = (SSL_CTX *) ssl_ctx;
-  (void)curl; /* unused */
+  (void)curl;
   SSL_CTX_set_cert_verify_callback(ctx, t758_cert_verify_callback, clientp);
   return CURLE_OK;
 }

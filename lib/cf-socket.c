@@ -1444,7 +1444,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t orig_len = len;
   CURLcode result = CURLE_OK;
 
-  (void)eos; /* unused */
+  (void)eos;
   *pnwritten = 0;
   fdsave = cf->conn->sock[cf->sockindex];
   cf->conn->sock[cf->sockindex] = ctx->sock;

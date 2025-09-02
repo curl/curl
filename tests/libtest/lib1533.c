@@ -77,7 +77,6 @@ static size_t t1533_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct cb_data *data = (struct cb_data *)userp;
   size_t totalsize = nmemb * size;
 
-  /* unused parameter */
   (void)ptr;
 
   /* all response headers have been received */

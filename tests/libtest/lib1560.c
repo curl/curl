@@ -2036,7 +2036,7 @@ static CURLcode test_lib1560(const char *URL)
 {
   bool has_utf8 = !!getenv("CURL_TEST_HAVE_CODESET_UTF8");
 
-  (void)URL; /* not used */
+  (void)URL;
 
   if(urldup())
     return (CURLcode)11;

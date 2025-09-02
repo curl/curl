@@ -27,10 +27,10 @@
 
 static size_t t1971_read_cb(char *ptr, size_t size, size_t nitems, void *userp)
 {
-  (void)ptr; /* unused */
-  (void)size; /* unused */
-  (void)nitems; /* unused */
-  (void)userp; /* unused */
+  (void)ptr;
+  (void)size;
+  (void)nitems;
+  (void)userp;
   return 0;
 }
 

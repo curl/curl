@@ -1287,8 +1287,8 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
 static CURLcode telnet_done(struct Curl_easy *data,
                             CURLcode status, bool premature)
 {
-  (void)status; /* unused */
-  (void)premature; /* not used */
+  (void)status;
+  (void)premature;
   Curl_meta_remove(data, CURL_META_TELNET_EASY);
   return CURLE_OK;
 }

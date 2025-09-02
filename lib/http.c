@@ -2995,7 +2995,7 @@ checkrtspprefix(struct Curl_easy *data,
 {
   statusline result = STATUS_BAD;
   statusline onmatch = len >= 5 ? STATUS_DONE : STATUS_UNKNOWN;
-  (void)data; /* unused */
+  (void)data;
   if(checkprefixmax("RTSP/", s, len))
     result = onmatch;
 
