@@ -150,7 +150,7 @@ int my_trace(CURL *handle, curl_infotype type,
   struct timeval tv;
   time_t secs;
   struct tm *now;
-  (void)handle; /* prevent compiler warning */
+  (void)handle;
 
   gettimeofday(&tv, NULL);
   if(!known_offset) {

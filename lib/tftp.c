@@ -1061,8 +1061,8 @@ static CURLcode tftp_done(struct Curl_easy *data, CURLcode status,
   struct connectdata *conn = data->conn;
   struct tftp_conn *state = Curl_conn_meta_get(conn, CURL_META_TFTP_CONN);
 
-  (void)status; /* unused */
-  (void)premature; /* not used */
+  (void)status;
+  (void)premature;
 
   if(Curl_pgrsDone(data))
     return CURLE_ABORTED_BY_CALLBACK;

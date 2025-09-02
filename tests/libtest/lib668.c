@@ -35,7 +35,7 @@ static size_t t668_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t668_WriteThis *pooh = (struct t668_WriteThis *)userp;
   size_t len = strlen(pooh->readptr);
 
-  (void)size; /* Always 1.*/
+  (void)size; /* Always 1 */
 
   if(len > nmemb)
     len = nmemb;

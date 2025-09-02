@@ -130,7 +130,7 @@ krb5_init(void *app_data)
 static int
 krb5_check_prot(void *app_data, int level)
 {
-  (void)app_data; /* unused */
+  (void)app_data;
   if(level == PROT_CONFIDENTIAL)
     return -1;
   return 0;
@@ -470,7 +470,7 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
       ftp_code = -1;
   }
 
-  (void)nread; /* Unused */
+  (void)nread;
   return ftp_code;
 }
 
@@ -703,7 +703,7 @@ static CURLcode sec_send(struct Curl_easy *data, int sockindex,
                          const void *buffer, size_t len, bool eos,
                          size_t *pnwritten)
 {
-  (void)eos; /* unused */
+  (void)eos;
   return sec_write(data, sockindex, buffer, len, pnwritten);
 }
 

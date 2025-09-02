@@ -87,7 +87,7 @@ int main(void)
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
-  (void)hp; /* not used for test */
+  (void)hp;
   (void)h_errnop;
 #elif defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)

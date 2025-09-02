@@ -276,19 +276,19 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
 
 static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc)
 {
-  (void)abstract; /* arg not used */
+  (void)abstract;
   return Curl_cmalloc(count);
 }
 
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc)
 {
-  (void)abstract; /* arg not used */
+  (void)abstract;
   return Curl_crealloc(ptr, count);
 }
 
 static LIBSSH2_FREE_FUNC(my_libssh2_free)
 {
-  (void)abstract; /* arg not used */
+  (void)abstract;
   if(ptr) /* ssh2 agent sometimes call free with null ptr */
     Curl_cfree(ptr);
 }
@@ -3732,7 +3732,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
                          bool premature)
 {
   struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
-  (void)premature; /* not used */
+  (void)premature;
 
   if(sshc && !status)
     myssh_state(data, sshc, SSH_SCP_DONE);

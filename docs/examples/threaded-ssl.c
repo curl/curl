@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 {
   pthread_t tid[NUMT];
   int i;
-  (void)argc; /* we do not use any arguments in this example */
+  (void)argc;
   (void)argv;
 
   /* Must initialize libcurl before any threads are started */

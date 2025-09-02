@@ -38,7 +38,7 @@ static CURLcode test_lib1550(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
   handle = curl_multi_init();
-  (void)URL; /* unused */
+  (void)URL;
 
   curl_multi_setopt(handle, CURLMOPT_PIPELINING_SERVER_BL, bl_servers);
   curl_multi_setopt(handle, CURLMOPT_PIPELINING_SITE_BL, bl_sites);

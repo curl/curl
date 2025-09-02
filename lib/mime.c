@@ -661,7 +661,7 @@ static size_t mime_mem_read(char *buffer, size_t size, size_t nitems,
 {
   curl_mimepart *part = (curl_mimepart *) instream;
   size_t sz = curlx_sotouz(part->datasize - part->state.offset);
-  (void)size;   /* Always 1.*/
+  (void)size;  /* Always 1 */
 
   if(!nitems)
     return STOP_FILLING;
@@ -1000,7 +1000,7 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
 {
   curl_mime *mime = (curl_mime *) instream;
   size_t cursize = 0;
-  (void)size;   /* Always 1. */
+  (void)size;  /* Always 1 */
 
   while(nitems) {
     size_t sz = 0;
@@ -1593,7 +1593,7 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
   size_t ret;
   bool hasread;
 
-  (void)size;   /* Always 1. */
+  (void)size;  /* Always 1 */
 
   /* If `nitems` is <= 4, some encoders will return STOP_FILLING without
    * adding any data and this loops infinitely. */

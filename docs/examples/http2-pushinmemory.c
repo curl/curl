@@ -97,8 +97,8 @@ static int server_push_callback(CURL *parent,
 {
   char *headp;
   int *transfers = (int *)userp;
-  (void)parent; /* we have no use for this */
-  (void)num_headers; /* unused */
+  (void)parent;
+  (void)num_headers;
 
   if(pushindex == MAX_FILES)
     /* cannot fit anymore */

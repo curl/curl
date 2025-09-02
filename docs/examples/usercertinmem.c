@@ -93,8 +93,8 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "-----END RSA PRIVATE KEY-----\n";
 
-  (void)curl; /* avoid warnings */
-  (void)pointer; /* avoid warnings */
+  (void)curl;
+  (void)pointer;
 
   /* get a BIO */
   bio = BIO_new_mem_buf((char *)mypem, -1);

@@ -92,7 +92,7 @@ int my_trace(CURL *handle, curl_infotype type,
              void *userp)
 {
   const char *text;
-  (void)handle; /* prevent compiler warning */
+  (void)handle;
   (void)userp;
   switch(type) {
   case CURLINFO_TEXT:
@@ -171,7 +171,7 @@ static int server_push_callback(CURL *parent,
   FILE *out;
   static unsigned int count = 0;
 
-  (void)parent; /* we have no use for this */
+  (void)parent;
 
   curl_msnprintf(filename, 128, "push%u", count++);
 

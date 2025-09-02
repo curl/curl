@@ -624,7 +624,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   static char zstd_buffer[80];
 #endif
 
-  (void)stamp; /* avoid compiler warnings, we do not use this */
+  (void)stamp;
 
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));

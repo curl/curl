@@ -292,8 +292,8 @@ static CURLcode file_done(struct Curl_easy *data,
                           CURLcode status, bool premature)
 {
   struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
-  (void)status; /* not used */
-  (void)premature; /* not used */
+  (void)status;
+  (void)premature;
 
   if(file)
     file_cleanup(file);
@@ -305,7 +305,7 @@ static CURLcode file_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool dead_connection)
 {
-  (void)dead_connection; /* not used */
+  (void)dead_connection;
   (void)conn;
   return file_done(data, CURLE_OK, FALSE);
 }

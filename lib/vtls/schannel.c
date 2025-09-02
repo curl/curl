@@ -1459,7 +1459,7 @@ static bool
 cert_counter_callback(const CERT_CONTEXT *ccert_context, bool reverse_order,
                       void *certs_count)
 {
-  (void)reverse_order; /* unused */
+  (void)reverse_order;
   if(valid_cert_encoding(ccert_context))
     (*(int *)certs_count)++;
   return TRUE;

@@ -146,10 +146,10 @@ int tool_readbusy_cb(void *clientp,
   struct OperationConfig *config = per->config;
   static curl_off_t ulprev;
 
-  (void)dltotal;  /* unused */
-  (void)dlnow;  /* unused */
-  (void)ultotal;  /* unused */
-  (void)ulnow;  /* unused */
+  (void)dltotal;
+  (void)dlnow;
+  (void)ultotal;
+  (void)ulnow;
 
   if(config->readbusy) {
     if(ulprev == ulnow) {

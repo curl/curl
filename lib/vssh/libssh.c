@@ -2840,7 +2840,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
                          bool premature)
 {
   struct ssh_conn *sshc = Curl_conn_meta_get(data->conn, CURL_META_SSH_CONN);
-  (void)premature;             /* not used */
+  (void)premature;
 
   if(!sshc)
     return CURLE_FAILED_INIT;

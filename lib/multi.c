@@ -1166,7 +1166,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
   struct Curl_multi *multi = m;
   struct easy_pollset ps;
   unsigned int i, mid;
-  (void)exc_fd_set; /* not used */
+  (void)exc_fd_set;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1865,7 +1865,7 @@ static void multi_posttransfer(struct Curl_easy *data)
   if(!data->set.no_signal)
     signal(SIGPIPE, data->state.prev_signal);
 #else
-  (void)data; /* unused parameter */
+  (void)data;
 #endif
 }
 

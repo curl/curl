@@ -164,7 +164,7 @@ static CURLcode test_lib517(const char *URL)
   int i;
   int error = 0;
 
-  (void)URL; /* not used */
+  (void)URL;
 
   for(i = 0; dates[i].input; i++) {
     time_t out = curl_getdate(dates[i].input, NULL);

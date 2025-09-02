@@ -1136,14 +1136,14 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
   Curl_resolve_test_delay();
 #endif
 
-#else /* USE_ALARM_TIMEOUT */
+#else /* !USE_ALARM_TIMEOUT */
 #ifndef CURLRES_ASYNCH
   if(timeoutms)
     infof(data, "timeout on name lookup is not supported");
 #else
-  (void)timeoutms; /* timeoutms not used with an async resolver */
+  (void)timeoutms;
 #endif
-#endif /* else USE_ALARM_TIMEOUT */
+#endif /* USE_ALARM_TIMEOUT */
 
   /* Perform the actual name resolution. This might be interrupted by an
    * alarm if it takes too long.

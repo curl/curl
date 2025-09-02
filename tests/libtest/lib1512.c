@@ -42,7 +42,7 @@ static CURLcode test_lib1512(const char *URL)
   struct curl_slist *slist = NULL;
   size_t i;
   char target_url[256];
-  (void)URL; /* URL is setup in the code */
+  (void)URL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

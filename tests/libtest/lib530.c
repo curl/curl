@@ -136,8 +136,8 @@ static int t530_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
 {
   struct t530_ReadWriteSockets *sockets = userp;
 
-  (void)easy; /* unused */
-  (void)socketp; /* unused */
+  (void)easy;
+  (void)socketp;
 
   t530_ctx.socket_calls++;
   t530_msg("-> CURLMOPT_SOCKETFUNCTION");
@@ -169,7 +169,7 @@ static int t530_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 {
   struct curltime *timeout = userp;
 
-  (void)multi; /* unused */
+  (void)multi;
   t530_ctx.timer_calls++;
   t530_msg("-> CURLMOPT_TIMERFUNCTION");
   if(t530_ctx.timer_calls == t530_ctx.max_timer_calls) {
