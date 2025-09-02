@@ -582,17 +582,16 @@ class CurlClient:
                       with_profile: bool = False,
                       with_tcpdump: bool = False,
                       no_save: bool = False,
+                      limit_rate: Optional[str] = None,
                       extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         if no_save:
-            extra_args.extend([
-                '--out-null',
-            ])
+            extra_args.extend(['--out-null'])
         else:
-            extra_args.extend([
-                '-o', 'download_#1.data',
-            ])
+            extra_args.extend(['-o', 'download_#1.data'])
+        if limit_rate:
+            extra_args.extend(['--limit-rate', limit_rate])
         # remove any existing ones
         for i in range(100):
             self._rmf(self.download_file(i))

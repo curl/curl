@@ -1093,7 +1093,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
 
   /* Unblocked and waiting to receive with buffered input.
    * Make transfer run again at next opportunity. */
-  if(!Curl_xfer_is_blocked(data) &&
+  if(!Curl_xfer_is_blocked(data) && !Curl_xfer_is_too_fast(data) &&
      ((Curl_pollset_want_read(data, ps, data->conn->sock[FIRSTSOCKET]) &&
        Curl_conn_data_pending(data, FIRSTSOCKET)) ||
       (Curl_pollset_want_read(data, ps, data->conn->sock[SECONDARYSOCKET]) &&
@@ -1103,36 +1103,41 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     Curl_multi_mark_dirty(data);
   }
 
-  switch(ps->n) {
-    case 0:
-      CURL_TRC_M(data, "%s pollset[], timeouts=%zu, paused %d/%d (r/w)",
-                 caller, Curl_llist_count(&data->state.timeoutlist),
-                 Curl_xfer_send_is_paused(data),
-                 Curl_xfer_recv_is_paused(data));
-      break;
-    case 1:
-      CURL_TRC_M(data, "%s pollset[fd=%" FMT_SOCKET_T " %s%s], timeouts=%zu",
-                 caller, ps->sockets[0],
-                 (ps->actions[0] & CURL_POLL_IN) ? "IN" : "",
-                 (ps->actions[0] & CURL_POLL_OUT) ? "OUT" : "",
-                 Curl_llist_count(&data->state.timeoutlist));
-      break;
-    case 2:
-      CURL_TRC_M(data, "%s pollset[fd=%" FMT_SOCKET_T " %s%s, "
-                 "fd=%" FMT_SOCKET_T " %s%s], timeouts=%zu",
-                 caller, ps->sockets[0],
-                 (ps->actions[0] & CURL_POLL_IN) ? "IN" : "",
-                 (ps->actions[0] & CURL_POLL_OUT) ? "OUT" : "",
-                 ps->sockets[1],
-                 (ps->actions[1] & CURL_POLL_IN) ? "IN" : "",
-                 (ps->actions[1] & CURL_POLL_OUT) ? "OUT" : "",
-                 Curl_llist_count(&data->state.timeoutlist));
-      break;
-    default:
-      CURL_TRC_M(data, "%s pollset[fds=%u], timeouts=%zu",
-                 caller, ps->n, Curl_llist_count(&data->state.timeoutlist));
-      break;
+  if(CURL_TRC_M_is_verbose(data)) {
+    size_t timeout_count = Curl_llist_count(&data->state.timeoutlist);
+    switch(ps->n) {
+      case 0:
+        CURL_TRC_M(data, "%s pollset[], timeouts=%zu, paused %d/%d (r/w)",
+                   caller, timeout_count,
+                   Curl_xfer_send_is_paused(data),
+                   Curl_xfer_recv_is_paused(data));
+        break;
+      case 1:
+        CURL_TRC_M(data, "%s pollset[fd=%" FMT_SOCKET_T " %s%s], timeouts=%zu",
+                   caller, ps->sockets[0],
+                   (ps->actions[0] & CURL_POLL_IN) ? "IN" : "",
+                   (ps->actions[0] & CURL_POLL_OUT) ? "OUT" : "",
+                   timeout_count);
+        break;
+      case 2:
+        CURL_TRC_M(data, "%s pollset[fd=%" FMT_SOCKET_T " %s%s, "
+                   "fd=%" FMT_SOCKET_T " %s%s], timeouts=%zu",
+                   caller, ps->sockets[0],
+                   (ps->actions[0] & CURL_POLL_IN) ? "IN" : "",
+                   (ps->actions[0] & CURL_POLL_OUT) ? "OUT" : "",
+                   ps->sockets[1],
+                   (ps->actions[1] & CURL_POLL_IN) ? "IN" : "",
+                   (ps->actions[1] & CURL_POLL_OUT) ? "OUT" : "",
+                   timeout_count);
+        break;
+      default:
+        CURL_TRC_M(data, "%s pollset[fds=%u], timeouts=%zu",
+                   caller, ps->n, timeout_count);
+        break;
+    }
+    CURL_TRC_M_TIMEOUTS(data);
   }
+
   if(expect_sockets && !ps->n && data->multi &&
      !Curl_uint_bset_contains(&data->multi->dirty, data->mid) &&
      !Curl_llist_count(&data->state.timeoutlist) &&
@@ -1880,6 +1885,40 @@ static CURLcode multi_follow(struct Curl_easy *data,
   return CURLE_TOO_MANY_REDIRECTS;
 }
 
+static CURLcode mspeed_check(struct Curl_easy *data,
+                             struct curltime *nowp)
+{
+  timediff_t recv_wait_ms = 0;
+  timediff_t send_wait_ms = 0;
+
+  /* check if over send speed */
+  if(data->set.max_send_speed)
+    send_wait_ms = Curl_pgrsLimitWaitTime(&data->progress.ul,
+                                          data->set.max_send_speed,
+                                          *nowp);
+
+  /* check if over recv speed */
+  if(data->set.max_recv_speed)
+    recv_wait_ms = Curl_pgrsLimitWaitTime(&data->progress.dl,
+                                          data->set.max_recv_speed,
+                                          *nowp);
+
+  if(send_wait_ms || recv_wait_ms) {
+    if(data->mstate != MSTATE_RATELIMITING) {
+      Curl_ratelimit(data, *nowp);
+      multistate(data, MSTATE_RATELIMITING);
+    }
+    Curl_expire(data, CURLMAX(send_wait_ms, recv_wait_ms), EXPIRE_TOOFAST);
+    Curl_multi_clear_dirty(data);
+    return CURLE_AGAIN;
+  }
+  else if(data->mstate != MSTATE_PERFORMING) {
+    multistate(data, MSTATE_PERFORMING);
+    Curl_ratelimit(data, *nowp);
+  }
+  return CURLE_OK;
+}
+
 static CURLMcode state_performing(struct Curl_easy *data,
                                   struct curltime *nowp,
                                   bool *stream_errorp,
@@ -1887,33 +1926,12 @@ static CURLMcode state_performing(struct Curl_easy *data,
 {
   char *newurl = NULL;
   bool retry = FALSE;
-  timediff_t recv_timeout_ms = 0;
-  timediff_t send_timeout_ms = 0;
   CURLMcode rc = CURLM_OK;
   CURLcode result = *resultp = CURLE_OK;
   *stream_errorp = FALSE;
 
-  /* check if over send speed */
-  if(data->set.max_send_speed)
-    send_timeout_ms = Curl_pgrsLimitWaitTime(&data->progress.ul,
-                                             data->set.max_send_speed,
-                                             *nowp);
-
-  /* check if over recv speed */
-  if(data->set.max_recv_speed)
-    recv_timeout_ms = Curl_pgrsLimitWaitTime(&data->progress.dl,
-                                             data->set.max_recv_speed,
-                                             *nowp);
-
-  if(send_timeout_ms || recv_timeout_ms) {
-    Curl_ratelimit(data, *nowp);
-    multistate(data, MSTATE_RATELIMITING);
-    if(send_timeout_ms >= recv_timeout_ms)
-      Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
-    else
-      Curl_expire(data, recv_timeout_ms, EXPIRE_TOOFAST);
+  if(mspeed_check(data, nowp) == CURLE_AGAIN)
     return CURLM_OK;
-  }
 
   /* read/write data if it is ready to do so */
   result = Curl_sendrecv(data, nowp);
@@ -2027,6 +2045,9 @@ static CURLMcode state_performing(struct Curl_easy *data,
         rc = CURLM_CALL_MULTI_PERFORM;
       }
     }
+  }
+  else { /* not errored, not done */
+    mspeed_check(data, nowp);
   }
   free(newurl);
   *resultp = result;
@@ -2195,30 +2216,8 @@ static CURLMcode state_ratelimiting(struct Curl_easy *data,
     multi_done(data, result, TRUE);
   }
   else {
-    timediff_t recv_timeout_ms = 0;
-    timediff_t send_timeout_ms = 0;
-    if(data->set.max_send_speed)
-      send_timeout_ms =
-        Curl_pgrsLimitWaitTime(&data->progress.ul,
-                               data->set.max_send_speed,
-                               *nowp);
-
-    if(data->set.max_recv_speed)
-      recv_timeout_ms =
-        Curl_pgrsLimitWaitTime(&data->progress.dl,
-                               data->set.max_recv_speed,
-                               *nowp);
-
-    if(!send_timeout_ms && !recv_timeout_ms) {
-      multistate(data, MSTATE_PERFORMING);
-      Curl_ratelimit(data, *nowp);
-      /* start performing again right away */
+    if(!mspeed_check(data, nowp))
       rc = CURLM_CALL_MULTI_PERFORM;
-    }
-    else if(send_timeout_ms >= recv_timeout_ms)
-      Curl_expire(data, send_timeout_ms, EXPIRE_TOOFAST);
-    else
-      Curl_expire(data, recv_timeout_ms, EXPIRE_TOOFAST);
   }
   *resultp = result;
   return rc;
@@ -3584,8 +3583,8 @@ void Curl_expire_ex(struct Curl_easy *data,
   multi->timetree = Curl_splayinsert(*curr_expire, multi->timetree,
                                      &data->state.timenode);
   if(data->id >= 0)
-    CURL_TRC_M(data, "set expire[%d] in %" FMT_TIMEDIFF_T "ns",
-               id, curlx_timediff_us(set, *nowp));
+    CURL_TRC_M(data, "[TIMEOUT] set %s to expire in %" FMT_TIMEDIFF_T "ns",
+               CURL_TIMER_NAME(id), curlx_timediff_us(set, *nowp));
 }
 
 /*
@@ -3615,6 +3614,8 @@ void Curl_expire_done(struct Curl_easy *data, expire_id id)
 {
   /* remove the timer, if there */
   multi_deltimeout(data, id);
+  if(data->id >= 0)
+    CURL_TRC_M(data, "[TIMEOUT] cleared %s", CURL_TIMER_NAME(id));
 }
 
 /*
@@ -3646,7 +3647,8 @@ bool Curl_expire_clear(struct Curl_easy *data)
     /* clear the timeout list too */
     Curl_llist_destroy(list, NULL);
 
-    CURL_TRC_M(data, "Expire cleared");
+    if(data->id >= 0)
+      CURL_TRC_M(data, "[TIMEOUT] all cleared");
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
     return TRUE;
@@ -3972,6 +3974,12 @@ void Curl_multi_mark_dirty(struct Curl_easy *data)
 {
   if(data->multi && data->mid != UINT_MAX)
     Curl_uint_bset_add(&data->multi->dirty, data->mid);
+}
+
+void Curl_multi_clear_dirty(struct Curl_easy *data)
+{
+  if(data->multi && data->mid != UINT_MAX)
+    Curl_uint_bset_remove(&data->multi->dirty, data->mid);
 }
 
 #ifdef DEBUGBUILD

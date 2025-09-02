@@ -162,5 +162,7 @@ unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
 /* Mark a transfer as dirty, e.g. to be rerun at earliest convenience.
  * A cheap operation, can be done many times repeatedly. */
 void Curl_multi_mark_dirty(struct Curl_easy *data);
+/* Clear transfer from the dirty set. */
+void Curl_multi_clear_dirty(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_MULTIIF_H */

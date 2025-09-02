@@ -61,7 +61,14 @@ class Card:
 
     @classmethod
     def fmt_mbs(cls, val):
-        return f'{val/(1024*1024):0.000f} MB/s' if val >= 0 else '--'
+        if val is None or val < 0:
+            return '--'
+        if val >= (1024*1024):
+            return f'{val/(1024*1024):0.000f} MB/s'
+        elif val >= 1024:
+            return f'{val / 1024:0.000f} KB/s'
+        else:
+            return f'{val:0.000f} B/s'
 
     @classmethod
     def fmt_reqs(cls, val):
@@ -119,6 +126,8 @@ class Card:
             print(f'Version: {score["meta"]["curl_V"]}')
         if 'curl_features' in score["meta"]:
             print(f'Features: {score["meta"]["curl_features"]}')
+        if 'limit-rate' in score['meta']:
+            print(f'--limit-rate: {score["meta"]["limit-rate"]}')
         print(f'Samples Size: {score["meta"]["samples"]}')
         if 'handshakes' in score:
             print(f'{"Handshakes":<24} {"ipv4":25} {"ipv6":28}')
@@ -188,7 +197,8 @@ class ScoreRunner:
                  server_addr: Optional[str] = None,
                  with_dtrace: bool = False,
                  with_flame: bool = False,
-                 socks_args: Optional[List[str]] = None):
+                 socks_args: Optional[List[str]] = None,
+                 limit_rate: Optional[str] = None):
         self.verbose = verbose
         self.env = env
         self.protocol = protocol
@@ -200,6 +210,7 @@ class ScoreRunner:
         self._with_dtrace = with_dtrace
         self._with_flame = with_flame
         self._socks_args = socks_args
+        self._limit_rate = limit_rate
 
     def info(self, msg):
         if self.verbose > 0:
@@ -289,7 +300,8 @@ class ScoreRunner:
             curl = self.mk_curl_client()
             r = curl.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True, with_headers=False,
-                                   with_profile=True)
+                                   with_profile=True,
+                                   limit_rate=self._limit_rate)
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
@@ -309,7 +321,9 @@ class ScoreRunner:
             curl = self.mk_curl_client()
             r = curl.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
-                                   with_headers=False, with_profile=True)
+                                   with_headers=False,
+                                   with_profile=True,
+                                   limit_rate=self._limit_rate)
             err = self._check_downloads(r, count)
             if err:
                 errors.append(err)
@@ -332,6 +346,7 @@ class ScoreRunner:
                                    no_save=True,
                                    with_headers=False,
                                    with_profile=True,
+                                   limit_rate=self._limit_rate,
                                    extra_args=[
                                        '--parallel',
                                        '--parallel-max', str(max_parallel)
@@ -582,6 +597,9 @@ class ScoreRunner:
                 'date': f'{datetime.datetime.now(tz=datetime.timezone.utc).isoformat()}',
             }
         }
+        if self._limit_rate:
+            score['meta']['limit-rate'] = self._limit_rate
+
         if self.protocol == 'h3':
             score['meta']['protocol'] = 'h3'
             if not self.env.have_h3_curl():
@@ -710,7 +728,8 @@ def run_score(args, protocol):
                                download_parallel=args.download_parallel,
                                with_dtrace=args.dtrace,
                                with_flame=args.flame,
-                               socks_args=socks_args)
+                               socks_args=socks_args,
+                               limit_rate=args.limit_rate)
             cards.append(card)
 
         if test_httpd:
@@ -737,7 +756,8 @@ def run_score(args, protocol):
                                download_parallel=args.download_parallel,
                                with_dtrace=args.dtrace,
                                with_flame=args.flame,
-                               socks_args=socks_args)
+                               socks_args=socks_args,
+                               limit_rate=args.limit_rate)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -763,7 +783,8 @@ def run_score(args, protocol):
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
                                with_dtrace=args.dtrace,
-                               socks_args=socks_args)
+                               socks_args=socks_args,
+                               limit_rate=args.limit_rate)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
 
@@ -847,6 +868,8 @@ def main():
                         default = False, help="produce dtrace of curl")
     parser.add_argument("--flame", action='store_true',
                         default = False, help="produce a flame graph on curl, implies --dtrace")
+    parser.add_argument("--limit-rate", action='store', type=str,
+                        default=None, help="use curl's --limit-rate")
 
     parser.add_argument("-H", "--handshakes", action='store_true',
                         default=False, help="evaluate handshakes only")

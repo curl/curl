@@ -767,6 +767,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
         cf->next = ctx->ballers.winner->cf;
         ctx->ballers.winner->cf = NULL;
         cf_ip_happy_ctx_clear(cf, data);
+        Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
