@@ -72,8 +72,8 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   int i;
   STACK_OF(X509_INFO) *inf;
 
-  (void)curl; /* avoid warnings */
-  (void)pointer; /* avoid warnings */
+  (void)curl;
+  (void)pointer;
 
   if(!cts || !cbio) {
     return rv;
