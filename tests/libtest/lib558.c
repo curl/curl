@@ -33,7 +33,7 @@ static CURLcode test_lib558(const char *URL)
   char *ptr = NULL;
   int asize;
 
-  (void)URL; /* we don't use this */
+  (void)URL;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

@@ -68,7 +68,7 @@ static int server_push_callback(CURL *parent,
   static unsigned int count = 0;
   int rv;
 
-  (void)parent; /* we have no use for this */
+  (void)parent;
   curl_msnprintf(filename, sizeof(filename) - 1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
