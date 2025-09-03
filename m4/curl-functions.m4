@@ -4312,8 +4312,8 @@ AC_DEFUN([CURL_COVERAGE],[
       CFLAGS="$CFLAGS -O0 -g -ftest-coverage -fprofile-arcs"
       LIBS="$LIBS -lgcov"
     else
-      CFLAGS="$CFLAGS -O0 -g --coverage"
-      LDFLAGS="$LDFLAGS --coverage"
+      CFLAGS="$CFLAGS -O0 -g -fprofile-instr-generate -fcoverage-mapping"
+      LDFLAGS="$LDFLAGS -fprofile-instr-generate -fcoverage-mapping"
     fi
   fi
 ])
