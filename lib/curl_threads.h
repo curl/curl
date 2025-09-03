@@ -26,6 +26,7 @@
 #include "curl_setup.h"
 
 #ifdef USE_THREADS_POSIX
+#  define CURL_THREAD_RETURN_T   unsigned int
 #  define CURL_STDCALL
 #  define curl_mutex_t           pthread_mutex_t
 #  define curl_thread_t          pthread_t *
@@ -35,6 +36,7 @@
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
 #elif defined(USE_THREADS_WIN32)
+#  define CURL_THREAD_RETURN_T   DWORD
 #  define CURL_STDCALL           WINAPI
 #  define curl_mutex_t           CRITICAL_SECTION
 #  define curl_thread_t          HANDLE

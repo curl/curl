@@ -412,7 +412,7 @@ struct select_ws_wait_data {
   HANDLE signal; /* internal event to signal handle trigger */
   HANDLE abort;  /* internal event to abort waiting threads */
 };
-static CURL_THREAD_RETURN_T WINAPI select_ws_wait_thread(void *lpParameter)
+static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
 {
   struct select_ws_wait_data *data;
   HANDLE signal, handle, handles[2];
