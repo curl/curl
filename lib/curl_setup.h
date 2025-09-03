@@ -640,12 +640,6 @@
 #endif
 #endif
 
-#ifdef _WIN32
-#define CURL_THREAD_RETURN_T DWORD
-#else
-#define CURL_THREAD_RETURN_T unsigned int
-#endif
-
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */
