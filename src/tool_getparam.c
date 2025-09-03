@@ -2947,8 +2947,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf("The filename argument '%s' looks like a flag.",
               nextarg);
       }
-      else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
-        warnf("The argument '%s' starts with a Unicode quote where "
+      else if(!strncmp("\xe2\x80", nextarg, 2)) {
+        warnf("The argument '%s' starts with a Unicode character where "
               "maybe an ASCII \" was intended?",
               nextarg);
       }
