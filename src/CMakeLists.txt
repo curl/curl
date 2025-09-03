@@ -23,6 +23,7 @@
 ###########################################################################
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS ${CURL_CFLAGS_COVERAGE})
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")

@@ -311,6 +311,19 @@ if(CURL_CLANG_TIDY)
   endif()
 endif()
 
+option(CURL_CODE_COVERAGE "Enable code coverage build options" OFF)
+if(CURL_CODE_COVERAGE)
+  set(CURL_CFLAGS_COVERAGE "")
+  set(CURL_LIBS_COVERAGE "")
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    string(APPEND CURL_CFLAGS_COVERAGE " -DNDEBUG -O0 -g -fprofile-arcs -ftest-coverage")
+    list(APPEND CURL_LIBS_COVERAGE "gcov")
+  elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    string(APPEND CURL_CFLAGS_COVERAGE " -DNDEBUG -O0 -g -fprofile-arcs -ftest-coverage")
+    list(APPEND CURL_LIBS_COVERAGE "llvm-gcov")
+  endif()
+endif()
+
 # For debug libs and exes, add "-d" postfix
 if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "-d")
@@ -1983,7 +1996,7 @@ if(WIN32)
   endif()
 endif()
 
-list(APPEND CURL_LIBS ${CURL_NETWORK_AND_TIME_LIBS})
+list(APPEND CURL_LIBS ${CURL_NETWORK_AND_TIME_LIBS} ${CURL_LIBS_COVERAGE})
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
