@@ -1,10 +1,10 @@
-curl and libcurl 8.15.1
+curl and libcurl 8.16.0
 
  Public curl releases:         270
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3498
+ Contributors:                 3501
 
 This release includes the following changes:
 
@@ -37,6 +37,8 @@ This release includes the following bugfixes:
  o asyn-thrdd: fix Curl_async_pollset without socketpair [205]
  o asyn-thrdd: fix no `HAVE_GETADDRINFO` builds [214]
  o asyn-thrdd: manage DEFERRED and locks better [228]
+ o autotools: make curl-config executable [253]
+ o aws-lc: do not use large buffer [250]
  o BINDINGS.md: add LibQurl [156]
  o bufq: add integer overflow checks before chunk allocations [108]
  o bufq: removed "Useless Assignment" [188]
@@ -53,6 +55,7 @@ This release includes the following bugfixes:
  o build: support LibreSSL native crypto lib with ngtcp2 1.15.0+ [209]
  o build: tidy up compiler definition for tests [37]
  o cf-https-connect: delete unused declaration [15]
+ o clang-tidy: disable `clang-analyzer-security.ArrayBound` [265]
  o cmake: `CURL_CA_FALLBACK` only works with OpenSSL [215]
  o cmake: capitalize 'Rustls' in the config summary
  o cmake: defer building `unitprotos.h` till a test target needs it [75]
@@ -88,8 +91,10 @@ This release includes the following bugfixes:
  o curl_fnmatch, servers: drop local macros in favour of `sizeof()` [21]
  o curl_mime_data_cb.md: mention what datasize is for [107]
  o curl_ossl: extend callback table for nghttp3 1.11.0 [46]
+ o curl_setup.h: include `stdint.h` earlier [260]
  o curl_setup.h: move UWP detection after `config-win32.h` (revert) [51]
  o curl_setup.h: move UWP detection after `config-win32.h` [23]
+ o CURLINFO_FILETIME*.md: correct the examples [242]
  o CURLOPT: bump `CURL_REDIR_*` macros to `long` [110]
  o CURLOPT: bump `CURL_SSLVERSION_*` macros to `long` [149]
  o CURLOPT: bump `CURLALTSVC_*` macros to `long` [96]
@@ -104,6 +109,7 @@ This release includes the following bugfixes:
  o CURLOPT_HTTP_VERSION: mention new default value [179]
  o CURLOPT_SSL_CTX_*: replace the base64 with XXXX [171]
  o delta: fix warnings, fix for non-GNU `date` tool [99]
+ o DEPRECATE.md: drop old OpenSSL versions [266]
  o DEPRECATE.md: drop support for c-ares versions before 1.16.0 [191]
  o DEPRECATE.md: drop support for Windows XP/2003 [31]
  o DEPRECATE.md: remove leftover "nothing" [57]
@@ -112,6 +118,7 @@ This release includes the following bugfixes:
  o docs: add CURLOPT type change history, drop casts where present [143]
  o docs: fix link CONTRIBUTE.md link [192]
  o docs: fix name in curl_easy_ssls_export man page [12]
+ o docs: fix typo (staring -> starting) [211]
  o docs: point two broken links to archive.org [134]
  o doh: rename symbols to avoid collision with mingw-w64 headers [66]
  o easy handle: check validity on external calls [28]
@@ -150,6 +157,7 @@ This release includes the following bugfixes:
  o multi: replace remaining EXPIRE_RUN_NOW [67]
  o multissl: initialize when requesting a random number [30]
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
+ o ngtcp2: handshake timeout should be equal to --connect-timeout [262]
  o ngtcp2: use custom mem funcs [204]
  o openssl: add and use `HAVE_BORINGSSL_LIKE` internal macro [222]
  o openssl: add and use `HAVE_OPENSSL3` internal macro [223]
@@ -171,9 +179,11 @@ This release includes the following bugfixes:
  o openssl: sync an AWS-LC guard with BoringSSL [199]
  o openssl: use `RSA_flags()` again with BoringSSL [219]
  o parallel-max: bump the max value to 65535 [86]
+ o parsedate: make Curl_getdate_capped able to return epoch [229]
  o processhelp.pm: fix to use the correct null device on Windows [164]
  o processhelp.pm: use `Win32::Process*` perl modules if available [200]
  o projects: drop unused logic from `generate.bat` [157]
+ o projects: fix Windows project 'clean' function [203]
  o pytest: add SOCKS tests and scoring [9]
  o pytest: fix test_17_09_ssl_min_max for BoringSSL [197]
  o pytest: increase server KeepAliveTimeout [26]
@@ -231,6 +241,7 @@ This release includes the following bugfixes:
  o TODO: remove session export item [194]
  o TODO: remove the expand ~ idea [216]
  o tool_cb_wrt: stop alloc/free for every chunk windows console output [140]
+ o tool_filetime: accept setting negative filetime [256]
  o tool_getparam: let --trace-config override -v [238]
  o tool_operate: avoid superfluous strdup'ing output [1]
  o tool_operate: use stricter curl_multi_setopt() arguments [225]
@@ -245,10 +256,12 @@ This release includes the following bugfixes:
  o URL-SYNTAX.md: drop link to codepoints.net to pass linkcheck [190]
  o urlapi: allow more path characters "raw" when asked to URL encode [146]
  o urldata: reduce two long struct fields to unsigned short [174]
+ o urlglob: only accept 255 globs
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
  o vquic: use curl_getenv [168]
  o vtls: set seen http version on successful ALPN [160]
  o websocket example: cast print values to unsigned int [251]
+ o websocket: improve handling of 0-len frames [269]
  o windows: assume `ADDRESS_FAMILY`, drop feature checks [88]
  o windows: document toolchain support for `CERT_NAME_SEARCH_ALL_NAMES_FLAG`
  o windows: document toolchain support for some macros (cont.) [111]
@@ -284,23 +297,24 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Anthony Hu,
-  Berthin Torres Callañaupa, BobodevMm on github, Caolán McNamara,
+  adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Andriy Druk,
+  Anthony Hu, Berthin Torres Callañaupa, BobodevMm on github, Caolán McNamara,
   Cole Leavitt, d1r3ct0r, Dan Fandrich, Daniel Böhmer, Daniel Engberg,
-  Daniel Stenberg, David Zhuang, devgs on github, Dominik Tomecki,
-  Dustin L. Howett, Eshan Kelkar, Gabriel Marin, Gisle Vanem, Google Big Sleep,
-  Harry Sintonen, IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms,
-  Kai Pastor, Karthik Das, kkmuffme on github, kupavcevdenis on github,
-  letshack9707 on hackerone, lf- on github, LoRd_MuldeR, Marcel Raad,
-  Michael Osipov, Michał Petryka, Natris on github, nevakrien on github,
-  Oxan van Leeuwen, Paul Gilmartin, Pavel Kropachev, Petar Popovic,
-  Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
-  renovate[bot], rm-rmonaghan on github, Roberto Hidalgo, Samuel Henrique,
-  Schrijvers Luc, Sebastian Carlos, Sergio Durigan Junior, Simon Dalvai,
-  Stanislav Osipov, Stefan Eissing, stephannn on github, sunriseL, Tal Regev,
-  Todd Gamblin, Viktor Szakats, Waldemar Kornewald, xfangfang, yaoy6 on github,
-  ウさん
-  (66 contributors)
+  Daniel McCarney, Daniel Stenberg, David Zhuang, devgs on github,
+  Dominik Tomecki, Dustin L. Howett, Eshan Kelkar, Florian Friedrich,
+  Gabriel Marin, Gisle Vanem, Google Big Sleep, Harry Sintonen,
+  IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms, Kai Pastor, Karthik Das,
+  kkmuffme on github, kupavcevdenis on github, letshack9707 on hackerone,
+  lf- on github, LoRd_MuldeR, Marcel Raad, Michael Osipov, Michał Petryka,
+  Natris on github, nevakrien on github, Oxan van Leeuwen, Paul Gilmartin,
+  Pavel Kropachev, Petar Popovic, Philippe Antoine, Pino Toscano, Qriist,
+  Qriist on github, Ray Satiro, renovate[bot], rm-rmonaghan on github,
+  Roberto Hidalgo, Samuel Henrique, Schrijvers Luc, Sebastian Carlos,
+  Sergio Durigan Junior, Simon Dalvai, Stanislav Osipov, Stefan Eissing,
+  stephannn on github, sunriseL, Tal Regev, Terence Eden, Todd Gamblin,
+  Viktor Szakats, Waldemar Kornewald, XCas13, xfangfang, yaoy6 on github,
+  Yedaya Katsman, ウさん
+  (72 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -506,6 +520,7 @@ References to bug reports and discussions on issues:
  [200] = https://curl.se/bug/?i=18308
  [201] = https://curl.se/bug/?i=18383
  [202] = https://curl.se/bug/?i=18029
+ [203] = https://curl.se/bug/?i=18412
  [204] = https://curl.se/bug/?i=18196
  [205] = https://curl.se/bug/?i=18306
  [206] = https://curl.se/bug/?i=18307
@@ -513,6 +528,7 @@ References to bug reports and discussions on issues:
  [208] = https://curl.se/bug/?i=18304
  [209] = https://curl.se/bug/?i=18377
  [210] = https://curl.se/bug/?i=18405
+ [211] = https://curl.se/bug/?i=18450
  [212] = https://curl.se/bug/?i=18378
  [214] = https://curl.se/bug/?i=18371
  [215] = https://curl.se/bug/?i=18365
@@ -529,6 +545,7 @@ References to bug reports and discussions on issues:
  [226] = https://curl.se/bug/?i=18357
  [227] = https://curl.se/bug/?i=18349
  [228] = https://curl.se/bug/?i=18350
+ [229] = https://curl.se/bug/?i=18445
  [230] = https://curl.se/bug/?i=18404
  [231] = https://curl.se/bug/?i=18351
  [232] = https://curl.se/bug/?i=18348
@@ -540,11 +557,20 @@ References to bug reports and discussions on issues:
  [238] = https://curl.se/bug/?i=18346
  [239] = https://curl.se/bug/?i=18323
  [241] = https://curl.se/bug/?i=18335
+ [242] = https://curl.se/bug/?i=18447
  [243] = https://curl.se/bug/?i=18390
  [244] = https://curl.se/bug/?i=18398
  [246] = https://curl.se/bug/?i=18333
  [247] = https://curl.se/bug/?i=18329
  [248] = https://curl.se/bug/?i=18328
  [249] = https://curl.se/bug/?i=18327
+ [250] = https://curl.se/bug/?i=18434
  [251] = https://curl.se/bug/?i=18326
  [252] = https://curl.se/bug/?i=18263
+ [253] = https://curl.se/bug/?i=18433
+ [256] = https://curl.se/bug/?i=18424
+ [260] = https://curl.se/bug/?i=18430
+ [262] = https://curl.se/bug/?i=18431
+ [265] = https://curl.se/bug/?i=18422
+ [266] = https://curl.se/bug/?i=18413
+ [269] = https://curl.se/bug/?i=18286
