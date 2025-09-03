@@ -2415,7 +2415,7 @@ static CURLcode http_cookies(struct Curl_easy *data,
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : data->conn->host.name;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      if (!Curl_cookie_getlist(data, data->conn, host, &list)) {
+      if(!Curl_cookie_getlist(data, data->conn, host, &list)) {
         struct Curl_llist_node *n;
         size_t clen = 8; /* hold the size of the generated Cookie: header */
 
