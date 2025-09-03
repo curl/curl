@@ -4291,7 +4291,7 @@ AC_DEFUN([CURL_COVERAGE],[
     coverage="$enableval")
 
   dnl if not gcc or clang switch off again
-  AS_IF([ test "$compiler_id" != "GNU_C" -a "$compiler_id" != "CLANG" ], coverage="no" )
+  AS_IF([test "$compiler_id" != "GNU_C" -a "$compiler_id" != "CLANG" -a "$compiler_id" != "APPLECLANG"], coverage="no" )
   AC_MSG_RESULT($coverage)
 
   if test "x$coverage" = "xyes"; then
