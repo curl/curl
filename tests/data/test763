@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+IDN
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+Unicode hostname ending up in a blank name
+</name>
+# e2 80 8b - ZERO WIDTH SPACE
+# e2 80 8c - ZERO WIDTH NON-JOINER
+<command>
+%hex['%e2%80%8b%e2%80%8c']hex%
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# curl: (3) URL using bad/illegal format or missing URL
+<errorcode>
+3
+</errorcode>
+</verify>
+</testcase>
