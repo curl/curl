@@ -4290,25 +4290,31 @@ AC_DEFUN([CURL_COVERAGE],[
     AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
     coverage="$enableval")
 
-  dnl if not gcc switch off again
-  AS_IF([ test "$GCC" != "yes" ], coverage="no" )
+  dnl if not gcc or clang switch off again
+  AS_IF([ test "$compiler_id" != "GNU_C" -a "$compiler_id" != "CLANG" ], coverage="no" )
   AC_MSG_RESULT($coverage)
 
   if test "x$coverage" = "xyes"; then
     curl_coverage_msg="enabled"
 
-    AC_CHECK_TOOL([GCOV], [gcov], [gcov])
-    if test -z "$GCOV"; then
-      AC_MSG_ERROR([needs gcov for code coverage])
-    fi
-    AC_CHECK_PROG([LCOV], [lcov], [lcov])
-    if test -z "$LCOV"; then
-      AC_MSG_ERROR([needs lcov for code coverage])
-    fi
-
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
-    CFLAGS="$CFLAGS -O0 -g -fprofile-arcs -ftest-coverage"
-    LIBS="$LIBS -lgcov"
+
+    if test "$compiler_id" = "GNU_C"; then
+      AC_CHECK_TOOL([GCOV], [gcov], [gcov])
+      if test -z "$GCOV"; then
+        AC_MSG_ERROR([needs gcov for code coverage])
+      fi
+      AC_CHECK_PROG([LCOV], [lcov], [lcov])
+      if test -z "$LCOV"; then
+        AC_MSG_ERROR([needs lcov for code coverage])
+      fi
+
+      CFLAGS="$CFLAGS -O0 -g -ftest-coverage -fprofile-arcs"
+      LIBS="$LIBS -lgcov"
+    else
+      CFLAGS="$CFLAGS -O0 -g --coverage"
+      LDFLAGS="$LDFLAGS --coverage"
+    fi
   fi
 ])
 
