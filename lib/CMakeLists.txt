@@ -200,6 +200,14 @@ if(BUILD_SHARED_LIBS)
     endif()
   endif()
 
+  if(CURL_COVERAGE_LDFLAGS)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+      target_link_options(${LIB_SHARED} PRIVATE ${CURL_COVERAGE_LDFLAGS})
+    else()
+      target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_COVERAGE_LDFLAGS})
+    endif()
+  endif()
+
   target_include_directories(${LIB_SHARED} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
