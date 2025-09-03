@@ -2808,6 +2808,12 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   return err;
 }
 
+/* detect e2 80 80 - e2 80 ff */
+static bool has_leading_unicode(const unsigned char *arg)
+{
+  return ((arg[0] == 0xe2) && (arg[1] == 0x80) && (arg[2] & 0x80));
+}
+
 /* the longest command line option, excluding the leading -- */
 #define MAX_OPTION_LEN 26
 
@@ -2947,10 +2953,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         warnf("The filename argument '%s' looks like a flag.",
               nextarg);
       }
-      else if(!strncmp("\xe2\x80", nextarg, 2)) {
+      else if(has_leading_unicode((const unsigned char *)nextarg)) {
         warnf("The argument '%s' starts with a Unicode character where "
-              "maybe an ASCII \" was intended?",
-              nextarg);
+              "maybe ASCII was intended?", nextarg);
       }
       /* ARG_FILE | ARG_STRG */
       err = opt_filestring(config, a, nextarg);
