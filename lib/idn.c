@@ -324,8 +324,10 @@ CURLcode Curl_idn_decode(const char *input, char **output)
   }
 #endif
   if(!result) {
-    if(!d[0]) /* ended up zero length, not acceptable */
+    if(!d[0]) { /* ended up zero length, not acceptable */
       result = CURLE_URL_MALFORMAT;
+      free(d);
+    }
     else
       *output = d;
   }
