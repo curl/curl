@@ -416,7 +416,6 @@ What server(s) this test case requires/uses. Available servers:
 - `http-unix`
 - `imap`
 - `mqtt`
-- `none`
 - `pop3`
 - `rtsp`
 - `rtsp-ipv6`

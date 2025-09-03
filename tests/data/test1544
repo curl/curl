@@ -8,10 +8,6 @@ source analysis
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify all string options are translated by OS/400 wrapper
 </name>

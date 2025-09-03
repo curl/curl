@@ -10,9 +10,6 @@ server key check
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 sftp
 </features>

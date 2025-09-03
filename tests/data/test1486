@@ -10,10 +10,6 @@ docs
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify that write-out.md and tool_writeout.c are in sync
 </name>

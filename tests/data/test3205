@@ -9,9 +9,6 @@ cipher_suite
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>

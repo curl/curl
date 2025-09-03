@@ -13,9 +13,6 @@ verbose logs
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

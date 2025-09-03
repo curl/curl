@@ -6,9 +6,6 @@ CURLOPT_OPENSOCKETFUNCTION
 </info>
 
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>

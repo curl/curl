@@ -12,9 +12,6 @@ typecheck
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Cross validate that gcc-typecheck macros match the option types.
 </name>

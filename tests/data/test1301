@@ -8,9 +8,6 @@ curl_strequal
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

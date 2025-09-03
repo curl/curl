@@ -9,10 +9,6 @@ CURL_DISABLE
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify configure.ac and source code CURL_DISABLE_-sync
 </name>

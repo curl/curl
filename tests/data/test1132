@@ -9,10 +9,6 @@ memory-includes
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify memory #include files in libcurl's C source files
 </name>

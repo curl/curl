@@ -10,10 +10,6 @@ documentation
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 src/tool_listhelp.c is in sync with docs/cmdline-opts
 </name>

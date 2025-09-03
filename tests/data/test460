@@ -8,9 +8,6 @@ expand
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 try --expand without an argument
 </name>

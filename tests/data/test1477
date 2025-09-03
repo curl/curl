@@ -8,10 +8,6 @@ documentation
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify that error codes in headers and libcurl-errors.3 are in sync
 </name>

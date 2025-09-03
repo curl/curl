@@ -20,9 +20,6 @@ non-existing host
 <features>
 http
 </features>
-<server>
-none
-</server>
 <name>
 HTTP GET with invalid --interface
 </name>

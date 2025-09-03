@@ -11,9 +11,6 @@ FAILURE
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 [] globbing overflowing the range counter
 </name>

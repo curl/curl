@@ -21,9 +21,6 @@ slow
 threadsafe
 threaded-resolver
 </features>
-<server>
-none
-</server>
 <name>
 curl_global_init thread-safety
 </name>

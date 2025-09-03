@@ -15,9 +15,6 @@ etag
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 --etag-save with bad path - no transfer
 </name>

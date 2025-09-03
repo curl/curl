@@ -9,10 +9,6 @@ symbols-in-versions
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify that symbols-in-versions and libcurl-errors.3 are in sync
 </name>

@@ -9,10 +9,6 @@ options-in-versions
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify that options-in-versions and docs/cmdline-opts are in sync
 </name>

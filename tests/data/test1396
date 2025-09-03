@@ -10,9 +10,6 @@ curl_easy_unescape
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>

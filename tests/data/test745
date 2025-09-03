@@ -9,9 +9,6 @@ symbols-in-versions
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 
 <name>
 Verify that typecheck-gcc and curl.h are in sync

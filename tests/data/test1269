@@ -13,9 +13,6 @@
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 too large --retry-delay value
 </name>

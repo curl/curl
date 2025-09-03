@@ -9,10 +9,6 @@ markdown
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify capital letters after period in markdown files
 </name>

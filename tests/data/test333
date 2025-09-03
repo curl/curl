@@ -13,9 +13,6 @@ cmdline
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Try a non-boolean command line option with --no-
 </name>

@@ -11,9 +11,6 @@ curl_easy_option
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 verify that curl_easy_setopt() rejects too long string inputs
 </name>

@@ -13,9 +13,6 @@ FAILURE
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 tftp
 </features>

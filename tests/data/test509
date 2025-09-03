@@ -11,9 +11,6 @@ memory callbacks
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 </features>

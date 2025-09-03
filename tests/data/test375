@@ -9,9 +9,6 @@ CURL_DISABLE_PROXY
 <features>
 !proxy
 </features>
-<server>
-none
-</server>
 <name>
 Disabled proxy should make curl fail with --proxy
 </name>

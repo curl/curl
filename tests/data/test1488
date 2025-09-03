@@ -10,10 +10,6 @@ manpages
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 symbols-in-versions and manpages agree on added-in versions
 </name>

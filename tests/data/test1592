@@ -12,9 +12,6 @@ timing-dependent
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

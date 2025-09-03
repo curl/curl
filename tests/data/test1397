@@ -9,9 +9,6 @@ Curl_cert_hostcheck
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>

@@ -13,9 +13,6 @@
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 curl --help
 </name>
