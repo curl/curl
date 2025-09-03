@@ -258,6 +258,13 @@ class TestFtpsVsFTPD:
         expdata = [indata] if len(indata) else []
         assert expdata == destdata, f'expected: {expdata}, got: {destdata}'
 
+    def test_32_11_download_non_existing(self, env: Env, vsftpds: VsFTPD):
+        curl = CurlClient(env=env)
+        url = f'ftps://{env.ftp_domain}:{vsftpds.port}/does-not-exist'
+        r = curl.ftp_get(urls=[url], with_stats=True)
+        r.check_exit_code(78)
+        r.check_stats(count=1, exitcode=78)
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
