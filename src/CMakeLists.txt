@@ -24,7 +24,6 @@
 
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_DEBUG_MACROS} ${CURL_COVERAGE_MACROS})
 set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS ${CURL_COVERAGE_CFLAGS})
-message(STATUS "|${CURL_COVERAGE_CFLAGS}|")
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
@@ -128,6 +127,14 @@ if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
     target_link_options(${EXE_NAME} PRIVATE "-municode")
   else()
     target_link_libraries(${EXE_NAME} PRIVATE "-municode")
+  endif()
+endif()
+
+if(CURL_CODE_COVERAGE)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(${EXE_NAME} PRIVATE ${CURL_COVERAGE_LDFLAGS})
+  else()
+    target_link_libraries(${EXE_NAME} PRIVATE ${CURL_COVERAGE_LDFLAGS})
   endif()
 endif()
 
