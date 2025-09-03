@@ -11,9 +11,6 @@ curl
 <features>
 manual
 </features>
-<server>
-none
-</server>
 
 <name>
 Verify curl -h --no-clobber

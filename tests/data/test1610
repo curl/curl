@@ -9,9 +9,6 @@ SHA256
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>

@@ -10,9 +10,6 @@ CURLOPT_PROTOCOLS_STR
 </reply>
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 CURLOPT_PROTOCOLS_STR
 </name>

@@ -10,9 +10,6 @@ httpsrr
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 DoH

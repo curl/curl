@@ -8,9 +8,6 @@ curl_easy_setopt
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

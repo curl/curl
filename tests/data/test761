@@ -8,9 +8,6 @@ globbing
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 too many {} globs
 </name>

@@ -14,9 +14,6 @@ HTTP POST
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Reject using -T and -d at once
 </name>

@@ -14,9 +14,6 @@ wrong option
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 # make this test require manual as the error message is different without it
 <features>
 manual

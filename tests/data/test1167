@@ -8,10 +8,6 @@ source analysis
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify curl prefix of public symbols in header files
 </name>

@@ -9,9 +9,6 @@ SHA-512/256
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 sha512-256

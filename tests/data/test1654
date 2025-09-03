@@ -7,9 +7,6 @@ Alt-Svc
 </info>
 
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 alt-svc

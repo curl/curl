@@ -10,9 +10,6 @@ FAILURE
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Pass in string to -C
 </name>

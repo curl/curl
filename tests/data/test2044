@@ -8,12 +8,6 @@
 #
 # Client-side
 <client>
-<features>
-none
-</features>
-<server>
-none
-</server>
 <name>
 Attempt to set a default protocol that does not exist
 </name>

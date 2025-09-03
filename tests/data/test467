@@ -8,9 +8,6 @@ cmdline
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 use a bad short option letter that does not exist (after one does exist)
 </name>

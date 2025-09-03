@@ -13,9 +13,6 @@
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 -K with missing file causes error
 </name>

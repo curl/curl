@@ -10,9 +10,6 @@ crash
 </reply>
 
 <client>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

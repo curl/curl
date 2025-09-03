@@ -10,10 +10,6 @@ documentation
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Manpage syntax checks
 </name>

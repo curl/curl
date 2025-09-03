@@ -3028,9 +3028,6 @@ sub startservers {
                 $run{'telnet'}="$pid $pid2";
             }
         }
-        elsif($what eq "none") {
-            logmsg "* starts no server\n" if($verbose);
-        }
         else {
             warn "we don't support a server for $what";
             return ("no server for $what", 4);

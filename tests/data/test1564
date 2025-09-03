@@ -15,9 +15,6 @@ wakeup
 <features>
 wakeup
 </features>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

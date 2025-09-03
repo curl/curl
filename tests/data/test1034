@@ -19,9 +19,6 @@ config file
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 IDN
 http

@@ -13,9 +13,6 @@ errorcode
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 verify return code for missing URL after --next
 </name>

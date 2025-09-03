@@ -16,9 +16,6 @@ Debug
 <name>
 Delayed resolve --connect-timeout check
 </name>
-<server>
-none
-</server>
 <setenv>
 CURL_DNS_DELAY_MS=5000
 </setenv>

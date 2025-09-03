@@ -9,9 +9,6 @@ FAILURE
 
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Space in FTP upload URL
 </name>

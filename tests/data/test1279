@@ -10,10 +10,6 @@ libcurl.def
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify libcurl.def against CURL_EXTERN declarations
 </name>

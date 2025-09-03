@@ -14,9 +14,6 @@ variables
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Missing environment variables in config file
 </name>

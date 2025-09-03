@@ -10,9 +10,6 @@ FAILURE
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Pass in negative number to --max-time
 </name>

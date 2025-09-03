@@ -8,10 +8,6 @@ source analysis
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify deprecation statuses and versions
 </name>

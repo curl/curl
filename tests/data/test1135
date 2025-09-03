@@ -9,10 +9,6 @@ CURL_EXTERN
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 # The VMS and OS/400 builds extract the CURL_EXTERN protos and use in
 # the build. We break binary compatibility by changing order. Only add
 # new entries last or bump the SONAME.

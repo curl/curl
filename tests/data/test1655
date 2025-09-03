@@ -9,9 +9,6 @@ DOH
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 DoH

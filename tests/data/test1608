@@ -9,9 +9,6 @@ curlopt_dns_shuffle_addresses
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 shuffle-dns

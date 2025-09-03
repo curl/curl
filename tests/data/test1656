@@ -9,9 +9,6 @@ Curl_x509_GTime2str
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 unittest
 </features>

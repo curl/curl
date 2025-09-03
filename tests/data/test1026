@@ -16,9 +16,6 @@
 <features>
 manual
 </features>
-<server>
-none
-</server>
 <name>
 curl --manual
 </name>

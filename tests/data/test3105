@@ -9,9 +9,6 @@ curl_multi_remove_handle
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <tool>
 lib%TESTNUMBER
 </tool>

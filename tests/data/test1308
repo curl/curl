@@ -14,9 +14,6 @@ FORM
 http
 form-api
 </features>
-<server>
-none
-</server>
 <name>
 formpost tests
 </name>

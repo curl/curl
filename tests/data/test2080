@@ -14,9 +14,6 @@ config
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 config file with overly long option
 </name>

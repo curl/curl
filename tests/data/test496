@@ -15,9 +15,6 @@ parallel
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 parallel upload missing file
 </name>

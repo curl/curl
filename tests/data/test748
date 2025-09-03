@@ -14,9 +14,6 @@
 # Client-side
 <client>
 
-<server>
-none
-</server>
 <name>
 A --config file that uses -h and no URL
 </name>

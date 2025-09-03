@@ -14,9 +14,6 @@ unsupported scheme
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <features>
 http
 proxy

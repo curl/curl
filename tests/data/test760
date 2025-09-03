@@ -8,9 +8,6 @@ globbing
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 more cmdline options than URLs and --next
 </name>

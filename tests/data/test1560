@@ -9,9 +9,6 @@ urlapi
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <setenv>
 LC_ALL=C.UTF-8
 </setenv>

@@ -10,10 +10,6 @@ documentation
 #
 # Client-side
 <client>
-<server>
-none
-</server>
-
 <name>
 Verify that feature names and CURL_VERSION_* in lib and docs are in sync
 </name>

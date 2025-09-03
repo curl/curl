@@ -8,9 +8,6 @@ integer overflow
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 too large -m timeout value
 </name>

@@ -13,9 +13,6 @@ curl-config
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 Compare curl --version with curl-config --version
 </name>

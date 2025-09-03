@@ -12,9 +12,6 @@ HTTP GET
 <features>
 Schannel
 </features>
-<server>
-none
-</server>
 <name>
 Disable certificate revocation checks
 </name>

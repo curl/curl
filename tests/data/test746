@@ -8,9 +8,6 @@ cmdline
 #
 # Client-side
 <client>
-<server>
-none
-</server>
 <name>
 too large numerical value passed to -m
 </name>
