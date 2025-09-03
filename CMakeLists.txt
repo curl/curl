@@ -329,6 +329,8 @@ if(CURL_CODE_COVERAGE)
     list(APPEND CURL_COVERAGE_MACROS "NDEBUG")
     list(APPEND CURL_COVERAGE_CFLAGS "-O0" "-g" "--coverage")
     list(APPEND CURL_COVERAGE_LDFLAGS "--coverage")
+  else()
+    set(CURL_CODE_COVERAGE OFF)
   endif()
 endif()
 
