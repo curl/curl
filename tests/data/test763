@@ -6,9 +6,6 @@ IDN
 </info>
 
 <client>
-<server>
-none
-</server>
 <features>
 IDN
 !AppleIDN
