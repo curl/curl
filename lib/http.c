@@ -2657,7 +2657,7 @@ static CURLcode http_add_connection_hd(struct Curl_easy *data,
   if(!result && data->state.http_hd_h2_settings) {
     result = curlx_dyn_addf(req, "%s%s", sep, "HTTP2-Settings");
   }
-  if(rlen < curlx_dyn_len(req))
+  if(!result && (rlen < curlx_dyn_len(req)))
     result = curlx_dyn_addn(req, STRCONST("\r\n"));
 
   free(custom_val);
