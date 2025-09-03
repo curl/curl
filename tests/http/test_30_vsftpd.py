@@ -215,6 +215,13 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpd, docname=docname, binary=False)
 
+    def test_30_11_download_non_existing(self, env: Env, vsftpd: VsFTPD):
+        curl = CurlClient(env=env)
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/does-not-exist'
+        r = curl.ftp_get(urls=[url], with_stats=True)
+        r.check_exit_code(78)
+        r.check_stats(count=1, exitcode=78)
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
