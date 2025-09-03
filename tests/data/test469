@@ -45,8 +45,8 @@ warn about Unicode quote character
 # Verify data after the test has been "shot"
 <verify>
 <stderr>
-%hex[Warning: The argument '%e2%80%9chost:' starts with a Unicode quote where maybe an ]hex%
-Warning: ASCII " was intended?
+%hex[Warning: The argument '%e2%80%9chost:' starts with a Unicode character. Maybe ASCII ]hex%
+Warning: was intended?
 </stderr>
 </verify>
 </testcase>

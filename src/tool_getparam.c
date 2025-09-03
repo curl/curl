@@ -2954,8 +2954,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               nextarg);
       }
       else if(has_leading_unicode((const unsigned char *)nextarg)) {
-        warnf("The argument '%s' starts with a Unicode character where "
-              "maybe ASCII was intended?", nextarg);
+        warnf("The argument '%s' starts with a Unicode character. "
+              "Maybe ASCII was intended?", nextarg);
       }
       /* ARG_FILE | ARG_STRG */
       err = opt_filestring(config, a, nextarg);
