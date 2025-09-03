@@ -640,18 +640,13 @@
 #endif
 #endif
 
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef _WIN32
 #define CURL_THREAD_RETURN_T DWORD
 #define CURL_WIN_THREADFUNC WINAPI
 typedef HANDLE curl_win_thread_handle_t;
 #define CURL_WIN_BEGINTHREAD CreateThread
 #else
 #define CURL_THREAD_RETURN_T unsigned int
-#ifdef _WIN32
-#define CURL_WIN_THREADFUNC __stdcall
-typedef uintptr_t curl_win_thread_handle_t;
-#define CURL_WIN_BEGINTHREAD _beginthreadex
-#endif /* _WIN32 */
 #endif
 
 /*
