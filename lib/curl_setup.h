@@ -642,9 +642,6 @@
 
 #ifdef _WIN32
 #define CURL_THREAD_RETURN_T DWORD
-#define CURL_WIN_THREADFUNC WINAPI
-typedef HANDLE curl_win_thread_handle_t;
-#define CURL_WIN_BEGINTHREAD CreateThread
 #else
 #define CURL_THREAD_RETURN_T unsigned int
 #endif

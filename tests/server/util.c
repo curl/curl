@@ -487,9 +487,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 }
 /* Window message queue loop for hidden main window, details see above.
  */
-#include <process.h>
-static
-CURL_THREAD_RETURN_T CURL_WIN_THREADFUNC main_window_loop(void *lpParameter)
+static CURL_THREAD_RETURN_T WINAPI main_window_loop(void *lpParameter)
 {
   WNDCLASS wc;
   BOOL ret;
@@ -625,10 +623,9 @@ void install_signal_handlers(bool keep_sigalrm)
 
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   {
-    curl_win_thread_handle_t thread;
-    thread = CURL_WIN_BEGINTHREAD(NULL, 0, &main_window_loop,
-                                  (void *)GetModuleHandle(NULL), 0,
-                                  &thread_main_id);
+    HANDLE thread = CreateThread(NULL, 0, &main_window_loop,
+                                 (void *)GetModuleHandle(NULL), 0,
+                                 &thread_main_id);
     thread_main_window = (HANDLE)thread;
     if(!thread_main_window || !thread_main_id)
       logmsg("cannot start main window loop");

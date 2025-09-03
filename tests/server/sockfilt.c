@@ -412,9 +412,7 @@ struct select_ws_wait_data {
   HANDLE signal; /* internal event to signal handle trigger */
   HANDLE abort;  /* internal event to abort waiting threads */
 };
-#include <process.h>
-static CURL_THREAD_RETURN_T
-CURL_WIN_THREADFUNC select_ws_wait_thread(void *lpParameter)
+static CURL_THREAD_RETURN_T WINAPI select_ws_wait_thread(void *lpParameter)
 {
   struct select_ws_wait_data *data;
   HANDLE signal, handle, handles[2];
@@ -559,7 +557,7 @@ CURL_WIN_THREADFUNC select_ws_wait_thread(void *lpParameter)
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
   struct select_ws_wait_data *data;
-  curl_win_thread_handle_t thread;
+  HANDLE thread;
 
   /* allocate internal waiting data structure */
   data = malloc(sizeof(struct select_ws_wait_data));
@@ -569,8 +567,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
     data->abort = abort;
 
     /* launch waiting thread */
-    thread = CURL_WIN_BEGINTHREAD(NULL, 0, &select_ws_wait_thread, data, 0,
-                                  NULL);
+    thread = CreateThread(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
 
     /* free data if thread failed to launch */
     if(!thread) {

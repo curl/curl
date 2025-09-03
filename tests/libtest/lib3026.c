@@ -26,8 +26,7 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
-#include <process.h>
-static CURL_THREAD_RETURN_T CURL_WIN_THREADFUNC t3026_run_thread(void *ptr)
+static CURL_THREAD_RETURN_T WINAPI t3026_run_thread(void *ptr)
 {
   CURLcode *result = ptr;
 
@@ -41,7 +40,7 @@ static CURL_THREAD_RETURN_T CURL_WIN_THREADFUNC t3026_run_thread(void *ptr)
 static CURLcode test_lib3026(const char *URL)
 {
   CURLcode results[NUM_THREADS];
-  curl_win_thread_handle_t thread_handles[NUM_THREADS];
+  HANDLE thread_handles[NUM_THREADS];
   unsigned tid_count = NUM_THREADS, i;
   CURLcode test_failure = CURLE_OK;
   curl_version_info_data *ver;
@@ -56,9 +55,9 @@ static CURLcode test_lib3026(const char *URL)
   }
 
   for(i = 0; i < tid_count; i++) {
-    curl_win_thread_handle_t th;
+    HANDLE th;
     results[i] = CURL_LAST; /* initialize with invalid value */
-    th = CURL_WIN_BEGINTHREAD(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
+    th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
     if(!th) {
       curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
                     __FILE__, __LINE__, GetLastError());
