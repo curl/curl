@@ -183,13 +183,17 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.1
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.2  g++ 11.0
-          -Wformat-non-iso                 # clang  3.1            appleclang  3.1
           -Wheader-guard                   # clang  3.4            appleclang  5.1
           -Wpragmas                        # clang  3.5  gcc  4.1  appleclang  6.0
           -Wsometimes-uninitialized        # clang  3.2            appleclang  4.2
         # -Wunreachable-code-break         # clang  3.5            appleclang  6.0  # Not used: Silent in "unity" builds
           -Wunused-const-variable          # clang  3.4  gcc  6.0  appleclang  5.1
         )
+        if(NOT MSVC)
+          list(APPEND _picky_enable
+            -Wformat-non-iso                 # clang  3.1            appleclang  3.1
+          )
+        endif()
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1))
