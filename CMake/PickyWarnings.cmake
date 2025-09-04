@@ -222,7 +222,7 @@ if(PICKY_COMPILER)
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0))
         list(APPEND _picky_enable
-          -Wcast-function-type-strict      # clang 16.0            appleclang 16.0  # appleclang 15.0 should support it, but does not
+          -Wcast-function-type-strict      # clang 16.0            appleclang 16.0
         )
       endif()
       if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
