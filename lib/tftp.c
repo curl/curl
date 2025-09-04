@@ -357,7 +357,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
       }
 
       state->blksize = (int)blksize;
-      infof(data, "blksize parsed from OACK (%d) requested (%d)",
+      infof(data, "blksize parsed from OACK (%u) requested (%u)",
             state->blksize, state->requested_blksize);
     }
     else if(checkprefix(TFTP_OPTION_TSIZE, option)) {
@@ -494,7 +494,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                                  (char *)state->spacket.data + sbytes, buf);
 
       /* add blksize option */
-      msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
+      msnprintf(buf, sizeof(buf), "%u", state->requested_blksize);
       if(result == CURLE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes,
@@ -929,7 +929,7 @@ static CURLcode tftp_state_machine(struct tftp_conn *state,
     infof(data, "%s", "TFTP finished");
     break;
   default:
-    DEBUGF(infof(data, "STATE: %d", state->state));
+    DEBUGF(infof(data, "STATE: %u", state->state));
     failf(data, "%s", "Internal state machine error");
     result = CURLE_TFTP_ILLEGAL;
     break;

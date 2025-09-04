@@ -42,7 +42,7 @@ static bool do_test(const struct test_spec *spec, size_t i,
   curlx_dyn_reset(dbuf);
   result = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
   if(result != spec->exp_result) {
-    curl_mfprintf(stderr, "test %zu: expect result %d, got %d\n",
+    curl_mfprintf(stderr, "test %zu: expect result %u, got %u\n",
                   i, spec->exp_result, result);
     return FALSE;
   }

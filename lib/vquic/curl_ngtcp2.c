@@ -322,7 +322,7 @@ static void cf_ngtcp2_stream_close(struct Curl_cfilter *cf,
                                       NGHTTP3_H3_REQUEST_CANCELLED);
     result = cf_progress_egress(cf, data, NULL);
     if(result)
-      CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cancel stream -> %d",
+      CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cancel stream -> %u",
                   stream->id, result);
   }
 }
@@ -974,7 +974,7 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
-      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %d writing %zu "
+      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %u writing %zu "
                   "bytes of headers", stream->id, stream->xfer_result, blen);
   }
 }
@@ -990,7 +990,7 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
     /* If the transfer write is errored, we do not want any more data */
     if(stream->xfer_result) {
-      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %d writing %zu bytes "
+      CURL_TRC_CF(data, cf, "[%"FMT_PRId64"] error %u writing %zu bytes "
                   "of data", stream->id, stream->xfer_result, blen);
     }
   }
@@ -1340,7 +1340,7 @@ out:
   result = Curl_1st_err(result, cf_progress_egress(cf, data, &pktx));
   result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
 
-  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(blen=%zu) -> %dm, %zu",
+  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(blen=%zu) -> %u, %zu",
               stream ? stream->id : -1, blen, result, *pnread);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -1437,7 +1437,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read req body -> "
-              "%d vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
+              "%d vecs%s with %zd (buffered=%zu, left=%" FMT_OFF_T ")",
               stream->id, (int)nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
@@ -1614,7 +1614,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     result = h3_stream_open(cf, data, buf, len, pnwritten);
     if(result) {
-      CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
+      CURL_TRC_CF(data, cf, "failed to open stream -> %u", result);
       goto out;
     }
     stream = H3_STREAM_CTX(ctx, data);
@@ -1651,7 +1651,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     result = Curl_bufq_write(&stream->sendbuf, buf, len, pnwritten);
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send, add to "
-                "sendbuf(len=%zu) -> %d, %zu",
+                "sendbuf(len=%zu) -> %u, %zu",
                 stream->id, len, result, *pnwritten);
     if(result)
       goto out;
@@ -1667,7 +1667,7 @@ static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 out:
   result = Curl_1st_err(result, check_and_set_expiry(cf, data, &pktx));
 
-  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %u, %zu",
               stream ? stream->id : -1, len, result, *pnwritten);
   CF_DATA_RESTORE(cf, save);
   return result;
@@ -1991,7 +1991,7 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
     if(stream && !stream->closed) {
       result = check_and_set_expiry(cf, data, NULL);
       if(result)
-        CURL_TRC_CF(data, cf, "data idle, check_and_set_expiry -> %d", result);
+        CURL_TRC_CF(data, cf, "data idle, check_and_set_expiry -> %u", result);
     }
     break;
   }
@@ -2065,7 +2065,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
         goto out;
       }
       else if(result) {
-        CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+        CURL_TRC_CF(data, cf, "shutdown, error %u flushing sendbuf", result);
         *done = TRUE;
         goto out;
       }
@@ -2078,7 +2078,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       NULL, /* pkt_info */
       (uint8_t *)buffer, sizeof(buffer),
       &ctx->last_error, pktx.ts);
-    CURL_TRC_CF(data, cf, "start shutdown(err_type=%d, err_code=%"
+    CURL_TRC_CF(data, cf, "start shutdown(err_type=%u, err_code=%"
                 FMT_PRIu64 ") -> %d", ctx->last_error.type,
                 (curl_uint64_t)ctx->last_error.error_code, (int)nwritten);
     /* there are cases listed in ngtcp2 documentation where this call
@@ -2092,7 +2092,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       result = Curl_bufq_write(&ctx->q.sendbuf, (const unsigned char *)buffer,
                                (size_t)nwritten, &n);
       if(result) {
-        CURL_TRC_CF(data, cf, "error %d adding shutdown packets to sendbuf, "
+        CURL_TRC_CF(data, cf, "error %u adding shutdown packets to sendbuf, "
                     "aborting shutdown", result);
         goto out;
       }
@@ -2112,7 +2112,7 @@ static CURLcode cf_ngtcp2_shutdown(struct Curl_cfilter *cf,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "shutdown, error %d flushing sendbuf", result);
+      CURL_TRC_CF(data, cf, "shutdown, error %u flushing sendbuf", result);
       *done = TRUE;
       goto out;
     }
@@ -2236,7 +2236,7 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     DEBUGASSERT(data);
     if(!data)
       return 0;
-    CURL_TRC_CF(data, cf, "SSL message: %s %s [%d]",
+    CURL_TRC_CF(data, cf, "SSL message: %s %s [%u]",
                 incoming ? "<-" : "->", gtls_hs_msg_name(htype), htype);
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
@@ -2590,7 +2590,7 @@ out:
     struct ip_quadruple ip;
 
     Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-    infof(data, "QUIC connect to %s port %u failed: %s",
+    infof(data, "QUIC connect to %s port %d failed: %s",
           ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
   }
 #endif
@@ -2598,7 +2598,7 @@ out:
     result = check_and_set_expiry(cf, data, &pktx);
   }
   if(result || *done)
-    CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
+    CURL_TRC_CF(data, cf, "connect -> %u, done=%d", result, *done);
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -2716,7 +2716,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
        only "protocol frames" */
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data, NULL);
-    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
+    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %u", result);
     alive = result ? FALSE : TRUE;
   }
 
