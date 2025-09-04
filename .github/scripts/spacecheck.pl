@@ -151,6 +151,11 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has multiple EOL at EOF";
     }
 
+    if($content =~ /\n\n\n\n/ ||
+        $content =~ /\r\n\r\n\r\n\r\n/) {
+        push @err, "content: has 3 or more consecutive empty lines";
+    }
+
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
         push @err, "content: has binary contents";
     }

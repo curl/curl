@@ -1140,7 +1140,6 @@ sub singletest_postcheck {
 }
 
 
-
 ###################################################################
 # Get ready to run a single test case
 sub runner_test_preprocess {

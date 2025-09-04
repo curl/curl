@@ -149,7 +149,6 @@ static void chunk_list_free(struct buf_chunk **anchor)
 }
 
 
-
 void Curl_bufcp_init(struct bufc_pool *pool,
                      size_t chunk_size, size_t spare_max)
 {

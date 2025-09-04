@@ -2244,8 +2244,6 @@ sub runnegtelnetserver {
 }
 
 
-
-
 #######################################################################
 # Single shot http and gopher server responsiveness test. This should only
 # be used to verify that a server present in %run hash is still functional

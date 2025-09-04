@@ -665,7 +665,6 @@ static CURLcode Curl_sha512_256_update(void *context,
 }
 
 
-
 /**
  * Size of "length" insertion in bits.
  * See FIPS PUB 180-4 section 5.1.2.

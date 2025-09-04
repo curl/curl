@@ -245,7 +245,6 @@ static void timer_cb(struct GlobalInfo *g, int revents)
 }
 
 
-
 /* Clean up the SockInfo structure */
 static void remsock(struct SockInfo *f, struct GlobalInfo *g)
 {
@@ -258,7 +257,6 @@ static void remsock(struct SockInfo *f, struct GlobalInfo *g)
     free(f);
   }
 }
-
 
 
 /* Assign information to a SockInfo structure */
@@ -285,7 +283,6 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
     fprintf(stderr, "EPOLL_CTL_ADD failed for fd: %d : %s\n",
             s, strerror(errno));
 }
-
 
 
 /* Initialize a new SockInfo structure */
@@ -326,7 +323,6 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   }
   return 0;
 }
-
 
 
 /* CURLOPT_WRITEFUNCTION */
