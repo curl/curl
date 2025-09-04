@@ -72,6 +72,10 @@ if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSI
    (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0))
   list(APPEND _picky "-Wno-documentation-unknown-command")  # clang 3.3  appleclang  5.0
 endif()
+if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0) OR
+   (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.1))
+  list(APPEND _picky "-Wno-reserved-macro-identifier")  # clang 13.0  appleclang 13.1, sometimes such upstream macros need to be set
+endif()
 if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
    (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0))
   list(APPEND _picky "-Wno-unsafe-buffer-usage")  # clang 16  appleclang 15.0
@@ -213,7 +217,6 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wcast-function-type             # clang 13.0            appleclang 13.1
           -Wreserved-identifier            # clang 13.0            appleclang 13.1
-          -Wreserved-macro-identifier      # clang 13.0            appleclang 13.1
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
