@@ -170,6 +170,7 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0))
         list(APPEND _picky_enable
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.2  g++ 11.0
+          -Wmissing-variable-declarations  # clang  3.2            appleclang  4.2
           -Wno-documentation-unknown-command # clang  3.3            appleclang  5.0
           -Wsometimes-uninitialized        # clang  3.2            appleclang  4.2
         )
@@ -188,7 +189,6 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1))
         list(APPEND _picky_enable
           -Wcomma                          # clang  3.9            appleclang  8.1
-          -Wmissing-variable-declarations  # clang  3.2            appleclang  4.2
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
