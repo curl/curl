@@ -142,11 +142,11 @@ static const char * const ftp_state_names[]={
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 /* This is the ONLY way to change FTP state! */
-static void _ftp_state(struct Curl_easy *data,
-                       struct ftp_conn *ftpc,
-                       ftpstate newstate
+static void ftp_state_low(struct Curl_easy *data,
+                          struct ftp_conn *ftpc,
+                          ftpstate newstate
 #ifdef DEBUGBUILD
-                       , int lineno
+                          , int lineno
 #endif
   )
 {
@@ -172,9 +172,9 @@ static void _ftp_state(struct Curl_easy *data,
 
 /* Local API functions */
 #ifndef DEBUGBUILD
-#define ftp_state(x,y,z) _ftp_state(x,y,z)
+#define ftp_state(x,y,z) ftp_state_low(x,y,z)
 #else /* !DEBUGBUILD */
-#define ftp_state(x,y,z) _ftp_state(x,y,z,__LINE__)
+#define ftp_state(x,y,z) ftp_state_low(x,y,z,__LINE__)
 #endif /* DEBUGBUILD */
 
 static CURLcode ftp_sendquote(struct Curl_easy *data,
