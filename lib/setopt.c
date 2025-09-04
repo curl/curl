@@ -2637,8 +2637,15 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      */
     s->fwrite_func = va_arg(param, curl_write_callback);
     if(!s->fwrite_func)
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type"
+#endif
       /* When set to NULL, reset to our internal default function */
       s->fwrite_func = (curl_write_callback)fwrite;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
     break;
   case CURLOPT_READFUNCTION:
     /*
@@ -2647,8 +2654,15 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     s->fread_func_set = va_arg(param, curl_read_callback);
     if(!s->fread_func_set) {
       s->is_fread_set = 0;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type"
+#endif
       /* When set to NULL, reset to our internal default function */
       s->fread_func_set = (curl_read_callback)fread;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
     }
     else
       s->is_fread_set = 1;
