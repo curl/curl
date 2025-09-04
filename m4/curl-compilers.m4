@@ -120,16 +120,18 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
     if test "$appleclang" = '1' && test "$oldapple" = '0'; then
       dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
-      if   test "$compiler_num" -ge '1300'; then compiler_num='1200'
-      elif test "$compiler_num" -ge '1205'; then compiler_num='1101'
-      elif test "$compiler_num" -ge '1204'; then compiler_num='1000'
-      elif test "$compiler_num" -ge '1107'; then compiler_num='900'
-      elif test "$compiler_num" -ge '1103'; then compiler_num='800'
-      elif test "$compiler_num" -ge '1003'; then compiler_num='700'
-      elif test "$compiler_num" -ge '1001'; then compiler_num='600'
-      elif test "$compiler_num" -ge  '904'; then compiler_num='500'
-      elif test "$compiler_num" -ge  '902'; then compiler_num='400'
-      elif test "$compiler_num" -ge  '803'; then compiler_num='309'
+      if   test "$compiler_num" -ge '1700'; then compiler_num='1901'
+      elif test "$compiler_num" -ge '1600'; then compiler_num='1700'
+      elif test "$compiler_num" -ge '1500'; then compiler_num='1600'
+      elif test "$compiler_num" -ge '1400'; then compiler_num='1400'
+      elif test "$compiler_num" -ge '1301'; then compiler_num='1300'
+      elif test "$compiler_num" -ge '1300'; then compiler_num='1200'
+      elif test "$compiler_num" -ge '1200'; then compiler_num='1000'
+      elif test "$compiler_num" -ge '1100'; then compiler_num='800'
+      elif test "$compiler_num" -ge '1000'; then compiler_num='600'
+      elif test "$compiler_num" -ge  '901'; then compiler_num='500'
+      elif test "$compiler_num" -ge  '900'; then compiler_num='400'
+      elif test "$compiler_num" -ge  '801'; then compiler_num='309'
       elif test "$compiler_num" -ge  '703'; then compiler_num='308'
       else                                       compiler_num='307'
       fi
