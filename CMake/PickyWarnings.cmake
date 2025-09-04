@@ -210,7 +210,7 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wcast-function-type             # clang 13.0            appleclang 13.1
           -Wreserved-identifier            # clang 13.0            appleclang 13.1  # Keep it before -Wno-reserved-macro-identifier
-          -Wno-reserved-macro-identifier   # clang 13.0            appleclang 13.1  # External macros have to be set sometimes
+            -Wno-reserved-macro-identifier # clang 13.0            appleclang 13.1  # External macros have to be set sometimes
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
