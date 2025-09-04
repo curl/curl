@@ -430,6 +430,7 @@ static const struct Curl_cwtype ftp_cw_lc = {
 };
 
 #endif /* CURL_PREFER_LF_LINEENDS */
+
 /***********************************************************************
  *
  * ftp_check_ctrl_on_data_wait()
@@ -629,7 +630,6 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
  * from a server after a command.
  *
  */
-
 CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
                              ssize_t *nreadp, /* return number of bytes read */
                              int *ftpcodep) /* return the ftp-code */
@@ -3494,7 +3494,6 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
  *
  * BLOCKING
  */
-
 static
 CURLcode ftp_sendquote(struct Curl_easy *data,
                        struct ftp_conn *ftpc,
@@ -3617,7 +3616,6 @@ ftp_pasv_verbose(struct Curl_easy *data,
  * (which basically is only for when PASV is being sent to retry a failed
  * EPSV).
  */
-
 static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 {
   struct connectdata *conn = data->conn;
@@ -3781,7 +3779,6 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
  * This is the actual DO function for FTP. Get a file/directory according to
  * the options previously setup.
  */
-
 static
 CURLcode ftp_perform(struct Curl_easy *data,
                      struct ftp_conn *ftpc,

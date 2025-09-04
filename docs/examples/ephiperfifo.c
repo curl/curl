@@ -88,7 +88,6 @@ struct GlobalInfo {
   FILE *input;
 };
 
-
 /* Information associated with a specific easy handle */
 struct ConnInfo {
   CURL *easy;
@@ -96,7 +95,6 @@ struct ConnInfo {
   struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
 };
-
 
 /* Information associated with a specific socket */
 struct SockInfo {
@@ -166,7 +164,6 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
   timerfd_settime(g->tfd, /* flags= */0, &its, NULL);
   return 0;
 }
-
 
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(struct GlobalInfo *g)
@@ -244,7 +241,6 @@ static void timer_cb(struct GlobalInfo *g, int revents)
   check_multi_info(g);
 }
 
-
 /* Clean up the SockInfo structure */
 static void remsock(struct SockInfo *f, struct GlobalInfo *g)
 {
@@ -257,7 +253,6 @@ static void remsock(struct SockInfo *f, struct GlobalInfo *g)
     free(f);
   }
 }
-
 
 /* Assign information to a SockInfo structure */
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
@@ -283,7 +278,6 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
     fprintf(stderr, "EPOLL_CTL_ADD failed for fd: %d : %s\n",
             s, strerror(errno));
 }
-
 
 /* Initialize a new SockInfo structure */
 static void addsock(curl_socket_t s, CURL *easy, int action,
@@ -324,7 +318,6 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
   return 0;
 }
 
-
 /* CURLOPT_WRITEFUNCTION */
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -332,7 +325,6 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
   (void)data;
   return size * nmemb;
 }
-
 
 /* CURLOPT_PROGRESSFUNCTION */
 static int prog_cb(void *p, double dltotal, double dlnow, double ult,
@@ -345,7 +337,6 @@ static int prog_cb(void *p, double dltotal, double dlnow, double ult,
   fprintf(MSG_OUT, "Progress: %s (%g/%g)\n", conn->url, dlnow, dltotal);
   return 0;
 }
-
 
 /* Create a new easy handle, and add it to the global curl_multi */
 static void new_conn(const char *url, struct GlobalInfo *g)
