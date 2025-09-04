@@ -2064,7 +2064,7 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
     (struct gtls_ssl_backend_data *)connssl->backend;
   char buf[1024];
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t nread = 0;
   size_t i;
 
   DEBUGASSERT(backend);
