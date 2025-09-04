@@ -432,7 +432,7 @@ cr_get_selected_ciphers(struct Curl_easy *data,
 {
   const size_t supported_len = *selected_size;
   const size_t default_len = rustls_default_crypto_provider_ciphersuites_len();
-  const struct rustls_supported_ciphersuite *entry;
+  const struct rustls_supported_ciphersuite *entry = NULL;
   const char *ciphers = ciphers12;
   size_t count = 0, default13_count = 0, i, j;
   const char *ptr, *end;
@@ -1315,7 +1315,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
-  size_t i, nread, nwritten;
+  size_t i, nread = 0, nwritten;
 
   DEBUGASSERT(backend);
   if(!backend->conn || cf->shutdown) {
