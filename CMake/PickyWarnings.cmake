@@ -56,8 +56,14 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
 endif()
 
 # Silence undesired -Weverything warnings
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  list(APPEND _picky "-Wno-padded")
+endif()
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-  list(APPEND _picky "-Wno-used-but-marked-unused")  # clang 3.0, triggered by typecheck-gcc.h when building with clang 14+
+  list(APPEND _picky "-Wno-used-but-marked-unused")  # clang 3.0, triggered by typecheck-gcc.h (clang 14+)
+endif()
+if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
+  list(APPEND _picky "-Wno-disabled-macro-expansion")  # clang 3.1  appleclang  3.1, triggered by typecheck-gcc.h (clang 14+)
 endif()
 if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.3) OR
    (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0))
