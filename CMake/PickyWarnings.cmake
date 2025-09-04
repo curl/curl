@@ -163,6 +163,7 @@ if(PICKY_COMPILER)
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       list(APPEND _picky_enable
         ${_picky_common_old}
+        -Wconditional-uninitialized        # clang  3.0
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  3.0  gcc  4.8
@@ -178,6 +179,7 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.3
           -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
+          -Wformat-non-iso                 # clang  3.1            appleclang  3.1
           -Wheader-guard                   # clang  3.4            appleclang  5.1
           -Wpragmas                        # clang  3.5  gcc  4.1  appleclang  6.0
           -Wsometimes-uninitialized        # clang  3.2            appleclang  4.6
@@ -210,6 +212,20 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.4))
         list(APPEND _picky_enable
           -Wreserved-identifier            # clang 13.0            appleclang 13.4
+          -Wreserved-macro-identifier      # clang 13.0            appleclang 13.4
+        )
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.4))
+        list(APPEND _picky_enable
+          -Wcast-function-type-strict      # clang 16.0            appleclang 15.4
+        )
+      endif()
+      if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
+        list(APPEND _picky_enable
+          -Wc++-hidden-decl                # clang 21.0            appleclang ?
+          -Wc++-keyword                    # clang 21.0            appleclang ?
+          -Wtentative-definition-compat    # clang 21.0            appleclang ?
         )
       endif()
     else()  # gcc
