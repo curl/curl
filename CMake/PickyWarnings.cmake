@@ -87,8 +87,8 @@ if(PICKY_COMPILER)
     set(_picky_detect
     )
 
-    # NOTE: -Wno-* options should ideally be disabled at their precise cutoff versions,
-    #       to suppress undesired warnings in case a -Weverything is passed as a custom option.
+    # Notes: -Wno-* options should ideally be disabled at their precise cutoff versions,
+    #        to suppress undesired warnings in case -Weverything is passed as a custom option.
 
     # Assume these options always exist with both clang and gcc.
     # Require clang 3.0 / gcc 2.95 or later.
@@ -209,8 +209,8 @@ if(PICKY_COMPILER)
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.1))
         list(APPEND _picky_enable
           -Wcast-function-type             # clang 13.0            appleclang 13.1
-          -Wreserved-identifier            # clang 13.0            appleclang 13.1
-          -Wno-reserved-macro-identifier   # clang 13.0            appleclang 13.1  # Sometimes such external macros need to be set
+          -Wreserved-identifier            # clang 13.0            appleclang 13.1  # Keep it before -Wno-reserved-macro-identifier
+          -Wno-reserved-macro-identifier   # clang 13.0            appleclang 13.1  # External macros have to be set sometimes
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
