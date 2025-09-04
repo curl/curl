@@ -868,7 +868,7 @@ CURLcode Curl_getformdata(CURL *data,
                particular, freopen(stdin) by the caller is not guaranteed
                to result as expected. This feature has been kept for backward
                compatibility: use of "-" pseudo filename should be avoided. */
-#if defined(__clang__) && __clang_major__ >= 16
+#if defined(__clang__) && __clang_major__ >= 13
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type"
 #endif
@@ -876,7 +876,7 @@ CURLcode Curl_getformdata(CURL *data,
                                        (curl_read_callback) fread,
                                        fseeko_wrapper,
                                        NULL, (void *) stdin);
-#if defined(__clang__) && __clang_major__ >= 16
+#if defined(__clang__) && __clang_major__ >= 13
 #pragma clang diagnostic pop
 #endif
           }
