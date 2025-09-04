@@ -42,7 +42,8 @@
 #if !defined(__clang__) && __GNUC__ >= 7
 #pragma GCC diagnostic ignored "-Wformat-overflow"
 #endif
-#if defined(__clang__) && __clang_major__ >= 4 /* 3.1 really */
+#if defined(__clang__) && \
+  ((__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 1))
 #pragma clang diagnostic ignored "-Wformat-non-iso"
 #endif
 #endif
