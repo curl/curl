@@ -224,6 +224,7 @@ if(PICKY_COMPILER)
       endif()
       if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
         list(APPEND _picky_enable
+          -Warray-compare                  # clang 20.0  gcc 12.0  appleclang ?
           -Wc++-hidden-decl                # clang 21.0            appleclang ?
           -Wc++-keyword                    # clang 21.0            appleclang ?
           -Wtentative-definition-compat    # clang 21.0            appleclang ?
