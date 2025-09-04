@@ -139,7 +139,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->offset = 0;
   req->httpcode = 0;
   req->keepon = 0;
-  req->upgr101 = UPGR101_INIT;
+  req->upgr101 = UPGR101_NONE;
   req->sendbuf_hds_len = 0;
   req->timeofdoc = 0;
   req->location = NULL;
