@@ -1200,6 +1200,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 
       /* start over with sending */
       data->req.eos_read = FALSE;
+      data->req.upload_done = FALSE;
       k->keepon |= KEEP_SEND;
     }
 
