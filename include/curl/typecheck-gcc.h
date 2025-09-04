@@ -704,60 +704,60 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), __typeof__(fread) *) ||              \
    curlcheck_cb_compatible((expr), curl_read_callback) ||               \
-   curlcheck_cb_compatible((expr), _curl_read_callback1) ||             \
-   curlcheck_cb_compatible((expr), _curl_read_callback2) ||             \
-   curlcheck_cb_compatible((expr), _curl_read_callback3) ||             \
-   curlcheck_cb_compatible((expr), _curl_read_callback4) ||             \
-   curlcheck_cb_compatible((expr), _curl_read_callback5) ||             \
-   curlcheck_cb_compatible((expr), _curl_read_callback6))
-typedef size_t (*_curl_read_callback1)(char *, size_t, size_t, void *);
-typedef size_t (*_curl_read_callback2)(char *, size_t, size_t, const void *);
-typedef size_t (*_curl_read_callback3)(char *, size_t, size_t, FILE *);
-typedef size_t (*_curl_read_callback4)(void *, size_t, size_t, void *);
-typedef size_t (*_curl_read_callback5)(void *, size_t, size_t, const void *);
-typedef size_t (*_curl_read_callback6)(void *, size_t, size_t, FILE *);
+   curlcheck_cb_compatible((expr), Wcurl_read_callback1) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_read_callback2) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_read_callback3) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_read_callback4) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_read_callback5) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_read_callback6))
+typedef size_t (*Wcurl_read_callback1)(char *, size_t, size_t, void *);
+typedef size_t (*Wcurl_read_callback2)(char *, size_t, size_t, const void *);
+typedef size_t (*Wcurl_read_callback3)(char *, size_t, size_t, FILE *);
+typedef size_t (*Wcurl_read_callback4)(void *, size_t, size_t, void *);
+typedef size_t (*Wcurl_read_callback5)(void *, size_t, size_t, const void *);
+typedef size_t (*Wcurl_read_callback6)(void *, size_t, size_t, FILE *);
 
 /* evaluates to true if expr is of type curl_write_callback or "similar" */
 #define curlcheck_write_cb(expr)                                        \
   (curlcheck_read_cb(expr) ||                                           \
    curlcheck_cb_compatible((expr), __typeof__(fwrite) *) ||             \
    curlcheck_cb_compatible((expr), curl_write_callback) ||              \
-   curlcheck_cb_compatible((expr), _curl_write_callback1) ||            \
-   curlcheck_cb_compatible((expr), _curl_write_callback2) ||            \
-   curlcheck_cb_compatible((expr), _curl_write_callback3) ||            \
-   curlcheck_cb_compatible((expr), _curl_write_callback4) ||            \
-   curlcheck_cb_compatible((expr), _curl_write_callback5) ||            \
-   curlcheck_cb_compatible((expr), _curl_write_callback6))
-typedef size_t (*_curl_write_callback1)(const char *, size_t, size_t, void *);
-typedef size_t (*_curl_write_callback2)(const char *, size_t, size_t,
+   curlcheck_cb_compatible((expr), Wcurl_write_callback1) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback2) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback3) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback4) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback5) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_write_callback6))
+typedef size_t (*Wcurl_write_callback1)(const char *, size_t, size_t, void *);
+typedef size_t (*Wcurl_write_callback2)(const char *, size_t, size_t,
                                        const void *);
-typedef size_t (*_curl_write_callback3)(const char *, size_t, size_t, FILE *);
-typedef size_t (*_curl_write_callback4)(const void *, size_t, size_t, void *);
-typedef size_t (*_curl_write_callback5)(const void *, size_t, size_t,
+typedef size_t (*Wcurl_write_callback3)(const char *, size_t, size_t, FILE *);
+typedef size_t (*Wcurl_write_callback4)(const void *, size_t, size_t, void *);
+typedef size_t (*Wcurl_write_callback5)(const void *, size_t, size_t,
                                        const void *);
-typedef size_t (*_curl_write_callback6)(const void *, size_t, size_t, FILE *);
+typedef size_t (*Wcurl_write_callback6)(const void *, size_t, size_t, FILE *);
 
 /* evaluates to true if expr is of type curl_ioctl_callback or "similar" */
 #define curlcheck_ioctl_cb(expr)                                        \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_ioctl_callback) ||              \
-   curlcheck_cb_compatible((expr), _curl_ioctl_callback1) ||            \
-   curlcheck_cb_compatible((expr), _curl_ioctl_callback2) ||            \
-   curlcheck_cb_compatible((expr), _curl_ioctl_callback3) ||            \
-   curlcheck_cb_compatible((expr), _curl_ioctl_callback4))
-typedef curlioerr (*_curl_ioctl_callback1)(CURL *, int, void *);
-typedef curlioerr (*_curl_ioctl_callback2)(CURL *, int, const void *);
-typedef curlioerr (*_curl_ioctl_callback3)(CURL *, curliocmd, void *);
-typedef curlioerr (*_curl_ioctl_callback4)(CURL *, curliocmd, const void *);
+   curlcheck_cb_compatible((expr), Wcurl_ioctl_callback1) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_ioctl_callback2) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_ioctl_callback3) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_ioctl_callback4))
+typedef curlioerr (*Wcurl_ioctl_callback1)(CURL *, int, void *);
+typedef curlioerr (*Wcurl_ioctl_callback2)(CURL *, int, const void *);
+typedef curlioerr (*Wcurl_ioctl_callback3)(CURL *, curliocmd, void *);
+typedef curlioerr (*Wcurl_ioctl_callback4)(CURL *, curliocmd, const void *);
 
 /* evaluates to true if expr is of type curl_sockopt_callback or "similar" */
 #define curlcheck_sockopt_cb(expr)                                      \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_sockopt_callback) ||            \
-   curlcheck_cb_compatible((expr), _curl_sockopt_callback1) ||          \
-   curlcheck_cb_compatible((expr), _curl_sockopt_callback2))
-typedef int (*_curl_sockopt_callback1)(void *, curl_socket_t, curlsocktype);
-typedef int (*_curl_sockopt_callback2)(const void *, curl_socket_t,
+   curlcheck_cb_compatible((expr), Wcurl_sockopt_callback1) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_sockopt_callback2))
+typedef int (*Wcurl_sockopt_callback1)(void *, curl_socket_t, curlsocktype);
+typedef int (*Wcurl_sockopt_callback2)(const void *, curl_socket_t,
                                       curlsocktype);
 
 /* evaluates to true if expr is of type curl_opensocket_callback or
@@ -765,28 +765,28 @@ typedef int (*_curl_sockopt_callback2)(const void *, curl_socket_t,
 #define curlcheck_opensocket_cb(expr)                                   \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_opensocket_callback) ||         \
-   curlcheck_cb_compatible((expr), _curl_opensocket_callback1) ||       \
-   curlcheck_cb_compatible((expr), _curl_opensocket_callback2) ||       \
-   curlcheck_cb_compatible((expr), _curl_opensocket_callback3) ||       \
-   curlcheck_cb_compatible((expr), _curl_opensocket_callback4))
-typedef curl_socket_t (*_curl_opensocket_callback1)
+   curlcheck_cb_compatible((expr), Wcurl_opensocket_callback1) ||       \
+   curlcheck_cb_compatible((expr), Wcurl_opensocket_callback2) ||       \
+   curlcheck_cb_compatible((expr), Wcurl_opensocket_callback3) ||       \
+   curlcheck_cb_compatible((expr), Wcurl_opensocket_callback4))
+typedef curl_socket_t (*Wcurl_opensocket_callback1)
   (void *, curlsocktype, struct curl_sockaddr *);
-typedef curl_socket_t (*_curl_opensocket_callback2)
+typedef curl_socket_t (*Wcurl_opensocket_callback2)
   (void *, curlsocktype, const struct curl_sockaddr *);
-typedef curl_socket_t (*_curl_opensocket_callback3)
+typedef curl_socket_t (*Wcurl_opensocket_callback3)
   (const void *, curlsocktype, struct curl_sockaddr *);
-typedef curl_socket_t (*_curl_opensocket_callback4)
+typedef curl_socket_t (*Wcurl_opensocket_callback4)
   (const void *, curlsocktype, const struct curl_sockaddr *);
 
 /* evaluates to true if expr is of type curl_progress_callback or "similar" */
 #define curlcheck_progress_cb(expr)                                     \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_progress_callback) ||           \
-   curlcheck_cb_compatible((expr), _curl_progress_callback1) ||         \
-   curlcheck_cb_compatible((expr), _curl_progress_callback2))
-typedef int (*_curl_progress_callback1)(void *,
+   curlcheck_cb_compatible((expr), Wcurl_progress_callback1) ||         \
+   curlcheck_cb_compatible((expr), Wcurl_progress_callback2))
+typedef int (*Wcurl_progress_callback1)(void *,
     double, double, double, double);
-typedef int (*_curl_progress_callback2)(const void *,
+typedef int (*Wcurl_progress_callback2)(const void *,
     double, double, double, double);
 
 /* evaluates to true if expr is of type curl_xferinfo_callback */
@@ -798,29 +798,29 @@ typedef int (*_curl_progress_callback2)(const void *,
 #define curlcheck_debug_cb(expr)                                        \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_debug_callback) ||              \
-   curlcheck_cb_compatible((expr), _curl_debug_callback1) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback2) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback3) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback4) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback5) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback6) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback7) ||            \
-   curlcheck_cb_compatible((expr), _curl_debug_callback8))
-typedef int (*_curl_debug_callback1) (CURL *,
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback1) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback2) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback3) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback4) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback5) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback6) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback7) ||            \
+   curlcheck_cb_compatible((expr), Wcurl_debug_callback8))
+typedef int (*Wcurl_debug_callback1) (CURL *,
     curl_infotype, char *, size_t, void *);
-typedef int (*_curl_debug_callback2) (CURL *,
+typedef int (*Wcurl_debug_callback2) (CURL *,
     curl_infotype, char *, size_t, const void *);
-typedef int (*_curl_debug_callback3) (CURL *,
+typedef int (*Wcurl_debug_callback3) (CURL *,
     curl_infotype, const char *, size_t, void *);
-typedef int (*_curl_debug_callback4) (CURL *,
+typedef int (*Wcurl_debug_callback4) (CURL *,
     curl_infotype, const char *, size_t, const void *);
-typedef int (*_curl_debug_callback5) (CURL *,
+typedef int (*Wcurl_debug_callback5) (CURL *,
     curl_infotype, unsigned char *, size_t, void *);
-typedef int (*_curl_debug_callback6) (CURL *,
+typedef int (*Wcurl_debug_callback6) (CURL *,
     curl_infotype, unsigned char *, size_t, const void *);
-typedef int (*_curl_debug_callback7) (CURL *,
+typedef int (*Wcurl_debug_callback7) (CURL *,
     curl_infotype, const unsigned char *, size_t, void *);
-typedef int (*_curl_debug_callback8) (CURL *,
+typedef int (*Wcurl_debug_callback8) (CURL *,
     curl_infotype, const unsigned char *, size_t, const void *);
 
 /* evaluates to true if expr is of type curl_ssl_ctx_callback or "similar" */
@@ -828,66 +828,66 @@ typedef int (*_curl_debug_callback8) (CURL *,
 #define curlcheck_ssl_ctx_cb(expr)                                      \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_ssl_ctx_callback) ||            \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback1) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback2) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback3) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback4) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback5) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback6) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback7) ||          \
-   curlcheck_cb_compatible((expr), _curl_ssl_ctx_callback8))
-typedef CURLcode (*_curl_ssl_ctx_callback1)(CURL *, void *, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback2)(CURL *, void *, const void *);
-typedef CURLcode (*_curl_ssl_ctx_callback3)(CURL *, const void *, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback4)(CURL *, const void *,
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback1) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback2) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback3) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback4) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback5) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback6) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback7) ||          \
+   curlcheck_cb_compatible((expr), Wcurl_ssl_ctx_callback8))
+typedef CURLcode (*Wcurl_ssl_ctx_callback1)(CURL *, void *, void *);
+typedef CURLcode (*Wcurl_ssl_ctx_callback2)(CURL *, void *, const void *);
+typedef CURLcode (*Wcurl_ssl_ctx_callback3)(CURL *, const void *, void *);
+typedef CURLcode (*Wcurl_ssl_ctx_callback4)(CURL *, const void *,
                                             const void *);
 #ifdef HEADER_SSL_H
 /* hack: if we included OpenSSL's ssl.h, we know about SSL_CTX
  * this will of course break if we are included before OpenSSL headers...
  */
-typedef CURLcode (*_curl_ssl_ctx_callback5)(CURL *, SSL_CTX *, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback6)(CURL *, SSL_CTX *, const void *);
-typedef CURLcode (*_curl_ssl_ctx_callback7)(CURL *, const SSL_CTX *, void *);
-typedef CURLcode (*_curl_ssl_ctx_callback8)(CURL *, const SSL_CTX *,
+typedef CURLcode (*Wcurl_ssl_ctx_callback5)(CURL *, SSL_CTX *, void *);
+typedef CURLcode (*Wcurl_ssl_ctx_callback6)(CURL *, SSL_CTX *, const void *);
+typedef CURLcode (*Wcurl_ssl_ctx_callback7)(CURL *, const SSL_CTX *, void *);
+typedef CURLcode (*Wcurl_ssl_ctx_callback8)(CURL *, const SSL_CTX *,
                                             const void *);
 #else
-typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback5;
-typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback6;
-typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback7;
-typedef _curl_ssl_ctx_callback1 _curl_ssl_ctx_callback8;
+typedef Wcurl_ssl_ctx_callback1 Wcurl_ssl_ctx_callback5;
+typedef Wcurl_ssl_ctx_callback1 Wcurl_ssl_ctx_callback6;
+typedef Wcurl_ssl_ctx_callback1 Wcurl_ssl_ctx_callback7;
+typedef Wcurl_ssl_ctx_callback1 Wcurl_ssl_ctx_callback8;
 #endif
 
 /* evaluates to true if expr is of type curl_conv_callback or "similar" */
 #define curlcheck_conv_cb(expr)                                         \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_conv_callback) ||               \
-   curlcheck_cb_compatible((expr), _curl_conv_callback1) ||             \
-   curlcheck_cb_compatible((expr), _curl_conv_callback2) ||             \
-   curlcheck_cb_compatible((expr), _curl_conv_callback3) ||             \
-   curlcheck_cb_compatible((expr), _curl_conv_callback4))
-typedef CURLcode (*_curl_conv_callback1)(char *, size_t length);
-typedef CURLcode (*_curl_conv_callback2)(const char *, size_t length);
-typedef CURLcode (*_curl_conv_callback3)(void *, size_t length);
-typedef CURLcode (*_curl_conv_callback4)(const void *, size_t length);
+   curlcheck_cb_compatible((expr), Wcurl_conv_callback1) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_conv_callback2) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_conv_callback3) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_conv_callback4))
+typedef CURLcode (*Wcurl_conv_callback1)(char *, size_t length);
+typedef CURLcode (*Wcurl_conv_callback2)(const char *, size_t length);
+typedef CURLcode (*Wcurl_conv_callback3)(void *, size_t length);
+typedef CURLcode (*Wcurl_conv_callback4)(const void *, size_t length);
 
 /* evaluates to true if expr is of type curl_seek_callback or "similar" */
 #define curlcheck_seek_cb(expr)                                         \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_seek_callback) ||               \
-   curlcheck_cb_compatible((expr), _curl_seek_callback1) ||             \
-   curlcheck_cb_compatible((expr), _curl_seek_callback2))
-typedef CURLcode (*_curl_seek_callback1)(void *, curl_off_t, int);
-typedef CURLcode (*_curl_seek_callback2)(const void *, curl_off_t, int);
+   curlcheck_cb_compatible((expr), Wcurl_seek_callback1) ||             \
+   curlcheck_cb_compatible((expr), Wcurl_seek_callback2))
+typedef CURLcode (*Wcurl_seek_callback1)(void *, curl_off_t, int);
+typedef CURLcode (*Wcurl_seek_callback2)(const void *, curl_off_t, int);
 
 /* evaluates to true if expr is of type curl_chunk_bgn_callback */
 #define curlcheck_chunk_bgn_cb(expr)                                    \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_chunk_bgn_callback) ||          \
-   curlcheck_cb_compatible((expr), _curl_chunk_bgn_callback1) ||        \
-   curlcheck_cb_compatible((expr), _curl_chunk_bgn_callback2))
-typedef long (*_curl_chunk_bgn_callback1)(struct curl_fileinfo *,
+   curlcheck_cb_compatible((expr), Wcurl_chunk_bgn_callback1) ||        \
+   curlcheck_cb_compatible((expr), Wcurl_chunk_bgn_callback2))
+typedef long (*Wcurl_chunk_bgn_callback1)(struct curl_fileinfo *,
                                           void *, int);
-typedef long (*_curl_chunk_bgn_callback2)(void *, void *, int);
+typedef long (*Wcurl_chunk_bgn_callback2)(void *, void *, int);
 
 /* evaluates to true if expr is of type curl_chunk_end_callback */
 #define curlcheck_chunk_end_cb(expr)                                    \
@@ -927,11 +927,11 @@ typedef long (*_curl_chunk_bgn_callback2)(void *, void *, int);
 /* evaluates to true if expr is of type curl_interleave_callback */
 #define curlcheck_interleave_cb(expr)                                   \
   (curlcheck_NULL(expr) ||                                              \
-   curlcheck_cb_compatible((expr), _curl_interleave_callback1) ||       \
-   curlcheck_cb_compatible((expr), _curl_interleave_callback2))
-typedef size_t (*_curl_interleave_callback1)(void *p, size_t s,
+   curlcheck_cb_compatible((expr), Wcurl_interleave_callback1) ||       \
+   curlcheck_cb_compatible((expr), Wcurl_interleave_callback2))
+typedef size_t (*Wcurl_interleave_callback1)(void *p, size_t s,
                                              size_t n, void *u);
-typedef size_t (*_curl_interleave_callback2)(char *p, size_t s,
+typedef size_t (*Wcurl_interleave_callback2)(char *p, size_t s,
                                              size_t n, void *u);
 
 /* evaluates to true if expr is of type curl_prereq_callback */
