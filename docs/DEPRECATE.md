@@ -12,13 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## winbuild build system
-
-curl drops support for the winbuild build method after September 2025.
-
-We recommend migrating to CMake. See the migration guide in
-`docs/INSTALL-CMAKE.md`.
-
 ## Windows CE
 
 Windows CE "mainstream support" ended on October 9, 2018, and "Extended
@@ -79,3 +72,4 @@ We remove support for this OpenSSL version from curl in June 2026.
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
+ - winbuild build system (removed in 8.17.0)
