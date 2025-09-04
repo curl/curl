@@ -2551,10 +2551,17 @@ static int schannel_init(void)
 {
 #if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
                         (GetProcAddress(GetModuleHandleA("ntdll"),
                                         "wine_get_version")));
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
   if(p_wine_get_version) {  /* WINE detected */
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0 or upper */
