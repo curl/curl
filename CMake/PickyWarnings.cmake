@@ -59,13 +59,13 @@ endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   list(APPEND _picky "-Wno-padded")
   list(APPEND _picky "-Wno-switch-default")  # clang 2.7  gcc 4.1, annoying to fix or silence
-  list(APPEND _picky "-Wno-switch-enum")  # clang 2.7  gcc 4.1, It basically disallows default case
+  list(APPEND _picky "-Wno-switch-enum")     # clang 2.7  gcc 4.1, It basically disallows default case
 endif()
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
   list(APPEND _picky "-Wno-used-but-marked-unused")  # clang 3.0, triggered by typecheck-gcc.h (clang 14+)
 endif()
 if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
-  list(APPEND _picky "-Wno-covered-switch-default")  # clang 3.1  appleclang  3.1, annoying to fix or silence
+  list(APPEND _picky "-Wno-covered-switch-default")    # clang 3.1  appleclang  3.1, annoying to fix or silence
   list(APPEND _picky "-Wno-disabled-macro-expansion")  # clang 3.1  appleclang  3.1, triggered by typecheck-gcc.h (clang 14+)
 endif()
 if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.3) OR
