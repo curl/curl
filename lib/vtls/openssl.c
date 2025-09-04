@@ -1634,14 +1634,12 @@ static int pkcs12load(struct Curl_easy *data,
 fail:
   EVP_PKEY_free(pri);
   X509_free(x509);
-#if defined(__clang__) && (__clang_major__ >= 16 || \
-  (defined(__apple_build_version__) && __clang_major__ >= 15))
+#if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
   sk_X509_pop_free(ca, X509_free);
-#if defined(__clang__) && (__clang_major__ >= 16 || \
-  (defined(__apple_build_version__) && __clang_major__ >= 15))
+#if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif
   if(!cert_done)
@@ -3169,14 +3167,12 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
     }
   }
 
-#if defined(__clang__) && (__clang_major__ >= 16 || \
-  (defined(__apple_build_version__) && __clang_major__ >= 15))
+#if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
-#if defined(__clang__) && (__clang_major__ >= 16 || \
-  (defined(__apple_build_version__) && __clang_major__ >= 15))
+#if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif
   BIO_free(cbio);
