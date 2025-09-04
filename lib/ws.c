@@ -108,6 +108,15 @@ struct ws_encoder {
   BIT(contfragment); /* set TRUE if the previous fragment sent was not final */
 };
 
+/* Control frames are allowed up to 125 characters, rfc6455, ch. 5.5 */
+#define WS_MAX_CNTRL_LEN    125
+
+struct ws_cntrl_frame {
+  unsigned int type;
+  size_t payload_len;
+  unsigned char payload[WS_MAX_CNTRL_LEN];
+};
+
 /* A websocket connection with en- and decoder that treat frames
  * and keep track of boundaries. */
 struct websocket {
@@ -117,6 +126,7 @@ struct websocket {
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
+  struct ws_cntrl_frame *send_cntrl; /* a control frame pending to be sent */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
@@ -229,7 +239,7 @@ static CURLcode ws_frame_flags2firstbyte(struct Curl_easy *data,
   switch(flags & ~CURLWS_OFFSET) {
     case 0:
       if(contfragment) {
-        infof(data, "[WS] no flags given; interpreting as continuation "
+        CURL_TRC_WS(data, "no flags given; interpreting as continuation "
                     "fragment for compatibility");
         *pfirstbyte = (WSBIT_OPCODE_CONT | WSBIT_FIN);
         return CURLE_OK;
@@ -316,12 +326,12 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
                                      struct websocket *ws,
                                      const char *buffer, size_t buflen);
 
-typedef ssize_t ws_write_payload(const unsigned char *buf, size_t buflen,
-                                 int frame_age, int frame_flags,
-                                 curl_off_t payload_offset,
-                                 curl_off_t payload_len,
-                                 void *userp,
-                                 CURLcode *err);
+typedef CURLcode ws_write_payload(const unsigned char *buf, size_t buflen,
+                                  int frame_age, int frame_flags,
+                                  curl_off_t payload_offset,
+                                  curl_off_t payload_len,
+                                  void *userp,
+                                  size_t *pnwritten);
 
 static void ws_dec_next_frame(struct ws_decoder *dec)
 {
@@ -390,21 +400,20 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
-      if(dec->frame_flags & CURLWS_PING && dec->head[1] > 125) {
+      if(dec->frame_flags & CURLWS_PING && dec->head[1] > WS_MAX_CNTRL_LEN) {
         /* The maximum valid size of PING frames is 125 bytes.
            Accepting overlong pings would mean sending equivalent pongs! */
         failf(data, "[WS] received PING frame is too big");
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
-      if(dec->frame_flags & CURLWS_PONG && dec->head[1] > 125) {
+      if(dec->frame_flags & CURLWS_PONG && dec->head[1] > WS_MAX_CNTRL_LEN) {
         /* The maximum valid size of PONG frames is 125 bytes. */
         failf(data, "[WS] received PONG frame is too big");
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
-      if(dec->frame_flags & CURLWS_CLOSE && dec->head[1] > 125) {
-        /* The maximum valid size of CLOSE frames is 125 bytes. */
+      if(dec->frame_flags & CURLWS_CLOSE && dec->head[1] > WS_MAX_CNTRL_LEN) {
         failf(data, "[WS] received CLOSE frame is too big");
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
@@ -479,7 +488,7 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
 {
   const unsigned char *inbuf;
   size_t inlen;
-  ssize_t nwritten;
+  size_t nwritten;
   CURLcode result;
   curl_off_t remain = dec->payload_len - dec->payload_offset;
 
@@ -487,15 +496,15 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
     if((curl_off_t)inlen > remain)
       inlen = (size_t)remain;
-    nwritten = write_cb(inbuf, inlen, dec->frame_age, dec->frame_flags,
-                        dec->payload_offset, dec->payload_len,
-                        write_ctx, &result);
-    if(nwritten < 0)
+    result = write_cb(inbuf, inlen, dec->frame_age, dec->frame_flags,
+                      dec->payload_offset, dec->payload_len,
+                      write_ctx, &nwritten);
+    if(result)
       return result;
-    Curl_bufq_skip(inraw, (size_t)nwritten);
-    dec->payload_offset += (curl_off_t)nwritten;
+    Curl_bufq_skip(inraw, nwritten);
+    dec->payload_offset += nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    CURL_TRC_WS(data, "passed %zd bytes payload, %"
+    CURL_TRC_WS(data, "passed %zu bytes payload, %"
                 FMT_OFF_T " remain", nwritten, remain);
   }
 
@@ -532,12 +541,12 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     /* head parsing done */
     dec->state = WS_DEC_PAYLOAD;
     if(dec->payload_len == 0) {
-      ssize_t nwritten;
+      size_t nwritten;
       const unsigned char tmp = '\0';
       /* special case of a 0 length frame, need to write once */
-      nwritten = write_cb(&tmp, 0, dec->frame_age, dec->frame_flags,
-                          0, 0, write_ctx, &result);
-      if(nwritten < 0)
+      result = write_cb(&tmp, 0, dec->frame_age, dec->frame_flags,
+                          0, 0, write_ctx, &nwritten);
+      if(result)
         return result;
       dec->state = WS_DEC_INIT;
       break;
@@ -602,43 +611,60 @@ struct ws_cw_dec_ctx {
   int cw_type;
 };
 
-static ssize_t ws_cw_dec_next(const unsigned char *buf, size_t buflen,
-                              int frame_age, int frame_flags,
-                              curl_off_t payload_offset,
-                              curl_off_t payload_len,
-                              void *user_data,
-                              CURLcode *err)
+static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
+                         bool blocking);
+static CURLcode ws_enc_send(struct Curl_easy *data,
+                            struct websocket *ws,
+                            const unsigned char *buffer,
+                            size_t buflen,
+                            curl_off_t fragsize,
+                            unsigned int flags,
+                            size_t *sent);
+static CURLcode ws_enc_send_cntrl(struct Curl_easy *data,
+                                  struct websocket *ws,
+                                  const unsigned char *payload,
+                                  size_t plen,
+                                  unsigned int frame_type);
+
+static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
+                               int frame_age, int frame_flags,
+                               curl_off_t payload_offset,
+                               curl_off_t payload_len,
+                               void *user_data,
+                               size_t *pnwritten)
 {
   struct ws_cw_dec_ctx *ctx = user_data;
   struct Curl_easy *data = ctx->data;
   struct websocket *ws = ctx->ws;
   bool auto_pong = !data->set.ws_no_auto_pong;
   curl_off_t remain = (payload_len - (payload_offset + buflen));
+  CURLcode result;
 
   (void)frame_age;
+  *pnwritten = 0;
 
   if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
-    size_t bytes;
-    infof(data, "[WS] auto-respond to PING with a PONG");
+    CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
+                "/%" FMT_OFF_T "]", payload_offset, payload_len);
     /* send back the exact same content as a PONG */
-    *err = curl_ws_send(data, buf, buflen, &bytes, 0, CURLWS_PONG);
-    if(*err)
-      return -1;
+    result = ws_enc_send_cntrl(data, ws, buf, buflen, CURLWS_PONG);
+    if(result)
+      return result;
   }
   else if(buflen || !remain) {
     /* forward the decoded frame to the next client writer. */
     update_meta(ws, frame_age, frame_flags, payload_offset,
                 payload_len, buflen);
 
-    *err = Curl_cwriter_write(data, ctx->next_writer,
+    result = Curl_cwriter_write(data, ctx->next_writer,
                               (ctx->cw_type | CLIENTWRITE_0LEN),
                               (const char *)buf, buflen);
-    if(*err)
-      return -1;
+    if(result)
+      return result;
   }
-  *err = CURLE_OK;
-  return (ssize_t)buflen;
+  *pnwritten = buflen;
+  return CURLE_OK;
 }
 
 static CURLcode ws_cw_write(struct Curl_easy *data,
@@ -664,7 +690,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     result = Curl_bufq_write(&ctx->buf, (const unsigned char *)buf,
                              nbytes, &nwritten);
     if(result) {
-      infof(data, "WS: error adding data to buffer %d", result);
+      infof(data, "[WS] error adding data to buffer %d", result);
       return result;
     }
   }
@@ -787,18 +813,15 @@ static CURLcode ws_enc_write_head(struct Curl_easy *data,
     enc->contfragment = (flags & CURLWS_CONT) ? (bit)TRUE : (bit)FALSE;
   }
 
-  if(flags & CURLWS_PING && payload_len > 125) {
-    /* The maximum valid size of PING frames is 125 bytes. */
+  if(flags & CURLWS_PING && payload_len > WS_MAX_CNTRL_LEN) {
     failf(data, "[WS] given PING frame is too big");
     return CURLE_TOO_LARGE;
   }
-  if(flags & CURLWS_PONG && payload_len > 125) {
-    /* The maximum valid size of PONG frames is 125 bytes. */
+  if(flags & CURLWS_PONG && payload_len > WS_MAX_CNTRL_LEN) {
     failf(data, "[WS] given PONG frame is too big");
     return CURLE_TOO_LARGE;
   }
-  if(flags & CURLWS_CLOSE && payload_len > 125) {
-    /* The maximum valid size of CLOSE frames is 125 bytes. */
+  if(flags & CURLWS_CLOSE && payload_len > WS_MAX_CNTRL_LEN) {
     failf(data, "[WS] given CLOSE frame is too big");
     return CURLE_TOO_LARGE;
   }
@@ -881,6 +904,180 @@ static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
   return CURLE_OK;
 }
 
+static CURLcode ws_enc_cntrl(struct Curl_easy *data,
+                             struct websocket *ws,
+                             struct ws_cntrl_frame *frame)
+{
+  CURLcode result;
+  size_t n;
+
+  if(ws->enc.payload_remain)
+    return CURLE_AGAIN;
+
+  result = ws_enc_write_head(data, &ws->enc, frame->type,
+                             (curl_off_t)frame->payload_len, &ws->sendbuf);
+  if(result) {
+    CURL_TRC_WS(data, "ws_enc_cntrl(), error addiong head: %d",
+                result);
+    return result;
+  }
+  result = ws_enc_write_payload(&ws->enc, data, frame->payload,
+                                frame->payload_len, &ws->sendbuf, &n);
+  if(result) {
+    CURL_TRC_WS(data, "ws_enc_cntrl(), error adding payload: %d",
+                result);
+    return result;
+  }
+  /* our buffer should always be able to take in a control frame */
+  DEBUGASSERT(n == frame->payload_len);
+  DEBUGASSERT(!ws->enc.payload_remain);
+  return CURLE_OK;
+}
+
+static CURLcode ws_enc_send_cntrl(struct Curl_easy *data,
+                                  struct websocket *ws,
+                                  const unsigned char *payload,
+                                  size_t plen,
+                                  unsigned int frame_type)
+{
+  DEBUGASSERT(plen <= WS_MAX_CNTRL_LEN);
+  if(plen > WS_MAX_CNTRL_LEN)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(ws->enc.payload_remain) {
+    /* frame assembly is ongoing, need to set frame aside.
+     * We keep only a single, pending control frame, discarding
+     * the previous one. */
+    if(!ws->send_cntrl) {
+      ws->send_cntrl = calloc(1, sizeof (*ws->send_cntrl));
+      if(!ws->send_cntrl)
+        return CURLE_OUT_OF_MEMORY;
+    }
+    ws->send_cntrl->type = frame_type;
+    ws->send_cntrl->payload_len = plen;
+    memcpy(ws->send_cntrl->payload, payload, plen);
+    return CURLE_OK;
+  }
+  else {
+    struct ws_cntrl_frame frame;
+    CURLcode result;
+
+    frame.type = frame_type;
+    frame.payload_len = plen;
+    memcpy(frame.payload, payload, plen);
+    result = ws_enc_cntrl(data, ws, &frame);
+    if(!result)
+      (void)ws_flush(data, ws, Curl_is_in_callback(data));
+    return result;
+  }
+}
+
+static CURLcode ws_enc_send(struct Curl_easy *data,
+                            struct websocket *ws,
+                            const unsigned char *buffer,
+                            size_t buflen,
+                            curl_off_t fragsize,
+                            unsigned int flags,
+                            size_t *pnsent)
+{
+  size_t n;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(!data->set.ws_raw_mode);
+  *pnsent = 0;
+
+  if(ws->enc.payload_remain || !Curl_bufq_is_empty(&ws->sendbuf)) {
+    /* a frame is ongoing with payload buffered or more payload
+     * that needs to be encoded into the buffer */
+    if(buflen < ws->sendbuf_payload) {
+      /* We have been called with LESS buffer data than before. This
+       * is not how it's supposed too work. */
+      failf(data, "[WS] curl_ws_send() called with smaller 'buflen' than "
+            "bytes already buffered in previous call, %zu vs %zu",
+            buflen, ws->sendbuf_payload);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    if((curl_off_t)buflen >
+       (ws->enc.payload_remain + (curl_off_t)ws->sendbuf_payload)) {
+      /* too large buflen beyond payload length of frame */
+      failf(data, "[WS] unaligned frame size (sending %zu instead of %"
+                  FMT_OFF_T ")",
+            buflen, ws->enc.payload_remain + ws->sendbuf_payload);
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+  }
+  else {
+    /* starting a new frame, we want a clean sendbuf.
+     * Any pending control frame we can add now as part of the flush. */
+    if(ws->send_cntrl) {
+      result = ws_enc_cntrl(data, ws, ws->send_cntrl);
+      if(result)
+        return result;
+      Curl_safefree(ws->send_cntrl);
+    }
+
+    result = ws_flush(data, ws, Curl_is_in_callback(data));
+    if(result)
+      return result;
+
+    result = ws_enc_write_head(data, &ws->enc, flags,
+                               (flags & CURLWS_OFFSET) ?
+                               fragsize : (curl_off_t)buflen,
+                               &ws->sendbuf);
+    if(result) {
+      CURL_TRC_WS(data, "curl_ws_send(), error writing frame head %d", result);
+      return result;
+    }
+  }
+
+  /* While there is either sendbuf to flush OR more payload to encode... */
+  while(!Curl_bufq_is_empty(&ws->sendbuf) || (buflen > ws->sendbuf_payload)) {
+    /* Try to add more payload to sendbuf */
+    if(buflen > ws->sendbuf_payload) {
+      size_t prev_len = Curl_bufq_len(&ws->sendbuf);
+      result = ws_enc_write_payload(&ws->enc, data,
+                                    buffer + ws->sendbuf_payload,
+                                    buflen - ws->sendbuf_payload,
+                                    &ws->sendbuf, &n);
+      if(result && (result != CURLE_AGAIN))
+        return result;
+      ws->sendbuf_payload += Curl_bufq_len(&ws->sendbuf) - prev_len;
+      if(!ws->sendbuf_payload) {
+        return CURLE_AGAIN;
+      }
+    }
+
+    /* flush, blocking when in callback */
+    result = ws_flush(data, ws, Curl_is_in_callback(data));
+    if(!result && ws->sendbuf_payload > 0) {
+      *pnsent += ws->sendbuf_payload;
+      buffer += ws->sendbuf_payload;
+      buflen -= ws->sendbuf_payload;
+      ws->sendbuf_payload = 0;
+    }
+    else if(result == CURLE_AGAIN) {
+      if(ws->sendbuf_payload > Curl_bufq_len(&ws->sendbuf)) {
+        /* blocked, part of payload bytes remain, report length
+         * that we managed to send. */
+        size_t flushed = (ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf));
+        *pnsent += flushed;
+        ws->sendbuf_payload -= flushed;
+        return CURLE_OK;
+      }
+      else {
+        /* blocked before sending headers or 1st payload byte. We cannot report
+         * OK on 0-length send (caller counts only payload) and EAGAIN */
+        CURL_TRC_WS(data, "EAGAIN flushing sendbuf, payload_encoded: %zu/%zu",
+                    ws->sendbuf_payload, buflen);
+        DEBUGASSERT(*pnsent == 0);
+        return CURLE_AGAIN;
+      }
+    }
+    else
+      return result;  /* real error sending the data */
+  }
+  return CURLE_OK;
+}
 
 struct cr_ws_ctx {
   struct Curl_creader super;
@@ -922,6 +1119,15 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
   if(!ws) {
     failf(data, "[WS] not a websocket transfer");
     return CURLE_FAILED_INIT;
+  }
+
+  /* If we have a pending control frame and are not in the middle
+   * of another one, lets add it into the sendbuf. */
+  if(ws->send_cntrl && !ws->enc.payload_remain) {
+    result = ws_enc_cntrl(data, ws, ws->send_cntrl);
+    if(result)
+      return result;
+    Curl_safefree(ws->send_cntrl);
   }
 
   if(Curl_bufq_is_empty(&ws->sendbuf)) {
@@ -1071,6 +1277,7 @@ static void ws_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_bufq_free(&ws->recvbuf);
   Curl_bufq_free(&ws->sendbuf);
+  free(ws->send_cntrl);
   free(ws);
 }
 
@@ -1229,6 +1436,7 @@ out:
 
 struct ws_collect {
   struct Curl_easy *data;
+  struct websocket *ws;
   unsigned char *buffer;
   size_t buflen;
   size_t bufidx;
@@ -1239,19 +1447,20 @@ struct ws_collect {
   bool written;
 };
 
-static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
-                                 int frame_age, int frame_flags,
-                                 curl_off_t payload_offset,
-                                 curl_off_t payload_len,
-                                 void *userp,
-                                 CURLcode *err)
+static CURLcode ws_client_collect(const unsigned char *buf, size_t buflen,
+                                  int frame_age, int frame_flags,
+                                  curl_off_t payload_offset,
+                                  curl_off_t payload_len,
+                                  void *userp,
+                                  size_t *pnwritten)
 {
   struct ws_collect *ctx = userp;
   struct Curl_easy *data = ctx->data;
   bool auto_pong = !data->set.ws_no_auto_pong;
-  size_t nwritten;
   curl_off_t remain = (payload_len - (payload_offset + buflen));
+  CURLcode result = CURLE_OK;
 
+  *pnwritten = 0;
   if(!ctx->bufidx) {
     /* first write */
     ctx->frame_age = frame_age;
@@ -1262,31 +1471,30 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
 
   if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
-    size_t bytes;
-    infof(ctx->data, "[WS] auto-respond to PING with a PONG");
+    CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
+                "/%" FMT_OFF_T "]", payload_offset, payload_len);
     /* send back the exact same content as a PONG */
-    *err = curl_ws_send(ctx->data, buf, buflen, &bytes, 0, CURLWS_PONG);
-    if(*err)
-      return -1;
-    nwritten = bytes;
+    result = ws_enc_send_cntrl(ctx->data, ctx->ws, buf, buflen, CURLWS_PONG);
+    if(result)
+      return result;
+    *pnwritten = buflen;
   }
   else {
+    size_t write_len;
+
     ctx->written = TRUE;
     DEBUGASSERT(ctx->buflen >= ctx->bufidx);
-    nwritten = CURLMIN(buflen, ctx->buflen - ctx->bufidx);
-    if(!nwritten) {
-      if(!buflen) {  /* 0 length write, we accept that */
-        *err = CURLE_OK;
-        return 0;
-      }
-      *err = CURLE_AGAIN;  /* no more space */
-      return -1;
+    write_len = CURLMIN(buflen, ctx->buflen - ctx->bufidx);
+    if(!write_len) {
+      if(!buflen)  /* 0 length write, we accept that */
+        return CURLE_OK;
+      return CURLE_AGAIN;  /* no more space */
     }
-    *err = CURLE_OK;
-    memcpy(ctx->buffer + ctx->bufidx, buf, nwritten);
-    ctx->bufidx += nwritten;
+    memcpy(ctx->buffer + ctx->bufidx, buf, write_len);
+    ctx->bufidx += write_len;
+    *pnwritten = write_len;
   }
-  return nwritten;
+  return result;
 }
 
 static CURLcode nw_in_recv(void *reader_ctx,
@@ -1334,6 +1542,7 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
 
   memset(&ctx, 0, sizeof(ctx));
   ctx.data = data;
+  ctx.ws = ws;
   ctx.buffer = buffer;
   ctx.buflen = buflen;
 
@@ -1384,6 +1593,15 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
                FMT_OFF_T ", %" FMT_OFF_T " left)",
                buflen, *nread, ws->recvframe.offset,
                ws->recvframe.bytesleft);
+  /* all's well, try to send any pending control. we do not know
+   * when the application will call `curl_ws_send()` again. */
+  if(!data->set.ws_raw_mode && ws->send_cntrl) {
+    CURLcode r2 = ws_enc_cntrl(data, ws, ws->send_cntrl);
+    if(!r2) {
+      Curl_safefree(ws->send_cntrl);
+      (void)ws_flush(data, ws, Curl_is_in_callback(data));
+    }
+  }
   return CURLE_OK;
 }
 
@@ -1531,9 +1749,10 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
 {
   struct websocket *ws;
   const unsigned char *buffer = buffer_arg;
-  size_t n;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = d;
+  size_t ndummy;
+  size_t *pnsent = sent ? sent : &ndummy;
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1541,8 +1760,7 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
               ", flags=%x), raw=%d",
               buflen, fragsize, flags, data->set.ws_raw_mode);
 
-  if(sent)
-    *sent = 0;
+  *pnsent = 0;
 
   if(!buffer && buflen) {
     failf(data, "[WS] buffer is NULL when buflen is not");
@@ -1586,107 +1804,18 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
       failf(data, "[WS] fragsize and flags must be zero in raw mode");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    result = ws_send_raw(data, buffer, buflen, sent);
+    result = ws_send_raw(data, buffer, buflen, pnsent);
     goto out;
   }
 
-  /* Not RAW mode, buf we do the frame encoding */
-
-  if(ws->enc.payload_remain || !Curl_bufq_is_empty(&ws->sendbuf)) {
-    /* a frame is ongoing with payload buffered or more payload
-     * that needs to be encoded into the buffer */
-    if(buflen < ws->sendbuf_payload) {
-      /* We have been called with LESS buffer data than before. This
-       * is not how it's supposed too work. */
-      failf(data, "[WS] curl_ws_send() called with smaller 'buflen' than "
-            "bytes already buffered in previous call, %zu vs %zu",
-            buflen, ws->sendbuf_payload);
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto out;
-    }
-    if((curl_off_t)buflen >
-       (ws->enc.payload_remain + (curl_off_t)ws->sendbuf_payload)) {
-      /* too large buflen beyond payload length of frame */
-      failf(data, "[WS] unaligned frame size (sending %zu instead of %"
-                  FMT_OFF_T ")",
-            buflen, ws->enc.payload_remain + ws->sendbuf_payload);
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto out;
-    }
-  }
-  else {
-    /* starting a new frame, we want a clean sendbuf */
-    result = ws_flush(data, ws, Curl_is_in_callback(data));
-    if(result)
-      goto out;
-
-    result = ws_enc_write_head(data, &ws->enc, flags,
-                               (flags & CURLWS_OFFSET) ?
-                               fragsize : (curl_off_t)buflen,
-                               &ws->sendbuf);
-    if(result) {
-      CURL_TRC_WS(data, "curl_ws_send(), error writing frame head %d", result);
-      goto out;
-    }
-  }
-
-  /* While there is either sendbuf to flush OR more payload to encode... */
-  while(!Curl_bufq_is_empty(&ws->sendbuf) || (buflen > ws->sendbuf_payload)) {
-    /* Try to add more payload to sendbuf */
-    if(buflen > ws->sendbuf_payload) {
-      size_t prev_len = Curl_bufq_len(&ws->sendbuf);
-      result = ws_enc_write_payload(&ws->enc, data,
-                                    buffer + ws->sendbuf_payload,
-                                    buflen - ws->sendbuf_payload,
-                                    &ws->sendbuf, &n);
-      if(result && (result != CURLE_AGAIN))
-        goto out;
-      ws->sendbuf_payload += Curl_bufq_len(&ws->sendbuf) - prev_len;
-      if(!ws->sendbuf_payload) {
-        result = CURLE_AGAIN;
-        goto out;
-      }
-    }
-
-    /* flush, blocking when in callback */
-    result = ws_flush(data, ws, Curl_is_in_callback(data));
-    if(!result && ws->sendbuf_payload > 0) {
-      if(sent)
-        *sent += ws->sendbuf_payload;
-      buffer += ws->sendbuf_payload;
-      buflen -= ws->sendbuf_payload;
-      ws->sendbuf_payload = 0;
-    }
-    else if(result == CURLE_AGAIN) {
-      if(ws->sendbuf_payload > Curl_bufq_len(&ws->sendbuf)) {
-        /* blocked, part of payload bytes remain, report length
-         * that we managed to send. */
-        size_t flushed = (ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf));
-        if(sent)
-          *sent += flushed;
-        ws->sendbuf_payload -= flushed;
-        result = CURLE_OK;
-        goto out;
-      }
-      else {
-        /* blocked before sending headers or 1st payload byte. We cannot report
-         * OK on 0-length send (caller counts only payload) and EAGAIN */
-        CURL_TRC_WS(data, "EAGAIN flushing sendbuf, payload_encoded: %zu/%zu",
-                    ws->sendbuf_payload, buflen);
-        DEBUGASSERT(!sent || *sent == 0);
-        result = CURLE_AGAIN;
-        goto out;
-      }
-    }
-    else
-      goto out;  /* real error sending the data */
-  }
+  /* Not RAW mode, we do the frame encoding */
+  result = ws_enc_send(data, ws, buffer, buflen, fragsize, flags, pnsent);
 
 out:
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
               ", flags=%x, raw=%d) -> %d, %zu",
               buflen, fragsize, flags, data->set.ws_raw_mode, result,
-              sent ? *sent : 0);
+              *pnsent);
   return result;
 }
 
