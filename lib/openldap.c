@@ -496,7 +496,24 @@ static CURLcode oldap_perform_sasl(struct Curl_easy *data)
 }
 
 #ifdef USE_SSL
-static Sockbuf_IO ldapsb_tls;
+static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg);
+static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod);
+static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg);
+static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
+                                  ber_len_t len);
+static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
+                                   ber_len_t len);
+static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod);
+
+static Sockbuf_IO ldapsb_tls =
+{
+  ldapsb_tls_setup,
+  ldapsb_tls_remove,
+  ldapsb_tls_ctrl,
+  ldapsb_tls_read,
+  ldapsb_tls_write,
+  ldapsb_tls_close
+};
 
 static bool ssl_installed(struct connectdata *conn)
 {
@@ -1293,16 +1310,6 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   }
   return ret;
 }
-
-static Sockbuf_IO ldapsb_tls =
-{
-  ldapsb_tls_setup,
-  ldapsb_tls_remove,
-  ldapsb_tls_ctrl,
-  ldapsb_tls_read,
-  ldapsb_tls_write,
-  ldapsb_tls_close
-};
 #endif /* USE_SSL */
 
 #endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
