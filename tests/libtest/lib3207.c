@@ -68,11 +68,13 @@ static size_t write_memory_callback(char *contents, size_t size,
   return realsize;
 }
 
+static
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-static CURL_THREAD_RETURN_T CURL_STDCALL test_thread(void *ptr)
+CURL_THREAD_RETURN_T CURL_STDCALL
 #else
-static unsigned int test_thread(void *ptr)
+unsigned int
 #endif
+test_thread(void *ptr)
 {
   struct Ctx *ctx = (struct Ctx *)ptr;
   CURLcode res = CURLE_OK;
