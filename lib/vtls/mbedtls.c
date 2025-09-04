@@ -1160,7 +1160,7 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
     (struct mbed_ssl_backend_data *)connssl->backend;
   unsigned char buf[1024];
   CURLcode result = CURLE_OK;
-  int ret;
+  int ret = 0;
   size_t i;
 
   DEBUGASSERT(backend);
