@@ -49,8 +49,6 @@
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
-#else
-#  define CURL_STDCALL
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
