@@ -256,7 +256,6 @@ _ TELNET
 _ TFTP
 
 
-
 Compiling on OS/400:
 
   These instructions targets people who knows about OS/400, compiling, IFS and
@@ -326,7 +325,6 @@ _ The EBCDIC CCSID used by QADRT is 37 by default, NOT THE JOB'S CCSID. If
 _ Do not use original source include files unless you know what you are doing.
   Use the installed members instead (in /QSYS.LIB/CURL.LIB/H.FILE and
   /curl/include/curl).
-
 
 
 ILE/RPG support:

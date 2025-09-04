@@ -165,7 +165,6 @@ static void mcode_or_die(const char *where, CURLMcode code)
 }
 
 
-
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(struct GlobalInfo *g)
 {
@@ -191,7 +190,6 @@ static void check_multi_info(struct GlobalInfo *g)
     }
   }
 }
-
 
 
 /* Called by libevent when we get action on a multi socket */
@@ -243,7 +241,6 @@ static void remsock(struct SockInfo *f, struct GlobalInfo *g)
 }
 
 
-
 /* Assign information to a SockInfo structure */
 static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
                     struct GlobalInfo *g)
@@ -263,7 +260,6 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
   f->evset = 1;
   ev_io_start(g->loop, &f->ev);
 }
-
 
 
 /* Initialize a new SockInfo structure */

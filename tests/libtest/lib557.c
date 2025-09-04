@@ -1222,7 +1222,6 @@ static int test_width_precision(void)
 }
 
 
-
 static int test_weird_arguments(void)
 {
   int errors = 0;
