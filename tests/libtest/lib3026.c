@@ -70,8 +70,8 @@ static CURLcode test_lib3026(const char *URL)
 
 cleanup:
   for(i = 0; i < tid_count; i++) {
-    WaitForSingleObject((HANDLE)thread_handles[i], INFINITE);
-    CloseHandle((HANDLE)thread_handles[i]);
+    WaitForSingleObject(thread_handles[i], INFINITE);
+    CloseHandle(thread_handles[i]);
     if(results[i] != CURLE_OK) {
       curl_mfprintf(stderr, "%s:%d thread[%u]: curl_global_init() failed,"
                     "with code %d (%s)\n", __FILE__, __LINE__,
