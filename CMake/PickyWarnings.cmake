@@ -69,6 +69,9 @@ if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSI
    (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0))
   list(APPEND _picky "-Wno-documentation-unknown-command")  # clang 3.3  appleclang  5.0
 endif()
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
+  list(APPEND _picky "-Wno-implicit-void-ptr-cast")  # clang 21.0
+endif()
 
 if(MSVC)
   list(APPEND _picky "-W4")  # Use the highest warning level for Visual Studio.
