@@ -759,7 +759,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 
   ancount = doh_get16bit(doh, 6);
   while(ancount) {
-    unsigned short class;
+    unsigned short dnsclass;
     unsigned int ttl;
 
     rc = doh_skipqname(doh, dohlen, &index);
@@ -779,8 +779,8 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
-    class = doh_get16bit(doh, index);
-    if(DNS_CLASS_IN != class)
+    dnsclass = doh_get16bit(doh, index);
+    if(DNS_CLASS_IN != dnsclass)
       return DOH_DNS_UNEXPECTED_CLASS; /* unsupported */
     index += 2;
 
@@ -816,7 +816,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     if(dohlen < (index + 8))
       return DOH_DNS_OUT_OF_RANGE;
 
-    index += 2 + 2 + 4; /* type, class and ttl */
+    index += 2 + 2 + 4; /* type, dnsclass and ttl */
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
@@ -838,7 +838,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     if(dohlen < (index + 8))
       return DOH_DNS_OUT_OF_RANGE;
 
-    index += 2 + 2 + 4; /* type, class and ttl */
+    index += 2 + 2 + 4; /* type, dnsclass and ttl */
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
