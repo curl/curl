@@ -95,7 +95,7 @@ static CURLcode test_lib1565(const char *URL)
   CURL *started_handles[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
-  pthread_t tid;
+  pthread_t tid = 0;
   bool tid_valid = false;
   struct CURLMsg *message;
 

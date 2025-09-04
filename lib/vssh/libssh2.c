@@ -1216,9 +1216,6 @@ sftp_upload_init(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/* make sure that this does not collide with an actual libssh2 error code */
-#define ERROR_LIBBSH2 1
-
 static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
                                     struct ssh_conn *sshc)
 {
@@ -3411,12 +3408,19 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     */
 #if LIBSSH2_VERSION_NUM >= 0x010b01
     infof(data, "Uses HTTPS proxy");
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
     libssh2_session_callback_set2(sshc->ssh_session,
                                   LIBSSH2_CALLBACK_RECV,
                                   (libssh2_cb_generic *)ssh_tls_recv);
     libssh2_session_callback_set2(sshc->ssh_session,
                                   LIBSSH2_CALLBACK_SEND,
                                   (libssh2_cb_generic *)ssh_tls_send);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
 #else
     /*
      * This crazy union dance is here to avoid assigning a void pointer a

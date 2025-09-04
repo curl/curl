@@ -878,7 +878,14 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
        given FILE * stream and we can actually attempt to rewind that
        ourselves with fseek() */
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
     if(data->state.fread_func == (curl_read_callback)fread) {
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
       int err = fseek(data->state.in, 0, SEEK_SET);
       CURL_TRC_READ(data, "cr_in, rewind via fseek -> %d(%d)",
                     (int)err, (int)errno);

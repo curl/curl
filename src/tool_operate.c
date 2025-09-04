@@ -1934,7 +1934,7 @@ static CURLcode serial_transfers(CURLSH *share)
   return result;
 }
 
-static CURLcode is_using_schannel(int *using)
+static CURLcode is_using_schannel(int *pusing)
 {
   CURLcode result = CURLE_OK;
   static int using_schannel = -1; /* -1 = not checked
@@ -1958,7 +1958,7 @@ static CURLcode is_using_schannel(int *using)
     if(result)
       return result;
   }
-  *using = using_schannel;
+  *pusing = using_schannel;
   return result;
 }
 

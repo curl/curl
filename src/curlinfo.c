@@ -236,18 +236,16 @@ static const char *disabled[]={
 #else
   "OFF"
 #endif
-  ,
-  NULL
 };
 
 int main(int argc, char **argv)
 {
-  int i;
+  size_t i;
 
   (void)argc;
   (void)argv;
 
-  for(i = 0; disabled[i]; i++)
+  for(i = 0; i < CURL_ARRAYSIZE(disabled); i++)
     printf("%s\n", disabled[i]);
 
   return 0;

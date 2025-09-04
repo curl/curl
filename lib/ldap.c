@@ -119,30 +119,30 @@ struct ldap_urldesc {
   char   *lud_filter;
 #endif
   char  **lud_exts;
-  size_t    lud_attrs_dups; /* how many were dup'ed, this field is not in the
-                               "real" struct so can only be used in code
-                               without HAVE_LDAP_URL_PARSE defined */
+  size_t  lud_attrs_dups; /* how many were dup'ed, this field is not in the
+                             "real" struct so can only be used in code
+                             without HAVE_LDAP_URL_PARSE defined */
 };
 
 #undef LDAPURLDesc
 #define LDAPURLDesc struct ldap_urldesc
 
-static int  _ldap_url_parse(struct Curl_easy *data,
-                            const struct connectdata *conn,
-                            LDAPURLDesc **ludp);
-static void _ldap_free_urldesc(LDAPURLDesc *ludp);
+static int  ldap_url_parse_low(struct Curl_easy *data,
+                               const struct connectdata *conn,
+                               LDAPURLDesc **ludp);
+static void ldap_free_urldesc_low(LDAPURLDesc *ludp);
 
 #undef ldap_free_urldesc
-#define ldap_free_urldesc       _ldap_free_urldesc
+#define ldap_free_urldesc       ldap_free_urldesc_low
 #endif
 
 #ifdef DEBUG_LDAP
   #define LDAP_TRACE(x)   do { \
-                            _ldap_trace("%u: ", __LINE__); \
-                            _ldap_trace x; \
+                            ldap_trace_low("%u: ", __LINE__); \
+                            ldap_trace_low x; \
                           } while(0)
 
-  static void _ldap_trace(const char *fmt, ...) CURL_PRINTF(1, 2);
+  static void ldap_trace_low(const char *fmt, ...) CURL_PRINTF(1, 2);
 #else
   #define LDAP_TRACE(x)   Curl_nop_stmt
 #endif
@@ -346,7 +346,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef HAVE_LDAP_URL_PARSE
   rc = ldap_url_parse(data->state.url, &ludp);
 #else
-  rc = _ldap_url_parse(data, conn, &ludp);
+  rc = ldap_url_parse_low(data, conn, &ludp);
 #endif
   if(rc) {
     failf(data, "Bad LDAP URL: %s", ldap_err2string((curl_ldap_num_t)rc));
@@ -728,7 +728,7 @@ quit:
 }
 
 #ifdef DEBUG_LDAP
-static void _ldap_trace(const char *fmt, ...)
+static void ldap_trace_low(const char *fmt, ...)
 {
   static int do_trace = -1;
   va_list args;
@@ -795,8 +795,9 @@ static size_t num_entries(const char *s)
  *
  * Defined in RFC4516 section 2.
  */
-static int _ldap_url_parse2(struct Curl_easy *data,
-                            const struct connectdata *conn, LDAPURLDesc *ludp)
+static int ldap_url_parse2_low(struct Curl_easy *data,
+                               const struct connectdata *conn,
+                               LDAPURLDesc *ludp)
 {
   int rc = LDAP_SUCCESS;
   char *p;
@@ -999,9 +1000,9 @@ quit:
   return rc;
 }
 
-static int _ldap_url_parse(struct Curl_easy *data,
-                           const struct connectdata *conn,
-                           LDAPURLDesc **ludpp)
+static int ldap_url_parse_low(struct Curl_easy *data,
+                              const struct connectdata *conn,
+                              LDAPURLDesc **ludpp)
 {
   LDAPURLDesc *ludp = calloc(1, sizeof(*ludp));
   int rc;
@@ -1010,16 +1011,16 @@ static int _ldap_url_parse(struct Curl_easy *data,
   if(!ludp)
     return LDAP_NO_MEMORY;
 
-  rc = _ldap_url_parse2(data, conn, ludp);
+  rc = ldap_url_parse2_low(data, conn, ludp);
   if(rc != LDAP_SUCCESS) {
-    _ldap_free_urldesc(ludp);
+    ldap_free_urldesc_low(ludp);
     ludp = NULL;
   }
   *ludpp = ludp;
   return rc;
 }
 
-static void _ldap_free_urldesc(LDAPURLDesc *ludp)
+static void ldap_free_urldesc_low(LDAPURLDesc *ludp)
 {
   if(!ludp)
     return;

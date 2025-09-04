@@ -91,9 +91,18 @@ static CURLcode test_unit1398(const char *arg)
   fail_unless(rc == 15, "return code should be 15");
   fail_unless(!strcmp(output, "    1234    567"), "wrong output");
 
+#if defined(__clang__) && \
+  (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 1))
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-non-iso"
+#endif
   /* double precision */
   rc = curl_msnprintf(output, 24, "%2$.*1$.99d", 3, 5678);
   fail_unless(rc == 0, "return code should be 0");
+#if defined(__clang__) && \
+  (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 1))
+#pragma clang diagnostic pop
+#endif
 
   /* 129 input % flags */
   rc = curl_msnprintf(output, 130,

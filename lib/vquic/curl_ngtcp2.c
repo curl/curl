@@ -80,7 +80,6 @@
 
 
 #define QUIC_MAX_STREAMS (256*1024)
-#define QUIC_MAX_DATA (1*1024*1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
@@ -102,8 +101,6 @@
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
-#define H3_STREAM_RECV_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 #define H3_STREAM_SEND_CHUNKS \
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 
@@ -1444,10 +1441,6 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
               stream->upload_left);
   return (nghttp3_ssize)nvecs;
 }
-
-/* Index where :authority header field will appear in request header
-   field list. */
-#define AUTHORITY_DST_IDX 3
 
 static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data,

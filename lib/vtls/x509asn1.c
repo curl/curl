@@ -199,7 +199,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   elem->header = beg;
   b = (unsigned char) *beg++;
   elem->constructed = (b & 0x20) != 0;
-  elem->class = (b >> 6) & 3;
+  elem->eclass = (b >> 6) & 3;
   b &= 0x1F;
   if(b == 0x1F)
     return NULL; /* Long tag values not supported here. */
@@ -456,7 +456,7 @@ static CURLcode encodeOID(struct dynbuf *store,
     x = 0;
     do {
       if(x & 0xFF000000)
-        return 0;
+        return CURLE_OK;
       y = *(const unsigned char *) beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);

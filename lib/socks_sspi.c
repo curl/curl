@@ -71,7 +71,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   CURLcode code;
   size_t actualread;
   size_t written;
-  int result;
+  CURLcode result;
+  int err;
   /* Needs GSS-API authentication */
   SECURITY_STATUS status;
   unsigned long sspi_ret_flags = 0;
@@ -236,8 +237,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
      * +----+------+-----+----------------+
      */
 
-    result = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
-    if(result || (actualread != 4)) {
+    err = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
+    if(err || (actualread != 4)) {
       failf(data, "Failed to receive SSPI authentication response.");
       result = CURLE_COULDNT_CONNECT;
       goto error;
@@ -268,10 +269,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       result = CURLE_OUT_OF_MEMORY;
       goto error;
     }
-    result = Curl_blockread_all(cf, data, (char *)sspi_recv_token.pvBuffer,
-                                sspi_recv_token.cbBuffer, &actualread);
+    err = Curl_blockread_all(cf, data, (char *)sspi_recv_token.pvBuffer,
+                             sspi_recv_token.cbBuffer, &actualread);
 
-    if(result || (actualread != us_length)) {
+    if(err || (actualread != us_length)) {
       failf(data, "Failed to receive SSPI authentication token.");
       result = CURLE_COULDNT_CONNECT;
       goto error;
@@ -452,8 +453,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     Curl_safefree(etbuf);
   }
 
-  result = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
-  if(result || (actualread != 4)) {
+  err = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
+  if(err || (actualread != 4)) {
     failf(data, "Failed to receive SSPI encryption response.");
     result = CURLE_COULDNT_CONNECT;
     goto error;
@@ -484,10 +485,10 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     goto error;
   }
 
-  result = Curl_blockread_all(cf, data, (char *)sspi_w_token[0].pvBuffer,
-                              sspi_w_token[0].cbBuffer, &actualread);
+  err = Curl_blockread_all(cf, data, (char *)sspi_w_token[0].pvBuffer,
+                           sspi_w_token[0].cbBuffer, &actualread);
 
-  if(result || (actualread != us_length)) {
+  if(err || (actualread != us_length)) {
     failf(data, "Failed to receive SSPI encryption type.");
     result = CURLE_COULDNT_CONNECT;
     goto error;

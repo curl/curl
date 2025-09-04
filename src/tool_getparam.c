@@ -2109,7 +2109,6 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_REMOTE_NAME: /* --remote-name */
     return parse_remote_name(config, toggle);
-    break;
   case C_PROXYTUNNEL: /* --proxytunnel */
     config->proxytunnel = toggle;
     break;
@@ -2131,7 +2130,6 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_VERBOSE: /* --verbose */
     return parse_verbose(toggle);
-    break;
   case C_VERSION: /* --version */
     if(toggle)    /* --no-version yields no output! */
       return PARAM_VERSION_INFO_REQUESTED;
@@ -2800,7 +2798,6 @@ static ParameterError opt_string(struct OperationConfig *config,
       global->parallel_host = PARALLEL_HOST_DEFAULT;
     else
       global->parallel_host = (unsigned short)val;
-    break;
     break;
   case C_PARALLEL_MAX:  /* --parallel-max */
     err = str2unum(&val, nextarg);

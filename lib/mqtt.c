@@ -54,7 +54,7 @@
 #define MQTT_MSG_SUBSCRIBE  0x82
 #define MQTT_MSG_SUBACK     0x90
 #define MQTT_MSG_DISCONNECT 0xe0
-#define MQTT_MSG_PINGREQ    0xC0
+/* #define MQTT_MSG_PINGREQ    0xC0 */
 #define MQTT_MSG_PINGRESP   0xD0
 
 #define MQTT_CONNACK_LEN 2
