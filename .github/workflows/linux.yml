@@ -9,7 +9,7 @@ name: 'Linux'
     branches:
       - master
       - '*/ci'
-    paths-ignore:
+    paths-ignore: &shared_paths
       - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
@@ -21,15 +21,7 @@ name: 'Linux'
   pull_request:
     branches:
       - master
-    paths-ignore:
-      - '**/*.md'
-      - '.circleci/**'
-      - 'appveyor.*'
-      - 'Dockerfile'
-      - 'packages/**'
-      - 'plan9/**'
-      - 'projects/**'
-      - 'winbuild/**'
+    paths-ignore: *shared_paths
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
