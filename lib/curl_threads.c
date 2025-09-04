@@ -129,9 +129,7 @@ int Curl_thread_cancel(curl_thread_t *hnd)
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
-  curl_thread_t t;
-  HANDLE thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
-  t = (curl_thread_t)thread_handle;
+  curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef UNDER_CE
     DWORD gle = GetLastError();
