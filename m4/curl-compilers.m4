@@ -829,9 +829,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-field-initializers])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-noreturn])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-default"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-enum"                    # Not used because this basically disallows default case
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [old-style-definition])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])      # Not used because this basically disallows default case
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits])
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
           # tmp_CFLAGS="$tmp_CFLAGS -Wno-error=unused-macros"
@@ -847,8 +848,8 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 2.9 or later
           if test "$compiler_num" -ge "209"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-sign-conversion"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shift-sign-overflow])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])  # Not used because we cannot change public structs
           fi
           #
           dnl Only clang 3.0 or later
@@ -1022,10 +1023,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
                 ;;
             esac
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unreachable-code unused-parameter])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [padded])           # Not used because we cannot change public structs
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-padded"                         # Not used because we cannot change public structs
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-default"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-switch-enum"                    # Not used because this basically disallows default case
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pragmas])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [redundant-decls])
-          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [switch-enum])      # Not used because this basically disallows default case
           # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused-macros])    # Not practical
           # tmp_CFLAGS="$tmp_CFLAGS -Wno-error=unused-macros"
           fi
