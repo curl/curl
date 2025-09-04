@@ -43,7 +43,7 @@
 #pragma GCC diagnostic ignored "-Wformat-overflow"
 #endif
 #if defined(__clang__) && \
-  ((__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 1))
+  (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 1))
 #pragma clang diagnostic ignored "-Wformat-non-iso"
 #endif
 #endif
