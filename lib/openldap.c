@@ -499,8 +499,10 @@ static CURLcode oldap_perform_sasl(struct Curl_easy *data)
 static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg);
 static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod);
 static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg);
-static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len);
-static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len);
+static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
+                                  ber_len_t len);
+static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
+                                   ber_len_t len);
 static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod);
 
 static Sockbuf_IO ldapsb_tls =
