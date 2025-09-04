@@ -365,7 +365,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->in_set = stdin;  /* default input from stdin */
   set->err = stderr;  /* default stderr to stderr */
 
-#if defined(__clang__) && __clang_major__ >= 16
+#if defined(__clang__) && __clang_major__ >= 13
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type"
 #endif
@@ -374,7 +374,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* use fread as default function to read input */
   set->fread_func_set = (curl_read_callback)fread;
-#if defined(__clang__) && __clang_major__ >= 16
+#if defined(__clang__) && __clang_major__ >= 13
 #pragma clang diagnostic pop
 #endif
   set->is_fread_set = 0;
