@@ -557,11 +557,12 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
   struct select_ws_wait_data *data;
-  HANDLE thread;
 
   /* allocate internal waiting data structure */
   data = malloc(sizeof(struct select_ws_wait_data));
   if(data) {
+    HANDLE thread;
+
     data->handle = handle;
     data->signal = signal;
     data->abort = abort;
@@ -573,7 +574,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
     if(!thread) {
       free(data);
     }
-    return (HANDLE)thread;
+    return thread;
   }
   return NULL;
 }
