@@ -48,11 +48,11 @@
 #define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
-#undef _tcsdup
+#undef Curl_tcsdup
 #ifdef UNICODE
-#define _tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#define Curl_tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
 #else
-#define _tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define Curl_tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #endif
 #endif /* _WIN32 */
 
