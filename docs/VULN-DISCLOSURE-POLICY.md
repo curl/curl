@@ -353,3 +353,90 @@ using the protocols or options that require the use of those algorithms.
 
 When servers upgrade to use secure alternatives, curl users should use those
 options/protocols.
+
+# curl major incident response
+
+Vulnerability disclosure manages the full life cycle of a vulnerability
+affecting curl - where the **curl-security** team privately engages with
+reporters coordinating on embargo and eventual release of security fixes.
+
+For most vulnerabilities (even critical vulnerabilities) this is the
+normal _'mode'_ of incident response.
+
+A **major incident** is defined as something that has much larger scope and
+impact on users and developers of curl.
+
+A major incident usually encompasses one or more of the following:
+* broad and deep impact on developers, distros and users
+* high visibility
+* remote code execution
+* exploit readily available
+* critical curl infrastructure compromised
+* time sensitive
+* premature disclosure (e.g. embargo broken)
+
+A major incident is declared only when it is deemed that the normal
+vulnerability disclosure process is not sufficient.
+
+The curl **major incident** process is as follows:
+
+## Major incident begins
+
+Only a member of the **curl-security** team can declare a **major incident**
+via any or all of the following communication channels:
+
+* **irc**: channel #curl on the network [Libera.Chat](https://libera.chat)
+* **mailing-lists**:
+  * curl-announce
+  * curl-users
+  * curl-distros
+* **website**: [curl.se](https://curl.se)
+
+This declaration may also be transmitted via other channels, though the
+above are considered official channels.
+
+The veracity of such a communication can be verified by consulting two
+or more **curl-security** team members.
+
+This announcement nominates, from **curl-security** team, the following
+roles:
+
+* **incident lead** - Coordinates technical efforts
+* **communication lead** - Single point of public contact
+
+It is likely that our [BDFL](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life) occupies
+one of these roles, though this plan does not depend on it.
+
+A declaration may also contain more detailed information but as we honor embargoes
+and vulnerability disclosure throughout this process, it may also just contain
+brief notification that a **major incident** is occurring.
+
+## Major incident ongoing
+
+During the incident - all press, media, legal or commercial entities should contact
+communication leader (security@curl.se).
+
+Existing **curl-security** team internal communication channels are used
+for all internal communication.
+
+Existing vulnerability disclosure process are followed for any embargoes
+and fixes.
+
+Where possible, public communication are provided:
+* regular communication from communication leader (ex. daily update)
+* asynchronous communication from incident leader
+
+* Delivered to the aforementioned curl communication channels.
+
+A log is kept of all external and internal communication.
+
+Once fixes have been released we may provide a more detailed postmortem and
+overall timeline of events.
+
+## Major incident ends
+
+Both the incident and communication leads declare when a **major incident**
+has finished.
+
+Any notices are removed and a return to normal vulnerability disclosure
+process.
