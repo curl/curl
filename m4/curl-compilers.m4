@@ -855,8 +855,16 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only clang 3.0 or later
           if test "$compiler_num" -ge "300"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-qual])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conditional-uninitialized])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
             tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-used-but-marked-unused"    # Triggered by typecheck-gcc.h (with clang 14+)
+          fi
+          dnl Only clang 3.1 or later
+          if test "$compiler_num" -ge "301"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [format-non-iso])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-covered-switch-default"    # Annoying to fix or silence
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-disabled-macro-expansion"  # Triggered by typecheck-gcc.h (with clang 14+)
           fi
           #
           dnl Only clang 3.2 or later
@@ -872,6 +880,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
                 CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-variable-declarations])
                 ;;
             esac
+          fi
+          dnl Only clang 3.3 or later
+          if test "$compiler_num" -ge "303"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-documentation-unknown-command"
           fi
           #
           dnl Only clang 3.4 or later
@@ -910,10 +922,30 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  # we have silencing markup for clang 10.0 and above only
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [xor-used-as-pow])
           fi
-          #
+          dnl clang 13 or later
+          if test "$compiler_num" -ge "1300"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [reserved-identifier]) # Keep it before -Wno-reserved-macro-identifier
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-reserved-macro-identifier"  # Sometimes such external macros need to be set
+          fi
+          dnl clang 16 or later
+          if test "$compiler_num" -ge "1700"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-unsafe-buffer-usage"
+          fi
+          dnl clang 17 or later
+          if test "$compiler_num" -ge "1700"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
+          fi
           dnl clang 20 or later
           if test "$compiler_num" -ge "2000"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [array-compare])
+          fi
+          dnl clang 21 or later
+          if test "$compiler_num" -ge "2100"; then
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [c++-hidden-decl])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [c++-keyword])
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-implicit-void-ptr-cast"
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [tentative-definition-compat])
           fi
         fi
         ;;
