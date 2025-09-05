@@ -42,12 +42,14 @@ struct altsvc {
   struct Curl_llist_node node;
   unsigned int prio;
   BIT(persist);
+  BIT(used);
 };
 
 struct altsvcinfo {
   char *filename;
   struct Curl_llist list; /* list of entries */
   long flags; /* the publicly set bitmask */
+  BIT(used);
 };
 
 const char *Curl_alpnid2str(enum alpnid id);
@@ -66,6 +68,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         int srcport,
                         struct altsvc **dstentry,
                         const int versions); /* CURLALTSVC_H* bits */
+bool Curl_is_altsvc_error(CURLcode rc);
+
 #else
 /* disabled */
 #define Curl_altsvc_save(a,b,c)
