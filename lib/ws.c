@@ -126,7 +126,7 @@ struct websocket {
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame recvframe;  /* the current WS FRAME received */
-  struct ws_cntrl_frame *send_cntrl; /* a control frame pending to be sent */
+  struct ws_cntrl_frame pending; /* a control frame pending to be sent */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
@@ -620,11 +620,33 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
                             curl_off_t fragsize,
                             unsigned int flags,
                             size_t *sent);
-static CURLcode ws_enc_send_cntrl(struct Curl_easy *data,
-                                  struct websocket *ws,
-                                  const unsigned char *payload,
-                                  size_t plen,
-                                  unsigned int frame_type);
+static CURLcode ws_enc_add_pending(struct Curl_easy *data,
+                                   struct websocket *ws);
+
+static CURLcode ws_enc_add_cntrl(struct Curl_easy *data,
+                                 struct websocket *ws,
+                                 const unsigned char *payload,
+                                 size_t plen,
+                                 unsigned int frame_type)
+{
+  DEBUGASSERT(plen <= WS_MAX_CNTRL_LEN);
+  if(plen > WS_MAX_CNTRL_LEN)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  /* Overwrite any pending frame with the new one, we keep
+   * only one. */
+  ws->pending.type = frame_type;
+  ws->pending.payload_len = plen;
+  memcpy(ws->pending.payload, payload, plen);
+
+  if(!ws->enc.payload_remain) { /* not in the middle of another frame */
+    CURLcode result = ws_enc_add_pending(data, ws);
+    if(!result)
+      (void)ws_flush(data, ws, Curl_is_in_callback(data));
+    return result;
+  }
+  return CURLE_OK;
+}
 
 static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
                                int frame_age, int frame_flags,
@@ -648,7 +670,7 @@ static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
     CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
                 "/%" FMT_OFF_T "]", payload_offset, payload_len);
     /* send back the exact same content as a PONG */
-    result = ws_enc_send_cntrl(data, ws, buf, buflen, CURLWS_PONG);
+    result = ws_enc_add_cntrl(data, ws, buf, buflen, CURLWS_PONG);
     if(result)
       return result;
   }
@@ -779,7 +801,7 @@ static void ws_enc_init(struct ws_encoder *enc)
      +---------------------------------------------------------------+
 */
 
-static CURLcode ws_enc_write_head(struct Curl_easy *data,
+static CURLcode ws_enc_add_frame(struct Curl_easy *data,
                                  struct ws_encoder *enc,
                                  unsigned int flags,
                                  curl_off_t payload_len,
@@ -870,6 +892,23 @@ static CURLcode ws_enc_write_head(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static CURLcode ws_enc_write_head(struct Curl_easy *data,
+                                  struct websocket *ws,
+                                  struct ws_encoder *enc,
+                                  unsigned int flags,
+                                  curl_off_t payload_len,
+                                  struct bufq *out)
+{
+  /* starting a new frame, we want a clean sendbuf.
+   * Any pending control frame we can add now as part of the flush. */
+  if(ws->pending.type) {
+    CURLcode result = ws_enc_add_pending(data, ws);
+    if(result)
+      return result;
+  }
+  return ws_enc_add_frame(data, enc, flags, payload_len, out);
+}
+
 static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
                                      struct Curl_easy *data,
                                      const unsigned char *buf, size_t buflen,
@@ -904,72 +943,40 @@ static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
   return CURLE_OK;
 }
 
-static CURLcode ws_enc_cntrl(struct Curl_easy *data,
-                             struct websocket *ws,
-                             struct ws_cntrl_frame *frame)
+static CURLcode ws_enc_add_pending(struct Curl_easy *data,
+                                   struct websocket *ws)
 {
   CURLcode result;
   size_t n;
 
-  if(ws->enc.payload_remain)
+  if(!ws->pending.type) /* no pending frame here */
+    return CURLE_OK;
+  if(ws->enc.payload_remain) /* in the middle of another frame */
     return CURLE_AGAIN;
 
-  result = ws_enc_write_head(data, &ws->enc, frame->type,
-                             (curl_off_t)frame->payload_len, &ws->sendbuf);
+  result = ws_enc_add_frame(data, &ws->enc, ws->pending.type,
+                            (curl_off_t)ws->pending.payload_len,
+                            &ws->sendbuf);
   if(result) {
     CURL_TRC_WS(data, "ws_enc_cntrl(), error addiong head: %d",
                 result);
-    return result;
+    goto out;
   }
-  result = ws_enc_write_payload(&ws->enc, data, frame->payload,
-                                frame->payload_len, &ws->sendbuf, &n);
+  result = ws_enc_write_payload(&ws->enc, data, ws->pending.payload,
+                                ws->pending.payload_len,
+                                &ws->sendbuf, &n);
   if(result) {
     CURL_TRC_WS(data, "ws_enc_cntrl(), error adding payload: %d",
                 result);
-    return result;
+    goto out;
   }
   /* our buffer should always be able to take in a control frame */
-  DEBUGASSERT(n == frame->payload_len);
+  DEBUGASSERT(n == ws->pending.payload_len);
   DEBUGASSERT(!ws->enc.payload_remain);
-  return CURLE_OK;
-}
 
-static CURLcode ws_enc_send_cntrl(struct Curl_easy *data,
-                                  struct websocket *ws,
-                                  const unsigned char *payload,
-                                  size_t plen,
-                                  unsigned int frame_type)
-{
-  DEBUGASSERT(plen <= WS_MAX_CNTRL_LEN);
-  if(plen > WS_MAX_CNTRL_LEN)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  if(ws->enc.payload_remain) {
-    /* frame assembly is ongoing, need to set frame aside.
-     * We keep only a single, pending control frame, discarding
-     * the previous one. */
-    if(!ws->send_cntrl) {
-      ws->send_cntrl = calloc(1, sizeof (*ws->send_cntrl));
-      if(!ws->send_cntrl)
-        return CURLE_OUT_OF_MEMORY;
-    }
-    ws->send_cntrl->type = frame_type;
-    ws->send_cntrl->payload_len = plen;
-    memcpy(ws->send_cntrl->payload, payload, plen);
-    return CURLE_OK;
-  }
-  else {
-    struct ws_cntrl_frame frame;
-    CURLcode result;
-
-    frame.type = frame_type;
-    frame.payload_len = plen;
-    memcpy(frame.payload, payload, plen);
-    result = ws_enc_cntrl(data, ws, &frame);
-    if(!result)
-      (void)ws_flush(data, ws, Curl_is_in_callback(data));
-    return result;
-  }
+out:
+  memset(&ws->pending, 0, sizeof(ws->pending));
+  return result;
 }
 
 static CURLcode ws_enc_send(struct Curl_easy *data,
@@ -1007,20 +1014,11 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
     }
   }
   else {
-    /* starting a new frame, we want a clean sendbuf.
-     * Any pending control frame we can add now as part of the flush. */
-    if(ws->send_cntrl) {
-      result = ws_enc_cntrl(data, ws, ws->send_cntrl);
-      if(result)
-        return result;
-      Curl_safefree(ws->send_cntrl);
-    }
-
     result = ws_flush(data, ws, Curl_is_in_callback(data));
     if(result)
       return result;
 
-    result = ws_enc_write_head(data, &ws->enc, flags,
+    result = ws_enc_write_head(data, ws, &ws->enc, flags,
                                (flags & CURLWS_OFFSET) ?
                                fragsize : (curl_off_t)buflen,
                                &ws->sendbuf);
@@ -1121,15 +1119,6 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
   }
 
-  /* If we have a pending control frame and are not in the middle
-   * of another one, lets add it into the sendbuf. */
-  if(ws->send_cntrl && !ws->enc.payload_remain) {
-    result = ws_enc_cntrl(data, ws, ws->send_cntrl);
-    if(result)
-      return result;
-    Curl_safefree(ws->send_cntrl);
-  }
-
   if(Curl_bufq_is_empty(&ws->sendbuf)) {
     if(ctx->read_eos) {
       ctx->eos = TRUE;
@@ -1165,7 +1154,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
 
     if(!ws->enc.payload_remain && Curl_bufq_is_empty(&ws->sendbuf)) {
       /* encode the data as a new BINARY frame */
-      result = ws_enc_write_head(data, &ws->enc, CURLWS_BINARY, nread,
+      result = ws_enc_write_head(data, ws, &ws->enc, CURLWS_BINARY, nread,
                                  &ws->sendbuf);
       if(result)
         goto out;
@@ -1277,7 +1266,6 @@ static void ws_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_bufq_free(&ws->recvbuf);
   Curl_bufq_free(&ws->sendbuf);
-  free(ws->send_cntrl);
   free(ws);
 }
 
@@ -1474,7 +1462,7 @@ static CURLcode ws_client_collect(const unsigned char *buf, size_t buflen,
     CURL_TRC_WS(data, "auto PONG to [PING payload=%" FMT_OFF_T
                 "/%" FMT_OFF_T "]", payload_offset, payload_len);
     /* send back the exact same content as a PONG */
-    result = ws_enc_send_cntrl(ctx->data, ctx->ws, buf, buflen, CURLWS_PONG);
+    result = ws_enc_add_cntrl(ctx->data, ctx->ws, buf, buflen, CURLWS_PONG);
     if(result)
       return result;
     *pnwritten = buflen;
@@ -1595,12 +1583,10 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
                ws->recvframe.bytesleft);
   /* all's well, try to send any pending control. we do not know
    * when the application will call `curl_ws_send()` again. */
-  if(!data->set.ws_raw_mode && ws->send_cntrl) {
-    CURLcode r2 = ws_enc_cntrl(data, ws, ws->send_cntrl);
-    if(!r2) {
-      Curl_safefree(ws->send_cntrl);
+  if(!data->set.ws_raw_mode && ws->pending.type) {
+    CURLcode r2 = ws_enc_add_pending(data, ws);
+    if(!r2)
       (void)ws_flush(data, ws, Curl_is_in_callback(data));
-    }
   }
   return CURLE_OK;
 }
@@ -1889,7 +1875,8 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *d,
     goto out;
   }
 
-  result = ws_enc_write_head(data, &ws->enc, flags, frame_len, &ws->sendbuf);
+  result = ws_enc_write_head(data, ws, &ws->enc, flags, frame_len,
+                             &ws->sendbuf);
   if(result)
     CURL_TRC_WS(data, "curl_start_frame(), error  adding frame head %d",
                 result);
