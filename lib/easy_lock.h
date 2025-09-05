@@ -53,7 +53,7 @@
 #if (defined(__GNUC__) && !defined(__clang__)) &&     \
     (defined(__i386__) || defined(__x86_64__))
 #define HAVE_BUILTIN_IA32_PAUSE
-#elif defined(__has_builtin)  /* Do not merge with other PP checks */
+#elif defined(__has_builtin)  /* Keep this PP check separate from others */
 #if __has_builtin(__builtin_ia32_pause)
 #define HAVE_BUILTIN_IA32_PAUSE
 #endif
