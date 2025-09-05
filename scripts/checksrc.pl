@@ -936,7 +936,6 @@ sub scanfile {
                     my $diff = $second - $first;
                     checkwarn("INDENTATION", $line, length($1), $file, $ol,
                               "not indented $indent steps (uses $diff)");
-
                 }
             }
         }
