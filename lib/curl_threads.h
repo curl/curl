@@ -51,7 +51,7 @@
 #  define CURL_STDCALL
 #endif
 
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
+#ifdef CURL_WINDOWS_UWP
 #define CURL_THREAD_RETURN_T DWORD
 #else
 #define CURL_THREAD_RETURN_T unsigned int

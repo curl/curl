@@ -111,12 +111,6 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
     /* we are always running on PLATFORM_WINNT */
     matched = FALSE;
   }
-#elif defined(UNDER_CE)
-  (void)majorVersion;
-  (void)minorVersion;
-  (void)buildVersion;
-  (void)platform;
-  (void)condition;
 #else
   ULONGLONG cm = 0;
   struct OUR_OSVERSIONINFOEXW osver;
@@ -134,8 +128,8 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   static bool onetime = TRUE; /* safe because first call is during init */
 
   if(onetime) {
-    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
-      (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+    pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN, (
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "RtlVerifyVersionInfo")));
     onetime = FALSE;
   }
 
