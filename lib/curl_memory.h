@@ -77,11 +77,11 @@
 #define free(ptr) Curl_cfree(ptr)
 
 #ifdef _WIN32
-#undef _tcsdup
+#undef Curl_tcsdup
 #ifdef UNICODE
-#define _tcsdup(ptr) Curl_wcsdup(ptr)
+#define Curl_tcsdup(ptr) Curl_wcsdup(ptr)
 #else
-#define _tcsdup(ptr) Curl_cstrdup(ptr)
+#define Curl_tcsdup(ptr) Curl_cstrdup(ptr)
 #endif
 #endif /* _WIN32 */
 
