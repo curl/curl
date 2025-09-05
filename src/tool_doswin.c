@@ -46,9 +46,10 @@
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) (0)  /* long filenames never available */
+#  define CURL_USE_LFN(f) 0  /* long filenames never available */
 #elif defined(__DJGPP__)
-#  include <fcntl.h>       /* _use_lfn(f) prototype */
+#  include <fcntl.h>         /* for _use_lfn(f) prototype */
+#  define CURL_USE_LFN(f) _use_lfn(f)
 #endif
 
 #ifdef MSDOS
@@ -314,7 +315,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
     return SANITIZE_ERR_INVALID_PATH;
 
   /* Support for Windows 9X VFAT systems, when available. */
-  if(_use_lfn(file_name)) {
+  if(CURL_USE_LFN(file_name)) {
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
   }

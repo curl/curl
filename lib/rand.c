@@ -149,12 +149,6 @@ static CURLcode weak_random(struct Curl_easy *data,
 }
 #endif
 
-#ifdef USE_SSL
-#define _random(x,y,z) Curl_ssl_random(x,y,z)
-#else
-#define _random(x,y,z) weak_random(x,y,z)
-#endif
-
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
                        bool env_override)
 {
@@ -185,7 +179,11 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
 #endif
 
   /* data may be NULL! */
-  return _random(data, (unsigned char *)rnd, sizeof(*rnd));
+#ifdef USE_SSL
+  return Curl_ssl_random(data, (unsigned char *)rnd, sizeof(*rnd));
+#else
+  return weak_random(data, (unsigned char *)rnd, sizeof(*rnd));
+#endif
 }
 
 /*

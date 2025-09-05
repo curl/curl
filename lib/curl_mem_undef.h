@@ -30,7 +30,7 @@
 #undef realloc
 #undef free
 #ifdef _WIN32
-#undef _tcsdup
+#undef Curl_tcsdup
 #endif
 
 #ifdef CURLDEBUG
