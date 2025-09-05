@@ -62,6 +62,7 @@ my %banfunc = (
     "_mbscat" => 1,
     "_mbsncat" => 1,
     "_tcscat" => 1,
+    "_tcsdup" => 1,
     "_tcsncat" => 1,
     "_wcscat" => 1,
     "_wcsncat" => 1,
