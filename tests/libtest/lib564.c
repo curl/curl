@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
 #include "memdebug.h"
 
 static CURLcode test_lib564(const char *URL)
@@ -32,6 +33,9 @@ static CURLcode test_lib564(const char *URL)
   int running;
   CURLM *m = NULL;
 
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
+
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
@@ -39,6 +43,8 @@ static CURLcode test_lib564(const char *URL)
   easy_init(curl);
 
   easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
