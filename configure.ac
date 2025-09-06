@@ -128,9 +128,6 @@ CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/inc
 XC_CHECK_PROG_CC
 CURL_ATOMIC
 
-dnl for --enable-code-coverage
-CURL_COVERAGE
-
 XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($CURLVERSION)
@@ -523,6 +520,8 @@ dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
 CURL_CHECK_COMPILER
+dnl for --enable-code-coverage
+CURL_COVERAGE
 CURL_CHECK_NATIVE_WINDOWS
 
 curl_cv_wince='no'
