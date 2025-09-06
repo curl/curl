@@ -33,7 +33,7 @@
 #undef recv
 
 #ifdef _WIN32
-#undef _tcsdup
+#undef Curl_tcsdup
 #endif
 
 #undef socket
