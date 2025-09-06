@@ -42,6 +42,10 @@
 #if !defined(__clang__) && __GNUC__ >= 7
 #pragma GCC diagnostic ignored "-Wformat-overflow"
 #endif
+#if defined(__clang__) && \
+  (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 1))
+#pragma clang diagnostic ignored "-Wformat-non-iso"
+#endif
 #endif
 
 #define BUFSZ    256
@@ -1101,7 +1105,7 @@ static int test_curl_off_t_formatting(void)
   return failed;
 }
 
-static int _string_check(int linenumber, char *buf, const char *buf2)
+static int string_check_low(int linenumber, char *buf, const char *buf2)
 {
   if(strcmp(buf, buf2)) {
     /* they shouldn't differ */
@@ -1111,9 +1115,9 @@ static int _string_check(int linenumber, char *buf, const char *buf2)
   }
   return 0;
 }
-#define string_check(x,y) _string_check(__LINE__, x, y)
+#define string_check(x,y) string_check_low(__LINE__, x, y)
 
-static int _strlen_check(int linenumber, char *buf, size_t len)
+static int strlen_check_low(int linenumber, char *buf, size_t len)
 {
   size_t buflen = strlen(buf);
   if(len != buflen) {
@@ -1124,8 +1128,7 @@ static int _strlen_check(int linenumber, char *buf, size_t len)
   }
   return 0;
 }
-
-#define strlen_check(x,y) _strlen_check(__LINE__, x, y)
+#define strlen_check(x,y) strlen_check_low(__LINE__, x, y)
 
 /*
  * The output strings in this test need to have been verified with a system

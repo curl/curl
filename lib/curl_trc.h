@@ -95,6 +95,11 @@ void Curl_trc_read(struct Curl_easy *data,
 void Curl_trc_dns(struct Curl_easy *data,
                   const char *fmt, ...) CURL_PRINTF(2, 3);
 
+struct curl_trc_feat {
+  const char *name;
+  int log_level;
+};
+
 #ifndef CURL_DISABLE_FTP
 extern struct curl_trc_feat Curl_trc_feat_ftp;
 void Curl_trc_ftp(struct Curl_easy *data,
@@ -183,11 +188,6 @@ void Curl_trc_ws(struct Curl_easy *data,
 #endif
 
 #endif /* !CURL_HAVE_C99 */
-
-struct curl_trc_feat {
-  const char *name;
-  int log_level;
-};
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* informational messages enabled */

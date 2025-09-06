@@ -640,8 +640,6 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
   (void)data; (void)cf; (void)fmt;
 }
 
-struct curl_trc_feat;
-
 void Curl_trc_multi(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
