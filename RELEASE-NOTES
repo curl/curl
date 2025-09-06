@@ -4,7 +4,7 @@ curl and libcurl 8.16.0
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3501
+ Contributors:                 3502
 
 This release includes the following changes:
 
@@ -63,6 +63,7 @@ This release includes the following bugfixes:
  o cmake: drop redundant unity mode for `curlinfo` [155]
  o cmake: enable `-Wall` for MSVC 1944 [128]
  o cmake: fix `ENABLE_UNIX_SOCKETS=OFF` with pre-fill enabled on unix
+ o cmake: fix setting LTO properties on the wrong targets [258]
  o cmake: fix to disable Schannel and SSPI for non-Windows targets
  o cmake: fix to restrict `SystemConfiguration` to macOS [139]
  o cmake: honor `CMAKE_C_FLAGS` in test 1119 and 1167 [206]
@@ -134,12 +135,15 @@ This release includes the following bugfixes:
  o hostip: do DNS cache pruning in milliseconds [132]
  o HTTP3.md: avoid `configure` issue for ngtcp2 1.14.0+ compatibility [182]
  o http: const up readonly H2_NON_FIELD [10]
+ o http: do the cookie list access under lock [270]
  o http: silence `-Warray-bounds` with gcc 13+ [44]
+ o idn: reject conversions that end up as a zero length hostname [273]
  o inet_pton, inet_ntop: drop declarations when unused [59]
  o lib1560: fix memory leak when run without UTF-8 support [17]
  o lib1560: replace an `int` with `bool` [97]
  o lib2700: use `testnum` [151]
  o lib517: use `LL` 64-bit literals & re-enable a test case (`time_t`) [100]
+ o lib: drop `UNUSED_PARAM` macro [259]
  o libcurl: reset rewind flag in curl_easy_reset() [184]
  o libssh: Use sftp_aio instead of sftp_async for sftp_recv [92]
  o libtests: update format strings to avoid casts, drop some macros [109]
@@ -212,6 +216,7 @@ This release includes the following bugfixes:
  o socks: do_SOCKS5: Fix invalid buffer content on short send [43]
  o socks_sspi: simplify, clean up Curl_SOCKS5_gssapi_negotiate [237]
  o spacecheck.pl: when detecting unicode, mention line number [85]
+ o spacecheck: warn for 3+ empty lines in a row, fix fallouts [240]
  o spelling: file system [232]
  o test1148: drop redundant `LC_NUMBER=` env setting [13]
  o test1557: pass `long` type to `multi_setopt()` [234]
@@ -243,6 +248,7 @@ This release includes the following bugfixes:
  o tool_cb_wrt: stop alloc/free for every chunk windows console output [140]
  o tool_filetime: accept setting negative filetime [256]
  o tool_getparam: let --trace-config override -v [238]
+ o tool_getparam: warn on more unicode prefixes [275]
  o tool_operate: avoid superfluous strdup'ing output [1]
  o tool_operate: use stricter curl_multi_setopt() arguments [225]
  o tool_operate: use the correct config pointer [115]
@@ -261,7 +267,9 @@ This release includes the following bugfixes:
  o vquic: use curl_getenv [168]
  o vtls: set seen http version on successful ALPN [160]
  o websocket example: cast print values to unsigned int [251]
+ o websocket: handling of PONG frames [213]
  o websocket: improve handling of 0-len frames [269]
+ o websocket: reset upload_done when sending data [245]
  o windows: assume `ADDRESS_FAMILY`, drop feature checks [88]
  o windows: document toolchain support for `CERT_NAME_SEARCH_ALL_NAMES_FLAG`
  o windows: document toolchain support for some macros (cont.) [111]
@@ -287,6 +295,7 @@ For all changes ever done in curl:
 Planned upcoming removals include:
 
  o Builds using VS2008
+ o OpenSSL 1.x support
  o Support for c-ares versions before 1.16.0
  o Support for Windows XP/2003
  o The winbuild build system
@@ -298,23 +307,24 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Andriy Druk,
-  Anthony Hu, Berthin Torres Callañaupa, BobodevMm on github, Caolán McNamara,
-  Cole Leavitt, d1r3ct0r, Dan Fandrich, Daniel Böhmer, Daniel Engberg,
-  Daniel McCarney, Daniel Stenberg, David Zhuang, devgs on github,
-  Dominik Tomecki, Dustin L. Howett, Eshan Kelkar, Florian Friedrich,
-  Gabriel Marin, Gisle Vanem, Google Big Sleep, Harry Sintonen,
-  IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms, Kai Pastor, Karthik Das,
-  kkmuffme on github, kupavcevdenis on github, letshack9707 on hackerone,
-  lf- on github, LoRd_MuldeR, Marcel Raad, Michael Osipov, Michał Petryka,
-  Natris on github, nevakrien on github, Oxan van Leeuwen, Paul Gilmartin,
-  Pavel Kropachev, Petar Popovic, Philippe Antoine, Pino Toscano, Qriist,
-  Qriist on github, Ray Satiro, renovate[bot], rm-rmonaghan on github,
+  Anthony Hu, Berthin Torres Callañaupa, BobodevMm on github, Calvin Ruocco,
+  Caolán McNamara, Cole Leavitt, d1r3ct0r, Dan Fandrich, Daniel Böhmer,
+  Daniel Engberg, Daniel McCarney, Daniel Stenberg, David Zhuang,
+  devgs on github, Dominik Tomecki, Dustin L. Howett, Eshan Kelkar,
+  Florian Friedrich, Gabriel Marin, Gisle Vanem, Google Big Sleep,
+  Harry Sintonen, IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms,
+  Kai Pastor, Karthik Das, kkmuffme on github, kupavcevdenis on github,
+  letshack9707 on hackerone, lf- on github, LoRd_MuldeR, Marcel Raad,
+  Michael Osipov, Michał Petryka, Natris on github, nevakrien on github,
+  Oxan van Leeuwen, Paul Gilmartin, Pavel Kropachev, Petar Popovic,
+  Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
+  renovate[bot], RepoRascal on hackerone, rm-rmonaghan on github,
   Roberto Hidalgo, Samuel Henrique, Schrijvers Luc, Sebastian Carlos,
   Sergio Durigan Junior, Simon Dalvai, Stanislav Osipov, Stefan Eissing,
   stephannn on github, sunriseL, Tal Regev, Terence Eden, Todd Gamblin,
   Viktor Szakats, Waldemar Kornewald, XCas13, xfangfang, yaoy6 on github,
   Yedaya Katsman, ウさん
-  (72 contributors)
+  (74 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -530,6 +540,7 @@ References to bug reports and discussions on issues:
  [210] = https://curl.se/bug/?i=18405
  [211] = https://curl.se/bug/?i=18450
  [212] = https://curl.se/bug/?i=18378
+ [213] = https://curl.se/bug/?i=16706
  [214] = https://curl.se/bug/?i=18371
  [215] = https://curl.se/bug/?i=18365
  [216] = https://curl.se/bug/?i=18363
@@ -556,10 +567,12 @@ References to bug reports and discussions on issues:
  [237] = https://curl.se/bug/?i=18315
  [238] = https://curl.se/bug/?i=18346
  [239] = https://curl.se/bug/?i=18323
+ [240] = https://curl.se/bug/?i=18478
  [241] = https://curl.se/bug/?i=18335
  [242] = https://curl.se/bug/?i=18447
  [243] = https://curl.se/bug/?i=18390
  [244] = https://curl.se/bug/?i=18398
+ [245] = https://curl.se/bug/?i=18476
  [246] = https://curl.se/bug/?i=18333
  [247] = https://curl.se/bug/?i=18329
  [248] = https://curl.se/bug/?i=18328
@@ -569,8 +582,13 @@ References to bug reports and discussions on issues:
  [252] = https://curl.se/bug/?i=18263
  [253] = https://curl.se/bug/?i=18433
  [256] = https://curl.se/bug/?i=18424
+ [258] = https://curl.se/bug/?i=18469
+ [259] = https://curl.se/bug/?i=18455
  [260] = https://curl.se/bug/?i=18430
  [262] = https://curl.se/bug/?i=18431
  [265] = https://curl.se/bug/?i=18422
  [266] = https://curl.se/bug/?i=18413
  [269] = https://curl.se/bug/?i=18286
+ [270] = https://curl.se/bug/?i=18457
+ [273] = https://curl.se/bug/?i=18462
+ [275] = https://curl.se/bug/?i=18459
