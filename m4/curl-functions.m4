@@ -4298,6 +4298,7 @@ AC_DEFUN([CURL_COVERAGE],[
     curl_coverage_msg="enabled"
 
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
+    CFLAGS="$CFLAGS -O0 -g"
 
     if test "$compiler_id" = "GNU_C"; then
       AC_CHECK_TOOL([GCOV], [gcov], [gcov])
@@ -4308,11 +4309,10 @@ AC_DEFUN([CURL_COVERAGE],[
       if test -z "$LCOV"; then
         AC_MSG_ERROR([needs lcov for code coverage])
       fi
-
-      CFLAGS="$CFLAGS -O0 -g -ftest-coverage -fprofile-arcs"
+      CFLAGS="$CFLAGS -ftest-coverage -fprofile-arcs"
       LIBS="$LIBS -lgcov"
     else
-      CFLAGS="$CFLAGS -O0 -g -fprofile-instr-generate -fcoverage-mapping"
+      CFLAGS="$CFLAGS -fprofile-instr-generate -fcoverage-mapping"
       LDFLAGS="$LDFLAGS -fprofile-instr-generate -fcoverage-mapping"
     fi
   fi
