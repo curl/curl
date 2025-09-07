@@ -10,7 +10,6 @@ name: 'Linux'
       - master
       - '*/ci'
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
@@ -22,7 +21,6 @@ name: 'Linux'
     branches:
       - master
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
