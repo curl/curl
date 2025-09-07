@@ -623,7 +623,7 @@ void install_signal_handlers(bool keep_sigalrm)
 
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   thread_main_window = CreateThread(NULL, 0, &main_window_loop,
-                                    (void *)GetModuleHandle(NULL), 0,
+                                    GetModuleHandle(NULL), 0,
                                     &thread_main_id);
   if(!thread_main_window || !thread_main_id)
     logmsg("cannot start main window loop");
