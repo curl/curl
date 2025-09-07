@@ -141,7 +141,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
      https://httpd.apache.org/docs/2.2/mod/mod_auth_digest.html#msie
 
      Further details on Digest implementation differences:
-     http://www.fngtps.com/2006/09/http-authentication
+     https://web.archive.org/web/2009/fngtps.com/2006/09/http-authentication
   */
 
   if(authp->iestyle) {
