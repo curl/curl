@@ -521,6 +521,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
       if(!digest->user) {
         free(output_token);
+        Curl_sspi_free_identity(p_identity);
         return CURLE_OUT_OF_MEMORY;
       }
     }
@@ -530,6 +531,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
       if(!digest->passwd) {
         free(output_token);
+        Curl_sspi_free_identity(p_identity);
         Curl_safefree(digest->user);
         return CURLE_OUT_OF_MEMORY;
       }
