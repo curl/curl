@@ -385,12 +385,12 @@ The curl **major incident** process is as follows:
 Only a member of the **curl-security** team can declare a **major incident**
 via any or all of the following communication channels:
 
-* **irc**: channel #curl on the network [Libera.Chat](https://libera.chat)
+* **irc**: channel #curl on the network [Libera.Chat](https://libera.chat/)
 * **mailing-lists**:
   * curl-announce
   * curl-users
   * curl-distros
-* **website**: [curl.se](https://curl.se)
+* **website**: [curl.se](https://curl.se/)
 
 This declaration may also be transmitted via other channels, though the
 above are considered official channels.
@@ -423,7 +423,7 @@ Existing vulnerability disclosure process are followed for any embargoes
 and fixes.
 
 Where possible, public communication are provided:
-* regular communication from communication leader (ex. daily update)
+* regular communication from communication leader (for example daily update)
 * asynchronous communication from incident leader
 
 * Delivered to the aforementioned curl communication channels.
