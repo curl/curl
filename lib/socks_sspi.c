@@ -83,7 +83,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   CtxtHandle sspi_context;
   PCtxtHandle context_handle = NULL;
   SecPkgCredentials_Names names;
-  TimeStamp expiry;
   char *service_name = NULL;
   unsigned short us_length;
   unsigned long qop;
@@ -146,7 +145,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                        (TCHAR *)CURL_UNCONST(TEXT("Kerberos")),
                                           SECPKG_CRED_OUTBOUND,
                                           NULL, NULL, NULL, NULL,
-                                          &cred_handle, &expiry);
+                                          &cred_handle, NULL);
 
   if(check_sspi_err(data, status, "AcquireCredentialsHandle")) {
     failf(data, "Failed to acquire credentials.");
@@ -178,8 +177,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                              &input_desc, 0,
                                              &sspi_context,
                                              &output_desc,
-                                             &sspi_ret_flags,
-                                             &expiry);
+                                             &sspi_ret_flags, NULL);
 
     curlx_unicodefree(sname);
 

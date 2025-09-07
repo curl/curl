@@ -796,8 +796,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             (TCHAR *)CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &credentials, NULL, NULL,
-                                            &backend->cred->cred_handle,
-                                            &backend->cred->time_stamp);
+                                            &backend->cred->cred_handle, NULL);
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
@@ -835,8 +834,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             (TCHAR *)CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &schannel_cred, NULL, NULL,
-                                            &backend->cred->cred_handle,
-                                            &backend->cred->time_stamp);
+                                            &backend->cred->cred_handle, NULL);
   }
 
   if(client_certs[0])
@@ -1050,7 +1048,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->req_flags, 0, 0,
     (backend->use_alpn ? &inbuf_desc : NULL),
     0, &backend->ctxt->ctxt_handle,
-    &outbuf_desc, &backend->ret_flags, &backend->ctxt->time_stamp);
+    &outbuf_desc, &backend->ret_flags, NULL);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     char buffer[STRERROR_LEN];
@@ -1259,7 +1257,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       &backend->cred->cred_handle, &backend->ctxt->ctxt_handle,
       backend->cred->sni_hostname, backend->req_flags,
       0, 0, &inbuf_desc, 0, NULL,
-      &outbuf_desc, &backend->ret_flags, &backend->ctxt->time_stamp);
+      &outbuf_desc, &backend->ret_flags, NULL);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
@@ -2440,8 +2438,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       0,
       &backend->ctxt->ctxt_handle,
       &outbuf_desc,
-      &backend->ret_flags,
-      &backend->ctxt->time_stamp);
+      &backend->ret_flags, NULL);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
