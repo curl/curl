@@ -159,8 +159,8 @@ static CURLcode test_unit1304(const char *arg)
    * with login[0] != 0.
    */
   free(password);
-  free(login);
   password = NULL;
+  free(login);
   login = NULL;
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
