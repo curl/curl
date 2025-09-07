@@ -170,11 +170,11 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
 
   /* Generate our type-1 message */
   status = Curl_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
-                                               ntlm->spn,
-                                               0, 0, SECURITY_NETWORK_DREP,
-                                               NULL, 0,
-                                               ntlm->context, &type_1_desc,
-                                               &attrs, &expiry);
+                                                  ntlm->spn,
+                                                  0, 0, SECURITY_NETWORK_DREP,
+                                                  NULL, 0,
+                                                  ntlm->context, &type_1_desc,
+                                                  &attrs, &expiry);
   if(status == SEC_I_COMPLETE_NEEDED ||
     status == SEC_I_COMPLETE_AND_CONTINUE)
     Curl_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
@@ -308,13 +308,13 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   /* Generate our type-3 message */
   status = Curl_pSecFn->InitializeSecurityContext(ntlm->credentials,
-                                               ntlm->context,
-                                               ntlm->spn,
-                                               0, 0, SECURITY_NETWORK_DREP,
-                                               &type_2_desc,
-                                               0, ntlm->context,
-                                               &type_3_desc,
-                                               &attrs, &expiry);
+                                                  ntlm->context,
+                                                  ntlm->spn,
+                                                  0, 0, SECURITY_NETWORK_DREP,
+                                                  &type_2_desc,
+                                                  0, ntlm->context,
+                                                  &type_3_desc,
+                                                  &attrs, &expiry);
   if(status != SEC_E_OK) {
     infof(data, "NTLM handshake failure (type-3 message): Status=%lx",
           status);
