@@ -105,7 +105,6 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   SecBufferDesc chlg_desc;
   SecBufferDesc resp_desc;
   unsigned long attrs;
-  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
@@ -173,7 +172,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
                                 SECPKG_CRED_OUTBOUND, NULL,
                                 nego->p_identity, NULL, NULL,
-                                nego->credentials, &expiry);
+                                nego->credentials, NULL);
     if(nego->status != SEC_E_OK)
       return CURLE_AUTH_ERROR;
 
@@ -250,8 +249,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                                   0, SECURITY_NATIVE_DREP,
                                                   chlg ? &chlg_desc : NULL,
                                                   0, nego->context,
-                                                  &resp_desc, &attrs,
-                                                  &expiry);
+                                                  &resp_desc, &attrs, NULL);
 
   /* Free the decoded challenge as it is not required anymore */
   free(chlg);
