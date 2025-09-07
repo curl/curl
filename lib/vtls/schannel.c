@@ -796,8 +796,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             (TCHAR *)CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &credentials, NULL, NULL,
-                                            &backend->cred->cred_handle,
-                                            &backend->cred->time_stamp);
+                                            &backend->cred->cred_handle, NULL);
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
@@ -835,8 +834,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             (TCHAR *)CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &schannel_cred, NULL, NULL,
-                                            &backend->cred->cred_handle,
-                                            &backend->cred->time_stamp);
+                                            &backend->cred->cred_handle, NULL);
   }
 
   if(client_certs[0])

@@ -107,7 +107,6 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   SecBufferDesc resp_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   if(!krb5->spn) {
     /* Generate our SPN */
@@ -162,7 +161,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                  (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_KERBEROS)),
                                  SECPKG_CRED_OUTBOUND, NULL,
                                  krb5->p_identity, NULL, NULL,
-                                 krb5->credentials, &expiry);
+                                 krb5->credentials, NULL);
     if(status != SEC_E_OK)
       return CURLE_LOGIN_DENIED;
 
@@ -204,8 +203,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
                                                0, SECURITY_NATIVE_DREP,
                                                chlg ? &chlg_desc : NULL, 0,
                                                &context,
-                                               &resp_desc, &attrs,
-                                               &expiry);
+                                               &resp_desc, &attrs, NULL);
 
   if(status == SEC_E_INSUFFICIENT_MEMORY)
     return CURLE_OUT_OF_MEMORY;
