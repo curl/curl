@@ -99,7 +99,6 @@ typedef struct _SCH_CREDENTIALS {
 
 struct Curl_schannel_cred {
   CredHandle cred_handle;
-  TimeStamp time_stamp;
   TCHAR *sni_hostname;
   HCERTSTORE client_cert_store;
   int refcount;
@@ -107,7 +106,6 @@ struct Curl_schannel_cred {
 
 struct Curl_schannel_ctxt {
   CtxtHandle ctxt_handle;
-  TimeStamp time_stamp;
 };
 
 struct schannel_ssl_backend_data {
