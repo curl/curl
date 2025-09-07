@@ -93,6 +93,14 @@ The value of header `name` from the transfer's most recent server response.
 Unlike other variables, the variable name `header` is not in braces. For
 example `%header{date}`. Refer to --write-out remarks. (Added in 7.84.0)
 
+Starting with 8.17.0, this output the contents of *all* header fields using a
+specific name - even for a whole redirect "chain" by appending
+`:all:[separator]` to the header name. The `[separator]` string (if not blank)
+is output between the headers if there are more than one. When more than one
+header is shown, they are output in the chronological order of appearance over
+the wire. To include a close brace (`}`) in the separator, escape it with a
+backslash: `\}`.
+
 ## `header_json`
 A JSON object with all HTTP response headers from the recent transfer. Values
 are provided as arrays, since in the case of multiple headers there can be
