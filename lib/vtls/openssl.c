@@ -137,12 +137,12 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
-#endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define OSSL_UI_METHOD_CAST(x) (x)
 #else
 #define OSSL_UI_METHOD_CAST(x) CURL_UNCONST(x)
+#endif
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L /* OpenSSL 1.1.0+ and LibreSSL */
