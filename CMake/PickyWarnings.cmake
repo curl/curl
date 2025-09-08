@@ -330,7 +330,7 @@ if(PICKY_COMPILER)
 
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       list(APPEND _picky_enable "-Wno-format")
-    else()
+    endif()
 
     #
 
