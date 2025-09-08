@@ -758,6 +758,7 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
   unsigned char head[14];
   size_t hlen;
   ssize_t n;
+  CURLcode result;
 
   if(payload_len < 0) {
     failf(data, "[WS] starting new frame with negative payload length %"
@@ -830,6 +831,18 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
 
   enc->payload_remain = enc->payload_len = payload_len;
   ws_enc_info(enc, data, "sending");
+
+  /* 4 bytes random */
+
+  result = Curl_rand(data, (unsigned char *)&enc->mask, sizeof(enc->mask));
+  if(result)
+    return result;
+
+#ifdef DEBUGBUILD
+  if(getenv("CURL_WS_FORCE_ZERO_MASK"))
+    /* force the bit mask to 0x00000000, effectively disabling masking */
+    memset(&enc->mask, 0, sizeof(enc->mask));
+#endif
 
   /* add 4 bytes mask */
   memcpy(&head[hlen], &enc->mask, 4);
@@ -1025,21 +1038,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
      subprotocol not requested by the client), the client MUST Fail
      the WebSocket Connection. */
 
-  /* 4 bytes random */
-
-  result = Curl_rand(data, (unsigned char *)&ws->enc.mask,
-                     sizeof(ws->enc.mask));
-  if(result)
-    return result;
-
-#ifdef DEBUGBUILD
-  if(getenv("CURL_WS_FORCE_ZERO_MASK"))
-    /* force the bit mask to 0x00000000, effectively disabling masking */
-    memset(ws->enc.mask, 0, sizeof(ws->enc.mask));
-#endif
-
-  infof(data, "[WS] Received 101, switch to WebSocket; mask %02x%02x%02x%02x",
-        ws->enc.mask[0], ws->enc.mask[1], ws->enc.mask[2], ws->enc.mask[3]);
+  infof(data, "[WS] Received 101, switch to WebSocket");
 
   /* Install our client writer that decodes WS frames payload */
   result = Curl_cwriter_create(&ws_dec_writer, data, &ws_cw_decode,
