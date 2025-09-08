@@ -382,7 +382,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     saved_c = c;
     saved_d = d;
 
-/* Round 1 */
+    /* Round 1 */
     MD5_STEP(MD5_F, a, b, c, d, MD5_SET(0), 0xd76aa478, 7)
     MD5_STEP(MD5_F, d, a, b, c, MD5_SET(1), 0xe8c7b756, 12)
     MD5_STEP(MD5_F, c, d, a, b, MD5_SET(2), 0x242070db, 17)
@@ -400,7 +400,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_F, c, d, a, b, MD5_SET(14), 0xa679438e, 17)
     MD5_STEP(MD5_F, b, c, d, a, MD5_SET(15), 0x49b40821, 22)
 
-/* Round 2 */
+    /* Round 2 */
     MD5_STEP(MD5_G, a, b, c, d, MD5_GET(1), 0xf61e2562, 5)
     MD5_STEP(MD5_G, d, a, b, c, MD5_GET(6), 0xc040b340, 9)
     MD5_STEP(MD5_G, c, d, a, b, MD5_GET(11), 0x265e5a51, 14)
@@ -418,7 +418,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_G, c, d, a, b, MD5_GET(7), 0x676f02d9, 14)
     MD5_STEP(MD5_G, b, c, d, a, MD5_GET(12), 0x8d2a4c8a, 20)
 
-/* Round 3 */
+    /* Round 3 */
     MD5_STEP(MD5_H, a, b, c, d, MD5_GET(5), 0xfffa3942, 4)
     MD5_STEP(MD5_H2, d, a, b, c, MD5_GET(8), 0x8771f681, 11)
     MD5_STEP(MD5_H, c, d, a, b, MD5_GET(11), 0x6d9d6122, 16)
@@ -436,7 +436,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_H, c, d, a, b, MD5_GET(15), 0x1fa27cf8, 16)
     MD5_STEP(MD5_H2, b, c, d, a, MD5_GET(2), 0xc4ac5665, 23)
 
-/* Round 4 */
+    /* Round 4 */
     MD5_STEP(MD5_I, a, b, c, d, MD5_GET(0), 0xf4292244, 6)
     MD5_STEP(MD5_I, d, a, b, c, MD5_GET(7), 0x432aff97, 10)
     MD5_STEP(MD5_I, c, d, a, b, MD5_GET(14), 0xab9423a7, 15)

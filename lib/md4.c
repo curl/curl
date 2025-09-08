@@ -342,7 +342,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
     saved_c = c;
     saved_d = d;
 
-/* Round 1 */
+    /* Round 1 */
     MD4_STEP(MD4_F, a, b, c, d, MD4_SET(0), 3)
     MD4_STEP(MD4_F, d, a, b, c, MD4_SET(1), 7)
     MD4_STEP(MD4_F, c, d, a, b, MD4_SET(2), 11)
@@ -360,7 +360,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
     MD4_STEP(MD4_F, c, d, a, b, MD4_SET(14), 11)
     MD4_STEP(MD4_F, b, c, d, a, MD4_SET(15), 19)
 
-/* Round 2 */
+    /* Round 2 */
     MD4_STEP(MD4_G, a, b, c, d, MD4_GET(0) + 0x5a827999, 3)
     MD4_STEP(MD4_G, d, a, b, c, MD4_GET(4) + 0x5a827999, 5)
     MD4_STEP(MD4_G, c, d, a, b, MD4_GET(8) + 0x5a827999, 9)
@@ -378,7 +378,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
     MD4_STEP(MD4_G, c, d, a, b, MD4_GET(11) + 0x5a827999, 9)
     MD4_STEP(MD4_G, b, c, d, a, MD4_GET(15) + 0x5a827999, 13)
 
-/* Round 3 */
+    /* Round 3 */
     MD4_STEP(MD4_H, a, b, c, d, MD4_GET(0) + 0x6ed9eba1, 3)
     MD4_STEP(MD4_H, d, a, b, c, MD4_GET(8) + 0x6ed9eba1, 9)
     MD4_STEP(MD4_H, c, d, a, b, MD4_GET(4) + 0x6ed9eba1, 11)
