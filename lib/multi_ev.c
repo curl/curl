@@ -51,8 +51,6 @@ static void mev_in_callback(struct Curl_multi *multi, bool value)
   multi->in_callback = value;
 }
 
-#define CURL_MEV_CONN_HASH_SIZE 3
-
 /* Information about a socket for which we inform the libcurl application
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
  */
@@ -635,8 +633,6 @@ void Curl_multi_ev_conn_done(struct Curl_multi *multi,
   (void)mev_assess(multi, data, conn);
   Curl_conn_meta_remove(conn, CURL_META_MEV_POLLSET);
 }
-
-#define CURL_MEV_PS_HASH_SLOTS   (991)  /* nice prime */
 
 void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)
 {
