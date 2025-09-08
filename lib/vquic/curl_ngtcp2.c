@@ -1442,10 +1442,6 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   return (nghttp3_ssize)nvecs;
 }
 
-/* Index where :authority header field will appear in request header
-   field list. */
-#define AUTHORITY_DST_IDX 3
-
 static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const void *buf, size_t len,
