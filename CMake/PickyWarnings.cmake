@@ -229,10 +229,18 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Warray-compare                  # clang 20.0  gcc 12.0  appleclang ?
           -Wc++-hidden-decl                # clang 21.0            appleclang ?
-          -Wc++-keyword                    # clang 21.0            appleclang ?
           -Wno-implicit-void-ptr-cast      # clang 21.0            appleclang ?
           -Wtentative-definition-compat    # clang 21.0            appleclang ?
         )
+        if(WIN32)
+          list(APPEND _picky_enable
+            -Wno-c++-keyword               # clang 21.0            appleclang ?  # `wchar_t` triggers it on Windows
+          )
+        else()
+          list(APPEND _picky_enable
+            -Wc++-keyword                  # clang 21.0            appleclang ?
+          )
+        endif()
       endif()
     else()  # gcc
       # Enable based on compiler version
