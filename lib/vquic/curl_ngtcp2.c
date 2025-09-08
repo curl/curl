@@ -80,7 +80,6 @@
 
 
 #define QUIC_MAX_STREAMS (256*1024)
-#define QUIC_MAX_DATA (1*1024*1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
