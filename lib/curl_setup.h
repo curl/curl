@@ -479,6 +479,8 @@
 #include <stdint.h>
 #endif
 
+#include <limits.h>
+
 #ifdef _WIN32
 #  ifdef HAVE_IO_H
 #  include <io.h>
