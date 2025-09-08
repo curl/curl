@@ -955,10 +955,6 @@ static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
   }
 }
 
-/* Index where :authority header field will appear in request header
-   field list. */
-#define AUTHORITY_DST_IDX 3
-
 static CURLcode h3_open_stream(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *buf, size_t blen, bool eos,
