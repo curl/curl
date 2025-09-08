@@ -67,6 +67,11 @@
 #include <ares_version.h> /* really old c-ares did not include this by
                              itself */
 
+#if ARES_VERSION >= 0x010601
+/* IPv6 supported since 1.6.1 */
+#define HAVE_CARES_IPV6 1
+#endif
+
 #if ARES_VERSION >= 0x010704
 #define HAVE_CARES_SERVERS_CSV 1
 #define HAVE_CARES_LOCAL_DEV 1
@@ -80,21 +85,6 @@
 #if ARES_VERSION >= 0x011000
 /* 1.16.0 or later has ares_getaddrinfo */
 #define HAVE_CARES_GETADDRINFO 1
-#else
-#if ARES_VERSION >= 0x010601
-/* IPv6 supported since 1.6.1 */
-#define HAVE_CARES_IPV6 1
-#endif
-/* How long we are willing to wait for additional parallel responses after
-   obtaining a "definitive" one. For old c-ares without getaddrinfo.
-
-   This is intended to equal the c-ares default timeout. cURL always uses that
-   default value. Unfortunately, c-ares does not expose its default timeout in
-   its API, but it is officially documented as 5 seconds.
-
-   See query_completed_cb() for an explanation of how this is used.
- */
-#define HAPPY_EYEBALLS_DNS_TIMEOUT 5000
 #endif
 
 #ifdef USE_HTTPSRR
@@ -108,6 +98,17 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
+
+/* How long we are willing to wait for additional parallel responses after
+   obtaining a "definitive" one. For old c-ares without getaddrinfo.
+
+   This is intended to equal the c-ares default timeout. cURL always uses that
+   default value. Unfortunately, c-ares does not expose its default timeout in
+   its API, but it is officially documented as 5 seconds.
+
+   See query_completed_cb() for an explanation of how this is used.
+ */
+#define HAPPY_EYEBALLS_DNS_TIMEOUT 5000
 
 #define CARES_TIMEOUT_PER_ATTEMPT 2000
 
