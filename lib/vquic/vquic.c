@@ -186,8 +186,9 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       return CURLE_SEND_ERROR;
     }
   }
-  else {
-    assert(pktlen == (size_t)sent);
+  else if(pktlen != (size_t)sent) {
+    failf(data, "sendmsg() sent only %zd/%zu bytes", sent, pktlen);
+    return CURLE_SEND_ERROR;
   }
 #else
   ssize_t sent;
