@@ -48,7 +48,7 @@ number specifies the number of "network bits" out of the address to use in the
 comparison (added in 7.86.0). For example "192.168.0.0/16" would match all
 addresses starting with "192.168".
 
-## `APPDATA <dir>`
+## `APPDATA <directory>`
 On Windows, this variable is used when trying to find the home directory. If
 the primary home variables are all unset.
 
@@ -61,7 +61,7 @@ using other ways.
 If set, it is used as the --cacert value. This environment variable is ignored
 if Schannel is used as the TLS backend.
 
-## `CURL_HOME <dir>`
+## `CURL_HOME <directory>`
 If set, is the first variable curl checks when trying to find its home
 directory. If not set, it continues to check *XDG_CONFIG_HOME*
 
@@ -79,6 +79,11 @@ SSL backend names (case-insensitive): **gnutls**, **mbedtls**, **openssl**,
 If set, this is used to find the home directory when that is needed. Like when
 looking for the default .curlrc. *CURL_HOME* and *XDG_CONFIG_HOME*
 have preference.
+
+## `NETRC <path>`
+If set, this is used to find the `.netrc` file. It overrides all other netrc
+file location mechanisms and should be set to the full file path.
+(Added in curl 8.16.0)
 
 ## `QLOGDIR <directory>`
 If curl was built with HTTP/3 support, setting this environment variable to a
