@@ -73,7 +73,6 @@ if(PICKY_COMPILER)
     # Prefer the -Wextra alias with clang.
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       set(_picky_enable "-Wextra")
-      list(APPEND _picky_enable "-Weverything")
     else()
       set(_picky_enable "-W")
     endif()
@@ -326,10 +325,6 @@ if(PICKY_COMPILER)
           -Wunterminated-string-initialization  #        gcc 15.0
         )
       endif()
-    endif()
-
-    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-      list(APPEND _picky_enable "-Wno-format")
     endif()
 
     #
