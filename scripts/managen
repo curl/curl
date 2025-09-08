@@ -373,11 +373,18 @@ sub render {
         }
         elsif(/^## (.*)/) {
             my $word = $1;
+            my $nontick = $word;
             # if there are enclosing quotes, remove them first
             $word =~ s/[\"\'](.*)[\"\']\z/$1/;
 
             # remove backticks from headers
             $word =~ s/\`//g;
+
+            # remove backticked sections
+            $nontick =~ s/\`[^\`]*\`//g;
+            if($nontick =~ /[^\\][\<\>]/) {
+                print STDERR "$f:$line:1:WARN: un-escaped < or > used: $nontick\n";
+            }
 
             # if there is a space, it needs quotes for manpage
             if(($word =~ / /) && $manpage) {

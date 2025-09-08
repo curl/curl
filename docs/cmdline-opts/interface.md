@@ -21,16 +21,16 @@ Perform the operation using a specified interface. You can enter interface
 name, IP address or hostname. If you prefer to be specific, you can use the
 following special syntax:
 
-## if!<name>
+## `if!<name>`
 
 Interface name. If the provided name does not match an existing interface,
 curl returns with error 45.
 
-## host!<name>
+## `host!<name>`
 
 IP address or hostname.
 
-## ifhost!<interface>!<host>
+## `ifhost!<interface>!<host>`
 
 Interface name and IP address or hostname. This syntax requires libcurl 8.9.0
 or later.
