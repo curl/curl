@@ -80,6 +80,11 @@ If set, this is used to find the home directory when that is needed. Like when
 looking for the default .curlrc. *CURL_HOME* and *XDG_CONFIG_HOME*
 have preference.
 
+## `NETRC` <path>
+If set, this is used to find the `.netrc` file. It overrides all other netrc
+file location mechanisms and should be set to the full file path.
+(Added in curl 8.16.0)
+
 ## `QLOGDIR` <directory name>
 If curl was built with HTTP/3 support, setting this environment variable to a
 local directory makes curl produce **qlogs** in that directory, using file
