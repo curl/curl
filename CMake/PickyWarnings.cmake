@@ -78,7 +78,7 @@ if(PICKY_COMPILER)
     endif()
 
     list(APPEND _picky_enable
-      -Wall -pedantic
+      -Wall -pedantic -Weverything -Wno-format
     )
 
     # ----------------------------------
