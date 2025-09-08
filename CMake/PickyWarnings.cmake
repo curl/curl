@@ -72,13 +72,13 @@ if(PICKY_COMPILER)
 
     # Prefer the -Wextra alias with clang.
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-      set(_picky_enable "-Wextra")
+      set(_picky_enable "-Wextra" "-Weverything" "-Wno-format")
     else()
       set(_picky_enable "-W")
     endif()
 
     list(APPEND _picky_enable
-      -Wall -pedantic -Weverything -Wno-format
+      -Wall -pedantic
     )
 
     # ----------------------------------
