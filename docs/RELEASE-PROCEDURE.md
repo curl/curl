@@ -35,8 +35,6 @@ in the curl-www repo
 
 - edit `Makefile` (version number and date),
 
-- edit `_newslog.html` (announce the new release) and
-
 - edit `_changes.html` (insert changes+bugfixes from RELEASE-NOTES)
 
 - commit all local changes
