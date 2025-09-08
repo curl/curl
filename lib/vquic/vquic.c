@@ -404,7 +404,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     }
 
     while((mcount = recvmmsg(qctx->sockfd, mmsg, n, 0, NULL)) == -1 &&
-          SOCKERRNO == SOCKEINTR)
+          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(mcount == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
@@ -420,7 +420,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         goto out;
       }
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
-      failf(data, "QUIC: recvmsg() unexpectedly returned %d (errno=%d; %s)",
+      failf(data, "QUIC: recvmmsg() unexpectedly returned %d (errno=%d; %s)",
                   mcount, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
@@ -497,7 +497,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg.msg_controllen = sizeof(msg_ctrl);
 
     while((nread = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
-          SOCKERRNO == SOCKEINTR)
+          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(nread == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
@@ -571,7 +571,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
     while((nread = recvfrom(qctx->sockfd, (char *)buf, bufsize, 0,
                             (struct sockaddr *)&remote_addr,
                             &remote_addrlen)) == -1 &&
-          SOCKERRNO == SOCKEINTR)
+          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
     if(nread == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
