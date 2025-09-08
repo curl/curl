@@ -1216,9 +1216,6 @@ sftp_upload_init(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/* make sure that this does not collide with an actual libssh2 error code */
-#define ERROR_LIBBSH2 1
-
 static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
                                     struct ssh_conn *sshc)
 {
