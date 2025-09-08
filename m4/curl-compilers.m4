@@ -929,7 +929,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wno-reserved-macro-identifier"  # Sometimes such external macros need to be set
           fi
           dnl clang 16 or later
-          if test "$compiler_num" -ge "1700"; then
+          if test "$compiler_num" -ge "1600"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-unsafe-buffer-usage"
           fi
           dnl clang 17 or later
