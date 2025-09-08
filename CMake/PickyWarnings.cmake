@@ -194,6 +194,11 @@ if(PICKY_COMPILER)
         list(APPEND _picky_enable
           -Wcomma                          # clang  3.9            appleclang  8.1
         )
+        if(MSVC)
+          list(APPEND _picky_enable
+            -Wno-nonportable-system-include-path  # clang 3.9            appleclang  8.1  # No truly portable solution to this
+          )
+        endif()
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11))
