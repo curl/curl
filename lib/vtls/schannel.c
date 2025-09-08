@@ -771,7 +771,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     SCH_CREDENTIALS credentials = { 0 };
     TLS_PARAMETERS tls_parameters = { 0 };
-    CRYPTO_SETTINGS crypto_settings[1] = { { 0 } };
+    CRYPTO_SETTINGS crypto_settings[1];
+
+    memset(crypto_settings, 0, sizeof(crypto_settings));
 
     tls_parameters.pDisabledCrypto = crypto_settings;
 
