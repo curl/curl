@@ -818,10 +818,10 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) ||        \
   defined(TCP_FASTOPEN_CONNECT)
     s->tcp_fastopen = enabled;
+    break;
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
-    break;
   case CURLOPT_SSL_ENABLE_ALPN:
     s->ssl_enable_alpn = enabled;
     break;
