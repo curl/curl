@@ -456,7 +456,7 @@ static CURLcode encodeOID(struct dynbuf *store,
     x = 0;
     do {
       if(x & 0xFF000000)
-        return 0;
+        return CURLE_OK;
       y = *(const unsigned char *) beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
