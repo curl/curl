@@ -659,7 +659,7 @@ static void output_header(struct per_transfer *per,
   const char *end;
   end = strchr(ptr, '}');
   do {
-    if(!end || (end && (end[-1] != '\\')))
+    if(!end || (end[-1] != '\\'))
       break;
     end = strchr(&end[1], '}');
   } while(end);
