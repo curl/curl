@@ -35,9 +35,6 @@
 
 #ifdef CURLDEBUG
 
-#undef send
-#undef recv
-
 #undef fopen
 #ifdef CURL_FOPEN
 #define fopen(fname, mode) CURL_FOPEN(fname, mode)

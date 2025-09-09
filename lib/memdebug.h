@@ -42,10 +42,6 @@
 #define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
 #undef free
 #define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
-#undef send
-#define send(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
-#undef recv
-#define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
 #undef Curl_tcsdup
