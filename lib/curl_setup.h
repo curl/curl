@@ -1097,6 +1097,8 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_ACCEPT4(sock,addr,len,flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
+#define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
+#define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #else /* !CURLDEBUG */
 
@@ -1114,6 +1116,8 @@ CURL_EXTERN ALLOC_FUNC
 #ifdef HAVE_ACCEPT4
 #define CURL_ACCEPT4 accept4
 #endif
+#define CURL_SEND send
+#define CURL_RECV recv
 
 #endif /* CURLDEBUG */
 
