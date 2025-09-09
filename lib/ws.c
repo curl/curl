@@ -969,7 +969,7 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                             (curl_off_t)ws->pending.payload_len,
                             &ws->sendbuf);
   if(result) {
-    CURL_TRC_WS(data, "ws_enc_cntrl(), error addiong head: %d",
+    CURL_TRC_WS(data, "ws_enc_cntrl(), error addiong head: %u",
                 result);
     goto out;
   }
@@ -977,7 +977,7 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                                 ws->pending.payload_len,
                                 &ws->sendbuf, &n);
   if(result) {
-    CURL_TRC_WS(data, "ws_enc_cntrl(), error adding payload: %d",
+    CURL_TRC_WS(data, "ws_enc_cntrl(), error adding payload: %u",
                 result);
     goto out;
   }
@@ -1020,7 +1020,7 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
       /* too large buflen beyond payload length of frame */
       failf(data, "[WS] unaligned frame size (sending %zu instead of %"
                   FMT_OFF_T ")",
-            buflen, ws->enc.payload_remain + ws->sendbuf_payload);
+            buflen, ws->enc.payload_remain + (curl_off_t)ws->sendbuf_payload);
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
