@@ -1,0 +1,61 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'CodeQL'
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'docs/**'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'tests/data/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'docs/**'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'tests/data/**'
+      - 'winbuild/**'
+  schedule:
+    - cron: '0 0 * * 4'
+
+concurrency:
+  group: ${{ github.workflow }}
+
+permissions: {}
+
+jobs:
+  codeql:
+    name: 'GHA and Python'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'initialize'
+        uses: github/codeql-action/init@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3
+        with:
+          languages: actions, python
+          queries: security-extended
+
+      - name: 'perform analysis'
+        uses: github/codeql-action/analyze@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3
