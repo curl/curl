@@ -1876,7 +1876,7 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *d,
   result = ws_enc_write_head(data, ws, &ws->enc, flags, frame_len,
                              &ws->sendbuf);
   if(result)
-    CURL_TRC_WS(data, "curl_start_frame(), error  adding frame head %d",
+    CURL_TRC_WS(data, "curl_start_frame(), error adding frame head %d",
                 result);
 
 out:
