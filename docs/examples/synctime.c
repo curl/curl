@@ -298,10 +298,8 @@ int main(int argc, char *argv[])
 
     /* Calculating time diff between GMT and localtime */
     tt       = time(0);
-    /* !checksrc! disable BANNEDFUNC 1 */
     lt       = localtime(&tt);
     tt_local = mktime(lt);
-    /* !checksrc! disable BANNEDFUNC 1 */
     gmt      = gmtime(&tt);
     tt_gmt   = mktime(gmt);
     tzonediffFloat = difftime(tt_local, tt_gmt);
