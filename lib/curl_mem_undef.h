@@ -24,8 +24,6 @@
 
 /* Unset redefined system symbols. */
 
-#ifndef CURLDEBUG
-
 #undef strdup
 #undef malloc
 #undef calloc
@@ -36,7 +34,7 @@
 #undef _tcsdup
 #endif
 
-#else
+#ifdef CURLDEBUG
 	
 #undef send
 #undef recv
