@@ -332,7 +332,8 @@ if(PICKY_COMPILER)
     set(_picky_skipped "")
     foreach(_ccopt IN LISTS _picky_enable)
       string(REGEX MATCH "-W([a-z0-9+-]+)" _ccmatch "${_ccopt}")
-      if(_ccmatch AND "${CMAKE_C_FLAGS} " MATCHES "-Wno-${CMAKE_MATCH_1} " AND
+      string(REPLACE "+" "\\+" _cmake_match_1 "${CMAKE_MATCH_1}")  # escape '+' to make it a valid regex
+      if(_ccmatch AND "${CMAKE_C_FLAGS} " MATCHES "-Wno-${_cmake_match_1} " AND
          NOT _ccopt STREQUAL "-Wall" AND
          NOT _ccopt MATCHES "^-Wno-")
         string(APPEND _picky_skipped " ${_ccopt}")
