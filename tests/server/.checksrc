@@ -1,1 +1,7 @@
+allowfunc accept
+allowfunc freeaddrinfo
+allowfunc getaddrinfo
+allowfunc recv
+allowfunc send
+allowfunc socket
 allowfunc strtoul

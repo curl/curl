@@ -311,6 +311,7 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   if(countcheck("socket", line, source))
     return CURL_SOCKET_BAD;
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
@@ -328,6 +329,7 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
     return -1;
+  /* !checksrc! disable BANNEDFUNC 1 */
   rc = send(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
@@ -342,6 +344,7 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
     return -1;
+  /* !checksrc! disable BANNEDFUNC 1 */
   rc = recv(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
@@ -354,6 +357,7 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
                         curl_socket_t socket_vector[2],
                         int line, const char *source)
 {
+  /* !checksrc! disable BANNEDFUNC 1 */
   int res = socketpair(domain, type, protocol, socket_vector);
 
   if(source && (res == 0))
@@ -371,6 +375,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
@@ -388,6 +393,7 @@ curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   curl_socket_t sockfd = accept4(s, addr, addrlen, flags);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
