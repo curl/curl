@@ -56,20 +56,6 @@
 #endif
 #endif /* _WIN32 */
 
-#undef socket
-#define socket(domain,type,protocol) \
-  curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
-#ifdef HAVE_ACCEPT4
-#undef accept4 /* for those with accept4 as a macro */
-#define accept4(sock,addr,len,flags) \
-  curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
-#endif
-#ifdef HAVE_SOCKETPAIR
-#define socketpair(domain,type,protocol,socket_vector) \
-  curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
-                      __LINE__, __FILE__)
-#endif
-
 #undef fopen
 #define fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #undef fdopen

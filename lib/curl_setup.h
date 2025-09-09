@@ -1084,8 +1084,19 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
 
+#define CURL_SOCKET(domain,type,protocol) \
+  curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
+#ifdef HAVE_SOCKETPAIR
+#define CURL_SOCKETPAIR(domain,type,protocol,socket_vector) \
+  curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
+                      __LINE__, __FILE__)
+#endif
 #define CURL_ACCEPT(sock,addr,len) \
   curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
+#ifdef HAVE_ACCEPT4
+#define CURL_ACCEPT4(sock,addr,len,flags) \
+  curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
+#endif
 
 #else /* !CURLDEBUG */
 
@@ -1095,7 +1106,14 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_GETADDRINFO getaddrinfo
 #define CURL_FREEADDRINFO freeaddrinfo
 
+#define CURL_SOCKET socket
+#ifdef HAVE_SOCKETPAIR
+#define CURL_SOCKETPAIR socketpair
+#endif
 #define CURL_ACCEPT accept
+#ifdef HAVE_ACCEPT4
+#define CURL_ACCEPT4 accept4
+#endif
 
 #endif /* CURLDEBUG */
 

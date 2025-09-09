@@ -54,5 +54,5 @@ curl_socket_t tool_socket_open_mptcp_cb(void *clientp,
     return CURL_SOCKET_BAD;
 #endif
 
-  return socket(addr->family, addr->socktype, protocol);
+  return CURL_SOCKET(addr->family, addr->socktype, protocol);
 }
