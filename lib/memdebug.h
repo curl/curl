@@ -59,9 +59,6 @@
 #undef socket
 #define socket(domain,type,protocol) \
   curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
-#undef accept /* for those with accept as a macro */
-#define accept(sock,addr,len) \
-  curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_ACCEPT4
 #undef accept4 /* for those with accept4 as a macro */
 #define accept4(sock,addr,len,flags) \

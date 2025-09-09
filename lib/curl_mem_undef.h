@@ -39,7 +39,6 @@
 #undef recv
 
 #undef socket
-#undef accept
 #ifdef HAVE_ACCEPT4
 #undef accept4
 #endif

@@ -1084,6 +1084,9 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
 
+#define CURL_ACCEPT(sock,addr,len) \
+  curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
+
 #else /* !CURLDEBUG */
 
 #define sclose(x) CURL_SCLOSE(x)
@@ -1091,6 +1094,8 @@ CURL_EXTERN ALLOC_FUNC
 
 #define CURL_GETADDRINFO getaddrinfo
 #define CURL_FREEADDRINFO freeaddrinfo
+
+#define CURL_ACCEPT accept
 
 #endif /* CURLDEBUG */
 
