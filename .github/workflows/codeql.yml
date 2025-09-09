@@ -42,21 +42,20 @@ permissions: {}
 
 jobs:
   codeql:
+    name: 'CodeQL'
     runs-on: ubuntu-latest
     permissions:
       security-events: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
-      # Initializes the CodeQL tools for scanning.
-      - name: Initialize CodeQL
+      - name: 'initialize'
         uses: github/codeql-action/init@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3
         with:
           languages: python, actions
           queries: security-extended
 
-      - name: Perform CodeQL Analysis
+      - name: 'perform analysis'
         uses: github/codeql-action/analyze@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3
