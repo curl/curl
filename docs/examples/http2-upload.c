@@ -161,7 +161,6 @@ int my_trace(CURL *handle, curl_infotype type,
     known_offset = 1;
   }
   secs = epoch_offset + tv.tv_sec;
-  /* !checksrc! disable BANNEDFUNC 1 */
   now = localtime(&secs);  /* not thread safe but we do not care */
   curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
                  now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);

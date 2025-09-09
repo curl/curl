@@ -40,6 +40,7 @@ path = [
   "tests/data/test**",
   "tests/valgrind.supp",
   # checksrc control files
+  "docs/examples/.checksrc",
   "lib/.checksrc",
   "lib/curlx/.checksrc",
   "lib/vauth/.checksrc",

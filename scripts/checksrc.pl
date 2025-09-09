@@ -77,6 +77,14 @@ my %banfunc = (
     "_waccess" => 1,
     "_access" => 1,
     "access" => 1,
+    "accept" => 1,
+    "accept4" => 1,
+    "freeaddrinfo" => 1,
+    "getaddrinfo" => 1,
+    "recv" => 1,
+    "send" => 1,
+    "socket" => 1,
+    "socketpair" => 1,
     );
 
 my %warnings_extended = (

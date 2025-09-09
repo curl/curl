@@ -333,6 +333,7 @@ Curl_getaddrinfo_a(const char *nodename, const char *servname,
     eservname[i] = '\0';
   }
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   status = getaddrinfo(enodename, eservname, hints, res);
   free(enodename);
   free(eservname);

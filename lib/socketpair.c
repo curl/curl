@@ -91,7 +91,7 @@ int Curl_socketpair(int domain, int type, int protocol,
 #ifdef SOCK_NONBLOCK
   type = nonblocking ? type | SOCK_NONBLOCK : type;
 #endif
-  if(socketpair(domain, type, protocol, socks))
+  if(CURL_SOCKETPAIR(domain, type, protocol, socks))
     return -1;
 #ifndef SOCK_NONBLOCK
   if(nonblocking) {
@@ -154,7 +154,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   (void)type;
   (void)protocol;
 
-  listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  listener = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if(listener == CURL_SOCKET_BAD)
     return -1;
 
@@ -188,7 +188,7 @@ int Curl_socketpair(int domain, int type, int protocol,
     goto error;
   if(listen(listener, 1) == -1)
     goto error;
-  socks[0] = socket(AF_INET, SOCK_STREAM, 0);
+  socks[0] = CURL_SOCKET(AF_INET, SOCK_STREAM, 0);
   if(socks[0] == CURL_SOCKET_BAD)
     goto error;
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)

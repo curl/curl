@@ -1,0 +1,3 @@
+allowfunc gmtime
+allowfunc localtime
+allowfunc socket
