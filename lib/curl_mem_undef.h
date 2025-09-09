@@ -24,6 +24,8 @@
 
 /* Unset redefined system symbols. */
 
+#ifdef CURLDEBUG
+
 #undef strdup
 #undef malloc
 #undef calloc
@@ -51,6 +53,8 @@
 #endif
 #undef fdopen
 #undef fclose
+
+#endif /* CURLDEBUG */
 
 #undef HEADER_CURL_MEMORY_H
 #undef HEADER_CURL_MEMDEBUG_H
