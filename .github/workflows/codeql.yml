@@ -42,7 +42,7 @@ permissions: {}
 
 jobs:
   codeql:
-    name: 'CodeQL'
+    name: 'GHA and Python'
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -54,7 +54,7 @@ jobs:
       - name: 'initialize'
         uses: github/codeql-action/init@aa578102511db1f4524ed59b8cc2bae4f6e88195 # v3
         with:
-          languages: python, actions
+          languages: actions, python
           queries: security-extended
 
       - name: 'perform analysis'
