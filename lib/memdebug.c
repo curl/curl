@@ -321,9 +321,9 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
 }
 
 SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
-                            SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
-                            SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags, int line,
-                            const char *source)
+                             SEND_QUAL_ARG2 SEND_TYPE_ARG2 buf,
+                             SEND_TYPE_ARG3 len, SEND_TYPE_ARG4 flags,
+                             int line, const char *source)
 {
   SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
@@ -336,8 +336,8 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
 }
 
 RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
-                            RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags, int line,
-                            const char *source)
+                             RECV_TYPE_ARG3 len, RECV_TYPE_ARG4 flags,
+                             int line, const char *source)
 {
   RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
