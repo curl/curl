@@ -2116,7 +2116,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     s_accepted = accept4(ctx->sock, (struct sockaddr *) &add, &size,
                          SOCK_NONBLOCK | SOCK_CLOEXEC);
 #else
-    s_accepted = accept(ctx->sock, (struct sockaddr *) &add, &size);
+    s_accepted = CURL_ACCEPT(ctx->sock, (struct sockaddr *) &add, &size);
 #endif
   }
 

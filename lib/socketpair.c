@@ -201,7 +201,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   pfd[0].events = POLLIN;
   pfd[0].revents = 0;
   (void)Curl_poll(pfd, 1, 1000); /* one second */
-  socks[1] = accept(listener, NULL, NULL);
+  socks[1] = CURL_ACCEPT(listener, NULL, NULL);
   if(socks[1] == CURL_SOCKET_BAD)
     goto error;
   else {

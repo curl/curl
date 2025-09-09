@@ -371,7 +371,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
-  curl_socket_t sockfd = (accept)(s, addr, addrlen);
+  curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
