@@ -1083,7 +1083,6 @@ CURL_EXTERN ALLOC_FUNC
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-
 #define CURL_SOCKET(domain,type,protocol) \
   curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
@@ -1107,7 +1106,6 @@ CURL_EXTERN ALLOC_FUNC
 
 #define CURL_GETADDRINFO getaddrinfo
 #define CURL_FREEADDRINFO freeaddrinfo
-
 #define CURL_SOCKET socket
 #ifdef HAVE_SOCKETPAIR
 #define CURL_SOCKETPAIR socketpair
