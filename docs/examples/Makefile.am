@@ -24,7 +24,7 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = CMakeLists.txt README.md Makefile.example $(COMPLICATED_EXAMPLES)
+EXTRA_DIST = CMakeLists.txt .checksrc README.md Makefile.example $(COMPLICATED_EXAMPLES)
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
