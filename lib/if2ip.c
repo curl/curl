@@ -208,7 +208,7 @@ if2ip_result_t Curl_if2ip(int af,
   if(len >= sizeof(req.ifr_name))
     return IF2IP_NOT_FOUND;
 
-  dummy = socket(AF_INET, SOCK_STREAM, 0);
+  dummy = CURL_SOCKET(AF_INET, SOCK_STREAM, 0);
   if(CURL_SOCKET_BAD == dummy)
     return IF2IP_NOT_FOUND;
 

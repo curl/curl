@@ -38,14 +38,6 @@
 #undef send
 #undef recv
 
-#undef socket
-#ifdef HAVE_ACCEPT4
-#undef accept4
-#endif
-#ifdef HAVE_SOCKETPAIR
-#undef socketpair
-#endif
-
 #undef fopen
 #ifdef CURL_FOPEN
 #define fopen(fname, mode) CURL_FOPEN(fname, mode)

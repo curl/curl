@@ -369,7 +369,7 @@ static CURLcode socket_open(struct Curl_easy *data,
   }
   else {
     /* opensocket callback not set, so simply create the socket now */
-    *sockfd = socket(addr->family, addr->socktype, addr->protocol);
+    *sockfd = CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
   }
 
   if(*sockfd == CURL_SOCKET_BAD)
@@ -2113,8 +2113,8 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   if(!getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
     size = sizeof(add);
 #ifdef HAVE_ACCEPT4
-    s_accepted = accept4(ctx->sock, (struct sockaddr *) &add, &size,
-                         SOCK_NONBLOCK | SOCK_CLOEXEC);
+    s_accepted = CURL_ACCEPT4(ctx->sock, (struct sockaddr *) &add, &size,
+                              SOCK_NONBLOCK | SOCK_CLOEXEC);
 #else
     s_accepted = CURL_ACCEPT(ctx->sock, (struct sockaddr *) &add, &size);
 #endif
