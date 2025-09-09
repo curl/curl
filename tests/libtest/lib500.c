@@ -35,7 +35,7 @@ static curl_socket_t tst_opensocket(void *clientp,
   (void)clientp;
   (void)purpose;
   curl_mprintf("[OPEN] counter: %d\n", ++testcounter);
-  return socket(addr->family, addr->socktype, addr->protocol);
+  return CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
 }
 
 static int tst_closesocket(void *clientp, curl_socket_t sock)
