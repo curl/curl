@@ -24,19 +24,22 @@
 
 /* Unset redefined system symbols. */
 
-#ifdef CURLDEBUG
+#ifndef CURLDEBUG
 
 #undef strdup
 #undef malloc
 #undef calloc
 #undef realloc
 #undef free
-#undef send
-#undef recv
 
 #ifdef _WIN32
 #undef _tcsdup
 #endif
+
+#else
+	
+#undef send
+#undef recv
 
 #undef socket
 #undef accept
