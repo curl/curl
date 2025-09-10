@@ -533,7 +533,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf stunnel4 \
+            libtool autoconf automake pkgconf \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libnghttp2-dev libuv1-dev \
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
