@@ -877,11 +877,15 @@ void curl_easy_cleanup(CURL *ptr)
  * information from a performed transfer and similar.
  */
 #undef curl_easy_getinfo
-CURLcode curl_easy_getinfo(CURL *data, CURLINFO info, ...)
+CURLcode curl_easy_getinfo(CURL *easy, CURLINFO info, ...)
 {
+  struct Curl_easy *data = easy;
   va_list arg;
   void *paramp;
   CURLcode result;
+
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
   paramp = va_arg(arg, void *);
