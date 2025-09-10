@@ -159,3 +159,4 @@ s/\(.*\) via #[0-9]*//
 s/jethrogb$/jethrogb on github/
 s/on github/on github/i
 s/Maksim Sciepanienka/Maksim Ściepanienka/
+s/Qriist.*/Qriist on github/
