@@ -524,6 +524,11 @@ jobs:
 
     steps:
       - name: 'install prereqs'
+        env:
+          INSTALL_PACKAGES: >-
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4 ' || '' }}
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'apache2 apache2-dev vsftpd dante-server' || '' }}
+
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -531,7 +536,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libnghttp2-dev libuv1-dev \
-            apache2 apache2-dev vsftpd dante-server
+            ${INSTALL_PACKAGES}
           python3 -m venv ~/venv
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
