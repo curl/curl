@@ -170,7 +170,6 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - name: 'cache quiche'
-        if: ${{ matrix.build.name == 'quiche' }}
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
         id: cache-quiche
         env:
