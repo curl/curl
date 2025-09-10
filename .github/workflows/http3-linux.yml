@@ -169,6 +169,16 @@ jobs:
           path: ~/nghttp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
+      - name: 'cache quiche'
+        if: ${{ matrix.build.name == 'quiche' }}
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        id: cache-quiche
+        env:
+          cache-name: cache-quiche
+        with:
+          path: ~/quiche
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
+
       - id: settings
         if: >-
           ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
@@ -181,7 +191,8 @@ jobs:
               steps.cache-nghttp3.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' ||
-              steps.cache-nghttp2.outputs.cache-hit != 'true' }}
+              steps.cache-nghttp2.outputs.cache-hit != 'true' ||
+              steps.cache-quiche.outputs.cache-hit != 'true' }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
@@ -341,6 +352,27 @@ jobs:
             LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib \
             --enable-http3
           make install
+
+      - name: 'build quiche and boringssl'
+        if: ${{ steps.cache-quiche.outputs.cache-hit != 'true' }}
+        run: |
+          cd ~
+          git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
+          cd quiche
+          #### Work-around https://github.com/curl/curl/issues/7927 #######
+          #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
+          sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
+
+          cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
+          ln -s libquiche.so target/release/libquiche.so.0
+          mkdir -v quiche/deps/boringssl/src/lib
+          # shellcheck disable=SC2046
+          ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
+
+          # include dir
+          # /home/runner/quiche/quiche/deps/boringssl/src/include
+          # lib dir
+          # /home/runner/quiche/quiche/deps/boringssl/src/lib
 
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
@@ -630,27 +662,6 @@ jobs:
         with:
           path: ~/quiche
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
-
-      - name: 'build quiche and boringssl'
-        if: ${{ matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true' }}
-        run: |
-          cd ~
-          git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
-          cd quiche
-          #### Work-around https://github.com/curl/curl/issues/7927 #######
-          #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
-          sed -i -e 's/cmake = "0.1"/cmake = "=0.1.45"/' quiche/Cargo.toml
-
-          cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
-          ln -s libquiche.so target/release/libquiche.so.0
-          mkdir -v quiche/deps/boringssl/src/lib
-          # shellcheck disable=SC2046
-          ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
-
-          # include dir
-          # /home/runner/quiche/quiche/deps/boringssl/src/include
-          # lib dir
-          # /home/runner/quiche/quiche/deps/boringssl/src/lib
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
