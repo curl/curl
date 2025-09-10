@@ -208,7 +208,7 @@ jobs:
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
             texinfo texlive texlive-extra-utils autopoint libev-dev \
-            apache2 apache2-dev libnghttp2-dev dante-server
+            apache2 libnghttp2-dev dante-server
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
@@ -532,7 +532,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libnghttp2-dev libuv1-dev \
-            apache2 apache2-dev vsftpd dante-server
+            apache2 vsftpd dante-server
           python3 -m venv ~/venv
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
