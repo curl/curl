@@ -203,7 +203,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libtool autoconf automake pkgconf stunnel4 \
+            libtool autoconf automake pkgconf \
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
             texinfo texlive texlive-extra-utils autopoint libev-dev \

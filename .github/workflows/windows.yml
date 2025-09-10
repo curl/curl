@@ -706,7 +706,7 @@ jobs:
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
     env:
       MAKEFLAGS: -j 5
       TRIPLET: 'x86_64-w64-mingw32'
