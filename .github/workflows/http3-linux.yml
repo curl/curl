@@ -208,7 +208,7 @@ jobs:
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
             texinfo texlive texlive-extra-utils autopoint libev-dev \
-            apache2 libnghttp2-dev dante-server
+            libnghttp2-dev
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
