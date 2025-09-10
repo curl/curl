@@ -531,7 +531,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libnghttp2-dev libuv1-dev \
-            apache2 vsftpd dante-server
+            apache2 apache2-dev vsftpd dante-server
           python3 -m venv ~/venv
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
