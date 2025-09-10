@@ -381,6 +381,7 @@ jobs:
     timeout-minutes: 45
     env:
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
+      MATRIX_INSTALL_PACKAGES: '${{ matrix.build.install_packages }}'
     strategy:
       fail-fast: false
       matrix:
@@ -461,6 +462,7 @@ jobs:
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
 
           - name: 'gnutls'
+            install_packages: nettle-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
@@ -469,6 +471,7 @@ jobs:
               --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
 
           - name: 'gnutls'
+            install_packages: nettle-dev
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_GNUTLS=ON
@@ -536,7 +539,8 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libnghttp2-dev libuv1-dev \
-            ${INSTALL_PACKAGES}
+            ${INSTALL_PACKAGES} \
+            ${MATRIX_INSTALL_PACKAGES}
           python3 -m venv ~/venv
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
