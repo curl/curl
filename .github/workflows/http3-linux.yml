@@ -204,10 +204,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
-            nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
-            libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
-            texinfo texlive texlive-extra-utils autopoint libev-dev \
-            libnghttp2-dev
+            nettle-dev libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for gnutls
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
