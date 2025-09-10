@@ -258,12 +258,19 @@ CURLcode Curl_close(struct Curl_easy **datap)
 
   Curl_expire_clear(data); /* shut off any timers left */
 
-  data->magic = 0; /* force a clear AFTER the possibly enforced removal from
-                      the multi handle, since that function uses the magic
-                      field! */
-
   if(data->state.rangestringalloc)
     free(data->state.range);
+
+  /* release any resolve information this transfer kept */
+  Curl_async_destroy(data);
+  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
+  Curl_resolv_unlink(data, &data->state.dns[1]);
+
+  data->set.verbose = FALSE; /* no more calls to DEBUGFUNCTION */
+  data->magic = 0; /* force a clear AFTER the possibly enforced removal from
+                    * the multi handle and async dns shutdown. The multi
+                    * handle might check the magic and so might any
+                    * DEBUGFUNCTION invoked for tracing */
 
   /* freed here just in case DONE was not called */
   Curl_req_free(&data->req, data);
@@ -298,11 +305,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.most_recent_ftp_entrypath);
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
-
-  /* release any resolve information this transfer kept */
-  Curl_async_destroy(data);
-  Curl_resolv_unlink(data, &data->state.dns[0]); /* done with this */
-  Curl_resolv_unlink(data, &data->state.dns[1]);
 
   data_priority_cleanup(data);
 
