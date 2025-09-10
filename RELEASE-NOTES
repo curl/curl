@@ -4,7 +4,7 @@ curl and libcurl 8.16.0
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3502
+ Contributors:                 3499
 
 This release includes the following changes:
 
@@ -117,10 +117,12 @@ This release includes the following bugfixes:
  o DISTROS.md: add Haiku [39]
  o docs/cmdline-opts: the auth types are not mutually exclusive [103]
  o docs: add CURLOPT type change history, drop casts where present [143]
+ o docs: add major incident section to vuln disclosure policy [271]
  o docs: fix link CONTRIBUTE.md link [192]
  o docs: fix name in curl_easy_ssls_export man page [12]
  o docs: fix typo (staring -> starting) [211]
  o docs: point two broken links to archive.org [134]
+ o docs: put `<>` within backticks in titles [261]
  o doh: rename symbols to avoid collision with mingw-w64 headers [66]
  o easy handle: check validity on external calls [28]
  o examples: drop long cast for `CURLALTSVC_*`
@@ -163,6 +165,7 @@ This release includes the following bugfixes:
  o ngtcp2: extend callback tables for nghttp3 1.11.0 and ngtcp2 1.14.0 [47]
  o ngtcp2: handshake timeout should be equal to --connect-timeout [262]
  o ngtcp2: use custom mem funcs [204]
+ o openldap: fix `-Wtentative-definition-compat` [268]
  o openssl: add and use `HAVE_BORINGSSL_LIKE` internal macro [222]
  o openssl: add and use `HAVE_OPENSSL3` internal macro [223]
  o openssl: assume `OPENSSL_VERSION_NUMBER` [181]
@@ -264,6 +267,7 @@ This release includes the following bugfixes:
  o urldata: reduce two long struct fields to unsigned short [174]
  o urlglob: only accept 255 globs
  o vquic-tls: fix SSL backend type for QUIC connections using gnutls [29]
+ o vquic: replace assert [254]
  o vquic: use curl_getenv [168]
  o vtls: set seen http version on successful ALPN [160]
  o websocket example: cast print values to unsigned int [251]
@@ -283,6 +287,7 @@ This release includes the following bugfixes:
  o wolfssl: rename ML-KEM hybrids to match IETF draft [173]
  o write-out.md: header_json is not included the json object [243]
  o ws: avoid NULL pointer deref in curl_ws_recv [91]
+ o ws: get a new mask for each new outgoing frame [255]
 
 This release includes the following known bugs:
 
@@ -306,25 +311,26 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi, Andriy Druk,
-  Anthony Hu, Berthin Torres Callañaupa, BobodevMm on github, Calvin Ruocco,
-  Caolán McNamara, Cole Leavitt, d1r3ct0r, Dan Fandrich, Daniel Böhmer,
-  Daniel Engberg, Daniel McCarney, Daniel Stenberg, David Zhuang,
-  devgs on github, Dominik Tomecki, Dustin L. Howett, Eshan Kelkar,
-  Florian Friedrich, Gabriel Marin, Gisle Vanem, Google Big Sleep,
-  Harry Sintonen, IoannisGS on github, Jelle Raaijmakers, Jeroen Ooms,
+  adamse on github, Ahmad Gani, Alice Lee Poetics, Ammar Faizi,
+  Andrew Kirillov, Andriy Druk, Anthony Hu, Berthin Torres Callañaupa,
+  BobodevMm on github, Calvin Ruocco, Caolán McNamara, Cole Leavitt,
+  correctmost on github, d1r3ct0r, Dan Fandrich, Daniel Böhmer, Daniel Engberg,
+  Daniel McCarney, Daniel Stenberg, David Zhuang, devgs on github,
+  Dominik Tomecki, Dustin L. Howett, Eshan Kelkar, Florian Friedrich,
+  Gabriel Marin, Gisle Vanem, Google Big Sleep, Harry Sintonen,
+  IoannisGS on github, James Fuller, Jelle Raaijmakers, Jeroen Ooms,
   Kai Pastor, Karthik Das, kkmuffme on github, kupavcevdenis on github,
   letshack9707 on hackerone, lf- on github, LoRd_MuldeR, Marcel Raad,
   Michael Osipov, Michał Petryka, Natris on github, nevakrien on github,
   Oxan van Leeuwen, Paul Gilmartin, Pavel Kropachev, Petar Popovic,
-  Philippe Antoine, Pino Toscano, Qriist, Qriist on github, Ray Satiro,
+  Philippe Antoine, Pino Toscano, Qriist on github, Ray Satiro,
   renovate[bot], RepoRascal on hackerone, rm-rmonaghan on github,
   Roberto Hidalgo, Samuel Henrique, Schrijvers Luc, Sebastian Carlos,
   Sergio Durigan Junior, Simon Dalvai, Stanislav Osipov, Stefan Eissing,
   stephannn on github, sunriseL, Tal Regev, Terence Eden, Todd Gamblin,
   Viktor Szakats, Waldemar Kornewald, XCas13, xfangfang, yaoy6 on github,
   Yedaya Katsman, ウさん
-  (74 contributors)
+  (76 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -581,14 +587,19 @@ References to bug reports and discussions on issues:
  [251] = https://curl.se/bug/?i=18326
  [252] = https://curl.se/bug/?i=18263
  [253] = https://curl.se/bug/?i=18433
+ [254] = https://curl.se/bug/?i=18495
+ [255] = https://curl.se/bug/?i=18496
  [256] = https://curl.se/bug/?i=18424
  [258] = https://curl.se/bug/?i=18469
  [259] = https://curl.se/bug/?i=18455
  [260] = https://curl.se/bug/?i=18430
+ [261] = https://curl.se/bug/?i=18498
  [262] = https://curl.se/bug/?i=18431
  [265] = https://curl.se/bug/?i=18422
  [266] = https://curl.se/bug/?i=18413
+ [268] = https://curl.se/bug/?i=18470
  [269] = https://curl.se/bug/?i=18286
  [270] = https://curl.se/bug/?i=18457
+ [271] = https://curl.se/bug/?i=18483
  [273] = https://curl.se/bug/?i=18462
  [275] = https://curl.se/bug/?i=18459
