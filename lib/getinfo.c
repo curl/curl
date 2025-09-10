@@ -621,7 +621,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   struct curl_slist **param_slistp = NULL;
   curl_socket_t *param_socketp = NULL;
   int type;
-  CURLcode result = CURLE_UNKNOWN_OPTION;
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -661,6 +661,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
       result = getinfo_socket(data, info, param_socketp);
     break;
   default:
+    result = CURLE_UNKNOWN_OPTION;
     break;
   }
 
