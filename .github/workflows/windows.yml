@@ -950,9 +950,8 @@ jobs:
               # Use Ninja when running tests to avoid MSBuild heuristics picking
               # up "error messages" in the test log output and making the job fail.
               # Officially this requires the vcvarsall.bat MS-DOS batch file (as of
-              # VS2022). Since it integrates badly with CI steps and shell scripts
-              # scripts, reproduce the necessary build configuration manually, and
-              # without envs.
+              # VS2022). Since it integrates badly with CI steps and shell scripts,
+              # reproduce the necessary build configuration manually, without envs.
               [[ "$(uname -s)" = *'ARM64'* ]] && MSVC_HOST='arm64' || MSVC_HOST='x64'  # x86
               MSVC_ROOTD="$(cygpath --mixed --short-name "$PROGRAMFILES/Microsoft Visual Studio")"  # to avoid spaces in directory names
               MSVC_ROOTU="$(/usr/bin/find "$(cygpath --unix "$MSVC_ROOTD/2022/Enterprise/vc/tools/msvc")" -mindepth 1 -maxdepth 1 -type d -name '*.*' | sort | tail -n 1)"
