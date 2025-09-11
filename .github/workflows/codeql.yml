@@ -59,3 +59,37 @@ jobs:
 
       - name: 'perform analysis'
         uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
+
+  c:
+    name: 'C'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: 'install prereqs'
+        timeout-minutes: 5
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'initialize'
+        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3
+        with:
+          languages: cpp
+          build-mode: manual
+
+      - name: 'build'
+        timeout-minutes: 10
+        run: |
+          cmake -B . -G Ninja
+          cmake --build . --verbose
+          src/curl -V
+
+      - name: 'perform analysis'
+        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
