@@ -8,6 +8,7 @@ Help: Load/save SSL session tickets from/to this file
 Added: 8.12.0
 Category: tls
 Multi: single
+Experimental: yes
 See-also:
   - tls-earlydata
 Example:
