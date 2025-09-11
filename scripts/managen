@@ -728,7 +728,8 @@ sub single {
     }
 
     if($experimental) {
-        push @leading, "**WARNING**: this option is experimental. Do not use in production.\n\n";
+        my $pref = $manpage ? "" : "[1]";
+        push @leading, "$pref**WARNING**: this option is experimental. Do not use in production.\n\n";
     }
 
     my $pre = $manpage ? "\n": "[1]";
