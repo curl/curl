@@ -162,9 +162,9 @@ jobs:
 
       - name: 'cache nghttp2'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
-        id: cache-nghttp2-test
+        id: cache-nghttp2
         env:
-          cache-name: cache-nghttp2-test
+          cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
@@ -181,7 +181,7 @@ jobs:
               steps.cache-nghttp3.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2.outputs.cache-hit != 'true' ||
               steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' ||
-              steps.cache-nghttp2-test.outputs.cache-hit != 'true' }}
+              steps.cache-nghttp2.outputs.cache-hit != 'true' }}
 
         run: echo 'needs-build=true' >> "$GITHUB_OUTPUT"
 
@@ -329,7 +329,7 @@ jobs:
           make install
 
       - name: 'build nghttp2'
-        if: ${{ steps.cache-nghttp2-test.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
@@ -623,9 +623,9 @@ jobs:
 
       - name: 'cache nghttp2'
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
-        id: cache-nghttp2-test
+        id: cache-nghttp2
         env:
-          cache-name: cache-nghttp2-test
+          cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
