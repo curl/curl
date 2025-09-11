@@ -476,6 +476,7 @@ jobs:
 
           - name: 'quiche'
             install_steps: skipall
+            PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quiche/target/release
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
@@ -484,7 +485,7 @@ jobs:
               --enable-unity
 
           - name: 'quiche'
-            PKG_CONFIG_PATH: /home/runner/quiche/target/release
+            PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig:/home/runner/quiche/target/release
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src
               -DUSE_QUICHE=ON
