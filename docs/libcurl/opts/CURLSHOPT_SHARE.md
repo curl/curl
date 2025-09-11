@@ -54,10 +54,9 @@ the same multi handle share the DNS cache by default without using this option.
 
 ## CURL_LOCK_DATA_SSL_SESSION
 
-SSL sessions are shared across the easy handles using this shared
-object. This reduces the time spent in the SSL handshake when reconnecting to
-the same server. This symbol was added in 7.10.3 but was not implemented until
-7.23.0.
+SSL sessions are shared across the easy handles using this shared object. This
+reduces the time spent in the SSL handshake when reconnecting to the same
+server.
 
 Note that when you use the multi interface, all easy handles added to the same
 multi handle share the SSL session cache by default without using this option.
@@ -73,9 +72,6 @@ Connections that are used for HTTP/2 or HTTP/3 multiplexing only get
 additional transfers added to them if the existing connection is held by the
 same multi or easy handle. libcurl does not support doing multiplexed streams
 in different threads using a shared connection.
-
-Support for **CURL_LOCK_DATA_CONNECT** was added in 7.57.0, but the symbol
-existed before this.
 
 Note that when you use the multi interface, all easy handles added to the same
 multi handle share the connection cache by default without using this option.

@@ -101,8 +101,6 @@ If you pass a 0 (zero) for this option, libcurl calls strlen() on the contents
 to figure out the size. If you really want to send a zero byte content then
 you must make sure strlen() on the data pointer returns zero.
 
-(Option added in 7.46.0)
-
 ## CURLFORM_CONTENTSLENGTH
 
 (This option is deprecated. Use *CURLFORM_CONTENTLEN* instead.)
@@ -171,13 +169,12 @@ long which gives the length of the buffer.
 
 ## CURLFORM_STREAM
 
-Tells libcurl to use the CURLOPT_READFUNCTION(3) callback to get
-data. The parameter you pass to *CURLFORM_STREAM* is the pointer passed on
-to the read callback's fourth argument. If you want the part to look like a
-file upload one, set the *CURLFORM_FILENAME* parameter as well. Note that
-when using *CURLFORM_STREAM*, *CURLFORM_CONTENTSLENGTH* must also be
-set with the total expected length of the part unless the formpost is sent
-chunked encoded. (Option added in libcurl 7.18.2)
+Tells libcurl to use the CURLOPT_READFUNCTION(3) callback to get data. The
+parameter you pass to *CURLFORM_STREAM* is the pointer passed on to the read
+callback's fourth argument. If you want the part to look like a file upload
+one, set the *CURLFORM_FILENAME* parameter as well. Note that when using
+*CURLFORM_STREAM*, *CURLFORM_CONTENTSLENGTH* must also be set with the total
+expected length of the part unless the formpost is sent chunked encoded.
 
 ## CURLFORM_ARRAY
 

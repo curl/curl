@@ -72,33 +72,22 @@ supported for wolfSSL.
 
 The flag defines the maximum supported TLS version as TLSv1.2, or the default
 value from the SSL library.
-(Added in 7.54.0)
 
 ## CURL_SSLVERSION_MAX_TLSv1_0
 
 The flag defines maximum supported TLS version as TLSv1.0.
-(Added in 7.54.0)
 
 ## CURL_SSLVERSION_MAX_TLSv1_1
 
 The flag defines maximum supported TLS version as TLSv1.1.
-(Added in 7.54.0)
 
 ## CURL_SSLVERSION_MAX_TLSv1_2
 
 The flag defines maximum supported TLS version as TLSv1.2.
-(Added in 7.54.0)
 
 ## CURL_SSLVERSION_MAX_TLSv1_3
 
 The flag defines maximum supported TLS version as TLSv1.3.
-(Added in 7.54.0)
-
-##
-
-In versions of curl prior to 7.54 the CURL_SSLVERSION_TLS options were
-documented to allow *only* the specified TLS version, but behavior was
-inconsistent depending on the TLS library.
 
 # DEFAULT
 

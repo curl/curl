@@ -120,7 +120,7 @@ operand, provided it is empty.
 ## statvfs file
 
 The statvfs command returns statistics on the file system in which specified
-file resides. (Added in 7.49.0)
+file resides.
 
 ## symlink source_file target_file
 

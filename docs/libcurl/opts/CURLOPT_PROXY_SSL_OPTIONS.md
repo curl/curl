@@ -49,8 +49,7 @@ Transport and OpenSSL.
 Tells libcurl to disable certificate revocation checks for those SSL backends
 where such behavior is present. This option is only supported for Schannel
 (the native Windows SSL library), with an exception in the case of Windows'
-Untrusted Publishers block list which it seems cannot be bypassed. (Added in
-7.44.0)
+Untrusted Publishers block list which it seems cannot be bypassed.
 
 ## CURLSSLOPT_NO_PARTIALCHAIN
 
