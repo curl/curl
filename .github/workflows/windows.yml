@@ -239,9 +239,6 @@ jobs:
             make -C bld V=1 examples
           fi
 
-      - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
-
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     needs:
@@ -500,9 +497,6 @@ jobs:
             make -C bld V=1 examples
           fi
 
-      - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
-
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
     needs:
@@ -700,9 +694,6 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld --target curl-examples-build
 
-      - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
-
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
@@ -798,9 +789,6 @@ jobs:
           else
             make -C bld examples
           fi
-
-      - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
@@ -1101,6 +1089,3 @@ jobs:
         timeout-minutes: 5
         if: ${{ contains(matrix.name, '+examples') }}
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5 --target curl-examples-build
-
-      - name: 'disk space used'
-        run: du -sh .; echo; du -sh -t 250KB ./*; echo; du -h -t 250KB bld
