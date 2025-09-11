@@ -2578,11 +2578,31 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
 out:
   if(result == CURLE_RECV_ERROR && ctx->qconn &&
      ngtcp2_conn_in_draining_period(ctx->qconn)) {
-    /* When a QUIC server instance is shutting down, it may send us a
-     * CONNECTION_CLOSE right away. Our connection then enters the DRAINING
-     * state. The CONNECT may work in the near future again. Indicate
-     * that as a "weird" reply. */
-    result = CURLE_WEIRD_SERVER_REPLY;
+    const ngtcp2_ccerr *cerr = ngtcp2_conn_get_ccerr(ctx->qconn);
+
+    result = CURLE_COULDNT_CONNECT;
+    if(cerr) {
+      CURL_TRC_CF(data, cf, "connect error, type=%d, code=%"
+                  FMT_PRIu64,
+                  cerr->type, (curl_uint64_t)cerr->error_code);
+      switch(cerr->type) {
+      case NGTCP2_CCERR_TYPE_VERSION_NEGOTIATION:
+        CURL_TRC_CF(data, cf, "error in version negotiation");
+        break;
+      default:
+        if(cerr->error_code >= NGTCP2_CRYPTO_ERROR) {
+          CURL_TRC_CF(data, cf, "crypto error, tls alert=%u",
+                      (unsigned int)(cerr->error_code & 0xffu));
+        }
+        else if(cerr->error_code == NGTCP2_CONNECTION_REFUSED) {
+          CURL_TRC_CF(data, cf, "connection refused by server");
+          /* When a QUIC server instance is shutting down, it may send us a
+           * CONNECTION_CLOSE with this code right away. We want
+            * to keep on trying in this case. */
+          result = CURLE_WEIRD_SERVER_REPLY;
+        }
+      }
+    }
   }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
