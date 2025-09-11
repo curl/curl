@@ -195,6 +195,7 @@ jobs:
             libtool autoconf automake pkgconf \
             libbrotli-dev libzstd-dev zlib1g-dev \
             libev-dev \
+            libc-ares-dev \
             nettle-dev libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
