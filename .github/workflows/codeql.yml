@@ -71,7 +71,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev
+          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -100,7 +100,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev
+          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -133,7 +133,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev
+          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
