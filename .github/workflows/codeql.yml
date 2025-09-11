@@ -95,6 +95,7 @@ jobs:
       security-events: write
     steps:
       - name: 'install prereqs'
+        timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -112,6 +113,7 @@ jobs:
           build-mode: manual
 
       - name: 'build'
+        timeout-minutes: 10
         run: |
           cmake -B . -G Ninja
           cmake --build . --verbose --target testdeps
@@ -126,6 +128,7 @@ jobs:
       security-events: write
     steps:
       - name: 'install prereqs'
+        timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
@@ -143,6 +146,7 @@ jobs:
           build-mode: manual
 
       - name: 'build'
+        timeout-minutes: 10
         run: |
           cmake -B . -G Ninja
           cmake --build . --verbose
