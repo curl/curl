@@ -35,16 +35,18 @@ connection to have to be considered for reuse for this request.
 
 libcurl features a connection cache that holds previously used connections.
 When a new request is to be done, libcurl considers any connection that
-matches for reuse. The CURLOPT_MAXLIFETIME_CONN(3) limit prevents
-libcurl from trying too old connections for reuse. This can be used for
-client-side load balancing. If a connection is found in the cache that is
-older than this set *maxlifetime*, it is instead marked for closure.
+matches for reuse. The CURLOPT_MAXLIFETIME_CONN(3) limit prevents libcurl from
+trying too old connections for reuse. This can be used for client-side load
+balancing. If a connection is found in the cache that is older than this set
+*maxlifetime*, it is instead marked for closure.
 
-If set to 0, this behavior is disabled: all connections are eligible for reuse.
+If set to 0, this behavior is disabled: all connections are eligible for
+reuse.
 
 # DEFAULT
 
-0 seconds (i.e., disabled)
+24 hours (since 8.17.0). Before that, the default was 0 seconds (i.e.,
+disabled)
 
 # %PROTOCOLS%
 

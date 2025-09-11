@@ -488,7 +488,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->upkeep_interval_ms = CURL_UPKEEP_INTERVAL_DEFAULT;
   set->maxconnects = DEFAULT_CONNCACHE_SIZE; /* for easy handles */
   set->conn_max_idle_ms = 118 * 1000;
-  set->conn_max_age_ms = 0;
+  set->conn_max_age_ms = 24 * 3600 * 1000;
   set->http09_allowed = FALSE;
   set->httpwant = CURL_HTTP_VERSION_NONE
     ;

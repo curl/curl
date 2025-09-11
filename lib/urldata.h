@@ -1390,9 +1390,9 @@ struct UserDefined {
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
   timediff_t conn_max_idle_ms; /* max idle time to allow a connection that
-                           is to be reused */
+                                  is to be reused */
   timediff_t conn_max_age_ms; /* max time since creation to allow a
-                            connection that is to be reused */
+                                 connection that is to be reused */
   curl_off_t filesize;  /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
