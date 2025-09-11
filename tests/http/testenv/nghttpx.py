@@ -124,15 +124,16 @@ class Nghttpx:
             running = self._process
             self._process = None
             os.kill(running.pid, signal.SIGQUIT)
-            end_wait = datetime.now() + timeout
+            end_wait = datetime.now() + timedelta(seconds=5)
             if not self.start(wait_live=False):
                 self._process = running
                 return False
             while datetime.now() < end_wait:
                 try:
                     log.debug(f'waiting for nghttpx({running.pid}) to exit.')
-                    running.wait(2)
+                    running.wait(1)
                     log.debug(f'nghttpx({running.pid}) terminated -> {running.returncode}')
+                    running = None
                     break
                 except subprocess.TimeoutExpired:
                     log.warning(f'nghttpx({running.pid}), not shut down yet.')
@@ -142,7 +143,7 @@ class Nghttpx:
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()
                 running.wait(1)
-            return self.wait_live(timeout=timedelta(seconds=Env.SERVER_TIMEOUT))
+            return self.wait_live(timeout=timeout)
         return False
 
     def wait_dead(self, timeout: timedelta):
