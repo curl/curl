@@ -291,7 +291,7 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
-    CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
+    CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %u, sent=%zu",
                 blen, gsolen, result, sent);
     if(result) {
       if(result == CURLE_AGAIN) {
@@ -414,7 +414,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
         struct ip_quadruple ip;
         Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-        failf(data, "QUIC: connection to %s port %u refused",
+        failf(data, "QUIC: connection to %s port %d refused",
               ip.remote_ip, ip.remote_port);
         result = CURLE_COULDNT_CONNECT;
         goto out;
@@ -456,7 +456,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %u",
                 pkts, total_nread, result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
@@ -506,7 +506,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
         struct ip_quadruple ip;
         Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-        failf(data, "QUIC: connection to %s port %u refused",
+        failf(data, "QUIC: connection to %s port %d refused",
               ip.remote_ip, ip.remote_port);
         result = CURLE_COULDNT_CONNECT;
         goto out;
@@ -545,7 +545,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %u",
                 pkts, total_nread, result);
   return result;
 }
@@ -581,7 +581,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
       if(!cf->connected && SOCKERRNO == SOCKECONNREFUSED) {
         struct ip_quadruple ip;
         Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-        failf(data, "QUIC: connection to %s port %u refused",
+        failf(data, "QUIC: connection to %s port %d refused",
               ip.remote_ip, ip.remote_port);
         result = CURLE_COULDNT_CONNECT;
         goto out;
@@ -603,7 +603,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %u",
                 pkts, total_nread, result);
   return result;
 }

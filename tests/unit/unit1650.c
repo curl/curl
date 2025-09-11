@@ -155,7 +155,7 @@ static CURLcode test_unit1650(const char *arg)
     DOHcode rc = doh_req_encode(req[i].name, req[i].type,
                                 buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
-      curl_mfprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
+      curl_mfprintf(stderr, "req %zu: Expected return code %u got %u\n", i,
                     req[i].rc, rc);
       abort_if(rc != req[i].rc, "return code");
     }
@@ -184,7 +184,7 @@ static CURLcode test_unit1650(const char *arg)
     rc = doh_resp_decode((const unsigned char *)resp[i].packet, resp[i].size,
                          resp[i].type, &d);
     if(rc != resp[i].rc) {
-      curl_mfprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
+      curl_mfprintf(stderr, "resp %zu: Expected return code %u got %u\n", i,
                     resp[i].rc, rc);
       abort_if(rc != resp[i].rc, "return code");
     }
@@ -240,7 +240,7 @@ static CURLcode test_unit1650(const char *arg)
                          &d);
     if(!rc) {
       /* none of them should work */
-      curl_mfprintf(stderr, "%zu: %d\n", i, rc);
+      curl_mfprintf(stderr, "%zu: %u\n", i, rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -254,7 +254,7 @@ static CURLcode test_unit1650(const char *arg)
                          CURL_DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      curl_mfprintf(stderr, "2 %zu: %d\n", i, rc);
+      curl_mfprintf(stderr, "2 %zu: %u\n", i, rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -272,7 +272,7 @@ static CURLcode test_unit1650(const char *arg)
     curl_msnprintf((char *)buffer, sizeof(buffer),
                    "%u.%u.%u.%u", p[0], p[1], p[2], p[3]);
     if(rc || strcmp((char *)buffer, "127.0.0.1")) {
-      curl_mfprintf(stderr, "bad address decoded: %s, rc == %d\n", buffer, rc);
+      curl_mfprintf(stderr, "bad address decoded: %s, rc == %u\n", buffer, rc);
       abort_if(rc || strcmp((char *)buffer, "127.0.0.1"), "bad address");
     }
     fail_if(d.numcname, "bad cname counter");

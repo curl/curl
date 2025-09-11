@@ -182,6 +182,12 @@ if(PICKY_COMPILER)
           -Wxor-used-as-pow                # clang 10.0  gcc 13.0
         )
       endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.3))
+        list(APPEND _picky_enable
+          -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 16.3
+        )
+      endif()
     else()  # gcc
       # Enable based on compiler version
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3)
@@ -215,6 +221,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
         list(APPEND _picky_enable
           -Warray-bounds=2                 # clang  3.0  gcc  5.0 (clang default: -Warray-bounds)
+          -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 16.3
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
