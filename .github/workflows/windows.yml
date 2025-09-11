@@ -720,6 +720,14 @@ jobs:
           - { build: 'cmake'    , compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'clang-tidy' }
     steps:
+      - name: 'test'
+        run: |
+          echo '------------'
+          which clang || true
+          echo '------------'
+          which clang-tidy || true
+          echo '------------'
+
       - name: 'install packages'
         env:
           INSTALL_PACKAGES: ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
