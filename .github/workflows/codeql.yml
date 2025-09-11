@@ -116,7 +116,6 @@ jobs:
         timeout-minutes: 10
         run: |
           cmake -B . -G Ninja
-          cmake --build . --verbose --target libtests
           cmake --build . --verbose --target servers
           cmake --build . --verbose --target tunits
 
