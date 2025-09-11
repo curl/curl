@@ -121,9 +121,11 @@ jobs:
       - name: 'build'
         timeout-minutes: 10
         run: |
-          cmake -B . -G Ninja
+          cmake -B . -G Ninja -DENABLE_DEBUG=ON
+          cmake --build . --verbose
           cmake --build . --verbose --target servers
           cmake --build . --verbose --target tunits
+          src/curl -V
 
       - name: 'perform analysis'
         uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
