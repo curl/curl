@@ -29,8 +29,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
 # DESCRIPTION
 
 Pass a pointer to a double to receive the content-length of the download. This
-is the value read from the Content-Length: field. Since 7.19.4, this returns
--1 if the size is not known.
+is the value read from the Content-Length: field. This returns -1 if the size
+is not known.
 
 CURLINFO_CONTENT_LENGTH_DOWNLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.

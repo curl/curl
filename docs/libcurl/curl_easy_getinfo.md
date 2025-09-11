@@ -45,7 +45,7 @@ The session's active socket. See CURLINFO_ACTIVESOCKET(3)
 ## CURLINFO_APPCONNECT_TIME
 
 The time it took from the start until the SSL connect/handshake with the
-remote host was completed as a double in number of seconds. (Added in 7.19.0)
+remote host was completed as a double in number of seconds.
 
 ## CURLINFO_APPCONNECT_TIME_T
 
@@ -222,7 +222,7 @@ User's private data pointer. See CURLINFO_PRIVATE(3)
 
 ## CURLINFO_PROTOCOL
 
-(**Deprecated**) The protocol used for the connection. (Added in 7.52.0) See
+(**Deprecated**) The protocol used for the connection. See
 CURLINFO_PROTOCOL(3)
 
 ## CURLINFO_PROXYAUTH_AVAIL
@@ -303,7 +303,7 @@ RTSP session ID. See CURLINFO_RTSP_SESSION_ID(3)
 
 ## CURLINFO_SCHEME
 
-The scheme used for the connection. (Added in 7.52.0) See CURLINFO_SCHEME(3)
+The scheme used for the connection. See CURLINFO_SCHEME(3)
 
 ## CURLINFO_SIZE_DOWNLOAD
 

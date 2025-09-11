@@ -31,14 +31,11 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
 
 # DESCRIPTION
 
-**This option has been superseded** by CURLINFO_TLS_SSL_PTR(3) which
-was added in 7.48.0. The only reason you would use this option instead is if
-you could be using a version of libcurl earlier than 7.48.0.
+**This option has been superseded** by CURLINFO_TLS_SSL_PTR(3).
 
-This option is exactly the same as CURLINFO_TLS_SSL_PTR(3) except in the
-case of OpenSSL and wolfSSL. If the session *backend* is
-CURLSSLBACKEND_OPENSSL the session *internals* pointer varies depending
-on the option:
+This option is exactly the same as CURLINFO_TLS_SSL_PTR(3) except in the case
+of OpenSSL and wolfSSL. If the session *backend* is CURLSSLBACKEND_OPENSSL the
+session *internals* pointer varies depending on the option:
 
 ## OpenSSL:
 

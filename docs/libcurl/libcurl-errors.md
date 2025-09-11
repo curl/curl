@@ -349,7 +349,7 @@ Initiating the SSL Engine failed.
 
 ## CURLE_LOGIN_DENIED (67)
 
-The remote server denied curl to login (Added in 7.13.1)
+The remote server denied curl to login
 
 ## CURLE_TFTP_NOTFOUND (68)
 
@@ -403,22 +403,20 @@ Failed to shut down the SSL connection.
 
 Socket is not ready for send/recv. Wait until it is ready and try again. This
 return code is only returned from curl_easy_recv(3) and curl_easy_send(3)
-(Added in 7.18.2)
 
 ## CURLE_SSL_CRL_BADFILE (82)
 
-Failed to load CRL file (Added in 7.19.0)
+Failed to load CRL file
 
 ## CURLE_SSL_ISSUER_ERROR (83)
 
-Issuer check failed (Added in 7.19.0)
+Issuer check failed
 
 ## CURLE_FTP_PRET_FAILED (84)
 
 The FTP server does not understand the PRET command at all or does not support
 the given argument. Be careful when using CURLOPT_CUSTOMREQUEST(3), a
-custom LIST command is sent with the PRET command before PASV as well. (Added
-in 7.20.0)
+custom LIST command is sent with the PRET command before PASV as well.
 
 ## CURLE_RTSP_CSEQ_ERROR (85)
 
@@ -439,7 +437,7 @@ Chunk callback reported error.
 ## CURLE_NO_CONNECTION_AVAILABLE (89)
 
 (For internal use only, is never returned by libcurl) No connection available,
-the session is queued. (added in 7.30.0)
+the session is queued.
 
 ## CURLE_SSL_PINNEDPUBKEYNOTMATCH (90)
 
@@ -509,7 +507,6 @@ used.
 
 An alias for *CURLM_CALL_MULTI_PERFORM*. Never returned by modern libcurl
 versions.
-(Added in 7.15.5)
 
 ## CURLM_OK (0)
 
@@ -536,17 +533,15 @@ This can only be returned if libcurl bugs. Please report it to us.
 ## CURLM_BAD_SOCKET (5)
 
 The passed-in socket is not a valid one that libcurl already knows about.
-(Added in 7.15.4)
 
 ## CURLM_UNKNOWN_OPTION (6)
 
 curl_multi_setopt() with unsupported option
-(Added in 7.15.4)
 
 ## CURLM_ADDED_ALREADY (7)
 
 An easy handle already added to a multi handle was attempted to get added a
-second time. (Added in 7.32.1)
+second time.
 
 ## CURLM_RECURSIVE_API_CALL (8)
 
@@ -592,12 +587,11 @@ An invalid share object was passed to the function.
 ## CURLSHE_NOMEM (4)
 
 Not enough memory was available.
-(Added in 7.12.0)
 
 ## CURLSHE_NOT_BUILT_IN (5)
 
 The requested sharing could not be done because the library you use do not have
-that particular feature enabled. (Added in 7.23.0)
+that particular feature enabled.
 
 # CURLUcode
 

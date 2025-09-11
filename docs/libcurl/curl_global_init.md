@@ -108,7 +108,7 @@ This bit has no point since 7.69.0 but its behavior is instead the default.
 
 Before 7.69.0: when this flag is set, curl acknowledges EINTR condition when
 connecting or when waiting for data. Otherwise, curl waits until full timeout
-elapses. (Added in 7.30.0)
+elapses.
 
 # %PROTOCOLS%
 
