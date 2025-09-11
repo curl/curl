@@ -476,6 +476,7 @@ jobs:
 
           - name: 'quiche'
             install_steps: skipall
+            PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/quiche/target/release
               --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
@@ -484,7 +485,7 @@ jobs:
               --enable-unity
 
           - name: 'quiche'
-            PKG_CONFIG_PATH: /home/runner/quiche/target/release
+            PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig:/home/runner/quiche/target/release
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src
               -DUSE_QUICHE=ON
@@ -495,7 +496,7 @@ jobs:
         env:
           INSTALL_PACKAGES: >-
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4 ' || '' }}
-            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server libev-dev' || '' }}
 
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -503,7 +504,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
-            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libuv1-dev \
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev \
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
           python3 -m venv ~/venv
