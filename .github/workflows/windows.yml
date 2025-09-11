@@ -720,20 +720,10 @@ jobs:
           - { build: 'cmake'    , compiler: 'gcc' }
           - { build: 'cmake'    , compiler: 'clang-tidy' }
     steps:
-      - name: 'test'
-        run: |
-          echo '------------'
-          which clang || true
-          echo '------------'
-          which clang-tidy || true
-          echo '------------'
-
       - name: 'install packages'
-        env:
-          INSTALL_PACKAGES: ${{ matrix.compiler == 'clang-tidy' && 'clang' || '' }}
         run: |
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32 ${INSTALL_PACKAGES}
+          sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
@@ -783,9 +773,9 @@ jobs:
       - name: 'build'
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
-            make -C bld
+            make -C bld --verbose
           fi
 
       - name: 'curl info'
