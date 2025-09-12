@@ -129,6 +129,16 @@ if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
   endif()
 endif()
 
+if(CURL_CODE_COVERAGE)
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_DEFINITIONS ${CURL_COVERAGE_MACROS})
+  set_property(TARGET ${EXE_NAME} APPEND PROPERTY COMPILE_OPTIONS ${CURL_COVERAGE_CFLAGS})
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
+    target_link_options(${EXE_NAME} PRIVATE ${CURL_COVERAGE_LDFLAGS})
+  else()
+    target_link_libraries(${EXE_NAME} PRIVATE ${CURL_COVERAGE_LDFLAGS})
+  endif()
+endif()
+
 ################################################################################
 
 install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
