@@ -1149,6 +1149,12 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   capath_warning="   (warning: certs not found)"
   check_capath=""
 
+  if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
+    ca_native="Apple OS SecTrust"
+  else
+    ca_native="no"
+  fi
+
   if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
           "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl both given

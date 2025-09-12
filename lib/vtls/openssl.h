@@ -71,7 +71,6 @@ struct ossl_ctx {
   /* these ones requires specific SSL-types */
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
-  X509*    server_cert;
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */

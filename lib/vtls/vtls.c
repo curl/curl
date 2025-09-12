@@ -80,6 +80,10 @@
 #include "../strdup.h"
 #include "../rand.h"
 
+#ifdef USE_APPLE_SECTRUST
+#include <Security/Security.h>
+#endif /* USE_APPLE_SECTRUST */
+
 /* The last #include files should be: */
 #include "../curl_memory.h"
 #include "../memdebug.h"

@@ -3903,7 +3903,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
 
   SSL_set_connect_state(octx->ssl);
 
-  octx->server_cert = NULL;
   if(peer->sni) {
     if(!SSL_set_tlsext_host_name(octx->ssl, peer->sni)) {
       failf(data, "Failed set SNI");
@@ -4823,7 +4822,156 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 #define infof_certstack(data, ssl)
 #endif
 
+static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  X509 *server_cert)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  X509 *issuer = NULL;
+  BIO *fp = NULL;
+  char err_buf[256]="";
+  bool strict = (conn_config->verifypeer || conn_config->verifyhost);
+  CURLcode result = CURLE_OK;
+
+  /* e.g. match issuer name with provided issuer certificate */
+  if(conn_config->issuercert_blob) {
+    fp = BIO_new_mem_buf(conn_config->issuercert_blob->data,
+                         (int)conn_config->issuercert_blob->len);
+    if(!fp) {
+      failf(data, "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
+            ossl_strerror(ERR_get_error(), err_buf, sizeof(err_buf)));
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+  else if(conn_config->issuercert) {
+    fp = BIO_new(BIO_s_file());
+    if(!fp) {
+      failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
+            ossl_strerror(ERR_get_error(), err_buf, sizeof(err_buf)));
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+
+    if(BIO_read_filename(fp, conn_config->issuercert) <= 0) {
+      if(strict)
+        failf(data, "SSL: Unable to open issuer cert (%s)",
+              conn_config->issuercert);
+      result = CURLE_SSL_ISSUER_ERROR;
+      goto out;
+    }
+  }
+
+  if(fp) {
+    issuer = PEM_read_bio_X509(fp, NULL, ZERO_NULL, NULL);
+    if(!issuer) {
+      if(strict)
+        failf(data, "SSL: Unable to read issuer cert (%s)",
+              conn_config->issuercert);
+      result = CURLE_SSL_ISSUER_ERROR;
+      goto out;
+    }
+
+    if(X509_check_issued(issuer, server_cert) != X509_V_OK) {
+      if(strict)
+        failf(data, "SSL: Certificate issuer check failed (%s)",
+              conn_config->issuercert);
+      result = CURLE_SSL_ISSUER_ERROR;
+      goto out;
+    }
+
+    infof(data, " SSL certificate issuer check ok (%s)",
+          conn_config->issuercert);
+  }
+
+out:
+  if(fp)
+    BIO_free(fp);
+  if(issuer)
+    X509_free(issuer);
+  return result;
+}
+
+static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      X509 *server_cert)
+{
+  const char *ptr;
+  CURLcode result = CURLE_OK;
+
+#ifndef CURL_DISABLE_PROXY
+  ptr = Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
+  if(ptr) {
+    result = ossl_pkp_pin_peer_pubkey(data, server_cert, ptr);
+    if(result)
+      failf(data, "SSL: public key does not match pinned public key");
+  }
+  return result;
+}
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 #define MAX_CERT_NAME_LENGTH 2048
+static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                X509 *server_cert)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  bool strict = (conn_config->verifypeer || conn_config->verifyhost);
+  BIO *mem = NULL;
+  struct dynbuf dname;
+  char err_buf[256] = "";
+  char *buf;
+  long len;
+  CURLcode result = CURLE_OK;
+
+  if(!Curl_trc_is_verbose(data))
+    return CURLE_OK;
+
+  curlx_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
+  mem = BIO_new(BIO_s_mem());
+  if(!mem) {
+    failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
+          ossl_strerror(ERR_get_error(), err_buf, sizeof(err_buf)));
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
+  infof(data, "%s certificate:", Curl_ssl_cf_is_proxy(cf) ?
+        "Proxy" : "Server");
+
+  result = x509_name_oneline(X509_get_subject_name(server_cert), &dname);
+  infof(data, " subject: %s", result ? "[NONE]" : curlx_dyn_ptr(&dname));
+
+  ASN1_TIME_print(mem, X509_get0_notBefore(server_cert));
+  len = BIO_get_mem_data(mem, (char **) &buf);
+  infof(data, " start date: %.*s", (int)len, buf);
+  (void)BIO_reset(mem);
+
+  ASN1_TIME_print(mem, X509_get0_notAfter(server_cert));
+  len = BIO_get_mem_data(mem, (char **) &buf);
+  infof(data, " expire date: %.*s", (int)len, buf);
+  (void)BIO_reset(mem);
+
+  result = x509_name_oneline(X509_get_issuer_name(server_cert), &dname);
+  if(result) {
+    if(strict)
+      failf(data, "SSL: could not get X509-issuer name");
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto out;
+  }
+  infof(data, " issuer: %s", curlx_dyn_ptr(&dname));
+
+out:
+  BIO_free(mem);
+  curlx_dyn_free(&dname);
+  return result;
+}
+#endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
 
 CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
@@ -4835,209 +4983,78 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   CURLcode result = CURLE_OK;
   long lerr;
-  X509 *issuer;
-  BIO *fp = NULL;
-  char error_buffer[256]="";
-  const char *ptr;
-  BIO *mem = BIO_new(BIO_s_mem());
   bool strict = (conn_config->verifypeer || conn_config->verifyhost);
-  struct dynbuf dname;
+  X509 *server_cert;
 
   DEBUGASSERT(octx);
-
-  curlx_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
-
-  if(!mem) {
-    failf(data,
-          "BIO_new return NULL, " OSSL_PACKAGE " error %s",
-          ossl_strerror(ERR_get_error(), error_buffer,
-                        sizeof(error_buffer)) );
-    return CURLE_OUT_OF_MEMORY;
-  }
 
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
     (void)ossl_certchain(data, octx->ssl);
 
-  octx->server_cert = SSL_get1_peer_certificate(octx->ssl);
-  if(!octx->server_cert) {
-    BIO_free(mem);
+  server_cert = SSL_get0_peer_certificate(octx->ssl);
+  if(!server_cert) {
     if(!strict)
-      return CURLE_OK;
+      goto out;
 
     failf(data, "SSL: could not get peer certificate");
-    return CURLE_PEER_FAILED_VERIFICATION;
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto out;
   }
-
-  infof(data, "%s certificate:",
-        Curl_ssl_cf_is_proxy(cf) ? "Proxy" : "Server");
-
-  result = x509_name_oneline(X509_get_subject_name(octx->server_cert),
-                             &dname);
-  infof(data, " subject: %s", result ? "[NONE]" : curlx_dyn_ptr(&dname));
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  {
-    char *buf;
-    long len;
-    ASN1_TIME_print(mem, X509_get0_notBefore(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &buf);
-    infof(data, " start date: %.*s", (int)len, buf);
-    (void)BIO_reset(mem);
-
-    ASN1_TIME_print(mem, X509_get0_notAfter(octx->server_cert));
-    len = BIO_get_mem_data(mem, (char **) &buf);
-    infof(data, " expire date: %.*s", (int)len, buf);
-    (void)BIO_reset(mem);
-  }
+  result = ossl_infof_cert(cf, data, server_cert);
+  if(result)
+    goto out;
 #endif
 
-  BIO_free(mem);
-
   if(conn_config->verifyhost) {
-    result = ossl_verifyhost(data, conn, peer, octx->server_cert);
-    if(result) {
-      X509_free(octx->server_cert);
-      octx->server_cert = NULL;
-      curlx_dyn_free(&dname);
-      return result;
-    }
+    result = ossl_verifyhost(data, conn, peer, server_cert);
+    if(result)
+      goto out;
   }
 
-  result = x509_name_oneline(X509_get_issuer_name(octx->server_cert),
-                             &dname);
-  if(result) {
-    if(strict)
-      failf(data, "SSL: could not get X509-issuer name");
-    result = CURLE_PEER_FAILED_VERIFICATION;
-  }
-  else {
-    infof(data, " issuer: %s", curlx_dyn_ptr(&dname));
-    curlx_dyn_free(&dname);
+  /* We could do all sorts of certificate verification stuff here before
+     deallocating the certificate. */
+  result = ossl_check_issuer(cf, data, server_cert);
+  if(result)
+    goto out;
 
-    /* We could do all sorts of certificate verification stuff here before
-       deallocating the certificate. */
-
-    /* e.g. match issuer name with provided issuer certificate */
-    if(conn_config->issuercert || conn_config->issuercert_blob) {
-      if(conn_config->issuercert_blob) {
-        fp = BIO_new_mem_buf(conn_config->issuercert_blob->data,
-                             (int)conn_config->issuercert_blob->len);
-        if(!fp) {
-          failf(data,
-                "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)) );
-          X509_free(octx->server_cert);
-          octx->server_cert = NULL;
-          return CURLE_OUT_OF_MEMORY;
-        }
-      }
-      else {
-        fp = BIO_new(BIO_s_file());
-        if(!fp) {
-          failf(data,
-                "BIO_new return NULL, " OSSL_PACKAGE " error %s",
-                ossl_strerror(ERR_get_error(), error_buffer,
-                              sizeof(error_buffer)) );
-          X509_free(octx->server_cert);
-          octx->server_cert = NULL;
-          return CURLE_OUT_OF_MEMORY;
-        }
-
-        if(BIO_read_filename(fp, conn_config->issuercert) <= 0) {
-          if(strict)
-            failf(data, "SSL: Unable to open issuer cert (%s)",
-                  conn_config->issuercert);
-          BIO_free(fp);
-          X509_free(octx->server_cert);
-          octx->server_cert = NULL;
-          return CURLE_SSL_ISSUER_ERROR;
-        }
-      }
-
-      issuer = PEM_read_bio_X509(fp, NULL, ZERO_NULL, NULL);
-      if(!issuer) {
-        if(strict)
-          failf(data, "SSL: Unable to read issuer cert (%s)",
-                conn_config->issuercert);
-        BIO_free(fp);
-        X509_free(issuer);
-        X509_free(octx->server_cert);
-        octx->server_cert = NULL;
-        return CURLE_SSL_ISSUER_ERROR;
-      }
-
-      if(X509_check_issued(issuer, octx->server_cert) != X509_V_OK) {
-        if(strict)
-          failf(data, "SSL: Certificate issuer check failed (%s)",
-                conn_config->issuercert);
-        BIO_free(fp);
-        X509_free(issuer);
-        X509_free(octx->server_cert);
-        octx->server_cert = NULL;
-        return CURLE_SSL_ISSUER_ERROR;
-      }
-
-      infof(data, " SSL certificate issuer check ok (%s)",
-            conn_config->issuercert);
-      BIO_free(fp);
-      X509_free(issuer);
-    }
-
-    lerr = SSL_get_verify_result(octx->ssl);
-    ssl_config->certverifyresult = lerr;
-    if(lerr != X509_V_OK) {
-      if(conn_config->verifypeer) {
-        /* We probably never reach this, because SSL_connect() will fail
-           and we return earlier if verifypeer is set? */
-        if(strict)
-          failf(data, "SSL certificate verify result: %s (%ld)",
-                X509_verify_cert_error_string(lerr), lerr);
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-      else
-        infof(data, " SSL certificate verify result: %s (%ld),"
-              " continuing anyway.",
+  lerr = SSL_get_verify_result(octx->ssl);
+  ssl_config->certverifyresult = lerr;
+  if(lerr != X509_V_OK) {
+    if(conn_config->verifypeer) {
+      /* We probably never reach this, because SSL_connect() will fail
+         and we return earlier if verifypeer is set? */
+      if(strict)
+        failf(data, "SSL certificate verify result: %s (%ld)",
               X509_verify_cert_error_string(lerr), lerr);
+      result = CURLE_PEER_FAILED_VERIFICATION;
+      goto out;
     }
     else
-      infof(data, " SSL certificate verify ok.");
+      infof(data, " SSL certificate verify result: %s (%ld),"
+            " continuing anyway.",
+            X509_verify_cert_error_string(lerr), lerr);
   }
+  else {
+    infof(data, " SSL certificate verify ok.");
+  }
+
   infof_certstack(data, octx->ssl);
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus && !octx->reused_session) {
     /* do not do this after Session ID reuse */
     result = verifystatus(cf, data, octx);
-    if(result) {
-      X509_free(octx->server_cert);
-      octx->server_cert = NULL;
-      return result;
-    }
-  }
-#endif
-
-  if(!strict)
-    /* when not strict, we do not bother about the verify cert problems */
-    result = CURLE_OK;
-
-#ifndef CURL_DISABLE_PROXY
-  ptr = Curl_ssl_cf_is_proxy(cf) ?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-#else
-  ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-#endif
-  if(!result && ptr) {
-    result = ossl_pkp_pin_peer_pubkey(data, octx->server_cert, ptr);
     if(result)
-      failf(data, "SSL: public key does not match pinned public key");
+      goto out;
   }
+#endif
 
-  X509_free(octx->server_cert);
-  octx->server_cert = NULL;
+  result = ossl_check_pinned_key(cf, data, server_cert);
 
+out:
   return result;
 }
 
