@@ -615,6 +615,111 @@ static const char *outtime(const char *ptr, /* %time{ ... */
   return ptr;
 }
 
+static void separator(const char *sep, size_t seplen, FILE *stream)
+{
+  while(seplen) {
+    if(*sep == '\\') {
+      switch(sep[1]) {
+      case 'r':
+        fputc('\r', stream);
+        break;
+      case 'n':
+        fputc('\n', stream);
+        break;
+      case 't':
+        fputc('\t', stream);
+        break;
+      case '}':
+        fputc('}', stream);
+        break;
+      case '\0':
+        break;
+      default:
+        /* unknown, just output this */
+        fputc(sep[0], stream);
+        fputc(sep[1], stream);
+        break;
+      }
+      sep += 2;
+      seplen -= 2;
+    }
+    else {
+      fputc(*sep, stream);
+      sep++;
+      seplen--;
+    }
+  }
+}
+
+static void output_header(struct per_transfer *per,
+                          FILE *stream,
+                          const char **pptr)
+{
+  const char *ptr = *pptr;
+  const char *end;
+  end = strchr(ptr, '}');
+  do {
+    if(!end || (end[-1] != '\\'))
+      break;
+    end = strchr(&end[1], '}');
+  } while(end);
+  if(end) {
+    char hname[256]; /* holds the longest header field name */
+    struct curl_header *header;
+    const char *instr;
+    const char *sep = NULL;
+    size_t seplen = 0;
+    size_t vlen = end - ptr;
+    instr = memchr(ptr, ':', vlen);
+    if(instr) {
+      /* instructions follow */
+      if(!strncmp(&instr[1], "all:", 4)) {
+        sep = &instr[5];
+        seplen = end - sep;
+        vlen -= (seplen + 5);
+      }
+    }
+    if(vlen < sizeof(hname)) {
+      memcpy(hname, ptr, vlen);
+      hname[vlen] = 0;
+      if(sep) {
+        /* get headers from all requests */
+        int reqno = 0;
+        size_t indno = 0;
+        bool output = FALSE;
+        do {
+          if(CURLHE_OK == curl_easy_header(per->curl, hname, indno,
+                                           CURLH_HEADER, reqno,
+                                           &header)) {
+            if(output)
+              /* output separator */
+              separator(sep, seplen, stream);
+            fputs(header->value, stream);
+            output = TRUE;
+          }
+          else
+            break;
+          if((header->index + 1) < header->amount)
+            indno++;
+          else {
+            ++reqno;
+            indno = 0;
+          }
+        } while(1);
+      }
+      else {
+        if(CURLHE_OK == curl_easy_header(per->curl, hname, 0,
+                                         CURLH_HEADER, -1, &header))
+          fputs(header->value, stream);
+      }
+    }
+    ptr = end + 1;
+  }
+  else
+    fputs("%header{", stream);
+  *pptr = ptr;
+}
+
 void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result)
 {
@@ -699,22 +804,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
         }
         else if(!strncmp("header{", &ptr[1], 7)) {
           ptr += 8;
-          end = strchr(ptr, '}');
-          if(end) {
-            char hname[256]; /* holds the longest header field name */
-            struct curl_header *header;
-            vlen = end - ptr;
-            if(vlen < sizeof(hname)) {
-              memcpy(hname, ptr, vlen);
-              hname[vlen] = 0;
-              if(CURLHE_OK == curl_easy_header(per->curl, hname, 0,
-                                               CURLH_HEADER, -1, &header))
-                fputs(header->value, stream);
-            }
-            ptr = end + 1;
-          }
-          else
-            fputs("%header{", stream);
+          output_header(per, stream, &ptr);
         }
         else if(!strncmp("time{", &ptr[1], 5)) {
           ptr = outtime(ptr, stream);
