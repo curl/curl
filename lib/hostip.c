@@ -709,7 +709,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
   else {
     int ipv6_works = -1;
     /* probe to see if we have a working IPv6 stack */
-    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
+    curl_socket_t s = CURL_SOCKET(PF_INET6, SOCK_DGRAM, 0);
     if(s == CURL_SOCKET_BAD)
       /* an IPv6 address was requested but we cannot get/use one */
       ipv6_works = 0;

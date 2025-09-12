@@ -96,7 +96,7 @@ static CURLcode test_lib1960(const char *URL)
    * over this socket as "already connected" to libcurl and make sure that
    * this works.
    */
-  client_fd = socket(AF_INET, SOCK_STREAM, 0);
+  client_fd = CURL_SOCKET(AF_INET, SOCK_STREAM, 0);
   if(client_fd == CURL_SOCKET_BAD) {
     curl_mfprintf(stderr, "socket creation error\n");
     goto test_cleanup;

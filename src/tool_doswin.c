@@ -785,7 +785,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if(n == 0)
       break;
-    nwritten = send(socket_w, buffer, n, 0);
+    nwritten = CURL_SEND(socket_w, buffer, n, 0);
     if(nwritten == SOCKET_ERROR)
       break;
     if((DWORD)nwritten != n)
@@ -889,7 +889,7 @@ curl_socket_t win32_stdin_read_thread(void)
     }
 
     /* Connect to the thread and rearrange our own STDIN handles */
-    socket_r = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(socket_r == CURL_SOCKET_BAD) {
       errorf("socket error: %08lx", GetLastError());
       break;
