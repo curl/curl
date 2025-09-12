@@ -181,7 +181,8 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
 }
 
 static CURLcode mqtt_send(struct Curl_easy *data,
-                          const char *buf, size_t len)
+                          const char *buf, size_t len,
+                          const char *buflog)
 {
   size_t n;
   CURLcode result;
@@ -194,7 +195,7 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   if(result)
     return result;
   mq->lastTime = curlx_now();
-  Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);
+  Curl_debug(data, CURLINFO_HEADER_OUT, buflog ? buflog : buf, (size_t)n);
   if(len != n) {
     size_t nsend = len - n;
     if(curlx_dyn_len(&mq->sendbuf)) {
@@ -328,6 +329,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   char client_id[MQTT_CLIENTID_LEN + 1] = "curl";
   const size_t clen = strlen("curl");
   char *packet = NULL;
+  char *packetlog = NULL;
 
   /* extracting username from request */
   const char *username = data->state.aptr.user ?
@@ -389,6 +391,14 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
   /* if passwd was provided, add it to the packet */
   if(plen) {
+    /* make a copy of the packet that omits the password, for logging */
+    if(data->set.verbose) {
+      packetlog = Curl_memdup0(packet, packetlen);
+      if(!packetlog) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto end;
+      }
+    }
     rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
       failf(data, "Password too long: [%zu]", plen);
@@ -398,11 +408,13 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   }
 
   if(!result)
-    result = mqtt_send(data, packet, packetlen);
+    result = mqtt_send(data, packet, packetlen, packetlog);
 
 end:
   if(packet)
     free(packet);
+  if(packetlog)
+    free(packetlog);
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
   return result;
@@ -410,7 +422,7 @@ end:
 
 static CURLcode mqtt_disconnect(struct Curl_easy *data)
 {
-  return mqtt_send(data, "\xe0\x00", 2);
+  return mqtt_send(data, "\xe0\x00", 2, NULL);
 }
 
 static CURLcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
@@ -541,7 +553,7 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   memcpy(&packet[5 + n], topic, topiclen);
   packet[5 + n + topiclen] = 0; /* QoS zero */
 
-  result = mqtt_send(data, (const char *)packet, packetlen);
+  result = mqtt_send(data, (const char *)packet, packetlen, NULL);
 
 fail:
   free(topic);
@@ -631,7 +643,7 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   i += topiclen;
   memcpy(&pkt[i], payload, payloadlen);
   i += payloadlen;
-  result = mqtt_send(data, (const char *)pkt, i);
+  result = mqtt_send(data, (const char *)pkt, i, NULL);
 
 fail:
   free(pkt);
@@ -850,7 +862,7 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
       unsigned char packet[2] = { 0xC0, 0x00 };
       size_t packetlen = sizeof(packet);
 
-      result = mqtt_send(data, (char *)packet, packetlen);
+      result = mqtt_send(data, (char *)packet, packetlen, NULL);
       if(!result) {
         mq->pingsent = TRUE;
       }
@@ -876,7 +888,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
   if(curlx_dyn_len(&mq->sendbuf)) {
     /* send the remainder of an outgoing packet */
     result = mqtt_send(data, curlx_dyn_ptr(&mq->sendbuf),
-                       curlx_dyn_len(&mq->sendbuf));
+                       curlx_dyn_len(&mq->sendbuf), NULL);
     if(result)
       return result;
   }
