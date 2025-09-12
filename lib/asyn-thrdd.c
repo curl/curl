@@ -228,6 +228,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 #endif
 
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
+  Curl_thread_disable_cancel();
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   do_abort = addr_ctx->do_abort;
@@ -237,6 +238,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
     char service[12];
     int rc;
 
+    Curl_thread_enable_cancel();
 #ifdef DEBUGBUILD
     Curl_resolve_test_delay();
 #endif
@@ -244,7 +246,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
 
     rc = Curl_getaddrinfo_ex(addr_ctx->hostname, service,
                              &addr_ctx->hints, &addr_ctx->res);
-
+    Curl_thread_disable_cancel();
     if(rc) {
       addr_ctx->sock_error = SOCKERRNO ? SOCKERRNO : rc;
       if(addr_ctx->sock_error == 0)
@@ -301,17 +303,21 @@ static CURL_THREAD_RETURN_T CURL_STDCALL gethostbyname_thread(void *arg)
 #endif
 
   Curl_thread_push_cleanup(async_thrd_cleanup, addr_ctx);
+  Curl_thread_disable_cancel();
 
   Curl_mutex_acquire(&addr_ctx->mutx);
   do_abort = addr_ctx->do_abort;
   Curl_mutex_release(&addr_ctx->mutx);
 
   if(!do_abort) {
+
+    Curl_thread_enable_cancel();
 #ifdef DEBUGBUILD
     Curl_resolve_test_delay();
 #endif
 
     addr_ctx->res = Curl_ipv4_resolve_r(addr_ctx->hostname, addr_ctx->port);
+    Curl_thread_disable_cancel();
     if(!addr_ctx->res) {
       addr_ctx->sock_error = SOCKERRNO;
       if(addr_ctx->sock_error == 0)
