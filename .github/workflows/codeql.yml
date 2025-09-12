@@ -41,7 +41,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  gha-python:
+  codeql:
     name: 'GHA and Python'
     runs-on: ubuntu-latest
     permissions:
