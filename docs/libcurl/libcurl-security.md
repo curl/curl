@@ -98,6 +98,24 @@ Use authenticated protocols protected with HTTPS or SSH.
 
 Never ever switch off certificate verification.
 
+# Certificates and Long-running Connections
+
+Certificate validation of encrypted connections is performed immediately after
+a connection is established. That connection could be used for many subsequent
+transfers, even if the certificate used for validation expires or is revoked,
+the local certificate bundle is changed in a way that would have caused that
+certificate to fail validation, the server changes its certificate to one
+that would have failed validation, or even if a completely different server is
+brought up under the same hostname. This could continue for many hours (or
+even years) after such a change occurs, which may not be desired behavior for
+some applications.
+
+Remedies:
+
+Use the CURLOPT_MAXLIFETIME_CONN(3) option to limit the amount of time that
+connections are used after they have been successfully validated. Further
+transfers require a new connection with validation performed again.
+
 # Redirects
 
 The CURLOPT_FOLLOWLOCATION(3) option automatically follows HTTP
