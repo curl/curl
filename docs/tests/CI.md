@@ -31,7 +31,7 @@ Consider the following table while looking at pull request failures:
 
  | CI platform as shown in PR          | State  | What to look at next       |
  | ----------------------------------- | ------ | -------------------------- |
- | CI / codeql                         | stable | quality check results      |
+ | CI / CodeQL                         | stable | quality check results      |
  | CI / fuzzing                        | stable | fuzzing results            |
  | CI / macos ...                      | stable | all errors and failures    |
  | Code scanning results / CodeQL      | stable | quality check results      |
