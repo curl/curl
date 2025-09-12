@@ -54,6 +54,10 @@ struct OperationConfig *config_alloc(void)
   config->upload_flags = CURLULFLAG_SEEN;
   config->retry_delay_ms = RETRY_SLEEP_DEFAULT;
   curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
+#ifdef CURL_CA_NATIVE_BY_DEFAULT
+  config->native_ca_store = TRUE;
+  config->proxy_native_ca_store = TRUE;
+#endif
   return config;
 }
 
