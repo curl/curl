@@ -47,8 +47,8 @@ endif()
 
 if(APPLE AND
    (CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.6) OR
-   (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.3))
-  list(APPEND _picky "-Werror=partial-availability")  # clang 3.6  appleclang 6.3
+   (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.1))
+  list(APPEND _picky "-Werror=partial-availability")  # clang 3.6  appleclang 6.1
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID MATCHES "Clang")
@@ -87,6 +87,9 @@ if(PICKY_COMPILER)
     set(_picky_detect
     )
 
+    # Notes: -Wno-* options should ideally be disabled at their precise cutoff versions,
+    #        to suppress undesired warnings in case -Weverything is passed as a custom option.
+
     # Assume these options always exist with both clang and gcc.
     # Require clang 3.0 / gcc 2.95 or later.
     list(APPEND _picky_enable
@@ -121,13 +124,14 @@ if(PICKY_COMPILER)
       -Wmissing-field-initializers         # clang  2.7  gcc  4.1
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
+      -Wno-padded                          # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
       -Wno-sign-conversion                 # clang  2.9  gcc  4.3
+      -Wno-switch-default                  # clang  2.7  gcc  4.1               # Not used: Annoying to fix or silence
+      -Wno-switch-enum                     # clang  2.7  gcc  4.1               # Not used: It basically disallows default case
       -Wno-system-headers                  # clang  1.0  gcc  3.0
-    # -Wpadded                             # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
       -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wredundant-decls                    # clang  2.7  gcc  4.1
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
-    # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used: It basically disallows default case
       -Wtype-limits                        # clang  2.7  gcc  4.3
       -Wunreachable-code                   # clang  2.7  gcc  4.1
     # -Wunused-macros                      # clang  2.7  gcc  4.1               # Not practical
@@ -139,6 +143,8 @@ if(PICKY_COMPILER)
     if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       list(APPEND _picky_enable
         ${_picky_common_old}
+        -Wconditional-uninitialized        # clang  3.0
+        -Wno-used-but-marked-unused        # clang  3.0                         # Triggered by typecheck-gcc.h (with clang 14+)
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  3.0  gcc  4.8
@@ -149,38 +155,101 @@ if(PICKY_COMPILER)
         )
       endif()
       # Enable based on compiler version
-      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.6) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.3))
+      if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.1)
         list(APPEND _picky_enable
-          -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.3
-          -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
+          -Wno-covered-switch-default      # clang  3.1            appleclang  3.1  # Annoying to fix or silence
+          -Wno-disabled-macro-expansion    # clang  3.1            appleclang  3.1  # Triggered by typecheck-gcc.h (with clang 14+)
+        )
+        if(MSVC)
+          list(APPEND _picky_enable
+            -Wno-format-non-iso            # clang  3.1            appleclang  3.1  # 'q' length modifier is not supported by ISO C
+          )
+        else()
+          list(APPEND _picky_enable
+            -Wformat-non-iso               # clang  3.1            appleclang  3.1
+          )
+        endif()
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.3) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0))
+        list(APPEND _picky_enable
+          -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.2  g++ 11.0
+          -Wmissing-variable-declarations  # clang  3.2            appleclang  4.2
+          -Wno-documentation-unknown-command # clang  3.3            appleclang  5.0
+          -Wsometimes-uninitialized        # clang  3.2            appleclang  4.2
+        )
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.6) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.1))
+        list(APPEND _picky_enable
+          -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.1
           -Wheader-guard                   # clang  3.4            appleclang  5.1
           -Wpragmas                        # clang  3.5  gcc  4.1  appleclang  6.0
-          -Wsometimes-uninitialized        # clang  3.2            appleclang  4.6
         # -Wunreachable-code-break         # clang  3.5            appleclang  6.0  # Not used: Silent in "unity" builds
           -Wunused-const-variable          # clang  3.4  gcc  6.0  appleclang  5.1
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.9) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.3))
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.1))
         list(APPEND _picky_enable
-          -Wcomma                          # clang  3.9            appleclang  8.3
-          -Wmissing-variable-declarations  # clang  3.2            appleclang  4.6
+          -Wcomma                          # clang  3.9            appleclang  8.1
         )
+        if(MSVC)
+          list(APPEND _picky_enable
+            -Wno-nonportable-system-include-path  # clang 3.9            appleclang  8.1  # No truly portable solution to this
+          )
+        endif()
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.3))
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 11))
         list(APPEND _picky_enable
-          -Wassign-enum                    # clang  7.0            appleclang 10.3
-          -Wextra-semi-stmt                # clang  7.0            appleclang 10.3
+          -Wassign-enum                    # clang  7.0            appleclang 11.0
+          -Wextra-semi-stmt                # clang  7.0            appleclang 11.0
         )
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0) OR
-         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12.4))
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12))
         list(APPEND _picky_enable
-          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # We do silencing for clang 10.0 and above only
-          -Wxor-used-as-pow                # clang 10.0  gcc 13.0
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang  9.0  # We do silencing for clang 10.0 and above only
+          -Wxor-used-as-pow                # clang 10.0  gcc 13.0  appleclang 12.0
         )
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.1))
+        list(APPEND _picky_enable
+          -Wcast-function-type             # clang 13.0            appleclang 13.1
+          -Wreserved-identifier            # clang 13.0            appleclang 13.1  # Keep it before -Wno-reserved-macro-identifier
+            -Wno-reserved-macro-identifier # clang 13.0            appleclang 13.1  # External macros have to be set sometimes
+        )
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0))
+        list(APPEND _picky_enable
+          -Wno-unsafe-buffer-usage         # clang 16.0            appleclang 15.0
+        )
+      endif()
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0))
+        list(APPEND _picky_enable
+          -Wcast-function-type-strict      # clang 16.0            appleclang 16.0
+        )
+      endif()
+      if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
+        list(APPEND _picky_enable
+          -Warray-compare                  # clang 20.0  gcc 12.0  appleclang ?
+          -Wc++-hidden-decl                # clang 21.0            appleclang ?
+          -Wno-implicit-void-ptr-cast      # clang 21.0            appleclang ?
+          -Wtentative-definition-compat    # clang 21.0            appleclang ?
+        )
+        if(WIN32)
+          list(APPEND _picky_enable
+            -Wno-c++-keyword               # clang 21.0            appleclang ?  # `wchar_t` triggers it on Windows
+          )
+        else()
+          list(APPEND _picky_enable
+            -Wc++-keyword                  # clang 21.0            appleclang ?
+          )
+        endif()
       endif()
     else()  # gcc
       # Enable based on compiler version
@@ -207,7 +276,7 @@ if(PICKY_COMPILER)
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
         list(APPEND _picky_enable
-          -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.3
+          -Wdouble-promotion               # clang  3.6  gcc  4.6  appleclang  6.1
           -Wformat=2                       # clang  3.0  gcc  4.8
           -Wtrampolines                    #             gcc  4.6
         )
@@ -232,21 +301,21 @@ if(PICKY_COMPILER)
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
           -Wformat-truncation=2            #             gcc  7.0
-          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang  9.0
           -Wrestrict                       #             gcc  7.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 10.0)
         list(APPEND _picky_enable
           -Warith-conversion               #             gcc 10.0
-          -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.6  g++ 11.0
+          -Wenum-conversion                # clang  3.2  gcc 10.0  appleclang  4.2  g++ 11.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
         list(APPEND _picky_enable
-          -Warray-compare                  # clang 20.0  gcc 12.0
+          -Warray-compare                  # clang 20.0  gcc 12.0  appleclang ?
           -Wenum-int-mismatch              #             gcc 13.0
-          -Wxor-used-as-pow                # clang 10.0  gcc 13.0
+          -Wxor-used-as-pow                # clang 10.0  gcc 13.0  appleclang 12.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 15.0)
@@ -262,8 +331,11 @@ if(PICKY_COMPILER)
 
     set(_picky_skipped "")
     foreach(_ccopt IN LISTS _picky_enable)
-      string(REGEX MATCH "-W([a-z0-9-]+)" _ccmatch "${_ccopt}")
-      if(_ccmatch AND CMAKE_C_FLAGS MATCHES "-Wno-${CMAKE_MATCH_1}" AND NOT _ccopt STREQUAL "-Wall" AND NOT _ccopt MATCHES "^-Wno-")
+      string(REGEX MATCH "-W([a-z0-9+-]+)" _ccmatch "${_ccopt}")
+      string(REPLACE "+" "\\+" _cmake_match_1 "${CMAKE_MATCH_1}")  # escape '+' to make it a valid regex
+      if(_ccmatch AND "${CMAKE_C_FLAGS} " MATCHES "-Wno-${_cmake_match_1} " AND
+         NOT _ccopt STREQUAL "-Wall" AND
+         NOT _ccopt MATCHES "^-Wno-")
         string(APPEND _picky_skipped " ${_ccopt}")
       else()
         list(APPEND _picky "${_ccopt}")

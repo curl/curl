@@ -38,8 +38,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define MAX_ALPN_LENGTH 255
-
 static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
                                     unsigned char *alpns)
 {

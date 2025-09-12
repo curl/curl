@@ -1095,9 +1095,6 @@ static CURLcode ssl_version(struct Curl_easy *data,
 }
 
 
-#define QUIC_CIPHERS                                                          \
-  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
-  "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
 #define QUIC_GROUPS "P-256:P-384:P-521"
 
 CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,

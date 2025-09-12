@@ -134,8 +134,15 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   static bool onetime = TRUE; /* safe because first call is during init */
 
   if(onetime) {
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
     pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
       (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
     onetime = FALSE;
   }
 
