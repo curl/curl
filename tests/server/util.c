@@ -350,7 +350,7 @@ static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-static unsigned int thread_main_id = 0;
+static DWORD thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
@@ -487,8 +487,7 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 }
 /* Window message queue loop for hidden main window, details see above.
  */
-#include <process.h>
-static unsigned int WINAPI main_window_loop(void *lpParameter)
+static DWORD WINAPI main_window_loop(void *lpParameter)
 {
   WNDCLASS wc;
   BOOL ret;
@@ -509,7 +508,7 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
                                       CW_USEDEFAULT, CW_USEDEFAULT,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
                                       (HWND)NULL, (HMENU)NULL,
-                                      wc.hInstance, (LPVOID)NULL);
+                                      wc.hInstance, NULL);
   if(!hidden_main_window) {
     win32_perror("CreateWindowEx failed");
     return (DWORD)-1;
@@ -623,15 +622,10 @@ void install_signal_handlers(bool keep_sigalrm)
 #endif
 
 #if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
-  {
-    typedef uintptr_t curl_win_thread_handle_t;
-    curl_win_thread_handle_t thread;
-    thread = _beginthreadex(NULL, 0, &main_window_loop,
-                            (void *)GetModuleHandle(NULL), 0, &thread_main_id);
-    thread_main_window = (HANDLE)thread;
-    if(!thread_main_window || !thread_main_id)
-      logmsg("cannot start main window loop");
-  }
+  thread_main_window = CreateThread(NULL, 0, &main_window_loop,
+                                    GetModuleHandle(NULL), 0, &thread_main_id);
+  if(!thread_main_window || !thread_main_id)
+    logmsg("cannot start main window loop");
 #endif
 #endif
 }
