@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.sender.login == 'appveyor[bot]' }}
     permissions:
-      statuses: write
+      statuses: write  # To update build statuses
     steps:
       - name: 'Create individual AppVeyor build statuses'
         if: ${{ github.event.sha && github.event.target_url }}
