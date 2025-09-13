@@ -194,9 +194,10 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
             libbrotli-dev libzstd-dev zlib1g-dev \
+            libidn2-0-dev \
             libev-dev \
             libc-ares-dev \
-            nettle-dev libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
+            nettle-dev libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
@@ -308,6 +309,7 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/quictls/build/lib/pkgconfig --enable-lib-only --with-openssl
           make install
           make clean
+          # required (for GnuTLS): libidn2-0-dev
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
