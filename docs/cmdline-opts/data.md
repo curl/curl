@@ -7,7 +7,7 @@ Arg: <data>
 Help: HTTP POST data
 Protocols: HTTP MQTT
 Mutexed: form head upload-file
-Category: important http post upload
+Category: important http post upload common
 Added: 4.0
 Multi: append
 See-also:
