@@ -66,22 +66,6 @@ void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
 
-int Curl_thread_cancel(curl_thread_t *hnd);
-
-#if defined(USE_THREADS_POSIX) && defined(PTHREAD_CANCEL_ENABLE)
-#define Curl_thread_push_cleanup(a,b)   pthread_cleanup_push(a,b)
-#define Curl_thread_pop_cleanup()       pthread_cleanup_pop(0)
-#define Curl_thread_enable_cancel()     \
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL)
-#define Curl_thread_disable_cancel()     \
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL)
-#else
-#define Curl_thread_push_cleanup(a,b)   ((void)a,(void)b)
-#define Curl_thread_pop_cleanup()       Curl_nop_stmt
-#define Curl_thread_enable_cancel()     Curl_nop_stmt
-#define Curl_thread_disable_cancel()    Curl_nop_stmt
-#endif
-
 #endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
 
 #endif /* HEADER_CURL_THREADS_H */
