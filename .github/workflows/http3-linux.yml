@@ -48,7 +48,7 @@ env:
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.1.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  AWSLC_VERSION: 1.60.0
+  AWSLC_VERSION: 1.61.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20250818.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
