@@ -54,8 +54,6 @@
 
 #undef fopen
 #define fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
-#undef fdopen
-#define fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
 #undef fclose
 #define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 

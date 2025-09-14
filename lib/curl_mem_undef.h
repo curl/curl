@@ -39,7 +39,6 @@
 #ifdef CURL_FOPEN
 #define fopen(fname, mode) CURL_FOPEN(fname, mode)
 #endif
-#undef fdopen
 #undef fclose
 
 #endif /* CURLDEBUG */
