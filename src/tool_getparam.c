@@ -2163,11 +2163,123 @@ static ParameterError opt_bool(struct OperationConfig *config,
   return PARAM_OK;
 }
 
+/* opt_file handles file options */
+static ParameterError opt_file(struct OperationConfig *config,
+                               const struct LongShort *a,
+                               const char *nextarg)
+{
+  ParameterError err = PARAM_OK;
+  if((nextarg[0] == '-') && nextarg[1]) {
+    /* if the filename looks like a command line option */
+    warnf("The filename argument '%s' looks like a flag.", nextarg);
+  }
+  switch(a->cmd) {
+  case C_ABSTRACT_UNIX_SOCKET: /* --abstract-unix-socket */
+    config->abstract_unix_socket = TRUE;
+    err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+    break;
+  case C_CACERT: /* --cacert */
+    err = getstr(&config->cacert, nextarg, DENY_BLANK);
+    break;
+  case C_CAPATH: /* --capath */
+    err = getstr(&config->capath, nextarg, DENY_BLANK);
+    break;
+  case C_CERT: /* --cert */
+    GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
+    break;
+  case C_CONFIG: /* --config */
+    if(parseconfig(nextarg)) {
+      errorf("cannot read config from '%s'", nextarg);
+      err = PARAM_READ_ERROR;
+    }
+    break;
+  case C_CRLFILE: /* --crlfile */
+    err = getstr(&config->crlfile, nextarg, DENY_BLANK);
+    break;
+  case C_DUMP_HEADER: /* --dump-header */
+    err = getstr(&config->headerfile, nextarg, DENY_BLANK);
+    break;
+  case C_ETAG_SAVE: /* --etag-save */
+    if(config->num_urls > 1) {
+      errorf("The etag options only work on a single URL");
+      err = PARAM_BAD_USE;
+    }
+    else
+      err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
+    break;
+  case C_ETAG_COMPARE: /* --etag-compare */
+    if(config->num_urls > 1) {
+      errorf("The etag options only work on a single URL");
+      err = PARAM_BAD_USE;
+    }
+    else
+      err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
+    break;
+  case C_KEY: /* --key */
+    err = getstr(&config->key, nextarg, DENY_BLANK);
+    break;
+  case C_NETRC_FILE: /* --netrc-file */
+    err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
+    break;
+  case C_OUTPUT: /* --output */
+    err = parse_output(config, nextarg);
+    break;
+  case C_PROXY_CACERT: /* --proxy-cacert */
+    err = getstr(&config->proxy_cacert, nextarg, DENY_BLANK);
+    break;
+  case C_PROXY_CAPATH: /* --proxy-capath */
+    err = getstr(&config->proxy_capath, nextarg, DENY_BLANK);
+    break;
+  case C_PROXY_CERT: /* --proxy-cert */
+    GetFileAndPassword(nextarg, &config->proxy_cert,
+                       &config->proxy_key_passwd);
+    break;
+  case C_PROXY_CRLFILE: /* --proxy-crlfile */
+    err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
+    break;
+  case C_PROXY_KEY: /* --proxy-key */
+    err = getstr(&config->proxy_key, nextarg, ALLOW_BLANK);
+    break;
+  case C_SSL_SESSIONS: /* --ssl-sessions */
+    if(feature_ssls_export)
+      err = getstr(&global->ssl_sessions, nextarg, DENY_BLANK);
+    else
+      err = PARAM_LIBCURL_DOESNT_SUPPORT;
+    break;
+  case C_STDERR: /* --stderr */
+    tool_set_stderr_file(nextarg);
+    break;
+  case C_TRACE: /* --trace */
+    err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
+    if(!err) {
+      if(global->tracetype && (global->tracetype != TRACE_BIN))
+        warnf("--trace overrides an earlier trace/verbose option");
+      global->tracetype = TRACE_BIN;
+    }
+    break;
+  case C_TRACE_ASCII: /* --trace-ascii */
+    err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
+    if(!err) {
+      if(global->tracetype && (global->tracetype != TRACE_ASCII))
+        warnf("--trace-ascii overrides an earlier trace/verbose option");
+      global->tracetype = TRACE_ASCII;
+    }
+    break;
+  case C_UNIX_SOCKET: /* --unix-socket */
+    config->abstract_unix_socket = FALSE;
+    err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+    break;
+  case C_UPLOAD_FILE: /* --upload-file */
+    err = parse_upload_file(config, nextarg);
+    break;
+  }
+  return err;
+}
 
-/* opt_filestring handles string and file options */
-static ParameterError opt_filestring(struct OperationConfig *config,
-                                     const struct LongShort *a,
-                                     const char *nextarg)
+/* opt_string handles string options */
+static ParameterError opt_string(struct OperationConfig *config,
+                                 const struct LongShort *a,
+                                 const char *nextarg)
 {
   ParameterError err = PARAM_OK;
   curl_off_t value;
@@ -2227,22 +2339,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
       /* IP addrs of DNS servers */
       err = getstr(&config->dns_servers, nextarg, DENY_BLANK);
     break;
-  case C_TRACE: /* --trace */
-    err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
-    if(!err) {
-      if(global->tracetype && (global->tracetype != TRACE_BIN))
-        warnf("--trace overrides an earlier trace/verbose option");
-      global->tracetype = TRACE_BIN;
-    }
-    break;
-  case C_TRACE_ASCII: /* --trace-ascii */
-    err = getstr(&global->trace_dump, nextarg, DENY_BLANK);
-    if(!err) {
-      if(global->tracetype && (global->tracetype != TRACE_ASCII))
-        warnf("--trace-ascii overrides an earlier trace/verbose option");
-      global->tracetype = TRACE_ASCII;
-    }
-    break;
   case C_LIMIT_RATE: /* --limit-rate */
     err = GetSizeParameter(nextarg, "rate", &value);
     if(!err) {
@@ -2271,9 +2367,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_AWS_SIGV4: /* --aws-sigv4 */
     config->authtype |= CURLAUTH_AWS_SIGV4;
     err = getstr(&config->aws_sigv4, nextarg, ALLOW_BLANK);
-    break;
-  case C_STDERR: /* --stderr */
-    tool_set_stderr_file(nextarg);
     break;
   case C_INTERFACE: /* --interface */
     /* interface */
@@ -2406,10 +2499,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_SASL_AUTHZID: /* --sasl-authzid */
     err = getstr(&config->sasl_authzid, nextarg, DENY_BLANK);
     break;
-  case C_UNIX_SOCKET: /* --unix-socket */
-    config->abstract_unix_socket = FALSE;
-    err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
-    break;
   case C_PROXY_SERVICE_NAME: /* --proxy-service-name */
     err = getstr(&config->proxy_service_name, nextarg, DENY_BLANK);
     break;
@@ -2426,10 +2515,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
     break;
   case C_CONNECT_TO: /* --connect-to */
     err = add2list(&config->connect_to, nextarg);
-    break;
-  case C_ABSTRACT_UNIX_SOCKET: /* --abstract-unix-socket */
-    config->abstract_unix_socket = TRUE;
-    err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
     break;
   case C_TLS_MAX: /* --tls-max */
     err = str2tls_max(&config->ssl_version_max, nextarg);
@@ -2499,9 +2584,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_URL_QUERY:  /* --url-query */
     err = url_query(nextarg, config);
     break;
-  case C_DUMP_HEADER: /* --dump-header */
-    err = getstr(&config->headerfile, nextarg, DENY_BLANK);
-    break;
   case C_REFERER: { /* --referer */
     size_t len = strlen(nextarg);
     /* does it end with ;auto ? */
@@ -2520,17 +2602,8 @@ static ParameterError opt_filestring(struct OperationConfig *config,
       tool_safefree(config->referer);
   }
     break;
-  case C_CERT: /* --cert */
-    GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
-    break;
-  case C_CACERT: /* --cacert */
-    err = getstr(&config->cacert, nextarg, DENY_BLANK);
-    break;
   case C_CERT_TYPE: /* --cert-type */
     err = getstr(&config->cert_type, nextarg, DENY_BLANK);
-    break;
-  case C_KEY: /* --key */
-    err = getstr(&config->key, nextarg, DENY_BLANK);
     break;
   case C_KEY_TYPE: /* --key-type */
     err = getstr(&config->key_type, nextarg, DENY_BLANK);
@@ -2548,9 +2621,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_ECH: /* --ech */
     err = parse_ech(config, nextarg);
     break;
-  case C_CAPATH: /* --capath */
-    err = getstr(&config->capath, nextarg, DENY_BLANK);
-    break;
   case C_PUBKEY: /* --pubkey */
     err = getstr(&config->pubkey, nextarg, DENY_BLANK);
     break;
@@ -2566,9 +2636,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
       err = PARAM_LIBCURL_DOESNT_SUPPORT;
     else
       err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
-    break;
-  case C_CRLFILE: /* --crlfile */
-    err = getstr(&config->crlfile, nextarg, DENY_BLANK);
     break;
   case C_TLSUSER: /* --tlsuser */
     if(!feature_tls_srp)
@@ -2597,12 +2664,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_PROXY_PINNEDPUBKEY: /* --proxy-pinnedpubkey */
     err = getstr(&config->proxy_pinnedpubkey, nextarg, DENY_BLANK);
     break;
-  case C_SSL_SESSIONS: /* --ssl-sessions */
-    if(feature_ssls_export)
-      err = getstr(&global->ssl_sessions, nextarg, DENY_BLANK);
-    else
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    break;
   case C_PROXY_TLSUSER: /* --proxy-tlsuser */
     if(!feature_tls_srp)
       err = PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -2625,15 +2686,8 @@ static ParameterError opt_filestring(struct OperationConfig *config,
         err = PARAM_LIBCURL_DOESNT_SUPPORT; /* only support TLS-SRP */
     }
     break;
-  case C_PROXY_CERT: /* --proxy-cert */
-    GetFileAndPassword(nextarg, &config->proxy_cert,
-                       &config->proxy_key_passwd);
-    break;
   case C_PROXY_CERT_TYPE: /* --proxy-cert-type */
     err = getstr(&config->proxy_cert_type, nextarg, DENY_BLANK);
-    break;
-  case C_PROXY_KEY: /* --proxy-key */
-    err = getstr(&config->proxy_key, nextarg, ALLOW_BLANK);
     break;
   case C_PROXY_KEY_TYPE: /* --proxy-key-type */
     err = getstr(&config->proxy_key_type, nextarg, DENY_BLANK);
@@ -2644,33 +2698,8 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_PROXY_CIPHERS: /* --proxy-ciphers */
     err = getstr(&config->proxy_cipher_list, nextarg, DENY_BLANK);
     break;
-  case C_PROXY_CRLFILE: /* --proxy-crlfile */
-    err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
-    break;
   case C_LOGIN_OPTIONS: /* --login-options */
     err = getstr(&config->login_options, nextarg, ALLOW_BLANK);
-    break;
-  case C_PROXY_CACERT: /* --proxy-cacert */
-    err = getstr(&config->proxy_cacert, nextarg, DENY_BLANK);
-    break;
-  case C_PROXY_CAPATH: /* --proxy-capath */
-    err = getstr(&config->proxy_capath, nextarg, DENY_BLANK);
-    break;
-  case C_ETAG_SAVE: /* --etag-save */
-    if(config->num_urls > 1) {
-      errorf("The etag options only work on a single URL");
-      err = PARAM_BAD_USE;
-    }
-    else
-      err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
-    break;
-  case C_ETAG_COMPARE: /* --etag-compare */
-    if(config->num_urls > 1) {
-      errorf("The etag options only work on a single URL");
-      err = PARAM_BAD_USE;
-    }
-    else
-      err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
     break;
   case C_CURVES: /* --curves */
     err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);
@@ -2695,24 +2724,12 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_PROXY_HEADER: /* --proxy-header */
     err = parse_header(config, (cmdline_t)a->cmd, nextarg);
     break;
-  case C_CONFIG: /* --config */
-    if(parseconfig(nextarg)) {
-      errorf("cannot read config from '%s'", nextarg);
-      err = PARAM_READ_ERROR;
-    }
-    break;
   case C_MAX_TIME: /* --max-time */
     /* specified max time */
     err = secs2ms(&config->timeout_ms, nextarg);
     break;
-  case C_NETRC_FILE: /* --netrc-file */
-    err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
-    break;
   case C_OUTPUT_DIR: /* --output-dir */
     err = getstr(&config->output_dir, nextarg, DENY_BLANK);
-    break;
-  case C_OUTPUT: /* --output */
-    err = parse_output(config, nextarg);
     break;
   case C_FTP_PORT: /* --ftp-port */
     /* This makes the FTP sessions use PORT instead of PASV */
@@ -2735,9 +2752,6 @@ static ParameterError opt_filestring(struct OperationConfig *config,
   case C_TELNET_OPTION: /* --telnet-option */
     /* Telnet options */
     err = add2list(&config->telnet_options, nextarg);
-    break;
-  case C_UPLOAD_FILE: /* --upload-file */
-    err = parse_upload_file(config, nextarg);
     break;
   case C_USER: /* --user */
     /* user:password  */
@@ -2947,18 +2961,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
 
-      if((ARGTYPE(a->desc) == ARG_FILE) &&
-         (nextarg[0] == '-') && nextarg[1]) {
-        /* if the filename looks like a command line option */
-        warnf("The filename argument '%s' looks like a flag.",
-              nextarg);
-      }
-      else if(has_leading_unicode((const unsigned char *)nextarg)) {
+      if(has_leading_unicode((const unsigned char *)nextarg)) {
         warnf("The argument '%s' starts with a Unicode character. "
               "Maybe ASCII was intended?", nextarg);
       }
-      /* ARG_FILE | ARG_STRG */
-      err = opt_filestring(config, a, nextarg);
+      if(ARGTYPE(a->desc) == ARG_FILE)
+        err = opt_file(config, a, nextarg);
+      else /* if(ARGTYPE(a->desc) == ARG_STRG) */
+        err = opt_string(config, a, nextarg);
       if(a->desc & ARG_CLEAR)
         cleanarg(CURL_UNCONST(nextarg));
     }
