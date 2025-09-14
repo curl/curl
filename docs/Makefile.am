@@ -42,7 +42,6 @@ CLEANFILES = $(MK_CA_DOCS) $(man_MANS) $(TEST_DOCS)
 endif
 
 TESTDOCS =                                      \
- tests/CI.md                                    \
  tests/FILEFORMAT.md                            \
  tests/HTTP.md                                  \
  tests/TEST-SUITE.md
