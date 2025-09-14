@@ -1,4 +1,5 @@
 allowfunc fdopen
+allowfunc fopen
 allowfunc gmtime
 allowfunc localtime
 allowfunc socket
