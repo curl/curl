@@ -96,7 +96,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
-            cmake -B . -DBUILD_SHARED_LIBS=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
+            cmake -B . -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
           else
             cmake -B . -G Ninja
           fi
