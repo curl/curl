@@ -35,6 +35,7 @@ from testenv.env import EnvConfig
 sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd
+from testenv.h2o import H2oServer, H2oProxy
 
 log = logging.getLogger(__name__)
 
@@ -54,6 +55,10 @@ def pytest_report_header(config):
     if env.have_h3():
         report.extend([
             f'  nghttpx: {env.nghttpx_version()}'
+        ])
+    if env.have_h2o():
+        report.extend([
+            f'  h2o: {env.h2o_version()}'
         ])
     if env.has_caddy():
         report.extend([
@@ -155,3 +160,26 @@ def server_reset(request, env, httpd, nghttpx):
             'configures_nghttpx' not in request.node._fixtureinfo.argnames:
         nghttpx.reset_config()
         nghttpx.reload_if_config_changed()
+
+@pytest.fixture(scope='session')
+def h2o_server(env) -> Generator[Union[H2oServer,bool], None, None]:
+    h2o = H2oServer(env=env)
+    if env.have_h2o():
+        h2o.clear_logs()
+        assert h2o.initial_start()
+        yield h2o
+        h2o.stop()
+    else:
+        yield False
+
+
+@pytest.fixture(scope='session')
+def h2o_proxy(env) -> Generator[Union[H2oProxy,bool], None, None]:
+    h2o = H2oProxy(env=env)
+    if env.have_h2o():
+        h2o.clear_logs()
+        assert h2o.initial_start()
+        yield h2o
+        h2o.stop()
+    else:
+        yield False

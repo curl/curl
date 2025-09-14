@@ -28,6 +28,12 @@ if(NOT CADDY)
 endif()
 mark_as_advanced(CADDY)
 
+find_program(H2O "h2o")  # /usr/local/bin/h2o
+if(NOT H2O)
+  set(H2O "")
+endif()
+mark_as_advanced(H2O)
+
 find_program(VSFTPD "vsftpd")  # /usr/sbin/vsftpd
 if(NOT VSFTPD)
   set(VSFTPD "")
@@ -58,5 +64,5 @@ if(NOT DANTED)
 endif()
 mark_as_advanced(DANTED)
 
-# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, DANTED, VSFTPD
+# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, H2O, DANTED, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)
