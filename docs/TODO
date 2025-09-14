@@ -33,7 +33,6 @@
  1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
  1.22 CURLINFO_PAUSE_STATE
- 1.23 Offer API to flush the connection pool
  1.25 Expose tried IP addresses that failed
  1.28 FD_CLOEXEC
  1.29 WebSocket read callback
@@ -341,12 +340,6 @@
 
  Return information about the transfer's current pause state, in both
  directions. https://github.com/curl/curl/issues/2588
-
-1.23 Offer API to flush the connection pool
-
- Sometimes applications want to flush all the existing connections kept alive.
- An API could allow a forced flush or just a forced loop that would properly
- close all connections that have been closed by the server already.
 
 1.25 Expose tried IP addresses that failed
 
