@@ -524,7 +524,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   if(!h->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = CURL_FOPEN(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_HSTS_LINE);
