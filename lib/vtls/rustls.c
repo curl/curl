@@ -32,6 +32,7 @@
 
 #include <rustls.h>
 
+#include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
 #include "../urldata.h"
 #include "../sendf.h"
@@ -397,7 +398,7 @@ static int
 read_file_into(const char *filename,
                struct dynbuf *out)
 {
-  FILE *f = fopen(filename, FOPEN_READTEXT);
+  FILE *f = curlx_fopen(filename, FOPEN_READTEXT);
   if(!f) {
     return 0;
   }
@@ -407,14 +408,14 @@ read_file_into(const char *filename,
     const size_t rr = fread(buf, 1, sizeof(buf), f);
     if(rr == 0 ||
        CURLE_OK != curlx_dyn_addn(out, buf, rr)) {
-      fclose(f);
+      curlx_fclose(f);
       return 0;
     }
     if(rr < sizeof(buf))
       break;
   }
 
-  return fclose(f) == 0;
+  return curlx_fclose(f) == 0;
 }
 
 static void

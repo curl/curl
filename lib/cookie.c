@@ -80,11 +80,11 @@ Example set of cookies:
 #include "slist.h"
 #include "share.h"
 #include "strcase.h"
+#include "curl_fopen.h"
 #include "curl_get_line.h"
 #include "curl_memrchr.h"
 #include "parsedate.h"
 #include "rename.h"
-#include "fopen.h"
 #include "strdup.h"
 #include "llist.h"
 #include "curlx/strparse.h"
@@ -1195,7 +1195,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       if(!strcmp(file, "-"))
         fp = stdin;
       else {
-        fp = fopen(file, "rb");
+        fp = curlx_fopen(file, "rb");
         if(!fp)
           infof(data, "WARNING: failed to open cookie file \"%s\"", file);
         else
@@ -1228,7 +1228,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       remove_expired(ci);
 
       if(handle)
-        fclose(handle);
+        curlx_fclose(handle);
     }
     data->state.cookie_engine = TRUE;
   }
@@ -1583,7 +1583,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
   }
 
   if(!use_stdout) {
-    fclose(out);
+    curlx_fclose(out);
     out = NULL;
     if(tempstore && Curl_rename(tempstore, filename)) {
       unlink(tempstore);
@@ -1602,7 +1602,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
 
 error:
   if(out && !use_stdout)
-    fclose(out);
+    curlx_fclose(out);
   free(tempstore);
   return error;
 }

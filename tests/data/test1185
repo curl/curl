@@ -47,7 +47,7 @@ func_return() ;
 
 a = sprintf(buffer, "%s", moo);
 
-FILE *f = fopen("filename", "r");
+FILE *f = curlx_fopen("filename", "r");
 
 void startfunc(int a, int b) {
   func();
@@ -124,7 +124,7 @@ void startfunc(int a, int b) {
  a = sprintf(buffer, "%s", moo);
      ^
 ./%LOGDIR/code1185.c:32:11: warning: use of non-binary fopen without FOPEN_* macro: r (FOPENMODE)
- FILE *f = fopen("filename", "r");
+ FILE *f = curlx_fopen("filename", "r");
            ^
 ./%LOGDIR/code1185.c:34:30: warning: wrongly placed open brace (BRACEPOS)
  void startfunc(int a, int b) {

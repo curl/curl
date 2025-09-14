@@ -47,6 +47,7 @@
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../select.h" /* for the socket readiness */
+#include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h" /* for IP addr SNI check */
 #include "../curlx/multibyte.h"
 #include "../curlx/warnless.h"
@@ -563,7 +564,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                  &cert_store_path, &cert_thumbprint_str);
 
       if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
-        fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
+        fInCert = curlx_fopen(data->set.ssl.primary.clientcert, "rb");
 
       if(result && !fInCert) {
         failf(data, "schannel: Failed to get certificate location"
@@ -611,7 +612,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         if((!certdata) ||
            ((int) fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
-        fclose(fInCert);
+        curlx_fclose(fInCert);
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
                 data->set.ssl.primary.clientcert);

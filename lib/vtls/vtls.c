@@ -68,6 +68,7 @@
 #include "../progress.h"
 #include "../share.h"
 #include "../multiif.h"
+#include "../curlx/fopen.h"
 #include "../curlx/timeval.h"
 #include "../curl_md5.h"
 #include "../curl_sha256.h"
@@ -803,7 +804,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     struct dynbuf buf;
     char unsigned *pem_ptr = NULL;
     size_t left;
-    FILE *fp = fopen(pinnedpubkey, "rb");
+    FILE *fp = curlx_fopen(pinnedpubkey, "rb");
     if(!fp)
       return result;
 
@@ -865,7 +866,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 end:
     curlx_dyn_free(&buf);
     Curl_safefree(pem_ptr);
-    fclose(fp);
+    curlx_fclose(fp);
   }
 
   return result;

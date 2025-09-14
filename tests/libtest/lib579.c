@@ -35,11 +35,11 @@ static size_t last_ul_total = 0;
 
 static void progress_final_report(void)
 {
-  FILE *moo = fopen(libtest_arg2, "ab");
+  FILE *moo = curlx_fopen(libtest_arg2, "ab");
   curl_mfprintf(moo ? moo : stderr, "Progress: end UL %zu/%zu\n",
                 last_ul, last_ul_total);
   if(moo)
-    fclose(moo);
+    curlx_fclose(moo);
   else
     curl_mfprintf(stderr, "Progress: end UL, can't open %s\n", libtest_arg2);
   started = FALSE;
@@ -59,11 +59,11 @@ static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
   last_ul = (size_t)ulnow;
   last_ul_total = (size_t)ultotal;
   if(!started) {
-    FILE *moo = fopen(libtest_arg2, "ab");
+    FILE *moo = curlx_fopen(libtest_arg2, "ab");
     curl_mfprintf(moo ? moo : stderr, "Progress: start UL %zu/%zu\n",
                   last_ul, last_ul_total);
     if(moo)
-      fclose(moo);
+      curlx_fclose(moo);
     else
       curl_mfprintf(stderr, "Progress: start UL, can't open %s\n",
                     libtest_arg2);

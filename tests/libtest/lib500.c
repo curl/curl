@@ -90,7 +90,7 @@ static CURLcode test_lib500(const char *URL)
   if(!res) {
     res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
     if(libtest_arg2) {
-      FILE *moo = fopen(libtest_arg2, "wb");
+      FILE *moo = curlx_fopen(libtest_arg2, "wb");
       if(moo) {
         curl_off_t time_namelookup;
         curl_off_t time_connect;
@@ -163,7 +163,7 @@ static CURLcode test_lib500(const char *URL)
                         (long)(time_total % 1000000));
         }
 
-        fclose(moo);
+        curlx_fclose(moo);
       }
     }
   }

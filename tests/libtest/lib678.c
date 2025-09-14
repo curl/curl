@@ -30,7 +30,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
   size_t datasize = 0;
   void *data = NULL;
   if(filename) {
-    FILE *fInCert = fopen(filename, "rb");
+    FILE *fInCert = curlx_fopen(filename, "rb");
 
     if(fInCert) {
       long cert_tell = 0;
@@ -48,7 +48,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       if((!data) ||
          ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
-      fclose(fInCert);
+      curlx_fclose(fInCert);
       if(!continue_reading) {
         free(data);
         datasize = 0;

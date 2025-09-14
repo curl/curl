@@ -38,7 +38,7 @@ static CURLcode test_lib569(const char *URL)
   int request = 1;
   int i;
 
-  FILE *idfile = fopen(libtest_arg2, "wb");
+  FILE *idfile = curlx_fopen(libtest_arg2, "wb");
   if(!idfile) {
     curl_mfprintf(stderr, "couldn't open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;
@@ -46,7 +46,7 @@ static CURLcode test_lib569(const char *URL)
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    fclose(idfile);
+    curlx_fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -54,7 +54,7 @@ static CURLcode test_lib569(const char *URL)
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    fclose(idfile);
+    curlx_fclose(idfile);
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -116,7 +116,7 @@ static CURLcode test_lib569(const char *URL)
 test_cleanup:
 
   if(idfile)
-    fclose(idfile);
+    curlx_fclose(idfile);
 
   curl_free(stream_uri);
   curl_easy_cleanup(curl);

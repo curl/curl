@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_FOPEN_H
+#define HEADER_CURL_FOPEN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,16 +24,9 @@
  *
  ***************************************************************************/
 
-/* Unset redefined system symbols. */
+#include "curlx/fopen.h"
 
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#ifdef _WIN32
-#undef Curl_tcsdup
+CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
+                    FILE **fh, char **tempname);
+
 #endif
-
-#undef HEADER_CURL_MEMORY_H
-#undef HEADER_CURL_MEMDEBUG_H

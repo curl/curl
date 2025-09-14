@@ -74,7 +74,7 @@ static int t537_fopen_works(void)
     fpa[i] = NULL;
   }
   for(i = 0; i < 3; i++) {
-    fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
+    fpa[i] = curlx_fopen(DEV_NULL, FOPEN_READTEXT);
     if(!fpa[i]) {
       t537_store_errmsg("fopen failed", errno);
       curl_mfprintf(stderr, "%s\n", t537_msgbuff);
@@ -84,7 +84,7 @@ static int t537_fopen_works(void)
   }
   for(i = 0; i < 3; i++) {
     if(fpa[i])
-      fclose(fpa[i]);
+      curlx_fclose(fpa[i]);
   }
   return ret;
 }

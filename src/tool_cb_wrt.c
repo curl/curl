@@ -55,7 +55,7 @@ bool tool_create_output_file(struct OutStruct *outs,
      (config->file_clobber_mode == CLOBBER_DEFAULT &&
       !outs->is_cd_filename)) {
     /* open file for writing */
-    file = fopen(fname, "wb");
+    file = curlx_fopen(fname, "wb");
   }
   else {
     int fd;
@@ -92,7 +92,7 @@ bool tool_create_output_file(struct OutStruct *outs,
        is not needed because we would have failed earlier, in the while loop
        and `fd` would now be -1 */
     if(fd != -1) {
-      file = fdopen(fd, "wb");
+      file = curlx_fdopen(fd, "wb");
       if(!file)
         close(fd);
     }

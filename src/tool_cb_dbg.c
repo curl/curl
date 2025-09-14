@@ -124,7 +124,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       /* Ok, this is somewhat hackish but we do it undocumented for now */
       global->trace_stream = tool_stderr;
     else {
-      global->trace_stream = fopen(global->trace_dump, FOPEN_WRITETEXT);
+      global->trace_stream = curlx_fopen(global->trace_dump, FOPEN_WRITETEXT);
       global->trace_fopened = TRUE;
     }
   }

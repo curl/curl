@@ -772,13 +772,13 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               break;
             case VAR_STDOUT:
               if(fclose_stream)
-                fclose(stream);
+                curlx_fclose(stream);
               fclose_stream = FALSE;
               stream = stdout;
               break;
             case VAR_STDERR:
               if(fclose_stream)
-                fclose(stream);
+                curlx_fclose(stream);
               fclose_stream = FALSE;
               stream = tool_stderr;
               break;
@@ -824,12 +824,12 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               FILE *stream2;
               memcpy(fname, ptr, flen);
               fname[flen] = 0;
-              stream2 = fopen(fname, append ? FOPEN_APPENDTEXT :
-                              FOPEN_WRITETEXT);
+              stream2 = curlx_fopen(fname, append ? FOPEN_APPENDTEXT :
+                                    FOPEN_WRITETEXT);
               if(stream2) {
                 /* only change if the open worked */
                 if(fclose_stream)
-                  fclose(stream);
+                  curlx_fclose(stream);
                 stream = stream2;
                 fclose_stream = TRUE;
               }
@@ -872,6 +872,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
     }
   }
   if(fclose_stream)
-    fclose(stream);
+    curlx_fclose(stream);
   curlx_dyn_free(&name);
 }

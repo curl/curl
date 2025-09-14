@@ -93,7 +93,7 @@ static CURLcode test_lib572(const char *URL)
   fstat(params, &file_info);
   close(params);
 
-  paramsf = fopen(libtest_arg2, "rb");
+  paramsf = curlx_fopen(libtest_arg2, "rb");
   if(!paramsf) {
     curl_mfprintf(stderr, "can't fopen %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
@@ -110,7 +110,7 @@ static CURLcode test_lib572(const char *URL)
     goto test_cleanup;
 
   test_setopt(curl, CURLOPT_UPLOAD, 0L);
-  fclose(paramsf);
+  curlx_fclose(paramsf);
   paramsf = NULL;
 
   /* Heartbeat GET_PARAMETERS */
@@ -163,7 +163,7 @@ static CURLcode test_lib572(const char *URL)
 test_cleanup:
 
   if(paramsf)
-    fclose(paramsf);
+    curlx_fclose(paramsf);
 
   curl_free(stream_uri);
 

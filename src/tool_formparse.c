@@ -563,14 +563,14 @@ static int get_param_part(char endchar,
             endpos--;
         sep = *p;
         *endpos = '\0';
-        fp = fopen(hdrfile, FOPEN_READTEXT);
+        fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
         if(!fp)
           warnf("Cannot read from %s: %s", hdrfile,
                 strerror(errno));
         else {
           int i = read_field_headers(hdrfile, fp, &headers);
 
-          fclose(fp);
+          curlx_fclose(fp);
           if(i) {
             curl_slist_free_all(headers);
             return -1;

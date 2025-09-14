@@ -64,6 +64,9 @@
 #include "dynbuf.h"
 /* The curlx_dyn_* functions */
 
+#include "fopen.h"
+/* The curlx_f* functions */
+
 #include "base64.h"
 #include "timeval.h"
 #include "timediff.h"

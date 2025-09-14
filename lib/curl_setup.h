@@ -509,11 +509,8 @@
 #  ifndef UNDER_CE
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      int curlx_win32_open(const char *filename, int oflag, ...);
-     FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #    define stat(fname, stp)           curlx_win32_stat(fname, stp)
 #    define open                       curlx_win32_open
-#    define CURL_FOPEN(fname, mode)    curlx_win32_fopen(fname, mode)
-#    define fopen(fname, mode)         CURL_FOPEN(fname, mode)
 #  endif
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */

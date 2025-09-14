@@ -33,7 +33,7 @@ static size_t data_size = CURL_ARRAYSIZE(t578_testdata);
 static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
                                   double ultotal, double ulnow)
 {
-  FILE *moo = fopen(libtest_arg2, "wb");
+  FILE *moo = curlx_fopen(libtest_arg2, "wb");
 
   (void)clientp;
   (void)dltotal;
@@ -45,7 +45,7 @@ static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
     else
       curl_mfprintf(moo, "Progress callback called with UL %f out of %f\n",
                     ulnow, ultotal);
-    fclose(moo);
+    curlx_fclose(moo);
   }
   return 0;
 }

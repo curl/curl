@@ -76,7 +76,7 @@ warnings are:
 
 - `EXCLAMATIONSPACE`: space found after exclamations mark
 
-- `FOPENMODE`: `fopen()` needs a macro for the mode string, use it
+- `FOPENMODE`: `curlx_fopen()` needs a macro for the mode string, use it
 
 - `INDENTATION`: detected a wrong start column for code. Note that this
    warning only checks some specific places and can certainly miss many bad

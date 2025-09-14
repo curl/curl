@@ -39,7 +39,7 @@ static CURLcode test_lib591(const char *URL)
 
   start_test_timing();
 
-  upload = fopen(libtest_arg3, "rb");
+  upload = curlx_fopen(libtest_arg3, "rb");
   if(!upload) {
     curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
                   errno, strerror(errno));
@@ -49,7 +49,7 @@ static CURLcode test_lib591(const char *URL)
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    fclose(upload);
+    curlx_fclose(upload);
     return res;
   }
 
@@ -138,7 +138,7 @@ test_cleanup:
   curl_global_cleanup();
 
   /* close the local file */
-  fclose(upload);
+  curlx_fclose(upload);
 
   return res;
 }

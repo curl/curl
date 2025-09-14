@@ -84,12 +84,12 @@ static CURLcode test_unit3200(const char *arg)
     char *line;
     curlx_dyn_init(&buf, len);
 
-    fp = fopen(arg, "wb");
+    fp = curlx_fopen(arg, "wb");
     abort_unless(fp != NULL, "Cannot open testfile");
     fwrite(filecontents[i], 1, strlen(filecontents[i]), fp);
-    fclose(fp);
+    curlx_fclose(fp);
 
-    fp = fopen(arg, "rb");
+    fp = curlx_fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
     curl_mfprintf(stderr, "Test %zd...", i);
@@ -158,7 +158,7 @@ static CURLcode test_unit3200(const char *arg)
         break;
     }
     curlx_dyn_free(&buf);
-    fclose(fp);
+    curlx_fclose(fp);
     curl_mfprintf(stderr, "OK\n");
   }
   return (CURLcode)rc;

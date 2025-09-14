@@ -42,7 +42,7 @@ static CURLcode test_lib525(const char *URL)
     return TEST_ERR_USAGE;
   }
 
-  hd_src = fopen(libtest_arg2, "rb");
+  hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
                   errno, strerror(errno));
@@ -61,13 +61,13 @@ static CURLcode test_lib525(const char *URL)
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_FSTAT;
   }
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return res;
   }
 
@@ -149,7 +149,7 @@ test_cleanup:
   }
 
   /* close the local file */
-  fclose(hd_src);
+  curlx_fclose(hd_src);
 
   return res;
 }

@@ -34,6 +34,7 @@ UTILS_C = memptr.c testutil.c testtrace.c
 UTILS_H = testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
+  ../../lib/curlx/fopen.c \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/timediff.c \

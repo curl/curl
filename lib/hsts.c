@@ -32,10 +32,10 @@
 #include "urldata.h"
 #include "llist.h"
 #include "hsts.h"
+#include "curl_fopen.h"
 #include "curl_get_line.h"
 #include "sendf.h"
 #include "parsedate.h"
-#include "fopen.h"
 #include "rename.h"
 #include "share.h"
 #include "strdup.h"
@@ -379,7 +379,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
       if(result)
         break;
     }
-    fclose(out);
+    curlx_fclose(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
@@ -524,7 +524,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   if(!h->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_HSTS_LINE);
@@ -542,7 +542,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
       hsts_add(h, lineptr);
     }
     curlx_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    curlx_fclose(fp);
   }
   return result;
 }

@@ -127,7 +127,7 @@ FILE *tool_execpath(const char *filename, char **pathp)
       if(strlen(filename) < remaining - 1) {
         curl_msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
         *pathp = filebuffer;
-        return fopen(filebuffer, FOPEN_READTEXT);
+        return curlx_fopen(filebuffer, FOPEN_READTEXT);
       }
     }
   }

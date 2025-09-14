@@ -39,6 +39,7 @@
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
+#include "curlx/fopen.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
@@ -76,7 +77,7 @@ enum found_state {
 static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
   NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
-  FILE *file = fopen(filename, FOPEN_READTEXT);
+  FILE *file = curlx_fopen(filename, FOPEN_READTEXT);
   struct dynbuf linebuf;
   curlx_dyn_init(&linebuf, MAX_NETRC_LINE);
 
@@ -99,7 +100,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 done:
   curlx_dyn_free(&linebuf);
   if(file)
-    fclose(file);
+    curlx_fclose(file);
   return ret;
 }
 

@@ -627,7 +627,7 @@ static ParameterError data_urlencode(const char *nextarg,
       CURLX_SET_BINMODE(stdin);
     }
     else {
-      file = fopen(p, "rb");
+      file = curlx_fopen(p, "rb");
       if(!file) {
         errorf("Failed to open %s", p);
         return PARAM_READ_ERROR;
@@ -637,7 +637,7 @@ static ParameterError data_urlencode(const char *nextarg,
     err = file2memory(&postdata, &size, file);
 
     if(file && (file != stdin))
-      fclose(file);
+      curlx_fclose(file);
     if(err)
       return err;
   }
@@ -899,7 +899,7 @@ static ParameterError set_data(cmdline_t cmd,
         CURLX_SET_BINMODE(stdin);
     }
     else {
-      file = fopen(nextarg, "rb");
+      file = curlx_fopen(nextarg, "rb");
       if(!file) {
         errorf("Failed to open %s", nextarg);
         return PARAM_READ_ERROR;
@@ -917,7 +917,7 @@ static ParameterError set_data(cmdline_t cmd,
     }
 
     if(file && (file != stdin))
-      fclose(file);
+      curlx_fclose(file);
     if(err)
       return err;
 
@@ -1094,7 +1094,7 @@ static ParameterError parse_url(struct OperationConfig *config,
     if(fromstdin)
       f = stdin;
     else
-      f = fopen(&nextarg[1], FOPEN_READTEXT);
+      f = curlx_fopen(&nextarg[1], FOPEN_READTEXT);
     if(f) {
       curlx_dyn_init(&line, 8092);
       while(my_get_line(f, &line, &error)) {
@@ -1104,7 +1104,7 @@ static ParameterError parse_url(struct OperationConfig *config,
           break;
       }
       if(!fromstdin)
-        fclose(f);
+        curlx_fclose(f);
       curlx_dyn_free(&line);
       if(error || err)
         return PARAM_READ_ERROR;
@@ -1206,7 +1206,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
         file = stdin;
       }
       else {
-        file = fopen(nextarg, FOPEN_READTEXT);
+        file = curlx_fopen(nextarg, FOPEN_READTEXT);
       }
       if(!file) {
         warnf("Couldn't read file \"%s\" "
@@ -1216,7 +1216,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
       }
       err = file2string(&tmpcfg, file);
       if(file != stdin)
-        fclose(file);
+        curlx_fclose(file);
       if(err)
         return err;
       config->ech_config = aprintf("ecl:%s",tmpcfg);
@@ -1242,7 +1242,7 @@ static ParameterError parse_header(struct OperationConfig *config,
   if(nextarg[0] == '@') {
     /* read many headers from a file or stdin */
     bool use_stdin = !strcmp(&nextarg[1], "-");
-    FILE *file = use_stdin ? stdin : fopen(&nextarg[1], FOPEN_READTEXT);
+    FILE *file = use_stdin ? stdin : curlx_fopen(&nextarg[1], FOPEN_READTEXT);
     if(!file) {
       errorf("Failed to open %s", &nextarg[1]);
       err = PARAM_READ_ERROR;
@@ -1263,7 +1263,7 @@ static ParameterError parse_header(struct OperationConfig *config,
         err = PARAM_READ_ERROR;
       curlx_dyn_free(&line);
       if(!use_stdin)
-        fclose(file);
+        curlx_fclose(file);
     }
   }
   else {
@@ -1536,7 +1536,7 @@ static ParameterError parse_writeout(struct OperationConfig *config,
     }
     else {
       fname = nextarg;
-      file = fopen(fname, FOPEN_READTEXT);
+      file = curlx_fopen(fname, FOPEN_READTEXT);
       if(!file) {
         errorf("Failed to open %s", fname);
         return PARAM_READ_ERROR;
@@ -1545,7 +1545,7 @@ static ParameterError parse_writeout(struct OperationConfig *config,
     tool_safefree(config->writeout);
     err = file2string(&config->writeout, file);
     if(file && (file != stdin))
-      fclose(file);
+      curlx_fclose(file);
     if(err)
       return err;
     if(!config->writeout)

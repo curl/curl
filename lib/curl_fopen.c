@@ -33,7 +33,7 @@
 
 #include "urldata.h"
 #include "rand.h"
-#include "fopen.h"
+#include "curl_fopen.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -102,7 +102,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   char *dir = NULL;
   *tempname = NULL;
 
-  *fh = fopen(filename, FOPEN_WRITETEXT);
+  *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
   if(
@@ -114,7 +114,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
      || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
   }
-  fclose(*fh);
+  curlx_fclose(*fh);
   *fh = NULL;
 
   result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
@@ -144,7 +144,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   if(fd == -1)
     goto fail;
 
-  *fh = fdopen(fd, FOPEN_WRITETEXT);
+  *fh = curlx_fdopen(fd, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
 

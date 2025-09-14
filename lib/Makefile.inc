@@ -26,6 +26,7 @@
 LIB_CURLX_CFILES = \
   curlx/base64.c   \
   curlx/dynbuf.c   \
+  curlx/fopen.c    \
   curlx/inet_ntop.c \
   curlx/inet_pton.c \
   curlx/multibyte.c \
@@ -43,6 +44,7 @@ LIB_CURLX_HFILES = \
   curlx/base64.h   \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
+  curlx/fopen.h    \
   curlx/inet_ntop.h \
   curlx/inet_pton.h \
   curlx/multibyte.h \
@@ -157,6 +159,7 @@ LIB_CFILES =         \
   curl_des.c         \
   curl_endian.c      \
   curl_fnmatch.c     \
+  curl_fopen.c       \
   curl_get_line.c    \
   curl_gethostname.c \
   curl_gssapi.c      \
@@ -181,7 +184,6 @@ LIB_CFILES =         \
   fake_addrinfo.c    \
   file.c             \
   fileinfo.c         \
-  fopen.c            \
   formdata.c         \
   ftp.c              \
   ftplistparser.c    \
@@ -286,6 +288,7 @@ LIB_HFILES =         \
   curl_des.h         \
   curl_endian.h      \
   curl_fnmatch.h     \
+  curl_fopen.h       \
   curl_get_line.h    \
   curl_gethostname.h \
   curl_gssapi.h      \
@@ -320,7 +323,6 @@ LIB_HFILES =         \
   fake_addrinfo.h    \
   file.h             \
   fileinfo.h         \
-  fopen.h            \
   formdata.h         \
   ftp.h              \
   ftplistparser.h    \

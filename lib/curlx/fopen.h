@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_FOPEN_H
-#define HEADER_CURL_FOPEN_H
+#ifndef HEADER_CURLX_FOPEN_H
+#define HEADER_CURLX_FOPEN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,7 +24,25 @@
  *
  ***************************************************************************/
 
-CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
-                    FILE **fh, char **tempname);
+#include "../curl_setup.h"
 
+#include "multibyte.h"
+
+#if defined(_WIN32) && !defined(UNDER_CE)
+FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#define CURLX_FOPEN_LOW(fname, mode) curlx_win32_fopen(fname, mode)
+#else
+#define CURLX_FOPEN_LOW fopen
 #endif
+
+#ifdef CURLDEBUG
+#define curlx_fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
+#define curlx_fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
+#define curlx_fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
+#else
+#define curlx_fopen CURLX_FOPEN_LOW
+#define curlx_fdopen fdopen
+#define curlx_fclose fclose
+#endif
+
+#endif /* HEADER_CURLX_FOPEN_H */

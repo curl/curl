@@ -29,6 +29,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW() */
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -68,7 +69,8 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
-    (fclose)(curl_dbg_logfile);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
 }
@@ -78,11 +80,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-#ifdef CURL_FOPEN
-      curl_dbg_logfile = CURL_FOPEN(logname, FOPEN_WRITETEXT);
-#else
-      curl_dbg_logfile = (fopen)(logname, FOPEN_WRITETEXT);
-#endif
+      curl_dbg_logfile = CURLX_FOPEN_LOW(logname, FOPEN_WRITETEXT);
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -424,13 +422,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res;
-#ifdef CURL_FOPEN
-  res = CURL_FOPEN(file, mode);
-#else
-  res = (fopen)(file, mode);
-#endif
-
+  FILE *res = CURLX_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
                 source, line, file, mode, (void *)res);
@@ -442,7 +434,8 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  FILE *res = (fdopen)(filedes, mode);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  FILE *res = fdopen(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -459,7 +452,8 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
-  res = (fclose)(file);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  res = fclose(file);
 
   return res;
 }

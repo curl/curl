@@ -31,11 +31,11 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "altsvc.h"
+#include "curl_fopen.h"
 #include "curl_get_line.h"
 #include "parsedate.h"
 #include "sendf.h"
 #include "curlx/warnless.h"
-#include "fopen.h"
 #include "rename.h"
 #include "strdup.h"
 #include "curlx/inet_pton.h"
@@ -227,7 +227,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   if(!asi->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_ALTSVC_LINE);
@@ -238,7 +238,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
         altsvc_add(asi, lineptr);
     }
     curlx_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    curlx_fclose(fp);
   }
   return result;
 }
@@ -391,7 +391,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
       if(result)
         break;
     }
-    fclose(out);
+    curlx_fclose(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 

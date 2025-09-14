@@ -30,7 +30,7 @@ static FILE *out_download;
 
 static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
-  out_download = fopen("download_0.data", "wb");
+  out_download = curlx_fopen("download_0.data", "wb");
   if(!out_download)
     return 1;  /* failed */
 
@@ -72,7 +72,7 @@ static int server_push_callback(CURL *parent,
   curl_msnprintf(filename, sizeof(filename) - 1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
-  out_push = fopen(filename, "wb");
+  out_push = curlx_fopen(filename, "wb");
   if(!out_push) {
     /* if we cannot save it, deny it */
     curl_mfprintf(stderr, "Failed to create output file for push\n");
@@ -129,7 +129,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   easy = curl_easy_init();
   if(setup_h2_serverpush(easy, URL)) {
-    fclose(out_download);
+    curlx_fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
     return (CURLcode)1;
   }
@@ -166,9 +166,9 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   curl_multi_cleanup(multi_handle);
 
-  fclose(out_download);
+  curlx_fclose(out_download);
   if(out_push)
-    fclose(out_push);
+    curlx_fclose(out_push);
 
   return CURLE_OK;
 }

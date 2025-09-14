@@ -258,7 +258,7 @@ static void free_globalconfig(void)
   tool_safefree(global->trace_dump);
 
   if(global->trace_fopened && global->trace_stream)
-    fclose(global->trace_stream);
+    curlx_fclose(global->trace_stream);
   global->trace_stream = NULL;
 
   tool_safefree(global->libcurl);

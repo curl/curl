@@ -42,7 +42,7 @@ static CURLcode test_lib541(const char *URL)
     return TEST_ERR_USAGE;
   }
 
-  hd_src = fopen(libtest_arg2, "rb");
+  hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
                   errno, strerror(errno));
@@ -61,19 +61,19 @@ static CURLcode test_lib541(const char *URL)
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(!file_info.st_size) {
     curl_mfprintf(stderr, "File %s has zero size!\n", libtest_arg2);
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -82,7 +82,7 @@ static CURLcode test_lib541(const char *URL)
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -110,7 +110,7 @@ static CURLcode test_lib541(const char *URL)
 test_cleanup:
 
   /* close the local file */
-  fclose(hd_src);
+  curlx_fclose(hd_src);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

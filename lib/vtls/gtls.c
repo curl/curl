@@ -54,6 +54,7 @@
 #include "../progress.h"
 #include "../select.h"
 #include "../strdup.h"
+#include "../curlx/fopen.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
 #include "../multiif.h"
@@ -211,7 +212,7 @@ static gnutls_datum_t load_file(const char *file)
   long filelen;
   void *ptr;
 
-  f = fopen(file, "rb");
+  f = curlx_fopen(file, "rb");
   if(!f)
     return loaded_file;
   if(fseek(f, 0, SEEK_END) != 0
@@ -227,7 +228,7 @@ static gnutls_datum_t load_file(const char *file)
   loaded_file.data = ptr;
   loaded_file.size = (unsigned int)filelen;
 out:
-  fclose(f);
+  curlx_fclose(f);
   return loaded_file;
 }
 

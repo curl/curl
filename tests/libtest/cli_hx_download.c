@@ -94,7 +94,7 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
   if(!t->out) {
     curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
                    t->idx);
-    t->out = fopen(t->filename, "wb");
+    t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
       return 0;
   }
@@ -530,7 +530,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   for(i = 0; i < transfer_count_d; ++i) {
     t = &transfer_d[i];
     if(t->out) {
-      fclose(t->out);
+      curlx_fclose(t->out);
       t->out = NULL;
     }
     if(t->easy) {
