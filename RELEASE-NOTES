@@ -4,7 +4,7 @@ curl and libcurl 8.16.1
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3499
+ Contributors:                 3500
 
 This release includes the following changes:
 
@@ -12,8 +12,17 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o curl_easy_getinfo: error code on NULL arg [2]
+ o curl_mem_undef.h: limit to `CURLDEBUG` for non-memalloc overrides [19]
+ o CURLINFO_FTP_ENTRY_PATH.md: this is for SFTP as well [8]
+ o CURLOPT_MAXLIFETIME_CONN: make default 24 hours [10]
+ o docs/libcurl: remove ancient version references [7]
  o easy_getinfo: check magic, Curl_close safety [3]
+ o libcurl-security.md: mention long-running connections [6]
+ o ngtcp2: check error code on connect failure [13]
+ o quic: fix min TLS version handling [14]
  o quic: ignore EMSGSIZE on receive [4]
+ o ssl-sessions.md: mark option experimental [12]
+ o urldata: FILE is not a list-only protocol [9]
 
 This release includes the following known bugs:
 
@@ -37,11 +46,22 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Ethan Everett, Stefan Eissing
-  (3 contributors)
+  Andrew Kirillov, Dan Fandrich, Daniel Stenberg, Emilio Pozuelo Monfort,
+  Ethan Everett, fds242 on github, renovate[bot], Stefan Eissing,
+  Viktor Szakats
+  (9 contributors)
 
 References to bug reports and discussions on issues:
 
  [2] = https://curl.se/bug/?i=18512
  [3] = https://curl.se/bug/?i=18511
  [4] = https://curl.se/bug/?i=18505
+ [6] = https://curl.se/bug/?i=18533
+ [7] = https://curl.se/bug/?i=18530
+ [8] = https://curl.se/bug/?i=18531
+ [9] = https://curl.se/bug/?i=18525
+ [10] = https://curl.se/bug/?i=18527
+ [12] = https://curl.se/bug/?i=18523
+ [13] = https://curl.se/bug/?i=18521
+ [14] = https://curl.se/bug/?i=18518
+ [19] = https://curl.se/bug/?i=18510
