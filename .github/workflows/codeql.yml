@@ -98,7 +98,7 @@ jobs:
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             cmake -B . -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
             cmake --build . --verbose
-            src/curl.exe --disable --version
+            src/Debug/curl.exe --disable --version
           else
             cmake -B . -G Ninja
             cmake --build . --verbose
