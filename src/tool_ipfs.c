@@ -88,7 +88,7 @@ static char *ipfs_gateway(void)
   if(!gateway_composed_file_path)
     goto fail;
 
-  gateway_file = fopen(gateway_composed_file_path, FOPEN_READTEXT);
+  gateway_file = CURL_FOPEN(gateway_composed_file_path, FOPEN_READTEXT);
   tool_safefree(gateway_composed_file_path);
 
   if(gateway_file) {

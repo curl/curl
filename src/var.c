@@ -455,7 +455,7 @@ ParameterError setvariable(const char *input)
     if(use_stdin)
       file = stdin;
     else {
-      file = fopen(line, "rb");
+      file = CURL_FOPEN(line, "rb");
       if(!file) {
         errorf("Failed to open %s: %s", line, strerror(errno));
         err = PARAM_READ_ERROR;

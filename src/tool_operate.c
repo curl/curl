@@ -164,7 +164,7 @@ static curl_off_t vms_realfilesize(const char *name,
   FILE * file;
 
   /* !checksrc! disable FOPENMODE 1 */
-  file = fopen(name, "r"); /* VMS */
+  file = CURL_FOPEN(name, "r"); /* VMS */
   if(!file) {
     return 0;
   }
@@ -800,7 +800,7 @@ static CURLcode etag_compare(struct OperationConfig *config)
   ParameterError pe;
 
   /* open file for reading: */
-  FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
+  FILE *file = CURL_FOPEN(config->etag_compare_file, FOPEN_READTEXT);
   if(!file)
     warnf("Failed to open %s: %s", config->etag_compare_file,
           strerror(errno));
@@ -843,7 +843,7 @@ static CURLcode etag_store(struct OperationConfig *config,
 
   /* open file for output: */
   if(strcmp(config->etag_save_file, "-")) {
-    FILE *newfile = fopen(config->etag_save_file, "ab");
+    FILE *newfile = CURL_FOPEN(config->etag_save_file, "ab");
     if(!newfile) {
       warnf("Failed creating file for saving etags: \"%s\". "
             "Skip this transfer", config->etag_save_file);
@@ -893,11 +893,11 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
         return result;
     }
     if(!per->prev || per->prev->config != config) {
-      newfile = fopen(config->headerfile, "wb");
+      newfile = CURL_FOPEN(config->headerfile, "wb");
       if(newfile)
         fclose(newfile);
     }
-    newfile = fopen(config->headerfile, "ab");
+    newfile = CURL_FOPEN(config->headerfile, "ab");
 
     if(!newfile) {
       errorf("Failed to open %s", config->headerfile);
@@ -999,11 +999,11 @@ static CURLcode setup_outfile(struct OperationConfig *config,
 #ifdef __VMS
     /* open file for output, forcing VMS output format into stream
        mode which is needed for stat() call above to always work. */
-    FILE *file = fopen(outfile, "ab",
-                       "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
+    FILE *file = CURL_FOPEN(outfile, "ab",
+                           "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
 #else
     /* open file for output: */
-    FILE *file = fopen(per->outfile, "ab");
+    FILE *file = CURL_FOPEN(per->outfile, "ab");
 #endif
     if(!file) {
       errorf("cannot open '%s'", per->outfile);
