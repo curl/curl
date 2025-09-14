@@ -102,7 +102,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   char *dir = NULL;
   *tempname = NULL;
 
-  *fh = fopen(filename, FOPEN_WRITETEXT);
+  *fh = CURL_FOPEN_LOW(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
   if(
