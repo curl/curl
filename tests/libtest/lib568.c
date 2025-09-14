@@ -75,7 +75,7 @@ static CURLcode test_lib568(const char *URL)
   fstat(sdp, &file_info);
   close(sdp);
 
-  sdpf = fopen(libtest_arg2, "rb");
+  sdpf = CURL_FOPEN(libtest_arg2, "rb");
   if(!sdpf) {
     curl_mfprintf(stderr, "can't fopen %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
