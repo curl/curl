@@ -23,24 +23,18 @@
  1.4 alt-svc sharing
  1.5 get rid of PATH_MAX
  1.6 thread-safe sharing
- 1.8 CURLOPT_RESOLVE for any port number
  1.10 auto-detect proxy
- 1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
  1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
- 1.14 connect to multiple IPs in parallel
  1.15 Monitor connections in the connection pool
  1.16 Try to URL encode given URL
  1.17 Add support for IRIs
  1.18 try next proxy if one does not work
  1.19 provide timing info for each redirect
  1.20 SRV and URI DNS records
- 1.21 netrc caching and sharing
  1.22 CURLINFO_PAUSE_STATE
- 1.23 Offer API to flush the connection pool
  1.25 Expose tried IP addresses that failed
  1.28 FD_CLOEXEC
- 1.29 WebSocket read callback
  1.30 config file parsing
  1.31 erase secrets from heap/stack after use
  1.32 add asynch getaddrinfo support
@@ -252,14 +246,6 @@
  share between multiple concurrent threads. Fixing this would enable more
  users to share data in more powerful ways.
 
-1.8 CURLOPT_RESOLVE for any port number
-
- This option allows applications to set a replacement IP address for a given
- host + port pair. Consider making support for providing a replacement address
- for the hostname on all port numbers.
-
- See https://github.com/curl/curl/issues/1264
-
 1.10 auto-detect proxy
 
  libcurl could be made to detect the system proxy setup automatically and use
@@ -271,14 +257,6 @@
 
  libdetectproxy is a (C++) library for detecting the proxy on Windows
  https://github.com/paulharris/libdetectproxy
-
-1.11 minimize dependencies with dynamically loaded modules
-
- We can create a system with loadable modules/plug-ins, where these modules
- would be the ones that link to 3rd party libs. That would allow us to avoid
- having to load ALL dependencies since only the necessary ones for this
- app/invoke/used protocols would be necessary to load. See
- https://github.com/curl/curl/issues/349
 
 1.12 updated DNS server while running
 
@@ -300,17 +278,6 @@
  sockets.
 
  See https://github.com/curl/curl/issues/2734
-
-1.14 connect to multiple IPs in parallel
-
- curl currently implements the happy eyeball algorithm for connecting to the
- IPv4 and IPv6 alternatives for a host in parallel, sticking with the
- connection that "wins". We could implement a similar algorithm per individual
- IP family as well when there are multiple available addresses: start with the
- first address, then start a second attempt N milliseconds after and then a
- third another N milliseconds later. That way there would be less waiting when
- the first IP has problems. It also improves the connection timeout value
- handling for multiple address situations.
 
 1.15 Monitor connections in the connection pool
 
@@ -368,23 +335,10 @@
  Offer support for resolving SRV and URI DNS records for libcurl to know which
  server to connect to for various protocols (including HTTP).
 
-1.21 netrc caching and sharing
-
- The netrc file is read and parsed each time a connection is setup, which
- means that if a transfer needs multiple connections for authentication or
- redirects, the file might be reread (and parsed) multiple times. This makes
- it impossible to provide the file as a pipe.
-
 1.22 CURLINFO_PAUSE_STATE
 
  Return information about the transfer's current pause state, in both
  directions. https://github.com/curl/curl/issues/2588
-
-1.23 Offer API to flush the connection pool
-
- Sometimes applications want to flush all the existing connections kept alive.
- An API could allow a forced flush or just a forced loop that would properly
- close all connections that have been closed by the server already.
 
 1.25 Expose tried IP addresses that failed
 
@@ -402,13 +356,6 @@
  exec-family functions succeed. Should probably be set by default?
 
  https://github.com/curl/curl/issues/2252
-
-1.29 WebSocket read callback
-
- Call the read callback once the connection is established to allow sending
- the first message in the connection.
-
- https://github.com/curl/curl/issues/11402
 
 1.30 config file parsing
 
