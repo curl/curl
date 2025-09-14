@@ -55,7 +55,7 @@ bool tool_create_output_file(struct OutStruct *outs,
      (config->file_clobber_mode == CLOBBER_DEFAULT &&
       !outs->is_cd_filename)) {
     /* open file for writing */
-    file = fopen(fname, "wb");
+    file = CURL_FOPEN(fname, "wb");
   }
   else {
     int fd;

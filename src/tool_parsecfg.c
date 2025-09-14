@@ -93,7 +93,7 @@ int parseconfig(const char *filename)
     /* NULL means load .curlrc from homedir! */
     char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
     if(curlrc) {
-      file = fopen(curlrc, FOPEN_READTEXT);
+      file = CURL_FOPEN(curlrc, FOPEN_READTEXT);
       if(!file) {
         free(curlrc);
         return 1;
@@ -115,7 +115,7 @@ int parseconfig(const char *filename)
   }
   else {
     if(strcmp(filename, "-"))
-      file = fopen(filename, FOPEN_READTEXT);
+      file = CURL_FOPEN(filename, FOPEN_READTEXT);
     else
       file = stdin;
   }
