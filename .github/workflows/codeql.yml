@@ -62,11 +62,18 @@ jobs:
 
   c:
     name: 'C'
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.image }}
     permissions:
       security-events: write  # To create/update security events
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [ubuntu-latest, windows-2022]
+    env:
+      MATRIX_IMAGE: '${{ matrix.image }}'
     steps:
       - name: 'install prereqs'
+        if: ${{ contains(matrix.image, 'ubuntu') }}
         timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -86,10 +93,15 @@ jobs:
 
       - name: 'build'
         timeout-minutes: 10
+        shell: bash
         run: |
-          cmake -B . -G Ninja
+          if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
+            cmake -B . -DBUILD_SHARED_LIBS=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
+          else
+            cmake -B . -G Ninja
+          fi
           cmake --build . --verbose
-          src/curl -V
+          src/curl --disable --verbose
 
       - name: 'perform analysis'
         uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
