@@ -23,7 +23,6 @@
  1.4 alt-svc sharing
  1.5 get rid of PATH_MAX
  1.6 thread-safe sharing
- 1.8 CURLOPT_RESOLVE for any port number
  1.10 auto-detect proxy
  1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
@@ -250,14 +249,6 @@
  several of the sharing options are documented as not safe and supported to
  share between multiple concurrent threads. Fixing this would enable more
  users to share data in more powerful ways.
-
-1.8 CURLOPT_RESOLVE for any port number
-
- This option allows applications to set a replacement IP address for a given
- host + port pair. Consider making support for providing a replacement address
- for the hostname on all port numbers.
-
- See https://github.com/curl/curl/issues/1264
 
 1.10 auto-detect proxy
 
