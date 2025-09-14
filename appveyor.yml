@@ -46,7 +46,7 @@ environment:
 
     # generated CMake-based Visual Studio builds
 
-    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.4, Shared, Build-tests'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
@@ -101,7 +101,7 @@ environment:
       OPENSSL: 'ON'
       SHARED: 'ON'
       TFLAGS: 'skipall'
-    - job_name: 'CMake, VS2019, Debug, x64, OpenSSL 1.1.1 + Schannel, Shared, Build-tests'
+    - job_name: 'CMake, VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
       PRJ_GEN: 'Visual Studio 16 2019'
       TARGET: '-A x64'
@@ -109,7 +109,7 @@ environment:
       OPENSSL: 'ON'
       SCHANNEL: 'ON'
       SHARED: 'ON'
-    - job_name: 'CMake, VS2022, Debug, x64, OpenSSL 3.4 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
+    - job_name: 'CMake, VS2022, Debug, x64, OpenSSL 3.5 + Schannel, Static, Unicode, Build-tests & examples, clang-cl'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       PRJ_GEN: 'Visual Studio 17 2022'
       TARGET: '-A x64'
