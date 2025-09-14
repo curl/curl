@@ -86,6 +86,7 @@ my %banfunc = (
     "socket" => 1,
     "socketpair" => 1,
     "fdopen" => 1,
+    "fopen" => 1,
     );
 
 my %warnings_extended = (
@@ -917,7 +918,7 @@ sub scanfile {
         }
 
         # scan for use of non-binary fopen without the macro
-        if($l =~ /^(.*\W)fopen\s*\([^,]*, *\"([^"]*)/) {
+        if($l =~ /^(.*\W)(CURL_FOPEN|CURL_FOPEN_LOW)\s*\([^,]*, *\"([^"]*)/) {
             my $mode = $2;
             if($mode !~ /b/) {
                 checkwarn("FOPENMODE",
