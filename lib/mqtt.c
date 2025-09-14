@@ -391,6 +391,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
   /* if passwd was provided, add it to the packet */
   if(plen) {
+#ifndef DEBUGBUILD
     /* make a copy of the packet that omits the password, for logging */
     if(data->set.verbose) {
       packetlog = Curl_memdup0(packet, packetlen);
@@ -399,6 +400,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
         goto end;
       }
     }
+#endif
     rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
       failf(data, "Password too long: [%zu]", plen);
