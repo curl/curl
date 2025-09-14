@@ -30,7 +30,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
   size_t datasize = 0;
   void *data = NULL;
   if(filename) {
-    FILE *fInCert = fopen(filename, "rb");
+    FILE *fInCert = CURL_FOPEN(filename, "rb");
 
     if(fInCert) {
       long cert_tell = 0;
