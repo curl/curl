@@ -24,7 +24,6 @@
  1.5 get rid of PATH_MAX
  1.6 thread-safe sharing
  1.10 auto-detect proxy
- 1.11 minimize dependencies with dynamically loaded modules
  1.12 updated DNS server while running
  1.13 c-ares and CURLOPT_OPENSOCKETFUNCTION
  1.15 Monitor connections in the connection pool
@@ -261,14 +260,6 @@
 
  libdetectproxy is a (C++) library for detecting the proxy on Windows
  https://github.com/paulharris/libdetectproxy
-
-1.11 minimize dependencies with dynamically loaded modules
-
- We can create a system with loadable modules/plug-ins, where these modules
- would be the ones that link to 3rd party libs. That would allow us to avoid
- having to load ALL dependencies since only the necessary ones for this
- app/invoke/used protocols would be necessary to load. See
- https://github.com/curl/curl/issues/349
 
 1.12 updated DNS server while running
 
