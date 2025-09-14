@@ -35,6 +35,8 @@ esac
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
   openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
+elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
+  openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
 else
   openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
 fi
