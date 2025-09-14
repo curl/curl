@@ -65,7 +65,6 @@ sub extract {
                 $syn++;
                 print O "/* !checksrc! disable UNUSEDIGNORE all */\n";
                 print O "/* !checksrc! disable COPYRIGHT all */\n";
-                print O "/* !checksrc! disable FOPENMODE all */\n";
                 printf O "#line %d \"$f\"\n", $iline+1;
             }
         }

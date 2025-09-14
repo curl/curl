@@ -34,13 +34,7 @@
 #endif
 
 #ifdef CURLDEBUG
-
-#undef fopen
-#ifdef CURL_FOPEN
-#define fopen(fname, mode) CURL_FOPEN(fname, mode)
-#endif
 #undef fclose
-
 #endif /* CURLDEBUG */
 
 #undef HEADER_CURL_MEMORY_H

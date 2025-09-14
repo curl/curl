@@ -510,10 +510,9 @@
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      int curlx_win32_open(const char *filename, int oflag, ...);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
-#    define stat(fname, stp)           curlx_win32_stat(fname, stp)
-#    define open                       curlx_win32_open
-#    define CURL_FOPEN(fname, mode)    curlx_win32_fopen(fname, mode)
-#    define fopen(fname, mode)         CURL_FOPEN(fname, mode)
+#    define stat(fname, stp)             curlx_win32_stat(fname, stp)
+#    define open                         curlx_win32_open
+#    define CURL_FOPEN_LOW(fname, mode)  curlx_win32_fopen(fname, mode)
 #  endif
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
@@ -521,6 +520,10 @@
 #  undef  lseek
 #  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
 #  define LSEEK_ERROR                (offset_t)-1
+#endif
+
+#ifndef CURL_FOPEN_LOW
+#define CURL_FOPEN_LOW fopen
 #endif
 
 #ifndef struct_stat
@@ -1099,6 +1102,7 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
 #define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
+#define CURL_FOPEN(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #define CURL_FDOPEN(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
 
 #else /* !CURLDEBUG */
@@ -1119,6 +1123,7 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_SEND send
 #define CURL_RECV recv
 
+#define CURL_FOPEN CURL_FOPEN_LOW
 #define CURL_FDOPEN fdopen
 
 #endif /* CURLDEBUG */

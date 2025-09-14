@@ -78,11 +78,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-#ifdef CURL_FOPEN
-      curl_dbg_logfile = CURL_FOPEN(logname, FOPEN_WRITETEXT);
-#else
-      curl_dbg_logfile = (fopen)(logname, FOPEN_WRITETEXT);
-#endif
+      curl_dbg_logfile = CURL_FOPEN_LOW(logname, FOPEN_WRITETEXT);
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -424,13 +420,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res;
-#ifdef CURL_FOPEN
-  res = CURL_FOPEN(file, mode);
-#else
-  res = (fopen)(file, mode);
-#endif
-
+  FILE *res = CURL_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
                 source, line, file, mode, (void *)res);
