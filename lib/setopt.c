@@ -1009,7 +1009,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     return httpauth(data, TRUE, uarg);
 
   case CURLOPT_PROXYTYPE:
-    if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_SOCKS5_HOSTNAME))
+    if((arg < CURLPROXY_HTTP) || (arg > CURLPROXY_HTTPS3))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->proxytype = (unsigned char)arg;
     break;

@@ -176,7 +176,7 @@
 --proxy-digest                       7.12.0
 --proxy-header                       7.37.0
 --proxy-http2                        8.1.0
---proxy-http3                        8.16.0
+--proxy-http3                        8.17.0
 --proxy-insecure                     7.52.0
 --proxy-key                          7.52.0
 --proxy-key-type                     7.52.0
@@ -195,7 +195,7 @@
 --proxy-user (-U)                    4.0
 --proxy1.0                           7.19.4
 --proxytunnel (-p)                   7.3
---proxyudptunnel                     8.16.0
+--proxyudptunnel                     8.17.0
 --pubkey                             7.16.2
 --quote (-Q)                         5.3
 --random-file                        7.7

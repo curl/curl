@@ -24,29 +24,16 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP) && \
+    defined(USE_NGHTTP3) && defined(USE_OPENSSL_QUIC)
 
 #include <openssl/bio.h>
 #include <curl/curl.h>
 #include "urldata.h"
 #include "curlx/dynbuf.h"
-#include "sendf.h"
-#include "http.h"
-#include "http1.h"
-#include "http_proxy.h"
-#include "url.h"
-#include "select.h"
-#include "progress.h"
 #include "cfilters.h"
-#include "cf-h1-proxy.h"
-#include "connect.h"
 #include "curl_trc.h"
 #include "bufq.h"
-#include "strcase.h"
-#include "vtls/vtls.h"
-#include "transfer.h"
-#include "multiif.h"
-#include "curlx/strparse.h"
 #include "capsule.h"
 
 /* The last 3 #include files should be in this order */
@@ -54,7 +41,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-uint64_t curl_capsule_ntohll(uint64_t value)
+/**
+ * Convert 64-bit value from network byte order to host byte order
+ */
+static uint64_t capsule_ntohll(uint64_t value)
 {
   union {
       uint64_t u64;
@@ -69,7 +59,13 @@ uint64_t curl_capsule_ntohll(uint64_t value)
   return dst.u64;
 }
 
-CURLcode curl_capsule_encode_varint(struct dynbuf *dyn, uint64_t value)
+/**
+ * Encode a variable-length integer according to HTTP/3 spec
+ * @param dyn   Dynamic buffer to write encoded varint to
+ * @param value Value to encode (must be <= 0x3FFFFFFFFFFFFFFF)
+ * @return CURLE_OK on success, error code on failure
+ */
+static CURLcode capsule_encode_varint(struct dynbuf *dyn, uint64_t value)
 {
   CURLcode result;
   DEBUGASSERT(value <= 0x3FFFFFFFFFFFFFFF);
@@ -97,13 +93,18 @@ CURLcode curl_capsule_encode_varint(struct dynbuf *dyn, uint64_t value)
     /* Set bits 63-62 to "11", preserve lower 62 bits */
     uint64_t encoded;
     encoded = (uint64_t)value & 0x3FFFFFFFFFFFFFFF;
-    encoded = curl_capsule_ntohll(encoded | 0xC000000000000000);
+    encoded = capsule_ntohll(encoded | 0xC000000000000000);
     result = curlx_dyn_addn(dyn, &encoded, sizeof(encoded));
   }
   return result;
 }
 
-uint64_t curl_capsule_decode_varint(char **start)
+/**
+ * Decode a variable-length integer according to HTTP/3 spec
+ * @param start Pointer to buffer position, updated after decoding
+ * @return Decoded value, or HTTP_INVALID_VARINT on error
+ */
+static uint64_t capsule_decode_varint(char **start)
 {
   uint8_t first_byte, bytes_left;
   uint64_t value;
@@ -131,7 +132,7 @@ uint64_t curl_capsule_decode_varint(char **start)
   return value;
 }
 
-CURLcode curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
+CURLcode Curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
                                          const void *buf, size_t blen)
 {
   CURLcode result = CURLE_OK;
@@ -142,7 +143,7 @@ CURLcode curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
 
   result = curlx_dyn_addn(dyn, &cap_type, sizeof(cap_type));
 
-  result = curl_capsule_encode_varint(dyn, blen + 1);
+  result = capsule_encode_varint(dyn, blen + 1);
 
   result = curlx_dyn_addn(dyn, &ctx_id, sizeof(ctx_id));
 
@@ -151,7 +152,7 @@ CURLcode curl_capsule_encap_udp_datagram(struct dynbuf *dyn,
   return result;
 }
 
-size_t curl_capsule_process_udp(struct Curl_cfilter *cf,
+size_t Curl_capsule_process_udp(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct bufq *recvbufq,
                                  char *buf, size_t len, CURLcode *err)
@@ -209,7 +210,7 @@ size_t curl_capsule_process_udp(struct Curl_cfilter *cf,
 
     /* Determine varint length */
     decode_ptr = (char *)(uintptr_t)temp_buf;
-    capsule_length = curl_capsule_decode_varint(&decode_ptr);
+    capsule_length = capsule_decode_varint(&decode_ptr);
 
     if(capsule_length == HTTP_INVALID_VARINT) {
       infof(data, "Error! Invalid varint length encoding");
@@ -307,4 +308,5 @@ size_t curl_capsule_process_udp(struct Curl_cfilter *cf,
   return (idx ? idx : 0);
 }
 
-#endif /* !CURL_DISABLE_PROXY */
+#endif /* !CURL_DISABLE_PROXY && !CURL_DISABLE_HTTP &&
+                USE_NGHTTP3 && USE_OPENSSL_QUIC */

@@ -26,7 +26,7 @@
 
 #if !defined(CURL_DISABLE_PROXY) && !defined(CURL_DISABLE_HTTP)
 
-#include <openssl/bio.h>
+
 #include <curl/curl.h>
 #include "urldata.h"
 #include "curlx/dynbuf.h"
@@ -41,7 +41,6 @@
 #include "cf-h1-proxy.h"
 #include "connect.h"
 #include "curl_trc.h"
-#include "bufq.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
@@ -844,7 +843,7 @@ cf_h1_proxy_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(data->conn->bits.udp_tunnel_proxy) {
     struct dynbuf dyn;
 
-    result = curl_capsule_encap_udp_datagram(&dyn, buf, len);
+    result = Curl_capsule_encap_udp_datagram(&dyn, buf, len);
     if(result)
       return result;
 
@@ -901,7 +900,7 @@ cf_h1_proxy_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     /* Now process capsules from recvbuf into BIO_MSG format */
-    *pnread = curl_capsule_process_udp(cf, data, &ts->recvbuf,
+    *pnread = Curl_capsule_process_udp(cf, data, &ts->recvbuf,
                                        buf, len, &result);
     return result;
   }

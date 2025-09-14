@@ -27,42 +27,36 @@
 #if !defined(CURL_DISABLE_HTTP) && \
     defined(USE_NGHTTP3) && !defined(CURL_DISABLE_PROXY)
 
+#ifdef USE_OPENSSL_QUIC
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
+#endif
 #include <nghttp3/nghttp3.h>
 
 #include "urldata.h"
 #include "hash.h"
 #include "sendf.h"
-#include "strdup.h"
-#include "rand.h"
 #include "multiif.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
 #include "progress.h"
 #include "strerror.h"
-#include "bufq.h"
 #include "curlx/dynbuf.h"
 #include "dynhds.h"
-#include "http1.h"
 #include "http_proxy.h"
 #include "select.h"
 #include "uint-hash.h"
 #include "vquic/vquic.h"
 #include "vquic/vquic_int.h"
 #include "vquic/vquic-tls.h"
-#include "vtls/keylog.h"
 #include "vtls/vtls.h"
 #include "vtls/openssl.h"
 #include "curl_trc.h"
 #include "cf-h3-proxy.h"
 #include "url.h"
-#include "curlx/warnless.h"
 #include "capsule.h"
-
-/* might not need line nos 63-350 */
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -403,6 +397,7 @@ struct cf_osslq_ctx
   struct cf_quic_ctx q;
   struct ssl_peer peer;
   struct curl_tls_ctx tls;
+  struct cf_call_data call_data;
   struct cf_osslq_h3conn h3;
   struct curltime started_at;    /* time the current attempt started */
   struct curltime handshake_at;  /* time connect handshake finished */
@@ -467,17 +462,26 @@ struct cf_h3_proxy_ctx
   BIT(connected);
 };
 
+/* How to access `call_data` from a cf_h3_proxy filter */
+#undef CF_CTX_CALL_DATA
+#define CF_CTX_CALL_DATA(cf)  \
+  ((struct cf_h3_proxy_ctx *)(cf)->ctx)->osslq_ctx->call_data
+
 static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
                                      struct Curl_easy *data, bool *done)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_osslq_ctx *ctx = proxy_ctx->osslq_ctx;
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
   int rc;
+
+  CF_DATA_SAVE(save, cf, data);
 
   if(!cf->connected || !ctx->h3.conn || cf->shutdown ||
                                         ctx->protocol_shutdown) {
     *done = TRUE;
+    CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
 
@@ -532,6 +536,7 @@ static CURLcode cf_h3_proxy_shutdown(struct Curl_cfilter *cf,
     }
   }
 out:
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -1842,7 +1847,10 @@ static CURLcode cf_h3_proxy_send(struct Curl_cfilter *cf,
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_osslq_ctx *ctx = proxy_ctx->osslq_ctx;
   struct h3_proxy_stream_ctx *stream = H3_PROXY_STREAM_CTX(ctx, data);
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
+
+  CF_DATA_SAVE(save, cf, data);
 
   *pnwritten = -1;
 
@@ -1883,7 +1891,7 @@ static CURLcode cf_h3_proxy_send(struct Curl_cfilter *cf,
     if(data->conn->bits.udp_tunnel_proxy) {
       struct dynbuf dyn;
 
-      result = curl_capsule_encap_udp_datagram(&dyn, buf, len);
+      result = Curl_capsule_encap_udp_datagram(&dyn, buf, len);
       if(result)
         goto out;
 
@@ -1917,6 +1925,7 @@ out:
                         " -> %zd, %d",
               stream ? stream->s.id : -1, len, *pnwritten, result);
 
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -1926,7 +1935,7 @@ static ssize_t process_udp_capsule(struct Curl_cfilter *cf,
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
 
-  return curl_capsule_process_udp(cf, data, &proxy_ctx->inbufq, buf, len, err);
+  return Curl_capsule_process_udp(cf, data, &proxy_ctx->inbufq, buf, len, err);
 }
 
 static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
@@ -1936,7 +1945,10 @@ static CURLcode cf_h3_proxy_recv(struct Curl_cfilter *cf,
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_osslq_ctx *ctx = proxy_ctx->osslq_ctx;
   struct h3_proxy_stream_ctx *stream = H3_PROXY_STREAM_CTX(ctx, data);
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
+
+  CF_DATA_SAVE(save, cf, data);
 
   *pnread = 0;
 
@@ -2009,6 +2021,7 @@ out:
                         " %zd, %d",
               stream ? stream->s.id : -1,
               len, *pnread, result);
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -2167,6 +2180,9 @@ static CURLcode cf_h3_proxy_query(struct Curl_cfilter *cf,
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_osslq_ctx *ctx = proxy_ctx->osslq_ctx;
+  struct cf_call_data save;
+
+  CF_DATA_SAVE(save, cf, data);
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT:
@@ -2235,6 +2251,7 @@ static CURLcode cf_h3_proxy_query(struct Curl_cfilter *cf,
   default:
     break;
   }
+  CF_DATA_RESTORE(cf, save);
   return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
@@ -2246,7 +2263,10 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_osslq_ctx *ctx = proxy_ctx->osslq_ctx;
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
+
+  CF_DATA_SAVE(save, cf, data);
 
   if(!ctx || !ctx->tls.ossl.ssl) {
     /* NOP */
@@ -2269,6 +2289,7 @@ static CURLcode cf_h3_proxy_adjust_pollset(struct Curl_cfilter *cf,
                                 ctx->need_recv, ctx->need_send);
     }
   }
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -2517,6 +2538,7 @@ static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
                                          bool *done)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
   struct curltime now;
   int err;
@@ -2543,6 +2565,8 @@ static CURLcode cf_h3_proxy_quic_connect(struct Curl_cfilter *cf,
     if(result)
       return result;
   }
+
+  CF_DATA_SAVE(save, cf, data);
 
   if(!proxy_ctx->osslq_ctx->got_first_byte) {
     int readable = SOCKET_READABLE(proxy_ctx->osslq_ctx->q.sockfd, 0);
@@ -2641,6 +2665,7 @@ out:
     CURL_TRC_CF(data, cf, "connect -> %d, done=%d", result, *done);
   }
 
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -2724,9 +2749,11 @@ cf_h3_proxy_connect(struct Curl_cfilter *cf,
                     bool *done)
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
   timediff_t check;
   struct tunnel_stream *ts = &proxy_ctx->tunnel;
+  bool data_saved = FALSE;
 
   /* Curl_cft_http_proxy --> Curl_cft_h3_proxy --> Curl_cft_udp */
   if(cf->connected) {
@@ -2747,6 +2774,9 @@ cf_h3_proxy_connect(struct Curl_cfilter *cf,
   if(*done != TRUE)
     goto out;
 
+  CF_DATA_SAVE(save, cf, data);
+  data_saved = TRUE;
+
   /* At this point the QUIC is connected, but the proxy isn't connected */
   *done = FALSE;
 
@@ -2761,6 +2791,8 @@ out:
     Curl_client_reset(data);
   }
 
+  if(data_saved)
+    CF_DATA_RESTORE(cf, save);
   return result;
 }
 
@@ -2802,7 +2834,10 @@ static CURLcode cf_h3_proxy_cntrl(struct Curl_cfilter *cf,
 {
   struct cf_h3_proxy_ctx *proxy_ctx = cf->ctx;
   struct cf_osslq_ctx *ctx = proxy_ctx->osslq_ctx;
+  struct cf_call_data save;
   CURLcode result = CURLE_OK;
+
+  CF_DATA_SAVE(save, cf, data);
 
   (void)arg1;
   (void)arg2;
@@ -2837,6 +2872,7 @@ static CURLcode cf_h3_proxy_cntrl(struct Curl_cfilter *cf,
     break;
   }
 
+  CF_DATA_RESTORE(cf, save);
   return result;
 }
 

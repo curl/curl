@@ -688,7 +688,7 @@ CURLOPT_HTTPGET                 7.8.1
 CURLOPT_HTTPHEADER              7.1
 CURLOPT_HTTPPOST                7.1           7.56.0
 CURLOPT_HTTPPROXYTUNNEL         7.3
-CURLOPT_HTTPPROXYUDPTUNNEL      8.16.0
+CURLOPT_HTTPPROXYUDPTUNNEL      8.17.0
 CURLOPT_HTTPREQUEST             7.1           -           7.15.5
 CURLOPT_IGNORE_CONTENT_LENGTH   7.14.1
 CURLOPT_INFILE                  7.1           7.9.7
@@ -986,7 +986,7 @@ CURLPROXY_HTTP                  7.10
 CURLPROXY_HTTP_1_0              7.19.4
 CURLPROXY_HTTPS                 7.52.0
 CURLPROXY_HTTPS2                8.1.0
-CURLPROXY_HTTPS3                8.16.0
+CURLPROXY_HTTPS3                8.17.0
 CURLPROXY_SOCKS4                7.10
 CURLPROXY_SOCKS4A               7.18.0
 CURLPROXY_SOCKS5                7.10

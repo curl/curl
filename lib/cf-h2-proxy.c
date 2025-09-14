@@ -27,7 +27,7 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
   defined(USE_NGHTTP2)
 
-#include <openssl/bio.h>
+
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
 #include "url.h"
@@ -1330,7 +1330,7 @@ static ssize_t process_udp_capsule(struct Curl_cfilter *cf,
   /* Track buffer consumption to calculate bytes consumed */
   consumed_before = Curl_bufq_len(&ctx->tunnel.recvbuf);
 
-  nread = curl_capsule_process_udp(cf, data, &ctx->tunnel.recvbuf,
+  nread = Curl_capsule_process_udp(cf, data, &ctx->tunnel.recvbuf,
                                    buf, len, err);
 
   if(nread > 0) {
@@ -1500,7 +1500,7 @@ static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
   if(data->conn->bits.udp_tunnel_proxy) {
     struct dynbuf dyn;
 
-    result = curl_capsule_encap_udp_datagram(&dyn, buf, len);
+    result = Curl_capsule_encap_udp_datagram(&dyn, buf, len);
     if(result)
       goto out;
 

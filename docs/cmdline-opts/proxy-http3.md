@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: proxy-http3
 Tags: Versions HTTP/3
 Protocols: HTTP
-Added: 8.16.0
+Added: 8.17.0
 Mutexed:
 Requires: HTTP/3
 Help: Use HTTP/3 with HTTPS proxy
@@ -20,6 +20,6 @@ Example:
 # `--proxy-http3`
 
 Negotiate HTTP/3 with an HTTPS proxy.
-What if the proxy does not offer HTTP/3?
+Fails to perform the transfer if the given proxy does not support HTTP/3.
 
 This has no effect for any other kinds of proxies.

@@ -796,15 +796,15 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
                                         added in 7.52.0 */
 #define CURLPROXY_HTTPS2          3L /* HTTPS and attempt HTTP/2
                                         added in 8.2.0 */
-#define CURLPROXY_HTTPS3          4L /* HTTPS and attempt HTTP/3
-                                        added in 8.16.0 */
-#define CURLPROXY_SOCKS4          5L /* support added in 7.15.2, enum existed
+#define CURLPROXY_SOCKS4          4L /* support added in 7.15.2, enum existed
                                         already in 7.10 */
-#define CURLPROXY_SOCKS5          6L /* added in 7.10 */
-#define CURLPROXY_SOCKS4A         7L /* added in 7.18.0 */
-#define CURLPROXY_SOCKS5_HOSTNAME 8L /* Use the SOCKS5 protocol but pass along
+#define CURLPROXY_SOCKS5          5L /* added in 7.10 */
+#define CURLPROXY_SOCKS4A         6L /* added in 7.18.0 */
+#define CURLPROXY_SOCKS5_HOSTNAME 7L /* Use the SOCKS5 protocol but pass along
                                         the hostname rather than the IP
                                         address. added in 7.18.0 */
+#define CURLPROXY_HTTPS3          8L /* HTTPS and attempt HTTP/3
+                                        added in 8.17.0 */
 
 typedef enum {
   CURLPROXY_LAST = 9 /* never use */
