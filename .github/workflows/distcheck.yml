@@ -33,7 +33,9 @@ jobs:
           persist-credentials: false
 
       - name: 'remove preinstalled curl libcurl4{-doc}'
-        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
+        run: |
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
       - name: 'autoreconf'
         run: autoreconf -fi
