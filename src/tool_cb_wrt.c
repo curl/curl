@@ -92,7 +92,7 @@ bool tool_create_output_file(struct OutStruct *outs,
        is not needed because we would have failed earlier, in the while loop
        and `fd` would now be -1 */
     if(fd != -1) {
-      file = fdopen(fd, "wb");
+      file = CURL_FDOPEN(fd, "wb");
       if(!file)
         close(fd);
     }
