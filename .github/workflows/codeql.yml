@@ -61,19 +61,23 @@ jobs:
         uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
 
   c:
-    name: 'C'
-    runs-on: ${{ matrix.image }}
+    name: 'C (${{ matrix.build.name }})'
+    runs-on: ${{ matrix.build.image }}
     permissions:
       security-events: write  # To create/update security events
     strategy:
       fail-fast: false
       matrix:
-        image: [ubuntu-latest, windows-2022]
+        build:
+          - name: 'Linux'
+            image: ubuntu-latest
+          - name: 'Windows'
+            image: windows-2022
     env:
-      MATRIX_IMAGE: '${{ matrix.image }}'
+      MATRIX_IMAGE: '${{ matrix.build.image }}'
     steps:
       - name: 'install prereqs'
-        if: ${{ contains(matrix.image, 'ubuntu') }}
+        if: ${{ contains(matrix.build.image, 'ubuntu') }}
         timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -96,7 +100,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
-            cmake -B . -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
+            cmake -B . -DCURL_USE_SCHANNEL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
             cmake --build . --verbose
             src/Debug/curl.exe --disable --version
           else
