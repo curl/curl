@@ -35,7 +35,6 @@
  1.22 CURLINFO_PAUSE_STATE
  1.25 Expose tried IP addresses that failed
  1.28 FD_CLOEXEC
- 1.29 WebSocket read callback
  1.30 config file parsing
  1.31 erase secrets from heap/stack after use
  1.32 add asynch getaddrinfo support
@@ -357,13 +356,6 @@
  exec-family functions succeed. Should probably be set by default?
 
  https://github.com/curl/curl/issues/2252
-
-1.29 WebSocket read callback
-
- Call the read callback once the connection is established to allow sending
- the first message in the connection.
-
- https://github.com/curl/curl/issues/11402
 
 1.30 config file parsing
 
