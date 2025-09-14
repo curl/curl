@@ -97,11 +97,13 @@ jobs:
         run: |
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             cmake -B . -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_VS_GLOBALS=TrackFileAccess=false
+            cmake --build . --verbose
+            src/curl.exe --disable --version
           else
             cmake -B . -G Ninja
+            cmake --build . --verbose
+            src/curl --disable --version
           fi
-          cmake --build . --verbose
-          src/curl --disable --version
 
       - name: 'perform analysis'
         uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
