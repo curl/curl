@@ -22,4 +22,4 @@ list` to print a list of build-time supported engines. Note that not all (and
 possibly none) of the engines may be available at runtime.
 
 The OpenSSL concept "engines" has been superseded by "providers" in OpenSSL 3,
-and this opption should work fine to specify such as well.
+and this option should work fine to specify such as well.
