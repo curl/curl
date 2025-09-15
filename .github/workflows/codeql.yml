@@ -107,7 +107,7 @@ jobs:
           else
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
-            export CC=clang
+            #export CC=clang
             cmake -B . -G Ninja \
               -DCURL_USE_OPENSSL=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
