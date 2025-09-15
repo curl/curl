@@ -652,16 +652,35 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
       altsvc_free(as);
       continue;
     }
+    if(as->used)
+      continue;
     if((as->src.alpnid == srcalpnid) &&
        hostcompare(srchost, as->src.host) &&
        (as->src.port == srcport) &&
        (versions & (int)as->dst.alpnid)) {
       /* match */
+      as->used = TRUE;
       *dstentry = as;
       return TRUE;
     }
   }
   return FALSE;
+}
+
+bool Curl_is_altsvc_error(CURLcode rc)
+{
+  switch(rc) {
+  case CURLE_COULDNT_RESOLVE_PROXY:
+  case CURLE_COULDNT_RESOLVE_HOST:
+  case CURLE_COULDNT_CONNECT:
+  case CURLE_GOT_NOTHING:
+  case CURLE_SEND_ERROR:
+  case CURLE_RECV_ERROR:
+    return true;
+
+  default:
+    return false;
+  }
 }
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)
