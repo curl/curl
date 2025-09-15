@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_TIMEVALUE (3)
 Protocol:
   - HTTP
+  - FILE
+  - FTP
 Added-in: 7.1
 ---
 
@@ -26,15 +28,15 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TIMECONDITION, long cond);
 
 # DESCRIPTION
 
-Pass a long as parameter. This defines how the CURLOPT_TIMEVALUE(3) time
-value is treated. You can set this parameter to *CURL_TIMECOND_IFMODSINCE*
-or *CURL_TIMECOND_IFUNMODSINCE*.
+Pass a long as parameter. This defines how the CURLOPT_TIMEVALUE(3) time value
+is treated. You can set this parameter to *CURL_TIMECOND_IFMODSINCE* or
+*CURL_TIMECOND_IFUNMODSINCE*.
 
 The last modification time of a file is not always known and in such instances
 this feature has no effect even if the given time condition would not have
-been met. curl_easy_getinfo(3) with the *CURLINFO_CONDITION_UNMET*
-option can be used after a transfer to learn if a zero-byte successful
-"transfer" was due to this condition not matching.
+been met. curl_easy_getinfo(3) with the *CURLINFO_CONDITION_UNMET* option can
+be used after a transfer to learn if a zero-byte successful "transfer" was due
+to this condition not matching.
 
 # DEFAULT
 
