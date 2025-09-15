@@ -290,9 +290,16 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
         blen = qctx->split_len;
     }
 
-    result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
-    CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
+    if(cf->next->cft == &Curl_cft_udp) {
+      result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
+      CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
                 blen, gsolen, result, sent);
+    }
+    else {
+      result = Curl_conn_cf_send(cf->next, data, (const char *)buf, blen,
+                                                FALSE, &sent);
+    }
+
     if(result) {
       if(result == CURLE_AGAIN) {
         Curl_bufq_skip(&qctx->sendbuf, sent);
@@ -679,6 +686,15 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+CURLcode Curl_cf_quic_insert_after(struct Curl_cfilter *cf_at,
+                                   struct Curl_easy *data,
+                                   struct Curl_dns_entry *remotehost)
+{
+#if defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
+  return Curl_cf_osslq_insert_after(cf_at, data, remotehost);
+#endif
+}
+
 CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
@@ -717,10 +733,6 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.socksproxy) {
     failf(data, "HTTP/3 is not supported over a SOCKS proxy");
-    return CURLE_URL_MALFORMAT;
-  }
-  if(conn->bits.httpproxy && conn->bits.tunnel_proxy) {
-    failf(data, "HTTP/3 is not supported over an HTTP proxy");
     return CURLE_URL_MALFORMAT;
   }
 #endif

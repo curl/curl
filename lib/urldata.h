@@ -374,6 +374,8 @@ struct ConnectBits {
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
                          apps */
+  BIT(udp_tunnel_proxy); /* if CONNECT-UDP is used to "tunnel" through
+                            the proxy */
   BIT(proxy); /* if set, this transfer is done through a proxy - any type */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
@@ -1579,6 +1581,7 @@ struct UserDefined {
   BIT(get_filetime);     /* get the time and get of the remote file */
 #ifndef CURL_DISABLE_PROXY
   BIT(tunnel_thru_httpproxy); /* use CONNECT through an HTTP proxy */
+  BIT(tunnel_thru_httpproxy_udp); /* use CONNECT through an HTTP proxy */
 #endif
   BIT(prefer_ascii);     /* ASCII rather than binary */
   BIT(remote_append);    /* append, not overwrite, on upload */
