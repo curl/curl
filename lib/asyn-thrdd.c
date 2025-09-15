@@ -489,7 +489,7 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
   done = addr_ctx->thrd_done;
   Curl_mutex_release(&addr_ctx->mutx);
 
-  /* Wait for the thread to terminate if it's already marked done. If it's
+  /* Wait for the thread to terminate if it's already marked done. If it is
      not done yet we can't do anything here. We had tried pthread_cancel but
      it caused hanging and resource leaks (#18532). */
   if(done && (addr_ctx->thread_hnd != curl_thread_t_null)) {
