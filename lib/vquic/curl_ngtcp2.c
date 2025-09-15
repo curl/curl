@@ -2433,8 +2433,8 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
-static const struct alpn_spec ALPN_SPEC_H3 = {
-  { "h3", "h3-29" }, 2
+  static const struct alpn_spec ALPN_SPEC_H3 = {
+    { "h3", "h3-29" }, 2
 };
 
   DEBUGASSERT(ctx->initialized);
