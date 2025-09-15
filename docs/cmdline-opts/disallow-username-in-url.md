@@ -16,3 +16,6 @@ Example:
 
 Exit with error if passed a URL containing a username. Probably most useful
 when the URL is being provided at runtime or similar.
+
+Accepting and using credentials in a URL is normally considered a security
+hazard as they are easily leaked that way.

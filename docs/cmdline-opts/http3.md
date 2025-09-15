@@ -33,3 +33,5 @@ still tries to proceed with an older HTTP version. The fallback performs the
 regular negotiation between HTTP/1 and HTTP/2.
 
 Use --http3-only for similar functionality *without* a fallback.
+
+curl cannot do HTTP/3 over any proxy.
