@@ -18,5 +18,8 @@ Example:
 # `--junk-session-cookies`
 
 When curl is told to read cookies from a given file, this option makes it
-discard all "session cookies". This has the same effect as if a new session is
+discard all session cookies. This has the same effect as if a new session is
 started. Typical browsers discard session cookies when they are closed down.
+
+Session cookies are cookies without a set expiry time. They are meant to only
+last for "a session".

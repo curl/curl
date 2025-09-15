@@ -16,6 +16,6 @@ Example:
 
 # `--abstract-unix-socket`
 
-Connect through an abstract Unix domain socket, instead of using the network.
-Note: netstat shows the path of an abstract socket prefixed with `@`, however
-the \<path\> argument should not have this leading character.
+Connect to the server through an abstract Unix domain socket, instead of using
+the network. Note: netstat shows the path of an abstract socket prefixed with
+`@`, however the \<path\> argument should not have this leading character.

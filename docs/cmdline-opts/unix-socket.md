@@ -16,4 +16,7 @@ Example:
 
 # `--unix-socket`
 
-Connect through this Unix domain socket, instead of using the network.
+Connect to the server through this Unix domain socket, instead of using the
+network.
+
+To connect to a proxy over Unix domain socket, see --proxy.

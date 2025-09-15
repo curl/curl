@@ -31,8 +31,7 @@ HTTPS proxy support works with the https:// protocol prefix for OpenSSL and
 GnuTLS (added in 7.52.0). It also works for mbedTLS, Rustls, Schannel and
 wolfSSL (added in 7.87.0).
 
-Unrecognized and unsupported proxy protocols cause an error (added in 7.52.0).
-Ancient curl versions ignored unknown schemes and used http:// instead.
+Unrecognized and unsupported proxy protocol schemes cause an error.
 
 If the port number is not specified in the proxy string, it is assumed to be
 1080.

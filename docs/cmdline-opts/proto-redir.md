@@ -9,8 +9,9 @@ Category: connection curl
 Multi: single
 See-also:
   - proto
+  - follow
 Example:
-  - --proto-redir =http,https $URL
+  - --proto-redir =http,https --follow $URL
 ---
 
 # `--proto-redir`
@@ -20,7 +21,7 @@ not overridden by this option. See --proto for how protocols are represented.
 
 Example, allow only HTTP and HTTPS on redirect:
 
-    curl --proto-redir -all,http,https http://example.com
+    curl --proto-redir -all,http,https --follow http://example.com
 
 By default curl only allows HTTP, HTTPS, FTP and FTPS on redirects
 (added in 7.65.2). Specifying *all* or *+all* enables all protocols on

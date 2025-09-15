@@ -9,6 +9,7 @@ Multi: boolean
 See-also:
   - request
   - location
+  - proto-redir
 Example:
   - -X POST --follow $URL
 ---
@@ -23,3 +24,5 @@ status codes 307 or 308, but may be reset to GET for 301, 302 and 303.
 
 This is subtly different than --location, as that option always set the custom
 method in all subsequent requests independent of response code.
+
+Retrict which protocols a redirect is accepted to follow with --proto-redir.
