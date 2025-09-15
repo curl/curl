@@ -489,20 +489,12 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
   done = addr_ctx->thrd_done;
   Curl_mutex_release(&addr_ctx->mutx);
 
-  if(done) {
-    if(addr_ctx->thread_hnd != curl_thread_t_null) {
-      Curl_thread_join(&addr_ctx->thread_hnd);
-      CURL_TRC_DNS(data, "async_thrdd_shutdown, thread joined");
-    }
-  }
-  else {
-    /* Ideally: we would somehow interrupt the thread and tell it
-     * to stop right away. We tried using pthread_cancel in curl 8.16.0,
-     * and while that worked with some libc implementations, users
-     * reported problems in #18532 on system using `nsswitch` that may
-     * drag in resolvers that are not prepared for pthread_cancel().
-     * It's too tricky to manage resources properly and we do not want
-     * to leak memory, files or other resources. RIP pthread_cancel. */
+  /* Wait for the thread to terminate if it's already marked done. If it's
+     not done yet we can't do anything here. We had tried pthread_cancel but
+     it caused hanging and resource leaks (#18532). */
+  if(done && (addr_ctx->thread_hnd != curl_thread_t_null)) {
+    Curl_thread_join(&addr_ctx->thread_hnd);
+    CURL_TRC_DNS(data, "async_thrdd_shutdown, thread joined");
   }
 }
 
