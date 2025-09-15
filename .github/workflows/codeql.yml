@@ -79,7 +79,6 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          # TODO: enable libgsasl-dev with ubuntu-24.10 or later
           sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev \
             heimdal-dev librtmp-dev libgnutls28-dev
           /home/linuxbrew/.linuxbrew/bin/brew install gsasl mbedtls
