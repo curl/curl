@@ -106,12 +106,7 @@ jobs:
           else
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-            export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix libnghttp3)/lib/pkgconfig:$(brew --prefix libngtcp2)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
-            cmake -B _bld2 -G Ninja \
-              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_NGTCP2=ON \
-              -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
-            cmake --build _bld2 --verbose
-
+            # MultiSSL
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix rustls-ffi)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
             cmake -B _bld1 -G Ninja \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
@@ -119,6 +114,13 @@ jobs:
             cmake --build _bld1 --verbose
             cmake --build _bld1 --verbose --target servers
             cmake --build _bld1 --verbose --target tunits
+
+            # HTTP/3
+            export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix libnghttp3)/lib/pkgconfig:$(brew --prefix libngtcp2)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
+            cmake -B _bld2 -G Ninja \
+              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl)" -DUSE_NGTCP2=ON \
+              -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+            cmake --build _bld2 --verbose
 
             _bld1/src/curl --disable --version
             _bld2/src/curl --disable --version
