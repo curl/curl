@@ -43,4 +43,4 @@ using the dedicated options for that: --post301, --post302 and --post303.
 The method set with --request overrides the method curl would otherwise select
 to use.
 
-Retrict which protocols a redirect is accepted to follow with --proto-redir.
+Restrict which protocols a redirect is accepted to follow with --proto-redir.

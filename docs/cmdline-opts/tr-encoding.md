@@ -20,5 +20,5 @@ curl supports, and uncompress the data while receiving it.
 
 This method was once intended to be the way to do automatic data compression
 for HTTP but for all practical purposes using Content-Encoding as done with
---compressed has superceeded transfer encoding. The --tr-encoding option is
+--compressed has superseded transfer encoding. The --tr-encoding option is
 therefore often not be one you want.
