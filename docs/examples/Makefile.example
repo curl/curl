@@ -39,7 +39,7 @@ CFLAGS ?= -g
 LDFLAGS ?= -L/home/dast/lib -L/usr/local/ssl/lib
 
 # We need -lsocket and -lnsl when on Solaris
-# We need -lssl and -lcrypto when using libcurl with SSL support
+# We need -lssl and -lcrypto when using libcurl with TLS support
 # We need -lpthread for the pthread example
 LIBS ?= -lsocket -lnsl -lssl -lcrypto
 # We need -lcurl for the curl stuff
