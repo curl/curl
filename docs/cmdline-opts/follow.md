@@ -10,6 +10,7 @@ See-also:
   - request
   - location
   - proto-redir
+  - max-redirs
 Example:
   - -X POST --follow $URL
 ---
