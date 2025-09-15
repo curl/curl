@@ -1161,9 +1161,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *peer_addr = NULL;
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
-  static const struct alpn_spec ALPN_SPEC_H3 = {
-    { "h3" }, 1
-};
+  static const struct alpn_spec ALPN_SPEC_H3 = {{ "h3" }, 1};
 
   DEBUGASSERT(ctx->initialized);
 
