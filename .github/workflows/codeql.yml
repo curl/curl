@@ -79,8 +79,8 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev \
-            heimdal-dev librtmp-dev libgnutls28-dev
+          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev \
+            libnghttp2-dev libldap-dev heimdal-dev librtmp-dev libgnutls28-dev
           /home/linuxbrew/.linuxbrew/bin/brew install gsasl mbedtls
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
