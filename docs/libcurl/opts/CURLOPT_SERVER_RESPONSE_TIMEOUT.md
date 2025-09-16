@@ -33,7 +33,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SERVER_RESPONSE_TIMEOUT,
 
 # DESCRIPTION
 
-Pass a long. IT tells libcurl to wait no longer than *timeout* seconds for
+Pass a long. It tells libcurl to wait no longer than *timeout* seconds for
 responses on sent commands. If no response is received within this period, the
 connection is considered dead and the transfer fails.
 
