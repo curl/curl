@@ -330,7 +330,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     size_t npath = 0; /* httppath length */
 
     if(sscanf(line,
-              "%" REQUEST_KEYWORD_SIZE_TXT"s ", request)) {
+              "%" REQUEST_KEYWORD_SIZE_TXT"s ", request) == 1) {
       http = strstr(line + strlen(request), "HTTP/");
 
       if(http && sscanf(http, "HTTP/%d.%d",
