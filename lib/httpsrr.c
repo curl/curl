@@ -61,8 +61,8 @@ static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
     /* we only store ALPN ids we know about */
     id = Curl_alpn2alpnid(cp, tlen);
     if(id != ALPN_none) {
-      if(idnum == MAX_HTTPSRR_ALPNS)
-        break;
+      if(idnum >= MAX_HTTPSRR_ALPNS - 1)
+        break; /* no more room, need space for terminator */
       if(idnum && memchr(alpns, id, idnum))
         /* this ALPN id is already stored */
         ;

@@ -197,6 +197,23 @@ static CURLcode test_unit1658(const char *arg)
       "r:0|p:0|name.some.|alpn:10|alpn:20|"
     },
     {
+      "four unique alpns max", /* test boundary condition */
+      (const unsigned char *)"\x00\x00" /* 16-bit prio */
+      "\x04name\x00" /* RNAME */
+      "\x00\x01" /* RR (1 == ALPN) */
+      "\x00\x0c" /* data size */
+      "\x02" /* ALPN length byte */
+      "h1"
+      "\x02" /* ALPN length byte */
+      "h2"
+      "\x02" /* ALPN length byte */
+      "h3"
+      "\x08" /* ALPN length byte */
+      "http/1.1",
+      29,
+      "r:0|p:0|name.|alpn:8|alpn:10|alpn:20|" /* only 3 since we need room for terminator */
+    },
+    {
       "rname only",
       (const unsigned char *)"\x00\x00" /* 16-bit prio */
       "\x04name\x04some\x00", /* RNAME */
