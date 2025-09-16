@@ -53,7 +53,7 @@ function(curl_add_manual_pages _listname)
 
     list(APPEND _rofffiles "${CMAKE_CURRENT_BINARY_DIR}/${_file}")
     string(REPLACE ".3" ".md" _mdfile "${_file}")
-    if(_mdfile STREQUAL "libcurl-symbols.md")  # Special case for auto-generated file
+    if(_file STREQUAL "libcurl-symbols.3")  # Special case for auto-generated file
       set(_mdfile "${CMAKE_CURRENT_BINARY_DIR}/${_mdfile}")
     endif()
     list(APPEND _mdfiles "${_mdfile}")
