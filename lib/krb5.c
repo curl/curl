@@ -620,16 +620,16 @@ static CURLcode sec_recv(struct Curl_easy *data, int sockindex,
 
 /* Send |length| bytes from |from| to the |sockindex| socket taking care of
    encoding and negotiating with the server. |from| can be NULL. */
-static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
-                        int sockindex, const char *from, size_t length)
+static CURLcode do_sec_send(struct Curl_easy *data, struct connectdata *conn,
+                            int sockindex, const char *from, size_t length)
 {
   int bytes, htonl_bytes; /* 32-bit integers for htonl */
   char *buffer = NULL;
   char *cmd_buffer;
   size_t cmd_size = 0;
-  CURLcode error;
   enum protection_level prot_level = conn->data_prot;
   bool iscmd = (prot_level == PROT_CMD);
+  CURLcode result = CURLE_OK;
 
   DEBUGASSERT(prot_level > PROT_NONE && prot_level < PROT_LAST);
 
@@ -642,36 +642,40 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
   bytes = conn->mech->encode(conn->app_data, from, (int)length,
                              (int)prot_level, (void **)&buffer);
   if(!buffer || bytes <= 0)
-    return; /* error */
+    return CURLE_OUT_OF_MEMORY; /* error */
 
   if(iscmd) {
-    error = curlx_base64_encode(buffer, curlx_sitouz(bytes),
-                               &cmd_buffer, &cmd_size);
-    if(error) {
+    result = curlx_base64_encode(buffer, curlx_sitouz(bytes),
+                                 &cmd_buffer, &cmd_size);
+    if(result) {
       free(buffer);
-      return; /* error */
+      return result; /* error */
     }
     if(cmd_size > 0) {
       static const char *enc = "ENC ";
       static const char *mic = "MIC ";
       if(prot_level == PROT_PRIVATE)
-        socket_write(data, sockindex, enc, 4);
+        result = socket_write(data, sockindex, enc, 4);
       else
-        socket_write(data, sockindex, mic, 4);
-
-      socket_write(data, sockindex, cmd_buffer, cmd_size);
-      socket_write(data, sockindex, "\r\n", 2);
-      infof(data, "Send: %s%s", prot_level == PROT_PRIVATE ? enc : mic,
-            cmd_buffer);
-      free(cmd_buffer);
+        result = socket_write(data, sockindex, mic, 4);
+      if(!result)
+        result = socket_write(data, sockindex, cmd_buffer, cmd_size);
+      if(!result)
+        result = socket_write(data, sockindex, "\r\n", 2);
+      if(!result)
+        infof(data, "Send: %s%s", prot_level == PROT_PRIVATE ? enc : mic,
+              cmd_buffer);
     }
+    free(cmd_buffer);
   }
   else {
     htonl_bytes = (int)htonl((OM_uint32)bytes);
-    socket_write(data, sockindex, &htonl_bytes, sizeof(htonl_bytes));
-    socket_write(data, sockindex, buffer, curlx_sitouz(bytes));
+    result = socket_write(data, sockindex, &htonl_bytes, sizeof(htonl_bytes));
+    if(!result)
+      result = socket_write(data, sockindex, buffer, curlx_sitouz(bytes));
   }
   free(buffer);
+  return result;
 }
 
 static CURLcode sec_write(struct Curl_easy *data, int sockindex,
@@ -685,11 +689,13 @@ static CURLcode sec_write(struct Curl_easy *data, int sockindex,
   if(len <= 0)
     len = length;
   while(length) {
+    CURLcode result;
     if(length < len)
       len = length;
 
-    /* WTF: this ignores all errors writing to the socket */
-    do_sec_send(data, conn, sockindex, buffer, len);
+    result = do_sec_send(data, conn, sockindex, buffer, len);
+    if(result)
+      return result;
     length -= len;
     buffer += len;
     *pnwritten += len;
