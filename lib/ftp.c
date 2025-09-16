@@ -599,6 +599,8 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
       /* normal ftp stuff we pass through! */
       break;
     }
+    if(code < 0)
+      return CURLE_RECV_ERROR;
   }
 #endif
 

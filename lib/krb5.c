@@ -720,7 +720,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
      int */
   int decoded_len;
   char *buf;
-  int ret_code = 0;
+  int ret_code = -1;
   size_t decoded_sz = 0;
   CURLcode error;
 
