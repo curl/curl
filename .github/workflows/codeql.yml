@@ -115,6 +115,7 @@ jobs:
             cmake --build _bld1 --verbose --target curlinfo
             cmake --build _bld1 --verbose --target servers
             cmake --build _bld1 --verbose --target tunits
+            cmake --build _bld1 --verbose --target curl-examples-build
 
             # HTTP/3
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix libnghttp3)/lib/pkgconfig:$(brew --prefix libngtcp2)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
