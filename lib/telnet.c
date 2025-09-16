@@ -108,15 +108,15 @@
  */
 typedef enum
 {
-   CURL_TS_DATA = 0,
-   CURL_TS_IAC,
-   CURL_TS_WILL,
-   CURL_TS_WONT,
-   CURL_TS_DO,
-   CURL_TS_DONT,
-   CURL_TS_CR,
-   CURL_TS_SB,   /* sub-option collection */
-   CURL_TS_SE   /* looking for sub-option end */
+  CURL_TS_DATA = 0,
+  CURL_TS_IAC,
+  CURL_TS_WILL,
+  CURL_TS_WONT,
+  CURL_TS_DO,
+  CURL_TS_DONT,
+  CURL_TS_CR,
+  CURL_TS_SB,   /* sub-option collection */
+  CURL_TS_SE    /* looking for sub-option end */
 } TelnetReceive;
 
 struct TELNET {
@@ -939,7 +939,6 @@ static bool bad_option(const char *data)
  * Look at the sub-option buffer, and try to be helpful to the other
  * side.
  */
-
 static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
 {
   struct curl_slist *v;
@@ -1023,13 +1022,11 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   return CURLE_OK;
 }
 
-
 /*
  * sendsuboption()
  *
  * Send suboption information to the server side.
  */
-
 static void sendsuboption(struct Curl_easy *data,
                           struct TELNET *tn, int option)
 {
@@ -1083,7 +1080,6 @@ static void sendsuboption(struct Curl_easy *data,
     break;
   }
 }
-
 
 static
 CURLcode telrcv(struct Curl_easy *data,

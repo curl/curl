@@ -100,8 +100,8 @@ jobs:
       - name: 'mdlinkcheck'
         run: ./scripts/mdlinkcheck
 
-  spellcheck:
-    name: 'spellcheck'
+  pyspelling:
+    name: 'pyspelling'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -125,6 +125,7 @@ jobs:
       - name: 'check spelling'
         run: |
           source ~/venv/bin/activate
+          # setup the custom wordlist
           grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
           aspell --version
           pyspelling --version

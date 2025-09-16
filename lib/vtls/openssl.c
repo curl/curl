@@ -125,7 +125,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
  * X509_V_ERR_EC_KEY_EXPLICIT_PARAMS. */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
   !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL) && \
-  (!defined(OPENSSL_IS_AWSLC) || (defined(X509_V_ERR_EC_KEY_EXPLICIT_PARAMS)))
+  (!defined(OPENSSL_IS_AWSLC) || defined(X509_V_ERR_EC_KEY_EXPLICIT_PARAMS))
 #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 

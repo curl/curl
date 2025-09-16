@@ -178,7 +178,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           x=CURLOPT_ERRORBUFFER;
           x=CURLOPT_STDERR;
           x=CURLOPT_VERBOSE;
-          if (x) {;}
+          if(x) {;}
         ]])],libcurl_cv_lib_curl_usable=yes,libcurl_cv_lib_curl_usable=no)
 
         CPPFLAGS=$_libcurl_save_cppflags

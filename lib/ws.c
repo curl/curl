@@ -545,7 +545,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
       const unsigned char tmp = '\0';
       /* special case of a 0 length frame, need to write once */
       result = write_cb(&tmp, 0, dec->frame_age, dec->frame_flags,
-                          0, 0, write_ctx, &nwritten);
+                        0, 0, write_ctx, &nwritten);
       if(result)
         return result;
       dec->state = WS_DEC_INIT;
@@ -680,8 +680,8 @@ static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
                 payload_len, buflen);
 
     result = Curl_cwriter_write(data, ctx->next_writer,
-                              (ctx->cw_type | CLIENTWRITE_0LEN),
-                              (const char *)buf, buflen);
+                                (ctx->cw_type | CLIENTWRITE_0LEN),
+                                (const char *)buf, buflen);
     if(result)
       return result;
   }
@@ -1579,9 +1579,9 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
   *metap = &ws->recvframe;
   *nread = ws->recvframe.len;
   CURL_TRC_WS(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
-               FMT_OFF_T ", %" FMT_OFF_T " left)",
-               buflen, *nread, ws->recvframe.offset,
-               ws->recvframe.bytesleft);
+              FMT_OFF_T ", %" FMT_OFF_T " left)",
+              buflen, *nread, ws->recvframe.offset,
+              ws->recvframe.bytesleft);
   /* all's well, try to send any pending control. we do not know
    * when the application will call `curl_ws_send()` again. */
   if(!data->set.ws_raw_mode && ws->pending.type) {

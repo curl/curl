@@ -2558,8 +2558,8 @@ static int schannel_init(void)
 #endif
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        (GetProcAddress(GetModuleHandleA("ntdll"),
-                                        "wine_get_version")));
+                        GetProcAddress(GetModuleHandleA("ntdll"),
+                                       "wine_get_version"));
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif

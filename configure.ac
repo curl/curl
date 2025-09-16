@@ -208,7 +208,7 @@ OPT_SCHANNEL=no
 AC_ARG_WITH(schannel,dnl
 AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
   OPT_SCHANNEL=$withval
-  TLSCHOICE="schannel")
+  TLSCHOICE="Schannel")
 
 OPT_AMISSL=no
 AC_ARG_WITH(amissl,dnl
@@ -5033,8 +5033,8 @@ if test "x$want_ech" != "xno"; then
       ECH_ENABLED_WOLFSSL=1)
   fi
   if test "x$RUSTLS_ENABLED" = "x1"; then
-      ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
-      ECH_ENABLED_RUSTLS=1
+    ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
+    ECH_ENABLED_RUSTLS=1
   fi
 
   dnl now deal with whatever we found
