@@ -121,14 +121,11 @@
 static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
-/*
- * AWS-LC has `SSL_CTX_set_default_read_buffer_len()?` but runs into
- * decryption failures with large buffers. Sporadic failures in
- * test_10_08 with h2 proxy uploads, increased frequency
- * with CURL_DBG_SOCK_RBLOCK=50. Looks like a bug on their part.
- */
+/* AWS-LC fixed a bug with large buffers in v1.61.0 which also introduced
+ * X509_V_ERR_EC_KEY_EXPLICIT_PARAMS. */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
-  !defined(LIBRESSL_VERSION_NUMBER) && !defined(HAVE_BORINGSSL_LIKE)
+  !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL) && \
+  (!defined(OPENSSL_IS_AWSLC) || (defined(X509_V_ERR_EC_KEY_EXPLICIT_PARAMS)))
 #define HAVE_SSL_CTX_SET_DEFAULT_READ_BUFFER_LEN 1
 #endif
 
