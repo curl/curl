@@ -67,6 +67,7 @@
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../curl_printf.h"
+#include "apple.h"
 
 #include <openssl/ssl.h>
 #include <openssl/rand.h>
@@ -4973,6 +4974,69 @@ out:
 }
 #endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
 
+struct ossl_cert_chain {
+  STACK_OF(X509) *sk;
+  size_t num_certs;
+};
+
+static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   void *user_data,
+                                   size_t i,
+                                   unsigned char **pder,
+                                   size_t *pder_len)
+{
+  struct ossl_cert_chain *chain = user_data;
+  X509 *cert;
+  int der_len;
+
+  (void)cf;
+  (void)data;
+  *pder_len = 0;
+  *pder = NULL;
+
+  if(i >= chain->num_certs)
+    return CURLE_TOO_LARGE;
+  cert = sk_X509_value(chain->sk, i);
+  if(!cert)
+    return CURLE_FAILED_INIT;
+  der_len = i2d_X509(cert, pder);
+  if(der_len < 0)
+    return CURLE_FAILED_INIT;
+  *pder_len = (size_t)der_len;
+  return CURLE_OK;
+}
+
+static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct ossl_ctx *octx,
+                                   struct ssl_peer *peer)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ossl_cert_chain chain;
+  CURLcode result;
+
+  memset(&chain, 0, sizeof(chain));
+  chain.sk = SSL_get_peer_cert_chain(octx->ssl);
+  chain.num_certs = chain.sk ? sk_X509_num(chain.sk) : 0;
+
+  if(!chain.num_certs &&
+     (conn_config->verifypeer || conn_config->verifyhost)) {
+    failf(data, "SSL: could not get peer certificate");
+    result = CURLE_PEER_FAILED_VERIFICATION;
+  }
+
+#ifdef USE_APPLE_SECTRUST
+  result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
+                                  ossl_chain_get_der, &chain,
+                                  NULL, 0);
+  return result;
+#else
+  failf(data, "native CA verification is not supported");
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
 CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct ossl_ctx *octx,
@@ -5008,40 +5072,38 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     goto out;
 #endif
 
-  if(conn_config->verifyhost) {
-    result = ossl_verifyhost(data, conn, peer, server_cert);
-    if(result)
-      goto out;
-  }
-
-  /* We could do all sorts of certificate verification stuff here before
-     deallocating the certificate. */
-  result = ossl_check_issuer(cf, data, server_cert);
-  if(result)
-    goto out;
-
-  lerr = SSL_get_verify_result(octx->ssl);
-  ssl_config->certverifyresult = lerr;
-  if(lerr != X509_V_OK) {
-    if(conn_config->verifypeer) {
-      /* We probably never reach this, because SSL_connect() will fail
-         and we return earlier if verifypeer is set? */
-      if(strict)
-        failf(data, "SSL certificate verify result: %s (%ld)",
-              X509_verify_cert_error_string(lerr), lerr);
-      result = CURLE_PEER_FAILED_VERIFICATION;
-      goto out;
-    }
-    else
-      infof(data, " SSL certificate verify result: %s (%ld),"
-            " continuing anyway.",
-            X509_verify_cert_error_string(lerr), lerr);
+  if(ssl_config->native_ca_store && conn_config->verifypeer) {
+    result = ossl_verify_native(cf, data, octx, peer);
   }
   else {
-    infof(data, " SSL certificate verify ok.");
+    if(conn_config->verifyhost)
+      result = ossl_verifyhost(data, conn, peer, server_cert);
+    if(!result) {
+      lerr = SSL_get_verify_result(octx->ssl);
+      ssl_config->certverifyresult = lerr;
+      if(lerr != X509_V_OK) {
+        /* We probably never reach this, because SSL_connect() will fail
+           and we return earlier if verifypeer is set? */
+        failf(data, "SSL certificate verify result: %s (%ld)",
+              X509_verify_cert_error_string(lerr), lerr);
+        result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+    }
   }
 
   infof_certstack(data, octx->ssl);
+
+  if(!result) {
+    infof(data, " SSL certificate verify ok.");
+  }
+  else if(result == CURLE_PEER_FAILED_VERIFICATION) {
+    if(conn_config->verifypeer)
+      goto out;
+    infof(data, " SSL certificate verification failed, continuing anyway!");
+    result = CURLE_OK;
+  }
+  else
+    goto out;
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus && !octx->reused_session) {
@@ -5051,6 +5113,10 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
       goto out;
   }
 #endif
+
+  result = ossl_check_issuer(cf, data, server_cert);
+  if(result)
+    goto out;
 
   result = ossl_check_pinned_key(cf, data, server_cert);
 

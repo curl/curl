@@ -93,8 +93,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 Curl_vtls_get_cert_der *der_cb,
                                 void *cb_user_data,
                                 const void *ocsp_buf,
-                                size_t ocsp_len,
-                                bool *pverified)
+                                size_t ocsp_len)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -107,8 +106,6 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   CFErrorRef error = NULL;
   OSStatus status = noErr;
   size_t i;
-
-  *pverified = FALSE;
 
   if(conn_config->verifyhost) {
     host_str = CFStringCreateWithCString(NULL,
@@ -143,10 +140,19 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
        * This policy further allows trustd to consult CRLs and OCSP data
        * to determine revocation status (which it may then cache). */
       CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
+#if 0
+      /* `revoke_best_effort` is off by default in libcurl. When we
+       * add `kSecRevocationRequirePositiveResponse` to the Apple
+       * Trust policies, it interprets this as it NEEDs a confirmation
+       * of a cert being NOT REVOKED. Which not in general available for
+       * certificates on the internet.
+       * It seems that applications using this policy are expected to PIN
+       * their certificate public keys or verfication will fail.
+       * This does not seem to be what we want here. */
       if(!ssl_config->revoke_best_effort) {
         revocation_flags |= kSecRevocationRequirePositiveResponse;
       }
-
+#endif
       policy = SecPolicyCreateRevocation(revocation_flags);
       if(!policy) {
         result = CURLE_OUT_OF_MEMORY;
@@ -226,7 +232,6 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #endif
     result = SecTrustEvaluateWithError(trust, &error) ?
              CURLE_OK : CURLE_PEER_FAILED_VERIFICATION;
-    *pverified = !result;
     if(error) {
       CFIndex code = CFErrorGetCode(error);
       CFStringRef error_desc = CFErrorCopyDescription(error);
@@ -273,7 +278,6 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
             (status == kSecTrustResultProceed)) {
       /* "unspecified" means system-trusted with no explicit user setting */
       result = CURLE_OK;
-      *pverified = TRUE;
     }
 #endif /* REQUIRES_SecTrustEvaluateWithError */
   }
