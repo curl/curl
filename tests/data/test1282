@@ -37,9 +37,9 @@ USER anonymous
 PASS ftp@example.com
 </protocol>
 
-# 67 == CURLE_LOGIN_DENIED
+# 56 == CURLE_RECV_ERROR
 <errorcode>
-67
+56
 </errorcode>
 </verify>
 </testcase>
