@@ -121,7 +121,7 @@
 static void ossl_provider_cleanup(struct Curl_easy *data);
 #endif
 
-/* AWS-LC fixed a bug with large buffers in v1.16.0 which also introduced
+/* AWS-LC fixed a bug with large buffers in v1.61.0 which also introduced
  * X509_V_ERR_EC_KEY_EXPLICIT_PARAMS. */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L && \
   !defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_IS_BORINGSSL) && \
