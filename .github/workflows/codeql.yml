@@ -79,7 +79,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev \
+          sudo apt-get -o Dpkg::Use-Pty=0 install libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libc-ares-dev \
             libnghttp2-dev libldap-dev heimdal-dev librtmp-dev libgnutls28-dev libwolfssl-dev
           /home/linuxbrew/.linuxbrew/bin/brew install gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
 
@@ -108,10 +108,11 @@ jobs:
 
             # MultiSSL
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix rustls-ffi)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
-            cmake -B _bld1 -G Ninja \
+            cmake -B _bld1 -G Ninja -DENABLE_DEBUG=ON \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
-              -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
+              -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DENABLE_ARES=ON
             cmake --build _bld1 --verbose
+            cmake --build _bld1 --verbose --target curlinfo
             cmake --build _bld1 --verbose --target servers
             cmake --build _bld1 --verbose --target tunits
 
