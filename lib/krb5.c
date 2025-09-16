@@ -713,7 +713,8 @@ static CURLcode sec_send(struct Curl_easy *data, int sockindex,
 }
 
 int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
-                      char *buffer, enum protection_level level)
+                      char *buffer, const size_t buflen,
+                      enum protection_level level)
 {
   /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
      int */
@@ -722,8 +723,6 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   int ret_code = 0;
   size_t decoded_sz = 0;
   CURLcode error;
-
-  (void)data;
 
   if(!conn->mech)
     /* not initialized, return error */
@@ -748,22 +747,25 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
     return -1;
   }
 
-  {
-    buf[decoded_len] = '\n';
-    Curl_debug(data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
-  }
-
+  buf[decoded_len] = '\n';
+  Curl_debug(data, CURLINFO_HEADER_IN, buf, decoded_len + 1);
   buf[decoded_len] = '\0';
+
   if(decoded_len <= 3)
     /* suspiciously short */
-    return 0;
+    return -1;
 
   if(buf[3] != '-')
     ret_code = atoi(buf);
 
   if(buf[decoded_len - 1] == '\n')
-    buf[decoded_len - 1] = '\0';
-  strcpy(buffer, buf);
+    buf[--decoded_len] = '\0';
+
+  if((size_t)decoded_len > buflen)
+    /* too big */
+    ret_code = -1;
+  else
+    memcpy(buffer, buf, decoded_len + 1);
   free(buf);
   return ret_code;
 }
