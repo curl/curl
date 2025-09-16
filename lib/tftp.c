@@ -1184,7 +1184,7 @@ static timediff_t tftp_state_timeout(struct tftp_conn *state,
   if(timeout_ms < 0) {
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
-    return 0;
+    return timeout_ms;
   }
   current = time(NULL);
   if(current > state->rx_time + state->retry_time) {
