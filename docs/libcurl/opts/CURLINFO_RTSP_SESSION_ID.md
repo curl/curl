@@ -33,9 +33,9 @@ most recent RTSP Session ID.
 Applications wishing to resume an RTSP session on another connection should
 retrieve this info before closing the active connection.
 
-The **id** pointer is NULL or points to private memory. You MUST NOT free - it
-gets freed when you call curl_easy_cleanup(3) on the corresponding curl
-handle.
+The **id** pointer is NULL or points to private memory. You **must not** free
+it. The memory gets freed automatically when you call curl_easy_cleanup(3) on
+the corresponding curl handle.
 
 # %PROTOCOLS%
 

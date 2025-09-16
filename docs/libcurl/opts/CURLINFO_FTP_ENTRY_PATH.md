@@ -32,9 +32,9 @@ path of the entry path. That is the initial path libcurl ended up in when
 logging on to the remote FTP or SFTP server. This stores a NULL as pointer if
 something is wrong.
 
-The **path** pointer is NULL or points to private memory. You MUST NOT free
-- it gets freed when you call curl_easy_cleanup(3) on the corresponding curl
-handle.
+The **path** pointer is NULL or points to private memory. You **must not**
+free it. The memory gets freed automatically when you call
+curl_easy_cleanup(3) on the corresponding curl handle.
 
 # %PROTOCOLS%
 

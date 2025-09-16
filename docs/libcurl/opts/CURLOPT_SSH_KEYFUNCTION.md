@@ -68,7 +68,7 @@ called if CURLOPT_SSH_KNOWNHOSTS(3) is also set.
 This callback function gets passed the curl handle, the key from the
 known_hosts file *knownkey*, the key from the remote site *foundkey*, info
 from libcurl on the matching status and a custom pointer (set with
-CURLOPT_SSH_KEYDATA(3)). It MUST return one of the following return codes to
+CURLOPT_SSH_KEYDATA(3)). It must return one of the following return codes to
 tell libcurl how to act:
 
 ## CURLKHSTAT_FINE_REPLACE

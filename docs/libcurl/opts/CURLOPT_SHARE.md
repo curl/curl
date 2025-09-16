@@ -26,13 +26,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SHARE, CURLSH *share);
 
 # DESCRIPTION
 
-Pass a *share* handle as a parameter. The share handle must have been
-created by a previous call to curl_share_init(3). Setting this option,
-makes this curl handle use the data from the shared handle instead of keeping
-the data to itself. This enables several curl handles to share data. If the
-curl handles are used simultaneously in multiple threads, you **MUST** use
-the locking methods in the share handle. See curl_share_setopt(3) for
-details.
+Pass a *share* handle as a parameter. The share handle must have been created
+by a previous call to curl_share_init(3). Setting this option, makes this curl
+handle use the data from the shared handle instead of keeping the data to
+itself. This enables several curl handles to share data. If the curl handles
+are used simultaneously in multiple threads, you **must** use the locking
+methods in the share handle. See curl_share_setopt(3) for details.
 
 If you add a share that is set to share cookies, your easy handle uses that
 cookie cache and get the cookie engine enabled. If you stop sharing an object
