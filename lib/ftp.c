@@ -582,17 +582,18 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   {
     struct connectdata *conn = data->conn;
     char * const buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
+    size_t bufsize = curlx_dyn_len(&ftpc->pp.recvbuf);
 
     /* handle the security-oriented responses 6xx ***/
     switch(code) {
     case 631:
-      code = Curl_sec_read_msg(data, conn, buf, PROT_SAFE);
+      code = Curl_sec_read_msg(data, conn, buf, bufsize, PROT_SAFE);
       break;
     case 632:
-      code = Curl_sec_read_msg(data, conn, buf, PROT_PRIVATE);
+      code = Curl_sec_read_msg(data, conn, buf, bufsize, PROT_PRIVATE);
       break;
     case 633:
-      code = Curl_sec_read_msg(data, conn, buf, PROT_CONFIDENTIAL);
+      code = Curl_sec_read_msg(data, conn, buf, bufsize, PROT_CONFIDENTIAL);
       break;
     default:
       /* normal ftp stuff we pass through! */

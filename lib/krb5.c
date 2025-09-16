@@ -707,7 +707,8 @@ static CURLcode sec_send(struct Curl_easy *data, int sockindex,
 }
 
 int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
-                      char *buffer, enum protection_level level)
+                      char *buffer, size_t bufsize,
+                      enum protection_level level)
 {
   /* decoded_len should be size_t or ssize_t but conn->mech->decode returns an
      int */
@@ -757,7 +758,18 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
 
   if(buf[decoded_len - 1] == '\n')
     buf[decoded_len - 1] = '\0';
-  strcpy(buffer, buf);
+
+  /* Calculate actual string length after potential newline removal */
+  size_t copy_len = strlen(buf);
+
+  /* Prevent buffer overflow by checking destination buffer size */
+  if(copy_len >= bufsize) {
+    free(buf);
+    return -1; /* Buffer too small */
+  }
+
+  /* Safe copy with known length and size check */
+  memcpy(buffer, buf, copy_len + 1);
   free(buf);
   return ret_code;
 }

@@ -43,7 +43,7 @@ struct Curl_sec_client_mech {
 void Curl_sec_conn_init(struct connectdata *);
 void Curl_sec_conn_destroy(struct connectdata *);
 int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn, char *,
-                      enum protection_level);
+                      size_t, enum protection_level);
 CURLcode Curl_sec_login(struct Curl_easy *, struct connectdata *);
 int Curl_sec_request_prot(struct connectdata *conn, const char *level);
 #else
