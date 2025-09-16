@@ -44,7 +44,7 @@ says what type it is, from the **CURLKHTYPE_*** series in the
 
 **clientp** is a custom pointer set with CURLOPT_SSH_HOSTKEYDATA(3).
 
-The callback MUST return one of the following return codes to tell libcurl how
+The callback must return one of the following return codes to tell libcurl how
 to act:
 
 ## CURLKHMATCH_OK

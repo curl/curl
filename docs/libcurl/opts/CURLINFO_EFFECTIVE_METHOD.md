@@ -35,9 +35,9 @@ method.
 In cases when you have asked libcurl to follow redirects, the method may not be
 the same method the first request would use.
 
-The **methodp** pointer is NULL or points to private memory. You MUST NOT
-free - it gets freed when you call curl_easy_cleanup(3) on the
-corresponding curl handle.
+The **methodp** pointer is NULL or points to private memory. You
+**must not** free it. The memory gets freed automatically when you call
+curl_easy_cleanup(3) on the corresponding curl handle.
 
 # %PROTOCOLS%
 

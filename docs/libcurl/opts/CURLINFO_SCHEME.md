@@ -33,9 +33,9 @@ Pass a pointer to a char pointer to receive the pointer to a null-terminated
 string holding the URL scheme used for the most recent connection done with
 this CURL **handle**.
 
-The **scheme** pointer is NULL or points to private memory. You MUST NOT
-free - it gets freed when you call curl_easy_cleanup(3) on the corresponding
-curl handle.
+The **scheme** pointer is NULL or points to private memory. You **must not**
+free it. The memory gets freed automatically when you call
+curl_easy_cleanup(3) on the corresponding curl handle.
 
 The returned scheme might be upper or lowercase. Do comparisons case
 insensitively.

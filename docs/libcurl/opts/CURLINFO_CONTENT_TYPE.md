@@ -33,9 +33,9 @@ object. This is the value read from the Content-Type: field. If you get NULL,
 it means that the server did not send a valid Content-Type header or that the
 protocol used does not support this.
 
-The **ct** pointer is set to NULL or pointing to private memory. You MUST
-NOT free it - it gets freed when you call curl_easy_cleanup(3) on the
-corresponding curl handle.
+The **ct** pointer is set to NULL or pointing to private memory. You
+**must not** free it. It gets freed automaticall when you call
+curl_easy_cleanup(3) on the corresponding curl handle.
 
 The modern way to get this header from a response is to instead use the
 curl_easy_header(3) function.
