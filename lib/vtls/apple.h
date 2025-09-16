@@ -48,8 +48,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 Curl_vtls_get_cert_der *der_cb,
                                 void *cb_user_data,
                                 const void *ocsp_buf,
-                                size_t ocsp_len,
-                                bool *pverified);
+                                size_t ocsp_len);
 
 #endif /* USE_APPLE_SECTRUST */
 
