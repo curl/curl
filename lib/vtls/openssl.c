@@ -5047,7 +5047,7 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
 
   if(i >= chain->num_certs)
     return CURLE_TOO_LARGE;
-  cert = sk_X509_value(chain->sk, i);
+  cert = sk_X509_value(chain->sk, (int)i);
   if(!cert)
     return CURLE_FAILED_INIT;
   der_len = i2d_X509(cert, pder);
@@ -5172,7 +5172,6 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     if(conn_config->verifypeer)
       goto out;
     infof(data, " SSL certificate verification failed, continuing anyway!");
-    result = CURLE_OK;
   }
   else if(result)
     goto out;
