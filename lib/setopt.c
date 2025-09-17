@@ -955,7 +955,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_MAXREDIRS:
-    result = value_range(&arg, -1, 0, 0x7fff);
+    result = value_range(&arg, -1, -1, 0x7fff);
     if(result)
       return result;
     s->maxredirs = (short)arg;
