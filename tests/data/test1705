@@ -224,9 +224,9 @@ End with a quote
 hello
 .fi
 
-This option is global and does not need to be specified for each use of --next.
+This option is global and does not need to be specified for each use of \fI\-\-next\fP.
 
-Providing --fakeitreal multiple times has no extra effect.
+Providing \fI\-\-fakeitreal\fP multiple times has no extra effect.
 Disable it again with \-\-no-fakeitreal.
 
 Example:
@@ -265,14 +265,14 @@ relying upon support for that protocol being built into curl to avoid an error.
 This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
 
-If --proto is provided several times, the last set value is used.
+If \fI\-\-proto\fP is provided several times, the last set value is used.
 
 Example:
 .nf
 curl --proto =http,https,sftp https://example.com
 .fi
 
-See also \fI-v, \-\-fakeitreal\fP and \fI\-\-proto\-default\fP.
+See also \fI\-\-fakeitreal\fP and \fI\-\-proto\-default\fP.
 .SH PROXY PROTOCOL PREFIXES
 The proxy string may be specified with a protocol:// prefix to specify
 alternative proxy protocols.
