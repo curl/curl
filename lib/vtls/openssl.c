@@ -5125,7 +5125,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     /* asked to gather certificate info */
     (void)ossl_certchain(data, octx->ssl);
 
-  server_cert = SSL_get_peer_certificate(octx->ssl);
+  server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!server_cert) {
     if(!strict)
       goto out;
