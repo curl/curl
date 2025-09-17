@@ -209,7 +209,6 @@ LIB_CFILES =         \
   idn.c              \
   if2ip.c            \
   imap.c             \
-  krb5.c             \
   ldap.c             \
   llist.c            \
   macos.c            \
@@ -292,7 +291,6 @@ LIB_HFILES =         \
   curl_gethostname.h \
   curl_gssapi.h      \
   curl_hmac.h        \
-  curl_krb5.h        \
   curl_ldap.h        \
   curl_md4.h         \
   curl_md5.h         \

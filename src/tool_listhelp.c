@@ -343,7 +343,7 @@ const struct helptxt helptext[] = {
    CURLHELP_TLS},
   {"    --krb <level>",
    "Enable Kerberos with security <level>",
-   CURLHELP_FTP},
+   CURLHELP_DEPRECATED},
   {"    --libcurl <file>",
    "Generate libcurl code for this command line",
    CURLHELP_CURL | CURLHELP_GLOBAL},

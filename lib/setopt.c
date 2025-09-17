@@ -1967,15 +1967,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
     return Curl_setstropt(&s->str[STRING_FTP_ALTERNATIVE_TO_USER], ptr);
 
-#ifdef HAVE_GSSAPI
   case CURLOPT_KRBLEVEL:
-    /*
-     * A string that defines the kerberos security level.
-     */
-    result = Curl_setstropt(&s->str[STRING_KRB_LEVEL], ptr);
-    s->krb = !!(s->str[STRING_KRB_LEVEL]);
-    break;
-#endif
+    return CURLE_NOT_BUILT_IN; /* removed in 8.17.0 */
 #endif
   case CURLOPT_URL:
     /*

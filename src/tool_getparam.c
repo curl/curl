@@ -196,8 +196,8 @@ static const struct LongShort aliases[]= {
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG|ARG_TLS, ' ', C_KEY_TYPE},
-  {"krb",                        ARG_STRG, ' ', C_KRB},
-  {"krb4",                       ARG_STRG, ' ', C_KRB4},
+  {"krb",                        ARG_STRG|ARG_DEPR, ' ', C_KRB},
+  {"krb4",                       ARG_STRG|ARG_DEPR, ' ', C_KRB4},
   {"libcurl",                    ARG_STRG, ' ', C_LIBCURL},
   {"limit-rate",                 ARG_STRG, ' ', C_LIMIT_RATE},
   {"list-only",                  ARG_BOOL, 'l', C_LIST_ONLY},
@@ -2371,13 +2371,6 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_INTERFACE: /* --interface */
     /* interface */
     err = getstr(&config->iface, nextarg, DENY_BLANK);
-    break;
-  case C_KRB: /* --krb */
-    /* kerberos level string */
-    if(!feature_spnego)
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-    else
-      err = getstr(&config->krblevel, nextarg, DENY_BLANK);
     break;
   case C_HAPROXY_CLIENTIP: /* --haproxy-clientip */
     err = getstr(&config->haproxy_clientip, nextarg, DENY_BLANK);

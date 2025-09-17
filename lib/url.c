@@ -98,7 +98,6 @@
 #include "hsts.h"
 #include "noproxy.h"
 #include "cfilters.h"
-#include "curl_krb5.h"
 #include "idn.h"
 
 /* And now for the protocols */
@@ -599,7 +598,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
 #endif
-  Curl_sec_conn_destroy(conn);
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->sasl_authzid);
@@ -1447,10 +1445,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   /* Initialize the attached xfers bitset */
   Curl_uint_spbset_init(&conn->xfers_attached);
-
-#ifdef HAVE_GSSAPI
-  conn->data_prot = PROT_CLEAR;
-#endif
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
@@ -3466,10 +3460,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   /* Do the unfailable inits first, before checks that may early return */
   Curl_hash_init(&conn->meta_hash, 23,
-               Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
-
-  /* GSSAPI related inits */
-  Curl_sec_conn_init(conn);
+                 Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
 
   result = parseurlandfillconn(data, conn);
   if(result)

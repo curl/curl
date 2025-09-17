@@ -234,25 +234,6 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
   ((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))
 #endif
 
-#ifdef HAVE_GSSAPI
-/* Types needed for krb5-ftp connections */
-struct krb5buffer {
-  struct dynbuf buf;
-  size_t index;
-  BIT(eof_flag);
-};
-
-enum protection_level {
-  PROT_NONE, /* first in list */
-  PROT_CLEAR,
-  PROT_SAFE,
-  PROT_CONFIDENTIAL,
-  PROT_PRIVATE,
-  PROT_CMD,
-  PROT_LAST /* last in list */
-};
-#endif
-
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
 struct Curl_ssl_scache_entry;
@@ -702,20 +683,6 @@ struct connectdata {
      This allows those protocols to track the last time the keepalive mechanism
      was used on this connection. */
   struct curltime keepalive;
-
-  /**** curl_get() phase fields */
-
-#ifdef HAVE_GSSAPI
-  BIT(sec_complete); /* if Kerberos is enabled for this connection */
-  unsigned char command_prot; /* enum protection_level */
-  unsigned char data_prot; /* enum protection_level */
-  unsigned char request_data_prot; /* enum protection_level */
-  size_t buffer_size;
-  struct krb5buffer in_buffer;
-  void *app_data;
-  const struct Curl_sec_client_mech *mech;
-  struct sockaddr_in local_addr;
-#endif
 
   struct uint_spbset xfers_attached; /* mids of attached transfers */
   /* A connection cache from a SHARE might be used in several multi handles.
@@ -1239,9 +1206,6 @@ enum dupstring {
   STRING_FTP_ALTERNATIVE_TO_USER, /* command to send if USER/PASS fails */
   STRING_FTPPORT,         /* port to send with the FTP PORT command */
 #endif
-#ifdef HAVE_GSSAPI
-  STRING_KRB_LEVEL,       /* krb security level */
-#endif
 #ifndef CURL_DISABLE_NETRC
   STRING_NETRC_FILE,      /* if not NULL, use this instead of trying to find
                              $HOME/.netrc */
@@ -1604,9 +1568,6 @@ struct UserDefined {
                              location: */
   BIT(opt_no_body);    /* as set with CURLOPT_NOBODY */
   BIT(verbose);        /* output verbosity */
-#ifdef HAVE_GSSAPI
-  BIT(krb);            /* Kerberos connection requested */
-#endif
   BIT(reuse_forbid);   /* forbidden to be reused, close after use */
   BIT(reuse_fresh);    /* do not reuse an existing connection  */
   BIT(no_signal);      /* do not use any signal/alarm handler */

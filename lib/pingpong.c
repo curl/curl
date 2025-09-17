@@ -182,10 +182,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   CURLcode result;
   struct connectdata *conn = data->conn;
 
-#ifdef HAVE_GSSAPI
-  enum protection_level data_sec;
-#endif
-
   DEBUGASSERT(pp->sendleft == 0);
   DEBUGASSERT(pp->sendsize == 0);
   DEBUGASSERT(pp->sendthis == NULL);
@@ -208,9 +204,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   write_len = curlx_dyn_len(&pp->sendbuf);
   s = curlx_dyn_ptr(&pp->sendbuf);
 
-#ifdef HAVE_GSSAPI
-  conn->data_prot = PROT_CMD;
-#endif
   result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
                           &bytes_written);
   if(result == CURLE_AGAIN) {
@@ -218,11 +211,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   }
   else if(result)
     return result;
-#ifdef HAVE_GSSAPI
-  data_sec = conn->data_prot;
-  DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
-  conn->data_prot = (unsigned char)data_sec;
-#endif
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, bytes_written);
 
@@ -272,17 +260,7 @@ static CURLcode pingpong_read(struct Curl_easy *data,
                               size_t buflen,
                               size_t *nread)
 {
-  CURLcode result;
-#ifdef HAVE_GSSAPI
-  enum protection_level prot = data->conn->data_prot;
-  data->conn->data_prot = PROT_CLEAR;
-#endif
-  result = Curl_conn_recv(data, sockindex, buffer, buflen, nread);
-#ifdef HAVE_GSSAPI
-  DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
-  data->conn->data_prot = (unsigned char)prot;
-#endif
-  return result;
+  return Curl_conn_recv(data, sockindex, buffer, buflen, nread);
 }
 
 /*
@@ -348,10 +326,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
         size_t length = nl - line + 1;
 
         /* output debug output if that is requested */
-#ifdef HAVE_GSSAPI
-        if(!conn->sec_complete)
-#endif
-          Curl_debug(data, CURLINFO_HEADER_IN, line, length);
+        Curl_debug(data, CURLINFO_HEADER_IN, line, length);
 
         /*
          * Pass all response-lines to the callback function registered for
