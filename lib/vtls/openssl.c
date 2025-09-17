@@ -3335,8 +3335,7 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
   *padded = FALSE;
   for(i = 0; i < CURL_ARRAYSIZE(win_stores); ++i) {
     bool store_added = FALSE;
-    result = ossl_windows_load_store(data, win_stores[i], store,
-                                     &store_added);
+    result = ossl_win_load_store(data, win_stores[i], store, &store_added);
     if(result)
       return result;
     if(store_added) {
