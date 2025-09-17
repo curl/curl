@@ -4948,6 +4948,7 @@ static CURLcode ossl_check_pinned_key(struct Curl_cfilter *cf,
   const char *ptr;
   CURLcode result = CURLE_OK;
 
+  (void)cf;
 #ifndef CURL_DISABLE_PROXY
   ptr = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
