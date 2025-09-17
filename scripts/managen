@@ -78,14 +78,9 @@ sub manpageify {
     my $klong = $k;
     # quote "bare" minuses in the long name
     $klong =~ s/-/\\-/g;
-    if($optlong{$k}) {
-        # both short + long
-        $l = "\\fI-".$optlong{$k}.", \\-\\-$klong\\fP$trail";
-    }
-    else {
-        # only long
-        $l = "\\fI\\-\\-$klong\\fP$trail";
-    }
+
+    # only long
+    $l = "\\fI\\-\\-$klong\\fP$trail";
     return $l;
 }
 
@@ -751,11 +746,15 @@ sub single {
 
     my @extra;
     if($multi eq "single") {
-        push @extra, "${pre}If --$long is provided several times, the last set ".
-            "value is used.\n";
+        push @extra,
+            sprintf("${pre}If %s is provided several times, the last set ".
+                    "value is used.\n",
+                    manpageify($long));
     }
     elsif($multi eq "append") {
-        push @extra, "${pre}--$long can be used several times in a command line\n";
+        push @extra,
+            sprintf("${pre}%s can be used several times in a command line\n",
+                    manpageify($long));
     }
     elsif($multi eq "boolean") {
         my $rev = "no-$long";
@@ -767,8 +766,9 @@ sub single {
         }
         my $dashes = $manpage ? "\\-\\-" : "--";
         push @extra,
-            "${pre}Providing --$long multiple times has no extra effect.\n".
-            "Disable it again with $dashes$rev.\n";
+            sprintf("${pre}Providing %s multiple times has no extra effect.\n".
+                    "Disable it again with $dashes$rev.\n",
+                    manpageify($long));
     }
     elsif($multi eq "mutex") {
         push @extra,
