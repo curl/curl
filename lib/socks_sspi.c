@@ -559,6 +559,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   */
   return CURLE_OK;
 error:
+  (void)curlx_nonblock(sock, TRUE);
   free(service_name);
   Curl_pSecFn->FreeCredentialsHandle(&cred_handle);
   Curl_pSecFn->DeleteSecurityContext(&sspi_context);
