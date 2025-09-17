@@ -540,7 +540,7 @@ Client key password. See CURLOPT_KEYPASSWD(3)
 
 ## CURLOPT_KRBLEVEL
 
-Kerberos security level. See CURLOPT_KRBLEVEL(3)
+**OBSOLETE**. Kerberos security level. See CURLOPT_KRBLEVEL(3)
 
 ## CURLOPT_LOCALPORT
 

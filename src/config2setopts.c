@@ -973,7 +973,6 @@ CURLcode config2setopts(struct OperationConfig *config,
   customrequest_helper(config->httpreq, config->customrequest);
   my_setopt(curl, CURLOPT_STDERR, tool_stderr);
   my_setopt_str(curl, CURLOPT_INTERFACE, config->iface);
-  my_setopt_str(curl, CURLOPT_KRBLEVEL, config->krblevel);
   progressbarinit(&per->progressbar, config);
   my_setopt_str(curl, CURLOPT_DNS_SERVERS, config->dns_servers);
   my_setopt_str(curl, CURLOPT_DNS_INTERFACE, config->dns_interface);
