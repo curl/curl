@@ -4340,11 +4340,9 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
       AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
       LIBS="$save_LIBS"
 
-      dnl on HP-UX, life is more complicated...
       case $host in
         *-hp-hpux*)
-          dnl it doesn't actually work without -lpthread
-          USE_THREADS_POSIX=""
+          CFLAGS="$CFLAGS -mt"
           ;;
         *)
           ;;
