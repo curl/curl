@@ -783,8 +783,9 @@ sub single {
     }
     elsif($multi eq "per-URL") {
         push @extra,
-            "${pre}--$long is associated with a single URL. Use it once per URL ".
-            "when you use several URLs in a command line.\n";
+            sprintf("${pre}%s is associated with a single URL. Use it once per URL ".
+                    "when you use several URLs in a command line.\n",
+                    manpageify($long, $manpage));
     }
     else {
         print STDERR "$f:$line:1:ERROR: unrecognized Multi: '$multi'\n";
