@@ -464,7 +464,9 @@ typedef enum {
    * be read via `curl_multi_info_read()`. */
   CURLMINFO_XFERS_DONE = 4,
   /* The total number of easy handles added to the multi handle, ever. */
-  CURLMINFO_XFERS_ADDED = 5
+  CURLMINFO_XFERS_ADDED = 5,
+
+  CURLMINFO_LASTENTRY /* the last unused */
 } CURLMinfo_offt;
 
 /*
