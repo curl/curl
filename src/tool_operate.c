@@ -522,6 +522,17 @@ static CURLcode retrycheck(struct OperationConfig *config,
         outs->bytes = 0; /* clear for next round */
       }
     }
+    /* When retrying a transfer that was started with --continue-at, make sure
+       subsequent attempts continue from the same point as the initial try.
+       If the user asked for "-" (current size), outs->init was set to the
+       file size at the time of the first attempt. We ensure libcurl's resume
+       offset reflects that initialization point for the retry. */
+    if(config->use_resume) {
+      if(config->resume_from_current)
+        config->resume_from = outs->init;
+      (void)curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
+                             config->resume_from);
+    }
     *retryp = TRUE;
     per->num_retries++;
     *delayms = sleeptime;
