@@ -66,8 +66,7 @@ my $indent = 4;
 
 # get the long name version, return the manpage string
 sub manpageify {
-    my ($k)=@_;
-    my $l;
+    my ($k, $manpage)=@_;
     my $trail = '';
     # the matching pattern might include a trailing dot that cannot be part of
     # the option name
@@ -75,13 +74,15 @@ sub manpageify {
         # cut off trailing dot
         $trail = ".";
     }
-    my $klong = $k;
-    # quote "bare" minuses in the long name
-    $klong =~ s/-/\\-/g;
+    if($manpage) {
+        my $klong = $k;
+        # quote "bare" minuses in the long name
+        $klong =~ s/-/\\-/g;
 
-    # only long
-    $l = "\\fI\\-\\-$klong\\fP$trail";
-    return $l;
+        # only long
+        return "\\fI\\-\\-$klong\\fP$trail";
+    }
+    return "--$k$trail";
 }
 
 
@@ -472,7 +473,7 @@ sub render {
 
         if($manpage) {
             if(!$quote && $d =~ /--/) {
-                $d =~ s/--([a-z0-9.-]+)/manpageify($1)/ge;
+                $d =~ s/--([a-z0-9.-]+)/manpageify($1, 1)/ge;
             }
 
             # quote minuses in the output
@@ -749,12 +750,12 @@ sub single {
         push @extra,
             sprintf("${pre}If %s is provided several times, the last set ".
                     "value is used.\n",
-                    manpageify($long));
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "append") {
         push @extra,
             sprintf("${pre}%s can be used several times in a command line\n",
-                    manpageify($long));
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "boolean") {
         my $rev = "no-$long";
@@ -768,7 +769,7 @@ sub single {
         push @extra,
             sprintf("${pre}Providing %s multiple times has no extra effect.\n".
                     "Disable it again with $dashes$rev.\n",
-                    manpageify($long));
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "mutex") {
         push @extra,
@@ -804,7 +805,7 @@ sub single {
         if(!$helplong{$k}) {
             print STDERR "$f:$line:1:WARN: see-also a non-existing option: $k\n";
         }
-        my $l = $manpage ? manpageify($k) : "--$k";
+        my $l = manpageify($k, $manpage);
         my $sep = " and";
         if($and && ($i < $and)) {
             $sep = ",";
@@ -814,7 +815,7 @@ sub single {
     }
 
     if($requires) {
-        my $l = $manpage ? manpageify($long) : "--$long";
+        my $l = manpageify($long, $manpage);
         push @foot, "$l requires that libcurl".
             " is built to support $requires.\n";
     }
@@ -827,7 +828,7 @@ sub single {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f mutexes a non-existing option: $k\n";
             }
-            my $l = $manpage ? manpageify($k) : "--$k";
+            my $l = manpageify($k, $manpage);
             my $sep = ", ";
             if($count == ($num -1)) {
                 $sep = " and ";
