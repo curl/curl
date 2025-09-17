@@ -3173,17 +3173,17 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
 }
 
 #ifdef USE_WIN32_CRYPTO
-static CURLcode import_windows_cert_store(struct Curl_easy *data,
-                                          const char *name,
-                                          X509_STORE *store,
-                                          bool *imported)
+static CURLcode ossl_win_load_store(struct Curl_easy *data,
+                                    const char *win_store,
+                                    X509_STORE *store,
+                                    bool *padded)
 {
   CURLcode result = CURLE_OK;
   HCERTSTORE hStore;
 
-  *imported = FALSE;
+  *padded = FALSE;
 
-  hStore = CertOpenSystemStoreA(0, name);
+  hStore = CertOpenSystemStoreA(0, win_store);
   if(hStore) {
     PCCERT_CONTEXT pContext = NULL;
     /* The array of enhanced key usage OIDs will vary per certificate and
@@ -3299,7 +3299,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
         infof(data, "SSL: Imported cert");
 #endif
-        *imported = TRUE;
+        *padded = TRUE;
       }
       X509_free(x509);
     }
@@ -3314,7 +3314,153 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 
   return result;
 }
+
+static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          X509_STORE *store,
+                                          bool *padded)
+{
+  /* Import certificates from the Windows root certificate store if
+     requested.
+     https://stackoverflow.com/questions/9507184/
+     https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
+     https://datatracker.ietf.org/doc/html/rfc5280 */
+  const char *win_stores[] = {
+    "ROOT",   /* Trusted Root Certification Authorities */
+    "CA"      /* Intermediate Certification Authorities */
+  };
+  size_t i;
+  CURLcode result = CURLE_OK;
+
+  *padded = FALSE;
+  for(i = 0; i < CURL_ARRAYSIZE(win_stores); ++i) {
+    bool store_added = FALSE;
+    result = ossl_windows_load_store(data, win_stores[i], store,
+                                     &store_added);
+    if(result)
+      return result;
+    if(store_added) {
+      CURL_TRC_CF(data, cf, "added trust anchors from Windows %s store",
+                  win_stores[i]);
+      *padded = TRUE;
+    }
+    else
+      infof(data, "error importing Windows %s store, continuing anyway",
+            win_stores[i]);
+  }
+  return result;
+}
+
+#endif /* USE_WIN32_CRYPTO */
+
+static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         X509_STORE *store)
+{
+  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  CURLcode result = CURLE_OK;
+  const char * const ssl_cafile =
+    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+    (conn_config->ca_info_blob ? NULL : conn_config->CAfile);
+  const char * const ssl_capath = conn_config->CApath;
+  bool store_is_empty = TRUE;
+
+  if(ssl_config->native_ca_store) {
+#ifdef USE_WIN32_CRYPTO
+    bool added = FALSE;
+    result = ossl_windows_load_anchors(cf, data, store, &added);
+    if(result)
+      return result;
+    if(added) {
+      infof(data, " Native: Windows System Stores ROOT+CA");
+      store_is_empty = FALSE;
+    }
+#elif defined(USE_APPLE_SECTRUST)
+    infof(data, " Native: Apple SecTrust");
+    store_is_empty = FALSE;
 #endif
+  }
+
+  if(conn_config->ca_info_blob) {
+    result = load_cacert_from_memory(store, conn_config->ca_info_blob);
+    if(result) {
+      failf(data, "error adding trust anchors from certificate blob: %d",
+            result);
+      return result;
+    }
+    infof(data, " CA Blob from configuration");
+    store_is_empty = FALSE;
+  }
+
+  if(ssl_cafile || ssl_capath) {
+#ifdef HAVE_OPENSSL3
+    /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
+    if(ssl_cafile) {
+      if(!X509_STORE_load_file(store, ssl_cafile)) {
+        if(store_is_empty) {
+          /* Fail if we insist on successfully verifying the server. */
+          failf(data, "error adding trust anchors from file: %s", ssl_cafile);
+          return CURLE_SSL_CACERT_BADFILE;
+        }
+        else
+          infof(data, "error setting certificate file, continuing anyway");
+      }
+      infof(data, " CAfile: %s", ssl_cafile);
+      store_is_empty = FALSE;
+    }
+    if(ssl_capath) {
+      if(!X509_STORE_load_path(store, ssl_capath)) {
+        if(store_is_empty) {
+          /* Fail if we insist on successfully verifying the server. */
+          failf(data, "error adding trust anchors from path: %s", ssl_capath);
+          return CURLE_SSL_CACERT_BADFILE;
+        }
+        else
+          infof(data, "error setting certificate path, continuing anyway");
+      }
+      infof(data, " CApath: %s", ssl_capath);
+      store_is_empty = FALSE;
+    }
+#else
+    /* tell OpenSSL where to find CA certificates that are used to verify the
+       server's certificate. */
+    if(!X509_STORE_load_locations(store, ssl_cafile, ssl_capath)) {
+      if(store_is_empty) {
+        /* Fail if we insist on successfully verifying the server. */
+        failf(data, "error adding trust anchors from locations:"
+              "  CAfile: %s CApath: %s",
+              ssl_cafile ? ssl_cafile : "none",
+              ssl_capath ? ssl_capath : "none");
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+      else {
+        infof(data, "error setting certificate verify locations,"
+              " continuing anyway");
+      }
+    }
+    if(ssl_cafile)
+      infof(data, " CAfile: %s", ssl_cafile);
+    if(ssl_capath)
+      infof(data, " CApath: %s", ssl_capath);
+    store_is_empty = FALSE;
+#endif
+  }
+
+#ifdef CURL_CA_FALLBACK
+  if(store_is_empty) {
+    /* verifying the peer without any CA certificates will not
+       work so use OpenSSL's built-in default as fallback */
+    X509_STORE_set_default_paths(store);
+    infof(data, " OpenSSL default paths (fallback)");
+    store_is_empty = FALSE;
+  }
+#endif
+  if(store_is_empty)
+    infof(data, " no trust anchors configured");
+
+  return result;
+}
 
 static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
@@ -3324,115 +3470,23 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_OK;
   X509_LOOKUP *lookup = NULL;
-  const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
-  const char * const ssl_cafile =
-    /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
-    (ca_info_blob ? NULL : conn_config->CAfile);
-  const char * const ssl_capath = conn_config->CApath;
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
-  const bool verifypeer = conn_config->verifypeer;
-  bool imported_native_ca = FALSE;
-  bool imported_ca_info_blob = FALSE;
 
-  CURL_TRC_CF(data, cf, "ossl_populate_x509_store, path=%s, blob=%d",
-              ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
+  CURL_TRC_CF(data, cf, "configuring OpenSSL's x509 trust store");
   if(!store)
     return CURLE_OUT_OF_MEMORY;
 
-  if(verifypeer) {
-#ifdef USE_WIN32_CRYPTO
-    /* Import certificates from the Windows root certificate store if
-       requested.
-       https://stackoverflow.com/questions/9507184/
-       https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
-       https://datatracker.ietf.org/doc/html/rfc5280 */
-    if(ssl_config->native_ca_store) {
-      const char *storeNames[] = {
-        "ROOT",   /* Trusted Root Certification Authorities */
-        "CA"      /* Intermediate Certification Authorities */
-      };
-      size_t i;
-      for(i = 0; i < CURL_ARRAYSIZE(storeNames); ++i) {
-        bool imported = FALSE;
-        result = import_windows_cert_store(data, storeNames[i], store,
-                                           &imported);
-        if(result)
-          return result;
-        if(imported) {
-          infof(data, "successfully imported Windows %s store", storeNames[i]);
-          imported_native_ca = TRUE;
-        }
-        else
-          infof(data, "error importing Windows %s store, continuing anyway",
-                storeNames[i]);
-      }
-    }
-#endif
-    if(ca_info_blob) {
-      result = load_cacert_from_memory(store, ca_info_blob);
-      if(result) {
-        failf(data, "error importing CA certificate blob");
-        return result;
-      }
-      else {
-        imported_ca_info_blob = TRUE;
-        infof(data, "successfully imported CA certificate blob");
-      }
-    }
-
-    if(ssl_cafile || ssl_capath) {
-#ifdef HAVE_OPENSSL3
-      /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
-      if(ssl_cafile && !X509_STORE_load_file(store, ssl_cafile)) {
-        if(!imported_native_ca && !imported_ca_info_blob) {
-          /* Fail if we insist on successfully verifying the server. */
-          failf(data, "error setting certificate file: %s", ssl_cafile);
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-        else
-          infof(data, "error setting certificate file, continuing anyway");
-      }
-      if(ssl_capath && !X509_STORE_load_path(store, ssl_capath)) {
-        if(!imported_native_ca && !imported_ca_info_blob) {
-          /* Fail if we insist on successfully verifying the server. */
-          failf(data, "error setting certificate path: %s", ssl_capath);
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-        else
-          infof(data, "error setting certificate path, continuing anyway");
-      }
-#else
-      /* tell OpenSSL where to find CA certificates that are used to verify the
-         server's certificate. */
-      if(!X509_STORE_load_locations(store, ssl_cafile, ssl_capath)) {
-        if(!imported_native_ca && !imported_ca_info_blob) {
-          /* Fail if we insist on successfully verifying the server. */
-          failf(data, "error setting certificate verify locations:"
-                "  CAfile: %s CApath: %s",
-                ssl_cafile ? ssl_cafile : "none",
-                ssl_capath ? ssl_capath : "none");
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-        else {
-          infof(data, "error setting certificate verify locations,"
-                " continuing anyway");
-        }
-      }
-#endif
-      infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
-      infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
-    }
-
-#ifdef CURL_CA_FALLBACK
-    if(!ssl_cafile && !ssl_capath &&
-       !imported_native_ca && !imported_ca_info_blob) {
-      /* verifying the peer without any CA certificates will not
-         work so use OpenSSL's built-in default as fallback */
-      X509_STORE_set_default_paths(store);
-    }
-#endif
+  if(!conn_config->verifypeer) {
+    infof(data, "TLS Trust: peer verification disabled");
+    return CURLE_OK;
   }
 
+  infof(data, "TLS Trust Anchors:");
+  result = ossl_load_trust_anchors(cf, data, store);
+  if(result)
+    return result;
+
+  /* Does not make sense to load a CRL file without peer verification */
   if(ssl_crlfile) {
     /* tell OpenSSL where to find CRL file that is used to check certificate
      * revocation */
@@ -3442,33 +3496,28 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
       failf(data, "error loading CRL file: %s", ssl_crlfile);
       return CURLE_SSL_CRL_BADFILE;
     }
-    /* Everything is fine. */
-    infof(data, "successfully loaded CRL file:");
     X509_STORE_set_flags(store,
                          X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
-
-    infof(data, "  CRLfile: %s", ssl_crlfile);
+    infof(data, " CRLfile: %s", ssl_crlfile);
   }
 
-  if(verifypeer) {
-    /* Try building a chain using issuers in the trusted store first to avoid
-       problems with server-sent legacy intermediates. Newer versions of
-       OpenSSL do alternate chain checking by default but we do not know how to
-       determine that in a reliable manner.
-       https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
-    */
-    X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
-    if(!ssl_config->no_partialchain && !ssl_crlfile) {
-      /* Have intermediate certificates in the trust store be treated as
-         trust-anchors, in the same way as self-signed root CA certificates
-         are. This allows users to verify servers using the intermediate cert
-         only, instead of needing the whole chain.
+  /* Try building a chain using issuers in the trusted store first to avoid
+     problems with server-sent legacy intermediates. Newer versions of
+     OpenSSL do alternate chain checking by default but we do not know how to
+     determine that in a reliable manner.
+     https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
+  */
+  X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
+  if(!ssl_config->no_partialchain && !ssl_crlfile) {
+    /* Have intermediate certificates in the trust store be treated as
+       trust-anchors, in the same way as self-signed root CA certificates
+       are. This allows users to verify servers using the intermediate cert
+       only, instead of needing the whole chain.
 
-         Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
-         cannot do partial chains with a CRL check.
-      */
-      X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
-    }
+       Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
+       cannot do partial chains with a CRL check.
+    */
+    X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
   }
 
   return result;
@@ -5010,8 +5059,15 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
 static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct ossl_ctx *octx,
-                                   struct ssl_peer *peer)
+                                   struct ssl_peer *peer,
+                                   bool *pverified)
 {
+#ifdef USE_WIN32_CRYPTO
+  /* For Windows, native CA loads certificates into the OpenSSL x509 store,
+   * so the "native" verification happens via OpenSSL already. */
+  *pverified = FALSE;
+  return CURLE_OK;
+#elif defined(USE_APPLE_SECTRUST)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ossl_cert_chain chain;
   CURLcode result;
@@ -5026,14 +5082,16 @@ static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
 
-#ifdef USE_APPLE_SECTRUST
   result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
                                   ossl_chain_get_der, &chain,
                                   NULL, 0);
+  *pverified = !result;
+  if(*pverified)
+    infof(data, " SSL certificate verified by Apple SecTrust.");
   return result;
 #else
-  failf(data, "native CA verification is not supported");
-  return CURLE_NOT_BUILT_IN;
+  *pverified = FALSE;
+  return CURLE_OK;
 #endif
 }
 
@@ -5049,6 +5107,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   long lerr;
   bool strict = (conn_config->verifypeer || conn_config->verifyhost);
   X509 *server_cert;
+  bool verified = FALSE;
 
   DEBUGASSERT(octx);
 
@@ -5056,7 +5115,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     /* asked to gather certificate info */
     (void)ossl_certchain(data, octx->ssl);
 
-  server_cert = SSL_get0_peer_certificate(octx->ssl);
+  server_cert = SSL_get_peer_certificate(octx->ssl);
   if(!server_cert) {
     if(!strict)
       goto out;
@@ -5073,18 +5132,24 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 #endif
 
   if(ssl_config->native_ca_store && conn_config->verifypeer) {
-    result = ossl_verify_native(cf, data, octx, peer);
+    result = ossl_verify_native(cf, data, octx, peer, &verified);
+    if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
+      goto out; /* unexpected error */
   }
-  else {
+  if(!verified) {
     if(conn_config->verifyhost)
       result = ossl_verifyhost(data, conn, peer, server_cert);
     if(!result) {
       lerr = SSL_get_verify_result(octx->ssl);
       ssl_config->certverifyresult = lerr;
-      if(lerr != X509_V_OK) {
+      if(lerr == X509_V_OK) {
+        infof(data, " SSL certificate verified by OpenSSL.");
+        verified = TRUE;
+      }
+      else {
         /* We probably never reach this, because SSL_connect() will fail
            and we return earlier if verifypeer is set? */
-        failf(data, "SSL certificate verify result: %s (%ld)",
+        failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
               X509_verify_cert_error_string(lerr), lerr);
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
@@ -5093,17 +5158,22 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   infof_certstack(data, octx->ssl);
 
-  if(!result) {
-    infof(data, " SSL certificate verify ok.");
-  }
-  else if(result == CURLE_PEER_FAILED_VERIFICATION) {
+  if(result == CURLE_PEER_FAILED_VERIFICATION) {
     if(conn_config->verifypeer)
       goto out;
     infof(data, " SSL certificate verification failed, continuing anyway!");
     result = CURLE_OK;
   }
-  else
+  else if(result)
     goto out;
+
+  if(!verified && conn_config->verifypeer) {
+    /* should not happen */
+    DEBUGASSERT(0);
+    result = CURLE_PEER_FAILED_VERIFICATION;
+    goto out;
+  }
+
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus && !octx->reused_session) {
@@ -5121,6 +5191,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   result = ossl_check_pinned_key(cf, data, server_cert);
 
 out:
+  X509_free(server_cert);
   return result;
 }
 

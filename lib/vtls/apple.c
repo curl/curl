@@ -199,7 +199,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 
   status = SecTrustCreateWithCertificates(cert_array, policies, &trust);
   if(status != noErr || !trust) {
-    failf(data, "SSL: failed to create validation trust");
+    failf(data, "Apple SecTrust: failed to create validation trust");
     result = CURLE_PEER_FAILED_VERIFICATION;
     goto out;
   }
@@ -213,7 +213,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
       if(status != noErr) {
-        failf(data, "SSL: failed to set OCSP response: %i", (int)status);
+        failf(data, "Apple SecTrust: failed to set OCSP response: %i",
+              (int)status);
         result = CURLE_PEER_FAILED_VERIFICATION;
         goto out;
       }
@@ -243,21 +244,22 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
         if(desc_str) {
           if(CFStringGetCString(error_desc, desc_str, size,
             kCFStringEncodingUTF8)) {
-            failf(data, "SSL: trust evaluation returned error: %s", desc_str);
+            failf(data, "Apple SecTrust: trust evaluation error '%s'",
+                  desc_str);
           }
           else {
-            failf(data, "SSL: failed to convert trust error string: %i",
+            failf(data, "Apple SecTrust: trust evaluation error %i",
               (int)code);
           }
           free(desc_str);
         }
         else {
-          failf(data, "SSL: failed to allocate trust error string: %i",
+          failf(data, "Apple SecTrust: trust evaluation error %i",
             (int)code);
         }
       }
       else {
-        infof(data, "SSL: trust evaluation returned error %ld", code);
+        infof(data, "Apple SecTrust: trust evaluation error %ld", code);
       }
 
       if(error_desc)
@@ -272,7 +274,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     status = SecTrustEvaluate(trust, &sec_result);
 
     if(status != noErr) {
-      failf(data, "SSL: trust evaluation returned error %i", (int)status);
+      failf(data, "Apple SecTrust: trust evaluation error %i", (int)status);
     }
     else if((status == kSecTrustResultUnspecified) ||
             (status == kSecTrustResultProceed)) {
