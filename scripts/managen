@@ -737,7 +737,9 @@ sub single {
         }
         if($scope eq "global") {
             push @desc, "\n" if(!$manpage);
-            push @desc, "${pre}This option is global and does not need to be specified for each use of --next.\n";
+            push @desc,
+                sprintf("${pre}This option is global and does not need to be specified for each use of %s.\n",
+                        manpageify("next", $manpage));
         }
         else {
             print STDERR "$f:$line:1:ERROR: unrecognized scope: '$scope'\n";
