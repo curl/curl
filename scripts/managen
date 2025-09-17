@@ -775,7 +775,8 @@ sub single {
     }
     elsif($multi eq "mutex") {
         push @extra,
-            "${pre}Providing --$long multiple times has no extra effect.\n";
+            sprintf("${pre}Providing %s multiple times has no extra effect.\n",
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "custom") {
         ; # left for the text to describe
