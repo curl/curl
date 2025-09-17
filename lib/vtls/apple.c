@@ -46,16 +46,16 @@
 #include "vtls.h"
 #include "apple.h"
 
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
 #include <Security/Security.h>
-#endif /* USE_APPLE_SECTRUST */
+#endif /* USE_SSL && USE_APPLE_SECTRUST */
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
 
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
 #define SSL_SYSTEM_VERIFIER
 
 #if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
@@ -96,7 +96,6 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 size_t ocsp_len)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_OK;
   SecTrustRef trust = NULL;
   SecPolicyRef policy = NULL;
@@ -133,33 +132,36 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   policy = NULL;
 
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
-  if(!ssl_config->no_revoke) {
-    if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-      /* Even without this set, validation will seemingly-unavoidably fail
-       * for certificates that trustd already knows to be revoked.
-       * This policy further allows trustd to consult CRLs and OCSP data
-       * to determine revocation status (which it may then cache). */
-      CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
+  {
+    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+    if(!ssl_config->no_revoke) {
+      if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
+        /* Even without this set, validation will seemingly-unavoidably fail
+         * for certificates that trustd already knows to be revoked.
+         * This policy further allows trustd to consult CRLs and OCSP data
+         * to determine revocation status (which it may then cache). */
+        CFOptionFlags revocation_flags = kSecRevocationUseAnyAvailableMethod;
 #if 0
-      /* `revoke_best_effort` is off by default in libcurl. When we
-       * add `kSecRevocationRequirePositiveResponse` to the Apple
-       * Trust policies, it interprets this as it NEEDs a confirmation
-       * of a cert being NOT REVOKED. Which not in general available for
-       * certificates on the internet.
-       * It seems that applications using this policy are expected to PIN
-       * their certificate public keys or verification will fail.
-       * This does not seem to be what we want here. */
-      if(!ssl_config->revoke_best_effort) {
-        revocation_flags |= kSecRevocationRequirePositiveResponse;
-      }
+        /* `revoke_best_effort` is off by default in libcurl. When we
+         * add `kSecRevocationRequirePositiveResponse` to the Apple
+         * Trust policies, it interprets this as it NEEDs a confirmation
+         * of a cert being NOT REVOKED. Which not in general available for
+         * certificates on the internet.
+         * It seems that applications using this policy are expected to PIN
+         * their certificate public keys or verification will fail.
+         * This does not seem to be what we want here. */
+        if(!ssl_config->revoke_best_effort) {
+          revocation_flags |= kSecRevocationRequirePositiveResponse;
+        }
 #endif
-      policy = SecPolicyCreateRevocation(revocation_flags);
-      if(!policy) {
-        result = CURLE_OUT_OF_MEMORY;
-        goto out;
-      }
+        policy = SecPolicyCreateRevocation(revocation_flags);
+        if(!policy) {
+          result = CURLE_OUT_OF_MEMORY;
+          goto out;
+        }
 
-      CFArrayAppendValue(policies, policy);
+        CFArrayAppendValue(policies, policy);
+      }
     }
   }
 #endif
@@ -300,4 +302,4 @@ out:
   return result;
 }
 
-#endif /* USE_APPLE_SECTRUST */
+#endif /* USE_SSL && USE_APPLE_SECTRUST */

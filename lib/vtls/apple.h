@@ -29,7 +29,7 @@
 struct Curl_cfilter;
 struct Curl_easy;
 
-#ifdef USE_APPLE_SECTRUST
+#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
 /* Get the DER encoded i-th certificate in the server handshake */
 typedef CURLcode Curl_vtls_get_cert_der(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
@@ -50,6 +50,6 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 const void *ocsp_buf,
                                 size_t ocsp_len);
 
-#endif /* USE_APPLE_SECTRUST */
+#endif /* USE_SSL && USE_APPLE_SECTRUST */
 
 #endif /* HEADER_CURL_VTLS_APPLE_H */
