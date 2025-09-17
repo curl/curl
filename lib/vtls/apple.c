@@ -147,7 +147,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
        * of a cert being NOT REVOKED. Which not in general available for
        * certificates on the internet.
        * It seems that applications using this policy are expected to PIN
-       * their certificate public keys or verfication will fail.
+       * their certificate public keys or verification will fail.
        * This does not seem to be what we want here. */
       if(!ssl_config->revoke_best_effort) {
         revocation_flags |= kSecRevocationRequirePositiveResponse;

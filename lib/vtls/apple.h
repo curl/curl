@@ -39,7 +39,7 @@ typedef CURLcode Curl_vtls_get_cert_der(struct Curl_cfilter *cf,
                                         size_t *pder_len);
 
 /* Ask Apple's Security framework to verify the certificate chain
- * send by the peer. On sucess, *pverified is TRUE and FALSE otherwise.
+ * send by the peer. On CURLE_OK it has been verified.
  */
 CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
