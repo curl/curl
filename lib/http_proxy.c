@@ -227,6 +227,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   const char *hostname = NULL;
+  struct curl_slist *headers;
   char *authority = NULL;
   int port;
   bool ipv6_ip;
@@ -271,7 +272,22 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
+  /* Add custom headers first, which may include User-Agent */
+  result = dynhds_add_custom(data, TRUE, ctx->httpversion, &req->headers);
+  if(result)
+    goto out;
+
+  /* Check if User-Agent is already present in regular headers
+   * to avoid duplicate User-Agent headers in CONNECT requests */
+  headers = data->set.headers;
+  while(headers) {
+    if(strncasecmp(headers->data, "User-Agent:", 11) == 0)
+      break;
+    headers = headers->next;
+  }
+
   if(!Curl_checkProxyheaders(data, cf->conn, STRCONST("User-Agent")) &&
+     !headers &&
      data->set.str[STRING_USERAGENT] && *data->set.str[STRING_USERAGENT]) {
     result = Curl_dynhds_cadd(&req->headers, "User-Agent",
                               data->set.str[STRING_USERAGENT]);
@@ -286,7 +302,6 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  result = dynhds_add_custom(data, TRUE, ctx->httpversion, &req->headers);
 
 out:
   if(result && req) {

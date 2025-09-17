@@ -508,10 +508,12 @@ static CURLcode http_setopts(struct OperationConfig *config,
   my_setopt_str(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
+  /* Always enable header separation for proper proxy behavior */
+  my_setopt_long(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
+
   /* new in libcurl 7.36.0 */
   if(config->proxyheaders) {
     my_setopt_slist(curl, CURLOPT_PROXYHEADER, config->proxyheaders);
-    my_setopt_long(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
   }
 
   /* new in libcurl 7.5 */
