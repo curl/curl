@@ -5028,6 +5028,7 @@ struct ossl_cert_chain {
   size_t num_certs;
 };
 
+#ifdef USE_APPLE_SECTRUST
 static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    void *user_data,
@@ -5055,6 +5056,7 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
   *pder_len = (size_t)der_len;
   return CURLE_OK;
 }
+#endif /* USE_APPLE_SECTRUST */
 
 static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
@@ -5063,6 +5065,10 @@ static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
                                    bool *pverified)
 {
 #ifdef USE_WIN32_CRYPTO
+  (void)cf;
+  (void)data;
+  (void)octx;
+  (void)peer;
   /* For Windows, native CA loads certificates into the OpenSSL x509 store,
    * so the "native" verification happens via OpenSSL already. */
   *pverified = FALSE;
@@ -5090,6 +5096,10 @@ static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
     infof(data, " SSL certificate verified by Apple SecTrust.");
   return result;
 #else
+  (void)cf;
+  (void)data;
+  (void)octx;
+  (void)peer;
   *pverified = FALSE;
   return CURLE_OK;
 #endif
