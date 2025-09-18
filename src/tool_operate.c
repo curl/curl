@@ -437,7 +437,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
       ": FTP error"
     };
 
-    sleeptime = per->retry_sleep;
     if(RETRY_HTTP == retry) {
       curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
       if(retry_after) {
@@ -464,20 +463,28 @@ static CURLcode retrycheck(struct OperationConfig *config,
         }
       }
     }
+    if(!sleeptime && !config->retry_delay_ms) {
+      if(!per->retry_sleep)
+        per->retry_sleep = RETRY_SLEEP_DEFAULT;
+      else
+        per->retry_sleep *= 2;
+      if(per->retry_sleep > RETRY_SLEEP_MAX)
+        per->retry_sleep = RETRY_SLEEP_MAX;
+    }
+    if(!sleeptime)
+      sleeptime = per->retry_sleep;
     warnf("Problem %s. "
-          "Will retry in %ld second%s. "
+          "Will retry in %ld%s%.*ld second%s. "
           "%ld retr%s left.",
           m[retry], sleeptime/1000L,
+          (sleeptime%1000L ? "." : ""),
+          (sleeptime%1000L ? 3 : 0),
+          sleeptime%1000L,
           (sleeptime/1000L == 1 ? "" : "s"),
           per->retry_remaining,
           (per->retry_remaining > 1 ? "ies" : "y"));
 
     per->retry_remaining--;
-    if(!config->retry_delay_ms) {
-      per->retry_sleep *= 2;
-      if(per->retry_sleep > RETRY_SLEEP_MAX)
-        per->retry_sleep = RETRY_SLEEP_MAX;
-    }
 
     if(outs->bytes && outs->filename && outs->stream) {
 #ifndef __MINGW32CE__
