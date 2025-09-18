@@ -634,22 +634,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           if((attr_len > 7) &&
              (strcmp(";binary", attr + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
-            result = curlx_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
-                                         &val_b64, &val_b64_sz);
-            if(result) {
-              ldap_value_free_len(vals);
-              FREE_ON_WINLDAP(attr);
-              ldap_memfree(attribute);
-              if(ber)
-                ber_free(ber, 0);
-
-              goto quit;
-            }
-
-            if(val_b64_sz > 0) {
-              result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
-                                         val_b64_sz);
-              free(val_b64);
+            if(vals[i]->bv_len) {
+              result = curlx_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+                                           &val_b64, &val_b64_sz);
               if(result) {
                 ldap_value_free_len(vals);
                 FREE_ON_WINLDAP(attr);
@@ -658,6 +645,21 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
                   ber_free(ber, 0);
 
                 goto quit;
+              }
+
+              if(val_b64_sz > 0) {
+                result = Curl_client_write(data, CLIENTWRITE_BODY, val_b64,
+                                           val_b64_sz);
+                free(val_b64);
+                if(result) {
+                  ldap_value_free_len(vals);
+                  FREE_ON_WINLDAP(attr);
+                  ldap_memfree(attribute);
+                  if(ber)
+                    ber_free(ber, 0);
+
+                  goto quit;
+                }
               }
             }
           }
