@@ -297,16 +297,12 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
                                struct Curl_cfilter *cf_new);
 
 /**
- * Discard, e.g. remove and destroy `discard` iff
- * it still is in the filter chain below `cf`. If `discard`
- * is no longer found beneath `cf` return FALSE.
- * if `destroy_always` is TRUE, will call `discard`s destroy
- * function and free it even if not found in the subchain.
+ * Extract filter `*pcf` from its connection filter chain.
+ * Destroy `*pcf`, even if it was not part of the chain and NULL it.
+ * Returns TRUE of cf has been part of chain.
  */
-bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
-                              struct Curl_cfilter *discard,
-                              struct Curl_easy *data,
-                              bool destroy_always);
+bool Curl_conn_cf_discard(struct Curl_cfilter **pcf,
+                          struct Curl_easy *data);
 
 /**
  * Discard all cfilters starting with `*pcf` and clearing it afterwards.

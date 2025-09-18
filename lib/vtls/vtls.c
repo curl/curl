@@ -1862,7 +1862,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
       Curl_shutdown_clear(data, sockindex);
       if(!result && !done) /* blocking failed? */
         result = CURLE_SSL_SHUTDOWN_FAILED;
-      Curl_conn_cf_discard_sub(head, cf, data, FALSE);
+      Curl_conn_cf_discard(&cf, data);
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, done -> %d", result);
       break;
     }
