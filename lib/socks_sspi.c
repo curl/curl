@@ -452,7 +452,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       goto error;
     }
     Curl_safefree(etbuf);
-    etbuf_size = 0;
   }
 
   result = Curl_blockread_all(cf, data, (char *)socksreq, 4, &actualread);
