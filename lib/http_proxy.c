@@ -216,7 +216,7 @@ CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
 
 struct cf_proxy_ctx {
   int httpversion; /* HTTP version used to CONNECT */
-  bool(sub_filter_installed);
+  BIT(sub_filter_installed);
 };
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
