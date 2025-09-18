@@ -45,6 +45,9 @@
 #ifdef _WIN32
 #undef stat
 #define stat _stat
+#undef fstat
+#define fstat _fstat
+#define fileno _fileno
 #endif
 
 /* curl stuff */
@@ -223,16 +226,6 @@ static int setup(struct input *i, int num, const char *upload)
 
   curl_msnprintf(url, 256, "https://localhost:8443/upload-%d", num);
 
-  /* get the file size of the local file */
-  if(stat(upload, &file_info)) {
-    fprintf(stderr, "error: could not stat file %s: %s\n", upload,
-            strerror(errno));
-    fclose(out);
-    return 1;
-  }
-
-  uploadsize = file_info.st_size;
-
   i->in = fopen(upload, "rb");
   if(!i->in) {
     fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
@@ -240,6 +233,19 @@ static int setup(struct input *i, int num, const char *upload)
     fclose(out);
     return 1;
   }
+
+#ifdef UNDER_CE
+  if(stat(upload, &file_info) != 0) {
+#else
+  if(fstat(fileno(i->in), &file_info) != 0) {
+#endif
+    fprintf(stderr, "error: could not stat file %s: %s\n", upload,
+            strerror(errno));
+    fclose(out);
+    return 1;
+  }
+
+  uploadsize = file_info.st_size;
 
   hnd = i->hnd = curl_easy_init();
 
