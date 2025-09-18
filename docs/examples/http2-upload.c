@@ -227,14 +227,9 @@ static int setup(struct input *t, int num, const char *upload)
     return 1;
   }
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(upload, &file_info) != 0) {
-#else
   if(fstat(fileno(t->in), &file_info) != 0) {
-#endif
-    fprintf(stderr, "error: could not stat file %s: %s\n",
-            upload, strerror(errno));
+    fprintf(stderr, "error: could not stat file %s: %s\n", upload,
+            strerror(errno));
     fclose(t->out);
     t->out = NULL;
     return 1;
