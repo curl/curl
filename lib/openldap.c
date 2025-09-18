@@ -1172,7 +1172,8 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         if(!binary) {
           /* check for leading or trailing whitespace */
           if(ISBLANK(bvals[i].bv_val[0]) ||
-             ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1]))
+             (bvals[i].bv_len &&
+              ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1])))
             binval = TRUE;
           else {
             /* check for unprintable characters */
