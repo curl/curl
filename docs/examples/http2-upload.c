@@ -229,11 +229,7 @@ static int setup(struct input *i, int num, const char *upload)
     return 1;
   }
 
-#ifdef UNDER_CE
-  if(stat(upload, &file_info) != 0) {
-#else
   if(fstat(fileno(i->in), &file_info) != 0) {
-#endif
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
     fclose(out);
