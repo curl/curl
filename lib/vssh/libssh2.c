@@ -1995,7 +1995,7 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
     return CURLE_AGAIN;
 
   if(rc > 0) {
-    /* This string is not always null-terminated */
+    /* It seems that this string is not always null-terminated */
     sshp->readdir_filename[rc] = '\0';
     free(sshc->homedir);
     sshc->homedir = strdup(sshp->readdir_filename);
@@ -2403,7 +2403,7 @@ static CURLcode ssh_state_sftp_readdir_link(struct Curl_easy *data,
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
-  /* This string is not always null-terminated */
+  /* It seems that this string is not always null-terminated */
   sshp->readdir_filename[rc] = '\0';
 
   curlx_dyn_free(&sshp->readdir_link);
