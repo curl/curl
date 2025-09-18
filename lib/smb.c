@@ -1104,7 +1104,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
     break;
 
   case SMB_DOWNLOAD:
-    if(h->status || smbc->got < sizeof(struct smb_header) + 14) {
+    if(h->status || smbc->got < sizeof(struct smb_header) + 15) {
       req->result = CURLE_RECV_ERROR;
       next_state = SMB_CLOSE;
       break;
@@ -1133,7 +1133,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
     break;
 
   case SMB_UPLOAD:
-    if(h->status || smbc->got < sizeof(struct smb_header) + 6) {
+    if(h->status || smbc->got < sizeof(struct smb_header) + 7) {
       req->result = CURLE_UPLOAD_FAILED;
       next_state = SMB_CLOSE;
       break;
