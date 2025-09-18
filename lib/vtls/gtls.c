@@ -1580,7 +1580,7 @@ static CURLcode glts_verify_native(struct Curl_cfilter *cf,
 #else
   (void)cf;
   (void)data;
-  (void)session;
+  (void)chain;
   (void)peer;
   /* we imported the native store into the GnuTLS credentials
    * and they are part of the verify check below. */
