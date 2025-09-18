@@ -480,7 +480,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
           (sleeptime%1000L ? "." : ""),
           (sleeptime%1000L ? 3 : 0),
           sleeptime%1000L,
-          (sleeptime/1000L == 1 ? "" : "s"),
+          (sleeptime == 1000L ? "" : "s"),
           per->retry_remaining,
           (per->retry_remaining > 1 ? "ies" : "y"));
 
