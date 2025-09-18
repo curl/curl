@@ -2403,6 +2403,9 @@ static CURLcode ssh_state_sftp_readdir_link(struct Curl_easy *data,
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
+  if(rc < 0)
+    return CURLE_OUT_OF_MEMORY;
+
   /* It seems that this string is not always null-terminated */
   sshp->readdir_filename[rc] = '\0';
 
