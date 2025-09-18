@@ -215,9 +215,8 @@ CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
 }
 
 struct cf_proxy_ctx {
-  /* the protocol specific sub-filter we install during connect */
-  struct Curl_cfilter *cf_protocol;
   int httpversion; /* HTTP version used to CONNECT */
+  bool(sub_filter_installed);
 };
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
@@ -317,8 +316,7 @@ connect_sub:
     return result;
 
   *done = FALSE;
-  if(!ctx->cf_protocol) {
-    struct Curl_cfilter *cf_protocol = NULL;
+  if(!ctx->sub_filter_installed) {
     int httpversion = 0;
     const char *alpn = Curl_conn_cf_get_alpn_negotiated(cf->next, data);
 
@@ -332,7 +330,6 @@ connect_sub:
       result = Curl_cf_h1_proxy_insert_after(cf, data);
       if(result)
         goto out;
-      cf_protocol = cf->next;
       httpversion = 10;
     }
     else if(!alpn || !strcmp(alpn, "http/1.1")) {
@@ -340,7 +337,6 @@ connect_sub:
       result = Curl_cf_h1_proxy_insert_after(cf, data);
       if(result)
         goto out;
-      cf_protocol = cf->next;
       /* Assume that without an ALPN, we are talking to an ancient one */
       httpversion = 11;
     }
@@ -350,7 +346,6 @@ connect_sub:
       result = Curl_cf_h2_proxy_insert_after(cf, data);
       if(result)
         goto out;
-      cf_protocol = cf->next;
       httpversion = 20;
     }
 #endif
@@ -360,7 +355,7 @@ connect_sub:
       goto out;
     }
 
-    ctx->cf_protocol = cf_protocol;
+    ctx->sub_filter_installed = TRUE;
     ctx->httpversion = httpversion;
     /* after we installed the filter "below" us, we call connect
      * on out sub-chain again.
@@ -371,7 +366,7 @@ connect_sub:
     /* subchain connected and we had already installed the protocol filter.
      * This means the protocol tunnel is established, we are done.
      */
-    DEBUGASSERT(ctx->cf_protocol);
+    DEBUGASSERT(ctx->sub_filter_installed);
     result = CURLE_OK;
   }
 
@@ -419,23 +414,8 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
 static void http_proxy_cf_close(struct Curl_cfilter *cf,
                                 struct Curl_easy *data)
 {
-  struct cf_proxy_ctx *ctx = cf->ctx;
-
   CURL_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
-  if(ctx->cf_protocol) {
-    struct Curl_cfilter *f;
-    /* if someone already removed it, we assume he also
-     * took care of destroying it. */
-    for(f = cf->next; f; f = f->next) {
-      if(f == ctx->cf_protocol) {
-        /* still in our sub-chain */
-        Curl_conn_cf_discard_sub(cf, ctx->cf_protocol, data, FALSE);
-        break;
-      }
-    }
-    ctx->cf_protocol = NULL;
-  }
   if(cf->next)
     cf->next->cft->do_close(cf->next, data);
 }

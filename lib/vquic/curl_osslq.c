@@ -2398,7 +2398,7 @@ CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
                               const struct Curl_addrinfo *ai)
 {
   struct cf_osslq_ctx *ctx = NULL;
-  struct Curl_cfilter *cf = NULL, *udp_cf = NULL;
+  struct Curl_cfilter *cf = NULL;
   CURLcode result;
 
   (void)data;
@@ -2412,23 +2412,22 @@ CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
     goto out;
+  cf->conn = conn;
 
-  result = Curl_cf_udp_create(&udp_cf, data, conn, ai, TRNSPRT_QUIC);
+  result = Curl_cf_udp_create(&cf->next, data, conn, ai, TRNSPRT_QUIC);
   if(result)
     goto out;
 
-  cf->conn = conn;
-  udp_cf->conn = cf->conn;
-  udp_cf->sockindex = cf->sockindex;
-  cf->next = udp_cf;
+  cf->next->conn = cf->conn;
+  cf->next->sockindex = cf->sockindex;
 
 out:
   *pcf = (!result) ? cf : NULL;
   if(result) {
-    if(udp_cf)
-      Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
-    Curl_safefree(cf);
-    cf_osslq_ctx_free(ctx);
+    if(cf)
+      Curl_conn_cf_discard_chain(&cf, data);
+    else if(ctx)
+      cf_osslq_ctx_free(ctx);
   }
   return result;
 }
