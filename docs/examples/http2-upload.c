@@ -235,15 +235,15 @@ static int setup(struct input *i, int num, const char *upload)
   }
 
 #ifdef UNDER_CE
-  stat(i->in, &file_info);
+  if(stat(upload, &file_info) != 0) {
 #else
-  if(fstat(fileno(i->in), &file_info)) {
+  if(fstat(fileno(i->in), &file_info) != 0) {
+#endif
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
     fclose(out);
     return 1;
   }
-#endif
 
   uploadsize = file_info.st_size;
 
