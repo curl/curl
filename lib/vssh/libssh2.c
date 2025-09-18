@@ -2405,6 +2405,12 @@ static CURLcode ssh_state_sftp_readdir_link(struct Curl_easy *data,
 
   curlx_dyn_free(&sshp->readdir_link);
 
+  if(rc < 0)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* It seems that this string is not always null-terminated */
+  sshp->readdir_filename[rc] = '\0';
+
   /* append filename and extra output */
   result = curlx_dyn_addf(&sshp->readdir, " -> %s", sshp->readdir_filename);
   if(result)
