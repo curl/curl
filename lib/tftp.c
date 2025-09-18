@@ -962,6 +962,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
   int need_blksize;
   struct connectdata *conn = data->conn;
   const struct Curl_sockaddr_ex *remote_addr = NULL;
+  CURLcode result;
 
   blksize = TFTP_BLKSIZE_DEFAULT;
 
@@ -1013,7 +1014,9 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
   ((struct sockaddr *)&state->local_addr)->sa_family =
     (CURL_SA_FAMILY_T)(remote_addr->family);
 
-  tftp_set_timeouts(state);
+  result = tftp_set_timeouts(state);
+  if(result)
+    return result;
 
   if(!conn->bits.bound) {
     /* If not already bound, bind to any interface, random UDP port. If it is
