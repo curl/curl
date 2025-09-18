@@ -3366,11 +3366,11 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
     if(result)
       return result;
     if(added) {
-      infof(data, " Native: Windows System Stores ROOT+CA");
+      infof(data, "  Native: Windows System Stores ROOT+CA");
       store_is_empty = FALSE;
     }
 #elif defined(USE_APPLE_SECTRUST)
-    infof(data, " Native: Apple SecTrust");
+    infof(data, "  Native: Apple SecTrust");
     store_is_empty = FALSE;
 #endif
   }
@@ -3382,7 +3382,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
             result);
       return result;
     }
-    infof(data, " CA Blob from configuration");
+    infof(data, "  CA Blob from configuration");
     store_is_empty = FALSE;
   }
 
@@ -3399,7 +3399,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
         else
           infof(data, "error setting certificate file, continuing anyway");
       }
-      infof(data, " CAfile: %s", ssl_cafile);
+      infof(data, "  CAfile: %s", ssl_cafile);
       store_is_empty = FALSE;
     }
     if(ssl_capath) {
@@ -3412,7 +3412,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
         else
           infof(data, "error setting certificate path, continuing anyway");
       }
-      infof(data, " CApath: %s", ssl_capath);
+      infof(data, "  CApath: %s", ssl_capath);
       store_is_empty = FALSE;
     }
 #else
@@ -3433,9 +3433,9 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
       }
     }
     if(ssl_cafile)
-      infof(data, " CAfile: %s", ssl_cafile);
+      infof(data, "  CAfile: %s", ssl_cafile);
     if(ssl_capath)
-      infof(data, " CApath: %s", ssl_capath);
+      infof(data, "  CApath: %s", ssl_capath);
     store_is_empty = FALSE;
 #endif
   }
@@ -3445,12 +3445,12 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
     /* verifying the peer without any CA certificates will not
        work so use OpenSSL's built-in default as fallback */
     X509_STORE_set_default_paths(store);
-    infof(data, " OpenSSL default paths (fallback)");
+    infof(data, "  OpenSSL default paths (fallback)");
     store_is_empty = FALSE;
   }
 #endif
   if(store_is_empty)
-    infof(data, " no trust anchors configured");
+    infof(data, "  no trust anchors configured");
 
   return result;
 }
@@ -3470,11 +3470,11 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
 
   if(!conn_config->verifypeer) {
-    infof(data, "TLS Trust: peer verification disabled");
+    infof(data, "SSL Trust: peer verification disabled");
     return CURLE_OK;
   }
 
-  infof(data, "TLS Trust Anchors:");
+  infof(data, "SSL Trust Anchors:");
   result = ossl_load_trust_anchors(cf, data, store);
   if(result)
     return result;
@@ -5019,12 +5019,12 @@ out:
 }
 #endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
 
+#ifdef USE_APPLE_SECTRUST
 struct ossl_cert_chain {
   STACK_OF(X509) *sk;
   size_t num_certs;
 };
 
-#ifdef USE_APPLE_SECTRUST
 static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    void *user_data,

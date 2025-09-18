@@ -24,7 +24,7 @@
 
 AC_DEFUN([CURL_WITH_APPLE_SECTRUST], [
 AC_MSG_CHECKING([whether to enable Apple OS native certificate validation])
-if test "x$OPT_APPLE_SECTRUST" != xno; then
+if test "x$OPT_APPLE_SECTRUST" = xyes; then
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
       #include <sys/types.h>

@@ -48,6 +48,7 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
+#include "apple.h"
 #include "../vauth/vauth.h"
 #include "../parsedate.h"
 #include "../connect.h" /* for the connect timeout */
@@ -453,61 +454,74 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
 {
   struct ssl_primary_config *config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  bool creds_are_empty = TRUE;
   int rc;
 
-  if(config->verifypeer) {
-    bool imported_native_ca = FALSE;
-
-    if(ssl_config->native_ca_store) {
-      rc = gnutls_certificate_set_x509_system_trust(creds);
-      if(rc < 0)
-        infof(data, "error reading native ca store (%s), continuing anyway",
-              gnutls_strerror(rc));
-      else {
-        infof(data, "found %d certificates in native ca store", rc);
-        if(rc > 0)
-          imported_native_ca = TRUE;
-      }
-    }
-
-    if(config->CAfile) {
-      /* set the trusted CA cert bundle file */
-      gnutls_certificate_set_verify_flags(creds,
-                                          GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
-
-      rc = gnutls_certificate_set_x509_trust_file(creds,
-                                                  config->CAfile,
-                                                  GNUTLS_X509_FMT_PEM);
-      if(rc < 0) {
-        infof(data, "error reading ca cert file %s (%s)%s",
-              config->CAfile, gnutls_strerror(rc),
-              (imported_native_ca ? ", continuing anyway" : ""));
-        if(!imported_native_ca) {
-          ssl_config->certverifyresult = rc;
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-      }
-      else
-        infof(data, "found %d certificates in %s", rc, config->CAfile);
-    }
-
-    if(config->CApath) {
-      /* set the trusted CA cert directory */
-      rc = gnutls_certificate_set_x509_trust_dir(creds, config->CApath,
-                                                 GNUTLS_X509_FMT_PEM);
-      if(rc < 0) {
-        infof(data, "error reading ca cert file %s (%s)%s",
-              config->CApath, gnutls_strerror(rc),
-              (imported_native_ca ? ", continuing anyway" : ""));
-        if(!imported_native_ca) {
-          ssl_config->certverifyresult = rc;
-          return CURLE_SSL_CACERT_BADFILE;
-        }
-      }
-      else
-        infof(data, "found %d certificates in %s", rc, config->CApath);
-    }
+  if(!config->verifypeer) {
+    infof(data, "SSL Trust: peer verification disabled");
+    return CURLE_OK;
   }
+
+  infof(data, "SSL Trust Anchors:");
+  if(ssl_config->native_ca_store) {
+#ifdef USE_APPLE_SECTRUST
+    infof(data, "  Native: Apple SecTrust");
+    creds_are_empty = FALSE;
+#else
+    rc = gnutls_certificate_set_x509_system_trust(creds);
+    if(rc < 0)
+      infof(data, "error reading native ca store (%s), continuing anyway",
+            gnutls_strerror(rc));
+    else {
+      infof(data, "  Native: %d certificates from system trust", rc);
+      if(rc > 0)
+        creds_are_empty = FALSE;
+    }
+#endif
+  }
+
+  if(config->CAfile) {
+    /* set the trusted CA cert bundle file */
+    gnutls_certificate_set_verify_flags(creds,
+                                        GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
+
+    rc = gnutls_certificate_set_x509_trust_file(creds,
+                                                config->CAfile,
+                                                GNUTLS_X509_FMT_PEM);
+    creds_are_empty = creds_are_empty && (rc <= 0);
+    if(rc < 0) {
+      infof(data, "error reading ca cert file %s (%s)%s",
+            config->CAfile, gnutls_strerror(rc),
+            (creds_are_empty ? "" : ", continuing anyway"));
+      if(creds_are_empty) {
+        ssl_config->certverifyresult = rc;
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+    }
+    else
+      infof(data, "  CAfile: %d certificates in %s", rc, config->CAfile);
+  }
+
+  if(config->CApath) {
+    /* set the trusted CA cert directory */
+    rc = gnutls_certificate_set_x509_trust_dir(creds, config->CApath,
+                                               GNUTLS_X509_FMT_PEM);
+    creds_are_empty = creds_are_empty && (rc <= 0);
+    if(rc < 0) {
+      infof(data, "error reading ca cert file %s (%s)%s",
+            config->CApath, gnutls_strerror(rc),
+            (creds_are_empty ? "" : ", continuing anyway"));
+      if(creds_are_empty) {
+        ssl_config->certverifyresult = rc;
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+    }
+    else
+      infof(data, "  CApath: %d certificates in %s", rc, config->CApath);
+  }
+
+  if(creds_are_empty)
+    infof(data, "  no trust anchors configured");
 
   if(config->CRLfile) {
     /* set the CRL list file */
@@ -519,7 +533,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
       return CURLE_SSL_CRL_BADFILE;
     }
     else
-      infof(data, "found %d CRL in %s", rc, config->CRLfile);
+      infof(data, "  CRLfile: %d CRL in %s", rc, config->CRLfile);
   }
 
   return CURLE_OK;
@@ -1519,17 +1533,72 @@ out:
   return result;
 }
 
+struct gtls_cert_chain {
+  const gnutls_datum_t *certs;
+  unsigned int num_certs;
+};
+
+#ifdef USE_APPLE_SECTRUST
+static CURLcode gtls_chain_get_der(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   void *user_data,
+                                   size_t i,
+                                   unsigned char **pder,
+                                   size_t *pder_len)
+{
+  struct gtls_cert_chain *chain = user_data;
+
+  (void)cf;
+  (void)data;
+  *pder_len = 0;
+  *pder = NULL;
+
+  if(i >= chain->num_certs)
+    return CURLE_TOO_LARGE;
+  *pder = chain->certs[i].data;
+  *pder_len = (size_t)chain->certs[i].size;
+  return CURLE_OK;
+}
+#endif /* USE_APPLE_SECTRUST */
+
+static CURLcode glts_verify_native(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct ssl_peer *peer,
+                                   struct gtls_cert_chain *chain,
+                                   bool *pverified)
+{
+#ifdef USE_APPLE_SECTRUST
+  CURLcode result;
+
+  result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
+                                  gtls_chain_get_der, chain,
+                                  NULL, 0);
+  *pverified = !result;
+  if(*pverified)
+    infof(data, "  SSL certificate verified by Apple SecTrust.");
+  return result;
+#else
+  (void)cf;
+  (void)data;
+  (void)session;
+  (void)peer;
+  /* we imported the native store into the GnuTLS credentials
+   * and they are part of the verify check below. */
+  *pverified = FALSE;
+  return CURLE_OK;
+#endif
+}
+
 CURLcode
-Curl_gtls_verifyserver(struct Curl_easy *data,
+Curl_gtls_verifyserver(struct Curl_cfilter *cf,
+                       struct Curl_easy *data,
                        gnutls_session_t session,
                        struct ssl_primary_config *config,
                        struct ssl_config_data *ssl_config,
                        struct ssl_peer *peer,
                        const char *pinned_key)
 {
-  unsigned int cert_list_size;
-  const gnutls_datum_t *chainp;
-  unsigned int verify_status = 0;
+  struct gtls_cert_chain chain;
   gnutls_x509_crt_t x509_cert = NULL, x509_issuer = NULL;
   time_t certclock;
   int rc;
@@ -1542,8 +1611,8 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
      first certificate in the list is the peer's certificate, following the
      issuer's certificate, then the issuer's issuer etc. */
 
-  chainp = gnutls_certificate_get_peers(session, &cert_list_size);
-  if(!chainp) {
+  chain.certs = gnutls_certificate_get_peers(session, &chain.num_certs);
+  if(!chain.certs) {
     if(config->verifypeer ||
        config->verifyhost ||
        config->issuercert) {
@@ -1566,16 +1635,16 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     infof(data, " common name: WARNING could not obtain");
   }
 
-  if(data->set.ssl.certinfo && chainp) {
+  if(data->set.ssl.certinfo && chain.certs) {
     unsigned int i;
 
-    result = Curl_ssl_init_certinfo(data, (int)cert_list_size);
+    result = Curl_ssl_init_certinfo(data, (int)chain.num_certs);
     if(result)
       goto out;
 
-    for(i = 0; i < cert_list_size; i++) {
-      const char *beg = (const char *) chainp[i].data;
-      const char *end = beg + chainp[i].size;
+    for(i = 0; i < chain.num_certs; i++) {
+      const char *beg = (const char *) chain.certs[i].data;
+      const char *end = beg + chain.certs[i].size;
 
       result = Curl_extract_certinfo(data, (int)i, beg, end);
       if(result)
@@ -1584,26 +1653,36 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   }
 
   if(config->verifypeer) {
-    /* This function will try to verify the peer's certificate and return its
-       status (trusted, invalid etc.). The value of status should be one or
-       more of the gnutls_certificate_status_t enumerated elements bitwise
-       or'd. To avoid denial of service attacks some default upper limits
-       regarding the certificate key size and chain size are set. To override
-       them use gnutls_certificate_set_verify_limits(). */
+    bool verified = FALSE;
 
-    rc = gnutls_certificate_verify_peers2(session, &verify_status);
-    if(rc < 0) {
-      failf(data, "server cert verify failed: %d", rc);
-      *certverifyresult = rc;
-      result = CURLE_SSL_CONNECT_ERROR;
-      goto out;
+    if(ssl_config->native_ca_store) {
+      result = glts_verify_native(cf, data, peer, &chain, &verified);
+      if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
+        goto out; /* unexpected error */
+      if(!verified)
+        *certverifyresult = GNUTLS_CERT_INVALID;
     }
 
-    *certverifyresult = verify_status;
+    if(!verified) {
+      unsigned int verify_status = 0;
+      /* This function will try to verify the peer's certificate and return
+         its status (trusted, invalid etc.). The value of status should be
+         one or more of the gnutls_certificate_status_t enumerated elements
+         bitwise or'd. To avoid denial of service attacks some default
+         upper limits regarding the certificate key size and chain size
+         are set. To override them use
+         gnutls_certificate_set_verify_limits(). */
+      rc = gnutls_certificate_verify_peers2(session, &verify_status);
+      if(rc < 0) {
+        failf(data, "server cert verify failed: %d", rc);
+        *certverifyresult = rc;
+        result = CURLE_SSL_CONNECT_ERROR;
+        goto out;
+      }
+      *certverifyresult = verify_status;
 
-    /* verify_status is a bitmask of gnutls_certificate_status bits */
-    if(verify_status & GNUTLS_CERT_INVALID) {
-      if(config->verifypeer) {
+      /* verify_status is a bitmask of gnutls_certificate_status bits */
+      if(verify_status & GNUTLS_CERT_INVALID) {
         const char *cause = "certificate error, no details available";
         if(verify_status & GNUTLS_CERT_EXPIRED)
           cause = "certificate has expired";
@@ -1613,7 +1692,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
           cause = "certificate uses insecure algorithm";
         else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
           cause = "attached OCSP status response is invalid";
-        failf(data, "server verification failed: %s. (CAfile: %s "
+        failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
               "CRLfile: %s)", cause,
               config->CAfile ? config->CAfile : "none",
               ssl_config->primary.CRLfile ?
@@ -1622,13 +1701,74 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
         goto out;
       }
       else
-        infof(data, "  server certificate verification FAILED");
+        infof(data, "  SSL certificate verified by GnuTLS");
+    }
+}
+  else
+    infof(data, "  SSL certificate verification SKIPPED");
+
+  /* initialize an X.509 certificate structure. */
+  gnutls_x509_crt_init(&x509_cert);
+
+  if(chain.certs)
+    /* convert the given DER or PEM encoded Certificate to the native
+       gnutls_x509_crt_t format */
+    gnutls_x509_crt_import(x509_cert, chain.certs, GNUTLS_X509_FMT_DER);
+
+  /* Check for time-based validity */
+  certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
+
+  if(certclock == (time_t)-1) {
+    if(config->verifypeer) {
+      failf(data, "server cert expiration date verify failed");
+      *certverifyresult = GNUTLS_CERT_EXPIRED;
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
     }
     else
-      infof(data, "  server certificate verification OK");
+      infof(data, "  SSL certificate expiration date verify FAILED");
   }
-  else
-    infof(data, "  server certificate verification SKIPPED");
+  else {
+    if(certclock < time(NULL)) {
+      if(config->verifypeer) {
+        failf(data, "server certificate expiration date has passed.");
+        *certverifyresult = GNUTLS_CERT_EXPIRED;
+        result = CURLE_PEER_FAILED_VERIFICATION;
+        goto out;
+      }
+      else
+        infof(data, "  SSL certificate expiration date FAILED");
+    }
+    else
+      infof(data, "  SSL certificate expiration date OK");
+  }
+
+  certclock = gnutls_x509_crt_get_activation_time(x509_cert);
+
+  if(certclock == (time_t)-1) {
+    if(config->verifypeer) {
+      failf(data, "server cert activation date verify failed");
+      *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    else
+      infof(data, "  SSL certificate activation date verify FAILED");
+  }
+  else {
+    if(certclock > time(NULL)) {
+      if(config->verifypeer) {
+        failf(data, "server certificate not activated yet.");
+        *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
+        result = CURLE_PEER_FAILED_VERIFICATION;
+        goto out;
+      }
+      else
+        infof(data, "  SSL certificate activation date FAILED");
+    }
+    else
+      infof(data, "  SSL certificate activation date OK");
+  }
 
   if(config->verifystatus) {
     result = gtls_verify_ocsp_status(data, session);
@@ -1636,15 +1776,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       goto out;
   }
   else
-    infof(data, "  server certificate status verification SKIPPED");
-
-  /* initialize an X.509 certificate structure. */
-  gnutls_x509_crt_init(&x509_cert);
-
-  if(chainp)
-    /* convert the given DER or PEM encoded Certificate to the native
-       gnutls_x509_crt_t format */
-    gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
+    infof(data, "  SSL certificate status verification SKIPPED");
 
   if(config->issuercert) {
     gnutls_datum_t issuerp;
@@ -1659,7 +1791,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
       result = CURLE_SSL_ISSUER_ERROR;
       goto out;
     }
-    infof(data, "  server certificate issuer check OK (Issuer Cert: %s)",
+    infof(data, "  SSL certificate issuer check OK (Issuer Cert: %s)",
           config->issuercert ? config->issuercert : "none");
   }
 
@@ -1724,61 +1856,6 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
   if(result)
     goto out;
 
-  /* Check for time-based validity */
-  certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
-
-  if(certclock == (time_t)-1) {
-    if(config->verifypeer) {
-      failf(data, "server cert expiration date verify failed");
-      *certverifyresult = GNUTLS_CERT_EXPIRED;
-      result = CURLE_SSL_CONNECT_ERROR;
-      goto out;
-    }
-    else
-      infof(data, "  server certificate expiration date verify FAILED");
-  }
-  else {
-    if(certclock < time(NULL)) {
-      if(config->verifypeer) {
-        failf(data, "server certificate expiration date has passed.");
-        *certverifyresult = GNUTLS_CERT_EXPIRED;
-        result = CURLE_PEER_FAILED_VERIFICATION;
-        goto out;
-      }
-      else
-        infof(data, "  server certificate expiration date FAILED");
-    }
-    else
-      infof(data, "  server certificate expiration date OK");
-  }
-
-  certclock = gnutls_x509_crt_get_activation_time(x509_cert);
-
-  if(certclock == (time_t)-1) {
-    if(config->verifypeer) {
-      failf(data, "server cert activation date verify failed");
-      *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
-      result = CURLE_SSL_CONNECT_ERROR;
-      goto out;
-    }
-    else
-      infof(data, "  server certificate activation date verify FAILED");
-  }
-  else {
-    if(certclock > time(NULL)) {
-      if(config->verifypeer) {
-        failf(data, "server certificate not activated yet.");
-        *certverifyresult = GNUTLS_CERT_NOT_ACTIVATED;
-        result = CURLE_PEER_FAILED_VERIFICATION;
-        goto out;
-      }
-      else
-        infof(data, "  server certificate activation date FAILED");
-    }
-    else
-      infof(data, "  server certificate activation date OK");
-  }
-
   if(pinned_key) {
     result = pkp_pin_peer_pubkey(data, x509_cert, pinned_key);
     if(result != CURLE_OK) {
@@ -1813,7 +1890,7 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
 #endif
   CURLcode result;
 
-  result = Curl_gtls_verifyserver(data, session, conn_config, ssl_config,
+  result = Curl_gtls_verifyserver(cf, data, session, conn_config, ssl_config,
                                   &connssl->peer, pinned_key);
   if(result)
     goto out;

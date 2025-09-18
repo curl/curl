@@ -434,7 +434,7 @@ class TestSSLUse:
         if env.curl_uses_lib('openssl') or env.curl_uses_lib('quictls'):
             exp_trace = r'.*SSL certificate problem: certificate has expired$'
         elif env.curl_uses_lib('gnutls'):
-            exp_trace = r'.*server verification failed: certificate has expired\..*'
+            exp_trace = r'.*SSL certificate verification failed: certificate has expired\..*'
         elif env.curl_uses_lib('wolfssl'):
             exp_trace = r'.*server verification failed: certificate has expired\.$'
         if exp_trace is not None:

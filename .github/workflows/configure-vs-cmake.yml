@@ -92,7 +92,7 @@ jobs:
         run: |
           autoreconf -fi
           export PKG_CONFIG_DEBUG_SPEW=1
-          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap --with-brotli --with-zstd
+          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap --with-brotli --with-zstd --with-apple-sectrust
 
       - name: 'run cmake'
         run: |
