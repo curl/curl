@@ -98,7 +98,7 @@ jobs:
         run: |
           cmake -B bld-cm -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON \
             -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-            -DCURL_USE_LIBSSH2=OFF
+            -DCURL_USE_LIBSSH2=OFF -DUSE_APPLE_SECTRUST=ON
 
       - name: 'configure log'
         run: cat bld-am/config.log 2>/dev/null || true
