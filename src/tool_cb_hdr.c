@@ -116,7 +116,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
   if(per->config->headerfile && heads->stream) {
     size_t rc = fwrite(ptr, size, nmemb, heads->stream);
-    if(rc != cb)
+    if(rc != nmemb)
       return rc;
     /* flush the stream to send off what we got earlier */
     if(fflush(heads->stream)) {
