@@ -100,7 +100,8 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct gtls_ctx *gtls);
 
-CURLcode Curl_gtls_verifyserver(struct Curl_easy *data,
+CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
                                 gnutls_session_t session,
                                 struct ssl_primary_config *config,
                                 struct ssl_config_data *ssl_config,

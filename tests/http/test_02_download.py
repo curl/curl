@@ -609,6 +609,8 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
             pytest.skip('failing on macOS CI runners')
+        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('gnutls'):
+            pytest.skip('h3 gnutls early data failing on macOS')
         count = 2
         docname = 'data-10k'
         # we want this test to always connect to nghttpx, since it is
