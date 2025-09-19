@@ -29,7 +29,7 @@ versions of libs and build tools.
  - GnuTLS       3.1.10
  - mbedTLS      3.2.0
  - zlib         1.2.5.2
- - libssh2      1.2.8
+ - libssh2      1.9.0
  - c-ares       1.6.0
  - libssh       0.9.0
  - libidn2      2.0.0

@@ -464,26 +464,18 @@ static CURLcode ssh_knownhost(struct Curl_easy *data,
       case LIBSSH2_HOSTKEY_TYPE_DSS:
         keybit = LIBSSH2_KNOWNHOST_KEY_SSHDSS;
         break;
-#ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_256
       case LIBSSH2_HOSTKEY_TYPE_ECDSA_256:
         keybit = LIBSSH2_KNOWNHOST_KEY_ECDSA_256;
         break;
-#endif
-#ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_384
       case LIBSSH2_HOSTKEY_TYPE_ECDSA_384:
         keybit = LIBSSH2_KNOWNHOST_KEY_ECDSA_384;
         break;
-#endif
-#ifdef LIBSSH2_HOSTKEY_TYPE_ECDSA_521
       case LIBSSH2_HOSTKEY_TYPE_ECDSA_521:
         keybit = LIBSSH2_KNOWNHOST_KEY_ECDSA_521;
         break;
-#endif
-#ifdef LIBSSH2_HOSTKEY_TYPE_ED25519
       case LIBSSH2_HOSTKEY_TYPE_ED25519:
         keybit = LIBSSH2_KNOWNHOST_KEY_ED25519;
         break;
-#endif
       default:
         infof(data, "unsupported key type, cannot check knownhosts");
         keybit = 0;
@@ -606,22 +598,9 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
     size_t pub_pos = 0;
     size_t b64_pos = 0;
 
-#ifdef LIBSSH2_HOSTKEY_HASH_SHA256
     /* The fingerprint points to static storage (!), do not free() it. */
     fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
                                        LIBSSH2_HOSTKEY_HASH_SHA256);
-#else
-    const char *hostkey;
-    size_t len = 0;
-    unsigned char hash[32];
-
-    hostkey = libssh2_session_hostkey(sshc->ssh_session, &len, NULL);
-    if(hostkey) {
-      if(!Curl_sha256it(hash, (const unsigned char *) hostkey, len))
-        fingerprint = (char *) hash;
-    }
-#endif
-
     if(!fingerprint) {
       failf(data,
             "Denied establishing ssh session: sha256 fingerprint "
@@ -755,24 +734,14 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-#ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
   static const char * const hostkey_method_ssh_ed25519
     = "ssh-ed25519";
-#endif
-#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_521
   static const char * const hostkey_method_ssh_ecdsa_521
     = "ecdsa-sha2-nistp521";
-#endif
-#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_384
   static const char * const hostkey_method_ssh_ecdsa_384
     = "ecdsa-sha2-nistp384";
-#endif
-#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_256
   static const char * const hostkey_method_ssh_ecdsa_256
     = "ecdsa-sha2-nistp256";
-#endif
-  static const char * const hostkey_method_ssh_rsa
-    = "ssh-rsa";
   static const char * const hostkey_method_ssh_rsa_all
     = "rsa-sha2-256,rsa-sha2-512,ssh-rsa";
   static const char * const hostkey_method_ssh_dss
@@ -830,35 +799,20 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
             conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
 
       switch(store->typemask & LIBSSH2_KNOWNHOST_KEY_MASK) {
-#ifdef LIBSSH2_KNOWNHOST_KEY_ED25519
       case LIBSSH2_KNOWNHOST_KEY_ED25519:
         hostkey_method = hostkey_method_ssh_ed25519;
         break;
-#endif
-#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_521
       case LIBSSH2_KNOWNHOST_KEY_ECDSA_521:
         hostkey_method = hostkey_method_ssh_ecdsa_521;
         break;
-#endif
-#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_384
       case LIBSSH2_KNOWNHOST_KEY_ECDSA_384:
         hostkey_method = hostkey_method_ssh_ecdsa_384;
         break;
-#endif
-#ifdef LIBSSH2_KNOWNHOST_KEY_ECDSA_256
       case LIBSSH2_KNOWNHOST_KEY_ECDSA_256:
         hostkey_method = hostkey_method_ssh_ecdsa_256;
         break;
-#endif
       case LIBSSH2_KNOWNHOST_KEY_SSHRSA:
-        if(libssh2_version(0x010900))
-          /* since 1.9.0 libssh2_session_method_pref() works as expected */
-          hostkey_method = hostkey_method_ssh_rsa_all;
-        else
-          /* old libssh2 which cannot correctly remove unsupported methods due
-           * to bug in src/kex.c or does not support the new methods anyways.
-           */
-          hostkey_method = hostkey_method_ssh_rsa;
+        hostkey_method = hostkey_method_ssh_rsa_all;
         break;
       case LIBSSH2_KNOWNHOST_KEY_SSHDSS:
         hostkey_method = hostkey_method_ssh_dss;
@@ -2436,18 +2390,9 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
    */
 
   /* get a fresh new channel from the ssh layer */
-#if LIBSSH2_VERSION_NUM < 0x010700
-  struct stat sb;
-  memset(&sb, 0, sizeof(struct stat));
-  sshc->ssh_channel = libssh2_scp_recv(sshc->ssh_session,
-                                       sshp->path, &sb);
-#else
   libssh2_struct_stat sb;
   memset(&sb, 0, sizeof(libssh2_struct_stat));
-  sshc->ssh_channel = libssh2_scp_recv2(sshc->ssh_session,
-                                        sshp->path, &sb);
-#endif
-
+  sshc->ssh_channel = libssh2_scp_recv2(sshc->ssh_session, sshp->path, &sb);
   if(!sshc->ssh_channel) {
     int ssh_err;
     char *err_msg = NULL;
