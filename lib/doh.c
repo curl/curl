@@ -1062,7 +1062,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
  * @return is 1 for success, error otherwise
  *
  * The encoding here is defined in
- * https://tools.ietf.org/html/rfc1035#section-3.1
+ * https://datatracker.ietf.org/doc/html/rfc1035#section-3.1
  *
  * The input buffer pointer will be modified so it points to
  * just after the end of the DNS name encoding on output. (And
