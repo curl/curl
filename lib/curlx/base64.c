@@ -182,7 +182,7 @@ static CURLcode base64_encode(const char *table64,
   *outlen = 0;
 
   if(!insize)
-    insize = strlen(inputbuff);
+    return CURLE_OK;
 
 #if SIZEOF_SIZE_T == 4
   if(insize > UINT_MAX/4)
@@ -239,8 +239,6 @@ static CURLcode base64_encode(const char *table64,
  * return a pointer in *outptr to a newly allocated memory area holding
  * encoded data. Size of encoded data is returned in variable pointed by
  * outlen.
- *
- * Input length of 0 indicates input buffer holds a null-terminated string.
  *
  * Returns CURLE_OK on success, otherwise specific error code. Function
  * output shall not be considered valid unless CURLE_OK is returned.
