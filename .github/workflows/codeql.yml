@@ -90,6 +90,7 @@ jobs:
         with:
           languages: cpp
           build-mode: manual
+          trap-caching: false
 
       - name: 'build'
         timeout-minutes: 10
