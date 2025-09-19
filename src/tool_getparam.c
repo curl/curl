@@ -1012,8 +1012,9 @@ static ParameterError set_rate(const char *nextarg)
       errorf("too large --rate unit");
       err = PARAM_NUMBER_TOO_LARGE;
     }
-    /* this typecast is okay based on the check above */
-    numerator *= (long)numunits;
+    else
+      /* this typecast is okay based on the check above */
+      numerator *= (long)numunits;
   }
 
   if(err)
