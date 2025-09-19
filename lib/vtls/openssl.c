@@ -3448,8 +3448,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        problems with server-sent legacy intermediates. Newer versions of
        OpenSSL do alternate chain checking by default but we do not know how to
        determine that in a reliable manner.
-       https://web.archive.org/web/20190422050538/
-       rt.openssl.org/Ticket/Display.html?id=3621
+       https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
     */
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
     if(!ssl_config->no_partialchain && !ssl_crlfile) {
@@ -4719,8 +4718,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     /* Begin Gyrations to get the subjectPublicKeyInfo     */
     /* Thanks to Viktor Dukhovni on the OpenSSL mailing list */
 
-    /* https://groups.google.com/group/mailing.openssl.users/browse_thread
-       /thread/d61858dae102c6c7 */
+    /* https://groups.google.com/group/mailing.openssl.users/browse_thread/thread/d61858dae102c6c7 */
     len1 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), NULL);
     if(len1 < 1)
       break; /* failed */
