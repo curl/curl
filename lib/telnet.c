@@ -713,7 +713,7 @@ static void printsub(struct Curl_easy *data,
       else /* bad input */
         return;
     }
-    if(length < 1) {
+    if(length <= 1) {
       infof(data, "(Empty suboption?)");
       return;
     }
