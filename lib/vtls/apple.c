@@ -104,6 +104,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   CFStringRef host_str = NULL;
   CFErrorRef error = NULL;
   OSStatus status = noErr;
+  CFStringRef error_ref = NULL;
+  char *err_desc = NULL;
   size_t i;
 
   if(conn_config->verifyhost) {
@@ -237,35 +239,22 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
              CURLE_OK : CURLE_PEER_FAILED_VERIFICATION;
     if(error) {
       CFIndex code = CFErrorGetCode(error);
-      CFStringRef error_desc = CFErrorCopyDescription(error);
+      error_ref = CFErrorCopyDescription(error);
 
-      if(error_desc) {
+      if(error_ref) {
         CFIndex size = CFStringGetMaximumSizeForEncoding(
-          CFStringGetLength(error_desc), kCFStringEncodingUTF8);
-        char *desc_str = malloc(size);
-        if(desc_str) {
-          if(CFStringGetCString(error_desc, desc_str, size,
-            kCFStringEncodingUTF8)) {
-            failf(data, "Apple SecTrust: trust evaluation error '%s'",
-                  desc_str);
+          CFStringGetLength(error_ref), kCFStringEncodingUTF8);
+        err_desc = malloc(size + 1);
+        if(err_desc) {
+          if(!CFStringGetCString(error_ref, err_desc, size,
+             kCFStringEncodingUTF8)) {
+            free(err_desc);
+            err_desc = NULL;
           }
-          else {
-            failf(data, "Apple SecTrust: trust evaluation error %i",
-              (int)code);
-          }
-          free(desc_str);
-        }
-        else {
-          failf(data, "Apple SecTrust: trust evaluation error %i",
-            (int)code);
         }
       }
-      else {
-        infof(data, "Apple SecTrust: trust evaluation error %ld", code);
-      }
-
-      if(error_desc)
-        CFRelease(error_desc);
+      infof(data, "Apple SecTrust failure %ld%s%s", code,
+            err_desc ? ": " : "", err_desc ? err_desc : "");
     }
   }
   else
@@ -276,7 +265,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     status = SecTrustEvaluate(trust, &sec_result);
 
     if(status != noErr) {
-      failf(data, "Apple SecTrust: trust evaluation error %i", (int)status);
+      failf(data, "Apple SecTrust verification failed: error %i", (int)status);
     }
     else if((status == kSecTrustResultUnspecified) ||
             (status == kSecTrustResultProceed)) {
@@ -287,6 +276,9 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   }
 
 out:
+  free(err_desc);
+  if(error_ref)
+    CFRelease(error_ref);
   if(error)
     CFRelease(error);
   if(host_str)

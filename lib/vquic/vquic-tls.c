@@ -130,7 +130,7 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
 {
 #ifdef USE_OPENSSL
   if(!ctx->ossl.x509_store_setup) {
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
+    CURLcode result = Curl_ssl_setup_x509_store(cf, data, &ctx->ossl);
     if(result)
       return result;
     ctx->ossl.x509_store_setup = TRUE;

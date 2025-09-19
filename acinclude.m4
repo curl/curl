@@ -1150,7 +1150,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   check_capath=""
 
   if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
-    ca_native="Apple OS SecTrust"
+    ca_native="Apple SecTrust"
   else
     ca_native="no"
   fi
@@ -1168,6 +1168,10 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     dnl --with-ca-path given
     capath="$want_capath"
     ca="no"
+  elif test "x$ca_native" != "xno"; then
+    # native ca configured, do not look further
+    ca="no"
+    capath="no"
   else
     dnl First try auto-detecting a CA bundle, then a CA path.
     dnl Both auto-detections can be skipped by --without-ca-*
