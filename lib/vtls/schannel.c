@@ -139,7 +139,7 @@
 
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
-     https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+     https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
    Or mingw-w64 9.0 or upper.
 */
 #if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
@@ -585,8 +585,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     if(fInCert || blob) {
       /* Reading a .P12 or .pfx file, like the example at bottom of
-         https://social.msdn.microsoft.com/Forums/windowsdesktop/
-         en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
+         https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
       */
       CRYPT_DATA_BLOB datablob;
       WCHAR* pszPassword;
@@ -1039,7 +1038,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   /* Schannel InitializeSecurityContext:
-     https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
+     https://learn.microsoft.com/windows/win32/api/rrascfg/nn-rrascfg-ieapproviderconfig
 
      At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and WINE (for which we currently disable ALPN) is giving
@@ -1945,7 +1944,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* copy data into output buffer */
   memcpy(outbuf[1].pvBuffer, buf, len);
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
+  /* https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-encryptmessage */
   sspi_status = Curl_pSecFn->EncryptMessage(&backend->ctxt->ctxt_handle, 0,
                                             &outbuf_desc, 0);
 
@@ -2164,7 +2163,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     InitSecBuffer(&inbuf[3], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
-    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx
+    /* https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-decryptmessage
      */
     sspi_status = Curl_pSecFn->DecryptMessage(&backend->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
@@ -2373,7 +2372,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   bool send_shutdown, bool *done)
 {
-  /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
+  /* See https://learn.microsoft.com/windows/win32/secauthn/shutting-down-an-schannel-connection
    * Shutting Down an Schannel Connection
    */
   struct ssl_connect_data *connssl = cf->ctx;
