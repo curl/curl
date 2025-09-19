@@ -860,14 +860,14 @@
  The existing support for the -E/--cert and --key options could be
  extended by supplying a custom certificate and key in PEM format, see:
  - Getting a Certificate for Schannel
-   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
+   https://learn.microsoft.com/windows/win32/secauthn/getting-a-certificate-for-schannel
 
 15.2 Extend support for the --ciphers option
 
  The existing support for the --ciphers option could be extended
  by mapping the OpenSSL/GnuTLS cipher suites to the Schannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
-   https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
+   https://learn.microsoft.com/windows/win32/secauthn/specifying-schannel-ciphers-and-cipher-strengths
 
 15.4 Add option to allow abrupt server closure
 
