@@ -1277,8 +1277,8 @@ static CURLcode single_transfer(struct OperationConfig *config,
         config->resume_from = -1; /* -1 will then force get-it-yourself */
     }
 
-    if(output_expected(per->url, per->uploadfile) && outs->stream &&
-       isatty(fileno(outs->stream)))
+    if(!outs->out_null && output_expected(per->url, per->uploadfile) &&
+       outs->stream && isatty(fileno(outs->stream)))
       /* we send the output to a tty, therefore we switch off the progress
          meter */
       per->noprogress = global->noprogress = global->isatty = TRUE;
