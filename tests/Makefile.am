@@ -171,7 +171,7 @@ event-test: perlcheck all
 default-pytest: ci-pytest
 
 ci-pytest: all
-	srcdir=$(srcdir) $(PYTEST) -n auto -v $(srcdir)/http
+	srcdir=$(srcdir) $(PYTEST) -n auto --dist worksteal -v $(srcdir)/http
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)
