@@ -172,7 +172,7 @@ static CURLcode test_unit1302(const char *arg)
       fprintf(stderr, "Test %u URL encoded output length %d instead of %d\n",
               i, (int)olen, (int)e->olen);
     }
-    if(memcmp(out, e->output, e->olen)) {
+    if(out && memcmp(out, e->output, e->olen)) {
       fprintf(stderr, "Test %u URL encoded badly. Got '%s', expected '%s'\n",
               i, out, e->output);
       unitfail++;
