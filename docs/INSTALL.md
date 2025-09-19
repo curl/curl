@@ -193,9 +193,9 @@ You can build curl with:
  KB140584 is a must for any Windows developer. Especially important is full
  understanding if you are not going to follow the advice given above.
 
- - [How To Use the C Runtime](https://support.microsoft.com/help/94248/how-to-use-the-c-run-time)
- - [Runtime Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
- - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
+ - [How To Use the C Runtime](https://learn.microsoft.com/troubleshoot/developer/visualstudio/cpp/libraries/use-c-run-time)
+ - [Runtime Library Compiler Options](https://learn.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
+ - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://learn.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
 If your app is misbehaving in some strange way, or it is suffering from memory
 corruption, before asking for further help, please try first to rebuild every

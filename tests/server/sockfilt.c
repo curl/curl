@@ -404,8 +404,8 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
  * other handle types supported by WaitForMultipleObjectsEx() as
  * well as disk files, anonymous and names pipes, and character input.
  *
- * https://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
- * https://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
+ * https://learn.microsoft.com/windows/win32/api/synchapi/nf-synchapi-waitformultipleobjectsex
+ * https://learn.microsoft.com/windows/win32/api/winsock2/nf-winsock2-wsaenumnetworkevents
  */
 struct select_ws_wait_data {
   HANDLE handle; /* actual handle to wait for during select */

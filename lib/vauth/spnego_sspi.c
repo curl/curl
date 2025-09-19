@@ -210,8 +210,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     * we have to pass a second SecBuffer to the SecBufferDesc
     * otherwise IIS will not pass the authentication (401 response).
     * Minimum supported version is Windows 7.
-    * https://docs.microsoft.com/en-us/security-updates
-    * /SecurityAdvisories/2009/973811
+    * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
     */
     if(nego->sslContext) {
       SEC_CHANNEL_BINDINGS channelBindings;

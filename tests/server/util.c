@@ -229,12 +229,9 @@ curl_off_t our_getpid(void)
   curl_off_t pid = (curl_off_t)t_getpid();
 #ifdef _WIN32
   /* store pid + MAX_PID to avoid conflict with Cygwin/msys PIDs, see also:
-   * - 2019-01-31: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;
-   *               h=b5e1003722cb14235c4f166be72c09acdffc62ea
-   * - 2019-02-02: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;
-   *               h=448cf5aa4b429d5a9cebf92a0da4ab4b5b6d23fe
-   * - 2024-12-19: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;
-   *               h=363357c023ce01e936bdaedf0f479292a8fa4e0f
+   * - 2019-01-31: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;h=b5e1003722cb14235c4f166be72c09acdffc62ea
+   * - 2019-02-02: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;h=448cf5aa4b429d5a9cebf92a0da4ab4b5b6d23fe
+   * - 2024-12-19: https://cygwin.com/git/?p=newlib-cygwin.git;a=commit;h=363357c023ce01e936bdaedf0f479292a8fa4e0f
    */
   pid += 4194304;
 #endif
@@ -422,7 +419,7 @@ static void exit_signal_handler(int signum)
  * They are included for ANSI compatibility. Therefore, you can set
  * signal handlers for these signals by using signal, and you can also
  * explicitly generate these signals by calling raise. Source:
- * https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/signal
+ * https://learn.microsoft.com/cpp/c-runtime-library/reference/signal
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {

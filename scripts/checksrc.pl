@@ -516,7 +516,7 @@ sub scanfile {
         }
 
         # detect long lines
-        if(length($l) > $max_column) {
+        if(length($l) > $max_column && $l !~ / https:\/\//) {
             checkwarn("LONGLINE", $line, length($l), $file, $l,
                       "Longer than $max_column columns");
         }

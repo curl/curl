@@ -170,7 +170,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
    * \\?\c:\longpath        --->    \\?\c:\longpath  (unchanged)
    * \\server\c$\longpath   --->    \\?\UNC\server\c$\longpath
    *
-   * https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
+   * https://learn.microsoft.com/dotnet/standard/io/file-path-formats
    */
   if(!wcsncmp(fbuf, L"\\\\?\\", 4))
     ; /* do nothing */

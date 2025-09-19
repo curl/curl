@@ -84,7 +84,7 @@ f:\foo:bar => f:\foo:bar   (flag SANITIZE_ALLOW_PATH)
 
 This function was implemented according to the guidelines in 'Naming Files,
 Paths, and Namespaces' section 'Naming Conventions'.
-https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
+https://learn.microsoft.com/windows/win32/fileio/naming-a-file
 
 Flags
 -----
@@ -473,9 +473,8 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 
   /* Rename reserved device names that are known to be accessible without \\.\
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
-     https://web.archive.org/web/20160314141551/
-       support.microsoft.com/en-us/kb/74496
-     https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
+     https://web.archive.org/web/20160314141551/support.microsoft.com/en-us/kb/74496
+     https://learn.microsoft.com/windows/win32/fileio/naming-a-file
      */
   for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
     size_t p_len;
