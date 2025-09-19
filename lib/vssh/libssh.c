@@ -2889,7 +2889,7 @@ static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
 {
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = Curl_conn_meta_get(conn, CURL_META_SSH_CONN);
-  ssize_t nread;
+  int nread;
 
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
   *pnread = 0;
@@ -2899,7 +2899,8 @@ static CURLcode scp_recv(struct Curl_easy *data, int sockindex,
 
   /* libssh returns int */
   nread = ssh_scp_read(sshc->scp_session, mem, len);
-
+  if(nread == SSH_ERROR)
+    return CURLE_SSH;
 #if 0
   /* The following code is misleading, mostly added as wishful thinking
    * that libssh at some point will implement non-blocking ssh_scp_write/read.
