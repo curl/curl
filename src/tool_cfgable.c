@@ -53,6 +53,10 @@ struct OperationConfig *config_alloc(void)
   config->file_clobber_mode = CLOBBER_DEFAULT;
   config->upload_flags = CURLULFLAG_SEEN;
   curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
+#ifdef CURL_CA_NATIVE_BY_DEFAULT
+  config->native_ca_store = TRUE;
+  config->proxy_native_ca_store = TRUE;
+#endif
   return config;
 }
 
