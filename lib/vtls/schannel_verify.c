@@ -552,7 +552,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
    * Right now we are only asking for the first preferred alternative name.
    * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
    * (If Windows CE supports that?) and run this section in a loop for each.
-   * !checksrc! disable LONGLINE
    * https://learn.microsoft.com/windows/win32/api/wincrypt/nf-wincrypt-certgetnamestringa
    * curl: (51) schannel: CertGetNameString() certificate hostname
    * (.google.com) did not match connection (google.com)
