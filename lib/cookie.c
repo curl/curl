@@ -1658,17 +1658,17 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
 {
   CURLcode res;
 
-  if(data->set.str[STRING_COOKIEJAR]) {
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-
+  Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+  /* only save the cookie file if a transfer was started (data->state.url is
+     set), as otherwise the cookies were not completely initialized and there
+     might be cookie files that weren't loaded so saving the file is the wrong
+     thing. */
+  if(data->set.str[STRING_COOKIEJAR] && data->state.url) {
     /* if we have a destination file for all the cookies to get dumped to */
     res = cookie_output(data, data->cookies, data->set.str[STRING_COOKIEJAR]);
     if(res)
       infof(data, "WARNING: failed to save cookies in %s: %s",
             data->set.str[STRING_COOKIEJAR], curl_easy_strerror(res));
-  }
-  else {
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   }
 
   if(cleanup && (!data->share || (data->cookies != data->share->cookies))) {

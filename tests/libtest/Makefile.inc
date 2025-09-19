@@ -90,7 +90,7 @@ TESTS_C = \
   lib1591.c lib1592.c lib1593.c lib1594.c                     lib1597.c \
   lib1598.c lib1599.c \
   lib1662.c \
-  lib1900.c lib1901.c           lib1903.c lib1905.c lib1906.c lib1907.c \
+  lib1900.c lib1901.c lib1902.c lib1903.c lib1905.c lib1906.c lib1907.c \
   lib1908.c           lib1910.c lib1911.c lib1912.c lib1913.c \
   lib1915.c lib1916.c           lib1918.c lib1919.c \
   lib1933.c lib1934.c lib1935.c lib1936.c lib1937.c lib1938.c lib1939.c \
