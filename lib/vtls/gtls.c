@@ -2195,7 +2195,7 @@ static CURLcode gtls_recv(struct Curl_cfilter *cf,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "gtls_recv(len=%zu) -> 0, %zu", blen, *pnread);
+  CURL_TRC_CF(data, cf, "gtls_recv(len=%zu) -> 0, %zd", blen, nread);
   return result;
 }
 
