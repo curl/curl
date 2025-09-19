@@ -11,6 +11,9 @@ cookies
 <name>
 set COOKIEFILE and COOKIEJAR but make no transfer
 </name>
+<features>
+cookies
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>
