@@ -2451,9 +2451,9 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
         if(written < outbuf.cbBuffer) {
+          result = CURLE_SEND_ERROR;
           failf(data, "schannel: failed to send close msg: %s"
                 " (bytes written: %zu)", curl_easy_strerror(result), written);
-          result = CURLE_SEND_ERROR;
           goto out;
         }
         backend->sent_shutdown = TRUE;
@@ -2466,8 +2466,8 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       }
       else {
         if(!backend->recv_connection_closed) {
-          failf(data, "schannel: error sending close msg: %d", result);
           result = CURLE_SEND_ERROR;
+          failf(data, "schannel: error sending close msg: %d", result);
           goto out;
         }
         /* Looks like server already closed the connection.
