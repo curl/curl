@@ -28,9 +28,10 @@ struct curl_slist *curl_slist_append(struct curl_slist *list,
 
 curl_slist_append(3) appends a string to a linked list of strings. The
 existing **list** should be passed as the first argument and the new list is
-returned from this function. Pass in NULL in the **list** argument to create
-a new list. The specified **string** has been appended when this function
-returns. curl_slist_append(3) copies the string.
+returned from this function. Pass in NULL in the **list** argument to create a
+new list. The specified **string** has been appended when this function
+returns. curl_slist_append(3) copies the string. The **string** argument must
+be a valid string pointer and cannot be NULL.
 
 The list should be freed again (after usage) with
 curl_slist_free_all(3).
