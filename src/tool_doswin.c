@@ -835,8 +835,7 @@ curl_socket_t win32_stdin_read_thread(void)
     }
     /* Create the listening socket for the thread. When it starts, it will
     * accept our connection and begin writing STDIN data to the connection. */
-    tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
-                                 IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    tdata->socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     if(tdata->socket_l == CURL_SOCKET_BAD) {
       errorf("WSASocketW error: %08lx", GetLastError());
