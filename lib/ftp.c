@@ -3594,6 +3594,9 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 
   if(!ftpc || !ftp)
     return CURLE_FAILED_INIT;
+
+  *completep = 0; /* default to stay in the state */
+
   /* if the second connection has been set up, try to connect it fully
    * to the remote host. This may not complete at this time, for several
    * reasons:
@@ -3612,7 +3615,6 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
         /* this is a EPSV connect failing, try PASV instead */
         return ftp_epsv_disable(data, ftpc, conn);
       }
-      *completep = (int)complete;
       return result;
     }
   }
