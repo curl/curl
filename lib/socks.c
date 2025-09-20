@@ -99,10 +99,10 @@ struct socks_state {
  * This is STUPID BLOCKING behavior. Only used by the SOCKS GSSAPI functions.
  */
 CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
-                       struct Curl_easy *data,   /* transfer */
-                       char *buf,                /* store read data here */
-                       size_t blen,              /* space in buf */
-                       size_t *pnread)           /* amount bytes read */
+                            struct Curl_easy *data,
+                            char *buf,             /* store read data here */
+                            size_t blen,           /* space in buf */
+                            size_t *pnread)        /* amount bytes read */
 {
   size_t nread = 0;
   CURLcode result;
@@ -116,9 +116,8 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
     }
     if(!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
-    if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0) {
-      return CURLE_RECV_ERROR;
-    }
+    if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0)
+      return CURLE_OPERATION_TIMEDOUT;
     result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
     if(CURLE_AGAIN == result)
       continue;
