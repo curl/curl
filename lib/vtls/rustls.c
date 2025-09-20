@@ -1231,8 +1231,8 @@ cr_connect(struct Curl_cfilter *cf,
             size_t errorlen;
             rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
             failf(data,
-              "Failed getting DER of server certificate #%ld: %.*s", i,
-              (int)errorlen, errorbuf);
+                  "Failed getting DER of server certificate #%zu: %.*s", i,
+                  (int)errorlen, errorbuf);
             return map_error(rresult);
           }
           {
