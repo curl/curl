@@ -773,7 +773,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
     goto ThreadCleanup;
   }
 
-  sclose(tdata->socket_l); /* sclose here fails test 1498 */
+  sclose(tdata->socket_l);
   tdata->socket_l = CURL_SOCKET_BAD;
   if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
     errorf("shutdown error: %d", SOCKERRNO);
