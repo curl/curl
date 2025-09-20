@@ -134,7 +134,6 @@ int Curl_thread_join(curl_thread_t *hnd)
 
   Curl_thread_destroy(hnd);
 
-
   return ret;
 }
 
