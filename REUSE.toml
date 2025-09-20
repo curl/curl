@@ -14,7 +14,6 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 [[annotations]]
 path = [
   ".mailmap",
-  "docs/examples/.checksrc",
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",
@@ -41,6 +40,7 @@ path = [
   "tests/data/test**",
   "tests/valgrind.supp",
   # checksrc control files
+  "docs/examples/.checksrc",
   "lib/.checksrc",
   "lib/curlx/.checksrc",
   "lib/vauth/.checksrc",
