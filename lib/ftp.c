@@ -1121,14 +1121,16 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     else
       break;
 
+    /* check if port is the maximum value here, because it might be 0xffff and
+       then the increment below will wrap the 16 bit counter */
+    if(port == port_max) {
+      /* maybe all ports were in use already */
+      failf(data, "bind() failed, ran out of ports");
+      goto out;
+    }
     port++;
   }
 
-  /* maybe all ports were in use already */
-  if(port > port_max) {
-    failf(data, "bind() failed, we ran out of ports");
-    goto out;
-  }
 
   /* get the name again after the bind() so that we can extract the
      port number it uses now */
