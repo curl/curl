@@ -40,13 +40,12 @@ delivered data, and the size of that data is *nmemb*; *size* is always 1.
 The data passed to this function is not null-terminated.
 
 The callback function is passed as much data as possible in all invokes, but
-you must not make any assumptions. It may be one byte, it may be
-thousands. The maximum amount of body data that is passed to the write
-callback is defined in the curl.h header file: *CURL_MAX_WRITE_SIZE* (the
-usual default is 16K). If CURLOPT_HEADER(3) is enabled, which makes header
-data get passed to the write callback, you can get up to
-*CURL_MAX_HTTP_HEADER* bytes of header data passed into it. This usually means
-100K.
+you must not make any assumptions. It may be one byte, it may be thousands.
+The maximum amount of body data that is passed to the write callback is
+defined in the curl.h header file: *CURL_MAX_WRITE_SIZE* (the usual default is
+16K). If CURLOPT_HEADER(3) is enabled, which makes header data get passed to
+the write callback, you can get up to *CURL_MAX_HTTP_HEADER* bytes of header
+data passed into it. This usually means 100K.
 
 This function may be called with zero bytes data if the transferred file is
 empty.
@@ -90,7 +89,7 @@ struct memory {
 
 static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
-  size_t realsize = size * nmemb;
+  size_t realsize = nmemb;
   struct memory *mem = (struct memory *)clientp;
 
   char *ptr = realloc(mem->response, mem->size + realsize + 1);
