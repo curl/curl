@@ -1492,6 +1492,11 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   if test "x$compiler_id" = 'xGNU_C'; then
     curl_pflags="${curl_pflags} GCC"
   fi
+  if "$compiler_id" = "APPLECLANG"; then
+    curl_pflags="${curl_pflags} APPLE-CLANG"
+  elif test "$compiler_id" = "CLANG"; then
+    curl_pflags="${curl_pflags} LLVM-CLANG"
+  fi
   case $host_os in
     mingw*) curl_pflags="${curl_pflags} MINGW";;
   esac

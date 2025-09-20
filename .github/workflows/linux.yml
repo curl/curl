@@ -179,6 +179,7 @@ jobs:
           - name: 'openssl clang krb5 LTO'
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: skiprun
+            CC: clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
