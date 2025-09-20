@@ -53,12 +53,6 @@ Download the latest source from the Git server:
 Report suspected security problems via [our HackerOne
 page](https://hackerone.com/curl) and not in public.
 
-## Notice
-
-curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
-Tekniska Högskolan. This notice is included here to comply with the
-distribution terms.
-
 ## Backers
 
 Thank you to all our backers :pray: [Become a backer](https://opencollective.com/curl#section-contribute).

@@ -53,7 +53,6 @@
 #include "fileinfo.h"
 #include "ftplistparser.h"
 #include "curl_range.h"
-#include "curl_krb5.h"
 #include "strcase.h"
 #include "vtls/vtls.h"
 #include "cfilters.h"
@@ -431,6 +430,9 @@ static const struct Curl_cwtype ftp_cw_lc = {
 
 #endif /* CURL_PREFER_LF_LINEENDS */
 
+static CURLcode getftpresponse(struct Curl_easy *data, ssize_t *nread,
+                               int *ftpcode);
+
 /***********************************************************************
  *
  * ftp_check_ctrl_on_data_wait()
@@ -450,7 +452,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
   if(curlx_dyn_len(&pp->recvbuf) && (*curlx_dyn_ptr(&pp->recvbuf) > '3')) {
     /* Data connection could not be established, let's return */
     infof(data, "There is negative response in cache while serv connect");
-    (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
+    (void)getftpresponse(data, &nread, &ftpcode);
     return CURLE_FTP_ACCEPT_FAILED;
   }
 
@@ -496,7 +498,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
       }
     }
 
-    (void)Curl_GetFTPResponse(data, &nread, &ftpcode);
+    (void)getftpresponse(data, &nread, &ftpcode);
 
     infof(data, "FTP code: %03d", ftpcode);
 
@@ -578,28 +580,6 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
   int code;
   CURLcode result = Curl_pp_readresp(data, sockindex, pp, &code, size);
   DEBUGASSERT(ftpcodep);
-#ifdef HAVE_GSSAPI
-  {
-    struct connectdata *conn = data->conn;
-    char * const buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
-
-    /* handle the security-oriented responses 6xx ***/
-    switch(code) {
-    case 631:
-      code = Curl_sec_read_msg(data, conn, buf, PROT_SAFE);
-      break;
-    case 632:
-      code = Curl_sec_read_msg(data, conn, buf, PROT_PRIVATE);
-      break;
-    case 633:
-      code = Curl_sec_read_msg(data, conn, buf, PROT_CONFIDENTIAL);
-      break;
-    default:
-      /* normal ftp stuff we pass through! */
-      break;
-    }
-  }
-#endif
 
   /* store the latest code for later retrieval, except during shutdown */
   if(!ftpc->shutdown)
@@ -626,13 +606,14 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
 /* --- parse FTP server responses --- */
 
 /*
- * Curl_GetFTPResponse() is a BLOCKING function to read the full response
- * from a server after a command.
+ * getftpresponse() is a BLOCKING function to read the full response from a
+ * server after a command.
  *
  */
-CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
-                             ssize_t *nreadp, /* return number of bytes read */
-                             int *ftpcodep) /* return the ftp-code */
+static CURLcode getftpresponse(struct Curl_easy *data,
+                               ssize_t *nreadp, /* return number of bytes
+                                                   read */
+                               int *ftpcodep) /* return the ftp-code */
 {
   /*
    * We cannot read just one byte per read() and then go back to select() as
@@ -650,7 +631,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   int cache_skip = 0;
   DEBUGASSERT(ftpcodep);
 
-  CURL_TRC_FTP(data, "getFTPResponse start");
+  CURL_TRC_FTP(data, "getftpresponse start");
   *nreadp = 0;
   *ftpcodep = 0; /* 0 for errors */
 
@@ -733,7 +714,7 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   } /* while there is buffer left and loop is requested */
 
   pp->pending_resp = FALSE;
-  CURL_TRC_FTP(data, "getFTPResponse -> result=%d, nread=%zd, ftpcode=%d",
+  CURL_TRC_FTP(data, "getftpresponse -> result=%d, nread=%zd, ftpcode=%d",
                result, *nreadp, *ftpcodep);
 
   return result;
@@ -2812,25 +2793,6 @@ static CURLcode ftp_wait_resp(struct Curl_easy *data,
     return CURLE_WEIRD_SERVER_REPLY;
   }
 
-  /* We have received a 220 response fine, now we proceed. */
-#ifdef HAVE_GSSAPI
-  if(data->set.krb) {
-    /* If not anonymous login, try a secure login. Note that this
-       procedure is still BLOCKING. */
-
-    Curl_sec_request_prot(conn, "private");
-    /* We set private first as default, in case the line below fails to
-       set a valid level */
-    Curl_sec_request_prot(conn, data->set.str[STRING_KRB_LEVEL]);
-
-    if(Curl_sec_login(data, conn)) {
-      failf(data, "secure login failed");
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
-    infof(data, "Authentication successful");
-  }
-#endif
-
   if(data->set.use_ssl && !conn->bits.ftp_use_control_ssl) {
     /* We do not have an SSL/TLS control connection yet, but FTPS is
        requested. Try an FTPS connection now */
@@ -3401,7 +3363,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     pp->response_time = 60*1000; /* give it only a minute for now */
     pp->response = curlx_now(); /* timeout relative now */
 
-    result = Curl_GetFTPResponse(data, &nread, &ftpcode);
+    result = getftpresponse(data, &nread, &ftpcode);
 
     pp->response_time = old_time; /* set this back to previous value */
 
@@ -3524,7 +3486,7 @@ CURLcode ftp_sendquote(struct Curl_easy *data,
       result = Curl_pp_sendf(data, &ftpc->pp, "%s", cmd);
       if(!result) {
         pp->response = curlx_now(); /* timeout relative now */
-        result = Curl_GetFTPResponse(data, &nread, &ftpcode);
+        result = getftpresponse(data, &nread, &ftpcode);
       }
       if(result)
         return result;
