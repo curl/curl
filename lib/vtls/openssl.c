@@ -4858,8 +4858,10 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   if(data->set.ssl.certinfo) {
     /* asked to gather certificate info */
     result = ossl_certchain(data, octx->ssl);
-    if(result)
+    if(result) {
+      BIO_free(mem);
       return result;
+    }
   }
 
   octx->server_cert = SSL_get1_peer_certificate(octx->ssl);
