@@ -791,6 +791,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Apple IDN */
 #cmakedefine USE_APPLE_IDN 1
 
+/* to enable Apple OS-native certificate verification */
+#cmakedefine USE_APPLE_SECTRUST 1
+
 /* Define to 1 if OpenSSL has the SSL_CTX_set_srp_username function. */
 #cmakedefine HAVE_OPENSSL_SRP 1
 
