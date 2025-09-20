@@ -765,7 +765,7 @@ static int myssh_in_SFTP_QUOTE_STATVFS(struct Curl_easy *data,
     #else
     #define CURL_LIBSSH_VFS_SIZE_MASK PRIu64
     #endif
-    CURLcode result;
+    CURLcode result = CURLE_OK;
     char *tmp = aprintf("statvfs:\n"
                         "f_bsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
                         "f_frsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
@@ -786,14 +786,13 @@ static int myssh_in_SFTP_QUOTE_STATVFS(struct Curl_easy *data,
                         statvfs->f_namemax);
     sftp_statvfs_free(statvfs);
 
-    if(!tmp) {
-      myssh_to(data, sshc, SSH_SFTP_CLOSE);
-      sshc->nextstate = SSH_NO_STATE;
-      return SSH_OK;
-    }
+    if(!tmp)
+      result = CURLE_OUT_OF_MEMORY;
 
-    result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-    free(tmp);
+    if(!result) {
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
+      free(tmp);
+    }
     if(result) {
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
