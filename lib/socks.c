@@ -98,14 +98,14 @@ struct socks_state {
  *
  * This is STUPID BLOCKING behavior. Only used by the SOCKS GSSAPI functions.
  */
-int Curl_blockread_all(struct Curl_cfilter *cf,
-                       struct Curl_easy *data,   /* transfer */
-                       char *buf,                /* store read data here */
-                       size_t blen,              /* space in buf */
-                       size_t *pnread)           /* amount bytes read */
+CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            char *buf,             /* store read data here */
+                            size_t blen,           /* space in buf */
+                            size_t *pnread)        /* amount bytes read */
 {
   size_t nread = 0;
-  CURLcode err;
+  CURLcode result;
 
   *pnread = 0;
   for(;;) {
@@ -116,21 +116,20 @@ int Curl_blockread_all(struct Curl_cfilter *cf,
     }
     if(!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
-    if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0) {
-      return ~CURLE_OK;
-    }
-    err = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-    if(CURLE_AGAIN == err)
+    if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0)
+      return CURLE_OPERATION_TIMEDOUT;
+    result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
+    if(CURLE_AGAIN == result)
       continue;
-    else if(err)
-      return (int)err;
+    else if(result)
+      return result;
 
     if(blen == nread) {
       *pnread += nread;
       return CURLE_OK;
     }
     if(!nread) /* EOF */
-      return ~CURLE_OK;
+      return CURLE_RECV_ERROR;
 
     buf += nread;
     blen -= nread;
