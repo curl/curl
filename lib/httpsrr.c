@@ -189,6 +189,7 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
        is in ServiceMode */
     target = ares_dns_rr_get_str(rr, ARES_RR_HTTPS_TARGET);
     if(target && target[0]) {
+      free(hinfo->target);
       hinfo->target = strdup(target);
       if(!hinfo->target) {
         result = CURLE_OUT_OF_MEMORY;
