@@ -236,9 +236,15 @@ if(PICKY_COMPILER)
       endif()
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0))
-        list(APPEND _picky_enable
-          -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 17.0
-        )
+        if(MSVC)
+          list(APPEND _picky_enable
+            -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0  # Enums are signed integers by default
+          )
+        else()
+          list(APPEND _picky_enable
+            -Wformat-signedness              # clang 19.1  gcc  5.1  appleclang 17.0
+          )
+        endif()
       endif()
       if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
         list(APPEND _picky_enable
