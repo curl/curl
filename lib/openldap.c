@@ -538,7 +538,8 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
       Sockbuf *sb;
 
       /* Install the libcurl SSL handlers into the sockbuf. */
-      ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+      if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
+        return CURLE_FAILED_INIT;
       ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
       li->recv = conn->recv[FIRSTSOCKET];
       li->send = conn->send[FIRSTSOCKET];
@@ -951,7 +952,8 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
 #ifdef USE_SSL
       if(ssl_installed(conn)) {
         Sockbuf *sb;
-        ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+        if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
+          return CURLE_FAILED_INIT;
         ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
       }
 #endif
@@ -986,7 +988,8 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
   if(ssl_installed(conn)) {
     Sockbuf *sb;
     /* re-install the libcurl SSL handlers into the sockbuf. */
-    ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb);
+    if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
+      return CURLE_FAILED_INIT;
     ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
   }
 #endif
