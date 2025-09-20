@@ -84,6 +84,7 @@ check_PROGRAMS = \
   ipv6 \
   keepalive \
   localport \
+  log_failed_transfers \
   maxconnects \
   multi-app \
   multi-debugcallback \
