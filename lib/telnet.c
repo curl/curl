@@ -164,7 +164,7 @@ static void set_remote_option(struct Curl_easy *data, struct TELNET *tn,
 static void printsub(struct Curl_easy *data,
                      int direction, unsigned char *pointer,
                      size_t length);
-static void suboption(struct Curl_easy *data, struct TELNET *tn);
+static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn);
 static void sendsuboption(struct Curl_easy *data,
                           struct TELNET *tn, int option);
 
@@ -932,7 +932,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
  * side.
  */
 
-static void suboption(struct Curl_easy *data, struct TELNET *tn)
+static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
 {
   struct curl_slist *v;
   unsigned char temp[2048];
@@ -944,22 +944,30 @@ static void suboption(struct Curl_easy *data, struct TELNET *tn)
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
-      len = strlen(tn->subopt_ttype) + 4 + 2;
-      msnprintf((char *)temp, sizeof(temp),
-                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
-                CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
+      if(strlen(tn->subopt_ttype) > 1000) {
+        failf(data, "Tool long telnet TTYPE");
+        return CURLE_SEND_ERROR;
+      }
+      len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                      CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
+                      CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+
       if(bytes_written < 0) {
         err = SOCKERRNO;
-        failf(data,"Sending data failed (%d)",err);
+        failf(data, "Sending data failed (%d)", err);
+        return CURLE_SEND_ERROR;
       }
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
-      len = strlen(tn->subopt_xdisploc) + 4 + 2;
-      msnprintf((char *)temp, sizeof(temp),
-                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
-                CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
+      if(strlen(tn->subopt_xdisploc) > 1000) {
+        failf(data, "Tool long telnet XDISPLOC");
+        return CURLE_SEND_ERROR;
+      }
+      len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                      CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
+                      CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
         err = SOCKERRNO;
@@ -968,11 +976,9 @@ static void suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
-      msnprintf((char *)temp, sizeof(temp),
-                "%c%c%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
-                CURL_TELQUAL_IS);
-      len = 4;
-
+      len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
+                      CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
+                      CURL_TELQUAL_IS);
       for(v = tn->telnet_vars; v; v = v->next) {
         size_t tmplen = (strlen(v->data) + 1);
         /* Add the variable if it fits */
@@ -1000,7 +1006,7 @@ static void suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
   }
-  return;
+  return CURLE_OK;
 }
 
 
@@ -1204,7 +1210,9 @@ process_iac:
             CURL_SB_TERM(tn);
 
             printoption(data, "In SUBOPTION processing, RCVD", CURL_IAC, c);
-            suboption(data, tn);   /* handle sub-option */
+            result = suboption(data, tn);   /* handle sub-option */
+            if(result)
+              return result;
             tn->telrcv_state = CURL_TS_IAC;
             goto process_iac;
           }
@@ -1216,7 +1224,9 @@ process_iac:
           CURL_SB_ACCUM(tn, CURL_SE);
           tn->subpointer -= 2;
           CURL_SB_TERM(tn);
-          suboption(data, tn);   /* handle sub-option */
+          result = suboption(data, tn);   /* handle sub-option */
+          if(result)
+            return result;
           tn->telrcv_state = CURL_TS_DATA;
         }
         break;
