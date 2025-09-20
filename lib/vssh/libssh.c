@@ -1319,8 +1319,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
 
     if(size < 0) {
       failf(data, "Bad file size (%" FMT_OFF_T ")", size);
-      rc = myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
-      return rc;
+      return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
     }
     if(data->state.use_range) {
       curl_off_t from, to;
@@ -1328,16 +1327,15 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
       int from_t, to_t;
 
       from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
-      if(from_t == STRE_OVERFLOW) {
-        rc = myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
-        return rc;
-      }
+      if(from_t == STRE_OVERFLOW)
+        return myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
+
       curlx_str_passblanks(&p);
       (void)curlx_str_single(&p, '-');
 
       to_t = curlx_str_numblanks(&p, &to);
       if(to_t == STRE_OVERFLOW)
-        return CURLE_RANGE_ERROR;
+        return myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
 
       if((to_t == STRE_NO_NUM) || (to >= size)) {
         to = size - 1;
@@ -1353,26 +1351,21 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
       if(from > size) {
         failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
               FMT_OFF_T ")", from, size);
-        rc = myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
-        return rc;
+        return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
       }
       if(from > to) {
         from = to;
         size = 0;
       }
       else {
-        if((to - from) == CURL_OFF_T_MAX) {
-          rc = myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
-          return rc;
-        }
+        if((to - from) == CURL_OFF_T_MAX)
+          return myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
         size = to - from + 1;
       }
 
       rc = sftp_seek64(sshc->sftp_file, from);
-      if(rc) {
-        rc = myssh_to_SFTP_CLOSE(data, sshc);
-        return rc;
-      }
+      if(rc)
+        return myssh_to_SFTP_CLOSE(data, sshc);
     }
     data->req.size = size;
     data->req.maxdownload = size;
@@ -1386,8 +1379,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
       if((curl_off_t)size < -data->state.resume_from) {
         failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
               FMT_OFF_T ")", data->state.resume_from, size);
-        rc = myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
-        return rc;
+        return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
       }
       /* download from where? */
       data->state.resume_from += size;
@@ -1397,8 +1389,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
         failf(data, "Offset (%" FMT_OFF_T
               ") was beyond file size (%" FMT_OFF_T ")",
               data->state.resume_from, size);
-        rc = myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
-        return rc;
+        return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
       }
     }
     /* Now store the number of bytes we are expected to download */
@@ -1408,10 +1399,8 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
                              size - data->state.resume_from);
 
     rc = sftp_seek64(sshc->sftp_file, data->state.resume_from);
-    if(rc) {
-      rc = myssh_to_SFTP_CLOSE(data, sshc);
-      return rc;
-    }
+    if(rc)
+      return myssh_to_SFTP_CLOSE(data, sshc);
   }
 
   /* Setup the actual download */
