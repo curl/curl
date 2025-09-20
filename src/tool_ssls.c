@@ -66,7 +66,7 @@ CURLcode tool_ssls_load(struct OperationConfig *config,
   bool error = FALSE;
 
   curlx_dyn_init(&buf, MAX_SSLS_LINE);
-  fp = fopen(filename, FOPEN_READTEXT);
+  fp = CURL_FOPEN(filename, FOPEN_READTEXT);
   if(!fp) { /* ok if it does not exist */
     notef("SSL session file does not exist (yet?): %s", filename);
     goto out;
@@ -190,7 +190,7 @@ CURLcode tool_ssls_save(struct OperationConfig *config,
   CURLcode r = CURLE_OK;
 
   ctx.exported = 0;
-  ctx.fp = fopen(filename, FOPEN_WRITETEXT);
+  ctx.fp = CURL_FOPEN(filename, FOPEN_WRITETEXT);
   if(!ctx.fp) {
     warnf("Warning: Failed to create SSL session file %s",
           filename);
