@@ -355,9 +355,8 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
   DEBUGASSERT(ssl);
 
   sk = SSL_get_peer_cert_chain(ssl);
-  if(!sk) {
-    return CURLE_OUT_OF_MEMORY;
-  }
+  if(!sk)
+    return CURLE_SSL_CONNECT_ERROR;
 
   numcerts = sk_X509_num(sk);
 
@@ -4856,9 +4855,15 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(data->set.ssl.certinfo)
-    /* asked to gather certificate info */
-    (void)ossl_certchain(data, octx->ssl);
+  if(data->set.ssl.certinfo && !octx->reused_session) {
+    /* asked to gather certificate info. Reused sessions don't have cert
+       chains */
+    result = ossl_certchain(data, octx->ssl);
+    if(result) {
+      BIO_free(mem);
+      return result;
+    }
+  }
 
   octx->server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!octx->server_cert) {
