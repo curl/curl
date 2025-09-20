@@ -617,7 +617,7 @@ This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
 and runs on, that is not listed, please let us know.
 
-## 104 Operating Systems
+## 103 Operating Systems
 
     AIX, AmigaOS, Android, ArcoOS, Aros, Atari FreeMiNT, BeOS, Blackberry
     10, Blackberry Tablet OS, Cell OS, CheriBSD, Chrome OS, Cisco IOS,
@@ -631,7 +631,7 @@ and runs on, that is not listed, please let us know.
     RTEMS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, software,
     Solaris, Sortix, SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS,
     ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks, watchOS, Wear OS,
-    WebOS, Wii system Wii U, Windows CE, Windows, Xbox System, Xenix, z/OS,
+    WebOS, Wii system Wii U, Windows, Xbox System, Xenix, z/OS,
     z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures

@@ -103,14 +103,6 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 {
   curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
   if(!t) {
-#ifdef UNDER_CE
-    DWORD gle = GetLastError();
-    /* !checksrc! disable ERRNOVAR 1 */
-    int err = (gle == ERROR_ACCESS_DENIED ||
-               gle == ERROR_NOT_ENOUGH_MEMORY) ?
-               EACCES : EINVAL;
-    CURL_SETERRNO(err);
-#endif
     return curl_thread_t_null;
   }
   return t;
@@ -126,11 +118,7 @@ void Curl_thread_destroy(curl_thread_t *hnd)
 
 int Curl_thread_join(curl_thread_t *hnd)
 {
-#ifdef UNDER_CE
-  int ret = (WaitForSingleObject(*hnd, INFINITE) == WAIT_OBJECT_0);
-#else
   int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);
-#endif
 
   Curl_thread_destroy(hnd);
 
