@@ -30,13 +30,6 @@ Bumping the minimum to VS2010. VS2008 is a pain to support.
 
 Previous discussion and details: https://github.com/curl/curl/discussions/15972
 
-## Windows XP
-
-In January 2026, curl drops support for Windows XP and Server 2003. Their
-"mainstream support" ended in 2014, with final updates on May 14, 2019.
-
-Making the new minimum target Windows version Vista / Server 2008.
-
 ## c-ares 1.16.0
 
 In March 2026, we drop support for all c-ares versions before 1.16.0.
@@ -73,3 +66,4 @@ We remove support for this OpenSSL version from curl in June 2026.
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
  - winbuild build system (removed in 8.17.0)
+ - Support for Windows XP (removed in 8.18.0)
