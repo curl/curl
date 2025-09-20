@@ -81,6 +81,8 @@ fail:
 
 /*
 ** callback for CURLOPT_HEADERFUNCTION
+*
+* 'size' is always 1
 */
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -164,7 +166,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           }
 #endif
 
-          fwrite(etag_h, size, etag_length, etag_save->stream);
+          fwrite(etag_h, 1, etag_length, etag_save->stream);
           /* terminate with newline */
           fputc('\n', etag_save->stream);
           (void)fflush(etag_save->stream);
