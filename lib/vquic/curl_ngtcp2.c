@@ -2635,7 +2635,7 @@ out:
 
     result = CURLE_COULDNT_CONNECT;
     if(cerr) {
-      CURL_TRC_CF(data, cf, "connect error, type=%d, code=%"
+      CURL_TRC_CF(data, cf, "connect error, type=%u, code=%"
                   FMT_PRIu64,
                   cerr->type, (curl_uint64_t)cerr->error_code);
       switch(cerr->type) {
