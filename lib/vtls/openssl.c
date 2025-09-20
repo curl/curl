@@ -293,20 +293,10 @@ do {                              \
 } while(0)
 #endif
 
-static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
+static int asn1_object_dump(const ASN1_OBJECT *a, char *buf, size_t len)
 {
-  int i, ilen;
-
-  ilen = (int)len;
-  if(ilen < 0)
-    return 1; /* buffer too big */
-
-  i = i2t_ASN1_OBJECT(buf, ilen, a);
-
-  if(i >= ilen)
-    return 1; /* buffer too small */
-
-  return 0;
+  int i = i2t_ASN1_OBJECT(buf, (int)len, a);
+  return (i >= (int)len);  /* buffer too small */
 }
 
 static CURLcode X509V3_ext(struct Curl_easy *data,
@@ -337,7 +327,9 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
 
     obj = X509_EXTENSION_get_object(ext);
 
-    asn1_object_dump(obj, namebuf, sizeof(namebuf));
+    if(asn1_object_dump(obj, namebuf, sizeof(namebuf)))
+      /* make sure the name is null-terminated */
+      namebuf [ sizeof(namebuf) - 1] = 0;
 
     if(!X509V3_EXT_print(bio_out, ext, 0, 0))
       ASN1_STRING_print(bio_out, (ASN1_STRING *)X509_EXTENSION_get_data(ext));
