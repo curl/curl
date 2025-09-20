@@ -153,6 +153,10 @@ struct Curl_ssl {
   size_t (*version)(char *buffer, size_t size);
   CURLcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool send_shutdown, bool *done);
+
+  /* data_pending() shall return TRUE when it wants to get called again to
+     drain internal buffers and deliver data instead of waiting for the socket
+     to get readable */
   bool (*data_pending)(struct Curl_cfilter *cf,
                        const struct Curl_easy *data);
 
