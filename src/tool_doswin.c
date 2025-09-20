@@ -769,14 +769,14 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
                                        &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
-    errorf("accept error: %08lx", GetLastError());
+    errorf("accept error: %d", SOCKERRNO);
     goto ThreadCleanup;
   }
 
-  closesocket(tdata->socket_l); /* sclose here fails test 1498 */
+  sclose(tdata->socket_l);
   tdata->socket_l = CURL_SOCKET_BAD;
   if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
-    errorf("shutdown error: %08lx", GetLastError());
+    errorf("shutdown error: %d", SOCKERRNO);
     goto ThreadCleanup;
   }
   for(;;) {
@@ -835,11 +835,9 @@ curl_socket_t win32_stdin_read_thread(void)
     }
     /* Create the listening socket for the thread. When it starts, it will
     * accept our connection and begin writing STDIN data to the connection. */
-    tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
-                                 IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-
+    tdata->socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(tdata->socket_l == CURL_SOCKET_BAD) {
-      errorf("WSASocketW error: %08lx", GetLastError());
+      errorf("socket() error: %d", SOCKERRNO);
       break;
     }
 
@@ -850,20 +848,20 @@ curl_socket_t win32_stdin_read_thread(void)
     /* Bind to any available loopback port */
     result = bind(tdata->socket_l, (SOCKADDR*)&selfaddr, socksize);
     if(result == SOCKET_ERROR) {
-      errorf("bind error: %08lx", GetLastError());
+      errorf("bind error: %d", SOCKERRNO);
       break;
     }
 
     /* Bind to any available loopback port */
     result = getsockname(tdata->socket_l, (SOCKADDR*)&selfaddr, &socksize);
     if(result == SOCKET_ERROR) {
-      errorf("getsockname error: %08lx", GetLastError());
+      errorf("getsockname error: %d", SOCKERRNO);
       break;
     }
 
     result = listen(tdata->socket_l, 1);
     if(result == SOCKET_ERROR) {
-      errorf("listen error: %08lx", GetLastError());
+      errorf("listen error: %d", SOCKERRNO);
       break;
     }
 
@@ -891,7 +889,7 @@ curl_socket_t win32_stdin_read_thread(void)
     /* Connect to the thread and rearrange our own STDIN handles */
     socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(socket_r == CURL_SOCKET_BAD) {
-      errorf("socket error: %08lx", GetLastError());
+      errorf("socket error: %d", SOCKERRNO);
       break;
     }
 
@@ -899,12 +897,12 @@ curl_socket_t win32_stdin_read_thread(void)
     setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
 
     if(connect(socket_r, (SOCKADDR*)&selfaddr, socksize) == SOCKET_ERROR) {
-      errorf("connect error: %08lx", GetLastError());
+      errorf("connect error: %d", SOCKERRNO);
       break;
     }
 
     if(shutdown(socket_r, SD_SEND) == SOCKET_ERROR) {
-      errorf("shutdown error: %08lx", GetLastError());
+      errorf("shutdown error: %d", SOCKERRNO);
       break;
     }
 
