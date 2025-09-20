@@ -1808,10 +1808,7 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   if(!strncmp(cmd, "chgrp", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t gid;
-    (void)curlx_str_number(&p, &gid, UINT_MAX);
-    sshc->quote_attrs->gid = (uint32_t)gid;
-    if(sshc->quote_attrs->gid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
-       !sshc->acceptfail) {
+    if(curlx_str_number(&p, &gid, UINT_MAX)) {
       Curl_safefree(sshc->quote_path1);
       Curl_safefree(sshc->quote_path2);
       failf(data, "Syntax error: chgrp gid not a number");
@@ -1820,6 +1817,7 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
       sshc->actualcode = CURLE_QUOTE_ERROR;
       return SSH_NO_ERROR;
     }
+    sshc->quote_attrs->gid = (uint32_t)gid;
     sshc->quote_attrs->flags |= SSH_FILEXFER_ATTR_UIDGID;
   }
   else if(!strncmp(cmd, "chmod", 5)) {
