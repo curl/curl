@@ -1310,7 +1310,7 @@ static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)
   if((state->state == TFTP_STATE_FIN) || result)
     return result;
 
-  tftp_multi_statemach(data, dophase_done);
+  result = tftp_multi_statemach(data, dophase_done);
 
   if(*dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
