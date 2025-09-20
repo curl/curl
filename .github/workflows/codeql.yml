@@ -17,7 +17,6 @@ name: 'CodeQL'
       - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
@@ -29,7 +28,6 @@ name: 'CodeQL'
       - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
-      - 'winbuild/**'
   schedule:
     - cron: '0 0 * * 4'
 
