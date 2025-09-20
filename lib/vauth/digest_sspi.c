@@ -474,7 +474,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       output_token_len = chlg_buf[4].cbBuffer;
     else { /* delete the context so a new one can be made */
       infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx",
-            (long)status);
+            (unsigned long)status);
       Curl_pSecFn->DeleteSecurityContext(digest->http_context);
       Curl_safefree(digest->http_context);
     }

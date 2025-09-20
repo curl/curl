@@ -58,12 +58,12 @@ static CURLcode test_lib574(const char *URL)
 
   res = curl_easy_perform(curl);
   if(res) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() failed %u\n", res);
     goto test_cleanup;
   }
   res = curl_easy_perform(curl);
   if(res) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() failed %u\n", res);
     goto test_cleanup;
   }
 

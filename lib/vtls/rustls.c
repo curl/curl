@@ -120,7 +120,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   else if(nread == 0)
     connssl->peer_closed = TRUE;
   *out_n = (uintptr_t)nread;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %u, %zu",
               (size_t)len, result, nread);
   return ret;
 }
@@ -143,7 +143,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
       ret = EINVAL;
   }
   *out_n = (uintptr_t)nwritten;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %u, %zu",
               len, result, nwritten);
   return ret;
 }
@@ -263,7 +263,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "rustls_recv(len=%zu) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "rustls_recv(len=%zu) -> %u, %zu",
               plainlen, result, *pnread);
   return result;
 }
@@ -339,7 +339,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
    * send. */
   if(backend->plain_out_buffered) {
     result = cr_flush_out(cf, data, rconn);
-    CURL_TRC_CF(data, cf, "cf_send: flushing %zu previously added bytes -> %d",
+    CURL_TRC_CF(data, cf, "cf_send: flushing %zu previously added bytes -> %u",
                 backend->plain_out_buffered, result);
     if(result)
       return result;
@@ -385,7 +385,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     *pnwritten += (ssize_t)plainwritten;
 
 out:
-  CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %d, %zd",
+  CURL_TRC_CF(data, cf, "rustls_send(len=%zu) -> %u, %zu",
               plainlen, result, *pnwritten);
   return result;
 }
@@ -1152,7 +1152,7 @@ cr_connect(struct Curl_cfilter *cf,
 
   DEBUGASSERT(backend);
 
-  CURL_TRC_CF(data, cf, "cr_connect, state=%d", connssl->state);
+  CURL_TRC_CF(data, cf, "cr_connect, state=%u", connssl->state);
   *done = FALSE;
 
   if(!backend->conn) {
@@ -1212,13 +1212,14 @@ cr_connect(struct Curl_cfilter *cf,
       }
       if(data->set.ssl.certinfo) {
         size_t num_certs = 0;
+        size_t i;
         while(rustls_connection_get_peer_certificate(rconn, (int)num_certs)) {
           num_certs++;
         }
         result = Curl_ssl_init_certinfo(data, (int)num_certs);
         if(result)
           return result;
-        for(size_t i = 0; i < num_certs; i++) {
+        for(i = 0; i < num_certs; i++) {
           const rustls_certificate *cert;
           const unsigned char *der_data;
           size_t der_len;
@@ -1231,7 +1232,7 @@ cr_connect(struct Curl_cfilter *cf,
             size_t errorlen;
             rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
             failf(data,
-              "Failed getting DER of server certificate #%ld: %.*s", i,
+              "Failed getting DER of server certificate #%zu: %.*s", i,
               (int)errorlen, errorbuf);
             return map_error(rresult);
           }
@@ -1342,7 +1343,7 @@ cr_shutdown(struct Curl_cfilter *cf,
       goto out;
     }
     DEBUGASSERT(result);
-    CURL_TRC_CF(data, cf, "shutdown send failed: %d", result);
+    CURL_TRC_CF(data, cf, "shutdown send failed: %u", result);
     goto out;
   }
 
@@ -1359,7 +1360,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   }
   else if(result) {
     DEBUGASSERT(result);
-    CURL_TRC_CF(data, cf, "shutdown, error: %d", result);
+    CURL_TRC_CF(data, cf, "shutdown, error: %u", result);
   }
   else if(nread == 0) {
     /* We got the close notify alert and are done. */

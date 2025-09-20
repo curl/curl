@@ -1165,8 +1165,8 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
       result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
       if(result)
         return result;
-      infof(data, "Opened %sSOCKS connection from %s port %u to %s port %u "
-            "(via %s port %u)",
+      infof(data, "Opened %sSOCKS connection from %s port %d to %s port %d "
+            "(via %s port %d)",
             (sockindex == SECONDARYSOCKET) ? "2nd " : "",
             ipquad.local_ip, ipquad.local_port,
             sx->hostname, sx->remote_port,
