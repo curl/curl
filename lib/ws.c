@@ -730,7 +730,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
       return CURLE_OK;
     }
     else if(result) {
-      failf(data, "[WS] decode payload error %u", result);
+      failf(data, "[WS] decode payload error %d", (int)result);
       return result;
     }
   }
