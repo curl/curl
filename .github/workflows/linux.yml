@@ -215,7 +215,7 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'clang-tidy'
-            install_packages: clang-tidy libssl-dev libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls wolfssl-opensslextra
             install_steps_brew: gsasl rustls-ffi
             make-custom-target: tidy
