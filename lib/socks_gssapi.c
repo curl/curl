@@ -359,8 +359,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
         (gss_enc == 0) ? "no" :
         ((gss_enc == 1) ? "integrity" : "confidentiality"));
-  /* force for the moment to no data protection */
-  gss_enc = 0;
+
   /*
    * Sending the encryption type in clear seems wrong. It should be
    * protected with gss_seal()/gss_wrap(). See RFC1961 extract below
