@@ -926,7 +926,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 }
 
 /* if the option contains an IAC code, it should be escaped in the output, but
-   as we can't think of any legit way to send that as part of the content we
+   as we cannot think of any legit way to send that as part of the content we
    rather just ban its use instead */
 static bool bad_option(const char *data)
 {
