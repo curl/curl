@@ -410,7 +410,7 @@ read_file_into(const char *filename,
     return 0;
   }
 
-  while(!feof(f)) {
+  for(;;) {
     uint8_t buf[256];
     const size_t rr = fread(buf, 1, sizeof(buf), f);
     if(rr == 0 ||
@@ -418,6 +418,8 @@ read_file_into(const char *filename,
       fclose(f);
       return 0;
     }
+    if(rr < sizeof(buf))
+      break;
   }
 
   return fclose(f) == 0;
