@@ -74,27 +74,26 @@ jobs:
       matrix:
         build:
           - name: 'libressl heimdal'
-            install_packages: zlib1g-dev libidn2-dev libnghttp2-dev libldap-dev heimdal-dev
+            install_packages: libidn2-dev libnghttp2-dev libldap-dev heimdal-dev
             install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl heimdal valgrind'
-            install_packages: zlib1g-dev libnghttp2-dev libldap-dev heimdal-dev valgrind
+            install_packages: libnghttp2-dev libldap-dev heimdal-dev valgrind
             install_steps: libressl
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
           - name: 'libressl clang'
-            install_packages: zlib1g-dev clang
+            install_packages: clang
             install_steps: libressl
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
           - name: 'wolfssl-all'
-            install_packages: zlib1g-dev
             install_steps: wolfssl-all
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind'
-            install_packages: zlib1g-dev valgrind
+            install_packages: valgrind
             install_steps: wolfssl-opensslextra wolfssh
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --enable-ech --enable-debug
 
@@ -133,17 +132,15 @@ jobs:
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
 
           - name: 'awslc'
-            install_packages: zlib1g-dev
             install_steps: awslc pytest
             configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
           - name: 'awslc'
-            install_packages: zlib1g-dev libidn2-dev
+            install_packages: libidn2-dev
             install_steps: awslc
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'boringssl'
-            install_packages: zlib1g-dev
             install_steps: boringssl pytest
             generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
@@ -152,32 +149,30 @@ jobs:
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: 'openssl libssh2 sync-resolver valgrind'
-            install_packages: zlib1g-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
+            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_USE_LIBSSH2=ON
 
           - name: 'openssl'
-            install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
           - name: 'openssl arm'
-            install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
             image: 'ubuntu-24.04-arm'
 
           - name: 'openssl -O3 libssh valgrind'
-            install_packages: zlib1g-dev libssh-dev valgrind
+            install_packages: libssh-dev valgrind
             CFLAGS: -O3
             generate: -DENABLE_DEBUG=ON -DCURL_USE_LIBSSH=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=50
 
           - name: 'openssl clang krb5 openldap static'
             install_steps: openldap-static
-            install_packages: zlib1g-dev libidn2-dev libkrb5-dev clang libssl-dev
+            install_packages: libidn2-dev libkrb5-dev clang libssl-dev
             configure: CC=clang --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
-            install_packages: zlib1g-dev libkrb5-dev clang
+            install_packages: libkrb5-dev clang
             install_steps: skiprun
             CC: clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
@@ -195,13 +190,13 @@ jobs:
               --disable-tftp --disable-ftp --disable-file --disable-smb
 
           - name: 'openssl torture !FTP'
-            install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+            install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=25 !FTP
             torture: true
 
           - name: 'openssl torture FTP'
-            install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+            install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=20 FTP
             torture: true
@@ -220,7 +215,7 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'clang-tidy'
-            install_packages: clang-tidy zlib1g-dev libssl-dev libkrb5-dev
+            install_packages: clang-tidy libkrb5-dev
             install_steps: skipall wolfssl-opensslextra wolfssh
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --with-wolfssh=/home/runner/wolfssh --with-openssl --enable-ech --with-gssapi --enable-ssls-export
             make-custom-target: tidy
@@ -234,7 +229,7 @@ jobs:
             make-prefix: scan-build --status-bugs
 
           - name: 'address-sanitizer'
-            install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
+            install_packages: libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer
@@ -242,7 +237,7 @@ jobs:
             configure: CC=clang --with-openssl --enable-debug
 
           - name: 'thread-sanitizer'
-            install_packages: zlib1g-dev clang libtsan2
+            install_packages: clang libtsan2
             install_steps: pytest openssl-tsan
             CFLAGS: -fsanitize=thread -g
             LDFLAGS: -fsanitize=thread
@@ -278,7 +273,7 @@ jobs:
             configure: --with-rustls --enable-ech --enable-debug
 
           - name: 'IntelC openssl'
-            install_packages: zlib1g-dev libssl-dev
+            install_packages: libssl-dev
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
 
@@ -311,7 +306,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
-            libpsl-dev libbrotli-dev libzstd-dev \
+            libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev \
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
           python3 -m venv ~/venv
