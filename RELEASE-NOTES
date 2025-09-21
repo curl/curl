@@ -11,7 +11,7 @@ This release includes the following changes:
  o build: drop the winbuild build system [81]
  o krb5: drop support for Kerberos FTP [43]
  o libssh2: up the minimum requirement to 1.9.0 [85]
- o write-out: make %header{} able to output *all* occurances of a header [25]
+ o write-out: make %header{} able to output *all* occurrences of a header [25]
 
 This release includes the following bugfixes:
 
