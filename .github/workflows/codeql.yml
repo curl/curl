@@ -108,11 +108,11 @@ jobs:
             cmake -B _bld1 -G Ninja -DENABLE_DEBUG=ON \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON
-            cmake --build _bld1 --verbose
-            cmake --build _bld1 --verbose --target curlinfo
-            cmake --build _bld1 --verbose --target servers
-            cmake --build _bld1 --verbose --target tunits
-            cmake --build _bld1 --verbose --target curl-examples-build
+            cmake --build _bld1
+            cmake --build _bld1 --target curlinfo
+            cmake --build _bld1 --target servers
+            cmake --build _bld1 --target tunits
+            cmake --build _bld1 --target curl-examples-build
 
             # HTTP/3
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix libnghttp3)/lib/pkgconfig:$(brew --prefix libngtcp2)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
@@ -120,8 +120,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl)" -DUSE_NGTCP2=ON \
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
-            cmake --build _bld2 --verbose
-            cmake --build _bld2 --verbose --target servers
+            cmake --build _bld2
+            cmake --build _bld2 --target servers
 
             _bld1/src/curl --disable --version
             _bld2/src/curl --disable --version
