@@ -226,12 +226,17 @@ jobs:
               --enable-ech --with-gssapi --enable-ssls-export
 
           - name: 'scanbuild'
-            install_packages: clang-tools clang libssl-dev libssh2-1-dev
-            install_steps: skipall
-            configure: --with-openssl --enable-debug --with-libssh2 --disable-unity
+            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_steps: skipall mbedtls wolfssl-opensslextra
             CC: clang
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
+            configure: >-
+              LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+              --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
+              --with-librtmp --with-libssh2 --with-libidn2
+              --enable-ech --with-gssapi --enable-ssls-export
+              --enable-debug --disable-unity
 
           - name: 'address-sanitizer'
             install_packages: libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
