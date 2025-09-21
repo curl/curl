@@ -664,7 +664,11 @@ jobs:
 
       - name: 'check curl -V output'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: bld/src/curl -V
+        env:
+          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
+        run: |
+          [ -n "${INSTALL_PACKAGES_BREW}" ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          bld/src/curl -V
 
       - name: 'curl install'
         run: |
