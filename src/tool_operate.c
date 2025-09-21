@@ -510,15 +510,14 @@ static CURLcode retrycheck(struct OperationConfig *config,
       if((scheme == proto_http || scheme == proto_https) &&
          method && !strcmp(method, "GET") &&
          response == (config->resume_from ? 206 : 200)) {
-        notef(config->global,
-              "Keeping %" CURL_FORMAT_CURL_OFF_T " bytes",
+        notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes",
               outs->bytes);
         if(fflush(outs->stream)) {
-          errorf(config->global, "Failed to flush output file stream");
+          errorf("Failed to flush output file stream");
           return CURLE_WRITE_ERROR;
         }
         if(outs->bytes >= CURL_OFF_T_MAX - outs->init) {
-          errorf(config->global, "Exceeded maximum supported file size ("
+          errorf("Exceeded maximum supported file size ("
                  "%" CURL_FORMAT_CURL_OFF_T " + "
                  "%" CURL_FORMAT_CURL_OFF_T ")",
                  outs->init, outs->bytes);
