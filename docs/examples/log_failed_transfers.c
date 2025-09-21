@@ -38,7 +38,9 @@
 #include <windows.h>
 #endif
 
+#include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <limits.h>
 #include <string.h>
 #include <curl/curl.h>
@@ -77,7 +79,7 @@ struct transfer transfer[] = {
   { "https://httpbin.org/status/400", "400.txt", "400_transfer_log.txt", },
 };
 
-void mem_reset(struct mem *mem)
+static void mem_reset(struct mem *mem)
 {
   free(mem->buf);
   mem->buf = NULL;
@@ -87,7 +89,7 @@ void mem_reset(struct mem *mem)
 }
 
 /* expand free buffer space to needed size. return -1 or 'needed'. */
-int mem_need(struct mem *mem, size_t needed)
+static int mem_need(struct mem *mem, size_t needed)
 {
   char *newbuf;
   size_t newsize;
@@ -120,7 +122,7 @@ int mem_need(struct mem *mem, size_t needed)
   return (int)needed;
 }
 
-int mem_addn(struct mem *mem, const char *buf, size_t len)
+static int mem_addn(struct mem *mem, const char *buf, size_t len)
 {
   if(len + 1 < len || mem_need(mem, len + 1) < 0)
     return -1;
@@ -131,12 +133,12 @@ int mem_addn(struct mem *mem, const char *buf, size_t len)
   return (int)len;
 }
 
-int mem_add(struct mem *mem, const char *str)
+static int mem_add(struct mem *mem, const char *str)
 {
   return mem_addn(mem, str, strlen(str));
 }
 
-int mem_addf(struct mem *mem, const char *format, ...)
+static int mem_addf(struct mem *mem, const char *format, ...)
 {
   int i, x;
   va_list va;
@@ -177,8 +179,8 @@ int mem_addf(struct mem *mem, const char *format, ...)
   return -1;
 }
 
-int mydebug(CURL *handle, curl_infotype type,
-            char *data, size_t size, void *userdata)
+static int mydebug(CURL *handle, curl_infotype type,
+                   char *data, size_t size, void *userdata)
 {
   struct transfer *t = (struct transfer *)userdata;
   static const char s_infotype[CURLINFO_END][3] = {
@@ -195,12 +197,15 @@ int mydebug(CURL *handle, curl_infotype type,
     mem_addn(&t->log, data, size);
     if(!size || data[size - 1] != '\n')
       mem_addn(&t->log, "\n", 1);
+    break;
+  default:
+    break;
   }
 
   return 0;
 }
 
-size_t mywrite(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t mywrite(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct transfer *t = (struct transfer *)userdata;
 
@@ -209,7 +214,7 @@ size_t mywrite(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 int main(void)
 {
-  int i;
+  unsigned i;
   int total_failed = 0;
   char errbuf[CURL_ERROR_SIZE] = { 0, };
 
