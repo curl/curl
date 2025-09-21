@@ -613,7 +613,6 @@ jobs:
             eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
             for pkg in ${INSTALL_PACKAGES_BREW}; do
               PKG_CONFIG_PATH+=":$(brew --prefix "${pkg}")/lib/pkgconfig"
-              LDFLAGS+=" -Wl,-rpath,$(brew --prefix "${pkg}")/lib"
             done
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
