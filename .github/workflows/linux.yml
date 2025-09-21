@@ -301,7 +301,7 @@ jobs:
       - name: 'install prereqs'
         if: ${{ matrix.build.container == null && !contains(matrix.build.name, 'i686') }}
         env:
-          INSTALL_PACKAGES_BREW: '${{ install_steps_brew }}'
+          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
           INSTALL_PACKAGES: >-
             ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'stunnel4' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'apache2 apache2-dev libnghttp2-dev vsftpd dante-server' || '' }}
