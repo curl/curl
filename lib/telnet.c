@@ -925,6 +925,14 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
   return result;
 }
 
+/* if the option contains an IAC code, it should be escaped in the output, but
+   as we cannot think of any legit way to send that as part of the content we
+   rather just ban its use instead */
+static bool bad_option(const char *data)
+{
+  return !!strchr(data, CURL_IAC);
+}
+
 /*
  * suboption()
  *
@@ -944,6 +952,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
+      if(bad_option(tn->subopt_ttype))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       if(strlen(tn->subopt_ttype) > 1000) {
         failf(data, "Tool long telnet TTYPE");
         return CURLE_SEND_ERROR;
@@ -961,6 +971,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
+      if(bad_option(tn->subopt_xdisploc))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
       if(strlen(tn->subopt_xdisploc) > 1000) {
         failf(data, "Tool long telnet XDISPLOC");
         return CURLE_SEND_ERROR;
@@ -981,6 +993,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
                       CURL_TELQUAL_IS);
       for(v = tn->telnet_vars; v; v = v->next) {
         size_t tmplen = (strlen(v->data) + 1);
+        if(bad_option(v->data))
+          return CURLE_BAD_FUNCTION_ARGUMENT;
         /* Add the variable if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
           char *s = strchr(v->data, ',');
