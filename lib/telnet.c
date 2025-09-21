@@ -108,15 +108,15 @@
  */
 typedef enum
 {
-   CURL_TS_DATA = 0,
-   CURL_TS_IAC,
-   CURL_TS_WILL,
-   CURL_TS_WONT,
-   CURL_TS_DO,
-   CURL_TS_DONT,
-   CURL_TS_CR,
-   CURL_TS_SB,   /* sub-option collection */
-   CURL_TS_SE   /* looking for sub-option end */
+  CURL_TS_DATA = 0,
+  CURL_TS_IAC,
+  CURL_TS_WILL,
+  CURL_TS_WONT,
+  CURL_TS_DO,
+  CURL_TS_DONT,
+  CURL_TS_CR,
+  CURL_TS_SB,   /* sub-option collection */
+  CURL_TS_SE    /* looking for sub-option end */
 } TelnetReceive;
 
 struct TELNET {
