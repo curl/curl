@@ -228,6 +228,7 @@ jobs:
           - name: 'scanbuild'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls wolfssl-opensslextra
+            install_steps_brew: gsasl rustls-ffi
             CC: clang
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
