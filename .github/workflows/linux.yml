@@ -323,7 +323,8 @@ jobs:
             ${MATRIX_INSTALL_PACKAGES}
           [ -n "${INSTALL_PACKAGES_BREW}" ] && /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
           echo '--------------'
-          /home/linuxbrew/.linuxbrew/bin/brew --prefic
+          /home/linuxbrew/.linuxbrew/bin/brew --prefix
+          /home/linuxbrew/.linuxbrew/bin/brew --prefix gsasl
           echo '--------------'
           python3 -m venv ~/venv
 
