@@ -37,7 +37,7 @@ foreach(_target IN LISTS check_PROGRAMS _all)  # keep '_all' last
       set(_examples_c "${check_PROGRAMS}")
       list(TRANSFORM _examples_c APPEND ".c")
       add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_examples_c})
-      if(MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
+      if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
         # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
         # warning LNK4006: main already defined in ....obj; second definition ignored
         # warning LNK4221: This object file does not define any previously undefined public symbols,
