@@ -126,6 +126,10 @@ struct tftp_packet {
 #define CURL_META_TFTP_CONN   "meta:proto:tftp:conn"
 
 struct tftp_conn {
+  struct Curl_sockaddr_storage local_addr;
+  struct Curl_sockaddr_storage remote_addr;
+  struct tftp_packet rpacket;
+  struct tftp_packet spacket;
   tftp_state_t    state;
   tftp_mode_t     mode;
   tftp_error_t    error;
@@ -136,16 +140,13 @@ struct tftp_conn {
   int             retry_time;
   int             retry_max;
   time_t          rx_time;
-  struct Curl_sockaddr_storage   local_addr;
-  struct Curl_sockaddr_storage   remote_addr;
   curl_socklen_t  remote_addrlen;
   int             rbytes;
   size_t          sbytes;
   unsigned int    blksize;
   unsigned int    requested_blksize;
   unsigned short  block;
-  struct tftp_packet rpacket;
-  struct tftp_packet spacket;
+  BIT(remote_pinned);
 };
 
 
@@ -1094,18 +1095,31 @@ static CURLcode tftp_pollset(struct Curl_easy *data,
 static CURLcode tftp_receive_packet(struct Curl_easy *data,
                                     struct tftp_conn *state)
 {
-  curl_socklen_t        fromlen;
-  CURLcode              result = CURLE_OK;
+  CURLcode result = CURLE_OK;
+  struct Curl_sockaddr_storage remote_addr;
+  curl_socklen_t fromlen = sizeof(remote_addr);
 
   /* Receive the packet */
-  fromlen = sizeof(state->remote_addr);
   state->rbytes = (int)recvfrom(state->sockfd,
                                 (void *)state->rpacket.data,
                                 (RECV_TYPE_ARG3)state->blksize + 4,
                                 0,
-                                (struct sockaddr *)&state->remote_addr,
+                                (struct sockaddr *)&remote_addr,
                                 &fromlen);
-  state->remote_addrlen = fromlen;
+  if(state->remote_pinned) {
+    /* pinned, verify that it comes from the same address */
+    if((state->remote_addrlen != fromlen) ||
+       memcmp(&remote_addr, &state->remote_addr, fromlen)) {
+      failf(data, "Data received from another address");
+      return CURLE_RECV_ERROR;
+    }
+  }
+  else {
+    /* pin address on first use */
+    state->remote_pinned = TRUE;
+    state->remote_addrlen = fromlen;
+    memcpy(&state->remote_addr, &remote_addr, fromlen);
+  }
 
   /* Sanity check packet length */
   if(state->rbytes < 4) {
