@@ -667,7 +667,9 @@ jobs:
         env:
           INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
         run: |
-          [ -n "${INSTALL_PACKAGES_BREW}" ] && export LD_LIBRARY_PATH; LD_LIBRARY_PATH="$(/home/linuxbrew/.linuxbrew/bin/brew --prefix)"/lib
+          if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
+            export LD_LIBRARY_PATH; LD_LIBRARY_PATH="$(/home/linuxbrew/.linuxbrew/bin/brew --prefix)"/lib
+          fi
           bld/src/curl -V
 
       - name: 'curl install'
