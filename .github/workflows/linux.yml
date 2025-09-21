@@ -216,12 +216,12 @@ jobs:
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libpsl-dev libbrotli-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
-            install_steps: skipall wolfssl-opensslextra
-            install_steps_brew: gsasl mbedtls rustls-ffi
+            install_steps: skipall mbedtls wolfssl-opensslextra
+            install_steps_brew: gsasl rustls-ffi
             make-custom-target: tidy
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
-              --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls --with-gnutls --with-libgsasl
+              --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export
 
@@ -594,17 +594,21 @@ jobs:
           CFLAGS: '${{ matrix.build.CFLAGS }}'
           LDFLAGS: '${{ matrix.build.LDFLAGS }}'
           LIBS: '${{ matrix.build.LIBS }}'
+          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_CONFIGURE_PREFIX: '${{ matrix.build.configure-prefix }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
-          if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-            export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix gsasl)/lib/pkgconfig:$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix rustls-ffi)/lib/pkgconfig"
-          fi
           [[ "${MATRIX_INSTALL_STEPS}" = *'awslc'* ]] && sudo apt-get -o Dpkg::Use-Pty=0 purge libssl-dev
-          [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
+          export PKG_CONFIG_PATH
+          [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
+          if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
+            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+            for pkg in ${INSTALL_PACKAGES_BREW}; do
+              PKG_CONFIG_PATH+=":$(brew --prefix "${pkg}")/lib/pkgconfig"
+            done
+          fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
