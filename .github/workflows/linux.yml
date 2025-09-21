@@ -220,7 +220,7 @@ jobs:
             install_steps_brew: gsasl
             make-custom-target: tidy
             configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+              LDFLAGS='-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib'
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export
@@ -233,7 +233,7 @@ jobs:
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
             configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib
+              LDFLAGS='-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/gsasl/lib'
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export
