@@ -74,6 +74,7 @@ my %banfunc = (
     "LoadLibraryEx" => 1,
     "LoadLibraryExA" => 1,
     "LoadLibraryExW" => 1,
+    "_beginthreadex" => 1,
     "_waccess" => 1,
     "_access" => 1,
     "access" => 1,
