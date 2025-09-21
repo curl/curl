@@ -1502,7 +1502,7 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
 
   *nread = 0;
   *metap = NULL;
-  if(!GOOD_EASY_HANDLE(data))
+  if(!GOOD_EASY_HANDLE(data) || (buflen && !buffer))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   conn = data->conn;
