@@ -432,6 +432,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
+  /* !checksrc! disable ERRNOVAR 1 */
   FILE *res = fdopen(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
