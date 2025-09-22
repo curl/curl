@@ -341,7 +341,7 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
     return CURLE_TOO_LARGE;
   }
 
-  memcpy(&dest->curl_sa_addr, ai->ai_addr, dest->addrlen);
+  memcpy(&dest->_sa_ex_u.buff, ai->ai_addr, dest->addrlen);
   return CURLE_OK;
 }
 
