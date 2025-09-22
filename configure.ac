@@ -340,21 +340,21 @@ if test "$request_httpd" = "check" -o "$request_httpd" = "yes"; then
     # common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
     AC_PATH_PROG([APXS], [apxs])
-    if test "$APXS" = ""; then
+    if test -z "$APXS"; then
       AC_MSG_NOTICE([apache2-dev not installed, httpd tests disabled])
       HTTPD_ENABLED="no"
     fi
   else
     AC_PATH_PROG([HTTPD], [httpd])
-    if test "$HTTPD" = ""; then
+    if test -z "$HTTPD"; then
       AC_PATH_PROG([HTTPD], [apache2])
     fi
     AC_PATH_PROG([APXS], [apxs])
-    if test "$HTTPD" = ""; then
+    if test -z "$HTTPD"; then
       AC_MSG_NOTICE([httpd/apache2 not in PATH, http tests disabled])
       HTTPD_ENABLED="no"
     fi
-    if test "$APXS" = ""; then
+    if test -z "$APXS"; then
       AC_MSG_NOTICE([apxs not in PATH, http tests disabled])
       HTTPD_ENABLED="no"
     fi
@@ -391,7 +391,7 @@ if test "$request_danted" = "check" -o "$request_danted" = "yes"; then
     DANTED="/usr/sbin/danted"
   else
     AC_PATH_PROG([DANTED], [danted])
-    if test "$DANTED" = ""; then
+    if test -z "$DANTED"; then
       AC_PATH_PROG([DANTED], [danted])
     fi
   fi
@@ -410,7 +410,7 @@ fi
 AC_SUBST(DANTED)
 
 dnl the nghttpx we might use in httpd testing
-if test "$TEST_NGHTTPX" != "" -a "$TEST_NGHTTPX" != "nghttpx"; then
+if test -n "$TEST_NGHTTPX" -a "$TEST_NGHTTPX" != "nghttpx"; then
   HTTPD_NGHTTPX="$TEST_NGHTTPX"
 else
   AC_PATH_PROG([HTTPD_NGHTTPX], [nghttpx], [],
@@ -419,7 +419,7 @@ fi
 AC_SUBST(HTTPD_NGHTTPX)
 
 dnl the Caddy server we might use in testing
-if test "$TEST_CADDY" != ""; then
+if test -n "$TEST_CADDY"; then
   CADDY="$TEST_CADDY"
 else
   AC_PATH_PROG([CADDY], [caddy])
@@ -2078,7 +2078,7 @@ if test -n "$check_for_ca_bundle"; then
   CURL_CHECK_CA_EMBED
 fi
 
-AM_CONDITIONAL(CURL_CA_EMBED_SET, test "$CURL_CA_EMBED" != "")
+AM_CONDITIONAL(CURL_CA_EMBED_SET, test -n "$CURL_CA_EMBED")
 
 dnl ----------------------
 dnl check unsafe CA search
@@ -3120,7 +3120,7 @@ if test "$want_nghttp2" != no; then
     AC_MSG_NOTICE([-L is $LD_H2])
 
     DIR_H2=`echo $LD_H2 | $SED -e 's/^-L//'`
-  elif test "$want_nghttp2_path" != ''; then
+  elif test -n "$want_nghttp2_path"; then
     LIB_H2="-lnghttp2"
     LD_H2=-L${want_nghttp2_path}/lib$libsuff
     CPP_H2=-I${want_nghttp2_path}/include
@@ -3979,11 +3979,11 @@ case "$OPT_ZSH_FPATH" in
     AC_SUBST(ZSH_FUNCTIONS_DIR)
     ;;
 esac
-if test -z "$PERL" -a "$ZSH_FUNCTIONS_DIR" != ''; then
+if test -z "$PERL" -a -n "$ZSH_FUNCTIONS_DIR"; then
   AC_MSG_WARN([perl was not found. Will not install zsh completions.])
   ZSH_FUNCTIONS_DIR=''
 fi
-AM_CONDITIONAL(USE_ZSH_COMPLETION, test "$ZSH_FUNCTIONS_DIR" != '')
+AM_CONDITIONAL(USE_ZSH_COMPLETION, test -n "$ZSH_FUNCTIONS_DIR")
 
 dnl **********************************************************************
 dnl Check for fish completion path
@@ -4014,11 +4014,11 @@ case "$OPT_FISH_FPATH" in
     AC_SUBST(FISH_FUNCTIONS_DIR)
     ;;
 esac
-if test -z "$PERL" -a "$FISH_FUNCTIONS_DIR" != ''; then
+if test -z "$PERL" -a -n "$FISH_FUNCTIONS_DIR"; then
   AC_MSG_WARN([perl was not found. Will not install fish completions.])
   FISH_FUNCTIONS_DIR=''
 fi
-AM_CONDITIONAL(USE_FISH_COMPLETION, test "$FISH_FUNCTIONS_DIR" != '')
+AM_CONDITIONAL(USE_FISH_COMPLETION, test -n "$FISH_FUNCTIONS_DIR")
 
 dnl Now check for the very most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
@@ -4373,7 +4373,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
           *-ibm-aix*)
             dnl Check if compiler is xlC
             COMPILER_VERSION=`"$CC" -qversion 2>/dev/null`
-            if test "$COMPILER_VERSION" = ""; then
+            if test -z "$COMPILER_VERSION"; then
               CFLAGS="$CFLAGS -pthread"
             else
               CFLAGS="$CFLAGS -qthreaded"
@@ -5378,7 +5378,7 @@ fi
 if test "$want_curldebug" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES TrackMemory"
 fi
-if test "$CURL_CA_EMBED" != ""; then
+if test -n "$CURL_CA_EMBED"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
   CURL_CA_EMBED_msg="$CURL_CA_EMBED"
 else
