@@ -15,7 +15,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  2. TLS
  2.1 IMAPS connection fails with Rustls error
- 2.2 Access violation sending client cert with SChannel
+ 2.2 Access violation sending client cert with Schannel
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
@@ -123,7 +123,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/10457
 
-2.2 Access violation sending client cert with SChannel
+2.2 Access violation sending client cert with Schannel
 
  When using Schannel to do client certs, curl sets PKCS12_NO_PERSIST_KEY to
  avoid leaking the private key into the filesystem. Unfortunately that flag
