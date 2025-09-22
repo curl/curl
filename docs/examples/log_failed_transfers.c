@@ -75,11 +75,6 @@ struct transfer {
   CURL *curl;
 };
 
-struct transfer transfer[] = {
-  { "https://httpbin.org/get", "200.txt", "200_transfer_log.txt", },
-  { "https://httpbin.org/status/400", "400.txt", "400_transfer_log.txt", },
-};
-
 static void mem_reset(struct mem *mem)
 {
   free(mem->buf);
@@ -150,15 +145,14 @@ static int mem_addf(struct mem *mem, const char *format, ...)
   /* first try: there's probably enough memory to write everything.
      second try: there's definitely enough memory to write everything. */
   for(i = 0; i < 2; ++i) {
-    if(x < 0 || (unsigned)x >= SIZE_MAX || mem_need(mem, (size_t)x + 1) < 0)
+    if(x < 0 || mem_need(mem, (size_t)x + 1) < 0)
       break;
 
     va_start(va, format);
     x = vsnprintf(mem->buf + mem->len, mem->allocsize - mem->len, format, va);
     va_end(va);
 
-    if(x >= 0 && (unsigned)x < SIZE_MAX &&
-       (size_t)x < (mem->allocsize - mem->len)) {
+    if(x >= 0 && (size_t)x < (mem->allocsize - mem->len)) {
       mem->recent = mem->buf + mem->len;
       mem->len += (size_t)x;
       return x;
@@ -197,7 +191,7 @@ static int mydebug(CURL *handle, curl_infotype type,
     mem_addn(&t->log, s_infotype[type], 2);
     mem_addn(&t->log, data, size);
     if(!size || data[size - 1] != '\n')
-      mem_addn(&t->log, "\n", 1);
+      mem_add(&t->log, "\n");
     break;
   default:
     break;
@@ -218,6 +212,17 @@ int main(void)
   unsigned i;
   int total_failed = 0;
   char errbuf[CURL_ERROR_SIZE] = { 0, };
+  struct transfer transfer[2];
+
+  memset(transfer, 0, sizeof(transfer));
+
+  transfer[0].url = "https://httpbin.org/get";
+  transfer[0].bodyfile = "200.txt";
+  transfer[0].logfile = "200_transfer_log.txt";
+
+  transfer[1].url = "https://httpbin.org/status/400";
+  transfer[1].bodyfile = "400.txt";
+  transfer[1].logfile = "400_transfer_log.txt";
 
   if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
     fprintf(stderr, "curl_global_init failed\n");
