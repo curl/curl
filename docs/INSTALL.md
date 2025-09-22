@@ -15,7 +15,8 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
-You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+You can download and install curl and libcurl using
+the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
 
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
@@ -30,8 +31,8 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in the root directory for specific instructions on how
-to proceed.
+the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in
+the root directory for specific instructions on how to proceed.
 
 # Unix
 
@@ -217,7 +218,7 @@ executable in `/bin/` or you see the configure fail toward the end.
 Download the setup installer from
 [`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
 packages are needed for the install. For more on installing packages visit
-[`cygwin setup`](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
+[`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
