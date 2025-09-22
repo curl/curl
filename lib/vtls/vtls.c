@@ -77,6 +77,7 @@
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
+#include "../setopt.h"
 #include "../strdup.h"
 #include "../rand.h"
 
