@@ -304,12 +304,12 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #endif
 
 #ifdef USE_APPLE_SECTRUST
-  if(!sslc->custom_capath && !sslc->custom_cafile)
+  if(!sslc->custom_capath && !sslc->custom_cafile &&
+     !sslc->primary.ca_info_blob)
     sslc->native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
-  if(!sslc->custom_capath) {
-    DEBUGASSERT(!set->str[STRING_SSL_CAPATH]);
+  if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
     if(result)
       return result;
@@ -317,8 +317,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
 #endif
 #ifdef CURL_CA_BUNDLE
-  if(!sslc->custom_cafile) {
-    DEBUGASSERT(!set->str[STRING_SSL_CAFILE]);
+  if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)
       return result;
@@ -351,12 +350,12 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
 #ifdef USE_APPLE_SECTRUST
-  if(!sslc->custom_capath && !sslc->custom_cafile)
+  if(!sslc->custom_capath && !sslc->custom_cafile &&
+     !sslc->primary.ca_info_blob)
     sslc->native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
-  if(!sslc->custom_capath) {
-    DEBUGASSERT(!set->str[STRING_SSL_CAPATH_PROXY]);
+  if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
     if(result)
       return result;
@@ -364,8 +363,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
 #endif
 #ifdef CURL_CA_BUNDLE
-  if(!sslc->custom_cafile) {
-    DEBUGASSERT(!set->str[STRING_SSL_CAFILE_PROXY]);
+  if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
                             CURL_CA_BUNDLE);
     if(result)
