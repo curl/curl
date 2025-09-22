@@ -3,6 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: sasl-ir
 Help: Initial response in SASL authentication
+Protocols: LDAP IMAP POP3 SMTP
 Added: 7.31.0
 Category: auth
 Multi: boolean

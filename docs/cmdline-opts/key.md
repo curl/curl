@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: key
 Arg: <key>
-Protocols: TLS SSH
+Protocols: TLS SCP SFTP
 Help: Private key filename
 Category: tls ssh
 Added: 7.9.3

@@ -6,6 +6,7 @@ Short: t
 Arg: <opt=val>
 Help: Set telnet option
 Category: telnet
+Protocols: TELNET
 Added: 7.7
 Multi: append
 See-also:
