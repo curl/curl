@@ -22,7 +22,7 @@ libcurl bindings
 
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-C++: [curlpp](https://github.com/jpbarrette/curlpp/) Written by Jean-Philippe Barrette-LaPierre,
+C++: [curlpp](https://github.com/jpbarrette/curlpp) Written by Jean-Philippe Barrette-LaPierre,
 [curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
 Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 

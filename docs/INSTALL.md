@@ -15,7 +15,8 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
-You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+You can download and install curl and libcurl using
+the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
 
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
@@ -30,8 +31,8 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in the root directory for specific instructions on how
-to proceed.
+the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in
+the root directory for specific instructions on how to proceed.
 
 # Unix
 
