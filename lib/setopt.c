@@ -2206,6 +2206,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
+    s->ssl.custom_cafile = TRUE;
     return Curl_setstropt(&s->str[STRING_SSL_CAFILE], ptr);
 
 #ifndef CURL_DISABLE_PROXY
@@ -2214,6 +2215,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set CA info SSL connection for proxy. Specify filename of the
      * CA certificate
      */
+    s->proxy_ssl.custom_cafile = TRUE;
     return Curl_setstropt(&s->str[STRING_SSL_CAFILE_PROXY], ptr);
 
 #endif
@@ -2223,9 +2225,11 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
+      s->ssl.custom_capath = TRUE;
       return Curl_setstropt(&s->str[STRING_SSL_CAPATH], ptr);
+    }
 #endif
     return CURLE_NOT_BUILT_IN;
 #ifndef CURL_DISABLE_PROXY
@@ -2235,9 +2239,11 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
+      s->proxy_ssl.custom_capath = TRUE;
       return Curl_setstropt(&s->str[STRING_SSL_CAPATH_PROXY], ptr);
+    }
 #endif
     return CURLE_NOT_BUILT_IN;
 #endif

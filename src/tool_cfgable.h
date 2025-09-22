@@ -340,12 +340,6 @@ struct OperationConfig {
   BIT(skip_existing);
 };
 
-#ifdef USE_APPLE_SECTRUST
-#define CURLCONF_NATIVE_CA_DEFAULT   TRUE
-#else
-#define CURLCONF_NATIVE_CA_DEFAULT   FALSE
-#endif
-
 #if defined(_WIN32) && !defined(UNDER_CE)
 struct termout {
   wchar_t *buf;

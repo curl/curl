@@ -435,36 +435,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->socks5_gssapi_nec = FALSE;
 #endif
 
-  /* Set the default CA cert bundle/path detected/specified at build time.
-   *
-   * If Schannel is the selected SSL backend then these locations are ignored.
-   * We allow setting CA location for Schannel when explicitly specified by
-   * the user via CURLOPT_CAINFO / --cacert.
-   */
-  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef CURL_CA_BUNDLE
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
-    if(result)
-      return result;
-#ifndef CURL_DISABLE_PROXY
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
-                            CURL_CA_BUNDLE);
-    if(result)
-      return result;
-#endif
-#endif
-#ifdef CURL_CA_PATH
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
-    if(result)
-      return result;
-#ifndef CURL_DISABLE_PROXY
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
-    if(result)
-      return result;
-#endif
-#endif
-  }
-
   /* set default minimum TLS version */
 #ifdef USE_SSL
   Curl_setopt_SSLVERSION(data, CURLOPT_SSLVERSION, CURL_SSLVERSION_DEFAULT);

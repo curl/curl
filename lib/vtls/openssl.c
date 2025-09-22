@@ -5131,7 +5131,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   bool verified = FALSE;
 
   DEBUGASSERT(octx);
-  CURL_TRC_CF(data, cf, "check peer certificate chain");
+  lerr = SSL_get_verify_result(octx->ssl);
+  CURL_TRC_CF(data, cf, "check peer cert, openssl verify %sOK (%ld)",
+              (lerr == X509_V_OK) ? "" : "NOT ", lerr);
 
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
@@ -5154,12 +5156,15 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   infof_certstack(data, octx->ssl);
 #endif
 
-  if(ssl_config->native_ca_store && conn_config->verifypeer) {
+  /* if we verify and use native and openssl has *NOT* already verified */
+  if(ssl_config->native_ca_store && conn_config->verifypeer &&
+    (lerr != X509_V_OK)) {
     result = ossl_verify_native(cf, data, octx, peer, &verified);
     if(result &&
        (octx->store_is_empty || (result != CURLE_PEER_FAILED_VERIFICATION)))
       goto out; /* unexpected error */
   }
+
   if(!verified) {
     if(conn_config->verifyhost)
       result = ossl_verifyhost(data, conn, peer, server_cert);

@@ -285,6 +285,8 @@ struct ssl_config_data {
   BIT(native_ca_store); /* use the native ca store of operating system */
   BIT(auto_client_cert);   /* automatically locate and use a client
                               certificate for authentication (Schannel) */
+  BIT(custom_cafile); /* application has set custom CA file */
+  BIT(custom_capath); /* application has set custom CA path */
 };
 
 struct ssl_general_config {
