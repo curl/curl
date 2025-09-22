@@ -217,7 +217,7 @@ executable in `/bin/` or you see the configure fail toward the end.
 Download the setup installer from
 [`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
 packages are needed for the install. For more on installing packages visit
-[`cygwin setup`](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
+[`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
