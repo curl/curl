@@ -1113,8 +1113,9 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   int nwritten;
 
   (void)data;
-  *pnwritten = 0;
   DEBUGASSERT(backend);
+  *pnwritten = 0;
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
   /* mbedtls is picky when a mbedtls_ssl_write) was previously blocked.
    * It requires to be called with the same amount of bytes again, or it
    * will lose bytes, e.g. reporting all was sent but they were not.
@@ -1135,11 +1136,22 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
                 len, -nwritten);
-    result = ((nwritten == MBEDTLS_ERR_SSL_WANT_WRITE)
+    switch(nwritten) {
 #ifdef MBEDTLS_SSL_PROTO_TLS1_3
-      || (nwritten == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
+    case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
 #endif
-      ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
+    case MBEDTLS_ERR_SSL_WANT_READ:
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      result = CURLE_AGAIN;
+      break;
+    case MBEDTLS_ERR_SSL_WANT_WRITE:
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
+      result = CURLE_AGAIN;
+      break;
+    default:
+      result = CURLE_SEND_ERROR;
+      break;
+    }
     if((result == CURLE_AGAIN) && !backend->send_blocked) {
       backend->send_blocked = TRUE;
       backend->send_blocked_len = len;
@@ -1280,6 +1292,7 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   (void)data;
   DEBUGASSERT(backend);
   *pnread = 0;
+  connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   nread = mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf, buffersize);
   if(nread > 0)
@@ -1294,6 +1307,11 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       FALLTHROUGH();
 #endif
     case MBEDTLS_ERR_SSL_WANT_READ:
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
+      result = CURLE_AGAIN;
+      break;
+    case MBEDTLS_ERR_SSL_WANT_WRITE:
+      connssl->io_need = CURL_SSL_IO_NEED_SEND;
       result = CURLE_AGAIN;
       break;
     case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
