@@ -1149,16 +1149,16 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   capath_warning="   (warning: certs not found)"
   check_capath=""
 
-  if test "$want_ca" != "no" -a "$want_ca" != "unset" -a \
-          "$want_capath" != "no" -a "$want_capath" != "unset"; then
+  if test "$want_ca" != "no" && test "$want_ca" != "unset" &&
+     test "$want_capath" != "no" && test "$want_capath" != "unset"; then
     dnl both given
     ca="$want_ca"
     capath="$want_capath"
-  elif test "$want_ca" != "no" -a "$want_ca" != "unset"; then
+  elif test "$want_ca" != "no" && test "$want_ca" != "unset"; then
     dnl --with-ca-bundle given
     ca="$want_ca"
     capath="no"
-  elif test "$want_capath" != "no" -a "$want_capath" != "unset"; then
+  elif test "$want_capath" != "no" && test "$want_capath" != "unset"; then
     dnl --with-ca-path given
     capath="$want_capath"
     ca="no"
@@ -1167,8 +1167,8 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     dnl Both auto-detections can be skipped by --without-ca-*
     ca="no"
     capath="no"
-    if test "$cross_compiling" != "yes" -a \
-            "$curl_cv_native_windows" != "yes"; then
+    if test "$cross_compiling" != "yes" &&
+       test "$curl_cv_native_windows" != "yes"; then
       dnl NOT cross-compiling and...
       dnl neither of the --with-ca-* options are provided
       if test "$want_ca" = "unset"; then
@@ -1247,7 +1247,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
 AS_HELP_STRING([--with-ca-fallback], [Use OpenSSL's built-in CA store])
 AS_HELP_STRING([--without-ca-fallback], [Don't use OpenSSL's built-in CA store]),
   [
-    if test "$with_ca_fallback" != "yes" -a "$with_ca_fallback" != "no"; then
+    if test "$with_ca_fallback" != "yes" && test "$with_ca_fallback" != "no"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
     fi
   ],
@@ -1283,7 +1283,7 @@ AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle in the cur
   [ want_ca_embed="unset" ])
 
   CURL_CA_EMBED=''
-  if test "$want_ca_embed" != "no" -a "$want_ca_embed" != "unset" -a -f "$want_ca_embed"; then
+  if test "$want_ca_embed" != "no" && test "$want_ca_embed" != "unset" && test -f "$want_ca_embed"; then
     if test -n "$PERL"; then
       CURL_CA_EMBED="$want_ca_embed"
       AC_SUBST(CURL_CA_EMBED)
@@ -1337,7 +1337,7 @@ AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports Win32 crypto API])
   curl_win32_crypto_api="no"
-  if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
+  if test "$curl_cv_native_windows" = "yes" && test "$curl_cv_winuwp" != "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         #undef inline

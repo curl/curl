@@ -152,7 +152,7 @@ if test "$OPT_OPENSSL" != no; then
       LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
       LDFLAGSPC="$CLEANLDFLAGSPC -L$LIB_OPENSSL"
     fi
-    if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
+    if test "$PKGCONFIG" = "no" && test -n "$PREFIX_OPENSSL" ; then
       # only set this if pkg-config wasn't used
       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
     fi

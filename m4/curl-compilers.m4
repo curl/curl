@@ -396,7 +396,8 @@ AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_CHECK_COMPILER])dnl
   AC_MSG_CHECKING([convert -I options to -isystem])
   if test "$compiler_id" = "GNU_C" ||
-    test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
+     test "$compiler_id" = "CLANG" ||
+     test "$compiler_id" = "APPLECLANG"; then
     AC_MSG_RESULT([yes])
     tmp_has_include="no"
     tmp_chg_FLAGS="$CFLAGS"
@@ -1185,19 +1186,19 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
           tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
         fi
-        if test "$compiler_num" -ge "402" -a "$compiler_num" -lt "406"; then
+        if test "$compiler_num" -ge "402" && test "$compiler_num" -lt "406"; then
           dnl GCC <4.6 do not support #pragma to suppress warnings locally. Disable globally instead.
           tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
         fi
-        if test "$compiler_num" -ge "400" -a "$compiler_num" -lt "407"; then
+        if test "$compiler_num" -ge "400" && test "$compiler_num" -lt "407"; then
           dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685
           tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-field-initializers"
         fi
-        if test "$compiler_num" -ge "403" -a "$compiler_num" -lt "408"; then
+        if test "$compiler_num" -ge "403" && test "$compiler_num" -lt "408"; then
           dnl Avoid false positives
           tmp_CFLAGS="$tmp_CFLAGS -Wno-type-limits"
         fi
-        if test "$compiler_num" -ge "501" -a "$compiler_num" -lt "505"; then
+        if test "$compiler_num" -ge "501" && test "$compiler_num" -lt "505"; then
           dnl Avoid false positives
           tmp_CFLAGS="$tmp_CFLAGS -Wno-conversion"
         fi
