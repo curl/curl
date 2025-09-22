@@ -263,6 +263,19 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 #define Curl_checkProxyheaders(x,y,z,a) NULL
 #endif
 
+static bool http_header_is_empty(const char *header)
+{
+  struct Curl_str out;
+
+  if(!curlx_str_cspn(&header, &out, ";:") &&
+     (!curlx_str_single(&header, ':') || !curlx_str_single(&header, ';'))) {
+    curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
+    curlx_str_trimblanks(&out);
+    return curlx_strlen(&out) == 0;
+  }
+  return TRUE; /* invalid head format, treat as empty */
+}
+
 /*
  * Strip off leading and trailing whitespace from the value in the given HTTP
  * header line and return a strdup()ed copy. Returns NULL in case of
@@ -1702,7 +1715,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
               curlx_str_casecompare(&name, "Content-Length"))
         ;
       else if(curlx_str_casecompare(&name, "Connection"))
-        /* Normal Connection: header generation takes care of this */
+        /* Connection headers are handled specially */
         ;
       else if((httpversion >= 20) &&
               curlx_str_casecompare(&name, "Transfer-Encoding"))
@@ -2636,17 +2649,29 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
 static CURLcode http_add_connection_hd(struct Curl_easy *data,
                                        struct dynbuf *req)
 {
-  char *custom = Curl_checkheaders(data, STRCONST("Connection"));
-  char *custom_val = custom ? Curl_copy_header_value(custom) : NULL;
-  const char *sep = (custom_val && *custom_val) ? ", " : "Connection: ";
+  struct curl_slist *head;
+  const char *sep = "Connection: ";
   CURLcode result = CURLE_OK;
   size_t rlen = curlx_dyn_len(req);
+  char *value;
+  bool skip;
 
-  if(custom && !custom_val)
-    return CURLE_OUT_OF_MEMORY;
+  /* Add the 1st custom "Connection: " header, if there is one */
+  for(head = data->set.headers; head; head = head->next) {
+    if(curl_strnequal(head->data, "Connection", 10) &&
+       Curl_headersep(head->data[10]) &&
+       !http_header_is_empty(head->data)) {
+      value = Curl_copy_header_value(head->data);
+      if(!value)
+        return CURLE_OUT_OF_MEMORY;
+      result = curlx_dyn_addf(req, "%s%s", sep, value);
+      sep = ", ";
+      free(value);
+      break; /* leave, having added 1st one */
+    }
+  }
 
-  if(custom_val && *custom_val)
-    result = curlx_dyn_addf(req, "Connection: %s", custom_val);
+  /* add our internal Connection: header values, if we have any */
   if(!result && data->state.http_hd_te) {
     result = curlx_dyn_addf(req, "%s%s", sep, "TE");
     sep = ", ";
@@ -2660,9 +2685,26 @@ static CURLcode http_add_connection_hd(struct Curl_easy *data,
   }
   if(!result && (rlen < curlx_dyn_len(req)))
     result = curlx_dyn_addn(req, STRCONST("\r\n"));
+  if(result)
+    return result;
 
-  free(custom_val);
-  return result;
+  /* Add all user-defined Connection: headers after the first */
+  skip = TRUE;
+  for(head = data->set.headers; head; head = head->next) {
+    if(curl_strnequal(head->data, "Connection", 10) &&
+       Curl_headersep(head->data[10]) &&
+       !http_header_is_empty(head->data)) {
+      if(skip) {
+        skip = FALSE;
+        continue;
+      }
+      result = curlx_dyn_addf(req, "%s\r\n", head->data);
+      if(result)
+        return result;
+    }
+  }
+
+  return CURLE_OK;
 }
 
 /* Header identifier in order we send them by default */
