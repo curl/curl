@@ -297,23 +297,31 @@ static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 {
   struct ssl_config_data *sslc = &data->set.ssl;
+  CURLcode result;
 
+  (void)result;
 #ifdef USE_APPLE_SECTRUST
   if(!sslc->custom_capath && !sslc->custom_cafile)
     sslc->native_ca_store = TRUE;
 #endif
-  if(sslc->custom_capath)
-    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
 #ifdef CURL_CA_PATH
-  else
-    sslc->primary.CApath = CURL_CA_PATH;
+  if(!sslc->custom_capath) {
+    DEBUGASSERT(!set->str[STRING_SSL_CAPATH]);
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
+    if(result)
+      return result;
+  }
+  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
 #endif
-  if(sslc->custom_cafile)
-    sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
 #ifdef CURL_CA_BUNDLE
-  else
-    sslc->primary.CAfile = CURL_CA_BUNDLE;
+  if(!sslc->custom_cafile) {
+    DEBUGASSERT(!set->str[STRING_SSL_CAFILE]);
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
+    if(result)
+      return result;
+  }
 #endif
+  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
   sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
   sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
   sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
@@ -343,18 +351,25 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   if(!sslc->custom_capath && !sslc->custom_cafile)
     sslc->native_ca_store = TRUE;
 #endif
-  if(sslc->custom_capath)
-    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
 #ifdef CURL_CA_PATH
-  else
-    sslc->primary.CApath = CURL_CA_PATH;
+  if(!sslc->custom_capath) {
+    DEBUGASSERT(!set->str[STRING_SSL_CAPATH_PROXY]);
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
+    if(result)
+      return result;
+  }
+  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
 #endif
-  if(sslc->custom_cafile)
-    sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
 #ifdef CURL_CA_BUNDLE
-  else
-    sslc->primary.CAfile = CURL_CA_BUNDLE;
+  if(!sslc->custom_cafile) {
+    DEBUGASSERT(!set->str[STRING_SSL_CAFILE_PROXY]);
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                            CURL_CA_BUNDLE);
+    if(result)
+      return result;
+  }
 #endif
+  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
   sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
   sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
   sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
