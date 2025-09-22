@@ -632,7 +632,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
     squeeze tmp_CPPFLAGS
     squeeze tmp_CFLAGS
     #
-    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
+    if test -n "$tmp_CFLAGS" || test -n "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts some basic options])
       CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
@@ -1303,7 +1303,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
     squeeze tmp_CPPFLAGS
     squeeze tmp_CFLAGS
     #
-    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
+    if test -n "$tmp_CFLAGS" || test -n "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts strict warning options])
       CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
