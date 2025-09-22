@@ -4,6 +4,7 @@ SPDX-License-Identifier: curl
 Long: follow
 Help: Follow redirects per spec
 Category: http
+Protocols: HTTP
 Added: 8.16.0
 Multi: boolean
 See-also:

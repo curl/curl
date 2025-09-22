@@ -6,6 +6,7 @@ Arg: <URL>
 Help: Resolve hostnames over DoH
 Added: 7.62.0
 Category: dns
+Protocols: DNS
 Multi: single
 See-also:
   - doh-insecure

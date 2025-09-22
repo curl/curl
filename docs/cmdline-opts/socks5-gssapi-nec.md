@@ -5,6 +5,7 @@ Long: socks5-gssapi-nec
 Help: Compatibility with NEC SOCKS5 server
 Added: 7.19.4
 Category: proxy auth
+Protocols: GSS/kerberos
 Multi: boolean
 See-also:
   - socks5

@@ -4,6 +4,7 @@ SPDX-License-Identifier: curl
 Long: sasl-authzid
 Arg: <identity>
 Help: Identity for SASL PLAIN authentication
+Protocols: LDAP IMAP POP3 SMTP
 Added: 7.66.0
 Category: auth
 Multi: single

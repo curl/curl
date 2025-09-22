@@ -5,6 +5,7 @@ Long: doh-insecure
 Help: Allow insecure DoH server connections
 Added: 7.76.0
 Category: dns tls
+Protocols: DNS
 Multi: boolean
 See-also:
   - doh-url

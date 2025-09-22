@@ -241,8 +241,38 @@ sub overrides {
     }
 }
 
+my %protexists = (
+    'DNS' => 1,
+    'FILE' => 1,
+    'FTP' => 1,
+    'FTPS' => 1,
+    'GSS/kerberos' => 1,
+    'HTTP' => 1,
+    'HTTPS' => 1,
+    'IMAP' => 1,
+    'IPFS' => 1,
+    'LDAP' => 1,
+    'MQTT' => 1,
+    'POP3' => 1,
+    'SCP' => 1,
+    'SFTP' => 1,
+    'SMTP' => 1,
+    'SSL' => 2, # deprecated
+    'TELNET' => 1,
+    'TFTP' => 1,
+    'TLS' => 1,
+    );
+
 sub protocols {
-    my ($manpage, $standalone, $data)=@_;
+    my ($f, $line, $manpage, $standalone, $data)=@_;
+    my @e = split(/ +/, $data);
+    for my $pr (@e) {
+        if(!$protexists{$pr}) {
+
+            print STDERR "$f:$line:1:ERROR: unrecognized protocol: $pr\n";
+            exit 2;
+        }
+    }
     if($standalone) {
         return ".SH \"PROTOCOLS\"\n$data\n";
     }
@@ -716,7 +746,7 @@ sub single {
     }
     my @leading;
     if($protocols) {
-        push @leading, protocols($manpage, $standalone, $protocols);
+        push @leading, protocols($f, $line, $manpage, $standalone, $protocols);
     }
 
     if($standalone) {
