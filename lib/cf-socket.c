@@ -1578,7 +1578,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     *pnread = (size_t)nread;
 
   CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
-  if(!result && !ctx->got_first_byte && nread) {
+  if(!result && !ctx->got_first_byte) {
     ctx->first_byte_at = curlx_now();
     ctx->got_first_byte = TRUE;
   }
