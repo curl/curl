@@ -280,11 +280,11 @@ void Curl_dnscache_prune(struct Curl_easy *data)
     timediff_t oldest_ms = dnscache_prune(&dnscache->entries, timeout_ms, now);
 
     if(Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE) {
-      if(oldest_ms < INT_MAX)
+      if(oldest_ms <= LLONG_MAX / 2)
         /* prune the ones over half this age */
-        timeout_ms = (int)oldest_ms / 2;
+        timeout_ms = oldest_ms / 2;
       else
-        timeout_ms = INT_MAX/2;
+        timeout_ms = LLONG_MAX / 2;
     }
     else
       break;
