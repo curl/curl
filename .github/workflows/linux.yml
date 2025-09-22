@@ -658,8 +658,6 @@ jobs:
 
       - name: 'check curl -V output'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        env:
-          INSTALL_PACKAGES_BREW: '${{ matrix.build.install_steps_brew }}'
         run: bld/src/curl -V
 
       - name: 'curl install'
