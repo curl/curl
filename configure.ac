@@ -272,8 +272,8 @@ AC_ARG_WITH(rustls,dnl
 AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to the installation root]),[
   OPT_RUSTLS=$withval
   if test X"$withval" != Xno; then
-    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls"
-    experimental="$experimental rustls"
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Rustls"
+    experimental="$experimental Rustls"
   fi
 ])
 
