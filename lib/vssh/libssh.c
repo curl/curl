@@ -1339,14 +1339,12 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
 
       if((to_t == STRE_NO_NUM) || (to >= size)) {
         to = size - 1;
-        to_t = STRE_OK;
       }
 
       if(from_t == STRE_NO_NUM) {
         /* from is relative to end of file */
         from = size - to;
         to = size - 1;
-        from_t = STRE_OK;
       }
       if(from > size) {
         failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
