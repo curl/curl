@@ -104,7 +104,11 @@ else()
   endif()
 
   if(_ngtcp2_crypto_backend)
-    get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+      cmake_path(GET NGTCP2_LIBRARY PARENT_PATH _ngtcp2_library_dir)
+    else()
+      get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
+    endif()
     find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} HINTS ${_ngtcp2_library_dir})
 
     if(${_crypto_library_upper}_LIBRARY)

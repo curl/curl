@@ -230,7 +230,11 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     if(GSS_FLAVOUR)
       set(_gss_libdir_suffixes "")
       set(_gss_libdir_hints ${_gss_root_hints})
-      get_filename_component(_gss_calculated_potential_root "${_gss_INCLUDE_DIRS}" DIRECTORY)
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+        cmake_path(GET _gss_INCLUDE_DIRS PARENT_PATH _gss_calculated_potential_root)
+      else()
+        get_filename_component(_gss_calculated_potential_root "${_gss_INCLUDE_DIRS}" DIRECTORY)
+      endif()
       list(APPEND _gss_libdir_hints ${_gss_calculated_potential_root})
 
       if(WIN32)
@@ -323,8 +327,13 @@ if(GSS_FLAVOUR)
       set(GSS_VERSION "Heimdal Unknown")
     endif()
   elseif(NOT GSS_VERSION AND GSS_FLAVOUR STREQUAL "MIT")
-    get_filename_component(_mit_version "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos\\SDK\\CurrentVersion;VersionString]" NAME
-      CACHE)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
+      cmake_host_system_information(RESULT _mit_version QUERY WINDOWS_REGISTRY
+        "HKLM/SOFTWARE/MIT/Kerberos/SDK/CurrentVersion" VALUE "VersionString")
+    else()
+      get_filename_component(_mit_version
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos\\SDK\\CurrentVersion;VersionString]" NAME CACHE)
+    endif()
     if(WIN32 AND _mit_version)
       set(GSS_VERSION "${_mit_version}")
     else()
