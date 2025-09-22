@@ -281,7 +281,7 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
-            install: llvm brotli zstd gnutls nettle krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
+            install: llvm brotli zstd gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish
             install_steps: clang-tidy skiprun
             chkprefill: _chkprefill
             generate: >-
