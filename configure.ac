@@ -1182,7 +1182,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   if test "$curl_cv_wince" = 'yes'; then
     dnl This is for Windows CE systems
     winsock_LIB="-lws2"
-    if test ! -z "$winsock_LIB"; then
+    if test -n "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
       LIBS="$winsock_LIB $LIBS"
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
@@ -1218,7 +1218,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "$curl_cv_winuwp" = "yes"; then
     if test "$curl_cv_winuwp" != "yes"; then
       winsock_LIB="$winsock_LIB -liphlpapi"
     fi
-    if test ! -z "$winsock_LIB"; then
+    if test -n "$winsock_LIB"; then
       my_ac_save_LIBS=$LIBS
       LIBS="$winsock_LIB $LIBS"
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])

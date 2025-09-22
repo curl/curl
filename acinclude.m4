@@ -1221,7 +1221,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     check_capath="$capath"
   fi
 
-  if test ! -z "$check_capath"; then
+  if test -n "$check_capath"; then
     for a in "$check_capath"; do
       if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
         if test "$capath" = "no"; then
