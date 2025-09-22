@@ -375,8 +375,8 @@ There are some known issues with the ECH implementation in wolfSSL:
 - The main issue is that the client currently handles HelloRetryRequest
   incorrectly.  [HRR issue](https://github.com/wolfSSL/wolfssl/issues/6802).)
   The HRR issue means that the client does not work for
-  [this ECH test web site](https://tls-ech.dev) and any other similarly configured
-  sites.
+  [this ECH test web site](https://tls-ech.dev/) and any other similarly
+  configured sites.
 - There is also an issue related to so-called middlebox compatibility mode.
   [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774)
 

@@ -7,8 +7,8 @@ SPDX-License-Identifier: curl
 # The curl bug bounty
 
 The curl project runs a bug bounty program in association with
-[HackerOne](https://www.hackerone.com) and the [Internet Bug
-Bounty](https://internetbugbounty.org).
+[HackerOne](https://www.hackerone.com/) and the [Internet Bug
+Bounty](https://internetbugbounty.org/).
 
 ## How does it work?
 
