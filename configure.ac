@@ -5224,8 +5224,7 @@ fi
 if test "$HAVE_ZSTD" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES zstd"
 fi
-if test "$USE_ARES" = "1" -o "$USE_THREADS_POSIX" = "1" \
-                          -o "$USE_THREADS_WIN32" = "1"; then
+if test "$USE_ARES" = "1" -o "$USE_THREADS_POSIX" = "1" -o "$USE_THREADS_WIN32" = "1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "$USE_ARES" = "1" -a "$want_threaded_resolver" = "yes" -a "$want_httpsrr" != "no"; then
