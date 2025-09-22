@@ -1702,7 +1702,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
               curlx_str_casecompare(&name, "Content-Length"))
         ;
       else if(curlx_str_casecompare(&name, "Connection"))
-        /* Normal Connection: header generation takes care of this */
+        /* Connection headers are handled specially */
         ;
       else if((httpversion >= 20) &&
               curlx_str_casecompare(&name, "Transfer-Encoding"))
@@ -2635,17 +2635,44 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
 static CURLcode http_add_connection_hd(struct Curl_easy *data,
                                        struct dynbuf *req)
 {
-  char *custom = Curl_checkheaders(data, STRCONST("Connection"));
-  char *custom_val = custom ? Curl_copy_header_value(custom) : NULL;
-  const char *sep = (custom_val && *custom_val) ? ", " : "Connection: ";
+  struct curl_slist *head;
+  const char *sep = "Connection: ";
   CURLcode result = CURLE_OK;
   size_t rlen = curlx_dyn_len(req);
+  bool has_custom = FALSE;
 
-  if(custom && !custom_val)
-    return CURLE_OUT_OF_MEMORY;
+  /* Add all custom Connection headers as separate headers */
+  for(head = data->set.headers; head; head = head->next) {
+    if(curl_strnequal(head->data, "Connection", 10) &&
+       Curl_headersep(head->data[10])) {
+      char *value = Curl_copy_header_value(head->data);
+      if(!value)
+        return CURLE_OUT_OF_MEMORY;
+      if(*value) {
+        result = curlx_dyn_addf(req, "Connection: %s\r\n", value);
+        has_custom = TRUE;
+      }
+      free(value);
+      if(result)
+        return result;
+    }
+  }
 
-  if(custom_val && *custom_val)
-    result = curlx_dyn_addf(req, "Connection: %s", custom_val);
+  /* If we have custom Connection headers, add TE/Upgrade/HTTP2-Settings
+     as a separate Connection header if needed */
+  if(has_custom) {
+    if(data->state.http_hd_te ||
+       data->state.http_hd_upgrade ||
+       data->state.http_hd_h2_settings) {
+      result = curlx_dyn_add(req, "Connection:");
+      sep = " ";
+    }
+    else {
+      /* No additional Connection header needed */
+      return CURLE_OK;
+    }
+  }
+
   if(!result && data->state.http_hd_te) {
     result = curlx_dyn_addf(req, "%s%s", sep, "TE");
     sep = ", ";
@@ -2660,7 +2687,6 @@ static CURLcode http_add_connection_hd(struct Curl_easy *data,
   if(!result && (rlen < curlx_dyn_len(req)))
     result = curlx_dyn_addn(req, STRCONST("\r\n"));
 
-  free(custom_val);
   return result;
 }
 
