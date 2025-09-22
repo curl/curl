@@ -6,7 +6,7 @@ SPDX-License-Identifier: curl
 
 # HTTPS RR
 
-[RFC 9460](https://datatracker.ietf.org/doc/rfc9460/) documents the HTTPS
+[RFC 9460](https://datatracker.ietf.org/doc/html/rfc9460/) documents the HTTPS
 DNS Resource Record.
 
 curl features **experimental** support for HTTPS RR.
