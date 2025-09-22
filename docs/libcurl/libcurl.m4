@@ -102,7 +102,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       AC_PATH_PROG([_libcurl_config],[curl-config],[],[$PATH])
     fi
 
-    if test "$_libcurl_config" != ""; then
+    if test -n "$_libcurl_config"; then
       AC_CACHE_CHECK([for the version of libcurl],
         [libcurl_cv_lib_curl_version],
         [libcurl_cv_lib_curl_version=`$_libcurl_config --version | $AWK '{print $[]2}'`])
@@ -123,10 +123,10 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       fi
 
       if test "$_libcurl_wanted" -eq 0 || test "$libcurl_cv_lib_version_ok" = yes; then
-        if test "$LIBCURL_CPPFLAGS" = ""; then
+        if test -z "$LIBCURL_CPPFLAGS"; then
           LIBCURL_CPPFLAGS=`$_libcurl_config --cflags`
         fi
-        if test "$LIBCURL" = ""; then
+        if test -z "$LIBCURL"; then
           LIBCURL=`$_libcurl_config --libs`
 
           # This is so silly, but Apple actually has a bug in their
@@ -217,7 +217,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           eval AS_TR_SH(libcurl_feature_$_libcurl_feature)=yes
         done
 
-        if test "$_libcurl_protocols" = ""; then
+        if test -z "$_libcurl_protocols"; then
 
           # We do not have --protocols, so just assume that all
           # protocols are available
