@@ -132,7 +132,7 @@ if test "x$OPT_RUSTLS" != xno; then
       dnl don't need any.
       LIBS="$SSL_LIBS $LIBS"
       link_pkgconfig=1
-      ssl_msg="rustls"
+      ssl_msg="Rustls"
       AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
       USE_RUSTLS="yes"
       RUSTLS_ENABLED=1
@@ -176,7 +176,7 @@ if test "x$OPT_RUSTLS" != xno; then
         AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
         RUSTLS_ENABLED=1
         USE_RUSTLS="yes"
-        ssl_msg="rustls"
+        ssl_msg="Rustls"
         test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ],
         AC_MSG_ERROR([--with-rustls was specified but could not find compatible Rustls.]),
