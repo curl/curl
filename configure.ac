@@ -5449,8 +5449,7 @@ if test "$CURL_DISABLE_IMAP" != "1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IMAPS"
   fi
 fi
-if test "$CURL_DISABLE_SMB" != "1" \
-    -a "$use_curl_ntlm_core" = "yes"; then
+if test "$CURL_DISABLE_SMB" != "1" -a "$use_curl_ntlm_core" = "yes"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMB"
   if test "$SSL_ENABLED" = "1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SMBS"
