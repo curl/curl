@@ -282,7 +282,7 @@ jobs:
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
             install: llvm brotli zstd gnutls nettle mbedtls gsasl rustls-ffi rtmpdump fish
-            install_steps: clang-tidy
+            install_steps: clang-tidy skiprun
             generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
             chkprefill: _chkprefill
           - name: 'HTTP/3 clang-tidy'
@@ -345,7 +345,7 @@ jobs:
         env:
           INSTALL_PACKAGES: >-
             ${{ matrix.build.generate && 'ninja' || 'automake libtool' }}
-            ${{ !contains(matrix.build.install_steps, 'clang-tidy') && 'nghttp2 stunnel' || '' }}
+            ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && 'nghttp2 stunnel' || '' }}
             ${{ contains(matrix.build.install_steps, 'pytest') && 'caddy httpd vsftpd' || '' }}
 
         run: |
@@ -473,14 +473,14 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
           python3 -m venv ~/venv
           source ~/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_steps, 'torture') && 20 || 10 }}
         env:
           TEST_TARGET: ${{ contains(matrix.build.install_steps, 'torture') && 'test-torture' || 'test-ci' }}
@@ -502,13 +502,13 @@ jobs:
           fi
 
       - name: 'install pytest prereqs'
-        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') && contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
         run: |
           source ~/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
-        if: ${{ !contains(matrix.build.install_steps, 'clang-tidy') && contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
         env:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
