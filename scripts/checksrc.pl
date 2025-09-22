@@ -922,7 +922,7 @@ sub scanfile {
 
         # scan for use of non-binary fopen without the macro
         if($l =~ /^(.*\W)(CURL_FOPEN|CURL_FOPEN_LOW)\s*\([^,]*, *\"([^"]*)/) {
-            my $mode = $2;
+            my $mode = $3;
             if($mode !~ /b/) {
                 checkwarn("FOPENMODE",
                           $line, length($1), $file, $ol,
