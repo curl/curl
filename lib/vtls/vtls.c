@@ -297,9 +297,11 @@ static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 {
   struct ssl_config_data *sslc = &data->set.ssl;
+#if defined(CURL_CA_PATH) || defined(CURL_CA_BUNDLE)
+  struct UserDefined *set = &data->set;
   CURLcode result;
+#endif
 
-  (void)result;
 #ifdef USE_APPLE_SECTRUST
   if(!sslc->custom_capath && !sslc->custom_cafile)
     sslc->native_ca_store = TRUE;
