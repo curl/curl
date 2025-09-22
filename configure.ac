@@ -5033,8 +5033,8 @@ if test "x$want_ech" != "xno"; then
       ECH_ENABLED_WOLFSSL=1)
   fi
   if test "x$RUSTLS_ENABLED" = "x1"; then
-      ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
-      ECH_ENABLED_RUSTLS=1
+    ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
+    ECH_ENABLED_RUSTLS=1
   fi
 
   dnl now deal with whatever we found
