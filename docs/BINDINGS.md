@@ -75,7 +75,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
 
-[Mono](https://web.archive.org/web/20070606064500/https://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
+[Mono](https://web.archive.org/web/20070606064500/forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
 [.NET](https://sourceforge.net/projects/libcurl-net/) libcurl-net by Jeffrey Phillips
 
