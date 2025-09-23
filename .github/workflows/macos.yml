@@ -608,6 +608,7 @@ jobs:
           # Reduce build combinations, by dropping less interesting ones
           - { compiler: gcc-13, build: cmake }
           - { compiler: gcc-14, build: autotools }
+          - { compiler: gcc-15, build: autotools }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
