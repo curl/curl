@@ -123,6 +123,8 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #define CURL_TRC_M_is_verbose(data) \
   Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)
+#define CURL_TRC_DNS_is_verbose(data) \
+  Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)
 
 #if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define infof(data, ...) \
@@ -141,7 +143,7 @@ void Curl_trc_ws(struct Curl_easy *data,
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
          Curl_trc_read(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_DNS(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) \
+  do { if(CURL_TRC_DNS_is_verbose(data)) \
          Curl_trc_dns(data, __VA_ARGS__); } while(0)
 
 #ifndef CURL_DISABLE_FTP
