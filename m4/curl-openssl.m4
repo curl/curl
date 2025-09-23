@@ -30,7 +30,7 @@ dnl Check for OpenSSL libraries and headers
 dnl **********************************************************************
 
 AC_DEFUN([CURL_WITH_OPENSSL], [
-if test "$OPT_OPENSSL" != no; then
+if test "$OPT_OPENSSL" != "no"; then
   ssl_msg=
 
   dnl backup the pre-ssl variables
@@ -209,13 +209,13 @@ if test "$OPT_OPENSSL" != no; then
 
     AC_CHECK_LIB(ssl, SSL_connect)
 
-    if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
+    if test "$ac_cv_lib_ssl_SSL_connect" != "yes"; then
       dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
       AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
       OLIBS=$LIBS
       LIBS="-lRSAglue -lrsaref $LIBS"
       AC_CHECK_LIB(ssl, SSL_connect)
-      if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
+      if test "$ac_cv_lib_ssl_SSL_connect" != "yes"; then
         dnl still no SSL_connect
         AC_MSG_RESULT(no)
         LIBS=$OLIBS
@@ -238,7 +238,7 @@ if test "$OPT_OPENSSL" != no; then
       LIBS="$CLEANLIBS"
     fi
 
-    if test "$OPT_OPENSSL" != off &&
+    if test "$OPT_OPENSSL" != "off" &&
        test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
     fi
@@ -348,7 +348,7 @@ if test "$OPT_OPENSSL" != no; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-if test "$OPT_OPENSSL" != no &&
+if test "$OPT_OPENSSL" != "no" &&
    test "$OPENSSL_ENABLED" != "1"; then
   AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])

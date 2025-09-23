@@ -190,7 +190,7 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
       curl_cv_native_windows="no"
     ])
   ])
-  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "$curl_cv_native_windows" = yes)
+  AM_CONDITIONAL(DOING_NATIVE_WINDOWS, test "$curl_cv_native_windows" = "yes")
 ])
 
 
@@ -1082,7 +1082,7 @@ dnl macro. It must also run AFTER all lib-checking macros are complete.
 AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
 
   dnl this test is of course not sensible if we are cross-compiling!
-  if test "$cross_compiling" != yes; then
+  if test "$cross_compiling" != "yes"; then
 
     dnl just run a program to verify that the libs checked for previous to this
     dnl point also is available run-time!
@@ -1185,7 +1185,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
         dnl the path we previously would have installed the curl CA bundle
         dnl to, and thus we now check for an already existing cert in that
         dnl place in case we find no other
-        if test "$prefix" != NONE; then
+        if test "$prefix" != "NONE"; then
           cac="${prefix}/share/curl/curl-ca-bundle.crt"
         else
           cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
@@ -1313,9 +1313,9 @@ dnl Check if curl's Win32 large file will be used
 
 AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  if test "$curl_cv_native_windows" = 'yes'; then
+  if test "$curl_cv_native_windows" = "yes"; then
     AC_MSG_CHECKING([whether build target supports Win32 large files])
-    if test "$curl_cv_wince" = 'yes'; then
+    if test "$curl_cv_wince" = "yes"; then
       dnl Windows CE does not support large files
       curl_win32_has_largefile='no'
     else
@@ -1324,7 +1324,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
     fi
     case "$curl_win32_has_largefile" in
       yes)
-        if test "$enable_largefile" = 'no'; then
+        if test "$enable_largefile" = "no"; then
           AC_MSG_RESULT([yes (large file disabled)])
         else
           AC_MSG_RESULT([yes (large file enabled)])
@@ -1455,7 +1455,7 @@ dnl Save build info for test runner to pick up and log
 
 AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   curl_pflags=""
-  if test "$curl_cv_apple" = 'yes'; then
+  if test "$curl_cv_apple" = "yes"; then
     curl_pflags="${curl_pflags} APPLE"
   fi
   case $host in
@@ -1475,23 +1475,23 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
       fi
       ;;
   esac
-  if test "$curl_cv_native_windows" = 'yes'; then
+  if test "$curl_cv_native_windows" = "yes"; then
     curl_pflags="${curl_pflags} WIN32"
   fi
-  if test "$curl_cv_wince" = 'yes'; then
+  if test "$curl_cv_wince" = "yes"; then
     curl_pflags="${curl_pflags} WINCE"
   fi
-  if test "$curl_cv_winuwp" = 'yes'; then
+  if test "$curl_cv_winuwp" = "yes"; then
     curl_pflags="${curl_pflags} UWP"
   fi
-  if test "$curl_cv_cygwin" = 'yes'; then
+  if test "$curl_cv_cygwin" = "yes"; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi
   case $host_os in
     msdos*) curl_pflags="${curl_pflags} DOS";;
     amiga*) curl_pflags="${curl_pflags} AMIGA";;
   esac
-  if test "$compiler_id" = 'GNU_C'; then
+  if test "$compiler_id" = "GNU_C"; then
     curl_pflags="${curl_pflags} GCC"
   fi
   if test "$compiler_id" = "APPLECLANG"; then
@@ -1502,7 +1502,7 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   case $host_os in
     mingw*) curl_pflags="${curl_pflags} MINGW";;
   esac
-  if test "$cross_compiling" = 'yes'; then
+  if test "$cross_compiling" = "yes"; then
     curl_pflags="${curl_pflags} CROSS"
   fi
   squeeze curl_pflags

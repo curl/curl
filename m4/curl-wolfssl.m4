@@ -36,14 +36,14 @@ case "$OPT_WOLFSSL" in
     ;;
 esac
 
-if test "$OPT_WOLFSSL" != no; then
+if test "$OPT_WOLFSSL" != "no"; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
   _ldflagspc=$LDFLAGSPC
 
   ssl_msg=
 
-  if test "$OPT_WOLFSSL" != no; then
+  if test "$OPT_WOLFSSL" != "no"; then
 
     if test "$OPT_WOLFSSL" = "yes"; then
       OPT_WOLFSSL=""
@@ -76,7 +76,7 @@ if test "$OPT_WOLFSSL" != no; then
       fi
     fi
 
-    if test "$curl_cv_apple" = 'yes'; then
+    if test "$curl_cv_apple" = "yes"; then
       addlib="$addlib -framework Security -framework CoreFoundation"
     else
       addlib="$addlib -lm"
@@ -150,12 +150,12 @@ if test "$OPT_WOLFSSL" != no; then
 
       dnl if this symbol is present, we want the include path to include the
       dnl OpenSSL API root as well
-      if test "$ac_cv_func_wolfSSL_DES_ecb_encrypt" = 'yes'; then
+      if test "$ac_cv_func_wolfSSL_DES_ecb_encrypt" = "yes"; then
         HAVE_WOLFSSL_DES_ECB_ENCRYPT=1
       fi
 
       dnl if this symbol is present, we can make use of BIO filter chains
-      if test "$ac_cv_func_wolfSSL_BIO_new" = 'yes'; then
+      if test "$ac_cv_func_wolfSSL_BIO_new" = "yes"; then
         HAVE_WOLFSSL_BIO_NEW=1
       fi
 
