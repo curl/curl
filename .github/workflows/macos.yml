@@ -555,7 +555,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@18, clang]
+        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@18, llvm@20, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-13: 14.1, 14.2, 14.3.1, 15.0.1, 15.1,*15.2
@@ -596,8 +596,13 @@ jobs:
           - { image: macos-15, xcode: '15.3'   }
           - { image: macos-15, xcode: '15.4'   }
           - { image: macos-13, compiler: 'llvm@18' }
+          - { image: macos-13, compiler: 'llvm@20' }
           - { image: macos-14, compiler: 'llvm@18' }
+          - { image: macos-14, compiler: 'llvm@20' }
           - { image: macos-15, compiler: 'llvm@15' }
+          - { image: macos-15, compiler: 'llvm@20' }
+          - { image: macos-26, compiler: 'llvm@15' }
+          - { image: macos-26, compiler: 'llvm@18' }
           # Reduce build combinations, by dropping less interesting ones
           - { compiler: gcc-13, build: cmake }
           - { compiler: gcc-14, build: autotools }
