@@ -57,7 +57,7 @@ internally used header is removed. To forcibly add a header without content
 
 There are exceptions for suppressing of headers. The `Connection: ` header
 in HTTP/1.1 cannot be overridden. You can provide values for it, but should a
-request require specific ones, they will always be added to your own.
+request require specific ones, they are always added to your own.
 
 The headers included in the linked list **must not** be CRLF-terminated, since
 libcurl adds CRLF after each header item itself. Failure to comply with this
