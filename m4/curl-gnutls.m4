@@ -27,10 +27,10 @@ dnl check for GnuTLS
 dnl ----------------------------------------------------
 
 AC_DEFUN([CURL_WITH_GNUTLS], [
-if test "$OPT_GNUTLS" != no; then
+if test "$OPT_GNUTLS" != "no"; then
   ssl_msg=
 
-  if test "$OPT_GNUTLS" != no; then
+  if test "$OPT_GNUTLS" != "no"; then
 
     addld=""
     addlib=""

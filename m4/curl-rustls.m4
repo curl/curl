@@ -27,7 +27,7 @@ dnl ----------------------------------------------------
 dnl check for Rustls
 dnl ----------------------------------------------------
 
-if test "$OPT_RUSTLS" != no; then
+if test "$OPT_RUSTLS" != "no"; then
   ssl_msg=
 
   dnl backup the pre-ssl variables
@@ -83,7 +83,7 @@ if test "$OPT_RUSTLS" != no; then
           CPPFLAGS="$CPPFLAGS $addcflags"
         fi
 
-        if test "$curl_cv_apple" = 'yes'; then
+        if test "$curl_cv_apple" = "yes"; then
           RUSTLS_LDFLAGS="-framework Security -framework Foundation"
         else
           RUSTLS_LDFLAGS="-lpthread -ldl -lm"
@@ -185,7 +185,7 @@ if test "$OPT_RUSTLS" != no; then
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 
-  if test "$OPT_RUSTLS" != no &&
+  if test "$OPT_RUSTLS" != "no" &&
     test "$RUSTLS_ENABLED" != "1"; then
     AC_MSG_NOTICE([OPT_RUSTLS: $OPT_RUSTLS])
     AC_MSG_NOTICE([RUSTLS_ENABLED: $RUSTLS_ENABLED])
