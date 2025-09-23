@@ -567,7 +567,7 @@ jobs:
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
         # TODO when dropping macos-13: replace '$(brew --prefix ...' with /opt/homebrew
-        image: [macos-13, macos-14, macos-15]
+        image: [macos-13, macos-14, macos-15, macos-26]
         # Can skip these to reduce jobs:
         #   15.1 has the same default macOS SDK as 15.2 and identical test results.
         #   14.1, 15.4 not revealing new fallouts.
