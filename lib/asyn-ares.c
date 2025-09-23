@@ -748,7 +748,7 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 
 #if ARES_VERSION >= 0x011800  /* >= v1.24.0 */
   if(CURL_TRC_DNS_is_verbose(data)) {
-    const char *csv = ares_get_servers_csv(ares->channel);
+    char *csv = ares_get_servers_csv(ares->channel);
     CURL_TRC_DNS(data, "asyn-ares: servers=%s", csv);
     ares_free_string(csv);
   }
