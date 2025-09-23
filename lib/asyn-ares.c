@@ -747,8 +747,11 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
   ares->result = CURLE_OK;
 
 #if ARES_VERSION >= 0x011800  /* >= v1.24.0 */
-  CURL_TRC_DNS(data, "asyn-ares: servers=%s",
-               ares_get_servers_csv(ares->channel));
+  if(CURL_TRC_DNS_is_verbose(data)) {
+    const char *csv = ares_get_servers_csv(ares->channel);
+    CURL_TRC_DNS(data, "asyn-ares: servers=%s", csv);
+    ares_free_string(csv);
+  }
 #endif
 
 #ifdef HAVE_CARES_GETADDRINFO
