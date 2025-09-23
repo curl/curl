@@ -114,7 +114,7 @@ if test "$OPT_WOLFSSL" != "no"; then
         WOLFSSL_ENABLED=1
         USE_WOLFSSL="yes"
         ssl_msg="wolfSSL"
-        test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test "wolfssl" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
       ],
       [
         AC_MSG_RESULT(no)

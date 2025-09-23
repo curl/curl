@@ -34,7 +34,7 @@ if test "$OPT_SCHANNEL" != "no"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
     ssl_msg="Schannel"
-    test schannel != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+    test "schannel" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SCHANNEL_ENABLED=1
     # --with-schannel implies --enable-sspi
     AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])

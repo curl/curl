@@ -106,7 +106,7 @@ if test "$OPT_GNUTLS" != "no"; then
         USE_GNUTLS="yes"
         ssl_msg="GnuTLS"
         QUIC_ENABLED=yes
-        test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test "gnutls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ],
         [
           LIBS="$CLEANLIBS"

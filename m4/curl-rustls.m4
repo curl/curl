@@ -136,7 +136,7 @@ if test "$OPT_RUSTLS" != "no"; then
       AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
       USE_RUSTLS="yes"
       RUSTLS_ENABLED=1
-      test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+      test "rustls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     else
       AC_MSG_ERROR([pkg-config: Could not find Rustls])
     fi
@@ -177,7 +177,7 @@ if test "$OPT_RUSTLS" != "no"; then
         RUSTLS_ENABLED=1
         USE_RUSTLS="yes"
         ssl_msg="Rustls"
-        test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test "rustls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ],
         AC_MSG_ERROR([--with-rustls was specified but could not find compatible Rustls.]),
         $RUSTLS_LDFLAGS)
