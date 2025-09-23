@@ -241,6 +241,20 @@ jobs:
               --enable-ech --with-gssapi --enable-ssls-export
               --disable-debug --disable-unity
 
+          - name: 'scan-build H3 c-ares'
+            install_packages: clang-tools clang libidn2-dev libnghttp2-dev
+            install_steps: skipall awslc
+            install_steps_brew: libngtcp2 libnghttp3 c-ares
+            CC: clang
+            configure-prefix: scan-build
+            make-prefix: scan-build --status-bugs
+            PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
+            configure: >-
+              --with-openssl=/home/runner/awslc --enable-ech
+              --with-libidn2 --enable-httpsrr --enable-ares
+              --disable-debug --disable-unity
+
           - name: 'address-sanitizer'
             install_packages: clang libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
