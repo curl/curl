@@ -242,12 +242,12 @@ jobs:
               --disable-debug --disable-unity
 
           - name: 'address-sanitizer'
-            install_packages: libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
+            install_packages: clang libssl-dev libubsan1 libasan8 libtsan2
             install_steps: pytest randcurl
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer
-            LIBS: -ldl -lubsan
-            configure: CC=clang --with-openssl --enable-debug
+            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
+            CC: clang
+            generate: -DENABLE_DEBUG=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang libtsan2
