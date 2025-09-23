@@ -239,7 +239,9 @@ int main(void)
 
   /* You could enable global tracing for extra verbosity when verbosity is
      enabled for a transfer. */
-  /* curl_global_trace("all"); */
+#if 0
+  curl_global_trace("all");
+#endif
 
   for(i = 0; i < sizeof(transfer)/sizeof(transfer[0]); ++i) {
     int failed = 0;
