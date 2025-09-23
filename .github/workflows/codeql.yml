@@ -112,6 +112,7 @@ jobs:
             cmake --build _bld1 --target curlinfo
             cmake --build _bld1 --target servers
             cmake --build _bld1 --target tunits
+            cmake --build _bld1 --target units
             cmake --build _bld1 --target curl-examples-build
 
             # HTTP/3
