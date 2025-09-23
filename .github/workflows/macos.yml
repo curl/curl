@@ -596,6 +596,18 @@ jobs:
           - { image: macos-15, xcode: '15.2'   }
           - { image: macos-15, xcode: '15.3'   }
           - { image: macos-15, xcode: '15.4'   }
+          - { image: macos-26, xcode: '14.1'   }
+          - { image: macos-26, xcode: '14.2'   }
+          - { image: macos-26, xcode: '14.3.1' }
+          - { image: macos-26, xcode: '15.0.1' }
+          - { image: macos-26, xcode: '15.1'   }
+          - { image: macos-26, xcode: '15.2'   }
+          - { image: macos-26, xcode: '15.3'   }
+          - { image: macos-26, xcode: '15.4'   }
+          - { image: macos-26, xcode: '16.0'   }
+          - { image: macos-26, xcode: '16.1'   }
+          - { image: macos-26, xcode: '16.2'   }
+          - { image: macos-26, xcode: '16.3'   }
           - { image: macos-13, compiler: 'llvm@18' }
           - { image: macos-13, compiler: 'llvm@20' }
           - { image: macos-14, compiler: 'llvm@18' }
