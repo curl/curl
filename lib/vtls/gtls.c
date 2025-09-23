@@ -1559,15 +1559,13 @@ static CURLcode gtls_chain_get_der(struct Curl_cfilter *cf,
   *pder_len = (size_t)chain->certs[i].size;
   return CURLE_OK;
 }
-#endif /* USE_APPLE_SECTRUST */
 
-static CURLcode glts_verify_native(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct ssl_peer *peer,
-                                   struct gtls_cert_chain *chain,
-                                   bool *pverified)
+static CURLcode glts_apple_verify(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct ssl_peer *peer,
+                                  struct gtls_cert_chain *chain,
+                                  bool *pverified)
 {
-#ifdef USE_APPLE_SECTRUST
   CURLcode result;
 
   result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
@@ -1577,17 +1575,8 @@ static CURLcode glts_verify_native(struct Curl_cfilter *cf,
   if(*pverified)
     infof(data, "  SSL certificate verified by Apple SecTrust.");
   return result;
-#else
-  (void)cf;
-  (void)data;
-  (void)chain;
-  (void)peer;
-  /* we imported the native store into the GnuTLS credentials
-   * and they are part of the verify check below. */
-  *pverified = FALSE;
-  return CURLE_OK;
-#endif
 }
+#endif /* USE_APPLE_SECTRUST */
 
 CURLcode
 Curl_gtls_verifyserver(struct Curl_cfilter *cf,
@@ -1677,7 +1666,7 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 #ifdef USE_APPLE_SECTRUST
     if(!verified && ssl_config->native_ca_store &&
        (verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)) {
-      result = glts_verify_native(cf, data, peer, &chain, &verified);
+      result = glts_apple_verify(cf, data, peer, &chain, &verified);
       if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
         goto out; /* unexpected error */
       if(verified) {
