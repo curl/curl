@@ -556,6 +556,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Sources:
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-arm64-Readme.md
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
+        # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
         compiler: [gcc-12, gcc-13, gcc-14, gcc-15, llvm@15, llvm@18, llvm@20, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
@@ -584,11 +589,19 @@ jobs:
           - { image: macos-13, xcode: '15.4'   }
           - { image: macos-13, xcode: '16.0'   }
           - { image: macos-13, xcode: '16.1'   }
+          - { image: macos-13, xcode: '16.2'   }
+          - { image: macos-13, xcode: '16.3'   }
+          - { image: macos-13, xcode: '16.4'   }
+          - { image: macos-13, xcode: '26.0'   }
           - { image: macos-14, xcode: '14.1'   }
           - { image: macos-14, xcode: '14.2'   }
           - { image: macos-14, xcode: '14.3.1' }
           - { image: macos-14, xcode: '16.0'   }
           - { image: macos-14, xcode: '16.1'   }
+          - { image: macos-14, xcode: '16.2'   }
+          - { image: macos-14, xcode: '16.3'   }
+          - { image: macos-14, xcode: '16.4'   }
+          - { image: macos-14, xcode: '26.0'   }
           - { image: macos-15, xcode: '14.1'   }
           - { image: macos-15, xcode: '14.2'   }
           - { image: macos-15, xcode: '14.3.1' }
