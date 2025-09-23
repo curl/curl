@@ -163,3 +163,44 @@ void headerJSON(FILE *stream, struct per_transfer *per)
   }
   fputs("\n}", stream);
 }
+
+void ourWriteOutStructuredJSON(FILE *stream,
+                               const struct writeoutvar variables[],
+                               size_t num_vars, struct per_transfer *per,
+                               CURLcode per_result)
+{
+  size_t i;
+  bool first = true;
+
+  fputs("{\n", stream);
+
+  for(i = 0; i < num_vars; i++) {
+    bool wrote;
+    /* Ignore special-purpose variables */
+    if(variables[i].id == VAR_JSON || variables[i].id == VAR_ONERROR ||
+       variables[i].id == VAR_STDOUT || variables[i].id == VAR_STDERR) {
+      continue;
+    }
+
+    if(!first) {
+      fputs(",\n", stream);
+    }
+
+    fprintf(stream, "  "); /* indentation */
+    if(variables[i].writefunc) {
+      wrote = variables[i].writefunc(stream, &variables[i], per,
+                                     per_result, true);
+      if(wrote)
+        first = false;
+    }
+  }
+
+  /* Add curl_version, like ourWriteOutJSON does */
+  if(!first) {
+    fputs(",\n", stream);
+  }
+  fprintf(stream, "  \"curl_version\": ");
+  jsonWriteString(stream, curl_version(), FALSE);
+
+  fputs("\n}\n", stream);
+}

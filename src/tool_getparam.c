@@ -374,6 +374,7 @@ static const struct LongShort aliases[]= {
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
 #endif
   {"write-out",                  ARG_STRG, 'w', C_WRITE_OUT},
+  {"write-out-format",           ARG_STRG, ' ', C_WRITEOUT_FORMAT},
   {"xattr",                      ARG_BOOL, ' ', C_XATTR},
 };
 
@@ -2755,6 +2756,15 @@ static ParameterError opt_string(struct OperationConfig *config,
     break;
   case C_WRITE_OUT: /* --write-out */
     err = parse_writeout(config, nextarg);
+    break;
+  case C_WRITEOUT_FORMAT: /* --write-out-format */
+    err = getstr(&config->writeout_format, nextarg, DENY_BLANK);
+    if(!err && config->writeout_format &&
+       strcmp(config->writeout_format, "json")) {
+      errorf("Format '%s' not supported. Currently, only 'json' is valid.",
+             nextarg);
+      err = PARAM_BAD_USE;
+    }
     break;
   case C_PREPROXY: /* --preproxy */
     err = getstr(&config->preproxy, nextarg, DENY_BLANK);

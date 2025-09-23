@@ -161,6 +161,7 @@ struct OperationConfig {
   char *krblevel;
   char *request_target;
   char *writeout;           /* %-styled format string to output */
+  char *writeout_format;    /* format for stdout output */
   struct curl_slist *quote;
   struct curl_slist *postquote;
   struct curl_slist *prequote;

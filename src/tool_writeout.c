@@ -730,6 +730,13 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   bool fclose_stream = FALSE;
   struct dynbuf name;
 
+  if(config->writeout_format && !strcmp(config->writeout_format, "json")) {
+    ourWriteOutStructuredJSON(stdout, variables,
+                              CURL_ARRAYSIZE(variables),
+                              per, per_result);
+    return;
+  }
+
   if(!writeinfo)
     return;
 

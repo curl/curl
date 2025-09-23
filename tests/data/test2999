@@ -1,0 +1,18 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+write-out
+json
+</keywords>
+</info>
+<name>Test --write-out-format json</name>
+<command>--write-out-format json --silent %URL</command>
+<protocol>http</protocol>
+<verify>
+<json>
+<file name="stdout"/>
+<jq>.response_code == 200 and .url_effective == "%URL/" and .size_download > 0</jq>
+</json>
+</verify>
+</testcase>

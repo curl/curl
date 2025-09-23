@@ -309,6 +309,7 @@ typedef enum {
   C_VLAN_PRIORITY,
   C_WDEBUG,
   C_WRITE_OUT,
+  C_WRITEOUT_FORMAT,
   C_XATTR
 } cmdline_t;
 
