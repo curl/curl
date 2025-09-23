@@ -545,7 +545,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
       const unsigned char tmp = '\0';
       /* special case of a 0 length frame, need to write once */
       result = write_cb(&tmp, 0, dec->frame_age, dec->frame_flags,
-                          0, 0, write_ctx, &nwritten);
+                        0, 0, write_ctx, &nwritten);
       if(result)
         return result;
       dec->state = WS_DEC_INIT;
@@ -680,8 +680,8 @@ static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
                 payload_len, buflen);
 
     result = Curl_cwriter_write(data, ctx->next_writer,
-                              (ctx->cw_type | CLIENTWRITE_0LEN),
-                              (const char *)buf, buflen);
+                                (ctx->cw_type | CLIENTWRITE_0LEN),
+                                (const char *)buf, buflen);
     if(result)
       return result;
   }
