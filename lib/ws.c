@@ -1579,9 +1579,9 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
   *metap = &ws->recvframe;
   *nread = ws->recvframe.len;
   CURL_TRC_WS(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
-               FMT_OFF_T ", %" FMT_OFF_T " left)",
-               buflen, *nread, ws->recvframe.offset,
-               ws->recvframe.bytesleft);
+              FMT_OFF_T ", %" FMT_OFF_T " left)",
+              buflen, *nread, ws->recvframe.offset,
+              ws->recvframe.bytesleft);
   /* all's well, try to send any pending control. we do not know
    * when the application will call `curl_ws_send()` again. */
   if(!data->set.ws_raw_mode && ws->pending.type) {
