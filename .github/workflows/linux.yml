@@ -248,7 +248,7 @@ jobs:
             CC: clang
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
-            LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib
+            LDFLAGS: -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             configure: >-
               --with-openssl=/home/linuxbrew/.linuxbrew/opt/openssl --with-ngtcp2 --with-nghttp3=
