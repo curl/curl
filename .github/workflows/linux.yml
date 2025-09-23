@@ -249,7 +249,6 @@ jobs:
             configure-prefix: scan-build
             make-prefix: scan-build --status-bugs
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
-            LDFLAGS: -Wl,-rpath,/home/runner/awslc/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             configure: >-
               --with-openssl=/home/runner/awslc --enable-ech
               --with-libidn2 --enable-httpsrr --enable-ares
@@ -265,13 +264,13 @@ jobs:
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang libubsan1 libasan8 libtsan2
-            install_steps: pytest awslc
+            install_steps: pytest openssl
             install_steps_brew: libngtcp2 libnghttp3 c-ares
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
-            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/runner/awslc/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libngtcp2/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
+            LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             CC: clang
-            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON
+            generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/runner/openssl -DUSE_NGTCP2=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON
 
           - name: 'thread-sanitizer'
             install_packages: clang libtsan2
