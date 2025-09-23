@@ -4661,7 +4661,7 @@ AS_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
     want_tls_srp=yes
 )
 
-if test "$want_tls_srp" = "yes" && ( test "$HAVE_GNUTLS_SRP" = "1" || test "$HAVE_OPENSSL_SRP" = "1"); then
+if test "$want_tls_srp" = "yes" && (test "$HAVE_GNUTLS_SRP" = "1" || test "$HAVE_OPENSSL_SRP" = "1"); then
   AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
   USE_TLS_SRP=1
   curl_tls_srp_msg="enabled"
@@ -5446,7 +5446,7 @@ if test "$CURL_DISABLE_LDAP" != "1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
   if test "$CURL_DISABLE_LDAPS" != "1"; then
     if (test "$USE_OPENLDAP" = "1" && test "$SSL_ENABLED" = "1") ||
-      (test "$USE_OPENLDAP" != "1" && test "$HAVE_LDAP_SSL" = "1"); then
+       (test "$USE_OPENLDAP" != "1" && test "$HAVE_LDAP_SSL" = "1"); then
       SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
     fi
   fi
