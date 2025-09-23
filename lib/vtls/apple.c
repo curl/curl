@@ -92,7 +92,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 size_t num_certs,
                                 Curl_vtls_get_cert_der *der_cb,
                                 void *cb_user_data,
-                                const void *ocsp_buf,
+                                const unsigned char *ocsp_buf,
                                 size_t ocsp_len)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);

@@ -1654,56 +1654,59 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   if(config->verifypeer) {
     bool verified = FALSE;
+    unsigned int verify_status = 0;
+    /* This function will try to verify the peer's certificate and return
+       its status (trusted, invalid etc.). The value of status should be
+       one or more of the gnutls_certificate_status_t enumerated elements
+       bitwise or'd. To avoid denial of service attacks some default
+       upper limits regarding the certificate key size and chain size
+       are set. To override them use
+       gnutls_certificate_set_verify_limits(). */
+    rc = gnutls_certificate_verify_peers2(session, &verify_status);
+    if(rc < 0) {
+      failf(data, "server cert verify failed: %d", rc);
+      *certverifyresult = rc;
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    *certverifyresult = verify_status;
+    verified = !(verify_status & GNUTLS_CERT_INVALID);
+    if(verified)
+      infof(data, "  SSL certificate verified by GnuTLS");
 
-    if(ssl_config->native_ca_store) {
+#ifdef USE_APPLE_SECTRUST
+    if(!verified && ssl_config->native_ca_store &&
+       (verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)) {
       result = glts_verify_native(cf, data, peer, &chain, &verified);
       if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
         goto out; /* unexpected error */
-      if(!verified)
-        *certverifyresult = GNUTLS_CERT_INVALID;
+      if(verified) {
+        infof(data, "SSL certificate verified via Apple SecTrust.");
+        *certverifyresult = 0;
+      }
     }
+#endif
 
     if(!verified) {
-      unsigned int verify_status = 0;
-      /* This function will try to verify the peer's certificate and return
-         its status (trusted, invalid etc.). The value of status should be
-         one or more of the gnutls_certificate_status_t enumerated elements
-         bitwise or'd. To avoid denial of service attacks some default
-         upper limits regarding the certificate key size and chain size
-         are set. To override them use
-         gnutls_certificate_set_verify_limits(). */
-      rc = gnutls_certificate_verify_peers2(session, &verify_status);
-      if(rc < 0) {
-        failf(data, "server cert verify failed: %d", rc);
-        *certverifyresult = rc;
-        result = CURLE_SSL_CONNECT_ERROR;
-        goto out;
-      }
-      *certverifyresult = verify_status;
-
       /* verify_status is a bitmask of gnutls_certificate_status bits */
-      if(verify_status & GNUTLS_CERT_INVALID) {
-        const char *cause = "certificate error, no details available";
-        if(verify_status & GNUTLS_CERT_EXPIRED)
-          cause = "certificate has expired";
-        else if(verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)
-          cause = "certificate signer not trusted";
-        else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
-          cause = "certificate uses insecure algorithm";
-        else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
-          cause = "attached OCSP status response is invalid";
-        failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
-              "CRLfile: %s)", cause,
-              config->CAfile ? config->CAfile : "none",
-              ssl_config->primary.CRLfile ?
-              ssl_config->primary.CRLfile : "none");
-        result = CURLE_PEER_FAILED_VERIFICATION;
-        goto out;
-      }
-      else
-        infof(data, "  SSL certificate verified by GnuTLS");
+      const char *cause = "certificate error, no details available";
+      if(verify_status & GNUTLS_CERT_EXPIRED)
+        cause = "certificate has expired";
+      else if(verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)
+        cause = "certificate signer not trusted";
+      else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
+        cause = "certificate uses insecure algorithm";
+      else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
+        cause = "attached OCSP status response is invalid";
+      failf(data, "SSL certificate verification failed: %s. (CAfile: %s "
+            "CRLfile: %s)", cause,
+            config->CAfile ? config->CAfile : "none",
+            ssl_config->primary.CRLfile ?
+            ssl_config->primary.CRLfile : "none");
+      result = CURLE_PEER_FAILED_VERIFICATION;
+      goto out;
     }
-}
+  }
   else
     infof(data, "  SSL certificate verification SKIPPED");
 

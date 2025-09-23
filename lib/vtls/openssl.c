@@ -5034,8 +5034,9 @@ out:
 }
 #endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
 
+
 #ifdef USE_APPLE_SECTRUST
-struct ossl_cert_chain {
+struct ossl_certs_ctx {
   STACK_OF(X509) *sk;
   size_t num_certs;
 };
@@ -5047,7 +5048,7 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
                                    unsigned char **pder,
                                    size_t *pder_len)
 {
-  struct ossl_cert_chain *chain = user_data;
+  struct ossl_certs_ctx *chain = user_data;
   X509 *cert;
   int der_len;
 
@@ -5067,26 +5068,21 @@ static CURLcode ossl_chain_get_der(struct Curl_cfilter *cf,
   *pder_len = (size_t)der_len;
   return CURLE_OK;
 }
-#endif /* USE_APPLE_SECTRUST */
 
-static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   struct ossl_ctx *octx,
-                                   struct ssl_peer *peer,
-                                   bool *pverified)
+static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  struct ossl_ctx *octx,
+                                  struct ssl_peer *peer,
+                                  bool *pverified)
 {
-#ifdef USE_WIN32_CRYPTO
-  (void)cf;
-  (void)data;
-  (void)octx;
-  (void)peer;
-  /* For Windows, native CA loads certificates into the OpenSSL x509 store,
-   * so the "native" verification happens via OpenSSL already. */
-  *pverified = FALSE;
-  return CURLE_OK;
-#elif defined(USE_APPLE_SECTRUST)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ossl_cert_chain chain;
+  struct ossl_certs_ctx chain;
+  long ocsp_len = 0;
+#ifdef HAVE_BORINGSSL_LIKE
+  const uint8_t *ocsp_data = NULL;
+#else
+  unsigned char *ocsp_data = NULL;
+#endif
   CURLcode result;
 
   memset(&chain, 0, sizeof(chain));
@@ -5099,22 +5095,16 @@ static CURLcode ossl_verify_native(struct Curl_cfilter *cf,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
 
+  if(conn_config->verifystatus && !octx->reused_session)
+    ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
+
   result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
                                   ossl_chain_get_der, &chain,
-                                  NULL, 0);
+                                  ocsp_data, ocsp_len);
   *pverified = !result;
-  if(*pverified)
-    infof(data, "SSL certificate verified by Apple SecTrust.");
   return result;
-#else
-  (void)cf;
-  (void)data;
-  (void)octx;
-  (void)peer;
-  *pverified = FALSE;
-  return CURLE_OK;
-#endif
 }
+#endif /* USE_APPLE_SECTRUST */
 
 CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
@@ -5125,16 +5115,12 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   CURLcode result = CURLE_OK;
-  long lerr;
+  long ossl_verify;
   bool strict = (conn_config->verifypeer || conn_config->verifyhost);
   X509 *server_cert;
   bool verified = FALSE;
 
   DEBUGASSERT(octx);
-  lerr = SSL_get_verify_result(octx->ssl);
-  CURL_TRC_CF(data, cf, "check peer cert, openssl verify %sOK (%ld)",
-              (lerr == X509_V_OK) ? "" : "NOT ", lerr);
-
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
     (void)ossl_certchain(data, octx->ssl);
@@ -5156,50 +5142,45 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   infof_certstack(data, octx->ssl);
 #endif
 
-  /* if we verify and use native and openssl has *NOT* already verified */
-  if(ssl_config->native_ca_store && conn_config->verifypeer &&
-    (lerr != X509_V_OK)) {
-    result = ossl_verify_native(cf, data, octx, peer, &verified);
-    if(result &&
-       (octx->store_is_empty || (result != CURLE_PEER_FAILED_VERIFICATION)))
-      goto out; /* unexpected error */
+  if(conn_config->verifyhost) {
+    result = ossl_verifyhost(data, conn, peer, server_cert);
+    if(result)
+      goto out;
   }
 
-  if(!verified) {
-    if(conn_config->verifyhost)
-      result = ossl_verifyhost(data, conn, peer, server_cert);
-    if(!result) {
-      lerr = SSL_get_verify_result(octx->ssl);
-      ssl_config->certverifyresult = lerr;
-      if(lerr == X509_V_OK) {
-        infof(data, "SSL certificate verified by OpenSSL.");
-        verified = TRUE;
-      }
-      else {
-        /* We probably never reach this, because SSL_connect() will fail
-           and we return earlier if verifypeer is set? */
-        failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
-              X509_verify_cert_error_string(lerr), lerr);
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
+  ossl_verify = SSL_get_verify_result(octx->ssl);
+  ssl_config->certverifyresult = ossl_verify;
+
+  verified = (ossl_verify == X509_V_OK);
+  if(verified)
+    infof(data, "SSL certificate verified via OpenSSL.");
+
+#ifdef USE_APPLE_SECTRUST
+  if(!verified &&
+     conn_config->verifypeer && ssl_config->native_ca_store &&
+     (ossl_verify == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY)) {
+    /* we verify using Apple SecTrust *unless* OpenSSL already verified.
+     * This may happen if the application intercepted the OpenSSL callback
+     * and installed its own. */
+    result = ossl_apple_verify(cf, data, octx, peer, &verified);
+    if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
+      goto out; /* unexpected error */
+    if(verified) {
+      infof(data, "SSL certificate verified via Apple SecTrust.");
+      ssl_config->certverifyresult = X509_V_OK;
     }
   }
+#endif
 
-  if(result == CURLE_PEER_FAILED_VERIFICATION) {
+  if(!verified) {
+    /* no trust established, report the OpenSSL status */
+    failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
+          X509_verify_cert_error_string(ossl_verify), ossl_verify);
+    result = CURLE_PEER_FAILED_VERIFICATION;
     if(conn_config->verifypeer)
       goto out;
     infof(data, " SSL certificate verification failed, continuing anyway!");
   }
-  else if(result)
-    goto out;
-
-  if(!verified && conn_config->verifypeer) {
-    /* should not happen */
-    DEBUGASSERT(0);
-    result = CURLE_PEER_FAILED_VERIFICATION;
-    goto out;
-  }
-
 
 #if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus && !octx->reused_session) {
