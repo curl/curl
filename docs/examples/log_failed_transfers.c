@@ -134,11 +134,7 @@ static int mem_add(struct mem *mem, const char *str)
   return mem_addn(mem, str, strlen(str));
 }
 
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
-#endif
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 __attribute__ ((format (printf, 2, 3)))
@@ -182,11 +178,8 @@ static int mem_addf(struct mem *mem, const char *format, ...)
     mem->buf[mem->len] = '\0';
   return -1;
 }
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
-#endif
-#ifdef __clang__
-#pragma clang diagnostic pop
 #endif
 
 static int mydebug(CURL *handle, curl_infotype type,
