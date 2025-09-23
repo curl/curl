@@ -104,6 +104,7 @@ jobs:
           xcodebuild -sdk -version | grep '^Path:' || true
           xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || true
           xcrun --sdk iphoneos --show-sdk-version || true
+          echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
@@ -637,6 +638,7 @@ jobs:
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           xcrun --sdk macosx --show-sdk-version || true
           ls -l /Library/Developer/CommandLineTools/SDKs || true
+          echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
