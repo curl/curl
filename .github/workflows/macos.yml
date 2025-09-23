@@ -555,7 +555,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@18, llvm@20, clang]
+        compiler: [gcc-12, gcc-13, gcc-14, gcc-15, llvm@15, llvm@18, llvm@20, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-13: 14.1, 14.2, 14.3.1, 15.0.1, 15.1,*15.2
