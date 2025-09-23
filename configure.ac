@@ -2059,13 +2059,13 @@ if test -n "$ssl_backends"; then
   curl_ssl_msg="enabled ($ssl_backends)"
 fi
 
-if test no = "$VALID_DEFAULT_SSL_BACKEND"; then
+if test "$VALID_DEFAULT_SSL_BACKEND" = "no"; then
   if test -n "$SSL_ENABLED"; then
     AC_MSG_ERROR([Default SSL backend $DEFAULT_SSL_BACKEND not enabled!])
   else
     AC_MSG_ERROR([Default SSL backend requires SSL!])
   fi
-elif test yes = "$VALID_DEFAULT_SSL_BACKEND"; then
+elif test "$VALID_DEFAULT_SSL_BACKEND" = "yes"; then
   AC_DEFINE_UNQUOTED([CURL_DEFAULT_SSL_BACKEND], ["$DEFAULT_SSL_BACKEND"], [Default SSL backend])
 fi
 
