@@ -5256,11 +5256,11 @@ if test "$hsts" = "yes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HSTS"
 fi
 
-if test "$CURL_DISABLE_NEGOTIATE_AUTH" != "1" && (test "$HAVE_GSSAPI" = "1" || test "$USE_WINDOWS_SSPI" = "1" ); then
+if test "$CURL_DISABLE_NEGOTIATE_AUTH" != "1" && (test "$HAVE_GSSAPI" = "1" || test "$USE_WINDOWS_SSPI" = "1"); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
 fi
 
-if test "$CURL_DISABLE_KERBEROS_AUTH" != "1" && (test "$HAVE_GSSAPI" = "1" || test "$USE_WINDOWS_SSPI" = "1" ); then
+if test "$CURL_DISABLE_KERBEROS_AUTH" != "1" && (test "$HAVE_GSSAPI" = "1" || test "$USE_WINDOWS_SSPI" = "1"); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Kerberos"
 fi
 
