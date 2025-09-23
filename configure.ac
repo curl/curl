@@ -208,7 +208,7 @@ OPT_SCHANNEL=no
 AC_ARG_WITH(schannel,dnl
 AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
   OPT_SCHANNEL=$withval
-  TLSCHOICE="schannel")
+  TLSCHOICE="Schannel")
 
 OPT_AMISSL=no
 AC_ARG_WITH(amissl,dnl
