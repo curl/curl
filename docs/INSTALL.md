@@ -505,8 +505,6 @@ of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
 Linux.
 
 ```sh
-#! /bin/sh
-
 export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
 export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
 export AR=ppc_405-ar
