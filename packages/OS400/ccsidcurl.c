@@ -1246,6 +1246,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
 
       data->set.postfieldsize = pfsize;         /* Replace data size. */
       s = cp;
+      cp = NULL;
     }
 
     result = curl_easy_setopt(easy, CURLOPT_POSTFIELDS, s);
