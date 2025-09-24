@@ -321,8 +321,9 @@ jobs:
             libpsl-dev zlib1g-dev libbrotli-dev libzstd-dev \
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
-          [ -n "${INSTALL_PACKAGES_BREW}" ] && /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
-          python3 -m venv ~/venv
+          if [ -n "${INSTALL_PACKAGES_BREW}" ]; then
+            /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
+          fi
 
       - name: 'install prereqs'
         if: ${{ contains(matrix.build.name, 'i686') }}
@@ -335,7 +336,6 @@ jobs:
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${MATRIX_INSTALL_PACKAGES}
-          python3 -m venv ~/venv
 
       - name: 'install dependencies'
         if: ${{ startsWith(matrix.build.container, 'alpine') }}
@@ -657,8 +657,8 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && matrix.build.container == null }}
         run: |
-          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
-          python3 -m pip install -r tests/requirements.txt
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
@@ -675,7 +675,7 @@ jobs:
               fi
             fi
           fi
-          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
+          [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
             locale || true
             export LC_ALL=C
@@ -691,8 +691,8 @@ jobs:
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
         run: |
-          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
-          python3 -m pip install -r tests/http/requirements.txt
+          [ -d ~/venv ] || python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
@@ -700,7 +700,7 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
+          [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
