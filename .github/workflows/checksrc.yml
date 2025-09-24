@@ -60,7 +60,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install python3-pip python3-venv
           python3 -m venv ~/venv
-          ~/venv/bin/pip install -r .github/scripts/requirements.txt
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements.txt
 
       - name: 'codespell'
         run: |
