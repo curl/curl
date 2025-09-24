@@ -60,11 +60,9 @@ problems may have been fixed or changed somewhat since this was written.
 
  9. SFTP and SCP
  9.1 SFTP does not do CURLOPT_POSTQUOTE correct
- 9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
  9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
- 9.6 wolfssh: all tests fail
 
  10. Connection
  10.1 --interface with link-scoped IPv6 address
@@ -400,14 +398,6 @@ problems may have been fixed or changed somewhat since this was written.
  report but it cannot be accepted as-is. See
  https://curl.se/bug/view.cgi?id=748
 
-9.2 wolfssh: publickey auth does not work
-
- When building curl to use the wolfSSH backend for SFTP, the publickey
- authentication does not work. This is simply functionality not written for curl
- yet, the necessary API for make this work is provided by wolfSSH.
-
- See https://github.com/curl/curl/issues/4820
-
 9.3 Remote recursive folder creation with SFTP
 
  On this servers, the curl fails to create directories on the remote server
@@ -428,12 +418,6 @@ problems may have been fixed or changed somewhat since this was written.
  Running SCP and SFTP tests on Cygwin makes this warning message appear.
 
  https://github.com/curl/curl/issues/11244
-
-9.6 wolfssh: all tests fail
-
- Something fundamental stops them all from working properly.
-
- https://github.com/curl/curl/issues/16794
 
 10. Connection
 

@@ -1213,8 +1213,8 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
       if(!s) {
         result = CURLE_OUT_OF_MEMORY;
         break;
-        }
       }
+    }
     else {
       /* Data length specified. */
       size_t len;

@@ -639,9 +639,6 @@ sub checksystemfeatures {
                     }
                 }
             }
-            if($libcurl =~ /wolfssh/i) {
-                $feature{"wolfssh"} = 1;
-            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             $proto = $1;

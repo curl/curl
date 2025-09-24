@@ -706,9 +706,6 @@ ${SIZEOF_TIME_T_CODE}
 /* if libssh2 is in use */
 #cmakedefine USE_LIBSSH2 1
 
-/* if wolfssh is in use */
-#cmakedefine USE_WOLFSSH 1
-
 /* if libpsl is in use */
 #cmakedefine USE_LIBPSL 1
 
