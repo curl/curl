@@ -673,7 +673,7 @@ jobs:
               fi
             fi
           fi
-          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
+          [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
             locale || true
             export LC_ALL=C
@@ -696,7 +696,7 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          [ -x ~/venv/bin/activate ] && source ~/venv/bin/activate
+          [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
