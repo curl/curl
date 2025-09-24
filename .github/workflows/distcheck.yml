@@ -258,6 +258,7 @@ jobs:
         shell: ${{ contains(matrix.image, 'windows') && 'msys2 {0}' || 'bash' }}
     env:
       CC: ${{ !contains(matrix.image, 'windows') && 'clang' || '' }}
+      MAKEFLAGS: ${{ contains(matrix.image, 'macos') && '-j 4' || '-j 5' }}
       MATRIX_IMAGE: '${{ matrix.image }}'
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
       OLD_CMAKE_VERSION: 3.11.4
