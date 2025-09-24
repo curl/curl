@@ -63,7 +63,7 @@ jobs:
             python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
             python3-typing-extensions python3-libcst python3-impacket \
             python3-websockets python3-pytest python3-filelock python3-pytest-xdist
-          python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9 codespell==2.4.1
+          python3 -m pip install --break-system-packages -r .github/scripts/requirements.txt
 
       - name: 'codespell'
         run: |
