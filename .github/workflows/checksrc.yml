@@ -59,6 +59,7 @@ jobs:
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
             -r .github/scripts/requirements.txt \
             -r tests/http/requirements.txt
+          # Install separately to work around conflicting requirements for the cryptography package
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
             -r tests/requirements.txt
 
