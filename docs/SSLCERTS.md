@@ -115,8 +115,9 @@ Schannel runs CRL checks on certificates unless peer verification is disabled.
 
 ### Apple + OpenSSL/GnuTLS
 
-When curl is built with Apple SecTrust enabled and uses an OpenSSL compatible TLS
-backend or GnuTLS, the default verification is handled by that Apple service. As in:
+When curl is built with Apple SecTrust enabled and uses an OpenSSL compatible
+TLS backend or GnuTLS, the default verification is handled by that Apple
+service. As in:
 
     curl https://example.com
 
@@ -124,9 +125,9 @@ You may still provide your own certificates on the command line, such as:
 
     curl --cacert mycerts.pem https://example.com
 
-In this situation, Apple SecTrust is **not** used and verfication is done **only** with
-the trust anchors found in `mycerts.pem`. If you want **both** Apple SecTrust and your
-own file to be considered, use:
+In this situation, Apple SecTrust is **not** used and verification is done
+**only** with the trust anchors found in `mycerts.pem`. If you want **both**
+Apple SecTrust and your own file to be considered, use:
 
     curl --ca-native --cacert mycerts.pem https://example.com
 

@@ -4296,7 +4296,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif /* HAVE_OPENSSL_SRP && USE_TLS_SRP */
 
   /* OpenSSL always tries to verify the peer. By setting the failure mode
-   * to NONE, we allow the connect to complete, irregardless of the outcome.
+   * to NONE, we allow the connect to complete, regardless of the outcome.
    * We then explicitly check the result and may try alternatives like
    * Apple's SecTrust for verification. */
   SSL_CTX_set_verify(octx->ssl_ctx, SSL_VERIFY_NONE, NULL);
