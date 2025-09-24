@@ -513,7 +513,6 @@ Features testable here are:
 - `wakeup`
 - `win32`
 - `WinIDN`
-- `wolfssh`
 - `wolfssl`
 - `xattr`
 - `zstd`

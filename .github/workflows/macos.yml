@@ -253,7 +253,7 @@ jobs:
               --disable-ldap --disable-pop3 --without-librtmp --disable-rtsp
               --disable-shared --disable-smb --disable-smtp --disable-telnet --disable-tftp --disable-unix-sockets
               --without-brotli --without-gssapi --without-libidn2 --without-libpsl --without-librtmp
-              --without-libssh2 --without-libssh --without-wolfssh
+              --without-libssh2 --without-libssh
               --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)

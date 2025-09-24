@@ -2290,12 +2290,6 @@ AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to th
 AS_HELP_STRING([--with-libssh], [enable libssh]),
   OPT_LIBSSH=$withval, OPT_LIBSSH=no)
 
-OPT_WOLFSSH=off
-AC_ARG_WITH(wolfssh,dnl
-AS_HELP_STRING([--with-wolfssh=PATH],[Where to look for wolfssh, PATH points to the wolfSSH installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AS_HELP_STRING([--with-wolfssh], [enable wolfssh]),
-  OPT_WOLFSSH=$withval, OPT_WOLFSSH=no)
-
 if test X"$OPT_LIBSSH2" != Xno; then
   dnl backup the pre-libssh2 variables
   CLEANLDFLAGS="$LDFLAGS"
@@ -2453,28 +2447,6 @@ elif test X"$OPT_LIBSSH" != Xno; then
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
-elif test X"$OPT_WOLFSSH" != Xno; then
-  dnl backup the pre-wolfssh variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANLDFLAGSPC="$LDFLAGSPC"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  if test "$OPT_WOLFSSH" != yes; then
-    WOLFCONFIG="$OPT_WOLFSSH/bin/wolfssh-config"
-    WOLFSSH_LIBS=`$WOLFCONFIG --libs`
-    LDFLAGS="$LDFLAGS $WOLFSSH_LIBS"
-    LDFLAGSPC="$LDFLAGSPC $WOLFSSH_LIBS"
-    CPPFLAGS="$CPPFLAGS `$WOLFCONFIG --cflags`"
-  fi
-
-  AC_CHECK_LIB(wolfssh, wolfSSH_Init)
-
-  AC_CHECK_HEADERS(wolfssh/ssh.h,
-    curl_ssh_msg="enabled (wolfSSH)"
-    AC_DEFINE(USE_WOLFSSH, 1, [if wolfSSH is in use])
-    USE_WOLFSSH=1
-  )
 fi
 
 dnl **********************************************************************
@@ -5499,9 +5471,6 @@ if test "x$USE_LIBSSH2" = "x1"; then
 fi
 if test "x$USE_LIBSSH" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
-fi
-if test "x$USE_WOLFSSH" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
 fi
 if test "x$CURL_DISABLE_IPFS" != "x1"; then
