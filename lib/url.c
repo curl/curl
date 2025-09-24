@@ -1611,7 +1611,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-#if defined(USE_SSH) && !defined(USE_WOLFSSH)
+#if defined(USE_SSH)
     &Curl_handler_scp,
 #else
     NULL,

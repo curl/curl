@@ -363,7 +363,6 @@ Details via CMake
 - `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
-- `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd (`ON`, `OFF` or `AUTO`). Default: `AUTO`
@@ -447,8 +446,6 @@ Details via CMake
 - `RUSTLS_INCLUDE_DIR`:                     The Rustls include directory.
 - `RUSTLS_LIBRARY`:                         Path to `rustls` library.
 - `WATT_ROOT`:                              Set this variable to the root installation of Watt-32.
-- `WOLFSSH_INCLUDE_DIR`:                    The wolfSSH include directory.
-- `WOLFSSH_LIBRARY`:                        Path to `wolfssh` library.
 - `WOLFSSL_INCLUDE_DIR`:                    The wolfSSL include directory.
 - `WOLFSSL_LIBRARY`:                        Path to `wolfssl` library.
 - `ZSTD_INCLUDE_DIR`:                       The zstd include directory.

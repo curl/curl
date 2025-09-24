@@ -776,7 +776,7 @@
 #  endif
 #endif
 
-#if defined(USE_LIBSSH2) || defined(USE_LIBSSH) || defined(USE_WOLFSSH)
+#if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
 #define USE_SSH
 #endif
 

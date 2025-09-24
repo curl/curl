@@ -368,10 +368,8 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_RTSP
   "rtsp",
 #endif
-#if defined(USE_SSH) && !defined(USE_WOLFSSH)
-  "scp",
-#endif
 #ifdef USE_SSH
+  "scp",
   "sftp",
 #endif
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
