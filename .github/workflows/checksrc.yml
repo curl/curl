@@ -58,15 +58,13 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get -o Dpkg::Use-Pty=0 update
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            python3-pip python3-networkx python3-pydot python3-yaml \
-            python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
-            python3-typing-extensions python3-libcst python3-impacket \
-            python3-websockets python3-pytest python3-filelock python3-pytest-xdist
-          python3 -m pip install --break-system-packages -r .github/scripts/requirements.txt
+          sudo apt-get -o Dpkg::Use-Pty=0 install python3-pip python3-venv
+          python3 -m venv ~/venv
+          ~/venv/bin/pip install -r .github/scripts/requirements.txt
 
       - name: 'codespell'
         run: |
+          source ~/venv/bin/activate
           codespell --version
           .github/scripts/codespell.sh
 
@@ -78,13 +76,19 @@ jobs:
           .github/scripts/typos.sh
 
       - name: 'cmakelint'
-        run: scripts/cmakelint.sh
+        run: |
+          source ~/venv/bin/activate
+          scripts/cmakelint.sh
 
       - name: 'pytype'
-        run: find . -name '*.py' -exec pytype -j auto -k {} +
+        run: |
+          source ~/venv/bin/activate
+          find . -name '*.py' -exec pytype -j auto -k {} +
 
       - name: 'ruff'
-        run: scripts/pythonlint.sh
+        run: |
+          source ~/venv/bin/activate
+          scripts/pythonlint.sh
 
   reuse:
     name: 'REUSE'
