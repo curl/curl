@@ -429,7 +429,8 @@ with `configure`, on macOS:
 
 ```sh
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
-# Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+# Same tag for Apple Silicon. Other OS values here:
+#   https://developer.android.com/ndk/guides/other_build_systems#overview
 export HOST_TAG=darwin-x86_64
 export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
 export AR=$TOOLCHAIN/bin/llvm-ar
@@ -455,7 +456,8 @@ install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
 for Android using OpenSSL like this:
 
 ```sh
-# For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
+# For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive
+# dependencies if you are linking statically.
 LIBS='-lssl -lcrypto -lc++'
 ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 ```
