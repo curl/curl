@@ -56,7 +56,10 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements.txt
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
+            -r .github/scripts/requirements.txt \
+            -r tests/http/requirements.txt \
+            -r tests/requirements.txt
 
       - name: 'codespell'
         run: |
