@@ -219,25 +219,6 @@ sub exerunner {
     return '';
 }
 
-#######################################################################
-# Quote an argument for passing safely to a Bourne shell
-# This does the same thing as String::ShellQuote but doesn't need a package.
-#
-sub shell_quote {
-    my ($s)=@_;
-    if($^O eq 'MSWin32') {
-        $s = '"' . $s . '"';
-    }
-    else {
-        if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
-            # string contains a "dangerous" character--quote it
-            $s =~ s/'/'"'"'/g;
-            $s = "'" . $s . "'";
-        }
-    }
-    return $s;
-}
-
 sub get_sha256_base64 {
     my ($file_path) = @_;
     return encode_base64(sha256(do { local $/; open my $fh, '<:raw', $file_path or die $!; <$fh> }), "");
@@ -275,4 +256,24 @@ sub substrippemfile {
         $$thing =~ s/%%FILE%%/$file_content/;
     }
 }
+
+#######################################################################
+# Quote an argument for passing safely to a Bourne shell
+# This does the same thing as String::ShellQuote but doesn't need a package.
+#
+sub shell_quote {
+    my ($s)=@_;
+    if($^O eq 'MSWin32') {
+        $s = '"' . $s . '"';
+    }
+    else {
+        if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
+            # string contains a "dangerous" character--quote it
+            $s =~ s/'/'"'"'/g;
+            $s = "'" . $s . "'";
+        }
+    }
+    return $s;
+}
+
 1;
