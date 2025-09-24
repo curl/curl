@@ -3,6 +3,6 @@
 # SPDX-License-Identifier: curl
 
 cmakelang == 0.6.13
+codespell == 2.4.1
 pytype == 2024.10.11
 ruff == 0.11.9
-codespell == 2.4.1
