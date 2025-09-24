@@ -55,7 +55,7 @@ without content (no data on the right side of the colon) as in `Accept:`, the
 internally used header is removed. To forcibly add a header without content
 (nothing after the colon), use the form `name;` (using a trailing semicolon).
 
-There are exceptions for suppressing of headers. The `Connection: ` header
+There are exceptions for suppressing of headers. The `Connection:` header
 in HTTP/1.1 cannot be overridden. You can provide values for it, but should a
 request require specific ones, they are always added to your own.
 
