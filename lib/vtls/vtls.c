@@ -75,8 +75,13 @@
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
+#include "../setopt.h"
 #include "../strdup.h"
 #include "../rand.h"
+
+#ifdef USE_APPLE_SECTRUST
+#include <Security/Security.h>
+#endif /* USE_APPLE_SECTRUST */
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -290,62 +295,95 @@ static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 {
-  data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH];
-  data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
-  data->set.ssl.primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
-  data->set.ssl.primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
-  data->set.ssl.primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
-  data->set.ssl.primary.cipher_list =
-    data->set.str[STRING_SSL_CIPHER_LIST];
-  data->set.ssl.primary.cipher_list13 =
-    data->set.str[STRING_SSL_CIPHER13_LIST];
-  data->set.ssl.primary.signature_algorithms =
-    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
-  data->set.ssl.primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-  data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT];
-  data->set.ssl.primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
-  data->set.ssl.primary.curves = data->set.str[STRING_SSL_EC_CURVES];
-#ifdef USE_TLS_SRP
-  data->set.ssl.primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
-  data->set.ssl.primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+  struct ssl_config_data *sslc = &data->set.ssl;
+#if defined(CURL_CA_PATH) || defined(CURL_CA_BUNDLE)
+  struct UserDefined *set = &data->set;
+  CURLcode result;
 #endif
-  data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE];
-  data->set.ssl.key = data->set.str[STRING_KEY];
-  data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE];
-  data->set.ssl.key_passwd = data->set.str[STRING_KEY_PASSWD];
-  data->set.ssl.primary.clientcert = data->set.str[STRING_CERT];
-  data->set.ssl.key_blob = data->set.blobs[BLOB_KEY];
+
+#ifdef USE_APPLE_SECTRUST
+  if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
+    sslc->native_ca_store = TRUE;
+#endif
+#ifdef CURL_CA_PATH
+  if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
+    if(result)
+      return result;
+  }
+  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
+#endif
+#ifdef CURL_CA_BUNDLE
+  if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
+    if(result)
+      return result;
+  }
+#endif
+  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
+  sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
+  sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
+  sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
+  sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
+  sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST];
+  sslc->primary.signature_algorithms =
+    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
+  sslc->primary.pinned_key =
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  sslc->primary.cert_blob = data->set.blobs[BLOB_CERT];
+  sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
+  sslc->primary.curves = data->set.str[STRING_SSL_EC_CURVES];
+#ifdef USE_TLS_SRP
+  sslc->primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
+  sslc->primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+#endif
+  sslc->cert_type = data->set.str[STRING_CERT_TYPE];
+  sslc->key = data->set.str[STRING_KEY];
+  sslc->key_type = data->set.str[STRING_KEY_TYPE];
+  sslc->key_passwd = data->set.str[STRING_KEY_PASSWD];
+  sslc->primary.clientcert = data->set.str[STRING_CERT];
+  sslc->key_blob = data->set.blobs[BLOB_KEY];
 
 #ifndef CURL_DISABLE_PROXY
-  data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
-  data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
-  data->set.proxy_ssl.primary.cipher_list =
-    data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
-  data->set.proxy_ssl.primary.cipher_list13 =
-    data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
-  data->set.proxy_ssl.primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
-  data->set.proxy_ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
-  data->set.proxy_ssl.primary.ca_info_blob =
-    data->set.blobs[BLOB_CAINFO_PROXY];
-  data->set.proxy_ssl.primary.issuercert =
-    data->set.str[STRING_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.primary.issuercert_blob =
-    data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.primary.CRLfile =
-    data->set.str[STRING_SSL_CRLFILE_PROXY];
-  data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
-  data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
-  data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
-  data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
-  data->set.proxy_ssl.primary.clientcert = data->set.str[STRING_CERT_PROXY];
-  data->set.proxy_ssl.key_blob = data->set.blobs[BLOB_KEY_PROXY];
+  sslc = &data->set.proxy_ssl;
+#ifdef USE_APPLE_SECTRUST
+  if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
+    sslc->native_ca_store = TRUE;
+#endif
+#ifdef CURL_CA_PATH
+  if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {
+    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
+    if(result)
+      return result;
+  }
+  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
+#endif
+#ifdef CURL_CA_BUNDLE
+  if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
+    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                            CURL_CA_BUNDLE);
+    if(result)
+      return result;
+  }
+#endif
+  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
+  sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
+  sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
+  sslc->primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
+  sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO_PROXY];
+  sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
+  sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY];
+  sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
+  sslc->cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
+  sslc->key = data->set.str[STRING_KEY_PROXY];
+  sslc->key_type = data->set.str[STRING_KEY_TYPE_PROXY];
+  sslc->key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
+  sslc->primary.clientcert = data->set.str[STRING_CERT_PROXY];
+  sslc->key_blob = data->set.blobs[BLOB_KEY_PROXY];
 #ifdef USE_TLS_SRP
-  data->set.proxy_ssl.primary.username =
-    data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
-  data->set.proxy_ssl.primary.password =
-    data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
+  sslc->primary.username = data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
+  sslc->primary.password = data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
 #endif
 #endif /* CURL_DISABLE_PROXY */
 

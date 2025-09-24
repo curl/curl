@@ -277,6 +277,12 @@ AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to th
   fi
 ])
 
+OPT_APPLE_SECTRUST=$curl_cv_apple
+AC_ARG_WITH(apple-sectrust,dnl
+AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verification]),[
+  OPT_APPLE_SECTRUST=$withval
+ ])
+
 AC_PATH_PROG(PERL, perl,, $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
 AC_SUBST(PERL)
 AM_CONDITIONAL(PERL, test -n "$PERL")
@@ -2016,6 +2022,7 @@ CURL_WITH_GNUTLS
 CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
 CURL_WITH_RUSTLS
+CURL_WITH_APPLE_SECTRUST
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
@@ -5588,6 +5595,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Verbose errors:   ${curl_verbose_msg}
   Code coverage:    ${curl_coverage_msg}
   SSPI:             ${curl_sspi_msg}
+  ca native:        ${ca_native}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
   ca cert embed:    ${CURL_CA_EMBED_msg}

@@ -130,7 +130,7 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
 {
 #ifdef USE_OPENSSL
   if(!ctx->ossl.x509_store_setup) {
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
+    CURLcode result = Curl_ssl_setup_x509_store(cf, data, &ctx->ossl);
     if(result)
       return result;
     ctx->ossl.x509_store_setup = TRUE;
@@ -170,7 +170,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   result = Curl_ossl_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
   if(conn_config->verifyhost) {
-    result = Curl_gtls_verifyserver(data, ctx->gtls.session,
+    result = Curl_gtls_verifyserver(cf, data, ctx->gtls.session,
                                     conn_config, &data->set.ssl, peer,
                                     data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
     if(result)

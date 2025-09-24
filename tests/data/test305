@@ -19,7 +19,7 @@ https
 insecure HTTPS without permission
 </name>
 <command>
-https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER --cacert moooo
+https://%HOSTIP:%HTTPSPORT/want/%TESTNUMBER --cacert moooo --no-ca-native
 </command>
 </client>
 
