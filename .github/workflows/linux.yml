@@ -44,9 +44,7 @@ env:
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
   libressl-version: 4.1.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  wolfssl-version: 5.8.0
-  # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  wolfssh-version: 1.4.19
+  WOLFSSL_VERSION: 5.8.2
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   mbedtls-version: 3.6.3
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
@@ -100,10 +98,10 @@ jobs:
             install_steps: wolfssl-all
             configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-ech --enable-debug
 
-          - name: wolfssl-opensslextra valgrind
-            install_packages: zlib1g-dev valgrind
-            install_steps: wolfssl-opensslextra wolfssh
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --with-wolfssh=$HOME/wolfssh --enable-ech --enable-debug
+          - name: 'wolfssl-opensslextra valgrind'
+            install_packages: valgrind
+            install_steps: wolfssl-opensslextra
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev libldap-dev valgrind
@@ -192,7 +190,7 @@ jobs:
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
               --without-librtmp --disable-rtsp
-              --without-libssh2 --without-libssh --without-wolfssh
+              --without-libssh2 --without-libssh
               --disable-tftp --disable-ftp --disable-file --disable-smb
 
           - name: openssl torture !FTP
@@ -422,30 +420,8 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-wolfssh --enable-ech --enable-opensslextra \
-            --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
-          make install
-
-      - name: 'cache wolfssh'
-        if: contains(matrix.build.install_steps, 'wolfssh')
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4
-        id: cache-wolfssh
-        env:
-          cache-name: cache-wolfssh
-        with:
-          path: ~/wolfssh
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssh-version }}-${{ env.wolfssl-version }}
-
-      - name: 'build wolfssh'
-        if: contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true'
-        run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
-            https://github.com/wolfSSL/wolfssh/archive/v${{ env.wolfssh-version }}-stable.tar.gz
-          tar -xzf v${{ env.wolfssh-version }}-stable.tar.gz
-          cd wolfssh-${{ env.wolfssh-version }}-stable
-          ./autogen.sh
-          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-opensslextra --enable-scp --enable-sftp --disable-term \
-            --disable-examples --prefix=$HOME/wolfssh
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-ech --enable-opensslextra \
+            --disable-benchmark --disable-crypttests --disable-examples --prefix=/home/runner/wolfssl-opensslextra
           make install
 
       - name: 'cache mbedtls'
@@ -671,12 +647,8 @@ jobs:
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         # zizmor: ignore[template-injection]
         run: |
-          export TFLAGS='${{ matrix.build.tflags }}'
-          if [ -z '${{ matrix.build.torture }}' ]; then
-            if [[ '${{ matrix.build.install_steps }}' = *'wolfssh'* ]]; then
-              TFLAGS+=' ~SFTP'  # curl: (79) wolfssh SFTP connect error -1051 / WS_MATCH_KEY_ALGO_E / cannot match key algo with peer
-            fi
-            if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
+          if [ "${TEST_TARGET}" = 'test-ci' ]; then
+            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
             fi
             if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
