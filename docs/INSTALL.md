@@ -429,7 +429,8 @@ with `configure`, on macOS:
 
 ```sh
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
-export HOST_TAG=darwin-x86_64 # Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+# Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+export HOST_TAG=darwin-x86_64
 export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
 export AR=$TOOLCHAIN/bin/llvm-ar
 export AS=$TOOLCHAIN/bin/llvm-as
@@ -455,7 +456,7 @@ for Android using OpenSSL like this:
 
 ```sh
 # For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
-LIBS="-lssl -lcrypto -lc++"
+LIBS='-lssl -lcrypto -lc++'
 ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 ```
 
@@ -514,11 +515,12 @@ export RANLIB=ppc_405-ranlib
 export CC=ppc_405-gcc
 export NM=ppc_405-nm
 
-./configure --target=powerpc-hardhat-linux
-    --host=powerpc-hardhat-linux
-    --build=i586-pc-linux-gnu
-    --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
-    --exec-prefix=/usr/local
+./configure \
+  --target=powerpc-hardhat-linux
+  --host=powerpc-hardhat-linux
+  --build=i586-pc-linux-gnu
+  --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
+  --exec-prefix=/usr/local
 ```
 
 The `--prefix` parameter specifies where curl gets installed. If `configure`
