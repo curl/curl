@@ -690,7 +690,9 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
-        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        run: |
+          [ -d ~/venv ] || python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
