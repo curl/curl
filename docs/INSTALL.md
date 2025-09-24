@@ -275,7 +275,7 @@ If any error occurs during curl installation, try:
 
 You can use either autotools or cmake:
 
-```bash
+```sh
 ./configure \
   CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
   AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
@@ -288,7 +288,7 @@ You can use either autotools or cmake:
   --disable-shared
 ```
 
-```bash
+```sh
 cmake . \
   -DCMAKE_SYSTEM_NAME=DOS \
   -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
@@ -314,7 +314,7 @@ Notes:
 
 You can use either autotools or cmake:
 
-```bash
+```sh
 ./configure \
   CC=/opt/amiga/bin/m68k-amigaos-gcc \
   AR=/opt/amiga/bin/m68k-amigaos-ar \
@@ -329,7 +329,7 @@ You can use either autotools or cmake:
   --disable-shared
 ```
 
-```bash
+```sh
 cmake . \
   -DAMIGA=1 \
   -DCMAKE_SYSTEM_NAME=Generic \
@@ -416,7 +416,7 @@ Examples to compile for `aarch64` and API level 29:
 
 with CMake, where `ANDROID_NDK_HOME` points into your NDK:
 
-```bash
+```sh
 cmake . \
   -DANDROID_ABI=arm64-v8a \
   -DANDROID_PLATFORM=android-29 \
@@ -427,7 +427,7 @@ cmake . \
 
 with `configure`, on macOS:
 
-```bash
+```sh
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
 export HOST_TAG=darwin-x86_64 # Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
 export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
@@ -453,7 +453,7 @@ install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
 `include/openssl` to `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl
 for Android using OpenSSL like this:
 
-```bash
+```sh
 # For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
 LIBS="-lssl -lcrypto -lc++"
 ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
@@ -504,7 +504,7 @@ configure with any options you need. Be sure and specify the `--host` and
 of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
 Linux.
 
-```bash
+```sh
 #! /bin/sh
 
 export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
