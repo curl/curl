@@ -725,9 +725,7 @@ jobs:
 
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          source ~/venv/bin/activate
-          python3 -m pip install -r tests/requirements.txt
+        run: ~/venv/bin/pip install -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
@@ -743,9 +741,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          source ~/venv/bin/activate
-          python3 -m pip install -r tests/http/requirements.txt
+        run: ~/venv/bin/pip install -r tests/http/requirements.txt
 
       - name: 'run pytest event based'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
