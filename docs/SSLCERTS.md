@@ -10,7 +10,7 @@ SPDX-License-Identifier: curl
 
 If curl was built with Schannel support, then curl uses the Windows native CA
 store for verification. On Apple operating systems, it is possible to use Apple's
-"SecTrust" services for certain TLS backends, details below. 
+"SecTrust" services for certain TLS backends, details below.
 All other TLS libraries use a file based CA store by
 default.
 
@@ -126,7 +126,7 @@ You may still provide your own certificates on the command line, such as:
 
 In this situation, Apple SecTrust is **not** used and verfication is done **only** with
 the trust anchors found in `mycerts.pem`. If you want **both** Apple SecTrust and your
-own file to be considered, use: 
+own file to be considered, use:
 
     curl --ca-native --cacert mycerts.pem https://example.com
 
@@ -139,7 +139,7 @@ the native CA on a range of operating systems. Some provide this only on specifi
 configurations.
 
 Specific support in curl exists for Windows and OpenSSL compatible TLS backends.
-It tries to load the certificates from the Windows "CA" and "ROOT" stores for 
+It tries to load the certificates from the Windows "CA" and "ROOT" stores for
 transfers requesting the native CA. Due to Window's delayed population of those
 stores, this might not always find all certificates.
 
