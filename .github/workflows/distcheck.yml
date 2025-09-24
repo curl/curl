@@ -252,7 +252,7 @@ jobs:
   cmake-integration:
     name: 'CM integration ${{ matrix.image }}'
     runs-on: ${{ matrix.image }}
-    timeout-minutes: 10
+    timeout-minutes: 15
     defaults:
       run:
         shell: ${{ contains(matrix.image, 'windows') && 'msys2 {0}' || 'bash' }}
