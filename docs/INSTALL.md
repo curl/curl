@@ -275,28 +275,32 @@ If any error occurs during curl installation, try:
 
 You can use either autotools or cmake:
 
-    ./configure \
-      CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-      AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
-      RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
-      WATT_ROOT=/path/to/djgpp/net/watt \
-      --host=i586-pc-msdosdjgpp \
-      --with-openssl=/path/to/djgpp \
-      --with-zlib=/path/to/djgpp \
-      --without-libpsl \
-      --disable-shared
+```bash
+./configure \
+  CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+  AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
+  RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+  WATT_ROOT=/path/to/djgpp/net/watt \
+  --host=i586-pc-msdosdjgpp \
+  --with-openssl=/path/to/djgpp \
+  --with-zlib=/path/to/djgpp \
+  --without-libpsl \
+  --disable-shared
+```
 
-    cmake . \
-      -DCMAKE_SYSTEM_NAME=DOS \
-      -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-      -DCMAKE_C_COMPILER=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-      -DWATT_ROOT=/path/to/djgpp/net/watt \
-      -DOPENSSL_INCLUDE_DIR=/path/to/djgpp/include \
-      -DOPENSSL_SSL_LIBRARY=/path/to/djgpp/lib/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
-      -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
-      -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
-      -DCURL_USE_LIBPSL=OFF
+```bash
+cmake . \
+  -DCMAKE_SYSTEM_NAME=DOS \
+  -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
+  -DCMAKE_C_COMPILER=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+  -DWATT_ROOT=/path/to/djgpp/net/watt \
+  -DOPENSSL_INCLUDE_DIR=/path/to/djgpp/include \
+  -DOPENSSL_SSL_LIBRARY=/path/to/djgpp/lib/libssl.a \
+  -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
+  -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
+  -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
+  -DCURL_USE_LIBPSL=OFF
+```
 
 Notes:
 
@@ -310,29 +314,33 @@ Notes:
 
 You can use either autotools or cmake:
 
-    ./configure \
-      CC=/opt/amiga/bin/m68k-amigaos-gcc \
-      AR=/opt/amiga/bin/m68k-amigaos-ar \
-      RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
-      --host=m68k-amigaos \
-      --with-amissl \
-      CFLAGS='-O0 -msoft-float -mcrt=clib2' \
-      CPPFLAGS=-I/path/to/AmiSSL/Developer/include \
-      LDFLAGS=-L/path/to/AmiSSL/Developer/lib/AmigaOS3 \
-      LIBS='-lnet -lm -latomic' \
-      --without-libpsl \
-      --disable-shared
+```bash
+./configure \
+  CC=/opt/amiga/bin/m68k-amigaos-gcc \
+  AR=/opt/amiga/bin/m68k-amigaos-ar \
+  RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
+  --host=m68k-amigaos \
+  --with-amissl \
+  CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+  CPPFLAGS=-I/path/to/AmiSSL/Developer/include \
+  LDFLAGS=-L/path/to/AmiSSL/Developer/lib/AmigaOS3 \
+  LIBS='-lnet -lm -latomic' \
+  --without-libpsl \
+  --disable-shared
+```
 
-    cmake . \
-      -DAMIGA=1 \
-      -DCMAKE_SYSTEM_NAME=Generic \
-      -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
-      -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
-      -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
-      -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
-      -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
-      -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
-      -DCURL_USE_LIBPSL=OFF
+```bash
+cmake . \
+  -DAMIGA=1 \
+  -DCMAKE_SYSTEM_NAME=Generic \
+  -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
+  -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
+  -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
+  -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
+  -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+  -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
+  -DCURL_USE_LIBPSL=OFF
+```
 
 ## Disabling Specific Protocols in Windows builds
 
@@ -408,12 +416,14 @@ Examples to compile for `aarch64` and API level 29:
 
 with CMake, where `ANDROID_NDK_HOME` points into your NDK:
 
-    cmake . \
-      -DANDROID_ABI=arm64-v8a \
-      -DANDROID_PLATFORM=android-29 \
-      -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
-      -DCURL_ENABLE_SSL=OFF \
-      -DCURL_USE_LIBPSL=OFF
+```bash
+cmake . \
+  -DANDROID_ABI=arm64-v8a \
+  -DANDROID_PLATFORM=android-29 \
+  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+  -DCURL_ENABLE_SSL=OFF \
+  -DCURL_USE_LIBPSL=OFF
+```
 
 with `configure`, on macOS:
 
@@ -444,7 +454,8 @@ install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
 for Android using OpenSSL like this:
 
 ```bash
-LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
+# For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
+LIBS="-lssl -lcrypto -lc++"
 ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 ```
 
