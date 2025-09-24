@@ -17,6 +17,7 @@ retry
 #
 <data nocheck="yes" nonewline="yes">
 HTTP/1.1 200 OK swsbounce swsclose
+Accept-Ranges: bytes
 Content-Type: text/html
 Content-Length: 26
 
@@ -51,6 +52,7 @@ body
 #
 <data3 nocheck="yes">
 HTTP/1.1 200 OK swsbounce
+Accept-Ranges: bytes
 Content-Type: text/html
 Content-Length: 30
 

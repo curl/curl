@@ -489,17 +489,19 @@ static CURLcode retrycheck(struct OperationConfig *config,
     per->retry_remaining--;
 
     /* Skip truncation of outfile if auto-resume is enabled for download and
-       the partially received data is good. Currently this is only for HTTP
-       GET requests in limited circumstances. */
+       the partially received data is good. Only for HTTP GET requests in
+       limited circumstances. */
     if(config->use_resume && config->resume_from_current &&
        config->resume_from >= 0 && outs->init == config->resume_from &&
+       outs->filename && outs->s_isreg && outs->fopened && outs->stream &&
+       outs->bytes > 0 && !config->customrequest && !per->uploadfile &&
        (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
         config->httpreq == TOOL_HTTPREQ_GET) &&
-       (!config->customrequest || !strcmp(config->customrequest, "GET")) &&
-       !config->use_ascii && !per->uploadfile &&
-       result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR &&
-       outs->bytes > 0 && outs->filename && outs->stream) {
+       /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
+       result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR) {
+
       long response = 0;
+      struct curl_header *header = NULL;
       const char *method = NULL, *scheme = NULL;
 
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &method);
@@ -509,9 +511,13 @@ static CURLcode retrycheck(struct OperationConfig *config,
 
       if((scheme == proto_http || scheme == proto_https) &&
          method && !strcmp(method, "GET") &&
-         response == (config->resume_from ? 206 : 200)) {
-        notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes",
-              outs->bytes);
+         ((response == 206 && config->resume_from) ||
+          (response == 200 &&
+           !curl_easy_header(curl, "Accept-Ranges", 0,
+                             CURLH_HEADER, -1, &header) &&
+           !strcmp(header->value, "bytes")))) {
+
+        notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         if(fflush(outs->stream)) {
           errorf("Failed to flush output file stream");
           return CURLE_WRITE_ERROR;
