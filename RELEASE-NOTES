@@ -64,7 +64,7 @@ This release includes the following bugfixes:
  o libcurl-security.md: mention long-running connections [6]
  o libssh2: drop two redundant null-terminations [26]
  o libssh2: error check and null-terminate in ssh_state_sftp_readdir_link() [34]
- o libssh: drop two unused assigments [104]
+ o libssh: drop two unused assignments [104]
  o libssh: error on bad chgrp number [71]
  o libssh: error on bad chown number and store the value [64]
  o libssh: fix range parsing error handling mistake [120]
