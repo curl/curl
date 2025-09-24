@@ -265,6 +265,11 @@ jobs:
             install: libnghttp3 libngtcp2
             install_steps: pytest
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
+          - name: 'OpenSSL SecTrust'
+            compiler: clang
+            install: libnghttp3 libngtcp2
+            install_steps: pytest
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2 --with-apple-sectrust
           - name: 'OpenSSL event-based'
             compiler: clang
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
@@ -275,9 +280,9 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=/opt/homebrew/opt/quictls LDFLAGS=-L/opt/homebrew/opt/quictls/lib
             macos-version-min: '10.15'
           # cmake
-          - name: 'OpenSSL gsasl rtmp AppleIDN'
+          - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust'
             install: libnghttp3 libngtcp2 gsasl rtmpdump
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON
+            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/openssl -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_NGTCP2=ON -DCURL_DISABLE_VERBOSE_STRINGS=ON -DUSE_APPLE_SECTRUST=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
             compiler: clang
             install: llvm brotli zstd gnutls nettle libressl krb5 mbedtls gsasl rustls-ffi rtmpdump libssh fish

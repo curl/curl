@@ -371,7 +371,7 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data)
 
 static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
                                          const char *name,
-                                         char *path,
+                                         const char *path,
                                          bool *is_local)
 {
   if(path && path[0]) {
