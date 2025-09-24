@@ -78,11 +78,9 @@ BEGIN {
 use pathhelp qw(
     exe_ext
     dirsepadd
-    );
-use Cwd qw(getcwd);
-use testutil qw(
     shell_quote
     );
+use Cwd qw(getcwd);
 use File::Spec;
 
 

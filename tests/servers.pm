@@ -105,6 +105,7 @@ use pathhelp qw(
     os_is_win
     build_sys_abs_path
     sys_native_abs_path
+    shell_quote
     );
 
 use processhelp;
@@ -114,7 +115,6 @@ use testutil qw(
     runclient
     runclientoutput
     exerunner
-    shell_quote
     );
 
 

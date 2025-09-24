@@ -84,6 +84,7 @@ use Storable qw(
 
 use pathhelp qw(
     exe_ext
+    shell_quote
     );
 use servers qw(
     checkcmd
@@ -100,7 +101,6 @@ use testutil qw(
     logmsg
     runclient
     exerunner
-    shell_quote
     subbase64
     subsha256base64file
     substrippemfile

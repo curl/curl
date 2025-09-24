@@ -91,6 +91,7 @@ use serverhelp qw(
 use pathhelp qw(
     exe_ext
     sys_native_current_path
+    shell_quote
     );
 
 use appveyor;
