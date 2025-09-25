@@ -1993,6 +1993,11 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
+    else if(!proto) {
+      DEBUGASSERT(0); /* with length, we need a pointer */
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
     else if((strlen(connssl->negotiated.alpn) != proto_len) ||
             memcmp(connssl->negotiated.alpn, proto, proto_len)) {
       failf(data, "ALPN: asked for '%s' from previous session, but server "
