@@ -117,7 +117,10 @@ class Caddy:
         self._mkpath(self._tmp_dir)
         if self._process:
             self._process.terminate()
-            self._process.wait(timeout=2)
+            try:
+                self._process.wait(timeout=1)
+            except Exception:
+                self._process.kill()
             self._process = None
             return not wait_dead or self.wait_dead(timeout=timedelta(seconds=5))
         return True

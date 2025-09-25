@@ -1421,12 +1421,16 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
     if(!snew)
       break;
 
-    (void)cf_osslq_h3conn_add_stream(&ctx->h3, snew, cf, data);
+    result = cf_osslq_h3conn_add_stream(&ctx->h3, snew, cf, data);
+    if(result)
+      goto out;
   }
 
   if(!SSL_handle_events(ctx->tls.ossl.ssl)) {
     int detail = SSL_get_error(ctx->tls.ossl.ssl, 0);
     result = cf_osslq_ssl_err(cf, data, detail, CURLE_RECV_ERROR);
+    if(result)
+      goto out;
   }
 
   if(ctx->h3.conn) {
