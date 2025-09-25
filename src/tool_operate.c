@@ -493,8 +493,9 @@ static CURLcode retrycheck(struct OperationConfig *config,
        limited circumstances. */
     if(config->use_resume && config->resume_from_current &&
        config->resume_from >= 0 && outs->init == config->resume_from &&
-       outs->filename && outs->s_isreg && outs->fopened && outs->stream &&
-       outs->bytes > 0 && !config->customrequest && !per->uploadfile &&
+       outs->bytes > 0 && outs->filename && outs->s_isreg && outs->fopened &&
+       outs->stream && !ferror(outs->stream) &&
+       !config->customrequest && !per->uploadfile &&
        (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
         config->httpreq == TOOL_HTTPREQ_GET) &&
        /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
