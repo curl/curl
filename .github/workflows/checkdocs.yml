@@ -126,7 +126,9 @@ jobs:
         run: |
           source ~/venv/bin/activate
           grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
-          pyspelling -c .github/scripts/spellcheck.yaml
+          pyspelling --version
+          aspell --version
+          pyspelling --verbose --config .github/scripts/spellcheck.yaml
 
   badwords-synopsis:
     name: 'badwords, synopsis'
