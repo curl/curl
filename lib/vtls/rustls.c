@@ -188,16 +188,8 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
 }
 
 /*
- * On each run:
- *  - Read a chunk of bytes from the socket into Rustls' TLS input buffer.
- *  - Tell Rustls to process any new packets.
- *  - Read out as many plaintext bytes from Rustls as possible, until hitting
- *    error, EOF, or EAGAIN/EWOULDBLOCK, or plainbuf/plainlen is filled up.
- *
- * it is okay to call this function with plainbuf == NULL and plainlen == 0. In
- * that case, it will copy bytes from the socket into Rustls' TLS input
- * buffer, and process packets, but will not consume bytes from Rustls'
- * plaintext output buffer.
+ * Filter receive method implementation. `plainbuf` and `plainlen`
+ * are always not NULL/0.
  */
 static CURLcode
 cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
