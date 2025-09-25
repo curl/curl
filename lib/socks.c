@@ -1291,15 +1291,16 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   if(Curl_trc_is_verbose(data)) {
     struct ip_quadruple ipquad;
     bool is_ipv6;
-    result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
-    if(result)
-      return result;
-    infof(data, "Opened %sSOCKS connection from %s port %u to %s port %u "
-          "(via %s port %u)",
-          (sockindex == SECONDARYSOCKET) ? "2nd " : "",
-          ipquad.local_ip, ipquad.local_port,
-          sx->hostname, sx->remote_port,
-          ipquad.remote_ip, ipquad.remote_port);
+    if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad))
+      infof(data, "Opened %sSOCKS connection from %s port %u to %s port %u "
+            "(via %s port %u)",
+            (sockindex == SECONDARYSOCKET) ? "2nd " : "",
+            ipquad.local_ip, ipquad.local_port,
+            sx->hostname, sx->remote_port,
+            ipquad.remote_ip, ipquad.remote_port);
+    else
+      infof(data, "Opened %sSOCKS connection",
+            (sockindex == SECONDARYSOCKET) ? "2nd " : "");
   }
 #endif
   socks_proxy_cf_free(cf);
