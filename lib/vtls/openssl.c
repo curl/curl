@@ -741,6 +741,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   if(!octx->x509_store_setup) {
     r2 = Curl_ssl_setup_x509_store(cf, data, octx->ssl_ctx);
     if(r2) {
+      BIO_clear_retry_flags(bio);
       octx->io_result = r2;
       return -1;
     }
