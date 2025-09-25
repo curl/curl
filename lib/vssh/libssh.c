@@ -2397,7 +2397,7 @@ static void myssh_block2waitfor(struct connectdata *conn,
     /* translate the libssh define bits into our own bit defines */
     conn->waitfor =
       ((dir & SSH_READ_PENDING) ? KEEP_RECV : 0) |
-      ((dir & SSH_WRITE_PENDING) ? KEEP_SEND | 0);
+      ((dir & SSH_WRITE_PENDING) ? KEEP_SEND : 0);
   }
   else
     /* if it did not block, use the original set */
