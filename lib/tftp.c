@@ -1108,8 +1108,8 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
                                 &fromlen);
   if(state->remote_pinned) {
     /* pinned, verify that it comes from the same address */
-    if((state->remote_addrlen != fromlen) ||
-       memcmp(&remote_addr, &state->remote_addr, fromlen)) {
+    if(fromlen && ((state->remote_addrlen != fromlen) ||
+                   memcmp(&remote_addr, &state->remote_addr, fromlen))) {
       failf(data, "Data received from another address");
       return CURLE_RECV_ERROR;
     }
