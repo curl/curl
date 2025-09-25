@@ -362,7 +362,7 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  if(!data || (blen < 0) {
+  if(!data || (blen < 0)) {
     wssl->io_result = CURLE_FAILED_INIT;
     return -1;
   }
