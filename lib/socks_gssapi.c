@@ -199,7 +199,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
        /* the size needs to fit in a 16 bit field */
        (gss_send_token.length > 0xffff)) {
       gss_release_name(&gss_status, &server);
-      gss_release_buffer(&gss_status, &gss_recv_token);
       gss_release_buffer(&gss_status, &gss_send_token);
       Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
       failf(data, "Failed to initial GSS-API token.");
@@ -217,7 +216,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       if(code || (nwritten != 4)) {
         failf(data, "Failed to send GSS-API authentication request.");
         gss_release_name(&gss_status, &server);
-        gss_release_buffer(&gss_status, &gss_recv_token);
         gss_release_buffer(&gss_status, &gss_send_token);
         Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
         return CURLE_COULDNT_CONNECT;
@@ -229,7 +227,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       if(code || (gss_send_token.length != nwritten)) {
         failf(data, "Failed to send GSS-API authentication token.");
         gss_release_name(&gss_status, &server);
-        gss_release_buffer(&gss_status, &gss_recv_token);
         gss_release_buffer(&gss_status, &gss_send_token);
         Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
         return CURLE_COULDNT_CONNECT;
@@ -238,7 +235,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
 
     gss_release_buffer(&gss_status, &gss_send_token);
-    gss_release_buffer(&gss_status, &gss_recv_token);
     if(gss_major_status != GSS_S_CONTINUE_NEEDED)
       break;
 
