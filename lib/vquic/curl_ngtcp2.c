@@ -1303,8 +1303,10 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *pnread = 0;
 
   /* handshake verification failed in callback, do not recv anything */
-  if(ctx->tls_vrfy_result)
-    return ctx->tls_vrfy_result;
+  if(ctx->tls_vrfy_result) {
+    result = ctx->tls_vrfy_result;
+    goto out;
+  }
 
   pktx_init(&pktx, cf, data);
 
