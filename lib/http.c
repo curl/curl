@@ -2636,14 +2636,33 @@ static CURLcode http_check_new_conn(struct Curl_easy *data)
 static CURLcode http_add_connection_hd(struct Curl_easy *data,
                                        struct dynbuf *req)
 {
-  char *custom = Curl_checkheaders(data, STRCONST("Connection"));
-  char *custom_val = custom ? Curl_copy_header_value(custom) : NULL;
-  const char *sep = (custom_val && *custom_val) ? ", " : "Connection: ";
+  struct curl_slist *h;
   CURLcode result = CURLE_OK;
   size_t rlen = curlx_dyn_len(req);
+  char *custom_val = NULL;
+  const char *sep = "Connection: ";
 
-  if(custom && !custom_val)
-    return CURLE_OUT_OF_MEMORY;
+  for(h = data->set.headers; h; h = h->next) {
+    if(curl_strnequal(h->data, "Connection:", 11)) {
+      const char *val = h->data + 11;
+      while(*val && ISSPACE(*val)) val++;
+      if(custom_val) {
+        char *tmp;
+        tmp = curl_maprintf("%s, %s", custom_val, val);
+        if(!tmp) {
+          free(custom_val);
+          return CURLE_OUT_OF_MEMORY;
+        }
+        free(custom_val);
+        custom_val = tmp;
+      }
+      else {
+        custom_val = strdup(val);
+        if(!custom_val)
+          return CURLE_OUT_OF_MEMORY;
+      }
+    }
+  }
 
   if(custom_val && *custom_val)
     result = curlx_dyn_addf(req, "Connection: %s", custom_val);
