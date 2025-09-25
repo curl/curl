@@ -49,8 +49,6 @@
 
 #define MAX_GSS_LEN 1024
 
-static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
-
 /*
  * Helper GSS-API error functions.
  */
@@ -134,6 +132,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   const char *serviceptr = data->set.str[STRING_PROXY_SERVICE_NAME] ?
                            data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
   const size_t serviceptr_length = strlen(serviceptr);
+  gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
+
 
   /*   GSS-API request looks like
    * +----+------+-----+----------------+
