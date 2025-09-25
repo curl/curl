@@ -48,13 +48,13 @@ jobs:
           persist-credentials: false
 
       - name: 'initialize'
-        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3
+        uses: github/codeql-action/init@303c0aef88fc2fe5ff6d63d3b1596bfd83dfa1f9 # v3
         with:
           languages: actions, python
           queries: security-extended
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
+        uses: github/codeql-action/analyze@303c0aef88fc2fe5ff6d63d3b1596bfd83dfa1f9 # v3
 
   c:
     name: 'C'
@@ -84,7 +84,7 @@ jobs:
           persist-credentials: false
 
       - name: 'initialize'
-        uses: github/codeql-action/init@192325c86100d080feab897ff886c34abd4c83a3 # v3
+        uses: github/codeql-action/init@303c0aef88fc2fe5ff6d63d3b1596bfd83dfa1f9 # v3
         with:
           languages: cpp
           build-mode: manual
@@ -129,4 +129,4 @@ jobs:
           fi
 
       - name: 'perform analysis'
-        uses: github/codeql-action/analyze@192325c86100d080feab897ff886c34abd4c83a3 # v3
+        uses: github/codeql-action/analyze@303c0aef88fc2fe5ff6d63d3b1596bfd83dfa1f9 # v3
