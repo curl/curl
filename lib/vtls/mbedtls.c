@@ -918,6 +918,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 static CURLcode
 mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
+  CURLcode result;
   int ret;
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
@@ -968,7 +969,6 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   if(pinnedpubkey) {
     int size;
-    CURLcode result;
     const mbedtls_x509_crt *peercert;
     mbedtls_x509_crt *p = NULL;
     unsigned char *pubkey = NULL;
@@ -1018,17 +1018,19 @@ pinnedpubkey_error:
     mbedtls_x509_crt_free(p);
     free(p);
     free(pubkey);
-    if(result) {
+    if(result)
       return result;
-    }
   }
 
 #ifdef HAS_ALPN_MBEDTLS
   if(connssl->alpn) {
     const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
-    Curl_alpn_set_negotiated(cf, data, connssl, (const unsigned char *)proto,
-                             proto ? strlen(proto) : 0);
+    result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                      (const unsigned char *)proto,
+                                      proto ? strlen(proto) : 0);
+    if(result)
+      return result;
   }
 #endif
 
