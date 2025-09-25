@@ -4855,8 +4855,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(data->set.ssl.certinfo) {
-    /* asked to gather certificate info */
+  if(data->set.ssl.certinfo && !octx->reused_session) {
+    /* asked to gather certificate info. Reused sessions don't have cert
+       chains */
     result = ossl_certchain(data, octx->ssl);
     if(result) {
       BIO_free(mem);
