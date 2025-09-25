@@ -283,7 +283,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
        * a quarter of the quota, break out. We want to stutter a bit
        * to keep in the limit, but too small receives will just cost
        * cpu unnecessarily. */
-      if(total_received >= (data->set.max_recv_speed / 4))
+      if(total_received && (total_received >= (data->set.max_recv_speed / 4)))
         break;
       if(data->set.max_recv_speed < (curl_off_t)bytestoread)
         bytestoread = (size_t)data->set.max_recv_speed;
