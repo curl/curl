@@ -865,9 +865,9 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       goto out;
   }
 
-  if(cf_process_ingress(cf, data)) {
+  result = cf_process_ingress(cf, data);
+  if(result) {
     CURL_TRC_CF(data, cf, "cf_recv, error on ingress");
-    result = CURLE_RECV_ERROR;
     goto out;
   }
 
