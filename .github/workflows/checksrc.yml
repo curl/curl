@@ -61,6 +61,11 @@ jobs:
             -r tests/http/requirements.txt \
             -r tests/requirements.txt
 
+      - name: 'REUSE check'
+        run: |
+          source ~/venv/bin/activate
+          reuse lint
+
       - name: 'codespell'
         run: |
           source ~/venv/bin/activate
@@ -88,11 +93,6 @@ jobs:
         run: |
           source ~/venv/bin/activate
           scripts/pythonlint.sh
-
-      - name: 'REUSE check'
-        run: |
-          source ~/venv/bin/activate
-          reuse lint
 
   complexity:
     name: 'complexity'
