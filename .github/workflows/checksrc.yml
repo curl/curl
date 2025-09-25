@@ -44,7 +44,7 @@ jobs:
         run: scripts/checksrc-all.pl
 
   linters:
-    name: 'spellcheck, cmakelint, pytype, ruff, reuse'
+    name: 'spellcheck, linters, REUSE'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
