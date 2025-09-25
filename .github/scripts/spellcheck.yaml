@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 #
+# Docs: https://facelessuser.github.io/pyspelling/configuration/
 # Docs: https://github.com/UnicornGlobal/spellcheck-github-actions
 matrix:
   - name: Markdown
