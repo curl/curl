@@ -5369,6 +5369,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
         connclose(conn, "TLS close_notify");
       break;
     case SSL_ERROR_WANT_READ:
+      connssl->io_need = CURL_SSL_IO_NEED_RECV;
       result = CURLE_AGAIN;
       goto out;
     case SSL_ERROR_WANT_WRITE:
