@@ -55,10 +55,6 @@
 #include <unistd.h>
 #endif
 
-#ifndef SIZE_MAX
-#define SIZE_MAX ((size_t)-1)
-#endif
-
 struct mem {
   /* 'buf' points to memory contents that is always zero terminated so that it
      can be treated like a string if appropriate. 'recent' points to the most
