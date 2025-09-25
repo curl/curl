@@ -1918,7 +1918,8 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
    * was not complete, we are lacking the close notify from the server. */
   if(send_shutdown) {
     wolfSSL_ERR_clear_error();
-    if(wolfSSL_shutdown(wctx->ssl) == 1) {
+    nread = wolfSSL_shutdown(wctx->ssl);
+    if(nread == 1) {
       CURL_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
       goto out;
