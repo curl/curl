@@ -125,6 +125,7 @@ jobs:
       - name: 'check spelling'
         run: |
           source ~/venv/bin/activate
+          # setup the custom wordlist
           grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
           aspell --version
           pyspelling --version
