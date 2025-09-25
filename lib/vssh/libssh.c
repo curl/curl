@@ -2392,19 +2392,16 @@ static void myssh_block2waitfor(struct connectdata *conn,
                                 struct ssh_conn *sshc,
                                 bool block)
 {
-  /* If it did not block, or nothing was returned by ssh_get_poll_flags
-   * have the original set */
-  conn->waitfor = sshc->orig_waitfor;
-
   if(block) {
     int dir = ssh_get_poll_flags(sshc->ssh_session);
-    conn->waitfor = 0;
     /* translate the libssh define bits into our own bit defines */
-    if(dir & SSH_READ_PENDING)
-      conn->waitfor |= KEEP_RECV;
-    if(dir & SSH_WRITE_PENDING)
-      conn->waitfor |= KEEP_SEND;
+    conn->waitfor =
+      ((dir & SSH_READ_PENDING) ? KEEP_RECV : 0) |
+      ((dir & SSH_WRITE_PENDING) ? KEEP_SEND | 0);
   }
+  else
+    /* if it did not block, use the original set */
+    conn->waitfor = sshc->orig_waitfor;
 }
 
 /* called repeatedly until done from multi.c */
