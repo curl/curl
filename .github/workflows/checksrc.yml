@@ -52,8 +52,6 @@ jobs:
           persist-credentials: false
 
       - name: 'install'
-        env:
-          DEBIAN_FRONTEND: noninteractive
         run: |
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
