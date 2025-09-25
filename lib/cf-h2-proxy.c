@@ -433,6 +433,11 @@ static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
       *err = CURLE_RECV_ERROR;
       return -1;
     }
+    else if(!rv) {
+      /* nghttp2 does not want to process more, but has no error. This
+       * probably cannot happen, but be safe. */
+      break;
+    }
     Curl_bufq_skip(&ctx->inbufq, (size_t)rv);
     if(Curl_bufq_is_empty(&ctx->inbufq)) {
       CURL_TRC_CF(data, cf, "[0] all data in connection buffer processed");
