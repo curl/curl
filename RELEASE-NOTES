@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3508
+ Contributors:                 3509
 
 This release includes the following changes:
 
@@ -28,6 +28,7 @@ This release includes the following bugfixes:
  o build: address some `-Weverything` warnings, update picky warnings [74]
  o build: avoid overriding system symbols for socket functions [68]
  o build: show llvm/clang in platform flags and `buildinfo.txt` [126]
+ o cf-h2-proxy: break loop on edge case [140]
  o cf-socket: use the right byte order for ports in bindlocal [61]
  o cfilter: unlink and discard [46]
  o cmake: add `CURL_CODE_COVERAGE` option [78]
@@ -60,10 +61,13 @@ This release includes the following bugfixes:
  o httpsrr: free old pointers when storing new [57]
  o krb5: return appropriate error on send failures [22]
  o ldap: do not base64 encode zero length string [42]
+ o lib: upgrade/multiplex handling [136]
  o libcurl-multi.md: added curl_multi_get_offt mention [53]
  o libcurl-security.md: mention long-running connections [6]
  o libssh2: drop two redundant null-terminations [26]
  o libssh2: error check and null-terminate in ssh_state_sftp_readdir_link() [34]
+ o libssh: acknowledge SSH_AGAIN in the SFTP state machine [89]
+ o libssh: clarify myssh_block2waitfor [92]
  o libssh: drop two unused assignments [104]
  o libssh: error on bad chgrp number [71]
  o libssh: error on bad chown number and store the value [64]
@@ -74,24 +78,43 @@ This release includes the following bugfixes:
  o managen: ignore version mentions < 7.66.0 [55]
  o managen: render better manpage references/links [54]
  o managen: strict protocol check [109]
+ o mbedtls: check result of setting ALPN [127]
+ o mbedtls: handle WANT_WRITE from mbedtls_ssl_read() [145]
  o multi.h: add CURLMINFO_LASTENTRY [51]
  o ngtcp2: check error code on connect failure [13]
+ o ngtcp2: fix early return [131]
  o openldap: avoid indexing the result at -1 for blank responses [44]
  o openldap: check ldap_get_option() return codes [119]
+ o openssl-quic: check results better [132]
+ o openssl-quic: handle error in SSL_get_stream_read_error_code [129]
+ o openssl: clear retry flag on x509 error [130]
+ o openssl: fail the transfer if ossl_certchain() fails [23]
  o openssl: make the asn1_object_dump name null terminated [56]
+ o openssl: set io_need always [99]
+ o OS400: fix a use-after-free/double-free case [142]
  o quic: fix min TLS version handling [14]
  o quic: ignore EMSGSIZE on receive [4]
+ o quiche: fix verbose message when ip quadruple cannot be obtained. [128]
+ o quiche: when ingress processing fails, return that error code [103]
  o rustls: fix clang-tidy warning [107]
+ o rustls: fix comment describing cr_recv() [117]
  o rustls: typecast variable for safer trace output [69]
  o rustls: use %zu for size_t in failf() format string [121]
  o sasl: clear canceled mechanism instead of toggling it [41]
  o schannel: assign result before using it [62]
+ o schannel_verify: use more human friendly error messages [96]
  o setopt: accept *_SSL_VERIFYHOST set to 2L [31]
  o setopt: make CURLOPT_MAXREDIRS accept -1 (again) [1]
  o smb: adjust buffer size checks [45]
  o smtp: check EHLO responses case insensitively [50]
+ o socks: handle error in verbose trace gracefully [94]
  o socks: make Curl_blockread_all return CURLcode [67]
+ o socks: rewwork, cleaning up socks state handling [135]
+ o socks_gssapi: make the gss_context a local variable [144]
  o socks_gssapi: reject too long tokens [90]
+ o socks_gssapi: remove superfluous releases of the gss_recv_token [139]
+ o socks_gssapi: remove the forced "no protection" [143]
+ o socks_sspi: bail out on too long fields [137]
  o socks_sspi: fix memory cleanup calls [40]
  o socks_sspi: restore non-blocking socket on error paths [48]
  o ssl-sessions.md: mark option experimental [12]
@@ -116,10 +139,14 @@ This release includes the following bugfixes:
  o tool_getparam/set_rate: skip the multiplication on overflow [84]
  o tool_operate: improve wording in retry message [37]
  o tool_operate: keep the progress meter for --out-null [33]
+ o transfer: avoid busy loop with tiny speed limit [100]
  o urldata: FILE is not a list-only protocol [9]
+ o vtls: alpn setting, check proto parameter [134]
  o vtls_int.h: clarify data_pending [124]
  o windows: replace `_beginthreadex()` with `CreateThread()` [80]
  o windows: stop passing unused, optional argument for Win9x compatibility [75]
+ o wolfssl: check BIO read parameters [133]
+ o wolfssl: fix error check in shutdown [105]
  o ws: clarify an error message [125]
  o ws: reject curl_ws_recv called with NULL buffer with a buflen [118]
 
@@ -149,9 +176,10 @@ advice from friends like these:
   divinity76 on github, Emilio Pozuelo Monfort, Ethan Everett,
   fds242 on github, Javier Blazquez, Jicea, jmaggard10 on github,
   Joseph Birr-Pixton, Joshua Rogers, kapsiR on github, Marcel Raad,
-  Michael Osipov, Michał Petryka, Nir Azkiel, Ray Satiro, renovate[bot],
-  rinsuki on github, Samuel Dionne-Riel, Stefan Eissing, Viktor Szakats
-  (28 contributors)
+  Michael Osipov, Michał Petryka, Nir Azkiel, Patrick Monnerat, Ray Satiro,
+  renovate[bot], rinsuki on github, Samuel Dionne-Riel, Stanislav Fort,
+  Stefan Eissing, Viktor Szakats
+  (30 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -177,6 +205,7 @@ References to bug reports and discussions on issues:
  [20] = https://curl.se/bug/?i=18554
  [21] = https://curl.se/bug/?i=18618
  [22] = https://curl.se/bug/?i=18561
+ [23] = https://curl.se/bug/?i=18646
  [24] = https://curl.se/bug/?i=18616
  [25] = https://curl.se/bug/?i=18491
  [26] = https://curl.se/bug/?i=18606
@@ -241,11 +270,19 @@ References to bug reports and discussions on issues:
  [85] = https://curl.se/bug/?i=18612
  [87] = https://curl.se/bug/?i=18707
  [88] = https://curl.se/bug/?i=18680
+ [89] = https://curl.se/bug/?i=18740
  [90] = https://curl.se/bug/?i=18681
  [91] = https://curl.se/bug/?i=18251
+ [92] = https://curl.se/bug/?i=18739
+ [94] = https://curl.se/bug/?i=18722
+ [96] = https://curl.se/bug/?i=18737
+ [99] = https://curl.se/bug/?i=18733
+ [100] = https://curl.se/bug/?i=18732
  [101] = https://curl.se/bug/?i=18689
  [102] = https://curl.se/bug/?i=18688
+ [103] = https://curl.se/bug/?i=18730
  [104] = https://curl.se/bug/?i=18684
+ [105] = https://curl.se/bug/?i=18729
  [106] = https://curl.se/bug/?i=18671
  [107] = https://curl.se/bug/?i=18670
  [108] = https://curl.se/bug/?i=18633
@@ -257,6 +294,7 @@ References to bug reports and discussions on issues:
  [114] = https://curl.se/bug/?i=18666
  [115] = https://curl.se/bug/?i=18664
  [116] = https://curl.se/bug/?i=18659
+ [117] = https://curl.se/bug/?i=18728
  [118] = https://curl.se/bug/?i=18656
  [119] = https://curl.se/bug/?i=18653
  [120] = https://curl.se/bug/?i=18652
@@ -266,3 +304,20 @@ References to bug reports and discussions on issues:
  [124] = https://curl.se/bug/?i=18644
  [125] = https://curl.se/bug/?i=18654
  [126] = https://curl.se/bug/?i=18645
+ [127] = https://curl.se/bug/?i=18727
+ [128] = https://curl.se/bug/?i=18726
+ [129] = https://curl.se/bug/?i=18725
+ [130] = https://curl.se/bug/?i=18724
+ [131] = https://curl.se/bug/?i=18723
+ [132] = https://curl.se/bug/?i=18720
+ [133] = https://curl.se/bug/?i=18718
+ [134] = https://curl.se/bug/?i=18717
+ [135] = https://curl.se/bug/?i=18401
+ [136] = https://curl.se/bug/?i=18227
+ [137] = https://curl.se/bug/?i=18719
+ [139] = https://curl.se/bug/?i=18714
+ [140] = https://curl.se/bug/?i=18715
+ [142] = https://curl.se/bug/?i=18713
+ [143] = https://curl.se/bug/?i=18712
+ [144] = https://curl.se/bug/?i=18711
+ [145] = https://curl.se/bug/?i=18682
