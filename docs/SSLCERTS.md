@@ -73,8 +73,10 @@ another option to restrict search to the application's directory.
 
 ### Use the native store
 
-In several environments, in particular on Windows and Apple operating systems, you can ask curl to use the
-system's native CA store when verifying the certificate. Depending on how curl was built, this may already be the default.
+In several environments, in particular on Microsoft and Apple operating
+systems, you can ask curl to use the system's native CA store when verifying
+the certificate. Depending on how curl was built, this may already be the
+default.
 
 With the curl command line tool: `--ca-native`.
 

@@ -301,25 +301,27 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   CURLcode result;
 #endif
 
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #ifdef USE_APPLE_SECTRUST
-  if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
-    sslc->native_ca_store = TRUE;
+    if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
+      sslc->native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
-  if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
-    if(result)
-      return result;
-  }
-  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
+    if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
+      if(result)
+        return result;
+    }
+    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
 #endif
 #ifdef CURL_CA_BUNDLE
-  if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
-    if(result)
-      return result;
-  }
+    if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
+      if(result)
+        return result;
+    }
 #endif
+  }
   sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
   sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
   sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
@@ -346,26 +348,29 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 
 #ifndef CURL_DISABLE_PROXY
   sslc = &data->set.proxy_ssl;
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
 #ifdef USE_APPLE_SECTRUST
-  if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
-    sslc->native_ca_store = TRUE;
+    if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
+      sslc->native_ca_store = TRUE;
 #endif
 #ifdef CURL_CA_PATH
-  if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
-    if(result)
-      return result;
-  }
-  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
+    if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
+                              CURL_CA_PATH);
+      if(result)
+        return result;
+    }
+    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
 #endif
 #ifdef CURL_CA_BUNDLE
-  if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
-                            CURL_CA_BUNDLE);
-    if(result)
-      return result;
-  }
+    if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                              CURL_CA_BUNDLE);
+      if(result)
+        return result;
+    }
 #endif
+  }
   sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
   sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
   sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
