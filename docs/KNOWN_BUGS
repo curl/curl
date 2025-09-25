@@ -86,6 +86,7 @@ problems may have been fixed or changed somewhat since this was written.
  12.4 LDAPS requests to ActiveDirectory server hang
 
  13. TCP/IP
+ 13.1 telnet code does not handle partial writes properly
  13.2 Trying local ports fails on Windows
 
  15. CMake
@@ -546,6 +547,11 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/9580
 
 13. TCP/IP
+
+13.1 telnet code does not handle partial writes properly
+
+ It probably does not happen too easily because of how slow and infrequent
+ sends are normally performed.
 
 13.2 Trying local ports fails on Windows
 
