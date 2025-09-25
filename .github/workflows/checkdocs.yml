@@ -113,13 +113,20 @@ jobs:
           # shellcheck disable=SC2046
           .github/scripts/cleancmd.pl $(find docs -name '*.md')
 
-      - name: 'setup the custom wordlist'
-        run: grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
+      - name: 'install'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install aspell aspell-en
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-docs.txt
 
-      - name: 'check Spelling'
-        uses: rojopolis/spellcheck-github-actions@739a1e3ceb79a98a5d4a9bf76f351137f9d78892 # v0
-        with:
-          config_path: .github/scripts/spellcheck.yaml
+      - name: 'check spelling'
+        run: |
+          source ~/venv/bin/activate
+          grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
+          pyspelling -c .github/scripts/spellcheck.yaml
 
   badwords-synopsis:
     name: 'badwords, synopsis'
