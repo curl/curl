@@ -1264,12 +1264,16 @@ static CURLcode h3_quic_recv(void *reader_ctx,
     else if(SSL_get_stream_read_state(x->s->ssl) ==
             SSL_STREAM_STATE_RESET_REMOTE) {
       uint64_t app_error_code = NGHTTP3_H3_NO_ERROR;
-      SSL_get_stream_read_error_code(x->s->ssl, &app_error_code);
-      CURL_TRC_CF(x->data, x->cf, "[%" FMT_PRId64 "] h3_quic_recv -> RESET, "
-                  "rv=%d, app_err=%" FMT_PRIu64,
-                  x->s->id, rv, (curl_uint64_t)app_error_code);
-      if(app_error_code != NGHTTP3_H3_NO_ERROR) {
+      if(!SSL_get_stream_read_error_code(x->s->ssl, &app_error_code)) {
         x->s->reset = TRUE;
+        return CURLE_RECV_ERROR;
+      }
+      else {
+        CURL_TRC_CF(x->data, x->cf, "[%" FMT_PRId64 "] h3_quic_recv -> RESET, "
+                    "rv=%d, app_err=%" FMT_PRIu64,
+                    x->s->id, rv, (curl_uint64_t)app_error_code);
+        if(app_error_code != NGHTTP3_H3_NO_ERROR)
+          x->s->reset = TRUE;
       }
       x->s->recvd_eos = TRUE;
       return CURLE_OK;
