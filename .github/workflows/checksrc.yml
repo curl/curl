@@ -43,8 +43,8 @@ jobs:
       - name: 'check'
         run: scripts/checksrc-all.pl
 
-  spellcheck-cmakelint-pytype-ruff:
-    name: 'spellcheck, cmakelint, pytype, ruff'
+  linters:
+    name: 'spellcheck, cmakelint, pytype, ruff, reuse'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
@@ -89,16 +89,10 @@ jobs:
           source ~/venv/bin/activate
           scripts/pythonlint.sh
 
-  reuse:
-    name: 'REUSE'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          persist-credentials: false
-
-      - name: 'check'
-        uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
+      - name: 'REUSE check'
+        run: |
+          source ~/venv/bin/activate
+          reuse lint
 
   complexity:
     name: 'complexity'
