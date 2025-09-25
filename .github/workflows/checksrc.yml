@@ -72,7 +72,7 @@ jobs:
 
       - name: 'typos'
         run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           typos --version
           .github/scripts/typos.sh
@@ -118,7 +118,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 'install prereqs'
-        run: /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
