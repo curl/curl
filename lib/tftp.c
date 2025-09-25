@@ -1106,19 +1106,21 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
                                 0,
                                 (struct sockaddr *)&remote_addr,
                                 &fromlen);
-  if(state->remote_pinned) {
-    /* pinned, verify that it comes from the same address */
-    if((state->remote_addrlen != fromlen) ||
-       memcmp(&remote_addr, &state->remote_addr, fromlen)) {
-      failf(data, "Data received from another address");
-      return CURLE_RECV_ERROR;
+  if(fromlen) {
+    if(state->remote_pinned) {
+      /* pinned, verify that it comes from the same address */
+      if((state->remote_addrlen != fromlen) ||
+         memcmp(&remote_addr, &state->remote_addr, fromlen)) {
+        failf(data, "Data received from another address");
+        return CURLE_RECV_ERROR;
+      }
     }
-  }
-  else {
-    /* pin address on first use */
-    state->remote_pinned = TRUE;
-    state->remote_addrlen = fromlen;
-    memcpy(&state->remote_addr, &remote_addr, fromlen);
+    else {
+      /* pin address on first use */
+      state->remote_pinned = TRUE;
+      state->remote_addrlen = fromlen;
+      memcpy(&state->remote_addr, &remote_addr, fromlen);
+    }
   }
 
   /* Sanity check packet length */
