@@ -889,7 +889,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 NULL,
                                 &pChainContext)) {
       char buffer[WINAPI_ERROR_LEN];
-      failf(data, "schannel: CertGetCertificateChain failed: %s",
+      failf(data, "schannel: failed to get the certificate chain: %s",
             curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       pChainContext = NULL;
       result = CURLE_PEER_FAILED_VERIFICATION;
@@ -910,23 +910,20 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
       if(dwTrustErrorMask) {
         if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_REVOKED");
+          failf(data, "schannel: trust for this certificate or one of "
+                "the certificates in the certificate chain has been revoked");
         else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_PARTIAL_CHAIN");
+          failf(data, "schannel: the certificate chain is incomplete");
         else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_UNTRUSTED_ROOT");
+          failf(data, "schannel: the certificate or certificate chain is "
+                "based on an untrusted root");
         else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_NOT_TIME_VALID");
+          failf(data, "schannel: this certificate or one of the certificates "
+                "in the certificate chain is not time valid");
         else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
+          failf(data, "schannel: the revocation status is unknown");
         else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08lx",
-                dwTrustErrorMask);
+          failf(data, "schannel: error 0x%08lx", dwTrustErrorMask);
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
     }
