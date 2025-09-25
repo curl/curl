@@ -193,6 +193,11 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     if(sspi_send_token.cbBuffer) {
       socksreq[0] = 1;    /* GSS-API subnegotiation version */
       socksreq[1] = 1;    /* authentication message type */
+      if(sspi_send_token.cbBuffer > 0xffff) {
+        /* needs to fit in an unsigned 16 bit field */
+        result = CURLE_COULDNT_CONNECT;
+        goto error;
+      }
       us_length = htons((unsigned short)sspi_send_token.cbBuffer);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
@@ -399,9 +404,13 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       goto error;
     }
 
-    etbuf_size = sspi_w_token[0].cbBuffer +
-                 sspi_w_token[1].cbBuffer +
-                 sspi_w_token[2].cbBuffer;
+    etbuf_size = sspi_w_token[0].cbBuffer + sspi_w_token[1].cbBuffer +
+      sspi_w_token[2].cbBuffer;
+    if(etbuf_size > 0xffff) {
+      /* needs to fit in an unsigned 16 bit field */
+      result = CURLE_COULDNT_CONNECT;
+      goto error;
+    }
     etbuf = malloc(etbuf_size);
     if(!etbuf) {
       result = CURLE_OUT_OF_MEMORY;
