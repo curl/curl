@@ -144,6 +144,15 @@ static unsigned int speedindex;
 static bool indexwrapped;
 static struct speedcount speedstore[SPEEDCNT];
 
+static void add_offt(curl_off_t *val, curl_off_t add)
+{
+  if(CURL_OFF_T_MAX - *val < add)
+    /* maxed out! */
+    *val = CURL_OFF_T_MAX;
+  else
+    *val += add;
+}
+
 /*
   |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
   |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
@@ -189,24 +198,24 @@ bool progress_meter(CURLM *multi,
     stamp = now;
 
     /* first add the amounts of the already completed transfers */
-    all_dlnow += all_dlalready;
-    all_ulnow += all_ulalready;
+    add_offt(&all_dlnow, all_dlalready);
+    add_offt(&all_ulnow, all_ulalready);
 
     for(per = transfers; per; per = per->next) {
-      all_dlnow += per->dlnow;
-      all_ulnow += per->ulnow;
+      add_offt(&all_dlnow, per->dlnow);
+      add_offt(&all_ulnow, per->ulnow);
       if(!per->dltotal)
         dlknown = FALSE;
       else if(!per->dltotal_added) {
         /* only add this amount once */
-        all_dltotal += per->dltotal;
+        add_offt(&all_dltotal, per->dltotal);
         per->dltotal_added = TRUE;
       }
       if(!per->ultotal)
         ulknown = FALSE;
       else if(!per->ultotal_added) {
         /* only add this amount once */
-        all_ultotal += per->ultotal;
+        add_offt(&all_ultotal, per->ultotal);
         per->ultotal_added = TRUE;
       }
     }
@@ -306,14 +315,14 @@ bool progress_meter(CURLM *multi,
 void progress_finalize(struct per_transfer *per)
 {
   /* get the numbers before this transfer goes away */
-  all_dlalready += per->dlnow;
-  all_ulalready += per->ulnow;
+  add_offt(&all_dlalready, per->dlnow);
+  add_offt(&all_ulalready, per->ulnow);
   if(!per->dltotal_added) {
-    all_dltotal += per->dltotal;
+    add_offt(&all_dltotal, per->dltotal);
     per->dltotal_added = TRUE;
   }
   if(!per->ultotal_added) {
-    all_ultotal += per->ultotal;
+    add_offt(&all_ultotal, per->ultotal);
     per->ultotal_added = TRUE;
   }
 }
