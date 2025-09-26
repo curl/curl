@@ -561,7 +561,7 @@ char **__crt0_glob_function(char *arg)
 
 #ifdef _WIN32
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+#if !defined(CURL_WINDOWS_UWP) && \
   !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 /* Search and set the CA cert file for Windows.
  *
@@ -613,7 +613,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 struct curl_slist *GetLoadedModulePaths(void)
 {
   struct curl_slist *slist = NULL;
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   HANDLE hnd = INVALID_HANDLE_VALUE;
   MODULEENTRY32 mod = {0};
 
@@ -664,7 +664,7 @@ cleanup:
 
 bool tool_term_has_bold;
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
 /* The terminal settings to restore on exit */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -735,14 +735,14 @@ static void init_terminal(void)
 CURLcode win32_init(void)
 {
   curlx_now_init();
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   init_terminal();
 #endif
 
   return CURLE_OK;
 }
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
 struct win_thread_data {
@@ -949,7 +949,7 @@ curl_socket_t win32_stdin_read_thread(void)
   return socket_r;
 }
 
-#endif /* !CURL_WINDOWS_UWP && !UNDER_CE */
+#endif /* !CURL_WINDOWS_UWP */
 
 #endif /* _WIN32 */
 
