@@ -130,5 +130,10 @@ while(@ARGV) {
         close($fh);
     }
 
+    if($PREFIX eq "test-client-cert") {
+        # Generate one client PKCS#12 to test Windows mTLS.
+        system("$OPENSSL pkcs12 -export -in $PREFIX.pem -inkey $PREFIX.pem -out $PREFIX.p12 -passout pass:secret 2>$dev_null");
+    }
+
     print "Certificate generated: CA=$CAPREFIX ${DURATION}days $KEYSIZE $PREFIX\n";
 }

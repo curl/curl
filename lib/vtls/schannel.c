@@ -37,6 +37,15 @@
 #  error "cannot compile SCHANNEL support without SSPI."
 #endif
 
+#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
+#undef _WIN32_WINNT
+/* Define _WIN32_WINNT to ensure MinGW headers show NCrypt definitions.
+ * MinGW 4.8.1 headers require _WIN32_WINNT>=600 to show  NCrypt symbols.
+ * curl documents Vista as lowest supported Windows version */
+#define _WIN32_WINNT 0x0600  /* Requires Windows Vista */
+#endif
+#include <ncrypt.h>
+
 #include "schannel.h"
 #include "schannel_int.h"
 #include "vtls.h"
@@ -122,11 +131,6 @@
 #if defined(__MINGW32CE__) && \
   !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
 #define ALG_CLASS_DHASH ALG_CLASS_HASH
-#endif
-
-/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
-#ifndef PKCS12_NO_PERSIST_KEY
-#define PKCS12_NO_PERSIST_KEY 0x00008000
 #endif
 
 /* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
@@ -446,6 +450,7 @@ static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
+  bool imported_cert = false;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -620,7 +625,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         }
       }
 
-      /* Convert key-pair data to the in-memory certificate store */
+      /* Import key into persistent store. Delete later.
+       * Importing key as ephemeral (not-persisted) errors with TLS 1.3. */
       datablob.pbData = (BYTE*)certdata;
       datablob.cbData = (DWORD)certsize;
 
@@ -640,12 +646,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        if(Curl_isVistaOrGreater)
-          cert_store = PFXImportCertStore(&datablob, pszPassword,
-                                          PKCS12_NO_PERSIST_KEY);
-        else
-          cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
-
+        cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
         free(pszPassword);
       }
       if(!blob)
@@ -682,6 +683,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
       }
+      /* Keep certificate handle to delete imported key later. */
+      imported_cert = true;
     }
     else {
       cert_store =
@@ -838,8 +841,13 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             &backend->cred->cred_handle, NULL);
   }
 
-  if(client_certs[0])
+  if(client_certs[0]) {
+    if(imported_cert) {
+      backend->cred->imported_cert =
+        CertDuplicateCertificateContext(client_certs[0]);
+    }
     CertFreeCertificateContext(client_certs[0]);
+  }
 
   if(sspi_status != SEC_E_OK) {
     char buffer[STRERROR_LEN];
@@ -1490,6 +1498,119 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, bool reverse_order,
   return args->result == CURLE_OK;
 }
 
+
+/* delete_imported_key deletes a persisted imported key. Errors ignored. */
+static void delete_imported_key(PCCERT_CONTEXT imported_cert)
+{
+  DWORD byte_count;
+  void *storage = NULL;
+  CRYPT_KEY_PROV_INFO *prov_info;
+  NCRYPT_PROV_HANDLE prov_handle = 0;
+  NCRYPT_PROV_HANDLE key_handle = 0;
+
+  DEBUGASSERT(imported_cert);
+
+  if(!CertGetCertificateContextProperty (
+    imported_cert, CERT_KEY_PROV_INFO_PROP_ID, NULL, &byte_count)) {
+    goto done;
+  }
+
+  storage = malloc(byte_count);
+  if(!storage) {
+    /* On failure to allocate, skip attempting to delete imported key. */
+    goto done;
+  }
+
+  if(!CertGetCertificateContextProperty (
+    imported_cert, CERT_KEY_PROV_INFO_PROP_ID, storage, &byte_count)) {
+    goto done;
+  }
+
+  prov_info = (CRYPT_KEY_PROV_INFO*) storage;
+
+  /* Delete persisted key: */
+  if(prov_info->dwProvType == 0) {
+      /* Key stored in CNG (Cryptographic Next Generation). */
+
+      /* Open provider handle. */
+      {
+        SECURITY_STATUS st = NCryptOpenStorageProvider(
+          &prov_handle, prov_info->pwszProvName, 0 /* dwFlags */);
+        if(st != ERROR_SUCCESS) {
+          /* Ignore error */
+          goto done;
+        }
+      }
+
+      /* Open key: */
+      {
+        SECURITY_STATUS st = NCryptOpenKey(
+          prov_handle,
+          &key_handle,
+          prov_info->pwszContainerName,
+          0 /* dwLegacyKeySpec */,
+          0 /* dwFlags */);
+        if(st != SEC_E_OK) {
+          /* Ignore error. */
+          goto done;
+        }
+      }
+
+      /* Delete persisted key: */
+      {
+        SECURITY_STATUS st = NCryptDeleteKey(key_handle, 0); /* Frees handle */
+        if(st != SEC_E_OK) {
+          /* Ignore error. */
+          goto done;
+        }
+        /* NCryptDeleteKey freed key_handle. */
+        key_handle = 0;
+      }
+  }
+  else {
+      /* Key stored in legacy CAPI (CryptoAPI). */
+      DWORD flags = (prov_info->dwFlags & CRYPT_MACHINE_KEYSET) |
+        CRYPT_DELETEKEYSET;
+      HCRYPTPROV prov = 0;
+      LPTSTR container_name;
+      LPTSTR prov_name;
+
+      #ifdef UNICODE
+      container_name = prov_info->pwszContainerName;
+      prov_name = prov_info->pwszProvName;
+      #else
+      container_name =
+        curlx_convert_wchar_to_UTF8(prov_info->pwszContainerName);
+      prov_name =
+        curlx_convert_wchar_to_UTF8(prov_info->pwszProvName);
+      #endif
+      CryptAcquireContext(
+        &prov,
+        container_name,
+        prov_name,
+        prov_info->dwProvType,
+        flags);
+      /* CryptAcquireContext is only called to delete key container.
+       * Expect no CSP is returned. */
+      DEBUGASSERT(prov == 0);
+
+      #ifndef UNICODE
+      curlx_unicodefree(container_name);
+      curlx_unicodefree(prov_name);
+      #endif
+  }
+
+done:
+    if(prov_handle) {
+      NCryptFreeObject(prov_handle);
+    }
+    if(key_handle) {
+      NCryptFreeObject(key_handle);
+    }
+    CertFreeCertificateContext(imported_cert);
+    free(storage);
+}
+
 static void schannel_session_free(void *sessionid)
 {
   /* this is expected to be called under sessionid lock */
@@ -1498,6 +1619,9 @@ static void schannel_session_free(void *sessionid)
   if(cred) {
     cred->refcount--;
     if(cred->refcount == 0) {
+      if(cred->imported_cert) {
+        delete_imported_key(cred->imported_cert);
+      }
       Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
       if(cred->client_cert_store) {

@@ -46,4 +46,5 @@ add_custom_target(clean-certs
     "test-ca.db*"
     "test-ca.raw*"
     "test-ca.srl"
+    "test-*.p12"
 )
