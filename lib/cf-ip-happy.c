@@ -637,9 +637,12 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
     hostname = conn->bits.conn_to_host ? conn->conn_to_host.name :
       conn->host.name;
 
+#ifdef USE_UNIX_SOCKETS
     if(conn->unix_domain_socket)
       msnprintf(viamsg, sizeof(viamsg), "over %s", conn->unix_domain_socket);
-    else {
+    else
+#endif
+    {
       int port;
       if(cf->sockindex == SECONDARYSOCKET)
         port = conn->secondary_port;
