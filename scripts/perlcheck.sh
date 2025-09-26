@@ -44,4 +44,4 @@ cd "$(dirname "$0")"/..
     # strip off the leading ./ to make the grep regexes work properly
     find . -type f \( -name '*.pl' -o -name '*.pm' \) | sed 's@^\./@@'
   fi
-} | xargs -n 1 perl -c -Itests
+} | xargs -n 1 -P 6 perl -c -Itests
