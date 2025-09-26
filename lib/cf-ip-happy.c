@@ -627,26 +627,35 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
 
   {
     const char *hostname, *proxy_name = NULL;
-    int port;
+    char viamsg[160];
 #ifndef CURL_DISABLE_PROXY
     if(conn->bits.socksproxy)
       proxy_name = conn->socks_proxy.host.name;
     else if(conn->bits.httpproxy)
       proxy_name = conn->http_proxy.host.name;
 #endif
-    hostname = conn->bits.conn_to_host ?
-               conn->conn_to_host.name : conn->host.name;
+    hostname = conn->bits.conn_to_host ? conn->conn_to_host.name :
+      conn->host.name;
 
-    if(cf->sockindex == SECONDARYSOCKET)
-      port = conn->secondary_port;
-    else if(cf->conn->bits.conn_to_port)
-      port = conn->conn_to_port;
+#ifdef USE_UNIX_SOCKETS
+    if(conn->unix_domain_socket)
+      msnprintf(viamsg, sizeof(viamsg), "over %s", conn->unix_domain_socket);
     else
-      port = conn->remote_port;
+#endif
+    {
+      int port;
+      if(cf->sockindex == SECONDARYSOCKET)
+        port = conn->secondary_port;
+      else if(cf->conn->bits.conn_to_port)
+        port = conn->conn_to_port;
+      else
+        port = conn->remote_port;
+      msnprintf(viamsg, sizeof(viamsg), "port %u", port);
+    }
 
-    failf(data, "Failed to connect to %s port %u %s%s%safter "
+    failf(data, "Failed to connect to %s %s %s%s%safter "
           "%" FMT_TIMEDIFF_T " ms: %s",
-          hostname, port,
+          hostname, viamsg,
           proxy_name ? "via " : "",
           proxy_name ? proxy_name : "",
           proxy_name ? " " : "",
