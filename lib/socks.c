@@ -439,7 +439,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
           "[SOCKS] cannot complete SOCKS4 connection to %u.%u.%u.%u:%u. (%u)"
           ", request rejected or failed.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned char)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_REQUEST_FAILED;
   case 92:
     failf(data,
@@ -447,7 +447,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
           ", request rejected because SOCKS server cannot connect to "
           "identd on the client.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned char)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_IDENTD;
   case 93:
     failf(data,
@@ -455,14 +455,14 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
           ", request rejected because the client program and identd "
           "report different user-ids.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned char)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_IDENTD_DIFFER;
   default:
     failf(data,
           "[SOCKS] cannot complete SOCKS4 connection to %u.%u.%u.%u:%u. (%u)"
           ", Unknown.",
           resp[4], resp[5], resp[6], resp[7],
-          ((resp[2] << 8) | resp[3]), resp[1]);
+          (unsigned char)((resp[2] << 8) | resp[3]), resp[1]);
     return CURLPX_UNKNOWN_FAIL;
   }
 }
