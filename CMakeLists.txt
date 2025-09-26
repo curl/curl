@@ -2343,7 +2343,6 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_QUICHE
   #   USE_RUSTLS
   #   USE_WIN32_LDAP CURL_DISABLE_LDAP
-  #   USE_WOLFSSH
   #   USE_WOLFSSL
   #   _win32_winsock
   configure_package_config_file("CMake/curl-config.cmake.in"
@@ -2380,7 +2379,6 @@ if(NOT CURL_DISABLE_INSTALL)
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNettle.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindQuiche.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindRustls.cmake"
-      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindWolfSSH.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindZstd.cmake"
     DESTINATION ${_install_cmake_dir})
