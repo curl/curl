@@ -531,19 +531,19 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
   if(!li)
     return CURLE_FAILED_INIT;
   result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
-  if(!result) {
-    oldap_state(data, li, newstate);
+  if(result)
+    return result;
+  oldap_state(data, li, newstate);
 
-    if(ssldone) {
-      Sockbuf *sb;
+  if(ssldone) {
+    Sockbuf *sb;
 
-      /* Install the libcurl SSL handlers into the sockbuf. */
-      if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
-        return CURLE_FAILED_INIT;
-      ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
-      li->recv = conn->recv[FIRSTSOCKET];
-      li->send = conn->send[FIRSTSOCKET];
-    }
+    /* Install the libcurl SSL handlers into the sockbuf. */
+    if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
+       ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
+      return CURLE_FAILED_INIT;
+    li->recv = conn->recv[FIRSTSOCKET];
+    li->send = conn->send[FIRSTSOCKET];
   }
 
   return result;
@@ -947,19 +947,18 @@ static CURLcode oldap_disconnect(struct Curl_easy *data,
   (void)data;
 #endif
 
-  if(li) {
-    if(li->ld) {
+  if(li && li->ld) {
 #ifdef USE_SSL
-      if(ssl_installed(conn)) {
-        Sockbuf *sb;
-        if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
-          return CURLE_FAILED_INIT;
-        ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
-      }
-#endif
-      ldap_unbind_ext(li->ld, NULL, NULL);
-      li->ld = NULL;
+    if(ssl_installed(conn)) {
+      Sockbuf *sb;
+      if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
+         ||
+         ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
+        return CURLE_FAILED_INIT;
     }
+#endif
+    ldap_unbind_ext(li->ld, NULL, NULL);
+    li->ld = NULL;
   }
   return CURLE_OK;
 }
@@ -988,9 +987,9 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
   if(ssl_installed(conn)) {
     Sockbuf *sb;
     /* re-install the libcurl SSL handlers into the sockbuf. */
-    if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS)
+    if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
+       ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
       return CURLE_FAILED_INIT;
-    ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data);
   }
 #endif
 
