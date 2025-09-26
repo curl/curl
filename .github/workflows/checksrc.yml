@@ -82,6 +82,10 @@ jobs:
           source ~/venv/bin/activate
           scripts/cmakelint.sh
 
+      - name: 'perlcheck'
+        run: |
+          scripts/perlcheck.sh
+
       - name: 'pytype'
         run: |
           source ~/venv/bin/activate
