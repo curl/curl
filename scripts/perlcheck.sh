@@ -30,18 +30,18 @@
 
 set -eu
 
-# TODO: also find Perl files without extension
-
 cd "$(dirname "$0")"/..
 
 {
   if [ -n "${1:-}" ]; then
     for A in "$@"; do printf "%s\n" "$A"; done
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    git ls-files
+    {
+      git ls-files | grep -E '\.(pl|pm)$'
+      git grep -l -E '^#!/usr/bin/env perl'
+    } | sort -u
   else
     # strip off the leading ./ to make the grep regexes work properly
-    find . -type f | sed 's@^\./@@'
+    find . -type f \( -name '*.pl' -o -name '*.pm' \) | sed 's@^\./@@'
   fi
-} | grep -E '\.(pl|pm)$' \
-  | xargs -n 1 perl -c -Itests
+} | xargs -n 1 perl -c -Itests
