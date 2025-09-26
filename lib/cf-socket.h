@@ -76,21 +76,6 @@ CURLcode Curl_socket_open(struct Curl_easy *data,
 int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
                       curl_socket_t sock);
 
-#ifdef USE_WINSOCK
-/* When you run a program that uses the Windows Sockets API, you may
-   experience slow performance when you copy data to a TCP server.
-
-   https://learn.microsoft.com/troubleshoot/windows-server/networking/slow-performance-copy-data-tcp-server-sockets-api
-
-   Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
-   Buffer Size
-
-*/
-void Curl_sndbuf_init(curl_socket_t sockfd);
-#else
-#define Curl_sndbuf_init(y) Curl_nop_stmt
-#endif
-
 /**
  * Creates a cfilter that opens a TCP socket to the given address
  * when calling its `connect` implementation.
