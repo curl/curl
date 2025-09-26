@@ -78,29 +78,11 @@ BEGIN {
 use pathhelp qw(
     exe_ext
     dirsepadd
+    shell_quote
     );
 use Cwd qw(getcwd);
 use File::Spec;
 
-
-#######################################################################
-# Quote an argument for passing safely to a Bourne shell
-# This does the same thing as String::ShellQuote but doesn't need a package.
-# Clone of the similar function in testutil.pm
-sub _shell_quote {
-    my ($s)=@_;
-    if($^O eq 'MSWin32') {
-        $s = '"' . $s . '"';
-    }
-    else {
-        if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
-            # string contains a "dangerous" character--quote it
-            $s =~ s/'/'"'"'/g;
-            $s = "'" . $s . "'";
-        }
-    }
-    return $s;
-}
 
 #######################################################################
 # global configuration variables
@@ -123,8 +105,8 @@ our $randseed = 0;    # random number seed
 # paths
 our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
-our $perlcmd = _shell_quote($^X);
-our $perl="$perlcmd -I. " . _shell_quote("-I$srcdir"); # invoke perl like this
+our $perlcmd=shell_quote($^X);
+our $perl="$perlcmd -I. " . shell_quote("-I$srcdir"); # invoke perl like this
 our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR=dirsepadd("./libtest/" . ($ENV{'CURL_DIRSUFFIX'} || ''));
@@ -141,7 +123,7 @@ our $VCURL=$CURL;  # what curl binary to use to verify the servers with
                    # VCURL is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification
 # the path to the script that analyzes the memory debug output file
-our $memanalyze = "$perl " . _shell_quote("$srcdir/memanalyze.pl");
+our $memanalyze="$perl " . shell_quote("$srcdir/memanalyze.pl");
 our $valgrind;     # path to valgrind, or empty if disabled
 our $dev_null = File::Spec->devnull();   # null device path, eg: /dev/null
 

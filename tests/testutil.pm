@@ -38,7 +38,6 @@ BEGIN {
         runclientoutput
         setlogfunc
         exerunner
-        shell_quote
         subbase64
         subnewlines
         subsha256base64file
@@ -256,24 +255,4 @@ sub substrippemfile {
         $$thing =~ s/%%FILE%%/$file_content/;
     }
 }
-
-#######################################################################
-# Quote an argument for passing safely to a Bourne shell
-# This does the same thing as String::ShellQuote but doesn't need a package.
-#
-sub shell_quote {
-    my ($s)=@_;
-    if($^O eq 'MSWin32') {
-        $s = '"' . $s . '"';
-    }
-    else {
-        if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
-            # string contains a "dangerous" character--quote it
-            $s =~ s/'/'"'"'/g;
-            $s = "'" . $s . "'";
-        }
-    }
-    return $s;
-}
-
 1;
