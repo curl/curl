@@ -333,12 +333,11 @@ static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
   }
   dest->addrlen = (unsigned int)ai->ai_addrlen;
 
-  if(dest->addrlen > sizeof(struct Curl_sockaddr_storage)) {
-    DEBUGASSERT(0);
+  DEBUGASSERT(dest->addrlen <= sizeof(dest->curl_sa_addrbuf));
+  if(dest->addrlen > sizeof(dest->curl_sa_addrbuf))
     return CURLE_TOO_LARGE;
-  }
 
-  memcpy(&dest->curl_sa_addr, ai->ai_addr, dest->addrlen);
+  memcpy(&dest->curl_sa_addrbuf, ai->ai_addr, dest->addrlen);
   return CURLE_OK;
 }
 

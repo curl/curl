@@ -48,11 +48,12 @@ struct Curl_sockaddr_ex {
   int protocol;
   unsigned int addrlen;
   union {
-    struct sockaddr addr;
-    struct Curl_sockaddr_storage buff;
-  } _sa_ex_u;
+    struct sockaddr sa;
+    struct Curl_sockaddr_storage buf;
+  } addr;
 };
-#define curl_sa_addr _sa_ex_u.addr
+#define curl_sa_addr addr.sa
+#define curl_sa_addrbuf addr.buf
 
 /*
  * Parse interface option, and return the interface name and the host part.
