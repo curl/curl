@@ -3180,6 +3180,9 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       char *hostd = strdup((char *)as->dst.host);
       if(!hostd)
         return CURLE_OUT_OF_MEMORY;
+
+      data->asi->used = TRUE;
+
       conn->conn_to_host.rawalloc = hostd;
       conn->conn_to_host.name = hostd;
       conn->bits.conn_to_host = TRUE;
