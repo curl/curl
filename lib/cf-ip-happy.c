@@ -650,7 +650,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
         port = conn->conn_to_port;
       else
         port = conn->remote_port;
-      msnprintf(viamsg, sizeof(viamsg), "port %u", port);
+      msnprintf(viamsg, sizeof(viamsg), "port %d", port);
     }
 
     failf(data, "Failed to connect to %s %s %s%s%safter "
