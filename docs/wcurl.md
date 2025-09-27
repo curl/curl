@@ -45,6 +45,9 @@ By default, **wcurl** does:
 ## * Download multiple URLs in parallel
     if the installed curl's version is \>= 7.66.0 (--parallel);
 
+## * Use a total number of 5 parallel connections to the same protocol + hostname + port number target
+    if the installed curl's version is \>= 8.16.0 (--parallel-max-host);
+
 ## * Follow redirects;
 
 ## * Automatically choose a filename as output;
@@ -124,10 +127,13 @@ Download a file passing the **--progress-bar** and **--http2** flags to curl:
 
 **wcurl --curl-options="--progress-bar --http2" example.com/filename.txt**
 
-Resume from an interrupted download (if more options are used, this needs to
-be the last one in the list):
+* Resume from an interrupted download. The options necessary to resume the download (`--clobber --continue-at -`) must be the **last** options specified in `--curl-options`. Note that the only way to resume interrupted downloads is to allow wcurl to overwrite the destination file:
 
-**wcurl --curl-options="--continue-at -" example.com/filename.txt**
+**wcurl --curl-options="--clobber --continue-at -" example.com/filename.txt**
+
+Download multiple files without a limit of concurrent connections per host (the default limit is 5):
+
+**wcurl --curl-options="--parallel-max-host 0" example.com/filename1.txt example.com/filename2.txt**
 
 # AUTHORS
 

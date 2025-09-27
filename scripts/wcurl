@@ -29,7 +29,7 @@
 # Stop on errors and on usage of unset variables.
 set -eu
 
-VERSION="2025.05.26"
+VERSION="2025.09.27"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -91,7 +91,7 @@ error()
 
 # Extra curl options provided by the user.
 # This is set per-URL for every URL provided.
-# Some options are global, but we are erroring on the side of needlesly setting
+# Some options are global, but we are erroring on the side of needlessly setting
 # them multiple times instead of causing issues with parameters that needs to
 # be set per-URL.
 CURL_OPTIONS=""
@@ -133,7 +133,7 @@ sanitize()
 is_subset_of()
 {
     case "${1}" in
-        *[!${2}]*|'') return 1;;
+        *[!${2}]* | '') return 1 ;;
     esac
 }
 
@@ -151,9 +151,9 @@ percent_decode()
                 decode_out="${decode_out}${decode_hex2}"
                 # Skip decoding if this is a control character (00-1F).
                 # Skip decoding if DECODE_FILENAME is not "true".
-                if is_subset_of "${decode_hex1}" "23456789abcdefABCDEF" && \
-                    is_subset_of "${decode_hex2}" "0123456789abcdefABCDEF" && \
-                    [ "${DECODE_FILENAME}" = "true" ]; then
+                if is_subset_of "${decode_hex1}" "23456789abcdefABCDEF" \
+                    && is_subset_of "${decode_hex2}" "0123456789abcdefABCDEF" \
+                    && [ "${DECODE_FILENAME}" = "true" ]; then
                     # Use printf to decode it into octal and then decode it to the final format.
                     decode_out="$(printf "%b" "\\$(printf %o "0x${decode_hex1}${decode_hex2}")")"
                 fi
@@ -171,7 +171,7 @@ get_url_filename()
     # If what remains contains a slash, there's a path; return it percent-decoded.
     case "${hostname_and_path}" in
         # sed to remove everything preceding the last '/', e.g.: "example/something" becomes "something"
-        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,')";;
+        */*) percent_decode "$(printf %s "${hostname_and_path}" | sed -e 's,^.*/,,')" ;;
     esac
     # No slash means there was just a hostname and no path; return empty string.
 }
@@ -181,35 +181,38 @@ exec_curl()
 {
     CMD="curl "
 
-    # Store version to check if it supports --no-clobber and --parallel.
+    # Store version to check if it supports --no-clobber, --parallel and --parallel-max-host.
     curl_version=$($CMD --version | cut -f2 -d' ' | head -n1)
     curl_version_major=$(echo "$curl_version" | cut -f1 -d.)
     curl_version_minor=$(echo "$curl_version" | cut -f2 -d.)
 
-    CURL_HAS_NO_CLOBBER=""
-    CURL_HAS_PARALLEL=""
+    CURL_NO_CLOBBER=""
+    CURL_PARALLEL=""
     # --no-clobber is only supported since 7.83.0.
     # --parallel is only supported since 7.66.0.
+    # --parallel-max-host is only supported since 8.16.0.
     if [ "${curl_version_major}" -ge 8 ]; then
-        CURL_HAS_NO_CLOBBER="--no-clobber"
-        CURL_HAS_PARALLEL="--parallel"
-    elif [ "${curl_version_major}" -eq 7 ];then
+        CURL_NO_CLOBBER="--no-clobber"
+        CURL_PARALLEL="--parallel"
+        if [ "${curl_version_minor}" -ge 16 ]; then
+            CURL_PARALLEL="--parallel --parallel-max-host 5"
+        fi
+    elif [ "${curl_version_major}" -eq 7 ]; then
         if [ "${curl_version_minor}" -ge 83 ]; then
-            CURL_HAS_NO_CLOBBER="--no-clobber"
+            CURL_NO_CLOBBER="--no-clobber"
         fi
         if [ "${curl_version_minor}" -ge 66 ]; then
-            CURL_HAS_PARALLEL="--parallel"
+            CURL_PARALLEL="--parallel"
         fi
     fi
 
-    # Detecting whether we need --parallel.  It's easier to rely on
+    # Detecting whether we need --parallel. It's easier to rely on
     # the shell's argument parsing.
     # shellcheck disable=SC2086
     set -- $URLS
 
-    if [ "$#" -gt 1 ]; then
-        CURL_PARALLEL="$CURL_HAS_PARALLEL"
-    else
+    # If there are less than two URLs, don't set the parallel flag.
+    if [ "$#" -lt 2 ]; then
         CURL_PARALLEL=""
     fi
 
@@ -231,7 +234,7 @@ exec_curl()
             [ -z "${OUTPUT_PATH}" ] && OUTPUT_PATH=index.html
         fi
         # shellcheck disable=SC2086
-        set -- "$@" ${NEXT_PARAMETER} ${PER_URL_PARAMETERS} ${CURL_HAS_NO_CLOBBER} ${CURL_OPTIONS} --output "${OUTPUT_PATH}" "${url}"
+        set -- "$@" ${NEXT_PARAMETER} ${PER_URL_PARAMETERS} ${CURL_NO_CLOBBER} --output "${OUTPUT_PATH}" ${CURL_OPTIONS} "${url}"
         NEXT_PARAMETER="--next"
     done
 
@@ -268,13 +271,13 @@ while [ -n "${1-}" ]; do
             OUTPUT_PATH="${opt}"
             ;;
 
-        -o|-O|--output)
+        -o | -O | --output)
             shift
             HAS_USER_SET_OUTPUT="true"
             OUTPUT_PATH="${1}"
             ;;
 
-        -o*|-O*)
+        -o* | -O*)
             opt=$(printf "%s\n" "${1}" | sed 's/^-[oO]//')
             HAS_USER_SET_OUTPUT="true"
             OUTPUT_PATH="${opt}"
@@ -284,12 +287,12 @@ while [ -n "${1-}" ]; do
             DECODE_FILENAME="false"
             ;;
 
-        -h|--help)
+        -h | --help)
             usage
             exit 0
             ;;
 
-        -V|--version)
+        -V | --version)
             print_version
             exit 0
             ;;
