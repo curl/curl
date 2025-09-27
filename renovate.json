@@ -21,7 +21,7 @@
         "pinDigest",
         "digest"
       ],
-      "commitMessagePrefix": "ci: ",
+      "commitMessagePrefix": "CI: ",
       "labels": [
         "CI"
       ]
@@ -30,7 +30,7 @@
       "matchManagers": [
         "custom.regex"
       ],
-      "commitMessagePrefix": "ci: ",
+      "commitMessagePrefix": "CI: ",
       "labels": [
         "CI"
       ]
