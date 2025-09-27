@@ -60,7 +60,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix="$HOME"/temp --enable-werror --without-ssl --without-libpsl
+          ./configure --prefix="$HOME"/temp --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl
           make
           make test-ci
           make install
@@ -86,7 +86,7 @@ jobs:
           touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
           mkdir build
           pushd build
-          ../curl-99.98.97/configure --enable-werror --without-ssl --without-libpsl
+          ../curl-99.98.97/configure --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl
           make
           make test-ci
           popd
@@ -110,7 +110,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --enable-debug --without-libpsl
+          ../configure --prefix="$PWD"/curl-install --enable-option-checking=fatal --enable-werror --without-ssl --enable-debug --without-libpsl
           make
           make test-ci
           make install
@@ -136,7 +136,7 @@ jobs:
           pushd curl-99.98.97
           mkdir build
           pushd build
-          ../configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
+          ../configure --prefix="$PWD"/curl-install --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
           make
           make install
           curl-install/bin/curl --disable --version
@@ -158,7 +158,7 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          ./configure --prefix="$PWD"/curl-install --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
+          ./configure --prefix="$PWD"/curl-install --enable-option-checking=fatal --enable-werror --without-ssl --without-libpsl ac_cv_path_PERL=
           make
           make install
           curl-install/bin/curl --disable --version

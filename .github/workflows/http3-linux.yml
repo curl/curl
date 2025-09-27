@@ -683,7 +683,7 @@ jobs:
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               ${MATRIX_GENERATE}
           else
-            mkdir bld && cd bld && ../configure --enable-warnings --enable-werror --enable-debug \
+            mkdir bld && cd bld && ../configure --enable-option-checking=fatal --enable-warnings --enable-werror --enable-debug \
               --with-libuv \
               --with-test-nghttpx=/home/runner/nghttp2/build/bin/nghttpx \
               --disable-dependency-tracking \
