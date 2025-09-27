@@ -66,7 +66,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
               --with-openssl \
               || { tail -1000 config.log; false; }
 
@@ -75,7 +75,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror \
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror \
               --with-openssl --disable-verbose \
               || { tail -1000 config.log; false; }
 
@@ -84,7 +84,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror \
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror \
               --with-openssl --disable-proxy \
               || { tail -1000 config.log; false; }
 
@@ -93,7 +93,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
               --with-openssl --with-libssh \
               || { tail -1000 config.log; false; }
 
@@ -102,7 +102,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
               --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
@@ -111,7 +111,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-debug \
+            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-debug \
               --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
