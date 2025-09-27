@@ -434,7 +434,7 @@ evaluate:
     if(addr) {  /* try another address */
       result = cf_ip_attempt_new(&a, cf, data, addr, ai_family,
                                 bs->transport, bs->cf_create);
-      CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %d",
+      CURL_TRC_CF(data, cf, "starting %s attempt for ipv%s -> %u",
                   bs->running ? "next" : "first",
                   (ai_family == AF_INET) ? "4" : "6", result);
       if(result)
@@ -464,7 +464,7 @@ evaluate:
           if(!a->inconclusive)
             continue;
           result = cf_ip_attempt_restart(a, cf, data);
-          CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, result);
+          CURL_TRC_CF(data, cf, "restarted baller %d -> %u", i, result);
           if(result) /* serious failure */
             goto out;
           bs->last_attempt_started = now;
@@ -484,7 +484,7 @@ evaluate:
       result = CURLE_COULDNT_CONNECT;
       i = 0;
       for(a = bs->running; a; a = a->next) {
-        CURL_TRC_CF(data, cf, "baller %d: result=%d", i, a->result);
+        CURL_TRC_CF(data, cf, "baller %d: result=%u", i, a->result);
         if(a->result)
           result = a->result;
       }
@@ -650,7 +650,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
         port = conn->conn_to_port;
       else
         port = conn->remote_port;
-      msnprintf(viamsg, sizeof(viamsg), "port %u", port);
+      msnprintf(viamsg, sizeof(viamsg), "port %d", port);
     }
 
     failf(data, "Failed to connect to %s %s %s%s%safter "
@@ -721,7 +721,7 @@ static CURLcode cf_ip_happy_shutdown(struct Curl_cfilter *cf,
   }
 
   result = cf_ip_ballers_shutdown(&ctx->ballers, data, done);
-  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  CURL_TRC_CF(data, cf, "shutdown -> %u, done=%d", result, *done);
   return result;
 }
 
@@ -734,7 +734,7 @@ static CURLcode cf_ip_happy_adjust_pollset(struct Curl_cfilter *cf,
 
   if(!cf->connected) {
     result = cf_ip_ballers_pollset(&ctx->ballers, data, ps);
-    CURL_TRC_CF(data, cf, "adjust_pollset -> %d, %d socks", result, ps->n);
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %u, %u socks", result, ps->n);
   }
   return result;
 }
@@ -788,7 +788,7 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
             const char *host;
             int port;
             Curl_conn_get_current_host(data, cf->sockindex, &host, &port);
-            CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
+            CURL_TRC_CF(data, cf, "Connected to %s (%s) port %d",
                         host, ipquad.remote_ip, ipquad.remote_port);
           }
         }

@@ -2378,7 +2378,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
   }
   if(!result && (sshc->state == SSH_STOP))
     result = sshc->actualcode;
-  DEBUGF(infof(data, "SSH: myssh_statemach_act -> %d", result));
+  DEBUGF(infof(data, "SSH: myssh_statemach_act -> %u", result));
   return result;
 }
 

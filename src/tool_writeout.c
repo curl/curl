@@ -178,8 +178,8 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
     if(use_json)
       fprintf(stream, "\"%s\":", wovar->name);
 
-    fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU
-            ".%06" CURL_FORMAT_CURL_OFF_TU, secs, us);
+    fprintf(stream, "%" CURL_FORMAT_CURL_OFF_T
+            ".%06" CURL_FORMAT_CURL_OFF_T, secs, us);
   }
   else {
     if(use_json)

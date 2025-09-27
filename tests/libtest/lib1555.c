@@ -46,9 +46,9 @@ static int progressCallback(void *arg,
   (void)ultotal;
   (void)ulnow;
   res = curl_easy_recv(t1555_curl, buffer, 256, &n);
-  curl_mprintf("curl_easy_recv returned %d\n", res);
+  curl_mprintf("curl_easy_recv returned %u\n", res);
   res = curl_easy_send(t1555_curl, buffer, n, &n);
-  curl_mprintf("curl_easy_send returned %d\n", res);
+  curl_mprintf("curl_easy_send returned %u\n", res);
 
   return 1;
 }

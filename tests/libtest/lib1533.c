@@ -100,7 +100,7 @@ static CURLcode perform_and_check_connections(CURL *curl,
 
   res = curl_easy_perform(curl);
   if(res != CURLE_OK) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed with %d\n", res);
+    curl_mfprintf(stderr, "curl_easy_perform() failed with %u\n", res);
     return TEST_ERR_MAJOR_BAD;
   }
 
