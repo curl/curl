@@ -45,7 +45,7 @@ commands:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
-            sudo python3 -m pip install impacket
+            sudo python3 -m pip install --progress-bar off --prefer-binary -r tests/requirements.txt
 
   install-wolfssl:
     steps:
