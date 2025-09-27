@@ -340,6 +340,23 @@ void single_transfer_cleanup(void)
   glob_cleanup(&state->inglob);
 }
 
+/* Helper function for retrycheck */
+static bool is_outfile_auto_resumable(struct OperationConfig *config,
+                                      struct per_transfer *per,
+                                      CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  return config->use_resume && config->resume_from_current &&
+         config->resume_from >= 0 && outs->init == config->resume_from &&
+         outs->bytes > 0 && outs->filename && outs->s_isreg && outs->fopened &&
+         outs->stream && !ferror(outs->stream) &&
+         !config->customrequest && !per->uploadfile &&
+         (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
+          config->httpreq == TOOL_HTTPREQ_GET) &&
+         /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
+         result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR;
+}
+
 static CURLcode retrycheck(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURLcode result,
@@ -491,16 +508,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     /* Skip truncation of outfile if auto-resume is enabled for download and
        the partially received data is good. Only for HTTP GET requests in
        limited circumstances. */
-    if(config->use_resume && config->resume_from_current &&
-       config->resume_from >= 0 && outs->init == config->resume_from &&
-       outs->bytes > 0 && outs->filename && outs->s_isreg && outs->fopened &&
-       outs->stream && !ferror(outs->stream) &&
-       !config->customrequest && !per->uploadfile &&
-       (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
-        config->httpreq == TOOL_HTTPREQ_GET) &&
-       /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
-       result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR) {
-
+    if(is_outfile_auto_resumable(config, per, result)) {
       long response = 0;
       struct curl_header *header = NULL;
       const char *method = NULL, *scheme = NULL;
