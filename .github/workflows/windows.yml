@@ -123,8 +123,8 @@ jobs:
           work-vol: 'D:'
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
-            autoconf libtool gcc-core gcc-g++ binutils
-            ${{ matrix.build }} make ninja
+            ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
+            gcc-core binutils
             openssh
             libpsl-devel
             zlib-devel
@@ -138,7 +138,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: ${{ matrix.build == 'automake' }}
+        if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 2
         run: |
           PATH=/usr/bin
