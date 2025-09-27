@@ -110,8 +110,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel libssh2-devel', name: 'openssl R' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
+          - { build: 'autotools', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel libssh2-devel', name: 'openssl R' }
+          - { build: 'cmake'    , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
