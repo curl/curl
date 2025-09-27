@@ -10,7 +10,7 @@
       "matchManagers": [
         "github-actions"
       ],
-      "commitMessagePrefix": "gha: ",
+      "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
       ]
@@ -21,7 +21,7 @@
         "pinDigest",
         "digest"
       ],
-      "commitMessagePrefix": "ci: ",
+      "commitMessagePrefix": "CI: ",
       "labels": [
         "CI"
       ]
@@ -30,7 +30,7 @@
       "matchManagers": [
         "custom.regex"
       ],
-      "commitMessagePrefix": "ci: ",
+      "commitMessagePrefix": "CI: ",
       "labels": [
         "CI"
       ]
@@ -43,6 +43,26 @@
         ".github/workflows/linux-old.yml"
       ],
       "enabled": false
+    },
+    {
+      "description": "Schedule CodeQL updates on the 10th of each month",
+      "matchPackageNames": [
+        "/codeql/i"
+      ],
+      "groupName": "CodeQL",
+      "schedule": [
+        "* * 10 * *"
+      ]
+    },
+    {
+      "description": "Schedule package updates on the 10th of each month",
+      "matchSourceUrls": [
+        "**/awslabs/**"
+      ],
+      "groupName": "monthly updates",
+      "schedule": [
+        "* * 10 * *"
+      ]
     }
   ],
   "customManagers": [
