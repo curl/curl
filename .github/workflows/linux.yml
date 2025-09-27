@@ -594,8 +594,8 @@ jobs:
           else
             mkdir bld && cd bld && \
             ${MATRIX_CONFIGURE_PREFIX} \
-            ../configure --prefix="$HOME"/curl-install --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
-              --disable-dependency-tracking \
+            ../configure --prefix="$HOME"/curl-install --enable-unity --enable-warnings --enable-werror \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIGURE}
           fi
 

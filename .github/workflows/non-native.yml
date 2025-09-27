@@ -188,11 +188,11 @@ jobs:
                 options='--disable-manual --disable-docs'  # Slow with autotools, skip on emulated CPU
               fi
               mkdir bld && cd bld
-              time ../configure --enable-option-checking=fatal --enable-unity --enable-debug --enable-warnings --enable-werror \
+              time ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
                 --prefix="$HOME"/curl-install \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
-                --disable-dependency-tracking \
+                --disable-dependency-tracking --enable-option-checking=fatal \
                 ${options} \
                 ${MATRIX_OPTIONS} \
                 || { tail -n 1000 config.log; false; }

@@ -157,10 +157,10 @@ jobs:
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
-            mkdir bld && cd bld && ../configure --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIG}
           fi
 
@@ -364,10 +364,10 @@ jobs:
             fi
           else
             export CFLAGS CPPFLAGS
-            mkdir bld && cd bld && ../configure --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIG}
           fi
 
@@ -752,11 +752,11 @@ jobs:
               -D_CURL_SKIP_BUILD_CERTS=ON \
               ${options}
           else
-            mkdir bld && cd bld && ../configure --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \
-              --disable-dependency-tracking
+              --disable-dependency-tracking --enable-option-checking=fatal
           fi
 
       - name: 'configure log'
