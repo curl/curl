@@ -110,8 +110,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel libssh2-devel', name: 'openssl R' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
+          - { build: 'autotools', platform: 'x86_64', tflags: 'skiprun', config: '--with-openssl', install: 'libssl-devel libssh2-devel', name: 'openssl R' }
+          - { build: 'cmake'    , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -123,8 +123,8 @@ jobs:
           work-vol: 'D:'
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
-            autoconf libtool gcc-core gcc-g++ binutils
-            ${{ matrix.build }} make ninja
+            ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
+            gcc-core binutils perl
             openssh
             libpsl-devel
             zlib-devel
@@ -138,7 +138,7 @@ jobs:
           persist-credentials: false
 
       - name: 'autoreconf'
-        if: ${{ matrix.build == 'automake' }}
+        if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 2
         run: |
           PATH=/usr/bin
