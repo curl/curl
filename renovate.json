@@ -43,6 +43,26 @@
         ".github/workflows/linux-old.yml"
       ],
       "enabled": false
+    },
+    {
+      "description": "Schedule CodeQL updates on the 10th of each month",
+      "matchPackageNames": [
+        "/codeql/i"
+      ],
+      "groupName": "CodeQL",
+      "schedule": [
+        "* * 10 * *"
+      ]
+    },
+    {
+      "description": "Schedule package updates on the 10th of each month",
+      "matchSourceUrls": [
+        "**/awslabs/**"
+      ],
+      "groupName": "monthly updates",
+      "schedule": [
+        "* * 10 * *"
+      ]
     }
   ],
   "customManagers": [
