@@ -160,7 +160,7 @@ jobs:
               ${MATRIX_GENERATE} ${options}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
               --host=aarch64-apple-darwin \
               --with-apple-idn \
@@ -440,7 +440,7 @@ jobs:
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             [[ "${MATRIX_INSTALL_STEPS}" = *'pytest'* ]] && options+=' --with-test-vsftpd=no'  # Skip ~20 tests that stretch run time by 7x on macOS
             mkdir bld && cd bld && ../configure --prefix="$PWD"/curl-install --enable-unity --enable-warnings --enable-werror \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               --with-libpsl=/opt/homebrew/opt/libpsl \
               ${MATRIX_CONFIGURE} ${options}
           fi
@@ -706,7 +706,7 @@ jobs:
             [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && CFLAGS+=" -mmacosx-version-min=${MATRIX_MACOS_VERSION_MIN}"
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               --disable-docs --disable-manual \
               --with-openssl="$(brew --prefix openssl)" \
               --without-nghttp2 --without-libidn2 \

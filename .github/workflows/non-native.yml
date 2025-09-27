@@ -192,7 +192,7 @@ jobs:
                 --prefix="$HOME"/curl-install \
                 --with-openssl \
                 --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
-                --disable-dependency-tracking \
+                --disable-dependency-tracking --enable-option-checking=fatal \
                 ${options} \
                 ${MATRIX_OPTIONS} \
                 || { tail -n 1000 config.log; false; }
@@ -284,7 +284,7 @@ jobs:
               ${MATRIX_OPTIONS}
           else
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-warnings --enable-werror \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${MATRIX_PLATFORM}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \

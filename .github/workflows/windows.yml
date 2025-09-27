@@ -160,7 +160,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIG}
           fi
 
@@ -367,7 +367,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --prefix="$HOME"/curl-install \
               --with-libssh2 \
-              --disable-dependency-tracking \
+              --disable-dependency-tracking --enable-option-checking=fatal \
               ${MATRIX_CONFIG}
           fi
 
@@ -756,7 +756,7 @@ jobs:
               --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \
-              --disable-dependency-tracking
+              --disable-dependency-tracking --enable-option-checking=fatal
           fi
 
       - name: 'configure log'
