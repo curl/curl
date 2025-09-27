@@ -10,7 +10,7 @@
       "matchManagers": [
         "github-actions"
       ],
-      "commitMessagePrefix": "gha: ",
+      "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
       ]
