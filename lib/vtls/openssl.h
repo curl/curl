@@ -71,7 +71,6 @@ struct ossl_ctx {
   /* these ones requires specific SSL-types */
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
-  X509*    server_cert;
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
   /* blocked writes need to retry with same length, remember it */
@@ -82,6 +81,7 @@ struct ossl_ctx {
   bool keylog_done;
 #endif
   BIT(x509_store_setup);            /* x509 store has been set up */
+  BIT(store_is_empty);              /* no certs/paths/blobs in x509 store */
   BIT(reused_session);              /* session-ID was reused for this */
 };
 
@@ -122,7 +122,7 @@ extern const struct Curl_ssl Curl_ssl_openssl;
  */
 CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
-                                   SSL_CTX *ssl_ctx);
+                                   struct ossl_ctx *octx);
 
 CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,

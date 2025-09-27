@@ -153,6 +153,25 @@ conflicting identical symbol names.
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
 
+### Selecting TLS Trust Anchors Defaults
+
+Verifying a server certificate established a chain of trust that needs to
+start somewhere. Those "root" certificates make the set of Trust Anchors.
+
+While the build system tries to find good defaults on the platform you
+use, you may specify these explicitly. The following options are provided:
+
+ - `--with-ca-bundle=FILE`: the file that libcurl loads default root
+ certificates from.
+ - `--with-ca-path=DIRECTORY`: a directory in which root certificates files
+ are found.
+ - `--with-ca-embed=FILE`: a file read *at build time* and added to `libcurl`.
+ - `--with-ca-fallback`: an OpenSSL specific option for delegating default
+ trust anchor selection to what OpenSSL thinks is best, *if* there are
+no other certificates configured by the application.
+ - `--with-apple-sectrust`: use the system "SecTrust" service on Apple
+ operating systems for verification. (Added in 8.17.0)
+
 ## MultiSSL and HTTP/3
 
 HTTP/3 needs QUIC and QUIC needs TLS. Building libcurl with HTTP/3 and QUIC

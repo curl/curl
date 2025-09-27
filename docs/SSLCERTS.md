@@ -8,8 +8,10 @@ SPDX-License-Identifier: curl
 
 ## Native vs file based
 
-If curl was built with Schannel support, then curl uses the system native CA
-store for verification. All other TLS libraries use a file based CA store by
+If curl was built with Schannel support, then curl uses the Windows native CA
+store for verification. On Apple operating systems, it is possible to use Apple's
+"SecTrust" services for certain TLS backends, details below.
+All other TLS libraries use a file based CA store by
 default.
 
 ## Verification
@@ -71,8 +73,10 @@ another option to restrict search to the application's directory.
 
 ### Use the native store
 
-In several environments, in particular on Windows, you can ask curl to use the
-system's native CA store when verifying the certificate.
+In several environments, in particular on Microsoft and Apple operating
+systems, you can ask curl to use the system's native CA store when verifying
+the certificate. Depending on how curl was built, this may already be the
+default.
 
 With the curl command line tool: `--ca-native`.
 
@@ -102,13 +106,45 @@ latest Firefox bundle.
 
 ## Native CA store
 
-If curl was built with Schannel or was instructed to use the native CA Store,
-then curl uses the certificates that are built into the OS. These are the same
-certificates that appear in the Internet Options control panel (under Windows)
-or Keychain Access application (under macOS). Any custom security rules for
-certificates are honored.
+### Windows + Schannel
+
+If curl was built with Schannel, then curl uses the certificates that are
+built into the OS. These are the same certificates that appear in the
+Internet Options control panel (under Windows).
+Any custom security rules for certificates are honored.
 
 Schannel runs CRL checks on certificates unless peer verification is disabled.
+
+### Apple + OpenSSL/GnuTLS
+
+When curl is built with Apple SecTrust enabled and uses an OpenSSL compatible
+TLS backend or GnuTLS, the default verification is handled by that Apple
+service. As in:
+
+    curl https://example.com
+
+You may still provide your own certificates on the command line, such as:
+
+    curl --cacert mycerts.pem https://example.com
+
+In this situation, Apple SecTrust is **not** used and verification is done
+**only** with the trust anchors found in `mycerts.pem`. If you want **both**
+Apple SecTrust and your own file to be considered, use:
+
+    curl --ca-native --cacert mycerts.pem https://example.com
+
+
+#### Other Combinations
+
+How well the use of native CA stores work in all other combinations depends
+on the TLS backend and the OS. Many TLS backends offer functionality to access
+the native CA on a range of operating systems. Some provide this only on specific
+configurations.
+
+Specific support in curl exists for Windows and OpenSSL compatible TLS backends.
+It tries to load the certificates from the Windows "CA" and "ROOT" stores for
+transfers requesting the native CA. Due to Window's delayed population of those
+stores, this might not always find all certificates.
 
 ## HTTPS proxy
 
