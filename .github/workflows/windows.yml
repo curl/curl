@@ -124,7 +124,7 @@ jobs:
           # https://cygwin.com/cgi-bin2/package-grep.cgi
           packages: >-
             ${{ matrix.build == 'autotools' && 'autoconf automake libtool make' || 'cmake ninja' }}
-            gcc-core binutils
+            gcc-core binutils perl_base
             openssh
             libpsl-devel
             zlib-devel
