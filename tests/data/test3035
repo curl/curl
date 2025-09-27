@@ -1,0 +1,127 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+Content-Range
+Resume
+retry
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+#
+# the first chunk
+#
+<data nocheck="yes" nonewline="yes">
+HTTP/1.1 200 OK swsbounce swsclose
+Accept-Ranges: bytes
+Content-Type: text/html
+Content-Length: 26
+
+abcde
+</data>
+
+#
+# the second chunk
+#
+<data1 nocheck="yes" nonewline="yes">
+HTTP/1.1 206 Partial Content swsbounce swsclose
+Content-Type: text/html
+Content-Length: 21
+Content-Range: bytes 5-25/26
+
+fghijk
+</data1>
+
+#
+# some nonsense that curl should ignore as unresumable
+#
+<data2 nocheck="yes">
+HTTP/1.1 404 Not Found swsbounce
+Content-Type: text/html
+Content-Length: 5
+
+body
+</data2>
+
+#
+# some more nonsense that curl should ignore as unresumable
+#
+<data3 nocheck="yes">
+HTTP/1.1 200 OK swsbounce
+Accept-Ranges: bytes
+Content-Type: text/html
+Content-Length: 30
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+</data3>
+
+#
+# the third chunk
+#
+<data4 nocheck="yes" nonewline="yes">
+HTTP/1.1 206 Partial Content swsbounce swsclose
+Content-Type: text/html
+Content-Length: 15
+Content-Range: bytes 11-25/26
+
+lmnopqrstuvwxyz
+</data4>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP retry failed download with keep data and auto-resume
+</name>
+<command option="no-output,no-include">
+--continue-at - --retry 4 --retry-delay 1 --retry-all-errors -o %LOGDIR/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Range: bytes=5-
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Range: bytes=11-
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Range: bytes=11-
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Range: bytes=11-
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+
+<file1 name="%LOGDIR/outfile%TESTNUMBER" nonewline="yes">
+abcdefghijklmnopqrstuvwxyz
+</file1>
+
+</verify>
+</testcase>
