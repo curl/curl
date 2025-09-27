@@ -499,6 +499,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.AWSLC_VERSION }}
 
       - name: 'build awslc'
+        if: ${{ contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/awslabs/aws-lc/archive/refs/tags/v${AWSLC_VERSION}.tar.gz" | tar -xz
