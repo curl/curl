@@ -86,7 +86,7 @@ jobs:
           cd bld-1
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
-          make install
+          VERBOSE=1 make install
           src/curl --disable --version
 
       - name: 'cmake build-only curl_config.h'
