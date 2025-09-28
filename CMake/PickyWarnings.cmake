@@ -422,11 +422,7 @@ if(_picky_nocheck OR _picky)
   string(REPLACE ";" " " _picky_tmp "${_picky_tmp}")
   string(STRIP "${_picky_tmp}" _picky_tmp)
   message(STATUS "Picky compiler options: ${_picky_tmp}")
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.11)
-    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
-  else()
-    add_compile_options("${_picky_nocheck}" "${_picky}")
-  endif()
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "${_picky_nocheck}" "${_picky}")
 
   # Apply to all feature checks
   string(REPLACE ";" " " _picky_tmp "${_picky}")
