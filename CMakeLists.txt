@@ -378,8 +378,13 @@ if(WIN32)
   if(CURL_STATIC_CRT AND MSVC)
     if(MSVC_VERSION GREATER_EQUAL 1900 OR BUILD_STATIC_CURL OR NOT BUILD_CURL_EXE)
       set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-      set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Release>:-MT>")
-      set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Debug>:-MTd>")
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.11)
+        set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Release>:-MT>")
+        set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "$<$<CONFIG:Debug>:-MTd>")
+      else()
+        add_compile_options("$<$<CONFIG:Release>:-MT>")
+        add_compile_options("$<$<CONFIG:Debug>:-MTd>")
+      endif()
     else()
       message(WARNING "Static CRT requires UCRT, static libcurl or no curl executable.")
     endif()
@@ -2003,7 +2008,11 @@ if(CURL_CODE_COVERAGE)
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.11)
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
+  else()
+    add_compile_options("-MP")  # Parallel compilation
+  endif()
 endif()
 
 if(CURL_LTO)
