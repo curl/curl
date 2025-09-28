@@ -89,7 +89,11 @@ elseif(WIN32 AND WINCE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # mingw32ce buil
   enable_language(RC)
 
   # To compile long long integer literals
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-std=gnu99")
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.11)
+    set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-std=gnu99")
+  else()
+    add_compile_options("-std=gnu99")
+  endif()
   string(APPEND CMAKE_REQUIRED_FLAGS " -std=gnu99")
 
   set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
