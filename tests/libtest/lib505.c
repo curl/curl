@@ -61,6 +61,7 @@ static CURLcode test_lib505(const char *URL)
 
   /* get the file size of the local file */
 #ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
   hd = stat(libtest_arg2, &file_info);
 #else
   hd = fstat(fileno(hd_src), &file_info);

@@ -205,7 +205,7 @@ static FILE * vmsfopenread(const char *file, const char *mode)
   struct_stat statbuf;
   int result;
 
-  result = stat(file, &statbuf);
+  result = curlx_stat(file, &statbuf);
 
   switch(statbuf.st_fab_rfm) {
   case FAB$C_VAR:
@@ -1412,7 +1412,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
     char *base;
     struct_stat sbuf;
 
-    if(stat(filename, &sbuf))
+    if(curlx_stat(filename, &sbuf))
       result = CURLE_READ_ERROR;
     else {
       part->data = strdup(filename);

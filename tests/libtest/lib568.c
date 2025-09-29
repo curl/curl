@@ -66,7 +66,7 @@ static CURLcode test_lib568(const char *URL)
   curl_free(stream_uri);
   stream_uri = NULL;
 
-  sdp = open(libtest_arg2, O_RDONLY);
+  sdp = curlx_open(libtest_arg2, O_RDONLY);
   if(sdp == -1) {
     curl_mfprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;

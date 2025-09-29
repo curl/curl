@@ -3,6 +3,7 @@ allowfunc fclose
 allowfunc fopen
 allowfunc freeaddrinfo
 allowfunc getaddrinfo
+allowfunc open
 allowfunc recv
 allowfunc send
 allowfunc socket

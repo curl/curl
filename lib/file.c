@@ -46,10 +46,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -70,6 +66,7 @@
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
+#include "curlx/fopen.h"
 #include "curlx/warnless.h"
 #include "curl_range.h"
 /* The last 3 #include files should be in this order */
@@ -237,7 +234,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open(actual_path, O_RDONLY|CURL_O_BINARY);
+  fd = curlx_open(actual_path, O_RDONLY | CURL_O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
@@ -261,16 +258,16 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     extern int __unix_path_semantics;
     if(strchr(real_path + 1, ':')) {
       /* Amiga absolute path */
-      fd = open(real_path + 1, O_RDONLY);
+      fd = curlx_open(real_path + 1, O_RDONLY);
       file->path++;
     }
     else if(__unix_path_semantics) {
       /* -lunix fallback */
-      fd = open(real_path, O_RDONLY);
+      fd = curlx_open(real_path, O_RDONLY);
     }
   }
   #else
-  fd = open(real_path, O_RDONLY);
+  fd = curlx_open(real_path, O_RDONLY);
   file->path = real_path;
   #endif
 #endif
@@ -349,9 +346,9 @@ static CURLcode file_upload(struct Curl_easy *data,
 
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
   (defined(__i386__) || defined(__arm__))
-  fd = open(file->path, mode, (mode_t)data->set.new_file_perms);
+  fd = curlx_open(file->path, mode, (mode_t)data->set.new_file_perms);
 #else
-  fd = open(file->path, mode, data->set.new_file_perms);
+  fd = curlx_open(file->path, mode, data->set.new_file_perms);
 #endif
   if(fd < 0) {
     failf(data, "cannot open %s for writing", file->path);

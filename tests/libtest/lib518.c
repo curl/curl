@@ -287,7 +287,7 @@ static int t518_test_rlimit(int keep_open)
 
   /* open a dummy descriptor */
 
-  t518_testfd[0] = open(DEV_NULL, O_RDONLY);
+  t518_testfd[0] = curlx_open(DEV_NULL, O_RDONLY);
   if(t518_testfd[0] < 0) {
     curl_msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     t518_store_errmsg(strbuff, errno);

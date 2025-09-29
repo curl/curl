@@ -91,6 +91,8 @@ my %banfunc = (
     "fclose" => 1,
     "fdopen" => 1,
     "fopen" => 1,
+    "open" => 1,
+    "stat" => 1,
     );
 
 my %warnings_extended = (

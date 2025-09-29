@@ -234,6 +234,7 @@ static int setup(struct input *i, int num, const char *upload)
   }
 
 #ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
   if(stat(upload, &file_info) != 0) {
 #else
   if(fstat(fileno(i->in), &file_info) != 0) {

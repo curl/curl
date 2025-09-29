@@ -27,15 +27,13 @@
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #ifdef USE_NGHTTP3
 #include <nghttp3/nghttp3.h>
 #endif
 #include "../urldata.h"
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
+#include "../curlx/fopen.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_ngtcp2.h"
@@ -665,8 +663,9 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
       result = curlx_dyn_add(&fname, ".sqlog");
 
     if(!result) {
-      int qlogfd = open(curlx_dyn_ptr(&fname), O_WRONLY|O_CREAT|CURL_O_BINARY,
-                        data->set.new_file_perms);
+      int qlogfd = curlx_open(curlx_dyn_ptr(&fname),
+                              O_WRONLY | O_CREAT | CURL_O_BINARY,
+                              data->set.new_file_perms);
       if(qlogfd != -1)
         *qlogfdp = qlogfd;
     }
