@@ -34,6 +34,7 @@
 
 #if defined(_WIN32) && !defined(UNDER_CE)
 
+#include "fopen.h"
 #include "multibyte.h"
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
