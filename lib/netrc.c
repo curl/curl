@@ -39,7 +39,7 @@
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
-#include "curlx/fopenx.h"
+#include "curlx/fopen.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

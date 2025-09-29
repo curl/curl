@@ -34,7 +34,7 @@ struct Curl_easy;
 #include "sendf.h"
 #include "transfer.h"
 #include "strdup.h"
-#include "curlx/fopenx.h"
+#include "curlx/fopen.h"
 #include "curlx/base64.h"
 
 #if !defined(CURL_DISABLE_MIME) && \

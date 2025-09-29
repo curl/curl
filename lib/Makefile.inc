@@ -43,7 +43,7 @@ LIB_CURLX_HFILES = \
   curlx/base64.h   \
   curlx/curlx.h    \
   curlx/dynbuf.h   \
-  curlx/fopenx.h   \
+  curlx/fopen.h    \
   curlx/inet_ntop.h \
   curlx/inet_pton.h \
   curlx/multibyte.h \

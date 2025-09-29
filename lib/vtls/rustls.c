@@ -32,7 +32,7 @@
 
 #include <rustls.h>
 
-#include "../curlx/fopenx.h"
+#include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
 #include "../urldata.h"
 #include "../sendf.h"

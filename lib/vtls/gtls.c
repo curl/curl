@@ -54,7 +54,7 @@
 #include "../progress.h"
 #include "../select.h"
 #include "../strdup.h"
-#include "../curlx/fopenx.h"
+#include "../curlx/fopen.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
 #include "../multiif.h"

@@ -68,7 +68,7 @@
 #include "../progress.h"
 #include "../share.h"
 #include "../multiif.h"
-#include "../curlx/fopenx.h"
+#include "../curlx/fopen.h"
 #include "../curlx/timeval.h"
 #include "../curl_md5.h"
 #include "../curl_sha256.h"
