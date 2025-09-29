@@ -68,7 +68,7 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
-    (fclose)(curl_dbg_logfile);
+    fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
 }
@@ -450,7 +450,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
-  res = (fclose)(file);
+  res = fclose(file);
 
   return res;
 }
