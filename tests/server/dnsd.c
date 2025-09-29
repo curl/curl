@@ -102,7 +102,7 @@ static int store_incoming(const unsigned char *data, size_t size,
   snprintf(dumpfile, sizeof(dumpfile), "%s/dnsd.input", logdir);
 
   /* Open request dump file. */
-  server = fopen(dumpfile, "ab");
+  server = curlx_fopen(dumpfile, "ab");
   if(!server) {
     int error = errno;
     logmsg("fopen() failed with error (%d) %s", error, strerror(error));
@@ -168,7 +168,7 @@ static int store_incoming(const unsigned char *data, size_t size,
   fprintf(server, "\n");
 #endif
 
-  fclose(server);
+  curlx_fclose(server);
 
   return 0;
 }
@@ -317,7 +317,7 @@ static void read_instructions(void)
   char file[256];
   FILE *f;
   snprintf(file, sizeof(file), "%s/" INSTRUCTIONS, logdir);
-  f = fopen(file, FOPEN_READTEXT);
+  f = curlx_fopen(file, FOPEN_READTEXT);
   if(f) {
     char buf[256];
     ancount_aaaa = ancount_a = 0;
@@ -367,7 +367,7 @@ static void read_instructions(void)
         }
       }
     }
-    fclose(f);
+    curlx_fclose(f);
   }
   else
     logmsg("Error opening file '%s'", file);

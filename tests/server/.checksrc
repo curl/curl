@@ -1,6 +1,4 @@
 allowfunc accept
-allowfunc fclose
-allowfunc fopen
 allowfunc freeaddrinfo
 allowfunc getaddrinfo
 allowfunc recv

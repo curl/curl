@@ -115,12 +115,12 @@ void logmsg(const char *msg, ...)
   va_end(ap);
 
   do {
-    logfp = fopen(serverlogfile, "ab");
+    logfp = curlx_fopen(serverlogfile, "ab");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!logfp && (errno == EINTR));
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
-    fclose(logfp);
+    curlx_fclose(logfp);
   }
   else {
     int error = errno;
@@ -207,13 +207,13 @@ FILE *test2fopen(long testno, const char *logdir2)
   char filename[256];
   /* first try the alternative, preprocessed, file */
   snprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
-  stream = fopen(filename, "rb");
+  stream = curlx_fopen(filename, "rb");
   if(stream)
     return stream;
 
   /* then try the source version */
   snprintf(filename, sizeof(filename), "%s/data/test%ld", srcpath, testno);
-  stream = fopen(filename, "rb");
+  stream = curlx_fopen(filename, "rb");
 
   return stream;
 }
@@ -244,13 +244,13 @@ int write_pidfile(const char *filename)
   curl_off_t pid;
 
   pid = our_getpid();
-  pidfile = fopen(filename, "wb");
+  pidfile = curlx_fopen(filename, "wb");
   if(!pidfile) {
     logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
   fprintf(pidfile, "%ld\n", (long)pid);
-  fclose(pidfile);
+  curlx_fclose(pidfile);
   logmsg("Wrote pid %ld to %s", (long)pid, filename);
   return 1; /* success */
 }
@@ -258,13 +258,13 @@ int write_pidfile(const char *filename)
 /* store the used port number in a file */
 int write_portfile(const char *filename, int port)
 {
-  FILE *portfile = fopen(filename, "wb");
+  FILE *portfile = curlx_fopen(filename, "wb");
   if(!portfile) {
     logmsg("Couldn't write port file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
   fprintf(portfile, "%d\n", port);
-  fclose(portfile);
+  curlx_fclose(portfile);
   logmsg("Wrote port %d to %s", port, filename);
   return 1; /* success */
 }
@@ -276,7 +276,7 @@ void set_advisor_read_lock(const char *filename)
   int res;
 
   do {
-    lockfile = fopen(filename, "wb");
+    lockfile = curlx_fopen(filename, "wb");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {
@@ -285,7 +285,7 @@ void set_advisor_read_lock(const char *filename)
     return;
   }
 
-  res = fclose(lockfile);
+  res = curlx_fclose(lockfile);
   if(res)
     logmsg("Error closing lock file %s error (%d) %s",
            filename, errno, strerror(errno));
