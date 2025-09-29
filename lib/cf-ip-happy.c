@@ -153,12 +153,17 @@ static const struct Curl_addrinfo *cf_ai_iter_next(struct cf_ai_iter *iter)
   return iter->last;
 }
 
-#ifdef USE_IPV6
-static bool cf_ai_iter_done(struct cf_ai_iter *iter)
+static bool cf_ai_iter_has_more(struct cf_ai_iter *iter)
 {
-  return (iter->n >= 0) && !iter->last;
+  const struct Curl_addrinfo *addr = iter->last ? iter->last->ai_next :
+    ((iter->n < 0) ? iter->head : NULL);
+  while(addr) {
+    if(addr->ai_family == iter->ai_family)
+      return TRUE;
+    addr = addr->ai_next;
+  }
+  return FALSE;
 }
-#endif
 
 struct cf_ip_attempt {
   struct cf_ip_attempt *next;
@@ -353,7 +358,7 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
 {
   CURLcode result = CURLE_OK;
   struct cf_ip_attempt *a = NULL, **panchor;
-  bool do_more, more_possible;
+  bool do_more;
   struct curltime now;
   timediff_t next_expire_ms;
   int i, inconclusive, ongoing;
@@ -364,7 +369,6 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
 evaluate:
   now = curlx_now();
   ongoing = inconclusive = 0;
-  more_possible = TRUE;
 
   /* check if a running baller connects now */
   i = -1;
@@ -404,7 +408,13 @@ evaluate:
     do_more = TRUE;
   }
   else {
-    do_more = (curlx_timediff(now, bs->last_attempt_started) >=
+    bool more_possible = cf_ai_iter_has_more(&bs->addr_iter);
+#ifdef USE_IPV6
+    if(!more_possible)
+      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
+#endif
+    do_more =  more_possible &&
+               (curlx_timediff(now, bs->last_attempt_started) >=
                bs->attempt_delay_ms);
     if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
@@ -418,7 +428,7 @@ evaluate:
     int ai_family = 0;
 #ifdef USE_IPV6
     if((bs->last_attempt_ai_family == AF_INET) ||
-        cf_ai_iter_done(&bs->addr_iter)) {
+        !cf_ai_iter_has_more(&bs->addr_iter)) {
        addr = cf_ai_iter_next(&bs->ipv6_iter);
        ai_family = bs->ipv6_iter.ai_family;
     }
@@ -472,11 +482,8 @@ evaluate:
       /* attempt timeout for restart has not expired yet */
       goto out;
     }
-    else if(ongoing) {
+    else if(!ongoing) {
       /* no more addresses, no inconclusive attempts */
-      more_possible = FALSE;
-    }
-    else {
       CURL_TRC_CF(data, cf, "no more attempts to try");
       result = CURLE_COULDNT_CONNECT;
       i = 0;
@@ -490,21 +497,34 @@ evaluate:
 
 out:
   if(!result) {
+    bool more_possible;
+
     /* when do we need to be called again? */
     next_expire_ms = Curl_timeleft(data, &now, TRUE);
-    if(more_possible) {
-      timediff_t expire_ms, elapsed_ms;
-      elapsed_ms = curlx_timediff(now, bs->last_attempt_started);
-      expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
-      next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
-    }
-
     if(next_expire_ms <= 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
             curlx_timediff(now, data->progress.t_startsingle));
       return CURLE_OPERATION_TIMEDOUT;
     }
-    Curl_expire(data, next_expire_ms, EXPIRE_HAPPY_EYEBALLS);
+
+    more_possible = cf_ai_iter_has_more(&bs->addr_iter);
+#ifdef USE_IPV6
+    if(!more_possible)
+      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
+#endif
+    if(more_possible) {
+      timediff_t expire_ms, elapsed_ms;
+      elapsed_ms = curlx_timediff(now, bs->last_attempt_started);
+      expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
+      next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
+      if(next_expire_ms <= 0) {
+        CURL_TRC_CF(data, cf, "HAPPY_EYBALLS timeout due, re-evaluate");
+        goto evaluate;
+      }
+      CURL_TRC_CF(data, cf, "next HAPPY_EYBALLS timeout in %" FMT_TIMEDIFF_T
+                  "ms", next_expire_ms);
+      Curl_expire(data, next_expire_ms, EXPIRE_HAPPY_EYEBALLS);
+    }
   }
   return result;
 }
