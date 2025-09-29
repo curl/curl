@@ -238,7 +238,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
         altsvc_add(asi, lineptr);
     }
     curlx_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    CURL_FCLOSE(fp);
   }
   return result;
 }
@@ -391,7 +391,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
       if(result)
         break;
     }
-    fclose(out);
+    CURL_FCLOSE(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 

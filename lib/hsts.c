@@ -379,7 +379,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
       if(result)
         break;
     }
-    fclose(out);
+    CURL_FCLOSE(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
@@ -542,7 +542,7 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
       hsts_add(h, lineptr);
     }
     curlx_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    CURL_FCLOSE(fp);
   }
   return result;
 }

@@ -1228,7 +1228,7 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
       remove_expired(ci);
 
       if(handle)
-        fclose(handle);
+        CURL_FCLOSE(handle);
     }
     data->state.cookie_engine = TRUE;
   }
@@ -1583,7 +1583,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
   }
 
   if(!use_stdout) {
-    fclose(out);
+    CURL_FCLOSE(out);
     out = NULL;
     if(tempstore && Curl_rename(tempstore, filename)) {
       unlink(tempstore);
@@ -1602,7 +1602,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
 
 error:
   if(out && !use_stdout)
-    fclose(out);
+    CURL_FCLOSE(out);
   free(tempstore);
   return error;
 }

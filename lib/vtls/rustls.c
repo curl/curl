@@ -407,14 +407,14 @@ read_file_into(const char *filename,
     const size_t rr = fread(buf, 1, sizeof(buf), f);
     if(rr == 0 ||
        CURLE_OK != curlx_dyn_addn(out, buf, rr)) {
-      fclose(f);
+      CURL_FCLOSE(f);
       return 0;
     }
     if(rr < sizeof(buf))
       break;
   }
 
-  return fclose(f) == 0;
+  return CURL_FCLOSE(f) == 0;
 }
 
 static void

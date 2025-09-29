@@ -99,7 +99,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 done:
   curlx_dyn_free(&linebuf);
   if(file)
-    fclose(file);
+    CURL_FCLOSE(file);
   return ret;
 }
 
