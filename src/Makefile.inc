@@ -49,6 +49,7 @@ CURLX_HFILES = \
   ../lib/curlx/multibyte.h \
   ../lib/curl_setup.h \
   ../lib/curlx/dynbuf.h \
+  ../lib/curlx/fopen.h \
   ../lib/curlx/nonblock.h \
   ../lib/curlx/strparse.h \
   ../lib/curlx/timediff.h \
