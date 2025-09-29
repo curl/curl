@@ -244,7 +244,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
 
         /* get the custom server control "commands" */
         int error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
-        curlx_fclose(stream);
+        fclose(stream);
         if(error) {
           logmsg("getpart() failed with error (%d)", error);
           req->open = FALSE; /* closes connection */
@@ -540,7 +540,7 @@ static void rtspd_storerequest(char *reqbuf, size_t totalsize)
     return;
 
   do {
-    dump = curlx_fopen(dumpfile, "ab");
+    dump = fopen(dumpfile, "ab");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
@@ -572,7 +572,7 @@ static void rtspd_storerequest(char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  res = curlx_fclose(dump);
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error (%d) %s",
            dumpfile, errno, strerror(errno));
@@ -794,7 +794,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     }
     else {
       error = getpart(&ptr, &count, "reply", partbuf, stream);
-      curlx_fclose(stream);
+      fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         return 0;
@@ -819,7 +819,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     else {
       /* get the custom server control "commands" */
       error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
-      curlx_fclose(stream);
+      fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         free(ptr);
@@ -848,7 +848,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
   else
     rtspd_prevbounce = FALSE;
 
-  dump = curlx_fopen(responsedump, "ab");
+  dump = fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
     logmsg("fopen() failed with error (%d) %s", error, strerror(error));
@@ -905,7 +905,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     req->rtp_buffersize = 0;
   }
 
-  res = curlx_fclose(dump);
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error (%d) %s",
            responsedump, errno, strerror(errno));

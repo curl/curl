@@ -114,7 +114,7 @@ static unsigned short shortval(char *value)
 
 static void socksd_getconfig(void)
 {
-  FILE *fp = curlx_fopen(configfile, FOPEN_READTEXT);
+  FILE *fp = fopen(configfile, FOPEN_READTEXT);
   socksd_resetdefaults();
   if(fp) {
     char buffer[512];
@@ -166,7 +166,7 @@ static void socksd_getconfig(void)
         }
       }
     }
-    curlx_fclose(fp);
+    fclose(fp);
   }
 }
 
@@ -455,7 +455,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   {
     FILE *dump;
-    dump = curlx_fopen(reqlogfile, "ab");
+    dump = fopen(reqlogfile, "ab");
     if(dump) {
       int i;
       fprintf(dump, "atyp %u =>", type);
@@ -478,7 +478,7 @@ static curl_socket_t sockit(curl_socket_t fd)
         fprintf(dump, "\n");
         break;
       }
-      curlx_fclose(dump);
+      fclose(dump);
     }
   }
 

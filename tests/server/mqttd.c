@@ -73,7 +73,7 @@ static void mqttd_resetdefaults(void)
 
 static void mqttd_getconfig(void)
 {
-  FILE *fp = curlx_fopen(configfile, FOPEN_READTEXT);
+  FILE *fp = fopen(configfile, FOPEN_READTEXT);
   mqttd_resetdefaults();
   if(fp) {
     char buffer[512];
@@ -108,7 +108,7 @@ static void mqttd_getconfig(void)
         }
       }
     }
-    curlx_fclose(fp);
+    fclose(fp);
   }
   else {
     logmsg("No config file '%s' to read", configfile);
@@ -419,7 +419,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     0x04              /* protocol level */
   };
   snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
-  dump = curlx_fopen(dumpfile, "ab");
+  dump = fopen(dumpfile, "ab");
   if(!dump)
     goto end;
 
@@ -623,9 +623,9 @@ end:
   if(buffer)
     free(buffer);
   if(dump)
-    curlx_fclose(dump);
+    fclose(dump);
   if(stream)
-    curlx_fclose(stream);
+    fclose(stream);
   return CURL_SOCKET_BAD;
 }
 
