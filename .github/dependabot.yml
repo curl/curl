@@ -7,8 +7,4 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'weekly'
-    ignore:
-    # ignore patch updates to reduce noise
-    - dependency-name: 'github/codeql-action'
-      update-type: 'version-update:semver-minor'
+      interval: 'monthly'
