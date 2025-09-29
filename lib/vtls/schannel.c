@@ -47,6 +47,7 @@
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../select.h" /* for the socket readiness */
+#include "../curlx/fopenx.h"
 #include "../curlx/inet_pton.h" /* for IP addr SNI check */
 #include "../curlx/multibyte.h"
 #include "../curlx/warnless.h"

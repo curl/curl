@@ -87,6 +87,7 @@ Example set of cookies:
 #include "fopen.h"
 #include "strdup.h"
 #include "llist.h"
+#include "curlx/fopenx.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

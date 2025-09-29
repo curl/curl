@@ -1,0 +1,39 @@
+#ifndef HEADER_CURLX_FOPEN_H
+#define HEADER_CURLX_FOPEN_H
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+
+#include "../curl_setup.h"
+
+#ifdef CURLDEBUG
+#define curlx_fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
+#define curlx_fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
+#define curlx_fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
+#else
+#define curlx_fopen CURL_FOPEN_LOW
+#define curlx_fdopen fdopen
+#define curlx_fclose fclose
+#endif
+
+#endif /* HEADER_CURLX_FOPEN_H */
