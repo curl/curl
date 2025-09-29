@@ -611,6 +611,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
 
     data->state.async.done = TRUE;
     Curl_resolv_unlink(data, &data->state.async.dns);
+    Curl_expire_done(data, EXPIRE_ASYNC_NAME);
 
     if(thrdd->addr->res) {
       data->state.async.dns =
