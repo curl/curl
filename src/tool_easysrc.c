@@ -227,7 +227,7 @@ void dumpeasysrc(void)
       fprintf(out, "%s\n", c);
 
     if(fopened)
-      CURL_FCLOSE(out);
+      curlx_fclose(out);
   }
 
   easysrc_free();

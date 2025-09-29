@@ -114,7 +114,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
      || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
   }
-  CURL_FCLOSE(*fh);
+  curlx_fclose(*fh);
   *fh = NULL;
 
   result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));

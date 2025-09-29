@@ -530,7 +530,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   for(i = 0; i < transfer_count_d; ++i) {
     t = &transfer_d[i];
     if(t->out) {
-      CURL_FCLOSE(t->out);
+      curlx_fclose(t->out);
       t->out = NULL;
     }
     if(t->easy) {

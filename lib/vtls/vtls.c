@@ -865,7 +865,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 end:
     curlx_dyn_free(&buf);
     Curl_safefree(pem_ptr);
-    CURL_FCLOSE(fp);
+    curlx_fclose(fp);
   }
 
   return result;

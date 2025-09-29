@@ -87,7 +87,7 @@ static int t518_fopen_works(void)
   }
   for(i = 0; i < 3; i++) {
     if(fpa[i])
-      CURL_FCLOSE(fpa[i]);
+      curlx_fclose(fpa[i]);
   }
   return ret;
 }

@@ -49,7 +49,7 @@ static CURLcode test_lib591(const char *URL)
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    CURL_FCLOSE(upload);
+    curlx_fclose(upload);
     return res;
   }
 
@@ -138,7 +138,7 @@ test_cleanup:
   curl_global_cleanup();
 
   /* close the local file */
-  CURL_FCLOSE(upload);
+  curlx_fclose(upload);
 
   return res;
 }

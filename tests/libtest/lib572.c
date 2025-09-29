@@ -110,7 +110,7 @@ static CURLcode test_lib572(const char *URL)
     goto test_cleanup;
 
   test_setopt(curl, CURLOPT_UPLOAD, 0L);
-  CURL_FCLOSE(paramsf);
+  curlx_fclose(paramsf);
   paramsf = NULL;
 
   /* Heartbeat GET_PARAMETERS */
@@ -163,7 +163,7 @@ static CURLcode test_lib572(const char *URL)
 test_cleanup:
 
   if(paramsf)
-    CURL_FCLOSE(paramsf);
+    curlx_fclose(paramsf);
 
   curl_free(stream_uri);
 

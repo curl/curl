@@ -250,7 +250,7 @@ int parseconfig(const char *filename)
     curlx_dyn_free(&buf);
     curlx_dyn_free(&pbuf);
     if(file != stdin)
-      CURL_FCLOSE(file);
+      curlx_fclose(file);
     if(fileerror)
       rc = 1;
   }

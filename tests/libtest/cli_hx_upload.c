@@ -494,7 +494,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   for(i = 0; i < transfer_count_u; ++i) {
     t = &transfer_u[i];
     if(t->out) {
-      CURL_FCLOSE(t->out);
+      curlx_fclose(t->out);
       t->out = NULL;
     }
     if(t->easy) {

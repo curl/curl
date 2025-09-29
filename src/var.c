@@ -469,7 +469,7 @@ ParameterError setvariable(const char *input)
     }
     curlx_dyn_free(&fname);
     if(!use_stdin && file)
-      CURL_FCLOSE(file);
+      curlx_fclose(file);
     if(err)
       return err;
   }

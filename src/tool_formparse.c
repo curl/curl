@@ -570,7 +570,7 @@ static int get_param_part(char endchar,
         else {
           int i = read_field_headers(hdrfile, fp, &headers);
 
-          CURL_FCLOSE(fp);
+          curlx_fclose(fp);
           if(i) {
             curl_slist_free_all(headers);
             return -1;

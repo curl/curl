@@ -227,7 +227,7 @@ static gnutls_datum_t load_file(const char *file)
   loaded_file.data = ptr;
   loaded_file.size = (unsigned int)filelen;
 out:
-  CURL_FCLOSE(f);
+  curlx_fclose(f);
   return loaded_file;
 }
 

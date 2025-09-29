@@ -165,7 +165,7 @@ curl_off_t VmsRealFileSize(const char *name,
     if(ret_stat)
       count += ret_stat;
   }
-  CURL_FCLOSE(file);
+  curlx_fclose(file);
 
   return count;
 }
@@ -745,7 +745,7 @@ static void mime_file_free(void *ptr)
   curl_mimepart *part = (curl_mimepart *) ptr;
 
   if(part->fp) {
-    CURL_FCLOSE(part->fp);
+    curlx_fclose(part->fp);
     part->fp = NULL;
   }
   Curl_safefree(part->data);
@@ -967,7 +967,7 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_END, NULL);
         /* Try sparing open file descriptors. */
         if(part->kind == MIMEKIND_FILE && part->fp) {
-          CURL_FCLOSE(part->fp);
+          curlx_fclose(part->fp);
           part->fp = NULL;
         }
         FALLTHROUGH();

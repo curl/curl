@@ -637,7 +637,7 @@ static ParameterError data_urlencode(const char *nextarg,
     err = file2memory(&postdata, &size, file);
 
     if(file && (file != stdin))
-      CURL_FCLOSE(file);
+      curlx_fclose(file);
     if(err)
       return err;
   }
@@ -917,7 +917,7 @@ static ParameterError set_data(cmdline_t cmd,
     }
 
     if(file && (file != stdin))
-      CURL_FCLOSE(file);
+      curlx_fclose(file);
     if(err)
       return err;
 
@@ -1104,7 +1104,7 @@ static ParameterError parse_url(struct OperationConfig *config,
           break;
       }
       if(!fromstdin)
-        CURL_FCLOSE(f);
+        curlx_fclose(f);
       curlx_dyn_free(&line);
       if(error || err)
         return PARAM_READ_ERROR;
@@ -1216,7 +1216,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
       }
       err = file2string(&tmpcfg, file);
       if(file != stdin)
-        CURL_FCLOSE(file);
+        curlx_fclose(file);
       if(err)
         return err;
       config->ech_config = aprintf("ecl:%s",tmpcfg);
@@ -1263,7 +1263,7 @@ static ParameterError parse_header(struct OperationConfig *config,
         err = PARAM_READ_ERROR;
       curlx_dyn_free(&line);
       if(!use_stdin)
-        CURL_FCLOSE(file);
+        curlx_fclose(file);
     }
   }
   else {
@@ -1545,7 +1545,7 @@ static ParameterError parse_writeout(struct OperationConfig *config,
     tool_safefree(config->writeout);
     err = file2string(&config->writeout, file);
     if(file && (file != stdin))
-      CURL_FCLOSE(file);
+      curlx_fclose(file);
     if(err)
       return err;
     if(!config->writeout)

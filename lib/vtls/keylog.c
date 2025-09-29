@@ -57,7 +57,7 @@ Curl_tls_keylog_open(void)
         if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
 #endif
         {
-          CURL_FCLOSE(keylog_file_fp);
+          curlx_fclose(keylog_file_fp);
           keylog_file_fp = NULL;
         }
       }
@@ -70,7 +70,7 @@ void
 Curl_tls_keylog_close(void)
 {
   if(keylog_file_fp) {
-    CURL_FCLOSE(keylog_file_fp);
+    curlx_fclose(keylog_file_fp);
     keylog_file_fp = NULL;
   }
 }

@@ -61,13 +61,13 @@ static CURLcode test_lib525(const char *URL)
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, strerror(errno));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
-    CURL_FCLOSE(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_FSTAT;
   }
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    CURL_FCLOSE(hd_src);
+    curlx_fclose(hd_src);
     return res;
   }
 
@@ -149,7 +149,7 @@ test_cleanup:
   }
 
   /* close the local file */
-  CURL_FCLOSE(hd_src);
+  curlx_fclose(hd_src);
 
   return res;
 }

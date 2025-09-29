@@ -611,7 +611,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         if((!certdata) ||
            ((int) fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
-        CURL_FCLOSE(fInCert);
+        curlx_fclose(fInCert);
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
                 data->set.ssl.primary.clientcert);

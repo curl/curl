@@ -163,7 +163,7 @@ static CURLcode test_lib500(const char *URL)
                         (long)(time_total % 1000000));
         }
 
-        CURL_FCLOSE(moo);
+        curlx_fclose(moo);
       }
     }
   }

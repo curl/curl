@@ -45,7 +45,7 @@ static int t578_progress_callback(void *clientp, double dltotal, double dlnow,
     else
       curl_mfprintf(moo, "Progress callback called with UL %f out of %f\n",
                     ulnow, ultotal);
-    CURL_FCLOSE(moo);
+    curlx_fclose(moo);
   }
   return 0;
 }
