@@ -74,7 +74,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
   if(!t->out) {
     curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
                    t->idx);
-    t->out = CURL_FOPEN(t->filename, "wb");
+    t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
       return 0;
   }

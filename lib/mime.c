@@ -131,7 +131,7 @@ static const char aschex[] =
 
 #ifndef __VMS
 #define filesize(name, stat_data) (stat_data.st_size)
-#define fopen_read CURL_FOPEN
+#define fopen_read curlx_fopen
 
 #else
 
@@ -154,7 +154,7 @@ curl_off_t VmsRealFileSize(const char *name,
   int ret_stat;
   FILE * file;
 
-  file = CURL_FOPEN(name, FOPEN_READTEXT); /* VMS */
+  file = curlx_fopen(name, FOPEN_READTEXT); /* VMS */
   if(!file)
     return 0;
 
@@ -210,10 +210,10 @@ static FILE * vmsfopenread(const char *file, const char *mode)
   case FAB$C_VAR:
   case FAB$C_VFC:
   case FAB$C_STMCR:
-    return CURL_FOPEN(file, FOPEN_READTEXT); /* VMS */
+    return curlx_fopen(file, FOPEN_READTEXT); /* VMS */
     break;
   default:
-    return CURL_FOPEN(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
+    return curlx_fopen(file, FOPEN_READTEXT, "rfm=stmlf", "ctx=stm");
   }
 }
 

@@ -82,7 +82,7 @@ static CURLcode test_lib599(const char *URL)
     FILE *moo;
     res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD,
                             &content_length);
-    moo = CURL_FOPEN(libtest_arg2, "wb");
+    moo = curlx_fopen(libtest_arg2, "wb");
     if(moo) {
       curl_mfprintf(moo, "CL %.0f\n", content_length);
       CURL_FCLOSE(moo);

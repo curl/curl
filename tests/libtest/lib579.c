@@ -35,7 +35,7 @@ static size_t last_ul_total = 0;
 
 static void progress_final_report(void)
 {
-  FILE *moo = CURL_FOPEN(libtest_arg2, "ab");
+  FILE *moo = curlx_fopen(libtest_arg2, "ab");
   curl_mfprintf(moo ? moo : stderr, "Progress: end UL %zu/%zu\n",
                 last_ul, last_ul_total);
   if(moo)
@@ -59,7 +59,7 @@ static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
   last_ul = (size_t)ulnow;
   last_ul_total = (size_t)ultotal;
   if(!started) {
-    FILE *moo = CURL_FOPEN(libtest_arg2, "ab");
+    FILE *moo = curlx_fopen(libtest_arg2, "ab");
     curl_mfprintf(moo ? moo : stderr, "Progress: start UL %zu/%zu\n",
                   last_ul, last_ul_total);
     if(moo)

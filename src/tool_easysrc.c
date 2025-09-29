@@ -178,7 +178,7 @@ void dumpeasysrc(void)
   FILE *out;
   bool fopened = FALSE;
   if(strcmp(o, "-")) {
-    out = CURL_FOPEN(o, FOPEN_WRITETEXT);
+    out = curlx_fopen(o, FOPEN_WRITETEXT);
     fopened = TRUE;
   }
   else

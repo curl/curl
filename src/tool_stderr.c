@@ -50,7 +50,7 @@ void tool_set_stderr_file(const char *filename)
 
   /* precheck that filename is accessible to lessen the chance that the
      subsequent freopen will fail. */
-  fp = CURL_FOPEN(filename, FOPEN_WRITETEXT);
+  fp = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!fp) {
     warnf("Warning: Failed to open %s", filename);
     return;

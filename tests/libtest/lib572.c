@@ -93,7 +93,7 @@ static CURLcode test_lib572(const char *URL)
   fstat(params, &file_info);
   close(params);
 
-  paramsf = CURL_FOPEN(libtest_arg2, "rb");
+  paramsf = curlx_fopen(libtest_arg2, "rb");
   if(!paramsf) {
     curl_mfprintf(stderr, "can't fopen %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;

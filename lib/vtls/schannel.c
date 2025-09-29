@@ -563,7 +563,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                  &cert_store_path, &cert_thumbprint_str);
 
       if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
-        fInCert = CURL_FOPEN(data->set.ssl.primary.clientcert, "rb");
+        fInCert = curlx_fopen(data->set.ssl.primary.clientcert, "rb");
 
       if(result && !fInCert) {
         failf(data, "schannel: Failed to get certificate location"

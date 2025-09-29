@@ -42,7 +42,7 @@ static CURLcode test_lib541(const char *URL)
     return TEST_ERR_USAGE;
   }
 
-  hd_src = CURL_FOPEN(libtest_arg2, "rb");
+  hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
                   errno, strerror(errno));

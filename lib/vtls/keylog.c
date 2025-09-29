@@ -49,7 +49,7 @@ Curl_tls_keylog_open(void)
   if(!keylog_file_fp) {
     keylog_file_name = curl_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
-      keylog_file_fp = CURL_FOPEN(keylog_file_name, FOPEN_APPENDTEXT);
+      keylog_file_fp = curlx_fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {
 #ifdef _WIN32
         if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))

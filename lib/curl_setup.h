@@ -1102,7 +1102,7 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
 #define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
-#define CURL_FOPEN(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
+#define curlx_fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #define CURL_FDOPEN(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
 #define CURL_FCLOSE(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 
@@ -1124,7 +1124,7 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_SEND send
 #define CURL_RECV recv
 
-#define CURL_FOPEN CURL_FOPEN_LOW
+#define curlx_fopen CURL_FOPEN_LOW
 #define CURL_FDOPEN fdopen
 #define CURL_FCLOSE fclose
 

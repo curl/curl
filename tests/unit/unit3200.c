@@ -84,12 +84,12 @@ static CURLcode test_unit3200(const char *arg)
     char *line;
     curlx_dyn_init(&buf, len);
 
-    fp = CURL_FOPEN(arg, "wb");
+    fp = curlx_fopen(arg, "wb");
     abort_unless(fp != NULL, "Cannot open testfile");
     fwrite(filecontents[i], 1, strlen(filecontents[i]), fp);
     CURL_FCLOSE(fp);
 
-    fp = CURL_FOPEN(arg, "rb");
+    fp = curlx_fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
     curl_mfprintf(stderr, "Test %zd...", i);

@@ -397,7 +397,7 @@ static int
 read_file_into(const char *filename,
                struct dynbuf *out)
 {
-  FILE *f = CURL_FOPEN(filename, FOPEN_READTEXT);
+  FILE *f = curlx_fopen(filename, FOPEN_READTEXT);
   if(!f) {
     return 0;
   }

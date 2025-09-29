@@ -39,7 +39,7 @@ static CURLcode test_lib591(const char *URL)
 
   start_test_timing();
 
-  upload = CURL_FOPEN(libtest_arg3, "rb");
+  upload = curlx_fopen(libtest_arg3, "rb");
   if(!upload) {
     curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
                   errno, strerror(errno));

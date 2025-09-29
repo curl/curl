@@ -803,7 +803,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     struct dynbuf buf;
     char unsigned *pem_ptr = NULL;
     size_t left;
-    FILE *fp = CURL_FOPEN(pinnedpubkey, "rb");
+    FILE *fp = curlx_fopen(pinnedpubkey, "rb");
     if(!fp)
       return result;
 

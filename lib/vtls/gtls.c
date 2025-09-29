@@ -211,7 +211,7 @@ static gnutls_datum_t load_file(const char *file)
   long filelen;
   void *ptr;
 
-  f = CURL_FOPEN(file, "rb");
+  f = curlx_fopen(file, "rb");
   if(!f)
     return loaded_file;
   if(fseek(f, 0, SEEK_END) != 0

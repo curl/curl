@@ -227,7 +227,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   if(!asi->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = CURL_FOPEN(file, FOPEN_READTEXT);
+  fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_ALTSVC_LINE);
