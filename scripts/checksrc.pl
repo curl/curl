@@ -88,9 +88,9 @@ my %banfunc = (
     "send" => 1,
     "socket" => 1,
     "socketpair" => 1,
+    "fclose" => 1,
     "fdopen" => 1,
     "fopen" => 1,
-    "fclose" => 1,
     );
 
 my %warnings_extended = (
