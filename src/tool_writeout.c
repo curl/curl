@@ -825,7 +825,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               memcpy(fname, ptr, flen);
               fname[flen] = 0;
               stream2 = curlx_fopen(fname, append ? FOPEN_APPENDTEXT :
-                                   FOPEN_WRITETEXT);
+                                    FOPEN_WRITETEXT);
               if(stream2) {
                 /* only change if the open worked */
                 if(fclose_stream)
