@@ -29,6 +29,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "curlx/fopen.h"  /* for CURL_FOPEN_LOW() */
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

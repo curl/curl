@@ -26,6 +26,13 @@
 
 #include "../curl_setup.h"
 
+#if defined(_WIN32) && !defined(UNDER_CE)
+FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#define CURL_FOPEN_LOW(fname, mode)  curlx_win32_fopen(fname, mode)
+#else
+#define CURL_FOPEN_LOW fopen
+#endif
+
 #ifdef CURLDEBUG
 #define curlx_fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #define curlx_fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
