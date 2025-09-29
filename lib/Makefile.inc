@@ -26,6 +26,7 @@
 LIB_CURLX_CFILES = \
   curlx/base64.c   \
   curlx/dynbuf.c   \
+  curlx/fopen.c    \
   curlx/inet_ntop.c \
   curlx/inet_pton.c \
   curlx/multibyte.c \
