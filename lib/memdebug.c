@@ -68,6 +68,7 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
+    /* !checksrc! disable BANNEDFUNC 1 */
     fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
@@ -450,6 +451,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   res = fclose(file);
 
   return res;
