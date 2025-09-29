@@ -33,7 +33,7 @@
 
 #include "urldata.h"
 #include "rand.h"
-#include "fopen.h"
+#include "curl_fopen.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
