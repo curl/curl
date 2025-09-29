@@ -373,12 +373,12 @@ static void exit_signal_handler(int signum)
     (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
+    int fd;
 #ifdef _WIN32
-#define OPENMODE S_IREAD | S_IWRITE
+    fd = _open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, S_IREAD | S_IWRITE);
 #else
-#define OPENMODE S_IRUSR | S_IWUSR
+    fd = open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, S_IRUSR | S_IWUSR);
 #endif
-    int fd = open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, OPENMODE);
     if(fd != -1) {
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
