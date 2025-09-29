@@ -378,7 +378,7 @@ static void exit_signal_handler(int signum)
 #else
 #define OPENMODE S_IRUSR | S_IWUSR
 #endif
-    int fd = open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, OPENMODE);
+    int fd = _open(serverlogfile, O_WRONLY|O_CREAT|O_APPEND, OPENMODE);
     if(fd != -1) {
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
