@@ -260,8 +260,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = fopen(target, mode);
+  result = (fopen)(target, mode);
 #endif
 
   (free)(fixed);
