@@ -28,7 +28,7 @@
 
 #if defined(_WIN32) && !defined(UNDER_CE)
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
-#define CURLX_FOPEN_LOW(fname, mode)  curlx_win32_fopen(fname, mode)
+#define CURLX_FOPEN_LOW(fname, mode) curlx_win32_fopen(fname, mode)
 #else
 #define CURLX_FOPEN_LOW fopen
 #endif
