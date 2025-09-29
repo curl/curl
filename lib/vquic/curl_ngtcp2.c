@@ -143,8 +143,8 @@ struct cf_ngtcp2_ctx {
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   size_t earlydata_max;              /* max amount of early data supported by
                                         server on session reuse */
-  size_t earlydata_skip;            /* sending bytes to skip when earlydata
-                                     * is accepted by peer */
+  size_t earlydata_skip;             /* sending bytes to skip when earlydata
+                                        is accepted by peer */
   CURLcode tls_vrfy_result;          /* result of TLS peer verification */
   int qlogfd;
   BIT(initialized);

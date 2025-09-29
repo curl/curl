@@ -312,6 +312,7 @@ void Curl_trc_timer(struct Curl_easy *data, int tid, const char *fmt, ...)
     va_end(ap);
   }
 }
+
 void Curl_trc_easy_timers(struct Curl_easy *data)
 {
   if(CURL_TRC_TIMER_is_verbose(data)) {

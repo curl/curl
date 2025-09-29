@@ -175,7 +175,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                                   ntlm->context, &type_1_desc,
                                                   &attrs, NULL);
   if(status == SEC_I_COMPLETE_NEEDED ||
-    status == SEC_I_COMPLETE_AND_CONTINUE)
+     status == SEC_I_COMPLETE_AND_CONTINUE)
     Curl_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
   else if(status == SEC_E_INSUFFICIENT_MEMORY)
     return CURLE_OUT_OF_MEMORY;
