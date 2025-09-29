@@ -55,7 +55,7 @@ void tool_set_stderr_file(const char *filename)
     warnf("Warning: Failed to open %s", filename);
     return;
   }
-  fclose(fp);
+  CURL_FCLOSE(fp);
 
   /* freopen the actual stderr (stdio.h stderr) instead of tool_stderr since
      the latter may be set to stdout. */

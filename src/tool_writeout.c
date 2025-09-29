@@ -772,13 +772,13 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               break;
             case VAR_STDOUT:
               if(fclose_stream)
-                fclose(stream);
+                CURL_FCLOSE(stream);
               fclose_stream = FALSE;
               stream = stdout;
               break;
             case VAR_STDERR:
               if(fclose_stream)
-                fclose(stream);
+                CURL_FCLOSE(stream);
               fclose_stream = FALSE;
               stream = tool_stderr;
               break;
@@ -829,7 +829,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               if(stream2) {
                 /* only change if the open worked */
                 if(fclose_stream)
-                  fclose(stream);
+                  CURL_FCLOSE(stream);
                 stream = stream2;
                 fclose_stream = TRUE;
               }
@@ -872,6 +872,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
     }
   }
   if(fclose_stream)
-    fclose(stream);
+    CURL_FCLOSE(stream);
   curlx_dyn_free(&name);
 }

@@ -175,7 +175,7 @@ static curl_off_t vms_realfilesize(const char *name,
     if(ret_stat)
       count += ret_stat;
   }
-  fclose(file);
+  CURL_FCLOSE(file);
 
   return count;
 }
@@ -660,7 +660,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
 
   /* Close the outs file */
   if(outs->fopened && outs->stream) {
-    rc = fclose(outs->stream);
+    rc = CURL_FCLOSE(outs->stream);
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
@@ -696,13 +696,13 @@ skip:
 
   /* Close function-local opened file descriptors */
   if(per->heads.fopened && per->heads.stream)
-    fclose(per->heads.stream);
+    CURL_FCLOSE(per->heads.stream);
 
   if(per->heads.alloc_filename)
     tool_safefree(per->heads.filename);
 
   if(per->etag_save.fopened && per->etag_save.stream)
-    fclose(per->etag_save.stream);
+    CURL_FCLOSE(per->etag_save.stream);
 
   if(per->etag_save.alloc_filename)
     tool_safefree(per->etag_save.filename);
@@ -815,7 +815,7 @@ static CURLcode etag_compare(struct OperationConfig *config)
 
   if(!header) {
     if(file)
-      fclose(file);
+      CURL_FCLOSE(file);
     errorf("Failed to allocate memory for custom etag header");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -825,7 +825,7 @@ static CURLcode etag_compare(struct OperationConfig *config)
   tool_safefree(header);
 
   if(file)
-    fclose(file);
+    CURL_FCLOSE(file);
   if(pe != PARAM_OK)
     result = CURLE_OUT_OF_MEMORY;
   return result;
@@ -895,7 +895,7 @@ static CURLcode setup_headerfile(struct OperationConfig *config,
     if(!per->prev || per->prev->config != config) {
       newfile = CURL_FOPEN(config->headerfile, "wb");
       if(newfile)
-        fclose(newfile);
+        CURL_FCLOSE(newfile);
     }
     newfile = CURL_FOPEN(config->headerfile, "ab");
 
@@ -1193,7 +1193,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     if(result) {
       curl_easy_cleanup(curl);
       if(etag_first.fopened)
-        fclose(etag_first.stream);
+        CURL_FCLOSE(etag_first.stream);
       return result;
     }
     per->etag_save = etag_first; /* copy the whole struct */
@@ -2004,7 +2004,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
     char *cacert = NULL;
     FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
     if(cafile) {
-      fclose(cafile);
+      CURL_FCLOSE(cafile);
       config->cacert = strdup(cacert);
     }
 #elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \

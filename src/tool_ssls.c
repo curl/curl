@@ -122,7 +122,7 @@ out:
   if(easy)
     curl_easy_cleanup(easy);
   if(fp)
-    fclose(fp);
+    CURL_FCLOSE(fp);
   curlx_dyn_free(&buf);
   curl_free(shmac);
   curl_free(sdata);
@@ -207,6 +207,6 @@ out:
   if(easy)
     curl_easy_cleanup(easy);
   if(ctx.fp)
-    fclose(ctx.fp);
+    CURL_FCLOSE(ctx.fp);
   return r;
 }

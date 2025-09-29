@@ -103,7 +103,7 @@ static char *ipfs_gateway(void)
         goto fail;
     }
 
-    fclose(gateway_file);
+    CURL_FCLOSE(gateway_file);
     gateway_file = NULL;
 
     if(curlx_dyn_len(&dyn))
@@ -121,7 +121,7 @@ static char *ipfs_gateway(void)
   }
 fail:
   if(gateway_file)
-    fclose(gateway_file);
+    CURL_FCLOSE(gateway_file);
   tool_safefree(gateway);
   tool_safefree(ipfs_path);
   return NULL;
