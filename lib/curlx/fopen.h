@@ -28,9 +28,9 @@
 
 #if defined(_WIN32) && !defined(UNDER_CE)
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
-#define CURL_FOPEN_LOW(fname, mode)  curlx_win32_fopen(fname, mode)
+#define CURLX_FOPEN_LOW(fname, mode)  curlx_win32_fopen(fname, mode)
 #else
-#define CURL_FOPEN_LOW fopen
+#define CURLX_FOPEN_LOW fopen
 #endif
 
 #ifdef CURLDEBUG
@@ -38,7 +38,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #define curlx_fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
 #define curlx_fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 #else
-#define curlx_fopen CURL_FOPEN_LOW
+#define curlx_fopen CURLX_FOPEN_LOW
 #define curlx_fdopen fdopen
 #define curlx_fclose fclose
 #endif

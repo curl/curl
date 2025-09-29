@@ -29,7 +29,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
-#include "curlx/fopen.h"  /* for CURL_FOPEN_LOW() */
+#include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW() */
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -80,7 +80,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-      curl_dbg_logfile = CURL_FOPEN_LOW(logname, FOPEN_WRITETEXT);
+      curl_dbg_logfile = CURLX_FOPEN_LOW(logname, FOPEN_WRITETEXT);
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -422,7 +422,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res = CURL_FOPEN_LOW(file, mode);
+  FILE *res = CURLX_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
                 source, line, file, mode, (void *)res);
