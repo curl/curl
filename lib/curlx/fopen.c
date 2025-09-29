@@ -30,9 +30,10 @@
  * versions: `ptr = (malloc)(123)`, `(free)(ptr)`, etc.
  */
 
+#include "../curl_setup.h"
+
 #if defined(_WIN32) && !defined(UNDER_CE)
 
-#include "../curl_setup.h"
 #include "multibyte.h"
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
