@@ -66,10 +66,6 @@ extern const struct entry_s s_entries[];
 
 #include <curlx/curlx.h>
 
-#if defined(_WIN32) && !defined(UNDER_CE)
-#  define fopen(fname, mode) CURLX_FOPEN_LOW(fname, mode)
-#endif
-
 /* adjust for old MSVC */
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #  define snprintf _snprintf
