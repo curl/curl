@@ -52,8 +52,5 @@
 #endif
 #endif /* _WIN32 */
 
-#undef fclose
-#define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
-
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMDEBUG_H */

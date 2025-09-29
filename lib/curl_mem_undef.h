@@ -33,9 +33,5 @@
 #undef Curl_tcsdup
 #endif
 
-#ifdef CURLDEBUG
-#undef fclose
-#endif /* CURLDEBUG */
-
 #undef HEADER_CURL_MEMORY_H
 #undef HEADER_CURL_MEMDEBUG_H

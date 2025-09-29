@@ -90,6 +90,7 @@ my %banfunc = (
     "socketpair" => 1,
     "fdopen" => 1,
     "fopen" => 1,
+    "fclose" => 1,
     );
 
 my %warnings_extended = (

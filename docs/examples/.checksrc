@@ -1,3 +1,4 @@
+allowfunc fclose
 allowfunc fdopen
 allowfunc fopen
 allowfunc gmtime

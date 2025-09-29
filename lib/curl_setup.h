@@ -1104,6 +1104,7 @@ CURL_EXTERN ALLOC_FUNC
 
 #define CURL_FOPEN(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #define CURL_FDOPEN(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
+#define CURL_FCLOSE(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 
 #else /* !CURLDEBUG */
 
@@ -1125,6 +1126,7 @@ CURL_EXTERN ALLOC_FUNC
 
 #define CURL_FOPEN CURL_FOPEN_LOW
 #define CURL_FDOPEN fdopen
+#define CURL_FCLOSE fclose
 
 #endif /* CURLDEBUG */
 
