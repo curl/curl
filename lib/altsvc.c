@@ -38,7 +38,6 @@
 #include "fopen.h"
 #include "rename.h"
 #include "strdup.h"
-#include "curlx/fopenx.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "connect.h"

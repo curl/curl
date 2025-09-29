@@ -39,7 +39,6 @@
 #include "rename.h"
 #include "share.h"
 #include "strdup.h"
-#include "curlx/fopenx.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
