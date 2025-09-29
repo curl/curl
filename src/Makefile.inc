@@ -36,6 +36,7 @@ CURLX_CFILES = \
   ../lib/curlx/base64.c \
   ../lib/curlx/multibyte.c \
   ../lib/curlx/dynbuf.c \
+  ../lib/curlx/fopen.c \
   ../lib/curlx/nonblock.c \
   ../lib/curlx/strparse.c \
   ../lib/curlx/timediff.c \
