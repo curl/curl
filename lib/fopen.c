@@ -144,7 +144,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   if(fd == -1)
     goto fail;
 
-  *fh = CURL_FDOPEN(fd, FOPEN_WRITETEXT);
+  *fh = curlx_fdopen(fd, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
 
