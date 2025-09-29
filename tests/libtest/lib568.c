@@ -94,7 +94,7 @@ static CURLcode test_lib568(const char *URL)
     goto test_cleanup;
 
   test_setopt(curl, CURLOPT_UPLOAD, 0L);
-  fclose(sdpf);
+  CURL_FCLOSE(sdpf);
   sdpf = NULL;
 
   /* Make sure we can do a normal request now */
@@ -159,7 +159,7 @@ static CURLcode test_lib568(const char *URL)
 test_cleanup:
 
   if(sdpf)
-    fclose(sdpf);
+    CURL_FCLOSE(sdpf);
 
   curl_free(stream_uri);
 

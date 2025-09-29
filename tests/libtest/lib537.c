@@ -84,7 +84,7 @@ static int t537_fopen_works(void)
   }
   for(i = 0; i < 3; i++) {
     if(fpa[i])
-      fclose(fpa[i]);
+      CURL_FCLOSE(fpa[i]);
   }
   return ret;
 }

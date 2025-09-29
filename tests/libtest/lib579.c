@@ -39,7 +39,7 @@ static void progress_final_report(void)
   curl_mfprintf(moo ? moo : stderr, "Progress: end UL %zu/%zu\n",
                 last_ul, last_ul_total);
   if(moo)
-    fclose(moo);
+    CURL_FCLOSE(moo);
   else
     curl_mfprintf(stderr, "Progress: end UL, can't open %s\n", libtest_arg2);
   started = FALSE;
@@ -63,7 +63,7 @@ static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
     curl_mfprintf(moo ? moo : stderr, "Progress: start UL %zu/%zu\n",
                   last_ul, last_ul_total);
     if(moo)
-      fclose(moo);
+      CURL_FCLOSE(moo);
     else
       curl_mfprintf(stderr, "Progress: start UL, can't open %s\n",
                     libtest_arg2);

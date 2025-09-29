@@ -87,7 +87,7 @@ static CURLcode test_unit3200(const char *arg)
     fp = CURL_FOPEN(arg, "wb");
     abort_unless(fp != NULL, "Cannot open testfile");
     fwrite(filecontents[i], 1, strlen(filecontents[i]), fp);
-    fclose(fp);
+    CURL_FCLOSE(fp);
 
     fp = CURL_FOPEN(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
@@ -158,7 +158,7 @@ static CURLcode test_unit3200(const char *arg)
         break;
     }
     curlx_dyn_free(&buf);
-    fclose(fp);
+    CURL_FCLOSE(fp);
     curl_mfprintf(stderr, "OK\n");
   }
   return (CURLcode)rc;

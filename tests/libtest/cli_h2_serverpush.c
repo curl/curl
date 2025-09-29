@@ -129,7 +129,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   easy = curl_easy_init();
   if(setup_h2_serverpush(easy, URL)) {
-    fclose(out_download);
+    CURL_FCLOSE(out_download);
     curl_mfprintf(stderr, "failed\n");
     return (CURLcode)1;
   }
@@ -166,9 +166,9 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   curl_multi_cleanup(multi_handle);
 
-  fclose(out_download);
+  CURL_FCLOSE(out_download);
   if(out_push)
-    fclose(out_push);
+    CURL_FCLOSE(out_push);
 
   return CURLE_OK;
 }

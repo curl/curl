@@ -57,7 +57,7 @@ static CURLcode test_lib566(const char *URL)
     moo = CURL_FOPEN(libtest_arg2, "wb");
     if(moo) {
       curl_mfprintf(moo, "CL %.0f\n", content_length);
-      fclose(moo);
+      CURL_FCLOSE(moo);
     }
   }
 
