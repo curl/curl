@@ -135,10 +135,10 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
   (defined(__i386__) || defined(__arm__))
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  (mode_t)(0600|sb.st_mode));
+                  (mode_t)(0600 | sb.st_mode));
 #else
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  0600|sb.st_mode);
+                  0600 | sb.st_mode);
 #endif
   if(fd == -1)
     goto fail;

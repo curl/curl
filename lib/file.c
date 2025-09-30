@@ -234,7 +234,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = curlx_open(actual_path, O_RDONLY|CURL_O_BINARY);
+  fd = curlx_open(actual_path, O_RDONLY | CURL_O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
