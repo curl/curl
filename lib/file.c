@@ -70,6 +70,7 @@
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
+#include "curlx/fopen.h"
 #include "curlx/warnless.h"
 #include "curl_range.h"
 /* The last 3 #include files should be in this order */
