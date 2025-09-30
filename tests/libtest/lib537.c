@@ -289,7 +289,7 @@ static int t537_test_rlimit(int keep_open)
 
   /* open a dummy descriptor */
 
-  t537_testfd[0] = open(DEV_NULL, O_RDONLY);
+  t537_testfd[0] = curlx_open(DEV_NULL, O_RDONLY);
   if(t537_testfd[0] < 0) {
     curl_msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     t537_store_errmsg(strbuff, errno);

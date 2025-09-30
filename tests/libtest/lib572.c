@@ -84,7 +84,7 @@ static CURLcode test_lib572(const char *URL)
   stream_uri = NULL;
 
   /* PUT style GET_PARAMETERS */
-  params = open(libtest_arg2, O_RDONLY);
+  params = curlx_open(libtest_arg2, O_RDONLY);
   if(params == -1) {
     curl_mfprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
