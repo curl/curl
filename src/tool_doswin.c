@@ -532,7 +532,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
      identify whether it is a reserved device name and not a regular
      filename. */
 #ifdef MSDOS
-  if(base && ((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
+  if(base && (curlx_stat(base, &st_buf) == 0) && S_ISCHR(st_buf.st_mode)) {
     /* Prepend a '_' */
     size_t blen = strlen(base);
     if(blen) {

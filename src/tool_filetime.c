@@ -75,7 +75,7 @@ int getfiletime(const char *filename, curl_off_t *stamp)
   }
 #else
   struct_stat statbuf;
-  if(stat(filename, &statbuf) != -1) {
+  if(curlx_stat(filename, &statbuf) != -1) {
     *stamp = (curl_off_t)statbuf.st_mtime;
     rc = 0;
   }

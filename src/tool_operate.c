@@ -275,7 +275,7 @@ static CURLcode pre_transfer(struct per_transfer *per)
 #ifdef __VMS
     /* Calculate the real upload size for VMS */
     per->infd = -1;
-    if(stat(per->uploadfile, &fileinfo) == 0) {
+    if(curlx_stat(per->uploadfile, &fileinfo) == 0) {
       fileinfo.st_size = VmsSpecialSize(uploadfile, &fileinfo);
       switch(fileinfo.st_fab_rfm) {
       case FAB$C_VAR:
@@ -664,7 +664,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     }
     if(result && config->rm_partial) {
       struct_stat st;
-      if(!stat(outs->filename, &st) &&
+      if(!curlx_stat(outs->filename, &st) &&
          S_ISREG(st.st_mode)) {
         if(!unlink(outs->filename))
           notef("Removed output file: %s", outs->filename);
@@ -970,7 +970,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
 
   if(config->skip_existing) {
     struct_stat fileinfo;
-    if(!stat(per->outfile, &fileinfo)) {
+    if(!curlx_stat(per->outfile, &fileinfo)) {
       /* file is present */
       notef("skips transfer, \"%s\" exists locally", per->outfile);
       per->skip = TRUE;
@@ -983,7 +983,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
        of the file as it is now and open it for append instead */
     struct_stat fileinfo;
     /* VMS -- Danger, the filesize is only valid for stream files */
-    if(stat(per->outfile, &fileinfo) == 0)
+    if(curlx_stat(per->outfile, &fileinfo) == 0)
       /* set offset to current file size: */
       config->resume_from = fileinfo.st_size;
     else
