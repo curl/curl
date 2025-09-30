@@ -665,8 +665,9 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
       result = curlx_dyn_add(&fname, ".sqlog");
 
     if(!result) {
-      int qlogfd = open(curlx_dyn_ptr(&fname), O_WRONLY|O_CREAT|CURL_O_BINARY,
-                        data->set.new_file_perms);
+      int qlogfd = curlx_open(curlx_dyn_ptr(&fname),
+                              O_WRONLY | O_CREAT | CURL_O_BINARY,
+                              data->set.new_file_perms);
       if(qlogfd != -1)
         *qlogfdp = qlogfd;
     }
