@@ -68,6 +68,7 @@
 #include "../sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "../multiif.h"
 #include "../select.h"
+#include "../curlx/fopen.h"
 #include "../curlx/warnless.h"
 #include "curl_path.h"
 #include "../curlx/strparse.h"
