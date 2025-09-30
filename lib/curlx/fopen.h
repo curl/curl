@@ -28,6 +28,10 @@
 
 #include "multibyte.h"
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>  /* for open() and attributes */
+#endif
+
 #if defined(_WIN32) && !defined(UNDER_CE)
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
 int curlx_win32_stat(const char *path, struct_stat *buffer);
@@ -36,9 +40,6 @@ int curlx_win32_open(const char *filename, int oflag, ...);
 #define curlx_stat(fname, stp)       curlx_win32_stat(fname, stp)
 #define curlx_open                   curlx_win32_open
 #else
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>  /* for open() */
-#endif
 #define CURLX_FOPEN_LOW              fopen
 #define curlx_stat(fname, stp)       stat(fname, stp)
 #define curlx_open                   open
