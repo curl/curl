@@ -484,6 +484,7 @@
 #define CURL_DISABLE_LDAP 1
 
 #ifndef _MSC_VER
+/* !checksrc! disable BANNEDFUNC 1 */
 extern int stat(const char *path, struct stat *buffer);
 #endif
 
