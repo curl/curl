@@ -893,7 +893,8 @@ sub scanfile {
         # scan for use of banned functions
         my $bl = $l;
       again:
-        if(($l =~ /^(.*?\W)(\w+)(\s*\()/x) && $banfunc{$2}) {
+        if((($l =~ /^(.*?\W)(\w+)(\s*\()/x) && $banfunc{$2}) ||
+           (($l =~ /^(.*?\()(\w+)(\s*\()/x) && $banfunc{$2})) {
             my $bad = $2;
             my $prefix = $1;
             my $suff = $3;
@@ -904,6 +905,7 @@ sub scanfile {
             $prefix =~ s/\*/\\*/;
             $prefix =~ s/\[/\\[/;
             $prefix =~ s/\]/\\]/;
+            $prefix =~ s/\(/\\(/;
             $suff =~ s/\(/\\(/;
             $l =~ s/$prefix$bad$suff/$prefix$replace/;
             goto again;
