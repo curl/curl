@@ -81,6 +81,7 @@ int main(void)
   CURLcode res;
   FILE *hd_src;
   struct stat file_info;
+  curl_off_t fsize;
 
   struct curl_slist *headerlist = NULL;
   static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
@@ -102,8 +103,9 @@ int main(void)
     fclose(hd_src);
     return 1; /* cannot continue */
   }
+  fsize = file_info.st_size;
 
-  printf("Local file size: %lu bytes.\n", (unsigned long)file_info.st_size);
+  printf("Local file size: %lu bytes.\n", (unsigned long)fsize);
 
   /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
@@ -134,8 +136,7 @@ int main(void)
        option you MUST make sure that the type of the passed-in argument is a
        curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
        make sure that to pass in a type 'long' argument. */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)file_info.st_size);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, fsize);
 
     /* Now run off and do what you have been told! */
     res = curl_easy_perform(curl);
