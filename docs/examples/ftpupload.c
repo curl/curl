@@ -37,6 +37,9 @@
 #include <io.h>
 #undef stat
 #define stat _stat
+#undef fstat
+#define fstat _fstat
+#define fileno _fileno
 #else
 #include <unistd.h>
 #endif
@@ -78,25 +81,31 @@ int main(void)
   CURLcode res;
   FILE *hd_src;
   struct stat file_info;
-  unsigned long fsize;
+  curl_off_t fsize;
 
   struct curl_slist *headerlist = NULL;
   static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
   static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
 
-  /* get the file size of the local file */
-  if(stat(LOCAL_FILE, &file_info)) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
-    return 1;
-  }
-  fsize = (unsigned long)file_info.st_size;
-
-  printf("Local file size: %lu bytes.\n", fsize);
-
-  /* get a FILE * of the same file */
+  /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
-  if(!hd_src)
+  if(!hd_src) {
+    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 2;
+  }
+
+  /* to get the file size */
+#ifdef UNDER_CE
+  if(stat(LOCAL_FILE, &file_info) != 0) {
+#else
+  if(fstat(fileno(hd_src), &file_info) != 0) {
+#endif
+    fclose(hd_src);
+    return 1; /* cannot continue */
+  }
+  fsize = file_info.st_size;
+
+  printf("Local file size: %lu bytes.\n", (unsigned long)fsize);
 
   /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
@@ -127,8 +136,7 @@ int main(void)
        option you MUST make sure that the type of the passed-in argument is a
        curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
        make sure that to pass in a type 'long' argument. */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)fsize);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, fsize);
 
     /* Now run off and do what you have been told! */
     res = curl_easy_perform(curl);

@@ -33,6 +33,9 @@
 #ifdef _WIN32
 #undef stat
 #define stat _stat
+#undef fstat
+#define fstat _fstat
+#define fileno _fileno
 #endif
 
 /*
@@ -79,15 +82,22 @@ int main(int argc, char **argv)
   file = argv[1];
   url = argv[2];
 
-  /* get the file size of the local file */
-  stat(file, &file_info);
-
   /* get a FILE * of the same file, could also be made with
      fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(file, "rb");
   if(!hd_src)
     return 2;
+
+  /* get the file size of the local file */
+#ifdef UNDER_CE
+  if(stat(file, &file_info) != 0) {
+#else
+  if(fstat(fileno(hd_src), &file_info) != 0) {
+#endif
+    fclose(hd_src);
+    return 1; /* cannot continue */
+  }
 
   /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
