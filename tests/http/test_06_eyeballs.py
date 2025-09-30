@@ -112,7 +112,7 @@ class TestEyeballs:
             '--resolve', 'xxx.invalid:443:0100::1,0100::2,0100::3',
             '--connect-timeout', '1',
             '--happy-eyeballs-timeout-ms', '123',
-            '--trace-config', 'timer'
+            '--trace-config', 'timer,happy-eyeballs,tcp'
         ])
         r.check_response(count=1, http_status=None, exitcode=False)
         assert r.stats[0]['time_connect'] == 0     # no one connected
