@@ -664,8 +664,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     }
     if(result && config->rm_partial) {
       struct_stat st;
-      if(!curlx_stat(outs->filename, &st) &&
-         S_ISREG(st.st_mode)) {
+      if(!curlx_stat(outs->filename, &st) && S_ISREG(st.st_mode)) {
         if(!unlink(outs->filename))
           notef("Removed output file: %s", outs->filename);
         else
