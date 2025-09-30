@@ -1135,7 +1135,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
                    caller, ps->n, timeout_count);
         break;
     }
-    CURL_TRC_M_TIMEOUTS(data);
+    CURL_TRC_EASY_TIMERS(data);
   }
 
   if(expect_sockets && !ps->n && data->multi &&
@@ -3050,7 +3050,13 @@ static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc)
     data = Curl_splayget(t); /* assign this for next loop */
     if(!data)
       continue;
-
+    if(CURL_TRC_TIMER_is_verbose(data)) {
+      struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
+      if(e) {
+        struct time_node *n = Curl_node_elem(e);
+        CURL_TRC_TIMER(data, n->eid, "has expired");
+      }
+    }
     (void)add_next_timeout(mrc->now, multi, data);
     Curl_multi_mark_dirty(data);
   }
@@ -3323,6 +3329,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms)
 {
   static const struct curltime tv_zero = {0, 0};
+  struct Curl_easy *data = NULL;
 
   if(multi->dead) {
     *timeout_ms = 0;
@@ -3350,14 +3357,14 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
        curlx_timediff_us(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
       timediff_t diff = curlx_timediff_ceil(multi->timetree->key, now);
+      data = Curl_splayget(multi->timetree);
       /* this should be safe even on 32-bit archs, as we do not use that
          overly long timeouts */
       *timeout_ms = (long)diff;
     }
     else {
       if(multi->timetree) {
-        struct Curl_easy *data = Curl_splayget(multi->timetree);
-        CURL_TRC_M(data, "multi_timeout() says this has expired");
+        data = Curl_splayget(multi->timetree);
       }
       /* 0 means immediately */
       *timeout_ms = 0;
@@ -3366,6 +3373,16 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
   else {
     *expire_time = tv_zero;
     *timeout_ms = -1;
+  }
+
+  if(data && CURL_TRC_TIMER_is_verbose(data)) {
+    struct Curl_llist_node *e =
+      Curl_llist_head(&data->state.timeoutlist);
+    if(e) {
+      struct time_node *n = Curl_node_elem(e);
+      CURL_TRC_TIMER(data, n->eid, "gives multi timeout in %"
+                     FMT_TIMEDIFF_T"ms", *timeout_ms);
+    }
   }
 
   return CURLM_OK;
@@ -3387,8 +3404,6 @@ CURLMcode curl_multi_timeout(CURLM *m,
   return multi_timeout(multi, &expire_time, timeout_ms);
 }
 
-#define DEBUG_UPDATE_TIMER    0
-
 /*
  * Tell the application it should update its timers, if it subscribes to the
  * update timer callback.
@@ -3407,47 +3422,34 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
   }
 
   if(timeout_ms < 0 && multi->last_timeout_ms < 0) {
-#if DEBUG_UPDATE_TIMER
-    fprintf(stderr, "Curl_update_timer(), still no timeout, no change\n");
-#endif
+    /* nothing to do */
   }
   else if(timeout_ms < 0) {
     /* there is no timeout now but there was one previously */
-#if DEBUG_UPDATE_TIMER
-    fprintf(stderr, "Curl_update_timer(), remove timeout, "
-        " last_timeout=%ldms\n", multi->last_timeout_ms);
-#endif
+    CURL_TRC_M(multi->admin, "[TIMER] clear");
     timeout_ms = -1; /* normalize */
     set_value = TRUE;
   }
   else if(multi->last_timeout_ms < 0) {
-#if DEBUG_UPDATE_TIMER
-    fprintf(stderr, "Curl_update_timer(), had no timeout, set now\n");
-#endif
+    CURL_TRC_M(multi->admin, "[TIMER] set %ldms, none before",
+               timeout_ms);
     set_value = TRUE;
   }
   else if(curlx_timediff_us(multi->last_expire_ts, expire_ts)) {
     /* We had a timeout before and have one now, the absolute timestamp
      * differs. The relative timeout_ms may be the same, but the starting
      * point differs. Let the application restart its timer. */
-#if DEBUG_UPDATE_TIMER
-    fprintf(stderr, "Curl_update_timer(), expire timestamp changed\n");
-#endif
+    CURL_TRC_M(multi->admin, "[TIMER] set %ldms, replace previous",
+               timeout_ms);
     set_value = TRUE;
   }
   else {
     /* We have same expire time as previously. Our relative 'timeout_ms'
      * may be different now, but the application has the timer running
      * and we do not to tell it to start this again. */
-#if DEBUG_UPDATE_TIMER
-    fprintf(stderr, "Curl_update_timer(), same expire timestamp, no change\n");
-#endif
   }
 
   if(set_value) {
-#if DEBUG_UPDATE_TIMER
-    fprintf(stderr, "Curl_update_timer(), set timeout %ldms\n", timeout_ms);
-#endif
     multi->last_expire_ts = expire_ts;
     multi->last_timeout_ms = timeout_ms;
     set_in_callback(multi, TRUE);
@@ -3491,7 +3493,8 @@ multi_deltimeout(struct Curl_easy *data, expire_id eid)
 static CURLMcode
 multi_addtimeout(struct Curl_easy *data,
                  struct curltime *stamp,
-                 expire_id eid)
+                 expire_id eid,
+                 const struct curltime *nowp)
 {
   struct Curl_llist_node *e;
   struct time_node *node;
@@ -3499,6 +3502,7 @@ multi_addtimeout(struct Curl_easy *data,
   size_t n;
   struct Curl_llist *timeoutlist = &data->state.timeoutlist;
 
+  (void)nowp;
   node = &data->state.expires[eid];
 
   /* copy the timestamp and id */
@@ -3521,6 +3525,8 @@ multi_addtimeout(struct Curl_easy *data,
      this is the first timeout on the list */
 
   Curl_llist_insert_next(timeoutlist, prev, node, &node->list);
+  CURL_TRC_TIMER(data, eid, "set for %" FMT_TIMEDIFF_T "ns",
+                 curlx_timediff_us(node->time, *nowp));
   return CURLM_OK;
 }
 
@@ -3553,7 +3559,7 @@ void Curl_expire_ex(struct Curl_easy *data,
 
   /* Add it to the timer list. It must stay in the list until it has expired
      in case we need to recompute the minimum timer later. */
-  multi_addtimeout(data, &set, id);
+  multi_addtimeout(data, &set, id, nowp);
 
   if(curr_expire->tv_sec || curr_expire->tv_usec) {
     /* This means that the struct is added as a node in the splay tree.
@@ -3582,9 +3588,6 @@ void Curl_expire_ex(struct Curl_easy *data,
   Curl_splayset(&data->state.timenode, data);
   multi->timetree = Curl_splayinsert(*curr_expire, multi->timetree,
                                      &data->state.timenode);
-  if(data->id >= 0)
-    CURL_TRC_M(data, "[TIMEOUT] set %s to expire in %" FMT_TIMEDIFF_T "ns",
-               CURL_TIMER_NAME(id), curlx_timediff_us(set, *nowp));
 }
 
 /*
@@ -3610,12 +3613,11 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
  * Removes the expire timer. Marks it as done.
  *
  */
-void Curl_expire_done(struct Curl_easy *data, expire_id id)
+void Curl_expire_done(struct Curl_easy *data, expire_id eid)
 {
   /* remove the timer, if there */
-  multi_deltimeout(data, id);
-  if(data->id >= 0)
-    CURL_TRC_M(data, "[TIMEOUT] cleared %s", CURL_TIMER_NAME(id));
+  multi_deltimeout(data, eid);
+  CURL_TRC_TIMER(data, eid, "cleared");
 }
 
 /*

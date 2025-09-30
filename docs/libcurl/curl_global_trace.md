@@ -138,6 +138,10 @@ Tracing of SSL Session handling, e.g. caching/import/export.
 
 Tracing of SMTP operations when this protocol is enabled in your build.
 
+## `timer`
+
+Tracing of timers set for transfers.
+
 ## `write`
 
 Traces writing of download data, received from the server, to the application.

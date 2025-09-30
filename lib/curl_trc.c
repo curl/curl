@@ -272,6 +272,10 @@ struct curl_trc_feat Curl_trc_feat_dns = {
   "DNS",
   CURL_LOG_LVL_NONE,
 };
+struct curl_trc_feat Curl_trc_feat_timer = {
+  "TIMER",
+  CURL_LOG_LVL_NONE,
+};
 
 static const char * const Curl_trc_timer_names[]={
   "100_TIMEOUT",
@@ -291,24 +295,36 @@ static const char * const Curl_trc_timer_names[]={
   "SHUTDOWN",
 };
 
-const char *Curl_trc_timer_name(int tid)
+static const char *trc_timer_name(int tid)
 {
   if((tid >= 0) && ((size_t)tid < CURL_ARRAYSIZE(Curl_trc_timer_names)))
     return Curl_trc_timer_names[(size_t)tid];
   return "UNKNOWN?";
 }
 
-void Curl_trc_multi_timeouts(struct Curl_easy *data)
+void Curl_trc_timer(struct Curl_easy *data, int tid, const char *fmt, ...)
 {
-  struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
-  if(e) {
-    struct curltime now = curlx_now();
-    while(e) {
-      struct time_node *n = Curl_node_elem(e);
-      e = Curl_node_next(e);
-      CURL_TRC_M(data, "[TIMEOUT] %s expires in %" FMT_TIMEDIFF_T "ns",
-                 CURL_TIMER_NAME(n->eid),
-                 curlx_timediff_us(n->time, now));
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)) {
+    const char *tname = trc_timer_name(tid);
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_timer, tname, 0, fmt, ap);
+    va_end(ap);
+  }
+}
+void Curl_trc_easy_timers(struct Curl_easy *data)
+{
+  if(CURL_TRC_TIMER_is_verbose(data)) {
+    struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
+    if(e) {
+      struct curltime now = curlx_now();
+      while(e) {
+        struct time_node *n = Curl_node_elem(e);
+        e = Curl_node_next(e);
+        CURL_TRC_TIMER(data, n->eid, "expires in %" FMT_TIMEDIFF_T "ns",
+                       curlx_timediff_us(n->time, now));
+      }
     }
   }
 }
@@ -476,6 +492,7 @@ static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
   { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
+  { &Curl_trc_feat_timer,     TRC_CT_NETWORK },
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif
