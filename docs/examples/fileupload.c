@@ -52,6 +52,7 @@ int main(void)
 
   /* to get the file size */
 #ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
   if(stat("debugit", &file_info) != 0) {
 #else
   if(fstat(fileno(fd), &file_info) != 0) {
