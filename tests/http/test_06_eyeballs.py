@@ -116,9 +116,19 @@ class TestEyeballs:
         ])
         r.check_response(count=1, http_status=None, exitcode=False)
         assert r.stats[0]['time_connect'] == 0     # no one connected
-        he_timers_set = [line for line in r.trace_lines
-                         if re.match(r'.*\[TIMER] \[HAPPY_EYEBALLS] set for 123000ns', line)]
-        assert len(he_timers_set) == 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
+        # check that we indeed started attempts on all 3 addresses
         tcp_attempts = [line for line in r.trace_lines
                          if re.match(r'.*Trying \[100::[123]]:443', line)]
         assert len(tcp_attempts) == 3, f'fond: {"".join(tcp_attempts)}\n{r.dump_logs()}'
+        # if the 0100::/64 really goes into the void, we should see 2 HAPPY_EYEBALLS
+        # timeouts being set here
+        failed_attempts = [line for line in r.trace_lines
+                           if re.match(r'.*checked connect attempts: 0 ongoing', line)]
+        if len(failed_attempts):
+            # github CI fails right away with "Network is unreachable", slackers...
+            assert len(failed_attempts) == 3, f'found: {"".join(failed_attempts)}\n{r.dump_logs()}'
+        else:
+            # no immediately failed attempts, as should be
+            he_timers_set = [line for line in r.trace_lines
+                             if re.match(r'.*\[TIMER] \[HAPPY_EYEBALLS] set for', line)]
+            assert len(he_timers_set) == 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
