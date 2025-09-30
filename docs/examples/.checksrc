@@ -5,4 +5,3 @@ allowfunc gmtime
 allowfunc localtime
 allowfunc open
 allowfunc socket
-allowfunc stat

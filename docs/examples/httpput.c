@@ -91,6 +91,7 @@ int main(int argc, char **argv)
 
   /* get the file size of the local file */
 #ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
   if(stat(file, &file_info) != 0) {
 #else
   if(fstat(fileno(hd_src), &file_info) != 0) {
