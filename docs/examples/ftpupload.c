@@ -91,12 +91,7 @@ int main(void)
   }
 
   /* to get the file size */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(LOCAL_FILE, &file_info) != 0) {
-#else
   if(fstat(fileno(hd_src), &file_info) != 0) {
-#endif
     fclose(hd_src);
     return 1; /* cannot continue */
   }
