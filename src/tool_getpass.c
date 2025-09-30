@@ -30,10 +30,6 @@
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
 
-#ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-#endif
-
 #ifdef HAVE_TERMIOS_H
 #  include <termios.h>
 #elif defined(HAVE_TERMIO_H)

@@ -27,10 +27,6 @@
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
   !defined(CURL_DISABLE_HSTS)
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
 #include "urldata.h"
 #include "rand.h"
 #include "curl_fopen.h"

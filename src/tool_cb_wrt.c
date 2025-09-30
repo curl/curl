@@ -23,11 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_FCNTL_H
-/* for open() */
-#include <fcntl.h>
-#endif
-
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"

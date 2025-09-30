@@ -27,9 +27,6 @@
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #ifdef USE_NGHTTP3
 #include <nghttp3/nghttp3.h>
 #endif

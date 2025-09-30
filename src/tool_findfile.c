@@ -33,10 +33,6 @@
 #endif
 #endif
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
 #include "tool_findfile.h"
 #include "tool_cfgable.h"
 

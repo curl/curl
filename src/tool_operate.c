@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-#endif
-
 #ifdef HAVE_LOCALE_H
 #  include <locale.h>
 #endif
