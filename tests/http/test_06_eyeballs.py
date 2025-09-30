@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import re
 import pytest
 
 from testenv import Env, CurlClient
@@ -100,3 +101,24 @@ class TestEyeballs:
         r.check_response(count=1, http_status=None, exitcode=False)
         assert r.stats[0]['time_connect'] == 0     # no one should have listened
         assert r.stats[0]['time_appconnect'] == 0  # did not happen either
+
+    # check timers when trying 3 unresponsive addresses
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('IPv6'),
+                        reason='curl lacks ipv6 support')
+    def test_06_13_timers(self, env: Env):
+        curl = CurlClient(env=env)
+        # ipv6 0100::/64 is supposed to go into the void (rfc6666)
+        r = curl.http_download(urls=['https://xxx.invalid/'], extra_args=[
+            '--resolve', f'xxx.invalid:443:0100::1,0100::2,0100::3',
+            '--connect-timeout', '1',
+            '--happy-eyeballs-timeout-ms', '123',
+            '--trace-config', 'timer'
+        ])
+        r.check_response(count=1, http_status=None, exitcode=False)
+        assert r.stats[0]['time_connect'] == 0     # no one connected
+        he_timers_set = [line for line in r.trace_lines
+                         if re.match(r'.*\[TIMER] \[HAPPY_EYEBALLS] set for 123000ns', line)]
+        assert len(he_timers_set) == 2, f'{"".join(he_timers_set)}'
+        tcp_attempts = [line for line in r.trace_lines
+                         if re.match(r'.*Trying \[100::[123]]:443', line)]
+        assert len(tcp_attempts) == 3, f'{"".join(tcp_attempts)}'

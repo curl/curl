@@ -418,7 +418,13 @@ evaluate:
     do_more = TRUE;
   }
   else {
-    do_more = (curlx_timediff(now, bs->last_attempt_started) >=
+    bool more_possible = cf_ai_iter_has_more(&bs->addr_iter);
+#ifdef USE_IPV6
+    if(!more_possible)
+      more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
+#endif
+    do_more =  more_possible &&
+               (curlx_timediff(now, bs->last_attempt_started) >=
                bs->attempt_delay_ms);
     if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
@@ -521,6 +527,10 @@ out:
       elapsed_ms = curlx_timediff(now, bs->last_attempt_started);
       expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
       next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
+      if(next_expire_ms <= 0) {
+        CURL_TRC_CF(data, cf, "HAPPY_EYBALLS timeout due, re-evaluate");
+        goto evaluate;
+      }
       CURL_TRC_CF(data, cf, "next HAPPY_EYBALLS timeout in %" FMT_TIMEDIFF_T
                   "ms", next_expire_ms);
       Curl_expire(data, next_expire_ms, EXPIRE_HAPPY_EYEBALLS);

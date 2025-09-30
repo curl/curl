@@ -895,6 +895,9 @@ class CurlClient:
         if not isinstance(urls, list):
             urls = [urls]
 
+        if options is not None and '--resolve' in options:
+            force_resolve = False
+
         args = [self._curl, "-s", "--path-as-is"]
         if 'CURL_TEST_EVENT' in os.environ:
             args.append('--test-event')
