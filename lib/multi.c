@@ -3380,8 +3380,8 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
       Curl_llist_head(&data->state.timeoutlist);
     if(e) {
       struct time_node *n = Curl_node_elem(e);
-      CURL_TRC_TIMER(data, n->eid, "gives multi timeout in %"
-                     FMT_TIMEDIFF_T"ms", *timeout_ms);
+      CURL_TRC_TIMER(data, n->eid, "gives multi timeout in %ldms",
+                     *timeout_ms);
     }
   }
 
