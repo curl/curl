@@ -168,13 +168,6 @@ static bool cf_ai_iter_has_more(struct cf_ai_iter *iter)
   return FALSE;
 }
 
-#ifdef USE_IPV6
-static bool cf_ai_iter_done(struct cf_ai_iter *iter)
-{
-  return (iter->n >= 0) && !iter->last;
-}
-#endif
-
 struct cf_ip_attempt {
   struct cf_ip_attempt *next;
   const struct Curl_addrinfo *addr;  /* List of addresses to try, not owned */
@@ -438,7 +431,7 @@ evaluate:
     int ai_family = 0;
 #ifdef USE_IPV6
     if((bs->last_attempt_ai_family == AF_INET) ||
-        cf_ai_iter_done(&bs->addr_iter)) {
+        !cf_ai_iter_has_more(&bs->addr_iter)) {
        addr = cf_ai_iter_next(&bs->ipv6_iter);
        ai_family = bs->ipv6_iter.ai_family;
     }
