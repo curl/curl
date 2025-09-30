@@ -48,7 +48,7 @@ env:
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20250818.0
   # handled in renovate.json
-  OPENSSL_VERSION: 3.5.3
+  OPENSSL_VERSION: 3.5.4
   # handled in renovate.json
   QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com

@@ -40,7 +40,7 @@ env:
   MAKEFLAGS: -j 5
   CURL_CI: github
   # handled in renovate.json
-  OPENSSL_VERSION: 3.5.3
+  OPENSSL_VERSION: 3.5.4
   # handled in renovate.json
   QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
