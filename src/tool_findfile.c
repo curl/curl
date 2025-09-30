@@ -77,7 +77,7 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
     else
       c = aprintf("%s" DIR_CHAR "%s", home, fname);
     if(c) {
-      int fd = open(c, O_RDONLY);
+      int fd = curlx_open(c, O_RDONLY);
       if(fd >= 0) {
         char *path = strdup(c);
         close(fd);

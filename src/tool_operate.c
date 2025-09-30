@@ -285,16 +285,16 @@ static CURLcode pre_transfer(struct per_transfer *per)
       case FAB$C_VAR:
       case FAB$C_VFC:
       case FAB$C_STMCR:
-        per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
+        per->infd = curlx_open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
         break;
       default:
-        per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY,
-                         "rfm=stmlf", "ctx=stm");
+        per->infd = curlx_open(per->uploadfile, O_RDONLY | CURL_O_BINARY,
+                               "rfm=stmlf", "ctx=stm");
       }
     }
     if(per->infd == -1)
 #else
-      per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
+      per->infd = curlx_open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {

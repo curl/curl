@@ -60,7 +60,8 @@ bool tool_create_output_file(struct OutStruct *outs,
   else {
     int fd;
     do {
-      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
+      fd = curlx_open(fname,
+                      O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
       /* Keep retrying in the hope that it is not interrupted sometime */
       /* !checksrc! disable ERRNOVAR 1 */
     } while(fd == -1 && errno == EINTR);
@@ -78,8 +79,9 @@ bool tool_create_output_file(struct OutStruct *outs,
           return FALSE;
         next_num++;
         do {
-          fd = open(curlx_dyn_ptr(&fbuffer),
-                    O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
+          fd = curlx_open(curlx_dyn_ptr(&fbuffer),
+                          O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY,
+                          OPENMODE);
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
