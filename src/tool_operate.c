@@ -999,7 +999,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     /* open file for output, forcing VMS output format into stream
        mode which is needed for stat() call above to always work. */
     FILE *file = curlx_fopen(outfile, "ab",
-                           "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
+                             "ctx=stm", "rfm=stmlf", "rat=cr", "mrs=0");
 #else
     /* open file for output: */
     FILE *file = curlx_fopen(per->outfile, "ab");
