@@ -1199,12 +1199,12 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
         sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
         if(!sshc->rsa)
           out_of_memory = TRUE;
-        else if(stat(sshc->rsa, &sbuf)) {
+        else if(curlx_stat(sshc->rsa, &sbuf)) {
           free(sshc->rsa);
           sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
           if(!sshc->rsa)
             out_of_memory = TRUE;
-          else if(stat(sshc->rsa, &sbuf)) {
+          else if(curlx_stat(sshc->rsa, &sbuf)) {
             Curl_safefree(sshc->rsa);
           }
         }
@@ -1213,10 +1213,10 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
       if(!out_of_memory && !sshc->rsa) {
         /* Nothing found; try the current dir. */
         sshc->rsa = strdup("id_rsa");
-        if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
+        if(sshc->rsa && curlx_stat(sshc->rsa, &sbuf)) {
           free(sshc->rsa);
           sshc->rsa = strdup("id_dsa");
-          if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
+          if(sshc->rsa && curlx_stat(sshc->rsa, &sbuf)) {
             free(sshc->rsa);
             /* Out of guesses. Set to the empty string to avoid
              * surprising info messages. */

@@ -103,6 +103,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     goto fail;
   if(
 #ifdef UNDER_CE
+     /* !checksrc! disable BANNEDFUNC 1 */
      stat(filename, &sb) == -1
 #else
      fstat(fileno(*fh), &sb) == -1
