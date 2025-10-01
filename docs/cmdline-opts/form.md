@@ -141,5 +141,3 @@ base64 attached file:
 
     curl -F '=text message;encoder=quoted-printable' \
          -F '=@localfile;encoder=base64' ... smtp://example.com
-
-See further examples and details in the MANUAL.
