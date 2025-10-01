@@ -412,9 +412,9 @@ evaluate:
     if(!more_possible)
       more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
 #endif
-    do_more =  more_possible &&
-               (curlx_timediff(now, bs->last_attempt_started) >=
-               bs->attempt_delay_ms);
+    do_more = more_possible &&
+              (curlx_timediff(now, bs->last_attempt_started) >=
+              bs->attempt_delay_ms);
     if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
                   "start next attempt");
