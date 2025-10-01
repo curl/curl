@@ -156,7 +156,7 @@ jobs:
 
           - name: 'openssl arm'
             install_steps: pytest
-            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug --disable-verbose
             image: 'ubuntu-24.04-arm'
 
           - name: 'openssl -O3 libssh valgrind'
@@ -252,6 +252,7 @@ jobs:
               --with-openssl=/home/linuxbrew/.linuxbrew/opt/openssl --with-ngtcp2 --with-nghttp3=
               --with-libidn2 --enable-httpsrr --enable-ares
               --disable-debug --disable-unity
+              --disable-verbose
 
           - name: 'address-sanitizer'
             install_packages: clang libssl-dev libssh-dev libidn2-dev libnghttp2-dev libubsan1 libasan8 libtsan2
