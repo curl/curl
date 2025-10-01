@@ -453,32 +453,36 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   curl_int64_t stream_id = (curl_int64_t)SSL_get_stream_id(stream_ssl);
-
-  if(h3->remote_ctrl_n >= CURL_ARRAYSIZE(h3->remote_ctrl)) {
-    /* rejected, we are full */
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] rejecting remote stream",
-                stream_id);
-    SSL_free(stream_ssl);
-    return CURLE_FAILED_INIT;
-  }
-  switch(SSL_get_stream_type(stream_ssl)) {
+  int stype = SSL_get_stream_type(stream_ssl);
+  /* This could be a GREASE stream, e.g. HTTP/3 rfc9114 ch 6.2.3
+   * reserved stream type that is supposed to be discarded silently.
+   * BUT OpenSSL does not offer this information to us. So, we silently
+   * ignore all such streams we do not expect. */
+  switch(stype) {
     case SSL_STREAM_TYPE_READ: {
-      struct cf_osslq_stream *nstream = &h3->remote_ctrl[h3->remote_ctrl_n++];
+      struct cf_osslq_stream *nstream;
+      if(h3->remote_ctrl_n >= CURL_ARRAYSIZE(h3->remote_ctrl)) {
+        /* rejected, we are full */
+        CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] reject remote uni stream",
+                    stream_id);
+        SSL_free(stream_ssl);
+        return CURLE_OK;
+      }
+      nstream = &h3->remote_ctrl[h3->remote_ctrl_n++];
       nstream->id = stream_id;
       nstream->ssl = stream_ssl;
       Curl_bufq_initp(&nstream->recvbuf, &ctx->stream_bufcp, 1, BUFQ_OPT_NONE);
       CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] accepted remote uni stream",
                   stream_id);
-      break;
+      return CURLE_OK;
     }
     default:
-      CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] reject remote non-uni-read"
-                  " stream", stream_id);
+      CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] reject remote %s"
+                  " stream, type=%x", stream_id,
+                  (stype == SSL_STREAM_TYPE_BIDI) ? "bidi" : "write", stype);
       SSL_free(stream_ssl);
-      return CURLE_FAILED_INIT;
+      return CURLE_OK;
   }
-  return CURLE_OK;
-
 }
 
 static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
