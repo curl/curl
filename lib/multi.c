@@ -1103,6 +1103,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     Curl_multi_mark_dirty(data);
   }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(CURL_TRC_M_is_verbose(data)) {
     size_t timeout_count = Curl_llist_count(&data->state.timeoutlist);
     switch(ps->n) {
@@ -1137,6 +1138,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     }
     CURL_TRC_EASY_TIMERS(data);
   }
+#endif
 
   if(expect_sockets && !ps->n && data->multi &&
      !Curl_uint_bset_contains(&data->multi->dirty, data->mid) &&
@@ -3050,6 +3052,7 @@ static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc)
     data = Curl_splayget(t); /* assign this for next loop */
     if(!data)
       continue;
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
     if(CURL_TRC_TIMER_is_verbose(data)) {
       struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
       if(e) {
@@ -3057,6 +3060,7 @@ static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc)
         CURL_TRC_TIMER(data, n->eid, "has expired");
       }
     }
+#endif
     (void)add_next_timeout(mrc->now, multi, data);
     Curl_multi_mark_dirty(data);
   }
@@ -3329,7 +3333,9 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms)
 {
   static const struct curltime tv_zero = {0, 0};
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct Curl_easy *data = NULL;
+#endif
 
   if(multi->dead) {
     *timeout_ms = 0;
@@ -3357,15 +3363,19 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
        curlx_timediff_us(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
       timediff_t diff = curlx_timediff_ceil(multi->timetree->key, now);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       data = Curl_splayget(multi->timetree);
+#endif
       /* this should be safe even on 32-bit archs, as we do not use that
          overly long timeouts */
       *timeout_ms = (long)diff;
     }
     else {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
       if(multi->timetree) {
         data = Curl_splayget(multi->timetree);
       }
+#endif
       /* 0 means immediately */
       *timeout_ms = 0;
     }
@@ -3375,6 +3385,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     *timeout_ms = -1;
   }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(data && CURL_TRC_TIMER_is_verbose(data)) {
     struct Curl_llist_node *e =
       Curl_llist_head(&data->state.timeoutlist);
@@ -3384,6 +3395,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
                      *timeout_ms);
     }
   }
+#endif
 
   return CURLM_OK;
 }
