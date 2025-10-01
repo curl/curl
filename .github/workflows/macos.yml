@@ -122,7 +122,7 @@ jobs:
         if: ${{ contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -x
+            "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja \
             -DCMAKE_INSTALL_PREFIX=/Users/runner/libressl \
