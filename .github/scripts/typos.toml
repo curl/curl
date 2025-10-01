@@ -12,6 +12,8 @@ extend-ignore-identifiers-re = [
   "^[0-9a-zA-Z+]{64,}$",  # possibly base64
   "^(Januar|eyeballers|HELO_smtp|kno22|MkTypLibCompatible|optin|passin|perfec|__SecURE|SMTP_HELO|v_alue)$",
   "^(clen|req_clen|smtp_perform_helo|smtp_state_helo_resp|_stati64)$",
+  "^Tru64$",
+  "^secur32$",
 ]
 
 extend-ignore-re = [
