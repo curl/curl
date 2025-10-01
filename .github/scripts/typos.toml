@@ -13,7 +13,7 @@ extend-ignore-identifiers-re = [
   "^(Januar|eyeballers|HELO_smtp|kno22|MkTypLibCompatible|optin|passin|perfec|__SecURE|SMTP_HELO|v_alue)$",
   "^(clen|req_clen|smtp_perform_helo|smtp_state_helo_resp|_stati64)$",
   "^Tru64$",
-  "^secur32$",
+  "secur32",
 ]
 
 extend-ignore-re = [
