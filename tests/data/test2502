@@ -48,6 +48,7 @@ file contents should appear once for each file
 <client>
 <features>
 http/3
+verbose-strings
 </features>
 <server>
 http/3

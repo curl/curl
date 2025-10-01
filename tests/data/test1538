@@ -13,6 +13,9 @@ verbose logs
 
 # Client-side
 <client>
+<features>
+verbose-strings
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>

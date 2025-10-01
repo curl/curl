@@ -23,6 +23,9 @@ Content-Length: 0
 <server>
 http
 </server>
+<features>
+verbose-strings
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>

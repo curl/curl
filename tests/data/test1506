@@ -48,6 +48,9 @@ file contents should appear once for each file
 <server>
 http
 </server>
+<features>
+verbose-strings
+</features>
 <tool>
 lib%TESTNUMBER
 </tool>
