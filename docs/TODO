@@ -531,7 +531,7 @@
 
 5.2 Obey Retry-After in redirects
 
- The Retry-After is said to dicate "the minimum time that the user agent is
+ The Retry-After is said to dictate "the minimum time that the user agent is
  asked to wait before issuing the redirected request" and libcurl does not
  obey this.
 
