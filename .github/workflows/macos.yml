@@ -124,9 +124,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -x
           cd "libressl-${LIBRESSL_VERSION}"
-          # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
           cmake -B . -G Ninja \
-            -DHAVE_ENDIAN_H=0 \
             -DCMAKE_INSTALL_PREFIX=/Users/runner/libressl \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
