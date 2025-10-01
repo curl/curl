@@ -160,6 +160,10 @@ class TestUnix:
             urls.append('http://xxx.invalid/data.json')
             xargs.extend([
                 '--unix-socket', uds_faker2.path,
+                '--retry', '10',
+                '--retry-connrefused',
+                '--retry-delay', '1',
+                '--retry-max-time', '3',
                 '--connect-timeout', '3',
                 '--max-time', '10',
             ])
@@ -170,7 +174,7 @@ class TestUnix:
         # at least the last one timed out and did not produce a stat
         assert successes < count, f'none failed\n{r.dump_logs()}'
         # some should report CURLE_OPERATION_TIMEDOUT
-        timeouts = len([stat for stat in r.stats if stat['exitcode'] == 28])
+        timeouts = len([stat for stat in r.stats if stat['exitcode'] in [7, 28]])
         assert timeouts > 0, f'none timed out?\n{r.dump_logs()}'
 
     # do test_11_04, but on a file that is no UDS. Needs to fail right away

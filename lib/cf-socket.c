@@ -1315,7 +1315,9 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "local address %s port %d...",
                   ctx->ip.local_ip, ctx->ip.local_port);
     if(-1 == rc) {
+      ctx->error = error;
       result = socket_connect_result(data, ctx->ip.remote_ip, error);
+ #if 0
       if((ctx->addr.family == AF_UNIX) &&
          (result == CURLE_COULDNT_CONNECT) &&
          (error == SOCKECONNREFUSED)) {
@@ -1326,6 +1328,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
          * Let's treat this as inconclusive, so we keep on trying. */
         result = CURLE_WEIRD_SERVER_REPLY;
       }
+ #endif
       CURL_TRC_CF(data, cf, "socket_connect_result(%d) -> %d", error, result);
       goto out;
     }
