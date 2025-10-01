@@ -14,6 +14,7 @@ verbose logs
 # require HTTP so that CURLOPT_POSTFIELDS works as assumed
 <features>
 http
+verbose-strings
 </features>
 <tool>
 lib%TESTNUMBER

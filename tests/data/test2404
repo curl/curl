@@ -49,6 +49,7 @@ file contents should appear once for each file
 <features>
 http/2
 SSL
+verbose-strings
 </features>
 <server>
 http/2

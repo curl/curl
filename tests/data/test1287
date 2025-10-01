@@ -62,6 +62,7 @@ HTTP over proxy-tunnel ignore TE and CL in CONNECT 2xx responses
 </command>
 <features>
 proxy
+verbose-strings
 </features>
 </client>
 
