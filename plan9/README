@@ -11,7 +11,7 @@ The zlib that is available on Plan 9 can be downloaded from:
 
 LibreSSL Portable can be downloaded from:
 
-  https://github.com/libressl-portable/portable/pull/510
+  https://github.com/libressl/portable/pull/510
 
 Instruction
 ===========

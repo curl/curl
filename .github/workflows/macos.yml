@@ -58,7 +58,7 @@ jobs:
       LDFLAGS: ''
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_OPTIONS: ${{ matrix.build.options }}
-      # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
+      # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
       LIBRESSL_VERSION: 4.1.1
     strategy:
       fail-fast: false
