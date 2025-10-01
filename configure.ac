@@ -4428,11 +4428,14 @@ AS_HELP_STRING([--disable-verbose],[Disable verbose strings]),
     curl_verbose_msg="no"
     ;;
   *)
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
     ;;
   esac ],
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
 )
+
+AC_DEFINE(CURL_DISABLE_VERBOSE_STRINGS, 1, [to disable verbose strings])
+curl_verbose_msg="no"
 
 if test "$curl_cv_winuwp" != 'yes'; then
   dnl ************************************************************
