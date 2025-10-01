@@ -901,8 +901,8 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 #else
     {
       char buffer[STRERROR_LEN];
-      infof(data, "Immediate connect fail for %s: %s",
-            ipaddress, Curl_strerror(error, buffer, sizeof(buffer)));
+      infof(data, "Immediate connect fail for %s: %s (%d)",
+            ipaddress, Curl_strerror(error, buffer, sizeof(buffer)), error);
     }
 #endif
     data->state.os_errno = error;
@@ -1309,11 +1309,24 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     /* Connect TCP socket */
     rc = do_connect(cf, data, cf->conn->bits.tcp_fastopen);
     error = SOCKERRNO;
+    CURL_TRC_CF(data, cf, "do_connect() -> %d, errno=%d", rc, error);
     set_local_ip(cf, data);
-    CURL_TRC_CF(data, cf, "local address %s port %d...",
-                ctx->ip.local_ip, ctx->ip.local_port);
+    if(ctx->addr.family != AF_UNIX)
+      CURL_TRC_CF(data, cf, "local address %s port %d...",
+                  ctx->ip.local_ip, ctx->ip.local_port);
     if(-1 == rc) {
       result = socket_connect_result(data, ctx->ip.remote_ip, error);
+      if((ctx->addr.family == AF_UNIX) &&
+         (result == CURLE_COULDNT_CONNECT) &&
+         (error == SOCKECONNREFUSED)) {
+        /* We could open a UNIX socket on the path, but then got an
+         * ECONNREFUSED (meaning it was a UDS path, but the server did
+         * not accept. Happens on slow servers when the accept queue
+         * gets full, see #18748.
+         * Let's treat this as inconclusive, so we keep on trying. */
+        result = CURLE_WEIRD_SERVER_REPLY;
+      }
+      CURL_TRC_CF(data, cf, "socket_connect_result(%d) -> %d", error, result);
       goto out;
     }
   }
@@ -1327,6 +1340,8 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
 #endif
   /* check socket for connect */
   rc = SOCKET_WRITABLE(ctx->sock, 0);
+  CURL_TRC_CF(data, cf, "SOCKET_WRITABLE(%" FMT_SOCKET_T ") -> %x",
+              ctx->sock, rc);
 
   if(rc == 0) { /* no connection yet */
     CURL_TRC_CF(data, cf, "not connected yet on fd=%" FMT_SOCKET_T,
@@ -1343,6 +1358,11 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "connected on fd=%" FMT_SOCKET_T, ctx->sock);
       return CURLE_OK;
     }
+  }
+  else if((ctx->addr.family == AF_UNIX) && (rc & CURL_CSELECT_ERR) &&
+          (rc & CURL_CSELECT_OUT)) {
+    CURL_TRC_CF(data, cf, "not accepted by server yet");
+    result = CURLE_OK;
   }
   else if(rc & CURL_CSELECT_ERR) {
     (void)verifyconnect(ctx->sock, &ctx->error);
@@ -1366,6 +1386,8 @@ out:
 #endif
     }
     if(ctx->sock != CURL_SOCKET_BAD) {
+      CURL_TRC_CF(data, cf, "connect failed, closing %" FMT_SOCKET_T,
+                  ctx->sock);
       socket_close(data, cf->conn, TRUE, ctx->sock);
       ctx->sock = CURL_SOCKET_BAD;
     }
