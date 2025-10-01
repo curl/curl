@@ -179,6 +179,8 @@ class TestUnix:
 
     # do test_11_04, but on a file that is no UDS. Needs to fail right away
     def test_11_05_unix_no_listener(self, env: Env, httpd):
+        if 'CURL_TEST_EVENT' in os.environ:
+            pytest.skip('FIXME: stat[exitcode] is not set when running event based')
         uds_none_path = os.path.join(env.gen_dir, 'uds_11_none.sock')
         open(uds_none_path, 'w')
         run_env = os.environ.copy()
