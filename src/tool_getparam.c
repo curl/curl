@@ -1267,6 +1267,10 @@ static ParameterError parse_header(struct OperationConfig *config,
     }
   }
   else {
+    if(!strchr(nextarg, ':') && !strchr(nextarg, ';')) {
+      warnf("The provided %s header '%s' does not look like a header?",
+            (cmd == C_PROXY_HEADER) ? "proxy": "HTTP", nextarg);
+    }
     if(cmd == C_PROXY_HEADER) /* --proxy-header */
       err = add2list(&config->proxyheaders, nextarg);
     else
