@@ -14,6 +14,8 @@ extend-ignore-identifiers-re = [
   "^(clen|req_clen|smtp_perform_helo|smtp_state_helo_resp|_stati64)$",
   "^Tru64$",
   "secur32",
+  # this should be limited to tests/http/*. Short for secure proxy.
+  "proxys",
 ]
 
 extend-ignore-re = [
