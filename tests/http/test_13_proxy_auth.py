@@ -120,6 +120,7 @@ class TestProxyAuth:
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
     def test_13_07_tunnels_no_auth(self, env: Env, httpd, configures_httpd, nghttpx_fwd, proto, tunnel):
@@ -139,6 +140,7 @@ class TestProxyAuth:
     @pytest.mark.skipif(condition=not Env.curl_has_feature('HTTPS-proxy'),
                         reason='curl lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
     def test_13_08_tunnels_auth(self, env: Env, httpd, configures_httpd, nghttpx_fwd, proto, tunnel):

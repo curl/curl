@@ -64,6 +64,7 @@ if not os.path.exists(CONFIG_PATH):
     CONFIG_PATH = ALT_CONFIG_PATH
 DEF_CONFIG = init_config_from(CONFIG_PATH)
 CURL = os.path.join(TOP_PATH, 'src', 'curl')
+CURLINFO = os.path.join(TOP_PATH, 'src', 'curlinfo')
 
 
 class NghttpxUtil:
@@ -110,6 +111,7 @@ class EnvConfig:
         self.config = DEF_CONFIG
         # check cur and its features
         self.curl = CURL
+        self.curlinfo = CURLINFO
         if 'CURL' in os.environ:
             self.curl = os.environ['CURL']
         self.curl_props = {
@@ -156,6 +158,12 @@ class EnvConfig:
                 self.curl_props['protocols'] = {
                     prot.lower() for prot in line[11:].split(' ')
                 }
+
+        p = subprocess.run(args=[self.curlinfo],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            raise RuntimeError(f'{self.curlinfo} failed with exit code: {p.returncode}')
+        self.curl_is_verbose = 'verbose-strings: ON' in p.stdout
 
         self.ports = {}
 
@@ -461,6 +469,10 @@ class Env:
     @staticmethod
     def curl_is_debug() -> bool:
         return Env.CONFIG.curl_is_debug
+
+    @staticmethod
+    def curl_is_verbose() -> bool:
+        return Env.CONFIG.curl_is_verbose
 
     @staticmethod
     def curl_can_early_data() -> bool:
