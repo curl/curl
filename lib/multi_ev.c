@@ -333,7 +333,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
     else if(conn) {
       first_time = !mev_sh_entry_conn_known(entry, conn);
     }
-    else {
+    else if(data) {
       first_time = !mev_sh_entry_xfer_known(entry, data);
     }
 
@@ -348,14 +348,14 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
         if(!mev_sh_entry_conn_add(entry, conn))
           return CURLM_OUT_OF_MEMORY;
       }
-      else {
+      else if(data) {
         if(!mev_sh_entry_xfer_add(entry, data))
           return CURLM_OUT_OF_MEMORY;
       }
       CURL_TRC_M(data, "ev entry fd=%" FMT_SOCKET_T ", added %s #%" FMT_OFF_T
                  ", total=%u/%d (xfer/conn)", s,
                  conn ? "connection" : "transfer",
-                 conn ? conn->connection_id : data->mid,
+                 conn ? conn->connection_id : (data ? data->mid : 0),
                  Curl_uint_spbset_count(&entry->xfers),
                  entry->conn ? 1 : 0);
     }
@@ -406,7 +406,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
       continue;
     }
 
-    if(!conn && !mev_sh_entry_xfer_remove(entry, data)) {
+    if(!conn && data && !mev_sh_entry_xfer_remove(entry, data)) {
       /* `data` says in `prev_ps` that it had been using a socket,
        * but `data` has not been registered for it.
        * This should not happen if our book-keeping is correct? */
