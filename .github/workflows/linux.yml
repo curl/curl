@@ -362,8 +362,9 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
-          ./configure --disable-dependency-tracking --prefix=/home/runner/libressl
-          make install
+          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl
+          cmake --build .
+          cmake --install .
 
       - name: 'cache wolfssl (all)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') }}
