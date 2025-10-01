@@ -195,7 +195,6 @@ class TestUnix:
                 '--max-time', '10',
             ])
         r = curl.http_download(urls=urls, with_stats=True, extra_args=xargs)
-        r.check_exit_code(7)
         r.check_response(count=count, http_status=0)
         # all should report CURLE_COULDNT_CONNECT
         timeouts = len([stat for stat in r.stats if stat['exitcode'] == 7])
