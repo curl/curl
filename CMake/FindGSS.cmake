@@ -181,7 +181,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         "inc"
     )
 
-    if(_gss_INCLUDE_DIRS)  # jay, we have found something
+    if(_gss_INCLUDE_DIRS)  # We have found something
       cmake_push_check_state()
       list(APPEND CMAKE_REQUIRED_INCLUDES "${_gss_INCLUDE_DIRS}")
       check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _gss_have_mit_headers)
