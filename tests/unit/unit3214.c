@@ -28,14 +28,15 @@
 static void checksize(const char *name, size_t size, size_t allowed)
 {
   if(size > allowed) {
-    fprintf(stderr, "BAD: struct %s is %d bytes, allowed to be %d",
-            name, (int)size, (int)allowed);
-    fprintf(stderr, ": %d bytes too big\n", (int)(size - allowed));
+    curl_mfprintf(stderr, "BAD: struct %s is %zu bytes, "
+                  "allowed to be %zu: %zu bytes too big\n",
+                  name, size, allowed, size - allowed);
     unitfail++;
   }
   else {
-    printf("FINE: struct %s is %d bytes, allowed %d (margin: %d bytes)\n",
-           name, (int)size, (int)allowed, (int)(allowed - size));
+    curl_mprintf("FINE: struct %s is %zu bytes, "
+                 "allowed %zu (margin: %zu bytes)\n",
+                 name, size, allowed, allowed - size);
   }
 }
 

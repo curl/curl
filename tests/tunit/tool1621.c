@@ -74,8 +74,9 @@ static CURLcode test_tool1621(const char *arg)
     const char *url = tests[i].input;
     char *stripped = stripcredentials(url);
     const char *strippedstr = stripped ? stripped : "(null)";
-    printf("Test %u got input \"%s\", output: \"%s\", expected: \"%s\"\n",
-           i, tests[i].input, strippedstr, tests[i].output);
+    curl_mprintf("Test %u got input \"%s\", output: \"%s\", "
+                 "expected: \"%s\"\n",
+                 i, tests[i].input, strippedstr, tests[i].output);
 
     fail_if(strcmp(tests[i].output, strippedstr), tests[i].output);
     curl_free(stripped);

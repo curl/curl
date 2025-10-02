@@ -38,7 +38,7 @@ static CURLcode test_unit1660(const char *arg)
 static void showsts(struct stsentry *e, const char *chost)
 {
   if(!e)
-    printf("'%s' is not HSTS\n", chost);
+    curl_mprintf("'%s' is not HSTS\n", chost);
   else {
     curl_mprintf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
                  chost, e->host, e->expires,
@@ -141,7 +141,7 @@ static CURLcode test_unit1660(const char *arg)
         continue;
       }
       else if(result) {
-        printf("Input %u: error %d\n", i, (int) result);
+        curl_mprintf("Input %u: error %d\n", i, (int) result);
         continue;
       }
     }

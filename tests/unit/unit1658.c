@@ -514,7 +514,7 @@ static CURLcode test_unit1658(const char *arg)
     for(i = 0; i < CURL_ARRAYSIZE(t); i++) {
       struct Curl_https_rrinfo *hrr;
 
-      printf("test %i: %s\n", i, t[i].name);
+      curl_mprintf("test %u: %s\n", i, t[i].name);
 
       result = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
 
@@ -523,7 +523,7 @@ static CURLcode test_unit1658(const char *arg)
 
       /* is the output the expected? */
       if(strcmp(rrbuffer, t[i].expect)) {
-        curl_mfprintf(stderr, "Test %s (%i) failed\n"
+        curl_mfprintf(stderr, "Test %s (%u) failed\n"
                       "Expected: %s\n"
                       "Received: %s\n", t[i].name, i, t[i].expect, rrbuffer);
         unitfail++;

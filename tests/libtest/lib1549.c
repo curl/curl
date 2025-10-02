@@ -58,14 +58,14 @@ static CURLcode test_lib1549(const char *URL)
       /* a linked list of cookies in cookie file format */
       struct curl_slist *each = cookies;
       while(each) {
-        printf("%s\n", each->data);
+        curl_mprintf("%s\n", each->data);
         each = each->next;
         num++;
       }
       /* we must free these cookies when we are done */
       curl_slist_free_all(cookies);
     }
-    fprintf(stderr, "%d cookies\n", num);
+    curl_mfprintf(stderr, "%d cookies\n", num);
   }
 test_cleanup:
 
