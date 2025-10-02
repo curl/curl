@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
         case 'm':
         case 'M':
           if(argv[0][2] == '=') {
+            /* !checksrc! disable BANNEDFUNC 1 */
             long m = strtol((*argv) + 3, NULL, 10);
             switch(m) {
             case 1:

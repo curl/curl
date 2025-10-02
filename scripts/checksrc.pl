@@ -61,6 +61,7 @@ my %banfunc = (
     "strncat" => 1,
     "strncpy" => 1,
     "strtok_r" => 1,
+    "strtol" => 1,
     "strtoul" => 1,
     "_mbscat" => 1,
     "_mbsncat" => 1,
