@@ -461,10 +461,10 @@ evaluate:
     else if(inconclusive) {
       /* tried all addresses, no success but some where inconclusive.
        * Let's restart the inconclusive ones. */
-      if(curlx_timediff(now, bs->last_attempt_started) >=
-         bs->attempt_delay_ms) {
-        CURL_TRC_CF(data, cf, "tried all addresses with inconclusive results"
-                    ", restarting one");
+      timediff_t since_ms = curlx_timediff(now, bs->last_attempt_started);
+      timediff_t delay_ms = bs->attempt_delay_ms - since_ms;
+      if(delay_ms <= 0) {
+        CURL_TRC_CF(data, cf, "all attempts inconclusive, restarting one");
         i = -1;
         for(a = bs->running; a; a = a->next) {
           ++i;
@@ -478,6 +478,12 @@ evaluate:
           goto evaluate;
         }
         DEBUGASSERT(0); /* should not come here */
+      }
+      else {
+        /* let's wait some more before restarting */
+        infof(data, "connect attempts inconclusive, retrying "
+                    "in %" FMT_TIMEDIFF_T "ms", delay_ms);
+        Curl_expire(data, delay_ms, EXPIRE_HAPPY_EYEBALLS);
       }
       /* attempt timeout for restart has not expired yet */
       goto out;
