@@ -70,15 +70,6 @@ commands:
               --with-openssl \
               || { tail -1000 config.log; false; }
 
-  configure-openssl-no-verbose:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror \
-              --with-openssl --disable-verbose \
-              || { tail -1000 config.log; false; }
-
   configure-no-proxy:
     steps:
       - run:
@@ -138,14 +129,6 @@ jobs:
       - configure
       - build
       - test
-
-  no-verbose:
-    executor: ubuntu
-    steps:
-      - checkout
-      - install-deps
-      - configure-openssl-no-verbose
-      - build
 
   no-proxy:
     executor: ubuntu
@@ -215,10 +198,6 @@ workflows:
   openssl-no-proxy:
     jobs:
       - no-proxy
-
-  openssl-no-verbose:
-    jobs:
-      - no-verbose
 
   arm-openssl:
     jobs:
