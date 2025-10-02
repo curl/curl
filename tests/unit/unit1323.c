@@ -45,13 +45,13 @@ static CURLcode test_unit1323(const char *arg)
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     timediff_t result = curlx_timediff(tests[i].first, tests[i].second);
     if(result != tests[i].result) {
-      printf("%ld.%06u to %ld.%06u got %d, but expected %ld\n",
-             (long)tests[i].first.tv_sec,
-             tests[i].first.tv_usec,
-             (long)tests[i].second.tv_sec,
-             tests[i].second.tv_usec,
-             (int)result,
-             (long)tests[i].result);
+      curl_mprintf("%ld.%06u to %ld.%06u got %d, but expected %ld\n",
+                   (long)tests[i].first.tv_sec,
+                   tests[i].first.tv_usec,
+                   (long)tests[i].second.tv_sec,
+                   tests[i].second.tv_usec,
+                   (int)result,
+                   (long)tests[i].result);
       fail("unexpected result!");
     }
   }
