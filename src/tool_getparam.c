@@ -736,7 +736,10 @@ static CURLcode set_trace_config(const char *token)
     if((len == 3) && curl_strnequal(name, "all", 3)) {
       global->traceids = toggle;
       global->tracetime = toggle;
-      result = curl_global_trace(token);
+      if(toggle)
+        result = curl_global_trace("all,-lib-ids");
+      else
+        result = curl_global_trace(token);
       if(result)
         goto out;
     }
@@ -747,8 +750,8 @@ static CURLcode set_trace_config(const char *token)
       global->tracetime = toggle;
     }
     else {
-      char buffer[32];
-      msnprintf(buffer, sizeof(buffer), "%c%.*s", toggle ? '+' : '-',
+      char buffer[64];
+      msnprintf(buffer, sizeof(buffer), "%c%.*s,-lib-ids", toggle ? '+' : '-',
                 (int)len, name);
       result = curl_global_trace(buffer);
       if(result)
