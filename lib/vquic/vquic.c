@@ -226,12 +226,10 @@ out:
   return result;
 }
 
-#ifndef CURL_DISABLE_VERBOSE_STRINGS
 #ifdef HAVE_SENDMSG
-static const char *vquic_send_method = "sendmsg";
+#define VQUIC_SEND_METHOD   "sendmsg"
 #else
-static const char *vquic_send_method = "send";
-#endif
+#define VQUIC_SEND_METHOD   "send"
 #endif
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
@@ -257,7 +255,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
 out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
               " -> %d, sent=%zu",
-              vquic_send_method, pktlen, gsolen, calls, result, *psent);
+              VQUIC_SEND_METHOD, pktlen, gsolen, calls, result, *psent);
   return CURLE_OK;
 }
 
@@ -287,7 +285,7 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
     result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
     CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=1)"
                 " -> %d, sent=%zu",
-                vquic_send_method, pktlen, gsolen, result, *psent);
+                VQUIC_SEND_METHOD, pktlen, gsolen, result, *psent);
   }
   if(!result)
     qctx->last_io = qctx->last_op;
