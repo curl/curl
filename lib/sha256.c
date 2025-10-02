@@ -231,8 +231,8 @@ static void my_sha256_final(unsigned char *digest, void *in)
 
 /* When no other crypto library is available we use this code segment */
 
-/* This is based on SHA256 implementation in LibTomCrypt that was released into
- * public domain by Tom St Denis. */
+/* This is based on the SHA256 implementation in LibTomCrypt that was released
+ * into public domain. */
 
 #define WPA_GET_BE32(a) ((((unsigned long)(a)[0]) << 24) | \
                          (((unsigned long)(a)[1]) << 16) | \

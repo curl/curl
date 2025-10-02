@@ -282,18 +282,6 @@ static void my_md5_final(unsigned char *digest, void *in)
  * There is ABSOLUTELY NO WARRANTY, express or implied.
  *
  * (This is a heavily cut-down "BSD license".)
- *
- * This differs from Colin Plumb's older public domain implementation in that
- * no exactly 32-bit integer data type is required (any 32-bit or wider
- * unsigned integer data type will do), there is no compile-time endianness
- * configuration, and the function prototypes match OpenSSL's. No code from
- * Colin Plumb's implementation has been reused; this comment merely compares
- * the properties of the two independent implementations.
- *
- * The primary goals of this implementation are portability and ease of use.
- * It is meant to be fast, but not as fast as possible. Some known
- * optimizations are not included to reduce source code size and avoid
- * compile-time configuration.
  */
 
 /* Any 32-bit or wider unsigned integer data type will do */

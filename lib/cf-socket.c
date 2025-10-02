@@ -821,8 +821,8 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    * In October 2003 we effectively nullified this function on Windows due to
    * problems with it using all CPU in multi-threaded cases.
    *
-   * In May 2004, we bring it back to offer more info back on connect failures.
-   * Gisle Vanem could reproduce the former problems with this function, but
+   * In May 2004, we brought it back to offer more info back on connect
+   * failures. We could reproduce the former problems with this function, but
    * could avoid them by adding this SleepEx() call below:
    *
    *    "I do not have Rational Quantify, but the hint from his post was
