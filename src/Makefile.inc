@@ -34,9 +34,9 @@
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/curlx/base64.c \
-  ../lib/curlx/multibyte.c \
   ../lib/curlx/dynbuf.c \
   ../lib/curlx/fopen.c \
+  ../lib/curlx/multibyte.c \
   ../lib/curlx/nonblock.c \
   ../lib/curlx/strerr.c \
   ../lib/curlx/strparse.c \
@@ -48,11 +48,11 @@ CURLX_CFILES = \
   ../lib/curlx/winapi.c
 
 CURLX_HFILES = \
-  ../lib/curlx/binmode.h \
-  ../lib/curlx/multibyte.h \
   ../lib/curl_setup.h \
+  ../lib/curlx/binmode.h \
   ../lib/curlx/dynbuf.h \
   ../lib/curlx/fopen.h \
+  ../lib/curlx/multibyte.h \
   ../lib/curlx/nonblock.h \
   ../lib/curlx/strerr.h \
   ../lib/curlx/strparse.h \
