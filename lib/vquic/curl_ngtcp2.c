@@ -410,13 +410,23 @@ static void qlog_callback(void *user_data, uint32_t flags,
       ctx->qlogfd = -1;
     }
   }
-
 }
 
 static void quic_settings(struct cf_ngtcp2_ctx *ctx,
                           struct Curl_easy *data,
                           struct pkt_io_ctx *pktx)
 {
+#ifdef NGTCP2_SETTINGS_V2x
+static uint16_t mtu_probes[] = {
+  1472, /* what h2o offers */
+  1452, /* what Caddy offers */
+  1454 - 48, /* The well known MTU used by a domestic optic fiber
+                service in Japan. */
+  1390 - 48, /* Typical Tunneled MTU */
+  1280 - 48, /* IPv6 minimum MTU */
+  1492 - 48, /* PPPoE */
+};
+#endif
   ngtcp2_settings *s = &ctx->settings;
   ngtcp2_transport_params *t = &ctx->transport_params;
 
@@ -433,6 +443,12 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
     data->set.connecttimeout * NGTCP2_MILLISECONDS : QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = 100 * ctx->max_stream_window;
   s->max_stream_window = 10 * ctx->max_stream_window;
+  s->no_pmtud = FALSE;
+#ifdef NGTCP2_SETTINGS_V2x
+  s->pmtud_probes = mtu_probes;
+  s->pmtud_probeslen = CURL_ARRAYSIZE(mtu_probes);
+  s->max_tx_udp_payload_size = 64 * 1024; /* mtu_probes[0]; */
+#endif
 
   t->initial_max_data = 10 * ctx->max_stream_window;
   t->initial_max_stream_data_bidi_local = ctx->max_stream_window;
@@ -468,8 +484,18 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
                                                     data, &ctx->peer);
-  CURL_TRC_CF(data, cf, "handshake complete after %dms",
-             (int)curlx_timediff(ctx->handshake_at, ctx->started_at));
+  if(Curl_trc_is_verbose(data)) {
+    const ngtcp2_transport_params *rp;
+    rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
+    CURL_TRC_CF(data, cf, "handshake complete after %dms, remote transport["
+                "max_udp_payload=%" FMT_PRIu64
+                ", initial_max_data=%" FMT_PRIu64
+                "]",
+               (int)curlx_timediff(ctx->handshake_at, ctx->started_at),
+               (curl_uint64_t)rp->max_udp_payload_size,
+               (curl_uint64_t)rp->initial_max_data);
+  }
+
   /* In case of earlydata, where we simulate being connected, update
    * the handshake time when we really did connect */
   if(ctx->use_earlydata)
@@ -1678,6 +1704,9 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
   ngtcp2_path path;
   int rv;
 
+  if(ecn)
+    CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, ecn=%x)",
+                pktlen, ecn);
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
                    (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
@@ -1696,7 +1725,6 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
       return CURLE_PEER_FAILED_VERIFICATION;
     return CURLE_RECV_ERROR;
   }
-
   return CURLE_OK;
 }
 
@@ -1711,6 +1739,10 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   if(!pktx) {
     pktx_init(&local_pktx, cf, data);
     pktx = &local_pktx;
+  }
+  else {
+    pktx_update_time(pktx, cf);
+    ngtcp2_path_storage_zero(&pktx->ps);
   }
 
   result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
@@ -1831,9 +1863,10 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   size_t nread;
-  size_t max_payload_size, path_max_payload_size, max_pktcnt;
+  size_t max_payload_size, path_max_payload_size;
   size_t pktcnt = 0;
   size_t gsolen = 0;  /* this disables gso until we have a clue */
+  size_t send_quantum;
   CURLcode curlcode;
   struct pkt_io_ctx local_pktx;
 
@@ -1869,71 +1902,69 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
   max_payload_size = ngtcp2_conn_get_max_tx_udp_payload_size(ctx->qconn);
   path_max_payload_size =
       ngtcp2_conn_get_path_max_tx_udp_payload_size(ctx->qconn);
-  /* maximum number of packets buffered before we flush to the socket */
-  max_pktcnt = CURLMIN(MAX_PKT_BURST,
-                       ctx->q.sendbuf.chunk_size / max_payload_size);
-
+  send_quantum = ngtcp2_conn_get_send_quantum(ctx->qconn);
+  CURL_TRC_CF(data, cf, "egress, collect and send packets, quantum=%zu",
+              send_quantum);
   for(;;) {
     /* add the next packet to send, if any, to our buffer */
     curlcode = Curl_bufq_sipn(&ctx->q.sendbuf, max_payload_size,
                               read_pkt_to_send, pktx, &nread);
-    if(curlcode) {
-      if(curlcode != CURLE_AGAIN)
-        return curlcode;
-      /* Nothing more to add, flush and leave */
-      curlcode = vquic_send(cf, data, &ctx->q, gsolen);
-      if(curlcode) {
-        if(curlcode == CURLE_AGAIN) {
-          Curl_expire(data, 1, EXPIRE_QUIC);
-          return CURLE_OK;
-        }
-        return curlcode;
+    if(curlcode == CURLE_AGAIN)
+      break;
+    else if(curlcode)
+      return curlcode;
+    else {
+      size_t buflen = Curl_bufq_len(&ctx->q.sendbuf);
+      if((buflen >= send_quantum) ||
+         ((buflen + gsolen) >= ctx->q.sendbuf.chunk_size))
+         break;
+      DEBUGASSERT(nread > 0);
+      ++pktcnt;
+      if(pktcnt == 1) {
+        /* first packet in buffer. This is either of a known, "good"
+         * payload size or it is a PMTUD. We will see. */
+        gsolen = nread;
       }
-      goto out;
-    }
-
-    DEBUGASSERT(nread > 0);
-    if(pktcnt == 0) {
-      /* first packet in buffer. This is either of a known, "good"
-       * payload size or it is a PMTUD. We will see. */
-      gsolen = nread;
-    }
-    else if(nread > gsolen ||
-            (gsolen > path_max_payload_size && nread != gsolen)) {
-      /* The just added packet is a PMTUD *or* the one(s) before the
-       * just added were PMTUD and the last one is smaller.
-       * Flush the buffer before the last add. */
-      curlcode = vquic_send_tail_split(cf, data, &ctx->q,
-                                       gsolen, nread, nread);
-      if(curlcode) {
-        if(curlcode == CURLE_AGAIN) {
-          Curl_expire(data, 1, EXPIRE_QUIC);
-          return CURLE_OK;
+      else if(nread > gsolen ||
+              (gsolen > path_max_payload_size && nread != gsolen)) {
+        /* The just added packet is a PMTUD *or* the one(s) before the
+         * just added were PMTUD and the last one is smaller.
+         * Flush the buffer before the last add. */
+        curlcode = vquic_send_tail_split(cf, data, &ctx->q,
+                                         gsolen, nread, nread);
+        if(curlcode) {
+          if(curlcode == CURLE_AGAIN) {
+            Curl_expire(data, 1, EXPIRE_QUIC);
+            return CURLE_OK;
+          }
+          return curlcode;
         }
-        return curlcode;
+        pktcnt = 0;
       }
-      pktcnt = 0;
-      continue;
-    }
-
-    if(++pktcnt >= max_pktcnt || nread < gsolen) {
-      /* Reached MAX_PKT_BURST *or*
-       * the capacity of our buffer *or*
-       * last add was shorter than the previous ones, flush */
-      curlcode = vquic_send(cf, data, &ctx->q, gsolen);
-      if(curlcode) {
-        if(curlcode == CURLE_AGAIN) {
-          Curl_expire(data, 1, EXPIRE_QUIC);
-          return CURLE_OK;
-        }
-        return curlcode;
+      else if(nread < gsolen) {
+        /* Reached MAX_PKT_BURST *or*
+         * the capacity of our buffer *or*
+         * last add was shorter than the previous ones, flush */
+        break;
       }
-      /* pktbuf has been completely sent */
-      pktcnt = 0;
     }
   }
 
-out:
+  if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    /* time to send */
+    CURL_TRC_CF(data, cf, "egress, send collected %zu packets in %zu bytes",
+                pktcnt, Curl_bufq_len(&ctx->q.sendbuf));
+    curlcode = vquic_send(cf, data, &ctx->q, gsolen);
+    if(curlcode) {
+      if(curlcode == CURLE_AGAIN) {
+        Curl_expire(data, 1, EXPIRE_QUIC);
+        return CURLE_OK;
+      }
+      return curlcode;
+    }
+    pktx_update_time(pktx, cf);
+    ngtcp2_conn_update_pkt_tx_time(ctx->qconn, pktx->ts);
+  }
   return CURLE_OK;
 }
 

@@ -55,7 +55,7 @@
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 
 #define NW_CHUNK_SIZE     (64 * 1024)
-#define NW_SEND_CHUNKS    2
+#define NW_SEND_CHUNKS    1
 
 
 int Curl_vquic_init(void)
@@ -125,6 +125,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
                            const uint8_t *pkt, size_t pktlen, size_t gsolen,
                            size_t *psent)
 {
+  CURLcode result = CURLE_OK;
 #ifdef HAVE_SENDMSG
   struct iovec msg_iov;
   struct msghdr msg = {0};
@@ -181,18 +182,21 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       FALLTHROUGH();
     default:
       failf(data, "sendmsg() returned %zd (errno %d)", sent, SOCKERRNO);
-      return CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
+      goto out;
     }
   }
   else if(pktlen != (size_t)sent) {
     failf(data, "sendmsg() sent only %zd/%zu bytes", sent, pktlen);
-    return CURLE_SEND_ERROR;
+    result = CURLE_SEND_ERROR;
+    goto out;
   }
 #else
   ssize_t sent;
   (void)gsolen;
 
   *psent = 0;
+  method = "send";
 
   while((sent = CURL_SEND(qctx->sockfd, (const char *)pkt,
                           (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
@@ -201,12 +205,14 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 
   if(sent == -1) {
     if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
-      return CURLE_AGAIN;
+      result = CURLE_AGAIN;
+      goto out;
     }
     else {
       failf(data, "send() returned %zd (errno %d)", sent, SOCKERRNO);
       if(SOCKERRNO != SOCKEMSGSIZE) {
-        return CURLE_SEND_ERROR;
+        result = CURLE_SEND_ERROR;
+        goto out;
       }
       /* UDP datagram is too large; caused by PMTUD. Just let it be
          lost. */
@@ -216,8 +222,17 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   (void)cf;
   *psent = pktlen;
 
-  return CURLE_OK;
+out:
+  return result;
 }
+
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef HAVE_SENDMSG
+static const char *vquic_send_method = "sendmsg";
+#else
+static const char *vquic_send_method = "send";
+#endif
+#endif
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
@@ -226,19 +241,23 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
                                    size_t gsolen, size_t *psent)
 {
   const uint8_t *p, *end = pkt + pktlen;
-  size_t sent;
+  size_t sent, len, calls = 0;
+  CURLcode result = CURLE_OK;
 
   *psent = 0;
 
   for(p = pkt; p < end; p += gsolen) {
-    size_t len = CURLMIN(gsolen, (size_t)(end - p));
-    CURLcode curlcode = do_sendmsg(cf, data, qctx, p, len, len, &sent);
-    if(curlcode != CURLE_OK) {
-      return curlcode;
-    }
+    len = CURLMIN(gsolen, (size_t)(end - p));
+    result = do_sendmsg(cf, data, qctx, p, len, len, &sent);
+    if(result)
+      goto out;
     *psent += sent;
+    ++calls;
   }
-
+out:
+  CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
+              " -> %d, sent=%zu",
+              vquic_send_method, pktlen, gsolen, calls, result, *psent);
   return CURLE_OK;
 }
 
@@ -266,6 +285,9 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
   }
   else {
     result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
+    CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=1)"
+                " -> %d, sent=%zu",
+                vquic_send_method, pktlen, gsolen, result, *psent);
   }
   if(!result)
     qctx->last_io = qctx->last_op;
@@ -289,8 +311,6 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
-    CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
-                blen, gsolen, result, sent);
     if(result) {
       if(result == CURLE_AGAIN) {
         Curl_bufq_skip(&qctx->sendbuf, sent);
@@ -369,7 +389,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   struct mmsghdr mmsg[MMSG_NUM];
   uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
   struct sockaddr_storage remote_addr[MMSG_NUM];
-  size_t total_nread = 0, pkts = 0;
+  size_t total_nread = 0, pkts = 0, calls = 0;
   int mcount, i, n;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
@@ -424,7 +444,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       goto out;
     }
 
-    CURL_TRC_CF(data, cf, "recvmmsg() -> %d packets", mcount);
+    ++calls;
     for(i = 0; i < mcount; ++i) {
       total_nread += mmsg[i].msg_len;
 
@@ -454,8 +474,8 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
-                pkts, total_nread, result);
+    CURL_TRC_CF(data, cf, "vquic_recvmmsg(len=%zu, packets=%zu, calls=%zu)"
+                " -> %d", total_nread, pkts, calls, result);
   Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
@@ -471,8 +491,9 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   struct msghdr msg;
   uint8_t buf[64*1024];
   struct sockaddr_storage remote_addr;
-  size_t total_nread, pkts;
-  ssize_t nread;
+  size_t total_nread, pkts, calls;
+  ssize_t rc;
+  size_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
   uint8_t msg_ctrl[CMSG_SPACE(sizeof(int))];
@@ -481,7 +502,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   size_t offset, to;
 
   DEBUGASSERT(max_pkts > 0);
-  for(pkts = 0, total_nread = 0; pkts < max_pkts;) {
+  for(pkts = 0, total_nread = 0, calls = 0; pkts < max_pkts;) {
     /* fully initialise this on each call to `recvmsg()`. There seem to
      * operating systems out there that mess with `msg_iov.iov_len`. */
     memset(&msg, 0, sizeof(msg));
@@ -494,10 +515,10 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg.msg_namelen = sizeof(remote_addr);
     msg.msg_controllen = sizeof(msg_ctrl);
 
-    while((nread = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
+    while((rc = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
-    if(nread == -1) {
+    if(rc == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         goto out;
       }
@@ -511,28 +532,28 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       }
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
-                  nread, SOCKERRNO, errstr);
+                  rc, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
 
-    total_nread += (size_t)nread;
+    nread = (size_t)rc;
+    total_nread += nread;
+    ++calls;
 
     gso_size = vquic_msghdr_get_udp_gro(&msg);
     if(gso_size == 0) {
-      gso_size = (size_t)nread;
+      gso_size = nread;
     }
 
-    for(offset = 0; offset < (size_t)nread; offset = to) {
+    for(offset = 0; offset < nread; offset = to) {
       ++pkts;
 
       to = offset + gso_size;
-      if(to > (size_t)nread) {
-        pktlen = (size_t)nread - offset;
-      }
-      else {
+      if(to > nread)
+        pktlen = nread - offset;
+      else
         pktlen = gso_size;
-      }
 
       result =
         recv_cb(buf + offset, pktlen, msg.msg_name, msg.msg_namelen, 0, userp);
@@ -543,8 +564,8 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
-                pkts, total_nread, result);
+    CURL_TRC_CF(data, cf, "vquic_recvmsg(len=%zu, packets=%zu, calls=%zu)"
+                " -> %d", total_nread, pkts, calls, result);
   return result;
 }
 
@@ -559,7 +580,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
   int bufsize = (int)sizeof(buf);
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen = sizeof(remote_addr);
-  size_t total_nread, pkts;
+  size_t total_nread, pkts, calls = 0;
   ssize_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
@@ -592,6 +613,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
     }
 
     ++pkts;
+    ++calls;
     total_nread += (size_t)nread;
     result = recv_cb(buf, (size_t)nread, &remote_addr, remote_addrlen,
                      0, userp);
@@ -601,8 +623,8 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
-                pkts, total_nread, result);
+    CURL_TRC_CF(data, cf, "vquic_recvfrom(len=%zu, packets=%zu, calls=%zu)"
+                " -> %d", total_nread, pkts, calls, result);
   return result;
 }
 #endif /* !HAVE_SENDMMSG && !HAVE_SENDMSG */
