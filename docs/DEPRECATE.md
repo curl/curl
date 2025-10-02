@@ -55,6 +55,21 @@ free version risk being vulnerable.
 
 We remove support for this OpenSSL version from curl in June 2026.
 
+## OpenSSL-QUIC
+
+OpenSSL-QUIC is what we call the curl QUIC backend that uses the OpenSSL QUIC
+stack.
+
+ - It is slower and uses more memory than the alternatives and is only
+   experimental in curl.
+ - It gets little attention from OpenSSL and we have no expectation of the
+   major flaws getting corrected anytime soon.
+ - No one has spoken up for keeping it
+ - curl users building with vanilla OpenSSL can still use QUIC through the
+   means of ngtcp2
+
+We remove the OpenSSL-QUIC backend in March 2026.
+
 ## Past removals
 
  - axTLS (removed in 7.63.0)
