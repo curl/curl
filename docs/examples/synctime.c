@@ -254,7 +254,8 @@ int main(int argc, char *argv[])
     int OptionIndex = 0;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
-        snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
+        curl_msnprintf(conf->timeserver, MAX_STRING, "%s",
+                       &argv[OptionIndex][9]);
 
       if(strcmp(argv[OptionIndex], "--showall") == 0)
         ShowAllHeader = 1;
@@ -263,10 +264,12 @@ int main(int argc, char *argv[])
         AutoSyncTime = 1;
 
       if(strncmp(argv[OptionIndex], "--proxy-user=", 13) == 0)
-        snprintf(conf->proxy_user, MAX_STRING, "%s", &argv[OptionIndex][13]);
+        curl_msnprintf(conf->proxy_user, MAX_STRING, "%s",
+                       &argv[OptionIndex][13]);
 
       if(strncmp(argv[OptionIndex], "--proxy=", 8) == 0)
-        snprintf(conf->http_proxy, MAX_STRING, "%s", &argv[OptionIndex][8]);
+        curl_msnprintf(conf->http_proxy, MAX_STRING, "%s",
+                       &argv[OptionIndex][8]);
 
       if((strcmp(argv[OptionIndex], "--help") == 0) ||
           (strcmp(argv[OptionIndex], "/?") == 0)) {
@@ -278,7 +281,7 @@ int main(int argc, char *argv[])
   }
 
   if(*conf->timeserver == 0)     /* Use default server for time information */
-    snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
+    curl_msnprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
   /* Init CURL before usage */
   curl_global_init(CURL_GLOBAL_ALL);
@@ -306,18 +309,18 @@ int main(int argc, char *argv[])
     tzonediffWord  = (int)(tzonediffFloat/3600.0);
 
     if((double)(tzonediffWord * 3600) == tzonediffFloat)
-      snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
+      curl_msnprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
-      snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
+      curl_msnprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
 
     /* Get current system time and local time */
     GetSystemTime(&SYSTime);
     GetLocalTime(&LOCALTime);
-    snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
-             DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-             LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-             LOCALTime.wMilliseconds);
+    curl_msnprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
+                   DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
+                   MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+                   LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
+                   LOCALTime.wMilliseconds);
 
     fprintf(stderr, "Fetch: %s\n\n", conf->timeserver);
     fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
@@ -327,11 +330,11 @@ int main(int argc, char *argv[])
                         HTTP_COMMAND_HEAD);
 
     GetLocalTime(&LOCALTime);
-    snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
-             DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-             LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-             LOCALTime.wMilliseconds);
+    curl_msnprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
+                   DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
+                   MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+                   LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
+                   LOCALTime.wMilliseconds);
     fprintf(stderr, "\nAfter  HTTP. Date: %s%s\n", timeBuf, tzoneBuf);
 
     if(AutoSyncTime == 3) {
@@ -343,11 +346,11 @@ int main(int argc, char *argv[])
       else {
         /* Successfully re-adjusted computer clock */
         GetLocalTime(&LOCALTime);
-        snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
-                 DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-                 MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-                 LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-                 LOCALTime.wMilliseconds);
+        curl_msnprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
+                       DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
+                       MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+                       LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
+                       LOCALTime.wMilliseconds);
         fprintf(stderr, "\nNew System's Date: %s%s\n", timeBuf, tzoneBuf);
       }
     }
