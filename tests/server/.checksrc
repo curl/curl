@@ -9,3 +9,4 @@ allowfunc send
 allowfunc snprintf
 allowfunc socket
 allowfunc strtoul
+allowfunc vsnprintf
