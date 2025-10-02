@@ -1,3 +1,2 @@
-banfunc sscanf
 banfunc strerror
 banfunc strtol

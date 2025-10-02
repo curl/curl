@@ -1,3 +1,2 @@
 enable STDERR
-banfunc sscanf
 banfunc strtol

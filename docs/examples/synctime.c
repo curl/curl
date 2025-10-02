@@ -139,9 +139,10 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
       *TmpStr1 = 0;
       *TmpStr2 = 0;
       if(strlen((char *)(ptr)) > 50) /* Can prevent buffer overflow to
-                                         TmpStr1 & 2? */
+                                        TmpStr1 & 2? */
         AutoSyncTime = 0;
       else {
+        /* !checksrc! disable BANNEDFUNC 1 */
         int RetVal = sscanf((char *)(ptr), "Date: %25s %hu %s %hu %hu:%hu:%hu",
                             TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
                             &SYSTime.wHour, &SYSTime.wMinute,

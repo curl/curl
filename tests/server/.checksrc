@@ -8,5 +8,6 @@ allowfunc recv
 allowfunc send
 allowfunc snprintf
 allowfunc socket
+allowfunc sscanf
 allowfunc strtoul
 allowfunc vsnprintf
