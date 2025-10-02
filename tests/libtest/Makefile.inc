@@ -107,4 +107,5 @@ TESTS_C = \
   lib2700.c \
   lib3010.c lib3025.c lib3026.c lib3027.c lib3033.c lib3034.c \
   lib3100.c lib3101.c lib3102.c lib3103.c lib3104.c lib3105.c \
-  lib3207.c lib3208.c
+  lib3207.c lib3208.c \
+  lib3303.c
