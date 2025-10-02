@@ -1198,6 +1198,7 @@ static CURLUcode updateurl(CURLU *u, const char *cmd, unsigned int setflags)
       memset(value, 0, sizeof(value)); /* Avoid valgrind false positive. */
       memcpy(buf, p, n);
       buf[n] = 0;
+      /* !checksrc! disable BANNEDFUNC 1 */
       if(sscanf(buf, "%79[^=]=%79[^,]", part, value) == 2) {
         CURLUPart what = part2id(part);
 #if 0

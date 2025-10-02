@@ -607,9 +607,7 @@ static int test_tftpd(int argc, char **argv)
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = util_ultous(ulnum);
+        port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }
@@ -1100,7 +1098,7 @@ static int validate_access(struct testcase *test,
       ptr++;
 
     /* get the number */
-    testno = strtol(ptr, &ptr, 10);
+    testno = atol(ptr);
 
     if(testno > 10000) {
       partno = testno % 10000;

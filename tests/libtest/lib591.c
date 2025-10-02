@@ -71,8 +71,7 @@ static CURLcode test_lib591(const char *URL)
   easy_setopt(easy, CURLOPT_FTPPORT, "-");
 
   /* server connection timeout */
-  easy_setopt(easy, CURLOPT_ACCEPTTIMEOUT_MS,
-              strtol(libtest_arg2, NULL, 10)*1000);
+  easy_setopt(easy, CURLOPT_ACCEPTTIMEOUT_MS, atol(libtest_arg2)*1000);
 
   multi_init(multi);
 

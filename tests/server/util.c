@@ -133,7 +133,7 @@ void logmsg(const char *msg, ...)
 
 unsigned char byteval(char *value)
 {
-  unsigned long num = strtoul(value, NULL, 10);
+  unsigned int num = (unsigned int)atoi(value);
   return num & 0xff;
 }
 
@@ -747,27 +747,6 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   return rc;
 }
 #endif
-
-/*
-** unsigned long to unsigned short
-*/
-#define CURL_MASK_USHORT  ((unsigned short)~0)
-#define CURL_MASK_SSHORT  (CURL_MASK_USHORT >> 1)
-
-unsigned short util_ultous(unsigned long ulnum)
-{
-#ifdef __INTEL_COMPILER
-#  pragma warning(push)
-#  pragma warning(disable:810) /* conversion may lose significant bits */
-#endif
-
-  DEBUGASSERT(ulnum <= (unsigned long) CURL_MASK_USHORT);
-  return (unsigned short)(ulnum & (unsigned long) CURL_MASK_USHORT);
-
-#ifdef __INTEL_COMPILER
-#  pragma warning(pop)
-#endif
-}
 
 curl_socket_t sockdaemon(curl_socket_t sock,
                          unsigned short *listenport,

@@ -782,15 +782,13 @@ static int test_mqttd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           ((ulnum != 0UL) && ((ulnum < 1025UL) || (ulnum > 65535UL)))) {
+        int inum = atoi(argv[arg]);
+        if(inum && ((inum < 1025) || (inum > 65535))) {
           fprintf(stderr, "mqttd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_port = util_ultous(ulnum);
+        server_port = (unsigned short)inum;
         arg++;
       }
     }

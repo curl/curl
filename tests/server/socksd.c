@@ -108,7 +108,7 @@ static void socksd_resetdefaults(void)
 
 static unsigned short shortval(char *value)
 {
-  unsigned long num = strtoul(value, NULL, 10);
+  unsigned long num = (unsigned long)atol(value);
   return num & 0xffff;
 }
 
@@ -831,9 +831,7 @@ static int test_socksd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        server_port = util_ultous(ulnum);
+        server_port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }

@@ -6,5 +6,7 @@ allowfunc getaddrinfo
 allowfunc open
 allowfunc recv
 allowfunc send
+allowfunc snprintf
 allowfunc socket
-allowfunc strtoul
+allowfunc sscanf
+allowfunc vsnprintf

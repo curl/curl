@@ -132,6 +132,7 @@ check_PROGRAMS = \
   smtp-tls \
   smtp-vrfy \
   sslbackend \
+  synctime \
   unixsocket \
   url2file \
   urlapi \
@@ -155,7 +156,6 @@ COMPLICATED_EXAMPLES = \
   multithread.c \
   sessioninfo.c \
   smooth-gtk-thread.c \
-  synctime.c \
   threaded-ssl.c \
   usercertinmem.c \
   version-check.pl \

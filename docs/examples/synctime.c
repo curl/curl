@@ -72,15 +72,32 @@
  */
 
 #include <stdio.h>
-#include <time.h>
-#include <curl/curl.h>
 
-#ifdef _WIN32
-#include <windows.h>
+#ifndef _WIN32
+int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
-#error "This example requires Windows."
+
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+   defined(WINAPI_FAMILY)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_UWP
+#  endif
 #endif
 
+#ifdef CURL_WINDOWS_UWP
+int main(void) { printf("Platform not supported.\n"); return 1; }
+#else
+
+#include <windows.h>
+#include <time.h>
+
+#include <curl/curl.h>
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
 
 #define MAX_STRING              256
 #define MAX_STRING1             MAX_STRING + 1
@@ -139,7 +156,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
       *TmpStr1 = 0;
       *TmpStr2 = 0;
       if(strlen((char *)(ptr)) > 50) /* Can prevent buffer overflow to
-                                         TmpStr1 & 2? */
+                                        TmpStr1 & 2? */
         AutoSyncTime = 0;
       else {
         int RetVal = sscanf((char *)(ptr), "Date: %25s %hu %s %hu %hu:%hu:%hu",
@@ -305,7 +322,7 @@ int main(int argc, char *argv[])
     tzonediffFloat = difftime(tt_local, tt_gmt);
     tzonediffWord  = (int)(tzonediffFloat/3600.0);
 
-    if((double)(tzonediffWord * 3600) == tzonediffFloat)
+    if(tzonediffWord == (int)(tzonediffFloat/3600.0))
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
@@ -358,3 +375,5 @@ int main(int argc, char *argv[])
   }
   return RetValue;
 }
+#endif /* CURL_WINDOWS_UWP */
+#endif /* _WIN32 */

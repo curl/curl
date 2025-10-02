@@ -362,6 +362,6 @@ This is the full list of functions generally banned.
     strtok_r
     strtol
     strtoul
-    vsnprint
+    vsnprintf
     vsprintf
     wcsdup

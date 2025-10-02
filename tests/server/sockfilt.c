@@ -376,6 +376,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   buffer[5] = '\0';
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
   if(*buffer_len > maxlen) {
     logmsg("Buffer size (%zd bytes) too small for data size error "
@@ -1278,9 +1279,7 @@ static int test_sockfilt(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        server_port = util_ultous(ulnum);
+        server_port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }
@@ -1289,15 +1288,13 @@ static int test_sockfilt(int argc, char *argv[])
          doing a passive server-style listening. */
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
+        int inum = atoi(argv[arg]);
+        if(inum && ((inum < 1025) || (inum > 65535))) {
           fprintf(stderr, "sockfilt: invalid --connect argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_connectport = util_ultous(ulnum);
+        server_connectport = (unsigned short)inum;
         arg++;
       }
     }

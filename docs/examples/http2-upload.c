@@ -40,6 +40,8 @@
 #ifndef _MSC_VER
 #include <sys/time.h>
 #include <unistd.h>
+#elif (_MSC_VER < 1900)
+#define snprintf _snprintf
 #endif
 
 #ifdef _WIN32
@@ -162,8 +164,8 @@ int my_trace(CURL *handle, curl_infotype type,
   }
   secs = epoch_offset + tv.tv_sec;
   now = localtime(&secs);  /* not thread safe but we do not care */
-  curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-                 now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+  snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
+           now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
 
   switch(type) {
   case CURLINFO_TEXT:
@@ -215,7 +217,7 @@ static int setup(struct input *i, int num, const char *upload)
   hnd = i->hnd = NULL;
 
   i->num = num;
-  curl_msnprintf(filename, 128, "dl-%d", num);
+  snprintf(filename, sizeof(filename), "dl-%d", num);
   out = fopen(filename, "wb");
   if(!out) {
     fprintf(stderr, "error: could not open file %s for writing: %s\n", upload,
@@ -223,7 +225,7 @@ static int setup(struct input *i, int num, const char *upload)
     return 1;
   }
 
-  curl_msnprintf(url, 256, "https://localhost:8443/upload-%d", num);
+  snprintf(url, sizeof(url), "https://localhost:8443/upload-%d", num);
 
   i->in = fopen(upload, "rb");
   if(!i->in) {

@@ -389,7 +389,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
         ptr++; /* skip the slash */
 
-        req->testno = strtol(ptr, &ptr, 10);
+        req->testno = atol(ptr);
 
         if(req->testno > 10000) {
           req->partno = req->testno % 10000;
@@ -430,6 +430,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
                in the 'part' variable and use as test case number!! */
             while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
               char *endp;
+              /* !checksrc! disable BANNEDFUNC 1 */
               part = strtoul(p, &endp, 16);
               if(ISXDIGIT(*p))
                 p = endp;
@@ -449,11 +450,11 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
             portp = strchr(doc, ':');
 
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
-            unsigned long ulnum = strtoul(portp + 1, NULL, 10);
-            if(!ulnum || (ulnum > 65535UL))
+            int inum = atoi(portp + 1);
+            if((inum <= 0) || (inum > 65535))
               logmsg("Invalid CONNECT port received");
             else
-              req->connect_port = util_ultous(ulnum);
+              req->connect_port = (unsigned short)inum;
 
           }
           logmsg("Port number: %d, test case number: %ld",
@@ -490,7 +491,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     /* check for a Testno: header with the test case number */
     char *testno = strstr(line, "\nTestno: ");
     if(testno) {
-      req->testno = strtol(&testno[9], NULL, 10);
+      req->testno = atol(&testno[9]);
       logmsg("Found test number %ld in Testno: header!", req->testno);
     }
     else {
@@ -516,7 +517,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
-      req->testno = strtol(ptr, &ptr, 10);
+      req->testno = atol(ptr);
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;
@@ -2071,15 +2072,13 @@ static int test_sws(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum && ((ulnum < 1025UL) || (ulnum > 65535UL)))) {
+        int inum = atoi(argv[arg]);
+        if(inum && ((inum < 1025) || (inum > 65535))) {
           fprintf(stderr, "sws: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        port = util_ultous(ulnum);
+        port = (unsigned short)inum;
         arg++;
       }
     }
@@ -2093,15 +2092,13 @@ static int test_sws(int argc, char *argv[])
     else if(!strcmp("--keepalive", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum && (ulnum > 65535UL))) {
+        int inum = atoi(argv[arg]);
+        if(inum && (inum > 65535)) {
           fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
                   "be number of seconds\n", argv[arg]);
           return 0;
         }
-        keepalive_secs = util_ultous(ulnum);
+        keepalive_secs = (unsigned short)inum;
         arg++;
       }
     }
