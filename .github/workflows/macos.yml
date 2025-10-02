@@ -554,62 +554,42 @@ jobs:
       fail-fast: false
       matrix:
         # Sources:
-        # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
         compiler: [gcc-12, gcc-13, gcc-15, llvm@15, llvm@18, llvm@20, clang]
-        # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
+        # Xcode support matrix as of 2025-10, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
-        # macos-13: 14.1, 14.2, 14.3.1, 15.0.1, 15.1,*15.2
-        # macos-14:                     15.0.1, 15.1, 15.2, 15.3,*15.4
-        # macos-15:                                                     16.0, 16.1, 16.2, 16.3,*16.4, 26.0
-        # macos-26:                                                                             16.4 *26.0
-        # macOSSDK: 13.0, 13.1, 13.3,   14.0,   14.2, 14.2, 14.4, 14.5, 15.0, 15.1, 15.2, 15.4, 15.5, 26.0
-        #           Ventura (2022)      Sonoma (2023)                   Sequoia (2024)                Tahoe (2025)
+        # macos-14: 15.0.1, 15.1, 15.2, 15.3,*15.4
+        # macos-15:                                 16.0, 16.1, 16.2, 16.3,*16.4, 26.0
+        # macos-26:                                                         16.4 *26.0
+        # macOSSDK: 14.0,   14.2, 14.2, 14.4, 14.5, 15.0, 15.1, 15.2, 15.4, 15.5, 26.0
+        #           Sonoma (2023)                   Sequoia (2024)                Tahoe (2025)
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
-        # TODO when dropping macos-13: replace '$(brew --prefix ...' with /opt/homebrew
-        image: [macos-13, macos-15, macos-26]
+        image: [macos-14, macos-15, macos-26]
         # Can skip these to reduce jobs:
         #   15.1 has the same default macOS SDK as 15.2 and identical test results.
-        #   14.1, 15.4 not revealing new fallouts.
-        #xcode: ['14.1', '14.2', '14.3.1', '15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
-        #xcode: ['14.1', '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
-        #xcode: [        '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
+        #   15.4 not revealing new fallouts.
+        #xcode: ['15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
+        #xcode: ['15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
+        #xcode: ['15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
         xcode: ['']  # default Xcodes
         macos-version-min: ['']
         build: [autotools, cmake]
         exclude:
           # Combinations not covered by runner images:
-          - { image: macos-13, xcode: '15.3'   }
-          - { image: macos-13, xcode: '15.4'   }
-          - { image: macos-13, xcode: '16.0'   }
-          - { image: macos-13, xcode: '16.1'   }
-          - { image: macos-13, xcode: '16.2'   }
-          - { image: macos-13, xcode: '16.3'   }
-          - { image: macos-13, xcode: '16.4'   }
-          - { image: macos-13, xcode: '26.0'   }
-          - { image: macos-14, xcode: '14.1'   }
-          - { image: macos-14, xcode: '14.2'   }
-          - { image: macos-14, xcode: '14.3.1' }
           - { image: macos-14, xcode: '16.0'   }
           - { image: macos-14, xcode: '16.1'   }
           - { image: macos-14, xcode: '16.2'   }
           - { image: macos-14, xcode: '16.3'   }
           - { image: macos-14, xcode: '16.4'   }
           - { image: macos-14, xcode: '26.0'   }
-          - { image: macos-15, xcode: '14.1'   }
-          - { image: macos-15, xcode: '14.2'   }
-          - { image: macos-15, xcode: '14.3.1' }
           - { image: macos-15, xcode: '15.0.1' }
           - { image: macos-15, xcode: '15.1'   }
           - { image: macos-15, xcode: '15.2'   }
           - { image: macos-15, xcode: '15.3'   }
           - { image: macos-15, xcode: '15.4'   }
-          - { image: macos-26, xcode: '14.1'   }
-          - { image: macos-26, xcode: '14.2'   }
-          - { image: macos-26, xcode: '14.3.1' }
           - { image: macos-26, xcode: '15.0.1' }
           - { image: macos-26, xcode: '15.1'   }
           - { image: macos-26, xcode: '15.2'   }
@@ -619,8 +599,6 @@ jobs:
           - { image: macos-26, xcode: '16.1'   }
           - { image: macos-26, xcode: '16.2'   }
           - { image: macos-26, xcode: '16.3'   }
-          - { image: macos-13, compiler: 'llvm@18' }
-          - { image: macos-13, compiler: 'llvm@20' }
           - { image: macos-14, compiler: 'llvm@18' }
           - { image: macos-14, compiler: 'llvm@20' }
           - { image: macos-15, compiler: 'llvm@15' }
@@ -650,7 +628,7 @@ jobs:
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
@@ -686,7 +664,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DCURL_USE_OPENSSL=ON \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
