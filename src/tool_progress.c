@@ -31,48 +31,30 @@
    Add suffix k, M, G when suitable... */
 static char *max5data(curl_off_t bytes, char *max5)
 {
-#define ONE_KILOBYTE (curl_off_t)1024
-#define ONE_MEGABYTE (1024 * ONE_KILOBYTE)
-#define ONE_GIGABYTE (1024 * ONE_MEGABYTE)
-#define ONE_TERABYTE (1024 * ONE_GIGABYTE)
-#define ONE_PETABYTE (1024 * ONE_TERABYTE)
-
+  /* a signed 64-bit value is 8192 petabytes maximum */
+  const char unit[] = { 'k', 'M', 'G', 'T', 'P', 0 };
+  int k = 0;
   if(bytes < 100000)
     msnprintf(max5, 6, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
 
-  else if(bytes < 10000 * ONE_KILOBYTE)
-    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "k", bytes/ONE_KILOBYTE);
-
-  else if(bytes < 100 * ONE_MEGABYTE)
-    /* 'XX.XM' is good as long as we are less than 100 megs */
-    msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-              CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
-              (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/10) );
-
-  else if(bytes < 10000 * ONE_MEGABYTE)
-    /* 'XXXXM' is good until we are at 10000MB or above */
-    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
-
-  else if(bytes < 100 * ONE_GIGABYTE)
-    /* 10000 MB - 100 GB, we show it as XX.XG */
-    msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-              CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE,
-              (bytes%ONE_GIGABYTE) / (ONE_GIGABYTE/10) );
-
-  else if(bytes < 10000 * ONE_GIGABYTE)
-    /* up to 10000GB, display without decimal: XXXXG */
-    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "G", bytes/ONE_GIGABYTE);
-
-  else if(bytes < 10000 * ONE_TERABYTE)
-    /* up to 10000TB, display without decimal: XXXXT */
-    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "T", bytes/ONE_TERABYTE);
-
-  else
-    /* up to 10000PB, display without decimal: XXXXP */
-    msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "P", bytes/ONE_PETABYTE);
-
-  /* 16384 petabytes (16 exabytes) is the maximum a 64-bit unsigned number can
-     hold, but our data type is signed so 8192PB will be the maximum. */
+  do {
+    curl_off_t nbytes = bytes / 1024;
+    if(nbytes < 100) {
+      /* display with a decimal */
+      msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
+                CURL_FORMAT_CURL_OFF_T "%c", bytes/1024,
+                (bytes%1024) / (1024/10), unit[k]);
+      break;
+    }
+    else if(nbytes < 10000) {
+      /* no decimals */
+      msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes, unit[k]);
+      break;
+    }
+    bytes = nbytes;
+    k++;
+    DEBUGASSERT(unit[k]);
+  } while(unit[k]);
   return max5;
 }
 
