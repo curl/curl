@@ -26,8 +26,8 @@ extend-exclude = [
   ".github/scripts/spellcheck.words",
   "docs/THANKS",
   "packages/*",
-  "scripts/wcurl",
   "projects/Windows/tmpl/curl.vcxproj",
   "projects/Windows/tmpl/libcurl.vcxproj",
+  "scripts/wcurl",
   "tests/data/test*",
 ]
