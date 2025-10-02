@@ -1,5 +1,4 @@
 enable STDERR
-banfunc snprintf
 banfunc sscanf
 banfunc strtol
 banfunc vsnprint

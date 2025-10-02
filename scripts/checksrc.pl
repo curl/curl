@@ -53,6 +53,7 @@ my %banfunc = (
     "gets" => 1,
     "strtok" => 1,
     "sprintf" => 1,
+    "snprintf" => 1,
     "vsprintf" => 1,
     "strcat" => 1,
     "strncat" => 1,
