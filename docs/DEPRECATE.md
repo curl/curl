@@ -53,7 +53,7 @@ We remove support for this OpenSSL version from curl in December 2025.
 OpenSSL and others only ship fixes to paying customers, meaning users of the
 free version risk being vulnerable.
 
-We remove support for this OpenSSL version from curl in June 2026.
+We remove support for this OpenSSL version from curl in December 2025.
 
 ## Past removals
 
