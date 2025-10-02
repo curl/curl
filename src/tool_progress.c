@@ -31,7 +31,7 @@
    Add suffix k, M, G when suitable... */
 static char *max5data(curl_off_t bytes, char *max5)
 {
-  /* a signed 64 bit value is 8192 petabytes maximum */
+  /* a signed 64-bit value is 8192 petabytes maximum */
   const char unit[] = { 'k', 'M', 'G', 'T', 'P', 0 };
   int k = 0;
   if(bytes < 100000)
