@@ -39,15 +39,16 @@ static char *max5data(curl_off_t bytes, char *max5)
 
   do {
     curl_off_t nbytes = bytes / 1024;
-    if(nbytes < 10000) {
-      if(nbytes < 100)
-        /* display with a decimal */
-        msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-                  CURL_FORMAT_CURL_OFF_T "%c", bytes/1024,
-                  (bytes%1024) / (1024/10), unit[k]);
-      else
-        /* no decimals */
-        msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes, unit[k]);
+    if(nbytes < 100) {
+      /* display with a decimal */
+      msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
+                CURL_FORMAT_CURL_OFF_T "%c", bytes/1024,
+                (bytes%1024) / (1024/10), unit[k]);
+      break;
+    }
+    else if(nbytes < 10000) {
+      /* no decimals */
+      msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes, unit[k]);
       break;
     }
     bytes = nbytes;
