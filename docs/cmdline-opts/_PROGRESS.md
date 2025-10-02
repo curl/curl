@@ -5,8 +5,8 @@
 curl normally displays a progress meter during operations, indicating the
 amount of transferred data, transfer speeds and estimated time left, etc. The
 progress meter displays the transfer rate in bytes per second. The suffixes
-(k, M, G, T, P) are 1024 based. For example 1k is 1024 bytes. 1M is 1048576
-bytes.
+(`k` for kilo, `M` for mega, `G` for giga, `T` for tera, and `P` for peta) are
+1024 based. For example 1k is 1024 bytes. 1M is 1048576 bytes.
 
 curl displays this data to the terminal by default, so if you invoke curl to
 do an operation and it is about to write data to the terminal, it *disables*
