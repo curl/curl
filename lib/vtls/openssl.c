@@ -1773,8 +1773,6 @@ static CURLcode client_cert(struct Curl_easy *data,
 
     x509 = SSL_get_certificate(ssl);
 
-    /* This version was provided by Evan Jordan and is supposed to not
-       leak memory as the previous version: */
     if(x509) {
       EVP_PKEY *pktmp = X509_get_pubkey(x509);
       EVP_PKEY_copy_parameters(pktmp, SSL_get_privatekey(ssl));
@@ -2931,10 +2929,9 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
   case CURL_SSLVERSION_MAX_NONE:  /* none selected */
   case CURL_SSLVERSION_MAX_DEFAULT:  /* max selected */
   default:
-    /* SSL_CTX_set_max_proto_version states that:
-       setting the maximum to 0 will enable
-       protocol versions up to the highest version
-       supported by the library */
+    /* SSL_CTX_set_max_proto_version states that: setting the maximum to 0
+       will enable protocol versions up to the highest version supported by
+       the library */
     ossl_ssl_version_max = 0;
     break;
   }
@@ -3291,9 +3288,9 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
       if(!x509)
         continue;
 
-      /* Try to import the certificate. This may fail for legitimate
-         reasons such as duplicate certificate, which is allowed by MS but
-         not OpenSSL. */
+      /* Try to import the certificate. This may fail for legitimate reasons
+         such as duplicate certificate, which is allowed by MS but not
+         OpenSSL. */
       if(X509_STORE_add_cert(store, x509) == 1) {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
         infof(data, "SSL: Imported cert");
@@ -4721,9 +4718,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     return result;
 
   do {
-    /* Begin Gyrations to get the subjectPublicKeyInfo     */
-    /* Thanks to Viktor Dukhovni on the OpenSSL mailing list */
-
+    /* Get the subjectPublicKeyInfo */
     /* https://groups.google.com/group/mailing.openssl.users/browse_thread/thread/d61858dae102c6c7 */
     len1 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), NULL);
     if(len1 < 1)
