@@ -38,7 +38,7 @@ static CURLcode test_unit1302(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
   CURLcode rc;
-  unsigned int i;
+  size_t i;
 
   /* common base64 encoding */
   struct etest encode[] = {
@@ -137,7 +137,7 @@ static CURLcode test_unit1302(const char *arg)
     abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     abort_unless(olen == e->olen, "wrong output size");
     if(memcmp(out, e->output, e->olen)) {
-      fprintf(stderr, "Test %u encoded badly\n", i);
+      curl_mfprintf(stderr, "Test %zu encoded badly\n", i);
       unitfail++;
     }
     Curl_safefree(out);
@@ -145,17 +145,17 @@ static CURLcode test_unit1302(const char *arg)
     /* then verify decode */
     rc = curlx_base64_decode(e->output, &decoded, &dlen);
     if(rc != CURLE_OK) {
-      fprintf(stderr, "Test %u URL decode returned %d\n", i, (int)rc);
+      curl_mfprintf(stderr, "Test %zu URL decode returned %d\n", i, (int)rc);
       unitfail++;
     }
     if(dlen != e->ilen) {
-      fprintf(stderr, "Test %u URL decode output length %d instead of %d\n",
-              i, (int)dlen, (int)e->ilen);
+      curl_mfprintf(stderr, "Test %zu URL decode output length %zu "
+                    "instead of %zu\n", i, dlen, e->ilen);
       unitfail++;
     }
     if(memcmp(decoded, e->input, dlen)) {
-      fprintf(stderr, "Test %u URL decoded badly. Got '%s', expected '%s'\n",
-              i, decoded, e->input);
+      curl_mfprintf(stderr, "Test %zu URL decoded badly. Got '%s', "
+                    "expected '%s'\n", i, decoded, e->input);
       unitfail++;
     }
 
@@ -169,12 +169,12 @@ static CURLcode test_unit1302(const char *arg)
     rc = curlx_base64url_encode(e->input, e->ilen, &out, &olen);
     abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     if(olen != e->olen) {
-      fprintf(stderr, "Test %u URL encoded output length %d instead of %d\n",
-              i, (int)olen, (int)e->olen);
+      curl_mfprintf(stderr, "Test %zu URL encoded output length %zu "
+                    "instead of %zu\n", i, olen, e->olen);
     }
     if(out && memcmp(out, e->output, e->olen)) {
-      fprintf(stderr, "Test %u URL encoded badly. Got '%s', expected '%s'\n",
-              i, out, e->output);
+      curl_mfprintf(stderr, "Test %zu URL encoded badly. Got '%s', "
+                    "expected '%s'\n", i, out, e->output);
       unitfail++;
     }
     Curl_safefree(out);
@@ -188,9 +188,9 @@ static CURLcode test_unit1302(const char *arg)
     /* then verify decode with illegal inputs */
     rc = curlx_base64_decode(e->output, &decoded, &dlen);
     if(rc != CURLE_BAD_CONTENT_ENCODING) {
-      fprintf(stderr, "Test %u URL bad decoded badly. "
-              "Returned '%d', expected '%d'\n",
-              i, (int)rc, CURLE_BAD_CONTENT_ENCODING);
+      curl_mfprintf(stderr, "Test %zu URL bad decoded badly. "
+                    "Returned '%d', expected '%d'\n",
+                    i, (int)rc, CURLE_BAD_CONTENT_ENCODING);
       unitfail++;
     }
   }
