@@ -567,7 +567,6 @@ jobs:
         #           Sonoma (2023)                   Sequoia (2024)                Tahoe (2025)
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
-        # TODO when dropping macos-13: replace '$(brew --prefix ...' with /opt/homebrew
         image: [macos-14, macos-15, macos-26]
         # Can skip these to reduce jobs:
         #   15.1 has the same default macOS SDK as 15.2 and identical test results.
@@ -638,7 +637,7 @@ jobs:
           ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::compiler defaults'; echo 'int main(void) {}' | "${CC}" -v -x c -; echo '::endgroup::'
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages preinstalled'; ls -l "/opt/homebrew/opt"; echo '::endgroup::'
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
@@ -674,7 +673,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64e/')-apple-darwin$(uname -r)" \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DCMAKE_IGNORE_PREFIX_PATH=/opt/homebrew \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DCURL_USE_OPENSSL=ON \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
