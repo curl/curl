@@ -35,9 +35,9 @@ static char *getflagstr(int flags)
   if(buf) {
     curl_msnprintf(buf, 256, "%s,%s",
                    ((flags & SANITIZE_ALLOW_PATH) ?
-                   "SANITIZE_ALLOW_PATH" : ""),
+                    "SANITIZE_ALLOW_PATH" : ""),
                    ((flags & SANITIZE_ALLOW_RESERVED) ?
-                   "SANITIZE_ALLOW_RESERVED" : ""));
+                    "SANITIZE_ALLOW_RESERVED" : ""));
   }
   return buf;
 }
