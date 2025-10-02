@@ -196,7 +196,6 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   (void)gsolen;
 
   *psent = 0;
-  method = "send";
 
   while((sent = CURL_SEND(qctx->sockfd, (const char *)pkt,
                           (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
