@@ -264,7 +264,7 @@ static CURLcode test_unit1307(const char *arg)
                                   "a",                      NOMATCH|LINUX_FAIL}
   };
 
-  int i;
+  size_t i;
 
   enum system {
     SYSTEM_CUSTOM,
@@ -280,14 +280,14 @@ static CURLcode test_unit1307(const char *arg)
 #else
   machine = SYSTEM_LINUX;
 #endif
-  printf("Tested with system fnmatch(), %s-style\n",
-         machine == SYSTEM_LINUX ? "linux" : "mac");
+  curl_mprintf("Tested with system fnmatch(), %s-style\n",
+               machine == SYSTEM_LINUX ? "linux" : "mac");
 #else
-  printf("Tested with custom fnmatch()\n");
+  curl_mprintf("Tested with custom fnmatch()\n");
   machine = SYSTEM_CUSTOM;
 #endif
 
-  for(i = 0; i < (int)CURL_ARRAYSIZE(tests); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     int result = tests[i].result;
     int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
     if(result & (LINUX_DIFFER|MAC_DIFFER)) {
@@ -298,10 +298,10 @@ static CURLcode test_unit1307(const char *arg)
       result &= 0x03; /* filter off all high bits */
     }
     if(rc != result) {
-      printf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
-             " [%d]\n",
-             tests[i].pattern, tests[i].string, ret2name(result),
-             ret2name(rc), i);
+      curl_printf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
+                  " [%zu]\n",
+                  tests[i].pattern, tests[i].string, ret2name(result),
+                  ret2name(rc), i);
       fail("pattern mismatch");
     }
   }
