@@ -48,7 +48,10 @@ path = [
   "lib/vssh/.checksrc",
   "lib/vtls/.checksrc",
   "src/.checksrc",
+  "tests/libtest/.checksrc",
   "tests/server/.checksrc",
+  "tests/tunit/.checksrc",
+  "tests/unit/.checksrc",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
