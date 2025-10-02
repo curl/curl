@@ -152,7 +152,7 @@ static CURLcode test_unit1652(const char *arg)
   memset(input, '\0', sizeof(input));
   memset(input, 'A', sizeof(input) - 1);
   Curl_infof(easy, "%s", input);
-  curl_fprintf(stderr, "output len %zu: %s", strlen(output), output);
+  curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 3");
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 3");
