@@ -5,3 +5,4 @@ allowfunc gmtime
 allowfunc localtime
 allowfunc open
 allowfunc socket
+allowfunc sscanf
