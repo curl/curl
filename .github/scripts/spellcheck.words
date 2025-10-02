@@ -231,9 +231,9 @@ else's
 encodings
 enctype
 endianness
-enums
 Engler
 enum
+enums
 epoll
 EPRT
 EPSV
@@ -294,6 +294,7 @@ GETing
 getpwuid
 ggcov
 Ghedini
+giga
 Gisle
 Glesys
 globbed
@@ -617,6 +618,7 @@ PEM
 pem
 perl
 permafailing
+peta
 PINGs
 pipelining
 PKCS
@@ -846,6 +848,7 @@ Tatsuhiro
 TBD
 TCP
 tcpdump
+tera
 testability
 testcurl
 TFTP
