@@ -52,8 +52,6 @@ extern int unitfail; /* for unittests */
 #include <sys/select.h>
 #endif
 
-#include "curl_printf.h"
-
 /* GCC <4.6 does not support '#pragma GCC diagnostic push' and
    does not support 'pragma GCC diagnostic' inside functions. */
 #if (defined(__GNUC__) && \
