@@ -298,10 +298,10 @@ static CURLcode test_unit1307(const char *arg)
       result &= 0x03; /* filter off all high bits */
     }
     if(rc != result) {
-      curl_printf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
-                  " [%zu]\n",
-                  tests[i].pattern, tests[i].string, ret2name(result),
-                  ret2name(rc), i);
+      curl_mprintf("Curl_fnmatch(\"%s\", \"%s\") should return %s (returns %s)"
+                   " [%zu]\n",
+                   tests[i].pattern, tests[i].string, ret2name(result),
+                   ret2name(rc), i);
       fail("pattern mismatch");
     }
   }
