@@ -95,7 +95,7 @@ static CURLcode test_unit1396(const char *arg)
     fail_unless(!memcmp(out, list1[i].out, list1[i].outlen),
                 "bad output data returned");
 
-    printf("curl_easy_unescape test %d DONE\n", i);
+    curl_mprintf("curl_easy_unescape test %d DONE\n", i);
 
     curl_free(out);
   }
@@ -110,7 +110,7 @@ static CURLcode test_unit1396(const char *arg)
     fail_unless(!memcmp(out, list2[i].out, list2[i].outlen),
                 "bad output data returned");
 
-    printf("curl_easy_escape test %d DONE (%s)\n", i, out);
+    curl_mprintf("curl_easy_escape test %d DONE (%s)\n", i, out);
 
     curl_free(out);
   }
