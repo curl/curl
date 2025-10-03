@@ -377,6 +377,9 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
      options should be added to check doh proxy insecure separately,
      CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
      */
+  doh->set.ssl.custom_cafile = data->set.ssl.custom_cafile;
+  doh->set.ssl.custom_capath = data->set.ssl.custom_capath;
+  doh->set.ssl.custom_cablob = data->set.ssl.custom_cablob;
   if(data->set.str[STRING_SSL_CAFILE]) {
     ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
                        data->set.str[STRING_SSL_CAFILE]);
