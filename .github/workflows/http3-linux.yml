@@ -165,7 +165,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
 
       - id: settings
         if: >-
@@ -337,8 +337,8 @@ jobs:
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            PKG_CONFIG_PATH=/home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig \
-            LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib \
+            PKG_CONFIG_PATH=/home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig \
+            LDFLAGS=-Wl,-rpath,/home/runner/libressl/build/lib \
             --with-libbrotlienc --with-libbrotlidec \
             --enable-app --enable-http3
           make install
@@ -625,7 +625,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: ~/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.QUICTLS_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache quiche'
