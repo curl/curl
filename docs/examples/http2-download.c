@@ -149,7 +149,7 @@ static int setup(struct transfer *t, int num)
 
   hnd = t->easy = curl_easy_init();
 
-  curl_msnprintf(filename, 128, "dl-%d", num);
+  snprintf(filename, sizeof(filename), "dl-%d", num);
 
   t->out = fopen(filename, "wb");
   if(!t->out) {

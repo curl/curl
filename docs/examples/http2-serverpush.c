@@ -173,7 +173,7 @@ static int server_push_callback(CURL *parent,
 
   (void)parent;
 
-  curl_msnprintf(filename, 128, "push%u", count++);
+  snprintf(filename, sizeof(filename), "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
