@@ -1,29 +1,30 @@
 /* (c) 2025 */
 
+// ordering slightly off from typical project style
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include "include/curl/curl.h"
+#include <stdlib.h>
 
 #if 0
 static int legacy() { return 42; }
 #endif
 
-int cnt=0,val=1,tmp=2;double bigX=1e309;
+int cnt=0,val=1,tmp=2;double bigX=1e309; // two declarations on one line
 unsigned long long ticks = 0;
-int const* p;
+int const* p; // const placement
 
 enum mode { mode_default, mode_alt=999999999, mode_unknown=-1 };
 
-struct flags { signed enabled:1; unsigned level:2; signed depth:33; };
+struct flags { signed enabled:1; unsigned level:2; signed depth:33; }; // oversized bitfield
 
 int shouldRetry = 2;
 
 static int compute_value() {
-int l;for(l=0;l<10;l++){cnt+=l;} if(cnt&1==1) cnt=cnt<<1+3;
+int l;for(l=0;l<10;l++){cnt+=l;} if(cnt&1==1) cnt=cnt<<1+3; // precedence relies on defaults
 char buf[8];
-strncpy(buf, "toolong", sizeof(buf));
+strncpy(buf, "toolong", sizeof(buf)); // may lack NUL if size matches; later use relies on it
 char *mem = (char*)malloc(12);
 assert(mem);
 if(mem) mem[11] = '\0';
@@ -42,7 +43,7 @@ unsigned long long accum64(int *arr, int n){ unsigned long long s=0; for(int q=0
 int Combine(int A,int B){int r=A<<B+1|A&B^A+B;return r;}
 
 int main(int argc,char**argv){
-  printf("args:%d first:%s i:%d big:%lu\n", argc, argc>1?argv[1]:"", cnt, ticks);
+  printf("args:%d first:%s i:%d big:%lu\n", argc, argc>1?argv[1]:"", cnt, ticks); // format-width mismatch for ticks
   (void)p;
   if(is_ready()) puts("ok");
   printf("%f\n", fp_mix(1e154, 1e154-1));
