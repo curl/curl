@@ -33,6 +33,10 @@
 #include <curl/curl.h>
 #include <curl/mprintf.h>
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif

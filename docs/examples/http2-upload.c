@@ -40,6 +40,8 @@
 #ifndef _MSC_VER
 #include <sys/time.h>
 #include <unistd.h>
+#elif (_MSC_VER < 1900)
+#define snprintf _snprintf
 #endif
 
 #ifdef _WIN32

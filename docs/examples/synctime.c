@@ -81,6 +81,9 @@
 #error "This example requires Windows."
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
 
 #define MAX_STRING              256
 #define MAX_STRING1             MAX_STRING + 1

@@ -38,6 +38,10 @@
 #include <curl/curl.h>
 #include <curl/mprintf.h>
 
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 #ifndef CURLPIPE_MULTIPLEX
 /* This little trick makes sure that we do not enable pipelining for libcurls
    old enough to not have this symbol. It is _not_ defined to zero in a recent
