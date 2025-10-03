@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         272
  curl_easy_setopt() options:   308
  Public functions in libcurl:  98
- Contributors:                 3510
+ Contributors:                 3513
 
 This release includes the following changes:
 
@@ -12,6 +12,7 @@ This release includes the following changes:
  o krb5: drop support for Kerberos FTP [43]
  o libssh2: up the minimum requirement to 1.9.0 [85]
  o vssh: drop support for wolfSSH [58]
+ o wcurl: import v2025.09.27 [182]
  o write-out: make %header{} able to output *all* occurrences of a header [25]
 
 This release includes the following bugfixes:
@@ -33,16 +34,19 @@ This release includes the following bugfixes:
  o build: show llvm/clang in platform flags and `buildinfo.txt` [126]
  o cf-h2-proxy: break loop on edge case [140]
  o cf-ip-happy: mention unix domain path, not port number [161]
+ o cf-socket: tweak a memcpy() to read better [177]
  o cf-socket: use the right byte order for ports in bindlocal [61]
  o cfilter: unlink and discard [46]
  o checksrc: catch banned functions when preceded by `(` [146]
  o checksrc: fix possible endless loop when detecting `BANNEDFUNC` [149]
  o cmake: add `CURL_CODE_COVERAGE` option [78]
  o cmake: clang detection tidy-ups [116]
+ o cmake: drop exclamation in comment looking like a name [160]
  o cmake: fix building docs when the base directory contains `.3` [18]
  o cmake: use modern alternatives for `get_filename_component()` [102]
  o cmake: use more `COMPILER_OPTIONS`, `LINK_OPTIONS` / `LINK_FLAGS` [152]
  o cmdline-docs: extended, clarified, refreshed [28]
+ o cmdline-opts/_PROGRESS.md: explain the suffixes [154]
  o configure: add "-mt" for pthread support on HP-UX [52]
  o cookie: avoid saving a cookie file if no transfer was done [11]
  o curl_easy_getinfo: error code on NULL arg [2]
@@ -62,15 +66,21 @@ This release includes the following bugfixes:
  o easy_getinfo: check magic, Curl_close safety [3]
  o examples: fix two issues found by CodeQL [35]
  o examples: fix two more cases of `stat()` TOCTOU [147]
+ o form.md: drop reference to MANUAL [178]
  o ftp: fix ftp_do_more returning with *completep unset [122]
  o ftp: fix port number range loop for PORT commands [66]
  o gtls: avoid potential use of uninitialized variable in trace output [83]
  o hostip: remove leftover INT_MAX check in Curl_dnscache_prune [88]
  o http: handle user-defined connection headers [165]
  o httpsrr: free old pointers when storing new [57]
+ o INTERNALS: drop Winsock 2.2 from the dependency list [162]
+ o INTERNALS: specify minimum version for Heimdal: 7.1.0 [158]
  o ip-happy: do not set unnecessary timeout [95]
+ o ip-happy: prevent event-based stall on retry [155]
  o krb5: return appropriate error on send failures [22]
  o ldap: do not base64 encode zero length string [42]
+ o lib: fix build error and compiler warnings with verbose strings disabled [173]
+ o lib: remove personal names from comments [168]
  o lib: upgrade/multiplex handling [136]
  o libcurl-multi.md: added curl_multi_get_offt mention [53]
  o libcurl-security.md: mention long-running connections [6]
@@ -91,6 +101,7 @@ This release includes the following bugfixes:
  o mbedtls: check result of setting ALPN [127]
  o mbedtls: handle WANT_WRITE from mbedtls_ssl_read() [145]
  o multi.h: add CURLMINFO_LASTENTRY [51]
+ o multi_ev: remove unnecessary data check that confuses analysers [167]
  o ngtcp2: check error code on connect failure [13]
  o ngtcp2: fix early return [131]
  o openldap: avoid indexing the result at -1 for blank responses [44]
@@ -98,15 +109,18 @@ This release includes the following bugfixes:
  o openldap: check ldap_get_option() return codes [119]
  o openssl-quic: check results better [132]
  o openssl-quic: handle error in SSL_get_stream_read_error_code [129]
+ o openssl-quic: ignore unexpected streams opened by server [176]
  o openssl: clear retry flag on x509 error [130]
  o openssl: fail the transfer if ossl_certchain() fails [23]
  o openssl: make the asn1_object_dump name null terminated [56]
  o openssl: set io_need always [99]
  o OS400: fix a use-after-free/double-free case [142]
+ o pytest: skip specific tests for no-verbose builds [171]
  o quic: fix min TLS version handling [14]
  o quic: ignore EMSGSIZE on receive [4]
  o quiche: fix verbose message when ip quadruple cannot be obtained. [128]
  o quiche: when ingress processing fails, return that error code [103]
+ o runtests: tag tests that require curl verbose strings [172]
  o rustls: fix clang-tidy warning [107]
  o rustls: fix comment describing cr_recv() [117]
  o rustls: typecast variable for safer trace output [69]
@@ -130,6 +144,7 @@ This release includes the following bugfixes:
  o socks_sspi: restore non-blocking socket on error paths [48]
  o ssl-sessions.md: mark option experimental [12]
  o sws: fix checking `sscanf()` return value [17]
+ o tcp-nodelay.md: expand the documentation [153]
  o telnet: make printsub require another byte input [21]
  o telnet: refuse IAC codes in content [111]
  o telnet: return error on crazy TTYPE or XDISPLOC lengths [123]
@@ -144,6 +159,7 @@ This release includes the following bugfixes:
  o tidy-up: avoid using the reserved macro namespace [76]
  o tidy-up: update MS links, allow long URLs via `checksrc` [73]
  o tidy-up: URLs [101]
+ o time-cond.md: refer to the singular curl_getdate man page [148]
  o TODO: fix a typo [93]
  o TODO: remove already implemented or bad items [36]
  o tool: fix exponential retry delay [47]
@@ -151,13 +167,17 @@ This release includes the following bugfixes:
  o tool_cb_hdr: size is always 1 [70]
  o tool_doswin: fix to use curl socket functions [108]
  o tool_getparam/set_rate: skip the multiplication on overflow [84]
+ o tool_getparam: always disable "lib-ids" for tracing [169]
+ o tool_getparam: warn if provided header looks malformed [179]
  o tool_operate: improve wording in retry message [37]
  o tool_operate: keep the progress meter for --out-null [33]
  o tool_progress: handle possible integer overflows [164]
+ o tool_progress: make max5data() use an algorithm [170]
  o transfer: avoid busy loop with tiny speed limit [100]
  o urldata: FILE is not a list-only protocol [9]
  o vtls: alpn setting, check proto parameter [134]
  o vtls_int.h: clarify data_pending [124]
+ o vtls_scache: fix race condition [157]
  o windows: replace `_beginthreadex()` with `CreateThread()` [80]
  o windows: stop passing unused, optional argument for Win9x compatibility [75]
  o wolfssl: check BIO read parameters [133]
@@ -186,16 +206,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Adam Light, Andrew Kirillov, Andrew Olsen, BobodevMm on github,
-  Christian Schmitz, Dan Fandrich, Daniel Stenberg, dependabot[bot],
-  divinity76 on github, Emilio Pozuelo Monfort, Ethan Everett,
+  Adam Light, Alice Lee Poetics, Andrew Kirillov, Andrew Olsen,
+  BobodevMm on github, Christian Schmitz, Dan Fandrich, Daniel Stenberg,
+  dependabot[bot], divinity76 on github, Emilio Pozuelo Monfort, Ethan Everett,
   Evgeny Grin (Karlson2k), fds242 on github, Howard Chu, Javier Blazquez,
   Jicea, jmaggard10 on github, Johannes Schindelin, Joseph Birr-Pixton,
   Joshua Rogers, kapsiR on github, kuchara on github, Marcel Raad,
   Michael Osipov, Michał Petryka, Mohamed Daahir, Nir Azkiel, Patrick Monnerat,
-  Ray Satiro, renovate[bot], rinsuki on github, Samuel Dionne-Riel,
-  Stanislav Fort, Stefan Eissing, Viktor Szakats
-  (35 contributors)
+  Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github,
+  Samuel Dionne-Riel, Samuel Henrique, Stanislav Fort, Stefan Eissing,
+  Viktor Szakats
+  (38 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -344,11 +365,31 @@ References to bug reports and discussions on issues:
  [145] = https://curl.se/bug/?i=18682
  [146] = https://curl.se/bug/?i=18779
  [147] = https://curl.se/bug/?i=18778
+ [148] = https://curl.se/bug/?i=18816
  [149] = https://curl.se/bug/?i=18775
  [150] = https://curl.se/bug/?i=18510
  [151] = https://curl.se/bug/?i=18774
  [152] = https://curl.se/bug/?i=18762
+ [153] = https://curl.se/bug/?i=18811
+ [154] = https://curl.se/bug/?i=18817
+ [155] = https://curl.se/bug/?i=18815
+ [157] = https://curl.se/bug/?i=18806
+ [158] = https://curl.se/bug/?i=18809
+ [160] = https://curl.se/bug/?i=18810
  [161] = https://curl.se/bug/?i=18749
+ [162] = https://curl.se/bug/?i=18808
  [163] = https://curl.se/bug/?i=18747
  [164] = https://curl.se/bug/?i=18744
  [165] = https://curl.se/bug/?i=18662
+ [167] = https://curl.se/bug/?i=18804
+ [168] = https://curl.se/bug/?i=18803
+ [169] = https://curl.se/bug/?i=18805
+ [170] = https://curl.se/bug/?i=18807
+ [171] = https://curl.se/bug/?i=18801
+ [172] = https://curl.se/bug/?i=18800
+ [173] = https://curl.se/bug/?i=18799
+ [176] = https://curl.se/bug/?i=18780
+ [177] = https://curl.se/bug/?i=18787
+ [178] = https://curl.se/bug/?i=18790
+ [179] = https://curl.se/bug/?i=18793
+ [182] = https://curl.se/bug/?i=18754
