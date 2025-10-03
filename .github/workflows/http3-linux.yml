@@ -72,10 +72,10 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-openssl-http3
         env:
-          cache-name: cache-openssl-http3
+          cache-name: cache-openssl-http3-no-deprecated
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-no-deprecated
 
       - name: 'cache libressl'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -169,7 +169,7 @@ jobs:
 
       - id: settings
         if: >-
-          ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' ||
+          ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' ||
               steps.cache-libressl.outputs.cache-hit != 'true' ||
               steps.cache-awslc.outputs.cache-hit != 'true' ||
               steps.cache-boringssl.outputs.cache-hit != 'true' ||
@@ -199,12 +199,12 @@ jobs:
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'build openssl'
-        if: ${{ steps.cache-openssl-http3.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests
+          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
           make -j1 install_sw
 
@@ -514,12 +514,12 @@ jobs:
       - name: 'cache openssl'
         if: ${{ matrix.build.name == 'openssl' || matrix.build.name == 'openssl-quic' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-openssl-http3
+        id: cache-openssl-http3-no-deprecated
         env:
-          cache-name: cache-openssl-http3
+          cache-name: cache-openssl-http3-no-deprecated
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-no-deprecated
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
