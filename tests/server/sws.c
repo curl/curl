@@ -413,7 +413,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
         static char doc[MAXDOCNAMELEN];
         if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                   doc, &prot_major, &prot_minor) == 3) {
-          char *portp = NULL;
+          const char *portp = NULL;
 
           logmsg("Received a CONNECT %s HTTP/%d.%d request",
                  doc, prot_major, prot_minor);
@@ -424,15 +424,13 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
             req->open = FALSE; /* HTTP 1.0 closes connection by default */
 
           if(doc[0] == '[') {
-            char *p = &doc[1];
-            unsigned long part = 0;
+            const char *p = &doc[1];
+            curl_off_t part = 0;
             /* scan through the hexgroups and store the value of the last group
                in the 'part' variable and use as test case number!! */
             while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
-              char *endp;
-              /* !checksrc! disable BANNEDFUNC 1 */
-              part = strtoul(p, &endp, 16);
-              if(ISXDIGIT(*p))
+              const char *endp = p;
+              if(!curlx_str_hex(&endp, &part, 0xffff))
                 p = endp;
               else
                 p++;
@@ -444,7 +442,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
             else
               portp = p + 1;
 
-            req->testno = part;
+            req->testno = (long)part;
           }
           else
             portp = strchr(doc, ':');
