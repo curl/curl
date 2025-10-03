@@ -371,13 +371,20 @@ static void lograw(unsigned char *buffer, ssize_t len)
 static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
                             ssize_t *buffer_len)
 {
+  curl_off_t value;
+  const char *endp;
+
   if(!read_stdin(buffer, 5))
     return FALSE;
 
   buffer[5] = '\0';
 
-  /* !checksrc! disable BANNEDFUNC 1 */
-  *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
+  endp = (char *)buffer;
+  if(curlx_str_hex(&endp, &value, 0xfffff)) {
+    logmsg("Failed to decode buffer size");
+    return FALSE;
+  }
+  *buffer_len = (ssize_t)value;
   if(*buffer_len > maxlen) {
     logmsg("Buffer size (%zd bytes) too small for data size error "
            "(%zd bytes)", maxlen, *buffer_len);
