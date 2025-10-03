@@ -1100,7 +1100,7 @@ static int validate_access(struct testcase *test,
       ptr++;
 
     /* get the number */
-    testno = strtol(ptr, &ptr, 10);
+    testno = atol(ptr);
 
     if(testno > 10000) {
       partno = testno % 10000;

@@ -389,7 +389,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
         ptr++; /* skip the slash */
 
-        req->testno = strtol(ptr, &ptr, 10);
+        req->testno = atol(ptr);
 
         if(req->testno > 10000) {
           req->partno = req->testno % 10000;
@@ -490,7 +490,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     /* check for a Testno: header with the test case number */
     char *testno = strstr(line, "\nTestno: ");
     if(testno) {
-      req->testno = strtol(&testno[9], NULL, 10);
+      req->testno = atol(&testno[9]);
       logmsg("Found test number %ld in Testno: header!", req->testno);
     }
     else {
@@ -516,7 +516,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
-      req->testno = strtol(ptr, &ptr, 10);
+      req->testno = atol(ptr);
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;

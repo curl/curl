@@ -211,7 +211,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
-      req->testno = strtol(ptr, &ptr, 10);
+      req->testno = atol(ptr);
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;
@@ -358,7 +358,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1)))
-            req->testno = strtol(portp + 1, NULL, 10);
+            req->testno = atol(portp + 1);
           else
             req->testno = DOCNUMBER_CONNECT;
         }
