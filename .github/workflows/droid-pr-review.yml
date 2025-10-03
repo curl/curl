@@ -1,0 +1,252 @@
+name: Droid PR Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: droid-review-only-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup droid CLI
+        run: |
+          curl -fsSL https://app.factory.ai/cli | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          $HOME/.local/bin/droid --version
+
+      - name: Prepare context
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = '.git/pr_review';
+            fs.mkdirSync(path, { recursive: true });
+
+            // Fetch existing PR comments
+            const prNumber = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100
+            });
+            fs.writeFileSync(`${path}/existing_comments.json`, JSON.stringify(comments, null, 2));
+
+            // Fetch changed files with patches
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
+            const reduced = files.map(f => ({ filename: f.filename, patch: f.patch }));
+            fs.writeFileSync(`${path}/files.json`, JSON.stringify(reduced, null, 2));
+
+            // Create diff via git locally
+            const { execSync } = require('child_process');
+            const base = context.payload.pull_request.base.sha;
+            const head = context.payload.pull_request.head.sha;
+            try {
+              const diff = execSync(`git diff ${base}...${head}`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+              fs.writeFileSync(`${path}/diff.txt`, diff);
+            } catch (e) {
+              fs.writeFileSync(`${path}/diff.txt`, '');
+            }
+
+      - name: Generate inline review
+        env:
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY_PROD }}
+        timeout-minutes: 10
+        run: |
+          # Copy context files to current directory for droid to access
+          cp .git/pr_review/existing_comments.json ./existing_comments.json
+          cp .git/pr_review/files.json ./files.json
+          cp .git/pr_review/diff.txt ./diff.txt
+
+          echo "Files prepared:"
+          ls -la *.json diff.txt 2>/dev/null || true
+
+          cat > prompt.txt << 'EOF'
+          You are an automated code review system. Review the PR diff and produce concrete, actionable inline comments based on the repository's review guidelines.
+
+          Input files (already in current directory):
+          - diff.txt: the code changes to review
+          - files.json: file patches with line numbers for positioning comments
+          - existing_comments.json: skip issues already mentioned here
+          - review_guidelines.md: the sole reference for what to check and how to report issues
+
+          Task: Create comments.json with this exact format:
+          [{ "path": "path/to/file.c", "position": 42, "body": "Your comment here" }]
+
+          Review rules:
+          - Use review_guidelines.md exclusively as your checklist (sections: indentation, naming, comments, documentation/Doxygen, integer/boolean/enums/bitfields, functions, expressions/conversions, constants/const, headers/include order, error checking/debugging, 64-bit ops, floating point, algorithms).
+          - Prioritize correctness, safety, clarity, and explicit violations of the guidelines over subjective style. Only raise style/formatting when the guideline calls for it.
+          - For each finding, reference the relevant guideline section/subsection in the body (e.g., "Guideline: 17.3 Expressions and Data Type Conversions").
+          - Do not duplicate issues already present in existing_comments.json.
+
+          Comment format (body suggestions):
+          - Describe the issue briefly, why it matters, and propose a minimal fix; include exact code suggestions when possible using GitHub's suggestion block.
+          - Keep language precise and technical. No emojis.
+
+          Positioning:
+          - Use the "position" value derived from files.json patches (diff line numbers, not file line numbers).
+          - Only comment on changed lines; ensure the position maps to a line present in the diff hunk.
+
+          Output:
+          - Write comments.json containing either [] or an array of objects with path, position, body as specified above.
+          EOF
+
+          # Run droid exec with stderr captured
+          echo "Running droid exec..."
+          droid exec --output-format debug --auto medium --model gpt-5-codex -f prompt.txt 2>&1
+
+          # Check if comments.json was created
+          if [ ! -f comments.json ]; then
+            echo "❌ ERROR: droid exec did not create comments.json"
+            echo "This indicates a failure in the review generation"
+            exit 1
+          fi
+
+          echo "✅ comments.json created successfully"
+          echo "=== Contents of comments.json ==="
+          cat comments.json
+
+      - name: Supersede prior no-issues comments if new issues found
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (!fs.existsSync('comments.json')) return;
+
+            const comments = JSON.parse(fs.readFileSync('comments.json','utf8'));
+            // Only supersede if we have actual issues to report
+            if (!Array.isArray(comments) || comments.length === 0) return;
+
+            const prNumber = context.payload.pull_request.number;
+            const existingComments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100
+            });
+
+            for (const c of existingComments) {
+              const body = (c.body || '').trim();
+              if (/^(✅\s*no issues|no issues found|lgtm)/i.test(body)) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: c.id,
+                  body: '[Superseded by new findings]'
+                });
+              }
+            }
+
+      - name: Display droid log contents
+        if: always()
+        run: |
+          echo "=== Droid Log Contents ==="
+          if [ -f "$HOME/.factory/logs/droid-log-single.log" ]; then
+            echo "Droid log found at $HOME/.factory/logs/droid-log-single.log"
+            tail -n 100 "$HOME/.factory/logs/droid-log-single.log" || echo "Failed to read droid log"
+          else
+            echo "Droid log not found at $HOME/.factory/logs/droid-log-single.log"
+          fi
+
+          echo ""
+          echo "=== Console Log Contents ==="
+          if [ -f "$HOME/.factory/logs/console.log" ]; then
+            echo "Console log found at $HOME/.factory/logs/console.log"
+            tail -n 100 "$HOME/.factory/logs/console.log" || echo "Failed to read console log"
+          else
+            echo "Console log not found at $HOME/.factory/logs/console.log"
+          fi
+
+          echo ""
+          echo "=== Checking .factory directory structure ==="
+          ls -la "$HOME/.factory/" 2>/dev/null || echo "No .factory directory found"
+          echo "Logs directory:"
+          ls -la "$HOME/.factory/logs/" 2>/dev/null || echo "No logs directory found"
+
+      - name: Submit inline review (no gh CLI)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const prNumber = context.payload.pull_request.number;
+            if (!fs.existsSync('comments.json')) {
+              core.info('comments.json missing; skipping');
+              return;
+            }
+            const comments = JSON.parse(fs.readFileSync('comments.json','utf8'));
+            if (!Array.isArray(comments) || comments.length === 0) {
+              // Post a single minimal top-level comment only if none exists yet
+              const existing = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                per_page: 100
+              });
+              const hasNoIssues = existing.some(c => /no issues/i.test(c.body || ''));
+              if (!hasNoIssues) {
+                await github.rest.pulls.createReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  event: 'COMMENT',
+                  body: '✅ No issues found in the current changes.\n\n- [x] All checks passed per review_guidelines.md'
+                });
+              }
+              return;
+            }
+            const summary = 'Automated review with inline comments.';
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              event: 'COMMENT',
+              body: summary,
+              comments: comments
+            });
+
+      - name: Upload review-only artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-review-only-${{ github.event.pull_request.number }}
+          path: |
+            comments.json
+            meta.json
+            .git/pr_review/*.json
+            .git/pr_review/diff.txt
+            droid-exec-debug.log
+            ${{ runner.home }}/.factory/logs/droid-log-single.log
+            ${{ runner.home }}/.factory/logs/console.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Fail if violations found (block merge)
+        run: |
+          if [ -f comments.json ] && [ "$(jq 'length' comments.json)" -gt 0 ]; then
+            echo "❌ Guideline violations found. Failing job to block merge.";
+            exit 1;
+          fi
+          echo "✅ No violations detected."
