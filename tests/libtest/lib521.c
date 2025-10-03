@@ -43,7 +43,7 @@ static CURLcode test_lib521(const char *URL)
   }
 
   test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_PORT, strtol(libtest_arg2, NULL, 10));
+  test_setopt(curl, CURLOPT_PORT, atol(libtest_arg2));
   test_setopt(curl, CURLOPT_USERPWD, "xxx:yyy");
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 

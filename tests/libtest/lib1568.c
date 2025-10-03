@@ -39,7 +39,7 @@ static CURLcode test_lib1568(const char *URL)
   curl_easy_setopt(hnd, CURLOPT_USERAGENT, "lib1568");
   curl_easy_setopt(hnd, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_PORT, strtol(libtest_arg2, NULL, 10));
+  curl_easy_setopt(hnd, CURLOPT_PORT, atol(libtest_arg2));
 
   ret = curl_easy_perform(hnd);
 
