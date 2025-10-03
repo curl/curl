@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: 'install build prereqs'
         if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
-        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
           msystem: msys
           install: gcc make
@@ -62,7 +62,7 @@ jobs:
         run: perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'cache perl packages'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-perl-win32-pkgs
         env:
           cache-name: cache-perl-win32-pkgs
@@ -133,7 +133,7 @@ jobs:
             libnghttp2-devel
             ${{ matrix.install }}
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -282,7 +282,7 @@ jobs:
       - run: git config --global core.autocrlf input
         shell: pwsh
 
-      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -298,7 +298,7 @@ jobs:
             libpsl-devel
             ${{ matrix.install }}
 
-      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -311,7 +311,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -433,7 +433,7 @@ jobs:
 
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-perl-win32-pkgs
         env:
           cache-name: cache-perl-win32-pkgs
@@ -558,7 +558,7 @@ jobs:
             tflags: 'skipall'
       fail-fast: false
     steps:
-      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
           msystem: ${{ matrix.dir }}
           release: false
@@ -570,7 +570,7 @@ jobs:
             ${{ matrix.install }}
 
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-compiler
         with:
           path: D:\my-cache
@@ -594,7 +594,7 @@ jobs:
 
       - run: git config --global core.autocrlf input
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -663,7 +663,7 @@ jobs:
 
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-perl-win32-pkgs
         env:
           cache-name: cache-perl-win32-pkgs
@@ -723,7 +723,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -892,7 +892,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
           msystem: ${{ matrix.arch == 'arm64' && 'clangarm64' || 'ucrt64' }}
           release: ${{ contains(matrix.image, 'arm') }}
@@ -914,7 +914,7 @@ jobs:
         timeout-minutes: 45
         run: vcpkg x-set-installed ${MATRIX_INSTALL_VCPKG} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -1057,7 +1057,7 @@ jobs:
 
       - name: 'cache perl packages'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-perl-win32-pkgs
         env:
           cache-name: cache-perl-win32-pkgs
