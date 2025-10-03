@@ -317,32 +317,32 @@ static CURLcode test_cli_hx_download(const char *URL)
       forbid_reuse_d = 1;
       break;
     case 'm':
-      max_parallel = (size_t)strtol(coptarg, NULL, 10);
+      max_parallel = (size_t)atol(coptarg);
       break;
     case 'n':
-      transfer_count_d = (size_t)strtol(coptarg, NULL, 10);
+      transfer_count_d = (size_t)atol(coptarg);
       break;
     case 'x':
       fresh_connect = 1;
       break;
     case 'A':
-      abort_offset = (size_t)strtol(coptarg, NULL, 10);
+      abort_offset = (size_t)atol(coptarg);
       break;
     case 'F':
-      fail_offset = (size_t)strtol(coptarg, NULL, 10);
+      fail_offset = (size_t)atol(coptarg);
       break;
     case 'M':
-      max_host_conns = (size_t)strtol(coptarg, NULL, 10);
+      max_host_conns = (size_t)atol(coptarg);
       break;
     case 'P':
-      pause_offset = (size_t)strtol(coptarg, NULL, 10);
+      pause_offset = (size_t)atol(coptarg);
       break;
     case 'r':
       free(resolve);
       resolve = strdup(coptarg);
       break;
     case 'T':
-      max_total_conns = (size_t)strtol(coptarg, NULL, 10);
+      max_total_conns = (size_t)atol(coptarg);
       break;
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
