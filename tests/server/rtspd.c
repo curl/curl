@@ -1045,9 +1045,7 @@ static int test_rtspd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = util_ultous(ulnum);
+        port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }
