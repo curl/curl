@@ -4,5 +4,6 @@ allowfunc fopen
 allowfunc gmtime
 allowfunc localtime
 allowfunc open
+allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
