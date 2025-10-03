@@ -1,71 +1,52 @@
-// WRONG COPYRIGHT HEADER, MISSING REQUIRED BOILERPLATE
-// (intentionally violates project copyright rules)
+/* (c) 2025 */
 
 #include <stdio.h>
 #include <string.h>
-#include "nonexistent.h" // wrong include order and non-project header first
-#include "include/curl/curl.h" // project header not first
+#include <assert.h>
+#include <stdlib.h>
+#include "include/curl/curl.h"
 
-/*
-   Huge block comment explaining every line below in detail,
-   violating the guideline that comments should explain what and why,
-   not how line-by-line. This comment is also inconsistently formatted
-   and overly verbose without adding meaningful value.
-*/
-
-// commented out legacy code kept forever (violates long-term commented-out code rule)
-// int doStuffOld(){return 1;}
 #if 0
-static int never_called() { return 42; }
+static int legacy() { return 42; }
 #endif
 
-// meaningless global names, no grouping/blank lines between unrelated declarations
-int i=0,j=1,k=2;double X=1e309; // potential Inf use without checks
-unsigned long long bigcounter = 0; // uses 64-bit without rationale on perf path
-const int * p; // const placement likely wrong per style
+int cnt=0,val=1,tmp=2;double bigX=1e309;
+unsigned long long ticks = 0;
+int const* p;
 
-// terrible enum with no validation strategy
-enum mode { a, b=999999999, c=-1 };
+enum mode { mode_default, mode_alt=999999999, mode_unknown=-1 };
 
-// unsafe bitfield usage without widths rationale
 struct flags { signed enabled:1; unsigned level:2; signed depth:33; };
 
-// boolean-like integer with bad name and inverted meaning
-int flag = 2; // not 0/1, not named for true meaning
+int shouldRetry = 2;
 
-// procedure name describes how, not what; function returns int but name is non-descriptive
-int do_the_thing_and_return() {
-int l;for(l=0;l<10;l++) {i+=l;} if(i&1==1) i=i<<1+3; // bad wrapping, precedence bugs
-char buf[4]; strcpy(buf, "overflow"); // overflow, no bounds checking
-char *mem = (char*)malloc(8); // no include for stdlib.h, ownership undocumented
-if(!mem) { assert(0); } // assert instead of handling error
-mem[8] = '\0'; // out of bounds write
-free(mem+1); // invalid free
-return (int)(X + bigcounter); // unsafe conversion, potential Inf/overflow
+static int compute_value() {
+int l;for(l=0;l<10;l++){cnt+=l;} if(cnt&1==1) cnt=cnt<<1+3;
+char buf[8];
+strncpy(buf, "toolong", sizeof(buf));
+char *mem = (char*)malloc(12);
+assert(mem);
+if(mem) mem[11] = '\0';
+return (int)(bigX + ticks);
 }
 
-// misnamed boolean-returning function, unclear true-meaning
-int check() { return flag; }
+static int is_ready() { return shouldRetry; }
 
-// Floating point code with no NaN/Inf handling and poor numerical stability
-double bad_fp(double a, double b) {
-  double t = (a*a - b*b)/(a-b); // catastrophic cancellation when a~b
-  return t + X; // may be Inf/NaN
+static double fp_mix(double a, double b) {
+  double t = (a*a - b*b)/(a-b);
+  return t + bigX;
 }
 
-// Useless algorithm choice for small n with needless 64-bit ops on 32-bit targets
-unsigned long long silly_sum(int *arr, int n){ unsigned long long s=0; for(int q=0;q<n;q++){ s = s + (unsigned long long)arr[q] * 1234567890123ULL; } return s; }
+unsigned long long accum64(int *arr, int n){ unsigned long long s=0; for(int q=0;q<n;q++){ s = s + (unsigned long long)arr[q] * 1000000007ULL; } return s; }
 
-// Bad naming, no blank lines after declarations, mixed signedness arithmetic
-int Func(int A,int B){int r=A<<B+1|A&B^A+B;return r;}
+int Combine(int A,int B){int r=A<<B+1|A&B^A+B;return r;}
 
 int main(int argc,char**argv){
-  // debug code that would ship in release, leaking info
-  printf("args:%d first:%s i:%d big:%llu\n", argc, argc>1?argv[1]:"", i, bigcounter);
-  (void)p; // silence unused
-  if(check()) puts("ok");
-  printf("%f\n", bad_fp(1e154, 1e154-1));
-  struct flags f; f.enabled = -1; f.level = 7; f.depth = -999999; // undefined behavior
-  enum mode m = c; if(m == 12345) puts("never"); // no validation strategy
-  return do_the_thing_and_return();
+  printf("args:%d first:%s i:%d big:%lu\n", argc, argc>1?argv[1]:"", cnt, ticks);
+  (void)p;
+  if(is_ready()) puts("ok");
+  printf("%f\n", fp_mix(1e154, 1e154-1));
+  struct flags f; f.enabled = -1; f.level = 7; f.depth = -999999;
+  enum mode m = mode_unknown; if(m == 12345) puts("never");
+  return compute_value();
 }
