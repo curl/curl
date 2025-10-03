@@ -77,8 +77,21 @@
 int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
 
-#include <time.h>
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+   defined(WINAPI_FAMILY)
+#  include <winapifamily.h>
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#    define CURL_WINDOWS_UWP
+#  endif
+#endif
+
+#ifdef CURL_WINDOWS_UWP
+int main(void) { printf("Platform not supported.\n"); return 1; }
+#else
+
 #include <windows.h>
+#include <time.h>
 
 #include <curl/curl.h>
 
@@ -362,4 +375,5 @@ int main(int argc, char *argv[])
   }
   return RetValue;
 }
-#endif
+#endif /* CURL_WINDOWS_UWP */
+#endif /* _WIN32 */
