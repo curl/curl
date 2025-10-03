@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
     tzonediffFloat = difftime(tt_local, tt_gmt);
     tzonediffWord  = (int)(tzonediffFloat/3600.0);
 
-    if((double)(tzonediffWord * 3600) == tzonediffFloat)
+    if(tzonediffWord == (int)(tzonediffFloat/3600.0))
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
