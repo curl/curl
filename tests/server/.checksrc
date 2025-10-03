@@ -9,6 +9,5 @@ allowfunc send
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
-allowfunc strtol
 allowfunc strtoul
 allowfunc vsnprintf

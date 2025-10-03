@@ -376,6 +376,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   buffer[5] = '\0';
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
   if(*buffer_len > maxlen) {
     logmsg("Buffer size (%zd bytes) too small for data size error "
