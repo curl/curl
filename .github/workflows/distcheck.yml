@@ -75,7 +75,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -99,7 +99,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -125,7 +125,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -149,7 +149,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -170,7 +170,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -192,7 +192,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -218,7 +218,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: 'release-tgz'
 
@@ -267,7 +267,7 @@ jobs:
       matrix:
         image: [ubuntu-latest, macos-latest, windows-2022]
     steps:
-      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2
+      - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         if: ${{ contains(matrix.image, 'windows') }}
         with:
           msystem: mingw64
