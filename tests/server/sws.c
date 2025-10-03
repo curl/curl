@@ -430,6 +430,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
                in the 'part' variable and use as test case number!! */
             while(*p && (ISXDIGIT(*p) || (*p == ':') || (*p == '.'))) {
               char *endp;
+              /* !checksrc! disable BANNEDFUNC 1 */
               part = strtoul(p, &endp, 16);
               if(ISXDIGIT(*p))
                 p = endp;
