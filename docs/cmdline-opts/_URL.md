@@ -22,7 +22,7 @@ separate curl runs.
 
 Provide an IPv6 zone id in the URL with an escaped percentage sign. Like in
 
-    "http://[fe80::3%25eth0]/"
+    http://[fe80::3%25eth0]/
 
 Everything provided on the command line that is not a command line option or
 its argument, curl assumes is a URL and treats it as such.
