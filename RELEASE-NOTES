@@ -197,6 +197,7 @@ Planned upcoming removals include:
 
  o Builds using VS2008
  o OpenSSL 1.x support
+ o OpenSSL-QUIC
  o Support for c-ares versions before 1.16.0
  o Support for Windows XP/2003
  o Windows CE support
