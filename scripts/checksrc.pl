@@ -908,6 +908,7 @@ sub scanfile {
             $prefix =~ s/\[/\\[/;
             $prefix =~ s/\]/\\]/;
             $prefix =~ s/\(/\\(/;
+            $prefix =~ s/\)/\\)/;
             $suff =~ s/\(/\\(/;
             $l =~ s/$prefix$bad$suff/$prefix$replace/;
             goto again;
