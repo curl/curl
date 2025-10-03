@@ -1288,15 +1288,13 @@ static int test_sockfilt(int argc, char *argv[])
          doing a passive server-style listening. */
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
+        int inum = atoi(argv[arg]);
+        if(inum && ((inum < 1025) || (inum > 65535))) {
           fprintf(stderr, "sockfilt: invalid --connect argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_connectport = util_ultous(ulnum);
+        server_connectport = (unsigned short)inum;
         arg++;
       }
     }

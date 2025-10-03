@@ -2071,15 +2071,13 @@ static int test_sws(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum && ((ulnum < 1025UL) || (ulnum > 65535UL)))) {
+        int inum = atoi(argv[arg]);
+        if(inum && ((inum < 1025) || (inum > 65535))) {
           fprintf(stderr, "sws: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        port = util_ultous(ulnum);
+        port = (unsigned short)inum;
         arg++;
       }
     }
@@ -2093,15 +2091,13 @@ static int test_sws(int argc, char *argv[])
     else if(!strcmp("--keepalive", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum && (ulnum > 65535UL))) {
+        int inum = atoi(argv[arg]);
+        if(inum && (inum > 65535)) {
           fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
                   "be number of seconds\n", argv[arg]);
           return 0;
         }
-        keepalive_secs = util_ultous(ulnum);
+        keepalive_secs = (unsigned short)inum;
         arg++;
       }
     }
