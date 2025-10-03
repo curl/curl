@@ -255,16 +255,17 @@ jobs:
               --without-nghttp2 --disable-ntlm --without-ssl --without-zlib --without-zstd
 
             macos-version-min: '10.15'  # Catalina (2019)
-          - name: 'LibreSSL +examples'
+          - name: 'LibreSSL !ldap +examples'
             compiler: clang
             install: libressl
             install_steps: pytest
-            configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl
-          - name: 'OpenSSL'
+            configure: --enable-debug --with-openssl=/opt/homebrew/opt/libressl --disable-ldap
+          - name: 'OpenSSL 10.15'
             compiler: clang
             install: libnghttp3 libngtcp2
             install_steps: pytest
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl --with-ngtcp2
+            macos-version-min: '10.15'
           - name: 'OpenSSL SecTrust'
             compiler: clang
             install: libnghttp3 libngtcp2
@@ -274,11 +275,6 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
             tflags: --test-event
-          - name: 'quictls libssh2 !ldap 10.15'
-            compiler: clang
-            install: quictls
-            configure: --enable-debug --disable-ldap --with-openssl=/opt/homebrew/opt/quictls LDFLAGS=-L/opt/homebrew/opt/quictls/lib
-            macos-version-min: '10.15'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust'
             install: libnghttp3 libngtcp2 gsasl rtmpdump
@@ -306,9 +302,6 @@ jobs:
               -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal
               -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=/opt/homebrew/opt/llvm/bin/clang-tidy
 
-          - name: 'quictls +static libssh +examples'
-            install: quictls libssh
-            generate: -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/quictls -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
           - name: 'LibreSSL openldap heimdal c-ares +examples'
             install: libressl heimdal openldap
             generate: -DENABLE_DEBUG=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/libressl -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/heimdal -DLDAP_INCLUDE_DIR=/opt/homebrew/opt/openldap/include -DLDAP_LIBRARY=/opt/homebrew/opt/openldap/lib/libldap.dylib -DLDAP_LBER_LIBRARY=/opt/homebrew/opt/openldap/lib/liblber.dylib
@@ -370,7 +363,7 @@ jobs:
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew bundle install --file /tmp/Brewfile; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'brew unlink openssl'
-        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') || contains(matrix.build.install, 'quictls') }}
+        if: ${{ contains(matrix.build.install, 'aws-lc') || contains(matrix.build.install, 'libressl') }}
         run: |
           if [ -d /opt/homebrew/include/openssl ]; then
             brew unlink openssl
