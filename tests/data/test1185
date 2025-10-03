@@ -75,6 +75,7 @@ void startfunc(int a, int b) {
  if(a) b++;
 
  if(sprintf(buffer, "%s", moo)) {}
+ *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
 
  // CPP comment ?
 
@@ -197,7 +198,10 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:59:5: warning: use of sprintf is banned (BANNEDFUNC)
   if(sprintf(buffer, "%s", moo)) {}
      ^
-./%LOGDIR/code1185.c:61:2: warning: // comment (CPPCOMMENTS)
+./%LOGDIR/code1185.c:60:25: warning: use of alsobad is banned (BANNEDFUNC)
+  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
+                         ^
+./%LOGDIR/code1185.c:62:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
@@ -206,7 +210,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
  
  ^
-checksrc: 0 errors and 40 warnings
+checksrc: 0 errors and 41 warnings
 </stdout>
 <errorcode>
 5
