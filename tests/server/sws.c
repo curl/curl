@@ -449,11 +449,11 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
             portp = strchr(doc, ':');
 
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
-            unsigned long ulnum = strtoul(portp + 1, NULL, 10);
-            if(!ulnum || (ulnum > 65535UL))
+            int inum = atoi(portp + 1);
+            if((inum <= 0) || (inum > 65535))
               logmsg("Invalid CONNECT port received");
             else
-              req->connect_port = util_ultous(ulnum);
+              req->connect_port = (unsigned short)inum;
 
           }
           logmsg("Port number: %d, test case number: %ld",

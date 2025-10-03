@@ -133,7 +133,7 @@ void logmsg(const char *msg, ...)
 
 unsigned char byteval(char *value)
 {
-  unsigned long num = strtoul(value, NULL, 10);
+  unsigned int num = (unsigned int)atoi(value);
   return num & 0xff;
 }
 

@@ -108,7 +108,7 @@ static void socksd_resetdefaults(void)
 
 static unsigned short shortval(char *value)
 {
-  unsigned long num = strtoul(value, NULL, 10);
+  unsigned long num = (unsigned long)atol(value);
   return num & 0xffff;
 }
 
