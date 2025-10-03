@@ -41,8 +41,6 @@ env:
   CURL_CI: github
   # handled in renovate.json
   OPENSSL_VERSION: 3.6.0
-  # handled in renovate.json
-  QUICTLS_VERSION: 3.3.0
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.1.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
@@ -104,15 +102,6 @@ jobs:
           path: ~/boringssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
 
-      - name: 'cache quictls'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-quictls-no-deprecated
-        env:
-          cache-name: cache-quictls-no-deprecated
-        with:
-          path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
-
       - name: 'cache gnutls'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-gnutls
@@ -173,7 +162,6 @@ jobs:
               steps.cache-libressl.outputs.cache-hit != 'true' ||
               steps.cache-awslc.outputs.cache-hit != 'true' ||
               steps.cache-boringssl.outputs.cache-hit != 'true' ||
-              steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
               steps.cache-gnutls.outputs.cache-hit != 'true' ||
               steps.cache-wolfssl.outputs.cache-hit != 'true' ||
               steps.cache-nghttp3.outputs.cache-hit != 'true' ||
@@ -240,16 +228,6 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'build quictls'
-        if: ${{ steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' }}
-        run: |
-          cd ~
-          git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl quictls
-          cd quictls
-          ./config no-deprecated --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests
-          make
-          make -j1 install_sw
-
       - name: 'build gnutls'
         if: ${{ steps.cache-gnutls.outputs.cache-hit != 'true' }}
         run: |
@@ -291,7 +269,7 @@ jobs:
 
       - name: 'build ngtcp2'
         if: ${{ steps.cache-ngtcp2.outputs.cache-hit != 'true' }}
-        # building 3 times to get crypto libs for ossl, libressl, quictls and awslc installed
+        # building 3 times to get crypto libs for ossl, libressl and awslc installed
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
@@ -410,21 +388,6 @@ jobs:
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DBUILD_SHARED_LIBS=OFF
               -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
               -DCMAKE_UNITY_BUILD=ON
-
-          - name: 'quictls'
-            install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/quictls/build/lib
-              --with-ngtcp2 --disable-ntlm
-              --with-openssl=/home/runner/quictls/build --enable-ssls-export
-              --enable-unity
-
-          - name: 'quictls'
-            PKG_CONFIG_PATH: /home/runner/quictls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/quictls/build
-              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
 
           - name: 'gnutls'
             install_packages: nettle-dev libp11-kit-dev
@@ -549,16 +512,6 @@ jobs:
         with:
           path: ~/boringssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
-          fail-on-cache-miss: true
-
-      - name: 'cache quictls'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-quictls-no-deprecated
-        env:
-          cache-name: cache-quictls-no-deprecated
-        with:
-          path: ~/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICTLS_VERSION }}-quic1
           fail-on-cache-miss: true
 
       - name: 'cache gnutls'
