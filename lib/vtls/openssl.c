@@ -1817,6 +1817,7 @@ static CURLcode client_cert(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* returns non-zero on failure */
 static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
 {
@@ -1838,6 +1839,7 @@ static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
   }
   return result;
 }
+#endif
 
 /**
  * Global SSL init
