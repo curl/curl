@@ -47,4 +47,4 @@ LIBS := -lcurl $(LIBS)
 
 # Link the target with all objects and libraries
 $(TARGET) : $(SRC)
-	$(CC) -o $(TARGET) $(CFLAGS) $(LDFLAGS) $(LIBS) $<
+	$(CC) $< $(CFLAGS) $(LDFLAGS) $(LIBS) -o $(TARGET)
