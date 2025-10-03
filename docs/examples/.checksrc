@@ -7,3 +7,11 @@ allowfunc open
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
+banfunc curl_maprintf
+banfunc curl_mfprintf
+banfunc curl_mprintf
+banfunc curl_msnprintf
+banfunc curl_mvaprintf
+banfunc curl_mvfprintf
+banfunc curl_mvprintf
+banfunc curl_mvsnprintf
