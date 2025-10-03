@@ -3358,9 +3358,9 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
 #endif /* USE_WIN32_CRYPTO */
 
 static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
-                                         struct Curl_easy *data,
-                                         struct ossl_ctx *octx,
-                                         X509_STORE *store)
+                                        struct Curl_easy *data,
+                                        struct ossl_ctx *octx,
+                                        X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
