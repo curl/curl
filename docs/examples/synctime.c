@@ -72,14 +72,15 @@
  */
 
 #include <stdio.h>
-#include <time.h>
-#include <curl/curl.h>
 
-#ifdef _WIN32
-#include <windows.h>
+#ifndef _WIN32
+int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
-#error "This example requires Windows."
-#endif
+
+#include <time.h>
+#include <windows.h>
+
+#include <curl/curl.h>
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
@@ -361,3 +362,4 @@ int main(int argc, char *argv[])
   }
   return RetValue;
 }
+#endif
