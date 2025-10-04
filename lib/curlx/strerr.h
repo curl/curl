@@ -24,10 +24,8 @@
  *
  ***************************************************************************/
 
-#include "urldata.h"
+#define STRERROR_LEN 256 /* a suitable length */
 
-#ifdef USE_WINDOWS_SSPI
-const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
-#endif
+const char *Curl_strerror(int err, char *buf, size_t buflen);
 
 #endif /* HEADER_CURL_STRERROR_H */
