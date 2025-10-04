@@ -632,6 +632,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
               -DCURL_WERROR=ON -DENABLE_DEBUG=ON \
+              -DCURL_DISABLE_LDAP=ON \
               -DCURL_USE_LIBUV=ON \
               -DTEST_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
               -DHTTPD_NGHTTPX=/home/runner/nghttp2/build/bin/nghttpx \
