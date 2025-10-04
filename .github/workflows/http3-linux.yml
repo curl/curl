@@ -187,10 +187,9 @@ jobs:
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'build openssl'
-        #if: ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' }}
+        if: ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          rm -rf openssl
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
           ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
