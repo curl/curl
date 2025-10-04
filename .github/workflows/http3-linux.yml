@@ -194,7 +194,8 @@ jobs:
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
           ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
-          make install_sw
+          make
+          make -j1 install_sw
 
       - name: 'build libressl'
         if: ${{ steps.cache-libressl.outputs.cache-hit != 'true' }}
