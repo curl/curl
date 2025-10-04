@@ -51,9 +51,11 @@ static void t518_store_errmsg(const char *msg, int err)
 {
   if(!err)
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s", msg);
-  else
+  else {
+    char buffer[STRERROR_LEN];
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s, errno %d, %s", msg,
-                   err, strerror(err));
+                   err, curlx_strerror(err, buffer, sizeof(buffer)));
+  }
 }
 
 static void t518_close_file_descriptors(void)
