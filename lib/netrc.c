@@ -42,8 +42,7 @@
 #include "curlx/fopen.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -437,7 +436,7 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
         return NETRC_FILE_MISSING; /* no home directory found (or possibly out
                                       of memory) */
 
-      filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
+      filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
         return NETRC_OUT_OF_MEMORY;
@@ -448,7 +447,7 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
-      filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
+      filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
         return NETRC_OUT_OF_MEMORY;
