@@ -1564,8 +1564,8 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
   (void)easy;
 
 #if DEBUG_UV
-  curl_mfprintf(tool_stderr, "parallel_event: cb_socket, fd=%d, "
-                "action=%x, p=%p\n", (int)s, action, socketp);
+  curl_mfprintf(tool_stderr, "parallel_event: cb_socket, "
+                "fd=%" FMT_SOCKET_T ", action=%x, p=%p\n", s, action, socketp);
 #endif
   switch(action) {
   case CURL_POLL_IN:
