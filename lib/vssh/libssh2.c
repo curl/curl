@@ -71,8 +71,7 @@
 #include "../curlx/base64.h" /* for base64 encoding/decoding */
 #include "../curl_sha256.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -174,11 +173,11 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
 
 #ifdef CURL_LIBSSH2_DEBUG
-  fprintf(stderr, "name=%s\n", name);
-  fprintf(stderr, "name_len=%d\n", name_len);
-  fprintf(stderr, "instruction=%s\n", instruction);
-  fprintf(stderr, "instruction_len=%d\n", instruction_len);
-  fprintf(stderr, "num_prompts=%d\n", num_prompts);
+  curl_mfprintf(stderr, "name=%s\n", name);
+  curl_mfprintf(stderr, "name_len=%d\n", name_len);
+  curl_mfprintf(stderr, "instruction=%s\n", instruction);
+  curl_mfprintf(stderr, "instruction_len=%d\n", instruction_len);
+  curl_mfprintf(stderr, "num_prompts=%d\n", num_prompts);
 #else
   (void)name;
   (void)name_len;
@@ -662,7 +661,8 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
       /* The fingerprint points to static storage (!), do not free() it. */
       int i;
       for(i = 0; i < 16; i++) {
-        msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
+        curl_msnprintf(&md5buffer[i*2], 3, "%02x",
+                       (unsigned char)fingerprint[i]);
       }
 
       infof(data, "SSH MD5 fingerprint: %s", md5buffer);
@@ -871,7 +871,8 @@ static CURLcode sftp_quote(struct Curl_easy *data,
 
   if(curl_strequal("pwd", cmd)) {
     /* output debug output if that is requested */
-    char *tmp = aprintf("257 \"%s\" is current directory.\n", sshp->path);
+    char *tmp = curl_maprintf("257 \"%s\" is current directory.\n",
+                              sshp->path);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
     Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
@@ -1193,12 +1194,12 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
       /* If no private key file is specified, try some common paths. */
       if(home) {
         /* Try ~/.ssh first. */
-        sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
+        sshc->rsa = curl_maprintf("%s/.ssh/id_rsa", home);
         if(!sshc->rsa)
           out_of_memory = TRUE;
         else if(curlx_stat(sshc->rsa, &sbuf)) {
           free(sshc->rsa);
-          sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
+          sshc->rsa = curl_maprintf("%s/.ssh/id_dsa", home);
           if(!sshc->rsa)
             out_of_memory = TRUE;
           else if(curlx_stat(sshc->rsa, &sbuf)) {
@@ -2234,24 +2235,24 @@ static CURLcode ssh_state_sftp_quote_statvfs(struct Curl_easy *data,
 #define CURL_LIBSSH2_VFS_SIZE_MASK "llu"
 #endif
     CURLcode result;
-    char *tmp = aprintf("statvfs:\n"
-                        "f_bsize: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_frsize: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_blocks: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_bfree: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_bavail: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_files: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_ffree: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_favail: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_fsid: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_flag: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
-                        "f_namemax: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n",
-                        statvfs.f_bsize, statvfs.f_frsize,
-                        statvfs.f_blocks, statvfs.f_bfree,
-                        statvfs.f_bavail, statvfs.f_files,
-                        statvfs.f_ffree, statvfs.f_favail,
-                        statvfs.f_fsid, statvfs.f_flag,
-                        statvfs.f_namemax);
+    char *tmp = curl_maprintf("statvfs:\n"
+                              "f_bsize: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_frsize: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_blocks: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_bfree: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_bavail: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_files: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_ffree: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_favail: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_fsid: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_flag: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                              "f_namemax: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n",
+                              statvfs.f_bsize, statvfs.f_frsize,
+                              statvfs.f_blocks, statvfs.f_bfree,
+                              statvfs.f_bavail, statvfs.f_files,
+                              statvfs.f_ffree, statvfs.f_favail,
+                              statvfs.f_fsid, statvfs.f_flag,
+                              statvfs.f_namemax);
     if(!tmp) {
       myssh_state(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
@@ -3974,7 +3975,7 @@ static const char *sftp_libssh2_strerror(unsigned long err)
 CURLcode Curl_ssh_init(void)
 {
   if(libssh2_init(0)) {
-    DEBUGF(fprintf(stderr, "Error: libssh2_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: libssh2_init failed\n"));
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -3987,7 +3988,7 @@ void Curl_ssh_cleanup(void)
 
 void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  (void)msnprintf(buffer, buflen, "libssh2/%s", libssh2_version(0));
+  (void)curl_msnprintf(buffer, buflen, "libssh2/%s", libssh2_version(0));
 }
 
 /* The SSH session is associated with the *CONNECTION* but the callback user
