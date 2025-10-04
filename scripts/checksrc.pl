@@ -907,10 +907,9 @@ sub scanfile {
             checkwarn("BANNEDFUNC",
                       $line, length($prefix), $file, $ol,
                       "use of $bad is banned");
-            my $replace = 'x' x (length($bad) + 1);
-            $prefix = quotemeta($prefix);
-            $suff = quotemeta($suff);
-            $l =~ s/$prefix$bad$suff/$prefix$replace/;
+            my $search = quotemeta($prefix . $bad . $suff);
+            my $replace = $prefix . 'x' x (length($bad) + 1);
+            $l =~ s/$search/$replace/;
             goto again;
         }
         $l = $bl; # restore to pre-bannedfunc content
