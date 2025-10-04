@@ -35,7 +35,7 @@ static char *max5data(curl_off_t bytes, char *max5)
   const char unit[] = { 'k', 'M', 'G', 'T', 'P', 0 };
   int k = 0;
   if(bytes < 100000) {
-    msnprintf(max5, 6, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
+    curl_msnprintf(max5, 6, "%5" CURL_FORMAT_CURL_OFF_T, bytes);
     return max5;
   }
 
@@ -43,14 +43,15 @@ static char *max5data(curl_off_t bytes, char *max5)
     curl_off_t nbytes = bytes / 1024;
     if(nbytes < 100) {
       /* display with a decimal */
-      msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-                CURL_FORMAT_CURL_OFF_T "%c", bytes/1024,
-                (bytes%1024) / (1024/10), unit[k]);
+      curl_msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
+                     CURL_FORMAT_CURL_OFF_T "%c", bytes/1024,
+                     (bytes%1024) / (1024/10), unit[k]);
       break;
     }
     else if(nbytes < 10000) {
       /* no decimals */
-      msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes, unit[k]);
+      curl_msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
+                     unit[k]);
       break;
     }
     bytes = nbytes;
@@ -97,8 +98,9 @@ static void time2str(char *r, curl_off_t seconds)
   if(h <= 99) {
     curl_off_t m = (seconds - (h * 3600)) / 60;
     curl_off_t s = (seconds - (h * 3600)) - (m * 60);
-    msnprintf(r, 9, "%2" CURL_FORMAT_CURL_OFF_T ":%02" CURL_FORMAT_CURL_OFF_T
-              ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
+    curl_msnprintf(r, 9, "%2" CURL_FORMAT_CURL_OFF_T
+                   ":%02" CURL_FORMAT_CURL_OFF_T
+                   ":%02" CURL_FORMAT_CURL_OFF_T, h, m, s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
@@ -106,10 +108,10 @@ static void time2str(char *r, curl_off_t seconds)
     curl_off_t d = seconds / 86400;
     h = (seconds - (d * 86400)) / 3600;
     if(d <= 999)
-      msnprintf(r, 9, "%3" CURL_FORMAT_CURL_OFF_T
-                "d %02" CURL_FORMAT_CURL_OFF_T "h", d, h);
+      curl_msnprintf(r, 9, "%3" CURL_FORMAT_CURL_OFF_T
+                     "d %02" CURL_FORMAT_CURL_OFF_T "h", d, h);
     else
-      msnprintf(r, 9, "%7" CURL_FORMAT_CURL_OFF_T "d", d);
+      curl_msnprintf(r, 9, "%7" CURL_FORMAT_CURL_OFF_T "d", d);
   }
 }
 
@@ -204,16 +206,16 @@ bool progress_meter(CURLM *multi,
       }
     }
     if(dlknown && all_dltotal)
-      msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
-                all_dlnow < (CURL_OFF_T_MAX/100) ?
-                (all_dlnow * 100 / all_dltotal) :
-                (all_dlnow / (all_dltotal/100)));
+      curl_msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
+                     all_dlnow < (CURL_OFF_T_MAX/100) ?
+                     (all_dlnow * 100 / all_dltotal) :
+                     (all_dlnow / (all_dltotal/100)));
 
     if(ulknown && all_ultotal)
-      msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
-                all_ulnow < (CURL_OFF_T_MAX/100) ?
-                (all_ulnow * 100 / all_ultotal) :
-                (all_ulnow / (all_ultotal/100)));
+      curl_msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
+                     all_ulnow < (CURL_OFF_T_MAX/100) ?
+                     (all_ulnow * 100 / all_ultotal) :
+                     (all_ulnow / (all_ultotal/100)));
 
     /* get the transfer speed, the higher of the two */
 
@@ -266,31 +268,31 @@ bool progress_meter(CURLM *multi,
 
     (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED, &xfers_added);
     (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING, &xfers_running);
-    fprintf(tool_stderr,
-            "\r"
-            "%-3s " /* percent downloaded */
-            "%-3s " /* percent uploaded */
-            "%s " /* Dled */
-            "%s " /* Uled */
-            "%5" CURL_FORMAT_CURL_OFF_T " " /* Xfers */
-            "%5" CURL_FORMAT_CURL_OFF_T " " /* Live */
-            " %s "  /* Total time */
-            "%s "  /* Current time */
-            "%s "  /* Time left */
-            "%s "  /* Speed */
-            "%5s" /* final newline */,
+    curl_mfprintf(tool_stderr,
+                  "\r"
+                  "%-3s " /* percent downloaded */
+                  "%-3s " /* percent uploaded */
+                  "%s " /* Dled */
+                  "%s " /* Uled */
+                  "%5" CURL_FORMAT_CURL_OFF_T " " /* Xfers */
+                  "%5" CURL_FORMAT_CURL_OFF_T " " /* Live */
+                  " %s "  /* Total time */
+                  "%s "  /* Current time */
+                  "%s "  /* Time left */
+                  "%s "  /* Speed */
+                  "%5s" /* final newline */,
 
-            dlpercen,  /* 3 letters */
-            ulpercen,  /* 3 letters */
-            max5data(all_dlnow, buffer[0]),
-            max5data(all_ulnow, buffer[1]),
-            xfers_added,
-            xfers_running,
-            time_total,
-            time_spent,
-            time_left,
-            max5data(speed, buffer[2]), /* speed */
-            final ? "\n" :"");
+                  dlpercen,  /* 3 letters */
+                  ulpercen,  /* 3 letters */
+                  max5data(all_dlnow, buffer[0]),
+                  max5data(all_ulnow, buffer[1]),
+                  xfers_added,
+                  xfers_running,
+                  time_total,
+                  time_spent,
+                  time_left,
+                  max5data(speed, buffer[2]), /* speed */
+                  final ? "\n" :"");
     return TRUE;
   }
   return FALSE;

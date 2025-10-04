@@ -1,1 +1,9 @@
 enable STDERR
+banfunc aprintf
+banfunc fprintf
+banfunc msnprintf
+banfunc mvsnprintf
+banfunc printf
+banfunc vaprintf
+banfunc vfprintf
+banfunc vprintf

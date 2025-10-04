@@ -114,7 +114,8 @@ static char *ssl_backend(void)
   if(!already) { /* if there is no existing version */
     const char *v = curl_version_info(CURLVERSION_NOW)->ssl_version;
     if(v)
-      msnprintf(ssl_ver, sizeof(ssl_ver), "%.*s", (int) strcspn(v, " "), v);
+      curl_msnprintf(ssl_ver, sizeof(ssl_ver),
+                     "%.*s", (int)strcspn(v, " "), v);
     already = TRUE;
   }
   return ssl_ver;

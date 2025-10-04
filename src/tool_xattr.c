@@ -83,7 +83,7 @@ static int xattr(int fd,
   if(value) {
 #ifdef DEBUGBUILD
     if(getenv("CURL_FAKE_XATTR")) {
-      printf("%s => %s\n", attr, value);
+      curl_mprintf("%s => %s\n", attr, value);
       return 0;
     }
 #endif
