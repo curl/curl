@@ -1735,7 +1735,7 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
 
   if(ecn)
     CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, ecn=%x)",
-                pktlen, ecn);
+                pktlen, (unsigned int)ecn);
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
                    (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,

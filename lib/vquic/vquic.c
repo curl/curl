@@ -252,7 +252,7 @@ static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
   }
 out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
-              " -> %d, sent=%zu",
+              " -> %u, sent=%zu",
               VQUIC_SEND_METHOD, pktlen, gsolen, calls, result, *psent);
   return CURLE_OK;
 }
@@ -282,7 +282,7 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
   else {
     result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
     CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=1)"
-                " -> %d, sent=%zu",
+                " -> %u, sent=%zu",
                 VQUIC_SEND_METHOD, pktlen, gsolen, result, *psent);
   }
   if(!result)
