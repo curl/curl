@@ -45,8 +45,7 @@
 #include "curlx/strparse.h"
 #include "uint-table.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -895,7 +894,7 @@ void Curl_cpool_print(struct cpool *cpool)
   if(!cpool)
     return;
 
-  fprintf(stderr, "=Bundle cache=\n");
+  curl_mfprintf(stderr, "=Bundle cache=\n");
 
   Curl_hash_start_iterate(cpool->dest2bundle, &iter);
 
@@ -906,15 +905,15 @@ void Curl_cpool_print(struct cpool *cpool)
 
     bundle = he->ptr;
 
-    fprintf(stderr, "%s -", he->key);
+    curl_mfprintf(stderr, "%s -", he->key);
     curr = Curl_llist_head(bundle->conns);
     while(curr) {
       conn = Curl_node_elem(curr);
 
-      fprintf(stderr, " [%p %d]", (void *)conn, conn->refcount);
+      curl_mfprintf(stderr, " [%p %d]", (void *)conn, conn->refcount);
       curr = Curl_node_next(curr);
     }
-    fprintf(stderr, "\n");
+    curl_mfprintf(stderr, "\n");
 
     he = Curl_hash_next_element(&iter);
   }

@@ -46,8 +46,7 @@
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -675,7 +674,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
       result = curlx_dyn_add(&fname, "/");
     for(i = 0; (i < scidlen) && !result; i++) {
       char hex[3];
-      msnprintf(hex, 3, "%02x", scid[i]);
+      curl_msnprintf(hex, 3, "%02x", scid[i]);
       result = curlx_dyn_add(&fname, hex);
     }
     if(!result)

@@ -65,8 +65,7 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -474,18 +473,18 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
       return CURLE_TFTP_ILLEGAL; /* too long filename field */
     }
 
-    msnprintf((char *)state->spacket.data + 2,
-              state->blksize,
-              "%s%c%s%c", filename, '\0',  mode, '\0');
+    curl_msnprintf((char *)state->spacket.data + 2,
+                   state->blksize,
+                   "%s%c%s%c", filename, '\0',  mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
 
     /* optional addition of TFTP options */
     if(!data->set.tftp_no_options) {
       char buf[64];
       /* add tsize option */
-      msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
-                data->state.upload && (data->state.infilesize != -1) ?
-                data->state.infilesize : 0);
+      curl_msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
+                     data->state.upload && (data->state.infilesize != -1) ?
+                     data->state.infilesize : 0);
 
       result = tftp_option_add(state, &sbytes,
                                (char *)state->spacket.data + sbytes,
@@ -495,7 +494,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                                  (char *)state->spacket.data + sbytes, buf);
 
       /* add blksize option */
-      msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
+      curl_msnprintf(buf, sizeof(buf), "%d", state->requested_blksize);
       if(result == CURLE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes,
@@ -505,7 +504,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                                  (char *)state->spacket.data + sbytes, buf);
 
       /* add timeout option */
-      msnprintf(buf, sizeof(buf), "%d", state->retry_time);
+      curl_msnprintf(buf, sizeof(buf), "%d", state->retry_time);
       if(result == CURLE_OK)
         result = tftp_option_add(state, &sbytes,
                                  (char *)state->spacket.data + sbytes,

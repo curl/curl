@@ -52,8 +52,7 @@
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -80,7 +79,7 @@
  */
 void Curl_quiche_ver(char *p, size_t len)
 {
-  (void)msnprintf(p, len, "quiche/%s", quiche_version());
+  (void)curl_msnprintf(p, len, "quiche/%s", quiche_version());
 }
 
 struct cf_quiche_ctx {
@@ -109,7 +108,7 @@ static int debug_log_init = 0;
 static void quiche_debug_log(const char *line, void *argp)
 {
   (void)argp;
-  fprintf(stderr, "%s\n", line);
+  curl_mfprintf(stderr, "%s\n", line);
 }
 #endif
 

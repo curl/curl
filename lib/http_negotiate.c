@@ -34,8 +34,7 @@
 #include "vtls/vtls.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -219,8 +218,8 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
     if(result)
       return result;
 
-    userp = aprintf("%sAuthorization: Negotiate %s\r\n", proxy ? "Proxy-" : "",
-                    base64);
+    userp = curl_maprintf("%sAuthorization: Negotiate %s\r\n",
+                          proxy ? "Proxy-" : "", base64);
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY

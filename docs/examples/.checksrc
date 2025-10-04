@@ -1,9 +1,11 @@
 allowfunc fclose
 allowfunc fdopen
 allowfunc fopen
+allowfunc fprintf
 allowfunc gmtime
 allowfunc localtime
 allowfunc open
+allowfunc printf
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf

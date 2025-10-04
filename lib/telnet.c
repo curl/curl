@@ -60,8 +60,7 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -814,7 +813,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       DEBUGF(infof(data, "set a non ASCII username in telnet"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
+    curl_msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
     beg = curl_slist_append(tn->telnet_vars, buffer);
     if(!beg) {
       curl_slist_free_all(tn->telnet_vars);
@@ -957,9 +956,10 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
         failf(data, "Tool long telnet TTYPE");
         return CURLE_SEND_ERROR;
       }
-      len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
-                      CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
-                      CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
+      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                           CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
+                           CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC,
+                           CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
 
       if(bytes_written < 0) {
@@ -976,9 +976,10 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
         failf(data, "Tool long telnet XDISPLOC");
         return CURLE_SEND_ERROR;
       }
-      len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
-                      CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
-                      CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
+      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                           CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
+                           CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC,
+                           CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
         err = SOCKERRNO;
@@ -987,9 +988,9 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
-      len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
-                      CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
-                      CURL_TELQUAL_IS);
+      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
+                           CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
+                           CURL_TELQUAL_IS);
       for(v = tn->telnet_vars; v; v = v->next) {
         size_t tmplen = (strlen(v->data) + 1);
         if(bad_option(v->data))
@@ -998,18 +999,18 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
         if(len + tmplen < (int)sizeof(temp)-6) {
           char *s = strchr(v->data, ',');
           if(!s)
-            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s", CURL_NEW_ENV_VAR, v->data);
+            len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                  "%c%s", CURL_NEW_ENV_VAR, v->data);
           else {
             size_t vlen = s - v->data;
-            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%.*s%c%s", CURL_NEW_ENV_VAR,
-                             (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
+            len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                  "%c%.*s%c%s", CURL_NEW_ENV_VAR,
+                                  (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
           }
         }
       }
-      msnprintf((char *)&temp[len], sizeof(temp) - len,
-                "%c%c", CURL_IAC, CURL_SE);
+      curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                     "%c%c", CURL_IAC, CURL_SE);
       len += 2;
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {

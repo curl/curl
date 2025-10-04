@@ -60,8 +60,7 @@
 #include "select.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -662,7 +661,8 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
 
 #ifdef USE_UNIX_SOCKETS
     if(conn->unix_domain_socket)
-      msnprintf(viamsg, sizeof(viamsg), "over %s", conn->unix_domain_socket);
+      curl_msnprintf(viamsg, sizeof(viamsg), "over %s",
+                     conn->unix_domain_socket);
     else
 #endif
     {
@@ -673,7 +673,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
         port = conn->conn_to_port;
       else
         port = conn->remote_port;
-      msnprintf(viamsg, sizeof(viamsg), "port %u", port);
+      curl_msnprintf(viamsg, sizeof(viamsg), "port %u", port);
     }
 
     failf(data, "Failed to connect to %s %s %s%s%safter "

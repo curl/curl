@@ -54,8 +54,8 @@
 #include "socketpair.h"
 #include "socks.h"
 #include "urlapi-int.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -522,8 +522,8 @@ static void debug_print_sock_hash(void *p)
 {
   struct Curl_sh_entry *sh = (struct Curl_sh_entry *)p;
 
-  fprintf(stderr, " [readers %u][writers %u]",
-          sh->readers, sh->writers);
+  curl_mfprintf(stderr, " [readers %u][writers %u]",
+                sh->readers, sh->writers);
 }
 #endif
 
@@ -4004,12 +4004,14 @@ static void multi_xfer_dump(struct Curl_multi *multi, unsigned int mid,
 
   (void)multi;
   if(!data) {
-    fprintf(stderr, "mid=%u, entry=NULL, bug in xfer table?\n", mid);
+    curl_mfprintf(stderr, "mid=%u, entry=NULL, bug in xfer table?\n", mid);
   }
   else {
-    fprintf(stderr, "mid=%u, magic=%s, p=%p, id=%" FMT_OFF_T ", url=%s\n",
-            mid, (data->magic == CURLEASY_MAGIC_NUMBER) ? "GOOD" : "BAD!",
-            (void *)data, data->id, data->state.url);
+    curl_mfprintf(stderr, "mid=%u, magic=%s, p=%p, id=%" FMT_OFF_T
+                  ", url=%s\n",
+                  mid,
+                  (data->magic == CURLEASY_MAGIC_NUMBER) ? "GOOD" : "BAD!",
+                  (void *)data, data->id, data->state.url);
   }
 }
 
@@ -4017,15 +4019,15 @@ static void multi_xfer_tbl_dump(struct Curl_multi *multi)
 {
   unsigned int mid;
   void *entry;
-  fprintf(stderr, "=== multi xfer table (count=%u, capacity=%u\n",
-          Curl_uint_tbl_count(&multi->xfers),
-          Curl_uint_tbl_capacity(&multi->xfers));
+  curl_mfprintf(stderr, "=== multi xfer table (count=%u, capacity=%u\n",
+                Curl_uint_tbl_count(&multi->xfers),
+                Curl_uint_tbl_capacity(&multi->xfers));
   if(Curl_uint_tbl_first(&multi->xfers, &mid, &entry)) {
     multi_xfer_dump(multi, mid, entry);
     while(Curl_uint_tbl_next(&multi->xfers, mid, &mid, &entry))
       multi_xfer_dump(multi, mid, entry);
   }
-  fprintf(stderr, "===\n");
+  curl_mfprintf(stderr, "===\n");
   fflush(stderr);
 }
 #endif /* DEBUGBUILD */

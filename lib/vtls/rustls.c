@@ -28,8 +28,6 @@
 
 #ifdef USE_RUSTLS
 
-#include "../curl_printf.h"
-
 #include <rustls.h>
 
 #include "../curlx/fopen.h"
@@ -520,7 +518,7 @@ cr_keylog_log_cb(struct rustls_str label,
   (void)client_random_len;
   DEBUGASSERT(client_random_len == CLIENT_RANDOM_SIZE);
   /* Turning a "rustls_str" into a null delimited "c" string */
-  msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
+  curl_msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
   Curl_tls_keylog_write(clabel, client_random, secret, secret_len);
 }
 
@@ -1389,7 +1387,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static size_t cr_version(char *buffer, size_t size)
 {
   const struct rustls_str ver = rustls_version();
-  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+  return curl_msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
 static CURLcode

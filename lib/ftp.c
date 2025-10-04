@@ -72,8 +72,8 @@
 #include "strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -1209,7 +1209,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
         source++;
       }
       *dest = 0;
-      msnprintf(dest, 20, ",%d,%d", (int)(port >> 8), (int)(port & 0xff));
+      curl_msnprintf(dest, 20, ",%d,%d", (int)(port >> 8), (int)(port & 0xff));
 
       result = Curl_pp_sendf(data, &ftpc->pp, "%s %s", mode[fcmd], target);
       if(result) {
@@ -1422,12 +1422,12 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
     }
   }
 
-  cmd = aprintf("%s%s%.*s",
-                data->set.str[STRING_CUSTOMREQUEST] ?
-                data->set.str[STRING_CUSTOMREQUEST] :
-                (data->state.list_only ? "NLST" : "LIST"),
-                lstArg ? " " : "",
-                lstArglen, lstArg ? lstArg : "");
+  cmd = curl_maprintf("%s%s%.*s",
+                      data->set.str[STRING_CUSTOMREQUEST] ?
+                      data->set.str[STRING_CUSTOMREQUEST] :
+                      (data->state.list_only ? "NLST" : "LIST"),
+                      lstArg ? " " : "",
+                      lstArglen, lstArg ? lstArg : "");
 
   if(!cmd)
     return CURLE_OUT_OF_MEMORY;
@@ -1887,7 +1887,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       ftpc->newhost = control_address_dup(data, conn);
     }
     else
-      ftpc->newhost = aprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+      ftpc->newhost = curl_maprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 
     if(!ftpc->newhost)
       return CURLE_OUT_OF_MEMORY;
@@ -2093,9 +2093,9 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       if(ftp_213_date(resp, &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         char timebuf[24];
-        msnprintf(timebuf, sizeof(timebuf),
-                  "%04d%02d%02d %02d:%02d:%02d GMT",
-                  year, month, day, hour, minute, second);
+        curl_msnprintf(timebuf, sizeof(timebuf),
+                       "%04d%02d%02d %02d:%02d:%02d GMT",
+                       year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
         if(!Curl_getdate_capped(timebuf, &data->info.filetime))
           showtime = TRUE;
@@ -2128,15 +2128,16 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
 
         /* format: "Tue, 15 Nov 1994 12:45:26" */
         headerbuflen =
-          msnprintf(headerbuf, sizeof(headerbuf),
-                    "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                    Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
-                    tm->tm_mday,
-                    Curl_month[tm->tm_mon],
-                    tm->tm_year + 1900,
-                    tm->tm_hour,
-                    tm->tm_min,
-                    tm->tm_sec);
+          curl_msnprintf(headerbuf, sizeof(headerbuf),
+                         "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d "
+                         "GMT\r\n",
+                         Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                         tm->tm_mday,
+                         Curl_month[tm->tm_mon],
+                         tm->tm_year + 1900,
+                         tm->tm_hour,
+                         tm->tm_min,
+                         tm->tm_sec);
         result = client_write_header(data, headerbuf, headerbuflen);
         if(result)
           return result;
@@ -2349,8 +2350,9 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
 #ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(filesize != -1) {
       char clbuf[128];
-      int clbuflen = msnprintf(clbuf, sizeof(clbuf),
-                "Content-Length: %" FMT_OFF_T "\r\n", filesize);
+      int clbuflen = curl_msnprintf(clbuf, sizeof(clbuf),
+                                    "Content-Length: %" FMT_OFF_T "\r\n",
+                                    filesize);
       result = client_write_header(data, clbuf, clbuflen);
       if(result)
         return result;
@@ -3937,7 +3939,7 @@ static CURLcode wc_statemach(struct Curl_easy *data,
       struct Curl_llist_node *head = Curl_llist_head(&wildcard->filelist);
       struct curl_fileinfo *finfo = Curl_node_elem(head);
 
-      char *tmp_path = aprintf("%s%s", wildcard->path, finfo->filename);
+      char *tmp_path = curl_maprintf("%s%s", wildcard->path, finfo->filename);
       if(!tmp_path)
         return CURLE_OUT_OF_MEMORY;
 

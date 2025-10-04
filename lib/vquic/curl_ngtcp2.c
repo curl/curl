@@ -72,8 +72,7 @@
 
 #include "../curlx/warnless.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -111,8 +110,8 @@ void Curl_ngtcp2_ver(char *p, size_t len)
 {
   const ngtcp2_info *ng2 = ngtcp2_version(0);
   const nghttp3_info *ht3 = nghttp3_version(0);
-  (void)msnprintf(p, len, "ngtcp2/%s nghttp3/%s",
-                  ng2->version_str, ht3->version_str);
+  (void)curl_msnprintf(p, len, "ngtcp2/%s nghttp3/%s",
+                       ng2->version_str, ht3->version_str);
 }
 
 struct cf_ngtcp2_ctx {
@@ -389,9 +388,9 @@ static void quic_printf(void *user_data, const char *fmt, ...)
   (void)ctx;  /* need an easy handle to infof() message */
   va_list ap;
   va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
+  curl_mvfprintf(stderr, fmt, ap);
   va_end(ap);
-  fprintf(stderr, "\n");
+  curl_mfprintf(stderr, "\n");
 }
 #endif
 

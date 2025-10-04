@@ -73,8 +73,7 @@
 #endif
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -220,7 +219,7 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
     char service[12];
     int rc;
 
-    msnprintf(service, sizeof(service), "%d", addr_ctx->port);
+    curl_msnprintf(service, sizeof(service), "%d", addr_ctx->port);
 
     rc = Curl_getaddrinfo_ex(addr_ctx->hostname, service,
                              &addr_ctx->hints, &addr_ctx->res);
