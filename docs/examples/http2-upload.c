@@ -40,8 +40,6 @@
 #ifndef _MSC_VER
 #include <sys/time.h>
 #include <unistd.h>
-#elif (_MSC_VER < 1900)
-#define snprintf _snprintf
 #endif
 
 #ifdef _WIN32
@@ -50,6 +48,10 @@
 #undef fstat
 #define fstat _fstat
 #define fileno _fileno
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
 #endif
 
 /* curl stuff */
