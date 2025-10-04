@@ -54,7 +54,6 @@
 
 /* curl stuff */
 #include <curl/curl.h>
-#include <curl/mprintf.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 /* This little trick makes sure that we do not enable pipelining for libcurls
