@@ -89,8 +89,7 @@ Example set of cookies:
 #include "llist.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -1479,7 +1478,7 @@ void Curl_cookie_cleanup(struct CookieInfo *ci)
  */
 static char *get_netscape_format(const struct Cookie *co)
 {
-  return aprintf(
+  return curl_maprintf(
     "%s"     /* httponly preamble */
     "%s%s\t" /* domain */
     "%s\t"   /* tailmatch */
@@ -1575,7 +1574,7 @@ static CURLcode cookie_output(struct Curl_easy *data,
         error = CURLE_OUT_OF_MEMORY;
         goto error;
       }
-      fprintf(out, "%s\n", format_ptr);
+      curl_mfprintf(out, "%s\n", format_ptr);
       free(format_ptr);
     }
 
