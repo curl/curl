@@ -457,7 +457,9 @@ ParameterError setvariable(const char *input)
     else {
       file = curlx_fopen(line, "rb");
       if(!file) {
-        errorf("Failed to open %s: %s", line, strerror(errno));
+        char buffer[STRERROR_LEN];
+        errorf("Failed to open %s: %s", line,
+               curlx_strerror(errno, buffer, sizeof(buffer)));
         err = PARAM_READ_ERROR;
       }
     }

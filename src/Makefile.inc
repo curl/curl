@@ -38,12 +38,14 @@ CURLX_CFILES = \
   ../lib/curlx/dynbuf.c \
   ../lib/curlx/fopen.c \
   ../lib/curlx/nonblock.c \
+  ../lib/curlx/strerr.c \
   ../lib/curlx/strparse.c \
   ../lib/curlx/timediff.c \
   ../lib/curlx/timeval.c \
   ../lib/curlx/version_win32.c \
   ../lib/curlx/wait.c \
-  ../lib/curlx/warnless.c
+  ../lib/curlx/warnless.c \
+  ../lib/curlx/winapi.c
 
 CURLX_HFILES = \
   ../lib/curlx/binmode.h \
@@ -52,12 +54,14 @@ CURLX_HFILES = \
   ../lib/curlx/dynbuf.h \
   ../lib/curlx/fopen.h \
   ../lib/curlx/nonblock.h \
+  ../lib/curlx/strerr.h \
   ../lib/curlx/strparse.h \
   ../lib/curlx/timediff.h \
   ../lib/curlx/timeval.h \
   ../lib/curlx/version_win32.h \
   ../lib/curlx/wait.h \
-  ../lib/curlx/warnless.h
+  ../lib/curlx/warnless.h \
+  ../lib/curlx/winapi.h
 
 CURL_CFILES = \
   config2setopts.c \

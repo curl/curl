@@ -77,8 +77,11 @@ int getfiletime(const char *filename, curl_off_t *stamp)
     *stamp = (curl_off_t)statbuf.st_mtime;
     rc = 0;
   }
-  else
-    warnf("Failed to get filetime: %s", strerror(errno));
+  else {
+    char buffer[STRERROR_LEN];
+    warnf("Failed to get filetime: %s",
+          curlx_strerror(errno, buffer, sizeof(buffer)));
+  }
 #endif
   return rc;
 }
@@ -131,8 +134,10 @@ void setfiletime(curl_off_t filetime, const char *filename)
   times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
   times[0].tv_usec = times[1].tv_usec = 0;
   if(utimes(filename, times)) {
+    char buffer[STRERROR_LEN];
     warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on '%s': %s", filetime, filename, strerror(errno));
+          " on '%s': %s", filetime, filename,
+          curlx_strerror(errno, buffer, sizeof(buffer)));
   }
 
 #elif defined(HAVE_UTIME)
@@ -140,8 +145,10 @@ void setfiletime(curl_off_t filetime, const char *filename)
   times.actime = (time_t)filetime;
   times.modtime = (time_t)filetime;
   if(utime(filename, &times)) {
+    char buffer[STRERROR_LEN];
     warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on '%s': %s", filetime, filename, strerror(errno));
+          " on '%s': %s", filetime, filename,
+          curlx_strerror(errno, buffer, sizeof(buffer)));
   }
 #endif
 }

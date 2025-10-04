@@ -604,9 +604,11 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   /* Set file extended attributes */
   if(!result && config->xattr && outs->fopened && outs->stream) {
     rc = fwrite_xattr(curl, per->url, fileno(outs->stream));
-    if(rc)
+    if(rc) {
+      char buffer[STRERROR_LEN];
       warnf("Error setting extended attributes on '%s': %s",
-            outs->filename, strerror(errno));
+            outs->filename, curlx_strerror(errno, buffer, sizeof(buffer)));
+    }
   }
 
   if(!result && !outs->stream && !outs->bytes) {
@@ -796,9 +798,11 @@ static CURLcode etag_compare(struct OperationConfig *config)
 
   /* open file for reading: */
   FILE *file = curlx_fopen(config->etag_compare_file, FOPEN_READTEXT);
-  if(!file)
+  if(!file) {
+    char buffer[STRERROR_LEN];
     warnf("Failed to open %s: %s", config->etag_compare_file,
-          strerror(errno));
+          curlx_strerror(errno, buffer, sizeof(buffer)));
+  }
 
   if((PARAM_OK == file2string(&etag_from_file, file)) &&
      etag_from_file) {
@@ -1068,8 +1072,11 @@ static void check_stdin_upload(struct OperationConfig *config,
     else
       per->infd = (int)f;
 #endif
-    if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
-      warnf("fcntl failed on fd=%d: %s", per->infd, strerror(errno));
+    if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0) {
+      char buffer[STRERROR_LEN];
+      warnf("fcntl failed on fd=%d: %s", per->infd,
+            curlx_strerror(errno, buffer, sizeof(buffer)));
+    }
   }
 }
 
