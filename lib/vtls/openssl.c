@@ -296,7 +296,12 @@ do {                              \
 
 static int asn1_object_dump(const ASN1_OBJECT *a, char *buf, size_t len)
 {
-  int i = i2t_ASN1_OBJECT(buf, (int)len, a);
+  int i;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+  i = i2t_ASN1_OBJECT(buf, (int)len, a);
+#else
+  i = i2t_ASN1_OBJECT(buf, (int)len, CURL_UNCONST(a));
+#endif
   return (i >= (int)len);  /* buffer too small */
 }
 
