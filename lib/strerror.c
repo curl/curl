@@ -34,10 +34,6 @@
 
 #include <curl/curl.h>
 
-#ifdef USE_LIBIDN2
-#include <idn2.h>
-#endif
-
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
 #endif
