@@ -3391,7 +3391,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
   if(conn_config->ca_info_blob) {
     result = load_cacert_from_memory(store, conn_config->ca_info_blob);
     if(result) {
-      failf(data, "error adding trust anchors from certificate blob: %d",
+      failf(data, "error adding trust anchors from certificate blob: %u",
             result);
       return result;
     }
