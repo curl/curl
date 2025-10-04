@@ -82,9 +82,9 @@
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
-
-/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -623,7 +623,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(data->set.str[STRING_USERAGENT]) {
     free(data->state.aptr.uagent);
     data->state.aptr.uagent =
-      aprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
+      curl_maprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!data->state.aptr.uagent)
       return CURLE_OUT_OF_MEMORY;
   }
