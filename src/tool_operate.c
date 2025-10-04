@@ -1626,8 +1626,8 @@ static CURLcode parallel_event(struct parastate *s)
   while(!s->mcode && (s->still_running || s->more_transfers)) {
 #if DEBUG_UV
     curl_mfprintf(tool_stderr, "parallel_event: uv_run(), "
-                  "mcode=%d, %d running, %d more\n", s->mcode,
-                  uv.s->still_running, s->more_transfers);
+                  "mcode=%d, %d running, %d more\n",
+                  s->mcode, uv.s->still_running, s->more_transfers);
 #endif
     uv_run(uv.loop, UV_RUN_DEFAULT);
 #if DEBUG_UV
