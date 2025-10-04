@@ -45,7 +45,6 @@
 
 #endif /* !BUILDING_LIBCURL */
 
-#ifdef _WIN32
 /* This is a helper function for Curl_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
@@ -86,13 +85,10 @@ const char *curlx_get_winapi_error(int err, char *buf, size_t buflen)
 
   return *buf ? buf : NULL;
 }
-#endif /* _WIN32 */
 
 const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 {
-#ifdef _WIN32
   DWORD old_win_err = GetLastError();
-#endif
   int old_errno = errno;
 
   if(!buflen)
@@ -125,10 +121,8 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
   if(errno != old_errno)
     CURL_SETERRNO(old_errno);
 
-#ifdef _WIN32
   if(old_win_err != GetLastError())
     SetLastError(old_win_err);
-#endif
 
   return buf;
 }
