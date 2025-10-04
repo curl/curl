@@ -49,8 +49,8 @@
 #include "hash.h"
 #include "share.h"
 #include "url.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -125,7 +125,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
   if(port) {
-    msnprintf(sbuf, sizeof(sbuf), "%d", port);
+    curl_msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
 
