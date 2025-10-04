@@ -75,8 +75,7 @@
 #include "http_proxy.h"
 #include "socks.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -267,7 +266,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
     case AF_UNIX:
       if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
         su = (struct sockaddr_un*)sa;
-        msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+        curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
       }
       else
         addr[0] = 0; /* socket with no name */
