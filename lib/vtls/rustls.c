@@ -34,6 +34,7 @@
 
 #include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
+#include "../curlx/strerr.h"
 #include "../urldata.h"
 #include "../sendf.h"
 #include "vtls.h"

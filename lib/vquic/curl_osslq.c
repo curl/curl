@@ -57,6 +57,7 @@
 #include "curl_osslq.h"
 #include "../url.h"
 #include "../curlx/warnless.h"
+#include "../curlx/strerr.h"
 
 /* The last 3 #include files should be in this order */
 #include "../curl_printf.h"

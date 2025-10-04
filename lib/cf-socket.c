@@ -80,6 +80,7 @@
 #include "strdup.h"
 #include "system_win32.h"
 #include "curlx/version_win32.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

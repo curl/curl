@@ -63,6 +63,7 @@
 #include "speedcheck.h"
 #include "select.h"
 #include "escape.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

@@ -125,6 +125,7 @@
 #include "altsvc.h"
 #include "curlx/dynbuf.h"
 #include "headers.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"

@@ -44,6 +44,7 @@
 #include "vquic.h"
 #include "vquic_int.h"
 #include "../strerror.h"
+#include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */

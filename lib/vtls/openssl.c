@@ -63,6 +63,7 @@
 #include "hostcheck.h"
 #include "../transfer.h"
 #include "../multiif.h"
+#include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 #include "../strdup.h"
 #include "../strerror.h"
