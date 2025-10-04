@@ -193,15 +193,7 @@ jobs:
           rm -rf openssl
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests # no-deprecated
-          make install_sw
-
-      - name: 'build quictls'
-        run: |
-          cd ~
-          git clone --quiet --depth=1 -b "openssl-${QUICTLS_VERSION}-quic1" https://github.com/quictls/openssl quictls
-          cd quictls
-          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests # no-deprecated
+          ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make install_sw
 
       - name: 'build libressl'
