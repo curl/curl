@@ -478,7 +478,8 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
     default:
       CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] reject remote %s"
                   " stream, type=%x", stream_id,
-                  (stype == SSL_STREAM_TYPE_BIDI) ? "bidi" : "write", stype);
+                  (stype == SSL_STREAM_TYPE_BIDI) ? "bidi" : "write",
+                  (unsigned int)stype);
       SSL_free(stream_ssl);
       return CURLE_OK;
   }
