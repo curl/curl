@@ -126,8 +126,8 @@
 #include "headers.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -504,7 +504,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data = calloc(1, sizeof(struct Curl_easy));
   if(!data) {
     /* this is a serious error */
-    DEBUGF(fprintf(stderr, "Error: calloc of Curl_easy failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: calloc of Curl_easy failed\n"));
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -1785,8 +1785,9 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   if(data->set.str[STRING_DEFAULT_PROTOCOL] &&
      !Curl_is_absolute_url(data->state.url, NULL, 0, TRUE)) {
-    char *url = aprintf("%s://%s", data->set.str[STRING_DEFAULT_PROTOCOL],
-                        data->state.url);
+    char *url = curl_maprintf("%s://%s",
+                              data->set.str[STRING_DEFAULT_PROTOCOL],
+                              data->state.url);
     if(!url)
       return CURLE_OUT_OF_MEMORY;
     if(data->state.url_alloc)
@@ -1997,7 +1998,7 @@ static CURLcode setup_range(struct Curl_easy *data)
       free(s->range);
 
     if(s->resume_from)
-      s->range = aprintf("%" FMT_OFF_T "-", s->resume_from);
+      s->range = curl_maprintf("%" FMT_OFF_T "-", s->resume_from);
     else
       s->range = strdup(data->set.str[STRING_SET_RANGE]);
 
@@ -2055,9 +2056,10 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   }
 
 #ifdef USE_IPV6
-  conn->destination = aprintf("%u/%d/%s", conn->scope_id, port, hostname);
+  conn->destination = curl_maprintf("%u/%d/%s", conn->scope_id, port,
+                                    hostname);
 #else
-  conn->destination = aprintf("%d/%s", port, hostname);
+  conn->destination = curl_maprintf("%d/%s", port, hostname);
 #endif
   if(!conn->destination)
     return CURLE_OUT_OF_MEMORY;
@@ -2105,7 +2107,8 @@ static char *detect_proxy(struct Curl_easy *data,
   (void)data;
 #endif
 
-  msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy", conn->handler->scheme);
+  curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
+                 conn->handler->scheme);
 
   /* read the protocol proxy: */
   proxy = curl_getenv(proxy_env);
@@ -2323,7 +2326,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     if(strcmp("/", path)) {
       is_unix_proxy = TRUE;
       free(host);
-      host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
+      host = curl_maprintf(UNIX_SOCKET_PREFIX"%s", path);
       if(!host) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;
@@ -2671,7 +2674,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     char portbuf[16];
     CURLUcode uc;
     conn->remote_port = data->set.use_port;
-    msnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
+    curl_mmsnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
     uc = curl_url_set(data->state.uh, CURLUPART_PORT, portbuf, 0);
     if(uc)
       return CURLE_OUT_OF_MEMORY;
@@ -2982,10 +2985,10 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
   else {
     /* check whether the URL's hostname matches */
     size_t hostname_to_match_len;
-    char *hostname_to_match = aprintf("%s%s%s",
-                                      conn->bits.ipv6_ip ? "[" : "",
-                                      conn->host.name,
-                                      conn->bits.ipv6_ip ? "]" : "");
+    char *hostname_to_match = curl_maprintf("%s%s%s",
+                                            conn->bits.ipv6_ip ? "[" : "",
+                                            conn->host.name,
+                                            conn->bits.ipv6_ip ? "]" : "");
     if(!hostname_to_match)
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
@@ -3703,7 +3706,7 @@ static CURLcode create_conn(struct Curl_easy *data,
        */
       result = Curl_ssl_conn_config_init(data, conn);
       if(result) {
-        DEBUGF(fprintf(stderr, "Error: init connection ssl config\n"));
+        DEBUGF(curl_mfprintf(stderr, "Error: init connection ssl config\n"));
         goto out;
       }
 
