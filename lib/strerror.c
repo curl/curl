@@ -30,6 +30,7 @@
 #include "curl_sspi.h"
 #endif
 
+#include "curlx/winapi.h"
 #include "strerror.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
