@@ -42,7 +42,7 @@
 #include "memdebug.h"
 
 #ifdef USE_WINSOCK
-/* This is a helper function for Curl_strerror that converts Winsock error
+/* This is a helper function for curlx_strerror that converts Winsock error
  * codes (WSAGetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
  */
@@ -256,7 +256,7 @@ get_winsock_error(int err, char *buf, size_t len)
  * Call Curl_sspi_strerror if the error code is definitely Windows SSPI.
  * Call curlx_winapi_strerror if the error code is definitely Windows API.
  */
-const char *Curl_strerror(int err, char *buf, size_t buflen)
+const char *curlx_strerror(int err, char *buf, size_t buflen)
 {
 #ifdef _WIN32
   DWORD old_win_err = GetLastError();

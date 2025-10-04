@@ -1007,7 +1007,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     sslen = sizeof(ss);
     if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
       failf(data, "getsockname() failed: %s",
-            Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+            curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       goto out;
     }
     switch(sa->sa_family) {
@@ -1054,7 +1054,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   }
   if(!ai) {
     failf(data, "socket failure: %s",
-          Curl_strerror(error, buffer, sizeof(buffer)));
+          curlx_strerror(error, buffer, sizeof(buffer)));
     goto out;
   }
   CURL_TRC_FTP(data, "[%s] ftp_state_use_port(), opened socket",
@@ -1081,12 +1081,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
          * the control connection instead and restart the port loop
          */
         infof(data, "bind(port=%hu) on non-local address failed: %s", port,
-              Curl_strerror(error, buffer, sizeof(buffer)));
+              curlx_strerror(error, buffer, sizeof(buffer)));
 
         sslen = sizeof(ss);
         if(getsockname(conn->sock[FIRSTSOCKET], sa, &sslen)) {
           failf(data, "getsockname() failed: %s",
-                Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+                curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
           goto out;
         }
         port = port_min;
@@ -1095,7 +1095,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       }
       if(error != SOCKEADDRINUSE && error != SOCKEACCES) {
         failf(data, "bind(port=%hu) failed: %s", port,
-              Curl_strerror(error, buffer, sizeof(buffer)));
+              curlx_strerror(error, buffer, sizeof(buffer)));
         goto out;
       }
     }
@@ -1118,7 +1118,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   sslen = sizeof(ss);
   if(getsockname(portsock, sa, &sslen)) {
     failf(data, "getsockname() failed: %s",
-          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+          curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     goto out;
   }
   CURL_TRC_FTP(data, "[%s] ftp_state_use_port(), socket bound to port %d",
@@ -1128,7 +1128,7 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
 
   if(listen(portsock, 1)) {
     failf(data, "socket failure: %s",
-          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+          curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
     goto out;
   }
   CURL_TRC_FTP(data, "[%s] ftp_state_use_port(), listening on %d",

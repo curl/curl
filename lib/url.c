@@ -1743,7 +1743,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
-              Curl_strerror(errno, buffer, sizeof(buffer)));
+              curlx_strerror(errno, buffer, sizeof(buffer)));
 #endif
       }
       else

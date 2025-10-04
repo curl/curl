@@ -542,7 +542,7 @@ curl_url_strerror(CURLUcode error)
 #ifdef USE_WINDOWS_SSPI
 /*
  * Curl_sspi_strerror:
- * Variant of Curl_strerror if the error code is definitely Windows SSPI.
+ * Variant of curlx_strerror if the error code is definitely Windows SSPI.
  */
 const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 {

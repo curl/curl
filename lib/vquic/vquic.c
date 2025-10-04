@@ -434,7 +434,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmmsg() unexpectedly returned %d (errno=%d; %s)",
                   mcount, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
@@ -527,7 +527,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
                   rc, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
@@ -602,7 +602,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
-      Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+      curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
                   nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
