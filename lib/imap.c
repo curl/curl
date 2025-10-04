@@ -78,8 +78,7 @@
 #include "curlx/warnless.h"
 #include "curl_ctype.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -1943,9 +1942,9 @@ static CURLcode imap_sendf(struct Curl_easy *data,
   DEBUGASSERT(fmt);
 
   /* Calculate the tag based on the connection ID and command ID */
-  msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-            'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
-            ++imapc->cmdid);
+  curl_msnprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
+                 'A' + curlx_sltosi((long)(data->conn->connection_id % 26)),
+                 ++imapc->cmdid);
 
   /* start with a blank buffer */
   curlx_dyn_reset(&imapc->dyn);
