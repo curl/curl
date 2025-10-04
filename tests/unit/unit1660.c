@@ -141,7 +141,7 @@ static CURLcode test_unit1660(const char *arg)
         continue;
       }
       else if(result) {
-        curl_mprintf("Input %d: error %u\n", i, (int) result);
+        curl_mprintf("Input %d: error %u\n", i, result);
         continue;
       }
     }
