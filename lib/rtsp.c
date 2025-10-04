@@ -558,7 +558,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Go ahead and use the Range stuff supplied for HTTP
    */
   if(data->state.use_range &&
-     (rtspreq  & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD))) {
+     (rtspreq & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD))) {
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
