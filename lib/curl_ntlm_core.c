@@ -119,8 +119,8 @@
 #include "curl_endian.h"
 #include "curl_des.h"
 #include "curl_md4.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -567,14 +567,15 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     return CURLE_OUT_OF_MEMORY;
 
   /* Create the BLOB structure */
-  msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
-            "%c%c%c%c"           /* NTLMv2_BLOB_SIGNATURE */
-            "%c%c%c%c"           /* Reserved = 0 */
-            "%c%c%c%c%c%c%c%c",  /* Timestamp */
-            NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
-            NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
-            0, 0, 0, 0,
-            LONGQUARTET(tw.dwLowDateTime), LONGQUARTET(tw.dwHighDateTime));
+  curl_msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
+                 "%c%c%c%c"           /* NTLMv2_BLOB_SIGNATURE */
+                 "%c%c%c%c"           /* Reserved = 0 */
+                 "%c%c%c%c%c%c%c%c",  /* Timestamp */
+                 NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
+                 NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
+                 0, 0, 0, 0,
+                 LONGQUARTET(tw.dwLowDateTime),
+                 LONGQUARTET(tw.dwHighDateTime));
 
   memcpy(ptr + 32, challenge_client, 8);
   if(ntlm->target_info_len)
