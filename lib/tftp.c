@@ -55,7 +55,6 @@
 #include "tftp.h"
 #include "progress.h"
 #include "connect.h"
-#include "strerror.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"
@@ -63,6 +62,7 @@
 #include "speedcheck.h"
 #include "select.h"
 #include "escape.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
@@ -539,7 +539,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
     free(filename);
     if(senddata != (ssize_t)sbytes) {
       char buffer[STRERROR_LEN];
-      failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
     break;
@@ -622,7 +622,7 @@ static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event)
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
 
@@ -647,7 +647,7 @@ static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event)
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     if(sbytes < 0) {
-      failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
 
@@ -673,7 +673,7 @@ static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event)
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
       if(sbytes < 0) {
-        failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+        failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
         return CURLE_SEND_ERROR;
       }
     }
@@ -750,8 +750,8 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
                           state->remote_addrlen);
           /* Check all sbytes were sent */
           if(sbytes < 0) {
-            failf(data, "%s", Curl_strerror(SOCKERRNO,
-                                            buffer, sizeof(buffer)));
+            failf(data, "%s",
+                  curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
             result = CURLE_SEND_ERROR;
           }
         }
@@ -795,7 +795,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
                     state->remote_addrlen);
     /* Check all sbytes were sent */
     if(sbytes < 0) {
-      failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+      failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
     /* Update the progress meter */
@@ -821,7 +821,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
                       state->remote_addrlen);
       /* Check all sbytes were sent */
       if(sbytes < 0) {
-        failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+        failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
         return CURLE_SEND_ERROR;
       }
       /* since this was a re-send, we remain at the still byte position */
@@ -1039,7 +1039,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     if(rc) {
       char buffer[STRERROR_LEN];
       failf(data, "bind() failed; %s",
-            Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+            curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return CURLE_COULDNT_CONNECT;
     }
     conn->bits.bound = TRUE;
@@ -1257,7 +1257,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
       /* bail out */
       int error = SOCKERRNO;
       char buffer[STRERROR_LEN];
-      failf(data, "%s", Curl_strerror(error, buffer, sizeof(buffer)));
+      failf(data, "%s", curlx_strerror(error, buffer, sizeof(buffer)));
       state->event = TFTP_EVENT_ERROR;
     }
     else if(rc) {

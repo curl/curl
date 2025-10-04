@@ -25,12 +25,12 @@
 
 /*
  * curlx_winapi_strerror:
- * Variant of Curl_strerror if the error code is definitely Windows API.
+ * Variant of curlx_strerror if the error code is definitely Windows API.
  */
 #ifdef _WIN32
 #include "winapi.h"
 
-#ifdef BUILDING_LIBCURL
+#ifndef WITHOUT_LIBCURL
 #include <curl/mprintf.h>
 #define SNPRINTF curl_msnprintf
 #else
@@ -42,10 +42,9 @@
 #else
 #define SNPRINTF snprintf
 #endif
+#endif /* !WITHOUT_LIBCURL */
 
-#endif /* !BUILDING_LIBCURL */
-
-/* This is a helper function for Curl_strerror that converts Windows API error
+/* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
  */

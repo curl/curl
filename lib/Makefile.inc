@@ -31,6 +31,7 @@ LIB_CURLX_CFILES = \
   curlx/inet_pton.c \
   curlx/multibyte.c \
   curlx/nonblock.c \
+  curlx/strerr.c   \
   curlx/strparse.c \
   curlx/timediff.c \
   curlx/timeval.c  \
@@ -49,6 +50,7 @@ LIB_CURLX_HFILES = \
   curlx/inet_pton.h \
   curlx/multibyte.h \
   curlx/nonblock.h \
+  curlx/strerr.h   \
   curlx/strparse.h \
   curlx/timediff.h \
   curlx/timeval.h  \

@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_STRERROR_H
-#define HEADER_CURL_STRERROR_H
+#ifndef HEADER_CURL_STRERR_H
+#define HEADER_CURL_STRERR_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,8 +24,6 @@
  *
  ***************************************************************************/
 
-#ifdef USE_WINDOWS_SSPI
-const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
-#endif
+const char *curlx_strerror(int err, char *buf, size_t buflen);
 
-#endif /* HEADER_CURL_STRERROR_H */
+#endif /* HEADER_CURL_STRERR_H */

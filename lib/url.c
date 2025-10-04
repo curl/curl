@@ -80,7 +80,6 @@
 #include "progress.h"
 #include "cookie.h"
 #include "strcase.h"
-#include "strerror.h"
 #include "escape.h"
 #include "share.h"
 #include "content_encoding.h"
@@ -125,6 +124,7 @@
 #include "altsvc.h"
 #include "curlx/dynbuf.h"
 #include "headers.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -1743,7 +1743,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
-              Curl_strerror(errno, buffer, sizeof(buffer)));
+              curlx_strerror(errno, buffer, sizeof(buffer)));
 #endif
       }
       else

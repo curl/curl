@@ -200,6 +200,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
     }
 
     if(rc < 0) {
+      char errbuf[STRERROR_LEN];
       error = errno;
       /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
@@ -211,7 +212,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
       }
       logmsg("reading from file descriptor: %d,", filedes);
       logmsg("unrecoverable read() failure (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return -1;
     }
 
@@ -253,13 +254,14 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
     }
 
     if(wc < 0) {
+      char errbuf[STRERROR_LEN];
       error = errno;
       /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);
       logmsg("unrecoverable write() failure (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return -1;
     }
 
@@ -947,6 +949,7 @@ static bool juggle(curl_socket_t *sockfdp,
   int maxfd = -99;
   ssize_t rc;
   int error = 0;
+  char errbuf[STRERROR_LEN];
 
   unsigned char buffer[BUFFER_SIZE];
   char data[16];
@@ -1067,7 +1070,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
   if(rc < 0) {
     logmsg("select() failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     return FALSE;
   }
 
@@ -1172,7 +1175,8 @@ static bool juggle(curl_socket_t *sockfdp,
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept() failed with error (%d) %s", error, sstrerror(error));
+        logmsg("accept() failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       }
       else {
         logmsg("====> Client connect");
@@ -1226,6 +1230,7 @@ static int test_sockfilt(int argc, char *argv[])
   bool juggle_again;
   int rc;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
@@ -1345,7 +1350,8 @@ static int test_sockfilt(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1382,8 +1388,8 @@ static int test_sockfilt(int argc, char *argv[])
     }
     if(rc) {
       error = SOCKERRNO;
-      logmsg("Error connecting to port %hu (%d) %s",
-             server_connectport, error, sstrerror(error));
+      logmsg("Error connecting to port %hu (%d) %s", server_connectport,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }

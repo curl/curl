@@ -130,7 +130,6 @@ extern void logmsg(const char *msg, ...);
 extern void loghex(unsigned char *buffer, ssize_t len);
 extern unsigned char byteval(char *value);
 extern int win32_init(void);
-extern const char *sstrerror(int err);
 extern FILE *test2fopen(long testno, const char *logdir2);
 extern curl_off_t our_getpid(void);
 extern int write_pidfile(const char *filename);

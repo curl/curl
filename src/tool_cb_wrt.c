@@ -96,7 +96,9 @@ bool tool_create_output_file(struct OutStruct *outs,
   }
 
   if(!file) {
-    warnf("Failed to open the file %s: %s", fname, strerror(errno));
+    char errbuf[STRERROR_LEN];
+    warnf("Failed to open the file %s: %s", fname,
+          curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return FALSE;
   }
   outs->s_isreg = TRUE;

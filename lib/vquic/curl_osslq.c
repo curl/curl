@@ -42,7 +42,6 @@
 #include "../cf-socket.h"
 #include "../connect.h"
 #include "../progress.h"
-#include "../strerror.h"
 #include "../curlx/dynbuf.h"
 #include "../http1.h"
 #include "../select.h"
@@ -57,6 +56,7 @@
 #include "curl_osslq.h"
 #include "../url.h"
 #include "../curlx/warnless.h"
+#include "../curlx/strerr.h"
 
 /* The last 3 #include files should be in this order */
 #include "../curl_printf.h"
@@ -552,7 +552,7 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
 
     Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     if(sockerr && detail == SSL_ERROR_SYSCALL)
-      Curl_strerror(sockerr, extramsg, sizeof(extramsg));
+      curlx_strerror(sockerr, extramsg, sizeof(extramsg));
     failf(data, "QUIC connect: %s in connection to %s:%d (%s)",
           extramsg[0] ? extramsg : osslq_SSL_ERROR_to_str(detail),
           ctx->peer.dispname, ip.remote_port, ip.remote_ip);

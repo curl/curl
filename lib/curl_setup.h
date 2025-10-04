@@ -950,6 +950,10 @@ endings either CRLF or LF so 't' is appropriate.
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
+/* Buffer size for error messages retrieved via
+   curlx_strerror() and Curl_sspi_strerror() */
+#define STRERROR_LEN 256
+
 #ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
  * The following memory function replacement typedef's are COPIED from

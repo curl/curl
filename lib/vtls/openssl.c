@@ -63,9 +63,9 @@
 #include "hostcheck.h"
 #include "../transfer.h"
 #include "../multiif.h"
+#include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 #include "../strdup.h"
-#include "../strerror.h"
 #include "../curl_printf.h"
 #include "apple.h"
 
@@ -4668,7 +4668,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         int sockerr = SOCKERRNO;
 
         if(sockerr && detail == SSL_ERROR_SYSCALL)
-          Curl_strerror(sockerr, extramsg, sizeof(extramsg));
+          curlx_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
               connssl->peer.hostname, connssl->peer.port);
@@ -5274,7 +5274,7 @@ static CURLcode ossl_send_earlydata(struct Curl_cfilter *cf,
         if(sslerror)
           ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
         else if(sockerr)
-          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+          curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
         else
           msnprintf(error_buffer, sizeof(error_buffer), "%s",
                     SSL_ERROR_to_str(err));
@@ -5460,7 +5460,7 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
       if(sslerror)
         ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
       else if(sockerr)
-        Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+        curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
       else
         msnprintf(error_buffer, sizeof(error_buffer), "%s",
                   SSL_ERROR_to_str(err));
@@ -5557,7 +5557,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
         if(sslerror)
           ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
         else if(sockerr && err == SSL_ERROR_SYSCALL)
-          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+          curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
         else
           msnprintf(error_buffer, sizeof(error_buffer), "%s",
                     SSL_ERROR_to_str(err));
@@ -5580,7 +5580,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
            * the error in case of some weirdness in the OSSL stack */
           int sockerr = SOCKERRNO;
           if(sockerr)
-            Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+            curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
           else {
             msnprintf(error_buffer, sizeof(error_buffer),
                       "Connection closed abruptly");

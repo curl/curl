@@ -62,7 +62,6 @@
 #include "bufq.h"
 #include "sendf.h"
 #include "if2ip.h"
-#include "strerror.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
@@ -80,6 +79,7 @@
 #include "strdup.h"
 #include "system_win32.h"
 #include "curlx/version_win32.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
@@ -114,7 +114,7 @@ static void tcpnodelay(struct Curl_easy *data, curl_socket_t sockfd)
   if(setsockopt(sockfd, level, TCP_NODELAY,
                 (void *)&onoff, sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s",
-          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+          curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
 #else
   (void)data;
   (void)sockfd;
@@ -136,7 +136,7 @@ static void nosigpipe(struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
     char buffer[STRERROR_LEN];
     infof(data, "Could not set SO_NOSIGPIPE: %s",
-          Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+          curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
 #endif
   }
 }
@@ -644,7 +644,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
           char buffer[STRERROR_LEN];
           data->state.os_errno = error = SOCKERRNO;
           failf(data, "Couldn't bind to interface '%s' with errno %d: %s",
-                iface, error, Curl_strerror(error, buffer, sizeof(buffer)));
+                iface, error, curlx_strerror(error, buffer, sizeof(buffer)));
           return CURLE_INTERFACE_FAILED;
         }
         break;
@@ -747,8 +747,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       char buffer[STRERROR_LEN];
       data->state.errorbuf = FALSE;
       data->state.os_errno = error = SOCKERRNO;
-      failf(data, "Couldn't bind to '%s' with errno %d: %s",
-            host, error, Curl_strerror(error, buffer, sizeof(buffer)));
+      failf(data, "Couldn't bind to '%s' with errno %d: %s", host,
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
       return CURLE_INTERFACE_FAILED;
     }
   }
@@ -799,7 +799,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     char buffer[STRERROR_LEN];
     data->state.os_errno = error = SOCKERRNO;
     failf(data, "bind failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
+          error, curlx_strerror(error, buffer, sizeof(buffer)));
   }
 
   return CURLE_INTERFACE_FAILED;
@@ -900,8 +900,8 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 #else
     {
       char buffer[STRERROR_LEN];
-      infof(data, "Immediate connect fail for %s: %s",
-            ipaddress, Curl_strerror(error, buffer, sizeof(buffer)));
+      infof(data, "Immediate connect fail for %s: %s", ipaddress,
+            curlx_strerror(error, buffer, sizeof(buffer)));
     }
 #endif
     data->state.os_errno = error;
@@ -1050,13 +1050,13 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
     if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
       int error = SOCKERRNO;
       failf(data, "getsockname() failed with errno %d: %s",
-            error, Curl_strerror(error, buffer, sizeof(buffer)));
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
       return CURLE_FAILED_INIT;
     }
     if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
                          ctx->ip.local_ip, &ctx->ip.local_port)) {
       failf(data, "ssloc inet_ntop() failed with errno %d: %s",
-            errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+            errno, curlx_strerror(errno, buffer, sizeof(buffer)));
       return CURLE_FAILED_INIT;
     }
   }
@@ -1082,7 +1082,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
     ctx->error = errno;
     /* malformed address or bug in inet_ntop, try next address */
     failf(data, "curl_sa_addr inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+          errno, curlx_strerror(errno, buffer, sizeof(buffer)));
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -1360,7 +1360,7 @@ out:
         infof(data, "connect to %s port %u from %s port %d failed: %s",
               ctx->ip.remote_ip, ctx->ip.remote_port,
               ctx->ip.local_ip, ctx->ip.local_port,
-              Curl_strerror(ctx->error, buffer, sizeof(buffer)));
+              curlx_strerror(ctx->error, buffer, sizeof(buffer)));
       }
 #endif
     }
@@ -1498,7 +1498,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     else {
       char buffer[STRERROR_LEN];
       failf(data, "Send failure: %s",
-            Curl_strerror(sockerr, buffer, sizeof(buffer)));
+            curlx_strerror(sockerr, buffer, sizeof(buffer)));
       data->state.os_errno = sockerr;
       result = CURLE_SEND_ERROR;
     }
@@ -1566,7 +1566,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     else {
       char buffer[STRERROR_LEN];
       failf(data, "Recv failure: %s",
-            Curl_strerror(sockerr, buffer, sizeof(buffer)));
+            curlx_strerror(sockerr, buffer, sizeof(buffer)));
       data->state.os_errno = sockerr;
       result = CURLE_RECV_ERROR;
     }
@@ -2037,13 +2037,13 @@ static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
   if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
     int error = SOCKERRNO;
     failf(data, "getpeername() failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
+          error, curlx_strerror(error, buffer, sizeof(buffer)));
     return;
   }
   if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
                        ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+          errno, curlx_strerror(errno, buffer, sizeof(buffer)));
     return;
   }
 #else

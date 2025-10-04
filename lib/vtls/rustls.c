@@ -34,13 +34,13 @@
 
 #include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
+#include "../curlx/strerr.h"
 #include "../urldata.h"
 #include "../sendf.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
 #include "keylog.h"
-#include "../strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
 
@@ -171,7 +171,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
   else if(io_error) {
     char buffer[STRERROR_LEN];
     failf(data, "reading from socket: %s",
-          Curl_strerror(io_error, buffer, sizeof(buffer)));
+          curlx_strerror(io_error, buffer, sizeof(buffer)));
     *err = CURLE_RECV_ERROR;
     return -1;
   }
@@ -283,7 +283,7 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
     else if(io_error) {
       char buffer[STRERROR_LEN];
       failf(data, "writing to socket: %s",
-            Curl_strerror(io_error, buffer, sizeof(buffer)));
+            curlx_strerror(io_error, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
     if(tlswritten == 0) {
