@@ -41,8 +41,7 @@
 #include "escape.h"
 #include "urlapi-int.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -513,7 +512,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     /* Only use HTTPS RR for HTTP(S) transfers */
     char *qname = NULL;
     if(port != PORT_HTTPS) {
-      qname = aprintf("_%d._https.%s", port, hostname);
+      qname = curl_maprintf("_%d._https.%s", port, hostname);
       if(!qname)
         goto error;
     }
@@ -890,8 +889,9 @@ static void doh_show(struct Curl_easy *data,
       len = sizeof(buffer) - len;
       for(j = 0; j < 16; j += 2) {
         size_t l;
-        msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "", d->addr[i].ip.v6[j],
-                  d->addr[i].ip.v6[j + 1]);
+        curl_msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "",
+                       d->addr[i].ip.v6[j],
+                       d->addr[i].ip.v6[j + 1]);
         l = strlen(ptr);
         len -= l;
         ptr += l;
