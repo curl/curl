@@ -58,8 +58,7 @@
 #include "../curlx/warnless.h"
 #include "../curlx/strerr.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -511,9 +510,9 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
     lerr = SSL_get_verify_result(ctx->tls.ossl.ssl);
     if(lerr != X509_V_OK) {
       ssl_config->certverifyresult = lerr;
-      msnprintf(ebuf, sizeof(ebuf),
-                "SSL certificate problem: %s",
-                X509_verify_cert_error_string(lerr));
+      curl_msnprintf(ebuf, sizeof(ebuf),
+                     "SSL certificate problem: %s",
+                     X509_verify_cert_error_string(lerr));
     }
     else
       err_descr = "SSL certificate verification failed";
@@ -867,8 +866,8 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
                                      (const char *)h3val.base, h3val.len);
     if(result)
       return -1;
-    ncopy = msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
-                      stream->status_code);
+    ncopy = curl_msnprintf(line, sizeof(line), "HTTP/3 %03d \r\n",
+                           stream->status_code);
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] status: %s", stream_id, line);
     result = write_resp_raw(cf, data, line, ncopy, FALSE);
     if(result) {
@@ -2465,7 +2464,7 @@ bool Curl_conn_is_osslq(const struct Curl_easy *data,
 void Curl_osslq_ver(char *p, size_t len)
 {
   const nghttp3_info *ht3 = nghttp3_version(0);
-  (void)msnprintf(p, len, "nghttp3/%s", ht3->version_str);
+  (void)curl_msnprintf(p, len, "nghttp3/%s", ht3->version_str);
 }
 
 #endif /* !CURL_DISABLE_HTTP && USE_OPENSSL_QUIC && USE_NGHTTP3 */
