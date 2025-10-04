@@ -235,7 +235,7 @@ get_winsock_error(int err, char *buf, size_t len)
   return buf;
 #endif
 }
-#endif   /* USE_WINSOCK */
+#endif /* USE_WINSOCK */
 
 /*
  * Our thread-safe and smart strerror() replacement.
