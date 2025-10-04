@@ -93,8 +93,8 @@
 #include "curlx/multibyte.h"
 #include "curlx/base64.h"
 #include "connect.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -746,7 +746,7 @@ static void ldap_trace_low(const char *fmt, ...)
     return;
 
   va_start(args, fmt);
-  vfprintf(stderr, fmt, args);
+  curl_mvfprintf(stderr, fmt, args);
   va_end(args);
 }
 #endif /* DEBUG_LDAP */
