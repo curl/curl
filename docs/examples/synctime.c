@@ -94,6 +94,8 @@ int main(void) { printf("Platform not supported.\n"); return 1; }
 
 #include <curl/curl.h>
 
+#include <windows.h>
+
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
 #endif
