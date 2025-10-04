@@ -9,4 +9,5 @@ allowfunc send
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
+allowfunc strerror
 allowfunc vsnprintf

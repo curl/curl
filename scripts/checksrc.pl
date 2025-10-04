@@ -58,6 +58,7 @@ my %banfunc = (
     "vsnprintf" => 1,
     "sscanf" => 1,
     "strcat" => 1,
+    "strerror" => 1,
     "strncat" => 1,
     "strncpy" => 1,
     "strtok_r" => 1,
