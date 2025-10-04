@@ -208,12 +208,12 @@ int tool_progress_cb(void *clientp,
       num = MAX_BARLENGTH;
     memset(line, '#', num);
     line[num] = '\0';
-    msnprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
+    curl_msnprintf(format, sizeof(format), "\r%%-%ds %%5.1f%%%%", barwidth);
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
-    fprintf(bar->out, format, line, percent);
+    curl_mfprintf(bar->out, format, line, percent);
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif

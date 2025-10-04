@@ -112,9 +112,9 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 
   /* The variables are sorted in alphabetical order but as a special case
      curl_version (which is not actually a --write-out variable) is last. */
-  fprintf(stream, "\"curl_version\":");
+  curl_mfprintf(stream, "\"curl_version\":");
   jsonWriteString(stream, curl_version(), FALSE);
-  fprintf(stream, "}");
+  curl_mfprintf(stream, "}");
 }
 
 void headerJSON(FILE *stream, struct per_transfer *per)

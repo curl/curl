@@ -584,8 +584,8 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     if(!config->synthetic_error && result &&
        (!global->silent || global->showerror)) {
       const char *msg = per->errorbuffer;
-      fprintf(tool_stderr, "curl: (%d) %s\n", result,
-              msg[0] ? msg : curl_easy_strerror(result));
+      curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,
+                    msg[0] ? msg : curl_easy_strerror(result));
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
     }
@@ -595,9 +595,9 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
       if(code >= 400) {
         if(!global->silent || global->showerror)
-          fprintf(tool_stderr,
-                  "curl: (%d) The requested URL returned error: %ld\n",
-                  CURLE_HTTP_RETURNED_ERROR, code);
+          curl_mfprintf(tool_stderr,
+                        "curl: (%d) The requested URL returned error: %ld\n",
+                        CURLE_HTTP_RETURNED_ERROR, code);
         result = CURLE_HTTP_RETURNED_ERROR;
       }
     }
@@ -802,11 +802,11 @@ static CURLcode etag_compare(struct OperationConfig *config)
 
   if((PARAM_OK == file2string(&etag_from_file, file)) &&
      etag_from_file) {
-    header = aprintf("If-None-Match: %s", etag_from_file);
+    header = curl_maprintf("If-None-Match: %s", etag_from_file);
     tool_safefree(etag_from_file);
   }
   else
-    header = aprintf("If-None-Match: \"\"");
+    header = curl_maprintf("If-None-Match: \"\"");
 
   if(!header) {
     if(file)
@@ -951,7 +951,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
   DEBUGASSERT(per->outfile);
 
   if(config->output_dir && *config->output_dir) {
-    char *d = aprintf("%s/%s", config->output_dir, per->outfile);
+    char *d = curl_maprintf("%s/%s", config->output_dir, per->outfile);
     if(!d)
       return CURLE_WRITE_ERROR;
     free(per->outfile);
@@ -1498,7 +1498,7 @@ static void on_uv_timeout(uv_timer_t *req)
 {
   struct datauv *uv = (struct datauv *) req->data;
 #if DEBUG_UV
-  fprintf(tool_stderr, "parallel_event: on_uv_timeout\n");
+  curl_mfprintf(tool_stderr, "parallel_event: on_uv_timeout\n");
 #endif
   if(uv && uv->s) {
     curl_multi_socket_action(uv->s->multi, CURL_SOCKET_TIMEOUT, 0,
@@ -1513,7 +1513,7 @@ static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
   struct datauv *uv = userp;
   (void)multi;
 #if DEBUG_UV
-  fprintf(tool_stderr, "parallel_event: cb_timeout=%ld\n", timeout_ms);
+  curl_mfprintf(tool_stderr, "parallel_event: cb_timeout=%ld\n", timeout_ms);
 #endif
   if(timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
@@ -1564,8 +1564,8 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
   (void)easy;
 
 #if DEBUG_UV
-  fprintf(tool_stderr, "parallel_event: cb_socket, fd=%d, action=%x, p=%p\n",
-          (int)s, action, socketp);
+  curl_mfprintf(tool_stderr, "parallel_event: cb_socket, fd=%d, "
+                "action=%x, p=%p\n", (int)s, action, socketp);
 #endif
   switch(action) {
   case CURL_POLL_IN:
@@ -1625,12 +1625,13 @@ static CURLcode parallel_event(struct parastate *s)
 
   while(!s->mcode && (s->still_running || s->more_transfers)) {
 #if DEBUG_UV
-    fprintf(tool_stderr, "parallel_event: uv_run(), mcode=%d, %d running, "
-            "%d more\n", s->mcode, uv.s->still_running, s->more_transfers);
+    curl_mfprintf(tool_stderr, "parallel_event: uv_run(), "
+                  "mcode=%d, %d running, %d more\n", s->mcode,
+                  uv.s->still_running, s->more_transfers);
 #endif
     uv_run(uv.loop, UV_RUN_DEFAULT);
 #if DEBUG_UV
-    fprintf(tool_stderr, "parallel_event: uv_run() returned\n");
+    curl_mfprintf(tool_stderr, "parallel_event: uv_run() returned\n");
 #endif
 
     result = check_finished(s);
@@ -1673,8 +1674,8 @@ static CURLcode parallel_event(struct parastate *s)
   curl_multi_cleanup(s->multi);
 
 #if DEBUG_UV
-  fprintf(tool_stderr, "DONE parallel_event -> %d, mcode=%d, %d running, "
-          "%d more\n",
+  curl_mfprintf(tool_stderr, "DONE parallel_event -> %d, mcode=%d, "
+          "%d running, %d more\n",
           result, s->mcode, uv.s->still_running, s->more_transfers);
 #endif
   return result;
@@ -1701,9 +1702,9 @@ static CURLcode check_finished(struct parastate *s)
       curl_multi_remove_handle(s->multi, easy);
 
       if(ended->abort && (tres == CURLE_ABORTED_BY_CALLBACK)) {
-        msnprintf(ended->errorbuffer, CURL_ERROR_SIZE,
-                  "Transfer aborted due to critical error "
-                  "in another transfer");
+        curl_msnprintf(ended->errorbuffer, CURL_ERROR_SIZE,
+                       "Transfer aborted due to critical error "
+                       "in another transfer");
       }
       tres = post_per_transfer(ended, tres, &retry, &delay);
       progress_finalize(ended); /* before it goes away */
@@ -2183,7 +2184,7 @@ CURLcode operate(int argc, argv_item_t argv[])
       /* Check if we were asked to dump the embedded CA bundle */
       else if(res == PARAM_CA_EMBED_REQUESTED) {
 #ifdef CURL_CA_EMBED
-        printf("%s", curl_ca_embed);
+        curl_mprintf("%s", curl_ca_embed);
 #endif
       }
       else if(res == PARAM_LIBCURL_UNSUPPORTED_PROTOCOL)
