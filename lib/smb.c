@@ -41,9 +41,9 @@
 #include "curl_ntlm_core.h"
 #include "escape.h"
 #include "curl_endian.h"
-
-/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -718,12 +718,12 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   p += sizeof(lm);
   memcpy(p, nt, sizeof(nt));
   p += sizeof(nt);
-  p += msnprintf(p, byte_count - sizeof(nt) - sizeof(lm),
-                 "%s%c"  /* user */
-                 "%s%c"  /* domain */
-                 "%s%c"  /* OS */
-                 "%s", /* client name */
-                 smbc->user, 0, smbc->domain, 0, CURL_OS, 0, CLIENTNAME);
+  p += curl_msnprintf(p, byte_count - sizeof(nt) - sizeof(lm),
+                      "%s%c"  /* user */
+                      "%s%c"  /* domain */
+                      "%s%c"  /* OS */
+                      "%s", /* client name */
+                      smbc->user, 0, smbc->domain, 0, CURL_OS, 0, CLIENTNAME);
   p++; /* count the final null-termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
@@ -750,11 +750,11 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data,
   msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
   msg.pw_len = 0;
 
-  p += msnprintf(p, byte_count,
-                 "\\\\%s\\"  /* hostname */
-                 "%s%c"      /* share */
-                 "%s",       /* service */
-                 conn->host.name, smbc->share, 0, SERVICENAME);
+  p += curl_msnprintf(p, byte_count,
+                      "\\\\%s\\"  /* hostname */
+                      "%s%c"      /* share */
+                      "%s",       /* service */
+                      conn->host.name, smbc->share, 0, SERVICENAME);
   p++; /* count the final null-termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
