@@ -36,9 +36,9 @@
 #include "socks.h"
 #include "curlx/warnless.h"
 #include "strdup.h"
-
-/* The last 3 #include files should be in this order */
 #include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -160,8 +160,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     service.length = serviceptr_length +
       strlen(conn->socks_proxy.host.name) + 1;
-    msnprintf(service.value, service.length + 1, "%s@%s",
-              serviceptr, conn->socks_proxy.host.name);
+    curl_msnprintf(service.value, service.length + 1, "%s@%s",
+                   serviceptr, conn->socks_proxy.host.name);
 
     gss_major_status = gss_import_name(&gss_minor_status, &service,
                                        GSS_C_NT_HOSTBASED_SERVICE, &server);
