@@ -55,7 +55,6 @@
 #include "tftp.h"
 #include "progress.h"
 #include "connect.h"
-#include "strerror.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"

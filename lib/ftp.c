@@ -58,7 +58,6 @@
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
-#include "strerror.h"
 #include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "select.h"

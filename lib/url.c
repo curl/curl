@@ -80,7 +80,6 @@
 #include "progress.h"
 #include "cookie.h"
 #include "strcase.h"
-#include "strerror.h"
 #include "escape.h"
 #include "share.h"
 #include "content_encoding.h"

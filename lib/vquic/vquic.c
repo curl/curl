@@ -43,7 +43,6 @@
 #include "../rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
-#include "../strerror.h"
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 

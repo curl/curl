@@ -66,7 +66,6 @@
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 #include "../strdup.h"
-#include "../strerror.h"
 #include "../curl_printf.h"
 #include "apple.h"
 

@@ -41,7 +41,6 @@
 #include "vtls_int.h"
 #include "rustls.h"
 #include "keylog.h"
-#include "../strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
 

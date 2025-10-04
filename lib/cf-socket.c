@@ -62,7 +62,6 @@
 #include "bufq.h"
 #include "sendf.h"
 #include "if2ip.h"
-#include "strerror.h"
 #include "cfilters.h"
 #include "cf-socket.h"
 #include "connect.h"
