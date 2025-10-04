@@ -105,8 +105,7 @@
 #define HTTPSRR_WORKS
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -782,7 +781,7 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
      * accordingly to save a call to getservbyname in inside C-Ares
      */
     hints.ai_flags = ARES_AI_NUMERICSERV;
-    msnprintf(service, sizeof(service), "%d", port);
+    curl_msnprintf(service, sizeof(service), "%d", port);
     ares->num_pending = 1;
     ares_getaddrinfo(ares->channel, data->state.async.hostname,
                      service, &hints, async_ares_addrinfo_cb, data);
