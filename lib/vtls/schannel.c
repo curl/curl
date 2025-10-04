@@ -52,7 +52,6 @@
 #include "../curlx/multibyte.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../curl_printf.h"
 #include "../multiif.h"
 #include "../system_win32.h"
 #include "../curlx/version_win32.h"
@@ -110,8 +109,8 @@
 #define CERT_THUMBPRINT_DATA_LEN 20
 
 /* Uncomment to force verbose output
- * #define infof(x, y, ...) printf(y, __VA_ARGS__)
- * #define failf(x, y, ...) printf(y, __VA_ARGS__)
+ * #define infof(x, y, ...) curl_mprintf(y, __VA_ARGS__)
+ * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
 /* Offered when targeting Vista (XP SP2+) */
@@ -2586,7 +2585,7 @@ static void schannel_cleanup(void)
 
 static size_t schannel_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "Schannel");
+  return curl_msnprintf(buffer, size, "Schannel");
 }
 
 static CURLcode schannel_random(struct Curl_easy *data,
