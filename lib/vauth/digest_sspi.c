@@ -203,7 +203,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     Curl_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-    char buffer[STRERROR_LEN];
+    char buffer[SSPIERROR_LEN];
 #endif
 
     Curl_pSecFn->FreeCredentialsHandle(&credentials);
@@ -603,7 +603,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       Curl_pSecFn->CompleteAuthToken(&credentials, &resp_desc);
     else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-      char buffer[STRERROR_LEN];
+      char buffer[SSPIERROR_LEN];
 #endif
 
       Curl_pSecFn->FreeCredentialsHandle(&credentials);

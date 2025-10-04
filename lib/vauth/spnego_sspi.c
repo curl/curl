@@ -254,7 +254,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   free(chlg);
 
   if(GSS_ERROR(nego->status)) {
-    char buffer[STRERROR_LEN];
+    char buffer[SSPIERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
           Curl_sspi_strerror((int)nego->status, buffer, sizeof(buffer)));
 
@@ -269,7 +269,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     nego->status = (DWORD)Curl_pSecFn->CompleteAuthToken(nego->context,
                                                          &resp_desc);
     if(GSS_ERROR(nego->status)) {
-      char buffer[STRERROR_LEN];
+      char buffer[SSPIERROR_LEN];
       failf(data, "CompleteAuthToken failed: %s",
             Curl_sspi_strerror((int)nego->status, buffer, sizeof(buffer)));
 

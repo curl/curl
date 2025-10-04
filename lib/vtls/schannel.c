@@ -843,7 +843,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     CertFreeCertificateContext(client_certs[0]);
 
   if(sspi_status != SEC_E_OK) {
-    char buffer[STRERROR_LEN];
+    char buffer[SSPIERROR_LEN];
     failf(data, "schannel: AcquireCredentialsHandle failed: %s",
           Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
     Curl_safefree(backend->cred);
@@ -1053,7 +1053,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     &outbuf_desc, &backend->ret_flags, NULL);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
-    char buffer[STRERROR_LEN];
+    char buffer[SSPIERROR_LEN];
     Curl_safefree(backend->ctxt);
     switch(sspi_status) {
     case SEC_E_INSUFFICIENT_MEMORY:
@@ -1311,7 +1311,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
     else {
-      char buffer[STRERROR_LEN];
+      char buffer[SSPIERROR_LEN];
       switch(sspi_status) {
       case SEC_E_INSUFFICIENT_MEMORY:
         failf(data, "schannel: next InitializeSecurityContext failed: %s",
@@ -2284,7 +2284,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
     else {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-      char buffer[STRERROR_LEN];
+      char buffer[SSPIERROR_LEN];
       failf(data, "schannel: failed to read data from server: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
 #endif
@@ -2418,7 +2418,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
                                               &BuffDesc);
 
     if(sspi_status != SEC_E_OK) {
-      char buffer[STRERROR_LEN];
+      char buffer[SSPIERROR_LEN];
       failf(data, "schannel: ApplyControlToken failure: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
       result = CURLE_SEND_ERROR;
@@ -2628,7 +2628,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
                                        &pCertContextServer);
 
     if((sspi_status != SEC_E_OK) || !pCertContextServer) {
-      char buffer[STRERROR_LEN];
+      char buffer[SSPIERROR_LEN];
       failf(data, "schannel: Failed to read remote certificate context: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
       break; /* failed */
