@@ -269,7 +269,7 @@ jobs:
 
       - name: 'build ngtcp2'
         if: ${{ steps.cache-ngtcp2.outputs.cache-hit != 'true' }}
-        # building 3 times to get crypto libs for ossl, libressl and awslc installed
+        # building twice to get crypto libs for ossl, libressl and awslc installed
         run: |
           cd ~
           git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
