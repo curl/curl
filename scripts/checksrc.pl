@@ -909,6 +909,7 @@ sub scanfile {
                       "use of $bad is banned");
             my $replace = 'x' x (length($bad) + 1);
             $prefix =~ s/\*/\\*/;
+            $prefix =~ s/\+/\\+/;
             $prefix =~ s/\[/\\[/;
             $prefix =~ s/\]/\\]/;
             $prefix =~ s/\(/\\(/;
