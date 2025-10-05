@@ -239,8 +239,8 @@ int write_pidfile(const char *filename)
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write pid file: %s %s", filename,
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("Couldn't write pid file: %s (%d) %s", filename,
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
   fprintf(pidfile, "%ld\n", (long)pid);
@@ -255,8 +255,8 @@ int write_portfile(const char *filename, int port)
   FILE *portfile = fopen(filename, "wb");
   if(!portfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write port file: %s %s", filename,
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("Couldn't write port file: %s (%d) %s", filename,
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
   fprintf(portfile, "%d\n", port);
@@ -577,23 +577,23 @@ void install_signal_handlers(bool keep_sigalrm)
   /* ignore SIGHUP signal */
   old_sighup_handler = set_signal(SIGHUP, SIG_IGN, FALSE);
   if(old_sighup_handler == SIG_ERR)
-    logmsg("cannot install SIGHUP handler: %s",
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("cannot install SIGHUP handler: (%d) %s",
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef SIGPIPE
   /* ignore SIGPIPE signal */
   old_sigpipe_handler = set_signal(SIGPIPE, SIG_IGN, FALSE);
   if(old_sigpipe_handler == SIG_ERR)
-    logmsg("cannot install SIGPIPE handler: %s",
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("cannot install SIGPIPE handler: (%d) %s",
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef SIGALRM
   if(!keep_sigalrm) {
     /* ignore SIGALRM signal */
     old_sigalrm_handler = set_signal(SIGALRM, SIG_IGN, FALSE);
     if(old_sigalrm_handler == SIG_ERR)
-      logmsg("cannot install SIGALRM handler: %s",
-             curlx_strerror(errno, errbuf, sizeof(errbuf)));
+      logmsg("cannot install SIGALRM handler: (%d) %s",
+             errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
   }
 #else
   (void)keep_sigalrm;
@@ -602,22 +602,22 @@ void install_signal_handlers(bool keep_sigalrm)
   /* handle SIGINT signal with our exit_signal_handler */
   old_sigint_handler = set_signal(SIGINT, exit_signal_handler, TRUE);
   if(old_sigint_handler == SIG_ERR)
-    logmsg("cannot install SIGINT handler: %s",
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("cannot install SIGINT handler: (%d) %s",
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef SIGTERM
   /* handle SIGTERM signal with our exit_signal_handler */
   old_sigterm_handler = set_signal(SIGTERM, exit_signal_handler, TRUE);
   if(old_sigterm_handler == SIG_ERR)
-    logmsg("cannot install SIGTERM handler: %s",
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("cannot install SIGTERM handler: (%d) %s",
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #if defined(SIGBREAK) && defined(_WIN32)
   /* handle SIGBREAK signal with our exit_signal_handler */
   old_sigbreak_handler = set_signal(SIGBREAK, exit_signal_handler, TRUE);
   if(old_sigbreak_handler == SIG_ERR)
-    logmsg("cannot install SIGBREAK handler: %s",
-           curlx_strerror(errno, errbuf, sizeof(errbuf)));
+    logmsg("cannot install SIGBREAK handler: (%d) %s",
+           errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef _WIN32
 #ifndef UNDER_CE
