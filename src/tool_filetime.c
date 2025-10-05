@@ -62,15 +62,13 @@ int getfiletime(const char *filename, curl_off_t *stamp)
       }
     }
     else {
-      warnf("Failed to get filetime: "
-            "GetFileTime failed: GetLastError %08lx",
+      warnf("Failed to get filetime: GetFileTime failed: GetLastError %08lx",
             GetLastError());
     }
     CloseHandle(hfile);
   }
   else if(GetLastError() != ERROR_FILE_NOT_FOUND) {
-    warnf("Failed to get filetime: "
-          "CreateFile failed: GetLastError %08lx",
+    warnf("Failed to get filetime: CreateFile failed: GetLastError %08lx",
           GetLastError());
   }
 #else
