@@ -309,7 +309,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
    * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
    * message string, or EINVAL if 'errnum' is not a valid error number.
    */
-  if(strerror_r(err, buf, buflen) && buflen > sizeof("Unknown error ") + 20) {
+  if(strerror_r(err, buf, buflen) && buflen >= sizeof("Unknown error %d") + 20) {
     if(buf[0] == '\0')
       SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
@@ -322,18 +322,18 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   {
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
-    if(msg && buflen > 1)
+    if(msg && buflen > sizeof("%s"))
       SNPRINTF(buf, buflen, "%s", msg);
-    else if(buflen > sizeof("Unknown error ") + 20)
+    else if(buflen >= sizeof("Unknown error %d"))
       SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #else
   {
     /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
-    if(msg && buflen > 1)
+    if(msg && buflen >= sizeof("%s"))
       SNPRINTF(buf, buflen, "%s", msg);
-    else if(buflen > sizeof("Unknown error ") + 20)
+    else if(buflen >= sizeof("Unknown error %d"))
       SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #endif
