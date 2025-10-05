@@ -320,7 +320,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
   struct connectdata *oldest_idle = NULL;
   struct cpool_bundle *bundle;
   struct curltime now;
-  timediff_t highscore =- 1;
+  timediff_t highscore = -1;
   timediff_t score;
 
   now = curlx_now();
