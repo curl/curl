@@ -73,7 +73,7 @@ jobs:
           cache-name: cache-openssl-http3-no-deprecated
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-no-deprecated
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
 
       - name: 'cache libressl'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -484,7 +484,7 @@ jobs:
           cache-name: cache-openssl-http3-no-deprecated
         with:
           path: ~/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}-no-deprecated
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache libressl'
