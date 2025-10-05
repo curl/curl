@@ -1000,8 +1000,9 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
-      if(qual != CURL_TELQUAL_SEND || tn->us[CURL_TELOPT_NEW_ENVIRON] != CURL_YES)
-        return CURLE_OK;
+      if(qual != CURL_TELQUAL_SEND ||
+         tn->us[CURL_TELOPT_NEW_ENVIRON] != CURL_YES)
+           return CURLE_OK;
       len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
                       CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
                       CURL_TELQUAL_IS);
