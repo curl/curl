@@ -97,8 +97,7 @@ static CURLcode test_unit1620(const char *arg)
   fail_unless(rc == CURLE_URL_MALFORMAT,
               "Curl_connect() failed to return CURLE_URL_MALFORMAT");
 
-  rc = Curl_init_userdefined(empty);
-  fail_unless(rc == CURLE_OK, "Curl_userdefined() failed");
+  Curl_init_userdefined(empty);
 
   rc = Curl_init_do(empty, empty->conn);
   fail_unless(rc == CURLE_OK, "Curl_init_do() failed");
