@@ -30,7 +30,7 @@
 #ifdef _WIN32
 #include "winapi.h"
 
-#ifdef BUILDING_LIBCURL
+#ifndef WITHOUT_LIBCURL
 #include <curl/mprintf.h>
 #define SNPRINTF curl_msnprintf
 #else
@@ -42,7 +42,7 @@
 #else
 #define SNPRINTF snprintf
 #endif
-#endif /* !BUILDING_LIBCURL */
+#endif /* !WITHOUT_LIBCURL */
 
 /* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.

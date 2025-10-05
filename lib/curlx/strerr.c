@@ -34,7 +34,7 @@
 
 #include <curl/curl.h>
 
-#ifdef BUILDING_LIBCURL
+#ifndef WITHOUT_LIBCURL
 #include <curl/mprintf.h>
 #define SNPRINTF curl_msnprintf
 #else
@@ -46,7 +46,7 @@
 #else
 #define SNPRINTF snprintf
 #endif
-#endif /* !BUILDING_LIBCURL */
+#endif /* !WITHOUT_LIBCURL */
 
 #include "winapi.h"
 #include "strerr.h"
