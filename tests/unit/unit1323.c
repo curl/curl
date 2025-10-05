@@ -47,9 +47,12 @@ static CURLcode test_unit1323(const char *arg)
     if(result != tests[i].result) {
       curl_mprintf("%ld.%06u to %ld.%06u got %" FMT_TIMEDIFF_T
                    ", but expected %" FMT_TIMEDIFF_T "\n",
-                   (long)tests[i].first.tv_sec, tests[i].first.tv_usec,
-                   (long)tests[i].second.tv_sec, tests[i].second.tv_usec,
-                   result, tests[i].result);
+                   (long)tests[i].first.tv_sec,
+                   tests[i].first.tv_usec,
+                   (long)tests[i].second.tv_sec,
+                   tests[i].second.tv_usec,
+                   result,
+                   tests[i].result);
       fail("unexpected result!");
     }
   }
