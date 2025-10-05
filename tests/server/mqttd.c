@@ -557,8 +557,10 @@ static curl_socket_t mqttit(curl_socket_t fd)
       logmsg("SUBSCRIBE to '%s' [%d]", topic, packet_id);
       stream = test2fopen(testno, logdir);
       if(!stream) {
+        char errbuf[STRERROR_LEN];
         error = errno;
-        logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+        logmsg("fopen() failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
         logmsg("Couldn't open test file %ld", testno);
         goto end;
       }
@@ -687,7 +689,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
 
     if(rc < 0) {
       logmsg("select() failed with error (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return FALSE;
     }
 

@@ -104,8 +104,10 @@ static int store_incoming(const unsigned char *data, size_t size,
   /* Open request dump file. */
   server = fopen(dumpfile, "ab");
   if(!server) {
+    char errbuf[STRERROR_LEN];
     int error = errno;
-    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     logmsg("Error opening file '%s'", dumpfile);
     return -1;
   }
