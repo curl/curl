@@ -947,10 +947,19 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   size_t len;
   int err;
   struct connectdata *conn = data->conn;
+  int opt;
+  int qual;
 
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
-  switch(CURL_SB_GET(tn)) {
+  opt = CURL_SB_GET(tn);
+  qual = (CURL_SB_LEN(tn) > 0) ? CURL_SB_GET(tn) : -1;
+
+  switch(opt) {
     case CURL_TELOPT_TTYPE:
+      if(qual != CURL_TELQUAL_SEND || tn->us[CURL_TELOPT_TTYPE] != CURL_YES)
+        return CURLE_OK;
+      if(!tn->subopt_ttype)
+        return CURLE_OK;
       if(bad_option(tn->subopt_ttype))
         return CURLE_BAD_FUNCTION_ARGUMENT;
       if(strlen(tn->subopt_ttype) > 1000) {
@@ -970,6 +979,10 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
+      if(qual != CURL_TELQUAL_SEND || tn->us[CURL_TELOPT_XDISPLOC] != CURL_YES)
+        return CURLE_OK;
+      if(!tn->subopt_xdisploc)
+        return CURLE_OK;
       if(bad_option(tn->subopt_xdisploc))
         return CURLE_BAD_FUNCTION_ARGUMENT;
       if(strlen(tn->subopt_xdisploc) > 1000) {
@@ -987,6 +1000,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
+      if(qual != CURL_TELQUAL_SEND || tn->us[CURL_TELOPT_NEW_ENVIRON] != CURL_YES)
+        return CURLE_OK;
       len = msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
                       CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
                       CURL_TELQUAL_IS);
