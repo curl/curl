@@ -309,7 +309,8 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
    * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
    * message string, or EINVAL if 'errnum' is not a valid error number.
    */
-  if(strerror_r(err, buf, buflen) && buflen > sizeof("Unknown error ") + 20) {
+  if(strerror_r(err, buf, buflen) &&
+     buflen > sizeof("Unknown error ") + 20) {
     if(buf[0] == '\0')
       SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
