@@ -79,7 +79,7 @@
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
   size_t dest_len; /* total length of destination, including NUL */
-  char *dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
+  char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
 
 
@@ -91,13 +91,13 @@ static void cpool_discard_conn(struct cpool *cpool,
 static struct cpool_bundle *cpool_bundle_create(const char *dest)
 {
   struct cpool_bundle *bundle;
-  size_t dest_len = strlen(dest);
+  size_t dest_len = strlen(dest) + 1;
 
-  bundle = calloc(1, sizeof(*bundle) + dest_len);
+  bundle = calloc(1, sizeof(*bundle) + dest_len - 1);
   if(!bundle)
     return NULL;
   Curl_llist_init(&bundle->conns, NULL);
-  bundle->dest_len = dest_len + 1;
+  bundle->dest_len = dest_len;
   memcpy(bundle->dest, dest, bundle->dest_len);
   return bundle;
 }
