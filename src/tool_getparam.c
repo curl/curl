@@ -196,6 +196,7 @@ static const struct LongShort aliases[]= {
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG|ARG_TLS, ' ', C_KEY_TYPE},
+  {"knownhosts",                 ARG_FILE, ' ', C_KNOWNHOSTS},
   {"krb",                        ARG_STRG|ARG_DEPR, ' ', C_KRB},
   {"krb4",                       ARG_STRG|ARG_DEPR, ' ', C_KRB4},
   {"libcurl",                    ARG_STRG, ' ', C_LIBCURL},
@@ -2223,6 +2224,9 @@ static ParameterError opt_file(struct OperationConfig *config,
     break;
   case C_KEY: /* --key */
     err = getstr(&config->key, nextarg, DENY_BLANK);
+    break;
+  case C_KNOWNHOSTS: /* --knownhosts */
+    err = getstr(&config->knownhosts, nextarg, DENY_BLANK);
     break;
   case C_NETRC_FILE: /* --netrc-file */
     err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
