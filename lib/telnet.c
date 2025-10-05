@@ -759,8 +759,8 @@ static void printsub(struct Curl_easy *data,
       switch(pointer[0]) {
       case CURL_TELOPT_TTYPE:
       case CURL_TELOPT_XDISPLOC:
-        pointer[length] = 0;
-        infof(data, " \"%s\"", &pointer[2]);
+        infof(data, " \"%.*s\"",
+              (int)((length > 2) ? (length - 2) : 0), &pointer[2]);
         break;
       case CURL_TELOPT_NEW_ENVIRON:
         if(pointer[1] == CURL_TELQUAL_IS) {
