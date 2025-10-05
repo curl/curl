@@ -955,7 +955,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
 
   switch(opt) {
     case CURL_TELOPT_TTYPE:
-      if(CURL_SB_LEN(tn) < 1) return CURLE_OK;
+      if(CURL_SB_LEN(tn) < 1)
+        return CURLE_OK;
       qual = CURL_SB_GET(tn);
 
       if(qual != CURL_TELQUAL_SEND || tn->us[CURL_TELOPT_TTYPE] != CURL_YES)
@@ -981,7 +982,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
-      if(CURL_SB_LEN(tn) < 1) return CURLE_OK;
+      if(CURL_SB_LEN(tn) < 1)
+        return CURLE_OK;
       qual = CURL_SB_GET(tn);
 
       if(qual != CURL_TELQUAL_SEND || tn->us[CURL_TELOPT_XDISPLOC] != CURL_YES)
@@ -1005,7 +1007,8 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
-      if(CURL_SB_LEN(tn) < 1) return CURLE_OK;
+      if(CURL_SB_LEN(tn) < 1)
+        return CURLE_OK;
       qual = CURL_SB_GET(tn);
 
       if(qual != CURL_TELQUAL_SEND ||
