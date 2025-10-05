@@ -181,9 +181,12 @@ struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy)
   struct ntlmdata *ntlm = Curl_conn_meta_get(conn, key);
   if(!ntlm) {
     ntlm = calloc(1, sizeof(*ntlm));
-    if(!ntlm ||
-       Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor))
+    if(!ntlm)
       return NULL;
+    if(Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor)) {
+      ntlm_conn_dtor(ntlm);
+      return NULL;
+    }
   }
   return ntlm;
 }
@@ -213,9 +216,12 @@ struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn)
   struct kerberos5data *krb5 = Curl_conn_meta_get(conn, CURL_META_KRB5_CONN);
   if(!krb5) {
     krb5 = calloc(1, sizeof(*krb5));
-    if(!krb5 ||
-       Curl_conn_meta_set(conn, CURL_META_KRB5_CONN, krb5, krb5_conn_dtor))
+    if(!krb5)
       return NULL;
+    if(Curl_conn_meta_set(conn, CURL_META_KRB5_CONN, krb5, krb5_conn_dtor)) {
+      krb5_conn_dtor(krb5);
+      return NULL;
+    }
   }
   return krb5;
 }
@@ -239,9 +245,12 @@ struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn)
   struct gsasldata *gsasl = Curl_conn_meta_get(conn, CURL_META_GSASL_CONN);
   if(!gsasl) {
     gsasl = calloc(1, sizeof(*gsasl));
-    if(!gsasl ||
-       Curl_conn_meta_set(conn, CURL_META_GSASL_CONN, gsasl, gsasl_conn_dtor))
+    if(!gsasl)
       return NULL;
+    if(Curl_conn_meta_set(conn, CURL_META_GSASL_CONN, gsasl, gsasl_conn_dtor)) {
+      gsasl_conn_dtor(gsasl);
+      return NULL;
+    }
   }
   return gsasl;
 }
@@ -267,9 +276,12 @@ struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
   struct negotiatedata *nego = Curl_conn_meta_get(conn, key);
   if(!nego) {
     nego = calloc(1, sizeof(*nego));
-    if(!nego ||
-       Curl_conn_meta_set(conn, key, nego, nego_conn_dtor))
+    if(!nego)
       return NULL;
+    if(Curl_conn_meta_set(conn, key, nego, nego_conn_dtor)) {
+      nego_conn_dtor(nego);
+      return NULL;
+    }
   }
   return nego;
 }
