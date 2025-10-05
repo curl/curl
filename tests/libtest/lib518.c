@@ -52,9 +52,9 @@ static void t518_store_errmsg(const char *msg, int err)
   if(!err)
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s", msg);
   else {
-    char buffer[STRERROR_LEN];
+    char errbuf[STRERROR_LEN];
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s, errno %d, %s", msg,
-                   err, curlx_strerror(err, buffer, sizeof(buffer)));
+                   err, curlx_strerror(err, errbuf, sizeof(errbuf)));
   }
 }
 

@@ -49,9 +49,9 @@ static void t537_store_errmsg(const char *msg, int err)
   if(!err)
     curl_msnprintf(t537_msgbuff, sizeof(t537_msgbuff), "%s", msg);
   else {
-    char buffer[STRERROR_LEN];
+    char errbuf[STRERROR_LEN];
     curl_msnprintf(t537_msgbuff, sizeof(t537_msgbuff), "%s, errno %d, %s", msg,
-                   err, curlx_strerror(err, buffer, sizeof(buffer)));
+                   err, curlx_strerror(err, errbuf, sizeof(errbuf)));
   }
 }
 

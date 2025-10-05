@@ -36,7 +36,7 @@ static CURLcode test_lib505(const char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  char buffer[STRERROR_LEN];
+  char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
   struct_stat file_info;
@@ -55,7 +55,7 @@ static CURLcode test_lib505(const char *URL)
   hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen failed with error (%d) %s\n",
-                  errno, curlx_strerror(errno, buffer, sizeof(buffer)));
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_MAJOR_BAD; /* if this happens things are major weird */
   }
@@ -70,7 +70,7 @@ static CURLcode test_lib505(const char *URL)
   if(hd == -1) {
     /* can't open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
-                  errno, curlx_strerror(errno, buffer, sizeof(buffer)));
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     curlx_fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
