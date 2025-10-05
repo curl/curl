@@ -732,7 +732,7 @@ static void printsub(struct Curl_easy *data,
       }
     }
     else
-      infof(data, "%d (unknown)", pointer[i]);
+      infof(data, "%d (unknown)", pointer[0]);
 
     switch(pointer[0]) {
     case CURL_TELOPT_NAWS:
