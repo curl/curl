@@ -306,7 +306,7 @@ mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
                           bool prefer_rfc)
 {
   if(id == MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8)
-    curl_msnprintf(buf, buf_size, "%s", "TLS_ECJPAKE_WITH_AES_128_CCM_8");
+    curl_msnprintf(buf, buf_size, "TLS_ECJPAKE_WITH_AES_128_CCM_8");
   else
     return Curl_cipher_suite_get_str(id, buf, buf_size, prefer_rfc);
   return 0;
