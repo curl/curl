@@ -885,12 +885,14 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
       fail = 1;
     }
     else if(got < 0) {
+      char errbuf[STRERROR_LEN];
       int error = SOCKERRNO;
       if(EAGAIN == error || SOCKEWOULDBLOCK == error) {
         /* nothing to read at the moment */
         return 0;
       }
-      logmsg("recv() returned error (%d) %s", error, sstrerror(error));
+      logmsg("recv() returned error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       fail = 1;
     }
     if(fail) {
@@ -1180,10 +1182,11 @@ retry:
             quarters--;
             res = curlx_wait_ms(250);
             if(res) {
+              char errbuf[STRERROR_LEN];
               /* should not happen */
               error = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
-                     error, sstrerror(error));
+                     error, curlx_strerror(error, errbuf, sizeof(errbuf)));
               break;
             }
           }
@@ -1214,6 +1217,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   srvr_sockaddr_union_t serveraddr;
   curl_socket_t serverfd;
   int error;
+  char errbuf[STRERROR_LEN];
   int rc = 0;
   const char *op_br = "";
   const char *cl_br = "";
@@ -1236,7 +1240,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   if(CURL_SOCKET_BAD == serverfd) {
     error = SOCKERRNO;
     logmsg("Error creating socket for server connection (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
 
@@ -1256,7 +1260,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   if(curlx_nonblock(serverfd, TRUE)) {
     error = SOCKERRNO;
     logmsg("curlx_nonblock(TRUE) failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1338,8 +1342,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
       }
     }
 error:
-    logmsg("Error connecting to server port %hu (%d) %s",
-           port, error, sstrerror(error));
+    logmsg("Error connecting to server port %hu (%d) %s", port,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1350,7 +1354,7 @@ success:
   if(curlx_nonblock(serverfd, FALSE)) {
     error = SOCKERRNO;
     logmsg("curlx_nonblock(FALSE) failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
@@ -1814,6 +1818,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 {
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int error;
+  char errbuf[STRERROR_LEN];
   int flag = 1;
 
   if(MAX_SOCKETS == num_sockets) {
@@ -1836,14 +1841,14 @@ static curl_socket_t accept_connection(curl_socket_t sock)
       return 0;
     }
     logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
 
   if(curlx_nonblock(msgsock, TRUE)) {
     error = SOCKERRNO;
     logmsg("curlx_nonblock failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
   }
@@ -1852,7 +1857,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
                 (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_KEEPALIVE) failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(msgsock);
     return CURL_SOCKET_BAD;
   }
@@ -1979,6 +1984,7 @@ static int test_sws(int argc, char *argv[])
   struct sws_httprequest *req = NULL;
   int rc = 0;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
   const char *connecthost = "127.0.0.1";
   char port_str[11];
@@ -2154,7 +2160,8 @@ static int test_sws(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2163,13 +2170,13 @@ static int test_sws(int argc, char *argv[])
                 (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
   if(curlx_nonblock(sock, TRUE)) {
     error = SOCKERRNO;
     logmsg("curlx_nonblock failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2199,12 +2206,12 @@ static int test_sws(int argc, char *argv[])
     error = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
-      logmsg("Error binding socket on path %s (%d) %s",
-             unix_socket, error, sstrerror(error));
+      logmsg("Error binding socket on path %s (%d) %s", unix_socket,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     else
 #endif
-      logmsg("Error binding socket on port %hu (%d) %s",
-             port, error, sstrerror(error));
+      logmsg("Error binding socket on port %hu (%d) %s", port,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2225,7 +2232,7 @@ static int test_sws(int argc, char *argv[])
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       sclose(sock);
       goto sws_cleanup;
     }
@@ -2263,7 +2270,8 @@ static int test_sws(int argc, char *argv[])
   rc = listen(sock, 50);
   if(rc) {
     error = SOCKERRNO;
-    logmsg("listen() failed with error (%d) %s", error, sstrerror(error));
+    logmsg("listen() failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto sws_cleanup;
   }
 
@@ -2343,7 +2351,8 @@ static int test_sws(int argc, char *argv[])
 
     if(rc < 0) {
       error = SOCKERRNO;
-      logmsg("select() failed with error (%d) %s", error, sstrerror(error));
+      logmsg("select() failed with error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       goto sws_cleanup;
     }
 

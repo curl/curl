@@ -34,9 +34,23 @@
 
 #include <curl/curl.h>
 
+#ifdef BUILDING_LIBCURL
+#include <curl/mprintf.h>
+#define SNPRINTF curl_msnprintf
+#else
+/* when built for the test servers */
+
+/* adjust for old MSVC */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define SNPRINTF _snprintf
+#else
+#define SNPRINTF snprintf
+#endif
+#endif /* !BUILDING_LIBCURL */
+
 #include "winapi.h"
 #include "strerr.h"
-/* The last 3 #include files should be in this order */
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -276,7 +290,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
 #ifndef UNDER_CE
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
-    curl_msnprintf(buf, buflen, "%s", sys_errlist[err]);
+    SNPRINTF(buf, buflen, "%s", sys_errlist[err]);
   else
 #endif
   {
@@ -285,7 +299,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
       !get_winsock_error(err, buf, buflen) &&
 #endif
       !curlx_get_winapi_error(err, buf, buflen))
-      curl_msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
+      SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
 #else /* not Windows coming up */
 
@@ -297,7 +311,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   */
   if(strerror_r(err, buf, buflen)) {
     if('\0' == buf[0])
-      curl_msnprintf(buf, buflen, "Unknown error %d", err);
+      SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R)
  /*
@@ -309,18 +323,18 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     if(msg)
-      curl_msnprintf(buf, buflen, "%s", msg);
+      SNPRINTF(buf, buflen, "%s", msg);
     else
-      curl_msnprintf(buf, buflen, "Unknown error %d", err);
+      SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #else
   {
     /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
     if(msg)
-      curl_msnprintf(buf, buflen, "%s", msg);
+      SNPRINTF(buf, buflen, "%s", msg);
     else
-      curl_msnprintf(buf, buflen, "Unknown error %d", err);
+      SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #endif
 

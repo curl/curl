@@ -658,6 +658,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
   do {
     ssize_t rc;
     int error = 0;
+    char errbuf[STRERROR_LEN];
     curl_socket_t sockfd = listenfd;
     int maxfd = (int)sockfd;
 
@@ -694,7 +695,8 @@ static bool mqttd_incoming(curl_socket_t listenfd)
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept() failed with error (%d) %s", error, sstrerror(error));
+        logmsg("accept() failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       }
       else {
         logmsg("====> Client connect, fd %ld. "
@@ -720,6 +722,7 @@ static int test_mqttd(int argc, char *argv[])
   int wroteportfile = 0;
   bool juggle_again;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
 
   pidname = ".mqttd.pid";
@@ -825,7 +828,8 @@ static int test_mqttd(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto mqttd_cleanup;
   }
 

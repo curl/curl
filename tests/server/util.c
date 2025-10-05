@@ -189,15 +189,6 @@ int win32_init(void)
   atexit(win32_cleanup);
   return 0;
 }
-
-/* socket-safe strerror (works on Winsock errors, too) */
-const char *sstrerror(int err)
-{
-  static char buf[512];
-  return curlx_winapi_strerror(err, buf, sizeof(buf));
-}
-#else
-#define sstrerror(e) strerror(e)
 #endif  /* _WIN32 */
 
 /* fopens the test case file */
@@ -687,6 +678,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                      struct sockaddr_un *sau)
 {
   int error;
+  char errbuf[STRERROR_LEN];
   int rc;
   size_t len = strlen(unix_socket);
 
@@ -703,8 +695,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket already exists. Perhaps it is stale? */
     curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(CURL_SOCKET_BAD == unixfd) {
-      logmsg("Failed to create socket at %s (%d) %s",
-             unix_socket, SOCKERRNO, sstrerror(SOCKERRNO));
+      logmsg("Failed to create socket at %s (%d) %s", unix_socket,
+             SOCKERRNO, curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
       return -1;
     }
     /* check whether the server is alive */
@@ -712,8 +704,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     error = SOCKERRNO;
     sclose(unixfd);
     if(rc && error != SOCKECONNREFUSED) {
-      logmsg("Failed to connect to %s (%d) %s",
-             unix_socket, error, sstrerror(error));
+      logmsg("Failed to connect to %s (%d) %s", unix_socket,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return rc;
     }
     /* socket server is not alive, now check if it was actually a socket. */
@@ -724,8 +716,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = lstat(unix_socket, &statbuf);
 #endif
     if(rc) {
-      logmsg("Error binding socket, failed to stat %s (%d) %s",
-             unix_socket, errno, strerror(errno));
+      logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
+             errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
       return rc;
     }
 #ifdef S_IFSOCK
@@ -762,6 +754,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
   int delay = 20;
   int attempt = 0;
   int error = 0;
+  char errbuf[STRERROR_LEN];
 
 #ifndef USE_UNIX_SOCKETS
   (void)unix_socket;
@@ -775,14 +768,14 @@ curl_socket_t sockdaemon(curl_socket_t sock,
     if(rc) {
       error = SOCKERRNO;
       logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       if(maxretr) {
         rc = curlx_wait_ms(delay);
         if(rc) {
           /* should not happen */
           error = SOCKERRNO;
           logmsg("curlx_wait_ms() failed with error (%d) %s",
-                 error, sstrerror(error));
+                 error, curlx_strerror(error, errbuf, sizeof(errbuf)));
           sclose(sock);
           return CURL_SOCKET_BAD;
         }
@@ -836,12 +829,12 @@ curl_socket_t sockdaemon(curl_socket_t sock,
     error = SOCKERRNO;
 #ifdef USE_UNIX_SOCKETS
     if(socket_domain == AF_UNIX)
-      logmsg("Error binding socket on path %s (%d) %s",
-             unix_socket, error, sstrerror(error));
+      logmsg("Error binding socket on path %s (%d) %s", unix_socket,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     else
 #endif
-      logmsg("Error binding socket on port %hu (%d) %s",
-             *listenport, error, sstrerror(error));
+      logmsg("Error binding socket on port %hu (%d) %s", *listenport,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }
@@ -865,7 +858,7 @@ curl_socket_t sockdaemon(curl_socket_t sock,
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       sclose(sock);
       return CURL_SOCKET_BAD;
     }
@@ -902,8 +895,8 @@ curl_socket_t sockdaemon(curl_socket_t sock,
   rc = listen(sock, 5);
   if(rc) {
     error = SOCKERRNO;
-    logmsg("listen(%ld, 5) failed with error (%d) %s",
-           (long)sock, error, sstrerror(error));
+    logmsg("listen(%ld, 5) failed with error (%d) %s", (long)sock,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     sclose(sock);
     return CURL_SOCKET_BAD;
   }

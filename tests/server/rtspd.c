@@ -582,6 +582,7 @@ storerequest_cleanup:
 static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
 {
   int error;
+  char errbuf[STRERROR_LEN];
   int fail = 0;
   int done_processing = 0;
   char *reqbuf = req->reqbuf;
@@ -642,7 +643,8 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     }
     else if(got < 0) {
       error = SOCKERRNO;
-      logmsg("recv() returned error (%d) %s", error, sstrerror(error));
+      logmsg("recv() returned error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       fail = 1;
     }
     if(fail) {
@@ -945,10 +947,11 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
             if(got_exit_signal)
               break;
             if(res) {
+              char errbuf[STRERROR_LEN];
               /* should not happen */
               error = SOCKERRNO;
               logmsg("curlx_wait_ms() failed with error (%d) %s",
-                     error, sstrerror(error));
+                     error, curlx_strerror(error, errbuf, sizeof(errbuf)));
               break;
             }
           }
@@ -987,6 +990,7 @@ static int test_rtspd(int argc, char *argv[])
   struct rtspd_httprequest req;
   int rc;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
 
   memset(&req, 0, sizeof(req));
@@ -1092,7 +1096,8 @@ static int test_rtspd(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1101,7 +1106,7 @@ static int test_rtspd(int argc, char *argv[])
                 (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1125,8 +1130,8 @@ static int test_rtspd(int argc, char *argv[])
 #endif /* USE_IPV6 */
   if(rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu (%d) %s",
-           port, error, sstrerror(error));
+    logmsg("Error binding socket on port %hu (%d) %s", port,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1147,7 +1152,7 @@ static int test_rtspd(int argc, char *argv[])
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       sclose(sock);
       goto server_cleanup;
     }
@@ -1180,7 +1185,7 @@ static int test_rtspd(int argc, char *argv[])
   if(rc) {
     error = SOCKERRNO;
     logmsg("listen() failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto server_cleanup;
   }
 
@@ -1207,7 +1212,7 @@ static int test_rtspd(int argc, char *argv[])
     if(CURL_SOCKET_BAD == msgsock) {
       error = SOCKERRNO;
       logmsg("MAJOR ERROR, accept() failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       break;
     }
 

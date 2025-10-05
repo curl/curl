@@ -42,7 +42,6 @@
 #else
 #define SNPRINTF snprintf
 #endif
-
 #endif /* !BUILDING_LIBCURL */
 
 /* This is a helper function for curlx_strerror that converts Windows API error
