@@ -130,7 +130,7 @@ struct formats {
 
 struct errmsg {
   int e_code;
-  const char *e_msg;
+  char e_msg[STRERROR_LEN];
 };
 
 typedef union {
@@ -174,7 +174,7 @@ static struct errmsg errmsgs[] = {
   { TFTP_EBADID,       "Unknown transfer ID" },
   { TFTP_EEXISTS,      "File already exists" },
   { TFTP_ENOUSER,      "No such user" },
-  { -1,                0 }
+  { -1,                "" }
 };
 
 static const struct formats formata[] = {
@@ -1363,7 +1363,7 @@ static void nak(int error)
     if(pe->e_code == error)
       break;
   if(pe->e_code < 0) {
-    pe->e_msg = strerror(error - 100);
+    curlx_strerror(error - 100, pe->e_msg, sizeof(pe->e_msg));
     tp->th_code = TFTP_EUNDEF;   /* set 'undef' errorcode */
   }
   length = (int)strlen(pe->e_msg);
