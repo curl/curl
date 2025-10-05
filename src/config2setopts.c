@@ -85,8 +85,8 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     if(result < 0) {
       char buffer[STRERROR_LEN];
       int error = errno;
-      warnf("Setting type of service to %d failed with errno %d: %s",
-            tos, error, curlx_strerror(error, buffer, sizeof(buffer)));
+      warnf("Setting type of service to %d failed with errno %d: %s", tos,
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
   }
 #endif
@@ -97,8 +97,8 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
                   (void *)&priority, sizeof(priority)) != 0) {
       char buffer[STRERROR_LEN];
       int error = errno;
-      warnf("VLAN priority %d failed with errno %d: %s",
-            priority, error, curlx_strerror(error, buffer, sizeof(buffer)));
+      warnf("VLAN priority %d failed with errno %d: %s", priority,
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
   }
 #endif
