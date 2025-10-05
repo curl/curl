@@ -732,9 +732,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     rc = lstat(unix_socket, &statbuf);
 #endif
     if(rc) {
-      error = errno;
       logmsg("Error binding socket, failed to stat %s (%d) %s", unix_socket,
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+             errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
       return rc;
     }
 #ifdef S_IFSOCK
