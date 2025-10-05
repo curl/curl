@@ -39,7 +39,6 @@
 #include "../multiif.h"
 #include "../connect.h"
 #include "../progress.h"
-#include "../strerror.h"
 #include "../select.h"
 #include "../http1.h"
 #include "vquic.h"
