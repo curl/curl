@@ -322,9 +322,9 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   {
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
-    if(msg)
+    if(msg && buflen > strlen(msg))
       SNPRINTF(buf, buflen, "%s", msg);
-    else
+    else if(buflen > sizeof("Unknown error ") + 20)
       SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #else
