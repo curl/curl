@@ -301,7 +301,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
       !curlx_get_winapi_error(err, buf, buflen))
       SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
-#else /* not Windows coming up */
+#else /* !_WIN32 */
 
 #if defined(HAVE_STRERROR_R) && defined(HAVE_POSIX_STRERROR_R)
   /*
@@ -339,7 +339,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   }
 #endif
 
-#endif /* end of not Windows */
+#endif /* _WIN32 */
 
   /* strip trailing '\r\n' or '\n'. */
   p = strrchr(buf, '\n');
