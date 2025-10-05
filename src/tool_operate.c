@@ -2273,7 +2273,6 @@ CURLcode operate(int argc, argv_item_t argv[])
   }
 
   varcleanup();
-  curl_free(global->knownhosts);
 
   return result;
 }

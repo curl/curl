@@ -94,6 +94,7 @@ struct OperationConfig {
   char *proxyuserpwd;
   char *proxy;
   char *noproxy;
+  char *knownhosts;
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
@@ -335,8 +336,6 @@ struct GlobalConfig {
   FILE *trace_stream;
   char *libcurl;                  /* Output libcurl code to this filename */
   char *ssl_sessions;             /* file to load/save SSL session tickets */
-  char *knownhosts;               /* known host path, if set. curl_free()
-                                     this */
   struct tool_var *variables;
   struct OperationConfig *first;
   struct OperationConfig *current;

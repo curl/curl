@@ -189,6 +189,7 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->ech);
   tool_safefree(config->ech_config);
   tool_safefree(config->ech_public);
+  tool_safefree(config->knownhosts);
 }
 
 void config_free(struct OperationConfig *config)

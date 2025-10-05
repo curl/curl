@@ -195,7 +195,7 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_SSH_COMPRESSION, 1);
 
   if(!config->insecure_ok) {
-    char *known = global->knownhosts;
+    char *known = config->knownhosts;
 
     if(!known)
       known = findfile(".ssh/known_hosts", FALSE);
@@ -203,12 +203,12 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       /* new in curl 7.19.6 */
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
-        global->knownhosts = NULL;
+        config->knownhosts = NULL;
         curl_free(known);
         return result;
       }
       /* store it in global to avoid repeated checks */
-      global->knownhosts = known;
+      config->knownhosts = known;
     }
     else if(!config->hostpubmd5 && !config->hostpubsha256) {
       errorf("Couldn't find a known_hosts file");

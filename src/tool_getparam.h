@@ -139,6 +139,7 @@ typedef enum {
   C_KEEPALIVE_TIME,
   C_KEY,
   C_KEY_TYPE,
+  C_KNOWNHOSTS,
   C_KRB,
   C_KRB4,
   C_LIBCURL,
