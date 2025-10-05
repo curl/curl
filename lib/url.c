@@ -355,10 +355,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
  * Initialize the UserDefined fields within a Curl_easy.
  * This may be safely called on a new or existing Curl_easy.
  */
-CURLcode Curl_init_userdefined(struct Curl_easy *data)
+void Curl_init_userdefined(struct Curl_easy *data)
 {
   struct UserDefined *set = &data->set;
-  CURLcode result = CURLE_OK;
 
   set->out = stdout;  /* default output to stdout */
   set->in_set = stdin;  /* default input from stdin */
@@ -476,8 +475,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->ws_raw_mode = FALSE;
   set->ws_no_auto_pong = FALSE;
 #endif
-
-  return result;
 }
 
 /* easy->meta_hash destructor. Should never be called as elements
@@ -501,7 +498,6 @@ static void easy_meta_freeentry(void *p)
 
 CURLcode Curl_open(struct Curl_easy **curl)
 {
-  CURLcode result;
   struct Curl_easy *data;
 
   /* simple start-up: alloc the struct, init it with zeroes and return */
@@ -532,21 +528,10 @@ CURLcode Curl_open(struct Curl_easy **curl)
   Curl_llist_init(&data->state.httphdrs, NULL);
 #endif
   Curl_netrc_init(&data->state.netrc);
+  Curl_init_userdefined(data);
 
-  result = Curl_init_userdefined(data);
-
-  if(result) {
-    curlx_dyn_free(&data->state.headerb);
-    Curl_freeset(data);
-    Curl_req_free(&data->req, data);
-    Curl_hash_destroy(&data->meta_hash);
-    data->magic = 0;
-    free(data);
-    data = NULL;
-  }
-  else
-    *curl = data;
-  return result;
+  *curl = data;
+  return CURLE_OK;
 }
 
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
