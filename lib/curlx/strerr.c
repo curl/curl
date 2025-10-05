@@ -304,21 +304,21 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
 #else /* not Windows coming up */
 
 #if defined(HAVE_STRERROR_R) && defined(HAVE_POSIX_STRERROR_R)
- /*
-  * The POSIX-style strerror_r() may set errno to ERANGE if insufficient
-  * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
-  * message string, or EINVAL if 'errnum' is not a valid error number.
-  */
+  /*
+   * The POSIX-style strerror_r() may set errno to ERANGE if insufficient
+   * storage is supplied via 'strerrbuf' and 'buflen' to hold the generated
+   * message string, or EINVAL if 'errnum' is not a valid error number.
+   */
   if(strerror_r(err, buf, buflen)) {
     if('\0' == buf[0])
       SNPRINTF(buf, buflen, "Unknown error %d", err);
   }
 #elif defined(HAVE_STRERROR_R) && defined(HAVE_GLIBC_STRERROR_R)
- /*
-  * The glibc-style strerror_r() only *might* use the buffer we pass to
-  * the function, but it always returns the error message as a pointer,
-  * so we must copy that string unconditionally (if non-NULL).
-  */
+  /*
+   * The glibc-style strerror_r() only *might* use the buffer we pass to
+   * the function, but it always returns the error message as a pointer,
+   * so we must copy that string unconditionally (if non-NULL).
+   */
   {
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
