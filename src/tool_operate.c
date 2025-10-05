@@ -606,8 +606,8 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     rc = fwrite_xattr(curl, per->url, fileno(outs->stream));
     if(rc) {
       char errbuf[STRERROR_LEN];
-      warnf("Error setting extended attributes on '%s': %s",
-            outs->filename, curlx_strerror(errno, errbuf, sizeof(errbuf)));
+      warnf("Error setting extended attributes on '%s': %s", outs->filename,
+            curlx_strerror(errno, errbuf, sizeof(errbuf)));
     }
   }
 

@@ -750,8 +750,8 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
                           state->remote_addrlen);
           /* Check all sbytes were sent */
           if(sbytes < 0) {
-            failf(data, "%s", curlx_strerror(SOCKERRNO,
-                                             buffer, sizeof(buffer)));
+            failf(data, "%s",
+                  curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
             result = CURLE_SEND_ERROR;
           }
         }

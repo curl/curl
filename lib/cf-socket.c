@@ -747,8 +747,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       char buffer[STRERROR_LEN];
       data->state.errorbuf = FALSE;
       data->state.os_errno = error = SOCKERRNO;
-      failf(data, "Couldn't bind to '%s' with errno %d: %s",
-            host, error, curlx_strerror(error, buffer, sizeof(buffer)));
+      failf(data, "Couldn't bind to '%s' with errno %d: %s", host,
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
       return CURLE_INTERFACE_FAILED;
     }
   }
@@ -900,8 +900,8 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 #else
     {
       char buffer[STRERROR_LEN];
-      infof(data, "Immediate connect fail for %s: %s",
-            ipaddress, curlx_strerror(error, buffer, sizeof(buffer)));
+      infof(data, "Immediate connect fail for %s: %s", ipaddress,
+            curlx_strerror(error, buffer, sizeof(buffer)));
     }
 #endif
     data->state.os_errno = error;
