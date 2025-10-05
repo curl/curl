@@ -322,7 +322,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   {
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
-    if(msg && buflen > 0)
+    if(msg && buflen > 1)
       SNPRINTF(buf, buflen, "%s", msg);
     else if(buflen > sizeof("Unknown error ") + 20)
       SNPRINTF(buf, buflen, "Unknown error %d", err);
@@ -331,7 +331,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   {
     /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
-    if(msg && buflen > 0)
+    if(msg && buflen > 1)
       SNPRINTF(buf, buflen, "%s", msg);
     else if(buflen > sizeof("Unknown error ") + 20)
       SNPRINTF(buf, buflen, "Unknown error %d", err);
