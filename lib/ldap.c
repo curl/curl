@@ -227,12 +227,12 @@ const struct Curl_handler Curl_handler_ldaps = {
 #ifdef USE_WIN32_LDAP
 
 #ifdef USE_WINDOWS_SSPI
-static int ldap_win_bind_auth(LDAP *server, const char *user,
-                              const char *passwd, unsigned long authflags)
+static ULONG ldap_win_bind_auth(LDAP *server, const char *user,
+                                const char *passwd, unsigned long authflags)
 {
   ULONG method = 0;
   SEC_WINNT_AUTH_IDENTITY cred;
-  int rc = LDAP_AUTH_METHOD_NOT_SUPPORTED;
+  ULONG rc = LDAP_AUTH_METHOD_NOT_SUPPORTED;
 
   memset(&cred, 0, sizeof(cred));
 
@@ -260,25 +260,27 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
 
   if(method && user && passwd) {
     CURLcode res = Curl_create_sspi_identity(user, passwd, &cred);
-    rc = (int)res;
-    if(!rc) {
-      rc = (int)ldap_bind_s(server, NULL, (TCHAR *)&cred, method);
+    if(!res) {
+      rc = ldap_bind_s(server, NULL, (TCHAR *)&cred, method);
       Curl_sspi_free_identity(&cred);
+    }
+    else {
+      rc = LDAP_NO_MEMORY;
     }
   }
   else {
     /* proceed with current user credentials */
     method = LDAP_AUTH_NEGOTIATE;
-    rc = (int)ldap_bind_s(server, NULL, NULL, method);
+    rc = ldap_bind_s(server, NULL, NULL, method);
   }
   return rc;
 }
 #endif /* USE_WINDOWS_SSPI */
 
-static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
-                         const char *user, const char *passwd)
+static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
+                           const char *user, const char *passwd)
 {
-  int rc = LDAP_INVALID_CREDENTIALS;
+  ULONG rc = LDAP_INVALID_CREDENTIALS;
 
   PTCHAR inuser = NULL;
   PTCHAR inpass = NULL;
@@ -287,14 +289,14 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
     inuser = curlx_convert_UTF8_to_tchar(user);
     inpass = curlx_convert_UTF8_to_tchar(passwd);
 
-    rc = (int)ldap_simple_bind_s(server, inuser, inpass);
+    rc = ldap_simple_bind_s(server, inuser, inpass);
 
     curlx_unicodefree(inuser);
     curlx_unicodefree(inpass);
   }
 #ifdef USE_WINDOWS_SSPI
   else {
-    rc = (int)ldap_win_bind_auth(server, user, passwd, data->set.httpauth);
+    rc = ldap_win_bind_auth(server, user, passwd, data->set.httpauth);
   }
 #endif
 
@@ -314,7 +316,7 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
 static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
-  int rc = 0;
+  curl_ldap_num_t rc = 0;
   LDAP *server = NULL;
   LDAPURLDesc *ludp = NULL;
   LDAPMessage *ldapmsg = NULL;
@@ -349,7 +351,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   rc = ldap_url_parse_low(data, conn, &ludp);
 #endif
   if(rc) {
-    failf(data, "Bad LDAP URL: %s", ldap_err2string((curl_ldap_num_t)rc));
+    failf(data, "Bad LDAP URL: %s", ldap_err2string(rc));
     result = CURLE_URL_MALFORMAT;
     goto quit;
   }
@@ -507,12 +509,12 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   }
 
   Curl_pgrsSetDownloadCounter(data, 0);
-  rc = (int)ldap_search_s(server, ludp->lud_dn,
-                          (curl_ldap_num_t)ludp->lud_scope,
-                          ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
+  rc = ldap_search_s(server, ludp->lud_dn,
+                     (curl_ldap_num_t)ludp->lud_scope,
+                     ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
   if(rc && rc != LDAP_SIZELIMIT_EXCEEDED) {
-    failf(data, "LDAP remote: %s", ldap_err2string((curl_ldap_num_t)rc));
+    failf(data, "LDAP remote: %s", ldap_err2string(rc));
     result = CURLE_LDAP_SEARCH_FAILED;
     goto quit;
   }
