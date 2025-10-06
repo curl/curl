@@ -449,11 +449,14 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
   bool response = FALSE;
 
   /* First check whether there is a cached response from server */
-  if(curlx_dyn_len(&pp->recvbuf) && (*curlx_dyn_ptr(&pp->recvbuf) > '3')) {
-    /* Data connection could not be established, let's return */
-    infof(data, "There is negative response in cache while serv connect");
-    (void)getftpresponse(data, &nread, &ftpcode);
-    return CURLE_FTP_ACCEPT_FAILED;
+  if(curlx_dyn_len(&pp->recvbuf)) {
+    const char *l = curlx_dyn_ptr(&pp->recvbuf);
+    if(!ISDIGIT(*l) || (*l > '3')) {
+      /* Data connection could not be established, let's return */
+      infof(data, "There is negative response in cache while serv connect");
+      (void)getftpresponse(data, &nread, &ftpcode);
+      return CURLE_FTP_ACCEPT_FAILED;
+    }
   }
 
   if(pp->overflow)
