@@ -2418,7 +2418,6 @@ static CURLcode ftp_state_stor_resp(struct Curl_easy *data,
   if(ftpcode >= 400) {
     failf(data, "Failed FTP upload: %0d", ftpcode);
     ftp_state(data, ftpc, FTP_STOP);
-    /* oops, we never close the sockets! */
     return CURLE_UPLOAD_FAILED;
   }
 
