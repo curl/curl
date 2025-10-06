@@ -663,7 +663,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
   }
   else {
     char msgbuf[256];
-    if(curlx_get_winapi_error(err, msgbuf, sizeof(msgbuf)))
+    if(curlx_get_winapi_error((DWORD)err, msgbuf, sizeof(msgbuf)))
       curl_msnprintf(buf, buflen, "%s (0x%08X) - %s", txt, err, msgbuf);
     else
       curl_msnprintf(buf, buflen, "%s (0x%08X)", txt, err);

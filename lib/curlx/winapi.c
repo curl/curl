@@ -48,7 +48,7 @@
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
  */
-const char *curlx_get_winapi_error(int err, char *buf, size_t buflen)
+const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 {
   char *p;
   wchar_t wbuf[256];
@@ -64,7 +64,7 @@ const char *curlx_get_winapi_error(int err, char *buf, size_t buflen)
      expect the local codepage (eg fprintf, failf, infof).
      FormatMessageW -> wcstombs is used for Windows CE compatibility. */
   if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                     LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
     size_t written = wcstombs(buf, wbuf, buflen - 1);
     if(written != (size_t)-1)
@@ -96,7 +96,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
   *buf = '\0';
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-  if(!curlx_get_winapi_error((int)err, buf, buflen)) {
+  if(!curlx_get_winapi_error(err, buf, buflen)) {
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wformat-truncation=1"
