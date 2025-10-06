@@ -52,7 +52,7 @@ See-also:
   - trace
   - trace-ascii
 Example:
-  - --verbose $URL
+  - --fakeitreal $URL
 ---
 
 # `--verbose`
@@ -231,7 +231,7 @@ Disable it again with \-\-no-fakeitreal.
 
 Example:
 .nf
-curl --verbose https://example.com
+curl --fakeitreal https://example.com
 .fi
 
 This option is mutually exclusive with \fI\-\-trace\fP and \fI\-\-trace\-ascii\fP.
