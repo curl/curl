@@ -43,11 +43,7 @@ static int sockopt_766(void *clientp,
 static CURLcode test_lib766(const char *URL)
 {
   CURL *easy = NULL;
-  CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
-  int running;
-  int msgs_left;
-  CURLMsg *msg;
 
   start_test_timing();
 
@@ -62,64 +58,10 @@ static CURLcode test_lib766(const char *URL)
   easy_setopt(easy, CURLOPT_FTPPORT, "-");
   easy_setopt(easy, CURLOPT_SOCKOPTFUNCTION, sockopt_766);
 
-  multi_init(multi);
-
-  multi_add_handle(multi, easy);
-
-  for(;;) {
-    struct timeval interval;
-    fd_set fdread;
-    fd_set fdwrite;
-    fd_set fdexcep;
-    long timeout = -99;
-    int maxfd = -99;
-
-    multi_perform(multi, &running);
-
-    abort_on_test_timeout();
-
-    if(!running)
-      break; /* done */
-
-    FD_ZERO(&fdread);
-    FD_ZERO(&fdwrite);
-    FD_ZERO(&fdexcep);
-
-    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
-
-    /* At this point, maxfd is guaranteed to be greater or equal than -1. */
-
-    multi_timeout(multi, &timeout);
-
-    /* At this point, timeout is guaranteed to be greater or equal than -1. */
-
-    if(timeout != -1L) {
-      int itimeout;
-#if LONG_MAX > INT_MAX
-      itimeout = (timeout > (long)INT_MAX) ? INT_MAX : (int)timeout;
-#else
-      itimeout = (int)timeout;
-#endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
-    }
-    else {
-      interval.tv_sec = 0;
-      interval.tv_usec = 100000L; /* 100 ms */
-    }
-
-    select_test(maxfd + 1, &fdread, &fdwrite, &fdexcep, &interval);
-
-    abort_on_test_timeout();
-  }
-
-  msg = curl_multi_info_read(multi, &msgs_left);
-  if(msg)
-    res = msg->data.result;
+  res = curl_easy_perform(easy);
 
 test_cleanup:
 
-  curl_multi_cleanup(multi);
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 
