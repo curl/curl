@@ -41,7 +41,6 @@
 struct mntfy_entry {
   unsigned int mid;
   unsigned int type;
-  struct curltime added;
 };
 
 #define CURL_MNTFY_CHUNK_SIZE   128
@@ -79,7 +78,6 @@ static bool mntfy_chunk_append(struct mntfy_chunk *chunk,
   e = &chunk->entries[chunk->w_offset++];
   e->mid = data->mid;
   e->type = type;
-  e->added = curlx_now();
   return TRUE;
 }
 
@@ -119,19 +117,10 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
       data = e->mid ? Curl_multi_get_easy(multi, e->mid) : multi->admin;
       /* only when notification has not been disabled in the meantime */
       if(data && Curl_uint_bset_contains(&multi->ntfy.enabled, e->type)) {
-        struct curltime now = curlx_now();
-        timediff_t age_ms = curlx_timediff(now, e->added);
         /* this may cause new notifications to be added! */
-        CURL_TRC_M(multi->admin, "[NTFY] dispatch %d to xfer %u, age=%"
-                   FMT_TIMEDIFF_T "ms",
-                   e->type, e->mid, age_ms);
-        multi->ntfy.ntfy_cb(multi, e->type, data,
-#if LONG_MAX >= TIMEDIFF_T_MAX
-                            (long)age_ms,
-#else
-                            (age_ms > LONG_MAX) ? LONG_MAX : (long)age_ms,
-#endif
-                            multi->ntfy.ntfy_cb_data);
+        CURL_TRC_M(multi->admin, "[NTFY] dispatch %d to xfer %u",
+                   e->type, e->mid);
+        multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
       }
       /* once dispatched, safe to increment */
       chunk->r_offset++;

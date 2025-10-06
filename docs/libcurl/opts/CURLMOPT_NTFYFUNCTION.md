@@ -26,7 +26,6 @@ CURLMOPT_NTFYFUNCTION - callback receiving notifications
 void ntfy_callback(CURLM *multi,     /* multi handle */
                    unsigned int notification, /* notification type */
                    CURL *easy,       /* easy handle */
-                   long age_ms,      /* how long ago it happened */
                    void *ntfyp);     /* private ntfy pointer */
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NTFYFUNCTION, ntfy_callback);
@@ -43,8 +42,7 @@ constantly interrogate the multi handle to observe such changes to
 act on them.
 
 Notifications are collected and dispatched to the application's callback
-function at an appropriate time. The **age_ms** argument tells the
-application how *long ago* the actual cause happened.
+function at an appropriate time.
 
 The notify callback is different from other callbacks in that it
 can use more libcurl API functions. Apart from curl_multi_perform(3),
@@ -87,12 +85,8 @@ successful and failed transfers.
 The *easy* handle passed is the transfer that is done. This *may* be
 an internal handle when DoH or other features are used.
 
-
 *easy* identifies the transfer involved. This may be one of the
 application's own easy handle or an internal handle.
-
-**age_ms** is the time difference between when the notification occurred
-and the invocation of the callback, e.g. how much in the past it happened.
 
 **ntfyp** is set with CURLMOPT_NTFYDATA(3).
 
@@ -110,7 +104,7 @@ struct priv {
 };
 
 static void ntfy_cb(CURLM *multi, unsigned int notification,
-                    CURL *easy, long age_ms, void *ntfyp)
+                    CURL *easy, void *ntfyp)
 {
   struct priv *p = ntfyp;
   printf("my ptr: %p\n", p->ours);

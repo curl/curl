@@ -1465,7 +1465,7 @@ struct contextuv {
 };
 
 static void mnotify(CURLM *multi, unsigned int notification,
-                    CURL *easy, long age_ms, void *user_data);
+                    CURL *easy, void *user_data);
 
 /* callback from libuv on socket activity */
 static void on_uv_socket(uv_poll_t *req, int status, int events)
@@ -1727,14 +1727,13 @@ static CURLcode check_finished(struct parastate *s)
 }
 
 static void mnotify(CURLM *multi, unsigned int notification,
-                    CURL *easy, long age_ms, void *user_data)
+                    CURL *easy, void *user_data)
 {
   struct parastate *s = user_data;
   CURLcode result;
 
   (void)multi;
   (void)easy;
-  (void)age_ms;
 
   switch(notification) {
   case CURLM_NTFY_INFO_READ:

@@ -47,7 +47,7 @@ struct priv {
 };
 
 static void ntfy_cb(CURLM *multi, unsigned int notification,
-                    CURL *easy, long age_ms, void *ntfyp)
+                    CURL *easy, void *ntfyp)
 {
   struct priv *p = ntfyp;
   printf("my ptr: %p\n", p->ours);

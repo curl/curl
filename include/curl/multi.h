@@ -538,7 +538,6 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
 typedef void (*curl_ntfy_callback)(CURLM *multi,
                                    unsigned int notification,
                                    CURL *easy,
-                                   long age_ms,
                                    void *user_data);
 
 
