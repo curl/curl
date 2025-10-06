@@ -54,7 +54,7 @@ static int check_sspi_err(struct Curl_easy *data,
      status != SEC_I_COMPLETE_AND_CONTINUE &&
      status != SEC_I_COMPLETE_NEEDED &&
      status != SEC_I_CONTINUE_NEEDED) {
-    char buffer[SSPIERROR_LEN];
+    char buffer[STRERROR_LEN];
     failf(data, "SSPI error: %s failed: %s", function,
           Curl_sspi_strerror(status, buffer, sizeof(buffer)));
     return 1;
