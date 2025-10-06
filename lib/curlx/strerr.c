@@ -298,7 +298,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
 #ifdef USE_WINSOCK
       !get_winsock_error(err, buf, buflen) &&
 #endif
-      !curlx_get_winapi_error(err, buf, buflen))
+      !curlx_get_winapi_error((DWORD)err, buf, buflen))
       SNPRINTF(buf, buflen, "Unknown error %d (%#x)", err, err);
   }
 #else /* !_WIN32 */
