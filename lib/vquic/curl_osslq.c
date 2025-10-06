@@ -550,12 +550,12 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
     int sockerr = SOCKERRNO;
     struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
     if(sockerr && detail == SSL_ERROR_SYSCALL)
       curlx_strerror(sockerr, extramsg, sizeof(extramsg));
-    failf(data, "QUIC connect: %s in connection to %s:%d (%s)",
-          extramsg[0] ? extramsg : osslq_SSL_ERROR_to_str(detail),
-          ctx->peer.dispname, ip.remote_port, ip.remote_ip);
+    if(!Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip))
+      failf(data, "QUIC connect: %s in connection to %s:%d (%s)",
+            extramsg[0] ? extramsg : osslq_SSL_ERROR_to_str(detail),
+            ctx->peer.dispname, ip.remote_port, ip.remote_ip);
   }
   else {
     /* Could be a CERT problem */
@@ -1177,8 +1177,8 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
 
   result = CURLE_QUIC_CONNECT_ERROR;
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL);
-  if(!peer_addr)
+  if(Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL) ||
+     !peer_addr)
     goto out;
 
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
@@ -1857,9 +1857,9 @@ out:
   if(result) {
     struct ip_quadruple ip;
 
-    Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-    infof(data, "QUIC connect to %s port %u failed: %s",
-          ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
+    if(!Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip))
+      infof(data, "QUIC connect to %s port %u failed: %s",
+            ip.remote_ip, ip.remote_port, curl_easy_strerror(result));
   }
 #endif
   if(!result)

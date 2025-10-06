@@ -1303,7 +1303,9 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL);
+  if(Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &sockaddr, NULL))
+    return CURLE_QUIC_CONNECT_ERROR;
+
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
   rv = getsockname(ctx->q.sockfd, (struct sockaddr *)&ctx->q.local_addr,
                    &ctx->q.local_addrlen);
