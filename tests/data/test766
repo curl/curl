@@ -35,7 +35,7 @@ ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 # Strip off parts of the EPRT command that might differ
 # The TYPE command might get sent so we ignore that
 <strippart>
-s/^TYPE (.*)//
+s/^TYPE (.*)$//
 s/^EPRT \|1\|(.*)/EPRT \|1\|/
 </strippart>
 <protocol>
