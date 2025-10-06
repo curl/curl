@@ -2,9 +2,6 @@
 <info>
 <keywords>
 SMTP
-HTTP
-HTTP CONNECT
-HTTP proxy
 </keywords>
 </info>
 
@@ -18,12 +15,7 @@ HTTP proxy
 <client>
 <server>
 smtp
-http-proxy
 </server>
-<features>
-http
-proxy
-</features>
 <name>
 Send >64K over SMTP
 </name>
