@@ -948,6 +948,9 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
   int err;
   struct connectdata *conn = data->conn;
 
+  if(!CURL_SB_LEN(tn)) /* ignore empty suboption */
+    return CURLE_OK;
+
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
