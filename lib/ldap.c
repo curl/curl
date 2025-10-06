@@ -500,7 +500,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   if(rc) {
 #ifdef USE_WIN32_LDAP
     failf(data, "LDAP local: bind via ldap_win_bind %s",
-          ldap_err2string((ULONG)rc));
+          ldap_err2string(rc));
 #else
     failf(data, "LDAP local: bind via ldap_simple_bind_s %s",
           ldap_err2string(rc));
@@ -798,11 +798,11 @@ static size_t num_entries(const char *s)
  *
  * Defined in RFC4516 section 2.
  */
-static int ldap_url_parse2_low(struct Curl_easy *data,
-                               const struct connectdata *conn,
-                               LDAPURLDesc *ludp)
+static curl_ldap_num_t ldap_url_parse2_low(struct Curl_easy *data,
+                                           const struct connectdata *conn,
+                                           LDAPURLDesc *ludp)
 {
-  int rc = LDAP_SUCCESS;
+  curl_ldap_num_t rc = LDAP_SUCCESS;
   char *p;
   char *path;
   char *q = NULL;
@@ -1003,12 +1003,12 @@ quit:
   return rc;
 }
 
-static int ldap_url_parse_low(struct Curl_easy *data,
-                              const struct connectdata *conn,
-                              LDAPURLDesc **ludpp)
+static curl_ldap_num_t ldap_url_parse_low(struct Curl_easy *data,
+                                          const struct connectdata *conn,
+                                          LDAPURLDesc **ludpp)
 {
   LDAPURLDesc *ludp = calloc(1, sizeof(*ludp));
-  int rc;
+  curl_ldap_num_t rc;
 
   *ludpp = NULL;
   if(!ludp)
