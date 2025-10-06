@@ -22,10 +22,10 @@ Example:
 When doing SCP and SFTP transfers, curl automatically checks a database
 containing identification for all hosts it has ever been used with to verify
 that the host it connects to is the same as previously. Host keys are stored
-in such a known hosts file. By default curl uses ~/.ssh/known_hosts in the
-user's home directory.
+in such a known hosts file. curl uses the ~/.ssh/known_hosts in the user's
+home directory by default.
 
 This option lets a user specify a specific file to check the host against.
 
-The known host check can be disabled with --insecure, but that makes the
-transfer insecure.
+The known hosts check can be disabled with --insecure, but that makes the
+transfer insecure and is strongly discouraged.
