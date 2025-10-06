@@ -145,11 +145,11 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   (void)stream;
 
   if(ShowAllHeader == 1)
-    fprintf(stderr, "%s", (char *)ptr);
+    fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
   if(strncmp((char *)ptr, "Date:", 5) == 0) {
     if(ShowAllHeader == 0)
-      fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);q
+      fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
     if(AutoSyncTime == 1) {
       int RetVal;
