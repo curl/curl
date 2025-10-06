@@ -52,7 +52,7 @@ See-also:
   - trace
   - trace-ascii
 Example:
-  - --verbose $URL
+  - --fakeitreal $URL
 ---
 
 # `--verbose`
@@ -196,7 +196,7 @@ DESCRIPTION
 	    effect. Disable it again with --no-fakeitreal.
 
 	    Example:
-	     curl --verbose https://example.com
+	     curl --fakeitreal https://example.com
 
 	    This option is mutually  exclusive with --trace and  --trace-ascii.
 	    See also --include, --silent, --trace and --trace-ascii.

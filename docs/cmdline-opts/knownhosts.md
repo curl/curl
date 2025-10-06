@@ -14,7 +14,7 @@ See-also:
   - insecure
   - key
 Example:
-  - --knownhost filename --key here $URL
+  - --knownhosts filename --key here $URL
 ---
 
 # `--knownhosts`
