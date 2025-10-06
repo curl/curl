@@ -48,9 +48,6 @@ static CURLcode test_lib766(const char *URL)
   start_test_timing();
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    return res;
-  }
 
   easy_init(easy);
   easy_setopt(easy, CURLOPT_VERBOSE, 1L);
