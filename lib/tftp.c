@@ -1105,7 +1105,7 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
                                 0,
                                 (struct sockaddr *)&remote_addr,
                                 &fromlen);
-  if(fromlen) {
+  if((state->rbytes >= 0) && fromlen) {
     if(state->remote_pinned) {
       /* pinned, verify that it comes from the same address */
       if((state->remote_addrlen != fromlen) ||
