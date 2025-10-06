@@ -686,12 +686,14 @@ static void printsub(struct Curl_easy *data,
     if(direction) {
       infof(data, "%s IAC SB ", (direction == '<') ? "RCVD" : "SENT");
       if(length >= 3) {
-        int j;
+        unsigned int j;
 
         i = pointer[length-2];
         j = pointer[length-1];
 
-        if(i != CURL_IAC || j != CURL_SE) {
+        if((j < CURL_ARRAYSIZE(telnetoptions)) &&
+           (i < CURL_ARRAYSIZE(telnetoptions)) &&
+           (i != CURL_IAC || j != CURL_SE)) {
           infof(data, "(terminated by ");
           if(CURL_TELOPT_OK(i))
             infof(data, "%s ", CURL_TELOPT(i));
