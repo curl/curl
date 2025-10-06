@@ -62,13 +62,13 @@ int getfiletime(const char *filename, curl_off_t *stamp)
       }
     }
     else {
-      warnf("Failed to get filetime: GetFileTime failed: GetLastError %lu",
+      warnf("Failed to get filetime: GetFileTime failed: GetLastError 0x%08lx",
             GetLastError());
     }
     CloseHandle(hfile);
   }
   else if(GetLastError() != ERROR_FILE_NOT_FOUND) {
-    warnf("Failed to get filetime: CreateFile failed: GetLastError %lu",
+    warnf("Failed to get filetime: CreateFile failed: GetLastError 0x%08lx",
           GetLastError());
   }
 #else
@@ -118,14 +118,14 @@ void setfiletime(curl_off_t filetime, const char *filename)
     ft.dwHighDateTime = (DWORD)(converted >> 32);
     if(!SetFileTime(hfile, NULL, &ft, &ft)) {
       warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on outfile: SetFileTime failed: GetLastError %lu",
+            " on outfile: SetFileTime failed: GetLastError 0x%08lx",
             filetime, GetLastError());
     }
     CloseHandle(hfile);
   }
   else {
     warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on outfile: CreateFile failed: GetLastError %lu",
+          " on outfile: CreateFile failed: GetLastError 0x%08lx",
           filetime, GetLastError());
   }
 

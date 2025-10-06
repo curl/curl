@@ -59,7 +59,8 @@ static CURLcode test_lib3026(const char *URL)
     results[i] = CURL_LAST; /* initialize with invalid value */
     th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
     if(!th) {
-      curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %lu\n",
+      curl_mfprintf(stderr, "%s:%d Couldn't create thread, "
+                    "GetLastError 0x%08lx\n",
                     __FILE__, __LINE__, GetLastError());
       tid_count = i;
       test_failure = TEST_ERR_MAJOR_BAD;

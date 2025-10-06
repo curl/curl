@@ -103,7 +103,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
     /* some GCC compilers cause false positive warnings if we allow this
        warning */
-    SNPRINTF(buf, buflen, "Unknown error %lu (0x%08lX)", err, err);
+    SNPRINTF(buf, buflen, "Unknown error %lu (0x%08lx)", err, err);
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
 #endif

@@ -871,7 +871,7 @@ curl_socket_t win32_stdin_read_thread(void)
                         0, FALSE, DUPLICATE_SAME_ACCESS);
 
     if(!r) {
-      errorf("DuplicateHandle error: %08lx", GetLastError());
+      errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
     }
 
@@ -882,7 +882,7 @@ curl_socket_t win32_stdin_read_thread(void)
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
                                 tdata, 0, NULL);
     if(!stdin_thread) {
-      errorf("CreateThread error: %08lx", GetLastError());
+      errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
     }
 
@@ -908,7 +908,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     /* Set the stdin handle to read from the socket. */
     if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
-      errorf("SetStdHandle error: %08lx", GetLastError());
+      errorf("SetStdHandle error: 0x%08lx", GetLastError());
       break;
     }
 
