@@ -24,8 +24,6 @@
  *
  ***************************************************************************/
 
-#include "urldata.h"
-
 #ifdef USE_WINDOWS_SSPI
 const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
 #endif
