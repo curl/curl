@@ -186,6 +186,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
       (struct sockaddr_in6 * const)CURL_UNCONST(&addr->curl_sa_addr);
     if(!BIO_ADDR_rawmake(bio_addr, AF_INET6, &sin->sin6_addr,
                          sizeof(sin->sin6_addr), sin->sin6_port)) {
+      goto out;
     }
     result = CURLE_OK;
     break;
