@@ -2319,7 +2319,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
        for all the digits at the end of the response and parse only those as a
        number. */
     char *start = &buf[4];
-    const char *fdigit = memchr(start, '\r', len);
+    const char *fdigit = memchr(start, '\r', len - 4);
     if(fdigit) {
       fdigit--;
       if(*fdigit == '\n')
