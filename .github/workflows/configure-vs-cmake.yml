@@ -131,7 +131,7 @@ jobs:
       - name: 'install packages'
         run: |
           sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install mingw-w64
+          sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
