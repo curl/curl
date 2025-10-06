@@ -876,6 +876,29 @@ sub single {
     if($examples[0]) {
         my $s ="";
         $s="s" if($examples[1]);
+        foreach my $e (@examples) {
+            my $check = $e;
+            # verify the used options
+            for my $e (split(/ /, $check)) {
+                if($e =~ /^-([^- ])/) {
+                    my $opt = $1;
+                    if(!$optshort{$opt}) {
+                        print STDERR "$f:$line:1:ERROR: unknown option in ".
+                            "example: -$opt\n";
+                        return 2;
+                    }
+                }
+                elsif($e =~ /^--([^ =]*)/) {
+                    my $opt = $1;
+                    $opt =~ s/^expand-//g;
+                    if(!$helplong{$opt}) {
+                        print STDERR "$f:$line:1:ERROR: unknown option in ".
+                            "example: '--$opt'\n";
+                        return 2;
+                    }
+                }
+            }
+        }
         if($manpage) {
             print "\nExample$s:\n";
             print ".nf\n";
