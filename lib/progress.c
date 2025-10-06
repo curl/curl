@@ -29,7 +29,6 @@
 #include "multiif.h"
 #include "progress.h"
 #include "curlx/timeval.h"
-#include "curl_printf.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
 #define MIN_RATE_LIMIT_PERIOD 3000

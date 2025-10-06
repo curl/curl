@@ -34,7 +34,6 @@
 #include "http2.h"
 #include "vssh/ssh.h"
 #include "vquic/vquic.h"
-#include "curl_printf.h"
 #include "easy_lock.h"
 
 #ifdef USE_ARES

@@ -41,7 +41,6 @@
 #include "curl_ntlm_core.h"
 #include "escape.h"
 #include "curl_endian.h"
-#include "curl_printf.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

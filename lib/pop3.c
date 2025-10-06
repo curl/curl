@@ -77,7 +77,6 @@
 #include "curl_md5.h"
 #include "curlx/warnless.h"
 #include "strdup.h"
-#include "curl_printf.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

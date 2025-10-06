@@ -59,7 +59,6 @@
 #include "select.h"
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
-#include "curl_printf.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
