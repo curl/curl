@@ -27,7 +27,6 @@
 #include "urldata.h"
 
 #ifdef USE_WINDOWS_SSPI
-#define SSPIERROR_LEN 256 /* a suitable length */
 const char *Curl_sspi_strerror(int err, char *buf, size_t buflen);
 #endif
 
