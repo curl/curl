@@ -98,6 +98,14 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef USE_WIN32_LDAP
+#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
+#define curl_ldap_num_t ULONG
+#else
+#define FREE_ON_WINLDAP(x)
+#define curl_ldap_num_t int
+#endif
+
 #ifndef HAVE_LDAP_URL_PARSE
 
 /* Use our own implementation. */
@@ -127,14 +135,6 @@ struct ldap_urldesc {
 #undef LDAPURLDesc
 #define LDAPURLDesc struct ldap_urldesc
 
-#ifdef USE_WIN32_LDAP
-#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
-#define curl_ldap_num_t ULONG
-#else
-#define FREE_ON_WINLDAP(x)
-#define curl_ldap_num_t int
-#endif
-
 static curl_ldap_num_t ldap_url_parse_low(struct Curl_easy *data,
                                           const struct connectdata *conn,
                                           LDAPURLDesc **ludp);
@@ -142,7 +142,8 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp);
 
 #undef ldap_free_urldesc
 #define ldap_free_urldesc       ldap_free_urldesc_low
-#endif
+
+#endif /* !HAVE_LDAP_URL_PARSE */
 
 #ifdef DEBUG_LDAP
   #define LDAP_TRACE(x)   do { \
