@@ -32,8 +32,10 @@ ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-# Strip off parts of the PORT and EPRT commands that might differ
+# Strip off parts of the EPRT command that might differ
+# The TYPE command might get sent so we ignore that
 <strippart>
+s/^TYPE (.*)//
 s/^EPRT \|1\|(.*)/EPRT \|1\|/
 </strippart>
 <protocol>
