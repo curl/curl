@@ -76,6 +76,7 @@ TESTS_C = \
   lib694.c lib695.c \
   lib751.c          lib753.c                                     lib758.c \
   lib757.c \
+  lib766.c \
   lib1156.c \
   lib1301.c                                                   lib1308.c \
   lib1485.c \
