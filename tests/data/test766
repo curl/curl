@@ -39,7 +39,7 @@ s/^EPRT \|1\|(.*)/EPRT \|1\|/
 # The TYPE command might get sent so we ignore that
 <strip>
 ^TYPE
-</strip
+</strip>
 
 <protocol>
 USER anonymous
