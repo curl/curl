@@ -699,7 +699,9 @@ sub single {
                 return 2;
             }
             if(!$spdx) {
+                # REUSE-IgnoreStart
                 print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
+                # REUSE-IgnoreEnd
                 return 2;
             }
             last;
