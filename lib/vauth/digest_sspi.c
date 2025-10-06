@@ -364,7 +364,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   }
 
   /* Store the challenge for use later */
-  digest->input_token = (BYTE *) Curl_memdup(chlg, chlglen + 1);
+  digest->input_token = (BYTE *)Curl_memdup(chlg, chlglen + 1);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
 
