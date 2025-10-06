@@ -160,7 +160,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                         TmpStr1 & 2? */
         AutoSyncTime = 0;
       else {
-        int RetVal = sscanf((char *)(ptr), "Date: %25s %hu %s %hu %hu:%hu:%hu",
+        int RetVal = sscanf((char *)(ptr), "Date: %25s %hu %25s %hu %hu:%hu:%hu",
                             TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
                             &SYSTime.wHour, &SYSTime.wMinute,
                             &SYSTime.wSecond);
