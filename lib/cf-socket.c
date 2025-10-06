@@ -1761,6 +1761,11 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   DEBUGASSERT(transport == TRNSPRT_TCP);
+  if(!ai) {
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
+  }
+
   ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1857,6 +1862,7 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
     *done = TRUE;
     return CURLE_OK;
   }
+
   *done = FALSE;
   if(ctx->sock == CURL_SOCKET_BAD) {
     result = cf_socket_open(cf, data);
@@ -1872,10 +1878,6 @@ static CURLcode cf_udp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "cf_udp_connect(), opened socket=%"
                   FMT_SOCKET_T " (%s:%d)",
                   ctx->sock, ctx->ip.local_ip, ctx->ip.local_port);
-    }
-    else {
-      CURL_TRC_CF(data, cf, "cf_udp_connect(), opened socket=%"
-                  FMT_SOCKET_T " (unconnected)", ctx->sock);
     }
     *done = TRUE;
     cf->connected = TRUE;
@@ -2058,6 +2060,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
                                       bool *done)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
+  char errbuf[STRERROR_LEN];
 #ifdef USE_IPV6
   struct Curl_sockaddr_storage add;
 #else
@@ -2076,6 +2079,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
+  *done = FALSE;
   timeout_ms = cf_tcp_accept_timeleft(cf, data);
   if(timeout_ms < 0) {
     /* if a timeout was already reached, bail out */
@@ -2103,23 +2107,21 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 
   if(!incoming) {
     CURL_TRC_CF(data, cf, "nothing heard from the server yet");
-    *done = FALSE;
     return CURLE_OK;
   }
 
-  if(!getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
-    size = sizeof(add);
+  size = sizeof(add);
 #ifdef HAVE_ACCEPT4
-    s_accepted = CURL_ACCEPT4(ctx->sock, (struct sockaddr *) &add, &size,
-                              SOCK_NONBLOCK | SOCK_CLOEXEC);
+  s_accepted = CURL_ACCEPT4(ctx->sock, (struct sockaddr *) &add, &size,
+                            SOCK_NONBLOCK | SOCK_CLOEXEC);
 #else
-    s_accepted = CURL_ACCEPT(ctx->sock, (struct sockaddr *) &add, &size);
+  s_accepted = CURL_ACCEPT(ctx->sock, (struct sockaddr *) &add, &size);
 #endif
-  }
 
   if(CURL_SOCKET_BAD == s_accepted) {
-    failf(data, "Error accept()ing server connect");
-    return CURLE_FTP_PORT_FAILED;
+    failf(data, "Error accept()ing server connect: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    return CURLE_FTP_ACCEPT_FAILED;
   }
 
   infof(data, "Connection accepted from server");
