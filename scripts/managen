@@ -661,12 +661,14 @@ sub single {
         elsif(/^Experimental: yes/i) {
             $experimental=1;
         }
+        # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
             $copyright=$1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
             $spdx=$1;
         }
+        # REUSE-IgnoreEnd
         elsif(/^Help: *(.*)/i) {
             ;
         }
@@ -697,7 +699,9 @@ sub single {
                 return 2;
             }
             if(!$spdx) {
+                # REUSE-IgnoreStart
                 print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
+                # REUSE-IgnoreEnd
                 return 2;
             }
             last;
