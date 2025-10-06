@@ -316,7 +316,7 @@ static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
 static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;
-  curl_ldap_num_t rc = 0;
+  curl_ldap_num_t rc = LDAP_SUCCESS;
   LDAP *server = NULL;
   LDAPURLDesc *ludp = NULL;
   LDAPMessage *ldapmsg = NULL;
@@ -488,7 +488,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
   rc = ldap_simple_bind_s(server, user, passwd);
 #endif
-  if(!ldap_ssl && rc) {
+  if(!ldap_ssl && rc != LDAP_SUCCESS) {
     ldap_proto = LDAP_VERSION2;
     ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 #ifdef USE_WIN32_LDAP
@@ -497,7 +497,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     rc = ldap_simple_bind_s(server, user, passwd);
 #endif
   }
-  if(rc) {
+  if(rc != LDAP_SUCCESS) {
 #ifdef USE_WIN32_LDAP
     failf(data, "LDAP local: bind via ldap_win_bind %s",
           ldap_err2string(rc));
@@ -514,7 +514,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
                      (curl_ldap_num_t)ludp->lud_scope,
                      ludp->lud_filter, ludp->lud_attrs, 0, &ldapmsg);
 
-  if(rc && rc != LDAP_SIZELIMIT_EXCEEDED) {
+  if(rc != LDAP_SUCCESS && rc != LDAP_SIZELIMIT_EXCEEDED) {
     failf(data, "LDAP remote: %s", ldap_err2string(rc));
     result = CURLE_LDAP_SEARCH_FAILED;
     goto quit;
