@@ -983,6 +983,8 @@ extern curl_calloc_callback Curl_ccalloc;
 #define Curl_safefree(ptr) \
   do { free((ptr)); (ptr) = NULL;} while(0)
 
+#include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
+
 #ifdef CURLDEBUG
 #ifdef __clang__
 #  define ALLOC_FUNC         __attribute__((__malloc__))
@@ -1006,9 +1008,6 @@ extern curl_calloc_callback Curl_ccalloc;
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #endif
-
-#include <curl/curl.h> /* for CURL_EXTERN */
-#include <curl/mprintf.h>
 
 extern FILE *curl_dbg_logfile;
 
