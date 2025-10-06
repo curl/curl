@@ -99,7 +99,7 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
     return FALSE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
-  if(rest && !((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
+  if(rest && ((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
     return FALSE;
 
   return TRUE;
