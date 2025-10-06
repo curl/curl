@@ -34,7 +34,6 @@ ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (.*)/PORT/
 s/^EPRT \|1\|(.*)/EPRT \|1\|/
 </strippart>
 <protocol>
