@@ -317,7 +317,7 @@ struct negotiatedata {
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   CtxtHandle *sslContext;
 #endif
-  DWORD status;
+  SECURITY_STATUS status;
   CredHandle *credentials;
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;
