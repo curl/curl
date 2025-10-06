@@ -1008,6 +1008,7 @@ extern curl_calloc_callback Curl_ccalloc;
 #endif
 
 #include <curl/curl.h> /* for CURL_EXTERN */
+#include <curl/mprintf.h>
 
 extern FILE *curl_dbg_logfile;
 
