@@ -414,7 +414,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
       if(rc != LDAP_SUCCESS) {
         failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
-                ldap_err2string(rc));
+              ldap_err2string(rc));
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
       }
@@ -426,7 +426,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &ldap_option);
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR setting cert verify mode: %s",
-              ldap_err2string(rc));
+            ldap_err2string(rc));
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
@@ -441,26 +441,27 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     rc = ldap_set_option(server, LDAP_OPT_X_TLS, &ldap_option);
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR setting SSL/TLS mode: %s",
-              ldap_err2string(rc));
+            ldap_err2string(rc));
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-/*
+#if 0
     rc = ldap_start_tls_s(server, NULL, NULL);
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR starting SSL/TLS mode: %s",
-              ldap_err2string(rc));
+            ldap_err2string(rc));
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-*/
+#endif
+
 #else
     (void)ldap_option;
     (void)ldap_ca;
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
-            "of the OpenLDAP toolkit\n");
+          "of the OpenLDAP toolkit\n");
     result = CURLE_SSL_CERTPROBLEM;
     goto quit;
 #endif
