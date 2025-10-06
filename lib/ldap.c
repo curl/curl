@@ -127,9 +127,17 @@ struct ldap_urldesc {
 #undef LDAPURLDesc
 #define LDAPURLDesc struct ldap_urldesc
 
-static int  ldap_url_parse_low(struct Curl_easy *data,
-                               const struct connectdata *conn,
-                               LDAPURLDesc **ludp);
+#ifdef USE_WIN32_LDAP
+#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
+#define curl_ldap_num_t ULONG
+#else
+#define FREE_ON_WINLDAP(x)
+#define curl_ldap_num_t int
+#endif
+
+static curl_ldap_num_t ldap_url_parse_low(struct Curl_easy *data,
+                                          const struct connectdata *conn,
+                                          LDAPURLDesc **ludp);
 static void ldap_free_urldesc_low(LDAPURLDesc *ludp);
 
 #undef ldap_free_urldesc
@@ -303,15 +311,6 @@ static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
   return rc;
 }
 #endif /* USE_WIN32_LDAP */
-
-#ifdef USE_WIN32_LDAP
-#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
-#define curl_ldap_num_t ULONG
-#else
-#define FREE_ON_WINLDAP(x)
-#define curl_ldap_num_t int
-#endif
-
 
 static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 {
