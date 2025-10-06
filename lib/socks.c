@@ -255,8 +255,14 @@ static CURLproxycode socks_recv(struct socks_state *sx,
             curl_easy_strerror(result));
       return CURLPX_RECV_CONNECT;
     }
-    else if(!nread) /* EOF */
+    else if(!nread) { /* EOF */
+      if(Curl_bufq_len(&sx->iobuf) < min_bytes) {
+        failf(data, "Failed to receive SOCKS response, "
+              "proxy closed connection");
+        return CURLPX_RECV_CONNECT;
+      }
       break;
+    }
   }
   *done = TRUE;
   return CURLPX_OK;
