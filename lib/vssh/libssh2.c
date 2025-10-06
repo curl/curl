@@ -2573,7 +2573,7 @@ static CURLcode ssh_state_session_disconnect(struct Curl_easy *data,
   if(sshc->ssh_channel) {
     rc = libssh2_channel_free(sshc->ssh_channel);
     if(rc == LIBSSH2_ERROR_EAGAIN)
-      return CURLE_OK;
+      return CURLE_AGAIN;
 
     if(rc < 0) {
       char *err_msg = NULL;
