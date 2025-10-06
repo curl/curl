@@ -564,7 +564,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
   default:
     failf(state->data, "tftp_send_first: internal error");
-    break;
+    return CURLE_TFTP_ILLEGAL;
   }
 
   return result;
