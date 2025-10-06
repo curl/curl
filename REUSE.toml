@@ -41,6 +41,7 @@ path = [
   "tests/valgrind.supp",
   # checksrc control files
   "docs/examples/.checksrc",
+  "scripts/.checksrc",
   "src/.checksrc",
   "tests/libtest/.checksrc",
   "tests/server/.checksrc",
