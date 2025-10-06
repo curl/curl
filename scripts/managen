@@ -661,12 +661,14 @@ sub single {
         elsif(/^Experimental: yes/i) {
             $experimental=1;
         }
+        # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
             $copyright=$1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
             $spdx=$1;
         }
+        # REUSE-IgnoreEnd
         elsif(/^Help: *(.*)/i) {
             ;
         }
