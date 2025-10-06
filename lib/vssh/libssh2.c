@@ -1942,13 +1942,12 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
+  myssh_state(data, sshc, SSH_STOP);
   if(rc > 0) {
     free(sshc->homedir);
     sshc->homedir = strdup(sshp->readdir_filename);
-    if(!sshc->homedir) {
-      myssh_state(data, sshc, SSH_SFTP_CLOSE);
+    if(!sshc->homedir)
       return CURLE_OUT_OF_MEMORY;
-    }
     free(data->state.most_recent_ftp_entrypath);
     data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
     if(!data->state.most_recent_ftp_entrypath)
@@ -1961,21 +1960,19 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
     if(sftperr)
       result = sftp_libssh2_error_to_CURLE(sftperr);
     else
-      /* in this case, the error was not in the SFTP level but for example
-         a time-out or similar */
+      /* in this case, the error was not in the SFTP level but for example a
+         time-out or similar */
       result = CURLE_SSH;
     DEBUGF(infof(data, "error = %lu makes libcurl = %d",
                  sftperr, (int)result));
-    myssh_state(data, sshc, SSH_STOP);
     return result;
   }
 
-  /* This is the last step in the SFTP connect phase. Do note that while
-     we get the homedir here, we get the "workingpath" in the DO action
-     since the homedir will remain the same between request but the
-     working path will not. */
+  /* This is the last step in the SFTP connect phase. Do note that while we
+     get the homedir here, we get the "workingpath" in the DO action since the
+     homedir will remain the same between request but the working path will
+     not. */
   DEBUGF(infof(data, "SSH CONNECT phase done"));
-  myssh_state(data, sshc, SSH_STOP);
   return CURLE_OK;
 }
 
