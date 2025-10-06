@@ -206,7 +206,7 @@ const struct Curl_handler Curl_handler_tftp = {
  **********************************************************/
 static CURLcode tftp_set_timeouts(struct tftp_conn *state)
 {
-  time_t maxtime, timeout;
+  time_t timeout;
   timediff_t timeout_ms;
   bool start = (state->state == TFTP_STATE_START);
 
@@ -219,13 +219,11 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     return CURLE_OPERATION_TIMEDOUT;
   }
 
-  if(timeout_ms > 0)
-    maxtime = (time_t)(timeout_ms + 500) / 1000;
-  else
-    maxtime = 3600; /* use for calculating block timeouts */
-
   /* Set per-block timeout to total */
-  timeout = maxtime;
+  if(timeout_ms > 0)
+    timeout = (time_t)(timeout_ms + 500) / 1000;
+  else
+    timeout = 15;
 
   /* Average reposting an ACK after 5 seconds */
   state->retry_max = (int)timeout/5;
