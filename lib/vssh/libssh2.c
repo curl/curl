@@ -1303,11 +1303,11 @@ sftp_quote_stat(struct Curl_easy *data,
   if(!strncmp(cmd, "chgrp", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t gid;
-    (void)curlx_str_number(&p, &gid, ULONG_MAX);
-    sshp->quote_attrs.gid = (unsigned long)gid;
-    sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
-    if(sshp->quote_attrs.gid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
-       !sshc->acceptfail) {
+    if(!curlx_str_number(&p, &gid, ULONG_MAX)) {
+      sshp->quote_attrs.gid = (unsigned long)gid;
+      sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
+    }
+    else if(!sshc->acceptfail) {
       failf(data, "Syntax error: chgrp gid not a number");
       goto fail;
     }
@@ -1327,11 +1327,11 @@ sftp_quote_stat(struct Curl_easy *data,
   else if(!strncmp(cmd, "chown", 5)) {
     const char *p = sshc->quote_path1;
     curl_off_t uid;
-    (void)curlx_str_number(&p, &uid, ULONG_MAX);
-    sshp->quote_attrs.uid = (unsigned long)uid;
-    sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
-    if(sshp->quote_attrs.uid == 0 && !ISDIGIT(sshc->quote_path1[0]) &&
-       !sshc->acceptfail) {
+    if(!curlx_str_number(&p, &uid, ULONG_MAX)) {
+      sshp->quote_attrs.uid = (unsigned long)uid;
+      sshp->quote_attrs.flags = LIBSSH2_SFTP_ATTR_UIDGID;
+    }
+    else if(!sshc->acceptfail) {
       failf(data, "Syntax error: chown uid not a number");
       goto fail;
     }
