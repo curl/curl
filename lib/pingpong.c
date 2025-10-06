@@ -99,7 +99,6 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
 
-  DEBUGF(infof(data, "pp_statematch, timeout=%" FMT_TIMEDIFF_T, timeout_ms));
   if(block) {
     interval_ms = 1000;  /* use 1 second timeout intervals */
     if(timeout_ms < interval_ms)
@@ -117,9 +116,6 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else {
-    DEBUGF(infof(data, "pp_statematch, select, timeout=%" FMT_TIMEDIFF_T
-           ", sendleft=%zu",
-           timeout_ms, pp->sendleft));
     rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
                            CURL_SOCKET_BAD,
                            pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
