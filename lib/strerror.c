@@ -25,6 +25,7 @@
 #include "curl_setup.h"
 
 #include <curl/curl.h>
+#include <curl/mprintf.h>
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
@@ -32,8 +33,8 @@
 
 #include "curlx/winapi.h"
 #include "strerror.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
