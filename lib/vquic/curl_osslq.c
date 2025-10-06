@@ -1177,7 +1177,8 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
     goto out;
 
   result = CURLE_QUIC_CONNECT_ERROR;
-  if(Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL))
+  if(Curl_cf_socket_peek(cf->next, data, &ctx->q.sockfd, &peer_addr, NULL) ||
+     !peer_addr)
     goto out;
 
   ctx->q.local_addrlen = sizeof(ctx->q.local_addr);
