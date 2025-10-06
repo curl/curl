@@ -1050,10 +1050,10 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp)
 
   free(ludp);
 }
-#endif  /* !HAVE_LDAP_URL_PARSE */
+#endif /* !HAVE_LDAP_URL_PARSE */
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
 
-#endif  /* !CURL_DISABLE_LDAP && !USE_OPENLDAP */
+#endif /* !CURL_DISABLE_LDAP && !USE_OPENLDAP */
