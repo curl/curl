@@ -393,7 +393,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     /* Win32 LDAP SDK does not support insecure mode without CA! */
     server = ldap_sslinit(host, (curl_ldap_num_t)ipquad.remote_port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
-#else
+#else /* !USE_WIN32_LDAP */
     int ldap_option;
     char *ldap_ca = conn->ssl_config.CAfile;
 #ifdef LDAP_OPT_X_TLS
@@ -455,7 +455,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
 #endif
 
-#else
+#else /* !LDAP_OPT_X_TLS */
     (void)ldap_option;
     (void)ldap_ca;
     /* we should probably never come up to here since configure
@@ -464,9 +464,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           "of the OpenLDAP toolkit\n");
     result = CURLE_SSL_CERTPROBLEM;
     goto quit;
-#endif
-#endif
-#endif /* CURL_LDAP_USE_SSL */
+#endif /* LDAP_OPT_X_TLS */
+#endif /* USE_WIN32_LDAP */
+#endif /* HAVE_LDAP_SSL */
   }
   else if(data->set.use_ssl > CURLUSESSL_TRY) {
     failf(data, "LDAP local: explicit TLS not supported");
@@ -749,7 +749,7 @@ static void ldap_trace_low(const char *fmt, ...)
   vfprintf(stderr, fmt, args);
   va_end(args);
 }
-#endif
+#endif /* DEBUG_LDAP */
 
 #ifndef HAVE_LDAP_URL_PARSE
 
