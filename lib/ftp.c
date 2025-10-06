@@ -479,13 +479,14 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
     infof(data, "Ctrl conn has data while waiting for data conn");
     if(pp->overflow > 3) {
       const char *r = curlx_dyn_ptr(&pp->recvbuf);
+      size_t len = curlx_dyn_len(&pp->recvbuf);
 
-      DEBUGASSERT((pp->overflow + pp->nfinal) <=
-                  curlx_dyn_len(&pp->recvbuf));
+      DEBUGASSERT((pp->overflow + pp->nfinal) <= curlx_dyn_len(&pp->recvbuf));
       /* move over the most recently handled response line */
       r += pp->nfinal;
+      len -= pp->nfinal;
 
-      if(LASTLINE(r)) {
+      if((len > 3) && LASTLINE(r)) {
         curl_off_t status;
         if(!curlx_str_number(&r, &status, 999) && (status == 226)) {
           /* funny timing situation where we get the final message on the
