@@ -930,7 +930,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
    rather just ban its use instead */
 static bool bad_option(const char *data)
 {
-  return !!strchr(data, CURL_IAC);
+  return !data || !!strchr(data, CURL_IAC);
 }
 
 /*
