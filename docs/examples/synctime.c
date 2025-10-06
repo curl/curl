@@ -56,8 +56,6 @@
  * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
  *
- * Written by: Frank (contributed to libcurl)
- *
  * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
  * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
@@ -151,7 +149,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
 
   if(strncmp((char *)ptr, "Date:", 5) == 0) {
     if(ShowAllHeader == 0)
-      fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
+      fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);q
 
     if(AutoSyncTime == 1) {
       int RetVal;
