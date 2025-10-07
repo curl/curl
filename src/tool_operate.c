@@ -1764,9 +1764,9 @@ static CURLcode parallel_transfers(CURLSH *share)
   if(!s->multi)
     return CURLE_OUT_OF_MEMORY;
 
-  (void)curl_multi_setopt(s->multi, CURLMOPT_NTFYFUNCTION, mnotify);
-  (void)curl_multi_setopt(s->multi, CURLMOPT_NTFYDATA, s);
-  (void)curl_multi_ntfy_enable(s->multi, CURLM_NTFY_INFO_READ);
+  (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYFUNCTION, mnotify);
+  (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYDATA, s);
+  (void)curl_multi_notify_enable(s->multi, CURLM_NTFY_INFO_READ);
 
   result = add_parallel_transfers(s->multi, s->share,
                                   &s->more_transfers, &s->added_transfers);

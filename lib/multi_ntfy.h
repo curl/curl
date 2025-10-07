@@ -30,7 +30,7 @@ struct Curl_easy;
 struct Curl_multi;
 
 struct curl_multi_ntfy {
-  curl_ntfy_callback ntfy_cb;
+  curl_notify_callback ntfy_cb;
   void *ntfy_cb_data;
   struct uint_bset enabled;
   CURLMcode failure;

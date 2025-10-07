@@ -1,14 +1,14 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: CURLMOPT_NTFYFUNCTION
+Title: CURLMOPT_NOTIFYFUNCTION
 Section: 3
 Source: libcurl
 See-also:
-  - CURLMOPT_NTFYDATA (3)
+  - CURLMOPT_NOTIFYDATA (3)
   - curl_multi_socket_action (3)
-  - curl_multi_ntfy_disable (3)
-  - curl_multi_ntfy_enable (3)
+  - curl_multi_notify_disable (3)
+  - curl_multi_notify_enable (3)
 Protocol:
   - All
 Added-in: 8.17.0
@@ -16,7 +16,7 @@ Added-in: 8.17.0
 
 # NAME
 
-CURLMOPT_NTFYFUNCTION - callback receiving notifications
+CURLMOPT_NOTIFYFUNCTION - callback receiving notifications
 
 # SYNOPSIS
 
@@ -28,7 +28,7 @@ void ntfy_callback(CURLM *multi,     /* multi handle */
                    CURL *easy,       /* easy handle */
                    void *ntfyp);     /* private ntfy pointer */
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NTFYFUNCTION, ntfy_callback);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NOTIFYFUNCTION, ntfy_callback);
 ~~~
 
 # DESCRIPTION
@@ -65,7 +65,7 @@ following types are available:
 
 ## CURLM_NTFY_INFO_READ
 
-When enabled via curl_multi_ntfy_enable(3), this informs the application
+When enabled via curl_multi_notify_enable(3), this informs the application
 that there are new messages to be processed via curl_multi_info_read(3).
 
 This notification happens whenever a message is added to an empty
@@ -78,7 +78,7 @@ The *easy* handle passed is an internal handle.
 
 ## CURLM_NTFY_EASY_DONE
 
-When enabled via curl_multi_ntfy_enable(3), this notification is triggered
+When enabled via curl_multi_notify_enable(3), this notification is triggered
 when a an easy handle has finished. This happens both for
 successful and failed transfers.
 
@@ -88,7 +88,7 @@ an internal handle when DoH or other features are used.
 *easy* identifies the transfer involved. This may be one of the
 application's own easy handle or an internal handle.
 
-**ntfyp** is set with CURLMOPT_NTFYDATA(3).
+**ntfyp** is set with CURLMOPT_NOTIFYDATA(3).
 
 # DEFAULT
 
@@ -116,9 +116,9 @@ int main(void)
   struct priv setup;
   CURLM *multi = curl_multi_init();
   /* ... use socket callback and custom pointer */
-  curl_multi_setopt(multi, CURLMOPT_NTFYFUNCTION, ntfy_cb);
-  curl_multi_setopt(multi, CURLMOPT_NTFYDATA, &setup);
-  curl_multi_ntfy_enable(multi, CURLM_NTFY_INFO_READ);
+  curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, ntfy_cb);
+  curl_multi_setopt(multi, CURLMOPT_NOTIFYDATA, &setup);
+  curl_multi_notify_enable(multi, CURLM_NTFY_INFO_READ);
 }
 ~~~
 

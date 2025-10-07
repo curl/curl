@@ -3296,10 +3296,10 @@ CURLMcode curl_multi_setopt(CURLM *m,
     }
     break;
   }
-  case CURLMOPT_NTFYFUNCTION:
-    multi->ntfy.ntfy_cb = va_arg(param, curl_ntfy_callback);
+  case CURLMOPT_NOTIFYFUNCTION:
+    multi->ntfy.ntfy_cb = va_arg(param, curl_notify_callback);
     break;
-  case CURLMOPT_NTFYDATA:
+  case CURLMOPT_NOTIFYDATA:
     multi->ntfy.ntfy_cb_data = va_arg(param, void *);
     break;
   default:
@@ -4035,7 +4035,7 @@ void Curl_multi_clear_dirty(struct Curl_easy *data)
     Curl_uint_bset_remove(&data->multi->dirty, data->mid);
 }
 
-CURLMcode curl_multi_ntfy_enable(CURLM *m, unsigned int notification)
+CURLMcode curl_multi_notify_enable(CURLM *m, unsigned int notification)
 {
   struct Curl_multi *multi = m;
 
@@ -4044,7 +4044,7 @@ CURLMcode curl_multi_ntfy_enable(CURLM *m, unsigned int notification)
   return Curl_mntfy_enable(multi, notification);
 }
 
-CURLMcode curl_multi_ntfy_disable(CURLM *m, unsigned int notification)
+CURLMcode curl_multi_notify_disable(CURLM *m, unsigned int notification)
 {
   struct Curl_multi *multi = m;
 

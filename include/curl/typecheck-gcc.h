@@ -208,7 +208,7 @@
         if(curlcheck_charpp_option(option))                             \
           if(!curlcheck_ptrptr(value, char))                            \
             Wcurl_multi_setopt_err_charpp();                            \
-        if((option) == CURLMOPT_NTFYFUNCTION)                           \
+        if((option) == CURLMOPT_NOTIFYFUNCTION)                           \
           if(!curlcheck_multintfy_cb(value))                            \
             Wcurl_multi_setopt_err_ntfycb();                            \
         if((option) == CURLMOPT_PUSHFUNCTION)                           \
@@ -227,7 +227,7 @@
 /* evaluates to true if the option takes a data argument to pass to a
    callback */
 #define curlcheck_multicb_data_option(option)                           \
-  ((option) == CURLMOPT_NTFYDATA ||                                     \
+  ((option) == CURLMOPT_NOTIFYDATA ||                                     \
    (option) == CURLMOPT_PUSHDATA ||                                     \
    (option) == CURLMOPT_SOCKETDATA ||                                   \
    (option) == CURLMOPT_TIMERDATA ||                                    \
@@ -257,7 +257,7 @@
 /* evaluates to true if expr is of type curl_push_callback */
 #define curlcheck_multintfy_cb(expr)                                  \
   (curlcheck_NULL(expr) ||                                            \
-   curlcheck_cb_compatible((expr), curl_ntfy_callback))
+   curlcheck_cb_compatible((expr), curl_notify_callback))
 
 /*
  * For now, just make sure that the functions are called with three arguments
@@ -285,7 +285,7 @@ CURLWARNING(Wcurl_multi_setopt_err_charpp,
 CURLWARNING(Wcurl_multi_setopt_err_pushcb,
             "curl_multi_setopt expects a curl_push_callback argument")
 CURLWARNING(Wcurl_multi_setopt_err_ntfycb,
-            "curl_multi_setopt expects a curl_ntfy_callback argument")
+            "curl_multi_setopt expects a curl_notify_callback argument")
 CURLWARNING(Wcurl_multi_setopt_err_socketcb,
             "curl_multi_setopt expects a curl_socket_callback argument")
 CURLWARNING(Wcurl_multi_setopt_err_timercb,

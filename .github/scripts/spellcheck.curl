@@ -133,8 +133,8 @@ curl_multi_setopt
 curl_multi_assign
 curl_multi_get_handles
 curl_multi_get_offt
-curl_multi_ntfy_disable
-curl_multi_ntfy_enable
+curl_multi_notify_disable
+curl_multi_notify_enable
 curl_pushheader_bynum
 curl_pushheader_byname
 curl_easy_option_by_name
