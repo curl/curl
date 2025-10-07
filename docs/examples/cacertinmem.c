@@ -34,7 +34,7 @@
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
-/* To silence a warning when calling sk_X509_INFO_pop_free() */
+/* Silence warning when calling sk_X509_INFO_pop_free() */
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
