@@ -109,10 +109,10 @@ jobs:
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls'
-            install_packages: libnghttp2-dev
+            install_packages: libnghttp2-dev libuv1-dev
             install_steps: mbedtls
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
           - name: 'mbedtls-pkg MultiSSL !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
