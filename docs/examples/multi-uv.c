@@ -167,9 +167,9 @@ static void on_uv_timeout(uv_timer_t *req)
 }
 
 /* callback from libcurl to update the timeout expiry */
-static int cb_timeout(CURLM *multi, long timeout_ms,
-                      struct datauv *uv)
+static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
 {
+  struct datauv *uv = (struct datauv *)userp;
   (void)multi;
   if(timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
@@ -185,9 +185,9 @@ static int cb_timeout(CURLM *multi, long timeout_ms,
 
 /* callback from libcurl to update socket activity to wait for */
 static int cb_socket(CURL *easy, curl_socket_t s, int action,
-                     struct datauv *uv,
-                     void *socketp)
+                     void *userp, void *socketp)
 {
+  struct datauv *uv = (struct datauv *)userp;
   struct curl_context *curl_context;
   int events = 0;
   (void)easy;
