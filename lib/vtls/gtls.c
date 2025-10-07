@@ -59,7 +59,6 @@
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
 #include "../multiif.h"
-#include "../curl_printf.h"
 #include "../curl_memory.h"
 /* The last #include file should be: */
 #include "../memdebug.h"
@@ -70,7 +69,7 @@
 #ifdef GTLSDEBUG
 static void tls_log_func(int level, const char *str)
 {
-    fprintf(stderr, "|<%d>| %s", level, str);
+    curl_mfprintf(stderr, "|<%d>| %s", level, str);
 }
 #endif
 static bool gtls_inited = FALSE;
@@ -191,17 +190,17 @@ static void showtime(struct Curl_easy *data,
   if(result)
     return;
 
-  msnprintf(str,
-            sizeof(str),
-            "  %s: %s, %02d %s %4d %02d:%02d:%02d GMT",
-            text,
-            Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
-            tm->tm_mday,
-            Curl_month[tm->tm_mon],
-            tm->tm_year + 1900,
-            tm->tm_hour,
-            tm->tm_min,
-            tm->tm_sec);
+  curl_msnprintf(str,
+                 sizeof(str),
+                 "  %s: %s, %02d %s %4d %02d:%02d:%02d GMT",
+                 text,
+                 Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                 tm->tm_mday,
+                 Curl_month[tm->tm_mon],
+                 tm->tm_year + 1900,
+                 tm->tm_hour,
+                 tm->tm_min,
+                 tm->tm_sec);
   infof(data, "%s", str);
 }
 #endif
@@ -2272,7 +2271,7 @@ out:
 
 size_t Curl_gtls_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
+  return curl_msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
 
 /* data might be NULL! */

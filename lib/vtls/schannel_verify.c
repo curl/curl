@@ -46,7 +46,6 @@
 #include "../strerror.h"
 #include "../curlx/winapi.h"
 #include "../curlx/multibyte.h"
-#include "../curl_printf.h"
 #include "hostcheck.h"
 #include "../curlx/version_win32.h"
 

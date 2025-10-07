@@ -147,6 +147,7 @@ DPAGES = \
   keepalive-time.md \
   key-type.md \
   key.md \
+  knownhosts.md \
   krb.md \
   libcurl.md \
   limit-rate.md \

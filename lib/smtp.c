@@ -81,8 +81,7 @@
 #include "idn.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -712,14 +711,14 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
             (!Curl_is_ASCII_name(host.name)));
 
     if(host.name) {
-      from = aprintf("<%s@%s>%s", address, host.name, suffix);
+      from = curl_maprintf("<%s@%s>%s", address, host.name, suffix);
 
       Curl_free_idnconverted_hostname(&host);
     }
     else
       /* An invalid mailbox was provided but we will simply let the server
          worry about that and reply with a 501 error */
-      from = aprintf("<%s>%s", address, suffix);
+      from = curl_maprintf("<%s>%s", address, suffix);
 
     free(address);
   }
@@ -754,14 +753,14 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
         utf8 = TRUE;
 
       if(host.name) {
-        auth = aprintf("<%s@%s>%s", address, host.name, suffix);
+        auth = curl_maprintf("<%s@%s>%s", address, host.name, suffix);
 
         Curl_free_idnconverted_hostname(&host);
       }
       else
         /* An invalid mailbox was provided but we will simply let the server
            worry about it */
-        auth = aprintf("<%s>%s", address, suffix);
+        auth = curl_maprintf("<%s>%s", address, suffix);
       free(address);
     }
     else
@@ -806,7 +805,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
 
   /* Calculate the optional SIZE parameter */
   if(smtpc->size_supported && data->state.infilesize > 0) {
-    size = aprintf("%" FMT_OFF_T, data->state.infilesize);
+    size = curl_maprintf("%" FMT_OFF_T, data->state.infilesize);
 
     if(!size) {
       result = CURLE_OUT_OF_MEMORY;

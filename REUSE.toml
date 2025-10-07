@@ -41,17 +41,9 @@ path = [
   "tests/valgrind.supp",
   # checksrc control files
   "docs/examples/.checksrc",
-  "lib/.checksrc",
-  "lib/curlx/.checksrc",
-  "lib/vauth/.checksrc",
-  "lib/vquic/.checksrc",
-  "lib/vssh/.checksrc",
-  "lib/vtls/.checksrc",
+  "scripts/.checksrc",
   "src/.checksrc",
-  "tests/libtest/.checksrc",
   "tests/server/.checksrc",
-  "tests/tunit/.checksrc",
-  "tests/unit/.checksrc",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"

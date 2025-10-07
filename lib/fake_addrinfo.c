@@ -31,8 +31,7 @@
 #include <stdlib.h>
 #include <ares.h>
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -178,7 +177,7 @@ int r_getaddrinfo(const char *node,
     if(env) {
       rc = ares_set_servers_ports_csv(channel, env);
       if(rc) {
-        fprintf(stderr, "ares_set_servers_ports_csv failed: %d", rc);
+        curl_mfprintf(stderr, "ares_set_servers_ports_csv failed: %d", rc);
         /* Cleanup */
         ares_destroy(channel);
         return EAI_MEMORY; /* we can't run */

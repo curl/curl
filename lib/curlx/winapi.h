@@ -26,7 +26,7 @@
 
 #ifdef _WIN32
 #define WINAPI_ERROR_LEN 100
-const char *curlx_get_winapi_error(int err, char *buf, size_t buflen);
+const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen);
 const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen);
 #endif
 

@@ -28,12 +28,9 @@ include Makefile.inc
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
-CHECKSRC_DIST = .checksrc \
-  curlx/.checksrc vauth/.checksrc vquic/.checksrc vssh/.checksrc vtls/.checksrc
-
 EXTRA_DIST = config-mac.h config-os400.h config-plan9.h config-riscos.h \
   config-win32.h curl_config.h.in $(LIB_RCFILES) libcurl.def            \
-  $(CMAKE_DIST) Makefile.soname optiontable.pl $(CHECKSRC_DIST)
+  $(CMAKE_DIST) Makefile.soname optiontable.pl
 
 lib_LTLIBRARIES = libcurl.la
 

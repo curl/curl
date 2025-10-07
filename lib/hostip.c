@@ -64,8 +64,7 @@
 #include "easy_lock.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -176,7 +175,7 @@ create_dnscache_id(const char *name,
     len = buflen - 7;
   /* store and lower case the name */
   Curl_strntolower(ptr, name, len);
-  return msnprintf(&ptr[len], 7, ":%u", port) + len;
+  return curl_msnprintf(&ptr[len], 7, ":%u", port) + len;
 }
 
 struct dnscache_prune_data {

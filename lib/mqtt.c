@@ -38,12 +38,11 @@
 #include "url.h"
 #include "escape.h"
 #include "curlx/warnless.h"
-#include "curl_printf.h"
-#include "curl_memory.h"
 #include "multiif.h"
 #include "rand.h"
 
-/* The last #include file should be: */
+/* The last 2 #includes file should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /* first byte is command.

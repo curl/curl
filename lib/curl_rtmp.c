@@ -37,8 +37,7 @@
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -386,9 +385,9 @@ void Curl_rtmp_version(char *version, size_t len)
   else
     suff[0] = '\0';
 
-  msnprintf(version, len, "librtmp/%d.%d%s",
-            RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
-            suff);
+  curl_msnprintf(version, len, "librtmp/%d.%d%s",
+                 RTMP_LIB_VERSION >> 16, (RTMP_LIB_VERSION >> 8) & 0xff,
+                 suff);
 }
 
 #endif  /* USE_LIBRTMP */

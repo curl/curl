@@ -24,7 +24,8 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = CMakeLists.txt .checksrc README.md Makefile.example $(COMPLICATED_EXAMPLES)
+EXTRA_DIST = CMakeLists.txt .checksrc README.md Makefile.example \
+  $(COMPLICATED_MAY_BUILD) $(COMPLICATED_EXAMPLES)
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -53,7 +54,7 @@ LDADD = $(top_builddir)/lib/libcurl.la
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
-# Get check_PROGRAMS variable
+# Get check_PROGRAMS, COMPLICATED_MAY_BUILD, COMPLICATED_EXAMPLES variables
 include Makefile.inc
 
 all: $(check_PROGRAMS)

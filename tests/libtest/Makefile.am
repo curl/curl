@@ -41,7 +41,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 # Get BUNDLE, FIRST_C, FIRST_H, UTILS_C, UTILS_H, CURLX_C, TESTS_C variables
 include Makefile.inc
 
-EXTRA_DIST = CMakeLists.txt .checksrc $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C) \
+EXTRA_DIST = CMakeLists.txt $(FIRST_C) $(FIRST_H) $(UTILS_C) $(UTILS_H) $(TESTS_C) \
   test307.pl test610.pl test613.pl test1013.pl test1022.pl mk-lib1521.pl
 
 CFLAGS += @CURL_CFLAG_EXTRAS@

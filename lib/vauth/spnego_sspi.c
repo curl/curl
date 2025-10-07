@@ -127,7 +127,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->output_token) {
     /* Query the security package for Negotiate */
-    nego->status = (DWORD)Curl_pSecFn->QuerySecurityPackageInfo(
+    nego->status = Curl_pSecFn->QuerySecurityPackageInfo(
                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
                                 &SecurityPackage);
     if(nego->status != SEC_E_OK) {
@@ -167,8 +167,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       return CURLE_OUT_OF_MEMORY;
 
     /* Acquire our credentials handle */
-    nego->status = (DWORD)
-      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+    nego->status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
                                 (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_NEGOTIATE)),
                                 SECPKG_CRED_OUTBOUND, NULL,
                                 nego->p_identity, NULL, NULL,
@@ -216,11 +215,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       SEC_CHANNEL_BINDINGS channelBindings;
       SecPkgContext_Bindings pkgBindings;
       pkgBindings.Bindings = &channelBindings;
-      nego->status = (DWORD)Curl_pSecFn->QueryContextAttributes(
+      nego->status = Curl_pSecFn->QueryContextAttributes(
           nego->sslContext,
           SECPKG_ATTR_ENDPOINT_BINDINGS,
-          &pkgBindings
-      );
+          &pkgBindings);
       if(nego->status == SEC_E_OK) {
         chlg_desc.cBuffers++;
         chlg_buf[1].BufferType = SECBUFFER_CHANNEL_BINDINGS;
@@ -241,14 +239,14 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   /* Generate our challenge-response message */
   nego->status =
-    (DWORD)Curl_pSecFn->InitializeSecurityContext(nego->credentials,
-                                                  chlg ? nego->context : NULL,
-                                                  nego->spn,
-                                                  ISC_REQ_CONFIDENTIALITY,
-                                                  0, SECURITY_NATIVE_DREP,
-                                                  chlg ? &chlg_desc : NULL,
-                                                  0, nego->context,
-                                                  &resp_desc, &attrs, NULL);
+    Curl_pSecFn->InitializeSecurityContext(nego->credentials,
+                                           chlg ? nego->context : NULL,
+                                           nego->spn,
+                                           ISC_REQ_CONFIDENTIALITY,
+                                           0, SECURITY_NATIVE_DREP,
+                                           chlg ? &chlg_desc : NULL,
+                                           0, nego->context,
+                                           &resp_desc, &attrs, NULL);
 
   /* Free the decoded challenge as it is not required anymore */
   free(chlg);
@@ -256,9 +254,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(GSS_ERROR(nego->status)) {
     char buffer[STRERROR_LEN];
     failf(data, "InitializeSecurityContext failed: %s",
-          Curl_sspi_strerror((int)nego->status, buffer, sizeof(buffer)));
+          Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
 
-    if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
+    if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
 
     return CURLE_AUTH_ERROR;
@@ -266,14 +264,13 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(nego->status == SEC_I_COMPLETE_NEEDED ||
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
-    nego->status = (DWORD)Curl_pSecFn->CompleteAuthToken(nego->context,
-                                                         &resp_desc);
+    nego->status = Curl_pSecFn->CompleteAuthToken(nego->context, &resp_desc);
     if(GSS_ERROR(nego->status)) {
       char buffer[STRERROR_LEN];
       failf(data, "CompleteAuthToken failed: %s",
-            Curl_sspi_strerror((int)nego->status, buffer, sizeof(buffer)));
+            Curl_sspi_strerror(nego->status, buffer, sizeof(buffer)));
 
-      if(nego->status == (DWORD)SEC_E_INSUFFICIENT_MEMORY)
+      if(nego->status == SEC_E_INSUFFICIENT_MEMORY)
         return CURLE_OUT_OF_MEMORY;
 
       return CURLE_AUTH_ERROR;

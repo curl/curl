@@ -67,8 +67,7 @@
 #include "mbedtls_threadlock.h"
 #include "../strdup.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -307,7 +306,7 @@ mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
                           bool prefer_rfc)
 {
   if(id == MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8)
-    msnprintf(buf, buf_size, "%s", "TLS_ECJPAKE_WITH_AES_128_CCM_8");
+    curl_msnprintf(buf, buf_size, "%s", "TLS_ECJPAKE_WITH_AES_128_CCM_8");
   else
     return Curl_cipher_suite_get_str(id, buf, buf_size, prefer_rfc);
   return 0;
@@ -1336,10 +1335,10 @@ static size_t mbedtls_version(char *buffer, size_t size)
 #ifdef MBEDTLS_VERSION_C
   /* if mbedtls_version_get_number() is available it is better */
   unsigned int version = mbedtls_version_get_number();
-  return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version >> 24,
-                   (version >> 16) & 0xff, (version >> 8) & 0xff);
+  return curl_msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version >> 24,
+                        (version >> 16) & 0xff, (version >> 8) & 0xff);
 #else
-  return msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
+  return curl_msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
 #endif
 }
 

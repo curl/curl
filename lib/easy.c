@@ -80,8 +80,7 @@
 
 #include "easy_lock.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -157,42 +156,42 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 
   if(Curl_trc_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_trc_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
   }
 
   if(!Curl_ssl_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
     goto fail;
   }
 
   if(!Curl_vquic_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_vquic_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
     goto fail;
   }
 
   if(Curl_win32_init(flags)) {
-    DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
 
   if(Curl_amiga_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
   }
 
   if(Curl_macos_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_macos_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_macos_init failed\n"));
     goto fail;
   }
 
   if(Curl_async_global_init()) {
-    DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: resolver_global_init failed\n"));
     goto fail;
   }
 
   if(Curl_ssh_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_ssh_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssh_init failed\n"));
     goto fail;
   }
 
@@ -361,7 +360,7 @@ CURL *curl_easy_init(void)
     result = global_init(CURL_GLOBAL_DEFAULT, TRUE);
     if(result) {
       /* something in the global init failed, return nothing */
-      DEBUGF(fprintf(stderr, "Error: curl_global_init failed\n"));
+      DEBUGF(curl_mfprintf(stderr, "Error: curl_global_init failed\n"));
       global_init_unlock();
       return NULL;
     }
@@ -371,7 +370,7 @@ CURL *curl_easy_init(void)
   /* We use curl_open() with undefined URL so far */
   result = Curl_open(&data);
   if(result) {
-    DEBUGF(fprintf(stderr, "Error: Curl_open failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_open failed\n"));
     return NULL;
   }
 
@@ -407,7 +406,7 @@ static int events_timer(CURLM *multi,    /* multi handle */
   struct events *ev = userp;
   (void)multi;
 #if DEBUG_EV_POLL
-  fprintf(stderr, "events_timer: set timeout %ldms\n", timeout_ms);
+  curl_mfprintf(stderr, "events_timer: set timeout %ldms\n", timeout_ms);
 #endif
   ev->ms = timeout_ms;
   ev->msbump = TRUE;
@@ -559,7 +558,7 @@ static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
     f->events = m->socket.events;
     f->revents = 0;
 #if DEBUG_EV_POLL
-    fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
+    curl_mfprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
 #endif
     f++;
     numfds++;
@@ -579,19 +578,19 @@ static CURLcode poll_fds(struct events *ev,
   if(numfds) {
     /* wait for activity or timeout */
 #if DEBUG_EV_POLL
-    fprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
+    curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
 #endif
     *pollrc = Curl_poll(fds, numfds, ev->ms);
 #if DEBUG_EV_POLL
-    fprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
-            numfds, ev->ms, *pollrc);
+    curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
+                  numfds, ev->ms, *pollrc);
 #endif
     if(*pollrc < 0)
       return CURLE_UNRECOVERABLE_POLL;
   }
   else {
 #if DEBUG_EV_POLL
-    fprintf(stderr, "poll, but no fds, wait timeout=%ldms\n", ev->ms);
+    curl_mfprintf(stderr, "poll, but no fds, wait timeout=%ldms\n", ev->ms);
 #endif
     *pollrc = 0;
     if(ev->ms > 0)
@@ -629,7 +628,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     if(!pollrc) {
       /* timeout! */
       ev->ms = 0;
-      /* fprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
+      /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
       mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                                        &ev->running_handles);
     }
@@ -658,8 +657,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         timediff_t timediff = curlx_timediff(curlx_now(), before);
         if(timediff > 0) {
 #if DEBUG_EV_POLL
-        fprintf(stderr, "poll timeout %ldms not updated, decrease by "
-                "time spent %ldms\n", ev->ms, (long)timediff);
+        curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
+                      "time spent %ldms\n", ev->ms, (long)timediff);
 #endif
           if(timediff > ev->ms)
             ev->ms = 0;
@@ -1110,7 +1109,7 @@ void curl_easy_reset(CURL *d)
   /* zero out UserDefined data: */
   Curl_freeset(data);
   memset(&data->set, 0, sizeof(struct UserDefined));
-  (void)Curl_init_userdefined(data);
+  Curl_init_userdefined(data);
 
   /* zero out Progress data: */
   memset(&data->progress, 0, sizeof(struct Progress));

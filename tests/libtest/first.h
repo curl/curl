@@ -427,15 +427,17 @@ void ws_close(CURL *curl);
 
 /* ---------------------------------------------------------------- */
 
-#define exe_select_test(A, B, C, D, E, Y, Z) do {          \
-    int ec;                                                \
-    if(select_wrapper((A), (B), (C), (D), (E)) == -1) {    \
-      ec = SOCKERRNO;                                      \
-      curl_mfprintf(stderr, "%s:%d select() failed, with " \
-                    "errno %d (%s)\n",                     \
-                    (Y), (Z), ec, strerror(ec));           \
-      res = TEST_ERR_SELECT;                               \
-    }                                                      \
+#define exe_select_test(A, B, C, D, E, Y, Z) do {                  \
+    int ec;                                                        \
+    if(select_wrapper((A), (B), (C), (D), (E)) == -1) {            \
+      char ecbuf[STRERROR_LEN];                                    \
+      ec = SOCKERRNO;                                              \
+      curl_mfprintf(stderr, "%s:%d select() failed, with "         \
+                    "errno %d (%s)\n",                             \
+                    (Y), (Z),                                      \
+                    ec, curlx_strerror(ec, ecbuf, sizeof(ecbuf))); \
+      res = TEST_ERR_SELECT;                                       \
+    }                                                              \
   } while(0)
 
 #define res_select_test(A, B, C, D, E) \

@@ -52,8 +52,8 @@
 #include "connect.h"
 #include "curl_sasl.h"
 #include "strcase.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -619,12 +619,12 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  hosturl = aprintf("%s://%s%s%s:%d",
-                    conn->handler->scheme,
-                    conn->bits.ipv6_ip ? "[" : "",
-                    conn->host.name,
-                    conn->bits.ipv6_ip ? "]" : "",
-                    conn->remote_port);
+  hosturl = curl_maprintf("%s://%s%s%s:%d",
+                          conn->handler->scheme,
+                          conn->bits.ipv6_ip ? "[" : "",
+                          conn->host.name,
+                          conn->bits.ipv6_ip ? "]" : "",
+                          conn->remote_port);
   if(!hosturl) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

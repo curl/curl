@@ -49,8 +49,7 @@
 #include "curl_sspi.h"
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -210,9 +209,9 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         free(*allocuserpwd);
-        *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
-                                proxy ? "Proxy-" : "",
-                                base64);
+        *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
+                                      proxy ? "Proxy-" : "",
+                                      base64);
         free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
@@ -229,9 +228,9 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         free(*allocuserpwd);
-        *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
-                                proxy ? "Proxy-" : "",
-                                base64);
+        *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
+                                      proxy ? "Proxy-" : "",
+                                      base64);
         free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;

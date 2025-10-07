@@ -69,7 +69,7 @@ static void add_download(const char *url, int num)
   FILE *file;
   CURL *handle;
 
-  snprintf(filename, 50, "%d.download", num);
+  snprintf(filename, sizeof(filename), "%d.download", num);
 
   file = fopen(filename, "wb");
   if(!file) {

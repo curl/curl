@@ -64,12 +64,14 @@ CURLOPT_SOCKOPTDATA(3) function.
 Return *CURL_SOCKOPT_OK* from the callback on success. Return
 *CURL_SOCKOPT_ERROR* from the callback function to signal an unrecoverable
 error to the library and it closes the socket and returns
-*CURLE_COULDNT_CONNECT*. Alternatively, the callback function can return
-*CURL_SOCKOPT_ALREADY_CONNECTED*, to tell libcurl that the socket is
-already connected and then libcurl does no attempt to connect. This allows an
-application to pass in an already connected socket with
-CURLOPT_OPENSOCKETFUNCTION(3) and then have this function make libcurl
-not attempt to connect (again).
+*CURLE_COULDNT_CONNECT* for *CURLSOCKTYPE_IPCXN* and
+*CURLE_ABORTED_BY_CALLBACK* for *CURLSOCKTYPE_ACCEPT*.
+
+The callback function may return *CURL_SOCKOPT_ALREADY_CONNECTED* for
+*CURLSOCKTYPE_IPCXN*, to tell libcurl that the socket is already connected and
+then libcurl does no attempt to connect. This allows an application to pass in
+an already connected socket with CURLOPT_OPENSOCKETFUNCTION(3) and then have
+this function make libcurl not attempt to connect (again).
 
 # DEFAULT
 

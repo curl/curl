@@ -77,8 +77,8 @@
 #include "curl_md5.h"
 #include "curlx/warnless.h"
 #include "strdup.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -600,7 +600,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   /* Convert the calculated 16 octet digest into a 32 byte hex string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
+    curl_msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
   result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s", conn->user, secret);
 

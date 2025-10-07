@@ -48,9 +48,11 @@ static void t537_store_errmsg(const char *msg, int err)
 {
   if(!err)
     curl_msnprintf(t537_msgbuff, sizeof(t537_msgbuff), "%s", msg);
-  else
+  else {
+    char errbuf[STRERROR_LEN];
     curl_msnprintf(t537_msgbuff, sizeof(t537_msgbuff), "%s, errno %d, %s", msg,
-                   err, strerror(err));
+                   err, curlx_strerror(err, errbuf, sizeof(errbuf)));
+  }
 }
 
 static void t537_close_file_descriptors(void)

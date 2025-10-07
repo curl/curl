@@ -47,8 +47,8 @@
 #include "transfer.h"
 #include "curlx/dynbuf.h"
 #include "headers.h"
+
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -734,7 +734,7 @@ static CURLcode http2_send_ping(struct Curl_cfilter *cf,
 void Curl_http2_ver(char *p, size_t len)
 {
   nghttp2_info *h2 = nghttp2_version(0);
-  (void)msnprintf(p, len, "nghttp2/%s", h2->version_str);
+  (void)curl_msnprintf(p, len, "nghttp2/%s", h2->version_str);
 }
 
 static CURLcode nw_out_flush(struct Curl_cfilter *cf,
@@ -1214,48 +1214,48 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
 {
   switch(frame->hd.type) {
     case NGHTTP2_DATA: {
-      return msnprintf(buffer, blen,
-                       "FRAME[DATA, len=%d, eos=%d, padlen=%d]",
-                       (int)frame->hd.length,
-                       !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM),
-                       (int)frame->data.padlen);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[DATA, len=%d, eos=%d, padlen=%d]",
+                            (int)frame->hd.length,
+                            !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM),
+                            (int)frame->data.padlen);
     }
     case NGHTTP2_HEADERS: {
-      return msnprintf(buffer, blen,
-                       "FRAME[HEADERS, len=%d, hend=%d, eos=%d]",
-                       (int)frame->hd.length,
-                       !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS),
-                       !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM));
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[HEADERS, len=%d, hend=%d, eos=%d]",
+                            (int)frame->hd.length,
+                            !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS),
+                            !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM));
     }
     case NGHTTP2_PRIORITY: {
-      return msnprintf(buffer, blen,
-                       "FRAME[PRIORITY, len=%d, flags=%d]",
-                       (int)frame->hd.length, frame->hd.flags);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[PRIORITY, len=%d, flags=%d]",
+                            (int)frame->hd.length, frame->hd.flags);
     }
     case NGHTTP2_RST_STREAM: {
-      return msnprintf(buffer, blen,
-                       "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
-                       (int)frame->hd.length, frame->hd.flags,
-                       frame->rst_stream.error_code);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
+                            (int)frame->hd.length, frame->hd.flags,
+                            frame->rst_stream.error_code);
     }
     case NGHTTP2_SETTINGS: {
       if(frame->hd.flags & NGHTTP2_FLAG_ACK) {
-        return msnprintf(buffer, blen, "FRAME[SETTINGS, ack=1]");
+        return curl_msnprintf(buffer, blen, "FRAME[SETTINGS, ack=1]");
       }
-      return msnprintf(buffer, blen,
-                       "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
     }
     case NGHTTP2_PUSH_PROMISE: {
-      return msnprintf(buffer, blen,
-                       "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
-                       (int)frame->hd.length,
-                       !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
+                            (int)frame->hd.length,
+                            !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
     }
     case NGHTTP2_PING: {
-      return msnprintf(buffer, blen,
-                       "FRAME[PING, len=%d, ack=%d]",
-                       (int)frame->hd.length,
-                       frame->hd.flags&NGHTTP2_FLAG_ACK);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[PING, len=%d, ack=%d]",
+                            (int)frame->hd.length,
+                            frame->hd.flags&NGHTTP2_FLAG_ACK);
     }
     case NGHTTP2_GOAWAY: {
       char scratch[128];
@@ -1265,19 +1265,20 @@ static int fr_print(const nghttp2_frame *frame, char *buffer, size_t blen)
       if(len)
         memcpy(scratch, frame->goaway.opaque_data, len);
       scratch[len] = '\0';
-      return msnprintf(buffer, blen, "FRAME[GOAWAY, error=%d, reason='%s', "
-                       "last_stream=%d]", frame->goaway.error_code,
-                       scratch, frame->goaway.last_stream_id);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[GOAWAY, error=%d, reason='%s', "
+                            "last_stream=%d]", frame->goaway.error_code,
+                            scratch, frame->goaway.last_stream_id);
     }
     case NGHTTP2_WINDOW_UPDATE: {
-      return msnprintf(buffer, blen,
-                       "FRAME[WINDOW_UPDATE, incr=%d]",
-                       frame->window_update.window_size_increment);
+      return curl_msnprintf(buffer, blen,
+                            "FRAME[WINDOW_UPDATE, incr=%d]",
+                            frame->window_update.window_size_increment);
     }
     default:
-      return msnprintf(buffer, blen, "FRAME[%d, len=%d, flags=%d]",
-                       frame->hd.type, (int)frame->hd.length,
-                       frame->hd.flags);
+      return curl_msnprintf(buffer, blen, "FRAME[%d, len=%d, flags=%d]",
+                            frame->hd.type, (int)frame->hd.length,
+                            frame->hd.flags);
   }
 }
 
@@ -1592,8 +1593,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
     if(!strcmp(HTTP_PSEUDO_AUTHORITY, (const char *)name)) {
       /* pseudo headers are lower case */
       int rc = 0;
-      char *check = aprintf("%s:%d", cf->conn->host.name,
-                            cf->conn->remote_port);
+      char *check = curl_maprintf("%s:%d", cf->conn->host.name,
+                                  cf->conn->remote_port);
       if(!check)
         /* no memory */
         return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1640,7 +1641,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       }
       stream->push_headers = headp;
     }
-    h = aprintf("%s:%s", name, value);
+    h = curl_maprintf("%s:%s", name, value);
     if(h)
       stream->push_headers[stream->push_headers_used++] = h;
     return 0;
@@ -1671,8 +1672,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
       cf_h2_header_error(cf, data_s, stream, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
-    msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%u\r",
-              stream->status_code);
+    curl_msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%u\r",
+                   stream->status_code);
     result = Curl_headers_push(data_s, buffer, CURLH_PSEUDO);
     if(result) {
       cf_h2_header_error(cf, data_s, stream, result);

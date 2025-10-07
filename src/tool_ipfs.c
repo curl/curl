@@ -76,14 +76,14 @@ static char *ipfs_gateway(void)
   if(!ipfs_path) {
     char *home = getenv("HOME");
     if(home && *home)
-      ipfs_path = aprintf("%s/.ipfs/", home);
+      ipfs_path = curl_maprintf("%s/.ipfs/", home);
     /* fallback to "~/.ipfs", as that is the default location. */
   }
 
   if(!ipfs_path || ensure_trailing_slash(&ipfs_path))
     goto fail;
 
-  gateway_composed_file_path = aprintf("%sgateway", ipfs_path);
+  gateway_composed_file_path = curl_maprintf("%sgateway", ipfs_path);
 
   if(!gateway_composed_file_path)
     goto fail;
@@ -233,8 +233,8 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   /* ensure the gateway path ends with a trailing slash */
   ensure_trailing_slash(&gwpath);
 
-  pathbuffer = aprintf("%s%s/%s%s", gwpath, protocol, cid,
-                       inputpath ? inputpath : "");
+  pathbuffer = curl_maprintf("%s%s/%s%s", gwpath, protocol, cid,
+                             inputpath ? inputpath : "");
   if(!pathbuffer) {
     goto clean;
   }

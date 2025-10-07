@@ -49,8 +49,8 @@ struct Curl_easy;
 #include "rand.h"
 #include "slist.h"
 #include "curlx/dynbuf.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -1688,7 +1688,7 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  s = vaprintf(fmt, ap);
+  s = curl_mvaprintf(fmt, ap);
   va_end(ap);
 
   if(s) {

@@ -27,6 +27,7 @@
 int main(int argc, char **argv)
 {
   (void)argc;
+  /* !checksrc! disable BANNEDFUNC 1 */
   printf("libcurl test: |%s|%s|\n", argv[0], curl_version());
   return 0;
 }

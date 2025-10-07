@@ -334,8 +334,8 @@ CURLcode tool_setopt_bitmask(CURL *curl, const char *name, CURLoption tag,
     char preamble[80];
     unsigned long rest = (unsigned long)lval;
     const struct NameValueUnsigned *nv = NULL;
-    msnprintf(preamble, sizeof(preamble),
-              "curl_easy_setopt(hnd, %s, ", name);
+    curl_msnprintf(preamble, sizeof(preamble),
+                   "curl_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
       if((nv->value & ~ rest) == 0) {
         /* all value flags contained in rest */
@@ -345,8 +345,8 @@ CURLcode tool_setopt_bitmask(CURL *curl, const char *name, CURLoption tag,
         if(!rest || ret)
           break;                /* handled them all */
         /* replace with all spaces for continuation line */
-        msnprintf(preamble, sizeof(preamble), "%*s", (int)strlen(preamble),
-                  "");
+        curl_msnprintf(preamble, sizeof(preamble), "%*s",
+                       (int)strlen(preamble), "");
       }
     }
     /* If any bits have no definition, output an explicit value.

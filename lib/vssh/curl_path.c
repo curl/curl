@@ -100,6 +100,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   }
   else
     *path = working_path;
+  DEBUGASSERT(*path && (*path)[0]);
 
   return CURLE_OK;
 }

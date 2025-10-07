@@ -49,7 +49,7 @@ static void voutf(const char *prefix,
     char *ptr;
     char *print_buffer;
 
-    print_buffer = vaprintf(fmt, ap);
+    print_buffer = curl_mvaprintf(fmt, ap);
     if(!print_buffer)
       return;
     len = strlen(print_buffer);
@@ -120,15 +120,15 @@ void helpf(const char *fmt, ...)
     va_start(ap, fmt);
     DEBUGASSERT(!strchr(fmt, '\n'));
     fputs("curl: ", tool_stderr); /* prefix it */
-    vfprintf(tool_stderr, fmt, ap);
+    curl_mvfprintf(tool_stderr, fmt, ap);
     va_end(ap);
     fputs("\n", tool_stderr); /* newline it */
   }
-  fprintf(tool_stderr, "curl: try 'curl --help' "
+  curl_mfprintf(tool_stderr, "curl: try 'curl --help' "
 #ifdef USE_MANUAL
-          "or 'curl --manual' "
+                "or 'curl --manual' "
 #endif
-          "for more information\n");
+                "for more information\n");
 }
 
 /*

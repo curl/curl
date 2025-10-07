@@ -62,16 +62,14 @@ int getfiletime(const char *filename, curl_off_t *stamp)
       }
     }
     else {
-      warnf("Failed to get filetime: "
-            "GetFileTime failed: GetLastError %u",
-            (unsigned int)GetLastError());
+      warnf("Failed to get filetime: GetFileTime failed: GetLastError 0x%08lx",
+            GetLastError());
     }
     CloseHandle(hfile);
   }
   else if(GetLastError() != ERROR_FILE_NOT_FOUND) {
-    warnf("Failed to get filetime: "
-          "CreateFile failed: GetLastError %u",
-          (unsigned int)GetLastError());
+    warnf("Failed to get filetime: CreateFile failed: GetLastError 0x%08lx",
+          GetLastError());
   }
 #else
   struct_stat statbuf;
@@ -79,8 +77,11 @@ int getfiletime(const char *filename, curl_off_t *stamp)
     *stamp = (curl_off_t)statbuf.st_mtime;
     rc = 0;
   }
-  else
-    warnf("Failed to get filetime: %s", strerror(errno));
+  else {
+    char errbuf[STRERROR_LEN];
+    warnf("Failed to get filetime: %s",
+          curlx_strerror(errno, errbuf, sizeof(errbuf)));
+  }
 #endif
   return rc;
 }
@@ -117,15 +118,15 @@ void setfiletime(curl_off_t filetime, const char *filename)
     ft.dwHighDateTime = (DWORD)(converted >> 32);
     if(!SetFileTime(hfile, NULL, &ft, &ft)) {
       warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-            " on outfile: SetFileTime failed: GetLastError %u",
-            filetime, (unsigned int)GetLastError());
+            " on outfile: SetFileTime failed: GetLastError 0x%08lx",
+            filetime, GetLastError());
     }
     CloseHandle(hfile);
   }
   else {
     warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on outfile: CreateFile failed: GetLastError %u",
-          filetime, (unsigned int)GetLastError());
+          " on outfile: CreateFile failed: GetLastError 0x%08lx",
+          filetime, GetLastError());
   }
 
 #elif defined(HAVE_UTIMES)
@@ -133,8 +134,10 @@ void setfiletime(curl_off_t filetime, const char *filename)
   times[0].tv_sec = times[1].tv_sec = (time_t)filetime;
   times[0].tv_usec = times[1].tv_usec = 0;
   if(utimes(filename, times)) {
+    char errbuf[STRERROR_LEN];
     warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on '%s': %s", filetime, filename, strerror(errno));
+          " on '%s': %s", filetime, filename,
+          curlx_strerror(errno, errbuf, sizeof(errbuf)));
   }
 
 #elif defined(HAVE_UTIME)
@@ -142,8 +145,10 @@ void setfiletime(curl_off_t filetime, const char *filename)
   times.actime = (time_t)filetime;
   times.modtime = (time_t)filetime;
   if(utime(filename, &times)) {
+    char errbuf[STRERROR_LEN];
     warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on '%s': %s", filetime, filename, strerror(errno));
+          " on '%s': %s", filetime, filename,
+          curlx_strerror(errno, errbuf, sizeof(errbuf)));
   }
 #endif
 }

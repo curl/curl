@@ -466,16 +466,16 @@ CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
       char text[512];
       const char *t;
       if(glob->pos) {
-        msnprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
-                  glob->error,
-                  glob->pos, url, (int)glob->pos - 1, " ");
+        curl_msnprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
+                       glob->error,
+                       glob->pos, url, (int)glob->pos - 1, " ");
         t = text;
       }
       else
         t = glob->error;
 
       /* send error description to the error-stream */
-      fprintf(error, "curl: (%d) %s\n", res, t);
+      curl_mfprintf(error, "curl: (%d) %s\n", res, t);
     }
     /* it failed, we cleanup */
     glob_cleanup(glob);

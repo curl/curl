@@ -51,16 +51,16 @@ void Curl_hash_print(struct Curl_hash *h,
   if(!h)
     return;
 
-  fprintf(stderr, "=Hash dump=\n");
+  curl_mfprintf(stderr, "=Hash dump=\n");
 
   Curl_hash_start_iterate(h, &iter);
 
   he = Curl_hash_next_element(&iter);
   while(he) {
     if(iter.slot_index != last_index) {
-      fprintf(stderr, "index %d:", (int)iter.slot_index);
+      curl_mfprintf(stderr, "index %d:", (int)iter.slot_index);
       if(last_index != UINT_MAX) {
-        fprintf(stderr, "\n");
+        curl_mfprintf(stderr, "\n");
       }
       last_index = iter.slot_index;
     }
@@ -68,13 +68,13 @@ void Curl_hash_print(struct Curl_hash *h,
     if(func)
       func(he->ptr);
     else
-      fprintf(stderr, " [key=%.*s, he=%p, ptr=%p]",
-              (int)he->key_len, (char *)he->key,
-              (void *)he, (void *)he->ptr);
+      curl_mfprintf(stderr, " [key=%.*s, he=%p, ptr=%p]",
+                    (int)he->key_len, (char *)he->key,
+                    (void *)he, (void *)he->ptr);
 
     he = Curl_hash_next_element(&iter);
   }
-  fprintf(stderr, "\n");
+  curl_mfprintf(stderr, "\n");
 }
 #endif
 

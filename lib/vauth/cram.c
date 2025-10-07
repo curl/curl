@@ -35,7 +35,6 @@
 #include "../curl_hmac.h"
 #include "../curl_md5.h"
 #include "../curlx/warnless.h"
-#include "../curl_printf.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -82,7 +81,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
   Curl_HMAC_final(ctxt, digest);
 
   /* Generate the response */
-  response = aprintf(
+  response = curl_maprintf(
     "%s %02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
     userp, digest[0], digest[1], digest[2], digest[3], digest[4],
     digest[5], digest[6], digest[7], digest[8], digest[9], digest[10],

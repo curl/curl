@@ -120,7 +120,7 @@ typedef enum {
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO {
-  char *path;                  /* the path we operate on */
+  char *path;        /* the path we operate on, at least one byte long */
 #ifdef USE_LIBSSH2
   struct dynbuf readdir_link;
   struct dynbuf readdir;

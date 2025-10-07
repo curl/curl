@@ -31,7 +31,7 @@
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_open(struct Curl_easy **curl);
-CURLcode Curl_init_userdefined(struct Curl_easy *data);
+void Curl_init_userdefined(struct Curl_easy *data);
 
 void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);

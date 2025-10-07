@@ -37,7 +37,6 @@
 #include "vauth.h"
 #include "../curlx/warnless.h"
 #include "../sendf.h"
-#include "../curl_printf.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"

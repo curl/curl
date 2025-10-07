@@ -69,9 +69,9 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
   for(i = 0; i < (dotscore ? 2 : 1); i++) {
     char *c;
     if(dotscore)
-      c = aprintf("%s" DIR_CHAR "%c%s", home, pref[i], &fname[1]);
+      c = curl_maprintf("%s" DIR_CHAR "%c%s", home, pref[i], &fname[1]);
     else
-      c = aprintf("%s" DIR_CHAR "%s", home, fname);
+      c = curl_maprintf("%s" DIR_CHAR "%s", home, fname);
     if(c) {
       int fd = curlx_open(c, O_RDONLY);
       if(fd >= 0) {
@@ -115,7 +115,7 @@ char *findfile(const char *fname, int dotscore)
         continue;
       }
       if(conf_list[i].append) {
-        char *c = aprintf("%s%s", home, conf_list[i].append);
+        char *c = curl_maprintf("%s%s", home, conf_list[i].append);
         curl_free(home);
         if(!c)
           return NULL;

@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
---help
+SMTP
 </keywords>
 </info>
 
@@ -13,111 +13,39 @@
 #
 # Client-side
 <client>
-<features>
-manual
-</features>
 <server>
-none
+smtp
 </server>
 <name>
-curl table:category --help
+Send >64K over SMTP
 </name>
+<file name="%LOGDIR/email%TESTNUMBER">
+From: different
+To: another
+
+%repeat[5000 x test in body... ]%
+</file>
 <command>
---help tAbLe:CoMmOn
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/email%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-0
-</errorcode>
-<stdout mode="text">
-common: Common options table
---compressed                               
------------------------------------------- 
-Request compressed response                
+<protocol crlf="yes">
+EHLO %TESTNUMBER
+MAIL FROM:<sender@example.com>
+RCPT TO:<recipient@example.com>
+DATA
+QUIT
+</protocol>
+<upload>
+From: different
+To: another
 
--b, --cookie <data|filename>               
------------------------------------------- 
-Send cookies from string/load from file    
-
--c, --cookie-jar <filename>                
------------------------------------------- 
-Save cookies to <filename> after operation 
-
--d, --data <data>                          
------------------------------------------- 
-HTTP POST data                             
-
--F, --form <name=content>                  
------------------------------------------- 
-Specify multipart MIME data                
-
--I, --head                                 
------------------------------------------- 
-Show document info only                    
-
--H, --header <header/@file>                
------------------------------------------- 
-Pass custom header(s) to server            
-
--k, --insecure                             
------------------------------------------- 
-Allow insecure server connections          
-
--L, --location                             
------------------------------------------- 
-Follow redirects                           
-
--m, --max-time <seconds>                   
------------------------------------------- 
-Maximum time allowed for transfer          
-
--o, --output <file>                        
------------------------------------------- 
-Write to file instead of stdout            
-
--x, --proxy <[protocol://]host[:port]>     
------------------------------------------- 
-Use this proxy                             
-
--O, --remote-name                          
------------------------------------------- 
-Write output to file named as remote file  
-
--X, --request <method>                     
------------------------------------------- 
-Specify request method to use              
-
--s, --silent                               
------------------------------------------- 
-Silent mode                                
-
---trace-ascii <file>                       
------------------------------------------- 
-Like --trace, but without hex output       
-
--T, --upload-file <file>                   
------------------------------------------- 
-Transfer local FILE to destination         
-
--u, --user <user:password>                 
------------------------------------------- 
-Server user and password                   
-
--A, --user-agent <name>                    
------------------------------------------- 
-Send User-Agent <name> to server           
-
--v, --verbose                              
------------------------------------------- 
-Make the operation more talkative          
-
--w, --write-out <format>                   
------------------------------------------- 
-Output FORMAT after completion             
-</stdout>
+%repeat[5000 x test in body... ]%
+.
+</upload>
 </verify>
 </testcase>

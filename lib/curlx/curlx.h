@@ -58,6 +58,9 @@
 #include "version_win32.h"
 /* provides curlx_verify_windows_version() */
 
+#include "strerr.h"
+/* The curlx_strerror() function */
+
 #include "strparse.h"
 /* The curlx_str_* parsing functions */
 

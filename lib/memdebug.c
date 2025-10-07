@@ -31,8 +31,7 @@
 #include "urldata.h"
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW() */
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -114,8 +113,8 @@ static bool countcheck(const char *func, int line, const char *source)
       curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
                    source, line, func);
       /* log to stderr also */
-      fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
-              source, line, func);
+      curl_mfprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
+                    source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
       /* !checksrc! disable ERRNOVAR 1 */
       CURL_SETERRNO(ENOMEM);
@@ -469,7 +468,7 @@ void curl_dbg_log(const char *format, ...)
     return;
 
   va_start(ap, format);
-  nchars = mvsnprintf(buf, sizeof(buf), format, ap);
+  nchars = curl_mvsnprintf(buf, sizeof(buf), format, ap);
   va_end(ap);
 
   if(nchars > (int)sizeof(buf) - 1)

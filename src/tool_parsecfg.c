@@ -156,7 +156,7 @@ int parseconfig(const char *filename)
         *line++ = '\0'; /* null-terminate, we have a local copy of the data */
 
 #ifdef DEBUG_CONFIG
-      fprintf(tool_stderr, "GOT: %s\n", option);
+      curl_mfprintf(tool_stderr, "GOT: %s\n", option);
 #endif
 
       /* pass spaces and separator(s) */
@@ -204,7 +204,7 @@ int parseconfig(const char *filename)
       }
 
 #ifdef DEBUG_CONFIG
-      fprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
+      curl_mfprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
       res = getparameter(option, param, &usedarg, config);
       config = global->last;

@@ -69,8 +69,8 @@
 #include "curlx/fopen.h"
 #include "curlx/warnless.h"
 #include "curl_range.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -488,8 +488,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
       headerlen =
-        msnprintf(header, sizeof(header), "Content-Length: %" FMT_OFF_T "\r\n",
-                  expected_size);
+        curl_msnprintf(header, sizeof(header),
+                       "Content-Length: %" FMT_OFF_T "\r\n", expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)
         return result;
@@ -507,15 +507,15 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
     headerlen =
-      msnprintf(header, sizeof(header),
-                "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
-                tm->tm_mday,
-                Curl_month[tm->tm_mon],
-                tm->tm_year + 1900,
-                tm->tm_hour,
-                tm->tm_min,
-                tm->tm_sec);
+      curl_msnprintf(header, sizeof(header),
+                     "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                     Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                     tm->tm_mday,
+                     Curl_month[tm->tm_mon],
+                     tm->tm_year + 1900,
+                     tm->tm_hour,
+                     tm->tm_min,
+                     tm->tm_sec);
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(!result)
       /* end of headers */

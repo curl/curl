@@ -87,8 +87,7 @@
 #include "curl_ctype.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -337,7 +336,7 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
     pwd = data->state.aptr.passwd;
   }
 
-  out = aprintf("%s:%s", user ? user : "", pwd ? pwd : "");
+  out = curl_maprintf("%s:%s", user ? user : "", pwd ? pwd : "");
   if(!out)
     return CURLE_OUT_OF_MEMORY;
 
@@ -351,9 +350,9 @@ static CURLcode http_output_basic(struct Curl_easy *data, bool proxy)
   }
 
   free(*userp);
-  *userp = aprintf("%sAuthorization: Basic %s\r\n",
-                   proxy ? "Proxy-" : "",
-                   authorization);
+  *userp = curl_maprintf("%sAuthorization: Basic %s\r\n",
+                         proxy ? "Proxy-" : "",
+                         authorization);
   free(authorization);
   if(!*userp) {
     result = CURLE_OUT_OF_MEMORY;
@@ -381,8 +380,8 @@ static CURLcode http_output_bearer(struct Curl_easy *data)
 
   userp = &data->state.aptr.userpwd;
   free(*userp);
-  *userp = aprintf("Authorization: Bearer %s\r\n",
-                   data->set.str[STRING_BEARER]);
+  *userp = curl_maprintf("Authorization: Bearer %s\r\n",
+                         data->set.str[STRING_BEARER]);
 
   if(!*userp) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1795,16 +1794,16 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
    */
 
   /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-  msnprintf(datestr, sizeof(datestr),
-            "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-            condp,
-            Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
-            tm->tm_mday,
-            Curl_month[tm->tm_mon],
-            tm->tm_year + 1900,
-            tm->tm_hour,
-            tm->tm_min,
-            tm->tm_sec);
+  curl_msnprintf(datestr, sizeof(datestr),
+                 "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                 condp,
+                 Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                 tm->tm_mday,
+                 Curl_month[tm->tm_mon],
+                 tm->tm_year + 1900,
+                 tm->tm_hour,
+                 tm->tm_min,
+                 tm->tm_sec);
 
   result = curlx_dyn_add(req, datestr);
   return result;
@@ -1936,7 +1935,7 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
 #endif
 
     if(!curl_strequal("Host:", ptr)) {
-      aptr->host = aprintf("Host:%s\r\n", &ptr[5]);
+      aptr->host = curl_maprintf("Host:%s\r\n", &ptr[5]);
       if(!aptr->host)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -1952,13 +1951,14 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
         (conn->remote_port == PORT_HTTP)) )
       /* if(HTTPS on port 443) OR (HTTP on port 80) then do not include
          the port number in the host string */
-      aptr->host = aprintf("Host: %s%s%s\r\n", conn->bits.ipv6_ip ? "[" : "",
-                           host, conn->bits.ipv6_ip ? "]" : "");
+      aptr->host = curl_maprintf("Host: %s%s%s\r\n",
+                                 conn->bits.ipv6_ip ? "[" : "",
+                                 host, conn->bits.ipv6_ip ? "]" : "");
     else
-      aptr->host = aprintf("Host: %s%s%s:%d\r\n",
-                           conn->bits.ipv6_ip ? "[" : "",
-                           host, conn->bits.ipv6_ip ? "]" : "",
-                           conn->remote_port);
+      aptr->host = curl_maprintf("Host: %s%s%s:%d\r\n",
+                                 conn->bits.ipv6_ip ? "[" : "",
+                                 host, conn->bits.ipv6_ip ? "]" : "",
+                                 conn->remote_port);
 
     if(!aptr->host)
       /* without Host: we cannot make a nice request */
@@ -2494,8 +2494,8 @@ static CURLcode http_range(struct Curl_easy *data,
        !Curl_checkheaders(data, STRCONST("Range"))) {
       /* if a line like this was already allocated, free the previous one */
       free(data->state.aptr.rangeline);
-      data->state.aptr.rangeline = aprintf("Range: bytes=%s\r\n",
-                                           data->state.range);
+      data->state.aptr.rangeline = curl_maprintf("Range: bytes=%s\r\n",
+                                                 data->state.range);
     }
     else if((httpreq == HTTPREQ_POST || httpreq == HTTPREQ_PUT) &&
             !Curl_checkheaders(data, STRCONST("Content-Range"))) {
@@ -2508,8 +2508,8 @@ static CURLcode http_range(struct Curl_easy *data,
            remote part so we tell the server (and act accordingly) that we
            upload the whole file (again) */
         data->state.aptr.rangeline =
-          aprintf("Content-Range: bytes 0-%" FMT_OFF_T "/%" FMT_OFF_T "\r\n",
-                  req_clen - 1, req_clen);
+          curl_maprintf("Content-Range: bytes 0-%" FMT_OFF_T "/"
+                        "%" FMT_OFF_T "\r\n", req_clen - 1, req_clen);
 
       }
       else if(data->state.resume_from) {
@@ -2521,15 +2521,16 @@ static CURLcode http_range(struct Curl_easy *data,
                                data->state.infilesize :
                                (data->state.resume_from + req_clen);
         data->state.aptr.rangeline =
-          aprintf("Content-Range: bytes %s%" FMT_OFF_T "/%" FMT_OFF_T "\r\n",
-                  data->state.range, total_len-1, total_len);
+          curl_maprintf("Content-Range: bytes %s%" FMT_OFF_T "/"
+                        "%" FMT_OFF_T "\r\n",
+                        data->state.range, total_len-1, total_len);
       }
       else {
         /* Range was selected and then we just pass the incoming range and
            append total size */
         data->state.aptr.rangeline =
-          aprintf("Content-Range: bytes %s/%" FMT_OFF_T "\r\n",
-                  data->state.range, req_clen);
+          curl_maprintf("Content-Range: bytes %s/%" FMT_OFF_T "\r\n",
+                        data->state.range, req_clen);
       }
       if(!data->state.aptr.rangeline)
         return CURLE_OUT_OF_MEMORY;
@@ -2931,7 +2932,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     /* setup the authentication headers, how that method and host are known */
     char *pq = NULL;
     if(data->state.up.query) {
-      pq = aprintf("%s?%s", data->state.up.path, data->state.up.query);
+      pq = curl_maprintf("%s?%s", data->state.up.path, data->state.up.query);
       if(!pq)
         return CURLE_OUT_OF_MEMORY;
     }

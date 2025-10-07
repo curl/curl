@@ -45,8 +45,7 @@
 #include "curlx/inet_pton.h"
 #include "url.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -255,8 +254,14 @@ static CURLproxycode socks_recv(struct socks_state *sx,
             curl_easy_strerror(result));
       return CURLPX_RECV_CONNECT;
     }
-    else if(!nread) /* EOF */
+    else if(!nread) { /* EOF */
+      if(Curl_bufq_len(&sx->iobuf) < min_bytes) {
+        failf(data, "Failed to receive SOCKS response, "
+              "proxy closed connection");
+        return CURLPX_RECV_CONNECT;
+      }
       break;
+    }
   }
   *done = TRUE;
   return CURLPX_OK;

@@ -28,19 +28,17 @@
 
 #ifdef USE_RUSTLS
 
-#include "../curl_printf.h"
-
 #include <rustls.h>
 
 #include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
+#include "../curlx/strerr.h"
 #include "../urldata.h"
 #include "../sendf.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
 #include "keylog.h"
-#include "../strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
 
@@ -171,7 +169,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
   else if(io_error) {
     char buffer[STRERROR_LEN];
     failf(data, "reading from socket: %s",
-          Curl_strerror(io_error, buffer, sizeof(buffer)));
+          curlx_strerror(io_error, buffer, sizeof(buffer)));
     *err = CURLE_RECV_ERROR;
     return -1;
   }
@@ -283,7 +281,7 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
     else if(io_error) {
       char buffer[STRERROR_LEN];
       failf(data, "writing to socket: %s",
-            Curl_strerror(io_error, buffer, sizeof(buffer)));
+            curlx_strerror(io_error, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
     if(tlswritten == 0) {
@@ -520,7 +518,7 @@ cr_keylog_log_cb(struct rustls_str label,
   (void)client_random_len;
   DEBUGASSERT(client_random_len == CLIENT_RANDOM_SIZE);
   /* Turning a "rustls_str" into a null delimited "c" string */
-  msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
+  curl_msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
   Curl_tls_keylog_write(clabel, client_random, secret, secret_len);
 }
 
@@ -1389,7 +1387,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static size_t cr_version(char *buffer, size_t size)
 {
   const struct rustls_str ver = rustls_version();
-  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+  return curl_msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
 static CURLcode

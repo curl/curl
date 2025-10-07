@@ -27,7 +27,6 @@
 #ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h" /* it includes http_chunks.h */
-#include "curl_printf.h"
 #include "curl_trc.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "curlx/dynbuf.h"
@@ -584,7 +583,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     int hdlen;
     size_t n;
 
-    hdlen = msnprintf(hd, sizeof(hd), "%zx\r\n", nread);
+    hdlen = curl_msnprintf(hd, sizeof(hd), "%zx\r\n", nread);
     if(hdlen <= 0)
       return CURLE_READ_ERROR;
     /* On a soft-limited bufq, we do not need to check that all was written */

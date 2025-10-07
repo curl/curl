@@ -111,6 +111,7 @@
 --keepalive-time                     7.18.0
 --key                                7.9.3
 --key-type                           7.9.3
+--knownhosts                         8.17.0
 --krb                                7.3
 --libcurl                            7.16.1
 --limit-rate                         7.10

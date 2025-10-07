@@ -238,7 +238,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
  *
  * data    [in]     - The session handle.
  * authzid [in]     - The authorization identity if some.
- * chlg    [in]     - The optional challenge message.
+ * chlg    [in]     - The challenge message.
  * krb5    [in/out] - The Kerberos 5 data struct being used and modified.
  * out     [out]    - The result storage.
  *
@@ -273,6 +273,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 #endif
 
   /* Ensure we have a valid challenge message */
+  DEBUGASSERT(chlg);
   if(!Curl_bufref_len(chlg)) {
     infof(data, "GSSAPI handshake failure (empty security message)");
     return CURLE_BAD_CONTENT_ENCODING;

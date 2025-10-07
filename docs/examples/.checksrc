@@ -1,12 +1,15 @@
 allowfunc fclose
 allowfunc fdopen
 allowfunc fopen
+allowfunc fprintf
 allowfunc gmtime
 allowfunc localtime
 allowfunc open
+allowfunc printf
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
+allowfunc strerror
 banfunc curl_maprintf
 banfunc curl_mfprintf
 banfunc curl_mprintf

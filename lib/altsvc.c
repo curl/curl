@@ -42,8 +42,7 @@
 #include "curlx/strparse.h"
 #include "connect.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -270,23 +269,23 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
     }
   }
 #endif
-  fprintf(fp,
-          "%s %s%s%s %u "
-          "%s %s%s%s %u "
-          "\"%d%02d%02d "
-          "%02d:%02d:%02d\" "
-          "%u %u\n",
-          Curl_alpnid2str(as->src.alpnid),
-          src6_pre, as->src.host, src6_post,
-          as->src.port,
+  curl_mfprintf(fp,
+                "%s %s%s%s %u "
+                "%s %s%s%s %u "
+                "\"%d%02d%02d "
+                "%02d:%02d:%02d\" "
+                "%u %u\n",
+                Curl_alpnid2str(as->src.alpnid),
+                src6_pre, as->src.host, src6_post,
+                as->src.port,
 
-          Curl_alpnid2str(as->dst.alpnid),
-          dst6_pre, as->dst.host, dst6_post,
-          as->dst.port,
+                Curl_alpnid2str(as->dst.alpnid),
+                dst6_pre, as->dst.host, dst6_post,
+                as->dst.port,
 
-          stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-          stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
-          as->persist, as->prio);
+                stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
+                as->persist, as->prio);
   return CURLE_OK;
 }
 

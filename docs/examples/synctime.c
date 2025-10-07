@@ -55,20 +55,6 @@
  * Usage:
  * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
- *
- * Written by: Frank (contributed to libcurl)
- *
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
- *
- * IN NO EVENT SHALL THE AUTHOR OF THIS SOFTWARE BE LIABLE FOR
- * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
- * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
- * OF THIS SOFTWARE.
- *
  */
 
 #include <stdio.h>
@@ -147,43 +133,39 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   (void)stream;
 
   if(ShowAllHeader == 1)
-    fprintf(stderr, "%s", (char *)(ptr));
+    fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
-  if(strncmp((char *)(ptr), "Date:", 5) == 0) {
+  if(strncmp((char *)ptr, "Date:", 5) == 0) {
     if(ShowAllHeader == 0)
-      fprintf(stderr, "HTTP Server. %s", (char *)(ptr));
+      fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
     if(AutoSyncTime == 1) {
+      int RetVal;
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      if(strlen((char *)(ptr)) > 50) /* Can prevent buffer overflow to
-                                        TmpStr1 & 2? */
-        AutoSyncTime = 0;
-      else {
-        int RetVal = sscanf((char *)(ptr), "Date: %25s %hu %s %hu %hu:%hu:%hu",
-                            TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                            &SYSTime.wHour, &SYSTime.wMinute,
-                            &SYSTime.wSecond);
+      RetVal = sscanf((char *)ptr, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
+                      TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                      &SYSTime.wHour, &SYSTime.wMinute,
+                      &SYSTime.wSecond);
 
-        if(RetVal == 7) {
-          int i;
-          SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
-          for(i = 0; i < 12; i++) {
-            if(strcmp(MthStr[i], TmpStr2) == 0) {
-              SYSTime.wMonth = (WORD)(i + 1);
-              break;
-            }
+      if(RetVal == 7) {
+        int i;
+        SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
+        for(i = 0; i < 12; i++) {
+          if(strcmp(MthStr[i], TmpStr2) == 0) {
+            SYSTime.wMonth = (WORD)(i + 1);
+            break;
           }
-          AutoSyncTime = 3;       /* Computer clock is adjusted */
         }
-        else {
-          AutoSyncTime = 0;       /* Error in sscanf() fields conversion */
-        }
+        AutoSyncTime = 3;       /* Computer clock is adjusted */
+      }
+      else {
+        AutoSyncTime = 0;       /* Error in sscanf() fields conversion */
       }
     }
   }
 
-  if(strncmp((char *)(ptr), "X-Cache: HIT", 12) == 0) {
+  if(strncmp((char *)ptr, "X-Cache: HIT", 12) == 0) {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;

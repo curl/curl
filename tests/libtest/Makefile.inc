@@ -34,14 +34,16 @@ UTILS_C = memptr.c testutil.c testtrace.c
 UTILS_H = testutil.h testtrace.h unitcheck.h
 
 CURLX_C = \
+  ../../lib/curl_threads.c \
   ../../lib/curlx/fopen.c \
-  ../../lib/curlx/warnless.c \
   ../../lib/curlx/multibyte.c \
+  ../../lib/curlx/strerr.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timeval.c \
-  ../../lib/curl_threads.c \
   ../../lib/curlx/version_win32.c \
-  ../../lib/curlx/wait.c
+  ../../lib/curlx/wait.c \
+  ../../lib/curlx/warnless.c \
+  ../../lib/curlx/winapi.c
 
 # All libtest programs
 TESTS_C = \
@@ -74,6 +76,7 @@ TESTS_C = \
   lib694.c lib695.c \
   lib751.c          lib753.c                                     lib758.c \
   lib757.c \
+  lib766.c \
   lib1156.c \
   lib1301.c                                                   lib1308.c \
   lib1485.c \

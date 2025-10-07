@@ -134,10 +134,10 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         char *newurl;
         if(ptr)
           /* there is a trailing slash on the path */
-          newpath = aprintf("%s%s", path, encfile);
+          newpath = curl_maprintf("%s%s", path, encfile);
         else
           /* there is no trailing slash on the path */
-          newpath = aprintf("%s/%s", path, encfile);
+          newpath = curl_maprintf("%s/%s", path, encfile);
 
         curl_free(encfile);
 

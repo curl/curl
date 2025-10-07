@@ -109,7 +109,7 @@ CURLcode easysrc_addf(struct slist_wc **plist, const char *fmt, ...)
   char *bufp;
   va_list ap;
   va_start(ap, fmt);
-  bufp = vaprintf(fmt, ap);
+  bufp = curl_mvaprintf(fmt, ap);
   va_end(ap);
   if(!bufp) {
     ret = CURLE_OUT_OF_MEMORY;
@@ -190,41 +190,41 @@ void dumpeasysrc(void)
     const char *c;
 
     for(i = 0; ((c = srchead[i]) != NULL); i++)
-      fprintf(out, "%s\n", c);
+      curl_mfprintf(out, "%s\n", c);
 
     /* Declare variables used for complex setopt values */
     if(easysrc_decl) {
       for(ptr = easysrc_decl->first; ptr; ptr = ptr->next)
-        fprintf(out, "  %s\n", ptr->data);
+        curl_mfprintf(out, "  %s\n", ptr->data);
     }
 
     /* Set up complex values for setopt calls */
     if(easysrc_data) {
-      fprintf(out, "\n");
+      curl_mfprintf(out, "\n");
 
       for(ptr = easysrc_data->first; ptr; ptr = ptr->next)
-        fprintf(out, "  %s\n", ptr->data);
+        curl_mfprintf(out, "  %s\n", ptr->data);
     }
 
-    fprintf(out, "\n");
+    curl_mfprintf(out, "\n");
     if(easysrc_code) {
       for(ptr = easysrc_code->first; ptr; ptr = ptr->next) {
         if(ptr->data[0]) {
-          fprintf(out, "  %s\n", ptr->data);
+          curl_mfprintf(out, "  %s\n", ptr->data);
         }
         else {
-          fprintf(out, "\n");
+          curl_mfprintf(out, "\n");
         }
       }
     }
 
     if(easysrc_clean) {
       for(ptr = easysrc_clean->first; ptr; ptr = ptr->next)
-        fprintf(out, "  %s\n", ptr->data);
+        curl_mfprintf(out, "  %s\n", ptr->data);
     }
 
     for(i = 0; ((c = srcend[i]) != NULL); i++)
-      fprintf(out, "%s\n", c);
+      curl_mfprintf(out, "%s\n", c);
 
     if(fopened)
       curlx_fclose(out);

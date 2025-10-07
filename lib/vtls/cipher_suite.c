@@ -25,7 +25,6 @@
 
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
-#include "../curl_printf.h"
 #include <string.h>
 
 /*
@@ -630,9 +629,9 @@ static int cs_zip_to_str(const uint8_t zip[6],
 
     /* append the part string to the buffer */
     if(i > 0)
-      r = msnprintf(&buf[len], buf_size - len, "%c%s", separator, entry);
+      r = curl_msnprintf(&buf[len], buf_size - len, "%c%s", separator, entry);
     else
-      r = msnprintf(&buf[len], buf_size - len, "%s", entry);
+      r = curl_msnprintf(&buf[len], buf_size - len, "%s", entry);
 
     if(r < 0)
       return -1;
@@ -703,7 +702,7 @@ int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
     r = cs_zip_to_str(cs_list[j].zip, buf, buf_size);
 
   if(r < 0)
-    msnprintf(buf, buf_size, "TLS_UNKNOWN_0x%04x", id);
+    curl_msnprintf(buf, buf_size, "TLS_UNKNOWN_0x%04x", id);
 
   return r;
 }

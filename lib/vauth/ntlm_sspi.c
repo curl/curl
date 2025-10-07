@@ -175,7 +175,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                                   ntlm->context, &type_1_desc,
                                                   &attrs, NULL);
   if(status == SEC_I_COMPLETE_NEEDED ||
-    status == SEC_I_COMPLETE_AND_CONTINUE)
+     status == SEC_I_COMPLETE_AND_CONTINUE)
     Curl_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
   else if(status == SEC_E_INSUFFICIENT_MEMORY)
     return CURLE_OUT_OF_MEMORY;
@@ -313,7 +313,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                                   &type_3_desc,
                                                   &attrs, NULL);
   if(status != SEC_E_OK) {
-    infof(data, "NTLM handshake failure (type-3 message): Status=%lx",
+    infof(data, "NTLM handshake failure (type-3 message): Status=0x%08lx",
           status);
 
     if(status == SEC_E_INSUFFICIENT_MEMORY)

@@ -246,6 +246,7 @@ int main(int argc, char **argv)
   (void)argv;
 
   for(i = 0; i < CURL_ARRAYSIZE(disabled); i++)
+    /* !checksrc! disable BANNEDFUNC 1 */
     printf("%s\n", disabled[i]);
 
   return 0;

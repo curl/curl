@@ -71,7 +71,6 @@
 #include "../curl_sha256.h"
 #include "../curlx/warnless.h"
 #include "../curlx/base64.h"
-#include "../curl_printf.h"
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
@@ -1094,8 +1093,8 @@ static size_t multissl_version(char *buffer, size_t size)
       bool paren = (selected != available_backends[i]);
 
       if(available_backends[i]->version(vb, sizeof(vb))) {
-        p += msnprintf(p, end - p, "%s%s%s%s", (p != backends ? " " : ""),
-                       (paren ? "(" : ""), vb, (paren ? ")" : ""));
+        p += curl_msnprintf(p, end - p, "%s%s%s%s", (p != backends ? " " : ""),
+                            (paren ? "(" : ""), vb, (paren ? ")" : ""));
       }
     }
 

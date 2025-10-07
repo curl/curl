@@ -222,8 +222,8 @@ CURLcode Curl_amiga_init(void)
     return CURLE_FAILED_INIT;
   }
 
-  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "curl",
+  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG)&errno,
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG)"curl",
                     TAG_DONE)) {
     CURL_AMIGA_REQUEST("SocketBaseTags ERROR");
     return CURLE_FAILED_INIT;

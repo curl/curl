@@ -54,8 +54,8 @@
 #include "socketpair.h"
 #include "socks.h"
 #include "urlapi-int.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -171,8 +171,15 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 #endif
 
   data->mstate = state;
-
-  if(state == MSTATE_COMPLETED) {
+  switch(state) {
+  case MSTATE_DONE:
+    CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
+    break;
+  case MSTATE_COMPLETED:
+    /* we sometimes directly jump to COMPLETED, trigger also a notification
+     * in that case. */
+    if(oldstate < MSTATE_DONE)
+      CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
     /* changing to COMPLETED means it is in process and needs to go */
     DEBUGASSERT(Curl_uint_bset_contains(&data->multi->process, data->mid));
     Curl_uint_bset_remove(&data->multi->process, data->mid);
@@ -182,6 +189,9 @@ static void mstate(struct Curl_easy *data, CURLMstate state
       /* free the transfer buffer when we have no more active transfers */
       multi_xfer_bufs_free(data->multi);
     }
+    break;
+  default:
+    break;
   }
 
   /* if this state has an init-function, run it */
@@ -215,6 +225,8 @@ static void ph_freeentry(void *p)
  */
 static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
 {
+  if(!Curl_llist_count(&multi->msglist))
+    CURLM_NTFY(multi->admin, CURLMNOTIFY_INFO_READ);
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
@@ -232,6 +244,7 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->magic = CURL_MULTI_HANDLE;
 
   Curl_dnscache_init(&multi->dnscache, dnssize);
+  Curl_mntfy_init(multi);
   Curl_multi_ev_init(multi, ev_hashsize);
   Curl_uint_tbl_init(&multi->xfers, NULL);
   Curl_uint_bset_init(&multi->process);
@@ -246,7 +259,8 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->max_concurrent_streams = 100;
   multi->last_timeout_ms = -1;
 
-  if(Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
+  if(Curl_mntfy_resize(multi) ||
+     Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->pending, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->dirty, xfer_table_size) ||
      Curl_uint_bset_resize(&multi->msgsent, xfer_table_size) ||
@@ -305,6 +319,7 @@ error:
     multi->admin->multi = NULL;
     Curl_close(&multi->admin);
   }
+  Curl_mntfy_cleanup(multi);
 
   Curl_uint_bset_destroy(&multi->process);
   Curl_uint_bset_destroy(&multi->dirty);
@@ -522,8 +537,8 @@ static void debug_print_sock_hash(void *p)
 {
   struct Curl_sh_entry *sh = (struct Curl_sh_entry *)p;
 
-  fprintf(stderr, " [readers %u][writers %u]",
-          sh->readers, sh->writers);
+  curl_mfprintf(stderr, " [readers %u][writers %u]",
+                sh->readers, sh->writers);
 }
 #endif
 
@@ -2754,6 +2769,9 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
+  if(multi->in_ntfy_callback)
+    return CURLM_RECURSIVE_API_CALL;
+
   sigpipe_init(&pipe_st);
   if(Curl_uint_bset_first(&multi->process, &mid)) {
     CURL_TRC_M(multi->admin, "multi_perform(running=%u)",
@@ -2784,6 +2802,9 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 
   if(multi_ischanged(m, TRUE))
     process_pending_handles(m);
+
+  if(!returncode)
+    returncode = Curl_mntfy_dispatch_all(multi);
 
   /*
    * Simply remove all expired timers from the splay since handles are dealt
@@ -2830,6 +2851,8 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     void *entry;
     unsigned int mid;
     if(multi->in_callback)
+      return CURLM_RECURSIVE_API_CALL;
+    if(multi->in_ntfy_callback)
       return CURLM_RECURSIVE_API_CALL;
 
     /* First remove all remaining easy handles,
@@ -2900,6 +2923,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 #endif
 
     multi_xfer_bufs_free(multi);
+    Curl_mntfy_cleanup(multi);
 #ifdef DEBUGBUILD
     if(Curl_uint_tbl_count(&multi->xfers)) {
       multi_xfer_tbl_dump(multi);
@@ -3180,6 +3204,9 @@ out:
   if(multi_ischanged(multi, TRUE))
     process_pending_handles(multi);
 
+  if(!result)
+    result = Curl_mntfy_dispatch_all(multi);
+
   if(running_handles) {
     unsigned int running = Curl_multi_xfers_running(multi);
     *running_handles = (running < INT_MAX) ? (int)running : INT_MAX;
@@ -3269,6 +3296,12 @@ CURLMcode curl_multi_setopt(CURLM *m,
     }
     break;
   }
+  case CURLMOPT_NOTIFYFUNCTION:
+    multi->ntfy.ntfy_cb = va_arg(param, curl_notify_callback);
+    break;
+  case CURLMOPT_NOTIFYDATA:
+    multi->ntfy.ntfy_cb_data = va_arg(param, void *);
+    break;
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;
@@ -3285,6 +3318,8 @@ CURLMcode curl_multi_socket(CURLM *m, curl_socket_t s, int *running_handles)
   struct Curl_multi *multi = m;
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
+  if(multi->in_ntfy_callback)
+    return CURLM_RECURSIVE_API_CALL;
   return multi_socket(multi, FALSE, s, 0, running_handles);
 }
 
@@ -3294,6 +3329,8 @@ CURLMcode curl_multi_socket_action(CURLM *m, curl_socket_t s,
   struct Curl_multi *multi = m;
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
+  if(multi->in_ntfy_callback)
+    return CURLM_RECURSIVE_API_CALL;
   return multi_socket(multi, FALSE, s, ev_bitmask, running_handles);
 }
 
@@ -3301,6 +3338,8 @@ CURLMcode curl_multi_socket_all(CURLM *m, int *running_handles)
 {
   struct Curl_multi *multi = m;
   if(multi->in_callback)
+    return CURLM_RECURSIVE_API_CALL;
+  if(multi->in_ntfy_callback)
     return CURLM_RECURSIVE_API_CALL;
   return multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0, running_handles);
 }
@@ -3996,6 +4035,24 @@ void Curl_multi_clear_dirty(struct Curl_easy *data)
     Curl_uint_bset_remove(&data->multi->dirty, data->mid);
 }
 
+CURLMcode curl_multi_notify_enable(CURLM *m, unsigned int notification)
+{
+  struct Curl_multi *multi = m;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+  return Curl_mntfy_enable(multi, notification);
+}
+
+CURLMcode curl_multi_notify_disable(CURLM *m, unsigned int notification)
+{
+  struct Curl_multi *multi = m;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+  return Curl_mntfy_disable(multi, notification);
+}
+
 #ifdef DEBUGBUILD
 static void multi_xfer_dump(struct Curl_multi *multi, unsigned int mid,
                             void *entry)
@@ -4004,12 +4061,14 @@ static void multi_xfer_dump(struct Curl_multi *multi, unsigned int mid,
 
   (void)multi;
   if(!data) {
-    fprintf(stderr, "mid=%u, entry=NULL, bug in xfer table?\n", mid);
+    curl_mfprintf(stderr, "mid=%u, entry=NULL, bug in xfer table?\n", mid);
   }
   else {
-    fprintf(stderr, "mid=%u, magic=%s, p=%p, id=%" FMT_OFF_T ", url=%s\n",
-            mid, (data->magic == CURLEASY_MAGIC_NUMBER) ? "GOOD" : "BAD!",
-            (void *)data, data->id, data->state.url);
+    curl_mfprintf(stderr, "mid=%u, magic=%s, p=%p, id=%" FMT_OFF_T
+                  ", url=%s\n",
+                  mid,
+                  (data->magic == CURLEASY_MAGIC_NUMBER) ? "GOOD" : "BAD!",
+                  (void *)data, data->id, data->state.url);
   }
 }
 
@@ -4017,15 +4076,15 @@ static void multi_xfer_tbl_dump(struct Curl_multi *multi)
 {
   unsigned int mid;
   void *entry;
-  fprintf(stderr, "=== multi xfer table (count=%u, capacity=%u\n",
-          Curl_uint_tbl_count(&multi->xfers),
-          Curl_uint_tbl_capacity(&multi->xfers));
+  curl_mfprintf(stderr, "=== multi xfer table (count=%u, capacity=%u\n",
+                Curl_uint_tbl_count(&multi->xfers),
+                Curl_uint_tbl_capacity(&multi->xfers));
   if(Curl_uint_tbl_first(&multi->xfers, &mid, &entry)) {
     multi_xfer_dump(multi, mid, entry);
     while(Curl_uint_tbl_next(&multi->xfers, mid, &mid, &entry))
       multi_xfer_dump(multi, mid, entry);
   }
-  fprintf(stderr, "===\n");
+  curl_mfprintf(stderr, "===\n");
   fflush(stderr);
 }
 #endif /* DEBUGBUILD */

@@ -52,7 +52,6 @@
 #include "../curlx/multibyte.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../curl_printf.h"
 #include "../multiif.h"
 #include "../system_win32.h"
 #include "../curlx/version_win32.h"
@@ -110,8 +109,8 @@
 #define CERT_THUMBPRINT_DATA_LEN 20
 
 /* Uncomment to force verbose output
- * #define infof(x, y, ...) printf(y, __VA_ARGS__)
- * #define failf(x, y, ...) printf(y, __VA_ARGS__)
+ * #define infof(x, y, ...) curl_mprintf(y, __VA_ARGS__)
+ * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
 /* Offered when targeting Vista (XP SP2+) */
@@ -659,7 +658,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                 cert_showfilename_error);
         else
           failf(data, "schannel: Failed to import cert file %s, "
-                "last error is 0x%lx",
+                "last error is 0x%08lx",
                 cert_showfilename_error, errorcode);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -678,7 +677,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
       if(!client_certs[0]) {
         failf(data, "schannel: Failed to get certificate from file %s"
-              ", last error is 0x%lx",
+              ", last error is 0x%08lx",
               cert_showfilename_error, GetLastError());
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
@@ -700,7 +699,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         char *path_utf8 =
           curlx_convert_tchar_to_UTF8(cert_store_path);
         failf(data, "schannel: Failed to open cert store %lx %s, "
-              "last error is 0x%lx",
+              "last error is 0x%08lx",
               cert_store_name,
               (path_utf8 ? path_utf8 : "(unknown)"),
               GetLastError());
@@ -2586,7 +2585,7 @@ static void schannel_cleanup(void)
 
 static size_t schannel_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "Schannel");
+  return curl_msnprintf(buffer, size, "Schannel");
 }
 
 static CURLcode schannel_random(struct Curl_easy *data,

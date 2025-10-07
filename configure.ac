@@ -281,7 +281,7 @@ OPT_APPLE_SECTRUST=$curl_cv_apple
 AC_ARG_WITH(apple-sectrust,dnl
 AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verification]),[
   OPT_APPLE_SECTRUST=$withval
- ])
+])
 
 AC_PATH_PROG(PERL, perl,, $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
 AC_SUBST(PERL)

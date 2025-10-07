@@ -475,7 +475,7 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
     else {
       char buffer[32];
       const char *p;
-      msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, str);
+      curl_msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, str);
 
       p = proto_token(buffer);
 
@@ -584,13 +584,13 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* build a nice-looking prompt */
     if(!i && last)
-      msnprintf(prompt, sizeof(prompt),
-                "Enter %s password for user '%s':",
-                kind, *userpwd);
+      curl_msnprintf(prompt, sizeof(prompt),
+                     "Enter %s password for user '%s':",
+                     kind, *userpwd);
     else
-      msnprintf(prompt, sizeof(prompt),
-                "Enter %s password for user '%s' on URL #%zu:",
-                kind, *userpwd, i + 1);
+      curl_msnprintf(prompt, sizeof(prompt),
+                     "Enter %s password for user '%s' on URL #%zu:",
+                     kind, *userpwd, i + 1);
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));

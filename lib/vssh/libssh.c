@@ -76,8 +76,7 @@
 #include <fcntl.h>
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -358,7 +357,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     }
 
     for(i = 0; i < 16; i++)
-      msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char)hash[i]);
+      curl_msnprintf(&md5buffer[i*2], 3, "%02x", (unsigned char)hash[i]);
 
     infof(data, "SSH MD5 fingerprint: %s", md5buffer);
 
@@ -602,7 +601,7 @@ static int myssh_in_SFTP_READDIR(struct Curl_easy *data,
     if(data->set.list_only) {
       char *tmpLine;
 
-      tmpLine = aprintf("%s\n", sshc->readdir_filename);
+      tmpLine = curl_maprintf("%s\n", sshc->readdir_filename);
       if(!tmpLine) {
         myssh_to(data, sshc, SSH_SFTP_CLOSE);
         sshc->actualcode = CURLE_OUT_OF_MEMORY;
@@ -628,8 +627,8 @@ static int myssh_in_SFTP_READDIR(struct Curl_easy *data,
       if((sshc->readdir_attrs->flags & SSH_FILEXFER_ATTR_PERMISSIONS) &&
          ((sshc->readdir_attrs->permissions & SSH_S_IFMT) ==
           SSH_S_IFLNK)) {
-        sshc->readdir_linkPath = aprintf("%s%s", sshp->path,
-                                         sshc->readdir_filename);
+        sshc->readdir_linkPath = curl_maprintf("%s%s", sshp->path,
+                                               sshc->readdir_filename);
 
         if(!sshc->readdir_linkPath) {
           myssh_to(data, sshc, SSH_SFTP_CLOSE);
@@ -766,24 +765,24 @@ static int myssh_in_SFTP_QUOTE_STATVFS(struct Curl_easy *data,
     #define CURL_LIBSSH_VFS_SIZE_MASK PRIu64
     #endif
     CURLcode result = CURLE_OK;
-    char *tmp = aprintf("statvfs:\n"
-                        "f_bsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_frsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_blocks: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_bfree: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_bavail: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_files: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_ffree: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_favail: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_fsid: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_flag: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
-                        "f_namemax: %" CURL_LIBSSH_VFS_SIZE_MASK "\n",
-                        statvfs->f_bsize, statvfs->f_frsize,
-                        statvfs->f_blocks, statvfs->f_bfree,
-                        statvfs->f_bavail, statvfs->f_files,
-                        statvfs->f_ffree, statvfs->f_favail,
-                        statvfs->f_fsid, statvfs->f_flag,
-                        statvfs->f_namemax);
+    char *tmp = curl_maprintf("statvfs:\n"
+                              "f_bsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_frsize: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_blocks: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_bfree: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_bavail: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_files: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_ffree: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_favail: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_fsid: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_flag: %" CURL_LIBSSH_VFS_SIZE_MASK "\n"
+                              "f_namemax: %" CURL_LIBSSH_VFS_SIZE_MASK "\n",
+                              statvfs->f_bsize, statvfs->f_frsize,
+                              statvfs->f_blocks, statvfs->f_bfree,
+                              statvfs->f_bavail, statvfs->f_files,
+                              statvfs->f_ffree, statvfs->f_favail,
+                              statvfs->f_fsid, statvfs->f_flag,
+                              statvfs->f_namemax);
     sftp_statvfs_free(statvfs);
 
     if(!tmp)
@@ -1577,7 +1576,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
 
   if(curl_strequal("pwd", cmd)) {
     /* output debug output if that is requested */
-    char *tmp = aprintf("257 \"%s\" is current directory.\n", sshp->path);
+    char *tmp = curl_maprintf("257 \"%s\" is current directory.\n",
+                              sshp->path);
     if(!tmp) {
       sshc->actualcode = CURLE_OUT_OF_MEMORY;
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
@@ -2564,7 +2564,7 @@ static CURLcode myssh_connect(struct Curl_easy *data, bool *done)
 
   if(conn->bits.ipv6_ip) {
     char ipv6[MAX_IPADR_LEN];
-    msnprintf(ipv6, sizeof(ipv6), "[%s]", conn->host.name);
+    curl_msnprintf(ipv6, sizeof(ipv6), "[%s]", conn->host.name);
     rc = ssh_options_set(sshc->ssh_session, SSH_OPTIONS_HOST, ipv6);
   }
   else
@@ -3150,7 +3150,7 @@ static CURLcode sftp_recv(struct Curl_easy *data, int sockindex,
 CURLcode Curl_ssh_init(void)
 {
   if(ssh_init()) {
-    DEBUGF(fprintf(stderr, "Error: libssh_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: libssh_init failed\n"));
     return CURLE_FAILED_INIT;
   }
   return CURLE_OK;
@@ -3163,7 +3163,7 @@ void Curl_ssh_cleanup(void)
 
 void Curl_ssh_version(char *buffer, size_t buflen)
 {
-  (void)msnprintf(buffer, buflen, "libssh/%s", ssh_version(0));
+  (void)curl_msnprintf(buffer, buflen, "libssh/%s", ssh_version(0));
 }
 
 #endif                          /* USE_LIBSSH */

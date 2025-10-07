@@ -47,8 +47,7 @@
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -102,14 +101,14 @@ static size_t trc_print_ids(struct Curl_easy *data, char *buf, size_t maxlen)
                    data->conn->connection_id : data->state.recent_conn_id;
   if(data->id >= 0) {
     if(cid >= 0)
-      return msnprintf(buf, maxlen, CURL_TRC_FMT_IDSDC, data->id, cid);
+      return curl_msnprintf(buf, maxlen, CURL_TRC_FMT_IDSDC, data->id, cid);
     else
-      return msnprintf(buf, maxlen, CURL_TRC_FMT_IDSD, data->id);
+      return curl_msnprintf(buf, maxlen, CURL_TRC_FMT_IDSD, data->id);
   }
   else if(cid >= 0)
-    return msnprintf(buf, maxlen, CURL_TRC_FMT_IDSC, cid);
+    return curl_msnprintf(buf, maxlen, CURL_TRC_FMT_IDSC, cid);
   else {
-    return msnprintf(buf, maxlen, "[x-x] ");
+    return curl_msnprintf(buf, maxlen, "[x-x] ");
   }
 }
 
@@ -143,8 +142,8 @@ void Curl_debug(struct Curl_easy *data, curl_infotype type,
 
       if(CURL_TRC_IDS(data) && (size < TRC_LINE_MAX)) {
         len = trc_print_ids(data, buf, TRC_LINE_MAX);
-        len += msnprintf(buf + len, TRC_LINE_MAX - len, "%.*s",
-                         (int)size, ptr);
+        len += curl_msnprintf(buf + len, TRC_LINE_MAX - len, "%.*s",
+                              (int)size, ptr);
         len = trc_end_buf(buf, len, TRC_LINE_MAX, FALSE);
         Curl_set_in_callback(data, TRUE);
         (void)(*data->set.fdebug)(data, type, buf, len, data->set.debugdata);
@@ -189,7 +188,7 @@ void Curl_failf(struct Curl_easy *data, const char *fmt, ...)
     size_t len;
     char error[CURL_ERROR_SIZE + 2];
     va_start(ap, fmt);
-    len = mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
+    len = curl_mvsnprintf(error, CURL_ERROR_SIZE, fmt, ap);
 
     if(data->set.errorbuffer && !data->state.errorbuf) {
       strcpy(data->set.errorbuffer, error);
@@ -220,15 +219,15 @@ static void trc_infof(struct Curl_easy *data,
   if(CURL_TRC_IDS(data))
     len += trc_print_ids(data, buf + len, TRC_LINE_MAX - len);
   if(feat)
-    len += msnprintf(buf + len, TRC_LINE_MAX - len, "[%s] ", feat->name);
+    len += curl_msnprintf(buf + len, TRC_LINE_MAX - len, "[%s] ", feat->name);
   if(opt_id) {
     if(opt_id_idx > 0)
-      len += msnprintf(buf + len, TRC_LINE_MAX - len, "[%s-%d] ",
-                       opt_id, opt_id_idx);
+      len += curl_msnprintf(buf + len, TRC_LINE_MAX - len, "[%s-%d] ",
+                            opt_id, opt_id_idx);
     else
-      len += msnprintf(buf + len, TRC_LINE_MAX - len, "[%s] ", opt_id);
+      len += curl_msnprintf(buf + len, TRC_LINE_MAX - len, "[%s] ", opt_id);
   }
-  len += mvsnprintf(buf + len, TRC_LINE_MAX - len, fmt, ap);
+  len += curl_mvsnprintf(buf + len, TRC_LINE_MAX - len, fmt, ap);
   len = trc_end_buf(buf, len, TRC_LINE_MAX, TRUE);
   trc_write(data, CURLINFO_TEXT, buf, len);
 }
@@ -313,6 +312,7 @@ void Curl_trc_timer(struct Curl_easy *data, int tid, const char *fmt, ...)
     va_end(ap);
   }
 }
+
 void Curl_trc_easy_timers(struct Curl_easy *data)
 {
   if(CURL_TRC_TIMER_is_verbose(data)) {

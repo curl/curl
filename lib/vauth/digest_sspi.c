@@ -364,7 +364,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   }
 
   /* Store the challenge for use later */
-  digest->input_token = (BYTE *) Curl_memdup(chlg, chlglen + 1);
+  digest->input_token = (BYTE *)Curl_memdup(chlg, chlglen + 1);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
 
@@ -473,8 +473,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     if(status == SEC_E_OK)
       output_token_len = chlg_buf[4].cbBuffer;
     else { /* delete the context so a new one can be made */
-      infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx",
-            (long)status);
+      infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx", status);
       Curl_pSecFn->DeleteSecurityContext(digest->http_context);
       Curl_safefree(digest->http_context);
     }
