@@ -137,7 +137,7 @@ void Curl_mntfy_init(struct Curl_multi *multi)
 
 CURLMcode Curl_mntfy_resize(struct Curl_multi *multi)
 {
-  if(Curl_uint_bset_resize(&multi->ntfy.enabled, CURLM_NTFY_EASY_DONE + 1))
+  if(Curl_uint_bset_resize(&multi->ntfy.enabled, CURLM_NOTIFY_EASY_DONE + 1))
     return CURLM_OUT_OF_MEMORY;
   return CURLM_OK;
 }
@@ -155,7 +155,7 @@ void Curl_mntfy_cleanup(struct Curl_multi *multi)
 
 CURLMcode Curl_mntfy_enable(struct Curl_multi *multi, unsigned int type)
 {
-  if(type > CURLM_NTFY_EASY_DONE)
+  if(type > CURLM_NOTIFY_EASY_DONE)
     return CURLM_UNKNOWN_OPTION;
   Curl_uint_bset_add(&multi->ntfy.enabled, type);
   return CURLM_OK;
@@ -163,7 +163,7 @@ CURLMcode Curl_mntfy_enable(struct Curl_multi *multi, unsigned int type)
 
 CURLMcode Curl_mntfy_disable(struct Curl_multi *multi, unsigned int type)
 {
-  if(type > CURLM_NTFY_EASY_DONE)
+  if(type > CURLM_NOTIFY_EASY_DONE)
     return CURLM_UNKNOWN_OPTION;
   Curl_uint_bset_remove(&multi->ntfy.enabled, type);
   return CURLM_OK;

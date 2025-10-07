@@ -529,8 +529,8 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
 /*
  * Notifications dispatched by a multi handle, when enabled.
  */
-#define CURLM_NTFY_INFO_READ    0
-#define CURLM_NTFY_EASY_DONE    1
+#define CURLM_NOTIFY_INFO_READ    0
+#define CURLM_NOTIFY_EASY_DONE    1
 
 /*
  * Callback to install via CURLMOPT_NOTIFYFUNCTION.

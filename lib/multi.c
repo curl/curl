@@ -173,13 +173,13 @@ static void mstate(struct Curl_easy *data, CURLMstate state
   data->mstate = state;
   switch(state) {
   case MSTATE_DONE:
-    CURLM_NTFY(data, CURLM_NTFY_EASY_DONE);
+    CURLM_NTFY(data, CURLM_NOTIFY_EASY_DONE);
     break;
   case MSTATE_COMPLETED:
     /* we sometimes directly jump to COMPLETED, trigger also a notification
      * in that case. */
     if(oldstate < MSTATE_DONE)
-      CURLM_NTFY(data, CURLM_NTFY_EASY_DONE);
+      CURLM_NTFY(data, CURLM_NOTIFY_EASY_DONE);
     /* changing to COMPLETED means it is in process and needs to go */
     DEBUGASSERT(Curl_uint_bset_contains(&data->multi->process, data->mid));
     Curl_uint_bset_remove(&data->multi->process, data->mid);
@@ -226,7 +226,7 @@ static void ph_freeentry(void *p)
 static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
 {
   if(!Curl_llist_count(&multi->msglist))
-    CURLM_NTFY(multi->admin, CURLM_NTFY_INFO_READ);
+    CURLM_NTFY(multi->admin, CURLM_NOTIFY_INFO_READ);
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 

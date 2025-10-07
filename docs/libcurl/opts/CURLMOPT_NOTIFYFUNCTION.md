@@ -63,7 +63,7 @@ are shut down.
 **notification** is the type of notification, e.g. what happened. The
 following types are available:
 
-## CURLM_NTFY_INFO_READ
+## CURLM_NOTIFY_INFO_READ
 
 When enabled via curl_multi_notify_enable(3), this informs the application
 that there are new messages to be processed via curl_multi_info_read(3).
@@ -76,7 +76,7 @@ again.
 
 The *easy* handle passed is an internal handle.
 
-## CURLM_NTFY_EASY_DONE
+## CURLM_NOTIFY_EASY_DONE
 
 When enabled via curl_multi_notify_enable(3), this notification is triggered
 when a an easy handle has finished. This happens both for
@@ -118,7 +118,7 @@ int main(void)
   /* ... use socket callback and custom pointer */
   curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, ntfy_cb);
   curl_multi_setopt(multi, CURLMOPT_NOTIFYDATA, &setup);
-  curl_multi_notify_enable(multi, CURLM_NTFY_INFO_READ);
+  curl_multi_notify_enable(multi, CURLM_NOTIFY_INFO_READ);
 }
 ~~~
 
