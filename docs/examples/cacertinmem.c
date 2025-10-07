@@ -74,7 +74,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     "-----END CERTIFICATE-----\n";
 
   BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
-  X509_STORE  *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+  X509_STORE *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
   ossl_valsize_t i;
   STACK_OF(X509_INFO) *inf;
 
@@ -102,7 +102,14 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
     }
   }
 
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
   BIO_free(cbio);
 
   rv = CURLE_OK;
