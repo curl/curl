@@ -30,8 +30,8 @@
 #include "urldata.h"
 #include "rand.h"
 #include "curl_fopen.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -122,7 +122,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   if(dir) {
     /* The temp filename should not end up too long for the target file
        system */
-    tempstore = aprintf("%s%s.tmp", dir, randbuf);
+    tempstore = curl_maprintf("%s%s.tmp", dir, randbuf);
     free(dir);
   }
 

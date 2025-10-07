@@ -126,6 +126,9 @@ class DTraceProfile:
             '-n', f'profile-97 /pid == {self._pid}/ {{ @[ustack()] = count(); }} tick-60s {{ exit(0); }}',
             '-o', f'{self._file}'
         ]
+        if sys.platform.startswith('darwin'):
+            # macOS seems to like this for producing symbols in user stacks
+            args.extend(['-p', f'{self._pid}'])
         self._proc = subprocess.Popen(args, text=True, cwd=self._run_dir, shell=False)
         assert self._proc
 

@@ -176,14 +176,14 @@ static void decc_init(void)
       }
       else {
         /* Invalid DECC feature value. */
-        printf(" INVALID DECC FEATURE VALUE, %d: %d <= %s <= %d.\n",
-               feat_value,
-               feat_value_min, decc_feat_array[i].name, feat_value_max);
+        curl_mprintf(" INVALID DECC FEATURE VALUE, %d: %d <= %s <= %d.\n",
+                     feat_value,
+                     feat_value_min, decc_feat_array[i].name, feat_value_max);
       }
     }
     else {
       /* Invalid DECC feature name. */
-      printf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
+      curl_mprintf(" UNKNOWN DECC FEATURE: %s.\n", decc_feat_array[i].name);
     }
 
   }

@@ -63,10 +63,9 @@
 #include "hostcheck.h"
 #include "../transfer.h"
 #include "../multiif.h"
+#include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 #include "../strdup.h"
-#include "../strerror.h"
-#include "../curl_printf.h"
 #include "apple.h"
 
 #include <openssl/ssl.h>
@@ -274,7 +273,7 @@ static CURLcode pubkey_show(struct Curl_easy *data,
 {
   char namebuf[32];
 
-  msnprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
+  curl_msnprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
 
   if(bn)
     BN_print(mem, bn);
@@ -2169,14 +2168,16 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   /* SSL should now have started the shutdown from our side. Since it
    * was not complete, we are lacking the close notify from the server. */
   if(send_shutdown && !(SSL_get_shutdown(octx->ssl) & SSL_SENT_SHUTDOWN)) {
+    int rc;
     ERR_clear_error();
     CURL_TRC_CF(data, cf, "send SSL close notify");
-    if(SSL_shutdown(octx->ssl) == 1) {
+    rc = SSL_shutdown(octx->ssl);
+    if(rc == 1) {
       CURL_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
       goto out;
     }
-    if(SSL_ERROR_WANT_WRITE == SSL_get_error(octx->ssl, nread)) {
+    if(SSL_ERROR_WANT_WRITE == SSL_get_error(octx->ssl, rc)) {
       CURL_TRC_CF(data, cf, "SSL shutdown still wants to send");
       connssl->io_need = CURL_SSL_IO_NEED_SEND;
       goto out;
@@ -2801,7 +2802,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   case 0:
     break;
   default:
-    msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
+    curl_msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
     verstr = unknown;
     break;
   }
@@ -2848,10 +2849,10 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
       msg_name = ssl_msg_type(ssl_ver, msg_type);
     }
 
-    txt_len = msnprintf(ssl_buf, sizeof(ssl_buf),
-                        "%s (%s), %s, %s (%d):\n",
-                        verstr, direction ? "OUT" : "IN",
-                        tls_rt_name, msg_name, msg_type);
+    txt_len = curl_msnprintf(ssl_buf, sizeof(ssl_buf),
+                             "%s (%s), %s, %s (%d):\n",
+                             verstr, direction ? "OUT" : "IN",
+                             tls_rt_name, msg_name, msg_type);
     Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len);
   }
 
@@ -3357,9 +3358,9 @@ static CURLcode ossl_windows_load_anchors(struct Curl_cfilter *cf,
 #endif /* USE_WIN32_CRYPTO */
 
 static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
-                                         struct Curl_easy *data,
-                                         struct ossl_ctx *octx,
-                                         X509_STORE *store)
+                                        struct Curl_easy *data,
+                                        struct ossl_ctx *octx,
+                                        X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -3726,6 +3727,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
   char error_buffer[256];
   CURLcode result;
@@ -3733,7 +3735,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
   Curl_alpn_copy(&alpns, alpns_requested);
 
   octx->reused_session = FALSE;
-  if(ssl_config->primary.cache_session) {
+  if(ssl_config->primary.cache_session && !conn_cfg->verifystatus) {
     struct Curl_ssl_session *scs = NULL;
 
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
@@ -4668,7 +4670,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         int sockerr = SOCKERRNO;
 
         if(sockerr && detail == SSL_ERROR_SYSCALL)
-          Curl_strerror(sockerr, extramsg, sizeof(extramsg));
+          curlx_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
               connssl->peer.hostname, connssl->peer.port);
@@ -4864,7 +4866,8 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
       char group_name[80] = "";
       get_group_name = EVP_PKEY_get_group_name(current_pkey, group_name,
                                                sizeof(group_name), NULL);
-      msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
+      curl_msnprintf(group_name_final, sizeof(group_name_final), "/%s",
+                     group_name);
     }
     type_name = current_pkey ? EVP_PKEY_get0_type_name(current_pkey) : NULL;
 #else
@@ -5274,10 +5277,10 @@ static CURLcode ossl_send_earlydata(struct Curl_cfilter *cf,
         if(sslerror)
           ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
         else if(sockerr)
-          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+          curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
         else
-          msnprintf(error_buffer, sizeof(error_buffer), "%s",
-                    SSL_ERROR_to_str(err));
+          curl_msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                         SSL_ERROR_to_str(err));
 
         failf(data, OSSL_PACKAGE " SSL_write:early_data: %s, errno %d",
               error_buffer, sockerr);
@@ -5460,10 +5463,10 @@ static CURLcode ossl_send(struct Curl_cfilter *cf,
       if(sslerror)
         ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
       else if(sockerr)
-        Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+        curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
       else
-        msnprintf(error_buffer, sizeof(error_buffer), "%s",
-                  SSL_ERROR_to_str(err));
+        curl_msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                       SSL_ERROR_to_str(err));
 
       failf(data, OSSL_PACKAGE " SSL_write: %s, errno %d",
             error_buffer, sockerr);
@@ -5557,10 +5560,10 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
         if(sslerror)
           ossl_strerror(sslerror, error_buffer, sizeof(error_buffer));
         else if(sockerr && err == SSL_ERROR_SYSCALL)
-          Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+          curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
         else
-          msnprintf(error_buffer, sizeof(error_buffer), "%s",
-                    SSL_ERROR_to_str(err));
+          curl_msnprintf(error_buffer, sizeof(error_buffer), "%s",
+                         SSL_ERROR_to_str(err));
         failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d",
               error_buffer, sockerr);
         result = CURLE_RECV_ERROR;
@@ -5580,10 +5583,10 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
            * the error in case of some weirdness in the OSSL stack */
           int sockerr = SOCKERRNO;
           if(sockerr)
-            Curl_strerror(sockerr, error_buffer, sizeof(error_buffer));
+            curlx_strerror(sockerr, error_buffer, sizeof(error_buffer));
           else {
-            msnprintf(error_buffer, sizeof(error_buffer),
-                      "Connection closed abruptly");
+            curl_msnprintf(error_buffer, sizeof(error_buffer),
+                           "Connection closed abruptly");
           }
           failf(data, OSSL_PACKAGE " SSL_read: %s, errno %d",
                 error_buffer, sockerr);
@@ -5703,7 +5706,7 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   if(curl_strnequal(ver, expected, sizeof(expected) - 1)) {
     ver += sizeof(expected) - 1;
   }
-  count = msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
+  count = curl_msnprintf(buffer, size, "%s/%s", OSSL_PACKAGE, ver);
   for(p = buffer; *p; ++p) {
     if(ISBLANK(*p))
       *p = '_';
@@ -5711,17 +5714,17 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   return count;
 #elif defined(OPENSSL_IS_BORINGSSL)
 #ifdef CURL_BORINGSSL_VERSION
-  return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE, CURL_BORINGSSL_VERSION);
+  return curl_msnprintf(buffer, size, "%s/%s",
+                        OSSL_PACKAGE, CURL_BORINGSSL_VERSION);
 #else
-  return msnprintf(buffer, size, OSSL_PACKAGE);
+  return curl_msnprintf(buffer, size, OSSL_PACKAGE);
 #endif
 #elif defined(OPENSSL_IS_AWSLC)
-  return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
+  return curl_msnprintf(buffer, size, "%s/%s",
+                        OSSL_PACKAGE, AWSLC_VERSION_NUMBER_STRING);
 #elif defined(OPENSSL_VERSION_STRING)  /* OpenSSL 3+ */
-  return msnprintf(buffer, size, "%s/%s",
-                   OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
+  return curl_msnprintf(buffer, size, "%s/%s",
+                        OSSL_PACKAGE, OpenSSL_version(OPENSSL_VERSION_STRING));
 #else
   /* not LibreSSL, BoringSSL and not using OpenSSL_version */
 
@@ -5744,16 +5747,16 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   else
     sub[0]='\0';
 
-  return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
+  return curl_msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
 #ifdef OPENSSL_FIPS
-                   "-fips"
+                        "-fips"
 #endif
-                   ,
-                   OSSL_PACKAGE,
-                   (ssleay_value >> 28) & 0xf,
-                   (ssleay_value >> 20) & 0xff,
-                   (ssleay_value >> 12) & 0xff,
-                   sub);
+                        ,
+                        OSSL_PACKAGE,
+                        (ssleay_value >> 28) & 0xf,
+                        (ssleay_value >> 20) & 0xff,
+                        (ssleay_value >> 12) & 0xff,
+                        sub);
 #endif
 }
 

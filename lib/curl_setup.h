@@ -950,6 +950,10 @@ endings either CRLF or LF so 't' is appropriate.
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 
+/* Buffer size for error messages retrieved via
+   curlx_strerror() and Curl_sspi_strerror() */
+#define STRERROR_LEN 256
+
 #ifndef CURL_DID_MEMORY_FUNC_TYPEDEFS /* only if not already done */
 /*
  * The following memory function replacement typedef's are COPIED from
@@ -979,6 +983,8 @@ extern curl_calloc_callback Curl_ccalloc;
 #define Curl_safefree(ptr) \
   do { free((ptr)); (ptr) = NULL;} while(0)
 
+#include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
+
 #ifdef CURLDEBUG
 #ifdef __clang__
 #  define ALLOC_FUNC         __attribute__((__malloc__))
@@ -1002,8 +1008,6 @@ extern curl_calloc_callback Curl_ccalloc;
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #endif
-
-#include <curl/curl.h> /* for CURL_EXTERN */
 
 extern FILE *curl_dbg_logfile;
 

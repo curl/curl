@@ -176,14 +176,14 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
     us %= 1000000;
 
     if(use_json)
-      fprintf(stream, "\"%s\":", wovar->name);
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
 
-    fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU
-            ".%06" CURL_FORMAT_CURL_OFF_TU, secs, us);
+    curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU
+                  ".%06" CURL_FORMAT_CURL_OFF_TU, secs, us);
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
 
   return 1; /* return 1 if anything was written */
@@ -414,7 +414,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   DEBUGASSERT(!valid || strinfo);
   if(valid && strinfo) {
     if(use_json) {
-      fprintf(stream, "\"%s\":", wovar->name);
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
       jsonWriteString(stream, strinfo, FALSE);
     }
     else
@@ -422,7 +422,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
   curl_free((char *)CURL_UNCONST(freestr));
 
@@ -470,17 +470,17 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
 
   if(valid) {
     if(use_json)
-      fprintf(stream, "\"%s\":%ld", wovar->name, longinfo);
+      curl_mfprintf(stream, "\"%s\":%ld", wovar->name, longinfo);
     else {
       if(wovar->id == VAR_HTTP_CODE || wovar->id == VAR_HTTP_CODE_PROXY)
-        fprintf(stream, "%03ld", longinfo);
+        curl_mfprintf(stream, "%03ld", longinfo);
       else
-        fprintf(stream, "%ld", longinfo);
+        curl_mfprintf(stream, "%ld", longinfo);
     }
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
 
   return 1; /* return 1 if anything was written */
@@ -516,13 +516,13 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
 
   if(valid) {
     if(use_json)
-      fprintf(stream, "\"%s\":", wovar->name);
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
 
-    fprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
+    curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
 
   return 1; /* return 1 if anything was written */
@@ -796,9 +796,9 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             }
           }
           else {
-            fprintf(tool_stderr,
-                    "curl: unknown --write-out variable: '%.*s'\n",
-                    (int)vlen, ptr);
+            curl_mfprintf(tool_stderr,
+                          "curl: unknown --write-out variable: '%.*s'\n",
+                          (int)vlen, ptr);
           }
           ptr = end + 1; /* pass the end */
         }

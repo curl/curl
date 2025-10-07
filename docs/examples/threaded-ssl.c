@@ -36,7 +36,8 @@
  * https://github.com/curl/curl/blob/curl-7_88_1/docs/examples/threaded-ssl.c
  */
 
-#define USE_OPENSSL /* or USE_GNUTLS accordingly */
+/* Requires: HAVE_PTHREAD_H */
+/* Also requires TLS support to run */
 
 #include <stdio.h>
 #include <pthread.h>
@@ -52,12 +53,13 @@ static const char * const urls[]= {
   "https://www4.example.com/",
 };
 
-static void *pull_one_url(void *url)
+static void *pull_one_url(void *pindex)
 {
+  int i = *(int *)pindex;
   CURL *curl;
 
   curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
   /* this example does not verify the server's certificate, which means we
      might be downloading stuff from an impostor */
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -82,7 +84,7 @@ int main(int argc, char **argv)
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
-                               (void *)urls[i]);
+                               (void *)&i);
     if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else

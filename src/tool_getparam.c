@@ -196,6 +196,7 @@ static const struct LongShort aliases[]= {
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG|ARG_TLS, ' ', C_KEY_TYPE},
+  {"knownhosts",                 ARG_FILE, ' ', C_KNOWNHOSTS},
   {"krb",                        ARG_STRG|ARG_DEPR, ' ', C_KRB},
   {"krb4",                       ARG_STRG|ARG_DEPR, ' ', C_KRB4},
   {"libcurl",                    ARG_STRG, ' ', C_LIBCURL},
@@ -751,8 +752,8 @@ static CURLcode set_trace_config(const char *token)
     }
     else {
       char buffer[64];
-      msnprintf(buffer, sizeof(buffer), "%c%.*s,-lib-ids", toggle ? '+' : '-',
-                (int)len, name);
+      curl_msnprintf(buffer, sizeof(buffer), "%c%.*s,-lib-ids",
+                     toggle ? '+' : '-', (int)len, name);
       result = curl_global_trace(buffer);
       if(result)
         goto out;
@@ -1140,7 +1141,7 @@ static ParameterError parse_localport(struct OperationConfig *config,
     if(ISBLANK(*pp))
       pp++;
   }
-  msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, nextarg);
+  curl_msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, nextarg);
   if(str2unummax(&config->localport, buffer, 65535))
     return PARAM_BAD_USE;
   if(!pp)
@@ -1222,7 +1223,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
         curlx_fclose(file);
       if(err)
         return err;
-      config->ech_config = aprintf("ecl:%s",tmpcfg);
+      config->ech_config = curl_maprintf("ecl:%s",tmpcfg);
       free(tmpcfg);
       if(!config->ech_config)
         return PARAM_NO_MEM;
@@ -1405,8 +1406,8 @@ static ParameterError parse_range(struct OperationConfig *config,
     char buffer[32];
     warnf("A specified range MUST include at least one dash (-). "
           "Appending one for you");
-    msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
-              value);
+    curl_msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
+                   value);
     free(config->range);
     config->range = strdup(buffer);
     if(!config->range)
@@ -2223,6 +2224,9 @@ static ParameterError opt_file(struct OperationConfig *config,
     break;
   case C_KEY: /* --key */
     err = getstr(&config->key, nextarg, DENY_BLANK);
+    break;
+  case C_KNOWNHOSTS: /* --knownhosts */
+    err = getstr(&config->knownhosts, nextarg, DENY_BLANK);
     break;
   case C_NETRC_FILE: /* --netrc-file */
     err = getstr(&config->netrc_file, nextarg, DENY_BLANK);

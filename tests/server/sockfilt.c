@@ -200,6 +200,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
     }
 
     if(rc < 0) {
+      char errbuf[STRERROR_LEN];
       error = errno;
       /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
@@ -211,7 +212,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
       }
       logmsg("reading from file descriptor: %d,", filedes);
       logmsg("unrecoverable read() failure (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return -1;
     }
 
@@ -253,13 +254,14 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
     }
 
     if(wc < 0) {
+      char errbuf[STRERROR_LEN];
       error = errno;
       /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);
       logmsg("unrecoverable write() failure (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return -1;
     }
 
@@ -371,13 +373,20 @@ static void lograw(unsigned char *buffer, ssize_t len)
 static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
                             ssize_t *buffer_len)
 {
+  curl_off_t value;
+  const char *endp;
+
   if(!read_stdin(buffer, 5))
     return FALSE;
 
   buffer[5] = '\0';
 
-  /* !checksrc! disable BANNEDFUNC 1 */
-  *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
+  endp = (char *)buffer;
+  if(curlx_str_hex(&endp, &value, 0xfffff)) {
+    logmsg("Failed to decode buffer size");
+    return FALSE;
+  }
+  *buffer_len = (ssize_t)value;
   if(*buffer_len > maxlen) {
     logmsg("Buffer size (%zd bytes) too small for data size error "
            "(%zd bytes)", maxlen, *buffer_len);
@@ -452,13 +461,13 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
         size.QuadPart = 0;
         size.LowPart = GetFileSize(handle, &length);
         if((size.LowPart != INVALID_FILE_SIZE) ||
-            (GetLastError() == NO_ERROR)) {
+           (GetLastError() == NO_ERROR)) {
           size.HighPart = (LONG)length;
           /* get the current position within the file */
           pos.QuadPart = 0;
           pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
           if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
-              (GetLastError() == NO_ERROR)) {
+             (GetLastError() == NO_ERROR)) {
             /* compare position with size, abort if not equal */
             if(size.QuadPart == pos.QuadPart) {
               /* sleep and continue waiting */
@@ -940,6 +949,7 @@ static bool juggle(curl_socket_t *sockfdp,
   int maxfd = -99;
   ssize_t rc;
   int error = 0;
+  char errbuf[STRERROR_LEN];
 
   unsigned char buffer[BUFFER_SIZE];
   char data[16];
@@ -1060,7 +1070,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
   if(rc < 0) {
     logmsg("select() failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     return FALSE;
   }
 
@@ -1165,7 +1175,8 @@ static bool juggle(curl_socket_t *sockfdp,
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept() failed with error (%d) %s", error, sstrerror(error));
+        logmsg("accept() failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       }
       else {
         logmsg("====> Client connect");
@@ -1219,6 +1230,7 @@ static int test_sockfilt(int argc, char *argv[])
   bool juggle_again;
   int rc;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
@@ -1338,7 +1350,8 @@ static int test_sockfilt(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1375,8 +1388,8 @@ static int test_sockfilt(int argc, char *argv[])
     }
     if(rc) {
       error = SOCKERRNO;
-      logmsg("Error connecting to port %hu (%d) %s",
-             server_connectport, error, sstrerror(error));
+      logmsg("Error connecting to port %hu (%d) %s", server_connectport,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }

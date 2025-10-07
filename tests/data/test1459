@@ -12,9 +12,6 @@ known_hosts
 <server>
 sftp
 </server>
-<precheck>
-mkdir -p %PWD/%LOGDIR/test%TESTNUMBER.dir/.ssh
-</precheck>
 <features>
 sftp
 !oldlibssh
@@ -23,15 +20,12 @@ sftp
 SFTP with corrupted known_hosts
 </name>
 <command>
--u : sftp://%HOSTIP:%SSHPORT/ -l
+-u : sftp://%HOSTIP:%SSHPORT/ -l --knownhosts %LOGDIR/known%TESTNUMBER
 </command>
-<file name="%LOGDIR/test%TESTNUMBER.dir/.ssh/known_hosts">
+<file name="%LOGDIR/known%TESTNUMBER">
 |1|qy29Y1x/+/F39AzdG5515YSSw+c=|iB2WX5jrU3ZTWc+ZfGau7HHEvBc= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAynDN8cDJ3xNzRjTNNGciSHSxpubxhZ6YnkLdp1TkrGW8n\
 R93Ey5VtBeBblYTRlFXBWJgKFcTKBRJ/O4qBZwbUgt10AHj31i6h8NehfT19tR8wG/YCmj3KtYLHmwdzmW1edEL9G2NdX2KiKYv7/zuly3QvmP0QA0NhWkAz0KdWNM=
 </file>
-<setenv>
-CURL_HOME=%PWD/%LOGDIR/test%TESTNUMBER.dir
-</setenv>
 </client>
 
 # Verify data after the test has been "shot"

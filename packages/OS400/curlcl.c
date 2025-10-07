@@ -107,6 +107,7 @@ parse_command_line(const char *cmdargs, size_t len,
   }
 
   if(quote) {
+    /* !checksrc! disable BANNEDFUNC 1 */
     fprintf(stderr, "Unterminated quote: %c\n", quote);
     return -1;
   }

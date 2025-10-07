@@ -41,8 +41,7 @@
 #include "strdup.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -308,9 +307,9 @@ static CURLcode hsts_push(struct Curl_easy *data,
     if(result)
       return result;
 
-    msnprintf(e.expire, sizeof(e.expire), "%d%02d%02d %02d:%02d:%02d",
-              stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-              stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+    curl_msnprintf(e.expire, sizeof(e.expire), "%d%02d%02d %02d:%02d:%02d",
+                   stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                   stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
     strcpy(e.expire, UNLIMITED);
@@ -331,14 +330,14 @@ static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
     CURLcode result = Curl_gmtime((time_t)sts->expires, &stamp);
     if(result)
       return result;
-    fprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
-            sts->includeSubDomains ? ".": "", sts->host,
-            stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-            stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+    curl_mfprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
+                  sts->includeSubDomains ? ".": "", sts->host,
+                  stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                  stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
-    fprintf(fp, "%s%s \"%s\"\n",
-            sts->includeSubDomains ? ".": "", sts->host, UNLIMITED);
+    curl_mfprintf(fp, "%s%s \"%s\"\n",
+                  sts->includeSubDomains ? ".": "", sts->host, UNLIMITED);
   return CURLE_OK;
 }
 

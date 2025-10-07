@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * multi_socket API using libuv
  * </DESC>
  */
+
 /* Use the socket_action interface to download multiple files in parallel,
    powered by libuv.
 
@@ -33,6 +33,8 @@
 
    See https://docs.libuv.org/en/v1.x/index.html libuv API documentation
 */
+
+/* Requires: USE_LIBUV */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,7 +87,7 @@ static void add_download(const char *url, int num, CURLM *multi)
   FILE *file;
   CURL *handle;
 
-  snprintf(filename, 50, "%d.download", num);
+  snprintf(filename, sizeof(filename), "%d.download", num);
 
   file = fopen(filename, "wb");
   if(!file) {
@@ -167,9 +169,9 @@ static void on_uv_timeout(uv_timer_t *req)
 }
 
 /* callback from libcurl to update the timeout expiry */
-static int cb_timeout(CURLM *multi, long timeout_ms,
-                      struct datauv *uv)
+static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
 {
+  struct datauv *uv = (struct datauv *)userp;
   (void)multi;
   if(timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
@@ -185,9 +187,9 @@ static int cb_timeout(CURLM *multi, long timeout_ms,
 
 /* callback from libcurl to update socket activity to wait for */
 static int cb_socket(CURL *easy, curl_socket_t s, int action,
-                     struct datauv *uv,
-                     void *socketp)
+                     void *userp, void *socketp)
 {
+  struct datauv *uv = (struct datauv *)userp;
   struct curl_context *curl_context;
   int events = 0;
   (void)easy;

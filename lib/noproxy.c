@@ -64,9 +64,10 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
     unsigned int haddr = htonl(address);
     unsigned int hcheck = htonl(check);
 #if 0
-    fprintf(stderr, "Host %s (%x) network %s (%x) bits %u mask %x => %x\n",
-            ipv4, haddr, network, hcheck, bits, mask,
-            (haddr ^ hcheck) & mask);
+    curl_mfprintf(stderr, "Host %s (%x) network %s (%x) "
+                  "bits %u mask %x => %x\n",
+                  ipv4, haddr, network, hcheck, bits, mask,
+                  (haddr ^ hcheck) & mask);
 #endif
     if((haddr ^ hcheck) & mask)
       return FALSE;
@@ -98,7 +99,7 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
     return FALSE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
-  if(rest && !((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
+  if(rest && ((address[bytes] ^ check[bytes]) & (0xff << (8 - rest))))
     return FALSE;
 
   return TRUE;

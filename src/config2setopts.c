@@ -83,9 +83,10 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
 #endif
     }
     if(result < 0) {
+      char buffer[STRERROR_LEN];
       int error = errno;
-      warnf("Setting type of service to %d failed with errno %d: %s",
-            tos, error, strerror(error));
+      warnf("Setting type of service to %d failed with errno %d: %s", tos,
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
   }
 #endif
@@ -94,9 +95,10 @@ static int sockopt_callback(void *clientp, curl_socket_t curlfd,
     int priority = (int)config->vlan_priority;
     if(setsockopt(curlfd, SOL_SOCKET, SO_PRIORITY,
                   (void *)&priority, sizeof(priority)) != 0) {
+      char buffer[STRERROR_LEN];
       int error = errno;
-      warnf("VLAN priority %d failed with errno %d: %s",
-            priority, error, strerror(error));
+      warnf("VLAN priority %d failed with errno %d: %s", priority,
+            error, curlx_strerror(error, buffer, sizeof(buffer)));
     }
   }
 #endif
@@ -112,7 +114,8 @@ static char *ssl_backend(void)
   if(!already) { /* if there is no existing version */
     const char *v = curl_version_info(CURLVERSION_NOW)->ssl_version;
     if(v)
-      msnprintf(ssl_ver, sizeof(ssl_ver), "%.*s", (int) strcspn(v, " "), v);
+      curl_msnprintf(ssl_ver, sizeof(ssl_ver),
+                     "%.*s", (int)strcspn(v, " "), v);
     already = TRUE;
   }
   return ssl_ver;
@@ -192,7 +195,7 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_SSH_COMPRESSION, 1);
 
   if(!config->insecure_ok) {
-    char *known = global->knownhosts;
+    char *known = config->knownhosts;
 
     if(!known)
       known = findfile(".ssh/known_hosts", FALSE);
@@ -200,12 +203,12 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       /* new in curl 7.19.6 */
       result = my_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
       if(result) {
-        global->knownhosts = NULL;
+        config->knownhosts = NULL;
         curl_free(known);
         return result;
       }
       /* store it in global to avoid repeated checks */
-      global->knownhosts = known;
+      config->knownhosts = known;
     }
     else if(!config->hostpubmd5 && !config->hostpubsha256) {
       errorf("Couldn't find a known_hosts file");

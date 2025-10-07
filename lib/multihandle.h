@@ -30,6 +30,7 @@
 #include "cshutdn.h"
 #include "hostip.h"
 #include "multi_ev.h"
+#include "multi_ntfy.h"
 #include "psl.h"
 #include "socketpair.h"
 #include "uint-bset.h"
@@ -134,6 +135,8 @@ struct Curl_multi {
 
   /* multi event related things */
   struct curl_multi_ev ev;
+  /* multi notification related things */
+  struct curl_multi_ntfy ntfy;
 
   /* `proto_hash` is a general key-value store for protocol implementations
    * with the lifetime of the multi handle. The number of elements kept here
@@ -178,6 +181,7 @@ struct Curl_multi {
   BIT(multiplexing);           /* multiplexing wanted */
   BIT(recheckstate);           /* see Curl_multi_connchanged */
   BIT(in_callback);            /* true while executing a callback */
+  BIT(in_ntfy_callback);       /* true while dispatching notifications */
 #ifdef USE_OPENSSL
   BIT(ssl_seeded);
 #endif

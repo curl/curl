@@ -29,8 +29,7 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -244,9 +243,10 @@ stub_gss_init_sec_context(OM_uint32 *min,
     }
 
     /* Token format: creds:target:type:padding */
-    used = msnprintf(token, length, "%s:%.*s:%d:", creds,
-                     (int)target_desc.length, (const char *)target_desc.value,
-                     ctx->sent);
+    used = curl_msnprintf(token, length, "%s:%.*s:%d:", creds,
+                          (int)target_desc.length,
+                          (const char *)target_desc.value,
+                          ctx->sent);
 
     gss_release_buffer(&minor_status, &target_desc);
   }
@@ -387,9 +387,9 @@ static size_t display_gss_error(OM_uint32 status, int type,
                                   &status_string);
     if(maj_stat == GSS_S_COMPLETE && status_string.length > 0) {
       if(GSS_LOG_BUFFER_LEN > len + status_string.length + 3) {
-        len += msnprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
-                         "%.*s. ", (int)status_string.length,
-                         (char *)status_string.value);
+        len += curl_msnprintf(buf + len, GSS_LOG_BUFFER_LEN - len,
+                              "%.*s. ", (int)status_string.length,
+                              (char *)status_string.value);
       }
     }
     gss_release_buffer(&min_stat, &status_string);

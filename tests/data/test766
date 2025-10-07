@@ -1,0 +1,58 @@
+<testcase>
+<info>
+<keywords>
+FTP
+PORT
+CURLOPT_SOCKOPTFUNCTION
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+FTP PORT with sockopt callback refusing the accept
+</name>
+<command>
+ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# Strip off parts of the EPRT command that might differ
+<strippart>
+s/^EPRT \|1\|(.*)/EPRT \|1\|/
+</strippart>
+# The TYPE command might get sent so we ignore that
+<strip>
+^TYPE
+</strip>
+
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+CWD path
+EPRT |1|
+</protocol>
+
+# 42 == CURLE_ABORTED_BY_CALLBACK
+<errorcode>
+42
+</errorcode>
+
+</verify>
+</testcase>

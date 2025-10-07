@@ -44,8 +44,7 @@
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -236,8 +235,8 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   if(result)
     goto out;
 
-  authority = aprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
-                      ipv6_ip ?"]" : "", port);
+  authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
+                            ipv6_ip ?"]" : "", port);
   if(!authority) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
