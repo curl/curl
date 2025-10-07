@@ -1113,7 +1113,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     result = Curl_http_decode_status(&stream->status_code,
                                      (const char *)h3val.base, h3val.len);
     if(result)
-      return -1;
+      return NGHTTP3_ERR_CALLBACK_FAILURE;
     curlx_dyn_reset(&ctx->scratch);
     result = curlx_dyn_addn(&ctx->scratch, STRCONST("HTTP/3 "));
     if(!result)
@@ -1127,7 +1127,7 @@ static int cb_h3_recv_header(nghttp3_conn *conn, int64_t sid,
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] status: %s",
                 stream_id, curlx_dyn_ptr(&ctx->scratch));
     if(result) {
-      return -1;
+      return NGHTTP3_ERR_CALLBACK_FAILURE;
     }
   }
   else {
