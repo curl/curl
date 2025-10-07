@@ -21,11 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * multi_socket API using libuv
  * </DESC>
  */
+
 /* Use the socket_action interface to download multiple files in parallel,
    powered by libuv.
 
@@ -33,6 +33,8 @@
 
    See https://docs.libuv.org/en/v1.x/index.html libuv API documentation
 */
+
+/* Requires: USE_LIBUV */
 
 #include <stdio.h>
 #include <stdlib.h>

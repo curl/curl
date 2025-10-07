@@ -31,6 +31,8 @@
  * must be used in real circumstances when a secure connection is required.
  */
 
+/* Requires: USE_OPENSSL */
+
 #ifndef OPENSSL_SUPPRESS_DEPRECATED
 #define OPENSSL_SUPPRESS_DEPRECATED
 #endif

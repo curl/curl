@@ -26,6 +26,8 @@
  * </DESC>
  */
 
+/* Requires: HAVE_PTHREAD_H */
+
 #include <stdio.h>
 #include <pthread.h>
 #include <curl/curl.h>
