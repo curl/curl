@@ -61,7 +61,8 @@ are shut down.
 *multi* identifies the multi handle that triggered the notification.
 
 **notification** is the type of notification, e.g. what happened. The
-following types are available:
+following types are available right now. In the future, new ones might be
+added.
 
 ## CURLMNOTIFY_INFO_READ
 
@@ -79,8 +80,8 @@ The *easy* handle passed is an internal handle.
 ## CURLMNOTIFY_EASY_DONE
 
 When enabled via curl_multi_notify_enable(3), this notification is triggered
-when a an easy handle has finished. This happens both for
-successful and failed transfers.
+when an easy handle has finished. This happens both for successful and failed
+transfers.
 
 The *easy* handle passed is the transfer that is done. This *may* be
 an internal handle when DoH or other features are used.
