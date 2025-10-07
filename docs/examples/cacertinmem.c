@@ -35,6 +35,12 @@
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+typedef size_t ossl_valsize_t;
+#else
+typedef int ossl_valsize_t;
+#endif
+
 static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, (FILE *)stream);
@@ -69,7 +75,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 
   BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
   X509_STORE  *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
-  int i;
+  ossl_valsize_t i;
   STACK_OF(X509_INFO) *inf;
 
   (void)curl;
