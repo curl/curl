@@ -97,7 +97,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   (void)pointer;
 
   /* get a BIO */
-  bio = BIO_new_mem_buf((char *)mypem, -1);
+  bio = BIO_new_mem_buf(mypem, -1);
 
   if(!bio) {
     printf("BIO_new_mem_buf failed\n");
@@ -118,7 +118,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   }
 
   /* create a bio for the RSA key */
-  kbio = BIO_new_mem_buf((char *)mykey, -1);
+  kbio = BIO_new_mem_buf(mykey, -1);
   if(!kbio) {
     printf("BIO_new_mem_buf failed\n");
   }
