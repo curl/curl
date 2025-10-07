@@ -300,6 +300,35 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+struct cf_ngtcp2_sfind_ctx {
+  curl_int64_t stream_id;
+  struct h3_stream_ctx *stream;
+  unsigned int mid;
+};
+
+static bool cf_ngtcp2_sfind(unsigned int mid, void *value, void *user_data)
+{
+  struct cf_ngtcp2_sfind_ctx *fctx = user_data;
+  struct h3_stream_ctx *stream = value;
+
+  if(fctx->stream_id == stream->id) {
+    fctx->mid = mid;
+    fctx->stream = stream;
+    return FALSE;
+  }
+  return TRUE; /* continue */
+}
+
+static struct h3_stream_ctx *
+cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx, curl_int64_t stream_id)
+{
+  struct cf_ngtcp2_sfind_ctx fctx;
+  fctx.stream_id = stream_id;
+  fctx.stream = NULL;
+  Curl_uint_hash_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
+  return fctx.stream;
+}
+
 static void cf_ngtcp2_stream_close(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct h3_stream_ctx *stream)
@@ -1808,13 +1837,13 @@ static CURLcode read_pkt_to_send(void *userp,
     else if(n < 0) {
       switch(n) {
       case NGTCP2_ERR_STREAM_DATA_BLOCKED: {
-        struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, x->data);
+        struct h3_stream_ctx *stream;
         DEBUGASSERT(ndatalen == -1);
         nghttp3_conn_block_stream(ctx->h3conn, stream_id);
         CURL_TRC_CF(x->data, x->cf, "[%" FMT_PRId64 "] block quic flow",
                     (curl_int64_t)stream_id);
-        DEBUGASSERT(stream);
-        if(stream)
+        stream = cf_ngtcp2_get_stream(ctx, stream_id);
+        if(stream) /* it might be not one of our h3 streams? */
           stream->quic_flow_blocked = TRUE;
         n = 0;
         break;
