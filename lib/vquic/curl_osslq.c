@@ -2251,10 +2251,11 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
                   "assume connection is dead.");
       goto out;
     }
-    CURL_TRC_CF(data, cf, "negotiated idle timeout: %zums", (size_t)idle_ms);
+    CURL_TRC_CF(data, cf, "negotiated idle timeout: %" FMT_PRIu64 "ms",
+                (curl_uint64_t)idle_ms);
     idletime = curlx_timediff(curlx_now(), ctx->q.last_io);
-    if(idletime > 0 && (uint64_t)idletime > idle_ms)
-      goto out;
+    if(idle_ms != 0 && idletime > 0 && (uint64_t)idletime > idle_ms)
+       goto out;
   }
 
 #endif
