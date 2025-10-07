@@ -36,6 +36,15 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
+#undef _WIN32_WINNT
+/* Define _WIN32_WINNT to ensure MinGW headers show NCrypt definitions.
+ * MinGW 4.8.1 headers require _WIN32_WINNT>=600 to show  NCrypt symbols.
+ * curl documents Vista as lowest supported Windows version */
+#define _WIN32_WINNT 0x0600  /* Requires Windows Vista */
+#endif
+
 /* Wincrypt must be included before anything that could include OpenSSL. */
 #ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
@@ -50,6 +59,7 @@
 
 #include <schnlsp.h>
 #include <schannel.h>
+#include <ncrypt.h> /* include after wincrypt.h */
 #include "../curl_sspi.h"
 
 #include "../cfilters.h"
