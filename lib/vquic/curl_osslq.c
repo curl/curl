@@ -288,10 +288,10 @@ struct cf_osslq_ctx {
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct uint_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
-  uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   SSL_POLL_ITEM *poll_items;         /* Array for polling on writable state */
   struct Curl_easy **curl_items;     /* Array of easy objs */
   size_t items_max;                  /* max elements in poll/curl_items */
+  uint32_t max_idle_ms;              /* max idle time for QUIC connection */
   BIT(initialized);
   BIT(got_first_byte);               /* if first byte was received */
   BIT(x509_store_setup);             /* if x509 store has been set up */
@@ -312,6 +312,7 @@ static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
   ctx->curl_items = NULL;
   ctx->items_max = 0;
   ctx->initialized = TRUE;
+  ctx->max_idle_ms = 0; /* no IDLE timeout from our side */
 }
 
 static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
@@ -1228,6 +1229,9 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   SSL_set_connect_state(ctx->tls.ossl.ssl);
   SSL_set_incoming_stream_policy(ctx->tls.ossl.ssl,
                                  SSL_INCOMING_STREAM_POLICY_ACCEPT, 0);
+  SSL_set_value_uint(ctx->tls.ossl.ssl,
+    SSL_VALUE_CLASS_FEATURE_REQUEST, SSL_VALUE_QUIC_IDLE_TIMEOUT,
+    ctx->max_idle_ms);
   /* setup the H3 things on top of the QUIC connection */
   result = cf_osslq_h3conn_init(ctx, ctx->tls.ossl.ssl, cf);
 
