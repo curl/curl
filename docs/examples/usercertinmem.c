@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Use an in-memory user certificate and RSA key and retrieve an https page.
+ * Use an in-memory user certificate and RSA key and retrieve an HTTPS page.
  * </DESC>
  */
 /* Written by Ishan SinghLevett, based on Theo Borm's cacertinmem.c.
