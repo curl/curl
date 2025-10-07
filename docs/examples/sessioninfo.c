@@ -29,6 +29,8 @@
 /* Note that this example currently requires curl to be linked against
    GnuTLS (and this program must also be linked against -lgnutls). */
 
+/* Requires: USE_GNUTLS */
+
 #ifndef CURL_DISABLE_DEPRECATION
 #define CURL_DISABLE_DEPRECATION
 #endif

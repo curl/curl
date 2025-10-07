@@ -36,7 +36,8 @@
  * https://github.com/curl/curl/blob/curl-7_88_1/docs/examples/threaded-ssl.c
  */
 
-#define USE_OPENSSL /* or USE_GNUTLS accordingly */
+/* Requires: HAVE_PTHREAD_H */
+/* Also requires TLS support to run */
 
 #include <stdio.h>
 #include <pthread.h>
