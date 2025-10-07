@@ -1326,13 +1326,13 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(ctx->h3conn);
   *pnread = 0;
 
+  pktx_init(&pktx, cf, data);
+
   /* handshake verification failed in callback, do not recv anything */
   if(ctx->tls_vrfy_result) {
     result = ctx->tls_vrfy_result;
     goto out;
   }
-
-  pktx_init(&pktx, cf, data);
 
   if(!stream || ctx->shutdown_started) {
     result = CURLE_RECV_ERROR;
