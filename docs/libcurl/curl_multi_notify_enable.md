@@ -49,7 +49,7 @@ int main(void)
   int rc;
   CURLM *multi = curl_multi_init();
 
-  rc = curl_multi_notify_enable(multi, CURLM_NOTIFY_INFO_READ);
+  rc = curl_multi_notify_enable(multi, CURLMNOTIFY_INFO_READ);
 }
 ~~~
 

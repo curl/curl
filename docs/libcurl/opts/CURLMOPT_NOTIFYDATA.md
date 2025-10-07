@@ -61,7 +61,7 @@ int main(void)
   /* ... use socket callback and custom pointer */
   curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, ntfy_cb);
   curl_multi_setopt(multi, CURLMOPT_NOTIFYDATA, &setup);
-  curl_multi_notify_enable(multi, CURLM_NOTIFY_INFO_READ);
+  curl_multi_notify_enable(multi, CURLMNOTIFY_INFO_READ);
 }
 ~~~
 
