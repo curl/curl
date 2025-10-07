@@ -86,7 +86,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NGTCP2_FOUND)
-  set(NGTCP2_VERSION "${NGTCP2_libngtcp2_VERSION}")
+  set(NGTCP2_VERSION ${NGTCP2_libngtcp2_VERSION})
   string(REPLACE ";" " " NGTCP2_CFLAGS "${NGTCP2_CFLAGS}")
   message(STATUS "Found NGTCP2 (via pkg-config): ${NGTCP2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()

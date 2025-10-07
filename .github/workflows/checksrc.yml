@@ -53,7 +53,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'install'
+      - name: 'install prereqs'
         run: |
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
