@@ -2743,9 +2743,12 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
   if(rp && rp->max_idle_timeout) {
     timediff_t idletime_ms = curlx_timediff(curlx_now(), ctx->q.last_io);
-    if(idletime_ms > 0 &&
-      ((uint64_t)idletime_ms * NGTCP2_MILLISECONDS) > rp->max_idle_timeout)
-      goto out;
+    if(idletime_ms > 0) {
+      uint64_t max_idle_ms =
+        (uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS);
+      if((uint64_t)idletime_ms > max_idle_ms)
+        goto out;
+    }
   }
 
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
