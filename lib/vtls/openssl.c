@@ -3727,6 +3727,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
   char error_buffer[256];
   CURLcode result;
@@ -3734,7 +3735,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
   Curl_alpn_copy(&alpns, alpns_requested);
 
   octx->reused_session = FALSE;
-  if(ssl_config->primary.cache_session) {
+  if(ssl_config->primary.cache_session && !conn_cfg->verifystatus) {
     struct Curl_ssl_session *scs = NULL;
 
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
