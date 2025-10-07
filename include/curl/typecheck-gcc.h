@@ -208,9 +208,9 @@
         if(curlcheck_charpp_option(option))                             \
           if(!curlcheck_ptrptr(value, char))                            \
             Wcurl_multi_setopt_err_charpp();                            \
-        if((option) == CURLMOPT_NOTIFYFUNCTION)                           \
-          if(!curlcheck_multintfy_cb(value))                            \
-            Wcurl_multi_setopt_err_ntfycb();                            \
+        if((option) == CURLMOPT_NOTIFYFUNCTION)                         \
+          if(!curlcheck_multinotify_cb(value))                          \
+            Wcurl_multi_setopt_err_notifycb();                          \
         if((option) == CURLMOPT_PUSHFUNCTION)                           \
           if(!curlcheck_multipush_cb(value))                            \
             Wcurl_multi_setopt_err_pushcb();                            \
@@ -227,7 +227,7 @@
 /* evaluates to true if the option takes a data argument to pass to a
    callback */
 #define curlcheck_multicb_data_option(option)                           \
-  ((option) == CURLMOPT_NOTIFYDATA ||                                     \
+  ((option) == CURLMOPT_NOTIFYDATA ||                                   \
    (option) == CURLMOPT_PUSHDATA ||                                     \
    (option) == CURLMOPT_SOCKETDATA ||                                   \
    (option) == CURLMOPT_TIMERDATA ||                                    \
@@ -250,13 +250,13 @@
    curlcheck_cb_compatible((expr), curl_socket_callback))
 
 /* evaluates to true if expr is of type curl_push_callback */
-#define curlcheck_multipush_cb(expr)                                  \
-  (curlcheck_NULL(expr) ||                                            \
+#define curlcheck_multipush_cb(expr)                                    \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_push_callback))
 
 /* evaluates to true if expr is of type curl_push_callback */
-#define curlcheck_multintfy_cb(expr)                                  \
-  (curlcheck_NULL(expr) ||                                            \
+#define curlcheck_multinotify_cb(expr)                                  \
+  (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_notify_callback))
 
 /*
@@ -284,7 +284,7 @@ CURLWARNING(Wcurl_multi_setopt_err_charpp,
             "curl_multi_setopt expects a 'char **' argument")
 CURLWARNING(Wcurl_multi_setopt_err_pushcb,
             "curl_multi_setopt expects a curl_push_callback argument")
-CURLWARNING(Wcurl_multi_setopt_err_ntfycb,
+CURLWARNING(Wcurl_multi_setopt_err_notifycb,
             "curl_multi_setopt expects a curl_notify_callback argument")
 CURLWARNING(Wcurl_multi_setopt_err_socketcb,
             "curl_multi_setopt expects a curl_socket_callback argument")
@@ -392,16 +392,16 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
 /* groups of curl_easy_setops options that take the same type of argument */
 
 /* evaluates to true if option takes a long argument */
-#define curlcheck_long_option(option)                   \
+#define curlcheck_long_option(option)                                   \
   (0 < (option) && (option) < CURLOPTTYPE_OBJECTPOINT)
 
 #define curlcheck_off_t_option(option)                                  \
   (((option) > CURLOPTTYPE_OFF_T) && ((option) < CURLOPTTYPE_BLOB))
 
 /* option takes a CURL * argument */
-#define curlcheck_curl_option(option)                                 \
-  ((option) == CURLOPT_STREAM_DEPENDS ||                              \
-   (option) == CURLOPT_STREAM_DEPENDS_E ||                            \
+#define curlcheck_curl_option(option)                                   \
+  ((option) == CURLOPT_STREAM_DEPENDS ||                                \
+   (option) == CURLOPT_STREAM_DEPENDS_E ||                              \
    0)
 
 /* evaluates to true if option takes a char* argument */
@@ -684,7 +684,7 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
   (curlcheck_ptr((expr), void) ||                                       \
    curlcheck_ptr((expr), FILE))
 #else /* be less strict */
-#define curlcheck_cb_data(expr)                 \
+#define curlcheck_cb_data(expr)                                         \
   curlcheck_any_ptr(expr)
 #endif
 

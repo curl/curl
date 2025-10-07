@@ -46,10 +46,10 @@ struct priv {
   void *ours;
 };
 
-static void ntfy_cb(CURLM *multi, unsigned int notification,
-                    CURL *easy, void *ntfyp)
+static void notify_cb(CURLM *multi, unsigned int notification,
+                      CURL *easy, void *notifyp)
 {
-  struct priv *p = ntfyp;
+  struct priv *p = notifyp;
   printf("my ptr: %p\n", p->ours);
   /* ... */
 }
@@ -59,7 +59,7 @@ int main(void)
   struct priv setup;
   CURLM *multi = curl_multi_init();
   /* ... use socket callback and custom pointer */
-  curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, ntfy_cb);
+  curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, notify_cb);
   curl_multi_setopt(multi, CURLMOPT_NOTIFYDATA, &setup);
   curl_multi_notify_enable(multi, CURLMNOTIFY_INFO_READ);
 }

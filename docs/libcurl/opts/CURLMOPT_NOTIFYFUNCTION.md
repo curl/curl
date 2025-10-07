@@ -23,12 +23,12 @@ CURLMOPT_NOTIFYFUNCTION - callback receiving notifications
 ~~~c
 #include <curl/curl.h>
 
-void ntfy_callback(CURLM *multi,     /* multi handle */
-                   unsigned int notification, /* notification type */
-                   CURL *easy,       /* easy handle */
-                   void *ntfyp);     /* private ntfy pointer */
+void notify_callback(CURLM *multi,     /* multi handle */
+                     unsigned int notification, /* notification type */
+                     CURL *easy,       /* easy handle */
+                     void *notifyp);   /* private notify pointer */
 
-CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NOTIFYFUNCTION, ntfy_callback);
+CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_NOTIFYFUNCTION, notify_callback);
 ~~~
 
 # DESCRIPTION
@@ -89,7 +89,7 @@ an internal handle when DoH or other features are used.
 *easy* identifies the transfer involved. This may be one of the
 application's own easy handle or an internal handle.
 
-**ntfyp** is set with CURLMOPT_NOTIFYDATA(3).
+**notifyp** is set with CURLMOPT_NOTIFYDATA(3).
 
 # DEFAULT
 
@@ -104,10 +104,10 @@ struct priv {
   void *ours;
 };
 
-static void ntfy_cb(CURLM *multi, unsigned int notification,
-                    CURL *easy, void *ntfyp)
+static void notify_cb(CURLM *multi, unsigned int notification,
+                      CURL *easy, void *notifyp)
 {
-  struct priv *p = ntfyp;
+  struct priv *p = notifyp;
   printf("my ptr: %p\n", p->ours);
   /* ... */
 }
@@ -117,7 +117,7 @@ int main(void)
   struct priv setup;
   CURLM *multi = curl_multi_init();
   /* ... use socket callback and custom pointer */
-  curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, ntfy_cb);
+  curl_multi_setopt(multi, CURLMOPT_NOTIFYFUNCTION, notify_cb);
   curl_multi_setopt(multi, CURLMOPT_NOTIFYDATA, &setup);
   curl_multi_notify_enable(multi, CURLMNOTIFY_INFO_READ);
 }
