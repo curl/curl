@@ -29,6 +29,10 @@
 /* Note that this example currently requires curl to be linked against
    GnuTLS (and this program must also be linked against -lgnutls). */
 
+#ifndef CURL_DISABLE_DEPRECATION
+#define CURL_DISABLE_DEPRECATION
+#endif
+
 #include <stdio.h>
 
 #include <curl/curl.h>
@@ -47,8 +51,7 @@ static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
   (void)stream;
   (void)ptr;
 
-  res = CURL_IGNORE_DEPRECATION(
-    curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info));
+  res = curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info);
 
   if(!res) {
     switch(info->backend) {
