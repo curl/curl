@@ -1736,7 +1736,7 @@ static void mnotify(CURLM *multi, unsigned int notification,
   (void)easy;
 
   switch(notification) {
-  case CURLM_NOTIFY_INFO_READ:
+  case CURLMNOTIFY_INFO_READ:
     result = check_finished(s);
     /* remember first failure */
     if(result && !s->result)
@@ -1766,7 +1766,7 @@ static CURLcode parallel_transfers(CURLSH *share)
 
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYFUNCTION, mnotify);
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYDATA, s);
-  (void)curl_multi_notify_enable(s->multi, CURLM_NOTIFY_INFO_READ);
+  (void)curl_multi_notify_enable(s->multi, CURLMNOTIFY_INFO_READ);
 
   result = add_parallel_transfers(s->multi, s->share,
                                   &s->more_transfers, &s->added_transfers);

@@ -529,8 +529,8 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
 /*
  * Notifications dispatched by a multi handle, when enabled.
  */
-#define CURLM_NOTIFY_INFO_READ    0
-#define CURLM_NOTIFY_EASY_DONE    1
+#define CURLMNOTIFY_INFO_READ    0
+#define CURLMNOTIFY_EASY_DONE    1
 
 /*
  * Callback to install via CURLMOPT_NOTIFYFUNCTION.
@@ -539,7 +539,6 @@ typedef void (*curl_notify_callback)(CURLM *multi,
                                      unsigned int notification,
                                      CURL *easy,
                                      void *user_data);
-
 
 CURL_EXTERN CURLMcode curl_multi_notify_disable(CURLM *multi,
                                                 unsigned int notification);
