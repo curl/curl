@@ -2255,7 +2255,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
                 (curl_uint64_t)idle_ms);
     idletime = curlx_timediff(curlx_now(), ctx->q.last_io);
     if(idle_ms != 0 && idletime > 0 && (uint64_t)idletime > idle_ms)
-       goto out;
+      goto out;
   }
 
 #endif
