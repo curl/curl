@@ -1607,6 +1607,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                   "%d (%s)", stream->id, rc, nghttp3_strerror(rc));
       break;
     }
+    cf_ngtcp2_stream_close(cf, data, stream);
     result = CURLE_SEND_ERROR;
     goto out;
   }
