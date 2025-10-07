@@ -209,8 +209,8 @@
           if(!curlcheck_ptrptr(value, char))                            \
             Wcurl_multi_setopt_err_charpp();                            \
         if((option) == CURLMOPT_NOTIFYFUNCTION)                         \
-          if(!curlcheck_multintfy_cb(value))                            \
-            Wcurl_multi_setopt_err_ntfycb();                            \
+          if(!curlcheck_multinotify_cb(value))                          \
+            Wcurl_multi_setopt_err_notifycb();                          \
         if((option) == CURLMOPT_PUSHFUNCTION)                           \
           if(!curlcheck_multipush_cb(value))                            \
             Wcurl_multi_setopt_err_pushcb();                            \
@@ -255,7 +255,7 @@
    curlcheck_cb_compatible((expr), curl_push_callback))
 
 /* evaluates to true if expr is of type curl_push_callback */
-#define curlcheck_multintfy_cb(expr)                                    \
+#define curlcheck_multinotify_cb(expr)                                  \
   (curlcheck_NULL(expr) ||                                              \
    curlcheck_cb_compatible((expr), curl_notify_callback))
 
@@ -284,7 +284,7 @@ CURLWARNING(Wcurl_multi_setopt_err_charpp,
             "curl_multi_setopt expects a 'char **' argument")
 CURLWARNING(Wcurl_multi_setopt_err_pushcb,
             "curl_multi_setopt expects a curl_push_callback argument")
-CURLWARNING(Wcurl_multi_setopt_err_ntfycb,
+CURLWARNING(Wcurl_multi_setopt_err_notifycb,
             "curl_multi_setopt expects a curl_notify_callback argument")
 CURLWARNING(Wcurl_multi_setopt_err_socketcb,
             "curl_multi_setopt expects a curl_socket_callback argument")
