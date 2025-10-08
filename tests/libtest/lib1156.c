@@ -36,6 +36,9 @@
 
 #include "memdebug.h"
 
+
+#include "memdebugx.h"
+
 #define F_RESUME        (1 << 0)        /* resume/range. */
 #define F_HTTP416       (1 << 1)        /* Server returns http code 416. */
 #define F_FAIL          (1 << 2)        /* Fail on error. */

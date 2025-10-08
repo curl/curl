@@ -31,6 +31,9 @@
 
 #ifdef CURLDEBUG
 
+#undef XMEM
+#define XMEM 9
+
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
 #define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
