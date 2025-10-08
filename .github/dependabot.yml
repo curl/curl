@@ -13,9 +13,9 @@ updates:
 
   - package-ecosystem: 'pip'
     directories:
+      - '/.github/scripts'
       - '/tests'
       - '/tests/http'
-      - '/.github/scripts'
     schedule:
       interval: 'monthly'
     commit-message:
