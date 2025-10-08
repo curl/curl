@@ -267,8 +267,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     if(status != noErr) {
       failf(data, "Apple SecTrust verification failed: error %i", (int)status);
     }
-    else if((status == kSecTrustResultUnspecified) ||
-            (status == kSecTrustResultProceed)) {
+    else if((sec_result == kSecTrustResultUnspecified) ||
+            (sec_result == kSecTrustResultProceed)) {
       /* "unspecified" means system-trusted with no explicit user setting */
       result = CURLE_OK;
     }
