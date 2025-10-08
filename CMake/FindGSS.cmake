@@ -161,7 +161,6 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     # Older versions may not have the "--vendor" parameter. In this case we just do not care.
     set(GSS_FLAVOUR "MIT")  # most probably, should not really matter
-    endif()
 
   else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
 
