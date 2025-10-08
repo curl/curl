@@ -55,10 +55,6 @@
 #include "strdup.h"
 #include "escape.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
   if(secs < 0)
@@ -98,7 +94,7 @@ CURLcode Curl_setstropt(char **charp, const char *s)
     if(strlen(s) > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    *charp = strdup(s);
+    *charp = curlx_strdup(s);
     if(!*charp)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -119,8 +115,8 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
     if(blob->len > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     nblob = (struct curl_blob *)
-      malloc(sizeof(struct curl_blob) +
-             ((blob->flags & CURL_BLOB_COPY) ? blob->len : 0));
+      curlx_malloc(sizeof(struct curl_blob) +
+                   ((blob->flags & CURL_BLOB_COPY) ? blob->len : 0));
     if(!nblob)
       return CURLE_OUT_OF_MEMORY;
     *nblob = *blob;
@@ -158,10 +154,10 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
       return result;
   }
 
-  free(*userp);
+  curlx_free(*userp);
   *userp = user;
 
-  free(*passwdp);
+  curlx_free(*passwdp);
   *passwdp = passwd;
 
   return CURLE_OK;
@@ -185,13 +181,13 @@ static CURLcode setstropt_interface(char *option, char **devp,
     if(result)
       return result;
   }
-  free(*devp);
+  curlx_free(*devp);
   *devp = dev;
 
-  free(*ifacep);
+  curlx_free(*ifacep);
   *ifacep = iface;
 
-  free(*hostp);
+  curlx_free(*hostp);
   *hostp = host;
 
   return CURLE_OK;
@@ -1706,7 +1702,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
         if(!p)
           return CURLE_OUT_OF_MEMORY;
         else {
-          free(s->str[STRING_COPYPOSTFIELDS]);
+          curlx_free(s->str[STRING_COPYPOSTFIELDS]);
           s->str[STRING_COPYPOSTFIELDS] = p;
         }
       }
@@ -2040,8 +2036,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     }
-    free(u);
-    free(p);
+    curlx_free(u);
+    curlx_free(p);
   }
     break;
   case CURLOPT_PROXYUSERNAME:

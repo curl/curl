@@ -50,10 +50,6 @@
 #include <Security/Security.h>
 #endif
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 #ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
@@ -244,11 +240,11 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       if(error_ref) {
         CFIndex size = CFStringGetMaximumSizeForEncoding(
           CFStringGetLength(error_ref), kCFStringEncodingUTF8);
-        err_desc = malloc(size + 1);
+        err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
              kCFStringEncodingUTF8)) {
-            free(err_desc);
+            curlx_free(err_desc);
             err_desc = NULL;
           }
         }
@@ -276,7 +272,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   }
 
 out:
-  free(err_desc);
+  curlx_free(err_desc);
   if(error_ref)
     CFRelease(error_ref);
   if(error)

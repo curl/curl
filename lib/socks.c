@@ -45,10 +45,6 @@
 #include "curlx/inet_pton.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define DEBUG_AND_VERBOSE
 #endif
@@ -1215,7 +1211,7 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
   struct socks_state *sxstate = cf->ctx;
   if(sxstate) {
     Curl_bufq_free(&sxstate->iobuf);
-    free(sxstate);
+    curlx_free(sxstate);
     cf->ctx = NULL;
   }
 }
@@ -1247,7 +1243,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return result;
 
   if(!sx) {
-    cf->ctx = sx = calloc(1, sizeof(*sx));
+    cf->ctx = sx = curlx_calloc(1, sizeof(*sx));
     if(!sx) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;

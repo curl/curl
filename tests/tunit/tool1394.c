@@ -25,8 +25,6 @@
 
 #include "tool_getparam.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode test_tool1394(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
@@ -120,9 +118,9 @@ static CURLcode test_tool1394(const char *arg)
       }
     }
     if(certname)
-      free(certname);
+      curlx_free(certname);
     if(passphrase)
-      free(passphrase);
+      curlx_free(passphrase);
   }
 
   UNITTEST_END_SIMPLE

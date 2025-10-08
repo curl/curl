@@ -30,8 +30,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1512(const char *URL)
 {
   CURLcode res = CURLE_OK;

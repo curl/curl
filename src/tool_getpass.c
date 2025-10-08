@@ -51,8 +51,6 @@
 #endif
 #include "tool_getpass.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef __VMS
 /* VMS implementation */
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)

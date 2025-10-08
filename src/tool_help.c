@@ -33,8 +33,6 @@
 #include "tool_cfgable.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct category_descriptors {
   const char *opt;
   const char *desc;
@@ -364,7 +362,7 @@ void tool_version_info(void)
 #ifdef CURL_CA_EMBED
     ++feat_ext_count;
 #endif
-    feat_ext = malloc(sizeof(*feature_names) * (feat_ext_count + 1));
+    feat_ext = curlx_malloc(sizeof(*feature_names) * (feat_ext_count + 1));
     if(feat_ext) {
       memcpy((void *)feat_ext, feature_names,
              sizeof(*feature_names) * feature_count);
@@ -379,7 +377,7 @@ void tool_version_info(void)
       for(builtin = feat_ext; *builtin; ++builtin)
         curl_mprintf(" %s", *builtin);
       puts(""); /* newline */
-      free((void *)feat_ext);
+      curlx_free((void *)feat_ext);
     }
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {

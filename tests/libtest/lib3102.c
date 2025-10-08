@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Verify correct order of certificates in the chain by comparing the
  * subject and issuer attributes of each certificate.

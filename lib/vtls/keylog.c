@@ -35,10 +35,6 @@
 #include "../escape.h"
 #include "../curlx/fopen.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;
 

@@ -25,8 +25,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib543(const char *URL)
 {
   static const unsigned char a[] = {

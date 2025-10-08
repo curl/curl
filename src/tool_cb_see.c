@@ -27,8 +27,6 @@
 #include "tool_operate.h"
 #include "tool_cb_see.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 /*
 ** callback for CURLOPT_SEEKFUNCTION
 **

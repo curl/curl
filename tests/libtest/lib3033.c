@@ -25,8 +25,6 @@
 
 #include "testtrace.h"
 
-#include "memdebug.h"
-
 static CURLcode t3033_req_test(CURLM *multi, CURL *curl,
                                const char *URL, int index)
 {

@@ -31,10 +31,6 @@
 #include <nghttp2/nghttp2.h>
 #endif /* USE_NGHTTP2 */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static struct dynhds_entry *
 entry_new(const char *name, size_t namelen,
@@ -45,7 +41,7 @@ entry_new(const char *name, size_t namelen,
 
   DEBUGASSERT(name);
   DEBUGASSERT(value);
-  e = calloc(1, sizeof(*e) + namelen + valuelen + 2);
+  e = curlx_calloc(1, sizeof(*e) + namelen + valuelen + 2);
   if(!e)
     return NULL;
   e->name = p = ((char *)e) + sizeof(*e);
@@ -68,7 +64,7 @@ entry_append(struct dynhds_entry *e,
   char *p;
 
   DEBUGASSERT(value);
-  e2 = calloc(1, sizeof(*e) + e->namelen + valuelen2 + 2);
+  e2 = curlx_calloc(1, sizeof(*e) + e->namelen + valuelen2 + 2);
   if(!e2)
     return NULL;
   e2->name = p = ((char *)e2) + sizeof(*e2);
@@ -85,7 +81,7 @@ entry_append(struct dynhds_entry *e,
 
 static void entry_free(struct dynhds_entry *e)
 {
-  free(e);
+  curlx_free(e);
 }
 
 void Curl_dynhds_init(struct dynhds *dynhds, size_t max_entries,
@@ -186,7 +182,7 @@ entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
     if(dynhds->max_entries && nallc > dynhds->max_entries)
       nallc = dynhds->max_entries;
 
-    nhds = calloc(nallc, sizeof(struct dynhds_entry *));
+    nhds = curlx_calloc(nallc, sizeof(struct dynhds_entry *));
     if(!nhds)
       goto out;
     if(dynhds->hds) {
@@ -374,7 +370,7 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
 
 nghttp2_nv *Curl_dynhds_to_nva(struct dynhds *dynhds, size_t *pcount)
 {
-  nghttp2_nv *nva = calloc(1, sizeof(nghttp2_nv) * dynhds->hds_len);
+  nghttp2_nv *nva = curlx_calloc(1, sizeof(nghttp2_nv) * dynhds->hds_len);
   size_t i;
 
   *pcount = 0;

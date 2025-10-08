@@ -352,10 +352,12 @@ This is the full list of functions generally banned.
     aprintf
     atoi
     atol
+    calloc
     fclose
     fdopen
     fopen
     fprintf
+    free
     freeaddrinfo
     freopen
     getaddrinfo
@@ -368,11 +370,13 @@ This is the full list of functions generally banned.
     LoadLibraryExW
     LoadLibraryW
     localtime
+    malloc
     mbstowcs
     msnprintf
     mvsnprintf
     open
     printf
+    realloc
     recv
     send
     snprintf
@@ -382,6 +386,7 @@ This is the full list of functions generally banned.
     sscanf
     stat
     strcat
+    strdup
     strerror
     strncat
     strncpy

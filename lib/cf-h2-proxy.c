@@ -45,10 +45,6 @@
 #include "curlx/warnless.h"
 #include "cf-h2-proxy.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define PROXY_H2_CHUNK_SIZE  (16*1024)
 
 #define PROXY_HTTP2_HUGE_WINDOW_SIZE (100 * 1024 * 1024)
@@ -209,7 +205,7 @@ static void cf_h2_proxy_ctx_free(struct cf_h2_proxy_ctx *ctx)
 {
   if(ctx) {
     cf_h2_proxy_ctx_clear(ctx);
-    free(ctx);
+    curlx_free(ctx);
   }
 }
 
@@ -919,7 +915,7 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
   result = CURLE_OK;
 
 out:
-  free(nva);
+  curlx_free(nva);
   Curl_dynhds_free(&h2_headers);
   *pstream_id = stream_id;
   return result;
@@ -1594,7 +1590,7 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 

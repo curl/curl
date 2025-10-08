@@ -28,8 +28,6 @@
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef _WIN32
 #define OPENMODE S_IREAD | S_IWRITE
 #else
@@ -211,8 +209,8 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
 
     /* grow the buffer if needed */
     if(len > global->term.len) {
-      wchar_t *buf = (wchar_t *) realloc(global->term.buf,
-                                         len * sizeof(wchar_t));
+      wchar_t *buf = (wchar_t *)curlx_realloc(global->term.buf,
+                                              len * sizeof(wchar_t));
       if(!buf)
         return CURL_WRITEFUNC_ERROR;
       global->term.len = len;

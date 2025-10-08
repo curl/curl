@@ -42,13 +42,6 @@
 #include "tool_libinfo.h"
 #include "tool_stderr.h"
 
-/*
- * This is low-level hard-hacking memory leak tracking and similar. Using
- * the library level code from this client-side is ugly, but we do this
- * anyway for convenience.
- */
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef __VMS
 /*
  * vms_show is a global variable, used in main() as parameter for
@@ -121,7 +114,7 @@ static void memory_tracking_init(void)
     curl_free(env);
     curl_dbg_memdebug(fname);
     /* this weird stuff here is to make curl_free() get called before
-       curl_dbg_memdebug() as otherwise memory tracking will log a free()
+       curl_dbg_memdebug() as otherwise memory tracking will log a curlx_free()
        without an alloc! */
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */

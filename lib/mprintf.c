@@ -27,10 +27,6 @@
 #include "curl_printf.h"
 #include "curlx/strparse.h"
 
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE
@@ -1177,7 +1173,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   }
   if(curlx_dyn_len(info.b))
     return curlx_dyn_ptr(info.b);
-  return strdup("");
+  return curlx_strdup("");
 }
 
 char *curl_maprintf(const char *format, ...)

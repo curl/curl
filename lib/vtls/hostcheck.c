@@ -37,10 +37,6 @@
 #include "hostcheck.h"
 #include "../hostip.h"
 
-#include "../curl_memory.h"
-/* The last #include file should be: */
-#include "../memdebug.h"
-
 /* check the two input strings with given length, but do not
    assume they end in nul-bytes */
 static bool pmatch(const char *hostname, size_t hostlen,

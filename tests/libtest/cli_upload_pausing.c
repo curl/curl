@@ -26,7 +26,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static size_t total_read = 0;
 

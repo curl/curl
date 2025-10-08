@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "bufref.h"
-#include "memdebug.h"
 
 static int freecount = 0;
 
@@ -31,7 +30,7 @@ static void test_free(void *p)
 {
   fail_unless(p, "pointer to free may not be NULL");
   freecount++;
-  free(p);
+  curlx_free(p);
 }
 
 static CURLcode t1661_setup(struct bufref *bufref)
@@ -68,7 +67,7 @@ static CURLcode test_unit1661(const char *arg)
   /**
    * testing Curl_bufref_set
    */
-  buffer = malloc(13);
+  buffer = curlx_malloc(13);
   abort_unless(buffer, "Out of memory");
   Curl_bufref_set(&bufref, buffer, 13, test_free);
 

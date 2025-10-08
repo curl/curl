@@ -30,7 +30,6 @@
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 #include "tool_msgs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /* Lookup tables for converting setopt values back to symbols */
 /* For enums, values may be in any order. */
@@ -385,7 +384,7 @@ static CURLcode libcurl_generate_slist(struct curl_slist *slist, int *slistno)
     ret = easysrc_addf(&easysrc_data,
                        "slist%d = curl_slist_append(slist%d, \"%s\");",
                        *slistno, *slistno, escaped);
-    free(escaped);
+    curlx_free(escaped);
   }
 
   return ret;
@@ -439,7 +438,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
         easysrc_addf(&easysrc_code,
                      "curl_mime_data(part%d, \"%s\", CURL_ZERO_TERMINATED);",
                      mimeno, escaped);
-      free(escaped);
+      curlx_free(escaped);
     }
     break;
 
@@ -452,7 +451,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
       ret = easysrc_addf(&easysrc_code,
                          "curl_mime_filename(part%d, NULL);", mimeno);
     }
-    free(escaped);
+    curlx_free(escaped);
     break;
   }
 
@@ -477,28 +476,28 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
     char *escaped = c_escape(part->encoder, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_encoder(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    curlx_free(escaped);
   }
 
   if(!ret && filename) {
     char *escaped = c_escape(filename, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_filename(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    curlx_free(escaped);
   }
 
   if(!ret && part->name) {
     char *escaped = c_escape(part->name, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_name(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    curlx_free(escaped);
   }
 
   if(!ret && part->type) {
     char *escaped = c_escape(part->type, ZERO_TERMINATED);
     ret = easysrc_addf(&easysrc_code, "curl_mime_type(part%d, \"%s\");",
                        mimeno, escaped);
-    free(escaped);
+    curlx_free(escaped);
   }
 
   if(!ret && part->headers) {
@@ -687,7 +686,7 @@ CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
       result = easysrc_addf(&easysrc_code,
                             "curl_easy_setopt(hnd, %s, \"%s\");",
                             name, escaped);
-      free(escaped);
+      curlx_free(escaped);
     }
     else
       result = CURLE_OUT_OF_MEMORY;

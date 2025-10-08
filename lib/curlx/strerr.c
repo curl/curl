@@ -37,9 +37,6 @@
 #include "winapi.h"
 #include "snprintf.h"
 #include "strerr.h"
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 #ifdef USE_WINSOCK
 /* This is a helper function for curlx_strerror that converts Winsock error

@@ -75,10 +75,6 @@
 #include <wolfssl/error-ssl.h>
 #include "wolfssl.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
 #define USE_ECH_WOLFSSL
 #endif
@@ -447,7 +443,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
     result = CURLE_FAILED_INIT;
     goto out;
   }
-  sdata = calloc(1, sdata_len);
+  sdata = curlx_calloc(1, sdata_len);
   if(!sdata) {
     failf(data, "unable to allocate session buffer of %u bytes", sdata_len);
     result = CURLE_OUT_OF_MEMORY;
@@ -462,7 +458,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
   if(quic_tp && quic_tp_len) {
     qtp_clone = Curl_memdup0((char *)quic_tp, quic_tp_len);
     if(!qtp_clone) {
-      free(sdata);
+      curlx_free(sdata);
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -483,7 +479,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
   }
 
 out:
-  free(sdata);
+  curlx_free(sdata);
   return result;
 }
 
@@ -726,8 +722,8 @@ static void wssl_x509_share_free(void *key, size_t key_len, void *p)
   if(share->store) {
     wolfSSL_X509_STORE_free(share->store);
   }
-  free(share->CAfile);
-  free(share);
+  curlx_free(share->CAfile);
+  curlx_free(share);
 }
 
 static bool
@@ -792,14 +788,14 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
                          sizeof(MPROTO_WSSL_X509_KEY)-1);
 
   if(!share) {
-    share = calloc(1, sizeof(*share));
+    share = curlx_calloc(1, sizeof(*share));
     if(!share)
       return;
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_WSSL_X509_KEY),
                        sizeof(MPROTO_WSSL_X509_KEY)-1,
                        share, wssl_x509_share_free)) {
-      free(share);
+      curlx_free(share);
       return;
     }
   }
@@ -808,7 +804,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
     char *CAfile = NULL;
 
     if(conn_config->CAfile) {
-      CAfile = strdup(conn_config->CAfile);
+      CAfile = curlx_strdup(conn_config->CAfile);
       if(!CAfile) {
         wolfSSL_X509_STORE_free(store);
         return;
@@ -817,7 +813,7 @@ static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
 
     if(share->store) {
       wolfSSL_X509_STORE_free(share->store);
-      free(share->CAfile);
+      curlx_free(share->CAfile);
     }
 
     share->time = curlx_now();
@@ -1821,7 +1817,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
                                      &b64str, &blen);
         if(!result && b64str)
           infof(data, "ECH: (not yet) retry_configs %s", b64str);
-        free(b64str);
+        curlx_free(b64str);
       }
       return CURLE_SSL_CONNECT_ERROR;
     }

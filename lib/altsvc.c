@@ -42,10 +42,6 @@
 #include "curlx/strparse.h"
 #include "connect.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define MAX_ALTSVC_LINE 4095
 #define MAX_ALTSVC_DATELEN 256
 #define MAX_ALTSVC_HOSTLEN 2048
@@ -71,9 +67,9 @@ const char *Curl_alpnid2str(enum alpnid id)
 
 static void altsvc_free(struct altsvc *as)
 {
-  free(as->src.host);
-  free(as->dst.host);
-  free(as);
+  curlx_free(as->src.host);
+  curlx_free(as->dst.host);
+  curlx_free(as);
 }
 
 static struct altsvc *altsvc_createid(const char *srchost,
@@ -85,7 +81,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
                                       size_t srcport,
                                       size_t dstport)
 {
-  struct altsvc *as = calloc(1, sizeof(struct altsvc));
+  struct altsvc *as = curlx_calloc(1, sizeof(struct altsvc));
   if(!as)
     return NULL;
   DEBUGASSERT(hlen);
@@ -219,8 +215,8 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
   /* we need a private copy of the filename so that the altsvc cache file
      name survives an easy handle reset */
-  free(asi->filename);
-  asi->filename = strdup(file);
+  curlx_free(asi->filename);
+  asi->filename = curlx_strdup(file);
   if(!asi->filename)
     return CURLE_OUT_OF_MEMORY;
 
@@ -299,7 +295,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
  */
 struct altsvcinfo *Curl_altsvc_init(void)
 {
-  struct altsvcinfo *asi = calloc(1, sizeof(struct altsvcinfo));
+  struct altsvcinfo *asi = curlx_calloc(1, sizeof(struct altsvcinfo));
   if(!asi)
     return NULL;
   Curl_llist_init(&asi->list, NULL);
@@ -350,8 +346,8 @@ void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
       n = Curl_node_next(e);
       altsvc_free(as);
     }
-    free(altsvc->filename);
-    free(altsvc);
+    curlx_free(altsvc->filename);
+    curlx_free(altsvc);
     *altsvcp = NULL; /* clear the pointer */
   }
 }
@@ -399,7 +395,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
     if(result && tempstore)
       unlink(tempstore);
   }
-  free(tempstore);
+  curlx_free(tempstore);
   return result;
 }
 

@@ -51,10 +51,6 @@
 #include "curlx/warnless.h"
 #include "sendf.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Supported mechanisms */
 static const struct {
   const char    *name;  /* Name */

@@ -38,22 +38,20 @@
 #include "tool_help.h"
 #include "var.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK FALSE
 
 static ParameterError getstr(char **str, const char *val, bool allowblank)
 {
   if(*str) {
-    free(*str);
+    curlx_free(*str);
     *str = NULL;
   }
   DEBUGASSERT(val);
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = strdup(val);
+  *str = curlx_strdup(val);
   if(!*str)
     return PARAM_NO_MEM;
 
@@ -64,14 +62,14 @@ static ParameterError getstrn(char **str, const char *val,
                               size_t len, bool allowblank)
 {
   if(*str) {
-    free(*str);
+    curlx_free(*str);
     *str = NULL;
   }
   DEBUGASSERT(val);
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = malloc(len + 1);
+  *str = curlx_malloc(len + 1);
   if(!*str)
     return PARAM_NO_MEM;
 
@@ -407,13 +405,13 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
    * means no passphrase was given and no characters escaped */
   if(curl_strnequal(cert_parameter, "pkcs11:", 7) ||
      !strpbrk(cert_parameter, ":\\")) {
-    *certname = strdup(cert_parameter);
+    *certname = curlx_strdup(cert_parameter);
     if(!*certname)
       return PARAM_NO_MEM;
     return PARAM_OK;
   }
   /* deal with escaped chars; find unescaped colon if it exists */
-  certname_place = malloc(param_length + 1);
+  certname_place = curlx_malloc(param_length + 1);
   if(!certname_place) {
     err = PARAM_NO_MEM;
     goto done;
@@ -475,7 +473,7 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
        * above; if we are still here, this is a separating colon */
       param_place++;
       if(*param_place) {
-        *passphrase = strdup(param_place);
+        *passphrase = curlx_strdup(param_place);
         if(!*passphrase)
           err = PARAM_NO_MEM;
       }
@@ -527,10 +525,10 @@ GetFileAndPassword(const char *nextarg, char **file, char **password)
   /* nextarg is never NULL here */
   err = parse_cert_parameter(nextarg, &certname, &passphrase);
   if(!err) {
-    free(*file);
+    curlx_free(*file);
     *file = certname;
     if(passphrase) {
-      free(*password);
+      curlx_free(*password);
       *password = passphrase;
     }
   }
@@ -668,7 +666,7 @@ static ParameterError data_urlencode(const char *nextarg,
   if(!postdata) {
     /* no data from the file, point to a zero byte string to make this
        get sent as a POST anyway */
-    postdata = strdup("");
+    postdata = curlx_strdup("");
     if(!postdata)
       return PARAM_NO_MEM;
     size = 0;
@@ -870,7 +868,7 @@ static ParameterError url_query(const char *nextarg,
 
   if(*nextarg == '+') {
     /* use without encoding */
-    query = strdup(&nextarg[1]);
+    query = curlx_strdup(&nextarg[1]);
     if(!query)
       err = PARAM_NO_MEM;
   }
@@ -880,11 +878,11 @@ static ParameterError url_query(const char *nextarg,
   if(!err) {
     if(config->query) {
       CURLcode result = curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
-      free(query);
+      curlx_free(query);
       if(result)
         err = PARAM_NO_MEM;
       else {
-        free(config->query);
+        curlx_free(config->query);
         config->query = curlx_dyn_ptr(&dyn);
       }
     }
@@ -944,7 +942,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!postdata) {
       /* no data from the file, point to a zero byte string to make this
          get sent as a POST anyway */
-      postdata = strdup("");
+      postdata = curlx_strdup("");
       if(!postdata)
         return PARAM_NO_MEM;
     }
@@ -1240,7 +1238,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
       if(err)
         return err;
       config->ech_config = curl_maprintf("ecl:%s",tmpcfg);
-      free(tmpcfg);
+      curlx_free(tmpcfg);
       if(!config->ech_config)
         return PARAM_NO_MEM;
     } /* file done */
@@ -1424,8 +1422,8 @@ static ParameterError parse_range(struct OperationConfig *config,
           "Appending one for you");
     curl_msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
                    value);
-    free(config->range);
-    config->range = strdup(buffer);
+    curlx_free(config->range);
+    config->range = curlx_strdup(buffer);
     if(!config->range)
       err = PARAM_NO_MEM;
   }
@@ -1509,8 +1507,8 @@ static ParameterError parse_verbose(bool toggle)
   switch(global->verbosity) {
   case 0:
     global->verbosity = 1;
-    free(global->trace_dump);
-    global->trace_dump = strdup("%");
+    curlx_free(global->trace_dump);
+    global->trace_dump = curlx_strdup("%");
     if(!global->trace_dump)
       err = PARAM_NO_MEM;
     else {
@@ -3021,7 +3019,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
 error:
   if(nextalloc)
-    free(CURL_UNCONST(nextarg));
+    curlx_free(CURL_UNCONST(nextarg));
   return err;
 }
 

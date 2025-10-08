@@ -32,10 +32,6 @@
 #include "vtls_spack.h"
 #include "../strdup.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff
 #endif
@@ -267,7 +263,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
     goto out;
   }
 
-  s = calloc(1, sizeof(*s));
+  s = curlx_calloc(1, sizeof(*s));
   if(!s) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "testtrace.h"
 
-#include "memdebug.h"
-
 struct libtest_trace_cfg debug_config;
 
 static time_t epoch_offset; /* for test time tracing */

@@ -28,9 +28,6 @@
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #include "curl_get_line.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #define appendnl(b)                             \
   curlx_dyn_addn(buf, "\n", 1)

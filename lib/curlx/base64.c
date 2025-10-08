@@ -30,12 +30,6 @@
 #include "warnless.h"
 #include "base64.h"
 
-/* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
-#include "../curl_memory.h"
-#endif
-#include "../memdebug.h"
-
 /* ---- Base64 Encoding/Decoding Table --- */
 const char Curl_base64encdec[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -103,7 +97,7 @@ CURLcode curlx_base64_decode(const char *src,
   rawlen = (numQuantums * 3) - padding;
 
   /* Allocate our buffer including room for a null-terminator */
-  newstr = malloc(rawlen + 1);
+  newstr = curlx_malloc(rawlen + 1);
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -165,7 +159,7 @@ CURLcode curlx_base64_decode(const char *src,
 
   return CURLE_OK;
 bad:
-  free(newstr);
+  curlx_free(newstr);
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
@@ -189,7 +183,7 @@ static CURLcode base64_encode(const char *table64,
   if(insize > CURL_MAX_BASE64_INPUT)
     return CURLE_TOO_LARGE;
 
-  base64data = output = malloc((insize + 2) / 3 * 4 + 1);
+  base64data = output = curlx_malloc((insize + 2) / 3 * 4 + 1);
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 

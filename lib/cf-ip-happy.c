@@ -60,10 +60,6 @@
 #include "select.h"
 #include "vquic/vquic.h" /* for quic cfilters */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 struct transport_provider {
   uint8_t transport;
@@ -186,7 +182,7 @@ static void cf_ip_attempt_free(struct cf_ip_attempt *a,
   if(a) {
     if(a->cf)
       Curl_conn_cf_discard_chain(&a->cf, data);
-    free(a);
+    curlx_free(a);
   }
 }
 
@@ -203,7 +199,7 @@ static CURLcode cf_ip_attempt_new(struct cf_ip_attempt **pa,
   CURLcode result = CURLE_OK;
 
   *pa = NULL;
-  a = calloc(1, sizeof(*a));
+  a = curlx_calloc(1, sizeof(*a));
   if(!a)
     return CURLE_OUT_OF_MEMORY;
 
@@ -941,7 +937,7 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   *pcf = NULL;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -954,7 +950,7 @@ static CURLcode cf_ip_happy_create(struct Curl_cfilter **pcf,
 out:
   if(result) {
     Curl_safefree(*pcf);
-    free(ctx);
+    curlx_free(ctx);
   }
   return result;
 }

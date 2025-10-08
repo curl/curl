@@ -76,10 +76,6 @@
 #include "http_proxy.h"
 #include "socks.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
@@ -527,7 +523,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -544,7 +540,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
 out:
   *pcf = result ? NULL : cf;
   if(ctx) {
-    free(ctx);
+    curlx_free(ctx);
   }
   return result;
 }

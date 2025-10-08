@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test CURLINFO_FILETIME */
 
 static CURLcode test_lib1534(const char *URL)

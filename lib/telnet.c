@@ -60,10 +60,6 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define SUBBUFSIZE 512
 
 #define CURL_SB_CLEAR(x)  x->subpointer = x->subbuffer
@@ -211,7 +207,7 @@ static void telnet_easy_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   curl_slist_free_all(tn->telnet_vars);
   curlx_dyn_free(&tn->out);
-  free(tn);
+  curlx_free(tn);
 }
 
 static
@@ -219,7 +215,7 @@ CURLcode init_telnet(struct Curl_easy *data)
 {
   struct TELNET *tn;
 
-  tn = calloc(1, sizeof(struct TELNET));
+  tn = curlx_calloc(1, sizeof(struct TELNET));
   if(!tn)
     return CURLE_OUT_OF_MEMORY;
 

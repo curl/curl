@@ -104,10 +104,6 @@
 #define HTTPSRR_WORKS
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define CARES_TIMEOUT_PER_ATTEMPT 2000
 
 static int ares_ver = 0;
@@ -633,7 +629,7 @@ async_ares_node2addr(struct ares_addrinfo_node *node)
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct Curl_addrinfo) + ss_size);
+    ca = curlx_malloc(sizeof(struct Curl_addrinfo) + ss_size);
     if(!ca) {
       error = EAI_MEMORY;
       break;
@@ -736,7 +732,7 @@ CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
   data->state.async.dns = NULL;     /* clear */
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
-  data->state.async.hostname = strdup(hostname);
+  data->state.async.hostname = curlx_strdup(hostname);
   if(!data->state.async.hostname)
     return CURLE_OUT_OF_MEMORY;
 #ifdef USE_HTTPSRR

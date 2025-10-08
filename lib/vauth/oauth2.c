@@ -36,10 +36,6 @@
 #include "vauth.h"
 #include "../curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
  * Curl_auth_create_oauth_bearer_message()
  *

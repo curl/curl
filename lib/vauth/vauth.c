@@ -32,10 +32,6 @@
 #include "../curlx/multibyte.h"
 #include "../url.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
  * Curl_auth_build_spn()
  *
@@ -96,10 +92,10 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
      must be freed by curlx_unicodefree we will dupe the result so that the
      pointer this function returns can be normally free'd. */
   tchar_spn = curlx_convert_UTF8_to_tchar(utf8_spn);
-  free(utf8_spn);
+  curlx_free(utf8_spn);
   if(!tchar_spn)
     return NULL;
-  dupe_tchar_spn = Curl_tcsdup(tchar_spn);
+  dupe_tchar_spn = curlx_tcsdup(tchar_spn);
   curlx_unicodefree(tchar_spn);
   return dupe_tchar_spn;
 }
@@ -170,7 +166,7 @@ static void ntlm_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   DEBUGASSERT(ntlm);
   Curl_auth_cleanup_ntlm(ntlm);
-  free(ntlm);
+  curlx_free(ntlm);
 }
 
 struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy)
@@ -179,7 +175,7 @@ struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy)
                     CURL_META_NTLM_CONN;
   struct ntlmdata *ntlm = Curl_conn_meta_get(conn, key);
   if(!ntlm) {
-    ntlm = calloc(1, sizeof(*ntlm));
+    ntlm = curlx_calloc(1, sizeof(*ntlm));
     if(!ntlm ||
        Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor))
       return NULL;
@@ -204,14 +200,14 @@ static void krb5_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   DEBUGASSERT(krb5);
   Curl_auth_cleanup_gssapi(krb5);
-  free(krb5);
+  curlx_free(krb5);
 }
 
 struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn)
 {
   struct kerberos5data *krb5 = Curl_conn_meta_get(conn, CURL_META_KRB5_CONN);
   if(!krb5) {
-    krb5 = calloc(1, sizeof(*krb5));
+    krb5 = curlx_calloc(1, sizeof(*krb5));
     if(!krb5 ||
        Curl_conn_meta_set(conn, CURL_META_KRB5_CONN, krb5, krb5_conn_dtor))
       return NULL;
@@ -230,14 +226,14 @@ static void gsasl_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   DEBUGASSERT(gsasl);
   Curl_auth_gsasl_cleanup(gsasl);
-  free(gsasl);
+  curlx_free(gsasl);
 }
 
 struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn)
 {
   struct gsasldata *gsasl = Curl_conn_meta_get(conn, CURL_META_GSASL_CONN);
   if(!gsasl) {
-    gsasl = calloc(1, sizeof(*gsasl));
+    gsasl = curlx_calloc(1, sizeof(*gsasl));
     if(!gsasl ||
        Curl_conn_meta_set(conn, CURL_META_GSASL_CONN, gsasl, gsasl_conn_dtor))
       return NULL;
@@ -256,7 +252,7 @@ static void nego_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   DEBUGASSERT(nego);
   Curl_auth_cleanup_spnego(nego);
-  free(nego);
+  curlx_free(nego);
 }
 
 struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
@@ -265,7 +261,7 @@ struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
                     CURL_META_NEGO_CONN;
   struct negotiatedata *nego = Curl_conn_meta_get(conn, key);
   if(!nego) {
-    nego = calloc(1, sizeof(*nego));
+    nego = curlx_calloc(1, sizeof(*nego));
     if(!nego ||
        Curl_conn_meta_set(conn, key, nego, nego_conn_dtor))
       return NULL;

@@ -34,10 +34,6 @@
 #include "vtls/vtls.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static void http_auth_nego_reset(struct connectdata *conn,
                                  struct negotiatedata *neg_ctx,
@@ -223,16 +219,16 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
     if(proxy) {
 #ifndef CURL_DISABLE_PROXY
-      free(data->state.aptr.proxyuserpwd);
+      curlx_free(data->state.aptr.proxyuserpwd);
       data->state.aptr.proxyuserpwd = userp;
 #endif
     }
     else {
-      free(data->state.aptr.userpwd);
+      curlx_free(data->state.aptr.userpwd);
       data->state.aptr.userpwd = userp;
     }
 
-    free(base64);
+    curlx_free(base64);
 
     if(!userp) {
       return CURLE_OUT_OF_MEMORY;

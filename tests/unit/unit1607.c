@@ -27,8 +27,6 @@
 #include "connect.h"
 #include "curl_share.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1607_setup(void)
 {
   CURLcode res = CURLE_OK;
@@ -135,7 +133,7 @@ static CURLcode test_unit1607(const char *arg)
       goto error;
     dns = Curl_hash_pick(&multi->dnscache.entries,
                          entry_id, strlen(entry_id) + 1);
-    free(entry_id);
+    curlx_free(entry_id);
     entry_id = NULL;
 
     addr = dns ? dns->addr : NULL;

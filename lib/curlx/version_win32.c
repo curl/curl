@@ -30,10 +30,6 @@
 #include "version_win32.h"
 #include "warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
    and RtlVerifyVersionInfo (RTLOSVERSIONINFOEXW) */
 struct OUR_OSVERSIONINFOEXW {

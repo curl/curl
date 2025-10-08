@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t1541_transfer_status {
   CURL *curl;
   int hd_count;

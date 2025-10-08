@@ -29,8 +29,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t consumed = 0;
 
 static size_t t1591_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)

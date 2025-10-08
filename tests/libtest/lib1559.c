@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1559(const char *URL)
 {
   static const int EXCESSIVE = 10*1000*1000;
@@ -38,7 +36,7 @@ static CURLcode test_lib1559(const char *URL)
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);
 
-  longurl = malloc(EXCESSIVE);
+  longurl = curlx_malloc(EXCESSIVE);
   if(!longurl) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
@@ -70,7 +68,7 @@ static CURLcode test_lib1559(const char *URL)
   }
 
 test_cleanup:
-  free(longurl);
+  curlx_free(longurl);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

@@ -30,9 +30,7 @@
 #include <curl/curl.h>
 #include "../curlx/strparse.h"
 #include "../curl_trc.h"
-#include "../curl_memory.h"
 #include "../escape.h"
-#include "../memdebug.h"
 
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 
@@ -59,7 +57,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
      (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
     /* It is referenced to the home directory, so strip the leading '/~/' */
     if(curlx_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
-      free(working_path);
+      curlx_free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -67,7 +65,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
           (!strcmp("/~", working_path) ||
            ((working_path_len > 2) && !memcmp(working_path, "/~/", 3)))) {
     if(curlx_dyn_add(&npath, homedir)) {
-      free(working_path);
+      curlx_free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
     if(working_path_len > 2) {
@@ -82,20 +80,20 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
 
       if(curlx_dyn_addn(&npath, &working_path[copyfrom],
                         working_path_len - copyfrom)) {
-        free(working_path);
+        curlx_free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
     else {
       if(curlx_dyn_add(&npath, "/")) {
-        free(working_path);
+        curlx_free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
   }
 
   if(curlx_dyn_len(&npath)) {
-    free(working_path);
+    curlx_free(working_path);
 
     /* store the pointer for the caller to receive */
     *path = curlx_dyn_ptr(&npath);

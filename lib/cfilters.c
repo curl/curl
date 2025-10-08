@@ -37,10 +37,6 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static void cf_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
 
@@ -143,7 +139,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
        */
       cf->next = NULL;
       cf->cft->destroy(cf, data);
-      free(cf);
+      curlx_free(cf);
       cf = cfn;
     }
   }
@@ -332,7 +328,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(cft);
-  cf = calloc(1, sizeof(*cf));
+  cf = curlx_calloc(1, sizeof(*cf));
   if(!cf)
     goto out;
 

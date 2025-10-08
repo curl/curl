@@ -32,8 +32,6 @@
 
 #include "cf-socket.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1663_setup(void)
 {
   CURLcode res = CURLE_OK;
@@ -67,9 +65,9 @@ static void t1663_parse(
                 "host should be equal to exp_host");
   }
 
-  free(dev);
-  free(iface);
-  free(host);
+  curlx_free(dev);
+  curlx_free(iface);
+  curlx_free(host);
 }
 
 static CURLcode test_unit1663(const char *arg)

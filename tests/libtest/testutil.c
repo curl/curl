@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "testutil.h"
 
-#include "memdebug.h"
-
 /* build request URL */
 char *tutil_suburl(const char *base, int i)
 {

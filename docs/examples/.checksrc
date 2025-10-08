@@ -4,17 +4,22 @@
 
 allowfunc atoi
 allowfunc atol
+allowfunc calloc
 allowfunc fclose
 allowfunc fdopen
 allowfunc fopen
 allowfunc fprintf
+allowfunc free
 allowfunc gmtime
 allowfunc localtime
+allowfunc malloc
 allowfunc open
 allowfunc printf
+allowfunc realloc
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
+allowfunc strdup
 allowfunc strerror
 allowfunc vsnprintf
 

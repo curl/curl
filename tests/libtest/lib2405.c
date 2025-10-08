@@ -39,8 +39,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 /* ---------------------------------------------------------------- */
 
 #define test_check(expected_fds) \

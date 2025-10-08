@@ -57,10 +57,6 @@
 #include "../curlx/warnless.h"
 #include "../curlx/strerr.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer. We use HTTP/3 flow control and only ACK
  * when we take things out of the buffer.
@@ -318,10 +314,10 @@ static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
     Curl_bufcp_free(&ctx->stream_bufcp);
     Curl_uint32_hash_destroy(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->peer);
-    free(ctx->poll_items);
-    free(ctx->curl_items);
+    curlx_free(ctx->poll_items);
+    curlx_free(ctx->curl_items);
   }
-  free(ctx);
+  curlx_free(ctx);
 }
 
 static void cf_osslq_ctx_close(struct cf_osslq_ctx *ctx)
@@ -596,7 +592,7 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
   Curl_bufq_free(&stream->sendbuf);
   Curl_bufq_free(&stream->recvbuf);
   Curl_h1_req_parse_free(&stream->h1);
-  free(stream);
+  curlx_free(stream);
 }
 
 static void h3_stream_hash_free(unsigned int id, void *stream)
@@ -618,7 +614,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   if(stream)
     return CURLE_OK;
 
-  stream = calloc(1, sizeof(*stream));
+  stream = curlx_calloc(1, sizeof(*stream));
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1511,18 +1507,19 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
     if(ctx->items_max < Curl_uint32_hash_count(&ctx->streams)) {
       size_t nmax = Curl_uint32_hash_count(&ctx->streams);
       ctx->items_max = 0;
-      tmpptr = realloc(ctx->poll_items, nmax * sizeof(SSL_POLL_ITEM));
+      tmpptr = curlx_realloc(ctx->poll_items, nmax * sizeof(SSL_POLL_ITEM));
       if(!tmpptr) {
-        free(ctx->poll_items);
+        curlx_free(ctx->poll_items);
         ctx->poll_items = NULL;
         res = CURLE_OUT_OF_MEMORY;
         goto out;
       }
       ctx->poll_items = tmpptr;
 
-      tmpptr = realloc(ctx->curl_items, nmax * sizeof(struct Curl_easy *));
+      tmpptr = curlx_realloc(ctx->curl_items,
+                             nmax * sizeof(struct Curl_easy *));
       if(!tmpptr) {
-        free(ctx->curl_items);
+        curlx_free(ctx->curl_items);
         ctx->curl_items = NULL;
         res = CURLE_OUT_OF_MEMORY;
         goto out;
@@ -1922,7 +1919,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
-  nva = malloc(sizeof(nghttp3_nv) * nheader);
+  nva = curlx_malloc(sizeof(nghttp3_nv) * nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1999,7 +1996,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   }
 
 out:
-  free(nva);
+  curlx_free(nva);
   Curl_dynhds_free(&h2_headers);
   return result;
 }
@@ -2407,7 +2404,7 @@ CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
   CURLcode result;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

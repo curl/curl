@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
                                       void *opaque)

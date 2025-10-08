@@ -52,10 +52,6 @@
 #include "multiif.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 typedef enum {
   PL_UNIX_TOTALSIZE = 0,
   PL_UNIX_FILETYPE,
@@ -205,18 +201,18 @@ void Curl_wildcard_dtor(struct WildcardData **wcp)
   DEBUGASSERT(wc->ftpwc == NULL);
 
   Curl_llist_destroy(&wc->filelist, NULL);
-  free(wc->path);
+  curlx_free(wc->path);
   wc->path = NULL;
-  free(wc->pattern);
+  curlx_free(wc->pattern);
   wc->pattern = NULL;
   wc->state = CURLWC_INIT;
-  free(wc);
+  curlx_free(wc);
   *wcp = NULL;
 }
 
 struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
 {
-  return calloc(1, sizeof(struct ftp_parselist_data));
+  return curlx_calloc(1, sizeof(struct ftp_parselist_data));
 }
 
 
@@ -225,7 +221,7 @@ void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
   struct ftp_parselist_data *parser = *parserp;
   if(parser)
     Curl_fileinfo_cleanup(parser->file_data);
-  free(parser);
+  curlx_free(parser);
   *parserp = NULL;
 }
 

@@ -37,10 +37,6 @@
 
 #include "mbedtls_threadlock.h"
 
-/* The last 2 #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* number of thread locks */
 #define NUMT                    2
 

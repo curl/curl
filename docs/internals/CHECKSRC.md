@@ -107,7 +107,7 @@ warnings are:
   `sizeof(int)` style.
 
 - `SNPRINTF` - Found use of `snprintf()`. Since we use an internal replacement
-   with a different return code etc, we prefer `msnprintf()`.
+   with a different return code etc, we prefer `curl_msnprintf()`.
 
 - `SPACEAFTERPAREN`: there was a space after open parenthesis, `( text`.
 

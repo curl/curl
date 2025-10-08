@@ -34,10 +34,6 @@
 #include "curlx/winapi.h"
 #include "strerror.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 const char *
 curl_easy_strerror(CURLcode error)
 {

@@ -28,8 +28,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib549(const char *URL)
 {
   CURLcode res;

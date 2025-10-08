@@ -33,10 +33,6 @@
 #include "system_win32.h"
 #include "curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Pointer to SSPI dispatch table */
 PSecurityFunctionTable Curl_pSecFn = NULL;
 
@@ -134,7 +130,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   }
 
   /* Setup the identity's user and length */
-  dup_user.tchar_ptr = Curl_tcsdup(user.tchar_ptr);
+  dup_user.tchar_ptr = curlx_tcsdup(user.tchar_ptr);
   if(!dup_user.tchar_ptr) {
     curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
@@ -144,7 +140,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   dup_user.tchar_ptr = NULL;
 
   /* Setup the identity's domain and length */
-  dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
+  dup_domain.tchar_ptr = curlx_malloc(sizeof(TCHAR) * (domlen + 1));
   if(!dup_domain.tchar_ptr) {
     curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
@@ -164,7 +160,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   passwd.tchar_ptr = curlx_convert_UTF8_to_tchar(passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
-  dup_passwd.tchar_ptr = Curl_tcsdup(passwd.tchar_ptr);
+  dup_passwd.tchar_ptr = curlx_tcsdup(passwd.tchar_ptr);
   if(!dup_passwd.tchar_ptr) {
     curlx_unicodefree(passwd.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;

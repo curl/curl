@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static void t1945_showem(CURL *curl, unsigned int type)
 {
   struct curl_header *header = NULL;

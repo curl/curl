@@ -27,10 +27,6 @@
 #include <curl/curl.h>
 
 #include "uint-hash.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -70,7 +66,7 @@ static struct uint_hash_entry *uint32_hash_mk_entry(uint32_t id, void *value)
   struct uint_hash_entry *e;
 
   /* allocate the struct for the hash entry */
-  e = malloc(sizeof(*e));
+  e = curlx_malloc(sizeof(*e));
   if(e) {
     e->id = id;
     e->next = NULL;
@@ -95,7 +91,7 @@ static void uint32_hash_entry_destroy(struct uint_hash *h,
                                       struct uint_hash_entry *e)
 {
   uint32_hash_entry_clear(h, e);
-  free(e);
+  curlx_free(e);
 }
 
 static void uint32_hash_entry_unlink(struct uint_hash *h,
@@ -126,7 +122,7 @@ bool Curl_uint32_hash_set(struct uint_hash *h, uint32_t id, void *value)
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   if(!h->table) {
-    h->table = calloc(h->slots, sizeof(*he));
+    h->table = curlx_calloc(h->slots, sizeof(*he));
     if(!h->table)
       return FALSE; /* OOM */
   }

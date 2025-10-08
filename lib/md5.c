@@ -81,10 +81,6 @@
 #include <wincrypt.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;
@@ -604,23 +600,23 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   struct MD5_context *ctxt;
 
   /* Create MD5 context */
-  ctxt = malloc(sizeof(*ctxt));
+  ctxt = curlx_malloc(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;
 
-  ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
+  ctxt->md5_hashctx = curlx_malloc(md5params->md5_ctxtsize);
 
   if(!ctxt->md5_hashctx) {
-    free(ctxt);
+    curlx_free(ctxt);
     return NULL;
   }
 
   ctxt->md5_hash = md5params;
 
   if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
-    free(ctxt->md5_hashctx);
-    free(ctxt);
+    curlx_free(ctxt->md5_hashctx);
+    curlx_free(ctxt);
     return NULL;
   }
 
@@ -640,8 +636,8 @@ CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
-  free(context->md5_hashctx);
-  free(context);
+  curlx_free(context->md5_hashctx);
+  curlx_free(context);
 
   return CURLE_OK;
 }

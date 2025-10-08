@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
@@ -83,8 +82,8 @@ static CURLcode test_ws_data_m2_echo(const char *url,
   size_t i, scount = count, rcount = count;
   int rblock, sblock;
 
-  send_buf = calloc(1, plen_max + 1);
-  recv_buf = calloc(1, plen_max + 1);
+  send_buf = curlx_calloc(1, plen_max + 1);
+  recv_buf = curlx_calloc(1, plen_max + 1);
   if(!send_buf || !recv_buf) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -184,8 +183,8 @@ out:
       ws_close(curl);
     curl_easy_cleanup(curl);
   }
-  free(send_buf);
-  free(recv_buf);
+  curlx_free(send_buf);
+  curlx_free(recv_buf);
   return r;
 }
 
@@ -294,8 +293,8 @@ static CURLcode test_ws_data_m1_echo(const char *url,
   curl_mfprintf(stderr, "test_ws_data_m1_echo(min=%zu, max=%zu)\n",
                 plen_min, plen_max);
   memset(&m1_ctx, 0, sizeof(m1_ctx));
-  m1_ctx.send_buf = calloc(1, plen_max + 1);
-  m1_ctx.recv_buf = calloc(1, plen_max + 1);
+  m1_ctx.send_buf = curlx_calloc(1, plen_max + 1);
+  m1_ctx.recv_buf = curlx_calloc(1, plen_max + 1);
   if(!m1_ctx.send_buf || !m1_ctx.recv_buf) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -389,8 +388,8 @@ out:
   if(m1_ctx.curl) {
     curl_easy_cleanup(m1_ctx.curl);
   }
-  free(m1_ctx.send_buf);
-  free(m1_ctx.recv_buf);
+  curlx_free(m1_ctx.send_buf);
+  curlx_free(m1_ctx.recv_buf);
   return r;
 }
 

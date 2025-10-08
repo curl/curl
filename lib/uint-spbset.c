@@ -26,10 +26,6 @@
 #include "uint-bset.h"
 #include "uint-spbset.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_SPBSET_MAGIC  0x70737362
 #endif
@@ -85,7 +81,7 @@ UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
 
   for(chunk = bset->head.next; chunk; chunk = next) {
     next = chunk->next;
-    free(chunk);
+    curlx_free(chunk);
   }
   memset(&bset->head, 0, sizeof(bset->head));
 }
@@ -116,7 +112,7 @@ uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
     return NULL;
 
   /* need a new one */
-  chunk = calloc(1, sizeof(*chunk));
+  chunk = curlx_calloc(1, sizeof(*chunk));
   if(!chunk)
     return NULL;
 

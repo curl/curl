@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib521(const char *URL)
 {
   CURLcode res = TEST_ERR_MAJOR_BAD;

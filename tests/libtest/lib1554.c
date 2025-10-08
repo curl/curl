@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char *ldata_names[] = {
   "NONE",
   "SHARE",

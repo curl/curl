@@ -28,8 +28,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t1514_WriteThis {
   char *readptr;
   size_t sizeleft;

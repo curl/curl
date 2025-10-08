@@ -42,10 +42,6 @@
 #  endif
 #endif
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef HAVE_PROTO_BSDSOCKET_H
 
 #ifdef __amigaos4__
@@ -135,7 +131,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     LONG h_errnop = 0;
     struct hostent *buf;
 
-    buf = calloc(1, CURL_HOSTENT_SIZE);
+    buf = curlx_calloc(1, CURL_HOSTENT_SIZE);
     if(buf) {
       h = gethostbyname_r((STRPTR)hostname, buf,
                           (char *)buf + sizeof(struct hostent),
@@ -144,7 +140,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
       if(h) {
         ai = Curl_he2ai(h, port);
       }
-      free(buf);
+      curlx_free(buf);
     }
   }
   else {

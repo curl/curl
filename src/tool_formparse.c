@@ -30,13 +30,11 @@
 #include "tool_formparse.h"
 #include "tool_parsecfg.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
 {
-  struct tool_mime *m = (struct tool_mime *) calloc(1, sizeof(*m));
+  struct tool_mime *m = (struct tool_mime *)curlx_calloc(1, sizeof(*m));
 
   if(m) {
     m->kind = kind;
@@ -60,11 +58,11 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   char *mime_data_copy;
   struct tool_mime *m = NULL;
 
-  mime_data_copy = strdup(mime_data);
+  mime_data_copy = curlx_strdup(mime_data);
   if(mime_data_copy) {
     m = tool_mime_new(parent, TOOLMIME_DATA);
     if(!m)
-      free(mime_data_copy);
+      curlx_free(mime_data_copy);
     else
       m->data = mime_data_copy;
   }
@@ -107,11 +105,11 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   *errcode = CURLE_OUT_OF_MEMORY;
   if(strcmp(filename, "-")) {
     /* This is a normal file. */
-    char *filedup = strdup(filename);
+    char *filedup = curlx_strdup(filename);
     if(filedup) {
       m = tool_mime_new(parent, TOOLMIME_FILE);
       if(!m)
-        free(filedup);
+        curlx_free(filedup);
       else {
         m->data = filedup;
         if(!isremotefile)
@@ -152,7 +150,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
       default:
         if(!stdinsize) {
           /* Zero-length data has been freed. Re-create it. */
-          data = strdup("");
+          data = curlx_strdup("");
           if(!data)
             return m;
         }
@@ -190,7 +188,7 @@ void tool_mime_free(struct tool_mime *mime)
     tool_safefree(mime->encoder);
     tool_safefree(mime->data);
     curl_slist_free_all(mime->headers);
-    free(mime);
+    curlx_free(mime);
   }
 }
 
@@ -711,7 +709,7 @@ static int get_param_part(char endchar,
 #define SET_TOOL_MIME_PTR(m, field)                                     \
   do {                                                                  \
     if(field) {                                                         \
-      (m)->field = strdup(field);                                       \
+      (m)->field = curlx_strdup(field);                                 \
       if(!(m)->field)                                                   \
         goto fail;                                                      \
     }                                                                   \
@@ -745,7 +743,7 @@ int formparse(const char *input,
   }
 
   /* Make a copy we can overwrite. */
-  contents = strdup(input);
+  contents = curlx_strdup(input);
   if(!contents)
     goto fail;
 

@@ -38,10 +38,6 @@
 #include "../curlx/warnless.h"
 #include "../sendf.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
  * Curl_auth_create_plain_message()
  *

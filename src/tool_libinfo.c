@@ -24,7 +24,6 @@
 #include "tool_setup.h"
 
 #include "tool_libinfo.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /* global variable definitions, for libcurl runtime info */
 

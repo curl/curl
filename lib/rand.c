@@ -38,10 +38,6 @@
 #include "rand.h"
 #include "escape.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef _WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_VISTA && \

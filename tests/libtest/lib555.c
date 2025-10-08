@@ -32,8 +32,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char t555_uploadthis[] = "this is the blurb we want to upload\n";
 #define T555_DATALEN (sizeof(t555_uploadthis)-1)
 

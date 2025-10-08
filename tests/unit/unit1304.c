@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "netrc.h"
-#include "memdebug.h" /* LAST include file */
 
 #ifndef CURL_DISABLE_NETRC
 
@@ -120,8 +119,8 @@ static CURLcode test_unit1304(const char *arg)
    * Test for the first existing host in our netrc file
    * with login[0] != 0.
    */
-  free(password);
-  free(login);
+  curlx_free(password);
+  curlx_free(login);
   password = NULL;
   login = NULL;
   Curl_netrc_init(&store);
@@ -139,9 +138,9 @@ static CURLcode test_unit1304(const char *arg)
    * Test for the second existing host in our netrc file
    * with login[0] = 0.
    */
-  free(password);
+  curlx_free(password);
   password = NULL;
-  free(login);
+  curlx_free(login);
   login = NULL;
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
@@ -158,9 +157,9 @@ static CURLcode test_unit1304(const char *arg)
    * Test for the second existing host in our netrc file
    * with login[0] != 0.
    */
-  free(password);
+  curlx_free(password);
   password = NULL;
-  free(login);
+  curlx_free(login);
   login = NULL;
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,

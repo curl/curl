@@ -38,10 +38,6 @@
 #include "curlx/multibyte.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
  * Helper sspi error functions.
  */
@@ -101,7 +97,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   /* prepare service name */
   if(strchr(service, '/'))
-    service_name = strdup(service);
+    service_name = curlx_strdup(service);
   else
     service_name = curl_maprintf("%s/%s",
                                  service, conn->socks_proxy.host.name);
@@ -267,7 +263,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     us_length = ntohs(us_length);
 
     sspi_recv_token.cbBuffer = us_length;
-    sspi_recv_token.pvBuffer = malloc(us_length);
+    sspi_recv_token.pvBuffer = curlx_malloc(us_length);
 
     if(!sspi_recv_token.pvBuffer) {
       result = CURLE_OUT_OF_MEMORY;
@@ -371,7 +367,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
     sspi_w_token[0].cbBuffer = sspi_sizes.cbSecurityTrailer;
     sspi_w_token[0].BufferType = SECBUFFER_TOKEN;
-    sspi_w_token[0].pvBuffer = malloc(sspi_sizes.cbSecurityTrailer);
+    sspi_w_token[0].pvBuffer = curlx_malloc(sspi_sizes.cbSecurityTrailer);
 
     if(!sspi_w_token[0].pvBuffer) {
       result = CURLE_OUT_OF_MEMORY;
@@ -379,7 +375,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
 
     sspi_w_token[1].cbBuffer = 1;
-    sspi_w_token[1].pvBuffer = malloc(1);
+    sspi_w_token[1].pvBuffer = curlx_malloc(1);
     if(!sspi_w_token[1].pvBuffer) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -388,7 +384,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(sspi_w_token[1].pvBuffer, &gss_enc, 1);
     sspi_w_token[2].BufferType = SECBUFFER_PADDING;
     sspi_w_token[2].cbBuffer = sspi_sizes.cbBlockSize;
-    sspi_w_token[2].pvBuffer = malloc(sspi_sizes.cbBlockSize);
+    sspi_w_token[2].pvBuffer = curlx_malloc(sspi_sizes.cbBlockSize);
     if(!sspi_w_token[2].pvBuffer) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -409,7 +405,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       result = CURLE_COULDNT_CONNECT;
       goto error;
     }
-    etbuf = malloc(etbuf_size);
+    etbuf = curlx_malloc(etbuf_size);
     if(!etbuf) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -486,7 +482,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   us_length = ntohs(us_length);
 
   sspi_w_token[0].cbBuffer = us_length;
-  sspi_w_token[0].pvBuffer = malloc(us_length);
+  sspi_w_token[0].pvBuffer = curlx_malloc(us_length);
   if(!sspi_w_token[0].pvBuffer) {
     result = CURLE_OUT_OF_MEMORY;
     goto error;
@@ -514,7 +510,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
     /* since sspi_w_token[1].pvBuffer is allocated by the SSPI in this case, it
        must be freed in this block using FreeContextBuffer() instead of
-       potentially in error cleanup using free(). */
+       potentially in error cleanup using curlx_free(). */
 
     if(check_sspi_err(data, status, "DecryptMessage")) {
       failf(data, "Failed to query security context attributes.");
@@ -577,18 +573,18 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   return CURLE_OK;
 error:
   (void)curlx_nonblock(sock, TRUE);
-  free(service_name);
+  curlx_free(service_name);
   Curl_pSecFn->DeleteSecurityContext(&sspi_context);
   Curl_pSecFn->FreeCredentialsHandle(&cred_handle);
-  free(sspi_recv_token.pvBuffer);
+  curlx_free(sspi_recv_token.pvBuffer);
   if(sspi_send_token.pvBuffer)
     Curl_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
   if(names.sUserName)
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
-  free(sspi_w_token[0].pvBuffer);
-  free(sspi_w_token[1].pvBuffer);
-  free(sspi_w_token[2].pvBuffer);
-  free(etbuf);
+  curlx_free(sspi_w_token[0].pvBuffer);
+  curlx_free(sspi_w_token[1].pvBuffer);
+  curlx_free(sspi_w_token[2].pvBuffer);
+  curlx_free(etbuf);
   return result;
 }
 #endif

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1531(const char *URL)
 {
   static char const testData[] = ".abc\0xyz";

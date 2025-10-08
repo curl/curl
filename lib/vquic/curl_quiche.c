@@ -52,10 +52,6 @@
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
 #define CURL_H3_NO_ERROR  (0x0100)
 
@@ -141,7 +137,7 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
     Curl_bufcp_free(&ctx->stream_bufcp);
     Curl_uint32_hash_destroy(&ctx->streams);
   }
-  free(ctx);
+  curlx_free(ctx);
 }
 
 static void cf_quiche_ctx_close(struct cf_quiche_ctx *ctx)
@@ -188,7 +184,7 @@ static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
   Curl_bufq_free(&stream->recvbuf);
   Curl_h1_req_parse_free(&stream->h1);
-  free(stream);
+  curlx_free(stream);
 }
 
 static void h3_stream_hash_free(unsigned int id, void *stream)
@@ -269,7 +265,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   if(stream)
     return CURLE_OK;
 
-  stream = calloc(1, sizeof(*stream));
+  stream = curlx_calloc(1, sizeof(*stream));
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1000,7 +996,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
-  nva = malloc(sizeof(quiche_h3_header) * nheader);
+  nva = curlx_malloc(sizeof(quiche_h3_header) * nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1070,7 +1066,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   }
 
 out:
-  free(nva);
+  curlx_free(nva);
   Curl_dynhds_free(&h2_headers);
   return result;
 }
@@ -1633,7 +1629,7 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

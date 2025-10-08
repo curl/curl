@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "uint-bset.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_BSET_MAGIC  0x62757473
 #endif
@@ -49,14 +45,14 @@ CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax)
 
   DEBUGASSERT(bset->init == CURL_UINT32_BSET_MAGIC);
   if(nslots != bset->nslots) {
-    uint64_t *slots = calloc(nslots, sizeof(uint64_t));
+    uint64_t *slots = curlx_calloc(nslots, sizeof(uint64_t));
     if(!slots)
       return CURLE_OUT_OF_MEMORY;
 
     if(bset->slots) {
       memcpy(slots, bset->slots,
              (CURLMIN(nslots, bset->nslots) * sizeof(uint64_t)));
-      free(bset->slots);
+      curlx_free(bset->slots);
     }
     bset->slots = slots;
     bset->nslots = nslots;
@@ -69,7 +65,7 @@ CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax)
 void Curl_uint32_bset_destroy(struct uint32_bset *bset)
 {
   DEBUGASSERT(bset->init == CURL_UINT32_BSET_MAGIC);
-  free(bset->slots);
+  curlx_free(bset->slots);
   memset(bset, 0, sizeof(*bset));
 }
 

@@ -54,10 +54,6 @@
 #include "socks.h"
 #include "urlapi-int.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE    512
 
@@ -235,7 +231,7 @@ struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t dnssize,   /* dns hash */
                                      size_t sesssize)  /* TLS session cache */
 {
-  struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
+  struct Curl_multi *multi = curlx_calloc(1, sizeof(struct Curl_multi));
 
   if(!multi)
     return NULL;
@@ -328,7 +324,7 @@ error:
   Curl_uint32_bset_destroy(&multi->msgsent);
   Curl_uint32_tbl_destroy(&multi->xfers);
 
-  free(multi);
+  curlx_free(multi);
   return NULL;
 }
 
@@ -2022,7 +2018,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
       data->state.errorbuf = FALSE;
       if(!newurl)
         /* typically for HTTP_1_1_REQUIRED error on first flight */
-        newurl = strdup(data->state.url);
+        newurl = curlx_strdup(data->state.url);
       if(!newurl) {
         result = CURLE_OUT_OF_MEMORY;
       }
@@ -2068,7 +2064,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
       if(!retry) {
         /* if the URL is a follow-location and not just a retried request then
            figure out the URL here */
-        free(newurl);
+        curlx_free(newurl);
         newurl = data->req.newurl;
         data->req.newurl = NULL;
         follow = FOLLOW_REDIR;
@@ -2089,7 +2085,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
       /* but first check to see if we got a location info even though we are
          not following redirects */
       if(data->req.location) {
-        free(newurl);
+        curlx_free(newurl);
         newurl = data->req.location;
         data->req.location = NULL;
         result = multi_follow(data, handler, newurl, FOLLOW_FAKE);
@@ -2109,7 +2105,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     *nowp = curlx_now();
     mspeed_check(data, *nowp);
   }
-  free(newurl);
+  curlx_free(newurl);
   *resultp = result;
   return rc;
 }
@@ -2237,7 +2233,7 @@ static CURLMcode state_do(struct Curl_easy *data,
         /* Have error handler disconnect conn if we cannot retry */
         *stream_errorp = TRUE;
       }
-      free(newurl);
+      curlx_free(newurl);
     }
     else {
       /* failure detected */
@@ -2976,7 +2972,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_uint32_bset_destroy(&multi->pending);
     Curl_uint32_bset_destroy(&multi->msgsent);
     Curl_uint32_tbl_destroy(&multi->xfers);
-    free(multi);
+    curlx_free(multi);
 
     return CURLM_OK;
   }
@@ -3814,7 +3810,7 @@ CURL **curl_multi_get_handles(CURLM *m)
   struct Curl_multi *multi = m;
   void *entry;
   unsigned int count = Curl_uint32_tbl_count(&multi->xfers);
-  CURL **a = malloc(sizeof(struct Curl_easy *) * (count + 1));
+  CURL **a = curlx_malloc(sizeof(struct Curl_easy *) * (count + 1));
   if(a) {
     unsigned int i = 0, mid;
 
@@ -3895,13 +3891,13 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   if(data->multi->xfer_buf &&
      data->set.buffer_size > data->multi->xfer_buf_len) {
     /* not large enough, get a new one */
-    free(data->multi->xfer_buf);
+    curlx_free(data->multi->xfer_buf);
     data->multi->xfer_buf = NULL;
     data->multi->xfer_buf_len = 0;
   }
 
   if(!data->multi->xfer_buf) {
-    data->multi->xfer_buf = malloc(curlx_uitouz(data->set.buffer_size));
+    data->multi->xfer_buf = curlx_malloc(curlx_uitouz(data->set.buffer_size));
     if(!data->multi->xfer_buf) {
       failf(data, "could not allocate xfer_buf of %u bytes",
             data->set.buffer_size);
@@ -3948,14 +3944,14 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
   if(data->multi->xfer_ulbuf &&
      data->set.upload_buffer_size > data->multi->xfer_ulbuf_len) {
     /* not large enough, get a new one */
-    free(data->multi->xfer_ulbuf);
+    curlx_free(data->multi->xfer_ulbuf);
     data->multi->xfer_ulbuf = NULL;
     data->multi->xfer_ulbuf_len = 0;
   }
 
   if(!data->multi->xfer_ulbuf) {
     data->multi->xfer_ulbuf =
-      malloc(curlx_uitouz(data->set.upload_buffer_size));
+      curlx_malloc(curlx_uitouz(data->set.upload_buffer_size));
     if(!data->multi->xfer_ulbuf) {
       failf(data, "could not allocate xfer_ulbuf of %u bytes",
             data->set.upload_buffer_size);
@@ -3996,13 +3992,13 @@ CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
 
   if(data->multi->xfer_sockbuf && blen > data->multi->xfer_sockbuf_len) {
     /* not large enough, get a new one */
-    free(data->multi->xfer_sockbuf);
+    curlx_free(data->multi->xfer_sockbuf);
     data->multi->xfer_sockbuf = NULL;
     data->multi->xfer_sockbuf_len = 0;
   }
 
   if(!data->multi->xfer_sockbuf) {
-    data->multi->xfer_sockbuf = malloc(blen);
+    data->multi->xfer_sockbuf = curlx_malloc(blen);
     if(!data->multi->xfer_sockbuf) {
       failf(data, "could not allocate xfer_sockbuf of %zu bytes", blen);
       return CURLE_OUT_OF_MEMORY;

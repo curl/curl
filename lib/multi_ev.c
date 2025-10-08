@@ -41,10 +41,6 @@
 #include "multihandle.h"
 #include "socks.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static void mev_in_callback(struct Curl_multi *multi, bool value)
 {
@@ -85,7 +81,7 @@ static void mev_sh_entry_dtor(void *freethis)
 {
   struct mev_sh_entry *entry = (struct mev_sh_entry *)freethis;
   Curl_uint32_spbset_destroy(&entry->xfers);
-  free(entry);
+  curlx_free(entry);
 }
 
 /* look up a given socket in the socket hash, skip invalid sockets */
@@ -112,7 +108,7 @@ mev_sh_entry_add(struct Curl_hash *sh, curl_socket_t s)
   }
 
   /* not present, add it */
-  check = calloc(1, sizeof(struct mev_sh_entry));
+  check = curlx_calloc(1, sizeof(struct mev_sh_entry));
   if(!check)
     return NULL; /* major failure */
 
@@ -446,7 +442,7 @@ static void mev_pollset_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   if(ps) {
     Curl_pollset_cleanup(ps);
-    free(ps);
+    curlx_free(ps);
   }
 }
 

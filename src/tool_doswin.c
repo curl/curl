@@ -40,8 +40,6 @@
 #include "tool_doswin.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef _WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
@@ -133,7 +131,7 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
   if(len > max_sanitized_len)
     return SANITIZE_ERR_INVALID_PATH;
 
-  target = strdup(file_name);
+  target = curlx_strdup(file_name);
   if(!target)
     return SANITIZE_ERR_OUT_OF_MEMORY;
 
@@ -183,28 +181,28 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
 #ifdef MSDOS
   sc = msdosify(&p, target, flags);
-  free(target);
+  curlx_free(target);
   if(sc)
     return sc;
   target = p;
   len = strlen(target);
 
   if(len > max_sanitized_len) {
-    free(target);
+    curlx_free(target);
     return SANITIZE_ERR_INVALID_PATH;
   }
 #endif
 
   if(!(flags & SANITIZE_ALLOW_RESERVED)) {
     sc = rename_if_reserved_dos(&p, target, flags);
-    free(target);
+    curlx_free(target);
     if(sc)
       return sc;
     target = p;
     len = strlen(target);
 
     if(len > max_sanitized_len) {
-      free(target);
+      curlx_free(target);
       return SANITIZE_ERR_INVALID_PATH;
     }
   }
@@ -415,7 +413,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
       return SANITIZE_ERR_INVALID_PATH;
   }
 
-  *sanitized = strdup(dos_name);
+  *sanitized = curlx_strdup(dos_name);
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 #endif /* MSDOS */
@@ -457,7 +455,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 #ifndef MSDOS
   if((flags & SANITIZE_ALLOW_PATH) &&
      file_name[0] == '\\' && file_name[1] == '\\') {
-    *sanitized = strdup(file_name);
+    *sanitized = curlx_strdup(file_name);
     if(!*sanitized)
       return SANITIZE_ERR_OUT_OF_MEMORY;
     return SANITIZE_ERR_OK;
@@ -544,7 +542,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
   }
 #endif
 
-  *sanitized = strdup(fname);
+  *sanitized = curlx_strdup(fname);
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 
@@ -597,7 +595,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
     char *mstr = curlx_convert_tchar_to_UTF8(buf);
     tool_safefree(config->cacert);
     if(mstr)
-      config->cacert = strdup(mstr);
+      config->cacert = curlx_strdup(mstr);
     curlx_unicodefree(mstr);
     if(!config->cacert)
       result = CURLE_OUT_OF_MEMORY;
@@ -801,7 +799,7 @@ ThreadCleanup:
   if(socket_w != CURL_SOCKET_BAD)
     sclose(socket_w);
 
-  free(tdata);
+  curlx_free(tdata);
   return 0;
 }
 
@@ -824,9 +822,10 @@ curl_socket_t win32_stdin_read_thread(void)
 
   do {
     /* Prepare handles for thread */
-    tdata = (struct win_thread_data*)calloc(1, sizeof(struct win_thread_data));
+    tdata = (struct win_thread_data*)
+      curlx_calloc(1, sizeof(struct win_thread_data));
     if(!tdata) {
-      errorf("calloc() error");
+      errorf("curlx_calloc() error");
       break;
     }
     /* Create the listening socket for the thread. When it starts, it will
@@ -937,7 +936,7 @@ curl_socket_t win32_stdin_read_thread(void)
       if(tdata->socket_l != CURL_SOCKET_BAD)
         sclose(tdata->socket_l);
 
-      free(tdata);
+      curlx_free(tdata);
     }
 
     return CURL_SOCKET_BAD;

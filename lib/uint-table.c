@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "uint-table.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_TBL_MAGIC  0x62757473
 #endif
@@ -73,14 +69,14 @@ CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
   if(!nrows)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(nrows != tbl->nrows) {
-    void **rows = calloc(nrows, sizeof(void *));
+    void **rows = curlx_calloc(nrows, sizeof(void *));
     if(!rows)
       return CURLE_OUT_OF_MEMORY;
     if(tbl->rows) {
       memcpy(rows, tbl->rows, (CURLMIN(nrows, tbl->nrows) * sizeof(void *)));
       if(nrows < tbl->nrows)
         uint32_tbl_clear_rows(tbl, nrows, tbl->nrows);
-      free(tbl->rows);
+      curlx_free(tbl->rows);
     }
     tbl->rows = rows;
     tbl->nrows = nrows;
@@ -93,7 +89,7 @@ void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl)
 {
   DEBUGASSERT(tbl->init == CURL_UINT32_TBL_MAGIC);
   Curl_uint32_tbl_clear(tbl);
-  free(tbl->rows);
+  curlx_free(tbl->rows);
   memset(tbl, 0, sizeof(*tbl));
 }
 

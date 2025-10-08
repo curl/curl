@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test CURLINFO_PROTOCOL */
 
 static CURLcode test_lib1535(const char *URL)

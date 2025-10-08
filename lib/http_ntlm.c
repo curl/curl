@@ -49,10 +49,6 @@
 #include "curl_sspi.h"
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 CURLcode Curl_input_ntlm(struct Curl_easy *data,
                          bool proxy,         /* if proxy or not */
                          const char *header) /* rest of the www-authenticate:
@@ -208,11 +204,11 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
       result = curlx_base64_encode(Curl_bufref_ptr(&ntlmmsg),
                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
-        free(*allocuserpwd);
+        curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
                                       proxy ? "Proxy-" : "",
                                       base64);
-        free(base64);
+        curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
       }
@@ -227,11 +223,11 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
       result = curlx_base64_encode(Curl_bufref_ptr(&ntlmmsg),
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
-        free(*allocuserpwd);
+        curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
                                       proxy ? "Proxy-" : "",
                                       base64);
-        free(base64);
+        curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
         else {

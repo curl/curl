@@ -41,10 +41,6 @@
 #include "strdup.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define MAX_HSTS_LINE 4095
 #define MAX_HSTS_HOSTLEN 2048
 #define MAX_HSTS_DATELEN 256
@@ -72,7 +68,7 @@ static time_t hsts_debugtime(void *unused)
 
 struct hsts *Curl_hsts_init(void)
 {
-  struct hsts *h = calloc(1, sizeof(struct hsts));
+  struct hsts *h = curlx_calloc(1, sizeof(struct hsts));
   if(h) {
     Curl_llist_init(&h->list, NULL);
   }
@@ -81,8 +77,8 @@ struct hsts *Curl_hsts_init(void)
 
 static void hsts_free(struct stsentry *e)
 {
-  free(CURL_UNCONST(e->host));
-  free(e);
+  curlx_free(CURL_UNCONST(e->host));
+  curlx_free(e);
 }
 
 void Curl_hsts_cleanup(struct hsts **hp)
@@ -96,8 +92,8 @@ void Curl_hsts_cleanup(struct hsts **hp)
       n = Curl_node_next(e);
       hsts_free(sts);
     }
-    free(h->filename);
-    free(h);
+    curlx_free(h->filename);
+    curlx_free(h);
     *hp = NULL;
   }
 }
@@ -116,13 +112,13 @@ static CURLcode hsts_create(struct hsts *h,
     --hlen;
   if(hlen) {
     char *duphost;
-    struct stsentry *sts = calloc(1, sizeof(struct stsentry));
+    struct stsentry *sts = curlx_calloc(1, sizeof(struct stsentry));
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
 
     duphost = Curl_memdup0(hostname, hlen);
     if(!duphost) {
-      free(sts);
+      curlx_free(sts);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -385,7 +381,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
     if(result && tempstore)
       unlink(tempstore);
   }
-  free(tempstore);
+  curlx_free(tempstore);
 skipsave:
   if(data->set.hsts_write) {
     /* if there is a write callback */
@@ -518,8 +514,8 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
   /* we need a private copy of the filename so that the hsts cache file
      name survives an easy handle reset */
-  free(h->filename);
-  h->filename = strdup(file);
+  curlx_free(h->filename);
+  h->filename = curlx_strdup(file);
   if(!h->filename)
     return CURLE_OUT_OF_MEMORY;
 

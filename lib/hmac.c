@@ -33,11 +33,7 @@
 #include <curl/curl.h>
 
 #include "curl_hmac.h"
-#include "curl_memory.h"
 #include "curlx/warnless.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /*
  * Generic HMAC algorithm.
@@ -62,7 +58,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
 
   /* Create HMAC context. */
   i = sizeof(*ctxt) + 2 * hashparams->ctxtsize + hashparams->resultlen;
-  ctxt = malloc(i);
+  ctxt = curlx_malloc(i);
 
   if(!ctxt)
     return ctxt;
@@ -103,7 +99,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
   return ctxt;
 
 fail:
-  free(ctxt);
+  curlx_free(ctxt);
   return NULL;
 }
 
@@ -130,7 +126,7 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
   hashparams->hfinal(output, ctxt->hashctxt1);
   hashparams->hupdate(ctxt->hashctxt2, output, hashparams->resultlen);
   hashparams->hfinal(output, ctxt->hashctxt2);
-  free(ctxt);
+  curlx_free(ctxt);
   return 0;
 }
 
