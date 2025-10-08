@@ -517,7 +517,7 @@ Note: These variables are internal and subject to change.
 - `curl-completion-fish`:   Build shell completions for fish (built by default if enabled)
 - `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
 - `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
-- `curl-ca-firefox`:        Build the CA bundle via `scritps/firefox-db2pem.sh`
+- `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
 
 # Migrating from Visual Studio IDE Project Files
 
