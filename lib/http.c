@@ -519,6 +519,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     /* We decided to abort the ongoing transfer */
     streamclose(conn, "Mid-auth HTTP and much data left to send");
     data->req.size = 0; /* do not download any more than 0 bytes */
+    data->req.http_bodyless = TRUE;
   }
   return CURLE_OK;
 }
@@ -3118,32 +3119,50 @@ static CURLcode http_header_c(struct Curl_easy *data,
   struct SingleRequest *k = &data->req;
   const char *v;
 
-  /* Check for Content-Length: header lines to get size */
+  /* Check for Content-Length: header lines to get size. Browsers insist we
+     should accept multiple Content-Length headers and that a comma separated
+     list also is fine and then we should accept them all as long as they are
+     the same value. Different values trigger error.
+   */
   v = (!k->http_bodyless && !data->set.ignorecl) ?
     HD_VAL(hd, hdlen, "Content-Length:") : NULL;
   if(v) {
-    curl_off_t contentlength;
-    int offt = curlx_str_numblanks(&v, &contentlength);
+    do {
+      curl_off_t contentlength;
+      int offt = curlx_str_numblanks(&v, &contentlength);
 
-    if(offt == STRE_OK) {
-      k->size = contentlength;
-      k->maxdownload = k->size;
-    }
-    else if(offt == STRE_OVERFLOW) {
-      /* out of range */
-      if(data->set.max_filesize) {
-        failf(data, "Maximum file size exceeded");
-        return CURLE_FILESIZE_EXCEEDED;
+      if(offt == STRE_OVERFLOW) {
+        /* out of range */
+        if(data->set.max_filesize) {
+          failf(data, "Maximum file size exceeded");
+          return CURLE_FILESIZE_EXCEEDED;
+        }
+        streamclose(conn, "overflow content-length");
+        infof(data, "Overflow Content-Length: value");
+        return CURLE_OK;
       }
-      streamclose(conn, "overflow content-length");
-      infof(data, "Overflow Content-Length: value");
-    }
-    else {
-      /* negative or just rubbish - bad HTTP */
-      failf(data, "Invalid Content-Length: value");
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
-    return CURLE_OK;
+      else {
+        if((offt == STRE_OK) &&
+           ((k->size == -1) || /* not set to something before */
+            (k->size == contentlength))) { /* or the same value */
+
+          k->size = contentlength;
+          curlx_str_passblanks(&v);
+
+          /* on a comma, loop and get the next instead */
+          if(!curlx_str_single(&v, ','))
+            continue;
+
+          if(!curlx_str_newline(&v)) {
+            k->maxdownload = k->size;
+            return CURLE_OK;
+          }
+        }
+        /* negative, different value or just rubbish - bad HTTP */
+        failf(data, "Invalid Content-Length: value");
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
+    } while(1);
   }
   v = (!k->http_bodyless && data->set.str[STRING_ENCODING]) ?
     HD_VAL(hd, hdlen, "Content-Encoding:") : NULL;
