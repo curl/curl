@@ -15,7 +15,6 @@ updates:
     directories:
       - '/.github/scripts'
       - '/tests'
-      - '/tests/http'
     schedule:
       interval: 'monthly'
     commit-message:
