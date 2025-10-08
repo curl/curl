@@ -84,7 +84,7 @@ jobs:
         run: |
           mkdir bld-1
           cd bld-1
-          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=/nothere \
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             || { cat CMakeFiles/CMake*.log; false; }
           VERBOSE=1 make install
@@ -101,7 +101,7 @@ jobs:
         run: |
           mkdir bld-cares
           cd bld-cares
-          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=/nothere \
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON \
             || { cat CMakeFiles/CMake*.log; false; }
@@ -135,7 +135,7 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --with-openssl=/nothere \
             --with-gnutls --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am \
             || { tail -n 1000 config.log; false; }
