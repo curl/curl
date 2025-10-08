@@ -1632,11 +1632,10 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
         break;
       default: {
         char error_buffer[256];
-        int detail = wolfSSL_get_error(wssl->ssl, err);
         CURL_TRC_CF(data, cf, "SSL send early data, error: '%s'(%d)",
                     wssl_strerror((unsigned long)err, error_buffer,
                                   sizeof(error_buffer)),
-                    detail);
+                    err);
         result = CURLE_SEND_ERROR;
         break;
       }
@@ -1959,11 +1958,10 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
     connssl->io_need = CURL_SSL_IO_NEED_SEND;
     break;
   default:
-    detail = wolfSSL_get_error(wctx->ssl, err);
     CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s'(%d)",
                 wssl_strerror((unsigned long)err, error_buffer,
                               sizeof(error_buffer)),
-                detail);
+                err);
     result = CURLE_RECV_ERROR;
     break;
   }
