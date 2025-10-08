@@ -501,7 +501,7 @@ Note: These variables are internal and subject to change.
 
 ## Useful build targets
 
-- `testdeps`:               Build test dependencies (servers, tools, test certificates)
+- `testdeps`:               Build test dependencies (servers, tools, test certificates).
                             Individual targets: `servers`, `curlinfo`, `libtests`, `tunits`, `units`
                             Test certificates: `build-certs`, `clean-certs`
 - `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS` env, e.g. `TFLAGS=1621`.
