@@ -666,9 +666,11 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
               X509_verify_cert_error_string(verify_ok));
         return CURLE_PEER_FAILED_VERIFICATION;
       }
+      failf(r->data, "ingress, quiche reports TLS fail");
+      return CURLE_RECV_ERROR;
     }
     else {
-      failf(r->data, "quiche_conn_recv() == %zd", nread);
+      failf(r->data, "quiche reports error %zd on receive", nread);
       return CURLE_RECV_ERROR;
     }
   }
