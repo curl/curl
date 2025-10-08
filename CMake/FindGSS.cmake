@@ -47,10 +47,7 @@ include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckTypeSize)
 
-set(_gss_root_hints
-  "${GSS_ROOT_DIR}"
-  "$ENV{GSS_ROOT_DIR}"
-)
+set(_gss_root_hints "${GSS_ROOT_DIR}" "$ENV{GSS_ROOT_DIR}")
 
 set(_gss_CFLAGS "")
 set(_gss_LIBRARY_DIRS "")
@@ -69,37 +66,22 @@ if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
 endif()
 
 if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional approach.
-  find_file(_gss_configure_script
-    NAMES
-      "krb5-config"
-    HINTS
-      ${_gss_root_hints}
-    PATH_SUFFIXES
-      "bin"
-    NO_CMAKE_PATH
-    NO_CMAKE_ENVIRONMENT_PATH
-  )
-
+  find_file(_gss_configure_script NAMES "krb5-config" PATH_SUFFIXES "bin" HINTS ${_gss_root_hints}
+    NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
   # If not found in user-supplied directories, maybe system knows better
-  find_file(_gss_configure_script
-    NAMES
-      "krb5-config"
-    PATH_SUFFIXES
-      "bin"
-  )
+  find_file(_gss_configure_script NAMES "krb5-config" PATH_SUFFIXES "bin")
 
   if(_gss_configure_script)
 
     set(_gss_INCLUDE_DIRS "")
     set(_gss_LIBRARIES "")
 
-    execute_process(
-      COMMAND ${_gss_configure_script} "--cflags" "gssapi"
+    execute_process(COMMAND ${_gss_configure_script} "--cflags" "gssapi"
       OUTPUT_VARIABLE _gss_cflags_raw
       RESULT_VARIABLE _gss_configure_failed
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
     message(STATUS "FindGSS krb5-config --cflags: ${_gss_cflags_raw}")
+
     if(NOT _gss_configure_failed)  # 0 means success
       # Should also work in an odd case when multiple directories are given.
       string(STRIP "${_gss_cflags_raw}" _gss_cflags_raw)
@@ -116,12 +98,10 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       endforeach()
     endif()
 
-    execute_process(
-      COMMAND ${_gss_configure_script} "--libs" "gssapi"
+    execute_process(COMMAND ${_gss_configure_script} "--libs" "gssapi"
       OUTPUT_VARIABLE _gss_lib_flags
       RESULT_VARIABLE _gss_configure_failed
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
     message(STATUS "FindGSS krb5-config --libs: ${_gss_lib_flags}")
 
     if(NOT _gss_configure_failed)  # 0 means success
@@ -141,24 +121,20 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       endforeach()
     endif()
 
-    execute_process(
-      COMMAND ${_gss_configure_script} "--version"
+    execute_process(COMMAND ${_gss_configure_script} "--version"
       OUTPUT_VARIABLE _gss_version
       RESULT_VARIABLE _gss_configure_failed
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     # Older versions may not have the "--version" parameter. In this case we just do not care.
     if(_gss_configure_failed)
       set(_gss_version 0)
     endif()
 
-    execute_process(
-      COMMAND ${_gss_configure_script} "--vendor"
+    execute_process(COMMAND ${_gss_configure_script} "--vendor"
       OUTPUT_VARIABLE _gss_vendor
       RESULT_VARIABLE _gss_configure_failed
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     # Older versions may not have the "--vendor" parameter. In this case we just do not care.
     if(_gss_configure_failed)
@@ -173,13 +149,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
   else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
 
-    find_path(_gss_INCLUDE_DIRS NAMES "gssapi/gssapi.h"
-      HINTS
-        ${_gss_root_hints}
-      PATH_SUFFIXES
-        "include"
-        "inc"
-    )
+    find_path(_gss_INCLUDE_DIRS NAMES "gssapi/gssapi.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include" "inc")
 
     if(_gss_INCLUDE_DIRS)  # We have found something
       cmake_push_check_state()
@@ -201,23 +171,12 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       cmake_pop_check_state()
     else()
       # I am not convinced if this is the right way but this is what autotools do at the moment
-      find_path(_gss_INCLUDE_DIRS NAMES "gssapi.h"
-        HINTS
-          ${_gss_root_hints}
-        PATH_SUFFIXES
-          "include"
-          "inc"
-      )
+      find_path(_gss_INCLUDE_DIRS NAMES "gssapi.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include" "inc")
 
       if(_gss_INCLUDE_DIRS)
         set(GSS_FLAVOUR "Heimdal")
       else()
-        find_path(_gss_INCLUDE_DIRS NAMES "gss.h"
-          HINTS
-            ${_gss_root_hints}
-          PATH_SUFFIXES
-            "include"
-        )
+        find_path(_gss_INCLUDE_DIRS NAMES "gss.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include")
 
         if(_gss_INCLUDE_DIRS)
           set(GSS_FLAVOUR "GNU")
@@ -268,12 +227,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         endif()
       endif()
 
-      find_library(_gss_LIBRARIES NAMES ${_gss_libname}
-        HINTS
-          ${_gss_libdir_hints}
-        PATH_SUFFIXES
-          ${_gss_libdir_suffixes}
-      )
+      find_library(_gss_LIBRARIES NAMES ${_gss_libname} HINTS ${_gss_libdir_hints} PATH_SUFFIXES ${_gss_libdir_suffixes})
     endif()
   endif()
 else()
