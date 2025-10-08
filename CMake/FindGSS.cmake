@@ -278,13 +278,15 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
   endif()
 else()
   # _gss_MODULE_NAME set since CMake 3.16
-  if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _gss_${_gnu_modname}_VERSION)
+  # _gss_<module>_VERSION is documented, but is empty with all tested CMake versions as of CMake 4.1.2.
+  # _pkg_check_modules_pkg_name is undocumented and used as a fallback for CMake <3.16 versions.
+  if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _gss_${_gnu_modname}_VERSION OR _pkg_check_modules_pkg_name STREQUAL _gnu_modname)
     set(GSS_FLAVOUR "GNU")
     set(GSS_PC_REQUIRES "gss")
     if(NOT _gss_version)  # for old CMake versions?
       set(_gss_version ${_gss_${_gnu_modname}_VERSION})
     endif()
-  elseif(_gss_MODULE_NAME STREQUAL _mit_modname OR _gss_${_mit_modname}_VERSION)
+  elseif(_gss_MODULE_NAME STREQUAL _mit_modname OR _gss_${_mit_modname}_VERSION OR _pkg_check_modules_pkg_name STREQUAL _mit_modname)
     set(GSS_FLAVOUR "MIT")
     set(GSS_PC_REQUIRES "mit-krb5-gssapi")
     if(NOT _gss_version)  # for old CMake versions?
