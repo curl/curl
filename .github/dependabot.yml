@@ -8,8 +8,15 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+    commit-message:
+      prefix: 'GHA:'
 
   - package-ecosystem: 'pip'
-    directory: '/'
+    directories:
+      - '/.github/scripts'
+      - '/tests'
+      - '/tests/http'
     schedule:
       interval: 'monthly'
+    commit-message:
+      prefix: 'GHA:'
