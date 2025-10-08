@@ -49,6 +49,8 @@
  */
 #include "memdebug.h" /* keep this as LAST include */
 
+#include "memdebugx.h"
+
 #ifdef __VMS
 /*
  * vms_show is a global variable, used in main() as parameter for

@@ -23,6 +23,8 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "memdebugx.h"
+
 /*
  * curl's test suite Real Time Streaming Protocol (RTSP) server.
  *

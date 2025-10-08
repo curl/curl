@@ -56,6 +56,9 @@
 
 #ifndef CURLDEBUG
 
+#undef XMEM
+#define XMEM 2
+
 /*
  * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
  * realloc and free, along with others, in memdebug.h in a different

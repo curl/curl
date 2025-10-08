@@ -27,6 +27,8 @@
 
 #include "memdebug.h" /* LAST include file */
 
+#include "memdebugx.h"
+
 static CURLcode test_tool1394(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE

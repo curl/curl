@@ -21,20 +21,18 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/* Unset redefined system symbols. */
-
-#undef XMEM
-#define XMEM 1
-
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#ifdef _WIN32
-#undef Curl_tcsdup
+#ifdef XMEM
+#if XMEM == 1
+#warning "XMEM defined DEFAULT"
+#elif XMEM == 2
+#warning "XMEM defined CURLALLOC"
+#elif XMEM == 9
+#warning "XMEM defined DEBUG"
+#else
+#define X_STRINGIFY(x) #x
+#define X_TOSTRING(x) X_STRINGIFY(x)
+#warning "XMEM defined unknown " X_TOSTRING(XMEM)
 #endif
-
-#undef HEADER_CURL_MEMORY_H
-#undef HEADER_CURL_MEMDEBUG_H
+#else
+#warning "XMEM not defined"
+#endif

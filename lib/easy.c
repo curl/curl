@@ -84,6 +84,8 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#include "memdebugx.h"
+
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
 static long          easy_init_flags;

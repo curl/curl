@@ -1166,6 +1166,8 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #  define CURL_INLINE /* empty */
 #endif
 
+#define XMEM 1
+
 #endif /* HEADER_CURL_SETUP_H */
 
 #include "curl_mem_undef.h"
