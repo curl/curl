@@ -8,6 +8,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'monthly'
+    commit-message:
+      prefix: 'GHA:'
 
   - package-ecosystem: 'pip'
     directories:
@@ -16,3 +18,5 @@ updates:
       - '/.github/scripts'
     schedule:
       interval: 'monthly'
+    commit-message:
+      prefix: 'GHA:'
