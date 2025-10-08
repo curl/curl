@@ -278,7 +278,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
   endif()
 else()
   # _gss_MODULE_NAME set since CMake 3.16
-  # _gss_<module>_VERSION is documented, but is empty with all tested CMake versions as of CMake 4.1.2.
+  # _gss_<module>_VERSION is documented, but empty in all tested CMake versions as of CMake 4.1.2.
   # _pkg_check_modules_pkg_name is undocumented and used as a fallback for CMake <3.16 versions.
   if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _pkg_check_modules_pkg_name STREQUAL _gnu_modname)
     set(GSS_FLAVOUR "GNU")
