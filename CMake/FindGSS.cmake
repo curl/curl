@@ -161,12 +161,19 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     )
 
     # Older versions may not have the "--vendor" parameter. In this case we just do not care.
+    message(STATUS "|0|${_gss_configure_failed}||")
+    message(STATUS "|1|${_gss_vendor}||")
+    message(STATUS "|2|${_gss_version}||")
     if(_gss_configure_failed)
+message(STATUS "||TRACE-1||")
       set(GSS_FLAVOUR "Heimdal")  # most probably, should not really matter
     else()
+message(STATUS "||TRACE-2||")
       if(_gss_vendor MATCHES "Heimdal|heimdal" OR _gss_version MATCHES "Heimdal|heimdal")
+message(STATUS "||TRACE-3||")
         set(GSS_FLAVOUR "Heimdal")
       else()
+message(STATUS "||TRACE-4||")
         set(GSS_FLAVOUR "MIT")
       endif()
     endif()
