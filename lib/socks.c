@@ -681,8 +681,12 @@ static CURLproxycode socks5_check_resp0(struct socks_state *sx,
     return CURLPX_GSSAPI_PERMSG;
   case 2:
     /* regular name + password authentication */
-    sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
-    return CURLPX_OK;
+    if(data->set.socks5auth & CURLAUTH_BASIC) {
+      sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
+      return CURLPX_OK;
+    }
+    failf(data, "BASIC authentication proposed but not enabled.");
+    return CURLPX_NO_AUTH;
   case 255:
     failf(data, "No authentication method was acceptable.");
     return CURLPX_NO_AUTH;
