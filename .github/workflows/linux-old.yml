@@ -89,6 +89,10 @@ jobs:
           VERBOSE=1 make install
           src/curl --disable --version
 
+      - name: 'cmake build-only configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld-1/CMakeFiles/CMake*.log 2>/dev/null || true
+
       - name: 'cmake build-only curl_config.h'
         run: |
           echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'
@@ -103,6 +107,10 @@ jobs:
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld-cares/CMakeFiles/CMake*.log 2>/dev/null || true
 
       - name: 'cmake curl_config.h'
         run: |
@@ -136,6 +144,10 @@ jobs:
           ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
             --with-gnutls --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
+
+      - name: 'autotools configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld-am/config.log 2>/dev/null || true
 
       - name: 'autotools curl_config.h'
         run: |
