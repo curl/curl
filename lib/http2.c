@@ -623,9 +623,8 @@ static int should_close_session(struct cf_h2_ctx *ctx)
  * This function returns 0 if it succeeds, or -1 and error code will
  * be assigned to *err.
  */
-static int h2_process_pending_input(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    CURLcode *err)
+static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   const unsigned char *buf;
@@ -633,12 +632,10 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
   ssize_t rv;
 
   while(Curl_bufq_peek(&ctx->inbufq, &buf, &blen)) {
-
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     if(rv < 0) {
       failf(data, "nghttp2 recv error %zd: %s", rv, nghttp2_strerror((int)rv));
-      *err = CURLE_HTTP2;
-      return -1;
+      return CURLE_HTTP2;
     }
     Curl_bufq_skip(&ctx->inbufq, (size_t)rv);
     if(Curl_bufq_is_empty(&ctx->inbufq)) {
@@ -658,7 +655,7 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
     connclose(cf->conn, "http/2: No new requests allowed");
   }
 
-  return 0;
+  return CURLE_OK;
 }
 
 /*
@@ -690,7 +687,8 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(!result) {
       CURL_TRC_CF(data, cf, "%zu bytes stray data read before trying "
                   "h2 connection", nread);
-      if(h2_process_pending_input(cf, data, &result) < 0)
+      result = h2_process_pending_input(cf, data);
+      if(result)
         /* immediate error, considered dead */
         alive = FALSE;
       else {
@@ -2043,9 +2041,13 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "Process %zu bytes in connection buffer",
                 Curl_bufq_len(&ctx->inbufq));
-    if(h2_process_pending_input(cf, data, &result) < 0)
+    result = h2_process_pending_input(cf, data);
+    if(result)
       return result;
   }
+
+  if(!data_max_bytes)
+    data_max_bytes = H2_CHUNK_SIZE;
 
   /* Receive data from the "lower" filters, e.g. network until
    * it is time to stop due to connection close or us not processing
@@ -2059,6 +2061,10 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
        * be consumed. */
       if(!cf->next || !cf->next->cft->has_data_pending(cf->next, data))
         Curl_multi_mark_dirty(data);
+      break;
+    }
+    else if(!stream) {
+      DEBUGASSERT(0);
       break;
     }
 
@@ -2081,7 +2087,8 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       data_max_bytes = (data_max_bytes > nread) ? (data_max_bytes - nread) : 0;
     }
 
-    if(h2_process_pending_input(cf, data, &result))
+    result = h2_process_pending_input(cf, data);
+    if(result)
       return result;
     CURL_TRC_CF(data, cf, "[0] progress ingress: inbufg=%zu",
                 Curl_bufq_len(&ctx->inbufq));
@@ -2544,7 +2551,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   }
 
   if(!first_time) {
-    result = h2_progress_ingress(cf, data, H2_CHUNK_SIZE);
+    result = h2_progress_ingress(cf, data, 0);
     if(result)
       goto out;
   }
