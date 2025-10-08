@@ -164,7 +164,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     if(_gss_configure_failed)
       set(GSS_FLAVOUR "Heimdal")  # most probably, should not really matter
     else()
-      if(_gss_vendor MATCHES "H|heimdal")
+      if(_gss_vendor MATCHES "Heimdal|heimdal" OR _gss_version MATCHES "Heimdal|heimdal")
         set(GSS_FLAVOUR "Heimdal")
       else()
         set(GSS_FLAVOUR "MIT")
