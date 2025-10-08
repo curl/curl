@@ -502,10 +502,10 @@ Note: These variables are internal and subject to change.
 ## Useful build targets
 
 - `testdeps`:               Build test dependencies (servers, tools, test certificates).
-                            Individual targets: `servers`, `curlinfo`, `libtests`, `tunits`, `units`
+                            Individual targets: `curlinfo`, `libtests`, `servers`, `tunits`, `units`
                             Test certificates: `build-certs`, `clean-certs`
 - `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS` environment variable, e.g. `TFLAGS=1621`.
-                            Other flavors: `test-quiet`, `test-am`, `test-full`, `test-nonflaky`, `test-ci`, `test-torture`, `test-event`
+                            Other flavors: `test-am`, `test-ci`, `test-event`, `test-full`, `test-nonflaky`, `test-quiet`, `test-torture`
 - `curl-pytest`:            Run tests (pytest).
                             Other flavor: `curl-test-ci`
 - `curl-examples`:          Build examples
