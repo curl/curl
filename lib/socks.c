@@ -432,7 +432,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
   switch(resp[1]) {
   case 90:
     CURL_TRC_CF(data, cf, "SOCKS4%s request granted.", sx->socks4a ? "a" : "");
-    Curl_bufq_reset(&sx->iobuf);
+    Curl_bufq_skip(&sx->iobuf, 8);
     return CURLPX_OK;
   case 91:
     failf(data,
@@ -664,7 +664,7 @@ static CURLproxycode socks5_check_resp0(struct socks_state *sx,
   }
 
   auth_mode = resp[1];
-  Curl_bufq_reset(&sx->iobuf);
+  Curl_bufq_skip(&sx->iobuf, 2);
 
   switch(auth_mode) {
   case 0:
@@ -765,7 +765,7 @@ static CURLproxycode socks5_check_auth_resp(struct socks_state *sx,
 
   /* ignore the first (VER) byte */
   auth_status = resp[1];
-  Curl_bufq_reset(&sx->iobuf);
+  Curl_bufq_skip(&sx->iobuf, 2);
 
   if(auth_status) {
     failf(data, "User was rejected by the SOCKS5 server (%d %d).",
