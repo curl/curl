@@ -10,6 +10,9 @@ updates:
       interval: 'monthly'
 
   - package-ecosystem: 'pip'
-    directory: '/'
+    directories:
+      - '/tests'
+      - '/tests/http'
+      - '/.github/scripts'
     schedule:
       interval: 'monthly'
