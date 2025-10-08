@@ -1877,7 +1877,6 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
   char error_buffer[256];
   int nread = -1, err;
   size_t i;
-  int detail;
 
   DEBUGASSERT(wctx);
   if(!wctx->ssl || cf->shutdown) {
