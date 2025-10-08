@@ -254,7 +254,7 @@ out:
   CURL_TRC_CF(data, cf, "vquic_%s(len=%zu, gso=%zu, calls=%zu)"
               " -> %d, sent=%zu",
               VQUIC_SEND_METHOD, pktlen, gsolen, calls, result, *psent);
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
