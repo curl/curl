@@ -1854,7 +1854,7 @@ if test x"$want_gss" = xyes; then
         ])
       if test "x$not_mit" = "x1"; then
         dnl MIT not found
-        AC_MSG_WARN([incompatible GSS library found but ignored (heimdal?)])
+        AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
       else
         dnl MIT found
         dnl check if we have a really old MIT Kerberos version (<= 1.2)
