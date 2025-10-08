@@ -15,5 +15,5 @@ codespell \
   --skip 'packages/*' \
   --skip 'scripts/wcurl' \
   --ignore-regex '.*spellchecker:disable-line' \
-  --ignore-words '.github/scripts/codespell-ignore.txt' \
+  --ignore-words '.github/scripts/codespell-ignore.words' \
   $(git ls-files)
