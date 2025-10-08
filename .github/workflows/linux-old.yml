@@ -138,13 +138,13 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --with-openssl=/nothere \
+          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
             --with-gnutls --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 
       - name: 'autotools configure log'
         if: ${{ !cancelled() }}
-        run: cat config.log 2>/dev/null || true
+        run: cat bld-am/config.log 2>/dev/null || true
 
       - name: 'autotools curl_config.h'
         run: |
