@@ -36,7 +36,6 @@ versions of libs and build tools.
  - wolfSSL      3.4.6
  - OpenLDAP     2.0
  - MIT Kerberos 1.2.4
- - Heimdal      7.1.0
  - nghttp2      1.15.0
 
 ## Build tools

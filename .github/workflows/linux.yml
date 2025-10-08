@@ -69,13 +69,13 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: 'libressl heimdal'
-            install_packages: libidn2-dev libnghttp2-dev libldap-dev heimdal-dev
+          - name: 'libressl krb5'
+            install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
             install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
-          - name: 'libressl heimdal valgrind'
-            install_packages: libnghttp2-dev libldap-dev heimdal-dev valgrind
+          - name: 'libressl krb5 valgrind'
+            install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
             install_steps: libressl
             generate: -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
@@ -365,7 +365,7 @@ jobs:
         run: |
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev \
             libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev \
-            heimdal-dev libpsl-dev c-ares-dev \
+            krb5-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git openssl
 
@@ -671,13 +671,8 @@ jobs:
           TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
-          if [ "${TEST_TARGET}" = 'test-ci' ]; then
-            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
-              TFLAGS+=' -j6'
-              if [[ "${MATRIX_INSTALL_PACKAGES}" = *'heimdal-dev'* ]]; then
-                TFLAGS+=' ~2056 ~2057 ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_import_name()
-              fi
-            fi
+          if [ "${TEST_TARGET}" = 'test-ci' ] && [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
+            TFLAGS+=' -j6'
           fi
           [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
