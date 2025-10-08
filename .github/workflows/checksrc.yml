@@ -12,7 +12,6 @@ name: 'Source'
       - master
       - '*/ci'
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
@@ -22,7 +21,6 @@ name: 'Source'
     branches:
       - master
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
