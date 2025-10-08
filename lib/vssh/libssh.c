@@ -1154,12 +1154,18 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
     }
   }
 
-  if(data->set.remote_append)
-    /* Try to open for append, but create if nonexisting */
-    flags = O_WRONLY|O_CREAT|O_APPEND;
-  else if(data->state.resume_from > 0)
-    /* If we have restart position then open for append */
-    flags = O_WRONLY|O_APPEND;
+  if(data->set.remote_append) {
+    /* True append mode: create if nonexisting */
+    flags = O_WRONLY | O_CREAT | O_APPEND;
+  }
+  else if(data->state.resume_from > 0) {
+    /*
+     * Resume MUST NOT use O_APPEND. Many SFTP servers/impls force all
+     * writes to EOF when O_APPEND is set, ignoring a prior seek().
+     * Open write-only and seek to the resume offset instead.
+     */
+    flags = O_WRONLY;
+  }
   else
     /* Clear file before writing (normal behavior) */
     flags = O_WRONLY|O_CREAT|O_TRUNC;
@@ -1189,8 +1195,8 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
   }
 
   /* If we have a restart point then we need to seek to the correct
-     position. */
-  if(data->state.resume_from > 0) {
+     position. Skip if in explicit remote append mode. */
+  if(data->state.resume_from > 0 && !data->set.remote_append) {
     int seekerr = CURL_SEEKFUNC_OK;
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
