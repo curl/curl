@@ -559,14 +559,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
       if(!result)
         result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
-      if(result) {
-        FREE_ON_WINLDAP(name);
-        ldap_memfree(dn);
-        goto quit;
-      }
-
       FREE_ON_WINLDAP(name);
       ldap_memfree(dn);
+      if(result)
+        goto quit;
     }
 
     /* Get the attributes and write them to the client */
