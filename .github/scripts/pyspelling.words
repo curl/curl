@@ -97,6 +97,7 @@ changeset
 CharConv
 charset
 charsets
+checkdocs
 checksrc
 checksums
 chgrp
@@ -293,6 +294,7 @@ getinfo
 GETing
 getpwuid
 ggcov
+GHA
 Ghedini
 giga
 Gisle
@@ -931,6 +933,7 @@ VC
 vcpkg
 vexxhost
 Viktor
+virtualized
 Virtuozzo
 VLAN
 VM
