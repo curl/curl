@@ -130,7 +130,7 @@ static int mem_add(struct mem *mem, const char *str)
 }
 
 #if defined(__GNUC__) || defined(__clang__)
-__attribute__ ((format (printf, 2, 3)))
+__attribute__((format(printf, 2, 3)))
 #endif
 static int mem_addf(struct mem *mem, const char *format, ...)
 {
