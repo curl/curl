@@ -1103,7 +1103,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     connssl->peer.hostname,
                                     &rconn);
   if(rr != RUSTLS_RESULT_OK) {
-    rustls_failf(data, result, "rustls_client_connection_new");
+    rustls_failf(data, rr, "rustls_client_connection_new");
     return CURLE_COULDNT_CONNECT;
   }
   DEBUGASSERT(rconn);
