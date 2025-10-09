@@ -161,7 +161,11 @@ get_buffer(struct buffer_t *buf, long size)
 static char *
 buffer_unthreaded(localkey_t key, long size)
 {
-  return get_buffer(locbufs + key, size);
+  char *r;
+  pthread_mutex_lock(&mutex);
+  r = get_buffer(locbufs + key, size);
+  pthread_mutex_unlock(&mutex);
+  return r;
 }
 
 
