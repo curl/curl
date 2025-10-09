@@ -506,8 +506,8 @@ static void async_ares_hostbyname_cb(void *user_data,
                                      int timeouts,
                                      struct hostent *hostent)
 {
-  struct Curl_easy *data = (struct Curl_easy *)user_data;
-  struct async_ares_ctx *ares = &data->state.async.ares;
+  struct Curl_easy *data;
+  struct async_ares_ctx *ares;
 
   (void)timeouts; /* ignored */
 
@@ -515,6 +515,9 @@ static void async_ares_hostbyname_cb(void *user_data,
     /* when this ares handle is getting destroyed, the 'arg' pointer may not
        be valid so only defer it when we know the 'status' says its fine! */
     return;
+
+  data = (struct Curl_easy *)user_data;
+  ares = &data->state.async.ares;
 
   if(ARES_SUCCESS == status) {
     ares->ares_status = status; /* one success overrules any error */
