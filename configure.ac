@@ -1855,29 +1855,6 @@ if test x"$want_gss" = xyes; then
       if test "x$not_mit" = "x1"; then
         dnl MIT not found
         AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
-      else
-        dnl MIT found
-        dnl check if we have a really old MIT Kerberos version (<= 1.2)
-        AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
-        AC_COMPILE_IFELSE([
-          AC_LANG_PROGRAM([[
-            #include <gssapi/gssapi.h>
-            #include <gssapi/gssapi_generic.h>
-            #include <gssapi/gssapi_krb5.h>
-          ]],[[
-            gss_import_name(
-                            (OM_uint32 *)0,
-                            (gss_buffer_t)0,
-                            GSS_C_NT_HOSTBASED_SERVICE,
-                            (gss_name_t *)0);
-          ]])
-        ],[
-          AC_MSG_RESULT([yes])
-        ],[
-          AC_MSG_RESULT([no])
-          AC_DEFINE(HAVE_OLD_GSSMIT, 1,
-            [if you have an old MIT Kerberos version, lacking GSS_C_NT_HOSTBASED_SERVICE])
-        ])
       fi
     ]
   )
