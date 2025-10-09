@@ -371,6 +371,7 @@ static CURLcode socket_open(struct Curl_easy *data,
     /* no socket, no connection */
     return CURLE_COULDNT_CONNECT;
 
+#ifdef HAVE_FCNTL
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
     char errbuf[STRERROR_LEN];
     failf(data, "fcntl set CLOEXEC: %s",
@@ -379,6 +380,7 @@ static CURLcode socket_open(struct Curl_easy *data,
     *sockfd = CURL_SOCKET_BAD;
     return CURLE_COULDNT_CONNECT;
   }
+#endif
 
 #if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(data->conn->scope_id && (addr->family == AF_INET6)) {
@@ -2131,7 +2133,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_FTP_ACCEPT_FAILED;
   }
-#ifndef HAVE_ACCEPT4
+#if !defined(HAVE_ACCEPT4) && defined(HAVE_FCNTL)
   if((fcntl(s_accepted, F_SETFD, FD_CLOEXEC) < 0) ||
      (curlx_nonblock(s_accepted, TRUE) < 0)) {
     failf(data, "fcntl set CLOEXEC/NONBLOCK: %s",
