@@ -111,7 +111,7 @@ void *Curl_memdup(const void *src, size_t length)
  ***************************************************************************/
 void *Curl_memdup0(const char *src, size_t length)
 {
-  char *buf = malloc(length + 1);
+  char *buf = (length < SIZE_MAX) ? malloc(length + 1) : NULL;
   if(!buf)
     return NULL;
   if(length) {
