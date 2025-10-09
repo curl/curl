@@ -1447,12 +1447,13 @@ if(CURL_USE_GSSAPI)
       list(APPEND CMAKE_REQUIRED_INCLUDES "${GSS_INCLUDE_DIRS}")
 
       set(_include_list "")
+
       check_include_file("gssapi/gssapi.h" HAVE_GSSAPI_GSSAPI_H)
       if(HAVE_GSSAPI_GSSAPI_H)
         list(APPEND _include_list "gssapi/gssapi.h")
       endif()
-      check_include_files("${_include_list};gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
 
+      check_include_files("${_include_list};gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
       check_include_files("${_include_list};gssapi/gssapi_krb5.h" _have_gssapi_gssapi_krb5_h)
       if(HAVE_GSSAPI_GSSAPI_GENERIC_H)
         list(APPEND _include_list "gssapi/gssapi_generic.h")
