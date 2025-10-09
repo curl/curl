@@ -658,11 +658,18 @@ static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
   struct Curl_easy *data = ctx->data;
   struct websocket *ws = ctx->ws;
   bool auto_pong = !data->set.ws_no_auto_pong;
-  curl_off_t remain = (payload_len - (payload_offset + buflen));
+  curl_off_t remain;
   CURLcode result;
 
   (void)frame_age;
   *pnwritten = 0;
+  remain = payload_len - payload_offset;
+  if(((curl_off_t)buflen < 0) ||
+     (remain < (curl_off_t)buflen)) {
+    DEBUGASSERT(0); /* parameter mismatch */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  remain -= (curl_off_t)buflen;
 
   if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
@@ -981,12 +988,18 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                 result);
     goto out;
   }
-  /* our buffer should always be able to take in a control frame */
-  DEBUGASSERT(n == ws->pending.payload_len);
+  if(n != ws->pending.payload_len) {
+    DEBUGASSERT(0); /* buffer should always be able to take all */
+    CURL_TRC_WS(data, "ws_enc_cntrl(), error added only %zu/%zu payload,",
+                n, ws->pending.payload_len);
+    result = CURLE_SEND_ERROR;
+    goto out;
+  }
+  /* the frame should be complete now */
   DEBUGASSERT(!ws->enc.payload_remain);
+  memset(&ws->pending, 0, sizeof(ws->pending));
 
 out:
-  memset(&ws->pending, 0, sizeof(ws->pending));
   return result;
 }
 
@@ -1445,10 +1458,18 @@ static CURLcode ws_client_collect(const unsigned char *buf, size_t buflen,
   struct ws_collect *ctx = userp;
   struct Curl_easy *data = ctx->data;
   bool auto_pong = !data->set.ws_no_auto_pong;
-  curl_off_t remain = (payload_len - (payload_offset + buflen));
+  curl_off_t remain;
   CURLcode result = CURLE_OK;
 
   *pnwritten = 0;
+  remain = payload_len - payload_offset;
+  if(((curl_off_t)buflen < 0) ||
+     (remain < (curl_off_t)buflen)) {
+    DEBUGASSERT(0); /* parameter mismatch */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+  remain -= (curl_off_t)buflen;
+
   if(!ctx->bufidx) {
     /* first write */
     ctx->frame_age = frame_age;
