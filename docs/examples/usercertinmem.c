@@ -176,9 +176,9 @@ int main(void)
 
     /* both VERIFYPEER and VERIFYHOST are set to 0 in this case because there
        is no CA certificate */
-
     curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
+
     curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
     curl_easy_setopt(ch, CURLOPT_SSLKEYTYPE, "PEM");
 
