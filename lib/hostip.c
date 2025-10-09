@@ -888,8 +888,10 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     st = data->set.resolver_start(resolver, NULL,
                                   data->set.resolver_start_client);
     Curl_set_in_callback(data, FALSE);
-    if(st)
+    if(st) {
+      keep_negative = FALSE;
       goto error;
+    }
   }
 
   /* shortcut literal IP addresses, if we are not told to resolve them. */
