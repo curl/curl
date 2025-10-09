@@ -60,3 +60,7 @@ Thank you to all our backers :pray: [Become a backer](https://opencollective.com
 ## Sponsors
 
 Support this project by becoming a [sponsor](https://curl.se/sponsors.html).
+
+## Special Thanks
+
+Arjan Prandeep contributor
