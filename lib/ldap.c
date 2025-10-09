@@ -553,27 +553,15 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         result = CURLE_FAILED_INIT;
       else {
         name_len = strlen(name);
-
         result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
       }
+      if(!result)
+        result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
+      if(!result)
+        result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       if(result) {
         FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
-        goto quit;
-      }
-
-      result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
-      if(result) {
-        FREE_ON_WINLDAP(name);
-        ldap_memfree(dn);
-        goto quit;
-      }
-
-      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
-      if(result) {
-        FREE_ON_WINLDAP(name);
-        ldap_memfree(dn);
-
         goto quit;
       }
 
