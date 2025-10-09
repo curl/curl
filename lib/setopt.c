@@ -879,7 +879,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
-    return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
+    if(arg != -1)
+      return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
+    s->dns_cache_timeout_ms = -1;
+    break;
 
   case CURLOPT_CA_CACHE_TIMEOUT:
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
