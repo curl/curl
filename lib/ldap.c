@@ -535,7 +535,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     /* Get the DN and write it to the client */
     {
       char *name;
-      size_t name_len;
+      size_t name_len = 0;
 #ifdef USE_WIN32_LDAP
       TCHAR *dn = ldap_get_dn(server, entryIterator);
       name = curlx_convert_tchar_to_UTF8(dn);
