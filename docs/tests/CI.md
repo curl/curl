@@ -30,7 +30,7 @@ Consider the following table while looking at pull request failures:
  | ----------------------------------- | ------ | -------------------------- |
  | Linux / macOS / Windows / ...       | stable | all errors and failures    |
  | Fuzzer                              | stable | fuzzing results            |
- | CodeQL                              | stable | new findings               |
+ | Code analyzers                      | stable | new findings               |
  | checkdocs / checksrc / dist / ...   | stable | all errors and failures    |
  | AppVeyor                            | stable | all errors and failures    |
  | buildbot/curl_Schannel ...          | stable | all errors and failures    |
