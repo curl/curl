@@ -1555,7 +1555,8 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
   result = Curl_async_is_resolved(data, dns);
   if(*dns)
     show_resolve_info(data, *dns);
-  if(result)
+  if((result == CURLE_COULDNT_RESOLVE_HOST) ||
+     (result == CURLE_COULDNT_RESOLVE_PROXY))
     store_negative_resolve(data, data->state.async.hostname,
                            data->state.async.port);
   return result;
