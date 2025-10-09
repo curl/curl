@@ -22,7 +22,7 @@ extend-ignore-re = [
 [files]
 extend-exclude = [
   ".github/scripts/codespell-ignore.words",
-  ".github/scripts/spellcheck.words",
+  ".github/scripts/pyspelling.words",
   "docs/THANKS",
   "packages/*",
   "projects/Windows/tmpl/curl.vcxproj",
