@@ -647,6 +647,22 @@ static CURLcode ws_enc_add_cntrl(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static curl_off_t ws_payload_remain(curl_off_t payload_total,
+                                    curl_off_t payload_offset,
+                                    size_t payload_buffered)
+{
+  curl_off_t remain = payload_total - payload_offset;
+  if((payload_total < 0) || (payload_offset < 0) || (remain < 0))
+    return -1;
+#if SIZEOF_OFF_T <= SIZEOF_SIZE_T
+  if((curl_off_t)payload_buffered < 0)
+    return -1;
+#endif
+  if(remain < (curl_off_t)payload_buffered)
+    return -1;
+  return remain - (curl_off_t)payload_buffered;
+}
+
 static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
                                int frame_age, int frame_flags,
                                curl_off_t payload_offset,
@@ -663,13 +679,11 @@ static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
 
   (void)frame_age;
   *pnwritten = 0;
-  remain = payload_len - payload_offset;
-  if(((curl_off_t)buflen < 0) ||
-     (remain < (curl_off_t)buflen)) {
+  remain = ws_payload_remain(payload_len, payload_offset, buflen);
+  if(remain < 0) {
     DEBUGASSERT(0); /* parameter mismatch */
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  remain -= (curl_off_t)buflen;
 
   if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
@@ -1462,13 +1476,11 @@ static CURLcode ws_client_collect(const unsigned char *buf, size_t buflen,
   CURLcode result = CURLE_OK;
 
   *pnwritten = 0;
-  remain = payload_len - payload_offset;
-  if(((curl_off_t)buflen < 0) ||
-     (remain < (curl_off_t)buflen)) {
+  remain = ws_payload_remain(payload_len, payload_offset, buflen);
+  if(remain < 0) {
     DEBUGASSERT(0); /* parameter mismatch */
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  remain -= (curl_off_t)buflen;
 
   if(!ctx->bufidx) {
     /* first write */
