@@ -53,7 +53,7 @@ my @non_ascii_allowed = (
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
 
 my @non_ascii = (
-    ".github/scripts/spellcheck.words",
+    ".github/scripts/pyspelling.words",
     ".mailmap",
     "RELEASE-NOTES",
     "docs/BINDINGS.md",
