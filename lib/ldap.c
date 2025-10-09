@@ -549,9 +549,13 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
       char *dn = name = ldap_get_dn(server, entryIterator);
 #endif
-      name_len = strlen(name);
+      if(!name)
+        result = CURLE_FAILED_INIT;
+      else {
+        name_len = strlen(name);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
+        result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
+      }
       if(result) {
         FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
