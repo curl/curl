@@ -102,7 +102,6 @@ This release includes the following bugfixes:
  o httpsrr: free old pointers when storing new [57]
  o INSTALL-CMAKE.md: document useful build targets [215]
  o INTERNALS: drop Winsock 2.2 from the dependency list [162]
- o INTERNALS: specify minimum version for Heimdal: 7.1.0 [158]
  o ip-happy: do not set unnecessary timeout [95]
  o ip-happy: prevent event-based stall on retry [155]
  o krb5: return appropriate error on send failures [22]
@@ -448,7 +447,6 @@ References to bug reports and discussions on issues:
  [155] = https://curl.se/bug/?i=18815
  [156] = https://curl.se/bug/?i=18893
  [157] = https://curl.se/bug/?i=18806
- [158] = https://curl.se/bug/?i=18809
  [159] = https://curl.se/bug/?i=18924
  [160] = https://curl.se/bug/?i=18810
  [161] = https://curl.se/bug/?i=18749
