@@ -611,8 +611,8 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
 
   sspi_status =
     Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-                                     SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                     &pCertContextServer);
+                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                        &pCertContextServer);
 
   if((sspi_status != SEC_E_OK) || !pCertContextServer) {
     char buffer[WINAPI_ERROR_LEN];
@@ -667,13 +667,14 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
       goto cleanup;
     }
     actual_len = cert_get_name_string(data, pCertContextServer,
-                 (LPTSTR)cert_hostname_buff, len, alt_name_info, Win8_compat);
+                                      (LPTSTR)cert_hostname_buff, len,
+                                      alt_name_info, Win8_compat);
 
     /* Sanity check */
     if(actual_len != len) {
       failf(data,
-      "schannel: CertGetNameString() returned certificate "
-      "name information of unexpected size");
+            "schannel: CertGetNameString() returned certificate "
+            "name information of unexpected size");
       goto cleanup;
     }
 
@@ -684,7 +685,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     while(cert_hostname_buff_index < len &&
           cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
           result == CURLE_PEER_FAILED_VERIFICATION) {
-
       char *cert_hostname;
 
       /* Comparing the cert name and the connection hostname encoded as UTF-8
@@ -692,15 +692,14 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
        * (or some equivalent) encoding
        */
       cert_hostname = curlx_convert_tchar_to_UTF8(
-      &cert_hostname_buff[cert_hostname_buff_index]);
+        &cert_hostname_buff[cert_hostname_buff_index]);
       if(!cert_hostname) {
         result = CURLE_OUT_OF_MEMORY;
       }
       else {
         if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
                                conn_hostname, hostlen)) {
-          infof(data,
-                "schannel: connection hostname (%s) validated "
+          infof(data, "schannel: connection hostname (%s) validated "
                 "against certificate name (%s)",
                 conn_hostname, cert_hostname);
           result = CURLE_OK;
@@ -736,6 +735,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   }
 
 cleanup:
+  LocalFree(alt_name_info);
   Curl_safefree(cert_hostname_buff);
 
   if(pCertContextServer)
