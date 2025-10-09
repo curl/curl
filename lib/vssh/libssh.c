@@ -1864,6 +1864,9 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
       sshc->actualcode = CURLE_QUOTE_ERROR;
       return SSH_NO_ERROR;
     }
+    if(date > UINT_MAX)
+      /* because the liubssh API can't deal with a larger value */
+      date = UINT_MAX;
     if(!strncmp(cmd, "atime", 5))
       sshc->quote_attrs->atime = (uint32_t)date;
     else /* mtime */
