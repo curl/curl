@@ -241,9 +241,6 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
 # else
 #  include <gssapi.h>
 # endif
-# ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
-#  include <gssapi/gssapi_generic.h>
-# endif
 #endif
 
 /* meta key for storing KRB5 meta at connection */
