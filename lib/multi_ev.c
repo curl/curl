@@ -517,7 +517,8 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
     else
       last_ps = mev_add_new_xfer_pollset(data);
     if(!last_ps) {
-      res = CURLM_OUT_OF_MEMORY;
+      DEBUGASSERT(0);
+      res = CURLM_INTERNAL_ERROR;
       goto out;
     }
   }
