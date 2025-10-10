@@ -42,9 +42,9 @@ environments. Sometimes a flaky failed test may occur in any jobs.
 
 Windows jobs have a number of flaky issues, most often, these:
 - test run hanging and timing out after 20 minutes.
-- test run aborting with 2304.
+- test run aborting with 2304 (0x900) or 3840 (0xF00).
 - test run crashing with fork errors.
-- steps past the test run exiting with -1073741502.
+- steps past the test run exiting with -1073741502 (0xC0000142).
 
 In these cases you can just try to update your pull requests to rerun the tests
 later as described below.
