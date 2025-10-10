@@ -107,16 +107,12 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 {
   curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
   if(!t) {
-#ifndef UNDER_CE
     DWORD gle = GetLastError();
     /* !checksrc! disable ERRNOVAR 1 */
     int err = (gle == ERROR_ACCESS_DENIED ||
                gle == ERROR_NOT_ENOUGH_MEMORY) ?
                EACCES : EINVAL;
     CURL_SETERRNO(err);
-#else
-    CURL_SETERRNO(31); /* Windows ERROR_GEN_FAILURE */
-#endif
     return curl_thread_t_null;
   }
   return t;
