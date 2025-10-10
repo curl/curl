@@ -390,7 +390,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-    BIO_printf(mem, "%lx", X509_get_version(x));
+    BIO_printf(mem, "%lx", (unsigned long)X509_get_version(x));
     result = push_certinfo(data, mem, "Version", i);
     if(result)
       break;
@@ -499,9 +499,9 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #else
           RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-          BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
+          BIO_printf(mem, "%d", (int)(n ? BN_num_bits(n) : 0));
 #else
-          BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
+          BIO_printf(mem, "%d", (int)(rsa->n ? BN_num_bits(rsa->n) : 0));
 #endif /* HAVE_OPAQUE_RSA_DSA_DH */
           result = push_certinfo(data, mem, "RSA Public Key", i);
           if(result)
@@ -696,7 +696,7 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
 
   result = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, FALSE,
                              &nwritten);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %u, %zu",
               blen, result, nwritten);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
@@ -725,7 +725,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
     return 0;
 
   result = Curl_conn_cf_recv(cf->next, data, buf, (size_t)blen, &nread);
-  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %d, %zu",
+  CURL_TRC_CF(data, cf, "ossl_bio_cf_in_read(len=%d) -> %u, %zu",
               blen, result, nread);
   BIO_clear_retry_flags(bio);
   octx->io_result = result;
@@ -2349,7 +2349,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     break;
   default:
     DEBUGASSERT(0);
-    failf(data, "unexpected ssl peer type: %d", peer->type);
+    failf(data, "unexpected ssl peer type: %u", peer->type);
     return CURLE_PEER_FAILED_VERIFICATION;
   }
 
@@ -2812,7 +2812,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   case 0:
     break;
   default:
-    curl_msnprintf(unknown, sizeof(unknown), "(%x)", ssl_ver);
+    curl_msnprintf(unknown, sizeof(unknown), "(%x)", (unsigned int)ssl_ver);
     verstr = unknown;
     break;
   }
@@ -3401,7 +3401,7 @@ static CURLcode ossl_load_trust_anchors(struct Curl_cfilter *cf,
   if(conn_config->ca_info_blob) {
     result = load_cacert_from_memory(store, conn_config->ca_info_blob);
     if(result) {
-      failf(data, "error adding trust anchors from certificate blob: %d",
+      failf(data, "error adding trust anchors from certificate blob: %u",
             result);
       return result;
     }
@@ -5617,7 +5617,7 @@ out:
      *   until more data arrives */
     connssl->input_pending = FALSE;
   }
-  CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %d, %zu (in_pending=%d)",
+  CURL_TRC_CF(data, cf, "ossl_recv(len=%zu) -> %u, %zu (in_pending=%d)",
               buffersize, result, *pnread, connssl->input_pending);
   return result;
 }

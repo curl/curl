@@ -369,7 +369,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
     if(result)
       Curl_resolv_unlink(data, &data->state.async.dns);
     *dns = data->state.async.dns;
-    CURL_TRC_DNS(data, "is_resolved() result=%d, dns=%sfound",
+    CURL_TRC_DNS(data, "is_resolved() result=%u, dns=%sfound",
                  result, *dns ? "" : "not ");
     async_ares_cleanup(data);
   }
@@ -706,7 +706,7 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
 
   (void)timeouts;
   --ares->num_pending;
-  CURL_TRC_DNS(data, "ares: httpsrr done, status=%d, pending=%d, "
+  CURL_TRC_DNS(data, "ares: httpsrr done, status=%u, pending=%d, "
                "dnsres=%sfound",
                status, ares->num_pending,
                (dnsrec &&

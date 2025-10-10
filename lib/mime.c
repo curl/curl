@@ -1969,7 +1969,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 
   /* Once we have errored, we will return the same error forever */
   if(ctx->errored) {
-    CURL_TRC_READ(data, "cr_mime_read(len=%zu) is errored -> %d, eos=0",
+    CURL_TRC_READ(data, "cr_mime_read(len=%zu) is errored -> %u, eos=0",
                   blen, ctx->error_result);
     *pnread = 0;
     *peos = FALSE;
@@ -2025,7 +2025,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   else
     nread = Curl_mime_read(buf, 1, blen, ctx->part);
 
-  CURL_TRC_READ(data, "cr_mime_read(len=%zu), mime_read() -> %zd",
+  CURL_TRC_READ(data, "cr_mime_read(len=%zu), mime_read() -> %zu",
                 blen, nread);
 
   switch(nread) {
@@ -2087,7 +2087,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   }
 
   CURL_TRC_READ(data, "cr_mime_read(len=%zu, total=%" FMT_OFF_T
-                ", read=%"FMT_OFF_T") -> %d, %zu, %d",
+                ", read=%"FMT_OFF_T") -> %u, %zu, %d",
                 blen, ctx->total_len, ctx->read_len, result, *pnread, *peos);
   return result;
 }

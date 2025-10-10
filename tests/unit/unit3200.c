@@ -92,7 +92,7 @@ static CURLcode test_unit3200(const char *arg)
     fp = curlx_fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
-    curl_mfprintf(stderr, "Test %zd...", i);
+    curl_mfprintf(stderr, "Test %zu...", i);
     switch(i) {
       case 0:
         rc = Curl_get_line(&buf, fp);

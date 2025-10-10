@@ -46,7 +46,7 @@ static CURLcode test_lib1906(const char *URL)
   res = curl_easy_perform(curl);
   if(res != CURLE_COULDNT_CONNECT && res != CURLE_OPERATION_TIMEDOUT) {
     curl_mfprintf(stderr, "failure expected, "
-                  "curl_easy_perform returned %d: <%s>, <%s>\n",
+                  "curl_easy_perform returned %u: <%s>, <%s>\n",
                   res, curl_easy_strerror(res), error_buffer);
     if(res == CURLE_OK)
       res = TEST_ERR_MAJOR_BAD;  /* force an error return */
@@ -66,7 +66,7 @@ static CURLcode test_lib1906(const char *URL)
   res = curl_easy_perform(curl);
   if(res)
     curl_mfprintf(stderr, "success expected, "
-                  "curl_easy_perform returned %d: <%s>, <%s>\n",
+                  "curl_easy_perform returned %u: <%s>, <%s>\n",
                   res, curl_easy_strerror(res), error_buffer);
 
   /* print url */

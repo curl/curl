@@ -306,7 +306,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                      sizeof(doh_req->req_body),
                      &doh_req->req_body_len);
   if(d) {
-    failf(data, "Failed to encode DoH packet [%d]", d);
+    failf(data, "Failed to encode DoH packet [%u]", d);
     result = CURLE_OUT_OF_MEMORY;
     goto error;
   }

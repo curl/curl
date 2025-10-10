@@ -575,7 +575,7 @@ static CURLcode cookie_setopts(struct OperationConfig *config, CURL *curl)
 
       if(result) {
         warnf("skipped provided cookie, the cookie header "
-              "would go over %u bytes", MAX_COOKIE_LINE);
+              "would go over %d bytes", MAX_COOKIE_LINE);
         return result;
       }
     }

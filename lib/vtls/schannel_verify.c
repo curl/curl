@@ -314,7 +314,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
 
   if(file_size.QuadPart > MAX_CAFILE_SIZE) {
     failf(data,
-          "schannel: CA file exceeds max size of %u bytes",
+          "schannel: CA file exceeds max size of %d bytes",
           MAX_CAFILE_SIZE);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;

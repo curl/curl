@@ -190,7 +190,7 @@ void ws_close(CURL *curl);
   CURLcode ec;                                                \
   if((ec = curl_easy_setopt((A), (B), (C))) != CURLE_OK) {    \
     curl_mfprintf(stderr, "%s:%d curl_easy_setopt() failed, " \
-                  "with code %d (%s)\n",                      \
+                  "with code %u (%s)\n",                      \
                   (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \
@@ -494,7 +494,7 @@ void ws_close(CURL *curl);
   CURLcode ec;                                                \
   if((ec = curl_global_init((A))) != CURLE_OK) {              \
     curl_mfprintf(stderr, "%s:%d curl_global_init() failed, " \
-                  "with code %d (%s)\n",                      \
+                  "with code %u (%s)\n",                      \
                   (Y), (Z), ec, curl_easy_strerror(ec));      \
     res = ec;                                                 \
   }                                                           \

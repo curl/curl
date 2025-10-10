@@ -654,7 +654,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     if(!config->synthetic_error && result &&
        (!global->silent || global->showerror)) {
       const char *msg = per->errorbuffer;
-      curl_mfprintf(tool_stderr, "curl: (%d) %s\n", result,
+      curl_mfprintf(tool_stderr, "curl: (%u) %s\n", result,
                     msg[0] ? msg : curl_easy_strerror(result));
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
@@ -732,7 +732,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     if(!result && rc) {
       /* something went wrong in the writing process */
       result = CURLE_WRITE_ERROR;
-      errorf("curl: (%d) Failed writing body", result);
+      errorf("curl: (%u) Failed writing body", result);
     }
     if(result && config->rm_partial) {
       struct_stat st;
@@ -837,7 +837,7 @@ static CURLcode append2query(struct OperationConfig *config,
                         CURLU_GUESS_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
-      errorf("(%d) Could not parse the URL, "
+      errorf("(%u) Could not parse the URL, "
              "failed to set query", result);
       config->synthetic_error = TRUE;
     }
