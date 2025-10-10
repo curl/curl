@@ -313,7 +313,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
     req_flags |= GSS_C_MUTUAL_FLAG;
 
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_POLICY_FLAG) {
-#ifdef GSS_C_DELEG_POLICY_FLAG
+#ifdef GSS_C_DELEG_POLICY_FLAG  /* MIT Kerberos 1.8+, missing from GNU GSS */
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
     infof(data, "WARNING: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
