@@ -39,7 +39,9 @@
 #include <windows.h>
 #endif
 
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -296,9 +298,11 @@ int main(void)
       }
     }
     else {
+#ifndef UNDER_CE
       mem_addf(&t->log, "Failed to create body output file %s: %s\n",
                t->bodyfile, strerror(errno));
       fprintf(stderr, "%s", t->log.recent);
+#endif
       failed = 1;
     }
 
@@ -307,10 +311,12 @@ int main(void)
 
       if(fp && t->log.len == fwrite(t->log.buf, 1, t->log.len, fp))
         fprintf(stderr, "Transfer log written to %s\n", t->logfile);
+#ifndef UNDER_CE
       else {
         fprintf(stderr, "Failed to write transfer log to %s: %s\n",
                 t->logfile, strerror(errno));
       }
+#endif
 
       if(fp)
         fclose(fp);
