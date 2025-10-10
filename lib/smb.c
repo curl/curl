@@ -565,6 +565,11 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
   nbt_size = Curl_read16_be((const unsigned char *)
                             (buf + sizeof(unsigned short))) +
     sizeof(unsigned int);
+  if(nbt_size > MAX_MESSAGE_SIZE) {
+    failf(data, "unable to handle NetBIOS frame size %zu", nbt_size);
+    return CURLE_RECV_ERROR;
+  }
+
   if(smbc->got < nbt_size)
     return CURLE_OK;
 
