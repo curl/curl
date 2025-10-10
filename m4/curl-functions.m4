@@ -522,7 +522,7 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
   #
   if test "$tst_compi_alarm" = "yes"; then
     AC_MSG_CHECKING([if alarm usage allowed])
-    if test "x$curl_disallow_alarm" != "xyes"; then
+    if test "$curl_disallow_alarm" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_alarm="yes"
     else
@@ -613,7 +613,7 @@ AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
   #
   if test "$tst_compi_basename" = "yes"; then
     AC_MSG_CHECKING([if basename usage allowed])
-    if test "x$curl_disallow_basename" != "xyes"; then
+    if test "$curl_disallow_basename" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_basename="yes"
     else
@@ -703,7 +703,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   #
   if test "$tst_compi_closesocket" = "yes"; then
     AC_MSG_CHECKING([if closesocket usage allowed])
-    if test "x$curl_disallow_closesocket" != "xyes"; then
+    if test "$curl_disallow_closesocket" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_closesocket="yes"
     else
@@ -782,7 +782,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
   #
   if test "$tst_compi_closesocket_camel" = "yes"; then
     AC_MSG_CHECKING([if CloseSocket usage allowed])
-    if test "x$curl_disallow_closesocket_camel" != "xyes"; then
+    if test "$curl_disallow_closesocket_camel" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_closesocket_camel="yes"
     else
@@ -865,7 +865,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
   #
   if test "$tst_compi_fcntl" = "yes"; then
     AC_MSG_CHECKING([if fcntl usage allowed])
-    if test "x$curl_disallow_fcntl" != "xyes"; then
+    if test "$curl_disallow_fcntl" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_fcntl="yes"
     else
@@ -931,7 +931,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
   #
   if test "$tst_compi_fcntl_o_nonblock" = "yes"; then
     AC_MSG_CHECKING([if fcntl O_NONBLOCK usage allowed])
-    if test "x$curl_disallow_fcntl_o_nonblock" != "xyes"; then
+    if test "$curl_disallow_fcntl_o_nonblock" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_fcntl_o_nonblock="yes"
     else
@@ -1025,7 +1025,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FREEADDRINFO], [
   #
   if test "$tst_compi_freeaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if freeaddrinfo usage allowed])
-    if test "x$curl_disallow_freeaddrinfo" != "xyes"; then
+    if test "$curl_disallow_freeaddrinfo" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_freeaddrinfo="yes"
     else
@@ -1138,7 +1138,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
   #
   if test "$tst_compi_fsetxattr" = "yes"; then
     AC_MSG_CHECKING([if fsetxattr usage allowed])
-    if test "x$curl_disallow_fsetxattr" != "xyes"; then
+    if test "$curl_disallow_fsetxattr" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_fsetxattr="yes"
     else
@@ -1232,7 +1232,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
   #
   if test "$tst_compi_ftruncate" = "yes"; then
     AC_MSG_CHECKING([if ftruncate usage allowed])
-    if test "x$curl_disallow_ftruncate" != "xyes"; then
+    if test "$curl_disallow_ftruncate" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ftruncate="yes"
     else
@@ -1339,7 +1339,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
     CURL_RUN_IFELSE([
@@ -1389,7 +1389,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   if test "$tst_compi_getaddrinfo" = "yes" &&
     test "$tst_works_getaddrinfo" != "no"; then
     AC_MSG_CHECKING([if getaddrinfo usage allowed])
-    if test "x$curl_disallow_getaddrinfo" != "xyes"; then
+    if test "$curl_disallow_getaddrinfo" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_getaddrinfo="yes"
     else
@@ -1415,7 +1415,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
-    if test "$curl_cv_apple" = 'yes'; then
+    if test "$curl_cv_apple" = "yes"; then
       dnl Darwin 6.0 and macOS 10.2.X and newer
       tst_tsafe_getaddrinfo="yes"
     fi
@@ -1597,7 +1597,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
   #
   if test "$tst_compi_gethostbyname_r" = "yes"; then
     AC_MSG_CHECKING([if gethostbyname_r usage allowed])
-    if test "x$curl_disallow_gethostbyname_r" != "xyes"; then
+    if test "$curl_disallow_gethostbyname_r" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_gethostbyname_r="yes"
     else
@@ -1745,7 +1745,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
   #
   if test "$tst_compi_gethostname" = "yes"; then
     AC_MSG_CHECKING([if gethostname usage allowed])
-    if test "x$curl_disallow_gethostname" != "xyes"; then
+    if test "$curl_disallow_gethostname" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_gethostname="yes"
     else
@@ -1843,7 +1843,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
   #
   if test "$tst_compi_getpeername" = "yes"; then
     AC_MSG_CHECKING([if getpeername usage allowed])
-    if test "x$curl_disallow_getpeername" != "xyes"; then
+    if test "$curl_disallow_getpeername" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_getpeername="yes"
     else
@@ -1941,7 +1941,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   #
   if test "$tst_compi_getsockname" = "yes"; then
     AC_MSG_CHECKING([if getsockname usage allowed])
-    if test "x$curl_disallow_getsockname" != "xyes"; then
+    if test "$curl_disallow_getsockname" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_getsockname="yes"
     else
@@ -2027,7 +2027,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
     CURL_RUN_IFELSE([
@@ -2058,7 +2058,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   if test "$tst_compi_getifaddrs" = "yes" &&
     test "$tst_works_getifaddrs" != "no"; then
     AC_MSG_CHECKING([if getifaddrs usage allowed])
-    if test "x$curl_disallow_getifaddrs" != "xyes"; then
+    if test "$curl_disallow_getifaddrs" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_getifaddrs="yes"
     else
@@ -2148,7 +2148,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
     CURL_RUN_IFELSE([
@@ -2178,7 +2178,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   if test "$tst_compi_gmtime_r" = "yes" &&
     test "$tst_works_gmtime_r" != "no"; then
     AC_MSG_CHECKING([if gmtime_r usage allowed])
-    if test "x$curl_disallow_gmtime_r" != "xyes"; then
+    if test "$curl_disallow_gmtime_r" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_gmtime_r="yes"
     else
@@ -2268,7 +2268,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
     CURL_RUN_IFELSE([
@@ -2339,7 +2339,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   if test "$tst_compi_inet_ntop" = "yes" &&
     test "$tst_works_inet_ntop" != "no"; then
     AC_MSG_CHECKING([if inet_ntop usage allowed])
-    if test "x$curl_disallow_inet_ntop" != "xyes"; then
+    if test "$curl_disallow_inet_ntop" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_inet_ntop="yes"
     else
@@ -2429,7 +2429,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
     CURL_RUN_IFELSE([
@@ -2493,7 +2493,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   if test "$tst_compi_inet_pton" = "yes" &&
     test "$tst_works_inet_pton" != "no"; then
     AC_MSG_CHECKING([if inet_pton usage allowed])
-    if test "x$curl_disallow_inet_pton" != "xyes"; then
+    if test "$curl_disallow_inet_pton" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_inet_pton="yes"
     else
@@ -2579,7 +2579,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
   #
   if test "$tst_compi_ioctl" = "yes"; then
     AC_MSG_CHECKING([if ioctl usage allowed])
-    if test "x$curl_disallow_ioctl" != "xyes"; then
+    if test "$curl_disallow_ioctl" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctl="yes"
     else
@@ -2637,7 +2637,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
   #
   if test "$tst_compi_ioctl_fionbio" = "yes"; then
     AC_MSG_CHECKING([if ioctl FIONBIO usage allowed])
-    if test "x$curl_disallow_ioctl_fionbio" != "xyes"; then
+    if test "$curl_disallow_ioctl_fionbio" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctl_fionbio="yes"
     else
@@ -2694,7 +2694,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
   #
   if test "$tst_compi_ioctl_siocgifaddr" = "yes"; then
     AC_MSG_CHECKING([if ioctl SIOCGIFADDR usage allowed])
-    if test "x$curl_disallow_ioctl_siocgifaddr" != "xyes"; then
+    if test "$curl_disallow_ioctl_siocgifaddr" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctl_siocgifaddr="yes"
     else
@@ -2782,7 +2782,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
   #
   if test "$tst_compi_ioctlsocket" = "yes"; then
     AC_MSG_CHECKING([if ioctlsocket usage allowed])
-    if test "x$curl_disallow_ioctlsocket" != "xyes"; then
+    if test "$curl_disallow_ioctlsocket" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctlsocket="yes"
     else
@@ -2841,7 +2841,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
   #
   if test "$tst_compi_ioctlsocket_fionbio" = "yes"; then
     AC_MSG_CHECKING([if ioctlsocket FIONBIO usage allowed])
-    if test "x$curl_disallow_ioctlsocket_fionbio" != "xyes"; then
+    if test "$curl_disallow_ioctlsocket_fionbio" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctlsocket_fionbio="yes"
     else
@@ -2915,7 +2915,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   #
   if test "$tst_compi_ioctlsocket_camel" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket usage allowed])
-    if test "x$curl_disallow_ioctlsocket_camel" != "xyes"; then
+    if test "$curl_disallow_ioctlsocket_camel" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctlsocket_camel="yes"
     else
@@ -2973,7 +2973,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
   #
   if test "$tst_compi_ioctlsocket_camel_fionbio" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket FIONBIO usage allowed])
-    if test "x$curl_disallow_ioctlsocket_camel_fionbio" != "xyes"; then
+    if test "$curl_disallow_ioctlsocket_camel_fionbio" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_ioctlsocket_camel_fionbio="yes"
     else
@@ -3076,7 +3076,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
   #
   if test "$tst_compi_memrchr" = "yes"; then
     AC_MSG_CHECKING([if memrchr usage allowed])
-    if test "x$curl_disallow_memrchr" != "xyes"; then
+    if test "$curl_disallow_memrchr" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_memrchr="yes"
     else
@@ -3161,7 +3161,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
   #
   if test "$tst_compi_sigaction" = "yes"; then
     AC_MSG_CHECKING([if sigaction usage allowed])
-    if test "x$curl_disallow_sigaction" != "xyes"; then
+    if test "$curl_disallow_sigaction" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_sigaction="yes"
     else
@@ -3246,7 +3246,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
   #
   if test "$tst_compi_siginterrupt" = "yes"; then
     AC_MSG_CHECKING([if siginterrupt usage allowed])
-    if test "x$curl_disallow_siginterrupt" != "xyes"; then
+    if test "$curl_disallow_siginterrupt" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_siginterrupt="yes"
     else
@@ -3331,7 +3331,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
   #
   if test "$tst_compi_signal" = "yes"; then
     AC_MSG_CHECKING([if signal usage allowed])
-    if test "x$curl_disallow_signal" != "xyes"; then
+    if test "$curl_disallow_signal" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_signal="yes"
     else
@@ -3438,7 +3438,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
   #
   if test "$tst_compi_sigsetjmp" = "yes"; then
     AC_MSG_CHECKING([if sigsetjmp usage allowed])
-    if test "x$curl_disallow_sigsetjmp" != "xyes"; then
+    if test "$curl_disallow_sigsetjmp" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_sigsetjmp="yes"
     else
@@ -3535,7 +3535,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   #
   if test "$tst_compi_socket" = "yes"; then
     AC_MSG_CHECKING([if socket usage allowed])
-    if test "x$curl_disallow_socket" != "xyes"; then
+    if test "$curl_disallow_socket" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_socket="yes"
     else
@@ -3621,7 +3621,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
   #
   if test "$tst_compi_socketpair" = "yes"; then
     AC_MSG_CHECKING([if socketpair usage allowed])
-    if test "x$curl_disallow_socketpair" != "xyes"; then
+    if test "$curl_disallow_socketpair" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_socketpair="yes"
     else
@@ -3706,7 +3706,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
   #
   if test "$tst_compi_strcasecmp" = "yes"; then
     AC_MSG_CHECKING([if strcasecmp usage allowed])
-    if test "x$curl_disallow_strcasecmp" != "xyes"; then
+    if test "$curl_disallow_strcasecmp" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_strcasecmp="yes"
     else
@@ -3790,7 +3790,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
   #
   if test "$tst_compi_strcmpi" = "yes"; then
     AC_MSG_CHECKING([if strcmpi usage allowed])
-    if test "x$curl_disallow_strcmpi" != "xyes"; then
+    if test "$curl_disallow_strcmpi" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_strcmpi="yes"
     else
@@ -3876,7 +3876,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRDUP], [
   #
   if test "$tst_compi_strdup" = "yes"; then
     AC_MSG_CHECKING([if strdup usage allowed])
-    if test "x$curl_disallow_strdup" != "xyes"; then
+    if test "$curl_disallow_strdup" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_strdup="yes"
     else
@@ -4016,7 +4016,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
@@ -4079,7 +4079,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
@@ -4126,7 +4126,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   if test "$tst_allow_strerror_r" = "check"; then
     AC_MSG_CHECKING([if strerror_r usage allowed])
-    if test "x$curl_disallow_strerror_r" != "xyes"; then
+    if test "$curl_disallow_strerror_r" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_strerror_r="yes"
     else
@@ -4227,7 +4227,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
   #
   if test "$tst_compi_stricmp" = "yes"; then
     AC_MSG_CHECKING([if stricmp usage allowed])
-    if test "x$curl_disallow_stricmp" != "xyes"; then
+    if test "$curl_disallow_stricmp" != "yes"; then
       AC_MSG_RESULT([yes])
       tst_allow_stricmp="yes"
     else
@@ -4259,7 +4259,7 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  if test "$curl_cv_apple" = 'yes'; then
+  if test "$curl_cv_apple" = "yes"; then
     AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
   else
     oldcc=$CC
@@ -4291,10 +4291,10 @@ AC_DEFUN([CURL_COVERAGE],[
     coverage="$enableval")
 
   dnl if not gcc or clang switch off again
-  AS_IF([test "$compiler_id" != "GNU_C" -a "$compiler_id" != "CLANG" -a "$compiler_id" != "APPLECLANG"], coverage="no" )
+  AS_IF([test "$compiler_id" != "GNU_C" && test "$compiler_id" != "CLANG" && test "$compiler_id" != "APPLECLANG"], coverage="no" )
   AC_MSG_RESULT($coverage)
 
-  if test "x$coverage" = "xyes"; then
+  if test "$coverage" = "yes"; then
     curl_coverage_msg="enabled"
 
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
@@ -4390,11 +4390,11 @@ AC_DEFUN([CURL_SIZEOF], [
       r=0
     ])
     dnl get out of the loop once matched
-    if test $r -gt 0; then
+    if test "$r" -gt 0; then
       break;
     fi
   done
-  if test $r -eq 0; then
+  if test "$r" -eq 0; then
     AC_MSG_ERROR([Failed to find size of $1])
   fi
   AC_MSG_RESULT($r)
