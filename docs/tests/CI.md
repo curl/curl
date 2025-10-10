@@ -49,8 +49,8 @@ Windows jobs have a number of flaky issues, most often, these:
 In these cases you can just try to update your pull requests to rerun the tests
 later as described below.
 
-A detailed overview of test runs and results can be found at:
-https://testclutch.curl.se/
+A detailed overview of test runs and results can be found on
+[Test Clutch](https://testclutch.curl.se/).
 
 ## CI servers
 
