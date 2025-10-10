@@ -419,12 +419,12 @@ struct hostname {
  * Flags on the keepon member of the Curl_transfer_keeper
  */
 
-#define KEEP_NONE  0
-#define KEEP_RECV  (1<<0)     /* there is or may be data to read */
-#define KEEP_SEND (1<<1)     /* there is or may be data to write */
-#define KEEP_RECV_HOLD (1<<2) /* when set, no reading should be done but there
-                                 might still be data to read */
-#define KEEP_SEND_HOLD (1<<3) /* when set, no writing should be done but there
+#define KEEP_NONE       0
+#define KEEP_RECV       (1<<0) /* there is or may be data to read */
+#define KEEP_SEND       (1<<1) /* there is or may be data to write */
+#define KEEP_RECV_HOLD  (1<<2) /* when set, no reading should be done but there
+                                  might still be data to read */
+#define KEEP_SEND_HOLD  (1<<3) /* when set, no writing should be done but there
                                   might still be data to write */
 #define KEEP_RECV_PAUSE (1<<4) /* reading is paused */
 #define KEEP_SEND_PAUSE (1<<5) /* writing is paused */
@@ -543,10 +543,10 @@ struct Curl_handler {
                      followtype type);
 
   int defport;            /* Default port. */
-  curl_prot_t protocol;  /* See CURLPROTO_* - this needs to be the single
-                            specific protocol bit */
-  curl_prot_t family;    /* single bit for protocol family; basically the
-                            non-TLS name of the protocol this is */
+  curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
+                             specific protocol bit */
+  curl_prot_t family;     /* single bit for protocol family; basically the
+                             non-TLS name of the protocol this is */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 
 };
@@ -574,13 +574,13 @@ struct Curl_handler {
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
-#define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
+#define PROTOPT_WILDCARD (1<<12)    /* protocol supports wildcard matching */
 #define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ASCII) in
                                        username and password */
-#define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
-#define PROTOPT_SSL_REUSE (1<<15)  /* this protocol may reuse an existing
-                                      SSL connection in the same family
-                                      without having PROTOPT_SSL. */
+#define PROTOPT_NOTCPPROXY (1<<14)  /* this protocol cannot proxy over TCP */
+#define PROTOPT_SSL_REUSE (1<<15)   /* this protocol may reuse an existing
+                                       SSL connection in the same family
+                                       without having PROTOPT_SSL. */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
