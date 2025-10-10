@@ -32,14 +32,9 @@
  *
  */
 
-#ifdef _WIN32
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#include <windows.h>
-#endif
-
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -47,6 +42,10 @@
 #include <curl/curl.h>
 
 #ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#include <windows.h>
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #define unlink _unlink
@@ -157,7 +156,7 @@ static int mem_addf(struct mem *mem, const char *format, ...)
       return x;
     }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
     /* Not all versions of Windows CRT vsnprintf are compliant with C99. Some
        return -1 if buffer too small. Try _vscprintf to get the needed size. */
     if(!i && x < 0) {
@@ -296,9 +295,11 @@ int main(void)
       }
     }
     else {
+#ifndef UNDER_CE
       mem_addf(&t->log, "Failed to create body output file %s: %s\n",
                t->bodyfile, strerror(errno));
       fprintf(stderr, "%s", t->log.recent);
+#endif
       failed = 1;
     }
 
@@ -307,10 +308,12 @@ int main(void)
 
       if(fp && t->log.len == fwrite(t->log.buf, 1, t->log.len, fp))
         fprintf(stderr, "Transfer log written to %s\n", t->logfile);
+#ifndef UNDER_CE
       else {
         fprintf(stderr, "Failed to write transfer log to %s: %s\n",
                 t->logfile, strerror(errno));
       }
+#endif
 
       if(fp)
         fclose(fp);
