@@ -115,7 +115,7 @@ jobs:
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
           - name: 'mbedtls-pkg MultiSSL gss !pc'
-            install_packages: libnghttp2-dev libmbedtls-dev
+            install_packages: libnghttp2-dev libmbedtls-dev libgss-dev
             install_steps: mbedtls skipall
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls
