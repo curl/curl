@@ -315,9 +315,6 @@
 /* if you have the gssapi libraries */
 #cmakedefine HAVE_GSSAPI 1
 
-/* Define to 1 if you have the <gssapi/gssapi.h> header file. */
-#cmakedefine HAVE_GSSAPI_GSSAPI_H 1
-
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 

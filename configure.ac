@@ -1841,17 +1841,10 @@ if test x"$want_gss" = xyes; then
     ],
     [
       dnl not found, check for MIT
-      AC_CHECK_HEADERS([gssapi/gssapi.h], [], [not_mit=1])
       AC_CHECK_HEADERS(
-        [gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
+        [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
         [],
-        [not_mit=1],
-        [
-          AC_INCLUDES_DEFAULT
-          #ifdef HAVE_GSSAPI_GSSAPI_H
-          #include <gssapi/gssapi.h>
-          #endif
-        ])
+        [not_mit=1])
       if test "x$not_mit" = "x1"; then
         dnl MIT not found
         AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
