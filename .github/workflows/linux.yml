@@ -93,8 +93,8 @@ jobs:
             install_steps: wolfssl-opensslextra
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
-          - name: 'mbedtls valgrind'
-            install_packages: libnghttp2-dev libidn2-dev libldap-dev valgrind
+          - name: 'mbedtls gss valgrind'
+            install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
@@ -102,6 +102,7 @@ jobs:
               -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
               -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
               -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
+              -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
@@ -114,8 +115,8 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
-          - name: 'mbedtls-pkg MultiSSL gss !pc'
-            install_packages: libnghttp2-dev libmbedtls-dev libgss-dev
+          - name: 'mbedtls-pkg MultiSSL !pc'
+            install_packages: libnghttp2-dev libmbedtls-dev
             install_steps: mbedtls skipall
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_DEFAULT_SSL_BACKEND=mbedtls
@@ -126,7 +127,6 @@ jobs:
               -DCURL_USE_PKGCONFIG=OFF -DCURL_USE_OPENSSL=ON
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
-              -DCURL_USE_GSSAPI=ON
 
           - name: 'awslc'
             install_steps: awslc pytest
@@ -674,6 +674,9 @@ jobs:
         run: |
           if [ "${TEST_TARGET}" = 'test-ci' ] && [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
             TFLAGS+=' -j6'
+            if [[ "${MATRIX_INSTALL_PACKAGES}" = *'libgss-dev'* ]]; then
+              TFLAGS+=' ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_init_sec_context()
+            fi
           fi
           [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
