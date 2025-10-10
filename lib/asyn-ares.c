@@ -675,7 +675,13 @@ static void async_ares_addrinfo_cb(void *user_data, int status, int timeouts,
 {
   struct Curl_easy *data = (struct Curl_easy *)user_data;
   struct async_ares_ctx *ares = &data->state.async.ares;
+
   (void)timeouts;
+  if(status == ARES_EDESTRUCTION)
+    /* when this ares handle is getting destroyed, the 'arg' pointer may not
+       be valid so only defer it when we know the 'status' says its fine! */
+    return;
+
   if(ares->ares_status != ARES_SUCCESS) /* do not overwrite success */
     ares->ares_status = status;
   if(status == ARES_SUCCESS) {
