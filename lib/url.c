@@ -3286,6 +3286,14 @@ static CURLcode resolve_server(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static void url_move_hostname(struct hostname *dest, struct hostname *src)
+{
+  Curl_safefree(dest->rawalloc);
+  Curl_free_idnconverted_hostname(dest);
+  *dest = *src;
+  memset(src, 0, sizeof(*src));
+}
+
 /*
  * Cleanup the connection `temp`, just allocated for `data`, before using the
  * previously `existing` one for `data`. All relevant info is copied over
@@ -3340,15 +3348,9 @@ static void reuse_conn(struct Curl_easy *data,
    *       used the original hostname in SNI to negotiate? Do we send
    *       requests for another host through the different SNI?
    */
-  Curl_free_idnconverted_hostname(&existing->host);
-  Curl_free_idnconverted_hostname(&existing->conn_to_host);
-  Curl_safefree(existing->host.rawalloc);
-  Curl_safefree(existing->conn_to_host.rawalloc);
-  existing->host = temp->host;
-  temp->host.rawalloc = NULL;
-  temp->host.encalloc = NULL;
-  existing->conn_to_host = temp->conn_to_host;
-  temp->conn_to_host.rawalloc = NULL;
+  url_move_hostname(&existing->host, &temp->host);
+  url_move_hostname(&existing->conn_to_host, &temp->conn_to_host);
+
   existing->conn_to_port = temp->conn_to_port;
   existing->remote_port = temp->remote_port;
   free(existing->hostname_resolve);
