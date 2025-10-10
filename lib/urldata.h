@@ -583,6 +583,9 @@ struct Curl_handler {
 #define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ASCII) in
                                        username and password */
 #define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
+#define PROTOPT_SSL_REUSE (1<<15)  /* this protocol may reuse an existing
+                                      SSL connection in the same family
+                                      without having PROTOPT_SSL. */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
