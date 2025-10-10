@@ -209,7 +209,8 @@ const struct Curl_handler Curl_handler_imap = {
   CURLPROTO_IMAP,                   /* protocol */
   CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION|              /* flags */
-  PROTOPT_URLOPTIONS
+  PROTOPT_URLOPTIONS|
+  PROTOPT_SSL_REUSE
 };
 
 #ifdef USE_SSL
