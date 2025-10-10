@@ -84,8 +84,8 @@ jobs:
             install_steps: libressl
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
-          - name: 'wolfssl-all gss'
-            install_packages: libgss-dev valgrind
+          - name: 'wolfssl-all'
+            install_packages: valgrind
             install_steps: wolfssl-all
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --with-gssapi --enable-debug
 
@@ -94,7 +94,7 @@ jobs:
             install_steps: wolfssl-opensslextra
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
-          - name: 'mbedtls gss valgrind'
+          - name: 'mbedtls valgrind'
             install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
             install_steps: mbedtls
             generate: >-
@@ -103,7 +103,6 @@ jobs:
               -DMBEDTLS_LIBRARY=/home/runner/mbedtls/lib/libmbedtls.a
               -DMBEDX509_LIBRARY=/home/runner/mbedtls/lib/libmbedx509.a
               -DMBEDCRYPTO_LIBRARY=/home/runner/mbedtls/lib/libmbedcrypto.a
-              -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
             install_packages: libnghttp2-dev libldap-dev clang
@@ -116,7 +115,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
-          - name: 'mbedtls-pkg MultiSSL !pc'
+          - name: 'mbedtls-pkg MultiSSL gss !pc'
             install_packages: libnghttp2-dev libmbedtls-dev
             install_steps: mbedtls skipall
             generate: >-
@@ -128,6 +127,7 @@ jobs:
               -DCURL_USE_PKGCONFIG=OFF -DCURL_USE_OPENSSL=ON
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
               -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
+              -DCURL_USE_GSSAPI=ON
 
           - name: 'awslc'
             install_steps: awslc pytest
@@ -225,7 +225,7 @@ jobs:
               --enable-ech --with-gssapi --enable-ssls-export
 
           - name: 'scan-build'
-            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
+            install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
             install_steps_brew: gsasl
             CC: clang
