@@ -85,9 +85,8 @@ jobs:
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --enable-debug
 
           - name: 'wolfssl-all'
-            install_packages: valgrind
             install_steps: wolfssl-all
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --with-gssapi --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-all/lib --with-wolfssl=/home/runner/wolfssl-all --enable-ech --enable-debug
 
           - name: 'wolfssl-opensslextra valgrind'
             install_packages: valgrind
@@ -95,7 +94,7 @@ jobs:
             configure: LDFLAGS=-Wl,-rpath,/home/runner/wolfssl-opensslextra/lib --with-wolfssl=/home/runner/wolfssl-opensslextra --enable-ech --enable-debug
 
           - name: 'mbedtls valgrind'
-            install_packages: libnghttp2-dev libidn2-dev libldap-dev libgss-dev valgrind
+            install_packages: libnghttp2-dev libidn2-dev libldap-dev valgrind
             install_steps: mbedtls
             generate: >-
               -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
