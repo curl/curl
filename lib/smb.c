@@ -661,7 +661,10 @@ static CURLcode smb_send_message(struct Curl_easy *data,
 {
   smb_format_message(smbc, req, (struct smb_header *)smbc->send_buf,
                      cmd, msg_len);
-  DEBUGASSERT((sizeof(struct smb_header) + msg_len) <= MAX_MESSAGE_SIZE);
+  if((sizeof(struct smb_header) + msg_len) > MAX_MESSAGE_SIZE) {
+    DEBUGASSERT(0);
+    return CURLE_SEND_ERROR;
+  }
   memcpy(smbc->send_buf + sizeof(struct smb_header), msg, msg_len);
 
   return smb_send(data, smbc, sizeof(struct smb_header) + msg_len, 0);
