@@ -145,6 +145,8 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     find_path(_gss_INCLUDE_DIRS NAMES "gssapi/gssapi.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include" "inc")
 
     if(_gss_INCLUDE_DIRS)  # We have found something
+      set(_gss_libdir_suffixes "")
+
       cmake_push_check_state()
       list(APPEND CMAKE_REQUIRED_INCLUDES "${_gss_INCLUDE_DIRS}")
       check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _gss_have_mit_headers)
@@ -152,6 +154,18 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
       if(_gss_have_mit_headers)
         set(GSS_FLAVOUR "MIT")
+        if(WIN32)
+          if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+            list(APPEND _gss_libdir_suffixes "lib/AMD64")
+            set(_gss_libname "gssapi64")
+          else()
+            list(APPEND _gss_libdir_suffixes "lib/i386")
+            set(_gss_libname "gssapi32")
+          endif()
+        else()
+          list(APPEND _gss_libdir_suffixes "lib" "lib64")  # those suffixes are not checked for HINTS
+          set(_gss_libname "gssapi_krb5")
+        endif()
       endif()
     else()
       find_path(_gss_INCLUDE_DIRS NAMES "gss.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include")
@@ -159,12 +173,12 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       if(_gss_INCLUDE_DIRS)
         set(GSS_FLAVOUR "GNU")
         set(GSS_PC_REQUIRES ${_gnu_modname})
+        set(_gss_libname "gss")
       endif()
     endif()
 
-    # If we have headers, check if we can link libraries
+    # If we have headers, look up libraries
     if(GSS_FLAVOUR)
-      set(_gss_libdir_suffixes "")
       set(_gss_libdir_hints ${_gss_root_hints})
       if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         cmake_path(GET _gss_INCLUDE_DIRS PARENT_PATH _gss_calculated_potential_root)
@@ -172,31 +186,6 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         get_filename_component(_gss_calculated_potential_root "${_gss_INCLUDE_DIRS}" DIRECTORY)
       endif()
       list(APPEND _gss_libdir_hints ${_gss_calculated_potential_root})
-
-      if(WIN32)
-        if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-          list(APPEND _gss_libdir_suffixes "lib/AMD64")
-          if(GSS_FLAVOUR STREQUAL "GNU")
-            set(_gss_libname "gss")
-          else()  # MIT
-            set(_gss_libname "gssapi64")
-          endif()
-        else()
-          list(APPEND _gss_libdir_suffixes "lib/i386")
-          if(GSS_FLAVOUR STREQUAL "GNU")
-            set(_gss_libname "gss")
-          else()  # MIT
-            set(_gss_libname "gssapi32")
-          endif()
-        endif()
-      else()
-        list(APPEND _gss_libdir_suffixes "lib;lib64")  # those suffixes are not checked for HINTS
-        if(GSS_FLAVOUR STREQUAL "GNU")
-          set(_gss_libname "gss")
-        else()  # MIT
-          set(_gss_libname "gssapi_krb5")
-        endif()
-      endif()
 
       find_library(_gss_LIBRARIES NAMES ${_gss_libname} HINTS ${_gss_libdir_hints} PATH_SUFFIXES ${_gss_libdir_suffixes})
     endif()
