@@ -32,7 +32,7 @@
 #include <fcntl.h>  /* for open() and attributes */
 #endif
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
 int curlx_win32_stat(const char *path, struct_stat *buffer);
 int curlx_win32_open(const char *filename, int oflag, ...);

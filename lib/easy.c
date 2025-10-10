@@ -106,12 +106,10 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#ifdef UNDER_CE
-#define system_strdup _strdup
-#elif !defined(HAVE_STRDUP)
-#define system_strdup Curl_strdup
-#else
+#ifdef HAVE_STRDUP
 #define system_strdup strdup
+#else
+#define system_strdup Curl_strdup
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)

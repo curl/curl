@@ -30,11 +30,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
 #include <errno.h>
-#endif
 
 /* somewhat Unix-specific */
 #ifndef _MSC_VER
@@ -236,12 +232,7 @@ static int setup(struct input *i, int num, const char *upload)
     return 1;
   }
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(upload, &file_info) != 0) {
-#else
   if(fstat(fileno(i->in), &file_info) != 0) {
-#endif
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
     fclose(out);

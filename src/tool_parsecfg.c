@@ -100,7 +100,7 @@ int parseconfig(const char *filename)
       }
       filename = pathalloc = curlrc;
     }
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
     else {
       char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
