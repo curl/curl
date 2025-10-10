@@ -32,13 +32,6 @@
  *
  */
 
-#ifdef _WIN32
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#include <windows.h>
-#endif
-
 #ifndef UNDER_CE
 #include <errno.h>
 #endif
@@ -49,6 +42,10 @@
 #include <curl/curl.h>
 
 #ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+#include <windows.h>
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
 #define unlink _unlink
