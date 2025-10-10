@@ -27,3 +27,7 @@ demonstrates curl's commitment to security and reliability, ensuring the
 project's sustainability and trustworthiness. This underscores curl's role as
 a leader in open-source software practices. More information can be found on
 [curl's OpenSSF Best Practices project page](https://www.bestpractices.dev/projects/63).
+
+## Security Thank
+
+For thank you securirty @ajpradeep
