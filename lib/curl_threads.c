@@ -69,7 +69,7 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 
   rc = pthread_create(t, NULL, curl_thread_create_thunk, ac);
   if(rc) {
-    CURL_SETERRNO(rc);
+    errno = rc;
     goto err;
   }
 
@@ -109,10 +109,9 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
   if(!t) {
     DWORD gle = GetLastError();
     /* !checksrc! disable ERRNOVAR 1 */
-    int err = (gle == ERROR_ACCESS_DENIED ||
-               gle == ERROR_NOT_ENOUGH_MEMORY) ?
-               EACCES : EINVAL;
-    CURL_SETERRNO(err);
+    errno = (gle == ERROR_ACCESS_DENIED ||
+             gle == ERROR_NOT_ENOUGH_MEMORY) ?
+             EACCES : EINVAL;
     return curl_thread_t_null;
   }
   return t;
