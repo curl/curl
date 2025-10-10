@@ -35,8 +35,9 @@ esac
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
   openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
-elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
-  openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
+elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ] || \
+     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ]; then
+  openssl_root_win="C:/OpenSSL${openssl_suffix}"
 else
   openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
 fi
@@ -85,7 +86,13 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  if ! time cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
+    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
+      find . -name BuildLog.htm -exec dos2unix '{}' +
+      find . -name BuildLog.htm -exec cat '{}' +
+    fi
+    false
+  fi
   [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib/${PRJ_CFG}:$PATH"
   [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
