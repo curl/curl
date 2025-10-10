@@ -60,14 +60,18 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
   struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
+  int rc;
   if(!(ac && t))
     goto err;
 
   ac->func = func;
   ac->arg = arg;
 
-  if(pthread_create(t, NULL, curl_thread_create_thunk, ac) != 0)
+  rc = pthread_create(t, NULL, curl_thread_create_thunk, ac);
+  if(rc) {
+    CURL_SETERRNO(rc);
     goto err;
+  }
 
   return t;
 
@@ -103,13 +107,15 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
 {
   curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
   if(!t) {
-#ifdef UNDER_CE
+#ifndef UNDER_CE
     DWORD gle = GetLastError();
     /* !checksrc! disable ERRNOVAR 1 */
     int err = (gle == ERROR_ACCESS_DENIED ||
                gle == ERROR_NOT_ENOUGH_MEMORY) ?
                EACCES : EINVAL;
     CURL_SETERRNO(err);
+#else
+    CURL_SETERRNO(31); /* Windows ERROR_GEN_FAILURE */
 #endif
     return curl_thread_t_null;
   }
