@@ -190,10 +190,8 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
 #  include <gss.h>
-# elif defined HAVE_GSSAPI_GSSAPI_H
-#  include <gssapi/gssapi.h>
 # else
-#  include <gssapi.h>
+#  include <gssapi/gssapi.h>
 # endif
 #endif
 
