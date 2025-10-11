@@ -461,7 +461,7 @@ static CURLcode oldap_perform_mechs(struct Curl_easy *data)
   struct ldapconninfo *li =
     Curl_conn_meta_get(data->conn, CURL_META_LDAP_CONN);
   int rc;
-  static const char * const supportedSASLMechanisms[] = {
+  char *supportedSASLMechanisms[] = {
     "supportedSASLMechanisms",
     NULL
   };
@@ -469,7 +469,7 @@ static CURLcode oldap_perform_mechs(struct Curl_easy *data)
   if(!li)
     return CURLE_FAILED_INIT;
   rc = ldap_search_ext(li->ld, "", LDAP_SCOPE_BASE, "(objectclass=*)",
-                       (char **)CURL_UNCONST(supportedSASLMechanisms), 0,
+                       supportedSASLMechanisms, 0,
                        NULL, NULL, NULL, 0, &li->msgid);
   if(rc != LDAP_SUCCESS)
     return oldap_map_error(rc, CURLE_LOGIN_DENIED);
