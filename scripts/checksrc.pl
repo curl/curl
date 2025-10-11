@@ -202,6 +202,10 @@ sub readlocalfile {
         if(/^\s*(#.*)/) {
             next;
         }
+        # Skip empty lines
+        elsif($_ eq '') {
+            next;
+        }
         elsif(/^enable ([A-Z]+)$/) {
             if(!defined($warnings_extended{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
