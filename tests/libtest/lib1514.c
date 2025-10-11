@@ -55,7 +55,6 @@ static size_t t1514_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib1514(const char *URL)
 {
   CURL *curl;
-  CURLcode result = CURLE_OK;
   CURLcode res = CURLE_OK;
 
   static char testdata[] = "dummy";
@@ -77,12 +76,12 @@ static CURLcode test_lib1514(const char *URL)
     easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
   }
 
-  result = curl_easy_perform(curl);
+  res = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return result;
+  return res;
 }
