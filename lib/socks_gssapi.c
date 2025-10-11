@@ -277,7 +277,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     us_length = ntohs(us_length);
 
     gss_recv_token.length = us_length;
-    gss_recv_token.value = (malloc)(us_length);
+    gss_recv_token.value = (malloc)(gss_recv_token.length);
     if(!gss_recv_token.value) {
       failf(data,
             "Could not allocate memory for GSS-API authentication "
@@ -392,12 +392,12 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
   else {
     gss_send_token.length = 1;
-    gss_send_token.value = (malloc)(1);
+    gss_send_token.value = (malloc)(gss_send_token.length);
     if(!gss_send_token.value) {
       Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
       return CURLE_OUT_OF_MEMORY;
     }
-    memcpy(gss_send_token.value, &gss_enc, 1);
+    memcpy(gss_send_token.value, &gss_enc, gss_send_token.length);
 
     gss_major_status = gss_wrap(&gss_minor_status, gss_context, 0,
                                 GSS_C_QOP_DEFAULT, &gss_send_token,
