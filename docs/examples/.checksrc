@@ -1,5 +1,7 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
 # SPDX-License-Identifier: curl
+
 allowfunc fclose
 allowfunc fdopen
 allowfunc fopen
@@ -13,6 +15,7 @@ allowfunc socket
 allowfunc sscanf
 allowfunc strerror
 allowfunc vsnprintf
+
 # Use of curl printf functions is discouraged
 banfunc curl_maprintf
 banfunc curl_mfprintf
