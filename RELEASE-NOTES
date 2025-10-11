@@ -38,10 +38,12 @@ This release includes the following bugfixes:
  o build: avoid overriding system symbols for fopen functions [150]
  o build: avoid overriding system symbols for socket functions [68]
  o build: show llvm/clang in platform flags and `buildinfo.txt` [126]
+ o c-ares: when resolving failed, persist error [270]
  o cf-h2-proxy: break loop on edge case [140]
  o cf-ip-happy: mention unix domain path, not port number [161]
  o cf-socket: always check Curl_cf_socket_peek() return code [198]
  o cf-socket: check params and remove accept procondition [197]
+ o cf-socket: set FD_CLOEXEC on all sockets opened [273]
  o cf-socket: tweak a memcpy() to read better [177]
  o cf-socket: use the right byte order for ports in bindlocal [61]
  o cfilter: unlink and discard [46]
@@ -50,7 +52,11 @@ This release includes the following bugfixes:
  o checksrc: fix possible endless loops/errors in the banned function logic [220]
  o checksrc: fix to handle `)` predecing a banned function [229]
  o checksrc: reduce directory-specific exceptions [228]
+ o CI.md: refresh [280]
+ o cmake/FindGSS: dedupe pkg-config module strings [277]
+ o cmake/FindGSS: drop wrong header check for GNU GSS [278]
  o cmake/FindGSS: fix `pkg-config` fallback logic for CMake <3.16 [189]
+ o cmake/FindGSS: simplify/de-dupe lib setup [253]
  o cmake/FindGSS: whitespace/formatting [268]
  o cmake: add `CURL_CODE_COVERAGE` option [78]
  o cmake: build the "all" examples source list dynamically [245]
@@ -58,12 +64,14 @@ This release includes the following bugfixes:
  o cmake: drop exclamation in comment looking like a name [160]
  o cmake: fix building docs when the base directory contains `.3` [18]
  o cmake: minor Heimdal flavour detection fix [269]
+ o cmake: pre-fill three more type sizes on Windows [244]
  o cmake: support building some complicated examples, build them in CI [235]
  o cmake: use modern alternatives for `get_filename_component()` [102]
  o cmake: use more `COMPILER_OPTIONS`, `LINK_OPTIONS` / `LINK_FLAGS` [152]
  o cmdline-docs: extended, clarified, refreshed [28]
  o cmdline-opts/_PROGRESS.md: explain the suffixes [154]
  o configure: add "-mt" for pthread support on HP-UX [52]
+ o conn: fix hostname move on connection reuse [272]
  o cookie: avoid saving a cookie file if no transfer was done [11]
  o cpool: make bundle->dest an array; fix UB [218]
  o curl_easy_getinfo: error code on NULL arg [2]
@@ -71,6 +79,7 @@ This release includes the following bugfixes:
  o curl_osslq: error out properly if BIO_ADDR_rawmake() fails [184]
  o Curl_resolv: fix comment. 'entry' argument is not optional [187]
  o curl_slist_append.md: clarify that a NULL pointer is not acceptable [72]
+ o curl_threads: delete WinCE fallback branch [233]
  o CURLINFO_FTP_ENTRY_PATH.md: this is for SFTP as well [8]
  o CURLOPT_COOKIEFILE.md: clarify when the cookies are loaded [159]
  o CURLOPT_HEADER/WRITEFUNCTION.md: drop '* size' since size is always 1 [63]
@@ -101,6 +110,8 @@ This release includes the following bugfixes:
  o ftp: fix the 213 scanner memchr buffer limit argument [196]
  o ftp: improve fragile check for first digit > 3 [194]
  o ftp: remove misleading comments [193]
+ o ftp: simplify the 150/126 size scanner [288]
+ o gnutls: check conversion of peer cert chain [275]
  o gtls: avoid potential use of uninitialized variable in trace output [83]
  o hostip: don't store negative resolves due unrelated errors [256]
  o hostip: remove leftover INT_MAX check in Curl_dnscache_prune [88]
@@ -114,9 +125,13 @@ This release includes the following bugfixes:
  o INTERNALS: drop Winsock 2.2 from the dependency list [162]
  o ip-happy: do not set unnecessary timeout [95]
  o ip-happy: prevent event-based stall on retry [155]
+ o kerberos: bump minimum to 1.3 (2003-07-08), drop legacy logic [279]
+ o kerberos: drop logic for MIT Kerberos <1.2.3 (pre-2002) versions [285]
+ o kerberos: stop including `gssapi/gssapi_generic.h` [282]
  o krb5: return appropriate error on send failures [22]
  o krb5_gssapi: fix memory leak on error path [190]
  o krb5_sspi: the chlg argument is NOT optional [200]
+ o ldap: avoid null ptr deref on failure [284]
  o ldap: do not base64 encode zero length string [42]
  o ldap: tidy-up types, fix error code confusion [191]
  o lib: drop unused include and duplicate guards [226]
@@ -139,6 +154,7 @@ This release includes the following bugfixes:
  o libssh: error on bad chgrp number [71]
  o libssh: error on bad chown number and store the value [64]
  o libssh: fix range parsing error handling mistake [120]
+ o libssh: make atime and mtime cap the timestamp instead of wrap [283]
  o libssh: react on errors from ssh_scp_read [24]
  o libssh: return out of memory correctly if aprintf fails [60]
  o Makefile.example: fix option order [231]
@@ -164,6 +180,8 @@ This release includes the following bugfixes:
  o openldap: avoid indexing the result at -1 for blank responses [44]
  o openldap: check ber_sockbuf_add_io() return code [163]
  o openldap: check ldap_get_option() return codes [119]
+ o openldap: fix memory-leak in error path [287]
+ o openldap: fix memory-leak on oldap_do's exit path [286]
  o openssl-quic: check results better [132]
  o openssl-quic: handle error in SSL_get_stream_read_error_code [129]
  o openssl-quic: ignore unexpected streams opened by server [176]
@@ -175,6 +193,7 @@ This release includes the following bugfixes:
  o openssl: make the asn1_object_dump name null terminated [56]
  o openssl: set io_need always [99]
  o openssl: skip session resumption when verifystatus is set [230]
+ o os400: document threads handling in code. [254]
  o OS400: fix a use-after-free/double-free case [142]
  o osslq: set idle timeout to 0 [237]
  o pingpong: remove two old leftover debug infof() calls
@@ -200,6 +219,7 @@ This release includes the following bugfixes:
  o setopt: make CURLOPT_MAXREDIRS accept -1 (again) [1]
  o smb: adjust buffer size checks [45]
  o smtp: check EHLO responses case insensitively [50]
+ o socks: advance iobuf instead of reset [276]
  o socks: deny server basic-auth if not configured [264]
  o socks: handle error in verbose trace gracefully [94]
  o socks: handle premature close [246]
@@ -234,6 +254,7 @@ This release includes the following bugfixes:
  o tftp: propagate expired timer from tftp_state_timeout() [39]
  o tftp: return error if it hits an illegal state [138]
  o tftp: return error when sendto() fails [59]
+ o thread: errno on thread creation [271]
  o tidy-up: `fcntl.h` includes [98]
  o tidy-up: assortment of small fixes [115]
  o tidy-up: avoid using the reserved macro namespace [76]
@@ -275,6 +296,7 @@ This release includes the following bugfixes:
  o wolfssl: fix error check in shutdown [105]
  o wolfssl: no double get_error() detail [188]
  o ws: clarify an error message [125]
+ o ws: fix some edge cases [274]
  o ws: reject curl_ws_recv called with NULL buffer with a buflen [118]
 
 This release includes the following known bugs:
@@ -545,6 +567,7 @@ References to bug reports and discussions on issues:
  [230] = https://curl.se/bug/?i=18902
  [231] = https://curl.se/bug/?i=18835
  [232] = https://curl.se/bug/?i=18918
+ [233] = https://curl.se/bug/?i=19015
  [234] = https://curl.se/bug/?i=18828
  [235] = https://curl.se/bug/?i=18909
  [236] = https://curl.se/bug/?i=18905
@@ -555,6 +578,7 @@ References to bug reports and discussions on issues:
  [241] = https://curl.se/bug/?i=18966
  [242] = https://curl.se/bug/?i=18961
  [243] = https://curl.se/bug/?i=18914
+ [244] = https://curl.se/bug/?i=19013
  [245] = https://curl.se/bug/?i=18911
  [246] = https://curl.se/bug/?i=18883
  [247] = https://curl.se/bug/?i=18908
@@ -563,6 +587,8 @@ References to bug reports and discussions on issues:
  [250] = https://curl.se/bug/?i=18432
  [251] = https://curl.se/bug/?i=18881
  [252] = https://curl.se/bug/?i=18890
+ [253] = https://curl.se/bug/?i=19012
+ [254] = https://curl.se/bug/?i=18967
  [255] = https://curl.se/bug/?i=18969
  [256] = https://curl.se/bug/?i=18953
  [257] = https://curl.se/bug/?i=18959
@@ -578,3 +604,21 @@ References to bug reports and discussions on issues:
  [267] = https://curl.se/bug/?i=18928
  [268] = https://curl.se/bug/?i=18957
  [269] = https://curl.se/bug/?i=18951
+ [270] = https://curl.se/bug/?i=18999
+ [271] = https://curl.se/bug/?i=18998
+ [272] = https://curl.se/bug/?i=18995
+ [273] = https://curl.se/bug/?i=18968
+ [274] = https://curl.se/bug/?i=18965
+ [275] = https://curl.se/bug/?i=18964
+ [276] = https://curl.se/bug/?i=18938
+ [277] = https://curl.se/bug/?i=18994
+ [278] = https://curl.se/bug/?i=18993
+ [279] = https://curl.se/bug/?i=18992
+ [280] = https://curl.se/bug/?i=18973
+ [282] = https://curl.se/bug/?i=18990
+ [283] = https://curl.se/bug/?i=18989
+ [284] = https://curl.se/bug/?i=18988
+ [285] = https://curl.se/bug/?i=18978
+ [286] = https://curl.se/bug/?i=18986
+ [287] = https://curl.se/bug/?i=18985
+ [288] = https://curl.se/bug/?i=18984
