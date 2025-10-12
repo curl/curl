@@ -140,13 +140,17 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
       fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
     if(AutoSyncTime == 1) {
-      int RetVal;
+      int RetVal = 0;
+      char *field = ptr;
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      RetVal = sscanf((char *)ptr, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
-                      TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                      &SYSTime.wHour, &SYSTime.wMinute,
-                      &SYSTime.wSecond);
+      if(nmemb && (field[nmemb] == '\n')) {
+        field[nmemb] = 0; /* null terminated */
+        RetVal = sscanf(field, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
+                        TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                        &SYSTime.wHour, &SYSTime.wMinute,
+                        &SYSTime.wSecond);
+      }
 
       if(RetVal == 7) {
         int i;
