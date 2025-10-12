@@ -58,6 +58,10 @@ struct State {
   curl_off_t urlidx;    /* index for globbed URLs */
 };
 
+#define FAIL_NONE      0
+#define FAIL_WITH_BODY 1
+#define FAIL_WO_BODY   2
+
 struct OperationConfig {
   struct dynbuf postdata;
   char *useragent;
@@ -223,6 +227,7 @@ struct OperationConfig {
   unsigned short porttouse;
   unsigned char ssl_version;     /* 0 - 4, 0 being default */
   unsigned char ssl_version_max; /* 0 - 4, 0 being default */
+  unsigned char fail;            /* NONE, with body, without body */
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
@@ -241,8 +246,6 @@ struct OperationConfig {
   BIT(ftp_append);          /* APPE on ftp */
   BIT(use_ascii);           /* select ASCII or text transfer */
   BIT(autoreferer);         /* automatically set referer */
-  BIT(failonerror);         /* fail on (HTTP) errors */
-  BIT(failwithbody);        /* fail on (HTTP) errors but still store body */
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
   BIT(dirlistonly);         /* only get the FTP dir list */

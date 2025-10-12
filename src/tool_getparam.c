@@ -2037,14 +2037,6 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_MAIL_RCPT_ALLOWFAILS: /* --mail-rcpt-allowfails */
     config->mail_rcpt_allowfails = toggle;
     break;
-  case C_FAIL_WITH_BODY: /* --fail-with-body */
-    config->failwithbody = toggle;
-    if(config->failonerror && config->failwithbody) {
-      errorf("You must select either --fail or "
-             "--fail-with-body, not both.");
-      return PARAM_BAD_USE;
-    }
-    break;
   case C_REMOVE_ON_ERROR: /* --remove-on-error */
     if(config->use_resume && toggle) {
       errorf("--continue-at is mutually exclusive with --remove-on-error");
@@ -2052,13 +2044,15 @@ static ParameterError opt_bool(struct OperationConfig *config,
     }
     config->rm_partial = toggle;
     break;
-  case C_FAIL: /* --fail */
-    config->failonerror = toggle;
-    if(config->failonerror && config->failwithbody) {
-      errorf("You must select either --fail or "
-             "--fail-with-body, not both.");
-      return PARAM_BAD_USE;
-    }
+  case C_FAIL: /* --fail without body */
+    if(toggle && (config->fail == FAIL_WITH_BODY))
+      warnf("--fail deselects --fail-with-body here");
+    config->fail = toggle ? FAIL_WO_BODY : FAIL_NONE;
+    break;
+  case C_FAIL_WITH_BODY: /* --fail-with-body */
+    if(toggle && (config->fail == FAIL_WO_BODY))
+      warnf("--fail-with-body deselects --fail here");
+    config->fail = toggle ? FAIL_WITH_BODY : FAIL_NONE;
     break;
   case C_GLOBOFF: /* --globoff */
     config->globoff = toggle;
