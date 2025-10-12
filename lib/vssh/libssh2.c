@@ -843,6 +843,14 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode return_quote_error(struct Curl_easy *data)
+{
+  failf(data, "Suspicious data after the command line");
+  Curl_safefree(sshc->quote_path1);
+  Curl_safefree(sshc->quote_path2);
+  return CURLE_QUOTE_ERROR;
+}
+
 static CURLcode sftp_quote(struct Curl_easy *data,
                            struct ssh_conn *sshc,
                            struct SSHPROTO *sshp)
@@ -930,6 +938,9 @@ static CURLcode sftp_quote(struct Curl_easy *data,
       Curl_safefree(sshc->quote_path1);
       return result;
     }
+    if(*cp)
+      return_quote_error(data);
+
     memset(&sshp->quote_attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
     myssh_state(data, sshc, SSH_SFTP_QUOTE_STAT);
     return result;
@@ -946,10 +957,14 @@ static CURLcode sftp_quote(struct Curl_easy *data,
       Curl_safefree(sshc->quote_path1);
       return result;
     }
+    if(*cp)
+      return_quote_error(data);
     myssh_state(data, sshc, SSH_SFTP_QUOTE_SYMLINK);
     return result;
   }
   else if(!strncmp(cmd, "mkdir ", 6)) {
+    if(*cp)
+      return_quote_error(data);
     /* create dir */
     myssh_state(data, sshc, SSH_SFTP_QUOTE_MKDIR);
     return result;
@@ -965,19 +980,27 @@ static CURLcode sftp_quote(struct Curl_easy *data,
       Curl_safefree(sshc->quote_path1);
       return result;
     }
+    if(*cp)
+      return_quote_error(data);
     myssh_state(data, sshc, SSH_SFTP_QUOTE_RENAME);
     return result;
   }
   else if(!strncmp(cmd, "rmdir ", 6)) {
+    if(*cp)
+      return_quote_error(data);
     /* delete dir */
     myssh_state(data, sshc, SSH_SFTP_QUOTE_RMDIR);
     return result;
   }
   else if(!strncmp(cmd, "rm ", 3)) {
+    if(*cp)
+      return_quote_error(data);
     myssh_state(data, sshc, SSH_SFTP_QUOTE_UNLINK);
     return result;
   }
   else if(!strncmp(cmd, "statvfs ", 8)) {
+    if(*cp)
+      return_quote_error(data);
     myssh_state(data, sshc, SSH_SFTP_QUOTE_STATVFS);
     return result;
   }
