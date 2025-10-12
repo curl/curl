@@ -460,6 +460,10 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
     /* As RFC3617 describes the separator slash is not actually part of the
        filename so we skip the always-present first letter of the path
        string. */
+    if(!state->data->state.up.path[1]) {
+      failf(data, "Missing filename");
+      return CURLE_TFTP_ILLEGAL;
+    }
     result = Curl_urldecode(&state->data->state.up.path[1], 0,
                             &filename, NULL, REJECT_ZERO);
     if(result)
