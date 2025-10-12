@@ -654,8 +654,8 @@ static curl_off_t ws_payload_remain(curl_off_t payload_total,
   curl_off_t remain = payload_total - payload_offset;
   if((payload_total < 0) || (payload_offset < 0) || (remain < 0))
     return -1;
-#if SIZEOF_OFF_T <= SIZEOF_SIZE_T
-  if((curl_off_t)payload_buffered < 0)
+#if SIZEOF_SIZE_T >= SIZEOF_CURL_OFF_T
+  if(payload_buffered > (size_t)CURL_OFF_T_MAX)
     return -1;
 #endif
   if(remain < (curl_off_t)payload_buffered)
