@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
   conf_init(conf);
 
   if(argc > 1) {
-    int OptionIndex = 0;
+    int OptionIndex = 1;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
