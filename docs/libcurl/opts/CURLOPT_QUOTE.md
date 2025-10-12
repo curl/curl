@@ -53,8 +53,8 @@ server using this option. If you change connection state, working directory or
 similar using quote commands, libcurl does not know about it.
 
 The path arguments for FTP or SFTP should use double quotes to distinguish a
-space from being the parameter separator or being a part of the path. e.g.
-rename with sftp using a quote command like this:
+space from being the parameter separator or being a part of the path. For
+example, rename with sftp using a quote command like this:
 
     rename "test/_upload.txt" "test/Hello World.txt"
 
