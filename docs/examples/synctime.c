@@ -117,7 +117,6 @@ static SYSTEMTIME LOCALTime;
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
-
 static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
@@ -125,6 +124,7 @@ static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
   return nmemb * size;
 }
 
+/* Remember: do not assume headers are passed on null terminated! */
 static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
@@ -135,7 +135,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   if(ShowAllHeader == 1)
     fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
-  if(strncmp((char *)ptr, "Date:", 5) == 0) {
+  if((nmemb >= 5) && !strncmp((char *)ptr, "Date:", 5)) {
     if(ShowAllHeader == 0)
       fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
@@ -165,7 +165,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
     }
   }
 
-  if(strncmp((char *)ptr, "X-Cache: HIT", 12) == 0) {
+  if((nmemb >= 12) && !strncmp((char *)ptr, "X-Cache: HIT", 12)) {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
