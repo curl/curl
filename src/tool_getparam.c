@@ -2040,9 +2040,8 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_FAIL_WITH_BODY: /* --fail-with-body */
     config->failwithbody = toggle;
     if(config->failonerror && config->failwithbody) {
-      errorf("You must select either --fail or "
-             "--fail-with-body, not both.");
-      return PARAM_BAD_USE;
+      warnf("--fail-with-body deselects --fail here");
+      config->failonerror = FALSE;
     }
     break;
   case C_REMOVE_ON_ERROR: /* --remove-on-error */
@@ -2055,9 +2054,8 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_FAIL: /* --fail */
     config->failonerror = toggle;
     if(config->failonerror && config->failwithbody) {
-      errorf("You must select either --fail or "
-             "--fail-with-body, not both.");
-      return PARAM_BAD_USE;
+      warnf("--fail deselects --fail-with-body here");
+      config->failwithbody = FALSE;
     }
     break;
   case C_GLOBOFF: /* --globoff */
