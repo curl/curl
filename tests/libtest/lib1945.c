@@ -67,7 +67,7 @@ static CURLcode test_lib1945(const char *URL)
   }
   res = curl_easy_perform(easy);
   if(res) {
-    curl_mprintf("badness: %d\n", res);
+    curl_mprintf("badness: %u\n", res);
   }
   t1945_showem(easy, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
 

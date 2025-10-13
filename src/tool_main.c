@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
   /* win32_init must be called before other init routines. */
   result = win32_init();
   if(result) {
-    errorf("(%d) Windows-specific init failed", result);
+    errorf("(%u) Windows-specific init failed", result);
     return (int)result;
   }
 #endif

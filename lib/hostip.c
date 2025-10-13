@@ -175,7 +175,7 @@ create_dnscache_id(const char *name,
     len = buflen - 7;
   /* store and lower case the name */
   Curl_strntolower(ptr, name, len);
-  return curl_msnprintf(&ptr[len], 7, ":%u", port) + len;
+  return curl_msnprintf(&ptr[len], 7, ":%d", port) + len;
 }
 
 struct dnscache_prune_data {

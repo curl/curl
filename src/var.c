@@ -402,7 +402,7 @@ ParameterError setvariable(const char *input)
     line++;
   nlen = line - name;
   if(!nlen || (nlen >= MAX_VAR_LEN)) {
-    warnf("Bad variable name length (%zd), skipping", nlen);
+    warnf("Bad variable name length (%zu), skipping", nlen);
     return PARAM_OK;
   }
   if(import) {

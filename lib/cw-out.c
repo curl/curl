@@ -232,7 +232,7 @@ static CURLcode cw_out_cb_write(struct cw_out_ctx *ctx,
   }
   else if(nwritten != blen) {
     failf(data, "Failure writing output to destination, "
-          "passed %zu returned %zd", blen, nwritten);
+          "passed %zu returned %zu", blen, nwritten);
     return CURLE_WRITE_ERROR;
   }
   *pnwritten = nwritten;

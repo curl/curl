@@ -285,7 +285,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 
                 stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
                 stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
-                as->persist, as->prio);
+                (unsigned int)as->persist, as->prio);
   return CURLE_OK;
 }
 

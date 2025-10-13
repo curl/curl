@@ -39,13 +39,13 @@ test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
   if(frame->flags & CURLWS_CLOSE) {
     curl_mfprintf(stderr, "recv_data: unexpected CLOSE frame from server, "
                   "got %zu bytes, offset=%zu, rflags %x\n",
-                  nread, r_offset, frame->flags);
+                  nread, r_offset, (unsigned int)frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(!r_offset && !(frame->flags & CURLWS_BINARY)) {
     curl_mfprintf(stderr, "recv_data: wrong frame, got %zu bytes, offset=%zu, "
                   "rflags %x\n",
-                  nread, r_offset, frame->flags);
+                  nread, r_offset, (unsigned int)frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(frame->offset != (curl_off_t)r_offset) {
@@ -121,7 +121,7 @@ static CURLcode test_ws_data_m2_echo(const char *url,
         r = curl_ws_send(curl, sbuf, slen, &nwritten, 0, CURLWS_BINARY);
         sblock = (r == CURLE_AGAIN);
         if(!r || (r == CURLE_AGAIN)) {
-          curl_mfprintf(stderr, "curl_ws_send(len=%zu) -> %d, "
+          curl_mfprintf(stderr, "curl_ws_send(len=%zu) -> %u, "
                         "%zu (%" CURL_FORMAT_CURL_OFF_T "/%zu)\n",
                         slen, r, nwritten, (curl_off_t)(len - slen), len);
           sbuf += nwritten;
@@ -142,7 +142,7 @@ static CURLcode test_ws_data_m2_echo(const char *url,
                          &nread, &frame);
         if(!r || (r == CURLE_AGAIN)) {
           rblock = (r == CURLE_AGAIN);
-          curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %d, %zu (%ld/%zu) "
+          curl_mfprintf(stderr, "curl_ws_recv(len=%zu) -> %u, %zu (%ld/%zu) "
                         "\n", rlen, r, nread, (long)(len - rlen), len);
           if(!r) {
             r = test_ws_data_m2_check_recv(frame, len - rlen, nread, len);
