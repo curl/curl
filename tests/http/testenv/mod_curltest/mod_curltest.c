@@ -694,13 +694,7 @@ static int curltest_1_1_required(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[16*1024];
   const char *ct;
-  const char *request_id = "none";
-  apr_time_t chunk_delay = 0;
-  apr_array_header_t *args = NULL;
-  long l;
-  int i;
 
   if(strcmp(r->handler, "curltest-1_1-required")) {
     return DECLINED;
