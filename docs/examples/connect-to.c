@@ -33,6 +33,11 @@ int main(void)
   CURL *curl;
   CURLcode res = CURLE_OK;
 
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Could not init curl\n");
+    return 1;
+  }
+
   /*
     Each single string should be written using the format
     HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT where HOST is the host of the
@@ -65,6 +70,8 @@ int main(void)
   }
 
   curl_slist_free_all(host);
+
+  curl_global_cleanup();
 
   return (int)res;
 }
