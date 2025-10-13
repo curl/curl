@@ -37,7 +37,8 @@
 #pragma warning(pop)
 #endif
 
-#if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && defined(HAVE_NCRYPT) && __MINGW32__
+#if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && defined(HAVE_NCRYPT)
+    && __MINGW32__
 #undef _WIN32_WINNT
 /* Define _WIN32_WINNT to ensure MinGW headers show NCrypt definitions.
  * MinGW 4.8.1 headers require _WIN32_WINNT>=600 to show  NCrypt symbols.  */

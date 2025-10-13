@@ -124,6 +124,11 @@
 #define ALG_CLASS_DHASH ALG_CLASS_HASH
 #endif
 
+/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
+#ifndef PKCS12_NO_PERSIST_KEY
+#define PKCS12_NO_PERSIST_KEY 0x00008000
+#endif
+
 /* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
 #ifndef CERT_FIND_HAS_PRIVATE_KEY
 #define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
@@ -590,6 +595,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       int cert_find_flags;
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
+      DWORD import_flags = 0;
       curlx_unicodefree(cert_path);
       if(fInCert) {
         long cert_tell = 0;
@@ -618,6 +624,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
       /* Import key into persistent store. Delete later.
        * Importing key as ephemeral (not-persisted) errors with TLS 1.3. */
+#ifndef HAVE_NCRYPT
+      /* Deleting key requires NCrypt API on Vista and newer.
+       * Import keys as ephemeral on older platforms.
+       */
+      import_flags = PKCS12_NO_PERSIST_KEY;
+#endif
       datablob.pbData = (BYTE*)certdata;
       datablob.cbData = (DWORD)certsize;
 
@@ -637,7 +649,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        cert_store = PFXImportCertStore(&datablob, pszPassword, 0);
+        cert_store = PFXImportCertStore(&datablob, pszPassword, import_flags);
         free(pszPassword);
       }
       if(!blob)
@@ -674,8 +686,10 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
       }
-      /* Keep certificate handle to delete imported key later. */
-      imported_cert = true;
+      if(!(import_flags & PKCS12_NO_PERSIST_KEY)) {
+        /* Keep certificate handle to delete imported key later. */
+        imported_cert = true;
+      }
     }
     else {
       cert_store =
