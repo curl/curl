@@ -63,7 +63,7 @@ int main(void)
   struct MemoryStruct chunk;
   static const char *postthis = "Field=1&Field=2&Field=3";
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
 
