@@ -1850,8 +1850,9 @@ static CURLcode ssh_state_auth_agent(struct Curl_easy *data,
       if(rc != LIBSSH2_ERROR_EAGAIN) {
         /* tried and failed? go to next identity */
         sshc->sshagent_prev_identity = sshc->sshagent_identity;
+        return CURLE_OK;
       }
-      return CURLE_OK;
+      return CURLE_AGAIN;
     }
   }
 
