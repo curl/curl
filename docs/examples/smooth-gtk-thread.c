@@ -67,22 +67,24 @@ size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
 
 static void run_one(gchar *http, int j)
 {
-  FILE *outfile = fopen(urls[j], "wb");
   CURL *curl;
 
   curl = curl_easy_init();
   if(curl) {
     printf("j = %d\n", j);
 
-    /* Set the URL and transfer type */
-    curl_easy_setopt(curl, CURLOPT_URL, http);
+    FILE *outfile = fopen(urls[j], "wb");
+    if(outfile) {
+      /* Set the URL and transfer type */
+      curl_easy_setopt(curl, CURLOPT_URL, http);
 
-    /* Write to the file */
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
-    (void)curl_easy_perform(curl);
+      /* Write to the file */
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
+      (void)curl_easy_perform(curl);
 
-    fclose(outfile);
+      fclose(outfile);
+    }
     curl_easy_cleanup(curl);
   }
 }
