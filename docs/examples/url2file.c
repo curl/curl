@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   }
 
   res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
+  if(res) {
     fprintf(stderr, "Could not init curl\n");
     return (int)res;
   }

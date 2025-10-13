@@ -56,8 +56,6 @@ static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
-  CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
-
   /** This example uses two (fake) certificates **/
   /* replace the XXX with the actual CA certificates */
   static const char mypem[] =
@@ -89,14 +87,14 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   (void)pointer;
 
   if(!cts || !cbio) {
-    return rv;
+    return CURLE_ABORTED_BY_CALLBACK;
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
 
   if(!inf) {
     BIO_free(cbio);
-    return rv;
+    return CURLE_ABORTED_BY_CALLBACK;
   }
 
   for(i = 0; i < sk_X509_INFO_num(inf); i++) {
@@ -112,8 +110,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
   BIO_free(cbio);
 
-  rv = CURLE_OK;
-  return rv;
+  return CURLE_OK;
 }
 
 int main(void)
@@ -148,8 +145,8 @@ int main(void)
   /* first try: retrieve page without ca certificates -> should fail
    * unless libcurl was built --with-ca-fallback enabled at build-time
    */
-  rv = curl_easy_perform(ch);
-  if(rv == CURLE_OK)
+  res = curl_easy_perform(ch);
+  if(res == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");

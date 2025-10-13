@@ -67,8 +67,6 @@ int main(void)
   for(i = 0; i < 3; i++) {
     CURL *curl = curl_easy_init();
     if(curl) {
-      CURLcode res;
-
       curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
       /* use the share object */
