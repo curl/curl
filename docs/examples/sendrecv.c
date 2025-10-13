@@ -97,7 +97,6 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
     curl_socket_t sockfd;
     size_t nsent_total = 0;
 

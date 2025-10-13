@@ -38,7 +38,6 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(void)
 {
-  CURLcode res;
   CURL *curl_handle;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
