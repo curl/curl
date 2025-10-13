@@ -610,7 +610,7 @@ static int curltest_put_handler(request_rec *r)
           }
         }
         else if(!strcmp("max_upload", arg)) {
-          rbody_max_len = (int)apr_atoi64(val);
+          rbody_max_len = (apr_off_t)apr_atoi64(val);
           continue;
         }
       }
