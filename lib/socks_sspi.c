@@ -590,7 +590,6 @@ error:
     Curl_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
   if(names.sUserName)
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
-#error xxx
   if(sspi_w_token[0].pvBuffer)
     Curl_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
   if(sspi_w_token[1].pvBuffer)
