@@ -33,10 +33,9 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  if(curl_global_init(CURL_GLOBAL_ALL)) {
-    fprintf(stderr, "Could not init curl\n");
-    return 1;
-  }
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -59,5 +58,5 @@ int main(void)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

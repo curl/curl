@@ -42,8 +42,11 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
   struct curl_slist *recipients = NULL;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -76,6 +79,8 @@ int main(void)
      */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return 0;
 }

@@ -35,10 +35,13 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
 
   CURLU *urlp;
   CURLUcode uc;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -73,5 +76,6 @@ int main(void)
 cleanup:
   curl_url_cleanup(urlp);
   curl_easy_cleanup(curl);
+  curl_global_cleanup();
   return 0;
 }

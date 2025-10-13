@@ -263,7 +263,7 @@ static void parseHtml(const std::string &html,
 int main(int argc, char *argv[])
 {
   CURL *conn = NULL;
-  CURLcode code;
+  CURLcode res;
   std::string title;
 
   // Ensure one argument is given
@@ -273,21 +273,24 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   // Initialize CURL connection
 
   if(!init(conn, argv[1])) {
     fprintf(stderr, "Connection initialization failed\n");
+    curl_global_cleanup();
     return EXIT_FAILURE;
   }
 
   // Retrieve content for the URL
 
-  code = curl_easy_perform(conn);
+  res = curl_easy_perform(conn);
   curl_easy_cleanup(conn);
 
-  if(code != CURLE_OK) {
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
     return EXIT_FAILURE;
   }
@@ -298,5 +301,5 @@ int main(int argc, char *argv[])
   // Display the extracted title
   printf("Title: %s\n", title.c_str());
 
-  return EXIT_SUCCESS;
+  return (int)res;
 }

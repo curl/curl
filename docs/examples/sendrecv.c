@@ -83,6 +83,10 @@ int main(void)
   const char *request = "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n";
   size_t request_len = strlen(request);
 
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   /* A general note of caution here: if you are using curl_easy_recv() or
      curl_easy_send() to implement HTTP or _any_ other protocol libcurl
      supports "natively", you are doing it wrong and you should stop.
@@ -175,5 +179,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }

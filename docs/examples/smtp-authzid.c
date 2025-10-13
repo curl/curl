@@ -95,9 +95,12 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
   struct curl_slist *recipients = NULL;
   struct upload_status upload_ctx = { 0 };
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -157,6 +160,8 @@ int main(void)
      */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

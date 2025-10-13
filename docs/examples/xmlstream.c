@@ -131,8 +131,11 @@ int main(void)
   XML_SetElementHandler(parser, startElement, endElement);
   XML_SetCharacterDataHandler(parser, characterDataHandler);
 
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   /* Initialize a libcurl handle. */
-  curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_handle = curl_easy_init();
   curl_easy_setopt(curl_handle, CURLOPT_URL,
                    "https://www.w3schools.com/xml/simple.xml");
@@ -166,5 +169,5 @@ int main(void)
   curl_easy_cleanup(curl_handle);
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

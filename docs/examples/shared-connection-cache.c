@@ -51,6 +51,10 @@ int main(void)
   CURLSH *share;
   int i;
 
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   share = curl_share_init();
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
 
@@ -83,5 +87,6 @@ int main(void)
   }
 
   curl_share_cleanup(share);
-  return 0;
+  curl_global_cleanup();
+  return (int)res;
 }
