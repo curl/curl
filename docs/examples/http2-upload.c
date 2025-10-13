@@ -292,6 +292,7 @@ static int setup(struct input *i, int num, const char *upload)
  */
 int main(int argc, char **argv)
 {
+  CURLcode res;
   struct input trans[NUM_HANDLES];
   CURLM *multi_handle;
   int i;
@@ -313,12 +314,18 @@ int main(int argc, char **argv)
   else
     num_transfers = 3;
 
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   /* init a multi stack */
   multi_handle = curl_multi_init();
 
   for(i = 0; i < num_transfers; i++) {
-    if(setup(&trans[i], i, filename))
+    if(setup(&trans[i], i, filename)) {
+      curl_global_cleanup();
       return 1;
+    }
 
     /* add the individual transfer */
     curl_multi_add_handle(multi_handle, trans[i].hnd);
@@ -347,6 +354,8 @@ int main(int argc, char **argv)
     curl_multi_remove_handle(multi_handle, trans[i].hnd);
     curl_easy_cleanup(trans[i].hnd);
   }
+
+  curl_global_cleanup();
 
   return 0;
 }

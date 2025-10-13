@@ -182,10 +182,14 @@ int main(void)
   int pending;
   int complete;
   int still_running;
+  CURLcode res;
+
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   signal(SIGINT, sighandler);
   LIBXML_TEST_VERSION
-  curl_global_init(CURL_GLOBAL_DEFAULT);
   multi_handle = curl_multi_init();
   curl_multi_setopt(multi_handle, CURLMOPT_MAX_TOTAL_CONNECTIONS, max_con);
   curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, 6L);

@@ -207,6 +207,7 @@ static size_t mywrite(char *ptr, size_t size, size_t nmemb, void *userdata)
 
 int main(void)
 {
+  CURLcode res;
   unsigned i;
   int total_failed = 0;
   char errbuf[CURL_ERROR_SIZE] = { 0, };
@@ -222,9 +223,10 @@ int main(void)
   transfer[1].bodyfile = "400.txt";
   transfer[1].logfile = "400_transfer_log.txt";
 
-  if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
     fprintf(stderr, "curl_global_init failed\n");
-    return 1;
+    return (int)res;
   }
 
   /* You could enable global tracing for extra verbosity when verbosity is
@@ -333,6 +335,8 @@ int main(void)
 
     printf("\n");
   }
+
+  curl_global_cleanup();
 
   return total_failed ? 1 : 0;
 }

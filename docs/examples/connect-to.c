@@ -30,8 +30,12 @@
 
 int main(void)
 {
+  struct curl_slist *host;
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /*
     Each single string should be written using the format
@@ -41,8 +45,7 @@ int main(void)
    */
   /* instead of curl.se:443, it resolves and uses example.com:443 but in other
      aspects work as if it still is curl.se */
-  struct curl_slist *host = curl_slist_append(NULL,
-                                              "curl.se:443:example.com:443");
+  host = curl_slist_append(NULL, "curl.se:443:example.com:443");
 
   curl = curl_easy_init();
   if(curl) {
@@ -65,6 +68,8 @@ int main(void)
   }
 
   curl_slist_free_all(host);
+
+  curl_global_cleanup();
 
   return (int)res;
 }

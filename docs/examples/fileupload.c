@@ -46,9 +46,15 @@ int main(void)
   curl_off_t speed_upload, total_time;
   FILE *fd;
 
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   fd = fopen("debugit", "rb"); /* open file to upload */
-  if(!fd)
+  if(!fd) {
+    curl_global_cleanup();
     return 1; /* cannot continue */
+  }
 
   /* to get the file size */
 #ifdef UNDER_CE
@@ -58,6 +64,7 @@ int main(void)
   if(fstat(fileno(fd), &file_info) != 0) {
 #endif
     fclose(fd);
+    curl_global_cleanup();
     return 1; /* cannot continue */
   }
 
@@ -100,5 +107,6 @@ int main(void)
     curl_easy_cleanup(curl);
   }
   fclose(fd);
+  curl_global_cleanup();
   return 0;
 }

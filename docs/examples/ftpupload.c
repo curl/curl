@@ -109,7 +109,11 @@ int main(void)
   printf("Local file size: %lu bytes.\n", (unsigned long)fsize);
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(hd_src);
+    return (int)res;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -155,5 +159,5 @@ int main(void)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

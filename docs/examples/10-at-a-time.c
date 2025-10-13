@@ -109,7 +109,10 @@ int main(void)
   int msgs_left = -1;
   int left = 0;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   cm = curl_multi_init();
 
   /* Limit the amount of simultaneous connections curl should allow: */

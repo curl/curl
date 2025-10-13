@@ -245,6 +245,7 @@ static int conf_init(struct conf *conf)
 
 int main(int argc, char *argv[])
 {
+  CURLcode res;
   CURL *curl;
   struct conf conf[1];
   int RetValue;
@@ -285,7 +286,10 @@ int main(int argc, char *argv[])
     snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
   /* Init CURL before usage */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
     struct tm *lt;

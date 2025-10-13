@@ -58,6 +58,10 @@ int main(void)
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
 
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   /* Allocate one curl handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)
     handles[i] = curl_easy_init();
@@ -186,6 +190,8 @@ int main(void)
   /* Free the curl handles */
   for(i = 0; i < HANDLECOUNT; i++)
     curl_easy_cleanup(handles[i]);
+
+   curl_global_cleanup();
 
   return 0;
 }

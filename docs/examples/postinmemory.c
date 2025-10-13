@@ -63,10 +63,13 @@ int main(void)
   struct MemoryStruct chunk;
   static const char *postthis = "Field=1&Field=2&Field=3";
 
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   chunk.memory = malloc(1);  /* grown as needed by realloc above */
   chunk.size = 0;    /* no data at this point */
 
-  curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.org/");

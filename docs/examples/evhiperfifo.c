@@ -415,9 +415,14 @@ static int init_fifo(struct GlobalInfo *g)
 
 int main(int argc, char **argv)
 {
+  CURLcode res;
   struct GlobalInfo g;
   (void)argc;
   (void)argv;
+
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   memset(&g, 0, sizeof(g));
   g.loop = ev_default_loop(0);
@@ -439,5 +444,6 @@ int main(int argc, char **argv)
 
   ev_loop(g.loop, 0);
   curl_multi_cleanup(g.multi);
+  curl_global_cleanup();
   return 0;
 }

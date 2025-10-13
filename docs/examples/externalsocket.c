@@ -103,14 +103,9 @@ int main(void)
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
-#ifdef _WIN32
-  WSADATA wsaData;
-  int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if(initwsa) {
-    printf("WSAStartup failed: %d\n", initwsa);
-    return 1;
-  }
-#endif
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -175,8 +170,7 @@ int main(void)
     }
   }
 
-#ifdef _WIN32
-  WSACleanup();
-#endif
+  curl_global_cleanup();
+
   return 0;
 }
