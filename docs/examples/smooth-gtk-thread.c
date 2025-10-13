@@ -214,5 +214,7 @@ int main(int argc, char **argv)
   gdk_threads_leave();
   printf("gdk_threads_leave\n");
 
+  curl_global_cleanup();
+
   return 0;
 }
