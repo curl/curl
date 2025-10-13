@@ -440,9 +440,11 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
   passwd.bv_len = 0;
 
   if(data->state.aptr.user) {
+    char empty[1] = "";
     binddn = conn->user;
-    passwd.bv_val = conn->passwd;
-    passwd.bv_len = strlen(passwd.bv_val);
+    /* Assuming empty passwords are a possibility here */
+    passwd.bv_val = conn->passwd ? conn->passwd : empty;
+    passwd.bv_len = conn->passwd ? strlen(passwd.bv_val) : 0;
   }
 
   rc = ldap_sasl_bind(li->ld, binddn, LDAP_SASL_SIMPLE, &passwd,
