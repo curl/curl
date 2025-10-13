@@ -57,7 +57,8 @@ int main(void)
       curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
       /* This fetches message 1 from the user's inbox */
-      curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX/;UID=1");
+      curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/"
+                       "INBOX/;UID=1");
 
       /* Tell the multi stack about our easy handle */
       curl_multi_add_handle(mcurl, curl);
