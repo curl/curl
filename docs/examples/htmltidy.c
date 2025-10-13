@@ -83,8 +83,10 @@ int main(int argc, char **argv)
   TidyBuffer tidy_errbuf = {0};
   CURLcode res;
 
-  if(argc != 2)
+  if(argc != 2) {
     printf("usage: %s <url>\n", argv[0]);
+    return 1;
+  }
 
   res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
