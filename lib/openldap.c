@@ -462,10 +462,8 @@ static CURLcode oldap_perform_mechs(struct Curl_easy *data)
     Curl_conn_meta_get(data->conn, CURL_META_LDAP_CONN);
   int rc;
   char name[]="supportedSASLMechanisms";
-  char *supportedSASLMechanisms[2] = {
-    name,
-    NULL
-  };
+  char *supportedSASLMechanisms[2] = { NULL, NULL };
+  supportedSASLMechanisms[0] = name;
 
   if(!li)
     return CURLE_FAILED_INIT;
