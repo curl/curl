@@ -912,16 +912,18 @@ sub scanfile {
         # scan for use of banned functions
         my $bl = $l;
       again:
-        if((($l =~ /^(.*?\W)(\w+)(\s*\()/x) && $banfunc{$2}) ||
-           (($l =~ /^(.*?\()(\w+)(\s*\()/x) && $banfunc{$2})) {
-            my $bad = $2;
+        if(($l =~ /^(.*?\W)(\w+)(\s*\()/x) ||
+           ($l =~ /^(.*?\()(\w+)(\s*\()/x)) {
+            my $func = $2;
             my $prefix = $1;
             my $suff = $3;
-            checkwarn("BANNEDFUNC",
-                      $line, length($prefix), $file, $ol,
-                      "use of $bad is banned");
-            my $search = quotemeta($prefix . $bad . $suff);
-            my $replace = $prefix . 'x' x (length($bad) + 1);
+            if($banfunc{$2}) {
+                checkwarn("BANNEDFUNC",
+                          $line, length($prefix), $file, $ol,
+                          "use of $func is banned");
+            }
+            my $search = quotemeta($prefix . $func . $suff);
+            my $replace = $prefix . 'x' x (length($func) + 1);
             $l =~ s/$search/$replace/;
             goto again;
         }
