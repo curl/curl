@@ -128,6 +128,11 @@ int main(void)
   CURLcode res;
   struct data config;
 
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
+    fprintf(stderr, "Could not init curl\n");
+    return 1;
+  }
+
   config.trace_ascii = 1; /* enable ASCII tracing */
 
   curl = curl_easy_init();
@@ -151,5 +156,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }
