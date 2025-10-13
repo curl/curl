@@ -1428,6 +1428,7 @@ sftp_download_stat(struct Curl_easy *data,
     data->req.size = -1;
     data->req.maxdownload = -1;
     Curl_pgrsSetDownloadSize(data, -1);
+    attrs.filesize = 0; /* might be uninitialized but will be read below */
   }
   else {
     curl_off_t size = attrs.filesize;
