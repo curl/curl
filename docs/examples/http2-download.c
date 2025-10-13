@@ -56,9 +56,8 @@ struct transfer {
 
 #define NUM_HANDLES 1000
 
-static
-void dump(const char *text, unsigned int num, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text, unsigned int num, unsigned char *ptr,
+                 size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -105,10 +104,8 @@ void dump(const char *text, unsigned int num, unsigned char *ptr, size_t size,
   }
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size, void *userp)
 {
   const char *text;
   struct transfer *t = (struct transfer *)userp;
@@ -210,6 +207,8 @@ int main(int argc, char **argv)
   if(res)
     return (int)res;
 
+  memset(trans, 0, sizeof(trans));
+
   /* init a multi stack */
   multi_handle = curl_multi_init();
 
@@ -242,6 +241,7 @@ int main(int argc, char **argv)
   }
 
   curl_multi_cleanup(multi_handle);
+  curl_global_cleanup();
 
   return 0;
 }

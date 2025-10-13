@@ -37,20 +37,16 @@
  * Download an HTTP file and upload an FTP file simultaneously.
  */
 
-#define HANDLECOUNT 2   /* Number of simultaneous transfers */
 #define HTTP_HANDLE 0   /* Index for the HTTP transfer */
 #define FTP_HANDLE 1    /* Index for the FTP transfer */
+#define HANDLECOUNT 2   /* Number of simultaneous transfers */
 
 int main(void)
 {
   CURL *handles[HANDLECOUNT];
   CURLM *multi_handle;
 
-  int still_running = 1; /* keep number of running handles */
   int i;
-
-  CURLMsg *msg; /* for picking up messages with the transfer status */
-  int msgs_left; /* how many messages are left */
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
@@ -68,52 +64,63 @@ int main(void)
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
+  if(multi_handle) {
 
-  /* add the individual transfers */
-  for(i = 0; i < HANDLECOUNT; i++)
-    curl_multi_add_handle(multi_handle, handles[i]);
+    int still_running = 1; /* keep number of running handles */
 
-  while(still_running) {
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    CURLMsg *msg; /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
 
-    if(still_running)
-      /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+    /* add the individual transfers */
+    for(i = 0; i < HANDLECOUNT; i++)
+      curl_multi_add_handle(multi_handle, handles[i]);
 
-    if(mc)
-      break;
-  }
-  /* See how the transfers went */
-  /* !checksrc! disable EQUALSNULL 1 */
-  while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
-    if(msg->msg == CURLMSG_DONE) {
-      int idx;
+    while(still_running) {
+      CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
-      /* Find out which handle this message is about */
-      for(idx = 0; idx < HANDLECOUNT; idx++) {
-        int found = (msg->easy_handle == handles[idx]);
-        if(found)
+      if(still_running)
+        /* wait for activity, timeout or "nothing" */
+        mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+      if(mc)
+        break;
+    }
+
+    /* See how the transfers went */
+    /* !checksrc! disable EQUALSNULL 1 */
+    while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
+      if(msg->msg == CURLMSG_DONE) {
+        int idx;
+
+        /* Find out which handle this message is about */
+        for(idx = 0; idx < HANDLECOUNT; idx++) {
+          int found = (msg->easy_handle == handles[idx]);
+          if(found)
+            break;
+        }
+
+        switch(idx) {
+        case HTTP_HANDLE:
+          printf("HTTP transfer completed with status %d\n", msg->data.result);
           break;
-      }
-
-      switch(idx) {
-      case HTTP_HANDLE:
-        printf("HTTP transfer completed with status %d\n", msg->data.result);
-        break;
-      case FTP_HANDLE:
-        printf("FTP transfer completed with status %d\n", msg->data.result);
-        break;
+        case FTP_HANDLE:
+          printf("FTP transfer completed with status %d\n", msg->data.result);
+          break;
+        }
       }
     }
+
+    /* remove the transfers */
+    for(i = 0; i < HANDLECOUNT; i++)
+      curl_multi_remove_handle(multi_handle, handles[i]);
+
+    curl_multi_cleanup(multi_handle);
   }
 
-  /* remove the transfers and cleanup the handles */
-  for(i = 0; i < HANDLECOUNT; i++) {
-    curl_multi_remove_handle(multi_handle, handles[i]);
+  /* Free the curl handles */
+  for(i = 0; i < HANDLECOUNT; i++)
     curl_easy_cleanup(handles[i]);
-  }
 
-  curl_multi_cleanup(multi_handle);
   curl_global_cleanup();
 
   return 0;

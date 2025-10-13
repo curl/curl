@@ -434,16 +434,18 @@ int main(void)
   g_io_add_watch(ch, G_IO_IN, fifo_cb, g);
   gmain = g_main_loop_new(NULL, FALSE);
   g->multi = curl_multi_init();
-  curl_multi_setopt(g->multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
-  curl_multi_setopt(g->multi, CURLMOPT_SOCKETDATA, g);
-  curl_multi_setopt(g->multi, CURLMOPT_TIMERFUNCTION, update_timeout_cb);
-  curl_multi_setopt(g->multi, CURLMOPT_TIMERDATA, g);
+  if(g->multi) {
+    curl_multi_setopt(g->multi, CURLMOPT_SOCKETFUNCTION, sock_cb);
+    curl_multi_setopt(g->multi, CURLMOPT_SOCKETDATA, g);
+    curl_multi_setopt(g->multi, CURLMOPT_TIMERFUNCTION, update_timeout_cb);
+    curl_multi_setopt(g->multi, CURLMOPT_TIMERDATA, g);
 
-  /* we do not call any curl_multi_socket*() function yet as we have no handles
-     added! */
+    /* we do not call any curl_multi_socket*() function yet as we have no
+       handles added! */
 
-  g_main_loop_run(gmain);
-  curl_multi_cleanup(g->multi);
+    g_main_loop_run(gmain);
+    curl_multi_cleanup(g->multi);
+  }
   curl_global_cleanup();
   return 0;
 }

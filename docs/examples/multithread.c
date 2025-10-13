@@ -52,13 +52,15 @@ static const char * const urls[NUMT]= {
 
 static void *pull_one_url(void *pindex)
 {
-  int i = *(int *)pindex;
   CURL *curl;
 
   curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
-  (void)curl_easy_perform(curl); /* ignores error */
-  curl_easy_cleanup(curl);
+  if(curl) {
+    int i = *(int *)pindex;
+    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+    (void)curl_easy_perform(curl); /* ignores error */
+    curl_easy_cleanup(curl);
+  }
 
   return NULL;
 }

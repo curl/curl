@@ -45,7 +45,6 @@
 int main(void)
 {
   CURL *curl;
-  struct curl_slist *recipients = NULL;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
@@ -53,6 +52,8 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *recipients = NULL;
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 

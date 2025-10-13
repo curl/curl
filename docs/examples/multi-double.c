@@ -38,9 +38,6 @@ int main(void)
 {
   CURL *http_handle;
   CURL *http_handle2;
-  CURLM *multi_handle;
-
-  int still_running = 1; /* keep number of running handles */
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
@@ -49,46 +46,57 @@ int main(void)
   http_handle = curl_easy_init();
   http_handle2 = curl_easy_init();
 
-  /* set options */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+  if(http_handle &&
+     http_handle2) {
 
-  /* set options */
-  curl_easy_setopt(http_handle2, CURLOPT_URL, "http://localhost/");
+    CURLM *multi_handle;
 
-  /* init a multi stack */
-  multi_handle = curl_multi_init();
+    /* set options */
+    curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
-  /* add the individual transfers */
-  curl_multi_add_handle(multi_handle, http_handle);
-  curl_multi_add_handle(multi_handle, http_handle2);
+    /* set options */
+    curl_easy_setopt(http_handle2, CURLOPT_URL, "http://localhost/");
 
-  while(still_running) {
-    CURLMsg *msg;
-    int queued;
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+    if(multi_handle) {
 
-    if(still_running)
-      /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      int still_running = 1; /* keep number of running handles */
 
-    if(mc)
-      break;
+      /* add the individual transfers */
+      curl_multi_add_handle(multi_handle, http_handle);
+      curl_multi_add_handle(multi_handle, http_handle2);
 
-    do {
-      msg = curl_multi_info_read(multi_handle, &queued);
-      if(msg) {
-        if(msg->msg == CURLMSG_DONE) {
-          /* a transfer ended */
-          fprintf(stderr, "Transfer completed\n");
-        }
+      while(still_running) {
+        CURLMsg *msg;
+        int queued;
+
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if(still_running)
+          /* wait for activity, timeout or "nothing" */
+          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if(mc)
+          break;
+
+        do {
+          msg = curl_multi_info_read(multi_handle, &queued);
+          if(msg) {
+            if(msg->msg == CURLMSG_DONE) {
+              /* a transfer ended */
+              fprintf(stderr, "Transfer completed\n");
+            }
+          }
+        } while(msg);
       }
-    } while(msg);
+
+      curl_multi_remove_handle(multi_handle, http_handle);
+      curl_multi_remove_handle(multi_handle, http_handle2);
+
+      curl_multi_cleanup(multi_handle);
+    }
   }
-
-  curl_multi_remove_handle(multi_handle, http_handle);
-  curl_multi_remove_handle(multi_handle, http_handle2);
-
-  curl_multi_cleanup(multi_handle);
 
   curl_easy_cleanup(http_handle);
   curl_easy_cleanup(http_handle2);

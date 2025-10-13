@@ -92,42 +92,47 @@ int main(int argc, char **argv)
   if(res)
     return (int)res;
 
-  curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
-  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
-
   tdoc = tidyCreate();
   tidyOptSetBool(tdoc, TidyForceOutput, yes); /* try harder */
   tidyOptSetInt(tdoc, TidyWrapLen, 4096);
   tidySetErrorBuffer(tdoc, &tidy_errbuf);
   tidyBufInit(&docbuf);
 
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
-  res = curl_easy_perform(curl);
-  if(!res) {
-    res = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
-    if(res >= 0) {
-      res = tidyCleanAndRepair(tdoc); /* fix any problems */
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
+    res = curl_easy_perform(curl);
+    if(!res) {
+      res = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
       if(res >= 0) {
-        res = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
+        res = tidyCleanAndRepair(tdoc); /* fix any problems */
         if(res >= 0) {
-          dumpNode(tdoc, tidyGetRoot(tdoc), 0); /* walk the tree */
-          fprintf(stderr, "%s\n", tidy_errbuf.bp); /* show errors */
+          res = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
+          if(res >= 0) {
+            dumpNode(tdoc, tidyGetRoot(tdoc), 0); /* walk the tree */
+            fprintf(stderr, "%s\n", tidy_errbuf.bp); /* show errors */
+          }
         }
       }
     }
-  }
-  else
-    fprintf(stderr, "%s\n", curl_errbuf);
+    else
+      fprintf(stderr, "%s\n", curl_errbuf);
 
-  /* clean-up */
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+    /* clean-up */
+    curl_easy_cleanup(curl);
+  }
+
   tidyBufFree(&docbuf);
   tidyBufFree(&tidy_errbuf);
   tidyRelease(tdoc);
+
+  curl_global_cleanup();
+
   return (int)res;
 }
