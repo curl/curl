@@ -590,9 +590,13 @@ error:
     Curl_pSecFn->FreeContextBuffer(sspi_send_token.pvBuffer);
   if(names.sUserName)
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
-  free(sspi_w_token[0].pvBuffer);
-  free(sspi_w_token[1].pvBuffer);
-  free(sspi_w_token[2].pvBuffer);
+#error xxx
+  if(sspi_w_token[0].pvBuffer)
+    Curl_pSecFn->FreeContextBuffer(sspi_w_token[0].pvBuffer);
+  if(sspi_w_token[1].pvBuffer)
+    Curl_pSecFn->FreeContextBuffer(sspi_w_token[1].pvBuffer);
+  if(sspi_w_token[2].pvBuffer)
+    Curl_pSecFn->FreeContextBuffer(sspi_w_token[2].pvBuffer);
   free(etbuf);
   return result;
 }
