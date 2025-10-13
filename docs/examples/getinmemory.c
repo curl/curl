@@ -66,12 +66,12 @@ int main(void)
 
   struct MemoryStruct chunk;
 
-  chunk.memory = malloc(1);  /* grown as needed by the realloc above */
-  chunk.size = 0;    /* no data at this point */
-
   res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
+
+  chunk.memory = malloc(1);  /* grown as needed by the realloc above */
+  chunk.size = 0;    /* no data at this point */
 
   /* init the curl session */
   curl_handle = curl_easy_init();
