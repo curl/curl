@@ -2036,6 +2036,7 @@ dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
 if test "x$curl_cv_native_windows" = "xyes" -a "$curl_cv_wince" = 'no'; then
   LIBS="-lbcrypt $LIBS"
   LIBS="-lncrypt $LIBS"
+  AC_DEFINE(HAVE_NCRYPT, 1, [to enable CNG API])
 fi
 
 case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$RUSTLS_ENABLED" in

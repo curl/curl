@@ -37,11 +37,10 @@
 #pragma warning(pop)
 #endif
 
-#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
+#if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && defined(HAVE_NCRYPT) && __MINGW32__
 #undef _WIN32_WINNT
 /* Define _WIN32_WINNT to ensure MinGW headers show NCrypt definitions.
- * MinGW 4.8.1 headers require _WIN32_WINNT>=600 to show  NCrypt symbols.
- * curl documents Vista as lowest supported Windows version */
+ * MinGW 4.8.1 headers require _WIN32_WINNT>=600 to show  NCrypt symbols.  */
 #define _WIN32_WINNT 0x0600  /* Requires Windows Vista */
 #endif
 
@@ -59,7 +58,9 @@
 
 #include <schnlsp.h>
 #include <schannel.h>
+#ifdef HAVE_NCRYPT
 #include <ncrypt.h> /* include after wincrypt.h */
+#endif
 #include "../curl_sspi.h"
 
 #include "../cfilters.h"

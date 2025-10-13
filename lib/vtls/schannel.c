@@ -1496,8 +1496,11 @@ static void delete_imported_key(PCCERT_CONTEXT imported_cert)
   DWORD byte_count;
   void *storage = NULL;
   CRYPT_KEY_PROV_INFO *prov_info;
+
+#ifdef HAVE_NCRYPT
   NCRYPT_PROV_HANDLE prov_handle = 0;
   NCRYPT_PROV_HANDLE key_handle = 0;
+#endif
 
   DEBUGASSERT(imported_cert);
 
@@ -1522,7 +1525,7 @@ static void delete_imported_key(PCCERT_CONTEXT imported_cert)
   /* Delete persisted key: */
   if(prov_info->dwProvType == 0) {
       /* Key stored in CNG (Cryptographic Next Generation). */
-
+#ifdef HAVE_NCRYPT
       /* Open provider handle. */
       {
         SECURITY_STATUS st = NCryptOpenStorageProvider(
@@ -1557,6 +1560,7 @@ static void delete_imported_key(PCCERT_CONTEXT imported_cert)
         /* NCryptDeleteKey freed key_handle. */
         key_handle = 0;
       }
+  #endif
   }
   else {
       /* Key stored in legacy CAPI (CryptoAPI). */
@@ -1592,12 +1596,14 @@ static void delete_imported_key(PCCERT_CONTEXT imported_cert)
   }
 
 done:
+#ifdef HAVE_NCRYPT
     if(prov_handle) {
       NCryptFreeObject(prov_handle);
     }
     if(key_handle) {
       NCryptFreeObject(key_handle);
     }
+#endif
     CertFreeCertificateContext(imported_cert);
     free(storage);
 }
