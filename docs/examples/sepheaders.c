@@ -38,6 +38,7 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(void)
 {
+  CURLcode res;
   CURL *curl_handle;
   static const char *headerfilename = "head.out";
   FILE *headerfile;
@@ -80,7 +81,7 @@ int main(void)
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, bodyfile);
 
   /* get it! */
-  curl_easy_perform(curl_handle);
+  res = curl_easy_perform(curl_handle);
 
   /* close the header file */
   fclose(headerfile);
@@ -93,5 +94,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }
