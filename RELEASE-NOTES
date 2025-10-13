@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3515
+ Contributors:                 3517
 
 This release includes the following changes:
 
@@ -23,6 +23,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o ares: fix leak in tracing [91]
+ o asyn-ares: remove wrong comment about the callback argument [306]
  o asyn-ares: use the duped hostname pointer for all calls [158]
  o asyn-thrdd resolver: clear timeout when done [97]
  o asyn-thrdd: drop pthread_cancel [30]
@@ -92,10 +93,13 @@ This release includes the following bugfixes:
  o docs/libcurl: clarify some timeout option behavior [15]
  o docs/libcurl: remove ancient version references [7]
  o docs/libcurl: use lowercase must [5]
+ o docs: expand on quoting rules for file names in SFTP quote [300]
  o docs: fix/tidy code fences [87]
+ o doswin: CloseHandle the thread on shutdown [307]
  o easy_getinfo: check magic, Curl_close safety [3]
  o examples/sessioninfo: cast printf string mask length to int [232]
  o examples/sessioninfo: do not disable security [255]
+ o examples/synctime: fix null termination assumptions [297]
  o examples/synctime: make the sscanf not overflow the local buffer [252]
  o examples/usercertinmem: avoid stripping const [247]
  o examples: drop unused `curl/mprintf.h` includes [224]
@@ -134,21 +138,28 @@ This release includes the following bugfixes:
  o ldap: avoid null ptr deref on failure [284]
  o ldap: do not base64 encode zero length string [42]
  o ldap: tidy-up types, fix error code confusion [191]
+ o lib1514: fix return code mixup [304]
  o lib: drop unused include and duplicate guards [226]
  o lib: fix build error and compiler warnings with verbose strings disabled [173]
  o lib: remove personal names from comments [168]
+ o lib: SSL connection reuse [301]
  o lib: upgrade/multiplex handling [136]
  o libcurl-multi.md: added curl_multi_get_offt mention [53]
  o libcurl-security.md: mention long-running connections [6]
+ o libssh/libssh2: reject quote command lines with too much data [299]
  o libssh/sftp: fix resume corruption by avoiding O_APPEND with rresume [263]
  o libssh2/sftp: fix resume corruption by avoiding O_APPEND with rresume [262]
  o libssh2/sftp_realpath: change state consistently [185]
+ o libssh2: avoid risking using an uninitialized local struct field [209]
  o libssh2: bail out on chgrp and chown number parsing errors [202]
  o libssh2: clarify that sshp->path is always at least one byte [201]
  o libssh2: drop two redundant null-terminations [26]
  o libssh2: error check and null-terminate in ssh_state_sftp_readdir_link() [34]
+ o libssh2: fix EAGAIN return in ssh_state_auth_agent [290]
  o libssh2: fix return code for EAGAIN [186]
+ o libssh2: use sockindex consistently [302]
  o libssh: acknowledge SSH_AGAIN in the SFTP state machine [89]
+ o libssh: catch a resume point larger than the size [281]
  o libssh: clarify myssh_block2waitfor [92]
  o libssh: drop two unused assignments [104]
  o libssh: error on bad chgrp number [71]
@@ -197,6 +208,7 @@ This release includes the following bugfixes:
  o OS400: fix a use-after-free/double-free case [142]
  o osslq: set idle timeout to 0 [237]
  o pingpong: remove two old leftover debug infof() calls
+ o pop3: function could get the ->transfer field wrong [292]
  o pytest: skip specific tests for no-verbose builds [171]
  o quic: fix min TLS version handling [14]
  o quic: ignore EMSGSIZE on receive [4]
@@ -218,6 +230,7 @@ This release includes the following bugfixes:
  o setopt: allow CURLOPT_DNS_CACHE_TIMEOUT set to -1 [257]
  o setopt: make CURLOPT_MAXREDIRS accept -1 (again) [1]
  o smb: adjust buffer size checks [45]
+ o smb: transfer debugassert to real check [303]
  o smtp: check EHLO responses case insensitively [50]
  o socks: advance iobuf instead of reset [276]
  o socks: deny server basic-auth if not configured [264]
@@ -231,10 +244,13 @@ This release includes the following bugfixes:
  o socks_gssapi: remove the forced "no protection" [143]
  o socks_sspi: bail out on too long fields [137]
  o socks_sspi: fix memory cleanup calls [40]
+ o socks_sspi: remove the enforced mode clearing [291]
  o socks_sspi: restore non-blocking socket on error paths [48]
+ o socksd: remove --bindonly mention, there is no such option [305]
  o ssl-sessions.md: mark option experimental [12]
  o strerror: drop workaround for SalfordC win32 header bug [214]
  o sws: fix checking `sscanf()` return value [17]
+ o sws: pass in socket reference to allow function to close it [298]
  o tcp-nodelay.md: expand the documentation [153]
  o telnet: ignore empty suboptions [86]
  o telnet: make bad_option() consider NULL a bad option too [192]
@@ -249,6 +265,7 @@ This release includes the following bugfixes:
  o tests/server: drop unsafe `open()` override in signal handler (Windows) [151]
  o tftp: check and act on tftp_set_timeouts() returning error [38]
  o tftp: default timeout per block is now 15 seconds [156]
+ o tftp: error requests for blank filenames [296]
  o tftp: handle tftp_multi_statemach() return code [65]
  o tftp: pin the first used address [110]
  o tftp: propagate expired timer from tftp_state_timeout() [39]
@@ -270,7 +287,9 @@ This release includes the following bugfixes:
  o tool_filetime: replace cast with the fitting printf mask (Windows) [212]
  o tool_getparam/set_rate: skip the multiplication on overflow [84]
  o tool_getparam: always disable "lib-ids" for tracing [169]
+ o tool_getparam: make --fail and --fail-with-body override each other [293]
  o tool_getparam: warn if provided header looks malformed [179]
+ o tool_msgs: make errorf() show if --show-error [294]
  o tool_operate: improve wording in retry message [37]
  o tool_operate: keep failed partial download for retry auto-resume [210]
  o tool_operate: keep the progress meter for --out-null [33]
@@ -325,14 +344,15 @@ advice from friends like these:
   Andrew Olsen, BobodevMm on github, Christian Schmitz, Dan Fandrich,
   Daniel Stenberg, Daniel Terhorst-North, dependabot[bot],
   divinity76 on github, Emilio Pozuelo Monfort, Ethan Everett,
-  Evgeny Grin (Karlson2k), fds242 on github, Howard Chu, Ignat Loskutov,
-  Javier Blazquez, Jicea, jmaggard10 on github, Johannes Schindelin,
-  Joseph Birr-Pixton, Joshua Rogers, kapsiR on github, kuchara on github,
-  Marcel Raad, Michael Osipov, Michał Petryka, Mohamed Daahir, Nir Azkiel,
-  Patrick Monnerat, Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github,
+  Evgeny Grin (Karlson2k), fds242 on github, Harry Sintonen, Howard Chu,
+  Ignat Loskutov, Javier Blazquez, Jicea, jmaggard10 on github,
+  Johannes Schindelin, Joseph Birr-Pixton, Joshua Rogers, kapsiR on github,
+  kuchara on github, Marcel Raad, Michael Osipov, Michał Petryka,
+  Mitchell Blank Jr, Mohamed Daahir, Nir Azkiel, Patrick Monnerat,
+  Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github, Sakthi SK,
   Samuel Dionne-Riel, Samuel Henrique, Stanislav Fort, Stefan Eissing,
   tkzv on github, Viktor Szakats
-  (42 contributors)
+  (45 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -544,6 +564,7 @@ References to bug reports and discussions on issues:
  [206] = https://curl.se/bug/?i=18868
  [207] = https://curl.se/bug/?i=18872
  [208] = https://curl.se/bug/?i=18972
+ [209] = https://curl.se/bug/?i=19043
  [210] = https://curl.se/bug/?i=18035
  [211] = https://curl.se/bug/?i=18860
  [212] = https://curl.se/bug/?i=18858
@@ -615,6 +636,7 @@ References to bug reports and discussions on issues:
  [278] = https://curl.se/bug/?i=18993
  [279] = https://curl.se/bug/?i=18992
  [280] = https://curl.se/bug/?i=18973
+ [281] = https://curl.se/bug/?i=19044
  [282] = https://curl.se/bug/?i=18990
  [283] = https://curl.se/bug/?i=18989
  [284] = https://curl.se/bug/?i=18988
@@ -622,3 +644,20 @@ References to bug reports and discussions on issues:
  [286] = https://curl.se/bug/?i=18986
  [287] = https://curl.se/bug/?i=18985
  [288] = https://curl.se/bug/?i=18984
+ [290] = https://curl.se/bug/?i=19042
+ [291] = https://curl.se/bug/?i=19040
+ [292] = https://curl.se/bug/?i=19039
+ [293] = https://curl.se/bug/?i=19029
+ [294] = https://curl.se/bug/?i=19035
+ [296] = https://curl.se/bug/?i=19033
+ [297] = https://curl.se/bug/?i=19032
+ [298] = https://curl.se/bug/?i=19031
+ [299] = https://curl.se/bug/?i=19030
+ [300] = https://curl.se/bug/?i=19025
+ [301] = https://curl.se/bug/?i=19006
+ [302] = https://curl.se/bug/?i=19004
+ [303] = https://curl.se/bug/?i=19003
+ [304] = https://curl.se/bug/?i=19027
+ [305] = https://curl.se/bug/?i=19026
+ [306] = https://curl.se/bug/?i=19014
+ [307] = https://curl.se/bug/?i=18996
