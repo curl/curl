@@ -195,7 +195,6 @@ class ScoreRunner:
                  curl_verbose: int,
                  download_parallel: int = 0,
                  server_addr: Optional[str] = None,
-                 with_dtrace: bool = False,
                  with_flame: bool = False,
                  socks_args: Optional[List[str]] = None,
                  limit_rate: Optional[str] = None):
@@ -207,7 +206,6 @@ class ScoreRunner:
         self.server_port = server_port
         self._silent_curl = not curl_verbose
         self._download_parallel = download_parallel
-        self._with_dtrace = with_dtrace
         self._with_flame = with_flame
         self._socks_args = socks_args
         self._limit_rate = limit_rate
@@ -220,7 +218,6 @@ class ScoreRunner:
     def mk_curl_client(self):
         return CurlClient(env=self.env, silent=self._silent_curl,
                           server_addr=self.server_addr,
-                          with_dtrace=self._with_dtrace,
                           with_flame=self._with_flame,
                           socks_args=self._socks_args)
 
@@ -726,7 +723,6 @@ def run_score(args, protocol):
                                verbose=args.verbose,
                                curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
-                               with_dtrace=args.dtrace,
                                with_flame=args.flame,
                                socks_args=socks_args,
                                limit_rate=args.limit_rate)
@@ -754,7 +750,6 @@ def run_score(args, protocol):
                                server_port=server_port,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
-                               with_dtrace=args.dtrace,
                                with_flame=args.flame,
                                socks_args=socks_args,
                                limit_rate=args.limit_rate)
@@ -782,7 +777,7 @@ def run_score(args, protocol):
                                server_port=server_port,
                                verbose=args.verbose, curl_verbose=args.curl_verbose,
                                download_parallel=args.download_parallel,
-                               with_dtrace=args.dtrace,
+                               with_flame=args.flame,
                                socks_args=socks_args,
                                limit_rate=args.limit_rate)
             card.setup_resources(server_docs, downloads)
@@ -864,10 +859,8 @@ def main():
                         help="only start the servers")
     parser.add_argument("--remote", action='store', type=str,
                         default=None, help="score against the remote server at <ip>:<port>")
-    parser.add_argument("--dtrace", action='store_true',
-                        default = False, help="produce dtrace of curl")
     parser.add_argument("--flame", action='store_true',
-                        default = False, help="produce a flame graph on curl, implies --dtrace")
+                        default = False, help="produce a flame graph on curl")
     parser.add_argument("--limit-rate", action='store', type=str,
                         default=None, help="use curl's --limit-rate")
 
