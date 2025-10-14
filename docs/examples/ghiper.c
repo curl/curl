@@ -440,8 +440,8 @@ int main(void)
     curl_multi_setopt(g->multi, CURLMOPT_TIMERFUNCTION, update_timeout_cb);
     curl_multi_setopt(g->multi, CURLMOPT_TIMERDATA, g);
 
-    /* we do not call any curl_multi_socket*() function yet as we have no handles
-       added! */
+    /* we do not call any curl_multi_socket*() function yet as we have no
+       handles added! */
 
     g_main_loop_run(gmain);
     curl_multi_cleanup(g->multi);

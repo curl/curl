@@ -174,8 +174,8 @@ int main(void)
     curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
     curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
 
-    /* both VERIFYPEER and VERIFYHOST are set to 0 in this case because there is
-       no CA certificate */
+    /* both VERIFYPEER and VERIFYHOST are set to 0 in this case because there
+       is no CA certificate */
 
     curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -190,8 +190,8 @@ int main(void)
       printf("*** transfer failed ***\n");
 
     /* second try: retrieve page using user certificate and key -> succeeds
-     * load the certificate and key by installing a function doing the necessary
-     * "modifications" to the SSL CONTEXT just before link init
+     * load the certificate and key by installing a function doing
+     * the necessary "modifications" to the SSL CONTEXT just before link init
      */
     curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
     res = curl_easy_perform(ch);

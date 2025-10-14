@@ -252,7 +252,8 @@ int main(int argc, char **argv)
     }
 
     /* kickstart the thing */
-    curl_multi_socket_action(uv.multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
+    curl_multi_socket_action(uv.multi, CURL_SOCKET_TIMEOUT, 0,
+                             &running_handles);
     uv_run(uv.loop, UV_RUN_DEFAULT);
     curl_multi_cleanup(uv.multi);
   }

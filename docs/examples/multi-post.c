@@ -70,12 +70,13 @@ int main(void)
       curl_mime_name(field, "submit");
       curl_mime_data(field, "send", CURL_ZERO_TERMINATED);
 
-      /* initialize custom header list (stating that Expect: 100-continue is not
-         wanted */
+      /* initialize custom header list (stating that Expect: 100-continue is
+         not wanted */
       headerlist = curl_slist_append(headerlist, buf);
 
       /* what URL that receives this POST */
-      curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/upload.cgi");
+      curl_easy_setopt(curl, CURLOPT_URL,
+                       "https://www.example.com/upload.cgi");
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);

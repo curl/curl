@@ -87,7 +87,8 @@ int main(void)
       int still_running = 0;
 
       /* what URL that receives this POST */
-      curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/upload.cgi");
+      curl_easy_setopt(curl, CURLOPT_URL,
+                       "https://www.example.com/upload.cgi");
       curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
