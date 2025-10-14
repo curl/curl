@@ -207,6 +207,8 @@ int main(int argc, char **argv)
   if(res)
     return (int)res;
 
+  memset(trans, 0, sizeof(trans));
+
   /* init a multi stack */
   multi_handle = curl_multi_init();
 
