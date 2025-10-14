@@ -105,10 +105,13 @@ int main(int argc, char **argv)
 
 #ifdef UNDER_CE
   /* !checksrc! disable BANNEDFUNC 1 */
-  stat(file, &file_info);
+  if(stat(file, &file_info) != 0) {
 #else
-  fstat(fileno(fp), &file_info);
+  if(fstat(fileno(fp), &file_info) != 0) {
 #endif
+    fclose(fp);
+    return 1; /* cannot continue */
+  }
 
   /* In Windows, this inits the Winsock stuff */
   res = curl_global_init(CURL_GLOBAL_ALL);
