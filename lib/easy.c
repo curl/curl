@@ -1319,7 +1319,6 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
  */
 CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
 {
-  CURLcode result;
   struct Curl_easy *data = d;
   timediff_t timeout_ms;
 
