@@ -77,6 +77,14 @@ struct stub_gss_ctx_id_t_desc {
   char creds[250];
 };
 
+#ifdef HAVE_GSSGNU
+#define Curl_gss_alloc (malloc)
+#define Curl_gss_free  (free)
+#else
+#define Curl_gss_alloc gssalloc_malloc
+#define Curl_gss_free  gssalloc_free
+#endif
+
 static OM_uint32
 stub_gss_init_sec_context(OM_uint32 *min,
                           gss_cred_id_t initiator_cred_handle,
@@ -212,9 +220,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     ctx->flags = req_flags;
   }
 
-  /* To avoid memdebug macro replacement, wrap the name in parentheses to call
-     the original version. It is freed via the GSS API gss_release_buffer(). */
-  token = (malloc)(length);
+  token = Curl_gss_alloc(length);
   if(!token) {
     free(ctx);
     *min = STUB_GSS_NO_MEMORY;
@@ -229,14 +235,14 @@ stub_gss_init_sec_context(OM_uint32 *min,
     major_status = gss_display_name(&minor_status, target_name,
                                     &target_desc, &name_type);
     if(GSS_ERROR(major_status)) {
-      (free)(token);
+      Curl_gss_free(token);
       free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
-      (free)(token);
+      Curl_gss_free(token);
       free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -252,7 +258,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
   }
 
   if(used >= length) {
-    (free)(token);
+    Curl_gss_free(token);
     free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
