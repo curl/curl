@@ -118,7 +118,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  */
 /*      data event                          arg1       arg2     return */
 #define CF_CTRL_DATA_SETUP            4  /* 0          NULL     first fail */
-#define CF_CTRL_DATA_IDLE             5  /* 0          NULL     first fail */
+/* unused now                         5  */
 #define CF_CTRL_DATA_PAUSE            6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE             7  /* premature  NULL     ignored */
 #define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
@@ -538,12 +538,6 @@ CURLcode Curl_cf_send_bufq(struct Curl_cfilter *cf,
  * a transfer.
  */
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data);
-
-/**
- * Notify connection filters that now would be a good time to
- * perform any idle, e.g. time related, actions.
- */
-CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data);
 
 /**
  * Notify connection filters that the transfer represented by `data`

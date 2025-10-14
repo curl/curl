@@ -966,13 +966,6 @@ CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
                       CF_CTRL_DATA_SETUP, 0, NULL);
 }
 
-CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
-{
-  return cf_cntrl_all(data->conn, data, FALSE,
-                      CF_CTRL_DATA_IDLE, 0, NULL);
-}
-
-
 CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
 {
   if(!CONN_SOCK_IDX_VALID(sockindex))
