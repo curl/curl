@@ -88,5 +88,7 @@ int main(void)
   fclose(ftpfile); /* close the local file */
   fclose(respfile); /* close the response file */
 
+  curl_global_cleanup();
+
   return (int)res;
 }
