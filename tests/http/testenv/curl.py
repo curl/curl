@@ -1094,8 +1094,8 @@ class CurlClient:
         return stacks_collapsed
 
     def _generate_flame(self, curl_args: List[str],
-                        dtrace: DTraceProfile = None,
-                        perf: PerfProfile = None):
+                        dtrace: Optional[DTraceProfile] = None,
+                        perf: Optional[PerfProfile] = None):
         fg_gen_flame = os.path.join(self._fg_dir, 'flamegraph.pl')
         file_svg = os.path.join(self._run_dir, 'curl.flamegraph.svg')
         if not os.path.exists(fg_gen_flame):
