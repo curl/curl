@@ -2040,26 +2040,25 @@ static CURLcode http_target(struct Curl_easy *data,
     if(result)
       return result;
 
-    if(curl_strequal("ftp", data->state.up.scheme)) {
-      if(data->set.proxy_transfer_mode) {
-        /* when doing ftp, append ;type=<a|i> if not present */
-        char *type = strstr(path, ";type=");
-        if(type && type[6] && type[7] == 0) {
-          switch(Curl_raw_toupper(type[6])) {
-          case 'A':
-          case 'D':
-          case 'I':
-            break;
-          default:
-            type = NULL;
-          }
+    if(curl_strequal("ftp", data->state.up.scheme) &&
+       data->set.proxy_transfer_mode) {
+      /* when doing ftp, append ;type=<a|i> if not present */
+      size_t len = strlen(path);
+      bool type_present = FALSE;
+      if((len >= 7) && !strncmp(&path[len - 7], ";type=", 6)) {
+        switch(Curl_raw_toupper(path[len - 1])) {
+        case 'A':
+        case 'D':
+        case 'I':
+          type_present = TRUE;
+          break;
         }
-        if(!type) {
-          result = curlx_dyn_addf(r, ";type=%c",
-                                  data->state.prefer_ascii ? 'a' : 'i');
-          if(result)
-            return result;
-        }
+      }
+      if(!type_present) {
+        result = curlx_dyn_addf(r, ";type=%c",
+                                data->state.prefer_ascii ? 'a' : 'i');
+        if(result)
+          return result;
       }
     }
   }
