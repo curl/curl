@@ -89,6 +89,7 @@ int my_gettimeofday(struct timeval *tp, void *tzp)
 
 struct input {
   FILE *in;
+  FILE *out;
   size_t bytes_read; /* count up */
   CURL *hnd;
   int num;
@@ -208,7 +209,6 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static int setup(struct input *i, int num, const char *upload)
 {
-  FILE *out;
   char url[256];
   char filename[128];
   struct stat file_info;
@@ -219,8 +219,8 @@ static int setup(struct input *i, int num, const char *upload)
 
   i->num = num;
   snprintf(filename, sizeof(filename), "dl-%d", num);
-  out = fopen(filename, "wb");
-  if(!out) {
+  i->out = fopen(filename, "wb");
+  if(!i->out) {
     fprintf(stderr, "error: could not open file %s for writing: %s\n", upload,
             strerror(errno));
     return 1;
@@ -232,7 +232,8 @@ static int setup(struct input *i, int num, const char *upload)
   if(!i->in) {
     fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
             strerror(errno));
-    fclose(out);
+    fclose(i->out);
+    i->out = NULL;
     return 1;
   }
 
@@ -244,7 +245,8 @@ static int setup(struct input *i, int num, const char *upload)
 #endif
     fprintf(stderr, "error: could not stat file %s: %s\n", upload,
             strerror(errno));
-    fclose(out);
+    fclose(i->out);
+    i->out = NULL;
     return 1;
   }
 
@@ -254,7 +256,7 @@ static int setup(struct input *i, int num, const char *upload)
   if(hnd) {
 
     /* write to this file */
-    curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
+    curl_easy_setopt(hnd, CURLOPT_WRITEDATA, i->out);
 
     /* we want to use our own read function */
     curl_easy_setopt(hnd, CURLOPT_READFUNCTION, read_callback);
@@ -315,6 +317,8 @@ int main(int argc, char **argv)
   else
     num_transfers = 3;
 
+  memset(trans, 0, sizeof(trans));
+
   res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
@@ -358,8 +362,14 @@ int main(int argc, char **argv)
     curl_multi_cleanup(multi_handle);
   }
 
-  for(i = 0; i < num_transfers; i++)
+  for(i = 0; i < num_transfers; i++) {
     curl_easy_cleanup(trans[i].hnd);
+
+    if(trans[i].in)
+      fclose(trans[i].in);
+    if(trans[i].out)
+      fclose(trans[i].out);
+  }
 
   curl_global_cleanup();
 
