@@ -55,7 +55,7 @@ static size_t t1514_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib1514(const char *URL)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode res = CURLE_OK;
 
   static char testdata[] = "dummy";
 
