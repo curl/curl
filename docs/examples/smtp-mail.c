@@ -92,8 +92,6 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  struct curl_slist *recipients = NULL;
-  struct upload_status upload_ctx = { 0 };
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
@@ -101,6 +99,9 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *recipients = NULL;
+    struct upload_status upload_ctx = { 0 };
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
