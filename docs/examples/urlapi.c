@@ -34,17 +34,13 @@
 
 int main(void)
 {
-  CURL *curl;
-
+  CURL *curl = NULL;
   CURLU *urlp;
   CURLUcode uc;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
-
-  /* get a curl handle */
-  curl = curl_easy_init();
 
   /* init Curl URL */
   urlp = curl_url();
@@ -56,6 +52,8 @@ int main(void)
     goto cleanup;
   }
 
+  /* get a curl handle */
+  curl = curl_easy_init();
   if(curl) {
     /* set urlp to use as working URL */
     curl_easy_setopt(curl, CURLOPT_CURLU, urlp);
@@ -69,8 +67,6 @@ int main(void)
     if(res != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(res));
-
-    goto cleanup;
   }
 
 cleanup:
