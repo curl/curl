@@ -234,16 +234,18 @@ int main(int argc, char **argv)
   timeout = evtimer_new(base, on_timeout, NULL);
 
   curl_handle = curl_multi_init();
-  curl_multi_setopt(curl_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
-  curl_multi_setopt(curl_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
+  if(curl_handle) {
+    curl_multi_setopt(curl_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
+    curl_multi_setopt(curl_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
 
-  while(argc-- > 1) {
-    add_download(argv[argc], argc);
+    while(argc-- > 1) {
+      add_download(argv[argc], argc);
+    }
+
+    event_base_dispatch(base);
+
+    curl_multi_cleanup(curl_handle);
   }
-
-  event_base_dispatch(base);
-
-  curl_multi_cleanup(curl_handle);
   event_free(timeout);
   event_base_free(base);
 
