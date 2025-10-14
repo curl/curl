@@ -243,5 +243,7 @@ int main(int argc, char **argv)
 
   curl_multi_cleanup(multi_handle);
 
+  curl_global_cleanup();
+
   return 0;
 }
