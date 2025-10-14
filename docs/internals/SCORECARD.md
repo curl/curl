@@ -61,7 +61,7 @@ involved. (Note: this does not work for HTTP/3)
 
 ## flame graphs
 
-With the excellent [Flame Graph](https://github.com/brendangregg/FlameGraph) by Brendan Gregg, scorecard can turn `perf`/`dtrace` samples into an interactive SVG. Either clone the Flamegraph repository next to your `curl` project or set the environment variable `FLAMEGRAPH` to the location of your clone. Then run scorecard with the `--flame` option, like
+With the excellent [Flame Graph](https://github.com/brendangregg/FlameGraph) by Brendan Gregg, scorecard can turn `perf`/`dtrace` samples into an interactive SVG. Either clone the `Flamegraph` repository next to your `curl` project or set the environment variable `FLAMEGRAPH` to the location of your clone. Then run scorecard with the `--flame` option, like
 
 ```
 curl> FLAMEGRAPH=/Users/sei/projects/FlameGraph python3 tests/http/scorecard.py \
