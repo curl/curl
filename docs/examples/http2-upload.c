@@ -317,11 +317,11 @@ int main(int argc, char **argv)
   else
     num_transfers = 3;
 
-  memset(trans, 0, sizeof(trans));
-
   res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
+
+  memset(trans, 0, sizeof(trans));
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
