@@ -81,6 +81,7 @@ struct stub_gss_ctx_id_t_desc {
 #define Curl_gss_alloc (malloc)
 #define Curl_gss_free  (free)
 #else
+#include <gssapi/gssapi_alloc.h>
 #define Curl_gss_alloc gssalloc_malloc
 #define Curl_gss_free  gssalloc_free
 #endif
