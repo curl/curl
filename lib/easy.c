@@ -1238,6 +1238,9 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
   CURLcode result;
   struct connectdata *c;
   struct Curl_easy *data = d;
+  timediff_t timeout_ms;
+
+  *n = 0;
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1253,7 +1256,10 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
        needs to be reattached */
     Curl_attach_connection(data, c);
 
-  *n = 0;
+  timeout_ms = Curl_timeleft(data, NULL, FALSE);
+  if(timeout_ms < 0)
+    return CURLE_OPERATION_TIMEDOUT;
+
   return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
 }
 
@@ -1313,17 +1319,22 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
  */
 CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
 {
-  size_t written = 0;
   CURLcode result;
   struct Curl_easy *data = d;
+  timediff_t timeout_ms;
+
+  *n = 0;
+
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  result = Curl_senddata(data, buffer, buflen, &written);
-  *n = written;
-  return result;
+  timeout_ms = Curl_timeleft(data, NULL, FALSE);
+  if(timeout_ms < 0)
+    return CURLE_OPERATION_TIMEDOUT;
+
+  return Curl_senddata(data, buffer, buflen, n);
 }
 
 /*
