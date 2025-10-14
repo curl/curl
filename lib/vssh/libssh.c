@@ -1105,6 +1105,7 @@ static int myssh_in_AUTH_PASS(struct Curl_easy *data,
 static int myssh_in_AUTH_DONE(struct Curl_easy *data,
                               struct ssh_conn *sshc)
 {
+  struct connectdata *conn = data->conn;
   if(!sshc->authed) {
     failf(data, "Authentication failure");
     return myssh_to_ERROR(data, sshc, CURLE_LOGIN_DENIED);
@@ -1113,10 +1114,10 @@ static int myssh_in_AUTH_DONE(struct Curl_easy *data,
   /* At this point we have an authenticated ssh session. */
   infof(data, "Authentication complete");
   Curl_pgrsTime(data, TIMER_APPCONNECT);      /* SSH is connected */
-  data->conn->recv_idx = FIRSTSOCKET;
-  data->conn->send_idx = -1;
+  conn->recv_idx = FIRSTSOCKET;
+  conn->send_idx = -1;
 
-  if(data->conn->handler->protocol == CURLPROTO_SFTP) {
+  if(conn->handler->protocol == CURLPROTO_SFTP) {
     myssh_to(data, sshc, SSH_SFTP_INIT);
     return SSH_NO_ERROR;
   }
@@ -2428,14 +2429,15 @@ static CURLcode myssh_pollset(struct Curl_easy *data,
                               struct easy_pollset *ps)
 {
   int flags = 0;
-  if(data->conn->waitfor & KEEP_RECV)
+  struct connectdata *conn = data->conn;
+  if(conn->waitfor & KEEP_RECV)
     flags |= CURL_POLL_IN;
-  if(data->conn->waitfor & KEEP_SEND)
+  if(conn->waitfor & KEEP_SEND)
     flags |= CURL_POLL_OUT;
-  if(!data->conn->waitfor)
+  if(!conn->waitfor)
     flags |= CURL_POLL_OUT;
   return flags ?
-    Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET], flags, 0) :
+    Curl_pollset_change(data, ps, conn->sock[FIRSTSOCKET], flags, 0) :
     CURLE_OK;
 }
 
