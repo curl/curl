@@ -29,14 +29,17 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 
+#ifdef DEBUGBUILD
 #ifdef HAVE_GSSGNU
 #define Curl_gss_alloc (malloc)
 #define Curl_gss_free  (free)
 #else
-#include <gssapi/gssapi_alloc.h> /* MIT Kerberos 1.10+, missing from GNU GSS */
+/* MIT Kerberos 1.10+ (Windows), 1.18+ (all platforms), missing from GNU GSS */
+#include <gssapi/gssapi_alloc.h>
 #define Curl_gss_alloc gssalloc_malloc
 #define Curl_gss_free  gssalloc_free
 #endif
+#endif /* DEBUGBUILD */
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
