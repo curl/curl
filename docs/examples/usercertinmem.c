@@ -163,43 +163,45 @@ int main(void)
     return (int)res;
 
   ch = curl_easy_init();
-  curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
-  curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
-  curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
-  curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, writefunction);
-  curl_easy_setopt(ch, CURLOPT_WRITEDATA, stdout);
-  curl_easy_setopt(ch, CURLOPT_HEADERFUNCTION, writefunction);
-  curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
-  curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
+  if(ch) {
+    curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
+    curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
+    curl_easy_setopt(ch, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(ch, CURLOPT_NOSIGNAL, 1L);
+    curl_easy_setopt(ch, CURLOPT_WRITEFUNCTION, writefunction);
+    curl_easy_setopt(ch, CURLOPT_WRITEDATA, stdout);
+    curl_easy_setopt(ch, CURLOPT_HEADERFUNCTION, writefunction);
+    curl_easy_setopt(ch, CURLOPT_HEADERDATA, stderr);
+    curl_easy_setopt(ch, CURLOPT_SSLCERTTYPE, "PEM");
 
-  /* both VERIFYPEER and VERIFYHOST are set to 0 in this case because there is
-     no CA certificate */
+    /* both VERIFYPEER and VERIFYHOST are set to 0 in this case because there is
+       no CA certificate */
 
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
-  curl_easy_setopt(ch, CURLOPT_SSLKEYTYPE, "PEM");
+    curl_easy_setopt(ch, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(ch, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(ch, CURLOPT_URL, "https://www.example.com/");
+    curl_easy_setopt(ch, CURLOPT_SSLKEYTYPE, "PEM");
 
-  /* first try: retrieve page without user certificate and key -> fails */
-  res = curl_easy_perform(ch);
-  if(res == CURLE_OK)
-    printf("*** transfer succeeded ***\n");
-  else
-    printf("*** transfer failed ***\n");
+    /* first try: retrieve page without user certificate and key -> fails */
+    res = curl_easy_perform(ch);
+    if(res == CURLE_OK)
+      printf("*** transfer succeeded ***\n");
+    else
+      printf("*** transfer failed ***\n");
 
-  /* second try: retrieve page using user certificate and key -> succeeds
-   * load the certificate and key by installing a function doing the necessary
-   * "modifications" to the SSL CONTEXT just before link init
-   */
-  curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
-  res = curl_easy_perform(ch);
-  if(res == CURLE_OK)
-    printf("*** transfer succeeded ***\n");
-  else
-    printf("*** transfer failed ***\n");
+    /* second try: retrieve page using user certificate and key -> succeeds
+     * load the certificate and key by installing a function doing the necessary
+     * "modifications" to the SSL CONTEXT just before link init
+     */
+    curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
+    res = curl_easy_perform(ch);
+    if(res == CURLE_OK)
+      printf("*** transfer succeeded ***\n");
+    else
+      printf("*** transfer failed ***\n");
 
-  curl_easy_cleanup(ch);
+    curl_easy_cleanup(ch);
+  }
   curl_global_cleanup();
   return (int)res;
 }
