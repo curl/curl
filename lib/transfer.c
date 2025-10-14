@@ -244,8 +244,7 @@ static ssize_t xfer_recv_resp(struct Curl_easy *data,
  * buffer)
  */
 static CURLcode sendrecv_dl(struct Curl_easy *data,
-                            struct SingleRequest *k,
-                            int *didwhat)
+                            struct SingleRequest *k)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
@@ -309,7 +308,6 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     /* We only get a 0-length receive at the end of the response */
     blen = (size_t)nread;
     is_eos = (blen == 0);
-    *didwhat |= KEEP_RECV;
 
     if(!blen) {
       /* if we receive 0 or less here, either the data transfer is done or the
@@ -369,17 +367,15 @@ out:
 /*
  * Send data to upload to the server, when the socket is writable.
  */
-static CURLcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
+static CURLcode sendrecv_ul(struct Curl_easy *data)
 {
   /* We should not get here when the sending is already done. It
    * probably means that someone set `data-req.keepon |= KEEP_SEND`
    * when it should not. */
   DEBUGASSERT(!Curl_req_done_sending(data));
 
-  if(!Curl_req_done_sending(data)) {
-    *didwhat |= KEEP_SEND;
+  if(!Curl_req_done_sending(data))
     return Curl_req_send_more(data);
-  }
   return CURLE_OK;
 }
 
@@ -391,7 +387,6 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
 {
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
-  int didwhat = 0;
 
   DEBUGASSERT(nowp);
   if(Curl_xfer_is_blocked(data)) {
@@ -402,21 +397,14 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   /* We go ahead and do a read if we have a readable socket or if the stream
      was rewound (in which case we have data in a buffer) */
   if(k->keepon & KEEP_RECV) {
-    result = sendrecv_dl(data, k, &didwhat);
+    result = sendrecv_dl(data, k);
     if(result || data->req.done)
       goto out;
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
   if(Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) {
-    result = sendrecv_ul(data, &didwhat);
-    if(result)
-      goto out;
-  }
-
-  if(!didwhat) {
-    /* Transfer wanted to send/recv, but nothing was possible. */
-    result = Curl_conn_ev_data_idle(data);
+    result = sendrecv_ul(data);
     if(result)
       goto out;
   }

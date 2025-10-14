@@ -2040,16 +2040,6 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
     }
     break;
   }
-  case CF_CTRL_DATA_IDLE: {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    CURL_TRC_CF(data, cf, "data idle");
-    if(stream && !stream->closed) {
-      result = check_and_set_expiry(cf, data, NULL);
-      if(result)
-        CURL_TRC_CF(data, cf, "data idle, check_and_set_expiry -> %d", result);
-    }
-    break;
-  }
   case CF_CTRL_CONN_INFO_UPDATE:
     if(!cf->sockindex && cf->connected) {
       cf->conn->httpversion_seen = 30;
