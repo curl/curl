@@ -29,6 +29,15 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 
+#ifdef HAVE_GSSGNU
+#define Curl_gss_alloc (malloc)
+#define Curl_gss_free  (free)
+#else
+#include <gssapi/gssapi_alloc.h> /* MIT Kerberos 1.10+, missing from GNU GSS */
+#define Curl_gss_alloc gssalloc_malloc
+#define Curl_gss_free  gssalloc_free
+#endif
+
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
@@ -76,15 +85,6 @@ struct stub_gss_ctx_id_t_desc {
   OM_uint32 flags;
   char creds[250];
 };
-
-#ifdef HAVE_GSSGNU
-#define Curl_gss_alloc (malloc)
-#define Curl_gss_free  (free)
-#else
-#include <gssapi/gssapi_alloc.h> /* MIT Kerberos 1.10+, missing from GNU GSS */
-#define Curl_gss_alloc gssalloc_malloc
-#define Curl_gss_free  gssalloc_free
-#endif
 
 static OM_uint32
 stub_gss_init_sec_context(OM_uint32 *min,
