@@ -481,6 +481,14 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
 
+  /* Reset the retry count at the start of each request.
+   * If the retry count is not reset, when the connection drops,
+   * it will not enter the retry mechanism on CONN_MAX_RETRIES + 1 attempts
+   * and will immediately throw
+   * "Connection died, tried CONN_MAX_RETRIES times before giving up".
+   * By resetting it here, we ensure each new request starts fresh. */
+  data->state.retrycount = 0;
+
   if(!data->set.str[STRING_SET_URL] && !data->set.uh) {
     /* we cannot do anything without URL */
     failf(data, "No URL set");
