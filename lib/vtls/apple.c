@@ -46,16 +46,16 @@
 #include "vtls.h"
 #include "apple.h"
 
-#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
+#ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
-#endif /* USE_SSL && USE_APPLE_SECTRUST */
+#endif
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
 
-#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
+#ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
 
 #if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
@@ -294,4 +294,4 @@ out:
   return result;
 }
 
-#endif /* USE_SSL && USE_APPLE_SECTRUST */
+#endif /* USE_APPLE_SECTRUST */

@@ -5304,6 +5304,10 @@ if test "x$OPENSSL_ENABLED" = "x1" -o -n "$SSL_ENABLED"; then
   fi
 fi
 
+if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
+fi
+
 if test "x$want_httpsrr" != "xno"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSRR"
 fi
