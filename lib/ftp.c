@@ -2606,7 +2606,7 @@ static CURLcode ftp_state_user_resp(struct Curl_easy *data,
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
     result = Curl_pp_sendf(data, &ftpc->pp, "PASS %s",
-                           data->conn->passwd ? data->conn->passwd : "");
+                           data->conn->passwd);
     if(!result)
       ftp_state(data, ftpc, FTP_PASS);
   }
