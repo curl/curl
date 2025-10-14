@@ -251,39 +251,41 @@ static int setup(struct input *i, int num, const char *upload)
   uploadsize = file_info.st_size;
 
   hnd = i->hnd = curl_easy_init();
+  if(hnd) {
 
-  /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
+    /* write to this file */
+    curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out);
 
-  /* we want to use our own read function */
-  curl_easy_setopt(hnd, CURLOPT_READFUNCTION, read_callback);
-  /* read from this file */
-  curl_easy_setopt(hnd, CURLOPT_READDATA, i);
-  /* provide the size of the upload */
-  curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, uploadsize);
+    /* we want to use our own read function */
+    curl_easy_setopt(hnd, CURLOPT_READFUNCTION, read_callback);
+    /* read from this file */
+    curl_easy_setopt(hnd, CURLOPT_READDATA, i);
+    /* provide the size of the upload */
+    curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, uploadsize);
 
-  /* send in the URL to store the upload as */
-  curl_easy_setopt(hnd, CURLOPT_URL, url);
+    /* send in the URL to store the upload as */
+    curl_easy_setopt(hnd, CURLOPT_URL, url);
 
-  /* upload please */
-  curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
+    /* upload please */
+    curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
 
-  /* please be verbose */
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, i);
+    /* please be verbose */
+    curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
+    curl_easy_setopt(hnd, CURLOPT_DEBUGDATA, i);
 
-  /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    /* HTTP/2 please */
+    curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
-  /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+    /* we use a self-signed test server, skip verification during debugging */
+    curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
 
 #if (CURLPIPE_MULTIPLEX > 0)
-  /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+    /* wait for pipe connection to confirm */
+    curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
 #endif
+  }
   return 0;
 }
 
@@ -296,7 +298,6 @@ int main(int argc, char **argv)
   struct input trans[NUM_HANDLES];
   CURLM *multi_handle;
   int i;
-  int still_running = 0; /* keep number of running handles */
   const char *filename = "index.html";
   int num_transfers;
 
@@ -320,40 +321,45 @@ int main(int argc, char **argv)
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
+  if(multi_handle) {
 
-  for(i = 0; i < num_transfers; i++) {
-    if(setup(&trans[i], i, filename)) {
-      curl_global_cleanup();
-      return 1;
+    int still_running = 0; /* keep number of running handles */
+
+    for(i = 0; i < num_transfers; i++) {
+      if(setup(&trans[i], i, filename)) {
+        curl_global_cleanup();
+        return 1;
+      }
+
+      /* add the individual transfer */
+      curl_multi_add_handle(multi_handle, trans[i].hnd);
     }
 
-    /* add the individual transfer */
-    curl_multi_add_handle(multi_handle, trans[i].hnd);
+    curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+
+    /* We do HTTP/2 so let's stick to one connection per host */
+    curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, 1L);
+
+    do {
+      CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+      if(still_running)
+        /* wait for activity, timeout or "nothing" */
+        mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+      if(mc)
+        break;
+
+    } while(still_running);
+
+    for(i = 0; i < num_transfers; i++)
+      curl_multi_remove_handle(multi_handle, trans[i].hnd);
+
+    curl_multi_cleanup(multi_handle);
   }
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-
-  /* We do HTTP/2 so let's stick to one connection per host */
-  curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, 1L);
-
-  do {
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
-
-    if(still_running)
-      /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
-
-    if(mc)
-      break;
-
-  } while(still_running);
-
-  curl_multi_cleanup(multi_handle);
-
-  for(i = 0; i < num_transfers; i++) {
-    curl_multi_remove_handle(multi_handle, trans[i].hnd);
+  for(i = 0; i < num_transfers; i++)
     curl_easy_cleanup(trans[i].hnd);
-  }
 
   curl_global_cleanup();
 
