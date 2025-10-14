@@ -162,7 +162,6 @@ int main(void)
   if(res)
     return (int)res;
 
-  curl_global_init(CURL_GLOBAL_ALL);
   ch = curl_easy_init();
   curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
