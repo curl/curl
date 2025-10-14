@@ -3061,12 +3061,13 @@ static CURLcode ssh_pollset(struct Curl_easy *data,
                             struct easy_pollset *ps)
 {
   int flags = 0;
-  if(data->conn->waitfor & KEEP_RECV)
+  struct connectdata *conn = data->conn;
+  if(conn->waitfor & KEEP_RECV)
     flags |= CURL_POLL_IN;
-  if(data->conn->waitfor & KEEP_SEND)
+  if(conn->waitfor & KEEP_SEND)
     flags |= CURL_POLL_OUT;
   return flags ?
-    Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET], flags, 0) :
+    Curl_pollset_change(data, ps, conn->sock[FIRSTSOCKET], flags, 0) :
     CURLE_OK;
 }
 

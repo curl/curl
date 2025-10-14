@@ -932,13 +932,14 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
 
 void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
 {
-  if(data->conn && CONN_SOCK_IDX_VALID(sockindex)) {
-    struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+  struct connectdata *conn = data->conn;
+  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
+    struct Curl_cfilter *cf = conn->cfilter[sockindex];
     if(cf)
       (void)Curl_conn_cf_cntrl(cf, data, TRUE,
                                CF_CTRL_FORGET_SOCKET, 0, NULL);
-    fake_sclose(data->conn->sock[sockindex]);
-    data->conn->sock[sockindex] = CURL_SOCKET_BAD;
+    fake_sclose(conn->sock[sockindex]);
+    conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
 }
 
