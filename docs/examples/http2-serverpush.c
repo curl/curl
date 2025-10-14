@@ -212,7 +212,6 @@ int main(int argc, char *argv[])
   CURL *easy;
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
-  struct CURLMsg *m;
   const char *url = "https://localhost:8443/index.html";
 
   if(argc == 2)
@@ -242,6 +241,7 @@ int main(int argc, char *argv[])
   curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   do {
+    struct CURLMsg *m;
     int still_running; /* keep number of running handles */
     CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
