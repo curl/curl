@@ -2045,7 +2045,7 @@ static CURLcode http_target(struct Curl_easy *data,
       /* when doing ftp, append ;type=<a|i> if not present */
       size_t len = strlen(path);
       bool type_present = FALSE;
-      if((len >= 7) && !strncmp(&path[len - 7], ";type=", 6)) {
+      if((len >= 7) && !memcmp(&path[len - 7], ";type=", 6)) {
         switch(Curl_raw_toupper(path[len - 1])) {
         case 'A':
         case 'D':
