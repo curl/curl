@@ -258,7 +258,5 @@ int main(int argc, char **argv)
   }
   curl_global_cleanup();
 
-  curl_global_cleanup();
-
   return 0;
 }
