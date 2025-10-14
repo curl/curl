@@ -69,13 +69,13 @@ curl> FLAMEGRAPH=/Users/sei/projects/FlameGraph python3 tests/http/scorecard.py 
 ```
 and the SVG of the run is in `tests/http/gen/curl/curl.flamegraph.svg`. You can open that in Firefox and zoom in/out of stacks of interest.
 
-The flamegraph is about the last run of `curl`. That is why you should add scorecard arguments
+The flame graph is about the last run of `curl`. That is why you should add scorecard arguments
 that restrict measurements to a single run.
 
 ### Measures/Privileges
 
 The `--flame` option uses `perf` on linux and `dtrace` on macOS. Since both tools require special
-privileges, they are run via the `sudo` command by scorecard. This means you'd need to issue a
+privileges, they are run via the `sudo` command by scorecard. This means you need to issue a
 `sudo` recently enough before running scorecard, so no new password check is needed.
 
 There is no support right now for measurements on other platforms.
