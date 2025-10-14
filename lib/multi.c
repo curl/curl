@@ -2376,7 +2376,8 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   /* Reset the retry count at the start of each request.
    * If the retry count is not reset, when the connection drops,
    * it will not enter the retry mechanism on CONN_MAX_RETRIES + 1 attempts
-   * and will immediately throw "Connection died, tried %d times before giving up".
+   * and will immediately throw
+   * "Connection died, tried CONN_MAX_RETRIES times before giving up".
    * By resetting it here, we ensure each new request starts fresh. */
   data->state.retrycount = 0;
 
