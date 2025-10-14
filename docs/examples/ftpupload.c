@@ -84,8 +84,8 @@ int main(void)
   curl_off_t fsize;
 
   struct curl_slist *headerlist = NULL;
-  static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
-  static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
+  static const char buf_1[] = "RNFR " UPLOAD_FILE_AS;
+  static const char buf_2[] = "RNTO " RENAME_FILE_TO;
 
   /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");

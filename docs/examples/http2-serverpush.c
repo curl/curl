@@ -40,9 +40,7 @@
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
-static
-void dump(const char *text, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
 {
   size_t i;
   size_t c;
@@ -89,10 +87,8 @@ void dump(const char *text, unsigned char *ptr, size_t size,
   }
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type,
+                    char *data, size_t size, void *userp)
 {
   const char *text;
   (void)handle;

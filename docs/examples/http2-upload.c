@@ -68,8 +68,7 @@
 
 #ifdef _MSC_VER
 #define gettimeofday(a, b) my_gettimeofday((a), (b))
-static
-int my_gettimeofday(struct timeval *tp, void *tzp)
+static int my_gettimeofday(struct timeval *tp, void *tzp)
 {
   (void)tzp;
   if(tp) {
@@ -95,9 +94,8 @@ struct input {
   int num;
 };
 
-static
-void dump(const char *text, int num, unsigned char *ptr, size_t size,
-          char nohex)
+static void dump(const char *text, int num, unsigned char *ptr, size_t size,
+                 char nohex)
 {
   size_t i;
   size_t c;
@@ -143,10 +141,8 @@ void dump(const char *text, int num, unsigned char *ptr, size_t size,
   }
 }
 
-static
-int my_trace(CURL *handle, curl_infotype type,
-             char *data, size_t size,
-             void *userp)
+static int my_trace(CURL *handle, curl_infotype type, char *data,
+                    size_t size, void *userp)
 {
   char timebuf[60];
   const char *text;
