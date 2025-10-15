@@ -80,14 +80,18 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'cmake build-only (out-of-tree)'
+      - name: 'cmake build-only configure (out-of-tree)'
         run: |
           mkdir bld-1
           cd bld-1
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
-          VERBOSE=1 make install
-          src/curl --disable --version
+
+      - name: 'cmake build-only build'
+        run: VERBOSE=1 make -C bld-1 install
+
+      - name: 'cmake build-only curl version'
+        run: bld-1/src/curl --disable --version
 
       - name: 'cmake build-only configure log'
         if: ${{ !cancelled() }}
@@ -118,9 +122,10 @@ jobs:
           grep -F '#define' bld-cares/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
-        run: |
-          make -C bld-cares
-          bld-cares/src/curl --disable --version
+        run: make -C bld-cares
+
+      - name: 'cmake curl version'
+        run: bld-cares/src/curl --disable --version
 
       - name: 'cmake install'
         run: make -C bld-cares install
@@ -155,9 +160,10 @@ jobs:
           grep -F '#define' bld-am/lib/curl_config.h | sort || true
 
       - name: 'autotools build'
-        run: |
-          make -C bld-am
-          bld-am/src/curl --disable --version
+        run: make -C bld-am
+
+      - name: 'autotools curl version'
+        run: bld-am/src/curl --disable --version
 
       - name: 'autotools install'
         run: make -C bld-am install
