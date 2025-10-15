@@ -1379,35 +1379,19 @@ static CURLcode tftp_do(struct Curl_easy *data, bool *done)
 static CURLcode tftp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
-  char *type;
+  char *path = data->state.up.path;
+  size_t len = strlen(path);
 
   conn->transport_wanted = TRNSPRT_UDP;
 
-  /* TFTP URLs support an extension like ";mode=<typecode>" that
-   * we will try to get now! */
-  type = strstr(data->state.up.path, ";mode=");
-
-  if(!type)
-    type = strstr(conn->host.rawalloc, ";mode=");
-
-  if(type) {
-    char command;
-    *type = 0;                   /* it was in the middle of the hostname */
-    command = Curl_raw_toupper(type[6]);
-
-    switch(command) {
-    case 'A': /* ASCII mode */
-    case 'N': /* NETASCII mode */
-      data->state.prefer_ascii = TRUE;
-      break;
-
-    case 'O': /* octet mode */
-    case 'I': /* binary mode */
-    default:
-      /* switch off ASCII */
-      data->state.prefer_ascii = FALSE;
-      break;
-    }
+  /* TFTP URLs support a trailing ";mode=netascii" or ";mode=octet" */
+  if((len >= 14) && !memcmp(&path[len - 14], ";mode=netascii", 14)) {
+    data->state.prefer_ascii = TRUE;
+    path[len - 14] = 0; /* cut it there */
+  }
+  else if((len >= 11) && !memcmp(&path[len - 11], ";mode=octet", 11)) {
+    data->state.prefer_ascii = FALSE;
+    path[len - 11] = 0; /* cut it there */
   }
 
   return CURLE_OK;
