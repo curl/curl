@@ -80,7 +80,7 @@
 
 #ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
-#endif /* USE_APPLE_SECTRUST */
+#endif
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
