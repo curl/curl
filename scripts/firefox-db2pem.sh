@@ -32,7 +32,11 @@
 
 set -eu
 
-db=$(ls -1d "$HOME"/.mozilla/firefox/*default*)
+if [ -d "$HOME/Library/Application Support"/Firefox/Profiles ]; then
+  db=$(ls -1d "$HOME/Library/Application Support"/Firefox/Profiles/*default*)
+else
+  db=$(ls -1d "$HOME"/.mozilla/firefox/*default*)
+fi
 out="${1:-}"
 
 if test -z "$out"; then
