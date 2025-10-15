@@ -43,7 +43,6 @@ problems may have been fixed or changed somewhat since this was written.
  5.15 Unicode on Windows
 
  6. Authentication
- 6.1 Digest auth-int for PUT/POST
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
@@ -301,10 +300,6 @@ problems may have been fixed or changed somewhat since this was written.
  https://curl.se/mail/lib-2012-07/0073.html
 
 6. Authentication
-
-6.1 Digest auth-int for PUT/POST
-
- We do not support auth-int for Digest using PUT or POST
 
 6.2 MIT Kerberos for Windows build
 
