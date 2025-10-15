@@ -675,9 +675,9 @@ static int curltest_put_handler(request_rec *r)
   }
 
 cleanup:
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if(rv == APR_SUCCESS ||
+     r->status != HTTP_OK ||
+     c->aborted) {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "put_handler: done");
     return OK;
   }
@@ -739,9 +739,9 @@ static int curltest_1_1_required(request_rec *r)
   rv = ap_pass_brigade(r->output_filters, bb);
 
 cleanup:
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if(rv == APR_SUCCESS ||
+     r->status != HTTP_OK ||
+     c->aborted) {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler: done");
     return OK;
   }
@@ -851,9 +851,9 @@ static int curltest_sslinfo_handler(request_rec *r)
 cleanup:
   if(close_conn)
     r->connection->keepalive = AP_CONN_CLOSE;
-  if(rv == APR_SUCCESS
-     || r->status != HTTP_OK
-     || c->aborted) {
+  if(rv == APR_SUCCESS ||
+     r->status != HTTP_OK ||
+     c->aborted) {
     ap_log_rerror(APLOG_MARK, APLOG_TRACE1, rv, r, "1_1_handler: done");
     return OK;
   }
