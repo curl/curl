@@ -981,7 +981,6 @@ struct UrlState {
   int first_remote_port;
   curl_prot_t first_remote_protocol;
   int os_errno;  /* filled in with errno whenever an error occurs */
-  long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
@@ -1101,6 +1100,7 @@ struct UrlState {
 #ifndef CURL_DISABLE_HTTP
   struct http_negotiation http_neg;
 #endif
+  unsigned short followlocation; /* redirect counter */
   unsigned char retrycount; /* number of retries on a new connection, up to
                                CONN_MAX_RETRIES */
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
