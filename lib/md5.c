@@ -50,8 +50,7 @@
 
 #ifdef USE_MBEDTLS
   #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER >= 0x03020000 && \
-      MBEDTLS_VERSION_NUMBER < 0x04000000
+  #if MBEDTLS_VERSION_NUMBER < 0x04000000
     #define USE_MBEDTLS_MD5
   #endif
 #endif
