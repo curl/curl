@@ -412,8 +412,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
       case 502: /* Bad Gateway */
       case 503: /* Service Unavailable */
       case 504: /* Gateway Timeout */
-      case 522: /* Connection Timed Out (Cloudflare) */
-      case 524: /* Proxy Read Timeout (Cloudflare) */
         retry = RETRY_HTTP;
         /*
          * At this point, we have already written data to the output
