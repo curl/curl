@@ -851,6 +851,7 @@ static int test_socksd(int argc, char *argv[])
            " --ipv4\n"
            " --ipv6\n"
            " --unix-socket [file]\n"
+           " --bindonly\n"
            " --port [port]\n");
       return 0;
     }
