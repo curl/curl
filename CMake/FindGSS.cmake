@@ -128,6 +128,9 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     # Older versions may not have the "--version" parameter. In this case we just do not care.
     if(_gss_configure_failed)
       set(_gss_version 0)
+    else()
+      # Strip prefix string to leave the version number only
+      string(REPLACE "Kerberos 5 release " "" _gss_version "${_gss_version}")
     endif()
 
     execute_process(COMMAND ${_gss_configure_script} "--vendor"
