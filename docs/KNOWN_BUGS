@@ -38,6 +38,7 @@ problems may have been fixed or changed somewhat since this was written.
  5.2 curl-config --libs contains private details
  5.3 LDFLAGS passed too late making libs linked incorrectly
  5.6 Cygwin: make install installs curl-config.1 twice
+ 5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
  5.15 Unicode on Windows
@@ -48,6 +49,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
+ 6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -236,6 +238,12 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/8839
 
+5.11 configure --with-gssapi with Heimdal is ignored on macOS
+
+ ... unless you also pass --with-gssapi-libs
+
+ https://github.com/curl/curl/issues/3841
+
 5.12 flaky CI builds
 
  We run many CI builds for each commit and PR on github, and especially a
@@ -333,6 +341,13 @@ problems may have been fixed or changed somewhat since this was written.
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
+
+6.8 Heimdal memory leaks
+
+ Running test 2077 and 2078 with curl built to do GSS with Heimdal causes
+ valgrind errors (memory leak).
+
+ https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 

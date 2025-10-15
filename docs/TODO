@@ -496,8 +496,8 @@
 4.6 GSSAPI via Windows SSPI
 
  In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
- via third-party GSS-API libraries, such as MIT Kerberos, also add support
- for GSSAPI authentication via Windows SSPI.
+ via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
+ support for GSSAPI authentication via Windows SSPI.
 
 4.7 STAT for LIST without data connection
 

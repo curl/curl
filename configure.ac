@@ -1840,7 +1840,7 @@ if test x"$want_gss" = xyes; then
       gnu_gss=yes
     ],
     [
-      dnl not found, check for MIT
+      dnl not found, check Heimdal or MIT
       AC_CHECK_HEADERS([gssapi/gssapi.h], [], [not_mit=1])
       AC_CHECK_HEADERS(
         [gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
@@ -1853,8 +1853,15 @@ if test x"$want_gss" = xyes; then
           #endif
         ])
       if test "x$not_mit" = "x1"; then
-        dnl MIT not found
-        AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
+        dnl MIT not found, check for Heimdal
+        AC_CHECK_HEADER(gssapi.h,
+          [],
+          [
+            dnl no header found, disabling GSS
+            want_gss=no
+            AC_MSG_WARN(disabling GSS-API support since no header files were found)
+          ]
+        )
       else
         dnl MIT found
         dnl check if we have a really old MIT Kerberos version (<= 1.2)
@@ -1887,7 +1894,7 @@ fi
 if test x"$want_gss" = xyes; then
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
   HAVE_GSSAPI=1
-  curl_gss_msg="enabled (MIT Kerberos)"
+  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
   link_pkgconfig=''
 
   if test -n "$gnu_gss"; then
@@ -1954,6 +1961,8 @@ if test x"$want_gss" = xyes; then
   if test -n "$link_pkgconfig"; then
     if test -n "$gnu_gss"; then
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
+    elif test "x$not_mit" = "x1"; then
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE heimdal-gssapi"
     else
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
     fi
