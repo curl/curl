@@ -851,7 +851,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   if(result)
     return result;
 
-  my_setopt_long(curl, CURLOPT_FAILONERROR, config->fail == FAIL_WO_BODY);
+  my_setopt_long(curl, CURLOPT_FAILONERROR, config->failonerror);
   my_setopt_str(curl, CURLOPT_REQUEST_TARGET, config->request_target);
   my_setopt_long(curl, CURLOPT_UPLOAD, !!per->uploadfile);
   my_setopt_long(curl, CURLOPT_DIRLISTONLY, config->dirlistonly);
