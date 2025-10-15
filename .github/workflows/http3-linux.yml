@@ -661,7 +661,7 @@ jobs:
             make -C bld V=1
           fi
 
-      - name: 'curl version'
+      - name: 'curl -V'
         run: bld/src/curl --disable -V
 
       - name: 'build tests'
