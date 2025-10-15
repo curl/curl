@@ -1027,21 +1027,15 @@ sftp_upload_init(struct Curl_easy *data,
     }
   }
 
-  if(data->set.remote_append) {
-    /* True append mode: create if nonexisting */
-    flags = LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_APPEND;
-  }
-  else if(data->state.resume_from > 0) {
-    /*
-     * Resume MUST NOT use APPEND; some servers force writes to EOF when
-     * APPEND is set, ignoring a prior seek().
-     */
-    flags = LIBSSH2_FXF_WRITE;
-  }
-  else {
+  if(data->set.remote_append)
+    /* Try to open for append, but create if nonexisting */
+    flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_APPEND;
+  else if(data->state.resume_from > 0)
+    /* If we have restart position then open for append */
+    flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND;
+  else
     /* Clear file before writing (normal behavior) */
-    flags = LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC;
-  }
+    flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC;
 
   sshc->sftp_handle =
     libssh2_sftp_open_ex(sshc->sftp_session, sshp->path,
@@ -1099,8 +1093,8 @@ sftp_upload_init(struct Curl_easy *data,
   }
 
   /* If we have a restart point then we need to seek to the correct
-     Skip if in explicit remote append mode. */
-  if(data->state.resume_from > 0 && !data->set.remote_append) {
+     position. */
+  if(data->state.resume_from > 0) {
     int seekerr = CURL_SEEKFUNC_OK;
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
