@@ -91,7 +91,5 @@ int main(void)
   /* cleanup curl stuff */
   curl_easy_cleanup(curl_handle);
 
-  curl_global_cleanup();
-
   return 0;
 }

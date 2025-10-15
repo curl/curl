@@ -360,9 +360,6 @@ int main(int argc, char *argv[])
     conf_init(conf);
     curl_easy_cleanup(curl);
   }
-
-  curl_global_cleanup();
-
   return RetValue;
 }
 #endif /* CURL_WINDOWS_UWP */

@@ -97,7 +97,5 @@ int main(int argc, char **argv)
     fprintf(stderr, "Thread %d terminated\n", i);
   }
 
-  curl_global_cleanup();
-
   return 0;
 }

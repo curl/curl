@@ -252,7 +252,5 @@ int main(int argc, char **argv)
   uv_run(uv.loop, UV_RUN_DEFAULT);
   curl_multi_cleanup(uv.multi);
 
-  curl_global_cleanup();
-
   return 0;
 }
