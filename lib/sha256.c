@@ -32,15 +32,19 @@
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
+#ifdef USE_MBEDTLS
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000 && \
+    MBEDTLS_VERSION_NUMBER < 0x04000000
+#define USE_MBEDTLS_SHA256
+#endif
+#endif
+
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/sha.h>
-#elif defined(USE_MBEDTLS)
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
+#elif defined(USE_MBEDTLS_SHA256)
 #include <mbedtls/sha256.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
@@ -126,7 +130,7 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_SHA256)
 
 typedef mbedtls_sha256_context my_sha256_ctx;
 
