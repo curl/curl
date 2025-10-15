@@ -9,7 +9,7 @@ cd "$(dirname "${0}")"/../..
 
 # shellcheck disable=SC2046
 codespell \
-  --skip '.github/scripts/pyspelling.words' \
+  --skip '.github/scripts/spellcheck.words' \
   --skip '.github/scripts/typos.toml' \
   --skip 'docs/THANKS' \
   --skip 'packages/*' \
