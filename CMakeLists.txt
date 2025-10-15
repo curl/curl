@@ -1442,6 +1442,11 @@ if(CURL_USE_GSSAPI)
 
     if(GSS_FLAVOUR STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
+    else()  # MIT
+      cmake_push_check_state()
+      list(APPEND CMAKE_REQUIRED_INCLUDES "${GSS_INCLUDE_DIRS}")
+      check_include_file("gssapi/gssapi.h" HAVE_GSSAPI_GSSAPI_H)
+      cmake_pop_check_state()
     endif()
   else()
     message(WARNING "GSSAPI has been requested, but no supporting libraries found. Skipping.")
