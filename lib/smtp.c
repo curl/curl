@@ -205,7 +205,7 @@ const struct Curl_handler Curl_handler_smtp = {
   CURLPROTO_SMTP,                   /* protocol */
   CURLPROTO_SMTP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE
+  PROTOPT_URLOPTIONS
 };
 
 #ifdef USE_SSL

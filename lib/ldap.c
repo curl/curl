@@ -199,7 +199,7 @@ const struct Curl_handler Curl_handler_ldap = {
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   CURLPROTO_LDAP,                       /* family */
-  PROTOPT_SSL_REUSE                     /* flags */
+  PROTOPT_NONE                          /* flags */
 };
 
 #ifdef HAVE_LDAP_SSL

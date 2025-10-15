@@ -932,16 +932,15 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
 static bool url_match_ssl_use(struct connectdata *conn,
                               struct url_conn_match *m)
 {
-  if(m->needle->handler->flags & PROTOPT_SSL) {
+  if(m->needle->handler->flags&PROTOPT_SSL) {
     /* We are looking for SSL, if `conn` does not do it, not a match. */
     if(!Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return FALSE;
   }
   else if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    /* If the protocol does not allow reuse of SSL connections OR
-       is of another protocol family, not a match. */
-    if(!(m->needle->handler->flags & PROTOPT_SSL_REUSE) ||
-       (get_protocol_family(conn->handler) != m->needle->handler->protocol))
+    /* We are not *requiring* SSL, however `conn` has it. If the
+     * protocol *family* is not the same, not a match. */
+    if(get_protocol_family(conn->handler) != m->needle->handler->protocol)
       return FALSE;
   }
   return TRUE;

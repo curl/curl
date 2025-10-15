@@ -273,23 +273,3 @@ class TestBasic:
             assert r.responses[0]['header']['request-te'] == te_out, f'{r.responses[0]}'
         else:
             assert 'request-te' not in r.responses[0]['header'], f'{r.responses[0]}'
-
-    # check that an existing https: connection is not reused for http:
-    def test_01_18_tls_reuse(self, env: Env, httpd):
-        proto = 'h2'
-        curl = CurlClient(env=env)
-        url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json'
-        url2 = f'http://{env.authority_for(env.domain1, proto)}/data.json'
-        r = curl.http_download(urls=[url1, url2], alpn_proto=proto, with_stats=True)
-        assert len(r.stats) == 2
-        assert r.total_connects == 2, f'{r.dump_logs()}'
-
-    # check that an existing http: connection is not reused for https:
-    def test_01_19_plain_reuse(self, env: Env, httpd):
-        proto = 'h2'
-        curl = CurlClient(env=env)
-        url1 = f'http://{env.domain1}:{env.http_port}/data.json'
-        url2 = f'https://{env.domain1}:{env.http_port}/data.json'
-        r = curl.http_download(urls=[url1, url2], alpn_proto=proto, with_stats=True)
-        assert len(r.stats) == 2
-        assert r.total_connects == 2, f'{r.dump_logs()}'

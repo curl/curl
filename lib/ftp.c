@@ -271,7 +271,7 @@ const struct Curl_handler Curl_handler_ftp = {
   CURLPROTO_FTP,                   /* family */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
   PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
-  PROTOPT_WILDCARD | PROTOPT_SSL_REUSE /* flags */
+  PROTOPT_WILDCARD /* flags */
 };
 
 
