@@ -290,10 +290,10 @@ char *curl_version(void)
   curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s", GSS_VERSION);
 #else
 #ifdef CURL_KRB5_VERSION
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "MIT-Kerberos/%s",
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
                  CURL_KRB5_VERSION);
 #else
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "MIT-Kerberos");
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
 #endif /* HAVE_GSSGNU */
 #endif /* HAVE_GSSAPI */
   src[i++] = gss_buf;
