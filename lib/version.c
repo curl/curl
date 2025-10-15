@@ -77,6 +77,14 @@
 #include <gsasl.h>
 #endif
 
+#ifdef HAVE_GSSAPI
+# ifdef HAVE_GSSGNU
+#  include <gss.h>
+# else
+#  include <gssapi/gssapi.h>
+# endif
+#endif
+
 #ifdef USE_OPENLDAP
 #include <ldap.h>
 #endif
@@ -273,6 +281,21 @@ char *curl_version(void)
   curl_msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
                  gsasl_check_version(NULL));
   src[i++] = gsasl_buf;
+#endif
+#ifdef HAVE_GSSAPI
+  {
+    char ver[30];
+# ifdef HAVE_GSSGNU
+    curl_msnprintf(ver, sizeof(ver), "libgss/%s", GSS_VERSION);
+# else
+#   ifdef CURL_KRB5_VERSION
+    curl_msnprintf(ver, sizeof(ver), "MIT-Kerberos/%s", CURL_KRB5_VERSION);
+#   else
+    curl_msnprintf(ver, sizeof(ver), "MIT-Kerberos");
+#   endif
+# endif
+    src[i++] = ver;
+  }
 #endif
 #ifdef USE_OPENLDAP
   oldap_version(ldap_buf, sizeof(ldap_buf));
