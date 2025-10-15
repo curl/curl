@@ -31,6 +31,8 @@
 
 #ifdef DEBUGBUILD
 #if defined(HAVE_GSSGNU) || !defined(_WIN32)
+/* To avoid memdebug macro replacement, wrap the name in parentheses to call
+   the original version. It is freed via the GSS API gss_release_buffer(). */
 #define Curl_gss_alloc (malloc)
 #define Curl_gss_free  (free)
 #define CURL_GSS_STUB
