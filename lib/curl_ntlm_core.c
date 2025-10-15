@@ -38,10 +38,9 @@
    1. USE_OPENSSL
    2. USE_WOLFSSL
    3. USE_GNUTLS
-   4. -
-   5. USE_MBEDTLS
-   6. USE_OS400CRYPTO
-   7. USE_WIN32_CRYPTO
+   4. USE_MBEDTLS
+   5. USE_OS400CRYPTO
+   6. USE_WIN32_CRYPTO
 
    This ensures that:
    - the same SSL branch gets activated throughout this source
