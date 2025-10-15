@@ -2496,19 +2496,30 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
        * those cases only confuses us.
        *
        * Example D above makes this parsing a little tricky */
-      size_t len = curlx_dyn_len(&ftpc->pp.recvbuf);
-      if(len >= 7) { /* "1 bytes" is 7 characters */
-        size_t i;
-        for(i = 0; i < len - 7; i++) {
-          curl_off_t what;
-          char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
-          const char *c = &buf[i];
-          if(!curlx_str_number(&c, &what, CURL_OFF_T_MAX) &&
-             !curlx_str_single(&c, ' ') &&
-             !strncmp(c, "bytes", 5)) {
-            size = what;
+      const char *bytes;
+      char *buf = curlx_dyn_ptr(&ftpc->pp.recvbuf);
+      bytes = strstr(buf, " bytes");
+      if(bytes) {
+        long in = (long)(--bytes-buf);
+        /* this is a hint there is size information in there! ;-) */
+        while(--in) {
+          /* scan for the left parenthesis and break there */
+          if('(' == *bytes)
+            break;
+          /* skip only digits */
+          if(!ISDIGIT(*bytes)) {
+            bytes = NULL;
             break;
           }
+          /* one more estep backwards */
+          bytes--;
+        }
+        /* if we have nothing but digits: */
+        if(bytes) {
+          ++bytes;
+          /* get the number! */
+          if(curlx_str_number(&bytes, &size, CURL_OFF_T_MAX))
+            size = 1;
         }
       }
     }
