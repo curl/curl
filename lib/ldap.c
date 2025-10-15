@@ -535,7 +535,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     /* Get the DN and write it to the client */
     {
       char *name;
-      size_t name_len = 0;
+      size_t name_len;
 #ifdef USE_WIN32_LDAP
       TCHAR *dn = ldap_get_dn(server, entryIterator);
       name = curlx_convert_tchar_to_UTF8(dn);
@@ -549,20 +549,32 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
       char *dn = name = ldap_get_dn(server, entryIterator);
 #endif
-      if(!name)
-        result = CURLE_FAILED_INIT;
-      else {
-        name_len = strlen(name);
-        result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
+      name_len = strlen(name);
+
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
+      if(result) {
+        FREE_ON_WINLDAP(name);
+        ldap_memfree(dn);
+        goto quit;
       }
-      if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
-      if(!result)
-        result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
+
+      result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
+      if(result) {
+        FREE_ON_WINLDAP(name);
+        ldap_memfree(dn);
+        goto quit;
+      }
+
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
+      if(result) {
+        FREE_ON_WINLDAP(name);
+        ldap_memfree(dn);
+
+        goto quit;
+      }
+
       FREE_ON_WINLDAP(name);
       ldap_memfree(dn);
-      if(result)
-        goto quit;
     }
 
     /* Get the attributes and write them to the client */
