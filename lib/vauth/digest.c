@@ -193,43 +193,26 @@ static char *auth_digest_string_quoted(const char *source)
 /* Retrieves the value for a corresponding key from the challenge string
  * returns TRUE if the key could be found, FALSE if it does not exists
  */
-static bool auth_digest_get_key_value(const char *chlg, const char *key,
-                                      char *buf, size_t buflen)
+static bool auth_digest_get_key_value(const char *chlg,
+                                      const char *key,
+                                      char *value,
+                                      size_t max_val_len,
+                                      char end_char)
 {
-  /* keyword=[value],keyword2=[value]
-     The values may or may not be quoted.
-   */
+  char *find_pos;
+  size_t i;
 
-  do {
-    struct Curl_str data;
-    struct Curl_str name;
-    if(!curlx_str_until(&chlg, &name, 64, '=') &&
-       !curlx_str_single(&chlg, '=')) {
-      /* this is the key, get the value, possibly quoted */
-      int rc = curlx_str_quotedword(&chlg, &data, 256);
-      if(rc == STRE_BEGQUOTE)
-        /* try unquoted until comma */
-        rc = curlx_str_until(&chlg, &data, 256, ',');
-      if(rc)
-        return FALSE; /* weird */
+  find_pos = strstr(chlg, key);
+  if(!find_pos)
+    return FALSE;
 
-      if(curlx_str_cmp(&name, key)) {
-        /* if this is our key, return the value */
-        if(curlx_strlen(&data) >= buflen)
-          /* doesn't fit */
-          return FALSE;
-        memcpy(buf, curlx_str(&data), curlx_strlen(&data));
-        buf[curlx_strlen(&data)] = 0;
-        return TRUE;
-      }
-      if(curlx_str_single(&chlg, ','))
-        return FALSE;
-    }
-    else /* odd syntax */
-      break;
-  } while(1);
+  find_pos += strlen(key);
 
-  return FALSE;
+  for(i = 0; *find_pos && *find_pos != end_char && i < max_val_len - 1; ++i)
+    value[i] = *find_pos++;
+  value[i] = '\0';
+
+  return TRUE;
 }
 
 static CURLcode auth_digest_get_qop_values(const char *options, int *value)
@@ -285,21 +268,21 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Retrieve nonce string from the challenge */
-  if(!auth_digest_get_key_value(chlg, "nonce", nonce, nlen))
+  if(!auth_digest_get_key_value(chlg, "nonce=\"", nonce, nlen, '\"'))
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Retrieve realm string from the challenge */
-  if(!auth_digest_get_key_value(chlg, "realm", realm, rlen)) {
+  if(!auth_digest_get_key_value(chlg, "realm=\"", realm, rlen, '\"')) {
     /* Challenge does not have a realm, set empty string [RFC2831] page 6 */
     *realm = '\0';
   }
 
   /* Retrieve algorithm string from the challenge */
-  if(!auth_digest_get_key_value(chlg, "algorithm", alg, alen))
+  if(!auth_digest_get_key_value(chlg, "algorithm=", alg, alen, ','))
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Retrieve qop-options string from the challenge */
-  if(!auth_digest_get_key_value(chlg, "qop", qop, qlen))
+  if(!auth_digest_get_key_value(chlg, "qop=\"", qop, qlen, '\"'))
     return CURLE_BAD_CONTENT_ENCODING;
 
   return CURLE_OK;
