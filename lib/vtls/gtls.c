@@ -1701,24 +1701,12 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
     infof(data, "  SSL certificate verification SKIPPED");
 
   /* initialize an X.509 certificate structure. */
-  if(gnutls_x509_crt_init(&x509_cert)) {
-    failf(data, "failed to init gnutls x509_crt");
-    *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
-    result = CURLE_SSL_CONNECT_ERROR;
-    goto out;
-  }
+  gnutls_x509_crt_init(&x509_cert);
 
-  if(chain.certs) {
+  if(chain.certs)
     /* convert the given DER or PEM encoded Certificate to the native
        gnutls_x509_crt_t format */
-    rc = gnutls_x509_crt_import(x509_cert, chain.certs, GNUTLS_X509_FMT_DER);
-    if(rc) {
-      failf(data, "error parsing server's certificate chain");
-      *certverifyresult = GNUTLS_E_NO_CERTIFICATE_FOUND;
-      result = CURLE_SSL_CONNECT_ERROR;
-      goto out;
-    }
-  }
+    gnutls_x509_crt_import(x509_cert, chain.certs, GNUTLS_X509_FMT_DER);
 
   /* Check for time-based validity */
   certclock = gnutls_x509_crt_get_expiration_time(x509_cert);
@@ -1785,15 +1773,10 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   if(config->issuercert) {
     gnutls_datum_t issuerp;
-    if(gnutls_x509_crt_init(&x509_issuer)) {
-      failf(data, "failed to init gnutls x509_crt for issuer");
-      result = CURLE_SSL_ISSUER_ERROR;
-      goto out;
-    }
+    gnutls_x509_crt_init(&x509_issuer);
     issuerp = load_file(config->issuercert);
-    rc = gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
-    if(!rc)
-      rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
+    gnutls_x509_crt_import(x509_issuer, &issuerp, GNUTLS_X509_FMT_PEM);
+    rc = (int)gnutls_x509_crt_check_issuer(x509_cert, x509_issuer);
     unload_file(issuerp);
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
