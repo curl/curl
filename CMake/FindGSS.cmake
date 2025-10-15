@@ -154,7 +154,9 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         set(GSS_FLAVOUR "MIT")
       endif()
     else()
-      find_path(_gss_INCLUDE_DIRS NAMES "gss.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include")
+      # I am not convinced if this is the right way but this is what autotools do at the moment
+      find_path(_gss_INCLUDE_DIRS NAMES "gssapi.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include" "inc")
+      find_path(_gss_INCLUDE_DIRS NAMES "gss.h"    HINTS ${_gss_root_hints} PATH_SUFFIXES "include")
 
       if(_gss_INCLUDE_DIRS)
         set(GSS_FLAVOUR "GNU")
