@@ -2589,9 +2589,6 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   for(i = 0; i < (int)sk_X509_num(ch); i++) {
     X509 *issuer = sk_X509_value(ch, (ossl_valsize_t)i);
     if(X509_check_issued(issuer, cert) == X509_V_OK) {
-      /* Note to analysis tools: using SHA1 here is fine. The `id`
-       * generated is used as a hash lookup key, not as a verifier
-       * of the OCSP data itself. This all according to RFC 5019. */
       id = OCSP_cert_to_id(EVP_sha1(), cert, issuer);
       break;
     }
@@ -2614,14 +2611,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
     goto end;
   }
 
-  /* Validate the OCSP response issuing and update times.
-   * - `thisupd` is the time the OCSP response was issued
-   * - `nextupd` is the time the OCSP response should be updated
-   *    (valid life time assigned by the OCSP responder)
-   * - 3rd param: how many seconds of clock skew we allow between
-   *   our clock and the instance that issued the OCSP response
-   * - 4th param: how many seconds in the past `thisupd` may be, with
-   *   -1 meaning there is no limit. */
+  /* Validate the corresponding single OCSP response */
   if(!OCSP_check_validity(thisupd, nextupd, 300L, -1L)) {
     failf(data, "OCSP response has expired");
     result = CURLE_SSL_INVALIDCERTSTATUS;
