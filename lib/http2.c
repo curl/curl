@@ -1030,7 +1030,6 @@ static int push_promise(struct Curl_cfilter *cf,
       infof(data, "failed to set user_data for stream %u",
             newstream->id);
       DEBUGASSERT(0);
-      discard_newhandle(cf, newhandle);
       rv = CURL_PUSH_DENY;
       goto fail;
     }
