@@ -34,13 +34,6 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#endif /* USE_MBEDTLS */
-
 #ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>
   #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
@@ -55,13 +48,21 @@
   #endif
 #endif
 
+#ifdef USE_MBEDTLS
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER >= 0x03020000 && \
+      MBEDTLS_VERSION_NUMBER < 0x04000000
+    #define USE_MBEDTLS_MD5
+  #endif
+#endif
+
 #ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
 #elif defined(USE_WOLFSSL_MD5)
 #include <wolfssl/openssl/md5.h>
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_MD5)
 #include <mbedtls/md5.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
@@ -152,7 +153,7 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_MD5)
 
 typedef mbedtls_md5_context my_md5_ctx;
 
