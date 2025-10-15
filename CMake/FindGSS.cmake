@@ -158,7 +158,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
       if(_gss_INCLUDE_DIRS)
         set(GSS_FLAVOUR "GNU")
-        set(GSS_PC_REQUIRES ${_gnu_modname})
+        set(GSS_PC_REQUIRES "gss")
       endif()
     endif()
 
@@ -209,10 +209,10 @@ else()
   # _pkg_check_modules_pkg_name is undocumented and used as a fallback for CMake <3.16 versions.
   if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _pkg_check_modules_pkg_name STREQUAL _gnu_modname)
     set(GSS_FLAVOUR "GNU")
-    set(GSS_PC_REQUIRES ${_gnu_modname})
+    set(GSS_PC_REQUIRES "gss")
   elseif(_gss_MODULE_NAME STREQUAL _mit_modname OR _pkg_check_modules_pkg_name STREQUAL _mit_modname)
     set(GSS_FLAVOUR "MIT")
-    set(GSS_PC_REQUIRES ${_mit_modname})
+    set(GSS_PC_REQUIRES "mit-krb5-gssapi")
   else()
     message(FATAL_ERROR "GNU or MIT GSS is required")
   endif()
