@@ -45,9 +45,11 @@
 #include <mbedtls/x509.h>
 
 #include <mbedtls/error.h>
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/sha256.h>
+#endif
 #ifdef MBEDTLS_DEBUG
 #include <mbedtls/debug.h>
 #endif
