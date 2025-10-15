@@ -1590,8 +1590,7 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
   if(frame->hd.type == NGHTTP2_PUSH_PROMISE) {
     char *h;
 
-    if((namelen == (sizeof(HTTP_PSEUDO_AUTHORITY)-1)) &&
-       !strncmp(HTTP_PSEUDO_AUTHORITY, (const char *)name, namelen)) {
+    if(!strcmp(HTTP_PSEUDO_AUTHORITY, (const char *)name)) {
       /* pseudo headers are lower case */
       int rc = 0;
       char *check = curl_maprintf("%s:%d", cf->conn->host.name,
