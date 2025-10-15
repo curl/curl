@@ -638,9 +638,9 @@ jobs:
           fi
           ./scripts/singleuse.pl --unit "${libcurla}"
 
-      - name: 'check curl -V output'
+      - name: 'curl -V'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: bld/src/curl -V
+        run: bld/src/curl --disable -V
 
       - name: 'curl install'
         run: |
