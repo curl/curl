@@ -629,6 +629,7 @@ static int curltest_put_handler(request_rec *r)
   apr_table_unset(r->headers_out, "Content-Length");
   /* Discourage content-encodings */
   apr_table_unset(r->headers_out, "Content-Encoding");
+  apr_table_setn(r->headers_out, "request-id", request_id);
   apr_table_setn(r->subprocess_env, "no-brotli", "1");
   apr_table_setn(r->subprocess_env, "no-gzip", "1");
 
@@ -813,6 +814,8 @@ static int curltest_sslinfo_handler(request_rec *r)
   apr_table_unset(r->headers_out, "Content-Length");
   /* Discourage content-encodings */
   apr_table_unset(r->headers_out, "Content-Encoding");
+  if(request_id)
+    apr_table_setn(r->headers_out, "request-id", request_id);
   apr_table_setn(r->subprocess_env, "no-brotli", "1");
   apr_table_setn(r->subprocess_env, "no-gzip", "1");
 
