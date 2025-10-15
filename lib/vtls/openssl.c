@@ -5628,7 +5628,6 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   struct Curl_cfilter *cf = conn->cfilter[sockindex];
   struct ossl_ctx *octx = NULL;
-  CURLcode result = CURLE_OK;
 
   do {
     const struct Curl_cftype *cft = cf->cft;
@@ -5650,15 +5649,15 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   }
 
   cert = SSL_get1_peer_certificate(octx->ssl);
-  if(!cert)
+  if(!cert) {
     /* No server certificate, don't do channel binding */
     return CURLE_OK;
+  }
 
   if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
     failf(data,
           "Unable to find digest NID for certificate signature algorithm");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    return CURLE_SSL_INVALIDCERTSTATUS;
   }
 
   /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
@@ -5671,28 +5670,23 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
       algo_name = OBJ_nid2sn(algo_nid);
       failf(data, "Could not find digest algorithm %s (NID %d)",
             algo_name ? algo_name : "(null)", algo_nid);
-      result = CURLE_SSL_INVALIDCERTSTATUS;
-      goto error;
+      return CURLE_SSL_INVALIDCERTSTATUS;
     }
   }
 
   if(!X509_digest(cert, algo_type, buf, &length)) {
     failf(data, "X509_digest() failed");
-    result = CURLE_SSL_INVALIDCERTSTATUS;
-    goto error;
+    return CURLE_SSL_INVALIDCERTSTATUS;
   }
 
   /* Append "tls-server-end-point:" */
-  result = curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1);
-  if(result)
-    goto error;
-
+  if(curlx_dyn_addn(binding, prefix, sizeof(prefix) - 1) != CURLE_OK)
+    return CURLE_OUT_OF_MEMORY;
   /* Append digest */
-  result = curlx_dyn_addn(binding, buf, length);
+  if(curlx_dyn_addn(binding, buf, length))
+    return CURLE_OUT_OF_MEMORY;
 
-error:
-  X509_free(cert);
-  return result;
+  return CURLE_OK;
 #else
   /* No X509_get_signature_nid support */
   (void)data;
