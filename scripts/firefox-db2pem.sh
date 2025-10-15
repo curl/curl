@@ -55,7 +55,7 @@ certutil -L -h 'Builtin Object Token' -d "$db" | \
 grep ' *[CcGTPpu]*,[CcGTPpu]*,[CcGTPpu]* *$' | \
 sed -e 's/ *[CcGTPpu]*,[CcGTPpu]*,[CcGTPpu]* *$//' -e 's/\(.*\)/"\1"/' | \
 sort | \
-while read -r nickname; \
- do echo "$nickname" | sed -e "s/Builtin Object Token://g"; \
- echo "$nickname" | xargs -I{} certutil -d "$db" -L -a -n -- {} ; \
+while read -r nickname; do
+  echo "$nickname" | sed -e "s/Builtin Object Token://g"; \
+  echo "$nickname" | xargs -I{} certutil -d "$db" -L -a -n {} ; \
 done >> "$out"
