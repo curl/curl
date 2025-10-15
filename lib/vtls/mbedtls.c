@@ -1482,10 +1482,14 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   size_t sha256len)
 {
   (void)sha256len;
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
   /* returns 0 on success, otherwise failure */
   if(mbedtls_sha256(input, inputlen, sha256sum, 0) != 0)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
+#else
+  return Curl_sha256it(sha256sum, input, inputlen);
+#endif
 }
 
 static void *mbedtls_get_internals(struct ssl_connect_data *connssl,
