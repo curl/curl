@@ -834,7 +834,7 @@ const struct helptxt helptext[] = {
    CURLHELP_HTTP | CURLHELP_POST | CURLHELP_UPLOAD},
   {"-B, --use-ascii",
    "Use ASCII/text transfer",
-   CURLHELP_FTP | CURLHELP_OUTPUT | CURLHELP_LDAP},
+   CURLHELP_FTP | CURLHELP_OUTPUT | CURLHELP_LDAP | CURLHELP_TFTP},
   {"-u, --user <user:password>",
    "Server user and password",
    CURLHELP_IMPORTANT | CURLHELP_AUTH},
