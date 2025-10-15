@@ -289,14 +289,12 @@ char *curl_version(void)
 #ifdef HAVE_GSSGNU
   curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s",
                  GSS_VERSION);
-#else
-#ifdef CURL_KRB5_VERSION
+#elif defined(CURL_KRB5_VERSION)
   curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
                  CURL_KRB5_VERSION);
 #else
   curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
 #endif
-#endif /* HAVE_GSSGNU */
   src[i++] = gss_buf;
 #endif /* HAVE_GSSAPI */
 #ifdef USE_OPENLDAP
