@@ -1918,7 +1918,7 @@ if test x"$want_gss" = xyes; then
       gss_version=`$KRB5CONFIG --version | $SED 's/Kerberos 5 release //'`
     fi
     if test -n "$gss_version"; then
-      AC_MSG_NOTICE([GSS-API version detected: $gss_version])
+      AC_MSG_NOTICE([GSS-API MIT Kerberos version detected: $gss_version])
       AC_DEFINE_UNQUOTED([CURL_KRB5_VERSION], ["$gss_version"], [MIT Kerberos version])
     fi
   else
