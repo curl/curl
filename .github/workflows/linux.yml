@@ -640,7 +640,7 @@ jobs:
 
       - name: 'curl version'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: bld/src/curl --disable --version
+        run: bld/src/curl --disable -V
 
       - name: 'curl install'
         run: |
