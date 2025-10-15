@@ -1119,7 +1119,6 @@ void curl_easy_reset(CURL *d)
 
   data->progress.hide = TRUE;
   data->state.current_speed = -1; /* init to negative == impossible */
-  data->state.retrycount = 0;     /* reset the retry counter */
   data->state.recent_conn_id = -1; /* clear remembered connection id */
 
   /* zero out authentication data: */
