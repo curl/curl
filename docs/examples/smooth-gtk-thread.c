@@ -80,7 +80,7 @@ static void run_one(gchar *http, int j)
     /* Write to the file */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
-    (void)curl_easy_perform(curl);
+    curl_easy_perform(curl);
 
     fclose(outfile);
     curl_easy_cleanup(curl);

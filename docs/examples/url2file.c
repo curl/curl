@@ -38,8 +38,6 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, char *argv[])
 {
-  CURLcode res = CURLE_OK;
-
   CURL *curl_handle;
   static const char *pagefilename = "page.out";
   FILE *pagefile;
@@ -74,7 +72,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, pagefile);
 
     /* get it! */
-    res = curl_easy_perform(curl_handle);
+    curl_easy_perform(curl_handle);
 
     /* close the header file */
     fclose(pagefile);
@@ -85,5 +83,5 @@ int main(int argc, char *argv[])
 
   curl_global_cleanup();
 
-  return (int)res;
+  return 0;
 }
