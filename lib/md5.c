@@ -34,13 +34,6 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#endif /* USE_MBEDTLS */
-
 #ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>
   #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
@@ -55,14 +48,21 @@
   #endif
 #endif
 
+#ifdef USE_MBEDTLS
+  #include <psa/crypto_config.h>
+  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+    #define USE_MBEDTLS_MD5
+  #endif
+#endif
+
 #ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
 #elif defined(USE_WOLFSSL_MD5)
 #include <wolfssl/openssl/md5.h>
-#elif defined(USE_MBEDTLS)
-#include <mbedtls/md5.h>
+#elif defined(USE_MBEDTLS_MD5)
+#include <psa/crypto.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
        defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
@@ -152,13 +152,14 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_MD5)
 
-typedef mbedtls_md5_context my_md5_ctx;
+typedef psa_hash_operation_t my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  if(mbedtls_md5_starts(ctx))
+  memset(ctx, 0, sizeof(my_md5_ctx));
+  if(psa_hash_setup(ctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
@@ -167,12 +168,13 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-  (void)mbedtls_md5_update(ctx, data, length);
+  (void)psa_hash_update(ctx, data, length);
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  (void)mbedtls_md5_finish(ctx, digest);
+  size_t actual_length;
+  (void)psa_hash_finish(ctx, digest, 16, &actual_length);
 }
 
 #elif defined(AN_APPLE_OS)
