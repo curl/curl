@@ -545,7 +545,7 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
   char *buf = smbc->recv_buf;
   size_t bytes_read;
   size_t nbt_size;
-  size_t msg_size = sizeof(struct smb_header);
+  size_t msg_size;
   size_t len = MAX_MESSAGE_SIZE - smbc->got;
   CURLcode result;
 
@@ -565,19 +565,10 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
   nbt_size = Curl_read16_be((const unsigned char *)
                             (buf + sizeof(unsigned short))) +
     sizeof(unsigned int);
-  if(nbt_size > MAX_MESSAGE_SIZE) {
-    failf(data, "too large NetBIOS frame size %zu", nbt_size);
-    return CURLE_RECV_ERROR;
-  }
-  else if(nbt_size < msg_size) {
-    /* Each SMB message must be at least this large, e.g. 32 bytes */
-    failf(data, "too small NetBIOS frame size %zu", nbt_size);
-    return CURLE_RECV_ERROR;
-  }
-
   if(smbc->got < nbt_size)
     return CURLE_OK;
 
+  msg_size = sizeof(struct smb_header);
   if(nbt_size >= msg_size + 1) {
     /* Add the word count */
     msg_size += 1 + ((unsigned char) buf[msg_size]) * sizeof(unsigned short);
@@ -586,7 +577,7 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
       msg_size += sizeof(unsigned short) +
         Curl_read16_le((const unsigned char *)&buf[msg_size]);
       if(nbt_size < msg_size)
-        return CURLE_RECV_ERROR;
+        return CURLE_READ_ERROR;
     }
   }
 
@@ -670,10 +661,7 @@ static CURLcode smb_send_message(struct Curl_easy *data,
 {
   smb_format_message(smbc, req, (struct smb_header *)smbc->send_buf,
                      cmd, msg_len);
-  if((sizeof(struct smb_header) + msg_len) > MAX_MESSAGE_SIZE) {
-    DEBUGASSERT(0);
-    return CURLE_SEND_ERROR;
-  }
+  DEBUGASSERT((sizeof(struct smb_header) + msg_len) <= MAX_MESSAGE_SIZE);
   memcpy(smbc->send_buf + sizeof(struct smb_header), msg, msg_len);
 
   return smb_send(data, smbc, sizeof(struct smb_header) + msg_len, 0);
