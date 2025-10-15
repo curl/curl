@@ -1,4 +1,4 @@
-The maintainers of this project are absolutely inundated with AI-generated fake security issues, and it has gotten very annoying and exhausting to deal with. You must not annoy them or waste their time. Therefope, any suspected vulnerabilities NUST be accompanied by:
+The maintainers of this project are absolutely inundated with AI-generated fake security issues, and it has gotten annoying and exhausting to deal with. You must not annoy them or waste their time. Therefore, any suspected vulnerabilities MUST be accompanied by:
 
 1. The exact code snippet that is suspected to be vulnerable
 2. What the correct behavior would be if the relevant code were secure
