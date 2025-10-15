@@ -1216,6 +1216,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         break;
     }
 
+    ber_free(ber, 0);
 
     if(!result)
       result = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
@@ -1224,7 +1225,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
     break;
   }
 
-  ber_free(ber, 0);
   ldap_msgfree(msg);
   return result;
 }
