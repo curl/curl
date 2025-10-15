@@ -255,12 +255,6 @@ $allowednumerrors
                name, code, curl_easy_strerror(code), lineno);
 }
 
-static void errneg(const char *name, CURLcode code, int lineno)
-{
-  curl_mprintf("%s set to -1 returned %d, \\"%s\\" on line %d\\n",
-               name, code, curl_easy_strerror(code), lineno);
-}
-
 static void errstring(const char *name, CURLcode code, int lineno)
 {
   /* allow this set of options to return CURLE_BAD_FUNCTION_ARGUMENT
@@ -326,23 +320,6 @@ static bool bad_long(CURLcode res, int check)
     return 1;
   }
   return 0;
-}
-
-/* long options that should handle -1 */
-static bool bad_neg(int check)
-{
-  switch(check) {
-    case CURLOPT_DNS_CACHE_TIMEOUT:
-    case CURLOPT_INFILESIZE:
-    case CURLOPT_INFILESIZE_LARGE:
-    case CURLOPT_MAXREDIRS:
-    case CURLOPT_POSTFIELDSIZE:
-    case CURLOPT_POSTFIELDSIZE_LARGE:
-    case CURLOPT_RESUME_FROM:
-    case CURLOPT_RESUME_FROM_LARGE:
-      return TRUE;
-  }
-  return FALSE;
 }
 
 /* macro to check the first setopt of an option which then is allowed to get a
@@ -479,12 +456,6 @@ MOO
 MOO
             ;
 
-        my $negcheck = <<MOO
-      if(res && bad_neg($name))
-        errneg("$name", res, __LINE__);
-MOO
-            ;
-
         my $nullcheck = <<MOO
       if(res)
         errnull(\"$name\", res, __LINE__);
@@ -503,7 +474,6 @@ MOO
             print $fh "$ifpresent";
             print $fh "${pref} 22L);\n$longcheck";
             print $fh "${pref} LO);\n$longcheck";
-            print $fh "${pref} -1L);\n$negcheck";
             print $fh "${pref} HI);\n$longcheck";
         }
         elsif($type eq "CURLOPTTYPE_OFF_T") {
