@@ -60,6 +60,11 @@
   #ifndef NO_DES3
     #define USE_OPENSSL_DES
   #endif
+#elif defined(USE_MBEDTLS)
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER < 0x04000000
+    #define USE_MBEDTLS_DES
+  #endif
 #endif
 
 #ifdef USE_OPENSSL_DES
@@ -96,7 +101,7 @@
 
 #  include <nettle/des.h>
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_DES)
 
 #  include <mbedtls/des.h>
 
@@ -177,7 +182,7 @@ static void setup_des_key(const unsigned char *key_56,
   des_set_key(des, (const uint8_t *) key);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_DES)
 
 static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
@@ -304,7 +309,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   des_encrypt(&des, 8, results + 8, plaintext);
   setup_des_key(keys + 14, &des);
   des_encrypt(&des, 8, results + 16, plaintext);
-#elif defined(USE_MBEDTLS) || defined(USE_OS400CRYPTO) ||       \
+#elif defined(USE_MBEDTLS_DES) || defined(USE_OS400CRYPTO) ||       \
   defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
@@ -352,7 +357,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     des_encrypt(&des, 8, lmbuffer, magic);
     setup_des_key(pw + 7, &des);
     des_encrypt(&des, 8, lmbuffer + 8, magic);
-#elif defined(USE_MBEDTLS) || defined(USE_OS400CRYPTO) ||       \
+#elif defined(USE_MBEDTLS_DES) || defined(USE_OS400CRYPTO) ||       \
   defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
