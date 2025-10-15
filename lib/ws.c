@@ -1534,30 +1534,36 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
   struct connectdata *conn;
   struct websocket *ws;
   struct ws_collect ctx;
+  CURLcode result = CURLE_OK;
 
   *nread = 0;
   *metap = NULL;
   if(!GOOD_EASY_HANDLE(data) || (buflen && !buffer))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!CURL_TGUARD_EASY_ENTER(data))
+    return CURLE_FOREIGN_THREAD;
 
   conn = data->conn;
   if(!conn) {
     /* Unhappy hack with lifetimes of transfers and connection */
     if(!data->set.connect_only) {
       failf(data, "[WS] CONNECT_ONLY is required");
-      return CURLE_UNSUPPORTED_PROTOCOL;
+      result = CURLE_UNSUPPORTED_PROTOCOL;
+      goto out;
     }
 
     Curl_getconnectinfo(data, &conn);
     if(!conn) {
       failf(data, "[WS] connection not found");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto out;
     }
   }
   ws = Curl_conn_meta_get(conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     failf(data, "[WS] connection is not setup for websocket");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto out;
   }
 
 
@@ -1568,18 +1574,17 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
   ctx.buflen = buflen;
 
   while(1) {
-    CURLcode result;
-
     /* receive more when our buffer is empty */
     if(Curl_bufq_is_empty(&ws->recvbuf)) {
       size_t n;
       result = Curl_bufq_slurp(&ws->recvbuf, nw_in_recv, data, &n);
       if(result)
-        return result;
+        goto out;
       else if(n == 0) {
         /* connection closed */
         infof(data, "[WS] connection expectedly closed?");
-        return CURLE_GOT_NOTHING;
+        result = CURLE_GOT_NOTHING;
+        goto out;
       }
       CURL_TRC_WS(data, "curl_ws_recv, added %zu bytes from network",
                   Curl_bufq_len(&ws->recvbuf));
@@ -1592,10 +1597,11 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
         ws_dec_info(&ws->dec, data, "need more input");
         continue;  /* nothing written, try more input */
       }
+      result = CURLE_OK;
       break;
     }
     else if(result) {
-      return result;
+      goto out;
     }
     else if(ctx.written) {
       /* The decoded frame is passed back to our caller.
@@ -1621,7 +1627,9 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
     if(!r2)
       (void)ws_flush(data, ws, Curl_is_in_callback(data));
   }
-  return CURLE_OK;
+out:
+  CURL_TGUARD_EASY_LEAVE(data);
+  return result;
 }
 
 static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
@@ -1775,6 +1783,8 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!CURL_TGUARD_EASY_ENTER(data))
+    return CURLE_FOREIGN_THREAD;
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
               ", flags=%x), raw=%d",
               buflen, fragsize, flags, data->set.ws_raw_mode);
@@ -1835,6 +1845,7 @@ out:
               ", flags=%x, raw=%d) -> %d, %zu",
               buflen, fragsize, flags, data->set.ws_raw_mode, result,
               *pnsent);
+  CURL_TGUARD_EASY_LEAVE(data);
   return result;
 }
 

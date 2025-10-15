@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include "urldata.h"
 
 #include <curl/curl.h>
 
@@ -140,3 +141,65 @@ int Curl_thread_join(curl_thread_t *hnd)
 }
 
 #endif /* USE_THREADS_* */
+
+#ifdef USE_THREAD_GUARD
+
+void Curl_tguard_init(struct curl_tguard *tguard)
+{
+  memset(tguard, 0, sizeof(*tguard));
+  Curl_mutex_init(&tguard->mutx);
+  tguard->initialised = TRUE;
+}
+
+void Curl_tguard_destroy(struct curl_tguard *tguard)
+{
+  DEBUGASSERT(tguard->initialised);
+  if(tguard->initialised) {
+    Curl_mutex_destroy(&tguard->mutx);
+    memset(tguard, 0, sizeof(*tguard));
+  }
+}
+
+bool Curl_tguard_easy_enter(struct Curl_easy *data)
+{
+  struct curl_tguard *tguard = &data->tguard;
+  bool accepted;
+  DEBUGASSERT(tguard->initialised);
+  Curl_mutex_acquire(&tguard->mutx);
+  if(tguard->depth) {
+    /* Called again with a call in progress. Is it from the same thread? */
+    if(curl_thread_equal(tguard->tid, curl_thread_self())) {
+      ++tguard->depth;
+      accepted = TRUE;
+    }
+    else {
+      DEBUGASSERT(0);
+      accepted = FALSE;
+    }
+  }
+  else {
+    /* No call in progress, record the calling thread */
+    DEBUGASSERT(!tguard->depth);
+    tguard->tid = curl_thread_self();
+    tguard->depth = 1;
+    accepted = TRUE;
+  }
+  Curl_mutex_release(&tguard->mutx);
+  return accepted;
+}
+
+void Curl_tguard_easy_leave(struct Curl_easy *data)
+{
+  struct curl_tguard *tguard = &data->tguard;
+  DEBUGASSERT(tguard->initialised);
+  if(tguard->initialised) {
+    Curl_mutex_acquire(&tguard->mutx);
+    DEBUGASSERT(tguard->depth);
+    --tguard->depth;
+    /* We cannot invalidate `tguard->tid` as pthread does not define
+     * an invalid value for pthread_t. */
+    Curl_mutex_release(&tguard->mutx);
+  }
+}
+
+#endif /* USE_THREAD_GUARD */

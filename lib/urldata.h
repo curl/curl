@@ -1701,7 +1701,22 @@ struct Curl_easy {
   struct PureInfo info;        /* stats, reports and info data */
   struct curl_tlssessioninfo tsi; /* Information about the TLS session, only
                                      valid after a client has asked for it */
+#ifdef USE_THREAD_GUARD
+  struct curl_tguard tguard;
+#endif
 };
+
+#ifdef USE_THREAD_GUARD
+#define CURL_TGUARD_EASY_INIT(d)     Curl_tguard_init(&(d)->tguard)
+#define CURL_TGUARD_EASY_DESTROY(d)  Curl_tguard_destroy(&(d)->tguard)
+#define CURL_TGUARD_EASY_ENTER(d)    Curl_tguard_easy_enter(d)
+#define CURL_TGUARD_EASY_LEAVE(d)    Curl_tguard_easy_leave(d)
+#else
+#define CURL_TGUARD_EASY_INIT(d)     Curl_nop_stmt
+#define CURL_TGUARD_EASY_DESTROY(d)  Curl_nop_stmt
+#define CURL_TGUARD_EASY_ENTER(d)    TRUE
+#define CURL_TGUARD_EASY_LEAVE(d)    Curl_nop_stmt
+#endif /* !USE_THREAD_GUARD */
 
 #define LIBCURL_NAME "libcurl"
 

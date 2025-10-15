@@ -347,6 +347,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_freeset(data);
   Curl_headers_cleanup(data);
   Curl_netrc_cleanup(&data->state.netrc);
+  CURL_TGUARD_EASY_DESTROY(data);
   free(data);
   return CURLE_OK;
 }
@@ -529,6 +530,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #endif
   Curl_netrc_init(&data->state.netrc);
   Curl_init_userdefined(data);
+  CURL_TGUARD_EASY_INIT(data);
 
   *curl = data;
   return CURLE_OK;

@@ -2986,6 +2986,8 @@ CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!CURL_TGUARD_EASY_ENTER(data))
+    return CURLE_FOREIGN_THREAD;
 
   va_start(arg, tag);
 
@@ -2994,5 +2996,6 @@ CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
   va_end(arg);
   if(result == CURLE_BAD_FUNCTION_ARGUMENT)
     failf(data, "setopt 0x%x got bad argument", tag);
+  CURL_TGUARD_EASY_LEAVE(data);
   return result;
 }
