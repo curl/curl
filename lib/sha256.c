@@ -35,7 +35,7 @@
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER < 0x04000000
-#define USE_MBEDTLS_SHA256
+  #define USE_MBEDTLS_SHA256
 #endif
 #endif
 
