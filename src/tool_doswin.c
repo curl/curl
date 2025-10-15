@@ -809,6 +809,9 @@ ThreadCleanup:
 }
 
 /* The background thread that reads and buffers the true stdin. */
+static HANDLE stdin_thread = NULL;
+static curl_socket_t socket_r = CURL_SOCKET_BAD;
+
 curl_socket_t win32_stdin_read_thread(void)
 {
   int result;
@@ -816,8 +819,6 @@ curl_socket_t win32_stdin_read_thread(void)
   int rc = 0, socksize = 0;
   struct win_thread_data *tdata = NULL;
   SOCKADDR_IN selfaddr;
-  static HANDLE stdin_thread = NULL;
-  static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
   if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread != NULL);
@@ -929,7 +930,6 @@ curl_socket_t win32_stdin_read_thread(void)
 
     if(stdin_thread) {
       TerminateThread(stdin_thread, 1);
-      CloseHandle(stdin_thread);
       stdin_thread = NULL;
     }
 
