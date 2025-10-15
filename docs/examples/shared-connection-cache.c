@@ -51,10 +51,6 @@ int main(void)
   CURLSH *share;
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   share = curl_share_init();
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
 
@@ -67,6 +63,8 @@ int main(void)
   for(i = 0; i < 3; i++) {
     CURL *curl = curl_easy_init();
     if(curl) {
+      CURLcode res;
+
       curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
       /* use the share object */
@@ -85,6 +83,5 @@ int main(void)
   }
 
   curl_share_cleanup(share);
-  curl_global_cleanup();
-  return (int)res;
+  return 0;
 }

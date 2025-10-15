@@ -130,10 +130,6 @@ int main(void)
   int i;
   struct CURLMsg *m;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   /* init a multi stack */
   multi = curl_multi_init();
 
@@ -159,6 +155,7 @@ int main(void)
     if(mcode)
       break;
 
+
     /*
      * When doing server push, libcurl itself created and added one or more
      * easy handles but *we* need to clean them up when they are done.
@@ -176,8 +173,8 @@ int main(void)
 
   }
 
+
   curl_multi_cleanup(multi);
-  curl_global_cleanup();
 
   /* 'pushindex' is now the number of received transfers */
   for(i = 0; i < pushindex; i++) {

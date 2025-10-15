@@ -37,9 +37,7 @@ int main(void)
   curl_version_info_data *ver;
   const char *const *ptr;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_ALL);
 
   ver = curl_version_info(CURLVERSION_NOW);
   printf("Protocols:\n");

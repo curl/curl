@@ -39,10 +39,7 @@
 int main(void)
 {
   CURL *curl;
-
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode res = CURLE_OK;
 
   curl = curl_easy_init();
   if(curl) {
@@ -65,8 +62,6 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
-
-  curl_global_cleanup();
 
   return (int)res;
 }

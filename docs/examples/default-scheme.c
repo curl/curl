@@ -33,10 +33,6 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "example.com");
@@ -57,6 +53,5 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  curl_global_cleanup();
-  return (int)res;
+  return 0;
 }

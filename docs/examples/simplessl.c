@@ -77,11 +77,7 @@ int main(void)
   if(!headerfile)
     return 1;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    fclose(headerfile);
-    return (int)res;
-  }
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   curl = curl_easy_init();
   if(curl) {

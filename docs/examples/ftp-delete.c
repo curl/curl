@@ -37,15 +37,14 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
   return size * nmemb;
 }
 
+
 int main(void)
 {
   CURL *curl;
   CURLcode res;
   struct curl_slist *headerlist = NULL;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   curl = curl_easy_init();
   if(curl) {
@@ -81,5 +80,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return 0;
 }

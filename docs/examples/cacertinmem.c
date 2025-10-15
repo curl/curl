@@ -56,6 +56,8 @@ static size_t writefunction(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
 {
+  CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
+
   /** This example uses two (fake) certificates **/
   /* replace the XXX with the actual CA certificates */
   static const char mypem[] =
@@ -87,14 +89,14 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   (void)pointer;
 
   if(!cts || !cbio) {
-    return CURLE_ABORTED_BY_CALLBACK;
+    return rv;
   }
 
   inf = PEM_X509_INFO_read_bio(cbio, NULL, NULL, NULL);
 
   if(!inf) {
     BIO_free(cbio);
-    return CURLE_ABORTED_BY_CALLBACK;
+    return rv;
   }
 
   for(i = 0; i < sk_X509_INFO_num(inf); i++) {
@@ -110,18 +112,16 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   sk_X509_INFO_pop_free(inf, X509_INFO_free);
   BIO_free(cbio);
 
-  return CURLE_OK;
+  rv = CURLE_OK;
+  return rv;
 }
 
 int main(void)
 {
   CURL *ch;
-  CURLcode res;
+  CURLcode rv;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
+  curl_global_init(CURL_GLOBAL_ALL);
   ch = curl_easy_init();
   curl_easy_setopt(ch, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(ch, CURLOPT_HEADER, 0L);
@@ -145,8 +145,8 @@ int main(void)
   /* first try: retrieve page without ca certificates -> should fail
    * unless libcurl was built --with-ca-fallback enabled at build-time
    */
-  res = curl_easy_perform(ch);
-  if(res == CURLE_OK)
+  rv = curl_easy_perform(ch);
+  if(rv == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
@@ -166,13 +166,13 @@ int main(void)
    * "modifications" to the SSL CONTEXT just before link init
    */
   curl_easy_setopt(ch, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
-  res = curl_easy_perform(ch);
-  if(res == CURLE_OK)
+  rv = curl_easy_perform(ch);
+  if(rv == CURLE_OK)
     printf("*** transfer succeeded ***\n");
   else
     printf("*** transfer failed ***\n");
 
   curl_easy_cleanup(ch);
   curl_global_cleanup();
-  return (int)res;
+  return (int)rv;
 }

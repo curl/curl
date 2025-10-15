@@ -101,11 +101,7 @@ int main(int argc, char **argv)
   }
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    fclose(hd_src);
-    return (int)res;
-  }
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -141,5 +137,5 @@ int main(int argc, char **argv)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return (int)res;
+  return 0;
 }

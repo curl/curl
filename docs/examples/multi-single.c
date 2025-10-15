@@ -41,9 +41,7 @@ int main(void)
   CURLM *multi_handle;
   int still_running = 1; /* keep number of running handles */
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   http_handle = curl_easy_init();
 

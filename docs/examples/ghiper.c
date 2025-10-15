@@ -421,15 +421,9 @@ int main(void)
   int fd;
   GIOChannel* ch;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   fd = init_fifo();
-  if(fd == CURL_SOCKET_BAD) {
-    curl_global_cleanup();
+  if(fd == CURL_SOCKET_BAD)
     return 1;
-  }
   ch = g_io_channel_unix_new(fd);
   g_io_add_watch(ch, G_IO_IN, fifo_cb, g);
   gmain = g_main_loop_new(NULL, FALSE);
@@ -444,6 +438,5 @@ int main(void)
 
   g_main_loop_run(gmain);
   curl_multi_cleanup(g->multi);
-  curl_global_cleanup();
   return 0;
 }

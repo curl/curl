@@ -87,42 +87,39 @@ int main(int argc, const char *argv[])
 {
   CURL *easy;
   struct read_ctx rctx;
+  CURLcode res;
   const char *payload = "Hello, friend!";
-
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
 
   memset(&rctx, 0, sizeof(rctx));
 
   easy = curl_easy_init();
-  if(easy) {
-    if(argc == 2)
-      curl_easy_setopt(easy, CURLOPT_URL, argv[1]);
-    else
-      curl_easy_setopt(easy, CURLOPT_URL, "wss://example.com");
+  if(!easy)
+    return 1;
 
-    curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, writecb);
-    curl_easy_setopt(easy, CURLOPT_WRITEDATA, easy);
-    curl_easy_setopt(easy, CURLOPT_READFUNCTION, readcb);
-    /* tell curl that we want to send the payload */
-    rctx.easy = easy;
-    rctx.blen = strlen(payload);
-    memcpy(rctx.buf, payload, rctx.blen);
-    curl_easy_setopt(easy, CURLOPT_READDATA, &rctx);
-    curl_easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+  if(argc == 2)
+    curl_easy_setopt(easy, CURLOPT_URL, argv[1]);
+  else
+    curl_easy_setopt(easy, CURLOPT_URL, "wss://example.com");
+
+  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, writecb);
+  curl_easy_setopt(easy, CURLOPT_WRITEDATA, easy);
+  curl_easy_setopt(easy, CURLOPT_READFUNCTION, readcb);
+  /* tell curl that we want to send the payload */
+  rctx.easy = easy;
+  rctx.blen = strlen(payload);
+  memcpy(rctx.buf, payload, rctx.blen);
+  curl_easy_setopt(easy, CURLOPT_READDATA, &rctx);
+  curl_easy_setopt(easy, CURLOPT_UPLOAD, 1L);
 
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(easy);
-    /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+  /* Perform the request, res gets the return code */
+  res = curl_easy_perform(easy);
+  /* Check for errors */
+  if(res != CURLE_OK)
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
 
-    /* always cleanup */
-    curl_easy_cleanup(easy);
-  }
-  curl_global_cleanup();
-  return (int)res;
+  /* always cleanup */
+  curl_easy_cleanup(easy);
+  return 0;
 }

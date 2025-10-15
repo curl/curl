@@ -79,7 +79,7 @@ int main(void)
   if(res != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",
             curl_easy_strerror(res));
-    return (int)res;
+    return 1;
   }
 
   /* get a curl handle */

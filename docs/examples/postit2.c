@@ -53,9 +53,7 @@ int main(int argc, char *argv[])
   struct curl_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(curl) {

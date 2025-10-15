@@ -449,17 +449,12 @@ void sigint_handler(int signo)
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
   struct GlobalInfo g;
   struct itimerspec its;
   struct epoll_event ev;
   struct epoll_event events[10];
   (void)argc;
   (void)argv;
-
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
 
   g_should_exit_ = 0;
   signal(SIGINT, sigint_handler);
@@ -468,14 +463,12 @@ int main(int argc, char **argv)
   g.epfd = epoll_create1(EPOLL_CLOEXEC);
   if(g.epfd == -1) {
     perror("epoll_create1 failed");
-    curl_global_cleanup();
     return 1;
   }
 
   g.tfd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
   if(g.tfd == -1) {
     perror("timerfd_create failed");
-    curl_global_cleanup();
     return 1;
   }
 
@@ -488,10 +481,8 @@ int main(int argc, char **argv)
   ev.data.fd = g.tfd;
   epoll_ctl(g.epfd, EPOLL_CTL_ADD, g.tfd, &ev);
 
-  if(init_fifo(&g)) {
-    curl_global_cleanup();
+  if(init_fifo(&g))
     return 1;
-  }
   g.multi = curl_multi_init();
 
   /* setup the generic multi interface options we want */
@@ -517,7 +508,6 @@ int main(int argc, char **argv)
       }
       else {
         perror("epoll_wait");
-        curl_global_cleanup();
         return 1;
       }
     }
@@ -540,6 +530,5 @@ int main(int argc, char **argv)
 
   curl_multi_cleanup(g.multi);
   clean_fifo(&g);
-  curl_global_cleanup();
   return 0;
 }

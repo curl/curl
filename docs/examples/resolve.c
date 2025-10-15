@@ -32,6 +32,7 @@
 int main(void)
 {
   CURL *curl;
+  CURLcode res = CURLE_OK;
 
   /* Each single name resolve string should be written using the format
      HOST:PORT:ADDRESS where HOST is the name libcurl tries to resolve, PORT
@@ -40,10 +41,6 @@ int main(void)
    */
   struct curl_slist *host = curl_slist_append(NULL,
                                               "example.com:443:127.0.0.1");
-
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -56,7 +53,6 @@ int main(void)
   }
 
   curl_slist_free_all(host);
-  curl_global_cleanup();
 
   return (int)res;
 }

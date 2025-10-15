@@ -156,9 +156,7 @@ int main(int argc, char *argv[])
   }
 
   /* init libcurl */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* init the curl session */
   curl_handle = curl_easy_init();

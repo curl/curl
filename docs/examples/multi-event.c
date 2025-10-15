@@ -219,15 +219,12 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
-
   if(argc <= 1)
     return 0;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(curl_global_init(CURL_GLOBAL_ALL)) {
     fprintf(stderr, "Could not init curl\n");
-    return (int)res;
+    return 1;
   }
 
   base = event_base_new();

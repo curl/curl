@@ -212,7 +212,6 @@ static int server_push_callback(CURL *parent,
  */
 int main(int argc, char *argv[])
 {
-  CURLcode res;
   CURL *easy;
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
@@ -222,10 +221,6 @@ int main(int argc, char *argv[])
   if(argc == 2)
     url = argv[1];
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   /* init a multi stack */
   multi_handle = curl_multi_init();
 
@@ -234,7 +229,6 @@ int main(int argc, char *argv[])
   /* set options */
   if(setup(easy, url)) {
     fprintf(stderr, "failed\n");
-    curl_global_cleanup();
     return 1;
   }
 
@@ -276,7 +270,7 @@ int main(int argc, char *argv[])
   } while(transfers); /* as long as we have transfers going */
 
   curl_multi_cleanup(multi_handle);
-  curl_global_cleanup();
+
 
   return 0;
 }

@@ -38,7 +38,8 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(int argc, char *argv[])
 {
-  CURLcode res;
+  CURLcode res = CURLE_OK;
+
   CURL *curl_handle;
   static const char *pagefilename = "page.out";
   FILE *pagefile;
@@ -48,11 +49,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
-    fprintf(stderr, "Could not init curl\n");
-    return (int)res;
-  }
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* init the curl session */
   curl_handle = curl_easy_init();

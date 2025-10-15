@@ -72,16 +72,13 @@ static void *pull_one_url(void *pindex)
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
   pthread_t tid[NUMT];
   int i;
   (void)argc;
   (void)argv;
 
   /* Must initialize libcurl before any threads are started */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_ALL);
 
   for(i = 0; i < NUMT; i++) {
     int error = pthread_create(&tid[i],

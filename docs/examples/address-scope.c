@@ -37,10 +37,7 @@ int main(void)
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__AMIGA__)
   /* Windows/MS-DOS users need to find how to use if_nametoindex() */
   CURL *curl;
-
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -60,9 +57,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  curl_global_cleanup();
-  return (int)res;
-#else
-  return 0;
 #endif
+  return 0;
 }

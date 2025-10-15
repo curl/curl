@@ -190,13 +190,11 @@ static int setup(struct transfer *t, int num)
  */
 int main(int argc, char **argv)
 {
-  CURLcode res;
   struct transfer trans[NUM_HANDLES];
   CURLM *multi_handle;
   int i;
   int still_running = 0; /* keep number of running handles */
   int num_transfers;
-
   if(argc > 1) {
     /* if given a number, do that many transfers */
     num_transfers = atoi(argv[1]);
@@ -206,18 +204,12 @@ int main(int argc, char **argv)
   else
     num_transfers = 3; /* suitable default */
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   /* init a multi stack */
   multi_handle = curl_multi_init();
 
   for(i = 0; i < num_transfers; i++) {
-    if(setup(&trans[i], i)) {
-      curl_global_cleanup();
+    if(setup(&trans[i], i))
       return 1;
-    }
 
     /* add the individual transfer */
     curl_multi_add_handle(multi_handle, trans[i].easy);

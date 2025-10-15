@@ -62,14 +62,13 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb,
 int main(void)
 {
   CURL *curl;
+  CURLcode res;
   struct FtpFile ftpfile = {
     "yourfile.bin", /* name to store the file as if successful */
     NULL
   };
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_DEFAULT);
 
   curl = curl_easy_init();
   if(curl) {
@@ -109,5 +108,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return 0;
 }

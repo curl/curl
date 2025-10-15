@@ -128,10 +128,6 @@ int main(void)
   CURLcode res;
   struct data config;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   config.trace_ascii = 1; /* enable ASCII tracing */
 
   curl = curl_easy_init();
@@ -155,6 +151,5 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  curl_global_cleanup();
-  return (int)res;
+  return 0;
 }

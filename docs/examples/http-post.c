@@ -34,9 +34,7 @@ int main(void)
   CURLcode res;
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -59,5 +57,5 @@ int main(void)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return 0;
 }

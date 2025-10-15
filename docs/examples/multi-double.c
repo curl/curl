@@ -42,10 +42,6 @@ int main(void)
 
   int still_running = 1; /* keep number of running handles */
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
-
   http_handle = curl_easy_init();
   http_handle2 = curl_easy_init();
 
@@ -92,8 +88,6 @@ int main(void)
 
   curl_easy_cleanup(http_handle);
   curl_easy_cleanup(http_handle2);
-
-  curl_global_cleanup();
 
   return 0;
 }
