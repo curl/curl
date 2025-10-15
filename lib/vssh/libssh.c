@@ -1239,10 +1239,6 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
 
     /* now, decrease the size of the read */
     if(data->state.infilesize > 0) {
-      if(data->state.resume_from > data->state.infilesize) {
-        failf(data, "Resume point beyond size");
-        return myssh_to_ERROR(data, sshc, CURLE_BAD_FUNCTION_ARGUMENT);
-      }
       data->state.infilesize -= data->state.resume_from;
       data->req.size = data->state.infilesize;
       Curl_pgrsSetUploadSize(data, data->state.infilesize);
