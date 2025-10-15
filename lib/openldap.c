@@ -468,10 +468,6 @@ static CURLcode oldap_perform_mechs(struct Curl_easy *data)
 
   if(!li)
     return CURLE_FAILED_INIT;
-  /* Casting away the const for the 3rd parameter that the LDAP API expects as
-     a non-const char ** is potentially unsafe but we believe the lack of
-     const in the API was an oversight and that no LDAP implementation
-     actually modifies the input. */
   rc = ldap_search_ext(li->ld, "", LDAP_SCOPE_BASE, "(objectclass=*)",
                        (char **)CURL_UNCONST(supportedSASLMechanisms), 0,
                        NULL, NULL, NULL, 0, &li->msgid);
