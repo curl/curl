@@ -474,6 +474,7 @@ the parent project, ideally in the "extra" find package redirect file:
 Available variables:
 
 - `HAVE_GNUTLS_SRP`:                        `gnutls_srp_verifier` present in GnuTLS.
+- `HAVE_GSS_C_NT_HOSTBASED_SERVICE`:        `GSS_C_NT_HOSTBASED_SERVICE` present in GSS/Kerberos.
 - `HAVE_LDAP_INIT_FD`:                      `ldap_init_fd` present in LDAP library.
 - `HAVE_LDAP_URL_PARSE`:                    `ldap_url_parse` present in LDAP library.
 - `HAVE_OPENSSL_SRP`:                       `SSL_CTX_set_srp_username` present in OpenSSL (or fork).
