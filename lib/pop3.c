@@ -1377,16 +1377,17 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  /* Start the first command in the DO phase, may alter data->req.no_body */
+  if(data->req.no_body) {
+    /* Requested no body means no transfer */
+    pop3->transfer = PPTRANSFER_INFO;
+  }
+
+  *dophase_done = FALSE; /* not done yet */
+
+  /* Start the first command in the DO phase */
   result = pop3_perform_command(data);
   if(result)
     return result;
-
-  if(data->req.no_body)
-    /* Requested no body means no transfer */
-    pop3->transfer = PPTRANSFER_INFO;
-
-  *dophase_done = FALSE; /* not done yet */
 
   /* Run the state-machine */
   result = pop3_multi_statemach(data, dophase_done);
