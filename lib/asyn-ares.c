@@ -517,6 +517,8 @@ static void async_ares_hostbyname_cb(void *user_data,
   (void)timeouts; /* ignored */
 
   if(ARES_EDESTRUCTION == status)
+    /* when this ares handle is getting destroyed, the 'arg' pointer may not
+       be valid so only defer it when we know the 'status' says its fine! */
     return;
 
   if(ARES_SUCCESS == status) {
