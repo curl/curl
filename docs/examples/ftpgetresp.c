@@ -30,7 +30,8 @@
  * in a separate file using our own callback!
  * </DESC>
  */
-static size_t write_response(void *ptr, size_t size, size_t nmemb, void *data)
+static size_t
+write_response(void *ptr, size_t size, size_t nmemb, void *data)
 {
   FILE *writehere = (FILE *)data;
   return fwrite(ptr, size, nmemb, writehere);
@@ -86,8 +87,6 @@ int main(void)
 
   fclose(ftpfile); /* close the local file */
   fclose(respfile); /* close the response file */
-
-  curl_global_cleanup();
 
   return (int)res;
 }

@@ -32,8 +32,10 @@ struct data {
   char trace_ascii; /* 1 or 0 */
 };
 
-static void dump(const char *text, FILE *stream, unsigned char *ptr,
-                 size_t size, char nohex)
+static
+void dump(const char *text,
+          FILE *stream, unsigned char *ptr, size_t size,
+          char nohex)
 {
   size_t i;
   size_t c;
@@ -81,8 +83,10 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fflush(stream);
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
-                    char *data, size_t size, void *userp)
+static
+int my_trace(CURL *handle, curl_infotype type,
+             char *data, size_t size,
+             void *userp)
 {
   struct data *config = (struct data *)userp;
   const char *text;

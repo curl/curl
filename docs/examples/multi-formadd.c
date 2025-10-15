@@ -40,6 +40,9 @@ int main(void)
 {
   CURL *curl;
 
+  CURLM *multi_handle;
+  int still_running = 0;
+
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
   struct curl_slist *headerlist = NULL;
@@ -73,59 +76,50 @@ int main(void)
                  CURLFORM_END);
   )
 
+  curl = curl_easy_init();
+  multi_handle = curl_multi_init();
+
   /* initialize custom header list (stating that Expect: 100-continue is not
      wanted */
   headerlist = curl_slist_append(headerlist, buf);
+  if(curl && multi_handle) {
 
-  curl = curl_easy_init();
-  if(curl) {
-    CURLM *multi_handle;
+    /* what URL that receives this POST */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/upload.cgi");
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    multi_handle = curl_multi_init();
-    if(multi_handle) {
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
+    CURL_IGNORE_DEPRECATION(
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    )
 
-      int still_running = 0;
+    curl_multi_add_handle(multi_handle, curl);
 
-      /* what URL that receives this POST */
-      curl_easy_setopt(curl, CURLOPT_URL,
-                       "https://www.example.com/upload.cgi");
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    do {
+      CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
-      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-      CURL_IGNORE_DEPRECATION(
-        curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-      )
+      if(still_running)
+        /* wait for activity, timeout or "nothing" */
+        mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-      curl_multi_add_handle(multi_handle, curl);
+      if(mc)
+        break;
 
-      do {
-        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    } while(still_running);
 
-        if(still_running)
-          /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
-
-        if(mc)
-          break;
-
-      } while(still_running);
-
-      curl_multi_cleanup(multi_handle);
-    }
+    curl_multi_cleanup(multi_handle);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
+
+    CURL_IGNORE_DEPRECATION(
+      /* then cleanup the formpost chain */
+      curl_formfree(formpost);
+    )
+
+    /* free slist */
+    curl_slist_free_all(headerlist);
   }
-
-  CURL_IGNORE_DEPRECATION(
-    /* then cleanup the formpost chain */
-    curl_formfree(formpost);
-  )
-
-  /* free slist */
-  curl_slist_free_all(headerlist);
-
   curl_global_cleanup();
-
   return 0;
 }

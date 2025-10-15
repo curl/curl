@@ -83,9 +83,10 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fflush(stream);
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
-                    unsigned char *data, size_t size,
-                    void *userp)
+static
+int my_trace(CURL *handle, curl_infotype type,
+             unsigned char *data, size_t size,
+             void *userp)
 {
   const char *text;
 
@@ -122,48 +123,43 @@ static int my_trace(CURL *handle, curl_infotype type,
 int main(void)
 {
   CURL *http_handle;
+  CURLM *multi_handle;
+
+  int still_running = 0; /* keep number of running handles */
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
 
   http_handle = curl_easy_init();
-  if(http_handle) {
 
-    CURLM *multi_handle;
+  /* set the options (I left out a few, you get the point anyway) */
+  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
-    /* set the options (I left out a few, you get the point anyway) */
-    curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+  curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
+  curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
 
-    curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
-    curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
+  /* init a multi stack */
+  multi_handle = curl_multi_init();
 
-    /* init a multi stack */
-    multi_handle = curl_multi_init();
-    if(multi_handle) {
+  /* add the individual transfers */
+  curl_multi_add_handle(multi_handle, http_handle);
 
-      int still_running = 0; /* keep number of running handles */
+  do {
+    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
-      /* add the individual transfers */
-      curl_multi_add_handle(multi_handle, http_handle);
+    if(still_running)
+      /* wait for activity, timeout or "nothing" */
+      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-      do {
-        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    if(mc)
+      break;
 
-        if(still_running)
-          /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+  } while(still_running);
 
-        if(mc)
-          break;
+  curl_multi_cleanup(multi_handle);
 
-      } while(still_running);
-
-      curl_multi_cleanup(multi_handle);
-    }
-
-    curl_easy_cleanup(http_handle);
-  }
+  curl_easy_cleanup(http_handle);
 
   curl_global_cleanup();
 

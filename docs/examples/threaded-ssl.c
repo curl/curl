@@ -55,19 +55,17 @@ static const char * const urls[]= {
 
 static void *pull_one_url(void *pindex)
 {
+  int i = *(int *)pindex;
   CURL *curl;
 
   curl = curl_easy_init();
-  if(curl) {
-    int i = *(int *)pindex;
-    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
-    /* this example does not verify the server's certificate, which means we
-       might be downloading stuff from an impostor */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    (void)curl_easy_perform(curl); /* ignores error */
-    curl_easy_cleanup(curl);
-  }
+  curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+  /* this example does not verify the server's certificate, which means we
+     might be downloading stuff from an impostor */
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  (void)curl_easy_perform(curl); /* ignores error */
+  curl_easy_cleanup(curl);
 
   return NULL;
 }

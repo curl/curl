@@ -37,7 +37,8 @@ struct Memory {
   size_t size;
 };
 
-static size_t write_cb(void *contents, size_t size, size_t nmemb, void *userp)
+static size_t
+write_cb(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct Memory *mem = (struct Memory *)userp;
@@ -124,8 +125,10 @@ int main(void)
 {
   CURL *easy;
   CURLM *multi;
+  int still_running; /* keep number of running handles */
   int transfers = 1; /* we start with one */
   int i;
+  struct CURLMsg *m;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
@@ -147,10 +150,7 @@ int main(void)
   curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &transfers);
 
   while(transfers) {
-    struct CURLMsg *m;
-    int still_running; /* keep number of running handles */
     int rc;
-
     CURLMcode mcode = curl_multi_perform(multi, &still_running);
     if(mcode)
       break;
@@ -173,6 +173,7 @@ int main(void)
         curl_easy_cleanup(e);
       }
     } while(m);
+
   }
 
   curl_multi_cleanup(multi);

@@ -38,48 +38,43 @@
 int main(void)
 {
   CURL *http_handle;
+  CURLM *multi_handle;
+  int still_running = 1; /* keep number of running handles */
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
 
   http_handle = curl_easy_init();
-  if(http_handle) {
 
-    CURLM *multi_handle;
-    int still_running = 1; /* keep number of running handles */
+  /* set the options (I left out a few, you get the point anyway) */
+  curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
 
-    /* set the options (I left out a few, you get the point anyway) */
-    curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+  /* init a multi stack */
+  multi_handle = curl_multi_init();
 
-    /* init a multi stack */
-    multi_handle = curl_multi_init();
-    if(multi_handle) {
+  /* add the individual transfers */
+  curl_multi_add_handle(multi_handle, http_handle);
 
-      /* add the individual transfers */
-      curl_multi_add_handle(multi_handle, http_handle);
+  do {
+    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
-      do {
-        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    if(!mc)
+      /* wait for activity, timeout or "nothing" */
+      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
 
-        if(!mc)
-          /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
-
-        if(mc) {
-          fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
-          break;
-        }
-
-      } while(still_running);
-
-      curl_multi_remove_handle(multi_handle, http_handle);
-
-      curl_multi_cleanup(multi_handle);
+    if(mc) {
+      fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mc);
+      break;
     }
 
-    curl_easy_cleanup(http_handle);
-  }
+  } while(still_running);
+
+  curl_multi_remove_handle(multi_handle, http_handle);
+
+  curl_easy_cleanup(http_handle);
+
+  curl_multi_cleanup(multi_handle);
 
   curl_global_cleanup();
 

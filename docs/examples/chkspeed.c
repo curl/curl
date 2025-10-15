@@ -162,67 +162,62 @@ int main(int argc, char *argv[])
 
   /* init the curl session */
   curl_handle = curl_easy_init();
-  if(curl_handle) {
 
-    /* specify URL to get */
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+  /* specify URL to get */
+  curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 
-    /* send all data to this function  */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteCallback);
+  /* send all data to this function  */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteCallback);
 
-    /* some servers do not like requests that are made without a user-agent
-       field, so we provide one */
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
-                     "libcurl-speedchecker/" CHKSPEED_VERSION);
+  /* some servers do not like requests that are made without a user-agent
+     field, so we provide one */
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
+                   "libcurl-speedchecker/" CHKSPEED_VERSION);
 
-    /* get it! */
-    res = curl_easy_perform(curl_handle);
+  /* get it! */
+  res = curl_easy_perform(curl_handle);
 
-    if(CURLE_OK == res) {
-      curl_off_t val;
+  if(CURLE_OK == res) {
+    curl_off_t val;
 
-      /* check for bytes downloaded */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &val);
+    /* check for bytes downloaded */
+    res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &val);
+    if((CURLE_OK == res) && (val > 0))
+      printf("Data downloaded: %lu bytes.\n", (unsigned long)val);
+
+    /* check for total download time */
+    res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME_T, &val);
+    if((CURLE_OK == res) && (val > 0))
+      printf("Total download time: %lu.%06lu sec.\n",
+             (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
+
+    /* check for average download speed */
+    res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD_T, &val);
+    if((CURLE_OK == res) && (val > 0))
+      printf("Average download speed: %lu kbyte/sec.\n",
+             (unsigned long)(val / 1024));
+
+    if(prtall) {
+      /* check for name resolution time */
+      res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME_T, &val);
       if((CURLE_OK == res) && (val > 0))
-        printf("Data downloaded: %lu bytes.\n", (unsigned long)val);
+        printf("Name lookup time: %lu.%06lu sec.\n",
+               (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
 
-      /* check for total download time */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME_T, &val);
+      /* check for connect time */
+      res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME_T, &val);
       if((CURLE_OK == res) && (val > 0))
-        printf("Total download time: %lu.%06lu sec.\n",
-               (unsigned long)(val / 1000000),
-               (unsigned long)(val % 1000000));
-
-      /* check for average download speed */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD_T, &val);
-      if((CURLE_OK == res) && (val > 0))
-        printf("Average download speed: %lu kbyte/sec.\n",
-               (unsigned long)(val / 1024));
-
-      if(prtall) {
-        /* check for name resolution time */
-        res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME_T, &val);
-        if((CURLE_OK == res) && (val > 0))
-          printf("Name lookup time: %lu.%06lu sec.\n",
-                 (unsigned long)(val / 1000000),
-                 (unsigned long)(val % 1000000));
-
-        /* check for connect time */
-        res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME_T, &val);
-        if((CURLE_OK == res) && (val > 0))
-          printf("Connect time: %lu.%06lu sec.\n",
-                 (unsigned long)(val / 1000000),
-                 (unsigned long)(val % 1000000));
-      }
+        printf("Connect time: %lu.%06lu sec.\n",
+               (unsigned long)(val / 1000000), (unsigned long)(val % 1000000));
     }
-    else {
-      fprintf(stderr, "Error while fetching '%s' : %s\n",
-              url, curl_easy_strerror(res));
-    }
-
-    /* cleanup curl stuff */
-    curl_easy_cleanup(curl_handle);
   }
+  else {
+    fprintf(stderr, "Error while fetching '%s' : %s\n",
+            url, curl_easy_strerror(res));
+  }
+
+  /* cleanup curl stuff */
+  curl_easy_cleanup(curl_handle);
 
   /* we are done with libcurl, so clean it up */
   curl_global_cleanup();

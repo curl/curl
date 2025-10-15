@@ -121,6 +121,8 @@ static int sftpResumeUpload(CURL *curlhandle, const char *remotepath,
 
 int main(void)
 {
+  const char *remote = "sftp://user:pass@example.com/path/filename";
+  const char *filename = "filename";
   CURL *curlhandle = NULL;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
@@ -128,16 +130,12 @@ int main(void)
     return (int)res;
 
   curlhandle = curl_easy_init();
-  if(curlhandle) {
-    const char *remote = "sftp://user:pass@example.com/path/filename";
-    const char *filename = "filename";
 
-    if(!sftpResumeUpload(curlhandle, remote, filename)) {
-      printf("resumed upload using curl %s failed\n", curl_version());
-    }
-
-    curl_easy_cleanup(curlhandle);
+  if(!sftpResumeUpload(curlhandle, remote, filename)) {
+    printf("resumed upload using curl %s failed\n", curl_version());
   }
+
+  curl_easy_cleanup(curlhandle);
   curl_global_cleanup();
 
   return 0;

@@ -38,8 +38,8 @@ struct MemoryStruct {
   size_t size;
 };
 
-static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t
+WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -75,43 +75,41 @@ int main(void)
 
   /* init the curl session */
   curl_handle = curl_easy_init();
-  if(curl_handle) {
 
-    /* specify URL to get */
-    curl_easy_setopt(curl_handle, CURLOPT_URL, "https://www.example.com/");
+  /* specify URL to get */
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "https://www.example.com/");
 
-    /* send all data to this function  */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+  /* send all data to this function  */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
-    /* we pass our 'chunk' struct to the callback function */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+  /* we pass our 'chunk' struct to the callback function */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 
-    /* some servers do not like requests that are made without a user-agent
-       field, so we provide one */
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+  /* some servers do not like requests that are made without a user-agent
+     field, so we provide one */
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
-    /* get it! */
-    res = curl_easy_perform(curl_handle);
+  /* get it! */
+  res = curl_easy_perform(curl_handle);
 
-    /* check for errors */
-    if(res != CURLE_OK) {
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
-    }
-    else {
-      /*
-       * Now, our chunk.memory points to a memory block that is chunk.size
-       * bytes big and contains the remote file.
-       *
-       * Do something nice with it!
-       */
-
-      printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-    }
-
-    /* cleanup curl stuff */
-    curl_easy_cleanup(curl_handle);
+  /* check for errors */
+  if(res != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
   }
+  else {
+    /*
+     * Now, our chunk.memory points to a memory block that is chunk.size
+     * bytes big and contains the remote file.
+     *
+     * Do something nice with it!
+     */
+
+    printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+  }
+
+  /* cleanup curl stuff */
+  curl_easy_cleanup(curl_handle);
 
   free(chunk.memory);
 
