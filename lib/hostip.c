@@ -846,7 +846,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   int respwait = 0;
   bool is_ipaddr;
   size_t hostname_len;
-  bool keep_negative = TRUE; /* cache a negative result */
 
 #ifndef CURL_DISABLE_DOH
   data->conn->bits.doh = FALSE; /* default is not */
@@ -888,10 +887,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     st = data->set.resolver_start(resolver, NULL,
                                   data->set.resolver_start_client);
     Curl_set_in_callback(data, FALSE);
-    if(st) {
-      keep_negative = FALSE;
+    if(st)
       goto error;
-    }
   }
 
   /* shortcut literal IP addresses, if we are not told to resolve them. */
@@ -950,11 +947,10 @@ out:
   else if(addr) {
     /* we got a response, create a dns entry, add to cache, return */
     dns = Curl_dnscache_mk_entry(data, addr, hostname, 0, port, FALSE);
-    if(!dns || Curl_dnscache_add(data, dns)) {
-      /* this is OOM or similar, don't store such negative resolves */
-      keep_negative = FALSE;
+    if(!dns)
       goto error;
-    }
+    if(Curl_dnscache_add(data, dns))
+      goto error;
     show_resolve_info(data, dns);
     *entry = dns;
     return CURLE_OK;
@@ -970,8 +966,7 @@ error:
     Curl_resolv_unlink(data, &dns);
   *entry = NULL;
   Curl_async_shutdown(data);
-  if(keep_negative)
-    store_negative_resolve(data, hostname, port);
+  store_negative_resolve(data, hostname, port);
   return CURLE_COULDNT_RESOLVE_HOST;
 }
 
@@ -1555,8 +1550,7 @@ CURLcode Curl_resolv_check(struct Curl_easy *data,
   result = Curl_async_is_resolved(data, dns);
   if(*dns)
     show_resolve_info(data, *dns);
-  if((result == CURLE_COULDNT_RESOLVE_HOST) ||
-     (result == CURLE_COULDNT_RESOLVE_PROXY))
+  if(result)
     store_negative_resolve(data, data->state.async.hostname,
                            data->state.async.port);
   return result;
