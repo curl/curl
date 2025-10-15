@@ -140,7 +140,7 @@ jobs:
         run: make -C bld-cares curl-examples-build
 
       - name: 'autoreconf'
-        run: autoreconf -if
+        run: autoreconf -fi
 
       - name: 'autotools configure (out-of-tree, c-ares, zstd, gssapi)'
         run: |
