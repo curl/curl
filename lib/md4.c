@@ -53,11 +53,13 @@
 
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000 && \
+    MBEDTLS_VERSION_NUMBER < 0x04000000 && \
+    defined(MBEDTLS_MD4_C)
+#define USE_MBEDTLS_MD4
 #include <mbedtls/mbedtls_config.h>
-#endif /* USE_MBEDTLS */
+#endif
+#endif
 
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
@@ -78,7 +80,7 @@
 #include <wincrypt.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/md4.h>
-#elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
+#elif defined(USE_MBEDTLS_MD4)
 #include <mbedtls/md4.h>
 #endif
 
@@ -187,7 +189,7 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
 
-#elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
+#elif defined(USE_MBEDTLS_MD4)
 
 struct md4_ctx {
   void *data;
