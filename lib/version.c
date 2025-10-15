@@ -295,10 +295,10 @@ char *curl_version(void)
                  CURL_KRB5_VERSION);
 #else
   curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
-#endif /* HAVE_GSSGNU */
-#endif /* HAVE_GSSAPI */
-  src[i++] = gss_buf;
 #endif
+#endif /* HAVE_GSSGNU */
+  src[i++] = gss_buf;
+#endif /* HAVE_GSSAPI */
 #ifdef USE_OPENLDAP
   oldap_version(ldap_buf, sizeof(ldap_buf));
   src[i++] = ldap_buf;
