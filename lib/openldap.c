@@ -988,10 +988,8 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
     Sockbuf *sb;
     /* re-install the libcurl SSL handlers into the sockbuf. */
     if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
-       ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data)) {
-      ldap_free_urldesc(lud);
+       ber_sockbuf_add_io(sb, &ldapsb_tls, LBER_SBIOD_LEVEL_TRANSPORT, data))
       return CURLE_FAILED_INIT;
-    }
   }
 #endif
 
