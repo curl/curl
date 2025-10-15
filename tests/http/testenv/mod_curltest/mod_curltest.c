@@ -768,10 +768,8 @@ static int curltest_sslinfo_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  apr_array_header_t *args = NULL;
   const char *request_id = NULL;
   int close_conn = 0;
-  long l;
   int i;
 
   if(strcmp(r->handler, "curltest-sslinfo")) {
