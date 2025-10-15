@@ -43,43 +43,45 @@ static void voutf(const char *prefix,
                   va_list ap)
 {
   size_t width = (get_terminal_columns() - strlen(prefix));
-  size_t len;
-  char *ptr;
-  char *print_buffer;
   DEBUGASSERT(!strchr(fmt, '\n'));
+  if(!global->silent) {
+    size_t len;
+    char *ptr;
+    char *print_buffer;
 
-  print_buffer = curl_mvaprintf(fmt, ap);
-  if(!print_buffer)
-    return;
-  len = strlen(print_buffer);
+    print_buffer = curl_mvaprintf(fmt, ap);
+    if(!print_buffer)
+      return;
+    len = strlen(print_buffer);
 
-  ptr = print_buffer;
-  while(len > 0) {
-    fputs(prefix, tool_stderr);
+    ptr = print_buffer;
+    while(len > 0) {
+      fputs(prefix, tool_stderr);
 
-    if(len > width) {
-      size_t cut = width-1;
+      if(len > width) {
+        size_t cut = width-1;
 
-      while(!ISBLANK(ptr[cut]) && cut) {
-        cut--;
+        while(!ISBLANK(ptr[cut]) && cut) {
+          cut--;
+        }
+        if(cut == 0)
+          /* not a single cutting position was found, just cut it at the
+             max text width then! */
+          cut = width-1;
+
+        (void)fwrite(ptr, cut + 1, 1, tool_stderr);
+        fputs("\n", tool_stderr);
+        ptr += cut + 1; /* skip the space too */
+        len -= cut + 1;
       }
-      if(cut == 0)
-        /* not a single cutting position was found, just cut it at the
-           max text width then! */
-        cut = width-1;
-
-      (void)fwrite(ptr, cut + 1, 1, tool_stderr);
-      fputs("\n", tool_stderr);
-      ptr += cut + 1; /* skip the space too */
-      len -= cut + 1;
+      else {
+        fputs(ptr, tool_stderr);
+        fputs("\n", tool_stderr);
+        len = 0;
+      }
     }
-    else {
-      fputs(ptr, tool_stderr);
-      fputs("\n", tool_stderr);
-      len = 0;
-    }
+    curl_free(print_buffer);
   }
-  curl_free(print_buffer);
 }
 
 /*
@@ -88,12 +90,11 @@ static void voutf(const char *prefix,
  */
 void notef(const char *fmt, ...)
 {
-  if(global->tracetype) {
-    va_list ap;
-    va_start(ap, fmt);
+  va_list ap;
+  va_start(ap, fmt);
+  if(global->tracetype)
     voutf(NOTE_PREFIX, fmt, ap);
-    va_end(ap);
-  }
+  va_end(ap);
 }
 
 /*
@@ -102,12 +103,10 @@ void notef(const char *fmt, ...)
  */
 void warnf(const char *fmt, ...)
 {
-  if(!global->silent) {
-    va_list ap;
-    va_start(ap, fmt);
-    voutf(WARN_PREFIX, fmt, ap);
-    va_end(ap);
-  }
+  va_list ap;
+  va_start(ap, fmt);
+  voutf(WARN_PREFIX, fmt, ap);
+  va_end(ap);
 }
 
 /*
