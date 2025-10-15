@@ -10,7 +10,6 @@ allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
 allowfunc strerror
-allowfunc vsnprintf
 banfunc curl_maprintf
 banfunc curl_mfprintf
 banfunc curl_mprintf
