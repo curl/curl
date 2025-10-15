@@ -217,7 +217,7 @@ char *curl_version(void)
   char gsasl_buf[30];
 #endif
 #ifdef HAVE_GSSAPI
-  char gss_buf[30];
+  char gss_buf[40];
 #endif
 #ifdef USE_OPENLDAP
   char ldap_buf[30];
