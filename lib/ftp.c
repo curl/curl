@@ -4420,10 +4420,38 @@ static void ftp_conn_dtor(void *key, size_t klen, void *entry)
   free(ftpc);
 }
 
+static void type_url_check(struct Curl_easy *data, struct FTP *ftp)
+{
+  size_t len = strlen(ftp->path);
+  /* FTP URLs support an extension like ";type=<typecode>" that
+   * we will try to get now! */
+  if((len >= 7) && !memcmp(&ftp->path[len - 7], ";type=", 6)) {
+    char *type = &ftp->path[len - 7];
+    char command = Curl_raw_toupper(type[6]);
+
+    *type = 0; /* cut it off */
+
+    switch(command) {
+    case 'A': /* ASCII mode */
+      data->state.prefer_ascii = TRUE;
+      break;
+
+    case 'D': /* directory mode */
+      data->state.list_only = TRUE;
+      break;
+
+    case 'I': /* binary mode */
+    default:
+      /* switch off ASCII */
+      data->state.prefer_ascii = FALSE;
+      break;
+    }
+  }
+}
+
 static CURLcode ftp_setup_connection(struct Curl_easy *data,
                                      struct connectdata *conn)
 {
-  char *type;
   struct FTP *ftp;
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc;
@@ -4458,34 +4486,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
 
   ftp->path = &data->state.up.path[1]; /* do not include the initial slash */
 
-  /* FTP URLs support an extension like ";type=<typecode>" that
-   * we will try to get now! */
-  type = strstr(ftp->path, ";type=");
-
-  if(!type)
-    type = strstr(conn->host.rawalloc, ";type=");
-
-  if(type) {
-    char command;
-    *type = 0;                     /* it was in the middle of the hostname */
-    command = Curl_raw_toupper(type[6]);
-
-    switch(command) {
-    case 'A': /* ASCII mode */
-      data->state.prefer_ascii = TRUE;
-      break;
-
-    case 'D': /* directory mode */
-      data->state.list_only = TRUE;
-      break;
-
-    case 'I': /* binary mode */
-    default:
-      /* switch off ASCII */
-      data->state.prefer_ascii = FALSE;
-      break;
-    }
-  }
+  type_url_check(data, ftp);
 
   /* get some initial data into the ftp struct */
   ftp->transfer = PPTRANSFER_BODY;
