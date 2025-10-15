@@ -96,8 +96,7 @@ class TestSSLUse:
         run_env['CURL_DEBUG'] = 'ssl'
         curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
-        urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo?'\
-            f'id=[0-{count-1}]&close'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo?close'
         r = curl.http_download(urls=[urln], alpn_proto=proto, with_stats=True,
                                extra_args=xargs)
         r.check_response(count=count, http_status=200)

@@ -181,7 +181,7 @@ class TestCaddy:
         count = 1
         fdata = os.path.join(env.gen_dir, 'data-10m')
         curl = CurlClient(env=env)
-        url = f'https://{env.domain2}:{caddy.port}/curltest/put?id=[0-{count-1}]'
+        url = f'https://{env.domain2}:{caddy.port}/curltest/put'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
