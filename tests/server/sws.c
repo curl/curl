@@ -1898,7 +1898,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
 
 /* returns 1 if the connection should be serviced again immediately, 0 if there
    is no data waiting, or < 0 if it should be closed */
-static int service_connection(curl_socket_t *msgsock,
+static int service_connection(curl_socket_t msgsock,
                               struct sws_httprequest *req,
                               curl_socket_t listensock,
                               const char *connecthost,
@@ -1908,7 +1908,7 @@ static int service_connection(curl_socket_t *msgsock,
     return -1;
 
   while(!req->done_processing) {
-    int rc = sws_get_request(*msgsock, req);
+    int rc = sws_get_request(msgsock, req);
     if(rc <= 0) {
       /* Nothing further to read now, possibly because the socket was closed */
       return rc;
@@ -1928,7 +1928,7 @@ static int service_connection(curl_socket_t *msgsock,
     }
   }
 
-  sws_send_doc(*msgsock, req);
+  sws_send_doc(msgsock, req);
   if(got_exit_signal)
     return -1;
 
@@ -1948,7 +1948,7 @@ static int service_connection(curl_socket_t *msgsock,
       return 1;
     }
     else {
-      http_connect(msgsock, listensock, connecthost, req->connect_port,
+      http_connect(&msgsock, listensock, connecthost, req->connect_port,
                    keepalive_secs);
       return -1;
     }
@@ -2391,7 +2391,7 @@ static int test_sws(int argc, char *argv[])
 
         /* Service this connection until it has nothing available */
         do {
-          rc = service_connection(&all_sockets[socket_idx], req, sock,
+          rc = service_connection(all_sockets[socket_idx], req, sock,
                                   connecthost, keepalive_secs);
           if(got_exit_signal)
             goto sws_cleanup;
