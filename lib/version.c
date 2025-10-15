@@ -287,7 +287,8 @@ char *curl_version(void)
 #endif
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_GSSGNU
-  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s", GSS_VERSION);
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s",
+                 GSS_VERSION);
 #else
 #ifdef CURL_KRB5_VERSION
   curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
