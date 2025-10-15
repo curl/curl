@@ -152,7 +152,7 @@ class TestUpload:
             pytest.skip("h3 not supported")
         count = 1
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], data=indata, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
@@ -263,7 +263,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-100k')
         count = 1
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                           extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
@@ -281,7 +281,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?chunk_delay=2ms'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]&chunk_delay=2ms'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                           extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
@@ -299,7 +299,7 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 1
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-{count-1}]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
         r.check_stats(count=count, http_status=200, exitcode=0)
 
@@ -559,7 +559,7 @@ class TestUpload:
         max_upload = 128 * 1024
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?'\
-            f'max_upload={max_upload}'
+            f'id=[0-{count-1}]&max_upload={max_upload}'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                           extra_args=['--trace-config', 'all'])
         r.check_stats(count=count, http_status=413, exitcode=0)
@@ -598,7 +598,7 @@ class TestUpload:
         up_len = 100 * 1024
         speed_limit = 50 * 1024
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
                           with_headers=True, extra_args=[
             '--limit-rate', f'{speed_limit}'
@@ -632,8 +632,8 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-1m+')
         read_delay = 1
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'\
-            f'?read_delay={read_delay}s'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'\
+            f'&read_delay={read_delay}s'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
             '--expect100-timeout', f'{read_delay+1}'
         ])
@@ -645,8 +645,8 @@ class TestUpload:
         fdata = os.path.join(env.gen_dir, 'data-1m+')
         read_delay = 2
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put'\
-            f'?read_delay={read_delay}s'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?id=[0-0]'\
+            f'&read_delay={read_delay}s'
         r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto, extra_args=[
             '--expect100-timeout', f'{read_delay-1}'
         ])
