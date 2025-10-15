@@ -216,6 +216,9 @@ char *curl_version(void)
 #ifdef USE_GSASL
   char gsasl_buf[30];
 #endif
+#ifdef HAVE_GSSAPI
+  char gss_buf[30];
+#endif
 #ifdef USE_OPENLDAP
   char ldap_buf[30];
 #endif
@@ -283,19 +286,17 @@ char *curl_version(void)
   src[i++] = gsasl_buf;
 #endif
 #ifdef HAVE_GSSAPI
-  {
-    char ver[30];
-# ifdef HAVE_GSSGNU
-    curl_msnprintf(ver, sizeof(ver), "libgss/%s", GSS_VERSION);
-# else
-#   ifdef CURL_KRB5_VERSION
-    curl_msnprintf(ver, sizeof(ver), "MIT-Kerberos/%s", CURL_KRB5_VERSION);
-#   else
-    curl_msnprintf(ver, sizeof(ver), "MIT-Kerberos");
-#   endif
-# endif
-    src[i++] = ver;
-  }
+#ifdef HAVE_GSSGNU
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s", GSS_VERSION);
+#else
+#ifdef CURL_KRB5_VERSION
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "MIT-Kerberos/%s",
+                 CURL_KRB5_VERSION);
+#else
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "MIT-Kerberos");
+#endif /* HAVE_GSSGNU */
+#endif /* HAVE_GSSAPI */
+  src[i++] = gss_buf;
 #endif
 #ifdef USE_OPENLDAP
   oldap_version(ldap_buf, sizeof(ldap_buf));

@@ -318,6 +318,9 @@
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
+/* MIT Kerberos version */
+#cmakedefine CURL_KRB5_VERSION ${CURL_KRB5_VERSION}
+
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 

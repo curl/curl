@@ -1442,6 +1442,8 @@ if(CURL_USE_GSSAPI)
 
     if(GSS_FLAVOUR STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
+    elseif(GSS_VERSION)  # MIT
+      set(CURL_KRB5_VERSION "\"${GSS_VERSION}\"")
     endif()
   else()
     message(WARNING "GSSAPI has been requested, but no supporting libraries found. Skipping.")
