@@ -302,13 +302,11 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
 
   if(data->state.async.done) {
     *dns = data->state.async.dns;
-    return ares->result;
+    return CURLE_OK;
   }
 
-  if(Curl_ares_perform(ares->channel, 0) < 0) {
-    result = CURLE_UNRECOVERABLE_POLL;
-    goto out;
-  }
+  if(Curl_ares_perform(ares->channel, 0) < 0)
+    return CURLE_UNRECOVERABLE_POLL;
 
 #ifndef HAVE_CARES_GETADDRINFO
   /* Now that we have checked for any last minute results above, see if there
@@ -373,9 +371,6 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
                  result, *dns ? "" : "not ");
     async_ares_cleanup(data);
   }
-
-out:
-  ares->result = result;
   return result;
 }
 
