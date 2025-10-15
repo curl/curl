@@ -117,6 +117,7 @@ static SYSTEMTIME LOCALTime;
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
+
 static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
@@ -124,7 +125,6 @@ static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
   return nmemb * size;
 }
 
-/* Remember: do not assume headers are passed on null terminated! */
 static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
@@ -135,22 +135,18 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   if(ShowAllHeader == 1)
     fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
-  if((nmemb >= 5) && !strncmp((char *)ptr, "Date:", 5)) {
+  if(strncmp((char *)ptr, "Date:", 5) == 0) {
     if(ShowAllHeader == 0)
       fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
     if(AutoSyncTime == 1) {
-      int RetVal = 0;
-      char *field = ptr;
+      int RetVal;
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      if(nmemb && (field[nmemb] == '\n')) {
-        field[nmemb] = 0; /* null terminated */
-        RetVal = sscanf(field, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
-                        TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                        &SYSTime.wHour, &SYSTime.wMinute,
-                        &SYSTime.wSecond);
-      }
+      RetVal = sscanf((char *)ptr, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
+                      TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                      &SYSTime.wHour, &SYSTime.wMinute,
+                      &SYSTime.wSecond);
 
       if(RetVal == 7) {
         int i;
@@ -169,7 +165,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
     }
   }
 
-  if((nmemb >= 12) && !strncmp((char *)ptr, "X-Cache: HIT", 12)) {
+  if(strncmp((char *)ptr, "X-Cache: HIT", 12) == 0) {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
@@ -255,7 +251,7 @@ int main(int argc, char *argv[])
   conf_init(conf);
 
   if(argc > 1) {
-    int OptionIndex = 1;
+    int OptionIndex = 0;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
