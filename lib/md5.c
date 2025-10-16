@@ -50,7 +50,7 @@
 
 #ifdef USE_MBEDTLS
   #include <psa/crypto_config.h>
-  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5
+  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
     #define USE_MBEDTLS_MD5
   #endif
 #endif

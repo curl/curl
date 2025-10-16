@@ -34,7 +34,7 @@
 
 #ifdef USE_MBEDTLS
   #include <psa/crypto_config.h>
-  #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
+  #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
     #define USE_MBEDTLS_SHA256
   #endif
 #endif
