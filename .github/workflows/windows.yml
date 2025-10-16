@@ -130,7 +130,7 @@ jobs:
             make -C bld V=1 install
           fi
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
           PATH=/usr/bin
@@ -332,7 +332,7 @@ jobs:
             make -C bld V=1 install
           fi
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -547,7 +547,7 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
@@ -907,7 +907,7 @@ jobs:
         timeout-minutes: 5
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
           /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;

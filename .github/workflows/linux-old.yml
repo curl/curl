@@ -90,7 +90,7 @@ jobs:
       - name: 'cmake build-only build'
         run: VERBOSE=1 make -C bld-1 install
 
-      - name: 'cmake build-only curl version'
+      - name: 'cmake build-only curl -V'
         run: bld-1/src/curl --disable --version
 
       - name: 'cmake build-only configure log'
@@ -124,7 +124,7 @@ jobs:
       - name: 'cmake build'
         run: make -C bld-cares
 
-      - name: 'cmake curl version'
+      - name: 'cmake curl -V'
         run: bld-cares/src/curl --disable --version
 
       - name: 'cmake install'
@@ -162,7 +162,7 @@ jobs:
       - name: 'autotools build'
         run: make -C bld-am
 
-      - name: 'autotools curl version'
+      - name: 'autotools curl -V'
         run: bld-am/src/curl --disable --version
 
       - name: 'autotools install'
