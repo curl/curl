@@ -1308,9 +1308,11 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_safefree(backend->ciphersuites);
     mbedtls_ssl_config_free(&backend->config);
     mbedtls_ssl_free(&backend->ssl);
-#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
+#ifdef CURL_MBEDTLS_DRBG
     mbedtls_ctr_drbg_free(&backend->ctr_drbg);
+#ifndef HAS_THREADING_SUPPORT
     mbedtls_entropy_free(&backend->entropy);
+#endif
 #endif
     backend->initialized = FALSE;
   }
