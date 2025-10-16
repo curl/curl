@@ -64,6 +64,7 @@ static CURLcode test_lib3036(const char *URL)
   CURL *easy;
   struct t3036_ctx ctx;
 
+  memset(&ctx, 0, sizeof(ctx));
   curl_global_init(CURL_GLOBAL_ALL);
 
   easy = curl_easy_init();
