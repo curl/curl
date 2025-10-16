@@ -43,15 +43,7 @@
 #include <mbedtls/x509.h>
 #include <mbedtls/psa_util.h>
 
-#if MBEDTLS_VERSION_NUMBER < 0x04000000
-#define CURL_MBEDTLS_DRBG
-#endif
-
 #include <mbedtls/error.h>
-#ifdef CURL_MBEDTLS_DRBG
-#include <mbedtls/entropy.h>
-#include <mbedtls/ctr_drbg.h>
-#endif
 #ifdef MBEDTLS_DEBUG
 #include <mbedtls/debug.h>
 #endif
@@ -68,7 +60,6 @@
 #include "../connect.h" /* for the connect timeout */
 #include "../select.h"
 #include "../multiif.h"
-#include "mbedtls_threadlock.h"
 #include "../strdup.h"
 
 /* The last 2 #include files should be in this order */
@@ -81,10 +72,6 @@
 #endif
 
 struct mbed_ssl_backend_data {
-#ifdef CURL_MBEDTLS_DRBG
-  mbedtls_ctr_drbg_context ctr_drbg;
-  mbedtls_entropy_context entropy;
-#endif
   mbedtls_ssl_context ssl;
   mbedtls_x509_crt cacert;
   mbedtls_x509_crt clicert;
@@ -111,46 +98,6 @@ struct mbed_ssl_backend_data {
 #ifndef MBEDTLS_ERROR_C
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
-
-#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
-static mbedtls_entropy_context ts_entropy;
-
-static int entropy_init_initialized = 0;
-
-static void entropy_init_mutex(mbedtls_entropy_context *ctx)
-{
-  /* lock 0 = entropy_init_mutex() */
-  Curl_mbedtlsthreadlock_lock_function(0);
-  if(entropy_init_initialized == 0) {
-    mbedtls_entropy_init(ctx);
-    entropy_init_initialized = 1;
-  }
-  Curl_mbedtlsthreadlock_unlock_function(0);
-}
-
-static void entropy_cleanup_mutex(mbedtls_entropy_context *ctx)
-{
-  /* lock 0 = use same lock as init */
-  Curl_mbedtlsthreadlock_lock_function(0);
-  if(entropy_init_initialized == 1) {
-    mbedtls_entropy_free(ctx);
-    entropy_init_initialized = 0;
-  }
-  Curl_mbedtlsthreadlock_unlock_function(0);
-}
-
-static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
-{
-  int ret;
-  /* lock 1 = entropy_func_mutex() */
-  Curl_mbedtlsthreadlock_lock_function(1);
-  ret = mbedtls_entropy_func(data, output, len);
-  Curl_mbedtlsthreadlock_unlock_function(1);
-
-  return ret;
-}
-
-#endif /* CURL_MBEDTLS_DRBG && HAS_THREADING_SUPPORT */
 
 #ifdef MBEDTLS_DEBUG
 static void mbed_debug(void *context, int level, const char *f_name,
@@ -543,33 +490,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "Not supported SSL version");
     return CURLE_NOT_BUILT_IN;
   }
-
-#ifdef CURL_MBEDTLS_DRBG
-#ifdef HAS_THREADING_SUPPORT
-  mbedtls_ctr_drbg_init(&backend->ctr_drbg);
-
-  ret = mbedtls_ctr_drbg_seed(&backend->ctr_drbg, entropy_func_mutex,
-                              &ts_entropy, NULL, 0);
-  if(ret) {
-    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
-          -ret, errorbuf);
-    return CURLE_FAILED_INIT;
-  }
-#else
-  mbedtls_entropy_init(&backend->entropy);
-  mbedtls_ctr_drbg_init(&backend->ctr_drbg);
-
-  ret = mbedtls_ctr_drbg_seed(&backend->ctr_drbg, mbedtls_entropy_func,
-                              &backend->entropy, NULL, 0);
-  if(ret) {
-    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
-          -ret, errorbuf);
-    return CURLE_FAILED_INIT;
-  }
-#endif /* HAS_THREADING_SUPPORT */
-#endif /* CURL_MBEDTLS_DRBG */
 
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
@@ -1280,10 +1200,6 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_safefree(backend->ciphersuites);
     mbedtls_ssl_config_free(&backend->config);
     mbedtls_ssl_free(&backend->ssl);
-#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
-    mbedtls_ctr_drbg_free(&backend->ctr_drbg);
-    mbedtls_entropy_free(&backend->entropy);
-#endif
     backend->initialized = FALSE;
   }
 }
@@ -1354,40 +1270,12 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#if 1
   int ret;
   (void)data;
 
   ret = mbedtls_psa_get_random(MBEDTLS_PSA_RANDOM_STATE, entropy, length);
 
   return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
-#elif defined(CURL_MBEDTLS_DRBG)
-  int ret;
-  mbedtls_entropy_context ctr_entropy;
-  mbedtls_ctr_drbg_context ctr_drbg;
-  mbedtls_entropy_init(&ctr_entropy);
-  mbedtls_ctr_drbg_init(&ctr_drbg);
-  (void)data;
-
-  ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
-                              &ctr_entropy, NULL, 0);
-
-  if(!ret)
-    ret = mbedtls_ctr_drbg_random(&ctr_drbg, entropy, length);
-
-  mbedtls_ctr_drbg_free(&ctr_drbg);
-  mbedtls_entropy_free(&ctr_entropy);
-
-  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
-#elif defined(MBEDTLS_HAVEGE_C)
-  mbedtls_havege_state hs;
-  mbedtls_havege_init(&hs);
-  mbedtls_havege_random(&hs, entropy, length);
-  mbedtls_havege_free(&hs);
-  return CURLE_OK;
-#else
-  return CURLE_NOT_BUILT_IN;
-#endif
 }
 
 static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
@@ -1447,20 +1335,11 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
  */
 static int mbedtls_init(void)
 {
-  if(!Curl_mbedtlsthreadlock_thread_setup())
-    return 0;
-#ifdef HAS_THREADING_SUPPORT
-  entropy_init_mutex(&ts_entropy);
-#endif
   return 1;
 }
 
 static void mbedtls_cleanup(void)
 {
-#ifdef HAS_THREADING_SUPPORT
-  entropy_cleanup_mutex(&ts_entropy);
-#endif
-  (void)Curl_mbedtlsthreadlock_thread_cleanup();
 }
 
 static bool mbedtls_data_pending(struct Curl_cfilter *cf,
