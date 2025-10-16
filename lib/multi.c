@@ -430,16 +430,20 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   if(!GOOD_EASY_HANDLE(data))
     return CURLM_BAD_EASY_HANDLE;
 
-  /* Prevent users from adding same easy handle more than once and prevent
-     adding to more than one multi stack */
-  if(data->multi)
-    return CURLM_ADDED_ALREADY;
-
-  if(multi->in_callback)
-    return CURLM_RECURSIVE_API_CALL;
-
   if(!CURL_TGUARD_MULTI_ENTER(multi))
     return CURLM_RECURSIVE_API_CALL; /* replace with uniq one */
+
+  /* Prevent users from adding same easy handle more than once and prevent
+     adding to more than one multi stack */
+  if(data->multi) {
+    rc = CURLM_ADDED_ALREADY;
+    goto out;
+  }
+
+  if(multi->in_callback) {
+    rc = CURLM_RECURSIVE_API_CALL;
+    goto out;
+  }
 
   if(multi->dead) {
     /* a "dead" handle cannot get added transfers while any existing easy
@@ -447,8 +451,10 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
        fine to start over and unmark the "deadness" of this handle.
        This means only the admin handle MUST be present. */
     if((Curl_uint_tbl_count(&multi->xfers) != 1) ||
-       !Curl_uint_tbl_contains(&multi->xfers, 0))
-      return CURLM_ABORTED_BY_CALLBACK;
+       !Curl_uint_tbl_contains(&multi->xfers, 0)) {
+      rc = CURLM_ABORTED_BY_CALLBACK;
+      goto out;
+    }
     multi->dead = FALSE;
     Curl_uint_bset_clear(&multi->process);
     Curl_uint_bset_clear(&multi->dirty);

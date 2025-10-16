@@ -66,6 +66,7 @@ void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
 
+/* enabled by default for now */
 #define USE_THREAD_GUARD
 
 #endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
@@ -86,8 +87,6 @@ void Curl_tguard_destroy(struct curl_tguard *tguard);
 /* Return FALSE if called from another thread during an active call.
  * Otherwise, remember the calling thread. */
 bool Curl_tguard_enter(struct curl_tguard *tguard);
-/* Check if, when tguard is in a call, call thread matches */
-bool Curl_tguard_check(struct curl_tguard *tguard);
 /* End a recorded thread call */
 void Curl_tguard_leave(struct curl_tguard *tguard);
 

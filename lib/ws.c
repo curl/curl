@@ -1535,12 +1535,13 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
   struct websocket *ws;
   struct ws_collect ctx;
   CURLcode result = CURLE_OK;
+  CURL_TGUARD_VAR(guarded);
 
   *nread = 0;
   *metap = NULL;
   if(!GOOD_EASY_HANDLE(data) || (buflen && !buffer))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(!CURL_TGUARD_EASY_ENTER(data))
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
     return CURLE_FOREIGN_THREAD;
 
   conn = data->conn;
@@ -1628,7 +1629,7 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
       (void)ws_flush(data, ws, Curl_is_in_callback(data));
   }
 out:
-  CURL_TGUARD_EASY_LEAVE(data);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return result;
 }
 
@@ -1780,10 +1781,11 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
   struct Curl_easy *data = d;
   size_t ndummy;
   size_t *pnsent = sent ? sent : &ndummy;
+  CURL_TGUARD_VAR(guarded);
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  if(!CURL_TGUARD_EASY_ENTER(data))
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
     return CURLE_FOREIGN_THREAD;
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
               ", flags=%x), raw=%d",
@@ -1845,7 +1847,7 @@ out:
               ", flags=%x, raw=%d) -> %d, %zu",
               buflen, fragsize, flags, data->set.ws_raw_mode, result,
               *pnsent);
-  CURL_TGUARD_EASY_LEAVE(data);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return result;
 }
 

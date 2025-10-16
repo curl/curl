@@ -172,34 +172,17 @@ bool Curl_tguard_enter(struct curl_tguard *tguard)
       accepted = TRUE;
     }
     else {
-      DEBUGASSERT(0);
       accepted = FALSE;
     }
   }
   else {
     /* No call in progress, record the calling thread */
-    DEBUGASSERT(!tguard->depth);
     tguard->tid = curl_thread_self();
     tguard->depth = 1;
     accepted = TRUE;
   }
   Curl_mutex_release(&tguard->mutx);
   return accepted;
-}
-
-bool Curl_tguard_check(struct curl_tguard *tguard)
-{
-  DEBUGASSERT(tguard->initialised);
-  Curl_mutex_acquire(&tguard->mutx);
-  if(tguard->depth) {
-    /* Called again with a call in progress. Is it from the same thread? */
-    if(!curl_thread_equal(tguard->tid, curl_thread_self())) {
-      Curl_mutex_release(&tguard->mutx);
-      return FALSE;
-    }
-  }
-  Curl_mutex_release(&tguard->mutx);
-  return TRUE;
 }
 
 void Curl_tguard_leave(struct curl_tguard *tguard)

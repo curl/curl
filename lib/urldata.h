@@ -1706,25 +1706,21 @@ struct Curl_easy {
 #ifdef USE_THREAD_GUARD
 #define CURL_TGUARD_MULTI_INIT(m)    Curl_tguard_init(&(m)->tguard)
 #define CURL_TGUARD_MULTI_DESTROY(m) Curl_tguard_destroy(&(m)->tguard)
-#define CURL_TGUARD_MULTI_ENTER(m)   Curl_tguard_enter(&(m)->tguard)
-#define CURL_TGUARD_MULTI_LEAVE(m)   Curl_tguard_leave(&(m)->tguard)
-  #if 1
-#define CURL_TGUARD_EASY_ENTER(d)    \
-  ((d)->multi ? Curl_tguard_enter(&(d)->multi->tguard) : TRUE)
-#define CURL_TGUARD_EASY_LEAVE(d)    \
-  ((d)->multi ? Curl_tguard_leave(&(d)->multi->tguard) : (void)0)
-  #else
-#define CURL_TGUARD_EASY_ENTER(d)    \
-  ((d)->multi ? Curl_tguard_check(&(d)->multi->tguard) : TRUE)
-#define CURL_TGUARD_EASY_LEAVE(d)    Curl_nop_stmt
-  #endif
+#define CURL_TGUARD_MULTI_ENTER(m)   (!(m) || Curl_tguard_enter(&(m)->tguard))
+#define CURL_TGUARD_MULTI_LEAVE(m)   \
+        ((m) ? Curl_tguard_leave(&(m)->tguard) : (void)0)
+#define CURL_TGUARD_VAR(x)           struct Curl_multi *x = NULL
+#define CURL_TGUARD_EASY_ENTER(d, m)  \
+        ((d)->multi ? (m = (d)->multi, CURL_TGUARD_MULTI_ENTER(m)) : TRUE)
+#define CURL_TGUARD_EASY_LEAVE(d, m)  CURL_TGUARD_MULTI_LEAVE(m)
 #else
 #define CURL_TGUARD_MULTI_INIT(m)    Curl_nop_stmt
 #define CURL_TGUARD_MULTI_DESTROY(m) Curl_nop_stmt
 #define CURL_TGUARD_MULTI_ENTER(m)   TRUE
 #define CURL_TGUARD_MULTI_LEAVE(m)   Curl_nop_stmt
-#define CURL_TGUARD_EASY_ENTER(d)    TRUE
-#define CURL_TGUARD_EASY_LEAVE(d)    Curl_nop_stmt
+#define CURL_TGUARD_VAR(x)
+#define CURL_TGUARD_EASY_ENTER(d, m) TRUE
+#define CURL_TGUARD_EASY_LEAVE(d, m) Curl_nop_stmt
 #endif /* !USE_THREAD_GUARD */
 
 #define LIBCURL_NAME "libcurl"
