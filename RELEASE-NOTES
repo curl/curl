@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3517
+ Contributors:                 3519
 
 This release includes the following changes:
 
@@ -48,6 +48,7 @@ This release includes the following bugfixes:
  o cf-socket: tweak a memcpy() to read better [177]
  o cf-socket: use the right byte order for ports in bindlocal [61]
  o cfilter: unlink and discard [46]
+ o checksrc: allow disabling warnings on FIXME/TODO comments [324]
  o checksrc: catch banned functions when preceded by `(` [146]
  o checksrc: fix possible endless loop when detecting `BANNEDFUNC` [149]
  o checksrc: fix possible endless loops/errors in the banned function logic [220]
@@ -73,6 +74,7 @@ This release includes the following bugfixes:
  o cmdline-opts/_PROGRESS.md: explain the suffixes [154]
  o configure: add "-mt" for pthread support on HP-UX [52]
  o conn: fix hostname move on connection reuse [272]
+ o connect: remove redundant condition in shutdown start [289]
  o cookie: avoid saving a cookie file if no transfer was done [11]
  o cpool: make bundle->dest an array; fix UB [218]
  o curl_easy_getinfo: error code on NULL arg [2]
@@ -102,11 +104,15 @@ This release includes the following bugfixes:
  o examples/synctime: fix null termination assumptions [297]
  o examples/synctime: make the sscanf not overflow the local buffer [252]
  o examples/usercertinmem: avoid stripping const [247]
+ o examples: call `curl_global_cleanup()` where missing [323]
+ o examples: check more errors, fix cleanups, scope variables [318]
  o examples: drop unused `curl/mprintf.h` includes [224]
  o examples: fix build issues in 'complicated' examples [243]
  o examples: fix two build issues surfaced with WinCE [223]
  o examples: fix two issues found by CodeQL [35]
  o examples: fix two more cases of `stat()` TOCTOU [147]
+ o examples: improve global init, error checks and returning errors [321]
+ o examples: return `curl_easy_perform()` results [322]
  o form.md: drop reference to MANUAL [178]
  o ftp: add extra buffer length check [195]
  o ftp: fix ftp_do_more returning with *completep unset [122]
@@ -114,6 +120,7 @@ This release includes the following bugfixes:
  o ftp: fix the 213 scanner memchr buffer limit argument [196]
  o ftp: improve fragile check for first digit > 3 [194]
  o ftp: remove misleading comments [193]
+ o ftp: replace strstr() in ;type= handling [313]
  o ftp: simplify the 150/126 size scanner [288]
  o gnutls: check conversion of peer cert chain [275]
  o gtls: avoid potential use of uninitialized variable in trace output [83]
@@ -123,6 +130,7 @@ This release includes the following bugfixes:
  o http2: cleanup pushed newhandle on fail [260]
  o http2: ingress handling edge cases [259]
  o http: handle user-defined connection headers [165]
+ o http: look for trailing 'type=' in ftp:// without strstr [315]
  o http: make Content-Length parser more WHATWG [183]
  o httpsrr: free old pointers when storing new [57]
  o INSTALL-CMAKE.md: document useful build targets [215]
@@ -143,6 +151,7 @@ This release includes the following bugfixes:
  o lib: fix build error and compiler warnings with verbose strings disabled [173]
  o lib: remove personal names from comments [168]
  o lib: SSL connection reuse [301]
+ o lib: stop NULL-checking conn->passwd and ->user [309]
  o lib: upgrade/multiplex handling [136]
  o libcurl-multi.md: added curl_multi_get_offt mention [53]
  o libcurl-security.md: mention long-running connections [6]
@@ -212,6 +221,7 @@ This release includes the following bugfixes:
  o pytest: skip specific tests for no-verbose builds [171]
  o quic: fix min TLS version handling [14]
  o quic: ignore EMSGSIZE on receive [4]
+ o quic: remove data_idle handling [311]
  o quiche: fix possible leaks on teardown [205]
  o quiche: fix verbose message when ip quadruple cannot be obtained. [128]
  o quiche: handle tls fail correctly [266]
@@ -264,6 +274,7 @@ This release includes the following bugfixes:
  o tests/server: drop pointless memory allocation overrides [219]
  o tests/server: drop unsafe `open()` override in signal handler (Windows) [151]
  o tftp: check and act on tftp_set_timeouts() returning error [38]
+ o tftp: check for trailing ";mode=" in URL without strstr [312]
  o tftp: default timeout per block is now 15 seconds [156]
  o tftp: error requests for blank filenames [296]
  o tftp: handle tftp_multi_statemach() return code [65]
@@ -293,13 +304,17 @@ This release includes the following bugfixes:
  o tool_operate: improve wording in retry message [37]
  o tool_operate: keep failed partial download for retry auto-resume [210]
  o tool_operate: keep the progress meter for --out-null [33]
+ o tool_operate: retry on HTTP response codes 522 and 524 [317]
  o tool_progress: handle possible integer overflows [164]
  o tool_progress: make max5data() use an algorithm [170]
  o transfer: avoid busy loop with tiny speed limit [100]
+ o transfer: reset retry count on each request [310]
  o unit1323: sync time types and printf masks, drop casts [211]
  o unit1664: drop casts, expand masks to full values [221]
  o url: make Curl_init_userdefined return void [213]
  o urldata: FILE is not a list-only protocol [9]
+ o urldata: make 'retrycount' a single byte [308]
+ o urldata: make redirect counter 16 bit [295]
  o vauth/digest: improve the digest parser [203]
  o vquic: fix idle-timeout checks (ms<-->ns), 64-bit log & honor 0=no-timeout [249]
  o vquic: handling of io improvements [239]
@@ -316,6 +331,7 @@ This release includes the following bugfixes:
  o wolfssl: no double get_error() detail [188]
  o ws: clarify an error message [125]
  o ws: fix some edge cases [274]
+ o ws: fix type conversion check [316]
  o ws: reject curl_ws_recv called with NULL buffer with a buflen [118]
 
 This release includes the following known bugs:
@@ -343,16 +359,16 @@ advice from friends like these:
   Adam Light, Alice Lee Poetics, Andrei Kurushin, Andrew Kirillov,
   Andrew Olsen, BobodevMm on github, Christian Schmitz, Dan Fandrich,
   Daniel Stenberg, Daniel Terhorst-North, dependabot[bot],
-  divinity76 on github, Emilio Pozuelo Monfort, Ethan Everett,
+  divinity76 on github, Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
   Evgeny Grin (Karlson2k), fds242 on github, Harry Sintonen, Howard Chu,
   Ignat Loskutov, Javier Blazquez, Jicea, jmaggard10 on github,
   Johannes Schindelin, Joseph Birr-Pixton, Joshua Rogers, kapsiR on github,
   kuchara on github, Marcel Raad, Michael Osipov, Michał Petryka,
   Mitchell Blank Jr, Mohamed Daahir, Nir Azkiel, Patrick Monnerat,
-  Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github, Sakthi SK,
-  Samuel Dionne-Riel, Samuel Henrique, Stanislav Fort, Stefan Eissing,
-  tkzv on github, Viktor Szakats
-  (45 contributors)
+  plv1313 on github, Pocs Norbert, Ray Satiro, renovate[bot],
+  rinsuki on github, Sakthi SK, Samuel Dionne-Riel, Samuel Henrique,
+  Stanislav Fort, Stefan Eissing, tkzv on github, Viktor Szakats
+  (47 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -644,11 +660,13 @@ References to bug reports and discussions on issues:
  [286] = https://curl.se/bug/?i=18986
  [287] = https://curl.se/bug/?i=18985
  [288] = https://curl.se/bug/?i=18984
+ [289] = https://curl.se/bug/?i=19079
  [290] = https://curl.se/bug/?i=19042
  [291] = https://curl.se/bug/?i=19040
  [292] = https://curl.se/bug/?i=19039
  [293] = https://curl.se/bug/?i=19029
  [294] = https://curl.se/bug/?i=19035
+ [295] = https://curl.se/bug/?i=19072
  [296] = https://curl.se/bug/?i=19033
  [297] = https://curl.se/bug/?i=19032
  [298] = https://curl.se/bug/?i=19031
@@ -661,3 +679,17 @@ References to bug reports and discussions on issues:
  [305] = https://curl.se/bug/?i=19026
  [306] = https://curl.se/bug/?i=19014
  [307] = https://curl.se/bug/?i=18996
+ [308] = https://curl.se/bug/?i=19071
+ [309] = https://curl.se/bug/?i=19059
+ [310] = https://curl.se/bug/?i=18926
+ [311] = https://curl.se/bug/?i=19060
+ [312] = https://curl.se/bug/?i=19070
+ [313] = https://curl.se/bug/?i=19069
+ [315] = https://curl.se/bug/?i=19065
+ [316] = https://curl.se/bug/?i=19017
+ [317] = https://curl.se/bug/?i=16143
+ [318] = https://curl.se/bug/?i=19055
+ [321] = https://curl.se/bug/?i=19053
+ [322] = https://curl.se/bug/?i=19052
+ [323] = https://curl.se/bug/?i=19051
+ [324] = https://curl.se/bug/?i=19048
