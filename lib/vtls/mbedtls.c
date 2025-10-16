@@ -803,7 +803,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ret != CURLE_OK)
     return ret;
 
-#if MBEDTLS_VERSION_NUMBER < 0x04000000
+#ifdef CURL_MBEDTLS_DRBG
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
 #endif
