@@ -49,6 +49,8 @@ static CURLcode test_lib1308(const char *URL)
   size_t total_size = 0;
   char buffer[] = "test buffer";
 
+  global_init(CURL_GLOBAL_ALL);
+
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
                     CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
   t1308_fail_unless(rc == 0, "curl_formadd returned error");
@@ -89,6 +91,8 @@ static CURLcode test_lib1308(const char *URL)
   t1308_fail_unless(total_size == 899, "curl_formget got wrong size back");
 
   curl_formfree(post);
+
+  curl_global_cleanup();
 
   return errorcount ? TEST_ERR_FAILURE : CURLE_OK;
 }
