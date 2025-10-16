@@ -1703,7 +1703,7 @@ struct Curl_easy {
                                      valid after a client has asked for it */
 };
 
-#ifdef USE_THREAD_GUARD
+#ifdef USE_THREAD_GUARDS
 #define CURL_TGUARD_MULTI_INIT(m)    Curl_tguard_init(&(m)->tguard)
 #define CURL_TGUARD_MULTI_DESTROY(m) Curl_tguard_destroy(&(m)->tguard)
 #define CURL_TGUARD_MULTI_ENTER(m)   (!(m) || Curl_tguard_enter(&(m)->tguard))
@@ -1721,7 +1721,7 @@ struct Curl_easy {
 #define CURL_TGUARD_VAR(x)
 #define CURL_TGUARD_EASY_ENTER(d, m) TRUE
 #define CURL_TGUARD_EASY_LEAVE(d, m) Curl_nop_stmt
-#endif /* !USE_THREAD_GUARD */
+#endif /* !USE_THREAD_GUARDS */
 
 #define LIBCURL_NAME "libcurl"
 

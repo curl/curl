@@ -87,7 +87,7 @@ struct Curl_multi {
   /* First a simple identifier to easier detect if a user mix up
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
   unsigned int magic;
-#ifdef USE_THREAD_GUARD
+#ifdef USE_THREAD_GUARDS
   struct curl_tguard tguard;
 #endif
 

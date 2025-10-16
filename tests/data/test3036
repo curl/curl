@@ -22,6 +22,7 @@ run 1: foobar and so on fun!
 <client>
 <features>
 SSL
+thread-guards
 </features>
 <server>
 https

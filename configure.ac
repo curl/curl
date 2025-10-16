@@ -283,6 +283,12 @@ AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verif
   OPT_APPLE_SECTRUST=$withval
 ])
 
+OPT_THREAD_GUARDS=no
+AC_ARG_WITH(thread-guards,dnl
+AS_HELP_STRING([--with-thread-guards],[enable guards against concurrent thread use]),[
+  OPT_THREAD_GUARDS=$withval
+])
+
 AC_PATH_PROG(PERL, perl,, $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
 AC_SUBST(PERL)
 AM_CONDITIONAL(PERL, test -n "$PERL")
@@ -4374,6 +4380,14 @@ if test "$want_threaded_resolver" != "no" -a "x$USE_THREADS_POSIX" != "x1" -a "x
   AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
 fi
 
+if test "x$OPT_THREAD_GUARDS" = xyes; then
+  if test "x$USE_THREADS_POSIX" != "x1" -a "x$USE_THREADS_WIN32" != "x1"; then
+    AC_MSG_ERROR([Thread guards are only available with POSXI or WIN32 threads])
+  fi
+  AC_DEFINE(USE_THREAD_GUARDS, 1, [enable thread guards])
+  THREAD_GUARDS_ENABLED=1
+fi
+
 AC_CHECK_HEADER(dirent.h,
   [ AC_DEFINE(HAVE_DIRENT_H, 1, [if you have <dirent.h>])
     AC_CHECK_FUNC(opendir, AC_DEFINE(HAVE_OPENDIR, 1, [if you have opendir]) )
@@ -5321,6 +5335,10 @@ if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
      "$curl_win32_file_api" = "win32_large_files"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES Largefile"
   fi
+fi
+
+if test "x$THREAD_GUARDS_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES thread-guards"
 fi
 
 if test "$tst_atomic" = "yes"; then

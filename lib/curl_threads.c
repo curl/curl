@@ -142,7 +142,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #endif /* USE_THREADS_* */
 
-#ifdef USE_THREAD_GUARD
+#ifdef USE_THREAD_GUARDS
 
 void Curl_tguard_init(struct curl_tguard *tguard)
 {
@@ -196,4 +196,4 @@ void Curl_tguard_leave(struct curl_tguard *tguard)
   Curl_mutex_release(&tguard->mutx);
 }
 
-#endif /* USE_THREAD_GUARD */
+#endif /* USE_THREAD_GUARDS */

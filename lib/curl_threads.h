@@ -66,12 +66,10 @@ void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
 
-/* enabled by default for now */
-#define USE_THREAD_GUARD
-
 #endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
 
-#ifdef USE_THREAD_GUARD
+
+#ifdef USE_THREAD_GUARDS
 
 struct Curl_easy;
 
@@ -90,6 +88,6 @@ bool Curl_tguard_enter(struct curl_tguard *tguard);
 /* End a recorded thread call */
 void Curl_tguard_leave(struct curl_tguard *tguard);
 
-#endif /* USE_THREAD_GUARD */
+#endif /* USE_THREAD_GUARDS */
 
 #endif /* HEADER_CURL_THREADS_H */
