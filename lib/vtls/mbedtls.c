@@ -1434,7 +1434,7 @@ static int mbedtls_init(void)
 {
   if(!Curl_mbedtlsthreadlock_thread_setup())
     return 0;
-#ifdef HAS_THREADING_SUPPORT
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
   entropy_init_mutex(&ts_entropy);
 #endif
   return 1;
@@ -1442,7 +1442,7 @@ static int mbedtls_init(void)
 
 static void mbedtls_cleanup(void)
 {
-#ifdef HAS_THREADING_SUPPORT
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
   entropy_cleanup_mutex(&ts_entropy);
 #endif
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
