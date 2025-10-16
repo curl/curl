@@ -141,7 +141,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 static char *leakpointer;
 #endif
 
-CURLcode Curl_crypto_init(void)
+static CURLcode crypto_init(void)
 {
 #ifdef USE_MBEDTLS
   if(psa_crypto_init() != PSA_SUCCESS)
@@ -150,7 +150,7 @@ CURLcode Curl_crypto_init(void)
   return CURLE_OK;
 }
 
-void Curl_crypto_cleanup(void)
+static void crypto_cleanup(void)
 {
 #ifdef USE_MBEDTLS
   mbedtls_psa_crypto_free();
@@ -180,7 +180,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     goto fail;
   }
 
-  if(Curl_crypto_init()) {
+  if(crypto_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_crypto_init failed\n"));
     goto fail;
   }
@@ -323,7 +323,7 @@ void curl_global_cleanup(void)
 
   Curl_ssh_cleanup();
 
-  Curl_crypto_cleanup();
+  crypto_cleanup();
 
 #ifdef DEBUGBUILD
   free(leakpointer);
