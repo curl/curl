@@ -659,6 +659,17 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   /* Do not chase referrals. */
   ldap_set_option(li->ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF);
 
+  {
+    ber_len_t max = 256*1024;
+    Sockbuf *sb;
+    if(ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, (void **)&sb) ||
+       /* Set the maximum allowed size of an incoming message, which to
+          OpenLDAP means that it will malloc() memory up to this size. If not
+          set, there is no limit and we instead risk a malloc() failure. */
+       ber_sockbuf_ctrl(sb, LBER_SB_OPT_SET_MAX_INCOMING, &max))
+      return CURLE_FAILED_INIT;
+  }
+
 #ifdef USE_SSL
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = oldap_ssl_connect(data, OLDAP_SSL);
