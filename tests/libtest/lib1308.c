@@ -43,7 +43,8 @@ static CURLcode test_lib1308(const char *URL)
 {
   int errorcount = 0;
   CURLFORMcode rc;
-  int res = 0;
+  CURLcode res;
+  int formres = 0;
   struct curl_httppost *post = NULL;
   struct curl_httppost *last = NULL;
   size_t total_size = 0;
@@ -68,8 +69,8 @@ static CURLcode test_lib1308(const char *URL)
                     CURLFORM_PTRCONTENTS, buffer, CURLFORM_END);
   t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
-  res = curl_formget(post, &total_size, print_httppost_callback);
-  t1308_fail_unless(res == 0, "curl_formget returned error");
+  formres = curl_formget(post, &total_size, print_httppost_callback);
+  t1308_fail_unless(formres == 0, "curl_formget returned error");
 
   t1308_fail_unless(total_size == 518, "curl_formget got wrong size back");
 
@@ -85,9 +86,9 @@ static CURLcode test_lib1308(const char *URL)
                     CURLFORM_END);
   t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
-  res = curl_formget(post, &total_size, print_httppost_callback);
+  formres = curl_formget(post, &total_size, print_httppost_callback);
 
-  t1308_fail_unless(res == 0, "curl_formget returned error");
+  t1308_fail_unless(formres == 0, "curl_formget returned error");
   t1308_fail_unless(total_size == 899, "curl_formget got wrong size back");
 
   curl_formfree(post);
