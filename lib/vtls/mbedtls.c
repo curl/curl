@@ -42,8 +42,12 @@
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509.h>
 
-#include <mbedtls/error.h>
 #if MBEDTLS_VERSION_NUMBER < 0x04000000
+#define CURL_MBEDTLS_DRBG
+#endif
+
+#include <mbedtls/error.h>
+#ifdef CURL_MBEDTLS_DRBG
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #endif
@@ -76,8 +80,10 @@
 #endif
 
 struct mbed_ssl_backend_data {
+#ifdef CURL_MBEDTLS_DRBG
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_context entropy;
+#endif
   mbedtls_ssl_context ssl;
   mbedtls_x509_crt cacert;
   mbedtls_x509_crt clicert;
@@ -105,7 +111,7 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
-#ifdef HAS_THREADING_SUPPORT
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
 static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
@@ -143,7 +149,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
   return ret;
 }
 
-#endif /* HAS_THREADING_SUPPORT */
+#endif /* CURL_MBEDTLS_DRBG && HAS_THREADING_SUPPORT */
 
 #ifdef MBEDTLS_DEBUG
 static void mbed_debug(void *context, int level, const char *f_name,
@@ -537,6 +543,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_NOT_BUILT_IN;
   }
 
+#ifdef CURL_MBEDTLS_DRBG
 #ifdef HAS_THREADING_SUPPORT
   mbedtls_ctr_drbg_init(&backend->ctr_drbg);
 
@@ -561,6 +568,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_FAILED_INIT;
   }
 #endif /* HAS_THREADING_SUPPORT */
+#endif /* CURL_MBEDTLS_DRBG */
 
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
@@ -1271,10 +1279,10 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_safefree(backend->ciphersuites);
     mbedtls_ssl_config_free(&backend->config);
     mbedtls_ssl_free(&backend->ssl);
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
     mbedtls_ctr_drbg_free(&backend->ctr_drbg);
-#ifndef HAS_THREADING_SUPPORT
     mbedtls_entropy_free(&backend->entropy);
-#endif /* HAS_THREADING_SUPPORT */
+#endif
     backend->initialized = FALSE;
   }
 }
@@ -1345,7 +1353,7 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#ifdef MBEDTLS_CTR_DRBG_C
+#ifdef CURL_MBEDTLS_DRBG
   int ret;
   mbedtls_entropy_context ctr_entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
