@@ -1383,12 +1383,12 @@ static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
 #if MBEDTLS_VERSION_NUMBER >= 0x04000000
-  int ret;
+  psa_status_t status;
   (void)data;
 
-  ret = mbedtls_psa_get_random(MBEDTLS_PSA_RANDOM_STATE, entropy, length);
+  status = psa_generate_random(entropy, length);
 
-  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
+  return status == PSA_SUCCESS ? CURLE_OK : CURLE_FAILED_INIT;
 #elif defined(CURL_MBEDTLS_DRBG)
   int ret;
   mbedtls_entropy_context ctr_entropy;
