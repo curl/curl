@@ -1483,15 +1483,15 @@ static int mbedtls_init(void)
   entropy_init_mutex(&ts_entropy);
 #endif
   {
-    psa_status_t ret;
+    psa_status_t status;
 #ifdef HAS_THREADING_SUPPORT
     Curl_mbedtlsthreadlock_lock_function(0);
 #endif
-    ret = psa_crypto_init();
+    status = psa_crypto_init();
 #ifdef HAS_THREADING_SUPPORT
     Curl_mbedtlsthreadlock_unlock_function(0);
 #endif
-    if(ret != PSA_SUCCESS)
+    if(status != PSA_SUCCESS)
       return 0;
   }
   return 1;
