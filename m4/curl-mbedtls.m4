@@ -106,6 +106,25 @@ if test "x$OPT_MBEDTLS" != xno; then
       if false; then
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls mbedx509 mbedcrypto"
       fi
+
+      mbedtls_4=0
+      AC_MSG_CHECKING([for mbedTLS >= v4])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <mbedtls/version.h>
+        ]],[[
+          #if (MBEDTLS_VERSION_NUMBER >= 0x04000000)
+          return 0;
+          #else
+          #error older than 4
+          #endif
+        ]])
+      ],[
+        mbedtls_4=1
+        AC_MSG_RESULT([yes])
+      ],[
+        AC_MSG_RESULT([no])
+      ])
     fi
 
   fi dnl mbedTLS not disabled
