@@ -680,7 +680,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                                    PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_ANY_HASH),
                                    PSA_KEY_USAGE_SIGN_HASH) ||
                        mbedtls_pk_can_do_psa(&backend->pk,
-                                   PSA_ALG_ECDSA(PSA_ALG_ANY_HASH),
+                                   MBEDTLS_PK_ALG_ECDSA(PSA_ALG_ANY_HASH),
                                    PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
@@ -717,7 +717,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                                    PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_ANY_HASH),
                                    PSA_KEY_USAGE_SIGN_HASH) ||
                        mbedtls_pk_can_do_psa(&backend->pk,
-                                   PSA_ALG_ECDSA(PSA_ALG_ANY_HASH),
+                                   MBEDTLS_PK_ALG_ECDSA(PSA_ALG_ANY_HASH),
                                    PSA_KEY_USAGE_SIGN_HASH)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
 #else
