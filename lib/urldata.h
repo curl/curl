@@ -1708,7 +1708,7 @@ struct Curl_easy {
 #define CURL_TGUARD_MULTI_DESTROY(m) Curl_tguard_destroy(&(m)->tguard)
 #define CURL_TGUARD_MULTI_ENTER(m)   Curl_tguard_enter(&(m)->tguard)
 #define CURL_TGUARD_MULTI_LEAVE(m)   Curl_tguard_leave(&(m)->tguard)
-  #if 0
+  #if 1
 #define CURL_TGUARD_EASY_ENTER(d)    \
   ((d)->multi ? Curl_tguard_enter(&(d)->multi->tguard) : TRUE)
 #define CURL_TGUARD_EASY_LEAVE(d)    \
