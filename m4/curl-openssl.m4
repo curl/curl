@@ -209,22 +209,7 @@ if test "x$OPT_OPENSSL" != xno; then
 
     AC_CHECK_LIB(ssl, SSL_connect)
 
-    if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-      dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
-      AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
-      OLIBS=$LIBS
-      LIBS="-lRSAglue -lrsaref $LIBS"
-      AC_CHECK_LIB(ssl, SSL_connect)
-      if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-        dnl still no SSL_connect
-        AC_MSG_RESULT(no)
-        LIBS=$OLIBS
-      else
-        AC_MSG_RESULT(yes)
-      fi
-
-    else
-
+    if test "$ac_cv_lib_ssl_SSL_connect" = yes; then
       dnl Have the libraries--check for OpenSSL headers
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h,
