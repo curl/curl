@@ -1384,7 +1384,7 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#if MBEDTLS_VERSION_NUMBER >= 0x04000000
+#ifdef MBEDTLS_USE_PSA_CRYPTO  /* 3.x: optional?, 4.x: always available */
   psa_status_t status;
   (void)data;
 
@@ -1482,6 +1482,7 @@ static int mbedtls_init(void)
 #if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
   entropy_init_mutex(&ts_entropy);
 #endif
+#ifdef MBEDTLS_USE_PSA_CRYPTO  /* 3.x: optional?, 4.x: always available */
   {
     psa_status_t status;
 #ifdef HAS_THREADING_SUPPORT
@@ -1494,6 +1495,7 @@ static int mbedtls_init(void)
     if(status != PSA_SUCCESS)
       return 0;
   }
+#endif /* MBEDTLS_USE_PSA_CRYPTO */
   return 1;
 }
 
