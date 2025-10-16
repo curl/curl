@@ -1436,20 +1436,6 @@ static int mbedtls_init(void)
 #ifdef HAS_THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
-#ifdef MBEDTLS_USE_PSA_CRYPTO  /* requires mbedTLS 3.6.0+ */
-  {
-    int ret;
-#ifdef HAS_THREADING_SUPPORT
-    Curl_mbedtlsthreadlock_lock_function(0);
-#endif
-    ret = psa_crypto_init();
-#ifdef HAS_THREADING_SUPPORT
-    Curl_mbedtlsthreadlock_unlock_function(0);
-#endif
-    if(ret != PSA_SUCCESS)
-      return 0;
-  }
-#endif /* MBEDTLS_USE_PSA_CRYPTO */
   return 1;
 }
 
