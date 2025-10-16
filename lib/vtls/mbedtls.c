@@ -41,6 +41,7 @@
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509.h>
+#include <mbedtls/psa_util.h>
 
 #if MBEDTLS_VERSION_NUMBER < 0x04000000
 #define CURL_MBEDTLS_DRBG
@@ -1353,7 +1354,14 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#ifdef CURL_MBEDTLS_DRBG
+#if 1
+  int ret;
+  (void)data;
+
+  ret = mbedtls_psa_get_random(MBEDTLS_PSA_RANDOM_STATE, entropy, length);
+
+  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
+#elif defined(CURL_MBEDTLS_DRBG)
   int ret;
   mbedtls_entropy_context ctr_entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
