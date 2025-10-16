@@ -1382,7 +1382,7 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#if 1
+#if MBEDTLS_VERSION_NUMBER >= 0x04000000
   int ret;
   (void)data;
 
