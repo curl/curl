@@ -43,7 +43,7 @@ static CURLcode test_lib1308(const char *URL)
 {
   int errorcount = 0;
   CURLFORMcode rc;
-  int res;
+  int res = 0;
   struct curl_httppost *post = NULL;
   struct curl_httppost *last = NULL;
   size_t total_size = 0;
