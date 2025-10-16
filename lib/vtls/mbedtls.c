@@ -37,6 +37,7 @@
 /* #define MBEDTLS_DEBUG */
 
 #include <mbedtls/version.h>
+#include <psa/crypto_config.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509.h>
@@ -45,7 +46,6 @@
 #if MBEDTLS_VERSION_NUMBER < 0x04000000
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
-#include <mbedtls/sha256.h>
 #endif
 #ifdef MBEDTLS_DEBUG
 #include <mbedtls/debug.h>
@@ -1464,13 +1464,18 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   unsigned char *sha256sum,
                                   size_t sha256len)
 {
+#if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
+  psa_status_t status;
+  size_t sha256len_actual;
   (void)sha256len;
-#if MBEDTLS_VERSION_NUMBER < 0x04000000
-  /* returns 0 on success, otherwise failure */
-  if(mbedtls_sha256(input, inputlen, sha256sum, 0) != 0)
+  status = psa_hash_compute(PSA_ALG_SHA_256, input, inputlen,
+                            sha256sum, sha256len,
+                            &sha256len_actual);
+  if(status != PSA_SUCCESS)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 #else
+  (void)sha256len;
   return Curl_sha256it(sha256sum, input, inputlen);
 #endif
 }
