@@ -43,8 +43,6 @@
 #include <openssl/evp.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/sha.h>
-#elif defined(USE_MBEDTLS_SHA256)
-#include <mbedtls/sha256.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
