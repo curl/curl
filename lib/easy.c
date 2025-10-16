@@ -183,7 +183,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   }
 
   if(crypto_init()) {
-    DEBUGF(curl_mfprintf(stderr, "Error: Curl_crypto_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: crypto_init failed\n"));
     goto fail;
   }
 
