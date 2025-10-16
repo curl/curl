@@ -33,10 +33,10 @@
 #include "curl_hmac.h"
 
 #ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x04000000
-  #define USE_MBEDTLS_SHA256
-#endif
+  #include <psa/crypto_config.h>
+  #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256
+    #define USE_MBEDTLS_SHA256
+  #endif
 #endif
 
 #ifdef USE_OPENSSL
@@ -131,11 +131,13 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
 
 #elif defined(USE_MBEDTLS_SHA256)
 
-typedef mbedtls_sha256_context my_sha256_ctx;
+typedef psa_hash_operation_t my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-  (void)mbedtls_sha256_starts(ctx, 0);
+  memset(ctx, 0, sizeof(my_md5_ctx));
+  if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
+    return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
@@ -143,12 +145,14 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-  (void)mbedtls_sha256_update(ctx, data, length);
+  (void)psa_hash_update(ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-  (void)mbedtls_sha256_finish(ctx, digest);
+  size_t actual_length;
+  (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
+                        &actual_length);
 }
 
 #elif defined(AN_APPLE_OS)
