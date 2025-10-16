@@ -593,10 +593,15 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->key || ssl_config->key_blob) {
     if(ssl_config->key) {
 #ifdef MBEDTLS_FS_IO
+#if MBEDTLS_VERSION_NUMBER >= 0x04000000
+      ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->key,
+                                     ssl_config->key_passwd);
+#else
       ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->key,
                                      ssl_config->key_passwd,
                                      mbedtls_ctr_drbg_random,
                                      &backend->ctr_drbg);
+#endif
       if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
                        mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
@@ -617,11 +622,17 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       const unsigned char *key_data =
         (const unsigned char *)ssl_key_blob->data;
       const char *passwd = ssl_config->key_passwd;
+#if MBEDTLS_VERSION_NUMBER >= 0x04000000
+      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+                                 (const unsigned char *)passwd,
+                                 passwd ? strlen(passwd) : 0);
+#else
       ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0,
                                  mbedtls_ctr_drbg_random,
                                  &backend->ctr_drbg);
+#endif
       if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
                        mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
@@ -697,8 +708,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ret != CURLE_OK)
     return ret;
 
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
+#endif
 
   ret = mbedtls_ssl_setup(&backend->ssl, &backend->config);
   if(ret) {
