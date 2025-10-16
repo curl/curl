@@ -455,7 +455,7 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'cache openldap-static'
+      - name: 'cache openldap (static)'
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-openldap-static
