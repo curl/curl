@@ -150,6 +150,13 @@ CURLcode Curl_crypto_init(void)
   return CURLE_OK;
 }
 
+void Curl_crypto_cleanup(void)
+{
+#ifdef USE_MBEDTLS
+  mbedtls_psa_crypto_free();
+#endif
+}
+
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
@@ -315,6 +322,8 @@ void curl_global_cleanup(void)
   Curl_amiga_cleanup();
 
   Curl_ssh_cleanup();
+
+  Curl_crypto_cleanup();
 
 #ifdef DEBUGBUILD
   free(leakpointer);
