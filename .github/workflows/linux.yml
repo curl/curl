@@ -43,6 +43,8 @@ env:
   WOLFSSL_VERSION: 5.8.2
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 4.0.0
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver:^3.0.0 registryUrl=https://github.com
+  MBEDTLS_VERSION_PREV: 3.6.4
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.61.4
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
@@ -109,10 +111,10 @@ jobs:
             install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
-          - name: 'mbedtls'
+          - name: 'mbedtls-prev'
             install_packages: libnghttp2-dev libuv1-dev
-            install_steps: mbedtls
-            PKG_CONFIG_PATH: /home/runner/mbedtls/lib/pkgconfig  # Requires v3.6.0
+            install_steps: mbedtls-prev pytest
+            PKG_CONFIG_PATH: /home/runner/mbedtls-prev/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
 
           - name: 'mbedtls-pkg MultiSSL !pc'
@@ -448,6 +450,29 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
           cd "mbedtls-${MBEDTLS_VERSION}"
+          ./scripts/config.py set MBEDTLS_THREADING_C
+          ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/mbedtls \
+            -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
+          cmake --build .
+          cmake --install .
+
+      - name: 'cache mbedtls (prev)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-mbedtls-threadsafe-prev
+        env:
+          cache-name: cache-mbedtls-threadsafe-prev
+        with:
+          path: ~/mbedtls-prev
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
+
+      - name: 'build mbedtls (prev)'
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') && steps.cache-mbedtls-threadsafe-prev.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION_PREV}/mbedtls-${MBEDTLS_VERSION_PREV}.tar.bz2" | tar -xj
+          cd "mbedtls-${MBEDTLS_VERSION_PREV}"
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=/home/runner/mbedtls \
