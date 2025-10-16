@@ -144,7 +144,9 @@ static char *leakpointer;
 static CURLcode crypto_init(void)
 {
 #ifdef USE_MBEDTLS
-  if(psa_crypto_init() != PSA_SUCCESS)
+  psa_status_t status;
+  status = psa_crypto_init();
+  if(status != PSA_SUCCESS)
     return CURLE_FAILED_INIT;
 #endif
   return CURLE_OK;
