@@ -1384,40 +1384,12 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#if MBEDTLS_VERSION_NUMBER >= 0x04000000
   psa_status_t status;
   (void)data;
 
   status = psa_generate_random(entropy, length);
 
   return status == PSA_SUCCESS ? CURLE_OK : CURLE_FAILED_INIT;
-#elif defined(CURL_MBEDTLS_DRBG)
-  int ret;
-  mbedtls_entropy_context ctr_entropy;
-  mbedtls_ctr_drbg_context ctr_drbg;
-  mbedtls_entropy_init(&ctr_entropy);
-  mbedtls_ctr_drbg_init(&ctr_drbg);
-  (void)data;
-
-  ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
-                              &ctr_entropy, NULL, 0);
-
-  if(!ret)
-    ret = mbedtls_ctr_drbg_random(&ctr_drbg, entropy, length);
-
-  mbedtls_ctr_drbg_free(&ctr_drbg);
-  mbedtls_entropy_free(&ctr_entropy);
-
-  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
-#elif defined(MBEDTLS_HAVEGE_C)
-  mbedtls_havege_state hs;
-  mbedtls_havege_init(&hs);
-  mbedtls_havege_random(&hs, entropy, length);
-  mbedtls_havege_free(&hs);
-  return CURLE_OK;
-#else
-  return CURLE_NOT_BUILT_IN;
-#endif
 }
 
 static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
@@ -1482,7 +1454,6 @@ static int mbedtls_init(void)
 #if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
   entropy_init_mutex(&ts_entropy);
 #endif
-#if MBEDTLS_VERSION_NUMBER >= 0x04000000
   {
     psa_status_t status;
 #ifdef HAS_THREADING_SUPPORT
@@ -1495,7 +1466,6 @@ static int mbedtls_init(void)
     if(status != PSA_SUCCESS)
       return 0;
   }
-#endif
   return 1;
 }
 
