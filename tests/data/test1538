@@ -131,7 +131,7 @@ e98: SSL Client Certificate required
 e99: Unrecoverable error in select/poll
 e100: A value or data field grew larger than allowed
 e101: ECH attempted but failed
-e102: concurent call from another thread
+e102: concurrent call from another thread
 e103: Unknown error
 m-1: Please call curl_multi_perform() soon
 m0: No error

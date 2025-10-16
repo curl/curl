@@ -306,7 +306,7 @@ curl_easy_strerror(CURLcode error)
     return "ECH attempted but failed";
 
   case CURLE_FOREIGN_THREAD:
-    return "concurent call from another thread";
+    return "concurrent call from another thread";
 
     /* error codes not used by current libcurl */
   default:
