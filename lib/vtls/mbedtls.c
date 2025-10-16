@@ -1312,7 +1312,7 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     mbedtls_ctr_drbg_free(&backend->ctr_drbg);
 #ifndef HAS_THREADING_SUPPORT
     mbedtls_entropy_free(&backend->entropy);
-#endif
+#endif /* !HAS_THREADING_SUPPORT */
 #endif
     backend->initialized = FALSE;
   }
