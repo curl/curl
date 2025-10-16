@@ -435,7 +435,7 @@ jobs:
       - name: 'cache mbedtls'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-mbedtls
+        id: cache-mbedtls-threadsafe
         env:
           cache-name: cache-mbedtls-threadsafe
         with:
@@ -443,7 +443,7 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.MBEDTLS_VERSION }}
 
       - name: 'build mbedtls'
-        if: ${{ contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true' }}
+        if: ${{ contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls-threadsafe.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${MBEDTLS_VERSION}/mbedtls-${MBEDTLS_VERSION}.tar.bz2" | tar -xj
