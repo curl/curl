@@ -160,9 +160,8 @@ void Curl_tguard_destroy(struct curl_tguard *tguard)
   }
 }
 
-bool Curl_tguard_easy_enter(struct Curl_easy *data)
+bool Curl_tguard_enter(struct curl_tguard *tguard)
 {
-  struct curl_tguard *tguard = &data->tguard;
   bool accepted;
   DEBUGASSERT(tguard->initialised);
   Curl_mutex_acquire(&tguard->mutx);
@@ -188,18 +187,30 @@ bool Curl_tguard_easy_enter(struct Curl_easy *data)
   return accepted;
 }
 
-void Curl_tguard_easy_leave(struct Curl_easy *data)
+bool Curl_tguard_check(struct curl_tguard *tguard)
 {
-  struct curl_tguard *tguard = &data->tguard;
   DEBUGASSERT(tguard->initialised);
-  if(tguard->initialised) {
-    Curl_mutex_acquire(&tguard->mutx);
-    DEBUGASSERT(tguard->depth);
-    --tguard->depth;
-    /* We cannot invalidate `tguard->tid` as pthread does not define
-     * an invalid value for pthread_t. */
-    Curl_mutex_release(&tguard->mutx);
+  Curl_mutex_acquire(&tguard->mutx);
+  if(tguard->depth) {
+    /* Called again with a call in progress. Is it from the same thread? */
+    if(!curl_thread_equal(tguard->tid, curl_thread_self())) {
+      Curl_mutex_release(&tguard->mutx);
+      return FALSE;
+    }
   }
+  Curl_mutex_release(&tguard->mutx);
+  return TRUE;
+}
+
+void Curl_tguard_leave(struct curl_tguard *tguard)
+{
+  DEBUGASSERT(tguard->initialised);
+  Curl_mutex_acquire(&tguard->mutx);
+  DEBUGASSERT(tguard->depth);
+  --tguard->depth;
+  /* We cannot invalidate `tguard->tid` as pthread does not define
+   * an invalid value for pthread_t. */
+  Curl_mutex_release(&tguard->mutx);
 }
 
 #endif /* USE_THREAD_GUARD */

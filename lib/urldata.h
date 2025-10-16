@@ -1701,19 +1701,28 @@ struct Curl_easy {
   struct PureInfo info;        /* stats, reports and info data */
   struct curl_tlssessioninfo tsi; /* Information about the TLS session, only
                                      valid after a client has asked for it */
-#ifdef USE_THREAD_GUARD
-  struct curl_tguard tguard;
-#endif
 };
 
 #ifdef USE_THREAD_GUARD
-#define CURL_TGUARD_EASY_INIT(d)     Curl_tguard_init(&(d)->tguard)
-#define CURL_TGUARD_EASY_DESTROY(d)  Curl_tguard_destroy(&(d)->tguard)
-#define CURL_TGUARD_EASY_ENTER(d)    Curl_tguard_easy_enter(d)
-#define CURL_TGUARD_EASY_LEAVE(d)    Curl_tguard_easy_leave(d)
+#define CURL_TGUARD_MULTI_INIT(m)    Curl_tguard_init(&(m)->tguard)
+#define CURL_TGUARD_MULTI_DESTROY(m) Curl_tguard_destroy(&(m)->tguard)
+#define CURL_TGUARD_MULTI_ENTER(m)   Curl_tguard_enter(&(m)->tguard)
+#define CURL_TGUARD_MULTI_LEAVE(m)   Curl_tguard_leave(&(m)->tguard)
+  #if 0
+#define CURL_TGUARD_EASY_ENTER(d)    \
+  ((d)->multi ? Curl_tguard_enter(&(d)->multi->tguard) : TRUE)
+#define CURL_TGUARD_EASY_LEAVE(d)    \
+  ((d)->multi ? Curl_tguard_leave(&(d)->multi->tguard) : (void)0)
+  #else
+#define CURL_TGUARD_EASY_ENTER(d)    \
+  ((d)->multi ? Curl_tguard_check(&(d)->multi->tguard) : TRUE)
+#define CURL_TGUARD_EASY_LEAVE(d)    Curl_nop_stmt
+  #endif
 #else
-#define CURL_TGUARD_EASY_INIT(d)     Curl_nop_stmt
-#define CURL_TGUARD_EASY_DESTROY(d)  Curl_nop_stmt
+#define CURL_TGUARD_MULTI_INIT(m)    Curl_nop_stmt
+#define CURL_TGUARD_MULTI_DESTROY(m) Curl_nop_stmt
+#define CURL_TGUARD_MULTI_ENTER(m)   TRUE
+#define CURL_TGUARD_MULTI_LEAVE(m)   Curl_nop_stmt
 #define CURL_TGUARD_EASY_ENTER(d)    TRUE
 #define CURL_TGUARD_EASY_LEAVE(d)    Curl_nop_stmt
 #endif /* !USE_THREAD_GUARD */

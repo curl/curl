@@ -1087,7 +1087,6 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
 
   /* we reach this point and thus we are OK */
-  CURL_TGUARD_EASY_INIT(outcurl);
   CURL_TGUARD_EASY_LEAVE(data);
   return outcurl;
 

@@ -85,9 +85,11 @@ void Curl_tguard_init(struct curl_tguard *tguard);
 void Curl_tguard_destroy(struct curl_tguard *tguard);
 /* Return FALSE if called from another thread during an active call.
  * Otherwise, remember the calling thread. */
-bool Curl_tguard_easy_enter(struct Curl_easy *data);
+bool Curl_tguard_enter(struct curl_tguard *tguard);
+/* Check if, when tguard is in a call, call thread matches */
+bool Curl_tguard_check(struct curl_tguard *tguard);
 /* End a recorded thread call */
-void Curl_tguard_easy_leave(struct Curl_easy *data);
+void Curl_tguard_leave(struct curl_tguard *tguard);
 
 #endif /* USE_THREAD_GUARD */
 
