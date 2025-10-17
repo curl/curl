@@ -78,7 +78,6 @@ static char *ipfs_gateway(void)
         goto fail;
     }
 
-    curlx_fclose(gfile);
 
     if(curlx_dyn_len(&dyn))
       gateway = curlx_dyn_ptr(&dyn);
@@ -87,6 +86,7 @@ static char *ipfs_gateway(void)
       goto fail;
 
     curl_free(ipfs_path_c);
+    curlx_fclose(gfile);
 
     return gateway;
   }
