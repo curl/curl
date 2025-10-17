@@ -1546,6 +1546,8 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wssl_ctx *wssl)
 {
+  WOLFSSL_X509 *x509 = NULL;
+  CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -1557,50 +1559,48 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
 
   if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
-    WOLFSSL_X509 *x509;
     const char *x509_der;
     int x509_der_len;
     struct Curl_X509certificate x509_parsed;
     struct Curl_asn1Element *pubkey;
-    CURLcode result;
+
+    result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
     x509 = wolfSSL_get_peer_certificate(wssl->ssl);
     if(!x509) {
       failf(data, "SSL: failed retrieving server certificate");
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
     }
 
     x509_der = (const char *)wolfSSL_X509_get_der(x509, &x509_der_len);
     if(!x509_der) {
       failf(data, "SSL: failed retrieving ASN.1 server certificate");
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
     }
 
     memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
 
     pubkey = &x509_parsed.subjectPublicKeyInfo;
     if(!pubkey->header || pubkey->end <= pubkey->header) {
       failf(data, "SSL: failed retrieving public key from server certificate");
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
     }
 
-    result = Curl_pin_peer_pubkey(data,
-                                  pinnedpubkey,
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
-    wolfSSL_FreeX509(x509);
-    if(result) {
+    if(result)
       failf(data, "SSL: public key does not match pinned public key");
-      return result;
-    }
 #else
     failf(data, "Library lacks pinning support built-in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
-  return CURLE_OK;
+end:
+  wolfSSL_FreeX509(x509);
+  return result;
 }
 
 #ifdef WOLFSSL_EARLY_DATA
