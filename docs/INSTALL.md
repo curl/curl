@@ -650,11 +650,11 @@ This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
 and runs on, that is not listed, please let us know.
 
-## 107 Operating Systems
+## 108 Operating Systems
 
     AIX, AmigaOS, Android, ArcaOS, Aros, Atari FreeMiNT, BeOS, Blackberry 10,
-    Blackberry Tablet OS, Cell OS, CheriBSD, Chrome OS, Cisco IOS, DG/UX,
-    DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS, Fuchsia,
+    Blackberry Tablet OS, Cell OS, Cesium, CheriBSD, Chrome OS, Cisco IOS,
+    DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS, Fuchsia,
     Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I, illumos,
     Integrity, iOS, ipadOS, IRIX, KasperskyOS, Linux, Lua RTOS, Mac OS 9,
     macOS, Maemo, Mbed, Meego, Micrium, MINIX, Minoca, Moblin, MorphOS,
