@@ -42,7 +42,10 @@ static char *ipfs_gateway(void)
   char *ipfs_path_c = NULL;
   char *gateway_composed_c = NULL;
   FILE *gfile = NULL;
-  char *gateway = curl_getenv("IPFS_GATEWAY");
+  char *gateway_env = getenv("IPFS_GATEWAY");
+
+  if(gateway_env)
+    return strdup(gateway_env);
 
   /* Try to find the gateway in the IPFS data folder. */
   ipfs_path_c = curl_getenv("IPFS_PATH");
@@ -69,6 +72,7 @@ static char *ipfs_gateway(void)
   if(gfile) {
     int c;
     struct dynbuf dyn;
+    char *gateway = NULL;
     curlx_dyn_init(&dyn, MAX_GATEWAY_URL_LEN);
 
     /* get the first line of the gateway file, ignore the rest */
@@ -78,12 +82,8 @@ static char *ipfs_gateway(void)
         goto fail;
     }
 
-
     if(curlx_dyn_len(&dyn))
       gateway = curlx_dyn_ptr(&dyn);
-
-    if(!gateway)
-      goto fail;
 
     curl_free(ipfs_path_c);
     curlx_fclose(gfile);
@@ -93,7 +93,6 @@ static char *ipfs_gateway(void)
 fail:
   if(gfile)
     curlx_fclose(gfile);
-  tool_safefree(gateway);
   curl_free(ipfs_path_c);
   return NULL;
 }
@@ -146,7 +145,6 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     }
   }
   else {
-    /* this is ensured to end in a trailing / within ipfs_gateway() */
     gateway = ipfs_gateway();
     if(!gateway) {
       result = CURLE_FILE_COULDNT_READ_FILE;
