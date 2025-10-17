@@ -404,8 +404,8 @@ read_file_into(const char *filename,
   for(;;) {
     uint8_t buf[256];
     const size_t rr = fread(buf, 1, sizeof(buf), f);
-    if(rr == 0 ||
-       CURLE_OK != curlx_dyn_addn(out, buf, rr)) {
+    if((!rr && !feof(f)) ||
+       curlx_dyn_addn(out, buf, rr)) {
       curlx_fclose(f);
       return 0;
     }
