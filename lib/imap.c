@@ -1056,19 +1056,19 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */
-      if(wordlen == 8 && !memcmp(line, "STARTTLS", 8))
+      if(wordlen == 8 && curl_strnequal(line, "STARTTLS", 8))
         imapc->tls_supported = TRUE;
 
       /* Has the server explicitly disabled clear text authentication? */
-      else if(wordlen == 13 && !memcmp(line, "LOGINDISABLED", 13))
+      else if(wordlen == 13 && curl_strnequal(line, "LOGINDISABLED", 13))
         imapc->login_disabled = TRUE;
 
       /* Does the server support the SASL-IR capability? */
-      else if(wordlen == 7 && !memcmp(line, "SASL-IR", 7))
+      else if(wordlen == 7 && curl_strnequal(line, "SASL-IR", 7))
         imapc->ir_supported = TRUE;
 
       /* Do we have a SASL based authentication mechanism? */
-      else if(wordlen > 5 && !memcmp(line, "AUTH=", 5)) {
+      else if(wordlen > 5 && curl_strnequal(line, "AUTH=", 5)) {
         size_t llen;
         unsigned short mechbit;
 
