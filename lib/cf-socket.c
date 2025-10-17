@@ -2138,6 +2138,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
      (curlx_nonblock(s_accepted, TRUE) < 0)) {
     failf(data, "fcntl set CLOEXEC/NONBLOCK: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    Curl_socket_close(data, cf->conn, s_accepted);
     return CURLE_FTP_ACCEPT_FAILED;
   }
 #endif
