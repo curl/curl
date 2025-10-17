@@ -1018,8 +1018,12 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
                                   struct h3_stream_ctx *stream,
                                   const char *buf, size_t blen, bool eos)
 {
-
-  /* If we already encountered an error, skip further writes */
+  /* This function returns no error intentionally, but records
+   * the result at the stream, skipping further writes once the
+   * `result` of the transfer is known.
+   * The stream is subsequently cancelled "higher up" in the filter's
+   * send/recv callbacks. Closing the stream here leads to SEND/RECV
+   * errors in other places that then overwrite the transfer's result. */
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
@@ -1033,8 +1037,12 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
                                struct h3_stream_ctx *stream,
                                const char *buf, size_t blen, bool eos)
 {
-
-  /* If we already encountered an error, skip further writes */
+  /* This function returns no error intentionally, but records
+   * the result at the stream, skipping further writes once the
+   * `result` of the transfer is known.
+   * The stream is subsequently cancelled "higher up" in the filter's
+   * send/recv callbacks. Closing the stream here leads to SEND/RECV
+   * errors in other places that then overwrite the transfer's result. */
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
     /* If the transfer write is errored, we do not want any more data */
