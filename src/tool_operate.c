@@ -584,10 +584,8 @@ static CURLcode retrycheck(struct OperationConfig *config,
         rc = fseek(outs->stream, 0, SEEK_END);
 #else
         /* ftruncate is not available, so just reposition the file
-           to the location we would have truncated it. This will not
-           work properly with large files on 32-bit systems, but
-           most of those will have ftruncate. */
-        rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
+           to the location we would have truncated it. */
+        rc = curlx_fseek(outs->stream, outs->init, SEEK_SET);
 #endif
         if(rc) {
           errorf("Failed seeking to end of file");
