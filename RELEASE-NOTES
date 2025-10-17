@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3519
+ Contributors:                 3520
 
 This release includes the following changes:
 
@@ -28,17 +28,18 @@ This release includes the following bugfixes:
  o asyn-thrdd resolver: clear timeout when done [97]
  o asyn-thrdd: drop pthread_cancel [30]
  o autotools: add support for libgsasl auto-detection via pkg-config [112]
- o autotools: capitalize 'Rustls' in the log output [106]
- o autotools: fix duplicate `UNIX` and `BSD` flags in `buildinfo.txt` [113]
- o autotools: fix silly mistake in clang detection for `buildinfo.txt` [114]
- o autotools: make `--enable-code-coverage` support llvm/clang [79]
+ o autotools: capitalize Rustls in the log output [106]
+ o autotools: drop detection of ancient OpenSSL libs RSAglue and rsaref [354]
+ o autotools: fix duplicate UNIX and BSD flags in buildinfo.txt [113]
+ o autotools: fix silly mistake in clang detection for buildinfo.txt [114]
+ o autotools: make --enable-code-coverage support llvm/clang [79]
  o aws-lc: re-enable large read-ahead with v1.61.0 again [16]
  o base64: accept zero length argument to base64_encode [82]
- o build: address some `-Weverything` warnings, update picky warnings [74]
- o build: avoid overriding system `open` and `stat` symbols [141]
+ o build: address some -Weverything warnings, update picky warnings [74]
+ o build: avoid overriding system open and stat symbols [141]
  o build: avoid overriding system symbols for fopen functions [150]
  o build: avoid overriding system symbols for socket functions [68]
- o build: show llvm/clang in platform flags and `buildinfo.txt` [126]
+ o build: show llvm/clang in platform flags and buildinfo.txt [126]
  o c-ares: when resolving failed, persist error [270]
  o cf-h2-proxy: break loop on edge case [140]
  o cf-ip-happy: mention unix domain path, not port number [161]
@@ -49,27 +50,27 @@ This release includes the following bugfixes:
  o cf-socket: use the right byte order for ports in bindlocal [61]
  o cfilter: unlink and discard [46]
  o checksrc: allow disabling warnings on FIXME/TODO comments [324]
- o checksrc: catch banned functions when preceded by `(` [146]
- o checksrc: fix possible endless loop when detecting `BANNEDFUNC` [149]
- o checksrc: fix possible endless loops/errors in the banned function logic [220]
- o checksrc: fix to handle `)` predecing a banned function [229]
+ o checksrc: catch banned functions when preceded by ( [146]
+ o checksrc: fix possible endless loop when detecting BANNEDFUNC [149]
+ o checksrc: fix possible endless loops in the banned function logic [220]
+ o checksrc: fix to handle ) predecing a banned function [229]
  o checksrc: reduce directory-specific exceptions [228]
  o CI.md: refresh [280]
  o cmake/FindGSS: dedupe pkg-config module strings [277]
  o cmake/FindGSS: drop wrong header check for GNU GSS [278]
- o cmake/FindGSS: fix `pkg-config` fallback logic for CMake <3.16 [189]
+ o cmake/FindGSS: fix pkg-config fallback logic for CMake <3.16 [189]
  o cmake/FindGSS: simplify/de-dupe lib setup [253]
  o cmake/FindGSS: whitespace/formatting [268]
- o cmake: add `CURL_CODE_COVERAGE` option [78]
+ o cmake: add CURL_CODE_COVERAGE option [78]
  o cmake: build the "all" examples source list dynamically [245]
  o cmake: clang detection tidy-ups [116]
  o cmake: drop exclamation in comment looking like a name [160]
- o cmake: fix building docs when the base directory contains `.3` [18]
+ o cmake: fix building docs when the base directory contains .3 [18]
  o cmake: minor Heimdal flavour detection fix [269]
  o cmake: pre-fill three more type sizes on Windows [244]
  o cmake: support building some complicated examples, build them in CI [235]
- o cmake: use modern alternatives for `get_filename_component()` [102]
- o cmake: use more `COMPILER_OPTIONS`, `LINK_OPTIONS` / `LINK_FLAGS` [152]
+ o cmake: use modern alternatives for get_filename_component() [102]
+ o cmake: use more COMPILER_OPTIONS, LINK_OPTIONS / LINK_FLAGS [152]
  o cmdline-docs: extended, clarified, refreshed [28]
  o cmdline-opts/_PROGRESS.md: explain the suffixes [154]
  o configure: add "-mt" for pthread support on HP-UX [52]
@@ -77,8 +78,9 @@ This release includes the following bugfixes:
  o connect: remove redundant condition in shutdown start [289]
  o cookie: avoid saving a cookie file if no transfer was done [11]
  o cpool: make bundle->dest an array; fix UB [218]
+ o curl.h: remove incorrect comment about CURLOPT_PINNEDPUBLICKEY [320]
  o curl_easy_getinfo: error code on NULL arg [2]
- o curl_mem_undef.h: limit to `CURLDEBUG` for non-memalloc overrides [19]
+ o curl_mem_undef.h: limit to CURLDEBUG for non-memalloc overrides [19]
  o curl_osslq: error out properly if BIO_ADDR_rawmake() fails [184]
  o Curl_resolv: fix comment. 'entry' argument is not optional [187]
  o curl_slist_append.md: clarify that a NULL pointer is not acceptable [72]
@@ -90,7 +92,7 @@ This release includes the following bugfixes:
  o CURLOPT_SSL_VERIFYHOST.md: add see-also to two other VERIFYHOST options [32]
  o CURLOPT_TIMECONDITION.md: works for FILE and FTP as well [27]
  o digest_sspi: fix two memory leaks in error branches [77]
- o dist: do not distribute `CI.md` [29]
+ o dist: do not distribute CI.md [29]
  o docs/cmdline-opts: drop double quotes from GLOBBING and URL examples [238]
  o docs/libcurl: clarify some timeout option behavior [15]
  o docs/libcurl: remove ancient version references [7]
@@ -104,15 +106,17 @@ This release includes the following bugfixes:
  o examples/synctime: fix null termination assumptions [297]
  o examples/synctime: make the sscanf not overflow the local buffer [252]
  o examples/usercertinmem: avoid stripping const [247]
- o examples: call `curl_global_cleanup()` where missing [323]
+ o examples/websocket: fix use of uninitialized rlen [346]
+ o examples: call curl_global_cleanup() where missing [323]
  o examples: check more errors, fix cleanups, scope variables [318]
- o examples: drop unused `curl/mprintf.h` includes [224]
+ o examples: drop unused curl/mprintf.h includes [224]
  o examples: fix build issues in 'complicated' examples [243]
  o examples: fix two build issues surfaced with WinCE [223]
  o examples: fix two issues found by CodeQL [35]
- o examples: fix two more cases of `stat()` TOCTOU [147]
+ o examples: fix two more cases of stat() TOCTOU [147]
  o examples: improve global init, error checks and returning errors [321]
- o examples: return `curl_easy_perform()` results [322]
+ o examples: return curl_easy_perform() results [322]
+ o firefox-db2pem.sh: add macOS support, tidy-ups [348]
  o form.md: drop reference to MANUAL [178]
  o ftp: add extra buffer length check [195]
  o ftp: fix ftp_do_more returning with *completep unset [122]
@@ -133,13 +137,16 @@ This release includes the following bugfixes:
  o http: look for trailing 'type=' in ftp:// without strstr [315]
  o http: make Content-Length parser more WHATWG [183]
  o httpsrr: free old pointers when storing new [57]
+ o imap: treat capabilities case insensitively [345]
  o INSTALL-CMAKE.md: document useful build targets [215]
+ o INSTALL: update the list of known operating systems [325]
  o INTERNALS: drop Winsock 2.2 from the dependency list [162]
  o ip-happy: do not set unnecessary timeout [95]
  o ip-happy: prevent event-based stall on retry [155]
  o kerberos: bump minimum to 1.3 (2003-07-08), drop legacy logic [279]
  o kerberos: drop logic for MIT Kerberos <1.2.3 (pre-2002) versions [285]
- o kerberos: stop including `gssapi/gssapi_generic.h` [282]
+ o kerberos: stop including gssapi/gssapi_generic.h [282]
+ o krb5: fix output_token allocators in the GSS debug stub (Windows) [326]
  o krb5: return appropriate error on send failures [22]
  o krb5_gssapi: fix memory leak on error path [190]
  o krb5_sspi: the chlg argument is NOT optional [200]
@@ -148,7 +155,7 @@ This release includes the following bugfixes:
  o ldap: tidy-up types, fix error code confusion [191]
  o lib1514: fix return code mixup [304]
  o lib: drop unused include and duplicate guards [226]
- o lib: fix build error and compiler warnings with verbose strings disabled [173]
+ o lib: fix build error with verbose strings disabled [173]
  o lib: remove personal names from comments [168]
  o lib: SSL connection reuse [301]
  o lib: stop NULL-checking conn->passwd and ->user [309]
@@ -183,13 +190,16 @@ This release includes the following bugfixes:
  o managen: render better manpage references/links [54]
  o managen: strict protocol check [109]
  o managen: verify the options used in example lines [181]
+ o mbedtls: add support for 4.0.0 [344]
  o mbedtls: check result of setting ALPN [127]
  o mbedtls: handle WANT_WRITE from mbedtls_ssl_read() [145]
  o mdlinkcheck: reject URLs containing quotes [174]
  o memdup0: handle edge case [241]
+ o mime: fix use of fseek() [334]
  o multi.h: add CURLMINFO_LASTENTRY [51]
  o multi_ev: remove unnecessary data check that confuses analysers [167]
  o nghttp3: return NGHTTP3_ERR_CALLBACK_FAILURE from recv_header [227]
+ o ngtcp2: add a comment explaining write result handling [340]
  o ngtcp2: check error code on connect failure [13]
  o ngtcp2: close just-opened QUIC stream when submit_request fails [222]
  o ngtcp2: compare idle timeout in ms to avoid overflow [248]
@@ -202,11 +212,14 @@ This release includes the following bugfixes:
  o openldap: check ldap_get_option() return codes [119]
  o openldap: fix memory-leak in error path [287]
  o openldap: fix memory-leak on oldap_do's exit path [286]
+ o openldap: limit max incoming size [347]
  o openssl-quic: check results better [132]
  o openssl-quic: handle error in SSL_get_stream_read_error_code [129]
  o openssl-quic: ignore unexpected streams opened by server [176]
+ o openssl: better return code checks when logging cert data [342]
  o openssl: call SSL_get_error() with proper error [207]
  o openssl: clear retry flag on x509 error [130]
+ o openssl: fail if more than MAX_ALLOWED_CERT_AMOUNT certs [339]
  o openssl: fail the transfer if ossl_certchain() fails [23]
  o openssl: fix build for v1.0.2 [225]
  o openssl: fix peer certificate leak in channel binding [258]
@@ -221,6 +234,7 @@ This release includes the following bugfixes:
  o pytest: skip specific tests for no-verbose builds [171]
  o quic: fix min TLS version handling [14]
  o quic: ignore EMSGSIZE on receive [4]
+ o quic: improve UDP GRO receives [330]
  o quic: remove data_idle handling [311]
  o quiche: fix possible leaks on teardown [205]
  o quiche: fix verbose message when ip quadruple cannot be obtained. [128]
@@ -229,6 +243,8 @@ This release includes the following bugfixes:
  o runtests: tag tests that require curl verbose strings [172]
  o rustls: fix clang-tidy warning [107]
  o rustls: fix comment describing cr_recv() [117]
+ o rustls: limit snprintf proper in cr_keylog_log_cb() [343]
+ o rustls: make read_file_into not reject good files [328]
  o rustls: pass the correct result to rustls_failf [242]
  o rustls: typecast variable for safer trace output [69]
  o rustls: use %zu for size_t in failf() format string [121]
@@ -236,8 +252,10 @@ This release includes the following bugfixes:
  o schannel: assign result before using it [62]
  o schannel_verify: fix mem-leak in Curl_verify_host [208]
  o schannel_verify: use more human friendly error messages [96]
+ o scripts: pass -- before passing xargs [349]
  o setopt: accept *_SSL_VERIFYHOST set to 2L [31]
  o setopt: allow CURLOPT_DNS_CACHE_TIMEOUT set to -1 [257]
+ o setopt: fix unused variable warning in minimal build [332]
  o setopt: make CURLOPT_MAXREDIRS accept -1 (again) [1]
  o smb: adjust buffer size checks [45]
  o smb: transfer debugassert to real check [303]
@@ -256,10 +274,11 @@ This release includes the following bugfixes:
  o socks_sspi: fix memory cleanup calls [40]
  o socks_sspi: remove the enforced mode clearing [291]
  o socks_sspi: restore non-blocking socket on error paths [48]
+ o socks_sspi: use the correct free function [331]
  o socksd: remove --bindonly mention, there is no such option [305]
  o ssl-sessions.md: mark option experimental [12]
  o strerror: drop workaround for SalfordC win32 header bug [214]
- o sws: fix checking `sscanf()` return value [17]
+ o sws: fix checking sscanf() return value [17]
  o sws: pass in socket reference to allow function to close it [298]
  o tcp-nodelay.md: expand the documentation [153]
  o telnet: ignore empty suboptions [86]
@@ -272,7 +291,7 @@ This release includes the following bugfixes:
  o telnet: send failure logged but not returned [175]
  o telnet: use pointer[0] for "unknown" option instead of pointer[i] [217]
  o tests/server: drop pointless memory allocation overrides [219]
- o tests/server: drop unsafe `open()` override in signal handler (Windows) [151]
+ o tests/server: drop unsafe open() override in signal handler (Windows) [151]
  o tftp: check and act on tftp_set_timeouts() returning error [38]
  o tftp: check for trailing ";mode=" in URL without strstr [312]
  o tftp: default timeout per block is now 15 seconds [156]
@@ -283,10 +302,10 @@ This release includes the following bugfixes:
  o tftp: return error if it hits an illegal state [138]
  o tftp: return error when sendto() fails [59]
  o thread: errno on thread creation [271]
- o tidy-up: `fcntl.h` includes [98]
+ o tidy-up: fcntl.h includes [98]
  o tidy-up: assortment of small fixes [115]
  o tidy-up: avoid using the reserved macro namespace [76]
- o tidy-up: update MS links, allow long URLs via `checksrc` [73]
+ o tidy-up: update MS links, allow long URLs via checksrc [73]
  o tidy-up: URLs [101]
  o time-cond.md: refer to the singular curl_getdate man page [148]
  o TODO: fix a typo [93]
@@ -300,6 +319,7 @@ This release includes the following bugfixes:
  o tool_getparam: always disable "lib-ids" for tracing [169]
  o tool_getparam: make --fail and --fail-with-body override each other [293]
  o tool_getparam: warn if provided header looks malformed [179]
+ o tool_ipfs: simplify the ipfs gateway logic [337]
  o tool_msgs: make errorf() show if --show-error [294]
  o tool_operate: improve wording in retry message [37]
  o tool_operate: keep failed partial download for retry auto-resume [210]
@@ -316,18 +336,20 @@ This release includes the following bugfixes:
  o urldata: make 'retrycount' a single byte [308]
  o urldata: make redirect counter 16 bit [295]
  o vauth/digest: improve the digest parser [203]
+ o version: add GSS backend name and version [353]
  o vquic: fix idle-timeout checks (ms<-->ns), 64-bit log & honor 0=no-timeout [249]
  o vquic: handling of io improvements [239]
  o vquic: sending non-gso packets fix for EAGAIN [265]
  o vtls: alpn setting, check proto parameter [134]
  o vtls_int.h: clarify data_pending [124]
  o vtls_scache: fix race condition [157]
- o windows: replace `_beginthreadex()` with `CreateThread()` [80]
+ o windows: replace _beginthreadex() with CreateThread() [80]
  o windows: stop passing unused, optional argument for Win9x compatibility [75]
  o windows: use consistent format when showing error codes [199]
  o windows: use native error code types more [206]
  o wolfssl: check BIO read parameters [133]
  o wolfssl: fix error check in shutdown [105]
+ o wolfssl: fix resource leak in verify_pinned error paths [314]
  o wolfssl: no double get_error() detail [188]
  o ws: clarify an error message [125]
  o ws: fix some edge cases [274]
@@ -357,8 +379,8 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Adam Light, Alice Lee Poetics, Andrei Kurushin, Andrew Kirillov,
-  Andrew Olsen, BobodevMm on github, Christian Schmitz, Dan Fandrich,
-  Daniel Stenberg, Daniel Terhorst-North, dependabot[bot],
+  Andrew Olsen, BobodevMm on github, Christian Schmitz, curl.stunt430,
+  Dan Fandrich, Daniel Stenberg, Daniel Terhorst-North, dependabot[bot],
   divinity76 on github, Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
   Evgeny Grin (Karlson2k), fds242 on github, Harry Sintonen, Howard Chu,
   Ignat Loskutov, Javier Blazquez, Jicea, jmaggard10 on github,
@@ -368,7 +390,7 @@ advice from friends like these:
   plv1313 on github, Pocs Norbert, Ray Satiro, renovate[bot],
   rinsuki on github, Sakthi SK, Samuel Dionne-Riel, Samuel Henrique,
   Stanislav Fort, Stefan Eissing, tkzv on github, Viktor Szakats
-  (47 contributors)
+  (48 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -685,11 +707,33 @@ References to bug reports and discussions on issues:
  [311] = https://curl.se/bug/?i=19060
  [312] = https://curl.se/bug/?i=19070
  [313] = https://curl.se/bug/?i=19069
+ [314] = https://curl.se/bug/?i=19110
  [315] = https://curl.se/bug/?i=19065
  [316] = https://curl.se/bug/?i=19017
  [317] = https://curl.se/bug/?i=16143
  [318] = https://curl.se/bug/?i=19055
+ [320] = https://curl.se/mail/lib-2025-10/0018.html
  [321] = https://curl.se/bug/?i=19053
  [322] = https://curl.se/bug/?i=19052
  [323] = https://curl.se/bug/?i=19051
  [324] = https://curl.se/bug/?i=19048
+ [325] = https://curl.se/bug/?i=19106
+ [326] = https://curl.se/bug/?i=19064
+ [328] = https://curl.se/bug/?i=19104
+ [330] = https://curl.se/bug/?i=19101
+ [331] = https://curl.se/bug/?i=19046
+ [332] = https://curl.se/bug/?i=19102
+ [334] = https://curl.se/bug/?i=19100
+ [337] = https://curl.se/bug/?i=19097
+ [339] = https://curl.se/bug/?i=19091
+ [340] = https://curl.se/bug/?i=19093
+ [342] = https://curl.se/bug/?i=19094
+ [343] = https://curl.se/bug/?i=19095
+ [344] = https://curl.se/bug/?i=19077
+ [345] = https://curl.se/bug/?i=19089
+ [346] = https://curl.se/bug/?i=19088
+ [347] = https://issues.oss-fuzz.com/issues/432441303
+ [348] = https://curl.se/bug/?i=19086
+ [349] = https://curl.se/bug/?i=19076
+ [353] = https://curl.se/bug/?i=19073
+ [354] = https://curl.se/bug/?i=19078
