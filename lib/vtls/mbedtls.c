@@ -1449,6 +1449,10 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
  */
 static int mbedtls_init(void)
 {
+  psa_status_t status;
+  status = psa_crypto_init();
+  if(status != PSA_SUCCESS)
+    return 0;
   if(!Curl_mbedtlsthreadlock_thread_setup())
     return 0;
 #if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
@@ -1463,6 +1467,7 @@ static void mbedtls_cleanup(void)
   entropy_cleanup_mutex(&ts_entropy);
 #endif
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
+  mbedtls_psa_crypto_free();
 }
 
 static bool mbedtls_data_pending(struct Curl_cfilter *cf,

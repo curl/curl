@@ -80,10 +80,6 @@
 
 #include "easy_lock.h"
 
-#ifdef USE_MBEDTLS
-#include <psa/crypto.h>
-#endif
-
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
@@ -141,24 +137,6 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 static char *leakpointer;
 #endif
 
-static CURLcode crypto_init(void)
-{
-#ifdef USE_MBEDTLS
-  psa_status_t status;
-  status = psa_crypto_init();
-  if(status != PSA_SUCCESS)
-    return CURLE_FAILED_INIT;
-#endif
-  return CURLE_OK;
-}
-
-static void crypto_cleanup(void)
-{
-#ifdef USE_MBEDTLS
-  mbedtls_psa_crypto_free();
-#endif
-}
-
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
  * different features of what to initialize.
@@ -179,11 +157,6 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 
   if(Curl_trc_init()) {
     DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
-    goto fail;
-  }
-
-  if(crypto_init()) {
-    DEBUGF(curl_mfprintf(stderr, "Error: crypto_init failed\n"));
     goto fail;
   }
 
@@ -324,8 +297,6 @@ void curl_global_cleanup(void)
   Curl_amiga_cleanup();
 
   Curl_ssh_cleanup();
-
-  crypto_cleanup();
 
 #ifdef DEBUGBUILD
   free(leakpointer);
