@@ -119,19 +119,6 @@ ParameterError file2string(char **bufp, FILE *file)
   return PARAM_OK;
 }
 
-static int myfseek(void *stream, curl_off_t offset, int whence)
-{
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
-  return _fseeki64(stream, (__int64)offset, whence);
-#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
-  return fseeko(stream, (off_t)offset, whence);
-#else
-  if(offset > LONG_MAX)
-    return -1;
-  return fseek(stream, (long)offset, whence);
-#endif
-}
-
 ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
                                  curl_off_t starto, curl_off_t endo)
 {
@@ -143,7 +130,7 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
 
     if(starto) {
       if(file != stdin) {
-        if(myfseek(file, starto, SEEK_SET))
+        if(curlx_fseek(file, starto, SEEK_SET))
           return PARAM_READ_ERROR;
         offset = starto;
       }
