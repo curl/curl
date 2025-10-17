@@ -34,7 +34,7 @@
 
 #include "fopen.h"
 
-int curlx_fseek(FILE *stream, curl_off_t offset, int whence)
+int curlx_fseek(void *stream, curl_off_t offset, int whence)
 {
 #if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
   return _fseeki64(stream, (__int64)offset, whence);
