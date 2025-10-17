@@ -71,7 +71,7 @@ jobs:
             "${DOCKER_IMAGE_STABLE}" \
             sh -c ./_ci-linux-debian.sh
 
-  linux-glibc-gcc-minimal:
+  linux-glibc-gcc-minimal:  # use gcc to minimize installed packages
     name: 'Linux gcc glibc minimal'
     runs-on: ubuntu-latest
     timeout-minutes: 5
