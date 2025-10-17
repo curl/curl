@@ -67,6 +67,7 @@ problems may have been fixed or changed somewhat since this was written.
  10. Connection
  10.1 --interface with link-scoped IPv6 address
  10.2 Does not acknowledge getaddrinfo sorting policy
+ 10.3 SOCKS-SSPI discards the security context
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
@@ -443,6 +444,15 @@ problems may have been fixed or changed somewhat since this was written.
  tries IPv6 addresses first.
 
  https://github.com/curl/curl/issues/16718
+
+
+10.3 SOCKS-SSPI discards the security context
+
+ After a successful SSPI/GSS-API exchange, the function queries and logs the
+ authenticated username and reports the supported data-protection level, but
+ then immediately deletes the negotiated SSPI security context and frees the
+ credentials before returning. The negotiated context is not stored on the
+ connection and is therefore never used to protect later SOCKS5 traffic.
 
 11. Internals
 
