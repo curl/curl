@@ -78,16 +78,17 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
                      struct cf_quic_ctx *qctx);
 
 
-typedef CURLcode vquic_recv_pkt_cb(const unsigned char *pkt, size_t pktlen,
-                                   struct sockaddr_storage *remote_addr,
-                                   socklen_t remote_addrlen, int ecn,
-                                   void *userp);
+typedef CURLcode vquic_recv_pkts_cb(const unsigned char *buf, size_t buflen,
+                                    size_t gso_size,
+                                    struct sockaddr_storage *remote_addr,
+                                    socklen_t remote_addrlen, int ecn,
+                                    void *userp);
 
 CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct cf_quic_ctx *qctx,
                             size_t max_pkts,
-                            vquic_recv_pkt_cb *recv_cb, void *userp);
+                            vquic_recv_pkts_cb *recv_cb, void *userp);
 
 #endif /* !USE_HTTP3 */
 

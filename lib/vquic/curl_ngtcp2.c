@@ -1731,37 +1731,43 @@ denied:
   return result;
 }
 
-static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
-                         struct sockaddr_storage *remote_addr,
-                         socklen_t remote_addrlen, int ecn,
-                         void *userp)
+static CURLcode cf_ngtcp2_recv_pkts(const unsigned char *buf, size_t buflen,
+                                    size_t gso_size,
+                                    struct sockaddr_storage *remote_addr,
+                                    socklen_t remote_addrlen, int ecn,
+                                    void *userp)
 {
   struct pkt_io_ctx *pktx = userp;
   struct cf_ngtcp2_ctx *ctx = pktx->cf->ctx;
   ngtcp2_pkt_info pi;
   ngtcp2_path path;
+  size_t offset, pktlen;
   int rv;
 
   if(ecn)
-    CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, ecn=%x)",
-                pktlen, ecn);
+    CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, gso=%zu, ecn=%x)",
+                buflen, gso_size, ecn);
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
                    (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
                    remote_addrlen);
   pi.ecn = (uint8_t)ecn;
 
-  rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi, pkt, pktlen, pktx->ts);
-  if(rv) {
-    CURL_TRC_CF(pktx->data, pktx->cf, "ingress, read_pkt -> %s (%d)",
-                ngtcp2_strerror(rv), rv);
-    cf_ngtcp2_err_set(pktx->cf, pktx->data, rv);
+  for(offset = 0; offset < buflen; offset += gso_size) {
+    pktlen = ((offset + gso_size) <= buflen) ? gso_size : (buflen - offset);
+    rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi,
+                              buf + offset, pktlen, pktx->ts);
+    if(rv) {
+      CURL_TRC_CF(pktx->data, pktx->cf, "ingress, read_pkt -> %s (%d)",
+                  ngtcp2_strerror(rv), rv);
+      cf_ngtcp2_err_set(pktx->cf, pktx->data, rv);
 
-    if(rv == NGTCP2_ERR_CRYPTO)
-      /* this is a "TLS problem", but a failed certificate verification
-         is a common reason for this */
-      return CURLE_PEER_FAILED_VERIFICATION;
-    return CURLE_RECV_ERROR;
+      if(rv == NGTCP2_ERR_CRYPTO)
+        /* this is a "TLS problem", but a failed certificate verification
+           is a common reason for this */
+        return CURLE_PEER_FAILED_VERIFICATION;
+      return CURLE_RECV_ERROR;
+    }
   }
   return CURLE_OK;
 }
@@ -1787,7 +1793,8 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  return vquic_recv_packets(cf, data, &ctx->q, 1000, recv_pkt, pktx);
+  return vquic_recv_packets(cf, data, &ctx->q, 1000,
+                            cf_ngtcp2_recv_pkts, pktx);
 }
 
 /**
