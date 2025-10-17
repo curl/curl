@@ -4845,6 +4845,8 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
     certstack = SSL_get_peer_cert_chain(ssl);
   else
     certstack = SSL_get0_verified_chain(ssl);
+  if(!certstack)
+    return;
   num_cert_levels = sk_X509_num(certstack);
 
   for(cert_level = 0; cert_level < num_cert_levels; cert_level++) {
@@ -4860,12 +4862,17 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
     const char *type_name;
 
     current_cert = sk_X509_value(certstack, cert_level);
+    if(!current_cert)
+      continue;
+
+    current_pkey = X509_get0_pubkey(current_cert);
+    if(!current_pkey)
+      continue;
 
     X509_get0_signature(NULL, &palg_cert, current_cert);
     X509_ALGOR_get0(&paobj_cert, NULL, NULL, palg_cert);
     OBJ_obj2txt(cert_algorithm, sizeof(cert_algorithm), paobj_cert, 0);
 
-    current_pkey = X509_get0_pubkey(current_cert);
     key_bits = EVP_PKEY_bits(current_pkey);
 #ifndef HAVE_OPENSSL3
 #define EVP_PKEY_get_security_bits EVP_PKEY_security_bits
