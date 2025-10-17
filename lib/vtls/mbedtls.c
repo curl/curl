@@ -1485,7 +1485,6 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
 #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
   psa_status_t status;
   size_t sha256len_actual;
-  (void)sha256len;
   status = psa_hash_compute(PSA_ALG_SHA_256, input, inputlen,
                             sha256sum, sha256len,
                             &sha256len_actual);
