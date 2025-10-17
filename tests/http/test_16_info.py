@@ -160,9 +160,12 @@ class TestInfo:
         for key in ['time_appconnect', 'time_connect', 'time_namelookup']:
             assert s[key] < s['time_pretransfer'], f'time "{key}" larger than' \
                 f'"time_pretransfer": {s}'
-        # assert transfer start is after pretransfer
-        assert s['time_pretransfer'] <= s['time_starttransfer'], f'"time_pretransfer" '\
-            f'greater than "time_starttransfer", {s}'
+        # assert transfer total is after pretransfer.
+        # (in MOST situations, pretransfer is before starttransfer, BUT
+        # in protocols like HTTP we might get a server response already before
+        # we transition to multi state DID.)
+        assert s['time_pretransfer'] <= s['time_total'], f'"time_pretransfer" '\
+            f'greater than "time_total", {s}'
         # assert that transfer start is before total
         assert s['time_starttransfer'] <= s['time_total'], f'"time_starttransfer" '\
             f'greater than "time_total", {s}'
