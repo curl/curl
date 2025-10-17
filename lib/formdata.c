@@ -37,6 +37,7 @@ struct Curl_easy;
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
+#include "curlx/fopen.h"
 #include "curlx/warnless.h"
 
 /* The last 2 #include files should be in this order */
@@ -860,7 +861,7 @@ CURLcode Curl_getformdata(CURL *data,
 #endif
             result = curl_mime_data_cb(part, (curl_off_t) -1,
                                        (curl_read_callback) fread,
-                                       Curl_fseeko,
+                                       curlx_fseek,
                                        NULL, (void *) stdin);
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop

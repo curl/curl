@@ -32,6 +32,8 @@
 #include <fcntl.h>  /* for open() and attributes */
 #endif
 
+int curlx_fseek(void *stream, curl_off_t offset, int whence);
+
 #if defined(_WIN32) && !defined(UNDER_CE)
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
 int curlx_win32_stat(const char *path, struct_stat *buffer);
