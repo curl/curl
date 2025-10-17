@@ -271,6 +271,20 @@ static char *Curl_basename(char *path)
 #define basename(x)  Curl_basename((x))
 #endif
 
+/* wrap call to fseeko so it matches the calling convention of callback */
+int Curl_fseeko(void *stream, curl_off_t offset, int whence)
+{
+#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
+  return _fseeki64(stream, (__int64)offset, whence);
+#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
+  return fseeko(stream, (off_t)offset, whence);
+#else
+  if(offset > LONG_MAX)
+    return -1;
+  return fseek(stream, (long)offset, whence);
+#endif
+}
+
 
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
@@ -703,14 +717,14 @@ static void mime_mem_free(void *ptr)
 
 /* Named file callbacks. */
 /* Argument is a pointer to the mime part. */
-static int mime_open_file(curl_mimepart *part)
+static bool mime_open_file(curl_mimepart *part)
 {
   /* Open a MIMEKIND_FILE part. */
 
   if(part->fp)
-    return 0;
+    return FALSE;
   part->fp = fopen_read(part->data, "rb");
-  return part->fp ? 0 : -1;
+  return part->fp ? FALSE : TRUE;
 }
 
 static size_t mime_file_read(char *buffer, size_t size, size_t nitems,
@@ -737,7 +751,7 @@ static int mime_file_seek(void *instream, curl_off_t offset, int whence)
   if(mime_open_file(part))
     return CURL_SEEKFUNC_FAIL;
 
-  return fseek(part->fp, (long) offset, whence) ?
+  return Curl_fseeko(part->fp, offset, whence) ?
     CURL_SEEKFUNC_CANTSEEK : CURL_SEEKFUNC_OK;
 }
 
