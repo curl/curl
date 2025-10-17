@@ -380,12 +380,19 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  size_t max_pkts,
                                  vquic_recv_pkt_cb *recv_cb, void *userp)
 {
+#if defined(__linux__) && defined(UDP_GRO)
 #define MMSG_NUM  16
+#define UDP_GRO_CNT_MAX  64
+#else
+#define MMSG_NUM  64
+#define UDP_GRO_CNT_MAX  1
+#endif
+#define MSG_BUF_SIZE  (UDP_GRO_CNT_MAX * 1500)
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
   uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
   struct sockaddr_storage remote_addr[MMSG_NUM];
-  size_t total_nread = 0, pkts = 0, calls = 0;
+  size_t total_nread = 0, pkts = 0, calls = 0, msg_pkts;
   int mcount, i, n;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
@@ -393,14 +400,14 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   size_t pktlen;
   size_t offset, to;
   char *sockbuf = NULL;
-  uint8_t (*bufs)[64*1024] = NULL;
+  uint8_t (*bufs)[MSG_BUF_SIZE] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
-  result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
+  result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * MSG_BUF_SIZE,
                                           &sockbuf);
   if(result)
     goto out;
-  bufs = (uint8_t (*)[64*1024])sockbuf;
+  bufs = (uint8_t (*)[MSG_BUF_SIZE])sockbuf;
 
   total_nread = 0;
   while(pkts < max_pkts) {
@@ -442,6 +449,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
     ++calls;
     for(i = 0; i < mcount; ++i) {
+      msg_pkts = 0;
       total_nread += mmsg[i].msg_len;
 
       gso_size = vquic_msghdr_get_udp_gro(&mmsg[i].msg_hdr);
@@ -450,7 +458,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       }
 
       for(offset = 0; offset < mmsg[i].msg_len; offset = to) {
-        ++pkts;
+        ++msg_pkts;
 
         to = offset + gso_size;
         if(to > mmsg[i].msg_len) {
@@ -465,6 +473,9 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         if(result)
           goto out;
       }
+      pkts += msg_pkts;
+      CURL_TRC_CF(data, cf, "recvmmsg, msg %d/%d with %zu packets, %zu total",
+                  i, mcount, msg_pkts, pkts);
     }
   }
 
