@@ -271,7 +271,6 @@ static char *Curl_basename(char *path)
 #define basename(x)  Curl_basename((x))
 #endif
 
-/* wrap call to fseeko so it matches the calling convention of callback */
 int Curl_fseeko(void *stream, curl_off_t offset, int whence)
 {
 #if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
