@@ -349,6 +349,8 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
   return result;
 }
 
+#define MAX_ALLOWED_CERT_AMOUNT 100
+
 static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 {
   CURLcode result;
@@ -364,6 +366,11 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     return CURLE_SSL_CONNECT_ERROR;
 
   numcerts = sk_X509_num(sk);
+  if(numcerts > MAX_ALLOWED_CERT_AMOUNT) {
+    failf(data, "%d certificates is more than allowed (%u)", (int)numcerts,
+          MAX_ALLOWED_CERT_AMOUNT);
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 
   result = Curl_ssl_init_certinfo(data, (int)numcerts);
   if(result)
