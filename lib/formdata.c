@@ -861,7 +861,7 @@ CURLcode Curl_getformdata(CURL *data,
 #endif
             result = curl_mime_data_cb(part, (curl_off_t) -1,
                                        (curl_read_callback) fread,
-                                       curlx_fseek,
+                                       (curl_seek_callback) curlx_fseek,
                                        NULL, (void *) stdin);
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
