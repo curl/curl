@@ -271,19 +271,6 @@ static char *Curl_basename(char *path)
 #define basename(x)  Curl_basename((x))
 #endif
 
-int Curl_fseeko(void *stream, curl_off_t offset, int whence)
-{
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
-  return _fseeki64(stream, (__int64)offset, whence);
-#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
-  return fseeko(stream, (off_t)offset, whence);
-#else
-  if(offset > LONG_MAX)
-    return -1;
-  return fseek(stream, (long)offset, whence);
-#endif
-}
-
 
 /* Set readback state. */
 static void mimesetstate(struct mime_state *state,
@@ -750,7 +737,7 @@ static int mime_file_seek(void *instream, curl_off_t offset, int whence)
   if(mime_open_file(part))
     return CURL_SEEKFUNC_FAIL;
 
-  return Curl_fseeko(part->fp, offset, whence) ?
+  return curlx_fseek(part->fp, offset, whence) ?
     CURL_SEEKFUNC_CANTSEEK : CURL_SEEKFUNC_OK;
 }
 

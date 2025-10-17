@@ -32,9 +32,23 @@
 
 #include "../curl_setup.h"
 
+#include "fopen.h"
+
+int curlx_fseek(void *stream, curl_off_t offset, int whence)
+{
+#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
+  return _fseeki64(stream, (__int64)offset, whence);
+#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
+  return fseeko(stream, (off_t)offset, whence);
+#else
+  if(offset > LONG_MAX)
+    return -1;
+  return fseek(stream, (long)offset, whence);
+#endif
+}
+
 #if defined(_WIN32) && !defined(UNDER_CE)
 
-#include "fopen.h"
 #include "multibyte.h"
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
