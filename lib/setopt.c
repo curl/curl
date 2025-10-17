@@ -870,7 +870,12 @@ static CURLcode value_range(long *value, long below_error, long min, long max)
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
+#if !defined(CURL_DISABLE_PROXY) || \
+  !defined(CURL_DISABLE_HTTP) || \
+  defined(HAVE_GSSAPI) || \
+  defined(USE_IPV6)
   unsigned long uarg = (unsigned long)arg;
+#endif
   bool set = FALSE;
   CURLcode result = setopt_bool(data, option, arg, &set);
   struct UserDefined *s = &data->set;
@@ -1097,7 +1102,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifdef HAVE_GSSAPI
   case CURLOPT_GSSAPI_DELEGATION:
-    s->gssapi_delegation = (unsigned char)uarg&
+    s->gssapi_delegation = (unsigned char)uarg &
       (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
     break;
 #endif
