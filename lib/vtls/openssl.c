@@ -5123,13 +5123,14 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
     failf(data, "SSL: could not get peer certificate");
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
+  else {
+    if(conn_config->verifystatus && !octx->reused_session)
+      ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
 
-  if(conn_config->verifystatus && !octx->reused_session)
-    ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
-
-  result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
-                                  ossl_chain_get_der, &chain,
-                                  ocsp_data, ocsp_len);
+    result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
+                                    ossl_chain_get_der, &chain,
+                                    ocsp_data, ocsp_len);
+  }
   *pverified = !result;
   return result;
 }
