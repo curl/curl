@@ -460,10 +460,6 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       if(result)
         goto out;
       pkts += (mmsg[i].msg_len + gso_size - 1) / gso_size;
-#if 0  /* very verbose, only apply to see mmsg+GRO usage */
-      CURL_TRC_CF(data, cf, "recvmmsg, msg %d/%d with %zu packets, %zu total",
-                  i + 1, mcount, msg_pkts, pkts);
-#endif
     }
   }
 
