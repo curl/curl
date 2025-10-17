@@ -1473,6 +1473,8 @@ static int providerload(struct Curl_easy *data,
     OSSL_STORE_CTX *store =
       OSSL_STORE_open_ex(cert_file, data->state.libctx,
                          NULL, NULL, NULL, NULL, NULL, NULL);
+    int rc;
+
     if(!store) {
       failf(data, "Failed to open OpenSSL store: %s",
             ossl_strerror(ERR_get_error(), error_buffer,
@@ -1501,13 +1503,15 @@ static int providerload(struct Curl_easy *data,
       return 0;
     }
 
-    if(SSL_CTX_use_certificate(ctx, cert) != 1) {
+    rc = SSL_CTX_use_certificate(ctx, cert);
+    X509_free(cert); /* we do not need the handle any more... */
+
+    if(rc != 1) {
       failf(data, "unable to set client certificate [%s]",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)));
       return 0;
     }
-    X509_free(cert); /* we do not need the handle any more... */
   }
   else {
     failf(data, "crypto provider not set, cannot load certificate");
