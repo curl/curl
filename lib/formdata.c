@@ -37,6 +37,7 @@ struct Curl_easy;
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
+#include "curlx/fopen.h"
 #include "curlx/warnless.h"
 
 /* The last 2 #include files should be in this order */
