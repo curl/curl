@@ -138,6 +138,7 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
                                     !defined(CURL_DISABLE_IMAP))
 
 /* Prototypes. */
+int Curl_fseeko(void *stream, curl_off_t offset, int whence);
 void Curl_mime_initpart(struct curl_mimepart *part);
 void Curl_mime_cleanpart(struct curl_mimepart *part);
 CURLcode Curl_mime_duppart(struct Curl_easy *data,
