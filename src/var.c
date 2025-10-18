@@ -446,10 +446,7 @@ ParameterError setvariable(const char *input)
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
-    struct dynbuf fname;
     line++;
-
-    curlx_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
@@ -469,7 +466,6 @@ ParameterError setvariable(const char *input)
       if(clen)
         contalloc = TRUE;
     }
-    curlx_dyn_free(&fname);
     if(!use_stdin && file)
       curlx_fclose(file);
     if(err)
