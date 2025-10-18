@@ -820,6 +820,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         failf(data, "schannel: Failed setting algorithm cipher list");
         if(client_certs[0])
           CertFreeCertificateContext(client_certs[0]);
+        Curl_safefree(backend->cred);
         return result;
       }
     }
