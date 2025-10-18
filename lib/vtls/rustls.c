@@ -746,6 +746,9 @@ init_config_builder_verifier(struct Curl_easy *data,
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build trusted root certificate store");
     result = CURLE_SSL_CACERT_BADFILE;
+    if(result) {
+      goto cleanup;
+    }
   }
 
   verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
@@ -754,7 +757,7 @@ init_config_builder_verifier(struct Curl_easy *data,
     result = init_config_builder_verifier_crl(data,
                                              conn_config,
                                              verifier_builder);
-    if(result != CURLE_OK) {
+    if(result) {
       goto cleanup;
     }
   }
