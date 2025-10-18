@@ -818,6 +818,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
       if(result) {
         failf(data, "schannel: Failed setting algorithm cipher list");
+        if(client_certs[0])
+          CertFreeCertificateContext(client_certs[0]);
         return result;
       }
     }
