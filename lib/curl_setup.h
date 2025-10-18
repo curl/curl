@@ -168,6 +168,20 @@
 
 #endif /* HAVE_CONFIG_H */
 
+#ifdef _WIN32
+#  if defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600)
+#    error The minimum build target is Windows Vista (0x0600)
+#  endif
+
+#  if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+     (defined(_MSC_VER) || \
+      (defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR >= 2)))
+#    ifndef HAVE_IF_NAMETOINDEX
+#    define HAVE_IF_NAMETOINDEX
+#    endif
+#  endif
+#endif
+
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
 /* behavior or generated code characteristics must be done here,   */
