@@ -461,7 +461,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
-          "of the OpenLDAP toolkit\n");
+          "of the OpenLDAP toolkit");
     result = CURLE_SSL_CERTPROBLEM;
     goto quit;
 #endif /* LDAP_OPT_X_TLS */
