@@ -746,7 +746,7 @@ static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
   case LDAP_RES_SEARCH_RESULT:
     switch(code) {
     case LDAP_SIZELIMIT_EXCEEDED:
-      infof(data, "Too many authentication mechanisms\n");
+      infof(data, "Too many authentication mechanisms");
       FALLTHROUGH();
     case LDAP_SUCCESS:
     case LDAP_NO_RESULTS_RETURNED:
