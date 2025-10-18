@@ -204,7 +204,7 @@ endif()
 set(HAVE_POLL 1)
 set(HAVE_POLL_H 1)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  set(HAVE_POSIX_STRERROR_R 0)
+  # Depends on C library.
 else()
   set(HAVE_POSIX_STRERROR_R 1)
 endif()
