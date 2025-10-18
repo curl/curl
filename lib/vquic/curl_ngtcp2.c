@@ -1888,7 +1888,7 @@ static CURLcode read_pkt_to_send(void *userp,
       /* we add the amount of data bytes to the flow windows */
       int rv = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, ndatalen);
       if(rv) {
-        failf(x->data, "nghttp3_conn_add_write_offset returned error: %s\n",
+        failf(x->data, "nghttp3_conn_add_write_offset returned error: %s",
               nghttp3_strerror(rv));
         return CURLE_SEND_ERROR;
       }
