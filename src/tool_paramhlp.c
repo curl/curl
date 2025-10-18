@@ -715,7 +715,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
 
 /*
  * Parse the string and modify ssl_version in the val argument. Return PARAM_OK
- * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ * on success, otherwise a parameter error enum.
  *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str
