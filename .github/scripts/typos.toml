@@ -27,6 +27,5 @@ extend-exclude = [
   "packages/*",
   "projects/Windows/tmpl/curl.vcxproj",
   "projects/Windows/tmpl/libcurl.vcxproj",
-  "scripts/wcurl",
   "tests/data/test*",
 ]

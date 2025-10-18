@@ -13,7 +13,6 @@ codespell \
   --skip '.github/scripts/typos.toml' \
   --skip 'docs/THANKS' \
   --skip 'packages/*' \
-  --skip 'scripts/wcurl' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.words' \
   $(git ls-files)
