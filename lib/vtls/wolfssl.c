@@ -357,7 +357,7 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  size_t nread;
+  size_t nread = 0;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
