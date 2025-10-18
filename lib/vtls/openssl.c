@@ -1328,6 +1328,7 @@ static int providercheck(struct Curl_easy *data,
       failf(data, "Failed to open OpenSSL store: %s",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)));
+      UI_destroy_method(ui_method);
       return 0;
     }
     if(OSSL_STORE_expect(store, OSSL_STORE_INFO_PKEY) != 1) {
