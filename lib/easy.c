@@ -764,9 +764,13 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   CURLMcode mcode;
   CURLcode result = CURLE_OK;
   SIGPIPE_VARIABLE(pipe_st);
+  CURL_TGUARD_VAR(guarded);
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   if(data->set.errorbuffer)
     /* clear this as early as possible */
@@ -776,7 +780,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   if(data->multi) {
     failf(data, "easy handle already used in multi handle");
-    return CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
+    goto out;
   }
 
   /* if the handle has a connection still attached (it is/was a connect-only
@@ -798,12 +803,16 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     /* this multi handle will only ever have a single easy handle attached to
        it, so make it use minimal hash sizes */
     multi = Curl_multi_handle(16, 1, 3, 7, 3);
-    if(!multi)
-      return CURLE_OUT_OF_MEMORY;
+    if(!multi) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
   }
 
-  if(multi->in_callback)
-    return CURLE_RECURSIVE_API_CALL;
+  if(multi->in_callback) {
+    result = CURLE_RECURSIVE_API_CALL;
+    goto out;
+  }
 
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
@@ -812,9 +821,9 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {
     curl_multi_cleanup(multi);
-    if(mcode == CURLM_OUT_OF_MEMORY)
-      return CURLE_OUT_OF_MEMORY;
-    return CURLE_FAILED_INIT;
+    result = (mcode == CURLM_OUT_OF_MEMORY) ?
+             CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
+    goto out;
   }
 
   /* assign this after curl_multi_add_handle() */
@@ -832,6 +841,8 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
 
   sigpipe_restore(&pipe_st);
 
+out:
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   /* The multi handle is kept alive, owned by the easy handle */
   return result;
 }
@@ -864,10 +875,17 @@ void curl_easy_cleanup(CURL *ptr)
 {
   struct Curl_easy *data = ptr;
   if(GOOD_EASY_HANDLE(data)) {
-    SIGPIPE_VARIABLE(pipe_st);
-    sigpipe_ignore(data, &pipe_st);
-    Curl_close(&data);
-    sigpipe_restore(&pipe_st);
+    /* We have no return code to fail this call. If called from
+     * another thread, we just refuse to do it. */
+    CURL_TGUARD_VAR(guarded);
+    if(CURL_TGUARD_EASY_ENTER(data, guarded)) {
+      SIGPIPE_VARIABLE(pipe_st);
+      sigpipe_ignore(data, &pipe_st);
+      Curl_close(&data);
+      sigpipe_restore(&pipe_st);
+    }
+    else
+      DEBUGASSERT(0);
   }
 }
 
@@ -882,9 +900,12 @@ CURLcode curl_easy_getinfo(CURL *easy, CURLINFO info, ...)
   va_list arg;
   void *paramp;
   CURLcode result;
+  CURL_TGUARD_VAR(guarded);
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   va_start(arg, info);
   paramp = va_arg(arg, void *);
@@ -892,6 +913,7 @@ CURLcode curl_easy_getinfo(CURL *easy, CURLINFO info, ...)
   result = Curl_getinfo(data, info, paramp);
 
   va_end(arg);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return result;
 }
 
@@ -967,11 +989,14 @@ CURL *curl_easy_duphandle(CURL *d)
 {
   struct Curl_easy *data = d;
   struct Curl_easy *outcurl = NULL;
+  CURL_TGUARD_VAR(guarded);
 
   if(!GOOD_EASY_HANDLE(data))
     goto fail;
   outcurl = calloc(1, sizeof(struct Curl_easy));
   if(!outcurl)
+    goto fail;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
     goto fail;
 
   /*
@@ -1068,7 +1093,7 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->magic = CURLEASY_MAGIC_NUMBER;
 
   /* we reach this point and thus we are OK */
-
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return outcurl;
 
 fail:
@@ -1082,6 +1107,7 @@ fail:
     Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
     free(outcurl);
+    CURL_TGUARD_EASY_LEAVE(data, guarded);
   }
 
   return NULL;
@@ -1094,7 +1120,11 @@ fail:
 void curl_easy_reset(CURL *d)
 {
   struct Curl_easy *data = d;
+  CURL_TGUARD_VAR(guarded);
+
   if(!GOOD_EASY_HANDLE(data))
+    return;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
     return;
 
   Curl_req_hard_reset(&data->req, data);
@@ -1129,6 +1159,7 @@ void curl_easy_reset(CURL *d)
   Curl_http_auth_cleanup_digest(data);
 #endif
   data->master_mid = UINT_MAX;
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
 }
 
 /*
@@ -1152,10 +1183,13 @@ CURLcode curl_easy_pause(CURL *d, int action)
   struct Curl_easy *data = d;
   bool recv_paused, recv_paused_new;
   bool send_paused, send_paused_new;
+  CURL_TGUARD_VAR(guarded);
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, do not continue */
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   if(Curl_is_in_callback(data))
     recursive = TRUE;
@@ -1199,6 +1233,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
        to false again on exit */
     Curl_set_in_callback(data, TRUE);
 
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return result;
 }
 
@@ -1237,11 +1272,14 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
   CURLcode result;
   struct connectdata *c;
   struct Curl_easy *data = d;
+  CURL_TGUARD_VAR(guarded);
 
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   result = easy_connection(data, &c);
   if(result)
@@ -1253,7 +1291,9 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
     Curl_attach_connection(data, c);
 
   *n = 0;
-  return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
+  result = Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
+  return result;
 }
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -1315,13 +1355,18 @@ CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
   size_t written = 0;
   CURLcode result;
   struct Curl_easy *data = d;
+  CURL_TGUARD_VAR(guarded);
+
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   result = Curl_senddata(data, buffer, buflen, &written);
   *n = written;
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return result;
 }
 
@@ -1331,15 +1376,21 @@ CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
 CURLcode curl_easy_upkeep(CURL *d)
 {
   struct Curl_easy *data = d;
-  /* Verify that we got an easy handle we can work with. */
+  CURLcode result;
+  CURL_TGUARD_VAR(guarded);
+
+ /* Verify that we got an easy handle we can work with. */
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   /* Use the common function to keep connections alive. */
-  return Curl_cpool_upkeep(data);
+  result = Curl_cpool_upkeep(data);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
+  return result;
 }
 
 CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
@@ -1348,10 +1399,17 @@ CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
 {
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
   struct Curl_easy *data = d;
+  CURLcode result;
+  CURL_TGUARD_VAR(guarded);
+
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  return Curl_ssl_session_import(data, session_key,
-                                 shmac, shmac_len, sdata, sdata_len);
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
+  result = Curl_ssl_session_import(data, session_key,
+                                   shmac, shmac_len, sdata, sdata_len);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
+  return result;
 #else
   (void)d;
   (void)session_key;
@@ -1369,9 +1427,17 @@ CURLcode curl_easy_ssls_export(CURL *d,
 {
 #if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
   struct Curl_easy *data = d;
+  CURLcode result;
+  CURL_TGUARD_VAR(guarded);
+
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  return Curl_ssl_session_export(data, export_fn, userptr);
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
+
+  result = Curl_ssl_session_export(data, export_fn, userptr);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
+  return result;
 #else
   (void)d;
   (void)export_fn;
