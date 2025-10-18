@@ -818,6 +818,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
       if(result) {
         failf(data, "schannel: Failed setting algorithm cipher list");
+        if(client_certs[0])
+          CertFreeCertificateContext(client_certs[0]);
         return result;
       }
     }
@@ -845,7 +847,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     char buffer[STRERROR_LEN];
     failf(data, "schannel: AcquireCredentialsHandle failed: %s",
           Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-    Curl_safefree(backend->cred);
     switch(sspi_status) {
     case SEC_E_INSUFFICIENT_MEMORY:
       return CURLE_OUT_OF_MEMORY;
