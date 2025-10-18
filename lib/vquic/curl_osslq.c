@@ -1661,14 +1661,14 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
       ctx->q.last_io = curlx_now();
       rv = nghttp3_conn_add_write_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
-        failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
+        failf(data, "nghttp3_conn_add_write_offset returned error: %s",
               nghttp3_strerror(rv));
         result = CURLE_SEND_ERROR;
         goto out;
       }
       rv = nghttp3_conn_add_ack_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
-        failf(data, "nghttp3_conn_add_ack_offset returned error: %s\n",
+        failf(data, "nghttp3_conn_add_ack_offset returned error: %s",
               nghttp3_strerror(rv));
         result = CURLE_SEND_ERROR;
         goto out;
