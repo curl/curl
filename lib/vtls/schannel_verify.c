@@ -576,7 +576,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
                              conn_hostname, strlen(conn_hostname))) {
         infof(data,
               "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
         result = CURLE_OK;
       }
