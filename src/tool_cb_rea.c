@@ -40,7 +40,10 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* wait up to a number of milliseconds for socket activity */
+#ifndef _WIN32
+/* Wait up to a number of milliseconds for socket activity. This function
+   waits on read activity on a file descriptor that is not a socket which
+   makes it not work with select() or poll() on Windows. */
 static bool waitfd(int waitms, int fd)
 {
 #ifdef HAVE_POLL
@@ -78,6 +81,7 @@ static bool waitfd(int waitms, int fd)
   return FALSE;
 #endif
 }
+#endif
 
 /*
 ** callback for CURLOPT_READFUNCTION
@@ -103,8 +107,6 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       /* timeout */
       return 0;
 #ifndef _WIN32
-    /* this logic waits on read activity on a file descriptor that is not a
-       socket which makes it not work with select() on Windows */
     else {
       long w = config->timeout_ms - msdelta;
       if(w > INT_MAX)
