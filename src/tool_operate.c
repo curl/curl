@@ -2032,35 +2032,54 @@ static CURLcode is_using_schannel(int *pusing)
  * environment-specified filename is found then check for CA bundle default
  * filename curl-ca-bundle.crt in the user's PATH.
  *
+ * If the user has set a CA cert/path or disabled peer verification (including
+ * for DoH, so completely disabled) then these locations are ignored.
+ *
  * If Schannel is the selected SSL backend then these locations are ignored.
  * We allow setting CA location for Schannel only when explicitly specified by
  * the user via CURLOPT_CAINFO / --cacert.
  */
-
 static CURLcode cacertpaths(struct OperationConfig *config)
 {
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-  char *env = curl_getenv("CURL_CA_BUNDLE");
+  char *env;
+  CURLcode result;
+  int using_schannel;
+
+  if(!feature_ssl || config->cacert || config->capath ||
+     (config->insecure_ok && (!config->doh_url || config->doh_insecure_ok)))
+    return CURLE_OK;
+
+  result = is_using_schannel(&using_schannel);
+  if(result || using_schannel)
+    return result;
+
+  env = curl_getenv("CURL_CA_BUNDLE");
   if(env) {
     config->cacert = strdup(env);
     curl_free(env);
-    if(!config->cacert)
+    if(!config->cacert) {
+      result = CURLE_OUT_OF_MEMORY;
       goto fail;
+    }
   }
   else {
     env = curl_getenv("SSL_CERT_DIR");
     if(env) {
       config->capath = strdup(env);
       curl_free(env);
-      if(!config->capath)
+      if(!config->capath) {
+        result = CURLE_OUT_OF_MEMORY;
         goto fail;
+      }
     }
     env = curl_getenv("SSL_CERT_FILE");
     if(env) {
       config->cacert = strdup(env);
       curl_free(env);
-      if(!config->cacert)
+      if(!config->cacert) {
+        result = CURLE_OUT_OF_MEMORY;
         goto fail;
+      }
     }
   }
 
@@ -2087,7 +2106,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 #endif
   return CURLE_OK;
 fail:
-  free(config->capath);
+  Curl_safefree(config->capath);
   return result;
 }
 
@@ -2106,30 +2125,8 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
     return CURLE_FAILED_INIT;
   }
 
-  /* On Windows we cannot set the path to curl-ca-bundle.crt at compile time.
-   * We look for the file in two ways:
-   * 1: look at the environment variable CURL_CA_BUNDLE for a path
-   * 2: if #1 is not found, use the Windows API function SearchPath()
-   *    to find it along the app's path (includes app's dir and CWD)
-   *
-   * We support the environment variable thing for non-Windows platforms
-   * too. Just for the sake of it.
-   */
-  if(feature_ssl &&
-     !config->cacert &&
-     !config->capath &&
-     (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
-    int using_schannel = -1;
-
-    result = is_using_schannel(&using_schannel);
-
-    /* With the addition of CAINFO support for Schannel, this search could
-     * find a certificate bundle that was previously ignored. To maintain
-     * backward compatibility, only perform this search if not using Schannel.
-     */
-    if(!result && !using_schannel)
-      result = cacertpaths(config);
-  }
+  if(!result)
+    result = cacertpaths(config);
 
   if(!result) {
     result = single_transfer(config, share, added, skipped);
