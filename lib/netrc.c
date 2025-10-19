@@ -83,6 +83,7 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
   if(file) {
     CURLcode result = CURLE_OK;
     bool eof;
+    ret = NETRC_OK;
     do {
       const char *line;
       result = Curl_get_line(&linebuf, file, &eof);
@@ -95,13 +96,12 @@ static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
         result = curlx_dyn_add(filebuf, line);
       }
       if(result) {
+        curlx_dyn_free(filebuf);
         ret = curl2netrc(result);
-        goto done;
+        break;
       }
     } while(!eof);
-    ret = NETRC_OK;
   }
-done:
   curlx_dyn_free(&linebuf);
   if(file)
     curlx_fclose(file);
