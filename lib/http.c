@@ -3266,18 +3266,20 @@ static CURLcode http_header_l(struct Curl_easy *data,
     return CURLE_OK;
   }
   if(HD_IS(hd, hdlen, "Location:")) {
-    if(data->req.location) {
-      failf(data, "Multiple Location headers");
-      return CURLE_WEIRD_SERVER_REPLY;
-    }
+    /* this is the URL that the server advises us to use instead */
+    char *location = Curl_copy_header_value(hd);
+    if(!location)
+      return CURLE_OUT_OF_MEMORY;
+    if(!*location)
+      /* ignore empty data */
+      free(location);
     else {
-      /* this is the URL that the server advises us to use instead */
-      char *location = Curl_copy_header_value(hd);
-      if(!location)
-        return CURLE_OUT_OF_MEMORY;
-      if(!*location)
-        /* ignore empty data */
+      if(data->req.location &&
+         strcmp(data->req.location, location)) {
+        failf(data, "Multiple Location headers");
         free(location);
+        return CURLE_WEIRD_SERVER_REPLY;
+      }
       else {
         data->req.location = location;
 
