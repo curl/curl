@@ -300,6 +300,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+#if NGTCP2_VERSION_NUM < 0x011100
 struct cf_ngtcp2_sfind_ctx {
   curl_int64_t stream_id;
   struct h3_stream_ctx *stream;
@@ -328,6 +329,20 @@ cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx, curl_int64_t stream_id)
   Curl_uint_hash_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
   return fctx.stream;
 }
+#else
+static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
+                                                  curl_int64_t stream_id)
+{
+  struct Curl_easy *data =
+    ngtcp2_conn_get_stream_user_data(ctx->qconn, stream_id);
+
+  if(!data) {
+    return NULL;
+  }
+
+  return H3_STREAM_CTX(ctx, data);
+}
+#endif
 
 static void cf_ngtcp2_stream_close(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
