@@ -41,7 +41,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* wait up to a number of milliseconds for socket activity */
-static bool waitfd(timediff_t waitms, curl_socket_t fd)
+static bool waitfd(int waitms, curl_socket_t fd)
 {
 #ifdef HAVE_POLL
   struct pollfd set;
@@ -49,7 +49,6 @@ static bool waitfd(timediff_t waitms, curl_socket_t fd)
   set.fd = fd;
   set.events = POLLIN;
   set.revents = 0;
-  DEBUGASSERT(waitms < INT_MAX);
   if(poll(&set, 1, (int)waitms))
     return TRUE; /* timeout */
   return FALSE;
@@ -107,7 +106,10 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     /* this logic waits on read activity on a file descriptor that is not a
        socket which makes it not work with select() on Windows */
     else {
-      waitfd(config->timeout_ms - msdelta, per->infd);
+      long w = config->timeout_ms - msdelta;
+      if(w > INT_MAX)
+        w = INT_MAX;
+      waitfd((int)w, per->infd);
     }
 #endif
   }
