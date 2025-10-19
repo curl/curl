@@ -686,6 +686,10 @@ Port number to connect to. See CURLOPT_PORT(3)
 
 Make an HTTP POST. See CURLOPT_POST(3)
 
+## CURLOPT_POSTFIELDS
+
+Send a POST with this data - does not copy it. See CURLOPT_POSTFIELDS(3)
+
 ## CURLOPT_POSTFIELDSIZE
 
 The POST data is this big. See CURLOPT_POSTFIELDSIZE(3)
