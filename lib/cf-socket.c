@@ -1042,10 +1042,12 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->ctx = NULL;
 }
 
-static CURLcode set_local_ip(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
+static void set_local_ip(struct Curl_cfilter *cf,
+                         struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
+  ctx->ip.local_ip[0] = 0;
+  ctx->ip.local_port = -1;
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&
@@ -1059,23 +1061,18 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
       int error = SOCKERRNO;
-      failf(data, "getsockname() failed with errno %d: %s",
+      infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
-      return CURLE_FAILED_INIT;
     }
-    if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
-                         ctx->ip.local_ip, &ctx->ip.local_port)) {
-      failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+    else if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
+                              ctx->ip.local_ip, &ctx->ip.local_port)) {
+      infof(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, curlx_strerror(errno, buffer, sizeof(buffer)));
-      return CURLE_FAILED_INIT;
     }
   }
 #else
   (void)data;
-  ctx->ip.local_ip[0] = 0;
-  ctx->ip.local_port = -1;
 #endif
-  return CURLE_OK;
 }
 
 static CURLcode set_remote_ip(struct Curl_cfilter *cf,
