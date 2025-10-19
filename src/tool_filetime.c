@@ -96,13 +96,17 @@ void setfiletime(curl_off_t filetime, const char *filename)
   HANDLE hfile;
   TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar(filename);
 
-  /* 910670515199 is the maximum Unix filetime that can be used as a
-     Windows FILETIME without overflow: 30827-12-31T23:59:59. */
+  /* 910670515199 is the maximum Unix filetime that can be used as a Windows
+     FILETIME without overflow: 30827-12-31T23:59:59. */
   if(filetime > 910670515199) {
-    warnf("Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
-          " on outfile: overflow", filetime);
-    curlx_unicodefree(tchar_filename);
-    return;
+    filetime = 910670515199;
+    warnf("Capping set filetime to max to avoid overflow");
+  }
+  else if(filetime < -6857222400) {
+    /* dates before 14 september 1752 (pre-Gregorian calendar) are not
+       accurate */
+    filetime = -6857222400;
+    warnf("Capping set filetime to minimum to avoid overflow");
   }
 
   hfile = CreateFile(tchar_filename, FILE_WRITE_ATTRIBUTES,
