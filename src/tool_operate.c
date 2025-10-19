@@ -2072,6 +2072,10 @@ static CURLcode cacertpaths(struct OperationConfig *config)
     if(cafile) {
       curlx_fclose(cafile);
       config->cacert = strdup(cacert);
+      if(!config->cacert) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
     }
 #elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
   !defined(CURL_DISABLE_CA_SEARCH)
