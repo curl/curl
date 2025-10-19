@@ -331,6 +331,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
   if(sx->start_resolving) {
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
+    DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version, TRUE, &dns);
@@ -858,6 +859,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   if(sx->start_resolving) {
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
+    DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version, TRUE, &dns);

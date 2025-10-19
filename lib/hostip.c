@@ -858,6 +858,7 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 
   /* We should intentionally error and not resolve .onion TLDs */
   hostname_len = strlen(hostname);
+  DEBUGASSERT(hostname_len);
   if(hostname_len >= 7 &&
      (curl_strequal(&hostname[hostname_len - 6], ".onion") ||
       curl_strequal(&hostname[hostname_len - 7], ".onion."))) {
@@ -982,7 +983,7 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsentry)
 {
   CURLcode result;
-
+  DEBUGASSERT(hostname && *hostname);
   *dnsentry = NULL;
   result = Curl_resolv(data, hostname, port, ip_version, FALSE, dnsentry);
   switch(result) {
@@ -1060,6 +1061,7 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
 #endif /* USE_ALARM_TIMEOUT */
   CURLcode result;
 
+  DEBUGASSERT(hostname && *hostname);
   *entry = NULL;
 
   if(timeoutms < 0)
