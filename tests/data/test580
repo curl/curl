@@ -20,6 +20,14 @@ Connection: close
 Location: and there's a second one too! / moo.html
 
 </data>
+<datacheck>
+HTTP/1.1 302 eat this!
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: this-is-the-first.html
+Content-Length: 0
+Connection: close
+</datacheck>
 </reply>
 
 # Client-side
@@ -51,5 +59,8 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+<errorcode>
+8
+</errorcode>
 </verify>
 </testcase>
