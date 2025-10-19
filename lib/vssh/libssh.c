@@ -613,6 +613,7 @@ static int myssh_in_SFTP_READDIR(struct Curl_easy *data,
 
       if(result) {
         myssh_to(data, sshc, SSH_STOP);
+        sshc->actualcode = result;
         return SSH_NO_ERROR;
       }
 
