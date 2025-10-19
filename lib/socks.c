@@ -765,13 +765,12 @@ static CURLproxycode socks5_check_auth_resp(struct socks_state *sx,
 
   /* ignore the first (VER) byte */
   auth_status = resp[1];
-  Curl_bufq_skip(&sx->iobuf, 2);
-
   if(auth_status) {
     failf(data, "User was rejected by the SOCKS5 server (%d %d).",
           resp[0], resp[1]);
     return CURLPX_USER_REJECTED;
   }
+  Curl_bufq_skip(&sx->iobuf, 2);
   return CURLPX_OK;
 }
 
