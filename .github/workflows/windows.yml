@@ -365,7 +365,6 @@ jobs:
         run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -560,7 +559,6 @@ jobs:
         run: |
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -937,7 +935,6 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
-          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
