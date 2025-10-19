@@ -106,7 +106,7 @@ int main(void)
   }
   fsize = file_info.st_size;
 
-  printf("Local file size: %lu bytes.\n", (unsigned long)fsize);
+  printf("Local file size: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", fsize);
 
   /* In Windows, this inits the Winsock stuff */
   res = curl_global_init(CURL_GLOBAL_ALL);
