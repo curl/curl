@@ -1136,7 +1136,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
     if(!data->req.no_body)
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
 
-    if(smtpcode != 1) {
+    if(!result && (smtpcode != 1)) {
       if(smtp->rcpt) {
         smtp->rcpt = smtp->rcpt->next;
 
