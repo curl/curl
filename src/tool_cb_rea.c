@@ -41,7 +41,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 /* wait up to a number of milliseconds for socket activity */
-static bool waitfd(int waitms, curl_socket_t fd)
+static bool waitfd(int waitms, int fd)
 {
 #ifdef HAVE_POLL
   struct pollfd set;
