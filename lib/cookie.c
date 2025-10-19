@@ -1205,19 +1205,27 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     ci->running = FALSE; /* this is not running, this is init */
     if(fp) {
       struct dynbuf buf;
+      bool eof = FALSE;
+      CURLcode result;
       curlx_dyn_init(&buf, MAX_COOKIE_LINE);
-      while(Curl_get_line(&buf, fp)) {
-        const char *lineptr = curlx_dyn_ptr(&buf);
-        bool headerline = FALSE;
-        if(checkprefix("Set-Cookie:", lineptr)) {
-          /* This is a cookie line, get it! */
-          lineptr += 11;
-          headerline = TRUE;
-          curlx_str_passblanks(&lineptr);
-        }
+      do {
+        result = Curl_get_line(&buf, fp, &eof);
+        if(!result) {
+          const char *lineptr = curlx_dyn_ptr(&buf);
+          bool headerline = FALSE;
+          if(checkprefix("Set-Cookie:", lineptr)) {
+            /* This is a cookie line, get it! */
+            lineptr += 11;
+            headerline = TRUE;
+            curlx_str_passblanks(&lineptr);
+          }
 
-        Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL, NULL, TRUE);
-      }
+          (void)Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL,
+                                NULL, TRUE);
+          /* File reading cookie failures are not propagated back to the
+             caller because there is no way to do that */
+        }
+      } while(!result && !eof);
       curlx_dyn_free(&buf); /* free the line buffer */
 
       /*
