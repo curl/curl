@@ -57,8 +57,6 @@ jobs:
           - { build: 'cmake'    , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
       fail-fast: false
     steps:
-      - run: git config --global core.autocrlf input
-        shell: pwsh
       - uses: cygwin/cygwin-install-action@f2009323764960f80959895c7bc3bb30210afe4d # v6
         with:
           platform: ${{ matrix.platform }}
