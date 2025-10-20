@@ -335,7 +335,7 @@ This release includes the following bugfixes:
  o tool_cb_hdr: size is always 1 [70]
  o tool_cb_rea: use poll instead of select if available [329]
  o tool_doswin: fix to use curl socket functions [108]
- o tool_filetime: cap crazy filetimes instead of erroring [327]
+ o tool_filetime: cap crazy file times instead of erroring [327]
  o tool_filetime: replace cast with the fitting printf mask (Windows) [212]
  o tool_formparse: rewrite the headers file parser [374]
  o tool_getparam/set_rate: skip the multiplication on overflow [84]
