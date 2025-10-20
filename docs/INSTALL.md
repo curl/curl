@@ -652,23 +652,23 @@ and runs on, that is not listed, please let us know.
 
 ## 109 Operating Systems
 
-AIX, AmigaOS, Android, ArcaOS, Aros, Atari FreeMiNT, Azure Sphere, BeOS,
-Blackberry 10, Blackberry Tablet OS, Cell OS, Cesium, CheriBSD, Chrome OS,
-Cisco IOS, DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS,
-Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I, illumos,
-Integrity, iOS, ipadOS, IRIX, KasperskyOS, Linux, Lua RTOS, Mac OS 9, macOS,
-Maemo, Mbed, Meego, Micrium, MINIX, Minoca, Moblin, MorphOS, MPE/iX, MS-DOS,
-NCR MP-RAS, NetBSD, Netware, NextStep, Nintendo 3DS, Nintendo Switch, NonStop
-OS, NuttX, OpenBSD, OpenStep, Orbis OS, OS/2, OS21, PikeOS, Plan 9,
-PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RISC OS, ROS, RTEMS,
-Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, SmartOS, Solaris, Sortix,
-SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS,
-UnixWare, visionOS, VMS, vxWorks, watchOS, Wear OS, WebOS, Wii System
-Software, Wii U, Windows, Windows CE, Xbox System, Xenix, z/OS, z/TPF, z/VM,
-z/VSE, Zephyr
+    AIX, AmigaOS, Android, ArcaOS, Aros, Atari FreeMiNT, Azure Sphere, BeOS,
+    Blackberry 10, Blackberry Tablet OS, Cell OS, Cesium, CheriBSD, Chrome OS,
+    Cisco IOS, DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS,
+    Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I,
+    illumos, Integrity, iOS, ipadOS, IRIX, KasperskyOS, Linux, Lua RTOS,
+    Mac OS 9, macOS, Maemo, Mbed, Meego, Micrium, MINIX, Minoca, Moblin,
+    MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD, Netware, NextStep,
+    Nintendo 3DS, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep,
+    Orbis OS, OS/2, OS21, PikeOS, Plan 9, PlayStation Portable, QNX, Qubes OS,
+    ReactOS, Redox, RISC OS, ROS, RTEMS, Sailfish OS, SCO Unix, Serenity,
+    SINIX-Z, SkyOS, SmartOS, Solaris, Sortix, SunOS, Syllable OS, Symbian,
+    Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS, UnixWare, visionOS, VMS,
+    vxWorks, watchOS, Wear OS, WebOS, Wii System Software, Wii U, Windows,
+    Windows CE, Xbox System, Xenix, z/OS, z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures
 
-Alpha, ARC, ARM, AVR32, C-SKY, CompactRISC, Elbrus, ETRAX, HP-PA, Itanium,
-LoongArch, m68k, m88k, MicroBlaze, MIPS, Nios, OpenRISC, POWER, PowerPC,
-RISC-V, s390, SH4, SPARC, Tilera, VAX, x86, Xtensa, z/arch
+    Alpha, ARC, ARM, AVR32, C-SKY, CompactRISC, Elbrus, ETRAX, HP-PA, Itanium,
+    LoongArch, m68k, m88k, MicroBlaze, MIPS, Nios, OpenRISC, POWER, PowerPC,
+    RISC-V, s390, SH4, SPARC, Tilera, VAX, x86, Xtensa, z/arch
