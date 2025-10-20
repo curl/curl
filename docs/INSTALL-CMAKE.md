@@ -405,8 +405,8 @@ Details via CMake
 - `CARES_LIBRARY`:                          Path to `cares` library.
 - `DL_LIBRARY`:                             Path to `dl` library. (for Rustls)
 - `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS. (also supported as environment)
-- `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
-- `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
+- `LDAP_LIBRARY`:                           Path to `ldap` library.
+- `LDAP_LBER_LIBRARY`:                      Path to `lber` library.
 - `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory.
 - `LIBGSASL_INCLUDE_DIR`:                   The libgsasl include directory.
 - `LIBGSASL_LIBRARY`:                       Path to `libgsasl` library.
