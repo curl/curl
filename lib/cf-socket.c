@@ -344,6 +344,8 @@ static CURLcode socket_open(struct Curl_easy *data,
                             struct Curl_sockaddr_ex *addr,
                             curl_socket_t *sockfd)
 {
+  char errbuf[STRERROR_LEN];
+
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   if(data->set.fopensocket) {
@@ -367,13 +369,15 @@ static CURLcode socket_open(struct Curl_easy *data,
     *sockfd = CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
   }
 
-  if(*sockfd == CURL_SOCKET_BAD)
+  if(*sockfd == CURL_SOCKET_BAD) {
     /* no socket, no connection */
+    failf(data, "failed to open socket: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_COULDNT_CONNECT;
+  }
 
 #ifdef HAVE_FCNTL
   if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
-    char errbuf[STRERROR_LEN];
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     close(*sockfd);
