@@ -34,6 +34,7 @@ CMAKE_DIST =                                    \
  CMake/CurlTests.c                              \
  CMake/FindBrotli.cmake                         \
  CMake/FindCares.cmake                          \
+ CMake/FindGnuTLS.cmake                         \
  CMake/FindGSS.cmake                            \
  CMake/FindLDAP.cmake                           \
  CMake/FindLibgsasl.cmake                       \
