@@ -3270,37 +3270,37 @@ static CURLcode http_header_l(struct Curl_easy *data,
     char *location = Curl_copy_header_value(hd);
     if(!location)
       return CURLE_OUT_OF_MEMORY;
-    if(!*location)
-      /* ignore empty data */
+    if(!*location ||
+       (data->req.location && !strcmp(data->req.location, location))) {
+      /* ignore empty header, or exact repeat of a previous one */
       free(location);
+      return CURLE_OK;
+    }
     else {
-      if(data->req.location &&
-         strcmp(data->req.location, location)) {
+      /* has value and is not an exact repeat */
+      if(data->req.location) {
         failf(data, "Multiple Location headers");
         free(location);
         return CURLE_WEIRD_SERVER_REPLY;
       }
-      else {
-        free(data->req.location);
-        data->req.location = location;
+      data->req.location = location;
 
-        if((k->httpcode >= 300 && k->httpcode < 400) &&
-           data->set.http_follow_mode) {
-          CURLcode result;
-          DEBUGASSERT(!data->req.newurl);
-          data->req.newurl = strdup(data->req.location); /* clone */
-          if(!data->req.newurl)
-            return CURLE_OUT_OF_MEMORY;
+      if((k->httpcode >= 300 && k->httpcode < 400) &&
+         data->set.http_follow_mode) {
+        CURLcode result;
+        DEBUGASSERT(!data->req.newurl);
+        data->req.newurl = strdup(data->req.location); /* clone */
+        if(!data->req.newurl)
+          return CURLE_OUT_OF_MEMORY;
 
-          /* some cases of POST and PUT etc needs to rewind the data
-             stream at this point */
-          result = http_perhapsrewind(data, conn);
-          if(result)
-            return result;
+        /* some cases of POST and PUT etc needs to rewind the data
+           stream at this point */
+        result = http_perhapsrewind(data, conn);
+        if(result)
+          return result;
 
-          /* mark the next request as a followed location: */
-          data->state.this_is_a_follow = TRUE;
-        }
+        /* mark the next request as a followed location: */
+        data->state.this_is_a_follow = TRUE;
       }
     }
   }
