@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `LIBIDN2_INCLUDE_DIR`:   The libidn2 include directory.
+# - `LIBIDN2_INCLUDE_DIR`:   Absolute path to libidn2 include directory.
 # - `LIBIDN2_LIBRARY`:       Absolute path to `libidn2` library.
 #
 # Result variables:

@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `LIBSSH_INCLUDE_DIR`:   The libssh include directory.
+# - `LIBSSH_INCLUDE_DIR`:   Absolute path to libssh include directory.
 # - `LIBSSH_LIBRARY`:       Absolute path to `libssh` library.
 #
 # Result variables:

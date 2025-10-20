@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `NGHTTP3_INCLUDE_DIR`:   The nghttp3 include directory.
+# - `NGHTTP3_INCLUDE_DIR`:   Absolute path to nghttp3 include directory.
 # - `NGHTTP3_LIBRARY`:       Absolute path to `nghttp3` library.
 #
 # Result variables:

@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `RUSTLS_INCLUDE_DIR`:   The Rustls include directory.
+# - `RUSTLS_INCLUDE_DIR`:   Absolute path to Rustls include directory.
 # - `RUSTLS_LIBRARY`:       Absolute path to `rustls` library.
 #
 # Result variables:

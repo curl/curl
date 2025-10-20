@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `LIBPSL_INCLUDE_DIR`:   The libpsl include directory.
+# - `LIBPSL_INCLUDE_DIR`:   Absolute path to libpsl include directory.
 # - `LIBPSL_LIBRARY`:       Absolute path to `libpsl` library.
 #
 # Result variables:

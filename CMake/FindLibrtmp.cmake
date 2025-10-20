@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `LIBRTMP_INCLUDE_DIR`:   The librtmp include directory.
+# - `LIBRTMP_INCLUDE_DIR`:   Absolute path to librtmp include directory.
 # - `LIBRTMP_LIBRARY`:       Absolute path to `librtmp` library.
 #
 # Result variables:

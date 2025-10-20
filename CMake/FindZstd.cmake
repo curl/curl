@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `ZSTD_INCLUDE_DIR`:   The zstd include directory.
+# - `ZSTD_INCLUDE_DIR`:   Absolute path to zstd include directory.
 # - `ZSTD_LIBRARY`:       Absolute path to `zstd` library.
 #
 # Result variables:
