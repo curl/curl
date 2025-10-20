@@ -68,7 +68,7 @@ CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
       return appendnl(buf);
     /* otherwise get next line to append */
   }
-  return CURLE_FAILED_INIT;
+  /* UNREACHABLE */
 }
 
 #endif /* if not disabled */
