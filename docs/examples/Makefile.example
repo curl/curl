@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-SRC ?= ftpget.c
+SRC ?= https.c
 
 # What to call the final executable
 TARGET ?= example
