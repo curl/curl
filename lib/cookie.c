@@ -750,7 +750,6 @@ parse_cookie_header(struct Curl_easy *data,
   if(!co->name)
     return CERR_BAD;
 
-  data->req.setcookies++;
   return CERR_OK;
 }
 
@@ -1139,6 +1138,9 @@ Curl_cookie_add(struct Curl_easy *data,
    */
   if(co->expires && (co->expires < ci->next_expiration))
     ci->next_expiration = co->expires;
+
+  if(httpheader)
+    data->req.setcookies++;
 
   return co;
 fail:
