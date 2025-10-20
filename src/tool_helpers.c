@@ -40,8 +40,6 @@ const char *param2text(ParameterError error)
     return "had unsupported trailing garbage";
   case PARAM_OPTION_UNKNOWN:
     return "is unknown";
-  case PARAM_OPTION_AMBIGUOUS:
-    return "is ambiguous";
   case PARAM_REQUIRES_PARAMETER:
     return "requires parameter";
   case PARAM_BAD_USE:
