@@ -2013,9 +2013,8 @@ endif()
 # (= regenerate it).
 function(curl_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
-  # cmake-lint: disable=W0106
-  string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
-  string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})  # cmake-lint: disable=W0106
+  string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})  # cmake-lint: disable=W0106
 
   string(REGEX REPLACE "\\\\\n" "!^!^!" _makefile_inc_text ${_makefile_inc_text})
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "set(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
