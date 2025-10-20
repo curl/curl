@@ -2190,12 +2190,13 @@ static ParameterError opt_file(struct OperationConfig *config,
     GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
     break;
   case C_CONFIG: /* --config */
-    if(max_recursive < 0) {
-      errorf("Max config file recursion level reached");
-      err = PARAM_RECURSION;
+    if(--max_recursive < 0) {
+      errorf("Max config file recursion level reached (%u)",
+             CONFIG_MAX_LEVELS);
+      err = PARAM_BAD_USE;
     }
     else {
-      err = parseconfig(nextarg, max_recursive--);
+      err = parseconfig(nextarg, max_recursive);
     }
     break;
   case C_CRLFILE: /* --crlfile */

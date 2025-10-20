@@ -68,8 +68,6 @@ const char *param2text(ParameterError error)
     return "blank argument where content is expected";
   case PARAM_VAR_SYNTAX:
     return "syntax error in --variable argument";
-  case PARAM_RECURSION:
-    return "too recursive --config use";
   default:
     return "unknown error";
   }
