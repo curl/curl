@@ -26,8 +26,8 @@
 # Input variables:
 #
 # - `LDAP_INCLUDE_DIR`:   The ldap include directory.
-# - `LDAP_LIBRARY`:       Path to `ldap` library.
-# - `LDAP_LBER_LIBRARY`:  Path to `lber` library.
+# - `LDAP_LIBRARY`:       Absolute path to `ldap` library.
+# - `LDAP_LBER_LIBRARY`:  Absolute path to `lber` library.
 #
 # Result variables:
 #

@@ -26,7 +26,7 @@
 # Input variables:
 #
 # - `WOLFSSL_INCLUDE_DIR`:   The wolfSSL include directory.
-# - `WOLFSSL_LIBRARY`:       Path to `wolfssl` library.
+# - `WOLFSSL_LIBRARY`:       Absolute path to `wolfssl` library.
 #
 # Result variables:
 #

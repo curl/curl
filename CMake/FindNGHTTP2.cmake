@@ -26,7 +26,7 @@
 # Input variables:
 #
 # - `NGHTTP2_INCLUDE_DIR`:   The nghttp2 include directory.
-# - `NGHTTP2_LIBRARY`:       Path to `nghttp2` library.
+# - `NGHTTP2_LIBRARY`:       Absolute path to `nghttp2` library.
 #
 # Result variables:
 #

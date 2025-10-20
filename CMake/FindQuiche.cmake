@@ -26,7 +26,7 @@
 # Input variables:
 #
 # - `QUICHE_INCLUDE_DIR`:   The quiche include directory.
-# - `QUICHE_LIBRARY`:       Path to `quiche` library.
+# - `QUICHE_LIBRARY`:       Absolute path to `quiche` library.
 #
 # Result variables:
 #
