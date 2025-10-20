@@ -85,7 +85,7 @@ ParameterError parseconfig(const char *filename, int max_recursive)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
-  int rc = 0;
+  ParameterError err = PARAM_OK;
   struct OperationConfig *config = global->last;
   char *pathalloc = NULL;
 
@@ -133,12 +133,12 @@ ParameterError parseconfig(const char *filename, int max_recursive)
     curlx_dyn_init(&pbuf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
-    while(!rc && my_get_line(file, &buf, &fileerror)) {
+    while(!err && my_get_line(file, &buf, &fileerror)) {
       ParameterError res;
       lineno++;
       line = curlx_dyn_ptr(&buf);
       if(!line) {
-        rc = 1; /* out of memory */
+        err = PARAM_NO_MEM; /* out of memory */
         break;
       }
 
@@ -166,9 +166,11 @@ ParameterError parseconfig(const char *filename, int max_recursive)
       /* the parameter starts here (unless quoted) */
       if(*line == '\"') {
         /* quoted parameter, do the quote dance */
-        rc = unslashquote(++line, &pbuf);
-        if(rc)
+        int rc = unslashquote(++line, &pbuf);
+        if(rc) {
+          err = PARAM_BAD_USE;
           break;
+        }
         param = curlx_dyn_len(&pbuf) ? curlx_dyn_ptr(&pbuf) : CURL_UNCONST("");
       }
       else {
@@ -245,7 +247,7 @@ ParameterError parseconfig(const char *filename, int max_recursive)
             const char *reason = param2text(res);
             errorf("%s:%d: '%s' %s", filename, lineno, option, reason);
           }
-          rc = (int)res;
+          err = res;
         }
       }
     }
@@ -254,16 +256,16 @@ ParameterError parseconfig(const char *filename, int max_recursive)
     if(file != stdin)
       curlx_fclose(file);
     if(fileerror)
-      rc = PARAM_READ_ERROR;
+      err = PARAM_READ_ERROR;
   }
   else
-    rc = PARAM_READ_ERROR; /* could not open the file */
+    err = PARAM_READ_ERROR; /* could not open the file */
 
-  if((rc == PARAM_READ_ERROR) && filename)
+  if((err == PARAM_READ_ERROR) && filename)
     errorf("cannot read config from '%s'", filename);
 
   free(pathalloc);
-  return rc;
+  return err;
 }
 
 
