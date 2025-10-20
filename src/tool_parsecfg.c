@@ -81,7 +81,7 @@ static int unslashquote(const char *line, struct dynbuf *param)
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename)
+int parseconfig(const char *filename, int max_recursive)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
@@ -206,7 +206,7 @@ int parseconfig(const char *filename)
 #ifdef DEBUG_CONFIG
       curl_mfprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
-      res = getparameter(option, param, &usedarg, config);
+      res = getparameter(option, param, &usedarg, config, max_recursive);
       config = global->last;
 
       if(!res && param && *param && !usedarg)
@@ -240,9 +240,11 @@ int parseconfig(const char *filename)
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
-          const char *reason = param2text(res);
-          errorf("%s:%d: '%s' %s",
-                 filename, lineno, option, reason);
+          /* only show error in the first level config call */
+          if(max_recursive == CONFIG_MAX_LEVELS) {
+            const char *reason = param2text(res);
+            errorf("%s:%d: '%s' %s", filename, lineno, option, reason);
+          }
           rc = (int)res;
         }
       }

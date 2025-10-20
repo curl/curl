@@ -358,6 +358,7 @@ typedef enum {
   PARAM_EXPAND_ERROR, /* --expand problem */
   PARAM_BLANK_STRING,
   PARAM_VAR_SYNTAX, /* --variable syntax error */
+  PARAM_RECURSION,
   PARAM_LAST
 } ParameterError;
 
@@ -368,7 +369,8 @@ const struct LongShort *findshortopt(char letter);
 
 ParameterError getparameter(const char *flag, const char *nextarg,
                             bool *usedarg,
-                            struct OperationConfig *config);
+                            struct OperationConfig *config,
+                            int max_recursive);
 
 #ifdef UNITTESTS
 void parse_cert_parameter(const char *cert_parameter,
