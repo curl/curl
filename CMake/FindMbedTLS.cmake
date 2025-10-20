@@ -25,10 +25,10 @@
 #
 # Input variables:
 #
-# - `MBEDTLS_INCLUDE_DIR`:   The mbedTLS include directory.
-# - `MBEDTLS_LIBRARY`:       Path to `mbedtls` library.
-# - `MBEDX509_LIBRARY`:      Path to `mbedx509` library.
-# - `MBEDCRYPTO_LIBRARY`:    Path to `mbedcrypto` library.
+# - `MBEDTLS_INCLUDE_DIR`:   Absolute path to mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:       Absolute path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:      Absolute path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:    Absolute path to `mbedcrypto` library.
 #
 # Result variables:
 #

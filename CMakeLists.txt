@@ -645,7 +645,7 @@ elseif(DOS)
     include_directories(SYSTEM "${WATT_ROOT}/inc")
     list(APPEND CMAKE_REQUIRED_INCLUDES "${WATT_ROOT}/inc")
   else()
-    message(FATAL_ERROR "Set WATT_ROOT variable to the root installation of Watt-32.")
+    message(FATAL_ERROR "Set WATT_ROOT variable to the absolute path to the root installation of Watt-32.")
   endif()
 elseif(AMIGA)
   if(AMISSL_INCLUDE_DIR AND AMISSL_STUBS_LIBRARY AND AMISSL_AUTO_LIBRARY)
@@ -1498,14 +1498,16 @@ endif()
 # CA handling
 #
 if(_curl_ca_bundle_supported)
+  set(_ca_opt_desc "Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+
   set(CURL_CA_BUNDLE "auto" CACHE
-    STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+    STRING "Absolute path to the CA bundle. ${_ca_opt_desc}")
   set(CURL_CA_FALLBACK OFF CACHE
     BOOL "Use built-in CA store of OpenSSL. Defaults to OFF")
   set(CURL_CA_PATH "auto" CACHE
-    STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+    STRING "Absolute path to a directory containing CA certificates stored individually. ${_ca_opt_desc}")
   set(CURL_CA_EMBED "" CACHE
-    STRING "Path to the CA bundle to embed in the curl tool.")
+    STRING "Absolute path to the CA bundle to embed in the curl tool.")
 
   if(CURL_CA_FALLBACK AND NOT CURL_USE_OPENSSL)
     message(FATAL_ERROR "CURL_CA_FALLBACK only works with OpenSSL.")
@@ -1556,8 +1558,8 @@ if(_curl_ca_bundle_supported)
         if(EXISTS "${_search_ca_bundle_path}")
           message(STATUS "Found CA bundle: ${_search_ca_bundle_path}")
           set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE
-            STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-          set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+            STRING "Absolute path to the CA bundle. ${_ca_opt_desc}")
+          set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Absolute path to the CA bundle has been set")
           break()
         endif()
       endforeach()
@@ -1570,8 +1572,8 @@ if(_curl_ca_bundle_supported)
         unset(_curl_ca_files_found)
         message(STATUS "Found CA path: ${_search_ca_path}")
         set(CURL_CA_PATH "${_search_ca_path}" CACHE
-          STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-        set(CURL_CA_PATH_SET TRUE CACHE BOOL "Path to the CA bundle has been set")
+          STRING "Absolute path to a directory containing CA certificates stored individually. ${_ca_opt_desc}")
+        set(CURL_CA_PATH_SET TRUE CACHE BOOL "Absolute path to the CA bundle has been set")
       endif()
     endif()
   endif()

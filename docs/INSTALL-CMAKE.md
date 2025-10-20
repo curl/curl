@@ -255,10 +255,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 
 ## CA bundle options
 
-- `CURL_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
-- `CURL_CA_EMBED`:                          Path to the CA bundle to embed in the curl tool. Default: (disabled)
+- `CURL_CA_BUNDLE`:                         Absolute path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `CURL_CA_EMBED`:                          Absolute path to the CA bundle to embed in the curl tool. Default: (disabled)
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of OpenSSL. Default: `OFF`
-- `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
 
 ## Enabling features
@@ -379,13 +379,13 @@ Details via CMake
 
 ## Dependency options (via CMake)
 
-- `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
-- `OPENSSL_INCLUDE_DIR`:                    The OpenSSL include directory.
-- `OPENSSL_SSL_LIBRARY`:                    Path to `ssl` library. With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
-- `OPENSSL_CRYPTO_LIBRARY`:                 Path to `crypto` library. With MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
+- `OPENSSL_ROOT_DIR`:                       Absolute path to the root installation of OpenSSL (and forks).
+- `OPENSSL_INCLUDE_DIR`:                    Absolute path to OpenSSL include directory.
+- `OPENSSL_SSL_LIBRARY`:                    Absolute path to `ssl` library. With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
+- `OPENSSL_CRYPTO_LIBRARY`:                 Absolute path to `crypto` library. With MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
-- `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
-- `ZLIB_LIBRARY`:                           Path to `zlib` library.
+- `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
+- `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
 
 ## Dependency options (tools)
@@ -395,64 +395,64 @@ Details via CMake
 
 ## Dependency options (libraries)
 
-- `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
-- `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
-- `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
-- `BROTLI_INCLUDE_DIR`:                     The brotli include directory.
-- `BROTLICOMMON_LIBRARY`:                   Path to `brotlicommon` library.
-- `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library.
-- `CARES_INCLUDE_DIR`:                      The c-ares include directory.
-- `CARES_LIBRARY`:                          Path to `cares` library.
-- `DL_LIBRARY`:                             Path to `dl` library. (for Rustls)
-- `GNUTLS_INCLUDE_DIR`:                     The GnuTLS include directory.
-- `GNUTLS_LIBRARY`:                         Path to `gnutls` library.
-- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS. (also supported as environment)
-- `LDAP_INCLUDE_DIR`:                       The LDAP include directory.
-- `LDAP_LIBRARY`:                           Path to `ldap` library.
-- `LDAP_LBER_LIBRARY`:                      Path to `lber` library.
-- `LIBGSASL_INCLUDE_DIR`:                   The libgsasl include directory.
-- `LIBGSASL_LIBRARY`:                       Path to `libgsasl` library.
-- `LIBIDN2_INCLUDE_DIR`:                    The libidn2 include directory.
-- `LIBIDN2_LIBRARY`:                        Path to `libidn2` library.
-- `LIBPSL_INCLUDE_DIR`:                     The libpsl include directory.
-- `LIBPSL_LIBRARY`:                         Path to `libpsl` library.
-- `LIBRTMP_INCLUDE_DIR`:                    The librtmp include directory.
-- `LIBRTMP_LIBRARY`:                        Path to `librtmp` library.
-- `LIBSSH_INCLUDE_DIR`:                     The libssh include directory.
-- `LIBSSH_LIBRARY`:                         Path to `libssh` library.
-- `LIBSSH2_INCLUDE_DIR`:                    The libssh2 include directory.
-- `LIBSSH2_LIBRARY`:                        Path to `libssh2` library.
-- `LIBUV_INCLUDE_DIR`:                      The libuv include directory.
-- `LIBUV_LIBRARY`:                          Path to `libuv` library.
-- `MATH_LIBRARY`:                           Path to `m` library. (for Rustls, wolfSSL)
-- `MBEDTLS_INCLUDE_DIR`:                    The mbedTLS include directory.
-- `MBEDTLS_LIBRARY`:                        Path to `mbedtls` library.
-- `MBEDX509_LIBRARY`:                       Path to `mbedx509` library.
-- `MBEDCRYPTO_LIBRARY`:                     Path to `mbedcrypto` library.
-- `NGHTTP2_INCLUDE_DIR`:                    The nghttp2 include directory.
-- `NGHTTP2_LIBRARY`:                        Path to `nghttp2` library.
-- `NGHTTP3_INCLUDE_DIR`:                    The nghttp3 include directory.
-- `NGHTTP3_LIBRARY`:                        Path to `nghttp3` library.
-- `NGTCP2_INCLUDE_DIR`:                     The ngtcp2 include directory.
-- `NGTCP2_LIBRARY`:                         Path to `ngtcp2` library.
-- `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Path to `ngtcp2_crypto_boringssl` library. (also for AWS-LC)
-- `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:           Path to `ngtcp2_crypto_gnutls` library.
-- `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:         Path to `ngtcp2_crypto_libressl` library. (requires ngtcp2 1.15.0+)
-- `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Path to `ngtcp2_crypto_ossl` library.
-- `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
-- `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Path to `ngtcp2_crypto_wolfssl` library.
-- `NETTLE_INCLUDE_DIR`:                     The nettle include directory.
-- `NETTLE_LIBRARY`:                         Path to `nettle` library.
-- `PTHREAD_LIBRARY`:                        Path to `pthread` library. (for Rustls)
-- `QUICHE_INCLUDE_DIR`:                     The quiche include directory.
-- `QUICHE_LIBRARY`:                         Path to `quiche` library.
-- `RUSTLS_INCLUDE_DIR`:                     The Rustls include directory.
-- `RUSTLS_LIBRARY`:                         Path to `rustls` library.
-- `WATT_ROOT`:                              Set this variable to the root installation of Watt-32.
-- `WOLFSSL_INCLUDE_DIR`:                    The wolfSSL include directory.
-- `WOLFSSL_LIBRARY`:                        Path to `wolfssl` library.
-- `ZSTD_INCLUDE_DIR`:                       The zstd include directory.
-- `ZSTD_LIBRARY`:                           Path to `zstd` library.
+- `AMISSL_INCLUDE_DIR`:                     Absolute path to AmiSSL include directory.
+- `AMISSL_STUBS_LIBRARY`:                   Absolute path to `amisslstubs` library.
+- `AMISSL_AUTO_LIBRARY`:                    Absolute path to `amisslauto` library.
+- `BROTLI_INCLUDE_DIR`:                     Absolute path to brotli include directory.
+- `BROTLICOMMON_LIBRARY`:                   Absolute path to `brotlicommon` library.
+- `BROTLIDEC_LIBRARY`:                      Absolute path to `brotlidec` library.
+- `CARES_INCLUDE_DIR`:                      Absolute path to c-ares include directory.
+- `CARES_LIBRARY`:                          Absolute path to `cares` library.
+- `DL_LIBRARY`:                             Absolute path to `dl` library. (for Rustls)
+- `GNUTLS_INCLUDE_DIR`:                     Absolute path to GnuTLS include directory.
+- `GNUTLS_LIBRARY`:                         Absolute path to `gnutls` library.
+- `GSS_ROOT_DIR`:                           Absolute path to the root installation of GSS. (also supported as environment)
+- `LDAP_INCLUDE_DIR`:                       Absolute path to LDAP include directory.
+- `LDAP_LIBRARY`:                           Absolute path to `ldap` library.
+- `LDAP_LBER_LIBRARY`:                      Absolute path to `lber` library.
+- `LIBGSASL_INCLUDE_DIR`:                   Absolute path to libgsasl include directory.
+- `LIBGSASL_LIBRARY`:                       Absolute path to `libgsasl` library.
+- `LIBIDN2_INCLUDE_DIR`:                    Absolute path to libidn2 include directory.
+- `LIBIDN2_LIBRARY`:                        Absolute path to `libidn2` library.
+- `LIBPSL_INCLUDE_DIR`:                     Absolute path to libpsl include directory.
+- `LIBPSL_LIBRARY`:                         Absolute path to `libpsl` library.
+- `LIBRTMP_INCLUDE_DIR`:                    Absolute path to librtmp include directory.
+- `LIBRTMP_LIBRARY`:                        Absolute path to `librtmp` library.
+- `LIBSSH_INCLUDE_DIR`:                     Absolute path to libssh include directory.
+- `LIBSSH_LIBRARY`:                         Absolute path to `libssh` library.
+- `LIBSSH2_INCLUDE_DIR`:                    Absolute path to libssh2 include directory.
+- `LIBSSH2_LIBRARY`:                        Absolute path to `libssh2` library.
+- `LIBUV_INCLUDE_DIR`:                      Absolute path to libuv include directory.
+- `LIBUV_LIBRARY`:                          Absolute path to `libuv` library.
+- `MATH_LIBRARY`:                           Absolute path to `m` library. (for Rustls, wolfSSL)
+- `MBEDTLS_INCLUDE_DIR`:                    Absolute path to mbedTLS include directory.
+- `MBEDTLS_LIBRARY`:                        Absolute path to `mbedtls` library.
+- `MBEDX509_LIBRARY`:                       Absolute path to `mbedx509` library.
+- `MBEDCRYPTO_LIBRARY`:                     Absolute path to `mbedcrypto` library.
+- `NGHTTP2_INCLUDE_DIR`:                    Absolute path to nghttp2 include directory.
+- `NGHTTP2_LIBRARY`:                        Absolute path to `nghttp2` library.
+- `NGHTTP3_INCLUDE_DIR`:                    Absolute path to nghttp3 include directory.
+- `NGHTTP3_LIBRARY`:                        Absolute path to `nghttp3` library.
+- `NGTCP2_INCLUDE_DIR`:                     Absolute path to ngtcp2 include directory.
+- `NGTCP2_LIBRARY`:                         Absolute path to `ngtcp2` library.
+- `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Absolute path to `ngtcp2_crypto_boringssl` library. (also for AWS-LC)
+- `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:           Absolute path to `ngtcp2_crypto_gnutls` library.
+- `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:         Absolute path to `ngtcp2_crypto_libressl` library. (requires ngtcp2 1.15.0+)
+- `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Absolute path to `ngtcp2_crypto_ossl` library.
+- `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Absolute path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
+- `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Absolute path to `ngtcp2_crypto_wolfssl` library.
+- `NETTLE_INCLUDE_DIR`:                     Absolute path to nettle include directory.
+- `NETTLE_LIBRARY`:                         Absolute path to `nettle` library.
+- `PTHREAD_LIBRARY`:                        Absolute path to `pthread` library. (for Rustls)
+- `QUICHE_INCLUDE_DIR`:                     Absolute path to quiche include directory.
+- `QUICHE_LIBRARY`:                         Absolute path to `quiche` library.
+- `RUSTLS_INCLUDE_DIR`:                     Absolute path to Rustls include directory.
+- `RUSTLS_LIBRARY`:                         Absolute path to `rustls` library.
+- `WATT_ROOT`:                              Absolute path to the root installation of Watt-32.
+- `WOLFSSL_INCLUDE_DIR`:                    Absolute path to wolfSSL include directory.
+- `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
+- `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
+- `ZSTD_LIBRARY`:                           Absolute path to `zstd` library.
 
 ## Test tools
 

@@ -25,8 +25,8 @@
 #
 # Input variables:
 #
-# - `LIBGSASL_INCLUDE_DIR`:   The libgsasl include directory.
-# - `LIBGSASL_LIBRARY`:       Path to `libgsasl` library.
+# - `LIBGSASL_INCLUDE_DIR`:   Absolute path to libgsasl include directory.
+# - `LIBGSASL_LIBRARY`:       Absolute path to `libgsasl` library.
 #
 # Result variables:
 #

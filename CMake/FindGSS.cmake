@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `GSS_ROOT_DIR`:      Set this variable to the root installation of GSS. (also supported as environment)
+# - `GSS_ROOT_DIR`:      Absolute path to the root installation of GSS. (also supported as environment)
 #
 # Result variables:
 #
@@ -253,7 +253,7 @@ find_package_handle_standard_args(GSS
   VERSION_VAR
     GSS_VERSION
   FAIL_MESSAGE
-    "Could NOT find GSS, try to set the path to GSS root folder in the system variable GSS_ROOT_DIR"
+    "Could NOT find GSS, try to set the absolute path to GSS installation root directory in the environment variable GSS_ROOT_DIR"
 )
 
 mark_as_advanced(

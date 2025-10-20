@@ -25,9 +25,9 @@
 #
 # Input variables:
 #
-# - `BROTLI_INCLUDE_DIR`:    The brotli include directory.
-# - `BROTLICOMMON_LIBRARY`:  Path to `brotlicommon` library.
-# - `BROTLIDEC_LIBRARY`:     Path to `brotlidec` library.
+# - `BROTLI_INCLUDE_DIR`:    Absolute path to brotli include directory.
+# - `BROTLICOMMON_LIBRARY`:  Absolute path to `brotlicommon` library.
+# - `BROTLIDEC_LIBRARY`:     Absolute path to `brotlidec` library.
 #
 # Result variables:
 #

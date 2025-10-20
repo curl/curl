@@ -35,14 +35,14 @@
 #
 # Input variables:
 #
-# - `NGTCP2_INCLUDE_DIR`:               The ngtcp2 include directory.
-# - `NGTCP2_LIBRARY`:                   Path to `ngtcp2` library.
-# - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:  Path to `ngtcp2_crypto_boringssl` library.
-# - `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:     Path to `ngtcp2_crypto_gnutls` library.
-# - `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:   Path to `ngtcp2_crypto_libressl` library.
-# - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Path to `ngtcp2_crypto_ossl` library.
-# - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Path to `ngtcp2_crypto_quictls` library.
-# - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Path to `ngtcp2_crypto_wolfssl` library.
+# - `NGTCP2_INCLUDE_DIR`:               Absolute path to ngtcp2 include directory.
+# - `NGTCP2_LIBRARY`:                   Absolute path to `ngtcp2` library.
+# - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:  Absolute path to `ngtcp2_crypto_boringssl` library.
+# - `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:     Absolute path to `ngtcp2_crypto_gnutls` library.
+# - `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:   Absolute path to `ngtcp2_crypto_libressl` library.
+# - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Absolute path to `ngtcp2_crypto_ossl` library.
+# - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Absolute path to `ngtcp2_crypto_quictls` library.
+# - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Absolute path to `ngtcp2_crypto_wolfssl` library.
 #
 # Result variables:
 #
