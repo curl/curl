@@ -66,6 +66,8 @@ This release includes the following bugfixes:
  o cmake: clang detection tidy-ups [116]
  o cmake: drop exclamation in comment looking like a name [160]
  o cmake: fix building docs when the base directory contains .3 [18]
+ o cmake: fix Linux pre-fill `HAVE_POSIX_STRERROR_R` (when `_CURL_PREFILL=ON`)
+ o cmake: fix Linux pre-fills for non-glibc (when `_CURL_PREFILL=ON`) [372]
  o cmake: minor Heimdal flavour detection fix [269]
  o cmake: pre-fill three more type sizes on Windows [244]
  o cmake: support building some complicated examples, build them in CI [235]
@@ -80,8 +82,10 @@ This release includes the following bugfixes:
  o cpool: make bundle->dest an array; fix UB [218]
  o curl.h: remove incorrect comment about CURLOPT_PINNEDPUBLICKEY [320]
  o curl_easy_getinfo: error code on NULL arg [2]
+ o curl_easy_setopt.md: add missing CURLOPT_POSTFIELDS [319]
  o curl_mem_undef.h: limit to CURLDEBUG for non-memalloc overrides [19]
  o curl_osslq: error out properly if BIO_ADDR_rawmake() fails [184]
+ o curl_path: make sure just whitespace is illegal [351]
  o Curl_resolv: fix comment. 'entry' argument is not optional [187]
  o curl_slist_append.md: clarify that a NULL pointer is not acceptable [72]
  o curl_threads: delete WinCE fallback branch [233]
@@ -101,6 +105,7 @@ This release includes the following bugfixes:
  o docs: fix/tidy code fences [87]
  o doswin: CloseHandle the thread on shutdown [307]
  o easy_getinfo: check magic, Curl_close safety [3]
+ o examples/chkspeed: portable printing when outputting curl_off_t values [365]
  o examples/sessioninfo: cast printf string mask length to int [232]
  o examples/sessioninfo: do not disable security [255]
  o examples/synctime: fix null termination assumptions [297]
@@ -115,6 +120,7 @@ This release includes the following bugfixes:
  o examples: fix two issues found by CodeQL [35]
  o examples: fix two more cases of stat() TOCTOU [147]
  o examples: improve global init, error checks and returning errors [321]
+ o examples: replace casts with `curl_off_t` printf masks [358]
  o examples: return curl_easy_perform() results [322]
  o firefox-db2pem.sh: add macOS support, tidy-ups [348]
  o form.md: drop reference to MANUAL [178]
@@ -152,10 +158,12 @@ This release includes the following bugfixes:
  o krb5_sspi: the chlg argument is NOT optional [200]
  o ldap: avoid null ptr deref on failure [284]
  o ldap: do not base64 encode zero length string [42]
+ o ldap: do not pass a \n to failf() [370]
  o ldap: tidy-up types, fix error code confusion [191]
  o lib1514: fix return code mixup [304]
  o lib: drop unused include and duplicate guards [226]
  o lib: fix build error with verbose strings disabled [173]
+ o lib: remove newlines from failf() calls [366]
  o lib: remove personal names from comments [168]
  o lib: SSL connection reuse [301]
  o lib: stop NULL-checking conn->passwd and ->user [309]
@@ -184,6 +192,7 @@ This release includes the following bugfixes:
  o libssh: make atime and mtime cap the timestamp instead of wrap [283]
  o libssh: react on errors from ssh_scp_read [24]
  o libssh: return out of memory correctly if aprintf fails [60]
+ o libssh: return the proper error for readdir problems [355]
  o Makefile.example: fix option order [231]
  o Makefile.example: simplify and make it configurable [20]
  o managen: ignore version mentions < 7.66.0 [55]
@@ -200,6 +209,7 @@ This release includes the following bugfixes:
  o multi_ev: remove unnecessary data check that confuses analysers [167]
  o nghttp3: return NGHTTP3_ERR_CALLBACK_FAILURE from recv_header [227]
  o ngtcp2: add a comment explaining write result handling [340]
+ o ngtcp2: adopt ngtcp2_conn_get_stream_user_data if available [362]
  o ngtcp2: check error code on connect failure [13]
  o ngtcp2: close just-opened QUIC stream when submit_request fails [222]
  o ngtcp2: compare idle timeout in ms to avoid overflow [248]
@@ -210,6 +220,7 @@ This release includes the following bugfixes:
  o openldap: avoid indexing the result at -1 for blank responses [44]
  o openldap: check ber_sockbuf_add_io() return code [163]
  o openldap: check ldap_get_option() return codes [119]
+ o openldap: do not pass newline to infof() [368]
  o openldap: fix memory-leak in error path [287]
  o openldap: fix memory-leak on oldap_do's exit path [286]
  o openldap: limit max incoming size [347]
@@ -223,6 +234,9 @@ This release includes the following bugfixes:
  o openssl: fail the transfer if ossl_certchain() fails [23]
  o openssl: fix build for v1.0.2 [225]
  o openssl: fix peer certificate leak in channel binding [258]
+ o openssl: fix resource leak in provider error path [376]
+ o openssl: fix unable do typo in failf() calls [341]
+ o openssl: free UI_METHOD on exit path [373]
  o openssl: make the asn1_object_dump name null terminated [56]
  o openssl: set io_need always [99]
  o openssl: skip session resumption when verifystatus is set [230]
@@ -241,6 +255,7 @@ This release includes the following bugfixes:
  o quiche: handle tls fail correctly [266]
  o quiche: when ingress processing fails, return that error code [103]
  o runtests: tag tests that require curl verbose strings [172]
+ o rustls: exit on error [335]
  o rustls: fix clang-tidy warning [107]
  o rustls: fix comment describing cr_recv() [117]
  o rustls: limit snprintf proper in cr_keylog_log_cb() [343]
@@ -250,6 +265,8 @@ This release includes the following bugfixes:
  o rustls: use %zu for size_t in failf() format string [121]
  o sasl: clear canceled mechanism instead of toggling it [41]
  o schannel: assign result before using it [62]
+ o schannel: fix memory leak [363]
+ o schannel_verify: do not call infof with an appended \n [371]
  o schannel_verify: fix mem-leak in Curl_verify_host [208]
  o schannel_verify: use more human friendly error messages [96]
  o scripts: pass -- before passing xargs [349]
@@ -260,7 +277,9 @@ This release includes the following bugfixes:
  o smb: adjust buffer size checks [45]
  o smb: transfer debugassert to real check [303]
  o smtp: check EHLO responses case insensitively [50]
+ o smtp: return value ignored [357]
  o socks: advance iobuf instead of reset [276]
+ o socks: avoid UAF risk in error path [359]
  o socks: deny server basic-auth if not configured [264]
  o socks: handle error in verbose trace gracefully [94]
  o socks: handle premature close [246]
@@ -276,6 +295,7 @@ This release includes the following bugfixes:
  o socks_sspi: restore non-blocking socket on error paths [48]
  o socks_sspi: use the correct free function [331]
  o socksd: remove --bindonly mention, there is no such option [305]
+ o src/var: remove dead code [369]
  o ssl-sessions.md: mark option experimental [12]
  o strerror: drop workaround for SalfordC win32 header bug [214]
  o sws: fix checking sscanf() return value [17]
@@ -302,9 +322,9 @@ This release includes the following bugfixes:
  o tftp: return error if it hits an illegal state [138]
  o tftp: return error when sendto() fails [59]
  o thread: errno on thread creation [271]
- o tidy-up: fcntl.h includes [98]
  o tidy-up: assortment of small fixes [115]
  o tidy-up: avoid using the reserved macro namespace [76]
+ o tidy-up: fcntl.h includes [98]
  o tidy-up: update MS links, allow long URLs via checksrc [73]
  o tidy-up: URLs [101]
  o time-cond.md: refer to the singular curl_getdate man page [148]
@@ -313,8 +333,11 @@ This release includes the following bugfixes:
  o tool: fix exponential retry delay [47]
  o tool_cb_hdr: fix fwrite check in header callback [49]
  o tool_cb_hdr: size is always 1 [70]
+ o tool_cb_rea: use poll instead of select if available [329]
  o tool_doswin: fix to use curl socket functions [108]
+ o tool_filetime: cap crazy filetimes instead of erroring [327]
  o tool_filetime: replace cast with the fitting printf mask (Windows) [212]
+ o tool_formparse: rewrite the headers file parser [374]
  o tool_getparam/set_rate: skip the multiplication on overflow [84]
  o tool_getparam: always disable "lib-ids" for tracing [169]
  o tool_getparam: make --fail and --fail-with-body override each other [293]
@@ -325,6 +348,8 @@ This release includes the following bugfixes:
  o tool_operate: keep failed partial download for retry auto-resume [210]
  o tool_operate: keep the progress meter for --out-null [33]
  o tool_operate: retry on HTTP response codes 522 and 524 [317]
+ o tool_operate: return error on strdup() failure [336]
+ o tool_paramhlp: remove outdated comment in str2tls_max() [367]
  o tool_progress: handle possible integer overflows [164]
  o tool_progress: make max5data() use an algorithm [170]
  o transfer: avoid busy loop with tiny speed limit [100]
@@ -348,6 +373,7 @@ This release includes the following bugfixes:
  o windows: use consistent format when showing error codes [199]
  o windows: use native error code types more [206]
  o wolfssl: check BIO read parameters [133]
+ o wolfssl: clear variable to avoid uninitialized use [361]
  o wolfssl: fix error check in shutdown [105]
  o wolfssl: fix resource leak in verify_pinned error paths [314]
  o wolfssl: no double get_error() detail [188]
@@ -383,14 +409,15 @@ advice from friends like these:
   Dan Fandrich, Daniel Stenberg, Daniel Terhorst-North, dependabot[bot],
   divinity76 on github, Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
   Evgeny Grin (Karlson2k), fds242 on github, Harry Sintonen, Howard Chu,
-  Ignat Loskutov, Javier Blazquez, Jicea, jmaggard10 on github,
-  Johannes Schindelin, Joseph Birr-Pixton, Joshua Rogers, kapsiR on github,
-  kuchara on github, Marcel Raad, Michael Osipov, Michał Petryka,
-  Mitchell Blank Jr, Mohamed Daahir, Nir Azkiel, Patrick Monnerat,
-  plv1313 on github, Pocs Norbert, Ray Satiro, renovate[bot],
-  rinsuki on github, Sakthi SK, Samuel Dionne-Riel, Samuel Henrique,
-  Stanislav Fort, Stefan Eissing, tkzv on github, Viktor Szakats
-  (48 contributors)
+  Ignat Loskutov, James Fuller, Javier Blazquez, Jicea, jmaggard10 on github,
+  Jochen Sprickerhof, Johannes Schindelin, Jonathan Cardoso Machado,
+  Joseph Birr-Pixton, Joshua Rogers, kapsiR on github, kuchara on github,
+  Marcel Raad, Michael Osipov, Michał Petryka, Mitchell Blank Jr,
+  Mohamed Daahir, Nir Azkiel, Patrick Monnerat, plv1313 on github,
+  Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github, Sakthi SK,
+  Samuel Dionne-Riel, Samuel Henrique, Stanislav Fort, Stefan Eissing,
+  Tatsuhiro Tsujikawa, tkzv on github, Viktor Szakats, Yedaya Katsman
+  (53 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -712,6 +739,7 @@ References to bug reports and discussions on issues:
  [316] = https://curl.se/bug/?i=19017
  [317] = https://curl.se/bug/?i=16143
  [318] = https://curl.se/bug/?i=19055
+ [319] = https://curl.se/bug/?i=19151
  [320] = https://curl.se/mail/lib-2025-10/0018.html
  [321] = https://curl.se/bug/?i=19053
  [322] = https://curl.se/bug/?i=19052
@@ -719,14 +747,19 @@ References to bug reports and discussions on issues:
  [324] = https://curl.se/bug/?i=19048
  [325] = https://curl.se/bug/?i=19106
  [326] = https://curl.se/bug/?i=19064
+ [327] = https://curl.se/bug/?i=19147
  [328] = https://curl.se/bug/?i=19104
+ [329] = https://curl.se/bug/?i=19143
  [330] = https://curl.se/bug/?i=19101
  [331] = https://curl.se/bug/?i=19046
  [332] = https://curl.se/bug/?i=19102
  [334] = https://curl.se/bug/?i=19100
+ [335] = https://curl.se/bug/?i=19125
+ [336] = https://curl.se/bug/?i=19145
  [337] = https://curl.se/bug/?i=19097
  [339] = https://curl.se/bug/?i=19091
  [340] = https://curl.se/bug/?i=19093
+ [341] = https://curl.se/bug/?i=19149
  [342] = https://curl.se/bug/?i=19094
  [343] = https://curl.se/bug/?i=19095
  [344] = https://curl.se/bug/?i=19077
@@ -735,5 +768,24 @@ References to bug reports and discussions on issues:
  [347] = https://issues.oss-fuzz.com/issues/432441303
  [348] = https://curl.se/bug/?i=19086
  [349] = https://curl.se/bug/?i=19076
+ [351] = https://curl.se/bug/?i=19141
  [353] = https://curl.se/bug/?i=19073
  [354] = https://curl.se/bug/?i=19078
+ [355] = https://curl.se/bug/?i=19135
+ [357] = https://curl.se/bug/?i=19136
+ [358] = https://curl.se/bug/?i=19133
+ [359] = https://curl.se/bug/?i=19139
+ [361] = https://curl.se/bug/?i=19126
+ [362] = https://curl.se/bug/?i=19132
+ [363] = https://curl.se/bug/?i=19118
+ [365] = https://curl.se/bug/?i=19112
+ [366] = https://curl.se/bug/?i=19124
+ [367] = https://curl.se/bug/?i=19115
+ [368] = https://curl.se/bug/?i=19120
+ [369] = https://curl.se/bug/?i=19119
+ [370] = https://curl.se/bug/?i=19122
+ [371] = https://curl.se/bug/?i=19123
+ [372] = https://curl.se/bug/?i=19116
+ [373] = https://curl.se/bug/?i=19114
+ [374] = https://curl.se/bug/?i=19113
+ [376] = https://curl.se/bug/?i=19111
