@@ -3274,11 +3274,14 @@ static CURLcode http_header_l(struct Curl_easy *data,
       /* ignore empty data */
       free(location);
     else {
-      if(data->req.location &&
-         strcmp(data->req.location, location)) {
-        failf(data, "Multiple Location headers");
-        free(location);
-        return CURLE_WEIRD_SERVER_REPLY;
+      if(data->req.location) {
+        if(strcmp(data->req.location, location)) {
+          failf(data, "Multiple Location headers");
+          free(location);
+          return CURLE_WEIRD_SERVER_REPLY;
+        }
+        /* repeat location header with same value, accept */
+        return CURLE_OK;
       }
       else {
         free(data->req.location);
