@@ -25,7 +25,7 @@
 #
 # Input variables:
 #
-# - `GSS_ROOT_DIR`:      Set this variable to the root installation of GSS. (also supported as environment)
+# - `GSS_ROOT_DIR`:      Absolute path to the root installation of GSS. (also supported as environment)
 #
 # Result variables:
 #
