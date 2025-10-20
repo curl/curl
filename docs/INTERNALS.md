@@ -35,7 +35,7 @@ versions of libs and build tools.
  - libidn2      2.0.0
  - wolfSSL      3.4.6
  - OpenLDAP     2.0
- - MIT Kerberos 1.3
+ - MIT Kerberos 1.8
  - nghttp2      1.15.0
 
 ## Build tools
