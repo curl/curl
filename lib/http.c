@@ -3283,7 +3283,6 @@ static CURLcode http_header_l(struct Curl_easy *data,
         free(location);
         return CURLE_WEIRD_SERVER_REPLY;
       }
-      free(data->req.location);
       data->req.location = location;
 
       if((k->httpcode >= 300 && k->httpcode < 400) &&
