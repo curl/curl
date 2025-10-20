@@ -29,11 +29,7 @@
 
 #ifdef HAVE_GSSAPI
 
-/* Detect if GSSAPI supports channel binding.
- * GSS_C_CHANNEL_BOUND_FLAG is present in MIT Kerberos >= 1.19 and modern
- * Heimdal, but missing in Apple's Heimdal fork used on macOS.
- */
-#ifdef GSS_C_CHANNEL_BOUND_FLAG
+#ifdef GSS_C_CHANNEL_BOUND_FLAG  /* MIT Kerberos 1.19+, missing from GNU GSS */
 #define CURL_GSSAPI_HAS_CHANNEL_BINDING
 #endif
 
