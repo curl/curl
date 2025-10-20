@@ -28,6 +28,15 @@
 #include "urldata.h"
 
 #ifdef HAVE_GSSAPI
+
+/* Detect if GSSAPI supports channel binding.
+ * GSS_C_CHANNEL_BOUND_FLAG is present in MIT Kerberos >= 1.19 and modern
+ * Heimdal, but missing in Apple's Heimdal fork used on macOS.
+ */
+#ifdef GSS_C_CHANNEL_BOUND_FLAG
+#define CURL_GSSAPI_HAS_CHANNEL_BINDING
+#endif
+
 extern gss_OID_desc Curl_spnego_mech_oid;
 extern gss_OID_desc Curl_krb5_mech_oid;
 
