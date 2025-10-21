@@ -188,6 +188,7 @@ static int curltest_echo_handler(request_rec *r)
   char buffer[8192];
   const char *ct;
   apr_off_t die_after_len = -1, total_read_len = 0;
+  apr_time_t read_delay = 0;
   int just_die = 0, die_after_100 = 0;
   long l;
 
@@ -220,6 +221,12 @@ static int curltest_echo_handler(request_rec *r)
         else if(!strcmp("die_after_100", arg)) {
           die_after_100 = 1;
           continue;
+        }
+        else if(!strcmp("read_delay", arg)) {
+          rv = duration_parse(&read_delay, val, "s");
+          if(APR_SUCCESS == rv) {
+            continue;
+          }
         }
       }
     }
@@ -257,6 +264,12 @@ static int curltest_echo_handler(request_rec *r)
   if(apr_table_get(r->headers_in, "TE"))
     apr_table_setn(r->headers_out, "Request-TE",
                    apr_table_get(r->headers_in, "TE"));
+
+  if(read_delay) {
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
+                  "put_handler: read_delay");
+    apr_sleep(read_delay);
+  }
 
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
@@ -637,6 +650,8 @@ static int curltest_put_handler(request_rec *r)
   ap_set_content_type(r, ct ? ct : "text/plain");
 
   if(read_delay) {
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
+                  "put_handler: read_delay");
     apr_sleep(read_delay);
   }
   bb = apr_brigade_create(r->pool, c->bucket_alloc);

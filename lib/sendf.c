@@ -1442,6 +1442,7 @@ CURLcode Curl_creader_unpause(struct Curl_easy *data)
 
   while(reader) {
     result = reader->crt->cntrl(data, reader, CURL_CRCNTRL_UNPAUSE);
+    CURL_TRC_READ(data, "unpausing %s -> %d", reader->crt->name, result);
     if(result)
       break;
     reader = reader->next;
