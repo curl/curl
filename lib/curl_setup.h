@@ -737,13 +737,6 @@
 #  endif
 #endif
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#endif
-
 #if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
 /* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
 #define NO_OLD_WC_NAMES
@@ -759,20 +752,6 @@
 #if !defined(CURL_DISABLE_KERBEROS_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
 #define USE_KERBEROS5
-#endif
-
-/* Single point where USE_NTLM definition might be defined */
-#ifndef CURL_DISABLE_NTLM
-#  if defined(USE_OPENSSL) ||                                           \
-  defined(USE_GNUTLS) ||                                                \
-  (defined(USE_MBEDTLS) && MBEDTLS_VERSION_NUMBER < 0x04000000) ||      \
-  defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
-  (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
-#    define USE_CURL_NTLM_CORE
-#  endif
-#  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
-#    define USE_NTLM
-#  endif
 #endif
 
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH)
