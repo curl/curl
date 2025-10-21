@@ -4923,6 +4923,31 @@ static void cr_exp100_done(struct Curl_easy *data,
   Curl_expire_done(data, EXPIRE_100_TIMEOUT);
 }
 
+static CURLcode cr_exp100_cntrl(struct Curl_easy *data,
+                                struct Curl_creader *reader,
+                                Curl_creader_cntrl opcode)
+{
+  struct cr_exp100_ctx *ctx = reader->ctx;
+
+  switch(opcode) {
+  case CURL_CRCNTRL_UNPAUSE:
+    /* If we are waiting for 100-continue and get unpaused, proceed with
+     * sending as if we received the 100 response. This allows MIME uploads
+     * with paused callbacks to resume correctly when unpaused while waiting
+     * for 100-continue. */
+    if(ctx->state == EXP100_AWAITING_CONTINUE) {
+      DEBUGF(infof(data, "cr_exp100 unpaused while awaiting 100-continue, "
+                   "proceeding with send"));
+      http_exp100_continue(data, reader);
+    }
+    break;
+  default:
+    break;
+  }
+
+  return CURLE_OK;
+}
+
 static const struct Curl_crtype cr_exp100 = {
   "cr-exp100",
   Curl_creader_def_init,
@@ -4931,7 +4956,7 @@ static const struct Curl_crtype cr_exp100 = {
   Curl_creader_def_needs_rewind,
   Curl_creader_def_total_length,
   Curl_creader_def_resume_from,
-  Curl_creader_def_cntrl,
+  cr_exp100_cntrl,
   Curl_creader_def_is_paused,
   cr_exp100_done,
   sizeof(struct cr_exp100_ctx)
