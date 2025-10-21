@@ -2936,8 +2936,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     char *pq = NULL;
     if(data->state.up.query) {
       pq = curl_maprintf("%s?%s", data->state.up.path, data->state.up.query);
-      if(!pq)
-        return CURLE_OUT_OF_MEMORY;
+      if(!pq) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto out;
+      }
     }
     result = Curl_http_output_auth(data, data->conn, method, httpreq,
                                    (pq ? pq : data->state.up.path), FALSE);
