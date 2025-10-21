@@ -59,7 +59,7 @@ endif()
 
 if(MBEDTLS_FOUND)
   set(MbedTLS_FOUND TRUE)
-  set(MBEDTLS_VERSION "${MBEDTLS_mbedtls_VERSION}")
+  set(MBEDTLS_VERSION ${MBEDTLS_mbedtls_VERSION})
   string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
   message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
