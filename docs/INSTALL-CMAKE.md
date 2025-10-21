@@ -454,6 +454,22 @@ Details via CMake
 - `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
 - `ZSTD_LIBRARY`:                           Absolute path to `zstd` library.
 
+Examples:
+
+- `-DLIBPSL_INCLUDE_DIR=/path/to/libpl/include`,
+  which directory contains `libpsl.h`.
+  No ending slash or backslash is necessary.
+
+- `-DNGHTTP3_INCLUDE_DIR=/path/to/libnghttp3/include`,
+  which directory contains an `nghttp3` subdirectory with `.h` files in it.
+
+- `-DLIBPSL_LIBRARY=/path/to/libpsl/lib/libpsl.a`
+  Always a single library, with its complete filename, as-is on the file system.
+
+- `-DOPENSSL_ROOT_DIR=/path/to/openssl`,
+  which directory (typically) contains `include` and `lib` subdirectories.
+  No ending slash or backslash is necessary.
+
 ## Test tools
 
 - `APXS`:                                   Default: `apxs`
