@@ -21,14 +21,26 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+/* <DESC>
+ * Performs an FTP upload and renames the file just after a successful
+ * transfer.
+ * </DESC>
+ */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <curl/curl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
+
 #ifdef _WIN32
 #include <io.h>
 #undef stat
@@ -39,12 +51,6 @@
 #else
 #include <unistd.h>
 #endif
-
-/* <DESC>
- * Performs an FTP upload and renames the file just after a successful
- * transfer.
- * </DESC>
- */
 
 #define LOCAL_FILE      "/tmp/uploadthis.txt"
 #define UPLOAD_FILE_AS  "while-uploading.txt"

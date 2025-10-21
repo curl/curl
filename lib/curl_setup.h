@@ -90,11 +90,15 @@
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
+#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
+#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), strdup(),
+                                      unlink(), etc. */
 #endif
-#ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for fopen(), getenv(), etc. */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for __sys_errlist, __sys_nerr, _wfopen(),
+                                    _wopen(), freopen(), getenv(), gmtime(),
+                                    sprintf(), strcpy(), wcscpy(), wcsncpy()
+                                    in tests: localtime(), open(), sscanf() */
 #endif
 #endif /* _MSC_VER */
 
