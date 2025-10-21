@@ -48,7 +48,7 @@ VMS_ROOT: is for the source files that are specific to OpenVMS.
           Note, you should create the VMS_ROOT: directory tree even if it is
           initially empty.  This is where you should put edits if you are
           making changes.
-LCL_ROOT: is manually created to have the same base and sub-directories as
+LCL_ROOT: is manually created to have the same base and subdirectories as
           SRC_ROOT: and VMS_ROOT:
 
 The logical name REF_ROOT: may be defined to be a search list for
