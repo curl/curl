@@ -458,7 +458,7 @@ Examples:
 
 - `-DLIBPSL_INCLUDE_DIR=/path/to/libpl/include`,
   which directory contains `libpsl.h`.
-  No ending directory separator (e.g. slash or backslash) is necessary.
+  No ending slash or backslash is necessary.
 
 - `-DNGHTTP3_INCLUDE_DIR=/path/to/libnghttp3/include`,
   which directory contains an `nghttp3` subdirectory with `.h` files in it.
@@ -468,7 +468,7 @@ Examples:
 
 - `-DOPENSSL_ROOT_DIR=/path/to/openssl`,
   which directory (typically) contains `include` and `lib` subdirectories.
-  No ending directory separator (e.g. slash or backslash) is necessary.
+  No ending slash or backslash is necessary.
 
 ## Test tools
 
