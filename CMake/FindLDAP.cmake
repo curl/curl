@@ -47,7 +47,7 @@ endif()
 
 if(_ldap_FOUND)
   set(LDAP_FOUND TRUE)
-  set(LDAP_VERSION "${_ldap_ldap_VERSION}")
+  set(LDAP_VERSION ${_ldap_ldap_VERSION})
   message(STATUS "Found LDAP (via pkg-config): ${_ldap_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
   set(_ldap_pc_requires "")  # Depend on pkg-config only when found via pkg-config
