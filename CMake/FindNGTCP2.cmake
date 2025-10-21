@@ -83,7 +83,7 @@ endif()
 
 if(_ngtcp2_FOUND)
   set(NGTCP2_FOUND TRUE)
-  set(NGTCP2_VERSION "${_ngtcp2_libngtcp2_VERSION}")
+  set(NGTCP2_VERSION ${_ngtcp2_libngtcp2_VERSION})
   message(STATUS "Found NGTCP2 (via pkg-config): ${_ngtcp2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()
   find_path(NGTCP2_INCLUDE_DIR NAMES "ngtcp2/ngtcp2.h")
