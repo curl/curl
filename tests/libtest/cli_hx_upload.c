@@ -33,6 +33,7 @@ struct transfer_u {
   CURL *easy;
   const char *method;
   char filename[128];
+  curl_mime *mime;
   FILE *out;
   curl_off_t send_total;
   curl_off_t recv_size;
@@ -158,18 +159,28 @@ static int setup_hx_upload(CURL *hnd, const char *url, struct transfer_u *t,
   if(use_earlydata)
     curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
 
-  if(!t->method || !strcmp("PUT", t->method))
-    curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
-  else if(!strcmp("POST", t->method))
-    curl_easy_setopt(hnd, CURLOPT_POST, 1L);
-  else {
-    curl_mfprintf(stderr, "unsupported method '%s'\n", t->method);
-    return 1;
+  if(!strcmp("MIME", t->method)) {
+    curl_mimepart *part;
+    t->mime = curl_mime_init(hnd);
+    part = curl_mime_addpart(t->mime);
+    curl_mime_name(part, "file");
+    curl_mime_data_cb(part, -1, my_read_cb, NULL, NULL, t);
+    curl_easy_setopt(hnd, CURLOPT_MIMEPOST, t->mime);
   }
-  curl_easy_setopt(hnd, CURLOPT_READFUNCTION, my_read_cb);
-  curl_easy_setopt(hnd, CURLOPT_READDATA, t);
-  if(announce_length)
-    curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, t->send_total);
+  else {
+    if(!t->method || !strcmp("PUT", t->method))
+      curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
+    else if(!strcmp("POST", t->method))
+      curl_easy_setopt(hnd, CURLOPT_POST, 1L);
+    else {
+      curl_mfprintf(stderr, "unsupported method '%s'\n", t->method);
+      return 1;
+    }
+    curl_easy_setopt(hnd, CURLOPT_READFUNCTION, my_read_cb);
+    curl_easy_setopt(hnd, CURLOPT_READDATA, t);
+    if(announce_length)
+      curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, t->send_total);
+  }
 
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_u_cb);
@@ -488,6 +499,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
     } while(active_transfers); /* as long as we have transfers going */
 
+    curl_mfprintf(stderr, "all transfers done, cleanup multi\n");
     curl_multi_cleanup(multi_handle);
   }
 
@@ -500,6 +512,9 @@ static CURLcode test_cli_hx_upload(const char *URL)
     if(t->easy) {
       curl_easy_cleanup(t->easy);
       t->easy = NULL;
+    }
+    if(t->mime) {
+      curl_mime_free(t->mime);
     }
   }
   free(transfer_u);
