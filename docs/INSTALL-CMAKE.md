@@ -404,6 +404,8 @@ Details via CMake
 - `CARES_INCLUDE_DIR`:                      The c-ares include directory.
 - `CARES_LIBRARY`:                          Path to `cares` library.
 - `DL_LIBRARY`:                             Path to `dl` library. (for Rustls)
+- `GNUTLS_INCLUDE_DIR`:                     The GnuTLS include directory.
+- `GNUTLS_LIBRARY`:                         Path to `gnutls` library.
 - `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS. (also supported as environment)
 - `LDAP_INCLUDE_DIR`:                       The LDAP include directory.
 - `LDAP_LIBRARY`:                           Path to `ldap` library.
