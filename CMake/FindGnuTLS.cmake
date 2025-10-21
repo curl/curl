@@ -25,8 +25,8 @@
 #
 # Input variables:
 #
-# - `GNUTLS_INCLUDE_DIR`:   The GnuTLS include directory.
-# - `GNUTLS_LIBRARY`:       Path to `gnutls` library.
+# - `GNUTLS_INCLUDE_DIR`:   Absolute path to GnuTLS include directory.
+# - `GNUTLS_LIBRARY`:       Absolute path to `gnutls` library.
 #
 # Result variables:
 #
