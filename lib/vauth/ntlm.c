@@ -24,6 +24,8 @@
 
 #include "../curl_setup.h"
 
+#include "../curl_ntlm_core.h"
+
 #if defined(USE_NTLM) && !defined(USE_WINDOWS_SSPI)
 
 /*
@@ -37,7 +39,6 @@
 
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../curl_ntlm_core.h"
 #include "../curl_gethostname.h"
 #include "../curlx/multibyte.h"
 #include "../curl_md5.h"
