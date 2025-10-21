@@ -1499,6 +1499,7 @@ endif()
 #
 if(_curl_ca_bundle_supported)
   set(_ca_opt_desc "Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+
   set(CURL_CA_BUNDLE "auto" CACHE
     STRING "Absolute path to the CA bundle. ${_ca_opt_desc}")
   set(CURL_CA_FALLBACK OFF CACHE
