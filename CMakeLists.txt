@@ -1498,12 +1498,13 @@ endif()
 # CA handling
 #
 if(_curl_ca_bundle_supported)
+  set(_ca_opt_desc "Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_BUNDLE "auto" CACHE
-    STRING "Absolute path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+    STRING "Absolute path to the CA bundle. ${_ca_opt_desc}")
   set(CURL_CA_FALLBACK OFF CACHE
     BOOL "Use built-in CA store of OpenSSL. Defaults to OFF")
   set(CURL_CA_PATH "auto" CACHE
-    STRING "Absolute path to a directory containing CA certificates stored individually. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")  # cmake-lint: disable=C0301
+    STRING "Absolute path to a directory containing CA certificates stored individually. ${_ca_opt_desc}")
   set(CURL_CA_EMBED "" CACHE
     STRING "Absolute path to the CA bundle to embed in the curl tool.")
 
@@ -1556,7 +1557,7 @@ if(_curl_ca_bundle_supported)
         if(EXISTS "${_search_ca_bundle_path}")
           message(STATUS "Found CA bundle: ${_search_ca_bundle_path}")
           set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE
-            STRING "Absolute path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+            STRING "Absolute path to the CA bundle. ${_ca_opt_desc}")
           set(CURL_CA_BUNDLE_SET TRUE CACHE BOOL "Absolute path to the CA bundle has been set")
           break()
         endif()
@@ -1570,7 +1571,7 @@ if(_curl_ca_bundle_supported)
         unset(_curl_ca_files_found)
         message(STATUS "Found CA path: ${_search_ca_path}")
         set(CURL_CA_PATH "${_search_ca_path}" CACHE
-          STRING "Absolute path to a directory containing CA certificates stored individually. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")  # cmake-lint: disable=C0301
+          STRING "Absolute path to a directory containing CA certificates stored individually. ${_ca_opt_desc}")
         set(CURL_CA_PATH_SET TRUE CACHE BOOL "Absolute path to the CA bundle has been set")
       endif()
     endif()
