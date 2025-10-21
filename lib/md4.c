@@ -24,12 +24,13 @@
 
 #include "curl_setup.h"
 
+#include "curl_md4.h"
+
 #ifdef USE_CURL_NTLM_CORE
 
 #include <string.h>
 
 #include "strdup.h"
-#include "curl_md4.h"
 #include "curlx/warnless.h"
 
 #ifdef USE_OPENSSL

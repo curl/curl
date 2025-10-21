@@ -24,6 +24,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include "curl_ntlm_core.h"
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
@@ -38,7 +39,6 @@
 #include "transfer.h"
 #include "select.h"
 #include "vtls/vtls.h"
-#include "curl_ntlm_core.h"
 #include "escape.h"
 #include "curl_endian.h"
 

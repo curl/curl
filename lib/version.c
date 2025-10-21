@@ -35,6 +35,7 @@
 #include "vssh/ssh.h"
 #include "vquic/vquic.h"
 #include "easy_lock.h"
+#include "curl_ntlm_core.h"
 
 #ifdef USE_ARES
 #  include <ares.h>

@@ -24,12 +24,12 @@
 
 #include "curl_setup.h"
 
+#include "curl_des.h"
+
 #if defined(USE_CURL_NTLM_CORE) && \
   (defined(USE_GNUTLS) ||          \
    defined(USE_OS400CRYPTO) ||     \
    defined(USE_WIN32_CRYPTO))
-
-#include "curl_des.h"
 
 /*
  * Curl_des_set_odd_parity()

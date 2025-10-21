@@ -26,6 +26,8 @@
 
 #include "curl_setup.h"
 
+#include "curl_ntlm_core.h"
+
 #if defined(USE_CURL_NTLM_CORE) && \
   (defined(USE_GNUTLS) ||          \
    defined(USE_OS400CRYPTO) ||     \

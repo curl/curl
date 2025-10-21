@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include "curl_ntlm_core.h"
 
 #ifdef USE_CURL_NTLM_CORE
 
@@ -116,7 +117,6 @@
 
 #include "urldata.h"
 #include "strcase.h"
-#include "curl_ntlm_core.h"
 #include "curl_md5.h"
 #include "curl_hmac.h"
 #include "curlx/warnless.h"

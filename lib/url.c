@@ -23,6 +23,7 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include "curl_ntlm_core.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>

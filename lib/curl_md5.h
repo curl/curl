@@ -24,10 +24,10 @@
  *
  ***************************************************************************/
 
+#include "curl_hmac.h"
+
 #if (defined(USE_CURL_NTLM_CORE) && !defined(USE_WINDOWS_SSPI)) || \
   !defined(CURL_DISABLE_DIGEST_AUTH)
-
-#include "curl_hmac.h"
 
 #define MD5_DIGEST_LEN  16
 
