@@ -24,6 +24,8 @@
 
 #include "curl_setup.h"
 
+#include "http_ntlm.h"
+
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
 
 /*
@@ -36,8 +38,6 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "strcase.h"
-#include "http_ntlm.h"
-#include "curl_ntlm_core.h"
 #include "curlx/base64.h"
 #include "vauth/vauth.h"
 #include "url.h"
