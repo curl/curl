@@ -519,6 +519,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   }
   free(transfer_u);
   curl_share_cleanup(share);
+  curl_slist_free_all(host);
 
   return CURLE_OK;
 }
