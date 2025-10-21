@@ -86,6 +86,7 @@
 #include "ws.h"
 #include "curl_ctype.h"
 #include "curlx/strparse.h"
+#include "curl_ntlm_core.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

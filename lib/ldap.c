@@ -93,6 +93,7 @@
 #include "curlx/multibyte.h"
 #include "curlx/base64.h"
 #include "connect.h"
+#include "curl_ntlm_core.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

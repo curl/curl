@@ -186,6 +186,7 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #include "ftplistparser.h"
 #include "multihandle.h"
 #include "cf-socket.h"
+#include "curl_ntlm_core.h"
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
