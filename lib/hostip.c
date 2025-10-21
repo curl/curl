@@ -1353,8 +1353,8 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
         }
 #ifndef USE_IPV6
         if(memchr(target.str, ':', target.len)) {
-          infof(data, "Ignoring resolve address '%s', missing IPv6 support.",
-                address);
+          infof(data, "Ignoring resolve address '%.*s', missing IPv6 support.",
+                (int)target.len, target.str);
           if(curlx_str_single(&host, ','))
             goto err;
           continue;
