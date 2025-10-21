@@ -464,7 +464,7 @@ Examples:
   which directory contains an `nghttp3` subdirectory with `.h` files in it.
 
 - `-DLIBPSL_LIBRARY=/path/to/libpsl/lib/libpsl.a`
-  Always a single library, with its complete filename (suffixes, lib-prefix, etc.), as-is on the filesystem.
+  Always a single library, with its complete filename (suffixes, lib-prefix, etc.), as-is on the file system.
 
 - `-DOPENSSL_ROOT_DIR=/path/to/openssl`,
   which directory (typically) contains `include` and `lib` subdirectories.
