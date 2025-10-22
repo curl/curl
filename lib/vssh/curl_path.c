@@ -167,8 +167,10 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
     /* Read to end of filename - either to whitespace or terminator */
     rc = curlx_str_word(&cp, &word, MAX_PATHLENGTH);
     if(rc) {
-      if(rc == STRE_BIG)
+      if(rc == STRE_BIG) {
+        curlx_dyn_free(&out);
         return CURLE_TOO_LARGE;
+      }
       else if(!content)
         /* no path, no word, this is incorrect */
         goto fail;
