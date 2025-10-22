@@ -533,7 +533,7 @@ static CURLcode ftp_initiate_transfer(struct Curl_easy *data,
   if(result || !connected)
     return result;
 
-  if(ftpc->state_saved == FTP_STOR) {
+  if(data->state.upload) {
     /* When we know we are uploading a specified file, we can get the file
        size prior to the actual upload. */
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
@@ -2428,7 +2428,7 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 
 static CURLcode ftp_state_stor_resp(struct Curl_easy *data,
                                     struct ftp_conn *ftpc,
-                                    int ftpcode, ftpstate instate)
+                                    int ftpcode)
 {
   CURLcode result = CURLE_OK;
 
@@ -2437,8 +2437,6 @@ static CURLcode ftp_state_stor_resp(struct Curl_easy *data,
     ftp_state(data, ftpc, FTP_STOP);
     return CURLE_UPLOAD_FAILED;
   }
-
-  ftpc->state_saved = instate;
 
   /* PORT means we are now awaiting the server to connect to us. */
   if(data->set.ftp_use_port) {
@@ -2541,7 +2539,6 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
       infof(data, "Getting file with size: %" FMT_OFF_T, size);
 
     /* FTP download: */
-    ftpc->state_saved = instate;
     ftpc->retr_size_saved = size;
 
     if(data->set.ftp_use_port) {
@@ -3142,7 +3139,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     break;
 
   case FTP_STOR:
-    result = ftp_state_stor_resp(data, ftpc, ftpcode, ftpc->state);
+    result = ftp_state_stor_resp(data, ftpc, ftpcode);
     break;
 
   case FTP_QUIT:
