@@ -150,9 +150,6 @@ struct ftp_conn {
                                < FTP_MAX_DIR_DEPTH */
   unsigned char state; /* (ftpstate enum) always use ftp.c:state() to change
                           state! */
-  unsigned char state_saved; /* (ftpstate enum) transfer type saved to be
-                                reloaded after data connection is
-                                established */
   unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                               IMAP or POP3 or others! (type: curl_usessl)*/
   unsigned char ccc;       /* ccc level for this connection */
