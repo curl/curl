@@ -403,7 +403,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
     /* still have buffered data, append and flush */
     result = cw_out_append(ctx, data, otype, buf, blen);
     if(result)
-      return result;
+      goto out;
     result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
     if(result)
       goto out;
@@ -414,7 +414,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
     result = cw_out_ptr_flush(ctx, data, otype, flush_all,
                               buf, blen, &consumed);
     if(result && (result != CURLE_AGAIN))
-      return result;
+      goto out;
     result = CURLE_OK;
     if(consumed < blen) {
       /* did not write all, append the rest */
