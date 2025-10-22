@@ -135,7 +135,6 @@ struct imap_conn {
 struct IMAP {
   curl_pp_transfer transfer;
   char *mailbox;          /* Mailbox to select */
-  unsigned int uidvalidity; /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
   char *mindex;           /* Index in mail box of mail to fetch */
   char *section;          /* Message SECTION to fetch */
@@ -143,6 +142,7 @@ struct IMAP {
   char *query;            /* Query to search for */
   char *custom;           /* Custom request */
   char *custom_params;    /* Parameters for the custom request */
+  unsigned int uidvalidity; /* UIDVALIDITY to check in select */
   BIT(uidvalidity_set);
 };
 
