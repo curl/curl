@@ -141,14 +141,18 @@ struct ftp_conn {
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */
-  int dirdepth;  /* number of entries used in the 'dirs' array */
-  int cwdcount;     /* number of CWD commands issued */
   int count1; /* general purpose counter for the state machine */
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
-  ftpstate state; /* always use ftp.c:state() to change state! */
-  ftpstate state_saved; /* transfer type saved to be reloaded after data
-                           connection is established */
+  unsigned short dirdepth;  /* number of entries used in the 'dirs' array,
+                               < FTP_MAX_DIR_DEPTH */
+  unsigned short cwdcount;  /* number of CWD commands issued,
+                               < FTP_MAX_DIR_DEPTH */
+  unsigned char state; /* (ftpstate enum) always use ftp.c:state() to change
+                          state! */
+  unsigned char state_saved; /* (ftpstate enum) transfer type saved to be
+                                reloaded after data connection is
+                                established */
   unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                               IMAP or POP3 or others! (type: curl_usessl)*/
   unsigned char ccc;       /* ccc level for this connection */

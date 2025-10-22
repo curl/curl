@@ -4169,6 +4169,8 @@ static size_t numof_slashes(const char *str)
   return num;
 }
 
+#define FTP_MAX_DIR_DEPTH 1000
+
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -4242,7 +4244,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
       /* number of entries to allocate for the 'dirs' array */
       size_t dirAlloc = numof_slashes(rawPath);
 
-      if(dirAlloc >= 1000)
+      if(dirAlloc >= FTP_MAX_DIR_DEPTH)
         /* suspiciously deep dir hierarchy */
         return CURLE_URL_MALFORMAT;
 
