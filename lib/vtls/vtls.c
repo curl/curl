@@ -1365,18 +1365,21 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(connssl);
 
   *done = FALSE;
+
+  if(!connssl->prefs_checked) {
+    if(!ssl_prefs_check(data)) {
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    connssl->prefs_checked = TRUE;
+  }
+
   if(!connssl->peer.hostname) {
     char tls_id[80];
     connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
     result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
     if(result)
       goto out;
-  }
-
-  if(!connssl->prefs_checked) {
-    if(!ssl_prefs_check(data))
-      return CURLE_SSL_CONNECT_ERROR;
-    connssl->prefs_checked = TRUE;
   }
 
   result = connssl->ssl_impl->do_connect(cf, data, done);
