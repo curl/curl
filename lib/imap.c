@@ -2193,7 +2193,6 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
       }
       else if(curl_strequal(name, "MAILINDEX") && !imap->mindex) {
         imap->mindex = value;
-        value = NULL;
       }
       else if(curl_strequal(name, "SECTION") && !imap->section) {
         imap->section = value;
