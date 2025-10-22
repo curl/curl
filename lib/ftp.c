@@ -1771,23 +1771,32 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
 }
 
 
-static char *control_address_dup(struct Curl_easy *data,
-                                 struct connectdata *conn)
+static CURLcode ftp_control_addr_dup(struct Curl_easy *data,
+                                     struct ftp_conn *ftpc)
 {
-    struct ip_quadruple ipquad;
-    bool is_ipv6;
+  struct connectdata *conn = data->conn;
+  struct ip_quadruple ipquad;
+  bool is_ipv6;
 
   /* Returns the control connection IP address.
      If a proxy tunnel is used, returns the original hostname instead, because
      the effective control connection address is the proxy address,
      not the ftp host. */
+  free(ftpc->newhost);
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
-    return strdup(conn->host.name);
+    ftpc->newhost = strdup(conn->host.name);
+  else
 #endif
-  if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad))
-    return strdup(ipquad.remote_ip);
-  return NULL;
+  if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad) &&
+     *ipquad.remote_ip)
+    ftpc->newhost = strdup(ipquad.remote_ip);
+  else {
+    /* failed to get the remote_ip of the DATA connection */
+    failf(data, "unable to get peername of DATA connection");
+    return CURLE_FAILED_INIT;
+  }
+  return ftpc->newhost ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
 static bool match_pasv_6nums(const char *p,
@@ -1840,9 +1849,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
         ftpc->newport = (unsigned short)num;
-        ftpc->newhost = control_address_dup(data, conn);
-        if(!ftpc->newhost)
-          return CURLE_OUT_OF_MEMORY;
+        result = ftp_control_addr_dup(data, ftpc);
+        if(result)
+          return result;
       }
       else
         ptr = NULL;
@@ -1884,7 +1893,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       infof(data, "Skip %u.%u.%u.%u for data connection, reuse %s instead",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
-      ftpc->newhost = control_address_dup(data, conn);
+      result = ftp_control_addr_dup(data, ftpc);
+      if(result)
+        return result;
     }
     else
       ftpc->newhost = curl_maprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
@@ -1938,9 +1949,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
       free(ftpc->newhost);
-      ftpc->newhost = control_address_dup(data, conn);
-      if(!ftpc->newhost)
-        return CURLE_OUT_OF_MEMORY;
+      result = ftp_control_addr_dup(data, ftpc);
+      if(result)
+        return result;
     }
 
     (void)Curl_resolv_blocking(data, ftpc->newhost, ftpc->newport,
