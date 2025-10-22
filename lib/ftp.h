@@ -133,8 +133,6 @@ struct ftp_conn {
   const char *file; /* url-decoded filename (or path), points into rawpath */
   char *rawpath; /* URL decoded, allocated, version of the path */
   struct pathcomp *dirs; /* allocated array for path components */
-  char *newhost; /* the (allocated) IP addr or hostname to connect the data
-                    connection to */
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
@@ -148,8 +146,6 @@ struct ftp_conn {
   int count1; /* general purpose counter for the state machine */
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
-  unsigned short newport;  /* the port of 'newhost' to connect the data
-                              connection to */
   ftpstate state; /* always use ftp.c:state() to change state! */
   ftpstate state_saved; /* transfer type saved to be reloaded after data
                            connection is established */

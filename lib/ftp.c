@@ -334,7 +334,6 @@ static void freedirs(struct ftp_conn *ftpc)
   ftpc->dirdepth = 0;
   Curl_safefree(ftpc->rawpath);
   ftpc->file = NULL;
-  Curl_safefree(ftpc->newhost);
 }
 
 #ifdef CURL_PREFER_LF_LINEENDS
@@ -1772,7 +1771,7 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
 
 
 static CURLcode ftp_control_addr_dup(struct Curl_easy *data,
-                                     struct ftp_conn *ftpc)
+                                     char **newhostp)
 {
   struct connectdata *conn = data->conn;
   struct ip_quadruple ipquad;
@@ -1782,21 +1781,21 @@ static CURLcode ftp_control_addr_dup(struct Curl_easy *data,
      If a proxy tunnel is used, returns the original hostname instead, because
      the effective control connection address is the proxy address,
      not the ftp host. */
-  free(ftpc->newhost);
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
-    ftpc->newhost = strdup(conn->host.name);
+    *newhostp = strdup(conn->host.name);
   else
 #endif
   if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad) &&
      *ipquad.remote_ip)
-    ftpc->newhost = strdup(ipquad.remote_ip);
+    *newhostp = strdup(ipquad.remote_ip);
   else {
     /* failed to get the remote_ip of the DATA connection */
     failf(data, "unable to get peername of DATA connection");
-    return CURLE_FAILED_INIT;
+    *newhostp = NULL;
+    return CURLE_FTP_CANT_GET_HOST;
   }
-  return ftpc->newhost ? CURLE_OK : CURLE_OUT_OF_MEMORY;
+  return *newhostp ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
 static bool match_pasv_6nums(const char *p,
@@ -1826,11 +1825,10 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   struct Curl_dns_entry *dns = NULL;
   unsigned short connectport; /* the local port connect() should use! */
   struct pingpong *pp = &ftpc->pp;
+  char *newhost = NULL;
+  unsigned short newport;
   char *str =
     curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first letter */
-
-  /* if we come here again, make sure the former name is cleared */
-  Curl_safefree(ftpc->newhost);
 
   if((ftpc->count1 == 0) &&
      (ftpcode == 229)) {
@@ -1848,8 +1846,8 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
           failf(data, "Illegal port number in EPSV reply");
           return CURLE_FTP_WEIRD_PASV_REPLY;
         }
-        ftpc->newport = (unsigned short)num;
-        result = ftp_control_addr_dup(data, ftpc);
+        newport = (unsigned short)num;
+        result = ftp_control_addr_dup(data, &newhost);
         if(result)
           return result;
       }
@@ -1893,17 +1891,17 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
       infof(data, "Skip %u.%u.%u.%u for data connection, reuse %s instead",
             ip[0], ip[1], ip[2], ip[3],
             conn->host.name);
-      result = ftp_control_addr_dup(data, ftpc);
+      result = ftp_control_addr_dup(data, &newhost);
       if(result)
         return result;
     }
     else
-      ftpc->newhost = curl_maprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+      newhost = curl_maprintf("%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 
-    if(!ftpc->newhost)
+    if(!newhost)
       return CURLE_OUT_OF_MEMORY;
 
-    ftpc->newport = (unsigned short)(((ip[4] << 8) + ip[5]) & 0xffff);
+    newport = (unsigned short)(((ip[4] << 8) + ip[5]) & 0xffff);
   }
   else if(ftpc->count1 == 0) {
     /* EPSV failed, move on to PASV */
@@ -1937,31 +1935,31 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     if(!dns) {
       failf(data, "cannot resolve proxy host %s:%hu", host_name, connectport);
-      return CURLE_COULDNT_RESOLVE_PROXY;
+      result = CURLE_COULDNT_RESOLVE_PROXY;
+      goto error;
     }
   }
   else
 #endif
   {
     /* normal, direct, ftp connection */
-    DEBUGASSERT(ftpc->newhost);
+    DEBUGASSERT(newhost);
 
     /* postponed address resolution in case of tcp fastopen */
-    if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      free(ftpc->newhost);
-      result = ftp_control_addr_dup(data, ftpc);
+    if(conn->bits.tcp_fastopen && !conn->bits.reuse && !newhost[0]) {
+      free(newhost);
+      result = ftp_control_addr_dup(data, &newhost);
       if(result)
-        return result;
+        goto error;
     }
 
-    (void)Curl_resolv_blocking(data, ftpc->newhost, ftpc->newport,
-                               conn->ip_version, &dns);
-    connectport = ftpc->newport; /* we connect to the remote port */
+    (void)Curl_resolv_blocking(data, newhost, newport, conn->ip_version, &dns);
+    connectport = newport; /* we connect to the remote port */
 
     if(!dns) {
-      failf(data, "cannot resolve new host %s:%hu",
-            ftpc->newhost, connectport);
-      return CURLE_FTP_CANT_GET_HOST;
+      failf(data, "cannot resolve new host %s:%hu", newhost, connectport);
+      result = CURLE_FTP_CANT_GET_HOST;
+      goto error;
     }
   }
 
@@ -1970,10 +1968,12 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
                            CURL_CF_SSL_ENABLE : CURL_CF_SSL_DISABLE);
 
   if(result) {
-    if(ftpc->count1 == 0 && ftpcode == 229)
+    if(ftpc->count1 == 0 && ftpcode == 229) {
+      free(newhost);
       return ftp_epsv_disable(data, ftpc, conn);
+    }
 
-    return result;
+    goto error;
   }
 
 
@@ -1985,17 +1985,21 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(data, dns->addr, ftpc->newhost, connectport);
+    ftp_pasv_verbose(data, dns->addr, newhost, connectport);
 
   free(conn->secondaryhostname);
-  conn->secondary_port = ftpc->newport;
-  conn->secondaryhostname = strdup(ftpc->newhost);
-  if(!conn->secondaryhostname)
-    return CURLE_OUT_OF_MEMORY;
+  conn->secondary_port = newport;
+  conn->secondaryhostname = strdup(newhost);
+  if(!conn->secondaryhostname) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto error;
+  }
 
   conn->bits.do_more = TRUE;
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
 
+error:
+  free(newhost);
   return result;
 }
 
