@@ -1826,7 +1826,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   unsigned short connectport; /* the local port connect() should use! */
   struct pingpong *pp = &ftpc->pp;
   char *newhost = NULL;
-  unsigned short newport;
+  unsigned short newport = 0;
   char *str =
     curlx_dyn_ptr(&pp->recvbuf) + 4; /* start on the first letter */
 
