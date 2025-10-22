@@ -2179,7 +2179,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
     if(valuelen > 0 && value[valuelen - 1] == '/')
       value[valuelen - 1] = '\0';
     if(valuelen) {
-      if(curl_strequal(name, "UIDVALIDITY") && !imap->uidvalidity) {
+      if(curl_strequal(name, "UIDVALIDITY") && !imap->uidvalidity_set) {
         curl_off_t num;
         const char *p = (const char *)value;
         if(!curlx_str_number(&p, &num, UINT_MAX)) {
