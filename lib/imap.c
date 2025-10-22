@@ -2203,10 +2203,12 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
       else {
         free(name);
         free(value);
-
         return CURLE_URL_MALFORMAT;
       }
     }
+    else
+      /* blank? */
+      free(value);
     free(name);
   }
 
