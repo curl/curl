@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+unittest
+string_to_sign
+aws-sigv4
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+sigv4 string-to-sign unit tests
+</name>
+</client>
+</testcase>
