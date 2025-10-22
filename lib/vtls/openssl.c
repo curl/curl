@@ -1721,12 +1721,12 @@ static CURLcode client_cert(struct Curl_easy *data,
       break;
 
     case SSL_FILETYPE_ENGINE:
-      if(!engineload(data, ctx, cert_file))
+      if(!cert_file || !engineload(data, ctx, cert_file))
         return CURLE_SSL_CERTPROBLEM;
       break;
 
     case SSL_FILETYPE_PROVIDER:
-      if(!providerload(data, ctx, cert_file))
+      if(!cert_file || !providerload(data, ctx, cert_file))
         return CURLE_SSL_CERTPROBLEM;
       break;
 
