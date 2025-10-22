@@ -254,6 +254,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   curl_off_t total_received = 0;
   bool is_multiplex = FALSE;
   bool rcvd_eagain = FALSE;
+  bool is_eos = FALSE;
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
@@ -262,7 +263,6 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   /* This is where we loop until we have read everything there is to
      read or we get a CURLE_AGAIN */
   do {
-    bool is_eos = FALSE;
     size_t bytestoread;
     ssize_t nread;
 
@@ -309,9 +309,14 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     blen = (size_t)nread;
     is_eos = (blen == 0);
 
-    if(!blen) {
-      /* if we receive 0 or less here, either the data transfer is done or the
-         server closed the connection and we bail out from this! */
+    if(!blen && (conn->recv[FIRSTSOCKET] == Curl_cf_recv)) {
+      /* if we receive 0 or less here and the protocol handler did not
+         replace the connection's `recv` callback, either the data transfer
+         is done or the server closed the connection and
+         we bail out from this!
+         With a `recv` replacement, we assume the protocol handler knows
+         what it is doing and a 0-length receive is fine. For example,
+         SFTP downloads of an empty file would show this. See #19165. */
       if(is_multiplex)
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
@@ -340,9 +345,9 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
 
   } while(maxloops--);
 
-  if(!Curl_xfer_is_blocked(data) &&
+  if(!is_eos && !Curl_xfer_is_blocked(data) &&
      (!rcvd_eagain || data_pending(data, rcvd_eagain))) {
-    /* Did not read until EAGAIN or there is still data pending
+    /* Did not read until EAGAIN/EOS or there is still data pending
      * in buffers. Mark as read-again via simulated SELECT results. */
     Curl_multi_mark_dirty(data);
     CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, mark as dirty");
@@ -662,9 +667,10 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
     return CURLE_OK;
 
-  if((data->req.bytecount + data->req.headerbytecount == 0) &&
-     conn->bits.reuse &&
-     (!data->req.no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
+  if(conn->bits.reuse &&
+     (data->req.bytecount + data->req.headerbytecount == 0) &&
+     ((!data->req.no_body && !data->req.done) ||
+      (conn->handler->protocol & PROTO_FAMILY_HTTP))
 #ifndef CURL_DISABLE_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
