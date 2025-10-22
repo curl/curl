@@ -1234,7 +1234,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
   }
   else if(imapcode == IMAP_RESP_OK) {
     /* Check if the UIDVALIDITY has been specified and matches */
-    if(imap->uidvalidity && imapc->mb_uidvalidity &&
+    if(imap->uidvalidity_set && imapc->mb_uidvalidity_set &&
        (imap->uidvalidity != imapc->mb_uidvalidity)) {
       failf(data, "Mailbox UIDVALIDITY has changed");
       result = CURLE_REMOTE_FILE_NOT_FOUND;
