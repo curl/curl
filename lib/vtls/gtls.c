@@ -239,8 +239,8 @@ static void unload_file(gnutls_datum_t data)
 
 
 /* this function does an SSL/TLS (re-)handshake */
-static CURLcode handshake(struct Curl_cfilter *cf,
-                          struct Curl_easy *data)
+static CURLcode cf_gtls_handshake(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
@@ -2005,7 +2005,7 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
     DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
                 (connssl->earlydata_state == ssl_earlydata_sent));
 #endif
-    result = handshake(cf, data);
+    result = cf_gtls_handshake(cf, data);
     if(result)
       goto out;
     connssl->connecting_state = ssl_connect_3;
@@ -2265,11 +2265,10 @@ static CURLcode gtls_recv(struct Curl_cfilter *cf,
       goto out;
     }
     else if(nread == GNUTLS_E_REHANDSHAKE) {
-      /* BLOCKING call, this is bad but a work-around for now. Fixing this "the
-         proper way" takes a whole lot of work. */
-      result = handshake(cf, data);
+      /* Either TLSv1.2 renegotiate or a TLSv1.3 session key update. */
+      result = cf_gtls_handshake(cf, data);
       if(!result)
-        result = CURLE_AGAIN; /* then return as if this was a wouldblock */
+        result = CURLE_AGAIN; /* make us get called again. */
       goto out;
     }
     else {
