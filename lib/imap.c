@@ -2198,9 +2198,6 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
         imap->section = value;
       }
       else if(curl_strequal(name, "PARTIAL") && !imap->partial) {
-        if(valuelen > 0 && value[valuelen - 1] == '/')
-          value[valuelen - 1] = '\0';
-
         imap->partial = value;
       }
       else {
