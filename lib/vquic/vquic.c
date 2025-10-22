@@ -539,6 +539,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
                      msg.msg_name, msg.msg_namelen, 0, userp);
     if(result)
       goto out;
+    pkts += (nread + gso_size - 1) / gso_size;
   }
 
 out:
