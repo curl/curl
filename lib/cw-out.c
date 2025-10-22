@@ -414,7 +414,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
     result = cw_out_ptr_flush(ctx, data, otype, flush_all,
                               buf, blen, &consumed);
     if(result && (result != CURLE_AGAIN))
-      goto out;
+      return result;
     result = CURLE_OK;
     if(consumed < blen) {
       /* did not write all, append the rest */
