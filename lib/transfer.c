@@ -662,9 +662,10 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
     return CURLE_OK;
 
-  if(!data->req.done && conn->bits.reuse &&
+  if(conn->bits.reuse &&
      (data->req.bytecount + data->req.headerbytecount == 0) &&
-     (!data->req.no_body || (conn->handler->protocol & PROTO_FAMILY_HTTP))
+     ((!data->req.no_body && !data->req.done) ||
+      (conn->handler->protocol & PROTO_FAMILY_HTTP))
 #ifndef CURL_DISABLE_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
