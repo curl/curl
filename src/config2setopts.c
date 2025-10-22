@@ -509,6 +509,11 @@ static CURLcode http_setopts(struct OperationConfig *config,
   my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH,
                  config->unrestricted_auth);
   my_setopt_str(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
+  my_setopt_str(curl, CURLOPT_AWS_SIGV4_ALGORITHM,
+                config->aws_sigv4_algorithm);
+  my_setopt_str(curl, CURLOPT_AWS_SIGV4_MODE, config->aws_sigv4_mode);
+  my_setopt_str(curl, CURLOPT_AWS_SIGV4_SIGNEDHEADERS,
+                config->aws_sigv4_signedheaders);
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
   /* new in libcurl 7.36.0 */

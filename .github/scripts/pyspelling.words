@@ -18,7 +18,9 @@ ALPN
 Altera
 AltSvc
 ALTSVC
+Amz
 amiga
+amz
 AmigaOS
 AmiSSL
 anyauth
@@ -37,6 +39,7 @@ asynch
 AsynchDNS
 atime
 auth
+aws
 autobuild
 autobuilds
 Autoconf
@@ -216,6 +219,7 @@ EAGAIN
 EBCDIC
 ECC
 ECDHE
+ECDSA
 ECH
 ECHConfig
 ECHConfigList
@@ -413,6 +417,7 @@ Kaufmann
 kB
 KDE
 keepalive
+keyId
 Keil
 kerberos
 Keychain
@@ -668,6 +673,7 @@ qname
 QNX
 QoS
 Qubes
+querystring
 QUIC
 quictls
 quicwg
@@ -744,6 +750,7 @@ SCP
 scp
 SDK
 se
+secretKey
 SEB
 SecTrust
 SEK
@@ -759,6 +766,10 @@ SHOUTcast
 SIGALRM
 SIGCHLD
 SIGPIPE
+SIGV
+SIGV4
+SIGV4A
+SignedHeaders
 singlecwd
 SINIX
 Sintonen
@@ -835,6 +846,7 @@ SunOS
 SunSSH
 superset
 svc
+svcs
 svcb
 SVCB
 SVG
@@ -940,6 +952,8 @@ VM
 VMS
 VMware
 vnd
+VPC
+vpc
 VRF
 VRFY
 VSE
@@ -985,6 +999,7 @@ XYZ
 Youtube
 YYYY
 YYYYMMDD
+YYYYMMDDTHHMMSSZ
 Zakrzewski
 Zitzmann
 zlib

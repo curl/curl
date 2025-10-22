@@ -51,10 +51,10 @@ s/Signature=[a-f0-9]{64}/Signature=stripped/
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: AWS4-HMAC-SHA256 Credential=xxx/19700101/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-meta-test;x-amz-meta-test-two, Signature=stripped
-X-Amz-Date: 19700101T000000Z
 x-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 X-Amz-Meta-Test-Two: test2
 x-amz-meta-test: test
+X-Amz-Date: 19700101T000000Z
 
 </protocol>
 </verify>

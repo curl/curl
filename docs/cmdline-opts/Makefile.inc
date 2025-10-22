@@ -50,6 +50,9 @@ DPAGES = \
   anyauth.md \
   append.md \
   aws-sigv4.md \
+  aws-sigv4-algorithm.md \
+  aws-sigv4-mode.md \
+  aws-sigv4-signedheaders.md \
   basic.md \
   ca-native.md \
   cacert.md \

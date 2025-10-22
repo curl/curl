@@ -74,6 +74,31 @@ static CURLcode test_unit1980(const char *arg)
       "Param-3=Value3&Param=Value2&%E1%88%B4=Value1",
       "%E1%88%B4=Value1&Param=Value2&Param-3=Value3"
     },
+    {
+      "case-sensitive-sorting-upper-lower",
+      "c=3&b=2&AAA=upper&a=1&aaa=lower",
+      "AAA=upper&a=1&aaa=lower&b=2&c=3"
+    },
+    {
+      "case-sensitive-sorting-z-params",
+      "c=3&b=2&ZZZ=upper&a=1&zzz=lower",
+      "ZZZ=upper&a=1&b=2&c=3&zzz=lower"
+    },
+    {
+      "plus-in-value",
+      "param=hello+world&other=test",
+      "other=test&param=hello%2Bworld"
+    },
+    {
+      "slash-in-value",
+      "param=hello/world&other=test",
+      "other=test&param=hello%2Fworld"
+    },
+    {
+      "equal-in-value",
+      "param=hello=world&other=test",
+      "other=test&param=hello%3Dworld"
+    },
   };
 
   size_t i;

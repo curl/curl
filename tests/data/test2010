@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+CURLOPT_AWS_SIGV4
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+AWS SigV4 with custom SignedHeaders override alternative order
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --aws-sigv4 "aws:amz:us-east-1:s3" --aws-sigv4-signedheaders "x-amz-content-sha256;host;x-amz-date" -u "AKIATEST:secretkey"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+^Accept:.*
+</strip>
+<strippart>
+s/Authorization: AWS4-HMAC-SHA256 Credential=AKIATEST\/[0-9]{8}\/us-east-1\/s3\/aws4_request, SignedHeaders=x-amz-content-sha256;host;x-amz-date, Signature=[a-f0-9]{64}/Authorization: AWS4-HMAC-SHA256 Credential=AKIATEST\/YYYYMMDD\/us-east-1\/s3\/aws4_request, SignedHeaders=x-amz-content-sha256;host;x-amz-date, Signature=SIGNATURE64/
+s/X-Amz-Date: [0-9]{8}T[0-9]{6}Z/X-Amz-Date: YYYYMMDDTHHMMSSZ/
+</strippart>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: AWS4-HMAC-SHA256 Credential=AKIATEST/YYYYMMDD/us-east-1/s3/aws4_request, SignedHeaders=x-amz-content-sha256;host;x-amz-date, Signature=SIGNATURE64
+x-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+X-Amz-Date: YYYYMMDDTHHMMSSZ
+
+</protocol>
+<postcheck>
+perl -e '
+  my $headers = "GET /%TESTNUMBER HTTP/1.1\nHost: %HOSTIP:%HTTPPORT\nAuthorization: AWS4-HMAC-SHA256 Credential=AKIATEST/YYYYMMDD/us-east-1/s3/aws4_request, SignedHeaders=x-amz-content-sha256;host;x-amz-date, Signature=SIGNATURE64\nx-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nX-Amz-Date: YYYYMMDDTHHMMSSZ";
+  if ($headers !~ /SignedHeaders=x-amz-content-sha256;host;x-amz-date/) {
+    print "ERROR: Expected SignedHeaders=x-amz-content-sha256;host;x-amz-date, but not found\n";
+    exit 1;
+  }
+  print "OK: Found correct custom SignedHeaders value\n";
+'
+</postcheck>
+</verify>
+</testcase>

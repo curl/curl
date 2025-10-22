@@ -30,6 +30,9 @@
 #include "strcase.h"
 #include "strdup.h"
 #include "http_aws_sigv4.h"
+
+#include "http_aws_sigv4a.h"
+
 #include "curl_sha256.h"
 #include "transfer.h"
 #include "parsedate.h"
@@ -44,18 +47,6 @@
 #include "memdebug.h"
 
 #include "slist.h"
-
-#define HMAC_SHA256(k, kl, d, dl, o)                \
-  do {                                              \
-    result = Curl_hmacit(&Curl_HMAC_SHA256,         \
-                         (const unsigned char *)k,  \
-                         kl,                        \
-                         (const unsigned char *)d,  \
-                         dl, o);                    \
-    if(result) {                                    \
-      goto fail;                                    \
-    }                                               \
-  } while(0)
 
 #define TIMESTAMP_SIZE 17
 
@@ -75,18 +66,40 @@ static CURLcode split_to_dyn_array(const char *source,
                                    struct dynbuf db[MAX_QUERY_COMPONENTS],
                                    size_t *num_splits);
 static bool is_reserved_char(const char c);
+static bool has_query_param(const char *query, const char *param);
 static CURLcode uri_encode_path(struct Curl_str *original_path,
                                 struct dynbuf *new_path);
-static CURLcode encode_query_component(char *component, size_t len,
-                                       struct dynbuf *db);
-static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-                                       struct dynbuf *out);
 static bool should_urlencode(struct Curl_str *service_name);
 
 static void sha256_to_hex(char *dst, unsigned char *sha)
 {
   Curl_hexencode(sha, CURL_SHA256_DIGEST_LENGTH,
                  (unsigned char *)dst, SHA256_HEX_LENGTH);
+}
+
+static bool has_query_param(const char *query, const char *param)
+{
+  size_t param_len;
+  const char *found;
+
+  if(!query || !param)
+    return false;
+
+  param_len = strlen(param);
+  found = query;
+
+  found = strstr(found, param);
+  while(found) {
+    /* Check if it's at start or after & */
+    if(found == query || *(found - 1) == '&') {
+      /* Check if followed by = */
+      if(found[param_len] == '=')
+        return true;
+    }
+    found++;
+    found = strstr(found, param);
+  }
+  return false;
 }
 
 static char *find_date_hdr(struct Curl_easy *data, const char *sig_hdr)
@@ -96,6 +109,50 @@ static char *find_date_hdr(struct Curl_easy *data, const char *sig_hdr)
   if(tmp)
     return tmp;
   return Curl_checkheaders(data, STRCONST("Date"));
+}
+
+/* Parse AWS credentials from --user option */
+UNITTEST CURLcode parse_aws_credentials(struct Curl_easy *data,
+                                        const char **access_key,
+                                        char **secret_key,
+                                        char **security_token)
+{
+  const char *user = data->state.aptr.user;
+  const char *passwd = data->state.aptr.passwd;
+  char *token_sep;
+
+  if(!user || !passwd) {
+    failf(data, "AWS SigV4 requires access key and secret key");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+  *access_key = user;
+
+  /* Check if passwd contains security token (secret:token format) */
+  token_sep = strchr(passwd, ':');
+  if(token_sep) {
+    /* Make a copy of passwd to modify */
+    *secret_key = strdup(passwd);
+    if(!*secret_key)
+      return CURLE_OUT_OF_MEMORY;
+
+    /* Split secret and token */
+    token_sep = strchr(*secret_key, ':');
+    *token_sep = '\0';
+    *security_token = strdup(token_sep + 1);
+    if(!*security_token) {
+      free(*secret_key);
+      return CURLE_OUT_OF_MEMORY;
+    }
+  }
+  else {
+    *secret_key = strdup(passwd);
+    if(!*secret_key)
+      return CURLE_OUT_OF_MEMORY;
+    *security_token = NULL;
+  }
+
+  return CURLE_OK;
 }
 
 /* remove whitespace, and lowercase all headers */
@@ -242,6 +299,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   struct curl_slist *tmp_head = NULL;
   CURLcode ret = CURLE_OUT_OF_MEMORY;
   struct curl_slist *l;
+  bool first_signed_header = true;
   bool again = TRUE;
 
   curl_msnprintf(date_hdr_key, DATE_HDR_KEY_LEN, "X-%.*s-Date",
@@ -273,7 +331,6 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
     }
   }
-
 
   if(*content_sha256_header) {
     tmp_head = curl_slist_append(head, content_sha256_header);
@@ -323,14 +380,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   trim_headers(head);
 
   *date_header = find_date_hdr(data, date_hdr_key);
-  if(!*date_header) {
-    tmp_head = curl_slist_append(head, date_full_hdr);
-    if(!tmp_head)
-      goto fail;
-    head = tmp_head;
-    *date_header = curl_maprintf("%s: %s\r\n", date_hdr_key, timestamp);
-  }
-  else {
+  if(*date_header) {
     const char *value;
     const char *endp;
     value = strchr(*date_header, ':');
@@ -374,6 +424,72 @@ static CURLcode make_headers(struct Curl_easy *data,
   if(ret)
     goto fail;
 
+  /* Handle custom signed headers list if provided */
+  if(data->set.str[STRING_AWS_SIGV4_SIGNEDHEADERS]) {
+    const char *custom_headers = data->set.str[STRING_AWS_SIGV4_SIGNEDHEADERS];
+    char *headers_copy = strdup(custom_headers);
+    char *token, *next_token;
+    struct curl_slist *custom_head = NULL;
+
+    infof(data, "aws_sigv4: using signedheaders='%s'", custom_headers);
+
+    if(!headers_copy) {
+      ret = CURLE_OUT_OF_MEMORY;
+      goto fail;
+    }
+
+    /* Parse semicolon-delimited header list */
+    token = headers_copy;
+    while(token && *token) {
+      char *header_name = token;
+      char *found_header = NULL;
+      char *semicolon = strchr(token, ';');
+
+      if(semicolon) {
+        *semicolon = '\0';
+        next_token = semicolon + 1;
+      }
+      else {
+        next_token = NULL;
+      }
+
+      /* Trim whitespace */
+      while(ISBLANK(*header_name))
+        header_name++;
+
+      /* Find this header in our collected headers */
+      for(l = head; l; l = l->next) {
+        char *colon = strchr(l->data, ':');
+        if(colon) {
+          size_t name_len = colon - l->data;
+          if(curl_strnequal(l->data, header_name, name_len) &&
+             strlen(header_name) == name_len) {
+            found_header = strdup(l->data);
+            break;
+          }
+        }
+      }
+
+      if(found_header) {
+        tmp_head = Curl_slist_append_nodup(custom_head, found_header);
+        if(!tmp_head) {
+          free(found_header);
+          free(headers_copy);
+          curl_slist_free_all(custom_head);
+          ret = CURLE_OUT_OF_MEMORY;
+          goto fail;
+        }
+        custom_head = tmp_head;
+      }
+
+      token = next_token;
+    }
+
+    free(headers_copy);
+    curl_slist_free_all(head);
+    head = custom_head;
+  }
+
   for(l = head; l; l = l->next) {
     char *tmp;
 
@@ -386,12 +502,13 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(tmp)
       *tmp = 0;
 
-    if(l != head) {
+    if(!first_signed_header) {
       if(curlx_dyn_add(signed_headers, ";"))
         goto fail;
     }
     if(curlx_dyn_add(signed_headers, l->data))
       goto fail;
+    first_signed_header = false;
   }
 
   ret = CURLE_OK;
@@ -561,6 +678,42 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
   return result;
 }
 
+/*
+* Populates a dynbuf containing url_encode(url_decode(in))
+*/
+
+UNITTEST CURLcode http_aws_decode_encode(const char *in, size_t in_len,
+                                         struct dynbuf *out)
+{
+  size_t i;
+
+  for(i = 0; i < in_len; i++) {
+    CURLcode result = CURLE_OK;
+
+    if(in[i] == '%' && i + 2 < in_len &&
+       ISXDIGIT(in[i + 1]) && ISXDIGIT(in[i + 2])) {
+      /* Valid percent encoding - normalize to uppercase */
+      result = curlx_dyn_addf(out, "%%%c%c",
+                              Curl_raw_toupper(in[i + 1]),
+                              Curl_raw_toupper(in[i + 2]));
+      i += 2; /* Skip the two hex digits */
+    }
+    else if(is_reserved_char(in[i])) {
+      /* Unreserved character - keep as-is */
+      result = curlx_dyn_addn(out, &in[i], 1);
+    }
+    else {
+      /* Reserved character - encode it */
+      result = curlx_dyn_addf(out, "%%%02X", (unsigned char)in[i]);
+    }
+
+    if(result)
+      return result;
+  }
+
+  return CURLE_OK;
+}
+
 UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
 {
   CURLcode result = CURLE_OK;
@@ -675,12 +828,14 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   struct Curl_str provider0;
   struct Curl_str provider1;
   struct Curl_str region = { NULL, 0};
+  struct Curl_str region_set_or_region = { NULL, 0};
   struct Curl_str service = { NULL, 0};
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;
   char timestamp[TIMESTAMP_SIZE];
   char date[9];
+  bool user_provided_date = false;
   struct dynbuf canonical_headers;
   struct dynbuf signed_headers;
   struct dynbuf canonical_query;
@@ -691,17 +846,67 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *payload_hash = NULL;
   size_t payload_hash_len = 0;
   unsigned char sha_hash[CURL_SHA256_DIGEST_LENGTH];
-  char sha_hex[SHA256_HEX_LENGTH];
+  char sha_hex[145]; /* Max DER signature: 72*2+1 */
   char content_sha256_hdr[CONTENT_SHA256_HDR_LEN + 2] = ""; /* add \r\n */
   char *canonical_request = NULL;
   char *request_type = NULL;
   char *credential_scope = NULL;
   char *str_to_sign = NULL;
-  const char *user = data->state.aptr.user ? data->state.aptr.user : "";
+  const char *access_key = NULL;
+  char *secret_key = NULL;
+  char *security_token = NULL;
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = {0};
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char date_key[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char region_key[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char service_key[CURL_SHA256_DIGEST_LENGTH] = {0};
+  /* Cache provider1 values to avoid repeated function calls */
+  const char *provider_str;
+  int provider_len;
+  const char *query_date_param;
+  char *header_date_param;
+  unsigned char signing_key[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char signature[72] = {0};
+  size_t sig_len = 0;
   char *auth_headers = NULL;
+  const char *mode = data->set.str[STRING_AWS_SIGV4_MODE];
+  const char *algorithm = data->set.str[STRING_AWS_SIGV4_ALGORITHM];
+  const char *existing_query = NULL;
+  bool querystring_mode = mode && !strcmp(mode, "querystring");
+  bool sigv4a_mode;
+
+  /* Default to AWS4-HMAC-SHA256 if no algorithm specified */
+  if(!algorithm)
+    algorithm = "AWS4-HMAC-SHA256";
+
+  /* Map short form to full algorithm name */
+  if(!strcmp(algorithm, "ECDSA-P256-SHA256"))
+    algorithm = "AWS4-ECDSA-P256-SHA256";
+
+  /* Set SigV4A mode after algorithm mapping */
+  sigv4a_mode = algorithm && !strcmp(algorithm, "AWS4-ECDSA-P256-SHA256");
+
+  infof(data, "aws_sigv4: mode='%s', algorithm='%s', querystring_mode=%d, "
+              "sigv4a_mode=%d", mode ? mode : "(null)", algorithm,
+              querystring_mode, sigv4a_mode);
+
+  infof(data, "aws_sigv4: parsing sigv4='%s'",
+        data->set.str[STRING_AWS_SIGV4]);
+
+  /* Validate algorithm */
+  if(strcmp(algorithm, "AWS4-HMAC-SHA256") &&
+     strcmp(algorithm, "AWS4-ECDSA-P256-SHA256")) {
+    failf(data, "Unsupported AWS SigV4 algorithm: %s", algorithm);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
+#ifndef HAVE_SIGV4A_SUPPORT
+  if(sigv4a_mode) {
+    failf(data, "aws-sigv4: SigV4A (ECDSA-P256-SHA256) not supported - "
+               "this version of OpenSSL was not compiled with required "
+               "EC support");
+    return CURLE_NOT_BUILT_IN;
+  }
+#endif
 
   if(data->set.path_as_is) {
     failf(data, "Cannot use sigv4 authentication with path-as-is flag");
@@ -712,6 +917,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     /* Authorization already present, Bailing out */
     return CURLE_OK;
   }
+
+  /* Parse AWS credentials from --user option */
+  result = parse_aws_credentials(data, &access_key, &secret_key,
+                                 &security_token);
+  if(result)
+    return result;
 
   /* we init those buffers here, so goto fail will free initialized dynbuf */
   curlx_dyn_init(&canonical_headers, CURL_MAX_HTTP_HEADER);
@@ -739,15 +950,62 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
   }
-  if(curlx_str_single(&line, ':') ||
-     curlx_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
+  /* Parse: provider0:provider1:region_set_or_region:service */
+  if(curlx_str_single(&line, ':')) {
+    /* No provider1, use provider0 */
     provider1 = provider0;
+    infof(data, "aws_sigv4: no provider1, using provider0");
   }
-  else if(curlx_str_single(&line, ':') ||
-          curlx_str_until(&line, &region, MAX_SIGV4_LEN, ':') ||
-          curlx_str_single(&line, ':') ||
-          curlx_str_until(&line, &service, MAX_SIGV4_LEN, ':')) {
-    /* nothing to do */
+  else if(curlx_str_until(&line, &provider1, MAX_SIGV4_LEN, ':')) {
+    /* Failed to parse provider1 */
+    provider1 = provider0;
+    infof(data, "aws_sigv4: failed to parse provider1, using provider0");
+  }
+
+  /* Parse region_set_or_region */
+  if(curlx_str_single(&line, ':')) {
+    infof(data, "aws_sigv4: no region_set_or_region");
+  }
+  else if(curlx_str_until(&line, &region_set_or_region, MAX_SIGV4_LEN,
+                          ':')) {
+    infof(data, "aws_sigv4: failed to parse region_set_or_region");
+  }
+  else {
+    infof(data, "aws_sigv4: using region_set_or_region='%.*s'",
+          (int)curlx_strlen(&region_set_or_region),
+          curlx_str(&region_set_or_region));
+  }
+
+  /* Parse service */
+  if(curlx_str_single(&line, ':')) {
+    infof(data, "aws_sigv4: no service");
+  }
+  else if(curlx_str_until(&line, &service, MAX_SIGV4_LEN, ':')) {
+    infof(data, "aws_sigv4: failed to parse service");
+  }
+  else {
+    infof(data, "aws_sigv4: using service='%.*s'",
+          (int)curlx_strlen(&service), curlx_str(&service));
+  }
+
+  /* Use region_set_or_region as region for now - interpretation later */
+  if(curlx_strlen(&region_set_or_region)) {
+    region = region_set_or_region;
+  }
+  else {
+    infof(data, "aws_sigv4: no region specified");
+  }
+
+  /* Cache provider1 values to avoid repeated function calls */
+  provider_str = curlx_str(&provider1);
+  provider_len = (int)curlx_strlen(&provider1);
+
+  /* Create capitalized provider string for querystring parameters */
+  char capitalized_provider[64];
+  if(provider_len < sizeof(capitalized_provider)) {
+    Curl_strntolower(capitalized_provider, provider_str, provider_len);
+    capitalized_provider[0] = Curl_raw_toupper(provider_str[0]);
+    capitalized_provider[provider_len] = '\0';
   }
 
   if(!curlx_strlen(&service)) {
@@ -820,6 +1078,138 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     goto fail;
   }
 
+  /* Override timestamp if user provided X-{Provider1}-Date */
+  if(querystring_mode && data->state.up.query) {
+    char date_param_name[64];
+    curl_msnprintf(date_param_name, sizeof(date_param_name), "X-%.*s-Date=",
+                   provider_len, provider_str);
+    /* provider1 ucfirst */
+    Curl_strntolower(&date_param_name[2], provider_str, provider_len);
+    date_param_name[2] = Curl_raw_toupper(provider_str[0]);
+
+    query_date_param = strstr(data->state.up.query, date_param_name);
+    if(query_date_param) {
+      const char *end;
+      size_t len;
+      /* Skip "X-{Provider1}-Date=" */
+      query_date_param += strlen(date_param_name);
+      end = strchr(query_date_param, '&');
+      len = end ? (size_t)(end - query_date_param) : strlen(query_date_param);
+      if(len == 16) { /* YYYYMMDDTHHMMSSZ */
+        memcpy(timestamp, query_date_param, len);
+        timestamp[len] = 0;
+        user_provided_date = true;
+        infof(data, "aws_sigv4: using x-%.*s-date override='%s'",
+              provider_len, provider_str, timestamp);
+      }
+    }
+  }
+  else if(!querystring_mode) {
+    char date_header_name[64];
+    curl_msnprintf(date_header_name, sizeof(date_header_name), "X-%.*s-Date",
+                   provider_len, provider_str);
+    /* provider1 ucfirst */
+    Curl_strntolower(&date_header_name[2], provider_str, provider_len);
+    date_header_name[2] = Curl_raw_toupper(provider_str[0]);
+
+    header_date_param = Curl_checkheaders(data, date_header_name,
+                                           strlen(date_header_name));
+    if(header_date_param) {
+      char *date_value = strchr(header_date_param, ':');
+      if(date_value) {
+        size_t len;
+        date_value++;
+        while(*date_value == ' ') date_value++;
+        len = strlen(date_value);
+        if(len == 16) { /* YYYYMMDDTHHMMSSZ */
+          memcpy(timestamp, date_value, len);
+          timestamp[len] = 0;
+          user_provided_date = true;
+          infof(data, "aws_sigv4: using x-%.*s-date override='%s'",
+                provider_len, provider_str, timestamp);
+        }
+      }
+    }
+  }
+
+  /* Add security token header to request headers if present and not in
+     querystring mode */
+  if(security_token && !querystring_mode) {
+    /* Only add X-{Provider1}-Security-Token if not already provided by user */
+    char security_token_header_name[128];
+    curl_msnprintf(security_token_header_name,
+                   sizeof(security_token_header_name),
+                   "X-%.*s-Security-Token", provider_len, provider_str);
+    /* provider1 ucfirst */
+    Curl_strntolower(&security_token_header_name[2], provider_str,
+                     provider_len);
+    security_token_header_name[2] = Curl_raw_toupper(provider_str[0]);
+
+    if(!Curl_checkheaders(data, security_token_header_name,
+                          strlen(security_token_header_name))) {
+      char *security_token_hdr = curl_maprintf("%s: %s",
+                                               security_token_header_name,
+                                               security_token);
+      if(!security_token_hdr) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+      data->set.headers = curl_slist_append(data->set.headers,
+                                           security_token_hdr);
+      curl_free(security_token_hdr);
+      if(!data->set.headers) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+    }
+  }
+
+  /* Add X-{Provider1}-Date header for header mode before canonicalization */
+  if(!querystring_mode) {
+    /* Only add X-{Provider1}-Date if not already provided by user */
+    if(!user_provided_date) {
+      char *date_hdr = curl_maprintf("X-%.*s-Date: %s",
+                                     provider_len, provider_str, timestamp);
+      if(!date_hdr) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+      /* provider1 ucfirst */
+      Curl_strntolower(&date_hdr[2], provider_str, provider_len);
+      date_hdr[2] = Curl_raw_toupper(provider_str[0]);
+
+      data->set.headers = curl_slist_append(data->set.headers, date_hdr);
+      curl_free(date_hdr);
+      if(!data->set.headers) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+    }
+
+    /* Add X-{Provider1}-Region-Set header if region_set_or_region specified */
+    if(curlx_strlen(&region_set_or_region) && sigv4a_mode) {
+      char *region_set_hdr = curl_maprintf("X-%.*s-Region-Set: %.*s",
+                                           provider_len, provider_str,
+                                           (int)curlx_strlen(
+                                             &region_set_or_region),
+                                           curlx_str(&region_set_or_region));
+      if(!region_set_hdr) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+      /* provider1 ucfirst */
+      Curl_strntolower(&region_set_hdr[2], provider_str, provider_len);
+      region_set_hdr[2] = Curl_raw_toupper(provider_str[0]);
+
+      data->set.headers = curl_slist_append(data->set.headers, region_set_hdr);
+      curl_free(region_set_hdr);
+      if(!data->set.headers) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
+    }
+  }
+
   result = make_headers(data, hostname, timestamp,
                         curlx_str(&provider1), curlx_strlen(&provider1),
                         &date_header, content_sha256_hdr,
@@ -837,9 +1227,156 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   memcpy(date, timestamp, sizeof(date));
   date[sizeof(date) - 1] = 0;
 
+  /* If user provided explicit X-{Provider}-Date, use it for credential */
+  if(querystring_mode && data->state.up.query) {
+    char date_param_name[32];
+    const char *date_param;
+    curl_msnprintf(date_param_name, sizeof(date_param_name), "X-%.*s-Date=",
+                   provider_len, provider_str);
+    date_param = strstr(data->state.up.query, date_param_name);
+    if(date_param) {
+      date_param += strlen(date_param_name);
+      memcpy(date, date_param, 8); /* Extract YYYYMMDD */
+      date[8] = 0;
+    }
+  }
+  else if(!querystring_mode) {
+    char date_hdr_name[32];
+    char *explicit_date;
+    curl_msnprintf(date_hdr_name, sizeof(date_hdr_name), "X-%.*s-Date",
+                   provider_len, provider_str);
+    explicit_date = Curl_checkheaders(data, date_hdr_name,
+                                       strlen(date_hdr_name));
+    if(explicit_date) {
+      /* Find the value part after "X-{Provider}-Date: " */
+      char *date_value = strchr(explicit_date, ':');
+      if(date_value) {
+        date_value++; /* Skip ':' */
+        while(*date_value == ' ') date_value++; /* Skip spaces */
+        memcpy(date, date_value, 8); /* Extract YYYYMMDD */
+        date[8] = 0;
+      }
+    }
+  }
+
   result = canon_query(data->state.up.query, &canonical_query);
   if(result)
     goto fail;
+
+  /* Create credential scope early for querystring mode */
+  request_type = curl_maprintf("%.*s4_request", (int)curlx_strlen(&provider0),
+                               curlx_str(&provider0));
+  if(!request_type)
+    goto fail;
+
+  /* provider0 is lowercased *after* curl_maprintf() so that the buffer
+     can be written to */
+  Curl_strntolower(request_type, request_type, curlx_strlen(&provider0));
+
+  if(sigv4a_mode) {
+    /* SigV4A: Credential scope excludes region */
+    credential_scope = curl_maprintf("%s/%.*s/%s", date,
+                                     (int)curlx_strlen(&service),
+                                     curlx_str(&service),
+                                     request_type);
+    infof(data, "aws_sigv4: SigV4A credential_scope='%s'", credential_scope);
+  }
+  else {
+    /* SigV4: Credential scope includes region */
+    credential_scope = curl_maprintf("%s/%.*s/%.*s/%s", date,
+                                     (int)curlx_strlen(&region),
+                                     curlx_str(&region),
+                                     (int)curlx_strlen(&service),
+                                     curlx_str(&service),
+                                     request_type);
+    infof(data, "aws_sigv4: SigV4 credential_scope='%s' (region='%.*s')",
+          credential_scope, (int)curlx_strlen(&region), curlx_str(&region));
+  }
+  if(!credential_scope)
+    goto fail;
+
+  /* Get existing query for later use */
+  existing_query = curlx_dyn_ptr(&canonical_query);
+
+  /* For querystring mode, add signature parameters to canonical query for
+     signature calculation */
+  if(querystring_mode) {
+    struct dynbuf temp_query;
+
+    curlx_dyn_init(&temp_query, CURL_MAX_HTTP_HEADER);
+
+    /* Add existing query if present */
+    if(existing_query && *existing_query) {
+      result = curlx_dyn_add(&temp_query, existing_query);
+      if(result) {
+        curlx_dyn_free(&temp_query);
+        goto fail;
+      }
+    }
+
+    /* Add signature parameters - let canon_query() sort them */
+    {
+      char *credential_string = curl_maprintf("%s/%s", access_key,
+                                               credential_scope);
+
+      if(!credential_string) {
+        result = CURLE_OUT_OF_MEMORY;
+        curlx_dyn_free(&temp_query);
+        goto fail;
+      }
+
+      /* Add each parameter separately so canon_query can sort them */
+      result = curlx_dyn_addf(&temp_query,
+                              "%sX-%.*s-Algorithm=%s",
+                              (existing_query && *existing_query) ? "&" : "",
+                              provider_len, capitalized_provider, algorithm);
+      if(!result)
+        result = curlx_dyn_addf(&temp_query, "&X-%.*s-Credential=%s",
+                                provider_len, capitalized_provider, credential_string);
+      if(!result) {
+        /* Only add X-{Provider}-Date if not already in query string */
+        char date_param_name[32];
+        curl_msnprintf(date_param_name, sizeof(date_param_name), "X-%.*s-Date",
+                       provider_len, provider_str);
+        if(!has_query_param(data->state.up.query, date_param_name))
+          result = curlx_dyn_addf(&temp_query, "&X-%.*s-Date=%s",
+                                  provider_len, capitalized_provider, timestamp);
+      }
+      if(!result)
+        result = curlx_dyn_addf(&temp_query, "&X-%.*s-SignedHeaders=%s",
+                                provider_len, capitalized_provider,
+                                curlx_dyn_ptr(&signed_headers));
+
+      if(!result && curlx_strlen(&region_set_or_region) && sigv4a_mode) {
+        result = curlx_dyn_addf(&temp_query, "&X-%.*s-Region-Set=%.*s",
+                                provider_len, capitalized_provider,
+                                (int)curlx_strlen(&region_set_or_region),
+                                curlx_str(&region_set_or_region));
+      }
+
+      if(!result && security_token) {
+        result = curlx_dyn_addf(&temp_query, "&X-%.*s-Security-Token=%s",
+                                provider_len, capitalized_provider, security_token);
+      }
+
+      curl_free(credential_string);
+    }
+
+    if(result) {
+      curlx_dyn_free(&temp_query);
+      goto fail;
+    }
+
+    /* Replace canonical query with the version including signature params for
+       signature calculation */
+    curlx_dyn_free(&canonical_query);
+
+    /* Re-canonicalize to ensure proper parameter sorting */
+    result = canon_query(curlx_dyn_ptr(&temp_query), &canonical_query);
+    curlx_dyn_free(&temp_query);
+    if(result)
+      goto fail;
+  }
 
   result = canon_path(data->state.up.path, strlen(data->state.up.path),
                         &canonical_path,
@@ -868,25 +1405,6 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]",
     canonical_request);
 
-  request_type = curl_maprintf("%.*s4_request",
-                               (int)curlx_strlen(&provider0),
-                               curlx_str(&provider0));
-  if(!request_type)
-    goto fail;
-
-  /* provider0 is lowercased *after* curl_maprintf() so that the buffer
-     can be written to */
-  Curl_strntolower(request_type, request_type, curlx_strlen(&provider0));
-
-  credential_scope = curl_maprintf("%s/%.*s/%.*s/%s", date,
-                                   (int)curlx_strlen(&region),
-                                   curlx_str(&region),
-                                   (int)curlx_strlen(&service),
-                                   curlx_str(&service),
-                                   request_type);
-  if(!credential_scope)
-    goto fail;
-
   if(Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
                    strlen(canonical_request)))
     goto fail;
@@ -894,15 +1412,14 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   sha256_to_hex(sha_hex, sha_hash);
 
   /*
-   * Google allows using RSA key instead of HMAC, so this code might change
-   * in the future. For now we only support HMAC.
+   * Create string to sign with configurable algorithm.
+   * SigV4A (ECDSA) uses different signing logic than HMAC.
    */
-  str_to_sign = curl_maprintf("%.*s4-HMAC-SHA256\n" /* Algorithm */
+  str_to_sign = curl_maprintf("%s\n" /* Algorithm */
                               "%s\n" /* RequestDateTime */
                               "%s\n" /* CredentialScope */
                               "%s",  /* HashedCanonicalRequest in hex */
-                              (int)curlx_strlen(&provider0),
-                              curlx_str(&provider0),
+                              algorithm,
                               timestamp,
                               credential_scope,
                               sha_hex);
@@ -917,50 +1434,273 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     str_to_sign);
 
   secret = curl_maprintf("%.*s4%s", (int)curlx_strlen(&provider0),
-                         curlx_str(&provider0), data->state.aptr.passwd ?
-                         data->state.aptr.passwd : "");
+                         curlx_str(&provider0), secret_key ? secret_key : "");
   if(!secret)
     goto fail;
   /* make provider0 part done uppercase */
   Curl_strntoupper(secret, curlx_str(&provider0), curlx_strlen(&provider0));
 
-  HMAC_SHA256(secret, strlen(secret), date, strlen(date), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0),
-              curlx_str(&region), curlx_strlen(&region), sign1);
-  HMAC_SHA256(sign1, sizeof(sign1),
-              curlx_str(&service), curlx_strlen(&service), sign0);
-  HMAC_SHA256(sign0, sizeof(sign0), request_type, strlen(request_type), sign1);
-  HMAC_SHA256(sign1, sizeof(sign1), str_to_sign, strlen(str_to_sign), sign0);
+  if(sigv4a_mode) {
+#ifdef HAVE_SIGV4A_SUPPORT
+    /* Use SigV4A key derivation */
+    result = Curl_aws_sigv4a_derive_key(access_key, secret_key, signing_key);
+    if(result)
+      goto fail;
+#else
+    /* Should not reach here due to earlier check */
+    result = CURLE_NOT_BUILT_IN;
+    goto fail;
+#endif
+  }
+  else {
+    /* Use SigV4 HMAC signing */
+    HMAC_SHA256(secret, strlen(secret), date, strlen(date), date_key);
+    HMAC_SHA256(date_key, sizeof(date_key),
+                curlx_str(&region), curlx_strlen(&region), region_key);
+    HMAC_SHA256(region_key, sizeof(region_key),
+                curlx_str(&service), curlx_strlen(&service), service_key);
+    HMAC_SHA256(service_key, sizeof(service_key), request_type,
+                strlen(request_type), signing_key);
+  }
 
-  sha256_to_hex(sha_hex, sign0);
+  if(sigv4a_mode) {
+#ifdef HAVE_SIGV4A_SUPPORT
+    /* SigV4A uses ECDSA signing */
+    result = Curl_aws_sigv4a_sign(signing_key, str_to_sign,
+                                  strlen(str_to_sign), signature, &sig_len);
+    if(result)
+      goto fail;
+#else
+    /* Should not reach here due to earlier check */
+    result = CURLE_NOT_BUILT_IN;
+    goto fail;
+#endif
+  }
+  else {
+    /* SigV4 uses HMAC signing */
+    HMAC_SHA256(signing_key, sizeof(signing_key), str_to_sign,
+                strlen(str_to_sign), signature);
+  }
+
+  if(sigv4a_mode) {
+    /* SigV4A signature uses DER encoding, convert actual length to hex */
+    Curl_hexencode(signature, sig_len, (unsigned char *)sha_hex,
+                   sig_len * 2 + 1);
+  }
+  else {
+    /* SigV4 signature is 32 bytes */
+    sha256_to_hex(sha_hex, signature);
+  }
 
   infof(data, "aws_sigv4: Signature - %s", sha_hex);
 
-  auth_headers = curl_maprintf("Authorization: %.*s4-HMAC-SHA256 "
-                               "Credential=%s/%s, "
-                               "SignedHeaders=%s, "
-                               "Signature=%s\r\n"
-                               /*
-                                * date_header is added here, only if it was not
-                                * user-specified (using CURLOPT_HTTPHEADER).
-                                * date_header includes \r\n
-                                */
-                               "%s"
-                               "%s", /* optional sha256 header includes \r\n */
-                               (int)curlx_strlen(&provider0),
-                               curlx_str(&provider0),
-                               user,
-                               credential_scope,
-                               curlx_dyn_ptr(&signed_headers),
-                               sha_hex,
-                               date_header ? date_header : "",
-                               content_sha256_hdr);
-  if(!auth_headers) {
-    goto fail;
+  if(querystring_mode) {
+    /* Add only AWS signature parameters to the actual wire query string */
+    struct dynbuf aws_params;
+    char *new_query = NULL;
+
+    curlx_dyn_init(&aws_params, CURL_MAX_HTTP_HEADER);
+
+    /* Build AWS signature parameters only */
+    {
+      char *credential_string = curl_maprintf("%s/%s", access_key,
+                                               credential_scope);
+      char *encoded_credential = curl_easy_escape(data, credential_string, 0);
+      char *encoded_signed_headers = curl_easy_escape(data,
+                                       curlx_dyn_ptr(&signed_headers), 0);
+      char *encoded_region_set = NULL;
+      if(curlx_strlen(&region_set_or_region) && sigv4a_mode) {
+        encoded_region_set = curl_easy_escape(data,
+                                              curlx_str(&region_set_or_region),
+                                              (int)curlx_strlen(
+                                                &region_set_or_region));
+      }
+      if(!credential_string || !encoded_credential ||
+         !encoded_signed_headers ||
+         (curlx_strlen(&region_set_or_region) && sigv4a_mode &&
+          !encoded_region_set)) {
+        result = CURLE_OUT_OF_MEMORY;
+        curlx_dyn_free(&aws_params);
+        curl_free(credential_string);
+        curl_free(encoded_credential);
+        curl_free(encoded_signed_headers);
+        curl_free(encoded_region_set);
+        goto fail;
+      }
+
+      if(encoded_region_set) {
+        /* Check if X-{Provider}-Date already exists in query */
+        char date_param_name[32];
+        bool has_date;
+        curl_msnprintf(date_param_name, sizeof(date_param_name), "X-%.*s-Date",
+                       provider_len, capitalized_provider);
+        has_date = has_query_param(data->state.up.query, date_param_name);
+        if(has_date) {
+          result = curlx_dyn_addf(&aws_params,
+                                 "X-%.*s-Algorithm=%s&"
+                                 "X-%.*s-Credential=%s&"
+                                 "X-%.*s-Region-Set=%s&"
+                                 "X-%.*s-SignedHeaders=%s&"
+                                 "X-%.*s-Signature=%s",
+                                 provider_len, capitalized_provider, algorithm,
+                                 provider_len, capitalized_provider,
+                                 encoded_credential,
+                                 provider_len, capitalized_provider,
+                                 encoded_region_set,
+                                 provider_len, capitalized_provider,
+                                 encoded_signed_headers,
+                                 provider_len, capitalized_provider, sha_hex);
+        }
+        else {
+          result = curlx_dyn_addf(&aws_params,
+                                 "X-%.*s-Algorithm=%s&"
+                                 "X-%.*s-Credential=%s&"
+                                 "X-%.*s-Date=%s&"
+                                 "X-%.*s-Region-Set=%s&"
+                                 "X-%.*s-SignedHeaders=%s&"
+                                 "X-%.*s-Signature=%s",
+                                 provider_len, capitalized_provider, algorithm,
+                                 provider_len, capitalized_provider,
+                                 encoded_credential,
+                                 provider_len, capitalized_provider, timestamp,
+                                 provider_len, capitalized_provider,
+                                 encoded_region_set,
+                                 provider_len, capitalized_provider,
+                                 encoded_signed_headers,
+                                 provider_len, capitalized_provider, sha_hex);
+        }
+      }
+      else {
+        /* Check if X-{Provider}-Date already exists in query */
+        char date_param_name[32];
+        bool has_date;
+        curl_msnprintf(date_param_name, sizeof(date_param_name), "X-%.*s-Date",
+                       provider_len, capitalized_provider);
+        has_date = has_query_param(data->state.up.query, date_param_name);
+        if(has_date) {
+          result = curlx_dyn_addf(&aws_params,
+                                 "X-%.*s-Algorithm=%s&"
+                                 "X-%.*s-Credential=%s&"
+                                 "X-%.*s-SignedHeaders=%s&"
+                                 "X-%.*s-Signature=%s",
+                                 provider_len, capitalized_provider, algorithm,
+                                 provider_len, capitalized_provider,
+                                 encoded_credential,
+                                 provider_len, capitalized_provider,
+                                 encoded_signed_headers,
+                                 provider_len, capitalized_provider, sha_hex);
+        }
+        else {
+          result = curlx_dyn_addf(&aws_params,
+                                 "X-%.*s-Algorithm=%s&"
+                                 "X-%.*s-Credential=%s&"
+                                 "X-%.*s-Date=%s&"
+                                 "X-%.*s-SignedHeaders=%s&"
+                                 "X-%.*s-Signature=%s",
+                                 provider_len, capitalized_provider, algorithm,
+                                 provider_len, capitalized_provider,
+                                 encoded_credential,
+                                 provider_len, capitalized_provider, timestamp,
+                                 provider_len, capitalized_provider,
+                                 encoded_signed_headers,
+                                 provider_len, capitalized_provider, sha_hex);
+        }
+      }
+      curl_free(credential_string);
+      curl_free(encoded_credential);
+      curl_free(encoded_signed_headers);
+      curl_free(encoded_region_set);
+    }
+
+    /* Add security token if present */
+    if(security_token) {
+      char *encoded_security_token = curl_easy_escape(data, security_token, 0);
+      if(encoded_security_token) {
+        result = curlx_dyn_addf(&aws_params, "&X-%.*s-Security-Token=%s",
+                                provider_len, capitalized_provider,
+                                encoded_security_token);
+        curl_free(encoded_security_token);
+      }
+    }
+
+    if(result) {
+      curlx_dyn_free(&aws_params);
+      infof(data, "aws_sigv4: ERROR building aws_params, result=%d", result);
+      goto fail;
+    }
+
+    if(result) {
+      curlx_dyn_free(&aws_params);
+      goto fail;
+    }
+
+    infof(data, "aws_sigv4: aws_params='%s'", curlx_dyn_ptr(&aws_params));
+    infof(data, "aws_sigv4: existing query='%s'",
+          data->state.up.query ? data->state.up.query : "(null)");
+
+    /* Append AWS parameters to existing query string */
+    if(data->state.up.query && *data->state.up.query) {
+      new_query = curl_maprintf("%s&%s", data->state.up.query,
+                                 curlx_dyn_ptr(&aws_params));
+    }
+    else {
+      new_query = strdup(curlx_dyn_ptr(&aws_params));
+    }
+
+    curlx_dyn_free(&aws_params);
+
+    infof(data, "aws_sigv4: new_query='%s'", new_query ? new_query : "(null)");
+
+    if(!new_query) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto fail;
+    }
+
+    /* Replace the query string */
+    free(data->state.up.query);
+    data->state.up.query = new_query;
+
+    /* In querystring mode, add NO AWS headers use queryparams */
+    auth_headers = strdup("");
+    if(!auth_headers) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto fail;
+    }
   }
-  /* provider 0 uppercase */
-  Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
-                   curlx_str(&provider0), curlx_strlen(&provider0));
+  else {
+    /* Header mode - original implementation */
+
+    auth_headers = curl_maprintf("Authorization: %.*s4-%s "
+                                 "Credential=%s/%s, "
+                                 "SignedHeaders=%s, "
+                                 "Signature=%s\r\n"
+                                 /*
+                                  * date_header is added here, only if it was
+                                  * not user-specified (using
+                                  * CURLOPT_HTTPHEADER).
+                                  * date_header includes \r\n
+                                  */
+                                 "%s"
+                                 "%s", /* optional sha256 header includes
+                                         \r\n */
+                                 (int)curlx_strlen(&provider0),
+                                 curlx_str(&provider0),
+                                 sigv4a_mode ? "ECDSA-P256-SHA256" :
+                                               "HMAC-SHA256",
+                                 access_key,
+                                 credential_scope,
+                                 curlx_dyn_ptr(&signed_headers),
+                                 sha_hex,
+                                 date_header ? date_header : "",
+                                 content_sha256_hdr);
+
+    if(!auth_headers) {
+      goto fail;
+    }
+    /* provider 0 uppercase */
+    Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
+                     curlx_str(&provider0), curlx_strlen(&provider0));
+  }
 
   free(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
@@ -977,6 +1717,8 @@ fail:
   free(credential_scope);
   free(str_to_sign);
   free(secret);
+  free(secret_key);
+  free(security_token);
   free(date_header);
   return result;
 }
@@ -1066,7 +1808,6 @@ fail:
   return result;
 }
 
-
 static bool is_reserved_char(const char c)
 {
   return (ISALNUM(c) || ISURLPUNTCS(c));
@@ -1091,49 +1832,6 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
   }
 
   return CURLE_OK;
-}
-
-
-static CURLcode encode_query_component(char *component, size_t len,
-                                       struct dynbuf *db)
-{
-  size_t i;
-  for(i = 0; i < len; i++) {
-    CURLcode result = CURLE_OK;
-    unsigned char this_char = component[i];
-
-    if(is_reserved_char(this_char))
-      /* Escape unreserved chars from RFC 3986 */
-      result = curlx_dyn_addn(db, &this_char, 1);
-    else if(this_char == '+')
-      /* Encode '+' as space */
-      result = curlx_dyn_add(db, "%20");
-    else
-      result = curlx_dyn_addf(db, "%%%02X", this_char);
-    if(result)
-      return result;
-  }
-
-  return CURLE_OK;
-}
-
-/*
-* Populates a dynbuf containing url_encode(url_decode(in))
-*/
-
-static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
-                                       struct dynbuf *out)
-{
-  char *out_s;
-  size_t out_s_len;
-  CURLcode result =
-    Curl_urldecode(in, in_len, &out_s, &out_s_len, REJECT_NADA);
-
-  if(!result) {
-    result = encode_query_component(out_s, out_s_len, out);
-    Curl_safefree(out_s);
-  }
-  return result;
 }
 
 static bool should_urlencode(struct Curl_str *service_name)
