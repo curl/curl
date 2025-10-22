@@ -2258,6 +2258,10 @@ typedef enum {
   /* set TLS supported signature algorithms */
   CURLOPT(CURLOPT_SSL_SIGNATURE_ALGORITHMS, CURLOPTTYPE_STRINGPOINT, 328),
 
+  /* prevent transparent retries on a new connection when a previously
+   * reused connection was reset or otherwise no longer unavailable. */
+  CURLOPT(CURLOPT_FORBID_RETRY_ON_REUSE, CURLOPTTYPE_LONG, 329),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
