@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3520
+ Contributors:                 3523
 
 This release includes the following changes:
 
@@ -45,6 +45,7 @@ This release includes the following bugfixes:
  o cf-ip-happy: mention unix domain path, not port number [161]
  o cf-socket: always check Curl_cf_socket_peek() return code [198]
  o cf-socket: check params and remove accept procondition [197]
+ o cf-socket: make set_local_ip void, and remove failf() [390]
  o cf-socket: set FD_CLOEXEC on all sockets opened [273]
  o cf-socket: tweak a memcpy() to read better [177]
  o cf-socket: use the right byte order for ports in bindlocal [61]
@@ -61,6 +62,7 @@ This release includes the following bugfixes:
  o cmake/FindGSS: fix pkg-config fallback logic for CMake <3.16 [189]
  o cmake/FindGSS: simplify/de-dupe lib setup [253]
  o cmake/FindGSS: whitespace/formatting [268]
+ o cmake: add and use local FindGnuTLS module [379]
  o cmake: add CURL_CODE_COVERAGE option [78]
  o cmake: build the "all" examples source list dynamically [245]
  o cmake: clang detection tidy-ups [116]
@@ -70,6 +72,7 @@ This release includes the following bugfixes:
  o cmake: fix Linux pre-fills for non-glibc (when `_CURL_PREFILL=ON`) [372]
  o cmake: minor Heimdal flavour detection fix [269]
  o cmake: pre-fill three more type sizes on Windows [244]
+ o cmake: say 'absolute path' in option descriptions and docs [378]
  o cmake: support building some complicated examples, build them in CI [235]
  o cmake: use modern alternatives for get_filename_component() [102]
  o cmake: use more COMPILER_OPTIONS, LINK_OPTIONS / LINK_FLAGS [152]
@@ -79,6 +82,7 @@ This release includes the following bugfixes:
  o conn: fix hostname move on connection reuse [272]
  o connect: remove redundant condition in shutdown start [289]
  o cookie: avoid saving a cookie file if no transfer was done [11]
+ o cookie: only count accepted cookies in Curl_cookie_add [364]
  o cpool: make bundle->dest an array; fix UB [218]
  o curl.h: remove incorrect comment about CURLOPT_PINNEDPUBLICKEY [320]
  o curl_easy_getinfo: error code on NULL arg [2]
@@ -134,17 +138,23 @@ This release includes the following bugfixes:
  o ftp: simplify the 150/126 size scanner [288]
  o gnutls: check conversion of peer cert chain [275]
  o gtls: avoid potential use of uninitialized variable in trace output [83]
+ o hmac: free memory properly on errors [377]
  o hostip: don't store negative resolves due unrelated errors [256]
+ o hostip: fix infof() output for non-ipv6 builds using IPv6 address [338]
  o hostip: remove leftover INT_MAX check in Curl_dnscache_prune [88]
  o http2: check push header names by length first [261]
  o http2: cleanup pushed newhandle on fail [260]
  o http2: ingress handling edge cases [259]
+ o HTTP3: clarify the status for "old" OpenSSL, not current [394]
  o http: handle user-defined connection headers [165]
  o http: look for trailing 'type=' in ftp:// without strstr [315]
  o http: make Content-Length parser more WHATWG [183]
+ o http: return error for a second Location: header [393]
  o httpsrr: free old pointers when storing new [57]
  o imap: treat capabilities case insensitively [345]
+ o INSTALL-CMAKE.md: add manual configuration examples [360]
  o INSTALL-CMAKE.md: document useful build targets [215]
+ o INSTALL-CMAKE.md: fix descriptions for LDAP dependency options [382]
  o INSTALL: update the list of known operating systems [325]
  o INTERNALS: drop Winsock 2.2 from the dependency list [162]
  o ip-happy: do not set unnecessary timeout [95]
@@ -193,7 +203,9 @@ This release includes the following bugfixes:
  o libssh: react on errors from ssh_scp_read [24]
  o libssh: return out of memory correctly if aprintf fails [60]
  o libssh: return the proper error for readdir problems [355]
+ o Makefile.example: bump default example from FTP to HTTPS [389]
  o Makefile.example: fix option order [231]
+ o Makefile.example: make default options more likely to work [388]
  o Makefile.example: simplify and make it configurable [20]
  o managen: ignore version mentions < 7.66.0 [55]
  o managen: render better manpage references/links [54]
@@ -204,6 +216,7 @@ This release includes the following bugfixes:
  o mbedtls: handle WANT_WRITE from mbedtls_ssl_read() [145]
  o mdlinkcheck: reject URLs containing quotes [174]
  o memdup0: handle edge case [241]
+ o mime: fix unpausing of readers [375]
  o mime: fix use of fseek() [334]
  o multi.h: add CURLMINFO_LASTENTRY [51]
  o multi_ev: remove unnecessary data check that confuses analysers [167]
@@ -289,6 +302,7 @@ This release includes the following bugfixes:
  o socks_gssapi: reject too long tokens [90]
  o socks_gssapi: remove superfluous releases of the gss_recv_token [139]
  o socks_gssapi: remove the forced "no protection" [143]
+ o socks_gssapi: replace `gss_release_buffer()` with curl free [386]
  o socks_sspi: bail out on too long fields [137]
  o socks_sspi: fix memory cleanup calls [40]
  o socks_sspi: remove the enforced mode clearing [291]
@@ -350,6 +364,7 @@ This release includes the following bugfixes:
  o tool_operate: retry on HTTP response codes 522 and 524 [317]
  o tool_operate: return error on strdup() failure [336]
  o tool_paramhlp: remove outdated comment in str2tls_max() [367]
+ o tool_parsecfg: detect and error on recursive --config use [380]
  o tool_progress: handle possible integer overflows [164]
  o tool_progress: make max5data() use an algorithm [170]
  o transfer: avoid busy loop with tiny speed limit [100]
@@ -409,15 +424,16 @@ advice from friends like these:
   Dan Fandrich, Daniel Stenberg, Daniel Terhorst-North, dependabot[bot],
   divinity76 on github, Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
   Evgeny Grin (Karlson2k), fds242 on github, Harry Sintonen, Howard Chu,
-  Ignat Loskutov, James Fuller, Javier Blazquez, Jicea, jmaggard10 on github,
-  Jochen Sprickerhof, Johannes Schindelin, Jonathan Cardoso Machado,
-  Joseph Birr-Pixton, Joshua Rogers, kapsiR on github, kuchara on github,
-  Marcel Raad, Michael Osipov, Michał Petryka, Mitchell Blank Jr,
-  Mohamed Daahir, Nir Azkiel, Patrick Monnerat, plv1313 on github,
-  Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github, Sakthi SK,
-  Samuel Dionne-Riel, Samuel Henrique, Stanislav Fort, Stefan Eissing,
-  Tatsuhiro Tsujikawa, tkzv on github, Viktor Szakats, Yedaya Katsman
-  (53 contributors)
+  Ignat Loskutov, Jakub Stasiak, James Fuller, Javier Blazquez, Jicea,
+  jmaggard10 on github, Jochen Sprickerhof, Johannes Schindelin,
+  Jonathan Cardoso Machado, Joseph Birr-Pixton, Joshua Rogers,
+  kapsiR on github, kuchara on github, Marcel Raad, Michael Osipov,
+  Michał Petryka, Mitchell Blank Jr, Mohamed Daahir, Nir Azkiel,
+  Patrick Monnerat, plv1313 on github, Pocs Norbert, Ray Satiro, renovate[bot],
+  rinsuki on github, Sakthi SK, Samuel Dionne-Riel, Samuel Henrique,
+  Stanislav Fort, Stefan Eissing, Tatsuhiro Tsujikawa, tkzv on github,
+  Viktor Szakats, WangDaLei on github, Xiaoke Wang, Yedaya Katsman, 包布丁
+  (57 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -757,6 +773,7 @@ References to bug reports and discussions on issues:
  [335] = https://curl.se/bug/?i=19125
  [336] = https://curl.se/bug/?i=19145
  [337] = https://curl.se/bug/?i=19097
+ [338] = https://curl.se/bug/?i=19184
  [339] = https://curl.se/bug/?i=19091
  [340] = https://curl.se/bug/?i=19093
  [341] = https://curl.se/bug/?i=19149
@@ -775,9 +792,11 @@ References to bug reports and discussions on issues:
  [357] = https://curl.se/bug/?i=19136
  [358] = https://curl.se/bug/?i=19133
  [359] = https://curl.se/bug/?i=19139
+ [360] = https://curl.se/bug/?i=19179
  [361] = https://curl.se/bug/?i=19126
  [362] = https://curl.se/bug/?i=19132
  [363] = https://curl.se/bug/?i=19118
+ [364] = https://curl.se/bug/?i=19157
  [365] = https://curl.se/bug/?i=19112
  [366] = https://curl.se/bug/?i=19124
  [367] = https://curl.se/bug/?i=19115
@@ -788,4 +807,16 @@ References to bug reports and discussions on issues:
  [372] = https://curl.se/bug/?i=19116
  [373] = https://curl.se/bug/?i=19114
  [374] = https://curl.se/bug/?i=19113
+ [375] = https://curl.se/bug/?i=18848
  [376] = https://curl.se/bug/?i=19111
+ [377] = https://curl.se/bug/?i=19176
+ [378] = https://curl.se/bug/?i=19169
+ [379] = https://curl.se/bug/?i=19163
+ [380] = https://curl.se/bug/?i=19168
+ [382] = https://curl.se/bug/?i=19170
+ [386] = https://curl.se/bug/?i=19018
+ [388] = https://curl.se/bug/?i=19161
+ [389] = https://curl.se/bug/?i=19160
+ [390] = https://curl.se/bug/?i=19137
+ [393] = https://curl.se/bug/?i=19130
+ [394] = https://curl.se/bug/?i=19153
