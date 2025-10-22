@@ -451,6 +451,7 @@ TLS:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
+              CMake/FindGnuTLS.cmake,\
               CMake/FindMbedTLS.cmake,\
               CMake/FindWolfSSL.cmake,\
               CMake/FindRustls.cmake,\
