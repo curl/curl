@@ -136,7 +136,6 @@ struct ftp_conn {
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
-  curl_off_t retr_size_saved; /* Size of retrieved file saved */
   char *server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
