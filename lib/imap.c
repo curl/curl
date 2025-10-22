@@ -115,8 +115,8 @@ struct imap_conn {
   struct SASL sasl;           /* SASL-related parameters */
   struct dynbuf dyn;          /* for the IMAP commands */
   char *mailbox;              /* The last selected mailbox */
-  char *mailbox_uidvalidity;  /* UIDVALIDITY parsed from select response */
   imapstate state;            /* Always use imap.c:state() to change state! */
+  unsigned int mb_uidvalidity; /* UIDVALIDITY parsed from select response */
   char resptag[5];            /* Response tag to wait for */
   unsigned char preftype;     /* Preferred authentication type */
   unsigned char cmdid;        /* Last used command ID */
@@ -125,6 +125,7 @@ struct imap_conn {
   BIT(tls_supported);         /* StartTLS capability supported by server */
   BIT(login_disabled);        /* LOGIN command disabled by server */
   BIT(ir_supported);          /* Initial response supported by server */
+  BIT(mb_uidvalidity_set);
 };
 
 /* This IMAP struct is used in the Curl_easy. All IMAP data that is
@@ -134,7 +135,6 @@ struct imap_conn {
 struct IMAP {
   curl_pp_transfer transfer;
   char *mailbox;          /* Mailbox to select */
-  char *uidvalidity;      /* UIDVALIDITY to check in select */
   char *uid;              /* Message UID to fetch */
   char *mindex;           /* Index in mail box of mail to fetch */
   char *section;          /* Message SECTION to fetch */
@@ -142,6 +142,8 @@ struct IMAP {
   char *query;            /* Query to search for */
   char *custom;           /* Custom request */
   char *custom_params;    /* Parameters for the custom request */
+  unsigned int uidvalidity; /* UIDVALIDITY to check in select */
+  BIT(uidvalidity_set);
 };
 
 
@@ -780,7 +782,6 @@ static CURLcode imap_perform_select(struct Curl_easy *data,
 
   /* Invalidate old information as we are switching mailboxes */
   Curl_safefree(imapc->mailbox);
-  Curl_safefree(imapc->mailbox_uidvalidity);
 
   /* Check we have a mailbox */
   if(!imap->mailbox) {
@@ -1222,24 +1223,19 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
   if(imapcode == '*') {
     /* See if this is an UIDVALIDITY response */
     if(checkprefix("OK [UIDVALIDITY ", line + 2)) {
-      size_t len = 0;
+      curl_off_t value;
       const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
-      while((len < 20) && p[len] && ISDIGIT(p[len]))
-        len++;
-      if(len && (p[len] == ']')) {
-        struct dynbuf uid;
-        curlx_dyn_init(&uid, 20);
-        if(curlx_dyn_addn(&uid, p, len))
-          return CURLE_OUT_OF_MEMORY;
-        free(imapc->mailbox_uidvalidity);
-        imapc->mailbox_uidvalidity = curlx_dyn_ptr(&uid);
+      if(!curlx_str_number(&p, &value, UINT_MAX)) {
+        imapc->mb_uidvalidity = (unsigned int)value;
+        imapc->mb_uidvalidity_set = TRUE;
       }
+
     }
   }
   else if(imapcode == IMAP_RESP_OK) {
     /* Check if the UIDVALIDITY has been specified and matches */
-    if(imap->uidvalidity && imapc->mailbox_uidvalidity &&
-       !curl_strequal(imap->uidvalidity, imapc->mailbox_uidvalidity)) {
+    if(imap->uidvalidity_set && imapc->mb_uidvalidity_set &&
+       (imap->uidvalidity != imapc->mb_uidvalidity)) {
       failf(data, "Mailbox UIDVALIDITY has changed");
       result = CURLE_REMOTE_FILE_NOT_FOUND;
     }
@@ -1690,8 +1686,8 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
      has already been selected on this connection */
   if(imap->mailbox && imapc->mailbox &&
      curl_strequal(imap->mailbox, imapc->mailbox) &&
-     (!imap->uidvalidity || !imapc->mailbox_uidvalidity ||
-      curl_strequal(imap->uidvalidity, imapc->mailbox_uidvalidity)))
+     (!imap->uidvalidity_set || !imapc->mb_uidvalidity_set ||
+      (imap->uidvalidity == imapc->mb_uidvalidity)))
     selected = TRUE;
 
   /* Start the first command in the DO phase */
@@ -1861,7 +1857,6 @@ static CURLcode imap_regular_transfer(struct Curl_easy *data,
 static void imap_easy_reset(struct IMAP *imap)
 {
   Curl_safefree(imap->mailbox);
-  Curl_safefree(imap->uidvalidity);
   Curl_safefree(imap->uid);
   Curl_safefree(imap->mindex);
   Curl_safefree(imap->section);
@@ -1890,7 +1885,6 @@ static void imap_conn_dtor(void *key, size_t klen, void *entry)
   Curl_pp_disconnect(&imapc->pp);
   curlx_dyn_free(&imapc->dyn);
   Curl_safefree(imapc->mailbox);
-  Curl_safefree(imapc->mailbox_uidvalidity);
   free(imapc);
 }
 
@@ -2177,54 +2171,45 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
 
     DEBUGF(infof(data, "IMAP URL parameter '%s' = '%s'", name, value));
 
-    /* Process the known hierarchical parameters (UIDVALIDITY, UID, SECTION and
-       PARTIAL) stripping of the trailing slash character if it is present.
+    /* Process the known hierarchical parameters (UIDVALIDITY, UID, SECTION
+       and PARTIAL) stripping of the trailing slash character if it is
+       present.
 
        Note: Unknown parameters trigger a URL_MALFORMAT error. */
-    if(curl_strequal(name, "UIDVALIDITY") && !imap->uidvalidity) {
-      if(valuelen > 0 && value[valuelen - 1] == '/')
-        value[valuelen - 1] = '\0';
-
-      imap->uidvalidity = value;
-      value = NULL;
+    if(valuelen > 0 && value[valuelen - 1] == '/')
+      value[valuelen - 1] = '\0';
+    if(valuelen) {
+      if(curl_strequal(name, "UIDVALIDITY") && !imap->uidvalidity_set) {
+        curl_off_t num;
+        const char *p = (const char *)value;
+        if(!curlx_str_number(&p, &num, UINT_MAX)) {
+          imap->uidvalidity = (unsigned int)num;
+          imap->uidvalidity_set = TRUE;
+        }
+        free(value);
+      }
+      else if(curl_strequal(name, "UID") && !imap->uid) {
+        imap->uid = value;
+      }
+      else if(curl_strequal(name, "MAILINDEX") && !imap->mindex) {
+        imap->mindex = value;
+      }
+      else if(curl_strequal(name, "SECTION") && !imap->section) {
+        imap->section = value;
+      }
+      else if(curl_strequal(name, "PARTIAL") && !imap->partial) {
+        imap->partial = value;
+      }
+      else {
+        free(name);
+        free(value);
+        return CURLE_URL_MALFORMAT;
+      }
     }
-    else if(curl_strequal(name, "UID") && !imap->uid) {
-      if(valuelen > 0 && value[valuelen - 1] == '/')
-        value[valuelen - 1] = '\0';
-
-      imap->uid = value;
-      value = NULL;
-    }
-    else if(curl_strequal(name, "MAILINDEX") && !imap->mindex) {
-      if(valuelen > 0 && value[valuelen - 1] == '/')
-        value[valuelen - 1] = '\0';
-
-      imap->mindex = value;
-      value = NULL;
-    }
-    else if(curl_strequal(name, "SECTION") && !imap->section) {
-      if(valuelen > 0 && value[valuelen - 1] == '/')
-        value[valuelen - 1] = '\0';
-
-      imap->section = value;
-      value = NULL;
-    }
-    else if(curl_strequal(name, "PARTIAL") && !imap->partial) {
-      if(valuelen > 0 && value[valuelen - 1] == '/')
-        value[valuelen - 1] = '\0';
-
-      imap->partial = value;
-      value = NULL;
-    }
-    else {
-      free(name);
+    else
+      /* blank? */
       free(value);
-
-      return CURLE_URL_MALFORMAT;
-    }
-
     free(name);
-    free(value);
   }
 
   /* Does the URL contain a query parameter? Only valid when we have a mailbox
