@@ -1,0 +1,197 @@
+name: .NET Build and Test
+
+on:
+  push:
+    branches: [ master, main, develop ]
+    paths:
+      - 'dotnet/**'
+      - '.github/workflows/dotnet.yml'
+  pull_request:
+    branches: [ master, main, develop ]
+    paths:
+      - 'dotnet/**'
+      - '.github/workflows/dotnet.yml'
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_FRAMEWORK_VERSION: '4.8'
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+jobs:
+  build-and-test:
+    name: Build and Test on ${{ matrix.os }} - ${{ matrix.framework }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        framework: ['net8.0', 'net6.0', 'netstandard2.0']
+        include:
+          - os: windows-latest
+            framework: 'net48'
+        exclude:
+          - os: macos-latest
+            framework: 'netstandard2.0'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Setup .NET Framework (Windows)
+      if: runner.os == 'Windows'
+      uses: microsoft/setup-msbuild@v1.3
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      working-directory: ./dotnet
+      run: dotnet restore
+
+    - name: Build
+      working-directory: ./dotnet
+      run: dotnet build --no-restore --configuration Release --framework ${{ matrix.framework }}
+
+    - name: Run unit tests
+      working-directory: ./dotnet
+      run: dotnet test --no-build --verbosity normal --configuration Release --framework ${{ matrix.framework }} --logger "trx;LogFileName=test-results.trx"
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.framework }}
+        path: dotnet/**/test-results.trx
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      working-directory: ./dotnet
+      run: dotnet restore
+
+    - name: Run code analysis
+      working-directory: ./dotnet
+      run: |
+        dotnet tool install --global dotnet-format --version 5.1.250801
+        dotnet format --verify-no-changes --verbosity diagnostic
+
+    - name: Check for security vulnerabilities
+      working-directory: ./dotnet
+      run: |
+        dotnet list package --vulnerable --include-transitive
+
+  package:
+    name: Create NuGet Package
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-quality]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      working-directory: ./dotnet
+      run: dotnet restore
+
+    - name: Build and pack
+      working-directory: ./dotnet/src/CurlDotNet
+      run: |
+        dotnet build --configuration Release
+        dotnet pack --configuration Release --no-build --output ./nupkg
+
+    - name: Upload NuGet package artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: nuget-package
+        path: dotnet/src/CurlDotNet/nupkg/*.nupkg
+
+    - name: Upload Symbol package artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: symbol-package
+        path: dotnet/src/CurlDotNet/nupkg/*.snupkg
+
+  publish-nuget:
+    name: Publish to NuGet
+    runs-on: ubuntu-latest
+    needs: package
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    environment: nuget-publish
+
+    steps:
+    - name: Download NuGet package artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: nuget-package
+        path: ./nupkg
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Publish to NuGet.org
+      run: |
+        dotnet nuget push "./nupkg/*.nupkg" \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+
+  benchmark:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Run benchmarks
+      working-directory: ./dotnet
+      run: |
+        dotnet build --configuration Release
+        # Benchmarks would go here once we add BenchmarkDotNet
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: benchmark-results
+        path: dotnet/**/BenchmarkDotNet.Artifacts/**/*
