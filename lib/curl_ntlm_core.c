@@ -77,6 +77,7 @@
 #  endif
 #  define DESKEY(x) &x
 #else
+#  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
 #  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
