@@ -1,0 +1,143 @@
+# Claude Code Transcript Log
+# Session: October 23, 2025
+# Purpose: CurlDotNet Architecture and Development Session
+
+## Session Start
+Working directory: /Users/jacob/Documents/GitHub/curl-dot-net
+
+## Work Completed Previously
+- Comprehensive testing framework created (100+ test cases)
+- Multi-framework support configured (.NET 8, 6, Core 3.1, Framework 4.7.2, Standard 2.0)
+- Dependency injection with Ninject added
+- Exception hierarchy created with full documentation
+- Unit tests for CommandParser, HttpHandler, HttpbinIntegration
+- Fixed exception constructor issues with fix_exceptions.sh script
+
+## Current Session Architecture Decisions
+
+### CRITICAL ARCHITECTURE DECISIONS - DO NOT LOSE
+
+#### Question 1: Library Goal
+**Decision:** Direct Port with .NET conventions
+- Maintain curl command-line compatibility while providing .NET-friendly API
+
+#### Question 2: Framework Support
+**User Response:** ".NET Standard 2.0 trying to target everything So yeah that's Include Legacy"
+**Decision:** Support .NET Standard 2.0, .NET Framework 4.7.2+, and all modern versions
+
+#### Question 3: Async Implementation
+**User Response:** "I think async 0.4.72 and standard both have async/await no? If not then we're going to have Conditional compile. There's always Task.Run to make any method async. So just a normal async wait pattern is a good idea. But there should be dotnetcurl.curl and dotnetcurl.curl.async should be the two main methods. And they're statics"
+**Decision:**
+- Two main static methods: DotNetCurl.Curl() and DotNetCurl.CurlAsync()
+- Use conditional compilation where needed
+- Task.Run as fallback for sync-to-async
+
+#### Question 4: Primary Use Case
+**User Response:** "CI/CD Integration"
+**Decision:** Optimize for build scripts and automation scenarios
+
+#### Question 5: Command-line Options Support
+**User Response:** "Full Support"
+**Decision:** Implement all 300+ curl options, not just core set
+
+#### Question 6: Authentication Strategy
+**User Response:** "Built-in All"
+**Decision:** Support Basic, Bearer, OAuth, NTLM, Kerberos, etc. natively
+
+#### Question 7: Response Data Handling
+**User Response:** "There should be a settings object and there should be a response object. That response object may contain a stream. You should definitely use streams not buffers. It could go straight to disc that would be done in the settings object. So you've got static functions but you have dynamic and fluently instantiated settings classes and response classes. So if you have response.saveToHtml.saveToFile that kind of thing in a fluent style API"
+**Decision:**
+- Settings object for configuration
+- Response object with streams (NOT buffers)
+- Fluent API for response handling (response.SaveToHtml().SaveToFile())
+- Static functions with dynamic settings/response classes
+
+#### Question 8: Logging/Debugging
+**User Response:** "I would go to console or to the response object or to a custom stream as put in the settings object which can be passed through the static method. However you would also require for every single error type to be handled like every error code has its own exception type so that we can catch them, deal with them. They should all have a hierarchy tree so that we can do it and there should be a mermaid diagram of everything so people understand it. One of my biggest concerns is in the Intellisense is perfect. You know that every type of error that can be thrown, the full documentation not only in the methods on the classes themselves and how to use them with examples and all the new tags that allow AI to understand how to use your code"
+**Decision:**
+- Logging to: Console, Response object, or custom stream (via settings)
+- EVERY error code needs its own exception type
+- Exception hierarchy with Mermaid diagram
+- Perfect IntelliSense with full documentation
+- AI-friendly tags in all documentation
+
+#### KILLER FEATURE REQUIREMENT
+**User Quote:** "The killer feature here is you copy and paste a curl string in and it works. If you don't put the word curl before it, it works. If you do put the curl inside the string, it works. If you put semicolons in there, I guess you could have curl multiple."
+**Requirements:**
+- Accept curl commands with or without "curl" prefix
+- Handle semicolon-separated multiple curl commands
+- Support curl multiple with multiple response objects
+
+#### IMPLEMENTATION NOTES
+**User Quote:** "A thing to understand is we're not editing the C++ we're using it as a reference. We're going to try and use low-level objects if we can and use built-in.NET objects only if necessary because they're HTTP objects have generally been very verbosely implemented and don't map well to Curl. So you can transpile C if you prefer"
+**Decision:**
+- Use C++ curl source as reference only
+- Prefer low-level .NET objects
+- Avoid verbose .NET HTTP objects that don't map well to curl
+- Consider transpiling C code where appropriate
+
+## API Design Based on Requirements
+
+```csharp
+// Main static entry points
+public static class DotNetCurl
+{
+    // KILLER FEATURE: Accept any curl string format
+    public static CurlResponse Curl(string command);
+    public static Task<CurlResponse> CurlAsync(string command);
+
+    // Settings-based approach
+    public static CurlResponse Curl(CurlSettings settings);
+    public static Task<CurlResponse> CurlAsync(CurlSettings settings);
+
+    // Multiple curl commands
+    public static CurlResponse[] CurlMultiple(string commands);
+    public static Task<CurlResponse[]> CurlMultipleAsync(string commands);
+}
+
+// Fluent response API
+public class CurlResponse
+{
+    public Stream DataStream { get; }
+    public CurlResponse SaveToFile(string path);
+    public CurlResponse SaveToHtml(string path);
+    // ... other fluent methods
+}
+
+// Settings object
+public class CurlSettings
+{
+    public Stream LogStream { get; set; }
+    public string OutputPath { get; set; }
+    // ... all curl options
+}
+```
+
+## Current Tasks in Progress
+1. ✅ Run fix_exceptions.sh script
+2. ✅ Build project to check errors
+3. ✅ Fix exception constructor parameter mismatches
+4. 🔄 Ask architecture questions and save responses
+5. ⏳ Fix remaining compilation errors
+6. ⏳ Implement missing interfaces
+7. ⏳ Run test suite
+
+## Build Status
+- 105 errors initially, reduced to 50 after exception fixes
+- Remaining issues: File.Async methods, HttpStatusCode enums, Dictionary.TryAdd
+
+## Files Modified Today
+- /dotnet/src/CurlDotNet/Exceptions/CurlExceptions.cs
+- /dotnet/src/CurlDotNet/Exceptions/CurlExceptionTypes.cs
+- /dotnet/src/CurlDotNet/Core/Handlers/FileHandler.cs
+- /dotnet/src/CurlDotNet/Core/Handlers/FtpHandler.cs
+- /dotnet/src/CurlDotNet/Core/Handlers/HttpHandler.cs
+- Created: /dotnet/ARCHITECTURE_DECISIONS.md
+- Created: /dotnet/claude_code_transcript.log
+
+## Next Steps
+1. Update ARCHITECTURE_DECISIONS.md with new decisions
+2. Fix remaining 50 compilation errors
+3. Create Mermaid diagram for exception hierarchy
+4. Implement killer feature (curl string parsing)
+5. Create perfect IntelliSense documentation

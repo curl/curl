@@ -248,6 +248,21 @@ namespace CurlDotNet.Exceptions
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CurlConnectionException"/> class with an error code.
+        /// </summary>
+        /// <param name="message">The error message describing the connection failure.</param>
+        /// <param name="curlErrorCode">The curl error code.</param>
+        /// <param name="host">The host that could not be connected to.</param>
+        /// <param name="port">The port number that was attempted.</param>
+        /// <param name="command">The curl command that was executing.</param>
+        protected CurlConnectionException(string message, int curlErrorCode, string host, int? port = null, string command = null)
+            : base(message, curlErrorCode, command)
+        {
+            Host = host;
+            Port = port;
+        }
+
+        /// <summary>
         /// Initializes a new instance with serialized data.
         /// </summary>
         protected CurlConnectionException(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -303,10 +318,9 @@ namespace CurlDotNet.Exceptions
         /// <param name="hostname">The hostname that could not be resolved.</param>
         /// <param name="command">The curl command that was executing.</param>
         public CurlDnsException(string hostname, string command = null)
-            : base($"Could not resolve host: {hostname}", hostname, null, command)
+            : base($"Could not resolve host: {hostname}", 6, hostname, null, command)
         {
             // CURLE_COULDNT_RESOLVE_HOST = 6
-            CurlErrorCode = 6;
         }
 
         /// <summary>
@@ -503,12 +517,11 @@ namespace CurlDotNet.Exceptions
         public int? ProxyPort { get; }
 
         public CurlProxyException(string message, string proxyHost, int? proxyPort = null, string command = null)
-            : base(message, proxyHost, proxyPort, command)
+            : base(message, 5, proxyHost, proxyPort, command)
         {
             ProxyHost = proxyHost;
             ProxyPort = proxyPort;
             // CURLE_COULDNT_RESOLVE_PROXY = 5
-            CurlErrorCode = 5;
         }
     }
 
@@ -563,11 +576,10 @@ namespace CurlDotNet.Exceptions
         public string Feature { get; }
 
         public CurlNotSupportedException(string feature, string command = null)
-            : base($"Feature not supported: {feature}", command)
+            : base($"Feature not supported: {feature}", 1, command)
         {
             Feature = feature;
             // CURLE_UNSUPPORTED_PROTOCOL = 1
-            CurlErrorCode = 1;
         }
     }
 

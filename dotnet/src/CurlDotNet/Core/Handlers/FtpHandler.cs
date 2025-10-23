@@ -131,11 +131,12 @@ namespace CurlDotNet.Core
                         (int)ftpResponse.StatusCode);
                 }
 
-                throw new CurlCouldntConnectException($"FTP connection failed: {ex.Message}", ex);
+                var uri = new Uri(options.Url);
+                throw new CurlCouldntConnectException(uri.Host, uri.Port);
             }
             catch (UriFormatException ex)
             {
-                throw new CurlUrlMalformatException($"Invalid FTP URL: {options.Url}", ex);
+                throw new CurlMalformedUrlException(options.Url);
             }
         }
 

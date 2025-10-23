@@ -89,7 +89,7 @@ namespace CurlDotNet.Core
             }
             catch (IOException ex)
             {
-                throw new CurlReadErrorException($"Failed to read file: {filePath}");
+                throw new CurlReadErrorException(filePath, ex.Message);
             }
         }
 

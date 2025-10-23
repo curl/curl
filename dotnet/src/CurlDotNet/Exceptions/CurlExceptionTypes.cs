@@ -166,9 +166,8 @@ namespace CurlDotNet.Exceptions
     public class CurlFtpAcceptTimeoutException : CurlTimeoutException
     {
         public CurlFtpAcceptTimeoutException(string message, string command = null)
-            : base(message, command)
+            : base(message, command, null)
         {
-            CurlErrorCode = 12;
         }
     }
 
@@ -181,7 +180,6 @@ namespace CurlDotNet.Exceptions
         public CurlHttpReturnedErrorException(int statusCode, string statusText, string body, string command = null)
             : base($"HTTP error {statusCode}: {statusText}", statusCode, statusText, body, command)
         {
-            CurlErrorCode = 22;
         }
     }
 
@@ -249,7 +247,6 @@ namespace CurlDotNet.Exceptions
         public CurlOperationTimeoutException(double timeoutSeconds, string command = null)
             : base($"Operation timed out after {timeoutSeconds} seconds", command, TimeSpan.FromSeconds(timeoutSeconds))
         {
-            CurlErrorCode = 28;
         }
     }
 
@@ -270,9 +267,8 @@ namespace CurlDotNet.Exceptions
     public class CurlSslConnectErrorException : CurlSslException
     {
         public CurlSslConnectErrorException(string message, string command = null)
-            : base($"SSL connect error: {message}", message, command)
+            : base($"SSL connect error: {message}", null, command)
         {
-            CurlErrorCode = 35;
         }
     }
 
@@ -388,7 +384,6 @@ namespace CurlDotNet.Exceptions
             : base($"Unknown option: {optionName}", optionName, command)
         {
             OptionName = optionName;
-            CurlErrorCode = 48;
         }
     }
 
@@ -401,7 +396,6 @@ namespace CurlDotNet.Exceptions
         public CurlOptionSyntaxException(string option, string command = null)
             : base($"Option syntax error: {option}", option, command)
         {
-            CurlErrorCode = 49;
         }
     }
 
@@ -422,9 +416,8 @@ namespace CurlDotNet.Exceptions
     public class CurlSslEngineNotFoundException : CurlSslException
     {
         public CurlSslEngineNotFoundException(string engine, string command = null)
-            : base($"SSL engine not found: {engine}", engine, command)
+            : base($"SSL engine not found: {engine}", null, command)
         {
-            CurlErrorCode = 53;
         }
     }
 
@@ -435,9 +428,8 @@ namespace CurlDotNet.Exceptions
     public class CurlSslEngineSetFailedException : CurlSslException
     {
         public CurlSslEngineSetFailedException(string message, string command = null)
-            : base($"Failed to set SSL engine: {message}", message, command)
+            : base($"Failed to set SSL engine: {message}", null, command)
         {
-            CurlErrorCode = 54;
         }
     }
 
@@ -470,7 +462,6 @@ namespace CurlDotNet.Exceptions
         public CurlSslCertificateProblemException(string certError, string command = null)
             : base($"Problem with local certificate: {certError}", certError, command)
         {
-            CurlErrorCode = 58;
         }
     }
 
@@ -483,10 +474,9 @@ namespace CurlDotNet.Exceptions
         public string CipherName { get; }
 
         public CurlSslCipherException(string cipher, string command = null)
-            : base($"Could not use SSL cipher: {cipher}", cipher, command)
+            : base($"Could not use SSL cipher: {cipher}", null, command)
         {
             CipherName = cipher;
-            CurlErrorCode = 59;
         }
     }
 
@@ -497,9 +487,8 @@ namespace CurlDotNet.Exceptions
     public class CurlPeerFailedVerificationException : CurlSslException
     {
         public CurlPeerFailedVerificationException(string message, string command = null)
-            : base($"Peer certificate verification failed: {message}", message, command)
+            : base($"Peer certificate verification failed: {message}", null, command)
         {
-            CurlErrorCode = 60;
         }
     }
 
@@ -542,9 +531,8 @@ namespace CurlDotNet.Exceptions
     public class CurlUseSslFailedException : CurlSslException
     {
         public CurlUseSslFailedException(string message, string command = null)
-            : base($"Required SSL level failed: {message}", message, command)
+            : base($"Required SSL level failed: {message}", null, command)
         {
-            CurlErrorCode = 64;
         }
     }
 
@@ -555,9 +543,8 @@ namespace CurlDotNet.Exceptions
     public class CurlLoginDeniedException : CurlAuthenticationException
     {
         public CurlLoginDeniedException(string message, string command = null)
-            : base($"Login denied: {message}", "login", command)
+            : base($"Login denied: {message}", null, command)
         {
-            CurlErrorCode = 67;
         }
     }
 }

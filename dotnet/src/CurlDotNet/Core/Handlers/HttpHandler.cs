@@ -303,7 +303,7 @@ namespace CurlDotNet.Core
 
             if (redirectCount >= options.MaxRedirects)
             {
-                throw new CurlTooManyRedirectsException($"Too many redirects (max: {options.MaxRedirects})");
+                throw new CurlTooManyRedirectsException(redirectCount);
             }
 
             return await CreateResult(currentResponse, options, timings, startTime);
