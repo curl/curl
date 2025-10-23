@@ -5252,7 +5252,7 @@ fi
 use_curl_ntlm_core=no
 
 if test "x$CURL_DISABLE_NTLM" != "x1"; then
-  if test "x$OPENSSL_ENABLED" = "x1" \
+  if test "x$HAVE_DES_ECB_ENCRYPT" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
       -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1" \
