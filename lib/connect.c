@@ -123,8 +123,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
      before the connect timeout expires and we must acknowledge whichever
      timeout that is reached first. The total timeout is set per entire
      operation, while the connect timeout is set per connect. */
-  if((!data->set.timeout || data->set.connect_only ||
-      data->set.connect_only_ws) && !duringconnect)
+  if((!data->set.timeout || data->set.connect_only) && !duringconnect)
     return 0; /* no timeout in place or checked, return "no limit" */
 
   if(!nowp) {
