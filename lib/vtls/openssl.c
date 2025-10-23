@@ -1578,8 +1578,6 @@ static int pkcs12load(struct Curl_easy *data,
     return 0;
   }
 
-  PKCS12_PBE_add();
-
   if(!PKCS12_parse(p12, key_passwd, &pri, &x509, &ca)) {
     failf(data,
           "could not parse PKCS12 file, check password, " OSSL_PACKAGE
