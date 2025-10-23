@@ -868,6 +868,18 @@ if(CURL_USE_MBEDTLS)
     set(_valid_default_ssl_backend TRUE)
   endif()
   set(_curl_ca_bundle_supported TRUE)
+
+  if(MBEDTLS_VERSION VERSION_GREATER_EQUAL 4.0.0)
+    set(HAVE_MBEDTLS_DES_CRYPT_ECB 0)  # pre-fill detection result
+  endif()
+  if(NOT DEFINED HAVE_MBEDTLS_DES_CRYPT_ECB)
+    cmake_push_check_state()
+    list(APPEND CMAKE_REQUIRED_INCLUDES "${MBEDTLS_INCLUDE_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "${MBEDTLS_LIBRARIES}")
+    curl_required_libpaths("${MBEDTLS_LIBRARY_DIRS}")
+    check_function_exists("mbedtls_des_crypt_ecb" HAVE_MBEDTLS_DES_CRYPT_ECB)
+    cmake_pop_check_state()
+  endif()
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -1075,6 +1087,9 @@ if(USE_WOLFSSL)
 endif()
 
 if(USE_OPENSSL)
+  if(NOT DEFINED HAVE_DES_ECB_ENCRYPT)
+    curl_openssl_check_exists("DES_ecb_encrypt" "openssl/des.h" HAVE_DES_ECB_ENCRYPT)
+  endif()
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
     curl_openssl_check_exists("SSL_set0_wbio" HAVE_SSL_SET0_WBIO)
   endif()
@@ -2079,8 +2094,8 @@ endmacro()
 # NTLM support requires crypto functions from various SSL libs.
 # These conditions must match those in lib/curl_setup.h.
 if(NOT CURL_DISABLE_NTLM AND
-   (USE_OPENSSL OR
-    (USE_MBEDTLS AND MBEDTLS_VERSION VERSION_LESS 4.0.0) OR
+   ((USE_OPENSSL AND HAVE_DES_ECB_ENCRYPT) OR
+    (USE_MBEDTLS AND HAVE_MBEDTLS_DES_CRYPT_ECB) OR
     USE_GNUTLS OR
     USE_WIN32_CRYPTO OR
     (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))

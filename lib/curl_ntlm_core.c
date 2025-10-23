@@ -50,21 +50,12 @@
      in NTLM type-3 messages.
  */
 
-#ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_DES
-  #endif
-#elif defined(USE_WOLFSSL)
-  #include <wolfssl/options.h>
-  #ifndef NO_DES3
-    #define USE_OPENSSL_DES
-  #endif
-#elif defined(USE_MBEDTLS)
-  #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER < 0x04000000
-    #define USE_MBEDTLS_DES
-  #endif
+#if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
+  #define USE_OPENSSL_DES
+#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+  #define USE_OPENSSL_DES
+#elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
+  #define USE_MBEDTLS_DES
 #endif
 
 #ifdef USE_OPENSSL_DES

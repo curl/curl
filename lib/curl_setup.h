@@ -765,7 +765,7 @@
 #ifndef CURL_DISABLE_NTLM
 #  if defined(USE_OPENSSL) ||                                           \
   defined(USE_GNUTLS) ||                                                \
-  (defined(USE_MBEDTLS) && MBEDTLS_VERSION_NUMBER < 0x04000000) ||      \
+  (defined(USE_MBEDTLS) && defined(MBEDTLS_DES_C)) ||                   \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
   (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 #    define USE_CURL_NTLM_CORE

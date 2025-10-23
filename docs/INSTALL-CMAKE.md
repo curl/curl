@@ -491,9 +491,11 @@ the parent project, ideally in the "extra" find package redirect file:
 
 Available variables:
 
+- `HAVE_DES_ECB_ENCRYPT`:                   `DES_ecb_encrypt` present in OpenSSL (or fork).
 - `HAVE_GNUTLS_SRP`:                        `gnutls_srp_verifier` present in GnuTLS.
 - `HAVE_LDAP_INIT_FD`:                      `ldap_init_fd` present in LDAP library.
 - `HAVE_LDAP_URL_PARSE`:                    `ldap_url_parse` present in LDAP library.
+- `HAVE_MBEDTLS_DES_CRYPT_ECB`:             `mbedtls_des_crypt_ecb` present in mbedTLS <4.
 - `HAVE_OPENSSL_SRP`:                       `SSL_CTX_set_srp_username` present in OpenSSL (or fork).
 - `HAVE_QUICHE_CONN_SET_QLOG_FD`:           `quiche_conn_set_qlog_fd` present in quiche.
 - `HAVE_RUSTLS_SUPPORTED_HPKE`:             `rustls_supported_hpke` present in Rustls (unused if Rustls is detected via `pkg-config`).
