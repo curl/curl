@@ -674,7 +674,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 #ifndef CURL_DISABLE_RTSP
      && (data->set.rtspreq != RTSPREQ_RECEIVE)
 #endif
-    )
+    ) {
     /* We got no data, we attempted to reuse a connection. For HTTP this
        can be a retry so we try again regardless if we expected a body.
        For other protocols we only try again only if we expected a body.
@@ -682,7 +682,9 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
        This might happen if the connection was left alive when we were
        done using it before, but that was closed when we wanted to read from
        it again. Bad luck. Retry the same request on a fresh connect! */
+    infof(data, "Got no data at all, retrying");
     retry = TRUE;
+  }
   else if(data->state.refused_stream &&
           (data->req.bytecount + data->req.headerbytecount == 0) ) {
     /* This was sent on a refused stream, safe to rerun. A refused stream
