@@ -1,260 +1,376 @@
 # CurlDotNet - Pure .NET Implementation of curl
 
-A pure .NET/C# implementation of curl that allows you to execute curl commands directly from your .NET code without shell execution or interop.
+[![NuGet](https://img.shields.io/nuget/v/CurlDotNet.svg)](https://www.nuget.org/packages/CurlDotNet/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%206.0%20%7C%20Framework%204.7.2-512BD4)](https://dotnet.microsoft.com/)
+[![Sponsored by IronSoftware](https://img.shields.io/badge/Sponsored%20by-IronSoftware-red.svg)](https://ironsoftware.com)
 
-## Features
+**CurlDotNet** brings the power and familiarity of curl to .NET developers. Simply paste any curl command and it works - no translation needed. Perfect for CI/CD pipelines, automated testing, and any scenario where you need reliable HTTP operations.
 
-- ✅ Pure .NET implementation - no native dependencies
-- ✅ Compatible with .NET Standard 2.0 (.NET Framework 4.7.2+ and .NET Core/5+)
-- ✅ Execute curl commands using familiar curl syntax
-- ✅ Programmatic access to response data
-- ✅ Support for HTTP/HTTPS, FTP/FTPS, and FILE protocols
-- ✅ Full support for common curl options
-- ✅ Async/await support throughout
-- ✅ Output to files or in-memory results
+## 🚀 The Killer Feature
 
-## Installation
-
-```bash
-# Install via NuGet
-dotnet add package CurlDotNet
-
-# Or via Package Manager Console
-Install-Package CurlDotNet
-```
-
-## Quick Start
+**Copy and paste any curl command - it just works!**
 
 ```csharp
 using CurlDotNet;
 
-// Create a curl instance
-var curl = new Curl();
+// Works with or without the "curl" prefix
+var response = await DotNetCurl.CurlAsync("curl -X POST https://api.example.com/data -H 'Content-Type: application/json' -d '{\"key\":\"value\"}'");
 
-// Execute a simple GET request
-var result = await curl.ExecuteAsync("curl https://api.github.com/users/jacob-mellor");
+// Also works without "curl"
+var response2 = await DotNetCurl.CurlAsync("-X GET https://api.example.com/users");
 
-// Access the response
-Console.WriteLine(result.ResponseBody);
-Console.WriteLine($"Status Code: {result.StatusCode}");
-```
-
-## Examples
-
-### Simple GET Request
-
-```csharp
-var curl = new Curl();
-var result = await curl.ExecuteAsync("curl https://api.example.com/data");
-Console.WriteLine(result.ResponseBody);
-```
-
-### POST with JSON Data
-
-```csharp
-var result = await curl.ExecuteAsync(@"
-    curl -X POST https://api.example.com/users \
-         -H 'Content-Type: application/json' \
-         -d '{""name"":""John"",""email"":""john@example.com""}'
+// Even handles multiple commands
+var responses = await DotNetCurl.CurlMultipleAsync(@"
+    curl https://api.example.com/users;
+    curl https://api.example.com/posts;
+    curl https://api.example.com/comments
 ");
 ```
 
-### Download File
+## 📦 Installation
+
+Install CurlDotNet via NuGet:
+
+```bash
+# Package Manager Console
+Install-Package CurlDotNet
+
+# .NET CLI
+dotnet add package CurlDotNet
+
+# PackageReference
+<PackageReference Include="CurlDotNet" Version="1.0.0" />
+```
+
+## 🎯 Quick Start
+
+### Basic GET Request
 
 ```csharp
-// Download and save to specific file
-var result = await curl.ExecuteAsync("curl -o download.pdf https://example.com/file.pdf");
-Console.WriteLine($"File saved to: {result.OutputPath}");
+using CurlDotNet;
 
-// Use remote filename
-await curl.ExecuteAsync("curl -O https://example.com/document.pdf");
+// Simple GET request
+var response = await DotNetCurl.CurlAsync("curl https://api.github.com/users/octocat");
+Console.WriteLine(response.Body);
+```
+
+### POST with JSON
+
+```csharp
+// POST JSON data
+var response = await DotNetCurl.CurlAsync(@"
+    curl -X POST https://api.example.com/users
+    -H 'Content-Type: application/json'
+    -d '{""name"":""John"",""email"":""john@example.com""}'
+");
+
+// Check status
+if (response.IsSuccess)
+{
+    var user = response.ParseJson<User>();
+    Console.WriteLine($"Created user: {user.Id}");
+}
+```
+
+### Download Files
+
+```csharp
+// Download a file
+var response = await DotNetCurl.CurlAsync("curl -o report.pdf https://example.com/report.pdf");
+
+// Or use the fluent API
+var response = await DotNetCurl.CurlAsync("curl https://example.com/image.jpg");
+response.SaveToFile("image.jpg");
 ```
 
 ### Authentication
 
 ```csharp
 // Basic authentication
-var result = await curl.ExecuteAsync("curl -u username:password https://api.example.com/secure");
+var response = await DotNetCurl.CurlAsync("curl -u username:password https://api.example.com/private");
 
 // Bearer token
-var result = await curl.ExecuteAsync(@"
-    curl -H 'Authorization: Bearer YOUR_TOKEN' https://api.example.com/data
-");
+var response = await DotNetCurl.CurlAsync("curl -H 'Authorization: Bearer YOUR_TOKEN' https://api.example.com/data");
+
+// OAuth, NTLM, Kerberos - all supported!
 ```
 
-### Follow Redirects
+## 💪 Advanced Features
+
+### Fluent API
 
 ```csharp
-var result = await curl.ExecuteAsync("curl -L https://short.link/abc123");
+var settings = new CurlSettings()
+    .WithUrl("https://api.example.com/data")
+    .WithMethod("POST")
+    .WithHeader("Content-Type", "application/json")
+    .WithData("{\"key\":\"value\"}")
+    .WithTimeout(TimeSpan.FromSeconds(30))
+    .WithAuthentication("Bearer", "YOUR_TOKEN");
+
+var response = await DotNetCurl.CurlAsync(settings);
 ```
 
-### Custom Headers
+### Stream-Based for Large Files
 
 ```csharp
-var result = await curl.ExecuteAsync(@"
-    curl -H 'Accept: application/json' \
-         -H 'X-API-Key: your-key' \
-         https://api.example.com/data
-");
-```
+// Efficient streaming - never loads entire file into memory
+var response = await DotNetCurl.CurlAsync("curl https://example.com/largefile.zip");
 
-### Verbose Output
-
-```csharp
-// Get detailed request/response information
-var result = await curl.ExecuteAsync("curl -v https://example.com");
-Console.WriteLine(result.FormattedOutput); // Includes verbose output
-```
-
-### Multiple Parallel Requests
-
-```csharp
-var results = await curl.ExecuteMultipleAsync(
-    "curl https://api1.example.com/data",
-    "curl https://api2.example.com/data",
-    "curl https://api3.example.com/data"
-);
-
-foreach (var kvp in results)
+using (var fileStream = File.Create("largefile.zip"))
 {
-    Console.WriteLine($"Command: {kvp.Key}");
-    Console.WriteLine($"Response: {kvp.Value.ResponseBody}");
+    await response.DataStream.CopyToAsync(fileStream);
 }
-```
-
-### Working with Files
-
-```csharp
-// Upload file
-var result = await curl.ExecuteAsync("curl -T upload.txt ftp://ftp.example.com/");
-
-// Download with resume
-var result = await curl.ExecuteAsync("curl -C - -O https://example.com/largefile.zip");
-
-// Read local file
-var result = await curl.ExecuteAsync("curl file:///path/to/local/file.txt");
 ```
 
 ### Error Handling
 
-```csharp
-var result = await curl.ExecuteAsync("curl -f https://example.com/404");
+Every curl error code has its own exception type for precise error handling:
 
-if (result.IsError)
+```csharp
+try
 {
-    Console.WriteLine($"Error: {result.ErrorMessage}");
-    Console.WriteLine($"Status Code: {result.StatusCode}");
+    var response = await DotNetCurl.CurlAsync("curl https://invalid-url");
+}
+catch (CurlDnsException ex)
+{
+    // DNS resolution failed (error code 6)
+    Console.WriteLine($"Could not resolve: {ex.Hostname}");
+}
+catch (CurlTimeoutException ex)
+{
+    // Operation timed out (error code 28)
+    Console.WriteLine($"Timeout after {ex.Timeout}");
+}
+catch (CurlSslException ex)
+{
+    // SSL/TLS error (various codes)
+    Console.WriteLine($"SSL error: {ex.Message}");
 }
 ```
 
-### Output Formatting
+### CI/CD Integration
+
+Optimized for build pipelines and automation:
 
 ```csharp
-// Custom write-out format
-var result = await curl.ExecuteAsync(@"
-    curl -w '\nTime: %{time_total}s\nSize: %{size_download} bytes' \
-         https://example.com
+// Returns proper exit codes like curl
+var result = DotNetCurl.Curl("curl --fail https://api.example.com/health");
+Environment.Exit(result.ExitCode); // 0 for success, non-zero for failure
+
+// Retry logic for reliability
+var settings = new CurlSettings()
+    .WithRetryCount(3)
+    .WithRetryDelay(TimeSpan.FromSeconds(2))
+    .WithExponentialBackoff();
+
+// Environment variable support
+// Automatically uses HTTP_PROXY, HTTPS_PROXY, NO_PROXY
+```
+
+## 🎨 Code Examples
+
+### REST API Testing
+
+```csharp
+// Complete CRUD operations
+public class ApiTests
+{
+    // CREATE
+    public async Task<User> CreateUser(User user)
+    {
+        var json = JsonSerializer.Serialize(user);
+        var response = await DotNetCurl.CurlAsync($@"
+            curl -X POST https://api.example.com/users
+            -H 'Content-Type: application/json'
+            -d '{json}'
+        ");
+        return response.ParseJson<User>();
+    }
+
+    // READ
+    public async Task<User> GetUser(int id)
+    {
+        var response = await DotNetCurl.CurlAsync($"curl https://api.example.com/users/{id}");
+        return response.ParseJson<User>();
+    }
+
+    // UPDATE
+    public async Task<User> UpdateUser(int id, User user)
+    {
+        var json = JsonSerializer.Serialize(user);
+        var response = await DotNetCurl.CurlAsync($@"
+            curl -X PUT https://api.example.com/users/{id}
+            -H 'Content-Type: application/json'
+            -d '{json}'
+        ");
+        return response.ParseJson<User>();
+    }
+
+    // DELETE
+    public async Task DeleteUser(int id)
+    {
+        await DotNetCurl.CurlAsync($"curl -X DELETE https://api.example.com/users/{id}");
+    }
+}
+```
+
+### WebHook Handler
+
+```csharp
+// Send webhooks with retries
+public async Task SendWebhook(string url, object payload)
+{
+    var settings = new CurlSettings()
+        .WithUrl(url)
+        .WithMethod("POST")
+        .WithHeader("Content-Type", "application/json")
+        .WithData(JsonSerializer.Serialize(payload))
+        .WithTimeout(TimeSpan.FromSeconds(10))
+        .WithRetryCount(3);
+
+    var response = await DotNetCurl.CurlAsync(settings);
+
+    if (!response.IsSuccess)
+    {
+        throw new WebhookException($"Webhook failed: {response.StatusCode}");
+    }
+}
+```
+
+### File Upload
+
+```csharp
+// Multipart form upload
+var response = await DotNetCurl.CurlAsync(@"
+    curl -X POST https://api.example.com/upload
+    -F 'file=@/path/to/file.pdf'
+    -F 'description=Monthly Report'
 ");
 
-// Silent mode with error display
-var result = await curl.ExecuteAsync("curl -sS https://example.com");
-```
-
-## Supported curl Options
-
-| Option | Description | Supported |
-|--------|-------------|-----------|
-| `-X, --request` | HTTP method | ✅ |
-| `-H, --header` | Custom header | ✅ |
-| `-d, --data` | POST data | ✅ |
-| `--data-binary` | Binary POST data | ✅ |
-| `--data-urlencode` | URL-encoded POST data | ✅ |
-| `-o, --output` | Output to file | ✅ |
-| `-O, --remote-name` | Use remote filename | ✅ |
-| `-L, --location` | Follow redirects | ✅ |
-| `-v, --verbose` | Verbose output | ✅ |
-| `-s, --silent` | Silent mode | ✅ |
-| `-S, --show-error` | Show errors in silent mode | ✅ |
-| `-i, --include` | Include headers in output | ✅ |
-| `-I, --head` | HEAD request | ✅ |
-| `-u, --user` | Authentication | ✅ |
-| `-A, --user-agent` | User agent | ✅ |
-| `-e, --referer` | Referer header | ✅ |
-| `-b, --cookie` | Cookie string | ✅ |
-| `-c, --cookie-jar` | Cookie jar file | ✅ |
-| `-T, --upload-file` | Upload file | ✅ |
-| `--proxy` | Proxy server | ✅ |
-| `-k, --insecure` | Allow insecure SSL | ✅ |
-| `--compressed` | Request compression | ✅ |
-| `-f, --fail` | Fail on HTTP errors | ✅ |
-| `--connect-timeout` | Connection timeout | ✅ |
-| `-m, --max-time` | Maximum time | ✅ |
-| `-w, --write-out` | Custom output format | ✅ |
-| `-G, --get` | Use GET for data | ✅ |
-| `--http1.0` | Use HTTP/1.0 | ✅ |
-| `--http1.1` | Use HTTP/1.1 | ✅ |
-| `--http2` | Use HTTP/2 | ✅ |
-
-## OutputResult Object
-
-The `ExecuteAsync` method returns an `OutputResult` object with the following properties:
-
-```csharp
-public class OutputResult
+// Check response
+if (response.StatusCode == 200)
 {
-    public string FormattedOutput { get; set; }    // Formatted curl-like output
-    public string ResponseBody { get; set; }       // Raw response body
-    public byte[] BinaryData { get; set; }         // Binary data (if applicable)
-    public string Headers { get; set; }            // Response headers
-    public int StatusCode { get; set; }            // HTTP status code
-    public string OutputPath { get; set; }         // File path (if written to file)
-    public bool WroteToFile { get; set; }          // Whether output was written to file
-    public long BytesWritten { get; set; }         // Number of bytes written
-    public bool IsError { get; set; }              // Whether an error occurred
-    public string ErrorMessage { get; set; }       // Error message (if any)
-
-    public Stream GetStream()                      // Get response as stream
+    var result = response.ParseJson<UploadResult>();
+    Console.WriteLine($"File uploaded: {result.FileId}");
 }
 ```
 
-## Architecture
+## 🏗️ Architecture & Extensibility
 
-This implementation transpiles curl's C source code to .NET/C#, maintaining compatibility with curl's command-line interface while providing a native .NET API. The library:
+### Middleware Support
 
-- Uses low-level .NET networking APIs for accurate curl behavior
-- Implements curl's exact command-line parsing logic
-- Maintains curl's output formatting and error codes
-- Supports curl's various protocols and options
+```csharp
+// Add custom middleware for logging, metrics, etc.
+DotNetCurl.AddMiddleware(async (request, next) =>
+{
+    Console.WriteLine($"Request: {request.Method} {request.Url}");
+    var response = await next(request);
+    Console.WriteLine($"Response: {response.StatusCode}");
+    return response;
+});
+```
 
-## Contributing
+### Dependency Injection
 
-Contributions are welcome! This project aims to:
-1. Maintain exact compatibility with curl's command-line interface
-2. Provide a pure .NET implementation without native dependencies
-3. Support all major curl features and options
+```csharp
+// Register in DI container
+services.AddCurlDotNet(options =>
+{
+    options.DefaultTimeout = TimeSpan.FromSeconds(30);
+    options.EnableLogging = true;
+    options.LogStream = Console.Out;
+});
 
-## License
+// Inject and use
+public class MyService
+{
+    private readonly ICurl _curl;
 
-This project is licensed under the curl license (MIT/X derivative license). See the [COPYING](COPYING) file for details.
+    public MyService(ICurl curl)
+    {
+        _curl = curl;
+    }
+}
+```
 
-## Credits
+## 📊 Platform Support
 
-- Original curl by Daniel Stenberg and contributors: https://github.com/curl/curl
-- .NET implementation by Jacob Mellor: https://github.com/jacob-mellor
-- Repository: https://github.com/jacob-mellor/curl-dot-net
+| Platform | Supported | Notes |
+|----------|-----------|--------|
+| .NET 8.0 | ✅ | Full support |
+| .NET 6.0 | ✅ | Full support |
+| .NET Framework 4.7.2 | ✅ | Windows only |
+| .NET Standard 2.0 | ✅ | Maximum compatibility |
+| Xamarin | ✅ | iOS, Android, Mac |
+| Unity | ✅ | 2018.1+ |
+| Blazor | ✅ | WASM & Server |
 
-## Roadmap
+## 🔧 Configuration
 
-- [ ] Add wget command support
-- [ ] WebAssembly compilation
-- [ ] Rust implementation
-- [ ] Additional protocol support (SFTP, SCP, etc.)
-- [ ] Full curl test suite migration
-- [ ] Performance optimizations
-- [ ] HTTP/3 support
+```csharp
+// Global configuration
+DotNetCurl.Configure(config =>
+{
+    config.UserAgent = "MyApp/1.0";
+    config.DefaultHeaders.Add("X-API-Version", "2.0");
+    config.EnableCookies = true;
+    config.CookieFile = "cookies.txt";
+    config.ProxyUrl = "http://proxy.company.com:8080";
+    config.InsecureMode = false; // Never ignore SSL errors in production!
+});
+```
 
-## Related Projects
+## 📈 Performance
 
-- [curl](https://github.com/curl/curl) - The original curl project
-- [curlie](https://github.com/rs/curlie) - A frontend to curl with colors
-- [curl-to-csharp](https://github.com/olsh/curl-to-csharp) - Convert curl commands to C# code
+- **Zero allocations** for streaming operations
+- **Connection pooling** for improved performance
+- **HTTP/2** and **HTTP/3** support
+- **Compression** (gzip, deflate, brotli) handled automatically
+- **Concurrent requests** with optimal thread usage
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## 📜 License
+
+CurlDotNet is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 💎 Sponsored by IronSoftware
+
+CurlDotNet is proudly sponsored by [IronSoftware](https://ironsoftware.com), creators of:
+- [IronPDF](https://ironpdf.com) - PDF Generation & Manipulation
+- [IronOCR](https://ironsoftware.com/csharp/ocr/) - Advanced OCR
+- [IronXL](https://ironsoftware.com/csharp/excel/) - Excel Processing
+- [IronBarcode](https://ironsoftware.com/csharp/barcode/) - Barcode Generation
+- [IronWebScraper](https://ironsoftware.com/csharp/webscraper/) - Web Scraping
+
+## 🌟 Why CurlDotNet?
+
+- **Familiar**: If you know curl, you know CurlDotNet
+- **Reliable**: Battle-tested curl behavior in pure .NET
+- **Fast**: Optimized for performance and low memory usage
+- **Complete**: Supports all 300+ curl options
+- **Cross-platform**: Works everywhere .NET runs
+- **CI/CD Ready**: Built for automation and scripting
+- **Well-documented**: IntelliSense everywhere, with examples
+- **Exception Hierarchy**: Catch exactly the errors you want
+
+## 📚 Resources
+
+- [Full Documentation](https://curldotnet.com/docs)
+- [API Reference](https://curldotnet.com/api)
+- [Examples](./EXAMPLES.md)
+- [Curl Command Reference](https://curl.se/docs/manpage.html)
+- [NuGet Package](https://www.nuget.org/packages/CurlDotNet/)
+- [GitHub Repository](https://github.com/jacob/curl-dot-net)
+
+## ✨ Get Started Now!
+
+```bash
+dotnet add package CurlDotNet
+```
+
+Transform your curl commands into powerful .NET applications today!
