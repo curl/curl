@@ -673,6 +673,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
 
+/* if mbedTLS <4 has the mbedtls_des_crypt_ecb function. */
+#cmakedefine HAVE_MBEDTLS_DES_CRYPT_ECB 1
+
 /* if Rustls is enabled */
 #cmakedefine USE_RUSTLS 1
 
@@ -801,7 +804,10 @@ ${SIZEOF_TIME_T_CODE}
 #cmakedefine USE_ECH 1
 
 /* Define to 1 if you have the wolfSSL_CTX_GenerateEchConfig function. */
-#cmakedefine HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+#cmakedefine HAVE_WOLFSSL_CTX_GENERATEECHCONFIG 1
 
 /* Define to 1 if you have the SSL_set1_ech_config_list function. */
-#cmakedefine HAVE_SSL_SET1_ECH_CONFIG_LIST
+#cmakedefine HAVE_SSL_SET1_ECH_CONFIG_LIST 1
+
+/* Define to 1 if OpenSSL has the DES_ecb_encrypt function. */
+#cmakedefine HAVE_DES_ECB_ENCRYPT 1

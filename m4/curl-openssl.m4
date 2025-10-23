@@ -341,6 +341,29 @@ if test X"$OPT_OPENSSL" != Xno &&
 fi
 
 dnl ---
+dnl We check OpenSSL for DES support.
+dnl ---
+if test "$OPENSSL_ENABLED" = "1"; then
+  AC_MSG_CHECKING([for DES support in OpenSSL])
+  AC_LINK_IFELSE([
+    AC_LANG_PROGRAM([[
+      #ifndef OPENSSL_SUPPRESS_DEPRECATED
+      #define OPENSSL_SUPPRESS_DEPRECATED
+      #endif
+      #include <openssl/des.h>
+    ]],[[
+      DES_ecb_encrypt(0, 0, 0, DES_ENCRYPT);
+    ]])
+  ],[
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_DES_ECB_ENCRYPT, 1, [if you have the function DES_ecb_encrypt])
+    HAVE_DES_ECB_ENCRYPT=1
+  ],[
+    AC_MSG_RESULT([no])
+  ])
+fi
+
+dnl ---
 dnl We require OpenSSL with SRP support.
 dnl ---
 if test "$OPENSSL_ENABLED" = "1"; then

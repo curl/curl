@@ -37,6 +37,9 @@
 /* #define MBEDTLS_DEBUG */
 
 #include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
+#endif
 #include <psa/crypto_config.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>

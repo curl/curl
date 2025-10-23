@@ -49,6 +49,10 @@
 #endif
 
 #ifdef USE_MBEDTLS
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER < 0x03020000
+    #error "mbedTLS 3.2.0 or later required"
+  #endif
   #include <psa/crypto_config.h>
   #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
     #define USE_MBEDTLS_MD5

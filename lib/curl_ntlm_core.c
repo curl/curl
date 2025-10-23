@@ -50,21 +50,19 @@
      in NTLM type-3 messages.
  */
 
-#ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_DES
-  #endif
-#elif defined(USE_WOLFSSL)
-  #include <wolfssl/options.h>
-  #ifndef NO_DES3
-    #define USE_OPENSSL_DES
-  #endif
-#elif defined(USE_MBEDTLS)
-  #include <mbedtls/version.h>
-  #if MBEDTLS_VERSION_NUMBER < 0x04000000
-    #define USE_MBEDTLS_DES
-  #endif
+#ifdef USE_MBEDTLS
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
+#endif
+#endif
+
+#if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
+  #define USE_OPENSSL_DES
+#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+  #define USE_OPENSSL_DES
+#elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
+  #define USE_MBEDTLS_DES
 #endif
 
 #ifdef USE_OPENSSL_DES
@@ -79,6 +77,7 @@
 #  endif
 #  define DESKEY(x) &x
 #else
+#  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
 #  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
@@ -111,7 +110,6 @@
 #  include <wincrypt.h>
 #else
 #  error "cannot compile NTLM support without a crypto library with DES."
-#  define CURL_NTLM_NOT_SUPPORTED
 #endif
 
 #include "urldata.h"
@@ -128,7 +126,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef CURL_NTLM_NOT_SUPPORTED
 /*
 * Turns a 56-bit key into being 64-bit wide.
 */
@@ -143,7 +140,6 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[6] = (char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
   key[7] = (char) ((key_56[6] << 1) & 0xFF);
 }
-#endif
 
 #ifdef USE_OPENSSL_DES
 /*
@@ -328,11 +324,9 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
-#ifndef CURL_NTLM_NOT_SUPPORTED
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
   };
-#endif
   size_t len = CURLMIN(strlen(password), 14);
 
   Curl_strntoupper((char *)pw, password, len);
