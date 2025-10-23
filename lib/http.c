@@ -322,9 +322,7 @@ char *Curl_copy_header_value(const char *header)
     curlx_str_trimblanks(&out);
     return Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
   }
-  /* bad input, should never happen */
-  DEBUGASSERT(0);
-  return NULL;
+  return NULL; /* bad input, should never happen */
 }
 
 #ifndef CURL_DISABLE_HTTP_AUTH
