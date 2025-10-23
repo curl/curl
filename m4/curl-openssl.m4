@@ -352,7 +352,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
       #endif
       #include <openssl/des.h>
     ]],[[
-      DES_ecb_encrypt(NULL, NULL, NULL, DES_ENCRYPT);
+      DES_ecb_encrypt(0, 0, 0, DES_ENCRYPT);
     ]])
   ],[
     AC_MSG_RESULT([yes])
