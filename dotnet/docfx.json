@@ -1,0 +1,80 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "src",
+          "files": ["**/*.csproj"],
+          "exclude": ["**/bin/**", "**/obj/**"]
+        }
+      ],
+      "dest": "api",
+      "filter": "filterConfig.yml",
+      "includePrivateMembers": false,
+      "disableGitFeatures": false,
+      "disableDefaultFilter": false,
+      "noRestore": false,
+      "namespaceLayout": "flattened",
+      "memberLayout": "samePage",
+      "allowCompilationErrors": false
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": ["api/**.yml", "api/index.md"]
+      },
+      {
+        "files": [
+          "articles/**.md",
+          "articles/**/toc.yml",
+          "toc.yml",
+          "*.md"
+        ],
+        "exclude": ["**/bin/**", "**/obj/**", "_site/**", "**/node_modules/**"]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**",
+          "favicon.ico"
+        ]
+      }
+    ],
+    "output": "_site",
+    "globalMetadata": {
+      "_appTitle": "CurlDotNet",
+      "_appName": "CurlDotNet - Pure .NET curl",
+      "_appFooter": "Sponsored by <a href='https://ironsoftware.com'>IronSoftware</a> | Copyright © 2025",
+      "_appLogoPath": "images/logo.svg",
+      "_appFaviconPath": "favicon.ico",
+      "_enableSearch": true,
+      "_enableNewTab": true,
+      "_disableBreadcrumb": false,
+      "_disableNavbar": false,
+      "_disableToc": false,
+      "_gitContribute": {
+        "repo": "https://github.com/jacob/curl-dot-net",
+        "branch": "main",
+        "apiSpecFolder": "docs"
+      }
+    },
+    "fileMetadata": {
+      "author": {
+        "api/**.yml": "CurlDotNet Contributors"
+      },
+      "keywords": {
+        "api/**.yml": ["curl", "http", "rest", "api", "client"]
+      }
+    },
+    "template": [
+      "default",
+      "modern"
+    ],
+    "theme": "light",
+    "postProcessors": ["ExtractSearchIndex"],
+    "keepFileLink": false,
+    "disableGitFeatures": false
+  }
+}
