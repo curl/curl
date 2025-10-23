@@ -1690,7 +1690,7 @@ enum schannel_renegotiate_caller_t {
   SCH_RENEG_CALLER_IS_SEND
 };
 
-#define MAX_REGEG_BLOCK_TIME (7 * 1000) /* 7 seconds in milliseconds */
+#define MAX_RENEG_BLOCK_TIME (7 * 1000) /* 7 seconds in milliseconds */
 
 /* This function renegotiates the connection due to a server request received
    by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
@@ -1747,7 +1747,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     timediff_t elapsed;
 
     elapsed = curlx_timediff(curlx_now(), rs->start_time);
-    if(elapsed >= MAX_REGEG_BLOCK_TIME) {
+    if(elapsed >= MAX_RENEG_BLOCK_TIME) {
       failf(data, "schannel: renegotiation timeout");
       result = CURLE_SSL_CONNECT_ERROR;
       break;
@@ -1814,12 +1814,12 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
 
       elapsed = curlx_timediff(curlx_now(), rs->start_time);
-      if(elapsed >= MAX_REGEG_BLOCK_TIME) {
+      if(elapsed >= MAX_RENEG_BLOCK_TIME) {
         failf(data, "schannel: renegotiation timeout");
         result = CURLE_SSL_CONNECT_ERROR;
         break;
       }
-      remaining = MAX_REGEG_BLOCK_TIME - elapsed;
+      remaining = MAX_RENEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
         timeout = Curl_timeleft(data, NULL, FALSE);
