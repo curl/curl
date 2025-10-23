@@ -1690,6 +1690,8 @@ enum schannel_renegotiate_caller_t {
   SCH_RENEG_CALLER_IS_SEND
 };
 
+#define MAX_REGEG_BLOCK_TIME (7 * 1000) /* 7 seconds in milliseconds */
+
 /* This function renegotiates the connection due to a server request received
    by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
    incomplete. In that case, we remain in the renegotiation (connecting) stage
@@ -1701,7 +1703,6 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   CURLcode result;
   curl_socket_t sockfd;
-  const timediff_t max_renegotiate_ms = 5 * 60 * 1000; /* 5 minutes */
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
@@ -1746,7 +1747,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     timediff_t elapsed;
 
     elapsed = curlx_timediff(curlx_now(), rs->start_time);
-    if(elapsed >= max_renegotiate_ms) {
+    if(elapsed >= MAX_REGEG_BLOCK_TIME) {
       failf(data, "schannel: renegotiation timeout");
       result = CURLE_SSL_CONNECT_ERROR;
       break;
@@ -1813,12 +1814,12 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
 
       elapsed = curlx_timediff(curlx_now(), rs->start_time);
-      if(elapsed >= max_renegotiate_ms) {
+      if(elapsed >= MAX_REGEG_BLOCK_TIME) {
         failf(data, "schannel: renegotiation timeout");
         result = CURLE_SSL_CONNECT_ERROR;
         break;
       }
-      remaining = max_renegotiate_ms - elapsed;
+      remaining = MAX_REGEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
         timeout = Curl_timeleft(data, NULL, FALSE);
