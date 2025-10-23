@@ -72,3 +72,4 @@ libstandaloneengine.a
 tests/string
 tests/config
 tests/ech-log/
+dotnet/claude_code_transcript.log

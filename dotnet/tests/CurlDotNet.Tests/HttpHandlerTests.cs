@@ -10,8 +10,8 @@ using Xunit.Abstractions;
 using FluentAssertions;
 using Moq;
 using Moq.Protected;
-using CurlDotNet.Handlers;
-using CurlDotNet.Options;
+using CurlDotNet.Core;
+using CurlDotNet.Exceptions;
 
 namespace CurlDotNet.Tests
 {

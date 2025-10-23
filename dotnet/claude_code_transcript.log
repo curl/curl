@@ -141,3 +141,71 @@ public class CurlSettings
 3. Create Mermaid diagram for exception hierarchy
 4. Implement killer feature (curl string parsing)
 5. Create perfect IntelliSense documentation
+
+## Session Continuation - Test Run Attempt
+
+### Build Errors Found
+- Still have 50 compilation errors in main code
+- 8 errors in test code (SyntheticTests.cs syntax errors)
+- Main issues:
+  - File.ReadAllTextAsync missing in older frameworks
+  - HttpStatusCode.PermanentRedirect missing
+  - Dictionary.TryAdd not available in .NET Standard 2.0
+  - Test syntax errors in SyntheticTests.cs
+
+### Important New Requirement from User
+**NuGet Package Planning:**
+- Multi-targeted NuGet package
+- Will be sponsored by ironsoftware.com
+- README in /dotnet folder is critical
+- NuGet homepage needs professional markdown
+- Look at IronPDF on NuGet as an example for quality/format
+
+
+
+
+## Fixing Test Compilation Issues
+
+### Namespace Structure Discovery
+- Classes are in CurlDotNet.Core namespace, not CurlDotNet.Options
+- Need to fix imports in test files
+- CommandParser is in CurlDotNet.Core
+- CurlOptions is in CurlDotNet.Core
+- Handlers are in CurlDotNet.Core.Handlers
+
+### Test Framework Target Strategy
+Per user guidance:
+- Acceptable to target .NET Framework 4.7.2 (Windows only) and .NET 8
+- More backwards compatibility is better but not required
+- On macOS, only run tests for modern .NET SDK
+- Don't need to run tests on every platform
+
+
+
+
+## Important Architecture Guidance - Class Visibility
+
+### User Requirements:
+1. Consider making public classes that don't need to be public either:
+   - internal (optimal sometimes)
+   - Hidden from IDE using [EditorBrowsable(EditorBrowsableState.Never)]
+   
+2. Support middleware and/or dependency injection
+   - Need to keep extension points public
+   - Middleware interceptors should be added to todo list
+
+### Implementation Strategy:
+- Use [EditorBrowsable(EditorBrowsableState.Never)] for internal implementation classes
+- Keep main API surface clean and minimal
+- Support middleware/interceptor pattern for extensibility
+- Example: HttpHandler, FileHandler might be internal or hidden
+- Keep interfaces public for DI/middleware support
+
+### Middleware Pattern Ideas:
+- Request/Response interceptors
+- Logging middleware
+- Retry middleware  
+- Authentication middleware
+- Rate limiting middleware
+
+

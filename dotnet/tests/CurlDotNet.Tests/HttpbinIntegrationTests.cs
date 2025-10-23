@@ -27,12 +27,10 @@ namespace CurlDotNet.Tests
     public class HttpbinIntegrationTests : CurlTestBase, IClassFixture<HttpbinIntegrationTests.HttpbinFixture>
     {
         private readonly string _httpbinUrl;
-        private readonly CurlExecutor _curl;
 
         public HttpbinIntegrationTests(ITestOutputHelper output, HttpbinFixture fixture) : base(output)
         {
             _httpbinUrl = fixture.HttpbinUrl;
-            _curl = new CurlExecutor();
             Output.WriteLine($"Using httpbin endpoint: {_httpbinUrl}");
         }
 
@@ -46,15 +44,15 @@ namespace CurlDotNet.Tests
             var command = $"curl {_httpbinUrl}/get";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
             result.Should().NotBeNull();
-            result.FormattedOutput.Should().Contain("\"url\":");
-            result.FormattedOutput.Should().Contain($"{_httpbinUrl}/get");
+            result.Body.Should().Contain("\"url\":");
+            result.Body.Should().Contain($"{_httpbinUrl}/get");
 
             // Parse JSON response
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("url").GetString().Should().Be($"{_httpbinUrl}/get");
         }
 
@@ -66,10 +64,10 @@ namespace CurlDotNet.Tests
             var command = $"curl \"{_httpbinUrl}/get?param1=value1&param2=value2\"";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             var args = json.RootElement.GetProperty("args");
 
             args.GetProperty("param1").GetString().Should().Be("value1");
@@ -84,10 +82,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -H 'X-Custom-Header: CustomValue' -H 'Accept: application/json' {_httpbinUrl}/headers";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             var headers = json.RootElement.GetProperty("headers");
 
             headers.GetProperty("X-Custom-Header").GetString().Should().Be("CustomValue");
@@ -107,10 +105,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -X POST -H 'Content-Type: application/json' -d '{jsonData}' {_httpbinUrl}/post";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
 
             // httpbin echoes back the posted data
             var data = json.RootElement.GetProperty("data").GetString();
@@ -128,10 +126,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -X POST -d 'field1=value1&field2=value2' {_httpbinUrl}/post";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             var form = json.RootElement.GetProperty("form");
 
             form.GetProperty("field1").GetString().Should().Be("value1");
@@ -150,10 +148,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -X PUT -d 'updated=true' {_httpbinUrl}/put";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("form").GetProperty("updated").GetString().Should().Be("true");
         }
 
@@ -165,11 +163,11 @@ namespace CurlDotNet.Tests
             var command = $@"curl -X DELETE {_httpbinUrl}/delete";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            result.FormattedOutput.Should().Contain("\"url\":");
-            result.FormattedOutput.Should().Contain("/delete");
+            result.Body.Should().Contain("\"url\":");
+            result.Body.Should().Contain("/delete");
         }
 
         #endregion
@@ -184,10 +182,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -u testuser:testpass {_httpbinUrl}/basic-auth/testuser/testpass";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("authenticated").GetBoolean().Should().BeTrue();
             json.RootElement.GetProperty("user").GetString().Should().Be("testuser");
         }
@@ -200,10 +198,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -H 'Authorization: Bearer test-token-123' {_httpbinUrl}/bearer";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("authenticated").GetBoolean().Should().BeTrue();
             json.RootElement.GetProperty("token").GetString().Should().Be("test-token-123");
         }
@@ -227,10 +225,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -i {_httpbinUrl}/status/{statusCode}";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            result.FormattedOutput.Should().Contain($"HTTP/1.1 {statusCode}");
+            result.Body.Should().Contain($"HTTP/1.1 {statusCode}");
         }
 
         #endregion
@@ -245,11 +243,11 @@ namespace CurlDotNet.Tests
             var command = $@"curl -i {_httpbinUrl}/redirect/1";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            result.FormattedOutput.Should().Contain("HTTP/1.1 302");
-            result.FormattedOutput.Should().Contain("Location:");
+            result.Body.Should().Contain("HTTP/1.1 302");
+            result.Body.Should().Contain("Location:");
         }
 
         [Fact]
@@ -260,11 +258,11 @@ namespace CurlDotNet.Tests
             var command = $@"curl -L {_httpbinUrl}/redirect/1";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
             // Should get the final destination content
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("url").GetString().Should().Contain("/get");
         }
 
@@ -283,7 +281,7 @@ namespace CurlDotNet.Tests
             var result = await _curl.ExecuteAsync($@"curl -L -b 'testcookie=testvalue' {_httpbinUrl}/cookies");
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             var cookies = json.RootElement.GetProperty("cookies");
             cookies.GetProperty("testcookie").GetString().Should().Be("testvalue");
         }
@@ -300,10 +298,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl -A 'CurlDotNet/1.0 Testing' {_httpbinUrl}/user-agent";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("user-agent").GetString().Should().Be("CurlDotNet/1.0 Testing");
         }
 
@@ -319,10 +317,10 @@ namespace CurlDotNet.Tests
             var command = $@"curl --compressed {_httpbinUrl}/gzip";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("gzipped").GetBoolean().Should().BeTrue();
         }
 
@@ -338,11 +336,11 @@ namespace CurlDotNet.Tests
             var command = $@"curl --max-time 5 {_httpbinUrl}/delay/1";
 
             // Act
-            var result = await _curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
 
             // Assert
             result.Should().NotBeNull();
-            var json = JsonDocument.Parse(result.FormattedOutput);
+            var json = JsonDocument.Parse(result.Body);
             json.RootElement.GetProperty("url").GetString().Should().Contain("/delay/1");
         }
 

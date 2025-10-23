@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using CurlDotNet;
+using CurlDotNet.Core;
 
 namespace CurlDotNet.Tests
 {
@@ -134,19 +136,18 @@ namespace CurlDotNet.Tests
         /// <summary>
         /// Executes a curl command and returns the result
         /// </summary>
-        protected async Task<string> ExecuteCurlAsync(string command)
+        protected async Task<CurlResult> ExecuteCurlAsync(string command)
         {
-            var curl = new Curl();
-            var result = await curl.ExecuteAsync(command);
+            var result = await Curl.Execute(command);
             Output.WriteLine($"Command: {command}");
-            Output.WriteLine($"Output: {result}");
+            Output.WriteLine($"Output: {result.Body}");
             return result;
         }
 
         /// <summary>
         /// Executes a curl command and asserts success
         /// </summary>
-        protected async Task<string> ExecuteCurlSuccessAsync(string command)
+        protected async Task<CurlResult> ExecuteCurlSuccessAsync(string command)
         {
             try
             {
