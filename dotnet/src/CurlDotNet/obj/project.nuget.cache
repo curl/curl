@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "oDStpwY8AZc=",
+  "dgSpecHash": "f0dE+H4mKqQ=",
   "success": true,
   "projectFilePath": "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj",
   "expectedPackageFiles": [
@@ -13,6 +13,7 @@
     "/Users/jacob/.nuget/packages/microsoft.win32.primitives/4.3.0/microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "/Users/jacob/.nuget/packages/netstandard.library/1.6.1/netstandard.library.1.6.1.nupkg.sha512",
     "/Users/jacob/.nuget/packages/netstandard.library/2.0.3/netstandard.library.2.0.3.nupkg.sha512",
+    "/Users/jacob/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
     "/Users/jacob/.nuget/packages/ninject/3.3.6/ninject.3.3.6.nupkg.sha512",
     "/Users/jacob/.nuget/packages/ninject.extensions.factory/3.3.3/ninject.extensions.factory.3.3.3.nupkg.sha512",
     "/Users/jacob/.nuget/packages/runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl/4.3.0/runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",

@@ -61,6 +61,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Ninject": {
               "target": "Package",
               "version": "[3.3.6, )"
@@ -109,6 +113,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Ninject": {
               "target": "Package",
               "version": "[3.3.6, )"
@@ -163,6 +171,10 @@
               "version": "[1.0.3, )",
               "autoReferenced": true
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Ninject": {
               "target": "Package",
               "version": "[3.3.6, )"
@@ -190,6 +202,10 @@
               "target": "Package",
               "version": "[2.0.3, )",
               "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             },
             "Ninject": {
               "target": "Package",
@@ -238,7 +254,6 @@
           "/Users/jacob/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net472",
           "net6.0",
           "net8.0",
           "netcoreapp3.1"
@@ -265,14 +280,6 @@
           },
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {
-              "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj": {
-                "projectPath": "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj"
-              }
-            }
-          },
-          "net472": {
-            "targetAlias": "net472",
             "projectReferences": {
               "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj": {
                 "projectPath": "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj"
@@ -478,48 +485,6 @@
             }
           },
           "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.306/PortableRuntimeIdentifierGraph.json"
-        },
-        "net472": {
-          "targetAlias": "net472",
-          "dependencies": {
-            "FluentAssertions": {
-              "target": "Package",
-              "version": "[6.12.0, )"
-            },
-            "Microsoft.NET.Test.Sdk": {
-              "target": "Package",
-              "version": "[17.8.0, )"
-            },
-            "Microsoft.NETFramework.ReferenceAssemblies": {
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[1.0.3, )",
-              "autoReferenced": true
-            },
-            "Moq": {
-              "target": "Package",
-              "version": "[4.20.69, )"
-            },
-            "Ninject": {
-              "target": "Package",
-              "version": "[3.3.6, )"
-            },
-            "Ninject.Extensions.Factory": {
-              "target": "Package",
-              "version": "[3.3.3, )"
-            },
-            "xunit": {
-              "target": "Package",
-              "version": "[2.6.2, )"
-            },
-            "xunit.runner.visualstudio": {
-              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[2.5.4, )"
-            }
-          },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.306/RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -125,7 +125,7 @@ namespace CurlDotNet.Core
                 .Replace("{body}", Body)
                 .Replace("{status}", StatusCode.ToString());
 
-            return await Cli.Curl.Execute(processedCommand);
+            return await Curl.Execute(processedCommand);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace CurlDotNet.Core
         /// </summary>
         public async Task<CurlResult> Retry()
         {
-            return await Cli.Curl.Execute(Command);
+            return await Curl.Execute(Command);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace CurlDotNet.Core
         {
             var settings = new CurlSettings();
             configure(settings);
-            return await Cli.Curl.Execute(Command, settings);
+            return await Curl.Execute(Command, settings);
         }
 
         #endregion

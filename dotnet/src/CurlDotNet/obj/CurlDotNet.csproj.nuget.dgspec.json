@@ -61,6 +61,10 @@
         "net6.0": {
           "targetAlias": "net6.0",
           "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Ninject": {
               "target": "Package",
               "version": "[3.3.6, )"
@@ -109,6 +113,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Ninject": {
               "target": "Package",
               "version": "[3.3.6, )"
@@ -163,6 +171,10 @@
               "version": "[1.0.3, )",
               "autoReferenced": true
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Ninject": {
               "target": "Package",
               "version": "[3.3.6, )"
@@ -190,6 +202,10 @@
               "target": "Package",
               "version": "[2.0.3, )",
               "autoReferenced": true
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             },
             "Ninject": {
               "target": "Package",
