@@ -362,6 +362,7 @@ out:
   }
   else {
     curlx_dyn_free(filebuf);
+    store->loaded = FALSE;
     if(!specific_login)
       free(login);
     free(password);
