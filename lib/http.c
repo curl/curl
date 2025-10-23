@@ -320,7 +320,6 @@ char *Curl_copy_header_value(const char *header)
      !curlx_str_single(&header, ':') &&
      !curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE)) {
     curlx_str_trimblanks(&out);
-
     return Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
   }
   /* bad input, should never happen */
@@ -1934,9 +1933,10 @@ static CURLcode http_set_aptr_host(struct Curl_easy *data)
        custom Host: header if this is NOT a redirect, as setting Host: in the
        redirected request is being out on thin ice. Except if the hostname
        is the same as the first one! */
-    char *cookiehost = Curl_copy_header_value(ptr);
-    if(!cookiehost)
-      return CURLE_OUT_OF_MEMORY;
+    char *cookiehost;
+    CURLcode result = copy_custom_value(ptr, &cookiehost);
+    if(result)
+      return result;
     if(!*cookiehost)
       /* ignore empty data */
       free(cookiehost);
