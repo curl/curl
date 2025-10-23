@@ -28,7 +28,7 @@ namespace CurlDotNet
         /// </summary>
         /// <param name="command">The curl command to execute</param>
         /// <returns>The result of the curl operation</returns>
-        public static Task<CurlResult> Curl(string command) => ExecuteAsync(command);
+        public static Task<CurlResult> RunAsync(string command) => ExecuteAsync(command);
 
         /// <summary>
         /// Execute a curl command - the primary API

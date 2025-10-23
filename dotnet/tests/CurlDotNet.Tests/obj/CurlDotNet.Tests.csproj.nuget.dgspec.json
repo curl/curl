@@ -75,7 +75,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.0.5, )"
             }
           },
           "imports": [
@@ -123,7 +123,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.0.5, )"
             }
           },
           "imports": [
@@ -177,7 +177,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.0.5, )"
             }
           },
           "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.306/RuntimeIdentifierGraph.json"
@@ -205,7 +205,7 @@
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[7.0.0, )"
+              "version": "[8.0.5, )"
             }
           },
           "imports": [

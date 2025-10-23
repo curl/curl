@@ -82,11 +82,11 @@ namespace CurlDotNet.DependencyInjection
             // Output formatter
             Bind<IOutputFormatter>().To<OutputFormatter>().InTransientScope();
 
-            // Session manager
-            Bind<ISessionManager>().To<SessionManager>().InSingletonScope();
+            // Session manager - TODO: Implement SessionManager class
+            // Bind<ISessionManager>().To<SessionManager>().InSingletonScope();
 
-            // Progress reporter
-            Bind<IProgressReporter>().To<ProgressReporter>().InTransientScope();
+            // Progress reporter - TODO: Implement ProgressReporter class
+            // Bind<IProgressReporter>().To<ProgressReporter>().InTransientScope();
         }
     }
 
