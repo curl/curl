@@ -103,9 +103,9 @@ namespace CurlDotNet.DependencyInjection
         /// Executes a curl command asynchronously.
         /// </summary>
         /// <param name="command">The curl command to execute.</param>
-        /// <returns>The output from the curl command.</returns>
+        /// <returns>The output result from the curl command.</returns>
         /// <exception cref="CurlException">Thrown when the curl command fails.</exception>
-        System.Threading.Tasks.Task<string> ExecuteAsync(string command);
+        System.Threading.Tasks.Task<Output.OutputResult> ExecuteAsync(string command);
     }
 
     /// <summary>

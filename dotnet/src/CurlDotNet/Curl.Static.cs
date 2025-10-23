@@ -24,6 +24,13 @@ namespace CurlDotNet
         private static readonly CurlExecutor _executor = new CurlExecutor();
 
         /// <summary>
+        /// Convenience method - shorthand for ExecuteAsync
+        /// </summary>
+        /// <param name="command">The curl command to execute</param>
+        /// <returns>The result of the curl operation</returns>
+        public static Task<CurlResult> Curl(string command) => ExecuteAsync(command);
+
+        /// <summary>
         /// Execute a curl command - the primary API
         /// </summary>
         /// <param name="command">Curl command string (curl prefix optional)</param>
@@ -32,18 +39,18 @@ namespace CurlDotNet
         /// <returns>Fluent result object with full response data</returns>
         /// <example>
         /// // Simple GET request
-        /// var result = await Curl.Curl("https://api.example.com/users");
+        /// var result = await Curl.ExecuteAsync("https://api.example.com/users");
         ///
         /// // With cancellation
         /// var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        /// var result = await Curl.Curl("https://slow-api.com/data", cts.Token);
+        /// var result = await Curl.ExecuteAsync("https://slow-api.com/data", cts.Token);
         ///
         /// // With progress tracking
         /// var progress = new Progress&lt;CurlProgressInfo&gt;(p =&gt;
         ///     Console.WriteLine($"Downloaded: {p.PercentComplete:P0}"));
-        /// var result = await Curl.Curl("https://example.com/large-file.zip", progress: progress);
+        /// var result = await Curl.ExecuteAsync("https://example.com/large-file.zip", progress: progress);
         /// </example>
-        public static async Task<CurlResult> Curl(
+        public static async Task<CurlResult> ExecuteAsync(
             string command,
             CancellationToken cancellationToken = default,
             IProgress<CurlProgressInfo> progress = null)
