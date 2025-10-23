@@ -9,85 +9,376 @@
  ***************************************************************************/
 
 using System;
+using System.Runtime.Serialization;
 
 namespace CurlDotNet.Exceptions
 {
     /// <summary>
-    /// Base exception for all curl operations
+    /// Base exception for all curl operations. This is the base class for all curl-specific exceptions.
     /// </summary>
+    /// <remarks>
+    /// <para>This exception provides common properties for all curl errors including the command that was executed and the curl error code.</para>
+    /// <para>Curl error codes match the original curl error codes from the C implementation.</para>
+    /// <para>AI-Usage: Catch this exception type to handle any curl-related error generically.</para>
+    /// <para>AI-Pattern: Use specific derived exceptions for targeted error handling.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// try
+    /// {
+    ///     var result = await curl.ExecuteAsync("curl https://api.example.com");
+    /// }
+    /// catch (CurlConnectionException ex)
+    /// {
+    ///     // Handle connection-specific issues
+    ///     Console.WriteLine($"Failed to connect to {ex.Host}:{ex.Port}");
+    /// }
+    /// catch (CurlException ex)
+    /// {
+    ///     // Handle any other curl error
+    ///     Console.WriteLine($"Curl failed: {ex.Message}");
+    ///     Console.WriteLine($"Command: {ex.Command}");
+    ///     Console.WriteLine($"Error code: {ex.CurlErrorCode}");
+    /// }
+    /// </code>
+    /// </example>
+    [Serializable]
     public class CurlException : Exception
     {
+        /// <summary>
+        /// Gets the curl command that was being executed when the exception occurred.
+        /// </summary>
+        /// <value>The full curl command string, or null if not applicable.</value>
+        /// <remarks>
+        /// <para>This property contains the exact command that was passed to the Execute method.</para>
+        /// <para>AI-Usage: Use this for logging and debugging to understand what command failed.</para>
+        /// </remarks>
         public string Command { get; }
+
+        /// <summary>
+        /// Gets the curl error code matching the original curl implementation.
+        /// </summary>
+        /// <value>The curl error code (e.g., 6 for DNS resolution failure, 28 for timeout), or null if not a curl-specific error.</value>
+        /// <remarks>
+        /// <para>Error codes match the CURLE_* constants from curl.h</para>
+        /// <para>Common codes: 6=DNS failure, 7=connection failed, 28=timeout, 35=SSL error</para>
+        /// <para>AI-Usage: Use this to determine the specific type of curl error programmatically.</para>
+        /// </remarks>
         public int? CurlErrorCode { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlException"/> class with a specified error message.
+        /// </summary>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+        /// <param name="command">The curl command that was executing when the error occurred.</param>
+        /// <param name="innerException">The exception that is the cause of the current exception.</param>
         public CurlException(string message, string command = null, Exception innerException = null)
             : base(message, innerException)
         {
             Command = command;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlException"/> class with a curl error code.
+        /// </summary>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
+        /// <param name="curlErrorCode">The curl error code from the original curl implementation.</param>
+        /// <param name="command">The curl command that was executing when the error occurred.</param>
         public CurlException(string message, int curlErrorCode, string command = null)
             : base(message)
         {
             Command = command;
             CurlErrorCode = curlErrorCode;
         }
-    }
 
-    /// <summary>
-    /// Thrown when the curl command syntax is invalid
-    /// </summary>
-    public class CurlInvalidCommandException : CurlException
-    {
-        public string InvalidPart { get; }
-
-        public CurlInvalidCommandException(string message, string invalidPart = null)
-            : base(message)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlException"/> class with serialized data.
+        /// </summary>
+        /// <param name="info">The serialization information.</param>
+        /// <param name="context">The streaming context.</param>
+        protected CurlException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
-            InvalidPart = invalidPart;
+            Command = info.GetString(nameof(Command));
+            CurlErrorCode = (int?)info.GetValue(nameof(CurlErrorCode), typeof(int?));
+        }
+
+        /// <summary>
+        /// Sets the <see cref="SerializationInfo"/> with information about the exception.
+        /// </summary>
+        /// <param name="info">The serialization information.</param>
+        /// <param name="context">The streaming context.</param>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(Command), Command);
+            info.AddValue(nameof(CurlErrorCode), CurlErrorCode);
         }
     }
 
     /// <summary>
-    /// Thrown when a network connection cannot be established
+    /// Thrown when the curl command syntax is invalid or cannot be parsed.
     /// </summary>
+    /// <remarks>
+    /// <para>This exception indicates a problem with the curl command syntax, not a network or execution error.</para>
+    /// <para>AI-Usage: Catch this to handle command syntax errors separately from execution errors.</para>
+    /// <para>AI-Pattern: Validate commands before execution to avoid this exception.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// try
+    /// {
+    ///     // Missing URL will throw CurlInvalidCommandException
+    ///     var result = await curl.ExecuteAsync("curl -X POST");
+    /// }
+    /// catch (CurlInvalidCommandException ex)
+    /// {
+    ///     Console.WriteLine($"Invalid command syntax: {ex.Message}");
+    ///     Console.WriteLine($"Problem with: {ex.InvalidPart}");
+    ///     // Suggest correction to user
+    ///     Console.WriteLine("Did you forget to specify a URL?");
+    /// }
+    /// </code>
+    /// </example>
+    [Serializable]
+    public class CurlInvalidCommandException : CurlException
+    {
+        /// <summary>
+        /// Gets the part of the command that is invalid.
+        /// </summary>
+        /// <value>The specific option, argument, or syntax element that caused the parsing error.</value>
+        /// <remarks>
+        /// <para>This helps identify exactly what part of the command is wrong.</para>
+        /// <para>AI-Usage: Use this to provide specific feedback about what needs to be corrected.</para>
+        /// </remarks>
+        public string InvalidPart { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlInvalidCommandException"/> class.
+        /// </summary>
+        /// <param name="message">The error message describing the invalid syntax.</param>
+        /// <param name="invalidPart">The specific part of the command that is invalid.</param>
+        /// <param name="command">The full curl command that failed to parse.</param>
+        public CurlInvalidCommandException(string message, string invalidPart = null, string command = null)
+            : base(message, command)
+        {
+            InvalidPart = invalidPart;
+        }
+
+        /// <summary>
+        /// Initializes a new instance with serialized data.
+        /// </summary>
+        protected CurlInvalidCommandException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            InvalidPart = info.GetString(nameof(InvalidPart));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(InvalidPart), InvalidPart);
+        }
+    }
+
+    /// <summary>
+    /// Thrown when a network connection cannot be established to the target host.
+    /// </summary>
+    /// <remarks>
+    /// <para>This exception indicates network-level connection failures, not HTTP errors.</para>
+    /// <para>Common causes include: host unreachable, port closed, firewall blocking, network timeout.</para>
+    /// <para>AI-Usage: Catch this to implement retry logic or fallback servers.</para>
+    /// <para>AI-Pattern: Check Host and Port properties to log connection details.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// try
+    /// {
+    ///     var result = await curl.ExecuteAsync("curl https://internal-server:8443/api");
+    /// }
+    /// catch (CurlDnsException ex)
+    /// {
+    ///     // DNS couldn't resolve the hostname
+    ///     Console.WriteLine($"DNS lookup failed for {ex.Host}");
+    ///     // Try fallback server
+    ///     result = await curl.ExecuteAsync("curl https://backup-server/api");
+    /// }
+    /// catch (CurlConnectionException ex)
+    /// {
+    ///     // Connection failed but DNS worked
+    ///     Console.WriteLine($"Cannot connect to {ex.Host}:{ex.Port}");
+    ///     Console.WriteLine("Check if the service is running and firewall rules");
+    /// }
+    /// </code>
+    /// </example>
+    [Serializable]
     public class CurlConnectionException : CurlException
     {
+        /// <summary>
+        /// Gets the host that could not be connected to.
+        /// </summary>
+        /// <value>The hostname or IP address that failed to connect.</value>
+        /// <remarks>
+        /// <para>This may be a hostname (e.g., "api.example.com") or IP address (e.g., "192.168.1.1").</para>
+        /// <para>AI-Usage: Use this to implement host-specific retry or fallback logic.</para>
+        /// </remarks>
         public string Host { get; }
+
+        /// <summary>
+        /// Gets the port number that was attempted.
+        /// </summary>
+        /// <value>The TCP port number, or null if using the default port for the protocol.</value>
+        /// <remarks>
+        /// <para>Default ports: HTTP=80, HTTPS=443, FTP=21, FTPS=990.</para>
+        /// <para>AI-Usage: Check if non-standard ports might be blocked by firewalls.</para>
+        /// </remarks>
         public int? Port { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlConnectionException"/> class.
+        /// </summary>
+        /// <param name="message">The error message describing the connection failure.</param>
+        /// <param name="host">The host that could not be connected to.</param>
+        /// <param name="port">The port number that was attempted.</param>
+        /// <param name="command">The curl command that was executing.</param>
         public CurlConnectionException(string message, string host, int? port = null, string command = null)
             : base(message, command)
         {
             Host = host;
             Port = port;
         }
+
+        /// <summary>
+        /// Initializes a new instance with serialized data.
+        /// </summary>
+        protected CurlConnectionException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            Host = info.GetString(nameof(Host));
+            Port = (int?)info.GetValue(nameof(Port), typeof(int?));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(Host), Host);
+            info.AddValue(nameof(Port), Port);
+        }
     }
 
     /// <summary>
-    /// Thrown when DNS resolution fails
+    /// Thrown when DNS resolution fails for a hostname.
     /// </summary>
+    /// <remarks>
+    /// <para>This exception indicates the hostname could not be resolved to an IP address.</para>
+    /// <para>Curl error code: CURLE_COULDNT_RESOLVE_HOST (6)</para>
+    /// <para>AI-Usage: Catch this to handle DNS failures separately from other connection issues.</para>
+    /// <para>AI-Pattern: Check for typos in hostname or DNS server configuration.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// try
+    /// {
+    ///     var result = await curl.ExecuteAsync("curl https://non-existent-domain.invalid");
+    /// }
+    /// catch (CurlDnsException ex)
+    /// {
+    ///     Console.WriteLine($"DNS lookup failed for: {ex.Host}");
+    ///
+    ///     // Suggest alternatives
+    ///     if (ex.Host.Contains("github"))
+    ///         Console.WriteLine("Did you mean: github.com?");
+    ///
+    ///     // Or try with IP address directly
+    ///     var ipAddress = "140.82.114.3"; // github.com IP
+    ///     result = await curl.ExecuteAsync($"curl https://{ipAddress}");
+    /// }
+    /// </code>
+    /// </example>
+    [Serializable]
     public class CurlDnsException : CurlConnectionException
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlDnsException"/> class.
+        /// </summary>
+        /// <param name="hostname">The hostname that could not be resolved.</param>
+        /// <param name="command">The curl command that was executing.</param>
         public CurlDnsException(string hostname, string command = null)
             : base($"Could not resolve host: {hostname}", hostname, null, command)
         {
             // CURLE_COULDNT_RESOLVE_HOST = 6
             CurlErrorCode = 6;
         }
+
+        /// <summary>
+        /// Initializes a new instance with serialized data.
+        /// </summary>
+        protected CurlDnsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
     }
 
     /// <summary>
-    /// Thrown when an operation times out
+    /// Thrown when an operation exceeds the configured timeout period.
     /// </summary>
+    /// <remarks>
+    /// <para>This can occur for connection timeout or total operation timeout.</para>
+    /// <para>Curl error code: CURLE_OPERATION_TIMEDOUT (28)</para>
+    /// <para>AI-Usage: Catch this to implement retry with longer timeout or fail fast.</para>
+    /// <para>AI-Pattern: Log timeout value to help diagnose if timeout is too short.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// try
+    /// {
+    ///     // Set a 5 second timeout
+    ///     var result = await curl.ExecuteAsync("curl --max-time 5 https://slow-server.com/large-file");
+    /// }
+    /// catch (CurlTimeoutException ex)
+    /// {
+    ///     Console.WriteLine($"Operation timed out after {ex.Timeout?.TotalSeconds ?? 0} seconds");
+    ///
+    ///     // Retry with longer timeout
+    ///     Console.WriteLine("Retrying with 30 second timeout...");
+    ///     result = await curl.ExecuteAsync("curl --max-time 30 https://slow-server.com/large-file");
+    /// }
+    /// </code>
+    /// </example>
+    [Serializable]
     public class CurlTimeoutException : CurlException
     {
+        /// <summary>
+        /// Gets the timeout duration that was exceeded.
+        /// </summary>
+        /// <value>The timeout duration, or null if not specified.</value>
+        /// <remarks>
+        /// <para>This represents the --max-time or --connect-timeout value that was exceeded.</para>
+        /// <para>AI-Usage: Use this to determine if timeout should be increased.</para>
+        /// </remarks>
         public TimeSpan? Timeout { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CurlTimeoutException"/> class.
+        /// </summary>
+        /// <param name="message">The error message describing the timeout.</param>
+        /// <param name="command">The curl command that was executing.</param>
+        /// <param name="timeout">The timeout duration that was exceeded.</param>
         public CurlTimeoutException(string message, string command = null, TimeSpan? timeout = null)
             : base(message, 28, command) // CURLE_OPERATION_TIMEDOUT = 28
         {
             Timeout = timeout;
+        }
+
+        /// <summary>
+        /// Initializes a new instance with serialized data.
+        /// </summary>
+        protected CurlTimeoutException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+            Timeout = (TimeSpan?)info.GetValue(nameof(Timeout), typeof(TimeSpan?));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(Timeout), Timeout);
         }
     }
 
