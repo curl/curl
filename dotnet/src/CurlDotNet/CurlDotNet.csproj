@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net48;net6.0;net8.0</TargetFrameworks>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Package Metadata -->
+    <PackageId>CurlDotNet</PackageId>
+    <Version>8.17.0</Version>
+    <AssemblyVersion>8.17.0.0</AssemblyVersion>
+    <FileVersion>8.17.0.0</FileVersion>
+
+    <!-- Authors and Sponsorship -->
+    <Authors>Jacob Mellor;Daniel Stenberg</Authors>
+    <Company>Sponsored by Iron Software (ironsoftware.com)</Company>
+    <Copyright>Copyright © Daniel Stenberg, Jacob Mellor, and contributors. Sponsored by Iron Software.</Copyright>
+
+    <!-- Package Description -->
+    <Title>CurlDotNet - Pure .NET Implementation of curl</Title>
+    <Description>A pure .NET implementation of curl (v8.17.0), transpiled from the original curl source code. Execute curl commands directly from .NET without shell execution or interop. Sponsored by Iron Software (ironsoftware.com).
+
+Key Features:
+• Execute curl commands as strings in your .NET code
+• Full compatibility with curl command-line syntax
+• Support for HTTP/HTTPS, FTP/FTPS, and FILE protocols
+• .NET Standard 2.0, .NET Framework 4.8+, and .NET 6.0/8.0 support
+• Zero native dependencies</Description>
+
+    <!-- Package Tags -->
+    <PackageTags>curl;http;https;ftp;rest;client;web;request;ironsoftware;command-line;wget;download;upload</PackageTags>
+
+    <!-- License and Repository -->
+    <PackageLicenseFile>COPYING</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/jacob-mellor/curl-dot-net</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/jacob-mellor/curl-dot-net</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Package Icon and Release Notes -->
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReleaseNotes>Version 8.17.0 - Matching curl 8.17.0
+• Initial release of pure .NET curl implementation
+• Full curl command-line compatibility
+• Sponsored by Iron Software (ironsoftware.com)</PackageReleaseNotes>
+
+    <!-- Output and Build -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\COPYING" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" Condition="Exists('..\..\icon.png')" />
+  </ItemGroup>
+
+  <!-- Conditional package references for different target frameworks -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+</Project>
