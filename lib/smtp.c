@@ -1968,6 +1968,8 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   if(!ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
     /* Get more and convert it when needed */
     result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+    CURL_TRC_SMTP(data, "cr_eob_read, next_read(len=%zu) -> %d, %zu eos=%d",
+                  blen, result, nread, eos);
     if(result)
       return result;
 
@@ -2020,6 +2022,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
      * to end the body. If we sent something and it did not end with "\r\n",
      * add "\r\n.\r\n" to end the body */
     const char *eob = SMTP_EOB;
+    CURL_TRC_SMTP(data, "auto-ending mail body with '\\r\\n.\\r\\n'");
     switch(ctx->n_eob) {
       case 2:
         /* seen a CRLF at the end, just add the remainder */
@@ -2046,6 +2049,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
 
   if(ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
     /* no more data, read all, done. */
+    CURL_TRC_SMTP(data, "mail body complete, returning EOS");
     ctx->eos = TRUE;
   }
   *peos = ctx->eos;
