@@ -50,6 +50,13 @@
      in NTLM type-3 messages.
  */
 
+#ifdef USE_MBEDTLS
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
+#endif
+#endif
+
 #if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
   #define USE_OPENSSL_DES
 #elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
