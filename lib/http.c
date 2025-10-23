@@ -318,11 +318,9 @@ char *Curl_copy_header_value(const char *header)
   /* find the end of the header name */
   if(!curlx_str_until(&header, &out, MAX_HTTP_RESP_HEADER_SIZE, ':') &&
      !curlx_str_single(&header, ':')) {
-    if(!curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE)) {
-      curlx_str_trimblanks(&out);
-      return Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
-    }
-    return strdup("");
+    curlx_str_untilnl(&header, &out, MAX_HTTP_RESP_HEADER_SIZE);
+    curlx_str_trimblanks(&out);
+    return Curl_memdup0(curlx_str(&out), curlx_strlen(&out));
   }
   /* bad input, should never happen */
   DEBUGASSERT(0);
