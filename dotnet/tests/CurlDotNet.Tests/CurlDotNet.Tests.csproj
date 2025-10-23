@@ -1,9 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- Multi-framework testing support -->
+    <TargetFrameworks>net8.0;net6.0;netcoreapp3.1;net472</TargetFrameworks>
+    <!-- Note: .NET 10 is not available yet, will add when released -->
+    <!-- For now using .NET 8.0 for primary testing -->
+    <!-- net6.0 for LTS compatibility -->
+    <!-- netcoreapp3.1 for legacy .NET Core support (EOL but included) -->
+    <!-- net472 for .NET Framework 4.7.2 compatibility (Windows only) -->
+    <!-- The library targets netstandard2.0 which supports Xamarin -->
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <!-- Generate documentation for test methods -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Platform-specific settings -->
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +30,8 @@
     </PackageReference>
     <PackageReference Include="Moq" Version="4.20.69" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Ninject" Version="3.3.6" />
+    <PackageReference Include="Ninject.Extensions.Factory" Version="3.3.3" />
   </ItemGroup>
 
   <ItemGroup>
