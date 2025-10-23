@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net48;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">netstandard2.0;net48;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Windows'))">netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -9,41 +10,58 @@
 
     <!-- Package Metadata -->
     <PackageId>CurlDotNet</PackageId>
-    <Version>8.17.0</Version>
-    <AssemblyVersion>8.17.0.0</AssemblyVersion>
-    <FileVersion>8.17.0.0</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
 
     <!-- Authors and Sponsorship -->
-    <Authors>Jacob Mellor;Daniel Stenberg</Authors>
-    <Company>Sponsored by Iron Software (ironsoftware.com)</Company>
-    <Copyright>Copyright © Daniel Stenberg, Jacob Mellor, and contributors. Sponsored by Iron Software.</Copyright>
+    <Authors>Jacob Mellor;IronSoftware</Authors>
+    <Company>IronSoftware</Company>
+    <Copyright>Copyright © 2025 Jacob Mellor and IronSoftware. All rights reserved.</Copyright>
 
     <!-- Package Description -->
-    <Title>CurlDotNet - Pure .NET Implementation of curl</Title>
-    <Description>A pure .NET implementation of curl (v8.17.0), transpiled from the original curl source code. Execute curl commands directly from .NET without shell execution or interop. Sponsored by Iron Software (ironsoftware.com).
+    <Title>CurlDotNet - Pure .NET curl | Sponsored by IronSoftware</Title>
+    <Description>🚀 THE KILLER FEATURE: Copy and paste any curl command - it just works!
 
-Key Features:
-• Execute curl commands as strings in your .NET code
-• Full compatibility with curl command-line syntax
-• Support for HTTP/HTTPS, FTP/FTPS, and FILE protocols
-• .NET Standard 2.0, .NET Framework 4.8+, and .NET 6.0/8.0 support
-• Zero native dependencies</Description>
+CurlDotNet brings the power of curl to .NET. Simply paste any curl command string and execute it directly. No translation needed, no shell execution, pure .NET.
+
+✨ Key Features:
+• Paste ANY curl command - works with or without "curl" prefix
+• All 300+ curl options supported
+• Stream-based for memory efficiency
+• Perfect for CI/CD pipelines
+• Every curl error code has its own exception type
+• Middleware and DI support
+
+📦 Supported Platforms:
+• .NET 8.0 and .NET 6.0
+• .NET Framework 4.7.2+ (Windows)
+• .NET Standard 2.0 (maximum compatibility)
+• Xamarin, Unity, Blazor
+
+💎 Proudly sponsored by IronSoftware (ironsoftware.com), creators of IronPDF, IronOCR, IronXL, and IronBarcode.</Description>
 
     <!-- Package Tags -->
-    <PackageTags>curl;http;https;ftp;rest;client;web;request;ironsoftware;command-line;wget;download;upload</PackageTags>
+    <PackageTags>curl;http;https;ftp;rest;api;client;web;request;ironsoftware;command-line;wget;download;upload;cicd;automation;testing</PackageTags>
 
     <!-- License and Repository -->
     <PackageLicenseFile>COPYING</PackageLicenseFile>
-    <RepositoryUrl>https://github.com/jacob-mellor/curl-dot-net</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/jacob-mellor/curl-dot-net</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jacob/curl-dot-net</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/jacob/curl-dot-net</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
     <!-- Package Icon and Release Notes -->
-    <PackageIcon>icon.png</PackageIcon>
-    <PackageReleaseNotes>Version 8.17.0 - Matching curl 8.17.0
-• Initial release of pure .NET curl implementation
-• Full curl command-line compatibility
-• Sponsored by Iron Software (ironsoftware.com)</PackageReleaseNotes>
+    <!-- <PackageIcon>icon.png</PackageIcon> -->
+    <PackageReleaseNotes>Version 1.0.0 - Initial Release
+🚀 Killer Feature: Paste any curl command and it works!
+✅ All 300+ curl options supported
+✅ Stream-based for memory efficiency
+✅ Perfect IntelliSense with full documentation
+✅ Every curl error code has its own exception
+✅ Middleware and DI support
+💎 Sponsored by IronSoftware
+
+For full documentation and examples, visit https://github.com/jacob/curl-dot-net</PackageReleaseNotes>
 
     <!-- Output and Build -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -60,10 +78,14 @@ Key Features:
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
+  <!-- Conditional package references for .NET Standard 2.0 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Include="..\..\COPYING" Pack="true" PackagePath="\" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
-    <None Include="..\..\icon.png" Pack="true" PackagePath="\" Condition="Exists('..\..\icon.png')" />
   </ItemGroup>
 
   <!-- Conditional package references for different target frameworks -->

@@ -94,7 +94,14 @@ namespace CurlDotNet.Lib
             // Apply default headers
             foreach (var header in _defaultHeaders)
             {
+#if NETSTANDARD2_0 || NET48
+                if (!options.Headers.ContainsKey(header.Key))
+                {
+                    options.Headers[header.Key] = header.Value;
+                }
+#else
                 options.Headers.TryAdd(header.Key, header.Value);
+#endif
             }
 
             return await _engine.ExecuteAsync(options);

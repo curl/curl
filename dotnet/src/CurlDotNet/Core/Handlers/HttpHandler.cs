@@ -315,7 +315,11 @@ namespace CurlDotNet.Core
                    statusCode == HttpStatusCode.Found ||
                    statusCode == HttpStatusCode.SeeOther ||
                    statusCode == HttpStatusCode.TemporaryRedirect ||
+#if NETSTANDARD2_0 || NET48
+                   statusCode == (HttpStatusCode)308; // PermanentRedirect
+#else
                    statusCode == HttpStatusCode.PermanentRedirect;
+#endif
         }
 
         private bool IsTextContent(HttpContent content)
@@ -354,11 +358,19 @@ namespace CurlDotNet.Core
         {
             if (result.BinaryData != null)
             {
+#if NETSTANDARD2_0 || NET48
+                await Task.Run(() => File.WriteAllBytes(outputFile, result.BinaryData));
+#else
                 await File.WriteAllBytesAsync(outputFile, result.BinaryData);
+#endif
             }
             else if (!string.IsNullOrEmpty(result.Body))
             {
+#if NETSTANDARD2_0 || NET48
+                await Task.Run(() => File.WriteAllText(outputFile, result.Body));
+#else
                 await File.WriteAllTextAsync(outputFile, result.Body);
+#endif
             }
             result.OutputFiles.Add(outputFile);
         }

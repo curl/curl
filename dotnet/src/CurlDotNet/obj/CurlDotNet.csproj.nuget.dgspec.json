@@ -5,7 +5,7 @@
   },
   "projects": {
     "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj": {
-      "version": "8.17.0",
+      "version": "1.0.0",
       "restore": {
         "projectUniqueName": "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/src/CurlDotNet/CurlDotNet.csproj",
         "projectName": "CurlDotNet",
@@ -19,7 +19,6 @@
           "/Users/jacob/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net48",
           "net6.0",
           "net8.0",
           "netstandard2.0"
@@ -34,10 +33,6 @@
           },
           "net8.0": {
             "targetAlias": "net8.0",
-            "projectReferences": {}
-          },
-          "net48": {
-            "targetAlias": "net48",
             "projectReferences": {}
           },
           "netstandard2.0": {
@@ -162,41 +157,13 @@
           },
           "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.306/PortableRuntimeIdentifierGraph.json"
         },
-        "net48": {
-          "targetAlias": "net48",
-          "dependencies": {
-            "Microsoft.NETFramework.ReferenceAssemblies": {
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[1.0.3, )",
-              "autoReferenced": true
-            },
-            "Newtonsoft.Json": {
-              "target": "Package",
-              "version": "[13.0.3, )"
-            },
-            "Ninject": {
-              "target": "Package",
-              "version": "[3.3.6, )"
-            },
-            "Ninject.Extensions.Factory": {
-              "target": "Package",
-              "version": "[3.3.3, )"
-            },
-            "System.CommandLine": {
-              "target": "Package",
-              "version": "[2.0.0-beta4.22272.1, )"
-            },
-            "System.Text.Json": {
-              "target": "Package",
-              "version": "[8.0.5, )"
-            }
-          },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.306/RuntimeIdentifierGraph.json"
-        },
         "netstandard2.0": {
           "targetAlias": "netstandard2.0",
           "dependencies": {
+            "Microsoft.CSharp": {
+              "target": "Package",
+              "version": "[4.7.0, )"
+            },
             "NETStandard.Library": {
               "suppressParent": "All",
               "target": "Package",
