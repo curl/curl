@@ -316,7 +316,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
          we bail out from this!
          With a `recv` replacement, we assume the protocol handler knows
          what it is doing and a 0-length receive is fine. For example,
-         SFTP downloads of a 0-lenght file would show this. See #19165. */
+         SFTP downloads of an empty file would show this. See #19165. */
       if(is_multiplex)
         DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
       else
