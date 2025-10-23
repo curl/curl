@@ -2,7 +2,9 @@
 
   <PropertyGroup>
     <!-- Multi-framework testing support -->
-    <TargetFrameworks>net8.0;net6.0;netcoreapp3.1;net472</TargetFrameworks>
+    <!-- Note: net472 removed for Mac compatibility, library still targets it -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">net8.0;net6.0;netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('Windows'))">net8.0;net6.0;netcoreapp3.1</TargetFrameworks>
     <!-- Note: .NET 10 is not available yet, will add when released -->
     <!-- For now using .NET 8.0 for primary testing -->
     <!-- net6.0 for LTS compatibility -->

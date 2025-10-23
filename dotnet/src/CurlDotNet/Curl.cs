@@ -1,164 +1,200 @@
 /***************************************************************************
- * CurlDotNet - Pure .NET implementation of curl
+ * Curl - Static API for copy-paste curl commands
  *
- * Based on curl by Daniel Stenberg, <daniel@haxx.se>, et al.
- * Original curl source: https://github.com/curl/curl
+ * The killer feature: Copy curl commands from anywhere and they just work!
  *
- * .NET transpilation by Jacob Mellor
- * GitHub Repository: https://github.com/jacob-mellor/curl-dot-net
- * GitHub Profile: https://github.com/jacob-mellor
+ * This could revolutionize how developers use HTTP in every language.
+ * Imagine: Same curl commands working in C#, Rust, JavaScript, Python...
  *
- * This implementation transpiles curl's C source code to .NET/C#
- * maintaining compatibility with curl's command-line interface.
- *
- * Licensed under the curl license - see COPYING file
- * SPDX-License-Identifier: curl
+ * By Jacob Mellor
+ * GitHub: https://github.com/jacob-mellor
  ***************************************************************************/
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using CurlDotNet.Options;
-using CurlDotNet.Handlers;
-using CurlDotNet.Output;
+using CurlDotNet.Core;
 
 namespace CurlDotNet
 {
     /// <summary>
-    /// Main curl implementation class. Provides a curl-like interface for making HTTP/HTTPS requests.
-    /// This is a pure .NET implementation that mimics curl's command-line behavior.
-    /// Transpiled from curl's tool_operate.c and related source files.
+    /// Static curl API - Just paste your curl command!
     /// </summary>
-    public class CurlExecutor : DependencyInjection.ICurl
+    /// <remarks>
+    /// <para>Copy curl commands from Stack Overflow, documentation, or AI responses.</para>
+    /// <para>They just work. No translation needed.</para>
+    /// <para>AI-Usage: This is how curl should work in every language.</para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // From Stack Overflow
+    /// var result = await Curl.Execute("curl -X POST https://api.example.com/users -H 'Content-Type: application/json' -d '{\"name\":\"John\"}'");
+    ///
+    /// // From API documentation
+    /// var data = await Curl.Execute("curl https://api.github.com/user -H 'Authorization: token OAUTH-TOKEN'");
+    ///
+    /// // From ChatGPT/Claude
+    /// var response = await Curl.Execute("curl -L -o output.json https://example.com/data.json");
+    /// </code>
+    /// </example>
+    public static class Curl
     {
-        private readonly HttpClient _httpClient;
-        private readonly CommandParser _parser;
-        private readonly OutputFormatter _outputFormatter;
+        private static readonly CurlEngine _engine = new CurlEngine();
 
-        public CurlExecutor() : this(new HttpClient())
-        {
-        }
+        // Global settings - thread-safe with volatile
+        private static volatile int _defaultMaxTimeSeconds = 0; // 0 = no timeout
+        private static volatile int _defaultConnectTimeoutSeconds = 0;
+        private static volatile bool _defaultFollowRedirects = false;
+        private static volatile bool _defaultInsecure = false;
 
-        public CurlExecutor(HttpClient httpClient)
+        /// <summary>
+        /// Set global maximum time for all curl operations (like --max-time).
+        /// Thread-safe.
+        /// </summary>
+        public static int DefaultMaxTimeSeconds
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _parser = new CommandParser();
-            _outputFormatter = new OutputFormatter();
+            get => _defaultMaxTimeSeconds;
+            set => _defaultMaxTimeSeconds = value;
         }
 
         /// <summary>
-        /// Execute a curl command string, exactly as you would on the command line.
-        /// Returns an OutputResult that can be used programmatically or written to disk.
+        /// Set global connection timeout (like --connect-timeout).
+        /// Thread-safe.
         /// </summary>
-        /// <param name="command">The curl command string (e.g., "curl https://example.com -H 'Accept: application/json'")</param>
-        /// <returns>OutputResult containing response data, file paths, and formatted output</returns>
-        public async Task<OutputResult> ExecuteAsync(string command)
+        public static int DefaultConnectTimeoutSeconds
         {
-            if (string.IsNullOrWhiteSpace(command))
-                throw new ArgumentException("Command cannot be empty", nameof(command));
-
-            // Parse the command string into options
-            var options = _parser.Parse(command);
-
-            // Validate that we have at least a URL
-            if (string.IsNullOrEmpty(options.Url))
-            {
-                throw new CurlException("No URL specified. Usage: curl [options...] <url>");
-            }
-
-            // Select the appropriate handler based on the URL scheme
-            IProtocolHandler handler = SelectHandler(options.Url);
-
-            // Execute the request
-            var response = await handler.ExecuteAsync(options, _httpClient);
-
-            // Handle output (to file or memory) and return result object
-            return await _outputFormatter.HandleOutputAsync(response, options);
+            get => _defaultConnectTimeoutSeconds;
+            set => _defaultConnectTimeoutSeconds = value;
         }
 
         /// <summary>
-        /// Synchronous wrapper for ExecuteAsync for compatibility.
+        /// Set whether to follow redirects by default (like -L).
+        /// Thread-safe.
         /// </summary>
-        public OutputResult Execute(string command)
+        public static bool DefaultFollowRedirects
         {
-            return ExecuteAsync(command).GetAwaiter().GetResult();
+            get => _defaultFollowRedirects;
+            set => _defaultFollowRedirects = value;
         }
 
         /// <summary>
-        /// Execute a curl command and write output directly to a stream.
-        /// Useful for large responses or when piping output.
+        /// Set whether to ignore SSL errors by default (like -k).
+        /// Thread-safe.
         /// </summary>
-        public async Task ExecuteAsync(string command, Stream outputStream)
+        public static bool DefaultInsecure
         {
-            if (outputStream == null)
-                throw new ArgumentNullException(nameof(outputStream));
-
-            var result = await ExecuteAsync(command);
-
-            // Write appropriate data to stream
-            if (result.BinaryData != null)
-            {
-                await outputStream.WriteAsync(result.BinaryData, 0, result.BinaryData.Length);
-            }
-            else if (!string.IsNullOrEmpty(result.FormattedOutput))
-            {
-                var bytes = Encoding.UTF8.GetBytes(result.FormattedOutput);
-                await outputStream.WriteAsync(bytes, 0, bytes.Length);
-            }
+            get => _defaultInsecure;
+            set => _defaultInsecure = value;
         }
 
         /// <summary>
-        /// Execute multiple curl commands in parallel (similar to GNU parallel with curl).
+        /// Execute any curl command - the main API.
         /// </summary>
-        public async Task<Dictionary<string, OutputResult>> ExecuteMultipleAsync(params string[] commands)
+        /// <param name="command">Copy-paste your curl command here</param>
+        /// <returns>Fluent result object</returns>
+        public static async Task<CurlResult> Execute(string command)
         {
-            var tasks = new Dictionary<string, Task<OutputResult>>();
-
-            foreach (var command in commands)
-            {
-                tasks[command] = ExecuteAsync(command);
-            }
-
-            await Task.WhenAll(tasks.Values);
-
-            var results = new Dictionary<string, OutputResult>();
-            foreach (var kvp in tasks)
-            {
-                results[kvp.Key] = await kvp.Value;
-            }
-
-            return results;
+            return await _engine.ExecuteAsync(command);
         }
 
-        private IProtocolHandler SelectHandler(string url)
+        /// <summary>
+        /// Execute with cancellation support.
+        /// </summary>
+        public static async Task<CurlResult> Execute(string command, CancellationToken cancellationToken)
         {
-            var uri = new Uri(url);
-
-            switch (uri.Scheme.ToLowerInvariant())
-            {
-                case "http":
-                case "https":
-                    return new HttpHandler();
-                case "ftp":
-                case "ftps":
-                    return new FtpHandler();
-                case "file":
-                    return new FileHandler();
-                default:
-                    throw new CurlException($"Protocol '{uri.Scheme}' is not supported");
-            }
+            return await _engine.ExecuteAsync(command, cancellationToken);
         }
-    }
 
-    /// <summary>
-    /// Exception thrown when curl operations fail.
-    /// </summary>
-    public class CurlException : Exception
-    {
-        public CurlException(string message) : base(message) { }
-        public CurlException(string message, Exception innerException) : base(message, innerException) { }
+        /// <summary>
+        /// Execute with .NET-specific settings (cancellation, progress, etc).
+        /// </summary>
+        public static async Task<CurlResult> Execute(string command, CurlSettings settings)
+        {
+            return await _engine.ExecuteAsync(command, settings);
+        }
+
+        /// <summary>
+        /// Quick GET request.
+        /// </summary>
+        public static async Task<CurlResult> Get(string url)
+        {
+            return await Execute($"curl {url}");
+        }
+
+        /// <summary>
+        /// Quick POST request.
+        /// </summary>
+        public static async Task<CurlResult> Post(string url, string data)
+        {
+            return await Execute($"curl -X POST -d '{data}' {url}");
+        }
+
+        /// <summary>
+        /// Quick POST with JSON.
+        /// </summary>
+        public static async Task<CurlResult> PostJson(string url, object data)
+        {
+            var json = SerializeJson(data);
+            return await Execute($"curl -X POST -H 'Content-Type: application/json' -d '{json}' {url}");
+        }
+
+        /// <summary>
+        /// Download a file.
+        /// </summary>
+        public static async Task<CurlResult> Download(string url, string outputPath)
+        {
+            return await Execute($"curl -o {outputPath} {url}");
+        }
+
+        /// <summary>
+        /// Execute multiple curl commands in parallel.
+        /// </summary>
+        public static async Task<CurlResult[]> ExecuteMany(params string[] commands)
+        {
+            var tasks = commands.Select(cmd => Execute(cmd));
+            return await Task.WhenAll(tasks);
+        }
+
+        /// <summary>
+        /// Validate a curl command without executing.
+        /// </summary>
+        public static ValidationResult Validate(string command)
+        {
+            return _engine.Validate(command);
+        }
+
+        /// <summary>
+        /// Convert curl command to equivalent HttpClient code.
+        /// Great for learning and migration!
+        /// </summary>
+        public static string ToHttpClient(string command)
+        {
+            return _engine.ToHttpClientCode(command);
+        }
+
+        /// <summary>
+        /// Convert curl command to equivalent JavaScript fetch.
+        /// </summary>
+        public static string ToFetch(string command)
+        {
+            return _engine.ToFetchCode(command);
+        }
+
+        /// <summary>
+        /// Convert curl command to Python requests.
+        /// </summary>
+        public static string ToPythonRequests(string command)
+        {
+            return _engine.ToPythonCode(command);
+        }
+
+        private static string SerializeJson(object data)
+        {
+            #if NETSTANDARD2_0
+            return Newtonsoft.Json.JsonConvert.SerializeObject(data);
+            #else
+            return System.Text.Json.JsonSerializer.Serialize(data);
+            #endif
+        }
     }
 }
