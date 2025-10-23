@@ -5255,9 +5255,8 @@ if test "x$CURL_DISABLE_NTLM" != "x1"; then
   if test "x$OPENSSL_ENABLED" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
-      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1"; then
-    use_curl_ntlm_core=yes
-  elif test "x$MBEDTLS_ENABLED" = "x1" && test "$mbedtls_4" = "0"; then
+      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1" \
+      -o "x$HAVE_MBEDTLS_DES_CRYPT_ECB" = "x1"; then
     use_curl_ntlm_core=yes
   fi
 
