@@ -3,6 +3,10 @@ using System.Net.Http;
 using Ninject;
 using Ninject.Modules;
 using CurlDotNet.Handlers;
+using CurlDotNet.Options;
+using CurlDotNet.Output;
+using CurlDotNet.Progress;
+using CurlDotNet.Sessions;
 
 namespace CurlDotNet.DependencyInjection
 {
@@ -48,7 +52,7 @@ namespace CurlDotNet.DependencyInjection
         public override void Load()
         {
             // Core curl implementation
-            Bind<ICurl>().To<Curl>().InTransientScope();
+            Bind<ICurl>().To<CurlExecutor>().InTransientScope();
 
             // Command parser
             Bind<ICommandParser>().To<CommandParser>().InSingletonScope();

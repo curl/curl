@@ -39,7 +39,7 @@ namespace CurlDotNet
         /// var result = await Curl.Curl("https://slow-api.com/data", cts.Token);
         ///
         /// // With progress tracking
-        /// var progress = new Progress<CurlProgressInfo>(p =>
+        /// var progress = new Progress&lt;CurlProgressInfo&gt;(p =&gt;
         ///     Console.WriteLine($"Downloaded: {p.PercentComplete:P0}"));
         /// var result = await Curl.Curl("https://example.com/large-file.zip", progress: progress);
         /// </example>

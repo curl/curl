@@ -32,17 +32,17 @@ namespace CurlDotNet
     /// This is a pure .NET implementation that mimics curl's command-line behavior.
     /// Transpiled from curl's tool_operate.c and related source files.
     /// </summary>
-    public class Curl
+    public class CurlExecutor : DependencyInjection.ICurl
     {
         private readonly HttpClient _httpClient;
         private readonly CommandParser _parser;
         private readonly OutputFormatter _outputFormatter;
 
-        public Curl() : this(new HttpClient())
+        public CurlExecutor() : this(new HttpClient())
         {
         }
 
-        public Curl(HttpClient httpClient)
+        public CurlExecutor(HttpClient httpClient)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _parser = new CommandParser();

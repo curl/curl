@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Condition=" '$(TargetFramework)' == '' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.6.2/buildMultiTargeting/xunit.core.targets" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.6.2/buildMultiTargeting/xunit.core.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net472' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.netframework.referenceassemblies.net472/1.0.3/build/Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.netframework.referenceassemblies.net472/1.0.3/build/Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/net462/Microsoft.NET.Test.Sdk.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/net462/Microsoft.NET.Test.Sdk.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net6.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/netcoreapp3.1/Microsoft.NET.Test.Sdk.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/netcoreapp3.1/Microsoft.NET.Test.Sdk.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'net8.0' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/netcoreapp3.1/Microsoft.NET.Test.Sdk.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/netcoreapp3.1/Microsoft.NET.Test.Sdk.targets')" />
+  </ImportGroup>
+  <ImportGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' AND '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets" Condition="Exists('$(NuGetPackageRoot)xunit.core/2.6.2/build/xunit.core.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.codecoverage/17.8.0/build/netstandard2.0/Microsoft.CodeCoverage.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/netcoreapp3.1/Microsoft.NET.Test.Sdk.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.net.test.sdk/17.8.0/build/netcoreapp3.1/Microsoft.NET.Test.Sdk.targets')" />
+  </ImportGroup>
+</Project>

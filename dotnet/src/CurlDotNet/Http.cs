@@ -21,7 +21,7 @@ namespace CurlDotNet
     /// </summary>
     public static class Http
     {
-        private static readonly Curl _sharedInstance = new Curl();
+        private static readonly CurlExecutor _sharedInstance = new CurlExecutor();
 
         /// <summary>
         /// Execute any curl command - just paste it in!
@@ -205,7 +205,7 @@ namespace CurlDotNet
 
         /// <summary>
         /// Fetch and parse JSON in one call
-        /// Usage: var users = await Http.GetJson<List<User>>("https://api.example.com/users");
+        /// Usage: var users = await Http.GetJson&lt;List&lt;User&gt;&gt;("https://api.example.com/users");
         /// </summary>
         public static async Task<T> GetJson<T>(string url)
         {

@@ -37,9 +37,7 @@ namespace CurlDotNet.Handlers
                 }
 
                 // Set FTP method based on curl options
-                request.Method = DetermineF
-
-Method(options, uri);
+                request.Method = DetermineFtpMethod(options, uri);
                 request.UseBinary = true;
                 request.UsePassive = options.FtpPassive;
                 request.KeepAlive = true;
