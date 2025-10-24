@@ -27,6 +27,7 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
+#include "../strdup.h"
 #include "../urldata.h"
 #include "../curlx/multibyte.h"
 #include "../url.h"

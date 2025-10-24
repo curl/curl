@@ -28,6 +28,7 @@
 
 #include <curl/curl.h>
 #include "curl_sspi.h"
+#include "strdup.h"
 #include "curlx/multibyte.h"
 #include "system_win32.h"
 #include "curlx/warnless.h"
