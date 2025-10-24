@@ -55,7 +55,6 @@
 #include "ssh.h"
 #include "../url.h"
 #include "../speedcheck.h"
-#include "../getinfo.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"

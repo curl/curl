@@ -61,7 +61,6 @@
 #include "escape.h"
 #include "file.h"
 #include "speedcheck.h"
-#include "getinfo.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
