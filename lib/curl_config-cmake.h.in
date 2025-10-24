@@ -321,6 +321,9 @@
 /* if you have the gssapi libraries */
 #cmakedefine HAVE_GSSAPI 1
 
+/* if you have Apple GSS */
+#cmakedefine HAVE_GSSAPPLE
+
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
