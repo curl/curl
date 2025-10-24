@@ -877,7 +877,7 @@ if(CURL_USE_MBEDTLS)
     list(APPEND CMAKE_REQUIRED_INCLUDES "${MBEDTLS_INCLUDE_DIRS}")
     list(APPEND CMAKE_REQUIRED_LIBRARIES "${MBEDTLS_LIBRARIES}")
     curl_required_libpaths("${MBEDTLS_LIBRARY_DIRS}")
-    check_function_exists("mbedtls_des_crypt_ecb" HAVE_MBEDTLS_DES_CRYPT_ECB)
+    check_function_exists("mbedtls_des_crypt_ecb" HAVE_MBEDTLS_DES_CRYPT_ECB)  # in mbedTLS <4
     cmake_pop_check_state()
   endif()
 endif()
