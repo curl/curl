@@ -30,8 +30,7 @@ name: 'Linux HTTP/3'
       - 'projects/**'
 
 concurrency:
-  # Hardcoded workflow filename as workflow name above is just Linux again
-  group: http3-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions: {}

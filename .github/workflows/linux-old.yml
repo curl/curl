@@ -43,6 +43,10 @@ name: 'Old Linux'
       - 'plan9/**'
       - 'projects/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions: {}
 
 env:
