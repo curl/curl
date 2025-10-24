@@ -542,8 +542,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       Curl_pollfds_reset(&cpfds);
       /* In general, we want to send after connect, wait on that. */
       if(sockfd != CURL_SOCKET_BAD)
-        Curl_pollset_set_out_only(data, &ps, sockfd);
-      result = Curl_conn_adjust_pollset(data, data->conn, &ps);
+        result = Curl_pollset_set_out_only(data, &ps, sockfd);
+      if(!result)
+        result = Curl_conn_adjust_pollset(data, data->conn, &ps);
       if(result)
         goto out;
       result = Curl_pollfds_add_ps(&cpfds, &ps);
