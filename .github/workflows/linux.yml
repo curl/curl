@@ -620,7 +620,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
-              -DCMAKE_UNITY_BUILD=OFF -DCURL_WERROR=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
               ${MATRIX_GENERATE}
           else
             mkdir bld && cd bld && \
