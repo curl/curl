@@ -198,7 +198,7 @@ namespace CurlDotNet.Tests
             var options = new CurlOptions
             {
                 Url = "https://api.example.com/secure",
-                UserAuth = "username:password"
+                UserAuth = new NetworkCredential("username", "password")
             };
 
             HttpRequestMessage capturedRequest = null;

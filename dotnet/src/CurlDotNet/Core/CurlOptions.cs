@@ -43,6 +43,11 @@ namespace CurlDotNet.Core
         public string Data { get; set; }
 
         /// <summary>
+        /// Whether to URL encode the data (--data-urlencode flag).
+        /// </summary>
+        public bool DataUrlEncode { get; set; }
+
+        /// <summary>
         /// Binary data for upload.
         /// </summary>
         public byte[] BinaryData { get; set; }
@@ -63,6 +68,11 @@ namespace CurlDotNet.Core
         public string OutputFile { get; set; }
 
         /// <summary>
+        /// Whether to use remote filename for output (-O flag).
+        /// </summary>
+        public bool UseRemoteFileName { get; set; }
+
+        /// <summary>
         /// Whether to include headers in output (-i flag).
         /// </summary>
         public bool IncludeHeaders { get; set; }
@@ -76,6 +86,15 @@ namespace CurlDotNet.Core
         /// Whether to follow redirects (-L flag).
         /// </summary>
         public bool FollowLocation { get; set; }
+
+        /// <summary>
+        /// Alias for FollowLocation for test compatibility.
+        /// </summary>
+        public bool FollowRedirects
+        {
+            get => FollowLocation;
+            set => FollowLocation = value;
+        }
 
         /// <summary>
         /// Maximum number of redirects to follow (--max-redirs).
@@ -131,6 +150,15 @@ namespace CurlDotNet.Core
         /// Basic authentication (-u or --user).
         /// </summary>
         public NetworkCredential Credentials { get; set; }
+
+        /// <summary>
+        /// Alias for Credentials for test compatibility.
+        /// </summary>
+        public NetworkCredential UserAuth
+        {
+            get => Credentials;
+            set => Credentials = value;
+        }
 
         /// <summary>
         /// Proxy URL (-x or --proxy).
@@ -191,6 +219,15 @@ namespace CurlDotNet.Core
         /// CA certificate file (--cacert).
         /// </summary>
         public string CaCertFile { get; set; }
+
+        /// <summary>
+        /// Alias for CaCertFile for test compatibility.
+        /// </summary>
+        public string CaCert
+        {
+            get => CaCertFile;
+            set => CaCertFile = value;
+        }
 
         /// <summary>
         /// Interface to use for outgoing connections (--interface).
@@ -308,10 +345,12 @@ namespace CurlDotNet.Core
                 Method = Method,
                 Headers = new Dictionary<string, string>(Headers),
                 Data = Data,
+                DataUrlEncode = DataUrlEncode,
                 BinaryData = BinaryData,
                 FormData = new Dictionary<string, string>(FormData),
                 Files = new Dictionary<string, string>(Files),
                 OutputFile = OutputFile,
+                UseRemoteFileName = UseRemoteFileName,
                 IncludeHeaders = IncludeHeaders,
                 HeadOnly = HeadOnly,
                 FollowLocation = FollowLocation,

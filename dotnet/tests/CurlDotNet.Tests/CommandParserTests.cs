@@ -7,6 +7,7 @@ using Xunit.Abstractions;
 using FluentAssertions;
 using CurlDotNet;
 using CurlDotNet.Core;
+using CurlDotNet.Exceptions;
 
 namespace CurlDotNet.Tests
 {

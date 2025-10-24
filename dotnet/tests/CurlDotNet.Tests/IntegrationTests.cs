@@ -258,7 +258,7 @@ namespace CurlDotNet.Tests
             var result = await curl.ExecuteAsync($"curl file://{nonExistentFile}");
 
             // Assert
-            !result.IsSuccess.Should().BeTrue();
+            result.IsSuccess.Should().BeFalse();
             result.StatusCode.Should().Be(404);
         }
 
@@ -282,7 +282,7 @@ namespace CurlDotNet.Tests
             var result = await curl.ExecuteAsync("curl -f https://api.example.com/missing");
 
             // Assert
-            !result.IsSuccess.Should().BeTrue();
+            result.IsSuccess.Should().BeFalse();
             result.StatusCode.Should().Be(404);
         }
 
@@ -305,7 +305,7 @@ namespace CurlDotNet.Tests
             var result = await curl.ExecuteAsync("curl --connect-timeout 1 https://api.example.com/slow");
 
             // Assert
-            !result.IsSuccess.Should().BeTrue();
+            result.IsSuccess.Should().BeFalse();
             // Timeout should result in an error status
         }
 
@@ -332,7 +332,7 @@ namespace CurlDotNet.Tests
             // Assert
             result.Body.Should().Contain("HTTP/");
             result.Body.Should().Contain("200");
-            result.Headers.Should().Contain("X-Custom-Header");
+            result.Headers.Should().ContainKey("X-Custom-Header");
         }
 
         [Fact]

@@ -262,11 +262,13 @@ namespace CurlDotNet.Tests
 
             // Test single quotes
             var options1 = parser.Parse("curl -H 'Accept: application/json' https://example.com");
-            options1.Headers[0].Should().Be("Accept: application/json");
+            options1.Headers.Should().ContainKey("Accept");
+            options1.Headers["Accept"].Should().Be("application/json");
 
             // Test double quotes
             var options2 = parser.Parse("curl -H \"User-Agent: My App\" https://example.com");
-            options2.Headers[0].Should().Be("User-Agent: My App");
+            options2.Headers.Should().ContainKey("User-Agent");
+            options2.Headers["User-Agent"].Should().Be("My App");
 
             // Test mixed
             var options3 = parser.Parse("curl -d '{\"key\": \"value with spaces\"}' https://example.com");

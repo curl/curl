@@ -391,7 +391,7 @@ namespace CurlDotNet.Tests
         {
             // Test .NET 6+ specific features
             // Modern .NET features
-            var span = new ReadOnlySpan<char>("test");
+            var span = new ReadOnlySpan<char>("test".ToCharArray());
             span.Length.Should().Be(4);
         }
 #endif

@@ -8,6 +8,7 @@ using Xunit;
 using Xunit.Abstractions;
 using FluentAssertions;
 using CurlDotNet;
+using CurlDotNet.Exceptions;
 
 namespace CurlDotNet.Tests
 {
@@ -278,7 +279,7 @@ namespace CurlDotNet.Tests
             var setCookieCommand = $@"curl {_httpbinUrl}/cookies/set?testcookie=testvalue";
 
             // Act - Follow redirect to see the cookie
-            var result = await _curl.ExecuteAsync($@"curl -L -b 'testcookie=testvalue' {_httpbinUrl}/cookies");
+            var result = await Curl.ExecuteAsync($@"curl -L -b 'testcookie=testvalue' {_httpbinUrl}/cookies");
 
             // Assert
             var json = JsonDocument.Parse(result.Body);
@@ -353,7 +354,7 @@ namespace CurlDotNet.Tests
 
             // Act & Assert
             await Assert.ThrowsAsync<CurlTimeoutException>(
-                () => _curl.ExecuteAsync(command));
+                () => Curl.ExecuteAsync(command));
         }
 
         #endregion
