@@ -1076,7 +1076,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
 
   while(*auth) {
 #ifdef USE_SPNEGO
-    if(authcmp("Negotiate", auth))
+    if(!result && authcmp("Negotiate", auth))
       result = auth_spnego(data, proxy, auth, authp, availp);
 #endif
 #ifdef USE_NTLM
@@ -1092,7 +1092,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
       result = auth_basic(data, authp, availp);
 #endif
 #ifndef CURL_DISABLE_BEARER_AUTH
-    if(authcmp("Bearer", auth))
+    if(!result && authcmp("Bearer", auth))
       result = auth_bearer(data, authp, availp);
 #endif
 
