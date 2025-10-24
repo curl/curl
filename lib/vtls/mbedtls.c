@@ -73,6 +73,7 @@
 #include "../multiif.h"
 #include "mbedtls_threadlock.h"
 #include "../strdup.h"
+#include "../curl_sha256.h"
 
 /* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
