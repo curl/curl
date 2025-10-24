@@ -33,7 +33,7 @@
 #include "curl_gssapi.h"
 #include "curl_trc.h"
 
-#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__) && !defined(HAVE_GSSAPPLE)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -318,7 +318,7 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
   }
 }
 
-#if defined(CURL_HAVE_DIAG) && defined(__APPLE__)
+#if defined(CURL_HAVE_DIAG) && defined(__APPLE__) && !defined(HAVE_GSSAPPLE)
 #pragma GCC diagnostic pop
 #endif
 
