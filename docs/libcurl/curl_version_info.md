@@ -335,6 +335,13 @@ makes libcurl use Windows-provided functions for Kerberos, NTLM, SPNEGO and
 Digest authentication. It also allows libcurl to use the current user
 credentials without the app having to pass them on.
 
+## `thread-guards`
+
+*features* mask bit: non-existent
+
+libcurl was built with protection against calling easy/multi handles
+that are being processed in another thread (Added in 8.18.0).
+
 ## `threadsafe`
 
 *features* mask bit: CURL_VERSION_THREADSAFE

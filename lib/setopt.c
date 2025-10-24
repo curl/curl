@@ -2988,9 +2988,12 @@ CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
   va_list arg;
   CURLcode result;
   struct Curl_easy *data = d;
+  CURL_TGUARD_VAR(guarded);
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  if(!CURL_TGUARD_EASY_ENTER(data, guarded))
+    return CURLE_FOREIGN_THREAD;
 
   va_start(arg, tag);
 
@@ -2999,5 +3002,6 @@ CURLcode curl_easy_setopt(CURL *d, CURLoption tag, ...)
   va_end(arg);
   if(result == CURLE_BAD_FUNCTION_ARGUMENT)
     failf(data, "setopt 0x%x got bad argument", tag);
+  CURL_TGUARD_EASY_LEAVE(data, guarded);
   return result;
 }

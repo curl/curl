@@ -35,6 +35,9 @@
 #  define Curl_mutex_acquire(m)  pthread_mutex_lock(m)
 #  define Curl_mutex_release(m)  pthread_mutex_unlock(m)
 #  define Curl_mutex_destroy(m)  pthread_mutex_destroy(m)
+#  define curl_thread_id         pthread_t
+#  define curl_thread_self       pthread_self
+#  define curl_thread_equal(a,b) pthread_equal(a, b)
 #elif defined(USE_THREADS_WIN32)
 #  define CURL_THREAD_RETURN_T   DWORD
 #  define CURL_STDCALL           WINAPI
@@ -49,6 +52,9 @@
 #  define Curl_mutex_acquire(m)  EnterCriticalSection(m)
 #  define Curl_mutex_release(m)  LeaveCriticalSection(m)
 #  define Curl_mutex_destroy(m)  DeleteCriticalSection(m)
+#  define curl_thread_id         HANDLE
+#  define curl_thread_self       GetCurrentThread
+#  define curl_thread_equal(a,b) ((a) == (b))
 #endif
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
@@ -61,5 +67,27 @@ void Curl_thread_destroy(curl_thread_t *hnd);
 int Curl_thread_join(curl_thread_t *hnd);
 
 #endif /* USE_THREADS_POSIX || USE_THREADS_WIN32 */
+
+
+#ifdef USE_THREAD_GUARDS
+
+struct Curl_easy;
+
+struct curl_tguard {
+  curl_mutex_t mutx;
+  curl_thread_id tid;
+  int depth;
+  BIT(initialised);
+};
+
+void Curl_tguard_init(struct curl_tguard *tguard);
+void Curl_tguard_destroy(struct curl_tguard *tguard);
+/* Return FALSE if called from another thread during an active call.
+ * Otherwise, remember the calling thread. */
+bool Curl_tguard_enter(struct curl_tguard *tguard);
+/* End a recorded thread call */
+void Curl_tguard_leave(struct curl_tguard *tguard);
+
+#endif /* USE_THREAD_GUARDS */
 
 #endif /* HEADER_CURL_THREADS_H */

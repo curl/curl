@@ -490,6 +490,11 @@ A value or data field grew larger than allowed.
 
 ECH was attempted but failed.
 
+## CURLE_FOREIGN_THREAD (102)"
+
+While calling an easy handle function, another call to the same handle
+was made from a different thread.
+
 # CURLMcode
 
 This is the generic return code used by functions in the libcurl multi

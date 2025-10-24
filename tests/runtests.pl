@@ -722,6 +722,7 @@ sub checksystemfeatures {
             $feature{"Unicode"} = $feat =~ /Unicode/i;
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
+            $feature{"thread-guards"} = $feat =~ /thread-guards/i;
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
             $feature{"ECH"} = $feat =~ /ECH/;
         }
