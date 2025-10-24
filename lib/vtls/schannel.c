@@ -58,6 +58,7 @@
 #include "../rand.h"
 #include "../curlx/strparse.h"
 #include "../progress.h"
+#include "../curl_sha256.h"
 
 /* The last #include file should be: */
 #include "../curl_memory.h"
