@@ -196,7 +196,7 @@ library check.
 
 # Windows
 
-Building for Windows XP is required as a minimum.
+Building for Windows Vista/Server 2008 is required as a minimum.
 
 You can build curl with:
 
