@@ -340,10 +340,10 @@ if test X"$OPT_OPENSSL" != Xno &&
   AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
 fi
 
-dnl ---
-dnl We check OpenSSL for DES support.
-dnl ---
 if test "$OPENSSL_ENABLED" = "1"; then
+  dnl ---
+  dnl We check OpenSSL for DES support.
+  dnl ---
   AC_MSG_CHECKING([for DES support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
@@ -361,12 +361,10 @@ if test "$OPENSSL_ENABLED" = "1"; then
   ],[
     AC_MSG_RESULT([no])
   ])
-fi
 
-dnl ---
-dnl We require OpenSSL with SRP support.
-dnl ---
-if test "$OPENSSL_ENABLED" = "1"; then
+  dnl ---
+  dnl We require OpenSSL with SRP support.
+  dnl ---
   AC_MSG_CHECKING([for SRP support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
@@ -385,12 +383,10 @@ if test "$OPENSSL_ENABLED" = "1"; then
   ],[
     AC_MSG_RESULT([no])
   ])
-fi
 
-dnl ---
-dnl Whether the OpenSSL configuration will be loaded automatically
-dnl ---
-if test X"$OPENSSL_ENABLED" = X"1"; then
+  dnl ---
+  dnl Whether the OpenSSL configuration will be loaded automatically
+  dnl ---
   AC_ARG_ENABLE(openssl-auto-load-config,
 AS_HELP_STRING([--enable-openssl-auto-load-config],[Enable automatic loading of OpenSSL configuration])
 AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading of OpenSSL configuration]),
@@ -399,12 +395,10 @@ AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading o
       AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration won't be loaded automatically])
     fi
   ])
-fi
 
-dnl ---
-dnl We may use OpenSSL QUIC.
-dnl ---
-if test "$OPENSSL_ENABLED" = "1"; then
+  dnl ---
+  dnl We may use OpenSSL QUIC.
+  dnl ---
   AC_MSG_CHECKING([for QUIC support and OpenSSL >= 3.3])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
