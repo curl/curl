@@ -9,7 +9,9 @@
  ***************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace CurlDotNet.Exceptions
 {
@@ -67,6 +69,21 @@ namespace CurlDotNet.Exceptions
         public int? CurlErrorCode { get; }
 
         /// <summary>
+        /// Gets additional context information added via fluent methods.
+        /// </summary>
+        public Dictionary<string, object> Context { get; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Gets suggestions for resolving this error.
+        /// </summary>
+        public List<string> Suggestions { get; } = new List<string>();
+
+        /// <summary>
+        /// Gets or sets custom diagnostic information.
+        /// </summary>
+        public string DiagnosticInfo { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CurlException"/> class with a specified error message.
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
@@ -113,6 +130,263 @@ namespace CurlDotNet.Exceptions
             info.AddValue(nameof(Command), Command);
             info.AddValue(nameof(CurlErrorCode), CurlErrorCode);
         }
+
+        #region Fluent Methods for Easy Inspection
+
+        /// <summary>
+        /// Add contextual information to the exception (fluent).
+        /// </summary>
+        /// <param name="key">Context key</param>
+        /// <param name="value">Context value</param>
+        /// <returns>This exception for chaining</returns>
+        public CurlException WithContext(string key, object value)
+        {
+            Context[key] = value;
+            return this;
+        }
+
+        /// <summary>
+        /// Add multiple context values (fluent).
+        /// </summary>
+        /// <param name="context">Dictionary of context values</param>
+        /// <returns>This exception for chaining</returns>
+        public CurlException WithContext(Dictionary<string, object> context)
+        {
+            foreach (var kvp in context)
+            {
+                Context[kvp.Key] = kvp.Value;
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Add a suggestion for resolving this error (fluent).
+        /// </summary>
+        /// <param name="suggestion">Helpful suggestion text</param>
+        /// <returns>This exception for chaining</returns>
+        public CurlException WithSuggestion(string suggestion)
+        {
+            Suggestions.Add(suggestion);
+            return this;
+        }
+
+        /// <summary>
+        /// Add diagnostic information (fluent).
+        /// </summary>
+        /// <param name="diagnosticInfo">Diagnostic details</param>
+        /// <returns>This exception for chaining</returns>
+        public CurlException WithDiagnostics(string diagnosticInfo)
+        {
+            DiagnosticInfo = diagnosticInfo;
+            return this;
+        }
+
+        /// <summary>
+        /// Get a detailed string representation of the exception.
+        /// </summary>
+        /// <returns>Detailed error information</returns>
+        public virtual string ToDetailedString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"=== CURL EXCEPTION DETAILS ===");
+            sb.AppendLine($"Type: {GetType().Name}");
+            sb.AppendLine($"Message: {Message}");
+
+            if (!string.IsNullOrEmpty(Command))
+                sb.AppendLine($"Command: {Command}");
+
+            if (CurlErrorCode.HasValue)
+            {
+                sb.AppendLine($"Curl Error Code: {CurlErrorCode} ({GetCurlErrorName()})");
+            }
+
+            if (Context.Count > 0)
+            {
+                sb.AppendLine("Context:");
+                foreach (var kvp in Context)
+                {
+                    sb.AppendLine($"  {kvp.Key}: {kvp.Value}");
+                }
+            }
+
+            if (Suggestions.Count > 0)
+            {
+                sb.AppendLine("Suggestions:");
+                foreach (var suggestion in Suggestions)
+                {
+                    sb.AppendLine($"  - {suggestion}");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(DiagnosticInfo))
+            {
+                sb.AppendLine($"Diagnostics: {DiagnosticInfo}");
+            }
+
+            if (InnerException != null)
+            {
+                sb.AppendLine($"Inner Exception: {InnerException.Message}");
+            }
+
+            sb.AppendLine($"Stack Trace:\n{StackTrace}");
+            sb.AppendLine("=============================");
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Get the exception as a structured JSON object for logging.
+        /// </summary>
+        /// <returns>JSON representation of the exception</returns>
+        public virtual string ToJson()
+        {
+            var errorObject = new Dictionary<string, object>
+            {
+                ["type"] = GetType().Name,
+                ["message"] = Message,
+                ["command"] = Command,
+                ["curlErrorCode"] = CurlErrorCode,
+                ["curlErrorName"] = GetCurlErrorName(),
+                ["context"] = Context,
+                ["suggestions"] = Suggestions,
+                ["diagnostics"] = DiagnosticInfo,
+                ["isRetryable"] = IsRetryable(),
+                ["stackTrace"] = StackTrace,
+                ["innerException"] = InnerException?.Message
+            };
+
+            #if NETSTANDARD2_0
+            return Newtonsoft.Json.JsonConvert.SerializeObject(errorObject, Newtonsoft.Json.Formatting.Indented);
+            #else
+            return System.Text.Json.JsonSerializer.Serialize(errorObject, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+            #endif
+        }
+
+        /// <summary>
+        /// Get diagnostic information for debugging.
+        /// </summary>
+        /// <returns>Diagnostic details</returns>
+        public virtual Dictionary<string, object> GetDiagnosticInfo()
+        {
+            return new Dictionary<string, object>
+            {
+                ["ExceptionType"] = GetType().FullName,
+                ["Message"] = Message,
+                ["Command"] = Command ?? "N/A",
+                ["CurlErrorCode"] = CurlErrorCode?.ToString() ?? "N/A",
+                ["CurlErrorName"] = GetCurlErrorName(),
+                ["Timestamp"] = DateTime.UtcNow.ToString("O"),
+                ["MachineName"] = Environment.MachineName,
+                ["OSVersion"] = Environment.OSVersion.ToString(),
+                ["IsRetryable"] = IsRetryable(),
+                ["Context"] = Context,
+                ["Suggestions"] = Suggestions,
+                ["HasInnerException"] = InnerException != null,
+                ["InnerExceptionType"] = InnerException?.GetType().Name,
+                ["InnerExceptionMessage"] = InnerException?.Message
+            };
+        }
+
+        /// <summary>
+        /// Get the CURLE_* constant name for the error code.
+        /// </summary>
+        /// <returns>Curl error constant name</returns>
+        public string GetCurlErrorName()
+        {
+            if (!CurlErrorCode.HasValue) return null;
+
+            return CurlErrorCode.Value switch
+            {
+                0 => "CURLE_OK",
+                1 => "CURLE_UNSUPPORTED_PROTOCOL",
+                2 => "CURLE_FAILED_INIT",
+                3 => "CURLE_URL_MALFORMAT",
+                4 => "CURLE_NOT_BUILT_IN",
+                5 => "CURLE_COULDNT_RESOLVE_PROXY",
+                6 => "CURLE_COULDNT_RESOLVE_HOST",
+                7 => "CURLE_COULDNT_CONNECT",
+                8 => "CURLE_WEIRD_SERVER_REPLY",
+                9 => "CURLE_FTP_ACCESS_DENIED",
+                22 => "CURLE_HTTP_RETURNED_ERROR",
+                23 => "CURLE_WRITE_ERROR",
+                26 => "CURLE_READ_ERROR",
+                27 => "CURLE_OUT_OF_MEMORY",
+                28 => "CURLE_OPERATION_TIMEDOUT",
+                35 => "CURLE_SSL_CONNECT_ERROR",
+                47 => "CURLE_TOO_MANY_REDIRECTS",
+                51 => "CURLE_PEER_FAILED_VERIFICATION",
+                52 => "CURLE_GOT_NOTHING",
+                53 => "CURLE_SSL_ENGINE_NOTFOUND",
+                54 => "CURLE_SSL_ENGINE_SETFAILED",
+                55 => "CURLE_SEND_ERROR",
+                56 => "CURLE_RECV_ERROR",
+                58 => "CURLE_SSL_CERTPROBLEM",
+                59 => "CURLE_SSL_CIPHER",
+                60 => "CURLE_PEER_FAILED_VERIFICATION",
+                61 => "CURLE_BAD_CONTENT_ENCODING",
+                67 => "CURLE_LOGIN_DENIED",
+                _ => $"CURLE_UNKNOWN_{CurlErrorCode}"
+            };
+        }
+
+        /// <summary>
+        /// Check if this error is potentially retryable.
+        /// </summary>
+        /// <returns>True if the error might succeed on retry</returns>
+        public virtual bool IsRetryable()
+        {
+            if (!CurlErrorCode.HasValue) return false;
+
+            // These error codes are potentially transient and worth retrying
+            return CurlErrorCode.Value switch
+            {
+                6 => true,  // DNS resolution might be temporary
+                7 => true,  // Connection failed - might be temporary
+                28 => true, // Timeout - might work with longer timeout
+                35 => false, // SSL errors usually require configuration changes
+                52 => true, // Got nothing - server might be temporarily overloaded
+                55 => true, // Send error - network glitch
+                56 => true, // Recv error - network glitch
+                _ => false
+            };
+        }
+
+        /// <summary>
+        /// Log this exception with structured data.
+        /// </summary>
+        /// <param name="logger">Action to perform logging</param>
+        public void Log(Action<string, Dictionary<string, object>> logger)
+        {
+            logger(ToDetailedString(), GetDiagnosticInfo());
+        }
+
+        /// <summary>
+        /// Create a user-friendly error message.
+        /// </summary>
+        /// <returns>Simplified error message for end users</returns>
+        public virtual string ToUserFriendlyMessage()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"Error: {Message}");
+
+            if (Suggestions.Count > 0)
+            {
+                sb.AppendLine("\nPossible solutions:");
+                foreach (var suggestion in Suggestions)
+                {
+                    sb.AppendLine($"• {suggestion}");
+                }
+            }
+
+            if (IsRetryable())
+            {
+                sb.AppendLine("\nThis error might be temporary. Please try again.");
+            }
+
+            return sb.ToString();
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -432,6 +706,7 @@ namespace CurlDotNet.Exceptions
         public int StatusCode { get; }
         public string StatusText { get; }
         public string ResponseBody { get; }
+        public Dictionary<string, string> ResponseHeaders { get; set; } = new Dictionary<string, string>();
 
         public CurlHttpException(string message, int statusCode, string statusText = null, string responseBody = null, string command = null)
             : base(message, command)
@@ -439,6 +714,9 @@ namespace CurlDotNet.Exceptions
             StatusCode = statusCode;
             StatusText = statusText;
             ResponseBody = responseBody;
+
+            // Add automatic suggestions based on status code
+            AutoAddSuggestions();
         }
 
         /// <summary>
@@ -450,6 +728,121 @@ namespace CurlDotNet.Exceptions
         /// Check if this is a server error (5xx)
         /// </summary>
         public bool IsServerError => StatusCode >= 500 && StatusCode < 600;
+
+        /// <summary>
+        /// Check if this is a specific status code.
+        /// </summary>
+        public bool IsStatus(int code) => StatusCode == code;
+
+        /// <summary>
+        /// Check if this is unauthorized (401).
+        /// </summary>
+        public bool IsUnauthorized => StatusCode == 401;
+
+        /// <summary>
+        /// Check if this is forbidden (403).
+        /// </summary>
+        public bool IsForbidden => StatusCode == 403;
+
+        /// <summary>
+        /// Check if this is not found (404).
+        /// </summary>
+        public bool IsNotFound => StatusCode == 404;
+
+        /// <summary>
+        /// Check if this is a rate limit error (429).
+        /// </summary>
+        public bool IsRateLimited => StatusCode == 429;
+
+        /// <summary>
+        /// Add response headers (fluent).
+        /// </summary>
+        public CurlHttpException WithHeaders(Dictionary<string, string> headers)
+        {
+            ResponseHeaders = headers;
+            return this;
+        }
+
+        /// <summary>
+        /// Get retry-after value if present in headers.
+        /// </summary>
+        public TimeSpan? GetRetryAfter()
+        {
+            if (ResponseHeaders.TryGetValue("Retry-After", out var retryAfter))
+            {
+                if (int.TryParse(retryAfter, out var seconds))
+                {
+                    return TimeSpan.FromSeconds(seconds);
+                }
+            }
+            return null;
+        }
+
+        private void AutoAddSuggestions()
+        {
+            switch (StatusCode)
+            {
+                case 400:
+                    Suggestions.Add("Check the request parameters and body format");
+                    Suggestions.Add("Ensure all required fields are included");
+                    break;
+                case 401:
+                    Suggestions.Add("Check your authentication credentials");
+                    Suggestions.Add("Ensure your API key or token is valid");
+                    Suggestions.Add("Check if the token has expired");
+                    break;
+                case 403:
+                    Suggestions.Add("Check if you have permission to access this resource");
+                    Suggestions.Add("Verify your API key has the required scopes");
+                    break;
+                case 404:
+                    Suggestions.Add("Verify the URL is correct");
+                    Suggestions.Add("Check if the resource exists");
+                    break;
+                case 429:
+                    Suggestions.Add("You've hit a rate limit - wait before retrying");
+                    Suggestions.Add("Consider implementing exponential backoff");
+                    break;
+                case 500:
+                case 502:
+                case 503:
+                    Suggestions.Add("This is a server error - try again later");
+                    Suggestions.Add("If the problem persists, contact the API provider");
+                    break;
+            }
+        }
+
+        public override string ToDetailedString()
+        {
+            var details = base.ToDetailedString();
+            var sb = new StringBuilder(details);
+
+            sb.AppendLine($"HTTP Status: {StatusCode} {StatusText}");
+            sb.AppendLine($"Is Client Error: {IsClientError}");
+            sb.AppendLine($"Is Server Error: {IsServerError}");
+
+            if (!string.IsNullOrEmpty(ResponseBody))
+            {
+                sb.AppendLine($"Response Body: {ResponseBody}");
+            }
+
+            if (ResponseHeaders.Count > 0)
+            {
+                sb.AppendLine("Response Headers:");
+                foreach (var header in ResponseHeaders)
+                {
+                    sb.AppendLine($"  {header.Key}: {header.Value}");
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public override bool IsRetryable()
+        {
+            // Server errors and rate limits are typically retryable
+            return StatusCode == 429 || StatusCode >= 500;
+        }
     }
 
     /// <summary>

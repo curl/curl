@@ -22,7 +22,7 @@ namespace CurlDotNet.Core
     /// <summary>
     /// Handler for HTTP and HTTPS protocols.
     /// </summary>
-    public class HttpHandler : IProtocolHandler
+    internal class HttpHandler : IProtocolHandler
     {
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;

@@ -1,693 +1,960 @@
-# CurlDotNet - Top 20 Real-World Use Cases
+# CurlDotNet Examples
 
-Based on curl by Daniel Stenberg <daniel@haxx.se>
-Original curl source: https://github.com/curl/curl
-.NET implementation by Jacob Mellor: https://github.com/jacob-mellor
-Sponsored by Iron Software: https://ironsoftware.com
+A comprehensive collection of examples showing how to use CurlDotNet for various HTTP operations and curl commands.
 
 ## Table of Contents
-1. [Simple GET Request](#1-simple-get-request)
-2. [POST JSON to REST API](#2-post-json-to-rest-api)
-3. [Download File with Progress Bar](#3-download-file-with-progress-bar)
-4. [Authentication (Basic, Bearer, API Key)](#4-authentication)
-5. [Handle Cookies and Sessions](#5-cookies-and-sessions)
-6. [Follow Redirects](#6-follow-redirects)
-7. [Custom Headers](#7-custom-headers)
-8. [Upload Files](#8-upload-files)
-9. [Form Data Submission](#9-form-data-submission)
-10. [Timeout and Retry Logic](#10-timeout-and-retry)
-11. [Proxy Configuration](#11-proxy-configuration)
-12. [HTTPS with Certificate Issues](#12-https-certificate-handling)
-13. [GraphQL Queries](#13-graphql-queries)
-14. [WebSocket Upgrade](#14-websocket-upgrade)
-15. [FTP Operations](#15-ftp-operations)
-16. [Parallel Requests](#16-parallel-requests)
-17. [Rate-Limited APIs](#17-rate-limited-apis)
-18. [Webhook Testing](#18-webhook-testing)
-19. [Health Checks and Monitoring](#19-health-checks)
-20. [Web Scraping](#20-web-scraping)
+
+- [Basic Usage](#basic-usage)
+- [HTTP Methods](#http-methods)
+- [Headers & Authentication](#headers--authentication)
+- [File Operations](#file-operations)
+- [Advanced Features](#advanced-features)
+- [Error Handling](#error-handling)
+- [Multiple Languages](#multiple-languages)
+- [Real-World Scenarios](#real-world-scenarios)
 
 ---
 
-## 1. Simple GET Request
+## Basic Usage
 
-The most basic use case - fetching data from an API.
+### The Killer Feature - Just Paste Any curl Command!
 
 ```csharp
-// Linux/Mac command line:
-// curl https://api.github.com/users/torvalds
+using CurlDotNet;
+using System;
+using System.Threading.Tasks;
 
-// CurlDotNet - Method 1: Direct string
-string response = await Curl.Curl("https://api.github.com/users/torvalds");
-Console.WriteLine(response);
+// Works with or without the "curl" prefix
+var response = await Curl.Execute("curl https://api.github.com/users/octocat");
+Console.WriteLine(response.Body);
 
-// Method 2: With error handling
-var result = await Curl.Curl("https://api.github.com/users/torvalds");
-if (result.IsSuccess)
-{
-    var user = result.ToJson<GitHubUser>();
-    Console.WriteLine($"Name: {user.Name}, Repos: {user.PublicRepos}");
-}
-
-// Method 3: Synchronous
-var data = Curl.CurlSync("https://api.github.com/users/torvalds");
+// Also works without "curl" prefix
+var data = await Curl.Execute("https://httpbin.org/get");
+Console.WriteLine(data.StatusCode); // 200
 ```
 
-## 2. POST JSON to REST API
-
-Creating resources via REST APIs - the second most common use case.
+### Synchronous API
 
 ```csharp
-// Linux command line:
-// curl -X POST https://api.example.com/users \
-//      -H "Content-Type: application/json" \
-//      -d '{"name":"John Doe","email":"john@example.com"}'
+using CurlDotNet;
+using System;
 
-// CurlDotNet - Method 1: Raw curl command
-var result = await Curl.Curl(@"
-    curl -X POST https://api.example.com/users
-         -H 'Content-Type: application/json'
-         -d '{""name"":""John Doe"",""email"":""john@example.com""}'
-");
+// Synchronous version for legacy code (blocks the thread)
+var result = Curl.Execute("curl https://api.example.com/data");
+Console.WriteLine(result.Body);
 
-// Method 2: Strongly typed
-var user = new { name = "John Doe", email = "john@example.com" };
-var result = await Http.Post("https://api.example.com/users", user);
-
-// Method 3: With response parsing
-var createdUser = await Http.PostJson<object, User>(
-    "https://api.example.com/users",
-    new { name = "John", email = "john@example.com" }
-);
-Console.WriteLine($"Created user with ID: {createdUser.Id}");
+// Or use DotNetCurl.Curl() for synchronous execution
+var data = DotNetCurl.Curl("curl https://api.example.com/data");
+Console.WriteLine(data.StatusCode);
 ```
 
-## 3. Download File with Progress Bar
-
-Downloading large files with progress tracking.
+### Multiple Commands
 
 ```csharp
-// Linux command line:
-// curl -L -o ubuntu.iso https://releases.ubuntu.com/22.04/ubuntu-22.04-desktop-amd64.iso
+using CurlDotNet;
+using System;
+using System.Threading.Tasks;
 
-// CurlDotNet with progress tracking
-var progress = new Progress<CurlProgressInfo>(p =>
-{
-    Console.Write($"\rDownloading: {p.PercentComplete:F1}% " +
-                  $"({p.TransferredBytes / 1024 / 1024}MB / {p.TotalBytes / 1024 / 1024}MB) " +
-                  $"Speed: {p.GetSpeedString()}");
+// Execute multiple curl commands at once
+var results = await Curl.ExecuteMany(new[] {
+    "curl https://api.github.com/users/octocat",
+    "curl https://api.github.com/users/torvalds",
+    "curl https://api.github.com/users/dotnet"
 });
 
-var result = await Curl.Curl(
-    "curl -L -o ubuntu.iso https://releases.ubuntu.com/22.04/ubuntu-22.04-desktop-amd64.iso",
-    progress: progress
-);
-
-Console.WriteLine("\nDownload complete!");
-
-// Alternative with progress bar
-var progressBar = new CurlProgressBar();
-await Http.Download(
-    "https://releases.ubuntu.com/22.04/ubuntu-22.04-desktop-amd64.iso",
-    @"C:\Downloads\ubuntu.iso",
-    p => progressBar.Render(p)
-);
-progressBar.Complete();
+foreach (var result in results)
+{
+    Console.WriteLine($"Status: {result.StatusCode}, Size: {result.Body.Length}");
+}
 ```
 
-## 4. Authentication
+## HTTP Methods
 
-Various authentication methods commonly used in APIs.
+### GET Request
 
 ```csharp
-// Basic Authentication
-// curl -u username:password https://api.example.com/private
+using CurlDotNet;
+using System;
+using System.Threading.Tasks;
 
-var result = await Curl.Curl("curl -u john:secret123 https://api.example.com/private");
+// Simple GET
+var response = await Curl.Execute("curl https://jsonplaceholder.typicode.com/posts/1");
 
-// Bearer Token (OAuth 2.0)
-// curl -H "Authorization: Bearer YOUR_TOKEN" https://api.example.com/data
+// GET with query parameters
+var users = await Curl.Execute("curl 'https://api.example.com/users?page=1&limit=10'");
 
-var result = await Curl.Curl(@"
-    curl -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-         https://api.example.com/data
+// GET with custom headers
+var data = await Curl.Execute(@"
+    curl https://api.example.com/data
+    -H 'Accept: application/json'
+    -H 'User-Agent: CurlDotNet/1.0'
 ");
-
-// API Key in header
-var result = await Curl.Curl(@"
-    curl -H 'X-API-Key: your-api-key-here'
-         https://api.example.com/data
-");
-
-// Using session for persistent auth
-using var session = new CurlSession();
-session.SetBearerToken("your-token-here");
-var result1 = await session.ExecuteAsync("https://api.example.com/endpoint1");
-var result2 = await session.ExecuteAsync("https://api.example.com/endpoint2");
 ```
 
-## 5. Cookies and Sessions
-
-Managing cookies for stateful interactions.
+### POST Request
 
 ```csharp
-// Save cookies to file
-// curl -c cookies.txt -b cookies.txt https://example.com/login
+using CurlDotNet;
+using CurlDotNet.Core;
+using System;
+using System.Threading.Tasks;
 
-// CurlDotNet with session management
-using var session = new CurlSession();
+// POST with JSON data
+var result = await Curl.Execute(@"
+    curl -X POST https://jsonplaceholder.typicode.com/posts
+    -H 'Content-Type: application/json'
+    -d '{""title"":""foo"",""body"":""bar"",""userId"":1}'
+");
 
-// Login and save cookies
-var loginResult = await session.ExecuteAsync(@"
+// Parse the JSON response
+var post = result.ParseJson<Post>();
+Console.WriteLine($"Created post with ID: {post.Id}");
+
+// POST with form data
+var response = await Curl.Execute(@"
+    curl -X POST https://httpbin.org/post
+    -F 'username=john'
+    -F 'password=secret'
+    -F 'file=@/path/to/file.pdf'
+");
+
+// POST with URL-encoded data
+var login = await Curl.Execute(@"
     curl -X POST https://example.com/login
-         -d 'username=john&password=secret'
-");
-
-// Subsequent requests use saved cookies
-var profileResult = await session.ExecuteAsync("https://example.com/profile");
-var ordersResult = await session.ExecuteAsync("https://example.com/orders");
-
-// Save cookies for later use
-await session.SaveCookiesAsync("cookies.txt");
-
-// Load cookies in new session
-using var newSession = new CurlSession();
-await newSession.LoadCookiesAsync("cookies.txt");
-```
-
-## 6. Follow Redirects
-
-Handling URL redirects automatically.
-
-```csharp
-// curl -L https://bit.ly/shortened-url
-
-var result = await Curl.Curl("curl -L https://bit.ly/shortened-url");
-Console.WriteLine($"Final URL: {result.EffectiveUrl}");
-Console.WriteLine($"Number of redirects: {result.RedirectCount}");
-
-// With max redirects limit
-var result = await Curl.Curl("curl -L --max-redirs 5 https://example.com/redirect");
-```
-
-## 7. Custom Headers
-
-Setting custom headers for API requirements.
-
-```csharp
-// Multiple headers
-// curl -H "Accept: application/json" \
-//      -H "Accept-Language: en-US" \
-//      -H "X-Custom-Header: value" \
-//      https://api.example.com/data
-
-var result = await Curl.Curl(@"
-    curl -H 'Accept: application/json'
-         -H 'Accept-Language: en-US'
-         -H 'X-Custom-Header: value'
-         -H 'Cache-Control: no-cache'
-         https://api.example.com/data
-");
-
-// User-Agent spoofing
-var result = await Curl.Curl(@"
-    curl -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0'
-         https://example.com
+    -d 'username=john&password=secret'
 ");
 ```
 
-## 8. Upload Files
-
-Uploading files to servers.
+### PUT Request
 
 ```csharp
-// Upload with PUT
-// curl -T file.pdf https://example.com/upload
-
-var result = await Curl.Curl("curl -T 'C:\\Documents\\report.pdf' https://example.com/upload");
-
-// Multipart form upload
-// curl -F "file=@photo.jpg" -F "name=vacation" https://example.com/upload
-
-var result = await Curl.Curl(@"
-    curl -F 'file=@C:\Photos\photo.jpg'
-         -F 'name=vacation'
-         -F 'description=Summer 2024'
-         https://example.com/upload
+// PUT to update resource
+var updated = await Curl.Execute(@"
+    curl -X PUT https://jsonplaceholder.typicode.com/posts/1
+    -H 'Content-Type: application/json'
+    -d '{""id"":1,""title"":""Updated"",""body"":""New content"",""userId"":1}'
 ");
+```
+
+### DELETE Request
+
+```csharp
+// DELETE a resource
+var deleted = await Curl.Execute("curl -X DELETE https://jsonplaceholder.typicode.com/posts/1");
+```
+
+### PATCH Request
+
+```csharp
+// PATCH for partial updates
+var patched = await Curl.Execute(@"
+    curl -X PATCH https://api.example.com/users/123
+    -H 'Content-Type: application/json'
+    -d '{""email"":""newemail@example.com""}'
+");
+```
+
+## Headers & Authentication
+
+### Basic Authentication
+
+```csharp
+// Basic auth with username:password
+var response = await Curl.Execute("curl -u admin:password123 https://api.example.com/admin");
+
+// Basic auth with header
+var data = await Curl.Execute(@"
+    curl https://api.example.com/secure
+    -H 'Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM='
+");
+```
+
+### Bearer Token
+
+```csharp
+// OAuth 2.0 Bearer token
+var result = await Curl.Execute(@"
+    curl https://api.example.com/protected
+    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+");
+
+// GitHub API with token
+var repos = await Curl.Execute(@"
+    curl https://api.github.com/user/repos
+    -H 'Authorization: token ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+");
+```
+
+### API Key Authentication
+
+```csharp
+// API key in header
+var weather = await Curl.Execute(@"
+    curl 'https://api.openweathermap.org/data/2.5/weather?q=London'
+    -H 'X-API-Key: your-api-key-here'
+");
+
+// API key in query string
+var maps = await Curl.Execute("curl 'https://maps.googleapis.com/maps/api/geocode/json?address=Seattle&key=YOUR_API_KEY'");
+```
+
+### Custom Headers
+
+```csharp
+// Multiple custom headers
+var response = await Curl.Execute(@"
+    curl https://api.example.com/data
+    -H 'Accept: application/json'
+    -H 'X-Request-ID: 12345'
+    -H 'X-Client-Version: 2.0.0'
+    -H 'Cache-Control: no-cache'
+");
+```
+
+## File Operations
+
+### Download Files
+
+```csharp
+// Download to specific file
+await Curl.Execute("curl -o output.pdf https://example.com/document.pdf");
+
+// Download with original filename
+await Curl.Execute("curl -O https://example.com/report-2024.xlsx");
+
+// Download multiple files
+await Curl.Execute(@"
+    curl -O https://example.com/file1.zip
+    -O https://example.com/file2.zip
+    -O https://example.com/file3.zip
+");
+
+// Download with progress bar
+await Curl.Execute("curl --progress-bar -o large-file.iso https://example.com/large.iso");
+```
+
+### Upload Files
+
+```csharp
+// Upload single file
+var uploaded = await Curl.Execute(@"
+    curl -X POST https://api.example.com/upload
+    -F 'file=@/path/to/document.pdf'
+    -F 'description=Annual Report'
+");
+
+// Upload multiple files
+var result = await Curl.Execute(@"
+    curl -X POST https://api.example.com/batch-upload
+    -F 'files[]=@file1.jpg'
+    -F 'files[]=@file2.jpg'
+    -F 'files[]=@file3.jpg'
+    -F 'album=vacation'
+");
+
+// Upload with metadata
+var response = await Curl.Execute(@"
+    curl -X POST https://api.cloudinary.com/v1_1/demo/image/upload
+    -F 'file=@photo.jpg'
+    -F 'upload_preset=unsigned'
+    -F 'tags=nature,mountains'
+");
+```
+
+### FTP Operations
+
+```csharp
+// FTP download
+await Curl.Execute("curl -u ftpuser:ftppass ftp://ftp.example.com/file.txt -o local.txt");
 
 // FTP upload
-var result = await Curl.Curl("curl -T file.zip ftp://ftp.example.com/ -u user:pass");
+await Curl.Execute("curl -u ftpuser:ftppass -T localfile.txt ftp://ftp.example.com/remote.txt");
+
+// FTP with SSL/TLS
+await Curl.Execute("curl --ftp-ssl -u user:pass ftp://secure.example.com/file.txt");
 ```
 
-## 9. Form Data Submission
+## Advanced Features
 
-Submitting HTML forms programmatically.
+### Following Redirects
 
 ```csharp
-// URL-encoded form data
-// curl -d "name=John&age=30&city=NewYork" https://example.com/form
+// Follow redirects automatically
+var final = await Curl.Execute("curl -L https://bit.ly/shortened-url");
 
-var result = await Curl.Curl(@"
-    curl -d 'name=John&age=30&city=NewYork'
-         https://example.com/form
-");
-
-// Form with file upload
-var result = await Curl.Curl(@"
-    curl -F 'username=john'
-         -F 'avatar=@profile.jpg'
-         -F 'bio=Software Developer'
-         https://example.com/profile/update
-");
-
-// URL-encoded with special characters
-var result = await Curl.Curl(@"
-    curl --data-urlencode 'message=Hello World & Special Characters!'
-         https://example.com/submit
-");
+// Limit redirect count
+var limited = await Curl.Execute("curl -L --max-redirs 3 https://example.com/redirect");
 ```
 
-## 10. Timeout and Retry
-
-Handling slow or unreliable endpoints.
+### Cookies
 
 ```csharp
-// With timeout
-// curl --connect-timeout 10 --max-time 30 https://slow-api.com
+// Save cookies
+await Curl.Execute("curl -c cookies.txt https://example.com/login");
 
-var result = await Curl.CurlWithTimeout(
-    "https://slow-api.com/endpoint",
-    TimeSpan.FromSeconds(30)
-);
+// Use saved cookies
+var response = await Curl.Execute("curl -b cookies.txt https://example.com/protected");
 
-// With retry logic
-var result = await Curl.CurlWithRetry(
-    "https://unreliable-api.com/data",
-    maxRetries: 3,
-    retryDelay: TimeSpan.FromSeconds(2)
-);
-
-// With cancellation token
-using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-var result = await Curl.Curl("https://api.example.com/long-running", cts.Token);
+// Send specific cookie
+var data = await Curl.Execute(@"
+    curl https://example.com/api
+    -H 'Cookie: session=abc123; user=john'
+");
 ```
 
-## 11. Proxy Configuration
+### Timeouts
 
-Using proxies for requests.
+```csharp
+// Connection timeout
+var fast = await Curl.Execute("curl --connect-timeout 5 https://api.example.com/data");
+
+// Total timeout
+var limited = await Curl.Execute("curl --max-time 30 https://slow-api.example.com/report");
+
+// Both timeouts
+var robust = await Curl.Execute(@"
+    curl --connect-timeout 5 --max-time 60
+    https://api.example.com/large-download
+");
+```
+
+### Proxy Configuration
 
 ```csharp
 // HTTP proxy
-// curl -x http://proxy.example.com:8080 https://api.example.com
-
-var result = await Curl.Curl(@"
-    curl -x http://proxy.example.com:8080
-         https://api.example.com/data
-");
-
-// Proxy with authentication
-var result = await Curl.Curl(@"
-    curl -x http://proxy.example.com:8080
-         -U proxyuser:proxypass
-         https://api.example.com/data
-");
+var proxied = await Curl.Execute("curl -x http://proxy.company.com:8080 https://example.com");
 
 // SOCKS5 proxy
-var result = await Curl.Curl(@"
-    curl --socks5 localhost:1080
-         https://api.example.com/data
+var secure = await Curl.Execute("curl --socks5 localhost:1080 https://blocked-site.com");
+
+// Proxy with authentication
+var authed = await Curl.Execute(@"
+    curl -x http://proxy.example.com:8080
+    --proxy-user username:password
+    https://external-api.com
 ");
 ```
 
-## 12. HTTPS Certificate Handling
-
-Dealing with SSL/TLS certificates.
+### SSL/TLS Options
 
 ```csharp
-// Ignore certificate errors (development only!)
-// curl -k https://self-signed.example.com
+// Skip certificate verification (dev only!)
+var insecure = await Curl.Execute("curl -k https://self-signed.example.com");
 
-var result = await Curl.Curl("curl -k https://self-signed.example.com");
-
-// Specify CA certificate
-var result = await Curl.Curl(@"
-    curl --cacert /path/to/ca-cert.pem
-         https://secure.example.com
+// Use client certificate
+var mutual = await Curl.Execute(@"
+    curl --cert client.crt --key client.key
+    https://mutual-tls.example.com/api
 ");
 
-// Client certificate authentication
-var result = await Curl.Curl(@"
-    curl --cert client-cert.pem --key client-key.pem
-         https://secure-api.example.com
-");
+// Specify TLS version
+var tls13 = await Curl.Execute("curl --tlsv1.3 https://modern-api.example.com");
 ```
 
-## 13. GraphQL Queries
-
-Working with GraphQL APIs.
+### Rate Limiting
 
 ```csharp
-// GraphQL query
-var query = @"
-    query GetUser($id: ID!) {
-        user(id: $id) {
-            name
-            email
-            posts {
-                title
-                content
-            }
-        }
-    }
-";
+// Limit download speed
+await Curl.Execute("curl --limit-rate 200K https://example.com/large-file.zip -o file.zip");
 
-var result = await Http.GraphQL(
-    "https://api.example.com/graphql",
-    query,
-    new { id = "123" }
-);
-
-// Using raw curl
-var result = await Curl.Curl(@"
-    curl -X POST https://api.example.com/graphql
-         -H 'Content-Type: application/json'
-         -d '{""query"": ""{ users { id name email } }""}'
+// Limit upload speed
+await Curl.Execute(@"
+    curl --limit-rate 100K
+    -T large-upload.zip
+    https://upload.example.com/files
 ");
 ```
 
-## 14. WebSocket Upgrade
+## Error Handling
 
-Initial HTTP request for WebSocket connections.
-
-```csharp
-// WebSocket handshake
-var result = await Curl.Curl(@"
-    curl -H 'Upgrade: websocket'
-         -H 'Connection: Upgrade'
-         -H 'Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw=='
-         -H 'Sec-WebSocket-Version: 13'
-         https://ws.example.com/socket
-");
-```
-
-## 15. FTP Operations
-
-File transfer protocol operations.
-
-```csharp
-// List FTP directory
-// curl ftp://ftp.example.com/pub/ -u user:pass
-
-var result = await Curl.Curl("curl ftp://ftp.example.com/pub/ -u user:pass");
-
-// Download from FTP
-var result = await Curl.Curl(@"
-    curl -o file.zip ftp://ftp.example.com/files/file.zip
-         -u username:password
-");
-
-// Upload to FTP
-var result = await Curl.Curl(@"
-    curl -T localfile.pdf ftp://ftp.example.com/uploads/
-         -u username:password
-");
-```
-
-## 16. Parallel Requests
-
-Making multiple requests concurrently.
-
-```csharp
-// Fetch multiple endpoints in parallel
-var results = await Curl.CurlParallel(new[]
-{
-    "https://api1.example.com/data",
-    "https://api2.example.com/data",
-    "https://api3.example.com/data"
-});
-
-// Named parallel requests
-var results = await Http.Parallel(
-    ("users", "curl https://api.example.com/users"),
-    ("posts", "curl https://api.example.com/posts"),
-    ("comments", "curl https://api.example.com/comments")
-);
-
-Console.WriteLine($"Users: {results["users"].Body}");
-Console.WriteLine($"Posts: {results["posts"].Body}");
-```
-
-## 17. Rate-Limited APIs
-
-Handling APIs with rate limiting.
+### Handling Specific Exceptions
 
 ```csharp
 try
 {
-    var result = await Curl.Curl("https://api.example.com/limited")
-        .ThrowOnError();
+    var response = await Curl.Execute("curl https://api.example.com/data");
 }
-catch (CurlRateLimitException ex)
+catch (CurlDnsException ex)
 {
-    Console.WriteLine($"Rate limited. Retry after: {ex.RetryAfter}");
-    await Task.Delay(ex.RetryAfter.Value);
-
-    // Retry the request
-    var result = await Curl.Curl("https://api.example.com/limited");
+    Console.WriteLine($"DNS resolution failed: {ex.Message}");
 }
-
-// Check rate limit headers
-var result = await Curl.Curl("https://api.example.com/data");
-var remaining = result.GetHeader("X-RateLimit-Remaining");
-var reset = result.GetHeader("X-RateLimit-Reset");
-Console.WriteLine($"Remaining: {remaining}, Reset: {reset}");
+catch (CurlTimeoutException ex)
+{
+    Console.WriteLine($"Request timed out: {ex.Message}");
+}
+catch (CurlSslException ex)
+{
+    Console.WriteLine($"SSL/TLS error: {ex.Message}");
+}
+catch (CurlAuthenticationException ex)
+{
+    Console.WriteLine($"Authentication failed: {ex.Message}");
+}
+catch (CurlHttpException ex)
+{
+    Console.WriteLine($"HTTP error {ex.StatusCode}: {ex.Message}");
+}
+catch (CurlException ex)
+{
+    Console.WriteLine($"General curl error: {ex.Message}");
+}
 ```
 
-## 18. Webhook Testing
-
-Testing webhook endpoints.
+### Retry Logic
 
 ```csharp
-// Send webhook
-var webhookData = new
+// Manual retry with exponential backoff
+async Task<CurlResult> ExecuteWithRetry(string command, int maxRetries = 3)
 {
-    @event = "user.created",
-    timestamp = DateTime.UtcNow,
-    data = new { userId = 123, email = "user@example.com" }
+    for (int i = 0; i < maxRetries; i++)
+    {
+        try
+        {
+            return await Curl.Execute(command);
+        }
+        catch (CurlException) when (i < maxRetries - 1)
+        {
+            await Task.Delay((int)Math.Pow(2, i) * 1000); // Exponential backoff
+        }
+    }
+    throw new Exception("Max retries exceeded");
+}
+
+// Usage
+var result = await ExecuteWithRetry("curl https://flaky-api.example.com/data");
+```
+
+## Multiple Languages
+
+### C# Examples
+
+```csharp
+// Async/await pattern
+public async Task<string> GetUserDataAsync(int userId)
+{
+    var response = await Curl.Execute($"curl https://api.example.com/users/{userId}");
+    return response.Body;
+}
+
+// LINQ with multiple requests
+var userIds = new[] { 1, 2, 3, 4, 5 };
+var tasks = userIds.Select(id =>
+    Curl.Execute($"curl https://api.example.com/users/{id}")
+);
+var results = await Task.WhenAll(tasks);
+
+// Pattern matching (C# 8+)
+var statusMessage = response.StatusCode switch
+{
+    200 => "Success",
+    404 => "Not found",
+    500 => "Server error",
+    _ => "Unknown status"
 };
-
-var result = await Http.Post("https://example.com/webhook", webhookData);
-
-// Verify webhook signature
-var result = await Curl.Curl(@"
-    curl -X POST https://example.com/webhook
-         -H 'X-Webhook-Signature: sha256=...'
-         -d '{""event"":""payment.completed""}'
-");
 ```
 
-## 19. Health Checks
+### VB.NET Examples
 
-Monitoring service health.
+```vb
+Imports CurlDotNet
+Imports System.Threading.Tasks
 
-```csharp
-// Simple health check
-bool isHealthy = await Http.IsHealthy("https://api.example.com/health");
+Module Program
+    Sub Main()
+        ' Synchronous execution
+        Dim response = Curl.ExecuteSync("curl https://api.github.com/users/dotnet")
+        Console.WriteLine(response.Body)
 
-// Detailed health check
-var result = await Curl.Curl("curl -I https://api.example.com/health");
-if (result.StatusCode == 200)
-{
-    Console.WriteLine("Service is healthy");
-}
+        ' Async execution
+        RunAsync().Wait()
+    End Sub
 
-// Multiple service health checks
-var services = new[] { "api", "auth", "database" };
-foreach (var service in services)
-{
-    var health = await Curl.CurlWithTimeout(
-        $"https://{service}.example.com/health",
-        TimeSpan.FromSeconds(5)
-    );
-    Console.WriteLine($"{service}: {health.StatusCode == 200 ? "✓" : "✗"}");
-}
+    Private Async Function RunAsync() As Task
+        ' GET request
+        Dim result = Await Curl.Execute("curl https://httpbin.org/get")
+        Console.WriteLine($"Status: {result.StatusCode}")
+
+        ' POST request
+        Dim postData = "curl -X POST https://httpbin.org/post -d 'test=value'"
+        Dim postResult = Await Curl.Execute(postData)
+        Console.WriteLine(postResult.Body)
+
+        ' With error handling
+        Try
+            Dim data = Await Curl.Execute("curl https://api.example.com/data")
+            Console.WriteLine(data.Body)
+        Catch ex As CurlException
+            Console.WriteLine($"Error: {ex.Message}")
+        End Try
+    End Function
+
+    ' Function with return value
+    Private Async Function GetWeatherAsync(city As String) As Task(Of String)
+        Dim url = $"https://api.openweathermap.org/data/2.5/weather?q={city}"
+        Dim response = Await Curl.Execute($"curl '{url}'")
+        Return response.Body
+    End Function
+End Module
 ```
 
-## 20. Web Scraping
+### F# Examples
 
-Extracting data from websites.
+```fsharp
+open System
+open CurlDotNet
+open System.Threading.Tasks
 
-```csharp
-// Basic scraping with headers to avoid bot detection
-var result = await Curl.Curl(@"
-    curl -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0'
-         -H 'Accept: text/html,application/xhtml+xml'
-         -H 'Accept-Language: en-US,en;q=0.9'
-         -H 'Cache-Control: no-cache'
-         https://example.com/page
-");
+// Simple GET request
+let getUser username =
+    async {
+        let! response =
+            Curl.Execute(sprintf "curl https://api.github.com/users/%s" username)
+            |> Async.AwaitTask
+        return response.Body
+    }
 
-// Parse HTML content
-var html = result.Body;
-// Use HtmlAgilityPack or AngleSharp to parse
+// Pattern matching with status codes
+let handleResponse (response: CurlResult) =
+    match response.StatusCode with
+    | 200 -> printfn "Success: %s" response.Body
+    | 404 -> printfn "Not found"
+    | 500 -> printfn "Server error"
+    | code -> printfn "Unexpected status: %d" code
 
-// With session for maintaining state
-using var session = new CurlSession(new CurlSessionSettings
-{
-    UserAgent = "Mozilla/5.0 (compatible; MyBot/1.0)",
-    FollowRedirects = true
-});
+// Pipeline operator usage
+let processData url =
+    url
+    |> sprintf "curl %s"
+    |> Curl.Execute
+    |> Async.AwaitTask
+    |> Async.RunSynchronously
+    |> handleResponse
 
-// Login if needed
-await session.ExecuteAsync(@"
-    curl -X POST https://example.com/login
-         -d 'username=user&password=pass'
-");
+// Async workflow with multiple requests
+let fetchMultiple urls =
+    async {
+        let! responses =
+            urls
+            |> List.map (sprintf "curl %s" >> Curl.Execute >> Async.AwaitTask)
+            |> Async.Parallel
 
-// Scrape protected content
-var content = await session.ExecuteAsync("https://example.com/protected-content");
+        responses
+        |> Array.iter (fun r -> printfn "Status: %d, Size: %d" r.StatusCode r.Body.Length)
+    }
+
+// Error handling
+let safeExecute command =
+    async {
+        try
+            let! result = Curl.Execute(command) |> Async.AwaitTask
+            return Ok result
+        with
+        | :? CurlDnsException as ex -> return Error (sprintf "DNS error: %s" ex.Message)
+        | :? CurlTimeoutException as ex -> return Error (sprintf "Timeout: %s" ex.Message)
+        | :? CurlException as ex -> return Error (sprintf "Curl error: %s" ex.Message)
+    }
+
+// Computation expression
+type CurlBuilder() =
+    member _.Bind(x, f) =
+        async {
+            let! result = Curl.Execute(x) |> Async.AwaitTask
+            return! f result
+        }
+    member _.Return(x) = async { return x }
+
+let curl = CurlBuilder()
+
+// Usage of computation expression
+let workflow =
+    curl {
+        let! user = "curl https://api.github.com/users/fsharp"
+        let! repos = "curl https://api.github.com/users/fsharp/repos"
+        return (user.Body, repos.Body)
+    }
 ```
 
----
+## Real-World Scenarios
 
-## Advanced Patterns
-
-### Creating a REST API Client
+### REST API Client
 
 ```csharp
 public class ApiClient
 {
-    private readonly CurlSession _session;
+    private readonly string _baseUrl;
+    private readonly string _apiKey;
 
-    public ApiClient(string apiKey)
+    public ApiClient(string baseUrl, string apiKey)
     {
-        _session = new CurlSession(new CurlSessionSettings
-        {
-            BaseUrl = "https://api.example.com",
-            ThrowOnHttpError = true,
-            RetryCount = 3
-        });
-
-        _session.AddDefaultHeader("X-API-Key", apiKey);
-        _session.AddDefaultHeader("Accept", "application/json");
+        _baseUrl = baseUrl;
+        _apiKey = apiKey;
     }
 
     public async Task<T> GetAsync<T>(string endpoint)
     {
-        var result = await _session.ExecuteAsync($"{endpoint}");
-        return result.ToJson<T>();
+        var response = await Curl.Execute($@"
+            curl {_baseUrl}/{endpoint}
+            -H 'Authorization: Bearer {_apiKey}'
+            -H 'Accept: application/json'
+        ");
+
+        return JsonSerializer.Deserialize<T>(response.Body);
     }
 
-    public async Task<TResponse> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)
+    public async Task<T> PostAsync<T>(string endpoint, object data)
     {
         var json = JsonSerializer.Serialize(data);
-        var result = await _session.ExecuteAsync($@"
-            curl -X POST {endpoint}
-                 -H 'Content-Type: application/json'
-                 -d '{json}'
+        var response = await Curl.Execute($@"
+            curl -X POST {_baseUrl}/{endpoint}
+            -H 'Authorization: Bearer {_apiKey}'
+            -H 'Content-Type: application/json'
+            -d '{json}'
         ");
-        return result.ToJson<TResponse>();
+
+        return JsonSerializer.Deserialize<T>(response.Body);
     }
 }
 ```
 
-### Implementing Circuit Breaker
+### CI/CD Integration
 
 ```csharp
-public class CurlCircuitBreaker
+// Deploy script using curl commands
+public async Task DeployToProduction()
 {
-    private int _failureCount = 0;
-    private DateTime _lastFailureTime;
-    private readonly int _threshold = 5;
-    private readonly TimeSpan _timeout = TimeSpan.FromMinutes(1);
+    // Check health endpoint
+    var health = await Curl.Execute("curl https://api.production.com/health");
+    if (health.StatusCode != 200)
+        throw new Exception("Production API is not healthy");
 
-    public async Task<CurlResult> ExecuteAsync(string command)
+    // Upload deployment artifact
+    var upload = await Curl.Execute(@"
+        curl -X POST https://deploy.production.com/artifacts
+        -F 'file=@./release.zip'
+        -F 'version=1.2.3'
+        -F 'environment=production'
+    ");
+
+    // Trigger deployment
+    var deploy = await Curl.Execute(@"
+        curl -X POST https://deploy.production.com/trigger
+        -H 'Content-Type: application/json'
+        -d '{""artifactId"":""' + upload.Body + '"",""strategy"":""rolling""}'
+    ");
+
+    // Wait for deployment to complete
+    string status;
+    do
     {
-        if (_failureCount >= _threshold)
+        await Task.Delay(5000);
+        var check = await Curl.Execute($"curl https://deploy.production.com/status/{deploy.Body}");
+        status = check.Body;
+    }
+    while (status != "completed" && status != "failed");
+
+    if (status == "failed")
+        throw new Exception("Deployment failed");
+}
+```
+
+### Web Scraping
+
+```csharp
+// Scrape product information
+public async Task<List<Product>> ScrapeProducts(string category)
+{
+    var products = new List<Product>();
+
+    // Get category page
+    var response = await Curl.Execute($@"
+        curl https://shop.example.com/category/{category}
+        -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        -H 'Accept: text/html,application/xhtml+xml'
+    ");
+
+    // Parse HTML and extract product URLs
+    var productUrls = ExtractProductUrls(response.Body);
+
+    // Fetch each product with rate limiting
+    foreach (var url in productUrls)
+    {
+        var productResponse = await Curl.Execute($@"
+            curl {url}
+            -H 'User-Agent: Mozilla/5.0'
+            --compressed
+        ");
+
+        products.Add(ParseProduct(productResponse.Body));
+
+        // Rate limiting
+        await Task.Delay(1000);
+    }
+
+    return products;
+}
+```
+
+### GraphQL Queries
+
+```csharp
+// GitHub GraphQL API
+public async Task<string> GetRepositoryInfo(string owner, string name)
+{
+    var query = @"{
+        repository(owner: """ + owner + @""", name: """ + name + @""") {
+            name
+            description
+            stargazerCount
+            forkCount
+            primaryLanguage { name }
+            issues(states: OPEN) { totalCount }
+            pullRequests(states: OPEN) { totalCount }
+        }
+    }";
+
+    var response = await Curl.Execute($@"
+        curl -X POST https://api.github.com/graphql
+        -H 'Authorization: Bearer {githubToken}'
+        -H 'Content-Type: application/json'
+        -d '{{""query"":""{query.Replace("\"", "\\\"")}""}}'"
+    ");
+
+    return response.Body;
+}
+```
+
+### Webhook Testing
+
+```csharp
+// Test webhook endpoint
+public async Task TestWebhook()
+{
+    var payload = new
+    {
+        @event = "order.completed",
+        orderId = "ORD-123456",
+        amount = 99.99,
+        timestamp = DateTime.UtcNow.ToString("o")
+    };
+
+    var json = JsonSerializer.Serialize(payload);
+    var signature = ComputeHmacSignature(json, "webhook-secret");
+
+    var response = await Curl.Execute($@"
+        curl -X POST https://localhost:5001/webhooks/stripe
+        -H 'Content-Type: application/json'
+        -H 'X-Webhook-Signature: {signature}'
+        -d '{json}'
+    ");
+
+    Console.WriteLine($"Webhook response: {response.StatusCode}");
+}
+```
+
+### Batch Processing
+
+```csharp
+// Process multiple API calls in parallel with batching
+public async Task<List<UserData>> GetUsersInBatches(List<int> userIds)
+{
+    const int batchSize = 10;
+    var allResults = new List<UserData>();
+
+    for (int i = 0; i < userIds.Count; i += batchSize)
+    {
+        var batch = userIds.Skip(i).Take(batchSize);
+        var commands = batch.Select(id =>
+            $"curl https://api.example.com/users/{id}"
+        ).ToArray();
+
+        var results = await Curl.ExecuteMany(commands);
+
+        foreach (var result in results)
         {
-            if (DateTime.UtcNow - _lastFailureTime < _timeout)
+            if (result.StatusCode == 200)
             {
-                throw new Exception("Circuit breaker is open");
+                var userData = JsonSerializer.Deserialize<UserData>(result.Body);
+                allResults.Add(userData);
             }
-            _failureCount = 0; // Reset
         }
 
-        try
+        // Rate limiting between batches
+        if (i + batchSize < userIds.Count)
+            await Task.Delay(1000);
+    }
+
+    return allResults;
+}
+```
+
+### Health Monitoring
+
+```csharp
+// Monitor multiple endpoints
+public async Task<Dictionary<string, bool>> CheckEndpointHealth()
+{
+    var endpoints = new[]
+    {
+        "https://api.service1.com/health",
+        "https://api.service2.com/health",
+        "https://api.service3.com/health"
+    };
+
+    var commands = endpoints.Select(e =>
+        $"curl --max-time 5 --connect-timeout 2 {e}"
+    ).ToArray();
+
+    var results = await Curl.ExecuteMany(commands);
+
+    return endpoints.Zip(results, (endpoint, result) =>
+        new { endpoint, healthy = result.StatusCode == 200 }
+    ).ToDictionary(x => x.endpoint, x => x.healthy);
+}
+```
+
+## Testing with CurlDotNet
+
+### Unit Testing
+
+```csharp
+[TestClass]
+public class ApiTests
+{
+    [TestMethod]
+    public async Task TestGetUser()
+    {
+        // Arrange
+        var userId = 123;
+
+        // Act
+        var response = await Curl.Execute($"curl https://api.example.com/users/{userId}");
+
+        // Assert
+        Assert.AreEqual(200, response.StatusCode);
+        Assert.IsTrue(response.Body.Contains("\"id\":123"));
+    }
+
+    [TestMethod]
+    public async Task TestAuthenticationRequired()
+    {
+        // Act & Assert
+        await Assert.ThrowsExceptionAsync<CurlAuthenticationException>(async () =>
         {
-            var result = await Curl.Curl(command);
-            if (!result.IsSuccess)
-            {
-                _failureCount++;
-                _lastFailureTime = DateTime.UtcNow;
-            }
-            else
-            {
-                _failureCount = 0; // Reset on success
-            }
-            return result;
-        }
-        catch
-        {
-            _failureCount++;
-            _lastFailureTime = DateTime.UtcNow;
-            throw;
-        }
+            await Curl.Execute("curl https://api.example.com/admin");
+        });
     }
 }
 ```
 
----
+### Integration Testing
+
+```csharp
+[TestClass]
+[TestCategory("Integration")]
+public class IntegrationTests
+{
+    [TestMethod]
+    public async Task TestFullWorkflow()
+    {
+        // Create resource
+        var createResponse = await Curl.Execute(@"
+            curl -X POST https://api.example.com/items
+            -H 'Content-Type: application/json'
+            -d '{""name"":""Test Item""}'
+        ");
+        Assert.AreEqual(201, createResponse.StatusCode);
+
+        var id = ExtractId(createResponse.Body);
+
+        // Read resource
+        var getResponse = await Curl.Execute($"curl https://api.example.com/items/{id}");
+        Assert.AreEqual(200, getResponse.StatusCode);
+
+        // Update resource
+        var updateResponse = await Curl.Execute($@"
+            curl -X PUT https://api.example.com/items/{id}
+            -H 'Content-Type: application/json'
+            -d '{{""name"":""Updated Item""}}'
+        ");
+        Assert.AreEqual(200, updateResponse.StatusCode);
+
+        // Delete resource
+        var deleteResponse = await Curl.Execute($"curl -X DELETE https://api.example.com/items/{id}");
+        Assert.AreEqual(204, deleteResponse.StatusCode);
+    }
+}
+```
 
 ## Performance Tips
 
-1. **Reuse Sessions**: For multiple requests to the same host, use `CurlSession`
-2. **Connection Pooling**: HttpClient handles this automatically
-3. **Compression**: Use `--compressed` flag for large responses
-4. **Parallel Requests**: Use `CurlParallel` for independent requests
-5. **Streaming**: For large files, use progress callbacks to avoid memory issues
-
-## Error Handling Best Practices
+### Connection Pooling
 
 ```csharp
-try
-{
-    var result = await Curl.Curl("https://api.example.com/data")
-        .ThrowOnError()
-        .EnsureSuccess();
+// Reuse connections for multiple requests to same host
+var commands = Enumerable.Range(1, 100)
+    .Select(i => $"curl https://api.example.com/data/{i}")
+    .ToArray();
 
-    var data = result.ToJson<MyData>();
-}
-catch (CurlTimeoutException ex)
+// CurlDotNet automatically manages connection pooling
+var results = await Curl.ExecuteMany(commands);
+```
+
+### Streaming Large Responses
+
+```csharp
+// Stream large files without buffering entire content
+public async Task DownloadLargeFile(string url, string outputPath)
 {
-    // Handle timeout
-    _logger.LogError($"Request timed out: {ex.Message}");
+    // CurlDotNet streams directly to file
+    await Curl.Execute($"curl -o {outputPath} {url}");
 }
-catch (CurlHttpException ex) when (ex.StatusCode == 404)
-{
-    // Handle not found
-    return null;
-}
-catch (CurlHttpException ex) when (ex.IsServerError)
-{
-    // Handle server errors with retry
-    await Task.Delay(5000);
-    // Retry...
-}
-catch (CurlConnectionException ex)
-{
-    // Handle connection issues
-    _logger.LogError($"Connection failed to {ex.Host}: {ex.Message}");
-}
-catch (CurlException ex)
-{
-    // Handle other curl errors
-    _logger.LogError($"Curl error: {ex.Message}, Command: {ex.Command}");
-}
+```
+
+### Compression
+
+```csharp
+// Request compressed responses
+var response = await Curl.Execute(@"
+    curl https://api.example.com/large-data
+    --compressed
+    -H 'Accept-Encoding: gzip, deflate, br'
+");
+```
+
+## Debugging
+
+### Verbose Output
+
+```csharp
+// Enable verbose output for debugging
+var response = await Curl.Execute("curl -v https://api.example.com/debug");
+
+// Access debug information
+Console.WriteLine($"Request headers: {response.RequestHeaders}");
+Console.WriteLine($"Response headers: {response.ResponseHeaders}");
+Console.WriteLine($"Timing: {response.TimingInfo}");
+```
+
+### Trace Network Activity
+
+```csharp
+// Trace all network activity
+var response = await Curl.Execute("curl --trace-ascii debug.txt https://api.example.com/data");
+
+// Or capture in response
+var result = await Curl.Execute("curl --trace - https://api.example.com/data");
+Console.WriteLine(result.TraceOutput);
 ```
 
 ---
 
-*Based on curl by Daniel Stenberg and the curl community*
-*CurlDotNet - Bringing the power of curl to .NET*
-*Sponsored by Iron Software*
+## Additional Resources
+
+- [Full API Documentation](./api/index.html)
+- [Architecture Guide](./ARCHITECTURE.md)
+- [Contributing Guide](./CONTRIBUTING.md)
+- [NuGet Package](https://www.nuget.org/packages/CurlDotNet/)
+
+---
+
+Made with ❤️ by the CurlDotNet Team | Sponsored by [IronSoftware](https://ironsoftware.com)

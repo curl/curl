@@ -10,7 +10,7 @@ namespace CurlDotNet.Core
     /// <summary>
     /// Interface for parsing curl command strings into options.
     /// </summary>
-    public interface ICommandParser
+    internal interface ICommandParser
     {
         /// <summary>
         /// Parse a curl command string into options.

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Ea0cf27OAAY=",
+  "dgSpecHash": "UUyXI5Ejg3Y=",
   "success": true,
   "projectFilePath": "/Users/jacob/Documents/GitHub/curl-dot-net/dotnet/tests/CurlDotNet.Tests/CurlDotNet.Tests.csproj",
   "expectedPackageFiles": [
@@ -8,6 +8,7 @@
     "/Users/jacob/.nuget/packages/fluentassertions/6.12.0/fluentassertions.6.12.0.nupkg.sha512",
     "/Users/jacob/.nuget/packages/microsoft.bcl.asyncinterfaces/8.0.0/microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",
     "/Users/jacob/.nuget/packages/microsoft.codecoverage/17.8.0/microsoft.codecoverage.17.8.0.nupkg.sha512",
+    "/Users/jacob/.nuget/packages/microsoft.csharp/4.7.0/microsoft.csharp.4.7.0.nupkg.sha512",
     "/Users/jacob/.nuget/packages/microsoft.net.test.sdk/17.8.0/microsoft.net.test.sdk.17.8.0.nupkg.sha512",
     "/Users/jacob/.nuget/packages/microsoft.netcore.platforms/1.1.0/microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "/Users/jacob/.nuget/packages/microsoft.netcore.platforms/3.1.0/microsoft.netcore.platforms.3.1.0.nupkg.sha512",

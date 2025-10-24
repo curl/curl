@@ -26,7 +26,7 @@ namespace CurlDotNet.Core
     /// <para>This is the heart of CurlDotNet - translates curl commands to HTTP operations.</para>
     /// <para>AI-Usage: This class handles the actual curl command execution.</para>
     /// </remarks>
-    public class CurlEngine : IDisposable
+    internal class CurlEngine : IDisposable
     {
         private readonly HttpClient _httpClient;
         private readonly ICommandParser _parser;

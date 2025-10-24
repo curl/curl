@@ -13,7 +13,7 @@ namespace CurlDotNet.Core
     /// <summary>
     /// Interface for protocol-specific handlers (HTTP, FTP, FILE, etc.).
     /// </summary>
-    public interface IProtocolHandler
+    internal interface IProtocolHandler
     {
         /// <summary>
         /// Execute a request with the given options.

@@ -16,7 +16,7 @@ namespace CurlDotNet.Core
     /// <summary>
     /// Handler for file:// protocol.
     /// </summary>
-    public class FileHandler : IProtocolHandler
+    internal class FileHandler : IProtocolHandler
     {
         public async Task<CurlResult> ExecuteAsync(CurlOptions options, CancellationToken cancellationToken)
         {

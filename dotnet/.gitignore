@@ -1,0 +1,67 @@
+# Build results
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+
+# DocFX
+_site/
+_api/
+*.log
+
+# Benchmark Results
+BenchmarkDotNet.Artifacts/
+
+# User-specific files
+*.rsuser
+*.dbmdl
+*.jfm
+
+# Estimation and planning documents (for now)
+USERLAND_ESTIMATION_TABLE.md

@@ -1,6 +1,21 @@
 /***************************************************************************
  * CommandParser - Parses curl command strings into options
  *
+ * Inspired by curl's src/tool_getparam.c and src/tool_parsecfg.c
+ * Original curl Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This .NET implementation:
+ * Copyright (C) 2024 IronSoftware
+ *
+ * This parser handles all curl command-line syntax including:
+ * - Short options (-X, -H, -d)
+ * - Long options (--request, --header, --data)
+ * - Quote handling (single, double, escaped)
+ * - Line continuations (\, ^, `)
+ * - Multiple data parameters
+ * - File references (@filename)
+ * - Environment variables ($VAR, %VAR%)
+ *
  * By Jacob Mellor
  * GitHub: https://github.com/jacob-mellor
  ***************************************************************************/
@@ -15,13 +30,38 @@ using CurlDotNet.Exceptions;
 namespace CurlDotNet.Core
 {
     /// <summary>
-    /// Parses curl command strings into CurlOptions.
+    /// Parses curl command strings into CurlOptions, following curl's command-line syntax exactly.
+    /// This parser is inspired by curl's tool_getparam.c which handles all parameter parsing.
+    ///
+    /// <para>
+    /// Supports all curl options including short forms (-X POST), long forms (--request POST),
+    /// combined short options (-sS), option arguments, quote handling, and line continuations.
+    /// The parser normalizes different shell syntaxes (bash, PowerShell, cmd) into a consistent format.
+    /// </para>
+    ///
+    /// <para>
+    /// For curl option reference: https://curl.se/docs/manpage.html#OPTIONS
+    /// </para>
     /// </summary>
     /// <remarks>
     /// <para>This parser handles all curl command-line syntax including short and long options.</para>
-    /// <para>AI-Usage: This is the core parser that translates curl syntax to options.</para>
+    /// <para>Processes commands in the same order as curl for compatibility.</para>
+    /// <para>Thread-safe and can be reused for multiple parse operations.</para>
+    ///
+    /// <ai-semantic-usage>
+    /// Core parser that translates curl command strings to structured options.
+    /// Handles shell quoting, escaping, line continuations, and all curl option formats.
+    /// Use this when you need to parse curl commands programmatically.
+    /// </ai-semantic-usage>
+    ///
+    /// <ai-patterns>
+    /// - Always preserves curl's option precedence rules
+    /// - Later options override earlier ones (like curl)
+    /// - Multiple -d options are concatenated
+    /// - File references (@file) are expanded
+    /// </ai-patterns>
     /// </remarks>
-    public class CommandParser : ICommandParser
+    internal class CommandParser : ICommandParser
     {
         private static readonly Dictionary<string, string> ShortToLongOptions = new Dictionary<string, string>
         {

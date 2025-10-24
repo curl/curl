@@ -1,0 +1,217 @@
+name: Build and Test CurlDotNet
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'dotnet/**'
+      - '.github/workflows/build.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'dotnet/**'
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build-and-test:
+    name: Build and Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            os-name: Linux
+          - os: windows-latest
+            os-name: Windows
+          - os: macos-latest
+            os-name: macOS
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup .NET 6.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Setup .NET Framework (Windows only)
+      if: runner.os == 'Windows'
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore dependencies
+      run: dotnet restore dotnet/CurlDotNet.sln
+      working-directory: .
+
+    - name: Build solution
+      run: dotnet build dotnet/CurlDotNet.sln --configuration Release --no-restore
+      working-directory: .
+
+    - name: Run tests
+      run: dotnet test dotnet/CurlDotNet.sln --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+      working-directory: .
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.os-name }}
+        path: dotnet/**/test-results.trx
+
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-${{ matrix.os-name }}
+        path: dotnet/**/coverage.cobertura.xml
+
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Run benchmarks
+      run: |
+        cd dotnet/benchmarks/CurlDotNet.Benchmarks
+        dotnet run -c Release --framework net8.0 -- --job short --filter "*" --exporters json html
+      working-directory: .
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: dotnet/benchmarks/CurlDotNet.Benchmarks/BenchmarkDotNet.Artifacts/
+
+    - name: Store benchmark result
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        tool: 'benchmarkdotnet'
+        output-file-path: dotnet/benchmarks/CurlDotNet.Benchmarks/BenchmarkDotNet.Artifacts/results/*-report-full.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: false
+        comment-on-alert: true
+        alert-threshold: '150%'
+        fail-on-alert: false
+
+  package:
+    name: Create NuGet Package
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Create NuGet package
+      run: |
+        dotnet pack dotnet/src/CurlDotNet/CurlDotNet.csproj \
+          --configuration Release \
+          --output ./artifacts \
+          -p:PackageVersion=1.0.${{ github.run_number }}
+
+    - name: Upload NuGet package
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-package
+        path: ./artifacts/*.nupkg
+
+  documentation:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install DocFX
+      run: dotnet tool install -g docfx
+
+    - name: Build documentation
+      run: |
+        cd dotnet
+        docfx metadata
+        docfx build
+      working-directory: .
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@v4
+      with:
+        name: documentation
+        path: dotnet/_site/
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8.0
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install tools
+      run: |
+        dotnet tool install -g dotnet-format
+        dotnet tool install -g dotnet-outdated-tool
+
+    - name: Check formatting
+      run: dotnet format dotnet/CurlDotNet.sln --verify-no-changes
+
+    - name: Check outdated packages
+      run: dotnet outdated dotnet/CurlDotNet.sln
+      continue-on-error: true
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: 'dotnet'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'

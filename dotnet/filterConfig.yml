@@ -1,0 +1,35 @@
+# DocFX Filter Configuration
+# This file controls which APIs are included in the documentation
+
+apiRules:
+- include:
+    uidRegex: ^CurlDotNet
+    type: Namespace
+- include:
+    uidRegex: ^CurlDotNet\.Curl
+    type: Type
+- include:
+    uidRegex: ^CurlDotNet\.DotNetCurl
+    type: Type
+- include:
+    uidRegex: ^CurlDotNet\.Core\.CurlResult
+    type: Type
+- include:
+    uidRegex: ^CurlDotNet\.Core\.CurlSettings
+    type: Type
+- include:
+    uidRegex: ^CurlDotNet\.Core\.CurlOptions
+    type: Type
+- include:
+    uidRegex: ^CurlDotNet\.Exceptions
+    type: Namespace
+- include:
+    uidRegex: ^CurlDotNet\.Middleware
+    type: Namespace
+- exclude:
+    uidRegex: \.Internal
+    type: Namespace
+- exclude:
+    hasAttribute:
+        uid: System.Runtime.CompilerServices.CompilerGeneratedAttribute
+    type: Member

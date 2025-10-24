@@ -23,7 +23,7 @@ namespace CurlDotNet.Core
     /// <para>Implements FTP operations using .NET's FtpWebRequest.</para>
     /// <para>AI-Usage: This handler supports FTP file operations matching curl's FTP functionality.</para>
     /// </remarks>
-    public class FtpHandler : IProtocolHandler
+    internal class FtpHandler : IProtocolHandler
     {
         public async Task<CurlResult> ExecuteAsync(CurlOptions options, CancellationToken cancellationToken)
         {
