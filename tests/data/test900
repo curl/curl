@@ -19,14 +19,16 @@ smtp
 <name>
 SMTP
 </name>
-<stdin>
+<file name="%LOGDIR/mail%TESTNUMBER">
 From: different
 To: another
 
 body
-</stdin>
+%repeat[6553 x 0123456789]%
+</file>
+
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/mail%TESTNUMBER
 </command>
 </client>
 
@@ -45,6 +47,8 @@ From: different
 To: another
 
 body
+%repeat[6553 x 0123456789]%
+
 .
 </upload>
 </verify>

@@ -1927,6 +1927,7 @@ struct cr_eob_ctx {
   size_t eob;       /* Number of bytes of the EOB (End Of Body) that
                        have been received so far */
   BIT(read_eos);  /* we read an EOS from the next reader */
+  BIT(processed_eos);  /* we read and processed an EOS */
   BIT(eos);       /* we have returned an EOS */
 };
 
@@ -1967,6 +1968,8 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   if(!ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
     /* Get more and convert it when needed */
     result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+    CURL_TRC_SMTP(data, "cr_eob_read, next_read(len=%zu) -> %d, %zu eos=%d",
+                  blen, result, nread, eos);
     if(result)
       return result;
 
@@ -2010,31 +2013,34 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
           return result;
       }
     }
-
-    if(ctx->read_eos) {
-      /* if we last matched a CRLF or if the data was empty, add ".\r\n"
-       * to end the body. If we sent something and it did not end with "\r\n",
-       * add "\r\n.\r\n" to end the body */
-      const char *eob = SMTP_EOB;
-      switch(ctx->n_eob) {
-        case 2:
-          /* seen a CRLF at the end, just add the remainder */
-          eob = &SMTP_EOB[2];
-          break;
-        case 3:
-          /* ended with '\r\n.', we should escape the last '.' */
-          eob = "." SMTP_EOB;
-          break;
-        default:
-          break;
-      }
-      result = Curl_bufq_cwrite(&ctx->buf, eob, strlen(eob), &n);
-      if(result)
-        return result;
-    }
   }
 
   *peos = FALSE;
+
+  if(ctx->read_eos && !ctx->processed_eos) {
+    /* if we last matched a CRLF or if the data was empty, add ".\r\n"
+     * to end the body. If we sent something and it did not end with "\r\n",
+     * add "\r\n.\r\n" to end the body */
+    const char *eob = SMTP_EOB;
+    CURL_TRC_SMTP(data, "auto-ending mail body with '\\r\\n.\\r\\n'");
+    switch(ctx->n_eob) {
+      case 2:
+        /* seen a CRLF at the end, just add the remainder */
+        eob = &SMTP_EOB[2];
+        break;
+      case 3:
+        /* ended with '\r\n.', we should escape the last '.' */
+        eob = "." SMTP_EOB;
+        break;
+      default:
+        break;
+    }
+    result = Curl_bufq_cwrite(&ctx->buf, eob, strlen(eob), &n);
+    if(result)
+      return result;
+    ctx->processed_eos = TRUE;
+  }
+
   if(!Curl_bufq_is_empty(&ctx->buf)) {
     result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
   }
@@ -2043,6 +2049,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
 
   if(ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
     /* no more data, read all, done. */
+    CURL_TRC_SMTP(data, "mail body complete, returning EOS");
     ctx->eos = TRUE;
   }
   *peos = ctx->eos;

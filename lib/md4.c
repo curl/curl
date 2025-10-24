@@ -51,14 +51,6 @@
 #endif
 #endif
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x04000000 && defined(MBEDTLS_MD4_C)
-#define USE_MBEDTLS_MD4
-#include <mbedtls/mbedtls_config.h>
-#endif
-#endif
-
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 #include <wolfssl/openssl/md4.h>
@@ -78,8 +70,6 @@
 #include <wincrypt.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/md4.h>
-#elif defined(USE_MBEDTLS_MD4)
-#include <mbedtls/md4.h>
 #endif
 
 /* The last 2 #include files should be in this order */
@@ -185,39 +175,6 @@ static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
-}
-
-#elif defined(USE_MBEDTLS_MD4)
-
-struct md4_ctx {
-  void *data;
-  unsigned long size;
-};
-typedef struct md4_ctx MD4_CTX;
-
-static int MD4_Init(MD4_CTX *ctx)
-{
-  ctx->data = NULL;
-  ctx->size = 0;
-  return 1;
-}
-
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
-{
-  if(!ctx->data) {
-    ctx->data = Curl_memdup(data, size);
-    if(ctx->data)
-      ctx->size = size;
-  }
-}
-
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
-{
-  if(ctx->data) {
-    mbedtls_md4(ctx->data, ctx->size, result);
-    Curl_safefree(ctx->data);
-    ctx->size = 0;
-  }
 }
 
 #else

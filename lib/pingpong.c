@@ -64,7 +64,7 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
      full response to arrive before we bail out */
   timeout_ms = response_time - curlx_timediff(now, pp->response);
 
-  if((data->set.timeout > 0) && !disconnecting) {
+  if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much overall remains */
     timediff_t timeout2_ms = Curl_timeleft(data, &now, FALSE);
     /* pick the lowest number */

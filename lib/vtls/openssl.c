@@ -1578,8 +1578,6 @@ static int pkcs12load(struct Curl_easy *data,
     return 0;
   }
 
-  PKCS12_PBE_add();
-
   if(!PKCS12_parse(p12, key_passwd, &pri, &x509, &ca)) {
     failf(data,
           "could not parse PKCS12 file, check password, " OSSL_PACKAGE
@@ -1721,12 +1719,12 @@ static CURLcode client_cert(struct Curl_easy *data,
       break;
 
     case SSL_FILETYPE_ENGINE:
-      if(!engineload(data, ctx, cert_file))
+      if(!cert_file || !engineload(data, ctx, cert_file))
         return CURLE_SSL_CERTPROBLEM;
       break;
 
     case SSL_FILETYPE_PROVIDER:
-      if(!providerload(data, ctx, cert_file))
+      if(!cert_file || !providerload(data, ctx, cert_file))
         return CURLE_SSL_CERTPROBLEM;
       break;
 

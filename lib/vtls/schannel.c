@@ -1711,15 +1711,11 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     failf(data, "schannel: unexpected call to schannel_recv_renegotiate");
     return CURLE_SSL_CONNECT_ERROR;
   }
-
+  DEBUGASSERT(caller <= SCH_RENEG_CALLER_IS_SEND);
   if(caller == SCH_RENEG_CALLER_IS_RECV)
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_recv"));
-  else if(caller == SCH_RENEG_CALLER_IS_SEND)
+  else
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_send"));
-  else {
-    failf(data, "schannel: unknown caller for schannel_recv_renegotiate");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   sockfd = Curl_conn_cf_get_socket(cf, data);
 
