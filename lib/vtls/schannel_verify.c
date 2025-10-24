@@ -55,22 +55,6 @@
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
-#ifdef __MINGW32CE__
-#define CERT_QUERY_OBJECT_BLOB 0x00000002
-#define CERT_QUERY_CONTENT_CERT 1
-#define CERT_QUERY_CONTENT_FLAG_CERT (1 << CERT_QUERY_CONTENT_CERT)
-#define CERT_QUERY_FORMAT_BINARY 1
-#define CERT_QUERY_FORMAT_BASE64_ENCODED 2
-#define CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED 3
-#define CERT_QUERY_FORMAT_FLAG_ALL               \
-  (1 << CERT_QUERY_FORMAT_BINARY) |              \
-  (1 << CERT_QUERY_FORMAT_BASE64_ENCODED) |      \
-  (1 << CERT_QUERY_FORMAT_ASN_ASCII_HEX_ENCODED)
-#define CERT_CHAIN_REVOCATION_CHECK_CHAIN 0x20000000
-#define CERT_NAME_DISABLE_IE4_UTF8_FLAG 0x00010000
-#define CERT_TRUST_IS_OFFLINE_REVOCATION 0x01000000
-#endif /* __MINGW32CE__ */
-
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
@@ -112,7 +96,6 @@ struct cert_chain_engine_config_win7 {
   HCERTSTORE hExclusiveTrustedPeople;
 };
 
-#ifndef UNDER_CE
 static int is_cr_or_lf(char c)
 {
   return c == '\r' || c == '\n';
@@ -534,7 +517,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
   result = TRUE;
   return result;
 }
-#endif /* !UNDER_CE */
 
 /* Verify the server's hostname */
 CURLcode Curl_verify_host(struct Curl_cfilter *cf,
@@ -543,58 +525,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   struct ssl_connect_data *connssl = cf->ctx;
   CERT_CONTEXT *pCertContextServer = NULL;
-#ifdef UNDER_CE
-  TCHAR cert_hostname_buff[256];
-  DWORD len;
-
-  /* This code does not support certificates with multiple alternative names.
-   * Right now we are only asking for the first preferred alternative name.
-   * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
-   * (If Windows CE supports that?) and run this section in a loop for each.
-   * https://learn.microsoft.com/windows/win32/api/wincrypt/nf-wincrypt-certgetnamestringa
-   * curl: (51) schannel: CertGetNameString() certificate hostname
-   * (.google.com) did not match connection (google.com)
-   */
-  len = CertGetNameString(pCertContextServer,
-                          CERT_NAME_DNS_TYPE,
-                          CERT_NAME_DISABLE_IE4_UTF8_FLAG,
-                          NULL,
-                          cert_hostname_buff,
-                          256);
-  if(len > 0) {
-    /* Comparing the cert name and the connection hostname encoded as UTF-8
-     * is acceptable since both values are assumed to use ASCII
-     * (or some equivalent) encoding
-     */
-    char *cert_hostname = curlx_convert_tchar_to_UTF8(cert_hostname_buff);
-    if(!cert_hostname) {
-      result = CURLE_OUT_OF_MEMORY;
-    }
-    else{
-      const char *conn_hostname = connssl->peer.hostname;
-      if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
-                             conn_hostname, strlen(conn_hostname))) {
-        infof(data,
-              "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)",
-              conn_hostname, cert_hostname);
-        result = CURLE_OK;
-      }
-      else{
-        failf(data,
-              "schannel: connection hostname (%s) "
-              "does not match certificate name (%s)",
-              conn_hostname, cert_hostname);
-      }
-      Curl_safefree(cert_hostname);
-    }
-  }
-  else {
-    failf(data,
-          "schannel: CertGetNameString did not provide any "
-          "certificate name information");
-  }
-#else
   SECURITY_STATUS sspi_status;
   TCHAR *cert_hostname_buff = NULL;
   size_t cert_hostname_buff_index = 0;
@@ -740,7 +670,6 @@ cleanup:
 
   if(pCertContextServer)
     CertFreeCertificateContext(pCertContextServer);
-#endif /* !UNDER_CE */
 
   return result;
 }
@@ -757,10 +686,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   CERT_CONTEXT *pCertContextServer = NULL;
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
   HCERTCHAINENGINE cert_chain_engine = NULL;
-#ifndef UNDER_CE
   HCERTSTORE trust_store = NULL;
   HCERTSTORE own_trust_store = NULL;
-#endif /* !UNDER_CE */
 
   DEBUGASSERT(BACKEND);
 
@@ -776,7 +703,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
 
-#ifndef UNDER_CE
   if(result == CURLE_OK &&
      (conn_config->CAfile || conn_config->ca_info_blob) &&
      BACKEND->use_manual_cred_validation) {
@@ -870,7 +796,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       }
     }
   }
-#endif /* !UNDER_CE */
 
   if(result == CURLE_OK) {
     CERT_CHAIN_PARA ChainPara;
@@ -934,7 +859,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
   }
 
-#ifndef UNDER_CE
   if(cert_chain_engine) {
     CertFreeCertificateChainEngine(cert_chain_engine);
   }
@@ -942,7 +866,6 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   if(own_trust_store) {
     CertCloseStore(own_trust_store, 0);
   }
-#endif /* !UNDER_CE */
 
   if(pChainContext)
     CertFreeCertificateChain(pChainContext);
