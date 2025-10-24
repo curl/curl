@@ -63,10 +63,12 @@ class TestVsFTPD:
             shutil.rmtree(vsftpd.docs_dir)
         if not os.path.exists(vsftpd.docs_dir):
             os.makedirs(vsftpd.docs_dir)
+        self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-0k', fsize=0)
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1k', fsize=1024)
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10k', fsize=10*1024)
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-1m', fsize=1024*1024)
         self._make_docs_file(docs_dir=vsftpd.docs_dir, fname='data-10m', fsize=10*1024*1024)
+        env.make_data_file(indir=env.gen_dir, fname="upload-0k", fsize=0)
         env.make_data_file(indir=env.gen_dir, fname="upload-1k", fsize=1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-100k", fsize=100*1024)
         env.make_data_file(indir=env.gen_dir, fname="upload-1m", fsize=1024*1024)
@@ -77,11 +79,11 @@ class TestVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_stats(count=1, http_status=226)
         lines = open(os.path.join(curl.run_dir, 'download_#1.data')).readlines()
-        assert len(lines) == 4, f'list: {lines}'
+        assert len(lines) == 5, f'list: {lines}'
 
     # download 1 file, no SSL
     @pytest.mark.parametrize("docname", [
-        'data-1k', 'data-1m', 'data-10m'
+        'data-0k', 'data-1k', 'data-1m', 'data-10m'
     ])
     def test_30_02_download_1(self, env: Env, vsftpd: VsFTPD, docname):
         curl = CurlClient(env=env)
@@ -93,7 +95,7 @@ class TestVsFTPD:
         self.check_downloads(curl, srcfile, count)
 
     @pytest.mark.parametrize("docname", [
-        'data-1k', 'data-1m', 'data-10m'
+        'data-0k', 'data-1k', 'data-1m', 'data-10m'
     ])
     def test_30_03_download_10_serial(self, env: Env, vsftpd: VsFTPD, docname):
         curl = CurlClient(env=env)
@@ -106,7 +108,7 @@ class TestVsFTPD:
         assert r.total_connects == count + 1, 'should reuse the control conn'
 
     @pytest.mark.parametrize("docname", [
-        'data-1k', 'data-1m', 'data-10m'
+        'data-0k', 'data-1k', 'data-1m', 'data-10m'
     ])
     def test_30_04_download_10_parallel(self, env: Env, vsftpd: VsFTPD, docname):
         curl = CurlClient(env=env)
@@ -121,7 +123,7 @@ class TestVsFTPD:
         assert r.total_connects > count + 1, 'should have used several control conns'
 
     @pytest.mark.parametrize("docname", [
-        'upload-1k', 'upload-100k', 'upload-1m'
+        'upload-0k', 'upload-1k', 'upload-100k', 'upload-1m'
     ])
     def test_30_05_upload_1(self, env: Env, vsftpd: VsFTPD, docname):
         curl = CurlClient(env=env)

@@ -224,6 +224,7 @@ struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
   struct curltime now = curlx_now();
 
+  DEBUGF(infof(data, "prgrsTime(%d)", (int)timer));
   Curl_pgrsTimeWas(data, timer, now);
   return now;
 }

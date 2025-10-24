@@ -121,6 +121,11 @@ static void before_perform(struct Curl_easy *data)
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
 }
 
+static void before_done(struct Curl_easy *data)
+{
+  Curl_pgrsTime(data, TIMER_POSTRANSFER);
+}
+
 static void init_completed(struct Curl_easy *data)
 {
   /* this is a completed transfer */
@@ -155,7 +160,7 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     before_perform,    /* DID */
     NULL,              /* PERFORMING */
     NULL,              /* RATELIMITING */
-    NULL,              /* DONE */
+    before_done,       /* DONE */
     init_completed,    /* COMPLETED */
     NULL               /* MSGSENT */
   };

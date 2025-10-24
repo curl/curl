@@ -45,6 +45,7 @@ class TestDownload:
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, httpd):
         indir = httpd.docs_dir
+        env.make_data_file(indir=indir, fname="data-0k", fsize=0)
         env.make_data_file(indir=indir, fname="data-10k", fsize=10*1024)
         env.make_data_file(indir=indir, fname="data-100k", fsize=100*1024)
         env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
@@ -54,11 +55,12 @@ class TestDownload:
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_02_01_download_1(self, env: Env, httpd, nghttpx, proto):
+    @pytest.mark.parametrize("docname", ['data.json', 'data-0k', 'data-10k', 'data-100k'])
+    def test_02_01_download_1(self, env: Env, httpd, nghttpx, proto, docname):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
+        url = f'https://{env.authority_for(env.domain1, proto)}/{docname}'
         r = curl.http_download(urls=[url], alpn_proto=proto)
         r.check_response(http_status=200)
 
