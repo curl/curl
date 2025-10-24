@@ -36,7 +36,8 @@ name: 'Fuzzer'
       - 'tests/data/**'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  # Hard-coded workflow name to avoid colliding with curl-fuzzer's group
+  group: curl-fuzz-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions: {}
