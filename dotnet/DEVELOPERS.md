@@ -190,7 +190,7 @@ git commit -m "feat: Add your feature description"
 ```csharp
 using CurlDotNet;
 
-var response = await Curl.Execute("curl https://api.example.com/data");
+var response = await Curl.ExecuteAsync("curl https://api.example.com/data");
 Console.WriteLine(response.Body);
 ```
 
@@ -200,7 +200,7 @@ Imports CurlDotNet
 
 Module Program
     Sub Main()
-        Dim response = Curl.Execute("curl https://api.example.com/data").Result
+        Dim response = Curl.ExecuteAsync("curl https://api.example.com/data").Result
         Console.WriteLine(response.Body)
     End Sub
 End Module
@@ -213,7 +213,7 @@ open CurlDotNet
 [<EntryPoint>]
 let main argv =
     async {
-        let! response = Curl.Execute("curl https://api.example.com/data") |> Async.AwaitTask
+        let! response = Curl.ExecuteAsync("curl https://api.example.com/data") |> Async.AwaitTask
         printfn "%s" response.Body
         return 0
     } |> Async.RunSynchronously

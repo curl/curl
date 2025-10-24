@@ -231,43 +231,43 @@ public class CurlVariationTests
         try
         {
             Console.WriteLine("Testing Windows style...");
-            var r1 = await Curl.Execute(windowsCmd);
+            var r1 = await Curl.ExecuteAsync(windowsCmd);
             Console.WriteLine($"✓ Windows: {r1.StatusCode}");
 
             Console.WriteLine("Testing Unix style...");
-            var r2 = await Curl.Execute(unixCmd);
+            var r2 = await Curl.ExecuteAsync(unixCmd);
             Console.WriteLine($"✓ Unix: {r2.StatusCode}");
 
             Console.WriteLine("Testing mixed quotes...");
-            var r3 = await Curl.Execute(mixedCmd);
+            var r3 = await Curl.ExecuteAsync(mixedCmd);
             Console.WriteLine($"✓ Mixed: {r3.StatusCode}");
 
             Console.WriteLine("Testing PowerShell style...");
-            var r4 = await Curl.Execute(powershellCmd);
+            var r4 = await Curl.ExecuteAsync(powershellCmd);
             Console.WriteLine($"✓ PowerShell: {r4.StatusCode}");
 
             Console.WriteLine("Testing no quotes...");
-            var r5 = await Curl.Execute(noQuotesCmd);
+            var r5 = await Curl.ExecuteAsync(noQuotesCmd);
             Console.WriteLine($"✓ No quotes: {r5.StatusCode}");
 
             Console.WriteLine("Testing multiple -d...");
-            var r6 = await Curl.Execute(multiDataCmd);
+            var r6 = await Curl.ExecuteAsync(multiDataCmd);
             Console.WriteLine($"✓ Multi-data: {r6.StatusCode}");
 
             Console.WriteLine("Testing file upload...");
-            var r7 = await Curl.Execute(fileUploadCmd);
+            var r7 = await Curl.ExecuteAsync(fileUploadCmd);
             Console.WriteLine($"✓ File upload: {r7.StatusCode}");
 
             Console.WriteLine("Testing authentication...");
-            var r8 = await Curl.Execute(authCmd);
+            var r8 = await Curl.ExecuteAsync(authCmd);
             Console.WriteLine($"✓ Auth: {r8.StatusCode}");
 
             Console.WriteLine("Testing env variables...");
-            var r9 = await Curl.Execute(envVarCmd);
+            var r9 = await Curl.ExecuteAsync(envVarCmd);
             Console.WriteLine($"✓ Env vars: {r9.StatusCode}");
 
             Console.WriteLine("Testing smart quotes...");
-            var r10 = await Curl.Execute(smartQuotesCmd);
+            var r10 = await Curl.ExecuteAsync(smartQuotesCmd);
             Console.WriteLine($"✓ Smart quotes: {r10.StatusCode}");
 
             Console.WriteLine("\n✅ All variations handled successfully!");

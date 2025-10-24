@@ -14,7 +14,7 @@ curl -X POST "https://api.digitalocean.com/v2/droplets" \
 ### CurlDotNet Implementation
 ```csharp
 // This should just work by pasting:
-var response = await Curl.Execute(@"
+var response = await Curl.ExecuteAsync(@"
     curl -X POST 'https://api.digitalocean.com/v2/droplets'
     -H 'Authorization: Bearer YOUR_TOKEN_HERE'
     -H 'Content-Type: application/json'
@@ -35,7 +35,7 @@ curl -X GET "https://api.digitalocean.com/v2/droplets" \
 
 ```csharp
 // In CurlDotNet
-var droplets = await Curl.Execute("curl -X GET 'https://api.digitalocean.com/v2/droplets' -H 'Authorization: Bearer YOUR_TOKEN'");
+var droplets = await Curl.ExecuteAsync("curl -X GET 'https://api.digitalocean.com/v2/droplets' -H 'Authorization: Bearer YOUR_TOKEN'");
 ```
 
 ### Create SSH Key
@@ -160,7 +160,7 @@ curl -X POST https://api.heroku.com/apps \
 public async Task TestRealProviderExamples()
 {
     // DigitalOcean - Create Droplet
-    var doCreate = await Curl.Execute(@"
+    var doCreate = await Curl.ExecuteAsync(@"
         curl -X POST 'https://api.digitalocean.com/v2/droplets'
         -H 'Authorization: Bearer YOUR_TOKEN'
         -H 'Content-Type: application/json'
@@ -168,13 +168,13 @@ public async Task TestRealProviderExamples()
     ");
 
     // AWS S3 - List Buckets
-    var awsS3 = await Curl.Execute(@"
+    var awsS3 = await Curl.ExecuteAsync(@"
         curl 'https://s3.amazonaws.com/'
         -H 'Authorization: AWS4-HMAC-SHA256 Credential=KEY/20130524/us-east-1/s3/aws4_request'
     ");
 
     // Cloudflare - Create DNS
-    var cfDns = await Curl.Execute(@"
+    var cfDns = await Curl.ExecuteAsync(@"
         curl -X POST 'https://api.cloudflare.com/client/v4/zones/ZONE_ID/dns_records'
         -H 'X-Auth-Email: user@example.com'
         -H 'X-Auth-Key: API_KEY'
