@@ -50,7 +50,6 @@
 #include "../url.h"
 #include "../uint-hash.h"
 #include "../sendf.h"
-#include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../cfilters.h"

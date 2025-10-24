@@ -51,13 +51,10 @@
 #include "../hostip.h"
 #include "../progress.h"
 #include "../transfer.h"
-#include "../escape.h"
 #include "../http.h"               /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
 #include "../speedcheck.h"
-#include "../getinfo.h"
-#include "../strdup.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"

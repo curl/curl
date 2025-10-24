@@ -34,7 +34,6 @@
 #include "../cfilters.h"
 #include "../cf-socket.h"
 #include "../sendf.h"
-#include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../connect.h"

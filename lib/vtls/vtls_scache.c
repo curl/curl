@@ -46,7 +46,6 @@
 #include "../curl_sha256.h"
 #include "../rand.h"
 #include "../curlx/warnless.h"
-#include "../strdup.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"

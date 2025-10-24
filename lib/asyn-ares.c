@@ -61,7 +61,6 @@
 #include "progress.h"
 #include "curlx/timediff.h"
 #include "httpsrr.h"
-#include "strdup.h"
 
 #include <ares.h>
 #include <ares_version.h> /* really old c-ares did not include this by
