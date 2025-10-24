@@ -54,6 +54,7 @@
 
  4. FTP
  4.1 HOST
+ 4.2 A fixed directory listing format
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -483,6 +484,16 @@
  servers named-based virtual hosting:
 
  https://datatracker.ietf.org/doc/html/rfc7151
+
+4.2 A fixed directory listing format
+
+ Since listing the contents of a remove directory with FTP is returning the
+ list in a format and style the server likes without any estblished or even
+ defactor standard existing, it would be a feature to users if curl could
+ parse the directory listing and output a general curl format that is fixed
+ and the same, independent of the server's choice. This would allow users to
+ better and more reliably extract information about remote content via FTP
+ directory listings.
 
 4.6 GSSAPI via Windows SSPI
 
