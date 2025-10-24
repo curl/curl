@@ -25,34 +25,31 @@
 #
 # Input variables:
 #
-# - `RUSTLS_INCLUDE_DIR`:   Absolute path to Rustls include directory.
-# - `RUSTLS_LIBRARY`:       Absolute path to `rustls` library.
+# - `RUSTLS_INCLUDE_DIR`:  Absolute path to Rustls include directory.
+# - `RUSTLS_LIBRARY`:      Absolute path to `rustls` library.
 #
-# Result variables:
+# Defines:
 #
-# - `RUSTLS_FOUND`:         System has Rustls.
-# - `RUSTLS_INCLUDE_DIRS`:  The Rustls include directories.
-# - `RUSTLS_LIBRARIES`:     The Rustls library names.
-# - `RUSTLS_LIBRARY_DIRS`:  The Rustls library directories.
-# - `RUSTLS_PC_REQUIRES`:   The Rustls pkg-config packages.
-# - `RUSTLS_CFLAGS`:        Required compiler flags.
-# - `RUSTLS_VERSION`:       Version of Rustls.
+# - `RUSTLS_FOUND`:        System has Rustls.
+# - `RUSTLS_VERSION`:      Version of Rustls.
+# - `CURL::rustls`:        Rustls library target.
 
-set(RUSTLS_PC_REQUIRES "rustls")
+set(_rustls_pc_requires "rustls")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED RUSTLS_INCLUDE_DIR AND
    NOT DEFINED RUSTLS_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(RUSTLS ${RUSTLS_PC_REQUIRES})
+  pkg_check_modules(_rustls ${_rustls_pc_requires})
 endif()
 
-if(RUSTLS_FOUND)
+if(_rustls_FOUND)
   set(Rustls_FOUND TRUE)
-  string(REPLACE ";" " " RUSTLS_CFLAGS "${RUSTLS_CFLAGS}")
-  message(STATUS "Found Rustls (via pkg-config): ${RUSTLS_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
+  set(RUSTLS_FOUND TRUE)
+  set(RUSTLS_VERSION ${_rustls_VERSION})
+  message(STATUS "Found Rustls (via pkg-config): ${_rustls_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
 else()
-  set(RUSTLS_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+  set(_rustls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h")
   find_library(RUSTLS_LIBRARY NAMES "rustls")
@@ -65,8 +62,8 @@ else()
   )
 
   if(RUSTLS_FOUND)
-    set(RUSTLS_INCLUDE_DIRS ${RUSTLS_INCLUDE_DIR})
-    set(RUSTLS_LIBRARIES    ${RUSTLS_LIBRARY})
+    set(_rustls_INCLUDE_DIRS ${RUSTLS_INCLUDE_DIR})
+    set(_rustls_LIBRARIES    ${RUSTLS_LIBRARY})
   endif()
 
   mark_as_advanced(RUSTLS_INCLUDE_DIR RUSTLS_LIBRARY)
@@ -79,31 +76,47 @@ if(RUSTLS_FOUND)
     if(NOT SECURITY_FRAMEWORK)
       message(FATAL_ERROR "Security framework not found")
     endif()
-    list(APPEND RUSTLS_LIBRARIES "-framework Security")
+    list(APPEND _rustls_LIBRARIES "-framework Security")
 
     find_library(FOUNDATION_FRAMEWORK NAMES "Foundation")
     mark_as_advanced(FOUNDATION_FRAMEWORK)
     if(NOT FOUNDATION_FRAMEWORK)
       message(FATAL_ERROR "Foundation framework not found")
     endif()
-    list(APPEND RUSTLS_LIBRARIES "-framework Foundation")
+    list(APPEND _rustls_LIBRARIES "-framework Foundation")
   elseif(NOT WIN32)
     find_library(PTHREAD_LIBRARY NAMES "pthread")
     if(PTHREAD_LIBRARY)
-      list(APPEND RUSTLS_LIBRARIES ${PTHREAD_LIBRARY})
+      list(APPEND _rustls_LIBRARIES ${PTHREAD_LIBRARY})
     endif()
     mark_as_advanced(PTHREAD_LIBRARY)
 
     find_library(DL_LIBRARY NAMES "dl")
     if(DL_LIBRARY)
-      list(APPEND RUSTLS_LIBRARIES ${DL_LIBRARY})
+      list(APPEND _rustls_LIBRARIES ${DL_LIBRARY})
     endif()
     mark_as_advanced(DL_LIBRARY)
 
     find_library(MATH_LIBRARY NAMES "m")
     if(MATH_LIBRARY)
-      list(APPEND RUSTLS_LIBRARIES ${MATH_LIBRARY})
+      list(APPEND _rustls_LIBRARIES ${MATH_LIBRARY})
     endif()
     mark_as_advanced(MATH_LIBRARY)
+  endif()
+endif()
+
+if(RUSTLS_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_rustls_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::rustls)
+    add_library(CURL::rustls INTERFACE IMPORTED)
+    set_target_properties(CURL::rustls PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_rustls_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_rustls_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_rustls_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_rustls_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_rustls_LIBRARIES}")
   endif()
 endif()

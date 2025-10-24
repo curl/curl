@@ -25,32 +25,29 @@
 #
 # Input variables:
 #
-# - `CARES_INCLUDE_DIR`:   Absolute path to c-ares include directory.
-# - `CARES_LIBRARY`:       Absolute path to `cares` library.
+# - `CARES_INCLUDE_DIR`:  Absolute path to c-ares include directory.
+# - `CARES_LIBRARY`:      Absolute path to `cares` library.
 #
-# Result variables:
+# Defines:
 #
-# - `CARES_FOUND`:         System has c-ares.
-# - `CARES_INCLUDE_DIRS`:  The c-ares include directories.
-# - `CARES_LIBRARIES`:     The c-ares library names.
-# - `CARES_LIBRARY_DIRS`:  The c-ares library directories.
-# - `CARES_PC_REQUIRES`:   The c-ares pkg-config packages.
-# - `CARES_CFLAGS`:        Required compiler flags.
-# - `CARES_VERSION`:       Version of c-ares.
+# - `CARES_FOUND`:        System has c-ares.
+# - `CARES_VERSION`:      Version of c-ares.
+# - `CURL::cares`:        c-ares library target.
 
-set(CARES_PC_REQUIRES "libcares")
+set(_cares_pc_requires "libcares")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED CARES_INCLUDE_DIR AND
    NOT DEFINED CARES_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(CARES ${CARES_PC_REQUIRES})
+  pkg_check_modules(_cares ${_cares_pc_requires})
 endif()
 
-if(CARES_FOUND)
+if(_cares_FOUND)
   set(Cares_FOUND TRUE)
-  string(REPLACE ";" " " CARES_CFLAGS "${CARES_CFLAGS}")
-  message(STATUS "Found Cares (via pkg-config): ${CARES_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
+  set(CARES_FOUND TRUE)
+  set(CARES_VERSION ${_cares_VERSION})
+  message(STATUS "Found Cares (via pkg-config): ${_cares_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
 else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
   find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
@@ -85,13 +82,29 @@ else()
   )
 
   if(CARES_FOUND)
-    set(CARES_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
-    set(CARES_LIBRARIES    ${CARES_LIBRARY})
+    set(_cares_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
+    set(_cares_LIBRARIES    ${CARES_LIBRARY})
   endif()
 
   mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)
 endif()
 
-if(CARES_FOUND AND WIN32)
-  list(APPEND CARES_LIBRARIES "iphlpapi")  # for if_indextoname and others
+if(CARES_FOUND)
+  if(WIN32)
+    list(APPEND _cares_LIBRARIES "iphlpapi")  # for if_indextoname and others
+  endif()
+
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_cares_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::cares)
+    add_library(CURL::cares INTERFACE IMPORTED)
+    set_target_properties(CURL::cares PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_cares_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_cares_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_cares_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_cares_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_cares_LIBRARIES}")
+  endif()
 endif()
