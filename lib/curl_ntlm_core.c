@@ -99,6 +99,7 @@
 #elif defined(USE_GNUTLS)
 
 #  include <nettle/des.h>
+#  define USE_CURL_DES_SET_ODD_PARITY
 
 #elif defined(USE_MBEDTLS_DES)
 
@@ -106,8 +107,10 @@
 
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
+#  define USE_CURL_DES_SET_ODD_PARITY
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
+#  define USE_CURL_DES_SET_ODD_PARITY
 #else
 #  error "cannot compile NTLM support without a crypto library with DES."
 #endif
@@ -119,12 +122,49 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 #include "curl_endian.h"
-#include "curl_des.h"
 #include "curl_md4.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
+
+#ifdef USE_CURL_DES_SET_ODD_PARITY
+/*
+ * curl_des_set_odd_parity()
+ *
+ * Copyright (C) Steve Holme, <steve_holme@hotmail.com>
+ *
+ * This is used to apply odd parity to the given byte array. It is typically
+ * used by when a cryptography engine does not have its own version.
+ *
+ * The function is a port of the Java based oddParity() function over at:
+ *
+ * https://davenport.sourceforge.net/ntlm.html
+ *
+ * Parameters:
+ *
+ * bytes       [in/out] - The data whose parity bits are to be adjusted for
+ *                        odd parity.
+ * len         [out]    - The length of the data.
+ */
+static void curl_des_set_odd_parity(unsigned char *bytes, size_t len)
+{
+  size_t i;
+
+  for(i = 0; i < len; i++) {
+    unsigned char b = bytes[i];
+
+    bool needs_parity = (((b >> 7) ^ (b >> 6) ^ (b >> 5) ^
+                          (b >> 4) ^ (b >> 3) ^ (b >> 2) ^
+                          (b >> 1)) & 0x01) == 0;
+
+    if(needs_parity)
+      bytes[i] |= 0x01;
+    else
+      bytes[i] &= 0xfe;
+  }
+}
+#endif /* USE_CURL_DES_SET_ODD_PARITY */
 
 /*
 * Turns a 56-bit key into being 64-bit wide.
@@ -172,7 +212,7 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
+  curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
 
   /* Set the key */
   des_set_key(des, (const uint8_t *) key);
@@ -214,7 +254,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) ctl.Crypto_Key, ctl.Data_Len);
+  curl_des_set_odd_parity((unsigned char *) ctl.Crypto_Key, ctl.Data_Len);
 
   /* Perform the encryption */
   _CIPHER((_SPCPTR *) &out, &ctl, (_SPCPTR *) &in);
@@ -252,7 +292,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, blob.key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) blob.key, sizeof(blob.key));
+  curl_des_set_odd_parity((unsigned char *) blob.key, sizeof(blob.key));
 
   /* Import the key */
   if(!CryptImportKey(hprov, (BYTE *) &blob, sizeof(blob), 0, 0, &hkey)) {

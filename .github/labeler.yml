@@ -162,9 +162,9 @@ cryptography:
               docs/libcurl/opts/CURLOPT_EGDSOCKET*,\
               lib/*sha256*,\
               lib/*sha512*,\
-              lib/curl_des.*,\
               lib/curl_hmac.*,\
               lib/curl_md?.*,\
+              lib/curl_ntlm_core.*,\
               lib/md?.*,\
               lib/rand.*\
               }"
