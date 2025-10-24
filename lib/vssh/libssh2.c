@@ -69,7 +69,6 @@
 #include "curl_path.h"
 #include "../curlx/strparse.h"
 #include "../curlx/base64.h" /* for base64 encoding/decoding */
-#include "../curl_sha256.h"
 
 /* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
