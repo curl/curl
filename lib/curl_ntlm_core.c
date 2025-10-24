@@ -69,7 +69,6 @@
 
 #ifdef USE_OPENSSL
 #  include <openssl/des.h>
-#  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
 #  ifdef OPENSSL_IS_AWSLC  /* for versions 1.2.0 to 1.30.1 */
@@ -79,7 +78,6 @@
 #else
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
-#  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
 #  include <wolfssl/openssl/rand.h>
 #  ifdef OPENSSL_COEXIST
@@ -118,7 +116,6 @@
 #include "urldata.h"
 #include "strcase.h"
 #include "curl_ntlm_core.h"
-#include "curl_md5.h"
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 #include "curl_endian.h"
