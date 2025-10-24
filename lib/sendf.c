@@ -50,7 +50,6 @@
 #include "multiif.h"
 #include "strerror.h"
 #include "select.h"
-#include "strdup.h"
 #include "http2.h"
 #include "progress.h"
 #include "curlx/warnless.h"

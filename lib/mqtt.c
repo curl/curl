@@ -34,7 +34,6 @@
 #include "progress.h"
 #include "mqtt.h"
 #include "select.h"
-#include "strdup.h"
 #include "url.h"
 #include "escape.h"
 #include "curlx/warnless.h"

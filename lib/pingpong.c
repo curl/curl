@@ -37,7 +37,6 @@
 #include "pingpong.h"
 #include "multiif.h"
 #include "vtls/vtls.h"
-#include "strdup.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

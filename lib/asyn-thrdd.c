@@ -64,7 +64,6 @@
 #include "multiif.h"
 #include "curl_threads.h"
 #include "select.h"
-#include "strdup.h"
 
 #ifdef USE_ARES
 #include <ares.h>

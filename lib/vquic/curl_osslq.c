@@ -35,7 +35,6 @@
 #include "../urldata.h"
 #include "../hash.h"
 #include "../sendf.h"
-#include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../cfilters.h"

@@ -42,7 +42,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "rand.h"
-#include "strdup.h"
 #include "curlx/strparse.h"
 #include "transfer.h"
 #include "curlx/dynbuf.h"

@@ -37,7 +37,6 @@
 #include "curl_sspi.h"
 #include "curlx/multibyte.h"
 #include "curlx/warnless.h"
-#include "strdup.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

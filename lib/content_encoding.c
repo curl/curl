@@ -51,7 +51,6 @@
 #include "sendf.h"
 #include "http.h"
 #include "content_encoding.h"
-#include "strdup.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

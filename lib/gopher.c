@@ -35,7 +35,6 @@
 #include "progress.h"
 #include "gopher.h"
 #include "select.h"
-#include "strdup.h"
 #include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
