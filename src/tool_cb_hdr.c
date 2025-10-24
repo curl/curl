@@ -34,7 +34,6 @@
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
 #include "tool_libinfo.h"
-#include "tool_strdup.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
