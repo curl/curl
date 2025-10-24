@@ -94,7 +94,7 @@ jobs:
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja -D_CURL_PREFILL=ON ${options} \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
-              -DCMAKE_UNITY_BUILD=OFF -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
               -DCURL_WERROR=ON \
               ${MATRIX_CONFIG}
           else
@@ -290,7 +290,7 @@ jobs:
                 -DCMAKE_INSTALL_PREFIX="${HOME}"/curl-install \
                 -DCMAKE_C_FLAGS="${CFLAGS_CMAKE} ${CPPFLAGS}" \
                 -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
-                -DCMAKE_UNITY_BUILD=OFF -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
+                -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
                 -DCURL_WERROR=ON \
                 ${MATRIX_CONFIG}
             done
@@ -514,7 +514,7 @@ jobs:
             cmake -B "bld${_chkprefill}" -G Ninja ${options} \
               -DCMAKE_C_COMPILER=gcc \
               -DCMAKE_BUILD_TYPE="${MATRIX_TYPE}" \
-              -DCMAKE_UNITY_BUILD=OFF -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
+              -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 \
               -DCURL_WERROR=ON \
               -DUSE_LIBIDN2=OFF \
               ${MATRIX_CONFIG}
@@ -629,7 +629,7 @@ jobs:
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
-              -DCMAKE_UNITY_BUILD=OFF \
+              -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF \
@@ -873,7 +873,7 @@ jobs:
               -DCMAKE_RC_FLAGS="${rcflags}" \
               -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
               -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
-              -DCMAKE_UNITY_BUILD=OFF \
+              -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DLIBPSL_INCLUDE_DIR="${MINGW_PREFIX}/include" \
               -DLIBPSL_LIBRARY="${MINGW_PREFIX}/lib/libpsl.dll.a" \
