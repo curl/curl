@@ -32,7 +32,8 @@ name: 'CodeQL'
     - cron: '0 0 * * 4'
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions: {}
 
