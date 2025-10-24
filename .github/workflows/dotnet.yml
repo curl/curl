@@ -195,3 +195,64 @@ jobs:
       with:
         name: benchmark-results
         path: dotnet/**/BenchmarkDotNet.Artifacts/**/*
+
+  generate-docs:
+    name: Generate and Deploy Documentation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dotnetcurl')
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install DocFX
+      run: dotnet tool install -g docfx
+
+    - name: Restore dependencies
+      working-directory: ./dotnet
+      run: dotnet restore
+
+    - name: Build project
+      working-directory: ./dotnet
+      run: dotnet build --configuration Release
+
+    - name: Generate DocFX documentation
+      working-directory: ./dotnet
+      run: |
+        export PATH="$PATH:$HOME/.dotnet/tools"
+        docfx metadata docfx.json --force
+        docfx build docfx.json --force
+
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./dotnet/_site
+
+  deploy-docs:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: generate-docs
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dotnetcurl')
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
