@@ -52,7 +52,7 @@ namespace CurlDotNet
     /// <remarks>
     /// <para><b>Why use CurlDotNet instead of HttpClient?</b></para>
     /// <list type="number">
-    /// <item>✂️ <b>Copy & Paste</b> - Use commands directly from API docs without translation</item>
+    /// <item>✂️ <b>Copy &amp; Paste</b> - Use commands directly from API docs without translation</item>
     /// <item>🎓 <b>No Learning Curve</b> - If you know curl (everyone does), you know this</item>
     /// <item>🔄 <b>Easy Migration</b> - Move from bash scripts to C# without rewriting</item>
     /// <item>📦 <b>All Features</b> - Supports all 300+ curl options out of the box</item>
@@ -64,7 +64,7 @@ namespace CurlDotNet
     ///
     /// <para><b>Sponsored by</b> <see href="https://ironsoftware.com">IronSoftware</see> - creators of IronPDF, IronOCR, IronXL, and IronBarcode.</para>
     /// </remarks>
-    public static class Curl
+    public static partial class Curl
     {
         private static readonly CurlEngine _engine = new CurlEngine();
 
@@ -341,7 +341,7 @@ namespace CurlDotNet
         /// <seealso cref="ExecuteMany(string[])">Execute multiple commands in parallel</seealso>
         /// <seealso cref="CurlResult">The response object returned</seealso>
         /// <seealso href="https://curl.se/docs/manpage.html">Complete curl documentation</seealso>
-        public static async Task<CurlResult> Execute(string command)
+        public static async Task<CurlResult> ExecuteAsync(string command)
         {
             return await _engine.ExecuteAsync(command);
         }
@@ -459,7 +459,7 @@ namespace CurlDotNet
         /// <item>Combine multiple tokens with CreateLinkedTokenSource for complex scenarios</item>
         /// </list>
         /// </remarks>
-        public static async Task<CurlResult> Execute(string command, CancellationToken cancellationToken)
+        public static async Task<CurlResult> ExecuteAsync(string command, CancellationToken cancellationToken)
         {
             return await _engine.ExecuteAsync(command, cancellationToken);
         }
@@ -509,7 +509,7 @@ namespace CurlDotNet
         /// <para>See <see cref="CurlSettings"/> for all options.</para>
         /// </param>
         /// <returns>A <see cref="CurlResult"/> with the response.</returns>
-        public static async Task<CurlResult> Execute(string command, CurlSettings settings)
+        public static async Task<CurlResult> ExecuteAsync(string command, CurlSettings settings)
         {
             return await _engine.ExecuteAsync(command, settings);
         }
@@ -543,9 +543,9 @@ namespace CurlDotNet
         /// <para>This is equivalent to: <c>Curl.Execute($"curl {url}")</c></para>
         /// <para>For GET requests with headers or auth, use the full <see cref="Execute(string)"/> method.</para>
         /// </remarks>
-        public static async Task<CurlResult> Get(string url)
+        public static async Task<CurlResult> GetAsync(string url)
         {
-            return await Execute($"curl {url}");
+            return await ExecuteAsync($"curl {url}");
         }
 
         /// <summary>
@@ -580,9 +580,9 @@ namespace CurlDotNet
         /// <para>This is equivalent to: <c>Curl.Execute($"curl -X POST -d '{data}' {url}")</c></para>
         /// <para>For POST with headers, use <see cref="PostJson"/> or the full <see cref="Execute(string)"/> method.</para>
         /// </remarks>
-        public static async Task<CurlResult> Post(string url, string data)
+        public static async Task<CurlResult> PostAsync(string url, string data)
         {
-            return await Execute($"curl -X POST -d '{data}' {url}");
+            return await ExecuteAsync($"curl -X POST -d '{data}' {url}");
         }
 
         /// <summary>
@@ -642,10 +642,10 @@ namespace CurlDotNet
         /// <para>Automatically adds: <c>Content-Type: application/json</c> header</para>
         /// <para>Uses System.Text.Json on .NET 6+ or Newtonsoft.Json on older frameworks</para>
         /// </remarks>
-        public static async Task<CurlResult> PostJson(string url, object data)
+        public static async Task<CurlResult> PostJsonAsync(string url, object data)
         {
             var json = SerializeJson(data);
-            return await Execute($"curl -X POST -H 'Content-Type: application/json' -d '{json}' {url}");
+            return await ExecuteAsync($"curl -X POST -H 'Content-Type: application/json' -d '{json}' {url}");
         }
 
         /// <summary>
@@ -701,9 +701,9 @@ namespace CurlDotNet
         /// <para>This is equivalent to: <c>Curl.Execute($"curl -o {outputPath} {url}")</c></para>
         /// <para>For large files with progress, use <see cref="Execute(string, CurlSettings)"/> with OnProgress callback.</para>
         /// </remarks>
-        public static async Task<CurlResult> Download(string url, string outputPath)
+        public static async Task<CurlResult> DownloadAsync(string url, string outputPath)
         {
-            return await Execute($"curl -o {outputPath} {url}");
+            return await ExecuteAsync($"curl -o {outputPath} {url}");
         }
 
         /// <summary>
@@ -781,9 +781,9 @@ namespace CurlDotNet
         /// running them in parallel takes ~1 second total instead of 10 seconds sequentially!</para>
         /// <para><b>Limit:</b> Be respectful of APIs - don't send hundreds of parallel requests.</para>
         /// </remarks>
-        public static async Task<CurlResult[]> ExecuteMany(params string[] commands)
+        public static async Task<CurlResult[]> ExecuteManyAsync(params string[] commands)
         {
-            var tasks = commands.Select(cmd => Execute(cmd));
+            var tasks = commands.Select(cmd => ExecuteAsync(cmd));
             return await Task.WhenAll(tasks);
         }
 

@@ -84,7 +84,7 @@ namespace CurlDotNet.Tests
                 var command = $"curl -o {tempFile} https://httpbin.org/bytes/1024";
 
                 // Act
-                var result = await Curl.Execute(command);
+                var result = await Curl.ExecuteAsync(command);
 
                 // Assert
                 result.OutputFiles.Should().Contain(tempFile);
@@ -163,7 +163,7 @@ namespace CurlDotNet.Tests
             for (int i = 0; i < 10; i++)
             {
                 var task = Task.Run(() =>
-                    Curl.Execute($"curl https://httpbin.org/uuid"));
+                    Curl.ExecuteAsync($"curl https://httpbin.org/uuid"));
                 tasks.Add(task);
             }
 
@@ -185,7 +185,7 @@ namespace CurlDotNet.Tests
             {
                 var localI = i;
                 var task = Task.Run(() =>
-                    Curl.Execute($"curl https://httpbin.org/anything?id={localI}"));
+                    Curl.ExecuteAsync($"curl https://httpbin.org/anything?id={localI}"));
                 tasks.Add(task);
             }
 
@@ -208,7 +208,7 @@ namespace CurlDotNet.Tests
             using var cts = new CancellationTokenSource();
 
             // Simulate a long-running request
-            var task = Curl.Execute("curl https://httpbin.org/delay/10", cts.Token);
+            var task = Curl.ExecuteAsync("curl https://httpbin.org/delay/10", cts.Token);
 
             // Cancel after a short delay
             cts.CancelAfter(100);
@@ -271,7 +271,7 @@ namespace CurlDotNet.Tests
         {
             // Act & Assert
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                Curl.Execute(command));
+                Curl.ExecuteAsync(command));
         }
 
         [Fact]
@@ -340,7 +340,7 @@ namespace CurlDotNet.Tests
 
             // Act
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            var results = await Curl.ExecuteMany(commands);
+            var results = await Curl.ExecuteManyAsync(commands);
             sw.Stop();
 
             // Assert

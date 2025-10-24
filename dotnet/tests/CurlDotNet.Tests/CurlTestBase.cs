@@ -138,7 +138,7 @@ namespace CurlDotNet.Tests
         /// </summary>
         protected async Task<CurlResult> ExecuteCurlAsync(string command)
         {
-            var result = await Curl.Execute(command);
+            var result = await Curl.ExecuteAsync(command);
             Output.WriteLine($"Command: {command}");
             Output.WriteLine($"Output: {result.Body}");
             return result;

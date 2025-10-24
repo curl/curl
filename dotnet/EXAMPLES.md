@@ -25,11 +25,11 @@ using System;
 using System.Threading.Tasks;
 
 // Works with or without the "curl" prefix
-var response = await Curl.Execute("curl https://api.github.com/users/octocat");
+var response = await Curl.ExecuteAsync("curl https://api.github.com/users/octocat");
 Console.WriteLine(response.Body);
 
 // Also works without "curl" prefix
-var data = await Curl.Execute("https://httpbin.org/get");
+var data = await Curl.ExecuteAsync("https://httpbin.org/get");
 Console.WriteLine(data.StatusCode); // 200
 ```
 
@@ -56,7 +56,7 @@ using System;
 using System.Threading.Tasks;
 
 // Execute multiple curl commands at once
-var results = await Curl.ExecuteMany(new[] {
+var results = await Curl.ExecuteManyAsync(new[] {
     "curl https://api.github.com/users/octocat",
     "curl https://api.github.com/users/torvalds",
     "curl https://api.github.com/users/dotnet"
@@ -78,13 +78,13 @@ using System;
 using System.Threading.Tasks;
 
 // Simple GET
-var response = await Curl.Execute("curl https://jsonplaceholder.typicode.com/posts/1");
+var response = await Curl.ExecuteAsync("curl https://jsonplaceholder.typicode.com/posts/1");
 
 // GET with query parameters
-var users = await Curl.Execute("curl 'https://api.example.com/users?page=1&limit=10'");
+var users = await Curl.ExecuteAsync("curl 'https://api.example.com/users?page=1&limit=10'");
 
 // GET with custom headers
-var data = await Curl.Execute(@"
+var data = await Curl.ExecuteAsync(@"
     curl https://api.example.com/data
     -H 'Accept: application/json'
     -H 'User-Agent: CurlDotNet/1.0'
@@ -100,7 +100,7 @@ using System;
 using System.Threading.Tasks;
 
 // POST with JSON data
-var result = await Curl.Execute(@"
+var result = await Curl.ExecuteAsync(@"
     curl -X POST https://jsonplaceholder.typicode.com/posts
     -H 'Content-Type: application/json'
     -d '{""title"":""foo"",""body"":""bar"",""userId"":1}'
@@ -111,7 +111,7 @@ var post = result.ParseJson<Post>();
 Console.WriteLine($"Created post with ID: {post.Id}");
 
 // POST with form data
-var response = await Curl.Execute(@"
+var response = await Curl.ExecuteAsync(@"
     curl -X POST https://httpbin.org/post
     -F 'username=john'
     -F 'password=secret'
@@ -119,7 +119,7 @@ var response = await Curl.Execute(@"
 ");
 
 // POST with URL-encoded data
-var login = await Curl.Execute(@"
+var login = await Curl.ExecuteAsync(@"
     curl -X POST https://example.com/login
     -d 'username=john&password=secret'
 ");
@@ -129,7 +129,7 @@ var login = await Curl.Execute(@"
 
 ```csharp
 // PUT to update resource
-var updated = await Curl.Execute(@"
+var updated = await Curl.ExecuteAsync(@"
     curl -X PUT https://jsonplaceholder.typicode.com/posts/1
     -H 'Content-Type: application/json'
     -d '{""id"":1,""title"":""Updated"",""body"":""New content"",""userId"":1}'
@@ -140,14 +140,14 @@ var updated = await Curl.Execute(@"
 
 ```csharp
 // DELETE a resource
-var deleted = await Curl.Execute("curl -X DELETE https://jsonplaceholder.typicode.com/posts/1");
+var deleted = await Curl.ExecuteAsync("curl -X DELETE https://jsonplaceholder.typicode.com/posts/1");
 ```
 
 ### PATCH Request
 
 ```csharp
 // PATCH for partial updates
-var patched = await Curl.Execute(@"
+var patched = await Curl.ExecuteAsync(@"
     curl -X PATCH https://api.example.com/users/123
     -H 'Content-Type: application/json'
     -d '{""email"":""newemail@example.com""}'
@@ -160,10 +160,10 @@ var patched = await Curl.Execute(@"
 
 ```csharp
 // Basic auth with username:password
-var response = await Curl.Execute("curl -u admin:password123 https://api.example.com/admin");
+var response = await Curl.ExecuteAsync("curl -u admin:password123 https://api.example.com/admin");
 
 // Basic auth with header
-var data = await Curl.Execute(@"
+var data = await Curl.ExecuteAsync(@"
     curl https://api.example.com/secure
     -H 'Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM='
 ");
@@ -173,13 +173,13 @@ var data = await Curl.Execute(@"
 
 ```csharp
 // OAuth 2.0 Bearer token
-var result = await Curl.Execute(@"
+var result = await Curl.ExecuteAsync(@"
     curl https://api.example.com/protected
     -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
 ");
 
 // GitHub API with token
-var repos = await Curl.Execute(@"
+var repos = await Curl.ExecuteAsync(@"
     curl https://api.github.com/user/repos
     -H 'Authorization: token ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 ");
@@ -189,20 +189,20 @@ var repos = await Curl.Execute(@"
 
 ```csharp
 // API key in header
-var weather = await Curl.Execute(@"
+var weather = await Curl.ExecuteAsync(@"
     curl 'https://api.openweathermap.org/data/2.5/weather?q=London'
     -H 'X-API-Key: your-api-key-here'
 ");
 
 // API key in query string
-var maps = await Curl.Execute("curl 'https://maps.googleapis.com/maps/api/geocode/json?address=Seattle&key=YOUR_API_KEY'");
+var maps = await Curl.ExecuteAsync("curl 'https://maps.googleapis.com/maps/api/geocode/json?address=Seattle&key=YOUR_API_KEY'");
 ```
 
 ### Custom Headers
 
 ```csharp
 // Multiple custom headers
-var response = await Curl.Execute(@"
+var response = await Curl.ExecuteAsync(@"
     curl https://api.example.com/data
     -H 'Accept: application/json'
     -H 'X-Request-ID: 12345'
@@ -217,34 +217,34 @@ var response = await Curl.Execute(@"
 
 ```csharp
 // Download to specific file
-await Curl.Execute("curl -o output.pdf https://example.com/document.pdf");
+await Curl.ExecuteAsync("curl -o output.pdf https://example.com/document.pdf");
 
 // Download with original filename
-await Curl.Execute("curl -O https://example.com/report-2024.xlsx");
+await Curl.ExecuteAsync("curl -O https://example.com/report-2024.xlsx");
 
 // Download multiple files
-await Curl.Execute(@"
+await Curl.ExecuteAsync(@"
     curl -O https://example.com/file1.zip
     -O https://example.com/file2.zip
     -O https://example.com/file3.zip
 ");
 
 // Download with progress bar
-await Curl.Execute("curl --progress-bar -o large-file.iso https://example.com/large.iso");
+await Curl.ExecuteAsync("curl --progress-bar -o large-file.iso https://example.com/large.iso");
 ```
 
 ### Upload Files
 
 ```csharp
 // Upload single file
-var uploaded = await Curl.Execute(@"
+var uploaded = await Curl.ExecuteAsync(@"
     curl -X POST https://api.example.com/upload
     -F 'file=@/path/to/document.pdf'
     -F 'description=Annual Report'
 ");
 
 // Upload multiple files
-var result = await Curl.Execute(@"
+var result = await Curl.ExecuteAsync(@"
     curl -X POST https://api.example.com/batch-upload
     -F 'files[]=@file1.jpg'
     -F 'files[]=@file2.jpg'
@@ -253,7 +253,7 @@ var result = await Curl.Execute(@"
 ");
 
 // Upload with metadata
-var response = await Curl.Execute(@"
+var response = await Curl.ExecuteAsync(@"
     curl -X POST https://api.cloudinary.com/v1_1/demo/image/upload
     -F 'file=@photo.jpg'
     -F 'upload_preset=unsigned'
@@ -265,13 +265,13 @@ var response = await Curl.Execute(@"
 
 ```csharp
 // FTP download
-await Curl.Execute("curl -u ftpuser:ftppass ftp://ftp.example.com/file.txt -o local.txt");
+await Curl.ExecuteAsync("curl -u ftpuser:ftppass ftp://ftp.example.com/file.txt -o local.txt");
 
 // FTP upload
-await Curl.Execute("curl -u ftpuser:ftppass -T localfile.txt ftp://ftp.example.com/remote.txt");
+await Curl.ExecuteAsync("curl -u ftpuser:ftppass -T localfile.txt ftp://ftp.example.com/remote.txt");
 
 // FTP with SSL/TLS
-await Curl.Execute("curl --ftp-ssl -u user:pass ftp://secure.example.com/file.txt");
+await Curl.ExecuteAsync("curl --ftp-ssl -u user:pass ftp://secure.example.com/file.txt");
 ```
 
 ## Advanced Features
@@ -280,23 +280,23 @@ await Curl.Execute("curl --ftp-ssl -u user:pass ftp://secure.example.com/file.tx
 
 ```csharp
 // Follow redirects automatically
-var final = await Curl.Execute("curl -L https://bit.ly/shortened-url");
+var final = await Curl.ExecuteAsync("curl -L https://bit.ly/shortened-url");
 
 // Limit redirect count
-var limited = await Curl.Execute("curl -L --max-redirs 3 https://example.com/redirect");
+var limited = await Curl.ExecuteAsync("curl -L --max-redirs 3 https://example.com/redirect");
 ```
 
 ### Cookies
 
 ```csharp
 // Save cookies
-await Curl.Execute("curl -c cookies.txt https://example.com/login");
+await Curl.ExecuteAsync("curl -c cookies.txt https://example.com/login");
 
 // Use saved cookies
-var response = await Curl.Execute("curl -b cookies.txt https://example.com/protected");
+var response = await Curl.ExecuteAsync("curl -b cookies.txt https://example.com/protected");
 
 // Send specific cookie
-var data = await Curl.Execute(@"
+var data = await Curl.ExecuteAsync(@"
     curl https://example.com/api
     -H 'Cookie: session=abc123; user=john'
 ");
@@ -306,13 +306,13 @@ var data = await Curl.Execute(@"
 
 ```csharp
 // Connection timeout
-var fast = await Curl.Execute("curl --connect-timeout 5 https://api.example.com/data");
+var fast = await Curl.ExecuteAsync("curl --connect-timeout 5 https://api.example.com/data");
 
 // Total timeout
-var limited = await Curl.Execute("curl --max-time 30 https://slow-api.example.com/report");
+var limited = await Curl.ExecuteAsync("curl --max-time 30 https://slow-api.example.com/report");
 
 // Both timeouts
-var robust = await Curl.Execute(@"
+var robust = await Curl.ExecuteAsync(@"
     curl --connect-timeout 5 --max-time 60
     https://api.example.com/large-download
 ");
@@ -322,13 +322,13 @@ var robust = await Curl.Execute(@"
 
 ```csharp
 // HTTP proxy
-var proxied = await Curl.Execute("curl -x http://proxy.company.com:8080 https://example.com");
+var proxied = await Curl.ExecuteAsync("curl -x http://proxy.company.com:8080 https://example.com");
 
 // SOCKS5 proxy
-var secure = await Curl.Execute("curl --socks5 localhost:1080 https://blocked-site.com");
+var secure = await Curl.ExecuteAsync("curl --socks5 localhost:1080 https://blocked-site.com");
 
 // Proxy with authentication
-var authed = await Curl.Execute(@"
+var authed = await Curl.ExecuteAsync(@"
     curl -x http://proxy.example.com:8080
     --proxy-user username:password
     https://external-api.com
@@ -339,26 +339,26 @@ var authed = await Curl.Execute(@"
 
 ```csharp
 // Skip certificate verification (dev only!)
-var insecure = await Curl.Execute("curl -k https://self-signed.example.com");
+var insecure = await Curl.ExecuteAsync("curl -k https://self-signed.example.com");
 
 // Use client certificate
-var mutual = await Curl.Execute(@"
+var mutual = await Curl.ExecuteAsync(@"
     curl --cert client.crt --key client.key
     https://mutual-tls.example.com/api
 ");
 
 // Specify TLS version
-var tls13 = await Curl.Execute("curl --tlsv1.3 https://modern-api.example.com");
+var tls13 = await Curl.ExecuteAsync("curl --tlsv1.3 https://modern-api.example.com");
 ```
 
 ### Rate Limiting
 
 ```csharp
 // Limit download speed
-await Curl.Execute("curl --limit-rate 200K https://example.com/large-file.zip -o file.zip");
+await Curl.ExecuteAsync("curl --limit-rate 200K https://example.com/large-file.zip -o file.zip");
 
 // Limit upload speed
-await Curl.Execute(@"
+await Curl.ExecuteAsync(@"
     curl --limit-rate 100K
     -T large-upload.zip
     https://upload.example.com/files
@@ -372,7 +372,7 @@ await Curl.Execute(@"
 ```csharp
 try
 {
-    var response = await Curl.Execute("curl https://api.example.com/data");
+    var response = await Curl.ExecuteAsync("curl https://api.example.com/data");
 }
 catch (CurlDnsException ex)
 {
@@ -410,7 +410,7 @@ async Task<CurlResult> ExecuteWithRetry(string command, int maxRetries = 3)
     {
         try
         {
-            return await Curl.Execute(command);
+            return await Curl.ExecuteAsync(command);
         }
         catch (CurlException) when (i < maxRetries - 1)
         {
@@ -432,7 +432,7 @@ var result = await ExecuteWithRetry("curl https://flaky-api.example.com/data");
 // Async/await pattern
 public async Task<string> GetUserDataAsync(int userId)
 {
-    var response = await Curl.Execute($"curl https://api.example.com/users/{userId}");
+    var response = await Curl.ExecuteAsync($"curl https://api.example.com/users/{userId}");
     return response.Body;
 }
 
@@ -592,7 +592,7 @@ public class ApiClient
 
     public async Task<T> GetAsync<T>(string endpoint)
     {
-        var response = await Curl.Execute($@"
+        var response = await Curl.ExecuteAsync($@"
             curl {_baseUrl}/{endpoint}
             -H 'Authorization: Bearer {_apiKey}'
             -H 'Accept: application/json'
@@ -604,7 +604,7 @@ public class ApiClient
     public async Task<T> PostAsync<T>(string endpoint, object data)
     {
         var json = JsonSerializer.Serialize(data);
-        var response = await Curl.Execute($@"
+        var response = await Curl.ExecuteAsync($@"
             curl -X POST {_baseUrl}/{endpoint}
             -H 'Authorization: Bearer {_apiKey}'
             -H 'Content-Type: application/json'
@@ -623,12 +623,12 @@ public class ApiClient
 public async Task DeployToProduction()
 {
     // Check health endpoint
-    var health = await Curl.Execute("curl https://api.production.com/health");
+    var health = await Curl.ExecuteAsync("curl https://api.production.com/health");
     if (health.StatusCode != 200)
         throw new Exception("Production API is not healthy");
 
     // Upload deployment artifact
-    var upload = await Curl.Execute(@"
+    var upload = await Curl.ExecuteAsync(@"
         curl -X POST https://deploy.production.com/artifacts
         -F 'file=@./release.zip'
         -F 'version=1.2.3'
@@ -636,7 +636,7 @@ public async Task DeployToProduction()
     ");
 
     // Trigger deployment
-    var deploy = await Curl.Execute(@"
+    var deploy = await Curl.ExecuteAsync(@"
         curl -X POST https://deploy.production.com/trigger
         -H 'Content-Type: application/json'
         -d '{""artifactId"":""' + upload.Body + '"",""strategy"":""rolling""}'
@@ -647,7 +647,7 @@ public async Task DeployToProduction()
     do
     {
         await Task.Delay(5000);
-        var check = await Curl.Execute($"curl https://deploy.production.com/status/{deploy.Body}");
+        var check = await Curl.ExecuteAsync($"curl https://deploy.production.com/status/{deploy.Body}");
         status = check.Body;
     }
     while (status != "completed" && status != "failed");
@@ -666,7 +666,7 @@ public async Task<List<Product>> ScrapeProducts(string category)
     var products = new List<Product>();
 
     // Get category page
-    var response = await Curl.Execute($@"
+    var response = await Curl.ExecuteAsync($@"
         curl https://shop.example.com/category/{category}
         -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         -H 'Accept: text/html,application/xhtml+xml'
@@ -678,7 +678,7 @@ public async Task<List<Product>> ScrapeProducts(string category)
     // Fetch each product with rate limiting
     foreach (var url in productUrls)
     {
-        var productResponse = await Curl.Execute($@"
+        var productResponse = await Curl.ExecuteAsync($@"
             curl {url}
             -H 'User-Agent: Mozilla/5.0'
             --compressed
@@ -712,7 +712,7 @@ public async Task<string> GetRepositoryInfo(string owner, string name)
         }
     }";
 
-    var response = await Curl.Execute($@"
+    var response = await Curl.ExecuteAsync($@"
         curl -X POST https://api.github.com/graphql
         -H 'Authorization: Bearer {githubToken}'
         -H 'Content-Type: application/json'
@@ -740,7 +740,7 @@ public async Task TestWebhook()
     var json = JsonSerializer.Serialize(payload);
     var signature = ComputeHmacSignature(json, "webhook-secret");
 
-    var response = await Curl.Execute($@"
+    var response = await Curl.ExecuteAsync($@"
         curl -X POST https://localhost:5001/webhooks/stripe
         -H 'Content-Type: application/json'
         -H 'X-Webhook-Signature: {signature}'
@@ -767,7 +767,7 @@ public async Task<List<UserData>> GetUsersInBatches(List<int> userIds)
             $"curl https://api.example.com/users/{id}"
         ).ToArray();
 
-        var results = await Curl.ExecuteMany(commands);
+        var results = await Curl.ExecuteManyAsync(commands);
 
         foreach (var result in results)
         {
@@ -804,7 +804,7 @@ public async Task<Dictionary<string, bool>> CheckEndpointHealth()
         $"curl --max-time 5 --connect-timeout 2 {e}"
     ).ToArray();
 
-    var results = await Curl.ExecuteMany(commands);
+    var results = await Curl.ExecuteManyAsync(commands);
 
     return endpoints.Zip(results, (endpoint, result) =>
         new { endpoint, healthy = result.StatusCode == 200 }
@@ -827,7 +827,7 @@ public class ApiTests
         var userId = 123;
 
         // Act
-        var response = await Curl.Execute($"curl https://api.example.com/users/{userId}");
+        var response = await Curl.ExecuteAsync($"curl https://api.example.com/users/{userId}");
 
         // Assert
         Assert.AreEqual(200, response.StatusCode);
@@ -840,7 +840,7 @@ public class ApiTests
         // Act & Assert
         await Assert.ThrowsExceptionAsync<CurlAuthenticationException>(async () =>
         {
-            await Curl.Execute("curl https://api.example.com/admin");
+            await Curl.ExecuteAsync("curl https://api.example.com/admin");
         });
     }
 }
@@ -857,7 +857,7 @@ public class IntegrationTests
     public async Task TestFullWorkflow()
     {
         // Create resource
-        var createResponse = await Curl.Execute(@"
+        var createResponse = await Curl.ExecuteAsync(@"
             curl -X POST https://api.example.com/items
             -H 'Content-Type: application/json'
             -d '{""name"":""Test Item""}'
@@ -867,11 +867,11 @@ public class IntegrationTests
         var id = ExtractId(createResponse.Body);
 
         // Read resource
-        var getResponse = await Curl.Execute($"curl https://api.example.com/items/{id}");
+        var getResponse = await Curl.ExecuteAsync($"curl https://api.example.com/items/{id}");
         Assert.AreEqual(200, getResponse.StatusCode);
 
         // Update resource
-        var updateResponse = await Curl.Execute($@"
+        var updateResponse = await Curl.ExecuteAsync($@"
             curl -X PUT https://api.example.com/items/{id}
             -H 'Content-Type: application/json'
             -d '{{""name"":""Updated Item""}}'
@@ -879,7 +879,7 @@ public class IntegrationTests
         Assert.AreEqual(200, updateResponse.StatusCode);
 
         // Delete resource
-        var deleteResponse = await Curl.Execute($"curl -X DELETE https://api.example.com/items/{id}");
+        var deleteResponse = await Curl.ExecuteAsync($"curl -X DELETE https://api.example.com/items/{id}");
         Assert.AreEqual(204, deleteResponse.StatusCode);
     }
 }
@@ -896,7 +896,7 @@ var commands = Enumerable.Range(1, 100)
     .ToArray();
 
 // CurlDotNet automatically manages connection pooling
-var results = await Curl.ExecuteMany(commands);
+var results = await Curl.ExecuteManyAsync(commands);
 ```
 
 ### Streaming Large Responses
@@ -906,7 +906,7 @@ var results = await Curl.ExecuteMany(commands);
 public async Task DownloadLargeFile(string url, string outputPath)
 {
     // CurlDotNet streams directly to file
-    await Curl.Execute($"curl -o {outputPath} {url}");
+    await Curl.ExecuteAsync($"curl -o {outputPath} {url}");
 }
 ```
 
@@ -914,7 +914,7 @@ public async Task DownloadLargeFile(string url, string outputPath)
 
 ```csharp
 // Request compressed responses
-var response = await Curl.Execute(@"
+var response = await Curl.ExecuteAsync(@"
     curl https://api.example.com/large-data
     --compressed
     -H 'Accept-Encoding: gzip, deflate, br'
@@ -927,7 +927,7 @@ var response = await Curl.Execute(@"
 
 ```csharp
 // Enable verbose output for debugging
-var response = await Curl.Execute("curl -v https://api.example.com/debug");
+var response = await Curl.ExecuteAsync("curl -v https://api.example.com/debug");
 
 // Access debug information
 Console.WriteLine($"Request headers: {response.RequestHeaders}");
@@ -939,10 +939,10 @@ Console.WriteLine($"Timing: {response.TimingInfo}");
 
 ```csharp
 // Trace all network activity
-var response = await Curl.Execute("curl --trace-ascii debug.txt https://api.example.com/data");
+var response = await Curl.ExecuteAsync("curl --trace-ascii debug.txt https://api.example.com/data");
 
 // Or capture in response
-var result = await Curl.Execute("curl --trace - https://api.example.com/data");
+var result = await Curl.ExecuteAsync("curl --trace - https://api.example.com/data");
 Console.WriteLine(result.TraceOutput);
 ```
 

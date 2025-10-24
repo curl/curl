@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using CurlDotNet;
+using CurlDotNet.Core;
 using Moq;
 using Moq.Protected;
 using System.Threading;

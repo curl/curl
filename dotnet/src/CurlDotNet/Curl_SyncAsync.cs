@@ -19,113 +19,8 @@ namespace CurlDotNet
 {
     public static partial class Curl
     {
-        #region ASYNCHRONOUS Methods (Preferred) - Don't block the thread
-
-        /// <summary>
-        /// <para><b>🎯 ASYNCHRONOUS - Execute curl command WITHOUT blocking (RECOMMENDED).</b></para>
-        ///
-        /// <para>This is the PREFERRED way to execute curl commands in modern .NET applications.
-        /// It doesn't block your thread, so your UI stays responsive and your server can handle more requests.</para>
-        ///
-        /// <para><b>When to use ASYNC (this method):</b></para>
-        /// <list type="bullet">
-        /// <item>✅ Web applications (ASP.NET Core)</item>
-        /// <item>✅ Desktop apps (WPF, WinForms, MAUI)</item>
-        /// <item>✅ Mobile apps (Xamarin, MAUI)</item>
-        /// <item>✅ Any modern .NET application</item>
-        /// <item>✅ When making multiple requests</item>
-        /// <item>✅ When you don't want to freeze the UI</item>
-        /// </list>
-        ///
-        /// <para><b>Example - The RIGHT way in modern apps:</b></para>
-        /// <code>
-        /// // ✅ GOOD - Doesn't block the thread
-        /// public async Task GetDataAsync()
-        /// {
-        ///     var result = await Curl.ExecuteAsync("curl https://api.example.com");
-        ///     ProcessResult(result);
-        /// }
-        ///
-        /// // ✅ GOOD - UI stays responsive
-        /// private async void Button_Click(object sender, EventArgs e)
-        /// {
-        ///     var result = await Curl.ExecuteAsync("curl https://api.example.com");
-        ///     textBox.Text = result.Body;
-        /// }
-        ///
-        /// // ✅ GOOD - Web API controller
-        /// [HttpGet]
-        /// public async Task&lt;IActionResult&gt; GetData()
-        /// {
-        ///     var result = await Curl.ExecuteAsync("curl https://external-api.com");
-        ///     return Ok(result.Body);
-        /// }
-        /// </code>
-        ///
-        /// <para><b>Multiple requests in parallel (FAST!):</b></para>
-        /// <code>
-        /// // Run 3 requests at the same time (takes ~1 second total, not 3!)
-        /// var task1 = Curl.ExecuteAsync("curl https://api1.example.com");
-        /// var task2 = Curl.ExecuteAsync("curl https://api2.example.com");
-        /// var task3 = Curl.ExecuteAsync("curl https://api3.example.com");
-        ///
-        /// var results = await Task.WhenAll(task1, task2, task3);
-        /// </code>
-        /// </summary>
-        /// <param name="command">The curl command to execute</param>
-        /// <returns>A Task that will complete with the result (doesn't block)</returns>
-        public static async Task<CurlResult> ExecuteAsync(string command)
-        {
-            return await _engine.ExecuteAsync(command);
-        }
-
-        /// <summary>
-        /// <para><b>ASYNCHRONOUS with cancellation - Can be cancelled if taking too long.</b></para>
-        ///
-        /// <para>Same as ExecuteAsync but can be cancelled. Still non-blocking (async).</para>
-        ///
-        /// <para><b>Example with timeout:</b></para>
-        /// <code>
-        /// // Cancel if takes longer than 30 seconds
-        /// using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-        ///
-        /// try
-        /// {
-        ///     var result = await Curl.ExecuteAsync("curl https://slow-api.com", cts.Token);
-        /// }
-        /// catch (OperationCanceledException)
-        /// {
-        ///     Console.WriteLine("Request took too long and was cancelled");
-        /// }
-        /// </code>
-        ///
-        /// <para><b>Example with user cancellation:</b></para>
-        /// <code>
-        /// private CancellationTokenSource _cts;
-        ///
-        /// async Task StartDownload()
-        /// {
-        ///     _cts = new CancellationTokenSource();
-        ///     var result = await Curl.ExecuteAsync("curl https://large-file.com", _cts.Token);
-        /// }
-        ///
-        /// void CancelButton_Click() => _cts?.Cancel();
-        /// </code>
-        /// </summary>
-        public static async Task<CurlResult> ExecuteAsync(string command, CancellationToken cancellationToken)
-        {
-            return await _engine.ExecuteAsync(command, cancellationToken);
-        }
-
-        /// <summary>
-        /// <para><b>ASYNCHRONOUS with settings - Advanced async execution.</b></para>
-        /// </summary>
-        public static async Task<CurlResult> ExecuteAsync(string command, CurlSettings settings)
-        {
-            return await _engine.ExecuteAsync(command, settings);
-        }
-
-        #endregion
+        // Note: Async methods are defined in Curl.cs
+        // This file only contains synchronous wrapper methods
 
         #region SYNCHRONOUS Methods (Compatibility) - Blocks the thread
 
@@ -209,18 +104,7 @@ namespace CurlDotNet
 
         #endregion
 
-        #region Quick Helper Methods - Both sync and async versions
-
-        /// <summary>
-        /// <para><b>ASYNCHRONOUS GET request (recommended).</b></para>
-        /// <code>
-        /// var result = await Curl.GetAsync("https://api.example.com");
-        /// </code>
-        /// </summary>
-        public static async Task<CurlResult> GetAsync(string url)
-        {
-            return await ExecuteAsync($"curl {url}");
-        }
+        #region Quick Helper Methods - Synchronous versions only
 
         /// <summary>
         /// <para><b>⚠️ SYNCHRONOUS GET request (blocks thread).</b></para>
@@ -234,34 +118,11 @@ namespace CurlDotNet
         }
 
         /// <summary>
-        /// <para><b>ASYNCHRONOUS POST request (recommended).</b></para>
-        /// <code>
-        /// var result = await Curl.PostAsync("https://api.example.com", jsonData);
-        /// </code>
-        /// </summary>
-        public static async Task<CurlResult> PostAsync(string url, string data)
-        {
-            return await ExecuteAsync($"curl -X POST -d '{data}' {url}");
-        }
-
-        /// <summary>
         /// <para><b>⚠️ SYNCHRONOUS POST request (blocks thread).</b></para>
         /// </summary>
         public static CurlResult Post(string url, string data)
         {
             return Execute($"curl -X POST -d '{data}' {url}");
-        }
-
-        /// <summary>
-        /// <para><b>ASYNCHRONOUS POST with JSON (recommended).</b></para>
-        /// <code>
-        /// var result = await Curl.PostJsonAsync("https://api.example.com", myObject);
-        /// </code>
-        /// </summary>
-        public static async Task<CurlResult> PostJsonAsync(string url, object data)
-        {
-            var json = SerializeJson(data);
-            return await ExecuteAsync($"curl -X POST -H 'Content-Type: application/json' -d '{json}' {url}");
         }
 
         /// <summary>
@@ -271,17 +132,6 @@ namespace CurlDotNet
         {
             var json = SerializeJson(data);
             return Execute($"curl -X POST -H 'Content-Type: application/json' -d '{json}' {url}");
-        }
-
-        /// <summary>
-        /// <para><b>ASYNCHRONOUS file download (recommended).</b></para>
-        /// <code>
-        /// await Curl.DownloadAsync("https://example.com/file.zip", "file.zip");
-        /// </code>
-        /// </summary>
-        public static async Task<CurlResult> DownloadAsync(string url, string outputPath)
-        {
-            return await ExecuteAsync($"curl -o {outputPath} {url}");
         }
 
         /// <summary>

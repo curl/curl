@@ -54,7 +54,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, responseContent);
 
             // Act
-            var response = await _handler.ExecuteAsync(options, _httpClient);
+            var response = await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             response.Should().NotBeNull();
@@ -81,7 +81,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, "[]", req => capturedRequest = req);
 
             // Act
-            await _handler.ExecuteAsync(options, _httpClient);
+            await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedRequest.Should().NotBeNull();
@@ -118,7 +118,7 @@ namespace CurlDotNet.Tests
             });
 
             // Act
-            var response = await _handler.ExecuteAsync(options, _httpClient);
+            var response = await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedRequest.Method.Should().Be(HttpMethod.Post);
@@ -149,7 +149,7 @@ namespace CurlDotNet.Tests
             });
 
             // Act
-            await _handler.ExecuteAsync(options, _httpClient);
+            await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedBody.Should().Contain("field1=value1");
@@ -181,7 +181,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, "", req => capturedRequest = req);
 
             // Act
-            await _handler.ExecuteAsync(options, _httpClient);
+            await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedRequest.Method.Method.Should().Be(method);
@@ -205,7 +205,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, "", req => capturedRequest = req);
 
             // Act
-            await _handler.ExecuteAsync(options, _httpClient);
+            await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedRequest.Headers.Authorization.Should().NotBeNull();
@@ -233,7 +233,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, "", req => capturedRequest = req);
 
             // Act
-            await _handler.ExecuteAsync(options, _httpClient);
+            await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedRequest.Headers.Authorization.Scheme.Should().Be("Bearer");
@@ -256,7 +256,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.NotFound, "Not Found");
 
             // Act
-            var response = await _handler.ExecuteAsync(options, _httpClient);
+            var response = await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             response.StatusCode.Should().Be(404);
@@ -276,7 +276,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.InternalServerError, "Internal Server Error");
 
             // Act
-            var response = await _handler.ExecuteAsync(options, _httpClient);
+            var response = await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             response.StatusCode.Should().Be(500);
@@ -302,7 +302,7 @@ namespace CurlDotNet.Tests
 
             // Act & Assert
             await Assert.ThrowsAsync<CurlTimeoutException>(
-                () => _handler.ExecuteAsync(options, _httpClient));
+                () => _handler.ExecuteAsync(options, CancellationToken.None));
         }
 
         #endregion
@@ -328,7 +328,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, "{}", headers: responseHeaders);
 
             // Act
-            var response = await _handler.ExecuteAsync(options, _httpClient);
+            var response = await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             response.Headers.Should().ContainKey("Content-Type");
@@ -354,7 +354,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, binaryData);
 
             // Act
-            var response = await _handler.ExecuteAsync(options, _httpClient);
+            var response = await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             response.IsBinary.Should().BeTrue();
@@ -380,7 +380,7 @@ namespace CurlDotNet.Tests
             SetupHttpResponse(HttpStatusCode.OK, "", req => capturedRequest = req);
 
             // Act
-            await _handler.ExecuteAsync(options, _httpClient);
+            await _handler.ExecuteAsync(options, CancellationToken.None);
 
             // Assert
             capturedRequest.Headers.UserAgent.ToString().Should().Contain("CurlDotNet/1.0 TestAgent");

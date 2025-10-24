@@ -18,13 +18,13 @@ Every developer knows curl. It's in every tutorial, every Stack Overflow answer,
 
 ```csharp
 // That curl command from the API docs? Just paste it.
-var result = await Curl.Execute("curl -X POST https://api.stripe.com/v1/charges -u sk_test_123: -d amount=2000 -d currency=usd");
+var result = await Curl.ExecuteAsync("curl -X POST https://api.stripe.com/v1/charges -u sk_test_123: -d amount=2000 -d currency=usd");
 
 // That example from Stack Overflow? Paste it.
-var data = await Curl.Execute("curl -H 'Accept: application/json' https://api.github.com/users/dotnet");
+var data = await Curl.ExecuteAsync("curl -H 'Accept: application/json' https://api.github.com/users/dotnet");
 
 // That complex command from your colleague? Paste it.
-var response = await Curl.Execute("curl -X PUT https://api.example.com/v2/upload -H 'Authorization: Bearer token' -F 'file=@data.json' --retry 3 --max-time 30");
+var response = await Curl.ExecuteAsync("curl -X PUT https://api.example.com/v2/upload -H 'Authorization: Bearer token' -F 'file=@data.json' --retry 3 --max-time 30");
 ```
 
 ### Why This Matters

@@ -147,7 +147,7 @@ namespace CurlDotNet.Core
         /// if (result.Headers.ContainsKey("X-RateLimit-Remaining"))
         /// {
         ///     var remaining = int.Parse(result.Headers["X-RateLimit-Remaining"]);
-        ///     if (remaining < 10)
+        ///     if (remaining &lt; 10)
         ///         Console.WriteLine("⚠️ Only {0} API calls left!", remaining);
         /// }
         /// </code>
@@ -413,10 +413,21 @@ namespace CurlDotNet.Core
         /// </summary>
         public async Task<CurlResult> SaveToFileAsync(string filePath)
         {
+#if NETSTANDARD2_0
+            // .NET Standard 2.0 doesn't have async file methods
+            await Task.Run(() =>
+            {
+                if (BinaryData != null)
+                    File.WriteAllBytes(filePath, BinaryData);
+                else
+                    File.WriteAllText(filePath, Body ?? "");
+            });
+#else
             if (BinaryData != null)
                 await File.WriteAllBytesAsync(filePath, BinaryData);
             else
                 await File.WriteAllTextAsync(filePath, Body ?? "");
+#endif
 
             OutputFiles.Add(filePath);
             return this;
@@ -698,7 +709,7 @@ namespace CurlDotNet.Core
             if (string.IsNullOrEmpty(Command))
                 throw new InvalidOperationException("Cannot retry: Original command not available");
 
-            return await Curl.Execute(Command);
+            return await Curl.ExecuteAsync(Command);
         }
 
         /// <summary>
@@ -726,7 +737,7 @@ namespace CurlDotNet.Core
 
             var settings = new CurlSettings();
             configure(settings);
-            return await Curl.Execute(Command, settings);
+            return await Curl.ExecuteAsync(Command, settings);
         }
 
         #endregion
@@ -837,6 +848,39 @@ namespace CurlDotNet.Core
         public T Transform<T>(Func<CurlResult, T> transformer)
         {
             return transformer(this);
+        }
+
+        /// <summary>
+        /// <para><b>Convert the response to a Stream for reading.</b></para>
+        ///
+        /// <para>Useful for streaming or processing data:</para>
+        /// <code>
+        /// using var stream = result.ToStream();
+        /// using var reader = new StreamReader(stream);
+        /// var line = await reader.ReadLineAsync();
+        ///
+        /// // Or for binary data
+        /// using var stream = result.ToStream();
+        /// var buffer = new byte[1024];
+        /// var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+        /// </code>
+        /// </summary>
+        /// <returns>A MemoryStream containing the response data</returns>
+        public Stream ToStream()
+        {
+            if (BinaryData != null)
+            {
+                return new MemoryStream(BinaryData);
+            }
+            else if (Body != null)
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(Body);
+                return new MemoryStream(bytes);
+            }
+            else
+            {
+                return new MemoryStream();
+            }
         }
 
         /// <summary>

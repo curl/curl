@@ -35,7 +35,7 @@ namespace CurlDotNet.Tests
             var command = "curl https://httpbin.org/get";
 
             // For now, just test that it doesn't throw
-            await Record.ExceptionAsync(async () => await Curl.Execute(command));
+            await Record.ExceptionAsync(async () => await Curl.ExecuteAsync(command));
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace CurlDotNet.Tests
             var command = "curl -H 'Accept: application/json' -H 'X-Custom: test' https://httpbin.org/headers";
 
             // Test that command parsing works (would need mock for full test)
-            await Record.ExceptionAsync(async () => await Curl.Execute(command));
+            await Record.ExceptionAsync(async () => await Curl.ExecuteAsync(command));
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace CurlDotNet.Tests
             var command = "curl -X POST -d '{\"key\":\"value\"}' https://httpbin.org/post";
 
             // Test command execution
-            await Record.ExceptionAsync(async () => await Curl.Execute(command));
+            await Record.ExceptionAsync(async () => await Curl.ExecuteAsync(command));
         }
 
         [Theory]
@@ -104,7 +104,7 @@ namespace CurlDotNet.Tests
             {
                 // Act
                 var command = $"curl -o {tempFile} https://httpbin.org/get";
-                var result = await Curl.Execute(command);
+                var result = await Curl.ExecuteAsync(command);
 
                 // Assert
                 result.OutputFiles.Should().Contain(tempFile);
@@ -194,7 +194,7 @@ namespace CurlDotNet.Tests
 
             // Act
             var startTime = DateTime.UtcNow;
-            var results = await Curl.ExecuteMany(commands);
+            var results = await Curl.ExecuteManyAsync(commands);
             var duration = DateTime.UtcNow - startTime;
 
             // Assert - If running in parallel, should take ~1 second, not 3

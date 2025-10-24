@@ -23,7 +23,7 @@ Just paste any curl command and it works:
 using CurlDotNet;
 
 // Works with or without the "curl" prefix
-var response = await Curl.Execute("curl https://api.github.com/users/octocat");
+var response = await Curl.ExecuteAsync("curl https://api.github.com/users/octocat");
 Console.WriteLine(response.Body);
 ```
 
@@ -58,17 +58,17 @@ Console.WriteLine(response.Body);
 
 ```csharp
 // GET request
-var response = await Curl.Execute("curl https://api.example.com/users");
+var response = await Curl.ExecuteAsync("curl https://api.example.com/users");
 
 // POST with JSON
-var result = await Curl.Execute(@"
+var result = await Curl.ExecuteAsync(@"
     curl -X POST https://api.example.com/users
     -H 'Content-Type: application/json'
     -d '{""name"":""John"",""email"":""john@example.com""}'
 ");
 
 // Download file
-await Curl.Execute("curl -o report.pdf https://example.com/report.pdf");
+await Curl.ExecuteAsync("curl -o report.pdf https://example.com/report.pdf");
 ```
 
 [🔗 View all examples](./EXAMPLES.md)
@@ -77,10 +77,10 @@ await Curl.Execute("curl -o report.pdf https://example.com/report.pdf");
 
 ```csharp
 // Basic auth
-var response = await Curl.Execute("curl -u username:password https://api.example.com");
+var response = await Curl.ExecuteAsync("curl -u username:password https://api.example.com");
 
 // Bearer token
-var data = await Curl.Execute("curl -H 'Authorization: Bearer TOKEN' https://api.example.com");
+var data = await Curl.ExecuteAsync("curl -H 'Authorization: Bearer TOKEN' https://api.example.com");
 
 // OAuth, NTLM, Kerberos - all supported!
 ```
@@ -89,7 +89,7 @@ var data = await Curl.Execute("curl -H 'Authorization: Bearer TOKEN' https://api
 
 ```csharp
 // Multiple commands
-var responses = await Curl.ExecuteMany(new[] {
+var responses = await Curl.ExecuteManyAsync(new[] {
     "curl https://api.example.com/users",
     "curl https://api.example.com/posts",
     "curl https://api.example.com/comments"
@@ -97,7 +97,7 @@ var responses = await Curl.ExecuteMany(new[] {
 
 // With cancellation
 var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-var response = await Curl.Execute("curl https://slow-api.com", cts.Token);
+var response = await Curl.ExecuteAsync("curl https://slow-api.com", cts.Token);
 ```
 
 ## Architecture

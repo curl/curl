@@ -111,7 +111,7 @@ namespace CurlDotNet
         /// </example>
         public static async Task<CurlResult> CurlAsync(string command)
         {
-            return await global::CurlDotNet.Curl.Execute(command);
+            return await global::CurlDotNet.Curl.ExecuteAsync(command);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace CurlDotNet
         /// </example>
         public static async Task<CurlResult> CurlAsync(string command, CancellationToken cancellationToken)
         {
-            return await global::CurlDotNet.Curl.Execute(command, cancellationToken);
+            return await global::CurlDotNet.Curl.ExecuteAsync(command, cancellationToken);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace CurlDotNet
         /// <returns>Task with result object</returns>
         public static async Task<CurlResult> CurlAsync(string command, CurlSettings settings)
         {
-            return await global::CurlDotNet.Curl.Execute(command, settings);
+            return await global::CurlDotNet.Curl.ExecuteAsync(command, settings);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace CurlDotNet
         /// </example>
         public static async Task<CurlResult[]> CurlManyAsync(params string[] commands)
         {
-            return await global::CurlDotNet.Curl.ExecuteMany(commands);
+            return await global::CurlDotNet.Curl.ExecuteManyAsync(commands);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace CurlDotNet
         /// <returns>Task with result object</returns>
         public static async Task<CurlResult> GetAsync(string url)
         {
-            return await global::CurlDotNet.Curl.Get(url);
+            return await global::CurlDotNet.Curl.GetAsync(url);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace CurlDotNet
         /// <returns>Task with result object</returns>
         public static async Task<CurlResult> PostAsync(string url, string data)
         {
-            return await global::CurlDotNet.Curl.Post(url, data);
+            return await global::CurlDotNet.Curl.PostAsync(url, data);
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace CurlDotNet
         /// <returns>Task with result object</returns>
         public static async Task<CurlResult> PostJsonAsync(string url, object data)
         {
-            return await global::CurlDotNet.Curl.PostJson(url, data);
+            return await global::CurlDotNet.Curl.PostJsonAsync(url, data);
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace CurlDotNet
         /// <returns>Task with result object</returns>
         public static async Task<CurlResult> DownloadAsync(string url, string outputPath)
         {
-            return await global::CurlDotNet.Curl.Download(url, outputPath);
+            return await global::CurlDotNet.Curl.DownloadAsync(url, outputPath);
         }
 
         /// <summary>
