@@ -135,7 +135,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --pedantic .github/workflows/*.yml
+          zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
 
       - name: 'shellcheck CI'
         run: |
