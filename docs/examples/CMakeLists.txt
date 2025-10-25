@@ -83,8 +83,7 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
     add_dependencies(curl-examples ${_target_name})
   endif()
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_NETWORK_AND_TIME_LIBS} ${_more_libs})
-  target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES"
-    "$<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>" "$<$<BOOL:${MSVC}>:_CRT_SECURE_NO_DEPRECATE>")
+  target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES" "$<$<BOOL:${WIN32}>:WIN32_LEAN_AND_MEAN>")
   set_target_properties(${_target_name} PROPERTIES OUTPUT_NAME "${_target}" PROJECT_LABEL "Example ${_target}" UNITY_BUILD OFF)
 endforeach()
 
