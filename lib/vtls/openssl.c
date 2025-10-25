@@ -5667,10 +5667,8 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
       break;
     }
 
-    if(cf->next)
-      cf = cf->next;
-
-  } while(cf->next);
+    cf = cf->next;
+  } while(cf);
 
   if(!octx) {
     failf(data, "Failed to find the SSL filter");
