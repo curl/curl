@@ -88,7 +88,7 @@ struct input {
   int num;
 };
 
-static void dump(const char *text, int num, unsigned char *ptr,
+static void dump(const char *text, int num, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;

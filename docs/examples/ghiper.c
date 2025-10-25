@@ -430,9 +430,9 @@ int init_fifo(void)
 int main(void)
 {
   struct GlobalInfo *g = g_malloc0(sizeof(struct GlobalInfo));
-  GMainLoop*gmain;
+  GMainLoop *gmain;
   int fd;
-  GIOChannel* ch;
+  GIOChannel *ch;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)

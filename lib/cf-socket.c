@@ -171,8 +171,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
   if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
                 (void *)&optval, sizeof(optval)) < 0) {
     CURL_TRC_CF(data, cf, "Failed to set SO_KEEPALIVE on fd "
-                "%" FMT_SOCKET_T ": errno %d",
-                sockfd, SOCKERRNO);
+                "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
   }
   else {
 #ifdef USE_WINSOCK
@@ -187,22 +186,19 @@ tcpkeepalive(struct Curl_cfilter *cf,
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                     (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
-                    "%" FMT_SOCKET_T ": errno %d",
-                    sockfd, SOCKERRNO);
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
       }
       optval = curlx_sltosi(data->set.tcp_keepintvl);
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
                     (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
-                    "%" FMT_SOCKET_T ": errno %d",
-                    sockfd, SOCKERRNO);
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
       }
       optval = curlx_sltosi(data->set.tcp_keepcnt);
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
                     (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPCNT on fd "
-                    "%" FMT_SOCKET_T ": errno %d",
-                    sockfd, SOCKERRNO);
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
       }
     }
     else
@@ -239,8 +235,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE)
     /* macOS style */
@@ -249,8 +244,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE_THRESHOLD)
     /* Solaris <11.4 style */
@@ -259,8 +253,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_THRESHOLD,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE_THRESHOLD on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #endif
 #ifdef TCP_KEEPINTVL
@@ -269,8 +262,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE_ABORT_THRESHOLD)
     /* Solaris <11.4 style */

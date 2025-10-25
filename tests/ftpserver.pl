@@ -3044,7 +3044,7 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: ftpserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: ftpserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }

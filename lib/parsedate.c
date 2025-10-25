@@ -286,7 +286,7 @@ enum assume {
 static time_t time2epoch(int sec, int min, int hour,
                          int mday, int mon, int year)
 {
-  static const int month_days_cumulative [12] =
+  static const int month_days_cumulative[12] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
   int leap_days = year - (mon <= 1);
   leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)

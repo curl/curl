@@ -42,7 +42,7 @@ echo "parallel: ${procs}"
   elif git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     {
       git ls-files | grep -E '\.(pl|pm)$'
-      git grep -l -E '^#!/usr/bin/env perl'
+      git grep -l '^#!/usr/bin/env perl'
     } | sort -u
   else
     # strip off the leading ./ to make the grep regexes work properly

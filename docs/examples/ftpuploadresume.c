@@ -39,7 +39,7 @@ static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
 
   r = sscanf(ptr, "Content-Length: %ld\n", &len);
   if(r == 1)
-    *((long *) stream) = len;
+    *((long *)stream) = len;
 
   return size * nmemb;
 }

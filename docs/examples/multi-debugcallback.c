@@ -34,7 +34,7 @@
 
 #define TRUE 1
 
-static void dump(const char *text, FILE *stream, unsigned char *ptr,
+static void dump(const char *text, FILE *stream, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;

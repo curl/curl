@@ -566,8 +566,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       }
     }
 
-    if((fInCert || blob) && (data->set.ssl.cert_type) &&
-       (!curl_strequal(data->set.ssl.cert_type, "P12"))) {
+    if((fInCert || blob) && data->set.ssl.cert_type &&
+       !curl_strequal(data->set.ssl.cert_type, "P12")) {
       failf(data, "schannel: certificate format compatibility error "
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);

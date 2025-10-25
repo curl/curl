@@ -357,7 +357,7 @@ if(!$opt_n) {
             report "LWP is not available (LWP::UserAgent not found)";
             exit 1;
         }
-        my $ua  = new LWP::UserAgent(agent => "$0/$version");
+        my $ua = new LWP::UserAgent(agent => "$0/$version");
         $ua->env_proxy();
         $resp = $ua->mirror($url, $txt);
         if($resp && $resp->code eq '304') {

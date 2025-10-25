@@ -241,7 +241,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     state->retry_time = 1;
 
   infof(state->data,
-        "set timeouts for state %d; Total % " FMT_OFF_T ", retry %d maxtry %d",
+        "set timeouts for state %d; Total %" FMT_OFF_T ", retry %d maxtry %d",
         (int)state->state, timeout_ms, state->retry_time, state->retry_max);
 
   /* init RX time */
@@ -381,7 +381,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
 static CURLcode tftp_option_add(struct tftp_conn *state, size_t *csize,
                                 char *buf, const char *option)
 {
-  if(( strlen(option) + *csize + 1) > (size_t)state->blksize)
+  if((strlen(option) + *csize + 1) > (size_t)state->blksize)
     return CURLE_TFTP_ILLEGAL;
   strcpy(buf, option);
   *csize += strlen(option) + 1;
