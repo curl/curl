@@ -1,0 +1,63 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP CONNECT
+</keywords>
+</info>
+
+<reply>
+<data crlf="yes" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
+-foo-
+</data>
+<connect crlf="yes">
+HTTP/1.1 200 fine
+Connection: close
+Content-Length: 0
+
+</connect>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+ftp
+proxy
+</features>
+<server>
+http
+</server>
+<name>
+HTTP CONNECT with custom headers for proxy and server
+</name>
+<command>
+http://hello/wanted/page -p -x %HOSTIP:%HTTPPORT --header "User-Agent: myapp/1.0" --proxy-header "User-Agent: Benjamin/2" --proxy-header "Host: todeloo" --header "Host: foo"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+
+<protocol crlf="yes">
+CONNECT hello:80 HTTP/1.1
+Proxy-Connection: Keep-Alive
+User-Agent: Benjamin/2
+Host: todeloo
+
+GET /wanted/page HTTP/1.1
+Host: foo
+Accept: */*
+User-Agent: myapp/1.0
+
+</protocol>
+</verify>
+</testcase>
