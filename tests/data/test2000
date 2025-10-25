@@ -1,23 +1,26 @@
 <testcase>
 <info>
 <keywords>
-FTP
-PASV
-FILE
-multiprotocol
+HTTP
+HTTP GET
+AWS
+SigV4
+HMAC-SHA256
+header
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<data nocheck="yes">
-data
-    to
-      see
-that FTP
-works
-  so does it?
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Oct 2025 20:04:16 GMT
+Server: test-server/fake
+Content-Type: text/plain
+Content-Length: 3
+
+OK
 </data>
 </reply>
 
@@ -25,49 +28,33 @@ works
 # Client-side
 <client>
 <server>
-ftp
-file
+http
 </server>
 <name>
-FTP RETR followed by FILE
+AWS SigV4 header signing test
 </name>
-<command option="no-include">
-ftp://%HOSTIP:%FTPPORT/%TESTNUMBER file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --aws-sigv4 "aws:amz:us-east-1:s3" -u "AKIATEST:secretkey"
 </command>
-<file name="%LOGDIR/test%TESTNUMBER.txt">
-foo
-   bar
-bar
-   foo
-moo
-</file>
 </client>
 
 #
-# Verify data after the test has been "shot"
+# Verify SigV4 header signing
 <verify>
-<protocol>
-USER anonymous
-PASS ftp@example.com
-PWD
-EPSV
-TYPE I
-SIZE %TESTNUMBER
-RETR %TESTNUMBER
-QUIT
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: AWS4-HMAC-SHA256 Credential=AKIATEST/YYYYMMDD/us-east-1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=SIGNATURE64
+x-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+User-Agent: curl/%VERSION
+Accept: */*
+X-Amz-Date: YYYYMMDDTHHMMSSZ
+
 </protocol>
-<stdout>
-data
-    to
-      see
-that FTP
-works
-  so does it?
-foo
-   bar
-bar
-   foo
-moo
-</stdout>
+<strippart>
+s/Credential=AKIATEST\/[0-9]{8}\/us-east-1\/s3\/aws4_request/Credential=AKIATEST\/YYYYMMDD\/us-east-1\/s3\/aws4_request/
+s/X-Amz-Date: [0-9]{8}T[0-9]{6}Z/X-Amz-Date: YYYYMMDDTHHMMSSZ/
+s/Signature=[a-f0-9]{64}/Signature=SIGNATURE64/
+</strippart>
 </verify>
 </testcase>

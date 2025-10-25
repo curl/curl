@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+unittest
+decode_encode
+aws-sigv4
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+sigv4 decode_encode unit tests
+</name>
+</client>
+</testcase>

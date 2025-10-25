@@ -36,6 +36,23 @@ UNITTEST CURLcode canon_path(const char *q, size_t len,
     struct dynbuf *new_path,
     bool normalize);
 UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq);
+UNITTEST CURLcode http_aws_decode_encode(const char *in, size_t in_len,
+                                         struct dynbuf *out);
+UNITTEST CURLcode parse_aws_credentials(struct Curl_easy *data,
+                                        const char **access_key,
+                                        char **secret_key,
+                                        char **security_token);
+#endif
+
+#ifndef HMAC_SHA256
+#define HMAC_SHA256(k, kl, d, dl, o)                \
+  do {                                              \
+    result = Curl_hmacit(&Curl_HMAC_SHA256,         \
+                         (const unsigned char *)k,  \
+                         kl,                        \
+                         (const unsigned char *)d,  \
+                         dl, o);                    \
+  } while(0)
 #endif
 
 #endif /* HEADER_CURL_HTTP_AWS_SIGV4_H */
