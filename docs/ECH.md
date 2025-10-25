@@ -22,9 +22,8 @@ To build the OpenSSL project's ECH feature branch:
 
 ```sh
 cd $HOME/code
-git clone https://github.com/openssl/openssl
+git clone https://github.com/openssl/openssl --branch feature/ech
 cd openssl
-git checkout feature/ech
 ./config --libdir=lib --prefix=$HOME/code/openssl-local-inst
 ...stuff...
 make -j8
