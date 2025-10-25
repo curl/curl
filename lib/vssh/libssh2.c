@@ -1975,16 +1975,21 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
   if(rc == LIBSSH2_ERROR_EAGAIN)
     return CURLE_AGAIN;
 
-  myssh_state(data, sshc, SSH_STOP);
   if(rc > 0) {
+    char *newhome = strdup(sshp->readdir_filename);
+    char *newentry;
+    if(!newhome)
+      return CURLE_OUT_OF_MEMORY;
+    newentry = strdup(newhome);
+    if(!newentry) {
+      free(newhome);
+      return CURLE_OUT_OF_MEMORY;
+    }
     free(sshc->homedir);
-    sshc->homedir = strdup(sshp->readdir_filename);
-    if(!sshc->homedir)
-      return CURLE_OUT_OF_MEMORY;
+    sshc->homedir = newhome;
     free(data->state.most_recent_ftp_entrypath);
-    data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
-    if(!data->state.most_recent_ftp_entrypath)
-      return CURLE_OUT_OF_MEMORY;
+    data->state.most_recent_ftp_entrypath = newentry;
+    myssh_state(data, sshc, SSH_STOP);
   }
   else {
     /* Return the error type */
