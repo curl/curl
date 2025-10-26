@@ -660,16 +660,13 @@ jobs:
 
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+        run: pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         env:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
-          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
           else
@@ -678,9 +675,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        run: pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
       - name: 'run pytest event based'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
@@ -689,7 +684,6 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else

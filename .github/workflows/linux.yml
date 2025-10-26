@@ -686,9 +686,7 @@ jobs:
 
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') && matrix.build.container == null }}
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+        run: pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
@@ -703,7 +701,6 @@ jobs:
               TFLAGS+=' ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_init_sec_context()
             fi
           fi
-          [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
             locale || true
             export LC_ALL=C
@@ -718,9 +715,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        run: pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
@@ -728,7 +723,6 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
