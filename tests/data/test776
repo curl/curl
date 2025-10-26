@@ -5,6 +5,7 @@ HTTP
 HTTP GET
 HTTP NTLM auth
 NTLM
+flaky
 </keywords>
 </info>
 
