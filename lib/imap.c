@@ -1200,7 +1200,9 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
   if(imapcode == '*') {
     /* Check if this response contains a literal (e.g. FETCH responses with
        body data). Literal syntax is {size}\r\n */
-    const char *ptr = memchr(line, '{', len);
+    const char *cr = memchr(line, '\r', len);
+    size_t line_len = cr ? (size_t)(cr - line) : len;
+    const char *ptr = memchr(line, '{', line_len);
     if(ptr) {
       curl_off_t size = 0;
       bool parsed = FALSE;
