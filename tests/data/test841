@@ -20,6 +20,11 @@ body
 </data>
 <datacheck>
 * 123 FETCH (BODY[1] {70}
+body
+
++ Curl did not used to like this line
+--
+  yours sincerely
 </datacheck>
 </reply>
 
