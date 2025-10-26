@@ -1197,8 +1197,95 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
   (void)instate;
 
-  if(imapcode == '*')
-    result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+  if(imapcode == '*') {
+    /* Check if this response contains a literal (e.g. FETCH responses with
+       body data). Literal syntax is {size}\r\n */
+    const char *ptr = memchr(line, '{', len);
+    if(ptr) {
+      curl_off_t size = 0;
+      bool parsed = FALSE;
+      ptr++;
+      if(!curlx_str_number(&ptr, &size, CURL_OFF_T_MAX) &&
+         !curlx_str_single(&ptr, '}'))
+        parsed = TRUE;
+
+      if(parsed) {
+        struct pingpong *pp = &imapc->pp;
+        size_t buffer_len = curlx_dyn_len(&pp->recvbuf);
+        size_t after_header = buffer_len - pp->nfinal;
+
+        /* This is a literal response, setup to receive the body data */
+        infof(data, "Found %" FMT_OFF_T " bytes to download", size);
+        /* Progress size includes both header line and literal body */
+        Curl_pgrsSetDownloadSize(data, size + len);
+
+        /* First write the header line */
+        result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+        if(result)
+          return result;
+
+        /* Handle data already in buffer after the header line */
+        if(after_header > 0) {
+          /* There is already data in the buffer that is part of the literal
+             body or subsequent responses */
+          size_t chunk = after_header;
+
+          /* Keep only the data after the header line */
+          curlx_dyn_tail(&pp->recvbuf, chunk);
+          pp->nfinal = 0; /* done */
+
+          /* Limit chunk to the literal size */
+          if(chunk > (size_t)size)
+            chunk = (size_t)size;
+
+          if(chunk) {
+            /* Write the literal body data */
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                       curlx_dyn_ptr(&pp->recvbuf), chunk);
+            if(result)
+              return result;
+          }
+
+          /* Handle remaining data in buffer (either more literal data or
+             subsequent responses) */
+          if(after_header > chunk) {
+            /* Keep the data after the literal body */
+            pp->overflow = after_header - chunk;
+            curlx_dyn_tail(&pp->recvbuf, pp->overflow);
+          }
+          else {
+            pp->overflow = 0;
+            curlx_dyn_reset(&pp->recvbuf);
+          }
+        }
+        else {
+          /* No data in buffer yet, reset overflow */
+          pp->overflow = 0;
+        }
+
+        if(data->req.bytecount == size + (curl_off_t)len)
+          /* All data already transferred (header + literal body) */
+          Curl_xfer_setup_nop(data);
+        else {
+          /* Setup to receive the literal body data.
+             maxdownload and transfer size include both header line and
+             literal body */
+          data->req.maxdownload = size + len;
+          Curl_xfer_setup_recv(data, FIRSTSOCKET, size + len);
+        }
+        /* End of DO phase */
+        imap_state(data, imapc, IMAP_STOP);
+      }
+      else {
+        /* Failed to parse literal, just write the line */
+        result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+      }
+    }
+    else {
+      /* No literal, just write the line as-is */
+      result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
+    }
+  }
   else if(imapcode != IMAP_RESP_OK)
     result = CURLE_QUOTE_ERROR;
   else
@@ -1631,10 +1718,13 @@ static CURLcode imap_done(struct Curl_easy *data, CURLcode status,
     connclose(conn, "IMAP done with bad status"); /* marked for closure */
     result = status;         /* use the already set error code */
   }
-  else if(!data->set.connect_only && !imap->custom &&
-          (imap->uid || imap->mindex || data->state.upload ||
-          IS_MIME_POST(data))) {
-    /* Handle responses after FETCH or APPEND transfer has finished */
+  else if(!data->set.connect_only &&
+          ((!imap->custom && (imap->uid || imap->mindex)) ||
+           (imap->custom && data->req.maxdownload > 0) ||
+           data->state.upload || IS_MIME_POST(data))) {
+    /* Handle responses after FETCH or APPEND transfer has finished.
+       For custom commands, check if we set up a download which indicates
+       a FETCH-like command with literal data. */
 
     if(!data->state.upload && !IS_MIME_POST(data))
       imap_state(data, imapc, IMAP_FETCH_FINAL);
