@@ -1715,6 +1715,11 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
   }
 #endif  /* OPENSSL_EXTRA */
 
+  detail = wolfSSL_get_error(wssl->ssl, ret);
+  CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
+
+  /* On a successful handshake with an IP address, do an extra check
+   * on the peer certificate */
   if(ret == WOLFSSL_SUCCESS &&
      conn_config->verifyhost &&
      !connssl->peer.sni) {
@@ -1731,9 +1736,6 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
       detail = DOMAIN_NAME_MISMATCH;
     wolfSSL_X509_free(cert);
   }
-  else
-    detail = wolfSSL_get_error(wssl->ssl, ret);
-  CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
 
   if(ret == WOLFSSL_SUCCESS) {
     return CURLE_OK;
