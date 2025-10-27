@@ -1491,11 +1491,10 @@ wssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  /* Enable RFC2818 checks */
-  if(conn_config->verifyhost) {
-    char *snihost = connssl->peer.sni ?
-      connssl->peer.sni : connssl->peer.hostname;
-    if(wolfSSL_check_domain_name(wssl->ssl, snihost) !=
+  /* Enable RFC2818 checks on domain names. This cannot check
+   * IP addresses which we need to do extra after the handshake. */
+  if(conn_config->verifyhost && connssl->peer.sni) {
+    if(wolfSSL_check_domain_name(wssl->ssl, connssl->peer.sni) !=
        WOLFSSL_SUCCESS) {
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -1718,6 +1717,25 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
 
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
+
+  /* On a successful handshake with an IP address, do an extra check
+   * on the peer certificate */
+  if(ret == WOLFSSL_SUCCESS &&
+     conn_config->verifyhost &&
+     !connssl->peer.sni) {
+    /* we have an IP address as host name. */
+    WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(wssl->ssl);
+    if(!cert) {
+      failf(data, "unable to get peer certificate");
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
+    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.hostname, 0);
+    CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
+                connssl->peer.hostname, ret);
+    if(ret != WOLFSSL_SUCCESS)
+      detail = DOMAIN_NAME_MISMATCH;
+    wolfSSL_X509_free(cert);
+  }
 
   if(ret == WOLFSSL_SUCCESS) {
     return CURLE_OK;
