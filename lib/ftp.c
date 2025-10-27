@@ -3364,14 +3364,8 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
      * data has been transferred. This happens when doing through NATs etc that
      * abandon old silent connections.
      */
-    timediff_t old_time = pp->response_time;
-
-    pp->response_time = 60*1000; /* give it only a minute for now */
     pp->response = curlx_now(); /* timeout relative now */
-
     result = getftpresponse(data, &nread, &ftpcode);
-
-    pp->response_time = old_time; /* set this back to previous value */
 
     if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
       failf(data, "control connection looks dead");
