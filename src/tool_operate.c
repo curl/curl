@@ -1591,6 +1591,9 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 
   c = (struct contextuv *) malloc(sizeof(*c));
 
+  if(!c)
+    return NULL;
+
   c->sockfd = sockfd;
   c->uv = uv;
 
@@ -1630,6 +1633,13 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
   case CURL_POLL_INOUT:
     c = socketp ?
       (struct contextuv *) socketp : create_context(s, uv);
+
+    if(!c) {
+#if DEBUG_UV
+      curl_mfprintf(tool_stderr, "parallel_event: Out of memory\n");
+#endif
+      break;
+    }
 
     curl_multi_assign(uv->s->multi, s, c);
 
