@@ -684,7 +684,6 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len)
 {
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct Curl_ssl_session *sc_session;
   unsigned char *sdata, *qtp_clone = NULL;
   size_t sdata_len = 0;

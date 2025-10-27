@@ -1086,7 +1086,6 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   mbedtls_ssl_session session;
   bool msession_alloced = FALSE;
   struct Curl_ssl_session *sc_session = NULL;
