@@ -859,7 +859,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_ssl_session *sc_session = NULL;
     CURLcode result;
 
@@ -1086,7 +1086,6 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   mbedtls_ssl_session session;
   bool msession_alloced = FALSE;
   struct Curl_ssl_session *sc_session = NULL;
@@ -1097,7 +1096,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   int ret;
 
   DEBUGASSERT(backend);
-  if(!ssl_config->primary.cache_session)
+  if(!Curl_ssl_scache_use(cf, data))
     return CURLE_OK;
 
   mbedtls_ssl_session_init(&session);
