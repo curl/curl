@@ -1248,8 +1248,10 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 
   if(!sx) {
     cf->ctx = sx = calloc(1, sizeof(*sx));
-    if(!sx)
-      return CURLE_OUT_OF_MEMORY;
+    if(!sx) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
 
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)
