@@ -496,8 +496,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz" | tar -xz
           cd "openldap-${OPENLDAP_VERSION}"
-          ./configure --enable-static --disable-shared --prefix=/home/runner/openldap-static
-          make
+          ./configure --enable-static --disable-shared --disable-slapd --prefix=/home/runner/openldap-static
           make install
 
       - name: 'cache openssl (thread sanitizer)'
