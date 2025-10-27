@@ -187,7 +187,7 @@ class EnvConfig:
         self.expired_domain = f"expired.{self.tld}"
         self.cert_specs = [
             CertificateSpec(domains=[self.domain1, self.domain1brotli, 'localhost', '127.0.0.1'], key_type='rsa2048'),
-            CertificateSpec(name='domain1-no-ip', domains=[self.domain1, self.domain1brotli], key_type='rsa2048'),
+            CertificateSpec(name='domain1-no-ip', domains=[self.domain1, self.domain1brotli, 'dns:127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
             CertificateSpec(domains=[self.ftp_domain], key_type='rsa2048'),
             CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),

@@ -176,6 +176,8 @@ class TestSSLUse:
                                nghttpx, configures_nghttpx):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        if env.curl_uses_lib('wolfssl'):
+            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address")
         httpd.set_domain1_cred_name('domain1-no-ip')
         httpd.reload_if_config_changed()
         if proto == 'h3':
