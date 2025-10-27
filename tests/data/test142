@@ -188,6 +188,7 @@ QUIT
 </protocol>
 <limits>
 Allocations: 170
+Maximum allocated: 150000
 </limits>
 </verify>
 </testcase>
