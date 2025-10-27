@@ -1493,9 +1493,9 @@ wssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Enable RFC2818 checks on domain names. This cannot check
    * IP addresses which we need to do extra after the handshake. */
-  if(conn_config->verifyhost && connssl->peer.sni) {
-    if(wolfSSL_check_domain_name(wssl->ssl, connssl->peer.sni) !=
-       WOLFSSL_SUCCESS) {
+  if(conn_config->verifyhost) {
+    if(wolfSSL_check_domain_name(wssl->ssl, connssl->peer.sni ?
+       connssl->peer.sni : connssl->peer.hostname) != WOLFSSL_SUCCESS) {
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
