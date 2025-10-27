@@ -83,7 +83,7 @@ static const char *type2string(unsigned short qtype)
  * Return query (qname + type + class), type and id.
  */
 static int store_incoming(const unsigned char *data, size_t size,
-                          unsigned char *qbuf, size_t *qlen,
+                          unsigned char *qbuf, size_t qbuflen, size_t *qlen,
                           unsigned short *qtype, unsigned short *idp)
 {
   FILE *server;
@@ -159,6 +159,12 @@ static int store_incoming(const unsigned char *data, size_t size,
     (void) get16bit(&data, &size);
 
     *qlen = qsize - size; /* total size of the query */
+    if(*qlen > qbuflen) {
+      logmsg("dnsd: query too large: %lu > %lu",
+             (unsigned long)*qlen, (unsigned long)qbuflen);
+      fclose(server);
+      return -1;
+    }
     memcpy(qbuf, qptr, *qlen);
   }
   else
@@ -616,7 +622,7 @@ static int test_dnsd(int argc, char **argv)
        per test case */
     read_instructions();
 
-    store_incoming(inbuffer, n, qbuf, &qlen, &qtype, &id);
+    store_incoming(inbuffer, n, qbuf, sizeof(qbuf), &qlen, &qtype, &id);
 
     set_advisor_read_lock(loglockfile);
     serverlogslocked = 1;
