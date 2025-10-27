@@ -50,8 +50,8 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
   timediff_t timeout_ms; /* in milliseconds */
-  timediff_t response_time = (data->set.server_response_timeout > 0) ?
-    data->set.server_response_timeout : pp->response_time;
+  timediff_t response_time = data->set.server_response_timeout ?
+    data->set.server_response_timeout : RESP_TIMEOUT;
   struct curltime now = curlx_now();
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine

@@ -127,7 +127,7 @@ typedef unsigned int curl_prot_t;
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
 /* Default FTP/IMAP etc response timeout in milliseconds */
-#define RESP_TIMEOUT (120*1000)
+#define RESP_TIMEOUT (60*1000)
 
 /* Max string input length is a precaution against abuse and to detect junk
    input easier and better. */
