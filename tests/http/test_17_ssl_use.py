@@ -176,12 +176,31 @@ class TestSSLUse:
                                nghttpx, configures_nghttpx):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if env.curl_uses_lib('wolfssl'):
-            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address")
         httpd.set_domain1_cred_name('domain1-no-ip')
         httpd.reload_if_config_changed()
         if proto == 'h3':
             nghttpx.set_cred_name('domain1-no-ip')
+            nghttpx.reload_if_config_changed()
+        curl = CurlClient(env=env)
+        url = f'https://127.0.0.1:{env.port_for(proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 60, f'{r}'
+
+    # use IP address that is in cert as DNS name (not really legal)
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_05_very_bad_ip_addr(self, env: Env, proto,
+                                    httpd, configures_httpd,
+                                    nghttpx, configures_nghttpx):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if env.curl_uses_lib('mbedtls'):
+            pytest.skip("mbedtls falsely verifies a DNS: altname as IP address")
+        if env.curl_uses_lib('wolfssl'):
+            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address")
+        httpd.set_domain1_cred_name('domain1-very-bad')
+        httpd.reload_if_config_changed()
+        if proto == 'h3':
+            nghttpx.set_cred_name('domain1-very-bad')
             nghttpx.reload_if_config_changed()
         curl = CurlClient(env=env)
         url = f'https://127.0.0.1:{env.port_for(proto)}/curltest/sslinfo'
