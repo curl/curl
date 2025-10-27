@@ -5,6 +5,7 @@ Title: CURLOPT_SERVER_RESPONSE_TIMEOUT_MS
 Section: 3
 Source: libcurl
 See-also:
+  - CURLOPT_SERVER_RESPONSE_TIMEOUT (3)
   - CURLOPT_CONNECTTIMEOUT (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
@@ -47,7 +48,7 @@ This is the millisecond version of CURLOPT_SERVER_RESPONSE_TIMEOUT(3).
 
 # DEFAULT
 
-None
+60000 milliseconds
 
 # %PROTOCOLS%
 
