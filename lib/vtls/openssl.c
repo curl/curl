@@ -3744,6 +3744,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                             const struct alpn_spec *alpns_requested,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
   char error_buffer[256];
@@ -3794,6 +3795,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
             }
           }
 #else
+          (void)ssl_config;
           (void)sess_reuse_cb;
 #endif
         }
