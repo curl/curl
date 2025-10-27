@@ -927,7 +927,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->cred = NULL;
 
   /* check for an existing reusable credential handle */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_schannel_cred *old_cred;
     Curl_ssl_scache_lock(data);
     old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
@@ -1585,7 +1585,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   /* save the current session data for possible reuse */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
     backend->cred->refcount++;

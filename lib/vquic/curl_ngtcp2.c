@@ -2384,7 +2384,6 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
                                         void *user_data)
 {
   struct curl_tls_ctx *ctx = user_data;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 
 #ifdef USE_OPENSSL
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
@@ -2401,7 +2400,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 #endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     /* Enable the session cache because it is a prerequisite for the
      * "new session" callback. Use the "external storage" mode to prevent
      * OpenSSL from creating an internal session cache.
@@ -2417,7 +2416,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_gnutls_configure_client_session failed");
     return CURLE_FAILED_INIT;
   }
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     gnutls_handshake_set_hook_function(ctx->gtls.session,
                                        GNUTLS_HANDSHAKE_ANY, GNUTLS_HOOK_POST,
                                        quic_gtls_handshake_cb);
@@ -2428,7 +2427,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     /* Register to get notified when a new session is received */
     wolfSSL_CTX_sess_set_new_cb(ctx->wssl.ssl_ctx, wssl_quic_new_session_cb);
   }

@@ -691,7 +691,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   size_t earlydata_max = 0;
   CURLcode result = CURLE_OK;
 
-  if(!ssl_config->primary.cache_session)
+  if(!Curl_ssl_scache_use(cf, data))
     return CURLE_OK;
 
   /* we always unconditionally get the session id here, as even if we

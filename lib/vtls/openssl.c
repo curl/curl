@@ -3056,7 +3056,6 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                unsigned char *quic_tp,
                                size_t quic_tp_len)
 {
-  const struct ssl_config_data *config;
   unsigned char *der_session_buf = NULL;
   unsigned char *qtp_clone = NULL;
   CURLcode result = CURLE_OK;
@@ -3064,8 +3063,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
   if(!cf || !data)
     goto out;
 
-  config = Curl_ssl_cf_get_config(cf, data);
-  if(config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_ssl_session *sc_session = NULL;
     size_t der_session_size;
     unsigned char *der_session_ptr;
@@ -3746,7 +3744,6 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
                             const struct alpn_spec *alpns_requested,
                             Curl_ossl_init_session_reuse_cb *sess_reuse_cb)
 {
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_cfg = Curl_ssl_cf_get_primary_config(cf);
   struct alpn_spec alpns;
   char error_buffer[256];
@@ -3755,7 +3752,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
   Curl_alpn_copy(&alpns, alpns_requested);
 
   octx->reused_session = FALSE;
-  if(ssl_config->primary.cache_session && !conn_cfg->verifystatus) {
+  if(Curl_ssl_scache_use(cf, data) && !conn_cfg->verifystatus) {
     struct Curl_ssl_session *scs = NULL;
 
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
