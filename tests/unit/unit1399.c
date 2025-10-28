@@ -75,42 +75,41 @@ static CURLcode test_unit1399(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  struct Curl_easy *data = curl_easy_init();
+  struct Curl_easy data;
   struct curltime now = curlx_now();
 
-  data->progress.t_nslookup = 0;
-  data->progress.t_connect = 0;
-  data->progress.t_appconnect = 0;
-  data->progress.t_pretransfer = 0;
-  data->progress.t_starttransfer = 0;
-  data->progress.t_redirect = 0;
-  data->progress.start.tv_sec = now.tv_sec - 2;
-  data->progress.start.tv_usec = now.tv_usec;
-  fake_t_startsingle_time(data, now, -2);
+  data.progress.t_nslookup = 0;
+  data.progress.t_connect = 0;
+  data.progress.t_appconnect = 0;
+  data.progress.t_pretransfer = 0;
+  data.progress.t_starttransfer = 0;
+  data.progress.t_redirect = 0;
+  data.progress.start.tv_sec = now.tv_sec - 2;
+  data.progress.start.tv_usec = now.tv_usec;
+  fake_t_startsingle_time(&data, now, -2);
 
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-  Curl_pgrsTime(data, TIMER_CONNECT);
-  Curl_pgrsTime(data, TIMER_APPCONNECT);
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+  Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
+  Curl_pgrsTime(&data, TIMER_CONNECT);
+  Curl_pgrsTime(&data, TIMER_APPCONNECT);
+  Curl_pgrsTime(&data, TIMER_PRETRANSFER);
+  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
-  expect_timer_seconds(data, 2);
+  expect_timer_seconds(&data, 2);
 
   /* now simulate the redirect */
-  data->progress.t_redirect = data->progress.t_starttransfer + 1;
-  fake_t_startsingle_time(data, now, -1);
+  data.progress.t_redirect = data.progress.t_starttransfer + 1;
+  fake_t_startsingle_time(&data, now, -1);
 
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
-  Curl_pgrsTime(data, TIMER_CONNECT);
-  Curl_pgrsTime(data, TIMER_APPCONNECT);
-  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+  Curl_pgrsTime(&data, TIMER_NAMELOOKUP);
+  Curl_pgrsTime(&data, TIMER_CONNECT);
+  Curl_pgrsTime(&data, TIMER_APPCONNECT);
+  Curl_pgrsTime(&data, TIMER_PRETRANSFER);
   /* ensure t_starttransfer is only set on the first invocation by attempting
    * to set it twice */
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
-  Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
+  Curl_pgrsTime(&data, TIMER_STARTTRANSFER);
 
-  expect_timer_seconds(data, 3);
+  expect_timer_seconds(&data, 3);
 
-  curl_easy_cleanup(data);
   UNITTEST_END_SIMPLE
 }

@@ -145,7 +145,6 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
 {
   timediff_t *delta = NULL;
 
-  DEBUGF(infof(data, "[PROGRESS] prgrsTimeWas(%d)", (int)timer));
   switch(timer) {
   default:
   case TIMER_NONE:
