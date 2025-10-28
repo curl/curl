@@ -316,29 +316,28 @@ static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
 {
   struct smtp_conn *smtpc =
     Curl_conn_meta_get(data->conn, CURL_META_SMTP_CONN);
-  char *message;
+  const char *ptr;
   size_t len;
 
   if(!smtpc)
     return CURLE_FAILED_INIT;
 
-  message = curlx_dyn_ptr(&smtpc->pp.recvbuf);
+  ptr = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   len = smtpc->pp.nfinal;
   if(len > 4) {
-    /* Find the start of the message */
-    len -= 4;
-    for(message += 4; *message == ' ' || *message == '\t'; message++, len--)
-      ;
+    struct Curl_str message;
+    ptr += 4;
+    if(!curlx_str_untilnl(&ptr, &message, DYN_PINGPPONG_CMD)) {
+      char *msgp;
+      curlx_str_trimblanks(&message);
+      msgp = CURL_UNCONST(curlx_str(&message));
 
-    /* Find the end of the message */
-    while(len--)
-      if(message[len] != '\r' && message[len] != '\n' && message[len] != ' ' &&
-         message[len] != '\t')
-        break;
-
-    /* Terminate the message */
-    message[++len] = '\0';
-    Curl_bufref_set(out, message, len, NULL);
+      /* Null-terminate the message string */
+      msgp[curlx_strlen(&message)] = '\0';
+      Curl_bufref_set(out, curlx_str(&message), curlx_strlen(&message), NULL);
+    }
+    else
+      return CURLE_WEIRD_SERVER_REPLY;
   }
   else
     /* junk input => zero length output */
@@ -1005,38 +1004,22 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
       /* Advance past the AUTH keyword */
       line += 5;
-      len -= 5;
 
       /* Loop through the data line */
       for(;;) {
-        size_t llen;
-        size_t wordlen;
-        unsigned short mechbit;
-
-        while(len &&
-              (*line == ' ' || *line == '\t' ||
-               *line == '\r' || *line == '\n')) {
-
-          line++;
-          len--;
+        struct Curl_str out;
+        curlx_str_passblanks(&line);
+        if(!curlx_str_cspn(&line, &out, " \r\r\n")) {
+          unsigned short mechbit;
+          size_t llen;
+          /* Test the word for a matching authentication mechanism */
+          mechbit = Curl_sasl_decode_mech(curlx_str(&out), curlx_strlen(&out),
+                                          &llen);
+          if(mechbit && llen == curlx_strlen(&out))
+            smtpc->sasl.authmechs |= mechbit;
         }
-
-        if(!len)
+        else
           break;
-
-        /* Extract the word */
-        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-              line[wordlen] != '\t' && line[wordlen] != '\r' &&
-              line[wordlen] != '\n';)
-          wordlen++;
-
-        /* Test the word for a matching authentication mechanism */
-        mechbit = Curl_sasl_decode_mech(line, wordlen, &llen);
-        if(mechbit && llen == wordlen)
-          smtpc->sasl.authmechs |= mechbit;
-
-        line += wordlen;
-        len -= wordlen;
       }
     }
 
@@ -1770,25 +1753,25 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn,
   const char *ptr = conn->options;
 
   while(!result && ptr && *ptr) {
-    const char *key = ptr;
-    const char *value;
+    struct Curl_str key;
+    if(!curlx_str_until(&ptr, &key, 64, '=') &&
+       !curlx_str_single(&ptr, '=')) {
+      struct Curl_str value;
+      bool semi =
+        !curlx_str_until(&ptr, &value, DYN_PINGPPONG_CMD, ';') &&
+        !curlx_str_single(&ptr, ';');
 
-    while(*ptr && *ptr != '=')
-      ptr++;
-
-    value = ptr + 1;
-
-    while(*ptr && *ptr != ';')
-      ptr++;
-
-    if(curl_strnequal(key, "AUTH=", 5))
-      result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
-                                               value, ptr - value);
+      if(curlx_str_casecompare(&key, "AUTH"))
+        result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
+                                                 curlx_str(&value),
+                                                 curlx_strlen(&value));
+      else
+        result = CURLE_URL_MALFORMAT;
+      if(!semi)
+        break;
+    }
     else
       result = CURLE_URL_MALFORMAT;
-
-    if(*ptr == ';')
-      ptr++;
   }
 
   return result;
