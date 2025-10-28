@@ -1754,6 +1754,7 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn,
 
   while(!result && ptr && *ptr) {
     struct Curl_str key;
+    result = CURLE_URL_MALFORMAT;
     if(!curlx_str_until(&ptr, &key, 64, '=') &&
        !curlx_str_single(&ptr, '=')) {
       struct Curl_str value;
@@ -1765,13 +1766,9 @@ static CURLcode smtp_parse_url_options(struct connectdata *conn,
         result = Curl_sasl_parse_url_auth_option(&smtpc->sasl,
                                                  curlx_str(&value),
                                                  curlx_strlen(&value));
-      else
-        result = CURLE_URL_MALFORMAT;
       if(!semi)
         break;
     }
-    else
-      result = CURLE_URL_MALFORMAT;
   }
 
   return result;
