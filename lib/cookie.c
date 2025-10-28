@@ -1595,7 +1595,6 @@ static CURLcode cookie_output(struct Curl_easy *data,
     curlx_fclose(out);
     out = NULL;
     if(tempstore && Curl_rename(tempstore, filename)) {
-      unlink(tempstore);
       error = CURLE_WRITE_ERROR;
       goto error;
     }
@@ -1612,7 +1611,10 @@ static CURLcode cookie_output(struct Curl_easy *data,
 error:
   if(out && !use_stdout)
     curlx_fclose(out);
-  free(tempstore);
+  if(tempstore) {
+    unlink(tempstore);
+    free(tempstore);
+  }
   return error;
 }
 
