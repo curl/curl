@@ -1802,12 +1802,15 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
 
   if(err == 1) {
     /* connected */
-    ctx->handshake_at = now;
-    ctx->q.last_io = now;
     if(!ctx->got_first_byte) {
+      /* if not recorded yet, take the timestamp before we called
+       * SSL_do_handshake() as the time we received the first packet. */
       ctx->got_first_byte = TRUE;
       ctx->first_byte_at = now;
     }
+    /* Record the handshake complete with a new time stamp. */
+    ctx->handshake_at = curlx_now();
+    ctx->q.last_io = ctx->handshake_at;
 
     CURL_TRC_CF(data, cf, "handshake complete after %dms",
                (int)curlx_timediff(now, ctx->started_at));
