@@ -943,6 +943,7 @@ out:
     if(!dns->addr) {
       infof(data, "Negative DNS entry");
       dns->refcount--;
+      *entry = NULL;
       return CURLE_COULDNT_RESOLVE_HOST;
     }
     *entry = dns;
