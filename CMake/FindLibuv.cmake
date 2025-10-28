@@ -97,7 +97,6 @@ if(LIBUV_FOUND)
   if(NOT TARGET CURL::libuv)
     add_library(CURL::libuv INTERFACE IMPORTED)
     set_target_properties(CURL::libuv PROPERTIES
-      VERSION "${LIBUV_VERSION}"
       INTERFACE_LIBCURL_PC_MODULES "${_libuv_pc_requires}"
       INTERFACE_COMPILE_OPTIONS "${_libuv_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_libuv_INCLUDE_DIRS}"
