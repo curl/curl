@@ -1804,6 +1804,11 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     /* connected */
     ctx->handshake_at = now;
     ctx->q.last_io = now;
+    if(!ctx->got_first_byte) {
+      ctx->got_first_byte = TRUE;
+      ctx->first_byte_at = now;
+    }
+
     CURL_TRC_CF(data, cf, "handshake complete after %dms",
                (int)curlx_timediff(now, ctx->started_at));
     result = cf_osslq_verify_peer(cf, data);
