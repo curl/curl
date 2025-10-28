@@ -85,6 +85,7 @@ class TestFtpsVsFTPD:
         r.check_stats(count=1, http_status=226)
         lines = open(os.path.join(curl.run_dir, 'download_#1.data')).readlines()
         assert len(lines) == 4, f'list: {lines}'
+        r.check_stats_timelines()
 
     # download 1 file, no SSL
     @pytest.mark.parametrize("docname", [
@@ -98,6 +99,7 @@ class TestFtpsVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -111,6 +113,7 @@ class TestFtpsVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects == count + 1, 'should reuse the control conn'
+        r.check_stats_timelines()
 
     # 2 serial transfers, first with 'ftps://' and second with 'ftp://'
     # we want connection reuse in this case
@@ -123,6 +126,7 @@ class TestFtpsVsFTPD:
         r = curl.ftp_get(urls=[url1, url2], with_stats=True)
         r.check_stats(count=count, http_status=226)
         assert r.total_connects == count + 1, 'should reuse the control conn'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -138,6 +142,7 @@ class TestFtpsVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects > count + 1, 'should have used several control conns'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'upload-1k', 'upload-100k', 'upload-1m'
@@ -152,6 +157,7 @@ class TestFtpsVsFTPD:
         r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpds, docname=docname)
+        r.check_stats_timelines()
 
     def _rmf(self, path):
         if os.path.exists(path):

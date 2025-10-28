@@ -80,6 +80,7 @@ class TestVsFTPD:
         r.check_stats(count=1, http_status=226)
         lines = open(os.path.join(curl.run_dir, 'download_#1.data')).readlines()
         assert len(lines) == 5, f'list: {lines}'
+        r.check_stats_timelines()
 
     # download 1 file, no SSL
     @pytest.mark.parametrize("docname", [
@@ -93,6 +94,7 @@ class TestVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-0k', 'data-1k', 'data-1m', 'data-10m'
@@ -106,6 +108,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects == count + 1, 'should reuse the control conn'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-0k', 'data-1k', 'data-1m', 'data-10m'
@@ -121,6 +124,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects > count + 1, 'should have used several control conns'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'upload-0k', 'upload-1k', 'upload-100k', 'upload-1m'
@@ -135,6 +139,7 @@ class TestVsFTPD:
         r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpd, docname=docname)
+        r.check_stats_timelines()
 
     def _rmf(self, path):
         if os.path.exists(path):
@@ -190,6 +195,7 @@ class TestVsFTPD:
         ])
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        r.check_stats_timelines()
 
     def test_30_09_active_up_file(self, env: Env, vsftpd: VsFTPD):
         docname = 'upload-1k'
@@ -204,6 +210,7 @@ class TestVsFTPD:
         ])
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpd, docname=docname)
+        r.check_stats_timelines()
 
     def test_30_10_active_up_ascii(self, env: Env, vsftpd: VsFTPD):
         docname = 'upload-1k'
@@ -218,6 +225,7 @@ class TestVsFTPD:
         ])
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpd, docname=docname, binary=False)
+        r.check_stats_timelines()
 
     def test_30_11_download_non_existing(self, env: Env, vsftpd: VsFTPD):
         curl = CurlClient(env=env)
@@ -225,6 +233,7 @@ class TestVsFTPD:
         r = curl.ftp_get(urls=[url], with_stats=True)
         r.check_exit_code(78)
         r.check_stats(count=1, exitcode=78)
+        r.check_stats_timelines()
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
