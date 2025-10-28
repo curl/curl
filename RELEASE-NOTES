@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3529
+ Contributors:                 3531
 
 This release includes the following changes:
 
@@ -86,6 +86,7 @@ This release includes the following bugfixes:
  o connect: remove redundant condition in shutdown start [289]
  o cookie: avoid saving a cookie file if no transfer was done [11]
  o cookie: only count accepted cookies in Curl_cookie_add [364]
+ o cookie: remove the temporary file on (all) errors [356]
  o cpool: make bundle->dest an array; fix UB [218]
  o curl.h: remove incorrect comment about CURLOPT_PINNEDPUBLICKEY [320]
  o curl_easy_getinfo: error code on NULL arg [2]
@@ -101,6 +102,7 @@ This release includes the following bugfixes:
  o CURLOPT_COOKIEFILE.md: clarify when the cookies are loaded [159]
  o CURLOPT_HEADER/WRITEFUNCTION.md: drop '* size' since size is always 1 [63]
  o CURLOPT_MAXLIFETIME_CONN: make default 24 hours [10]
+ o CURLOPT_SERVER_RESPONSE_TIMEOUT*: add default and see-also [397]
  o CURLOPT_SSL_VERIFYHOST.md: add see-also to two other VERIFYHOST options [32]
  o CURLOPT_TIMECONDITION.md: works for FILE and FTP as well [27]
  o cw-out: unify the error handling pattern in cw_out_do_write [414]
@@ -114,6 +116,7 @@ This release includes the following bugfixes:
  o docs: fix/tidy code fences [87]
  o doswin: CloseHandle the thread on shutdown [307]
  o easy_getinfo: check magic, Curl_close safety [3]
+ o ECH.md: make OpenSSL branch clone instructions work [430]
  o examples/chkspeed: portable printing when outputting curl_off_t values [365]
  o examples/sessioninfo: cast printf string mask length to int [232]
  o examples/sessioninfo: do not disable security [255]
@@ -149,6 +152,7 @@ This release includes the following bugfixes:
  o gnutls: check conversion of peer cert chain [275]
  o gnutls: fix re-handshake comments [422]
  o gtls: avoid potential use of uninitialized variable in trace output [83]
+ o header.md: see-also --proxy-header and vice versa [396]
  o hmac: free memory properly on errors [377]
  o hostip: don't store negative resolves due unrelated errors [256]
  o hostip: fix infof() output for non-ipv6 builds using IPv6 address [338]
@@ -162,6 +166,7 @@ This release includes the following bugfixes:
  o http: make Content-Length parser more WHATWG [183]
  o http: only accept ';' as a separator for custom headers [407]
  o http: return error for a second Location: header [393]
+ o http_proxy: fix adding custom proxy headers [424]
  o httpsrr: free old pointers when storing new [57]
  o imap: parse and use UIDVALIDITY as a number [420]
  o imap: treat capabilities case insensitively [345]
@@ -278,6 +283,7 @@ This release includes the following bugfixes:
  o OS400: fix a use-after-free/double-free case [142]
  o osslq: set idle timeout to 0 [237]
  o pingpong: remove two old leftover debug infof() calls
+ o pop3: fix CAPA response termination detection [427]
  o pop3: function could get the ->transfer field wrong [292]
  o pytest: skip specific tests for no-verbose builds [171]
  o quic: fix min TLS version handling [14]
@@ -300,6 +306,7 @@ This release includes the following bugfixes:
  o sasl: clear canceled mechanism instead of toggling it [41]
  o schannel: assign result before using it [62]
  o schannel: fix memory leak [363]
+ o schannel: handle Curl_conn_cf_send() errors better [352]
  o schannel: lower the maximum allowed time to block to 7 seconds [333]
  o schannel_verify: do not call infof with an appended \n [371]
  o schannel_verify: fix mem-leak in Curl_verify_host [208]
@@ -309,6 +316,7 @@ This release includes the following bugfixes:
  o setopt: allow CURLOPT_DNS_CACHE_TIMEOUT set to -1 [257]
  o setopt: fix unused variable warning in minimal build [332]
  o setopt: make CURLOPT_MAXREDIRS accept -1 (again) [1]
+ o singleuse.pl: fix string warning [392]
  o smb: adjust buffer size checks [45]
  o smb: transfer debugassert to real check [303]
  o smtp: check EHLO responses case insensitively [50]
@@ -320,7 +328,9 @@ This release includes the following bugfixes:
  o socks: handle error in verbose trace gracefully [94]
  o socks: handle premature close [246]
  o socks: make Curl_blockread_all return CURLcode [67]
+ o socks: properly maintain the status of 'done' [405]
  o socks: rewwork, cleaning up socks state handling [135]
+ o socks_gssapi: also reset buffer length after free [429]
  o socks_gssapi: make the gss_context a local variable [144]
  o socks_gssapi: reject too long tokens [90]
  o socks_gssapi: remove superfluous releases of the gss_recv_token [139]
@@ -365,6 +375,7 @@ This release includes the following bugfixes:
  o tidy-up: update MS links, allow long URLs via checksrc [73]
  o tidy-up: URLs [101]
  o time-cond.md: refer to the singular curl_getdate man page [148]
+ o TLS: IP address verification, extend test [398]
  o TODO: fix a typo [93]
  o TODO: remove already implemented or bad items [36]
  o tool: fix exponential retry delay [47]
@@ -412,6 +423,7 @@ This release includes the following bugfixes:
  o vtls: unify the error handling in ssl_cf_connect(). [413]
  o vtls_int.h: clarify data_pending [124]
  o vtls_scache: fix race condition [157]
+ o wcurl: sync to +dev snapshot [425]
  o windows: replace _beginthreadex() with CreateThread() [80]
  o windows: stop passing unused, optional argument for Win9x compatibility [75]
  o windows: use consistent format when showing error codes [199]
@@ -461,9 +473,9 @@ advice from friends like these:
   Nir Azkiel, Patrick Monnerat, Pavel P, plv1313 on github, Pocs Norbert,
   Ray Satiro, renovate[bot], rinsuki on github, Sakthi SK, Samuel Dionne-Riel,
   Samuel Henrique, Stanislav Fort, Stefan Eissing, Tatsuhiro Tsujikawa,
-  Theo Buehler, Tim Becker, tkzv on github, Viktor Szakats,
-  WangDaLei on github, Xiaoke Wang, Yedaya Katsman, 包布丁
-  (63 contributors)
+  TheBitBrine, Theo Buehler, Tim Becker, tkzv on github, Viktor Szakatas,
+  Viktor Szakats, WangDaLei on github, Xiaoke Wang, Yedaya Katsman, 包布丁
+  (65 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -817,9 +829,11 @@ References to bug reports and discussions on issues:
  [348] = https://curl.se/bug/?i=19086
  [349] = https://curl.se/bug/?i=19076
  [351] = https://curl.se/bug/?i=19141
+ [352] = https://curl.se/bug/?i=19265
  [353] = https://curl.se/bug/?i=19073
  [354] = https://curl.se/bug/?i=19078
  [355] = https://curl.se/bug/?i=19135
+ [356] = https://curl.se/bug/?i=19267
  [357] = https://curl.se/bug/?i=19136
  [358] = https://curl.se/bug/?i=19133
  [359] = https://curl.se/bug/?i=19139
@@ -854,13 +868,18 @@ References to bug reports and discussions on issues:
  [389] = https://curl.se/bug/?i=19160
  [390] = https://curl.se/bug/?i=19137
  [391] = https://curl.se/bug/?i=19223
+ [392] = https://curl.se/bug/?i=19266
  [393] = https://curl.se/bug/?i=19130
  [394] = https://curl.se/bug/?i=19153
+ [396] = https://curl.se/bug/?i=19259
+ [397] = https://curl.se/bug/?i=19258
+ [398] = https://curl.se/bug/?i=19252
  [399] = https://curl.se/bug/?i=19206
  [400] = https://curl.se/bug/?i=19208
  [402] = https://curl.se/bug/?i=19211
  [403] = https://curl.se/bug/?i=19213
  [404] = https://curl.se/bug/?i=18991
+ [405] = https://curl.se/bug/?i=19255
  [406] = https://curl.se/bug/?i=19202
  [407] = https://curl.se/bug/?i=19200
  [408] = https://curl.se/bug/?i=19201
@@ -879,3 +898,8 @@ References to bug reports and discussions on issues:
  [421] = https://curl.se/bug/?i=19186
  [422] = https://curl.se/bug/?i=19187
  [423] = https://curl.se/bug/?i=19185
+ [424] = https://curl.se/bug/?i=19227
+ [425] = https://curl.se/bug/?i=19247
+ [427] = https://curl.se/bug/?i=19228
+ [429] = https://curl.se/bug/?i=19167
+ [430] = https://curl.se/bug/?i=19237
