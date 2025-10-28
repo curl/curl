@@ -531,11 +531,17 @@ static bool cpool_foreach(struct Curl_easy *data,
 bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  unsigned int maxconnects = !data->multi->maxconnects ?
-    (Curl_multi_xfers_running(data->multi) * 4) : data->multi->maxconnects;
+  unsigned int maxconnects;
   struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
+
+  if(!data->multi->maxconnects) {
+    unsigned int running = Curl_multi_xfers_running(data->multi);
+    maxconnects = (running <= UINT_MAX / 4) ? running * 4 : UINT_MAX;
+  } else {
+    maxconnects = data->multi->maxconnects;
+  }
 
   conn->lastused = curlx_now(); /* it was used up until now */
   if(cpool && maxconnects) {
