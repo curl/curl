@@ -1133,6 +1133,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   const char *pubkey_ptr;
 
   DEBUGASSERT(backend);
+  DEBUGASSERT(backend->cred);
+  DEBUGASSERT(backend->ctxt);
 
   doread = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ? FALSE : TRUE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
@@ -1202,10 +1204,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                        "need more data"));
           return CURLE_OK;
         }
-        else {
-          DEBUGF(infof(data, "schannel: no new handshake data received, "
-                       "continuing to process existing handshake data"));
-        }
+        return result;
       }
       else if(result || (nread == 0)) {
         failf(data, "schannel: failed to receive handshake, "
