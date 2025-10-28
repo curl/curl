@@ -848,6 +848,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   size_t hostname_len;
   bool keep_negative = TRUE; /* cache a negative result */
 
+  *entry = NULL;
+
 #ifndef CURL_DISABLE_DOH
   data->conn->bits.doh = FALSE; /* default is not */
 #else
@@ -969,7 +971,6 @@ out:
 error:
   if(dns)
     Curl_resolv_unlink(data, &dns);
-  *entry = NULL;
   Curl_async_shutdown(data);
   if(keep_negative)
     store_negative_resolve(data, hostname, port);
