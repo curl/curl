@@ -96,7 +96,9 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
+#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
   struct gss_channel_bindings_struct chan;
+#endif
 
   (void)user;
   (void)password;
