@@ -2016,4 +2016,4 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !CURL_DISABLE_WEBSOCKETS */
+#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
