@@ -1096,7 +1096,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   BerElement *ber = NULL;
   struct timeval tv = {0, 0};
   struct berval bv, *bvals;
-  bool binary = FALSE;
   CURLcode result = CURLE_AGAIN;
   int code;
   char *info = NULL;
@@ -1167,6 +1166,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         rc == LDAP_SUCCESS;
         rc = ldap_get_attribute_ber(li->ld, msg, ber, &bv, &bvals)) {
       int i;
+      bool binary;
 
       if(!bv.bv_val)
         break;
