@@ -2780,7 +2780,11 @@ static CURLcode http_add_hd(struct Curl_easy *data,
                             Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
+#if !defined(CURL_DISABLE_ALTSVC) || \
+  !defined(CURL_DISABLE_PROXY) || \
+  !defined(CURL_DISABLE_WEBSOCKETS)
   struct connectdata *conn = data->conn;
+#endif
   switch(id) {
   case H1_HD_REQUEST:
     /* add the main request stuff */
