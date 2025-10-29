@@ -457,17 +457,6 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
                           struct Curl_easy *data,
                           struct pkt_io_ctx *pktx)
 {
-#ifdef NGTCP2_SETTINGS_V2x
-static uint16_t mtu_probes[] = {
-  1472, /* what h2o offers */
-  1452, /* what Caddy offers */
-  1454 - 48, /* The well known MTU used by a domestic optic fiber
-                service in Japan. */
-  1390 - 48, /* Typical Tunneled MTU */
-  1280 - 48, /* IPv6 minimum MTU */
-  1492 - 48, /* PPPoE */
-};
-#endif
   ngtcp2_settings *s = &ctx->settings;
   ngtcp2_transport_params *t = &ctx->transport_params;
 
@@ -485,12 +474,11 @@ static uint16_t mtu_probes[] = {
   s->max_window = 100 * ctx->max_stream_window;
   s->max_stream_window = 10 * ctx->max_stream_window;
   s->no_pmtud = FALSE;
-#ifdef NGTCP2_SETTINGS_V2x
-  s->pmtud_probes = mtu_probes;
-  s->pmtud_probeslen = CURL_ARRAYSIZE(mtu_probes);
-  s->max_tx_udp_payload_size = 64 * 1024; /* mtu_probes[0]; */
+#ifdef NGTCP2_SETTINGS_V3
+  /* try ten times the ngtcp2 defaults here for problems with Caddy */
+  s->glitch_ratelim_burst = 1000 * 10;
+  s->glitch_ratelim_rate = 33 * 10;
 #endif
-
   t->initial_max_data = 10 * ctx->max_stream_window;
   t->initial_max_stream_data_bidi_local = ctx->max_stream_window;
   t->initial_max_stream_data_bidi_remote = ctx->max_stream_window;
