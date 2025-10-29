@@ -1852,9 +1852,12 @@ void Curl_http_method(struct Curl_easy *data,
 {
   Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
+#ifndef CURL_DISABLE_WEBSOCKETS
   if(data->conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
     httpreq = HTTPREQ_GET;
-  else if((data->conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
+  else
+#endif
+  if((data->conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
      data->state.upload)
     httpreq = HTTPREQ_PUT;
 
