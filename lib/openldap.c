@@ -1180,7 +1180,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       }
 
       binary = bv.bv_len > 7 &&
-        !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7);
+        curl_strnequal(bv.bv_val + bv.bv_len - 7, ";binary", 7);
 
       for(i = 0; bvals[i].bv_val != NULL; i++) {
         bool binval = FALSE;
