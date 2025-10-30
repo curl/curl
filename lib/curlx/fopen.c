@@ -47,7 +47,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 #endif
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 
 #include "multibyte.h"
 
@@ -235,7 +235,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
-    CURL_SETERRNO(EINVAL);
+    errno = EINVAL;
 #else
   if(fix_excessive_path(filename, &fixed))
     target = fixed;
@@ -266,7 +266,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
-    CURL_SETERRNO(EINVAL);
+    errno = EINVAL;
   curlx_unicodefree(filename_w);
   curlx_unicodefree(mode_w);
 #else
@@ -304,7 +304,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
-    CURL_SETERRNO(EINVAL);
+    errno = EINVAL;
 #else
   if(fix_excessive_path(path, &fixed))
     target = fixed;
@@ -321,4 +321,4 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
-#endif /* _WIN32 && !UNDER_CE */
+#endif /* _WIN32 */

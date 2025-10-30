@@ -109,7 +109,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   return TRUE;
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
                           char *buffer, size_t bytes,
                           size_t *retp)
@@ -247,7 +247,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
   bool is_tty = global->isatty;
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
 #endif
@@ -321,7 +321,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
   /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&

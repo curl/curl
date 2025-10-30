@@ -386,10 +386,7 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
      * valid when used in another process with different CWD. However,
      * when a path does not exist, this does not work. Then, we add
      * the path as is. */
-#ifdef UNDER_CE
-    (void)is_local;
-    return curlx_dyn_addf(buf, ":%s-%s", name, path);
-#elif defined(_WIN32)
+#ifdef _WIN32
     char abspath[_MAX_PATH];
     if(_fullpath(abspath, path, _MAX_PATH))
       return curlx_dyn_addf(buf, ":%s-%s", name, abspath);
