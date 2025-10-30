@@ -88,7 +88,7 @@ User-Agent: curl
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

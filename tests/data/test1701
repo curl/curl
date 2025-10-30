@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 -d "datatosend"
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
 User-Agent: curl/%VERSION

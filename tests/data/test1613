@@ -40,7 +40,7 @@ proxy
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 OPTIONS * HTTP/1.1
 Host: www.example.org
 User-Agent: curl/%VERSION
