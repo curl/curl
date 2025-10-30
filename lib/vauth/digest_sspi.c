@@ -629,7 +629,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     Curl_sspi_free_identity(p_identity);
   }
 
-  resp = Curl_memdup0(output_token, output_token_len);
+  resp = Curl_memdup0((const char *)output_token, output_token_len);
   free(output_token);
   if(!resp) {
     return CURLE_OUT_OF_MEMORY;
