@@ -74,7 +74,7 @@ cookies
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: domain..tld:%HTTPPORT
 User-Agent: curl/%VERSION

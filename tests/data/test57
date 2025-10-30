@@ -35,7 +35,7 @@ HTTP content-type with spaces in
 <stdout mode="text">
 text/html; charset=ISO-8859-4
 </stdout>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

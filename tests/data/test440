@@ -52,7 +52,7 @@ test-duphandle
 
 <verify>
 # we let it CONNECT to the server to confirm HSTS but deny from there
-<protocol>
+<protocol crlf="yes">
 CONNECT this.hsts.example.:443 HTTP/1.1
 Host: this.hsts.example.:443
 User-Agent: curl/%VERSION
