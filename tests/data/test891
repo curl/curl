@@ -35,7 +35,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH CRAM-MD5
 dXNlciA1YzhkYjAzZjA0Y2VjMGY0M2JjYjA2MDAyMzkxNDE5MA==
