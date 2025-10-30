@@ -34,8 +34,6 @@ Dummy test file for remove test
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 <postcheck>
 %PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/test%TESTNUMBER.txt
 </postcheck>
