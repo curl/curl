@@ -14,7 +14,7 @@ mooo
 # a long set of response strings to CWD to make sure the ftp parser deals
 # with it nicely
 <servercmd>
-REPLY CWD %repeat[226 x 250-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\n]%250 Finally, here is the response
+REPLY CWD %repeat[226 x 250-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%0d%0a]%250 Finally, here is the response
 </servercmd>
 </reply>
 
