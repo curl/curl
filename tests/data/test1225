@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT//foo/%TESTNUMBER ftp://%HOSTIP:%FTPPORT//foo/bar/%TESTNUM
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
