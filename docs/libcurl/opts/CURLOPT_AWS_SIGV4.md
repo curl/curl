@@ -97,7 +97,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_AWS_SIGV4,
                      "provider1:provider2:region:service");
 
+    /* Basic credentials */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "MY_ACCESS_KEY:MY_SECRET_KEY");
+
+    /* OR for temporary credentials with security token */
+    /* curl_easy_setopt(curl, CURLOPT_USERPWD,
+                        "MY_ACCESS_KEY:MY_SECRET_KEY:MY_SECURITY_TOKEN"); */
     curl_easy_perform(curl);
   }
 }

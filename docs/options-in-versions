@@ -15,6 +15,9 @@
 --anyauth                            7.10.6
 --append (-a)                        4.8
 --aws-sigv4                          7.75.0
+--aws-sigv4-algorithm                8.17.0
+--aws-sigv4-mode                     8.17.0
+--aws-sigv4-signedheaders            8.17.0
 --basic                              7.10.6
 --ca-native                          8.2.0
 --cacert                             7.5

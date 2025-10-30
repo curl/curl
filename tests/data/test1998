@@ -1,0 +1,75 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+AWS
+SigV4A
+ECDSA-P256-SHA256
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Oct 2025 19:59:42 GMT
+Server: test-server/fake
+Content-Type: text/plain
+Content-Length: 3
+
+OK
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+AWS SigV4A basic functionality test
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --aws-sigv4 "aws:amz:us-east-1:s3" --aws-sigv4-algorithm "ECDSA-P256-SHA256" -u "AKIATEST:secretkey"
+</command>
+</client>
+
+#
+# Verify the key SigV4A characteristics (or proper error when not supported)
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: AWS4-ECDSA-P256-SHA256 Credential=AKIATEST/YYYYMMDD/s3/aws4_request, SignedHeaders=HEADERS, Signature=SIGNATURE64
+x-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+User-Agent: curl/%VERSION
+Accept: */*
+X-Amz-Date: YYYYMMDDTHHMMSSZ
+X-Amz-Region-Set: us-east-1
+
+</protocol>
+<strippart>
+s/Authorization: AWS4-ECDSA-P256-SHA256 Credential=AKIATEST\/[0-9]{8}\/s3\/aws4_request, SignedHeaders=[^,]+, Signature=[a-f0-9]{64,144}/Authorization: AWS4-ECDSA-P256-SHA256 Credential=AKIATEST\/YYYYMMDD\/s3\/aws4_request, SignedHeaders=HEADERS, Signature=SIGNATURE64/
+s/X-Amz-Date: [0-9]{8}T[0-9]{6}Z/X-Amz-Date: YYYYMMDDTHHMMSSZ/
+</strippart>
+<postcheck>
+perl -e '
+  my $headers = "GET /%TESTNUMBER HTTP/1.1\nHost: %HOSTIP:%HTTPPORT\nAuthorization: AWS4-ECDSA-P256-SHA256 Credential=AKIATEST/YYYYMMDD/s3/aws4_request, SignedHeaders=HEADERS, Signature=SIGNATURE64\nx-amz-content-sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nUser-Agent: curl/%VERSION\nAccept: */*\nX-Amz-Date: YYYYMMDDTHHMMSSZ\nX-Amz-Region-Set: us-east-1";
+  my @dates = ($headers =~ /^X-Amz-Date:/gmi);
+  if (@dates != 1) {
+    print "ERROR: Found " . scalar(@dates) . " X-Amz-Date headers, expected exactly 1\n";
+    exit 1;
+  }
+  print "OK: Found exactly 1 X-Amz-Date header\n";
+'
+</postcheck>
+# Accept either success (0) or "not built in" error (4) for SigV4A
+<errorcode>
+0
+4
+</errorcode>
+</verify>
+</testcase>

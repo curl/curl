@@ -63,8 +63,8 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 GET /aws_sigv4/testapi/test HTTP/1.1
 Host: exam.ple.com:9000
 Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;x-xxx-content-sha256;x-xxx-date, Signature=dfe78c8846a9b7d65d1eb4c1d6ea7bc886650d03f3568088cb8d5b4c3778287f
-X-Xxx-Date: 19700101T000000Z
-X-Xxx-Content-Sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+X-Xxx-Content-Sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855[CR][LF]
+X-Xxx-Date: 19700101T000000Z[CR][LF]
 
 </protocol>
 </verify>

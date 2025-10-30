@@ -170,6 +170,9 @@ struct OperationConfig {
   char *unix_socket_path;         /* path to Unix domain socket */
   char *haproxy_clientip;         /* client IP for HAProxy protocol */
   char *aws_sigv4;
+  char *aws_sigv4_algorithm;
+  char *aws_sigv4_mode;
+  char *aws_sigv4_signedheaders;
   char *ech;                      /* Config set by --ech keywords */
   char *ech_config;               /* Config set by "--ech esl:" option */
   char *ech_public;               /* Config set by "--ech pn:" option */

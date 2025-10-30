@@ -1,0 +1,20 @@
+<testcase>
+<info>
+<keywords>
+unittest
+credentials
+aws-sigv4
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+unittest
+</features>
+<name>
+sigv4 credentials parsing unit tests
+</name>
+</client>
+</testcase>

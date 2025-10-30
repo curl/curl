@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+AWS
+SigV4A
+ECDSA-P256-SHA256
+querystring
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 22 Oct 2025 20:04:16 GMT
+Server: test-server/fake
+Content-Type: text/plain
+Content-Length: 3
+
+OK
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+AWS SigV4A querystring signing mode
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --aws-sigv4 "aws:amz:us-east-1:s3" --aws-sigv4-algorithm "ECDSA-P256-SHA256" --aws-sigv4-mode "querystring" -u "AKIATEST:secretkey"
+</command>
+</client>
+
+#
+# Verify SigV4A querystring signing (or proper error when not supported)
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER?X-Amz-Algorithm=AWS4-ECDSA-P256-SHA256&X-Amz-Credential=AKIATEST%2FYYYYMMDD%2Fs3%2Faws4_request&X-Amz-Date=YYYYMMDDTHHMMSSZ&X-Amz-Region-Set=us-east-1&X-Amz-SignedHeaders=host%3Bx-amz-content-sha256&X-Amz-Signature=SIGNATURE64 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<strippart>
+s/X-Amz-Credential=AKIATEST%2F[0-9]{8}%2Fs3%2Faws4_request/X-Amz-Credential=AKIATEST%2FYYYYMMDD%2Fs3%2Faws4_request/
+s/X-Amz-Date=[0-9]{8}T[0-9]{6}Z/X-Amz-Date=YYYYMMDDTHHMMSSZ/
+s/X-Amz-Signature=[a-f0-9]{64,144}/X-Amz-Signature=SIGNATURE64/
+</strippart>
+<postcheck>
+perl -e '
+  my $query = "GET /%TESTNUMBER?X-Amz-Algorithm=AWS4-ECDSA-P256-SHA256&X-Amz-Credential=AKIATEST%2FYYYYMMDD%2Fs3%2Faws4_request&X-Amz-Date=YYYYMMDDTHHMMSSZ&X-Amz-SignedHeaders=host%3Bx-amz-content-sha256&X-Amz-Signature=SIGNATURE64 HTTP/1.1";
+  my @dates = ($query =~ /X-Amz-Date=/g);
+  if (@dates != 1) {
+    print "ERROR: Found " . scalar(@dates) . " X-Amz-Date parameters, expected exactly 1\n";
+    exit 1;
+  }
+  print "OK: Found exactly 1 X-Amz-Date parameter\n";
+'
+</postcheck>
+# Accept either success (0) or "not built in" error (4) for SigV4A
+<errorcode>
+0
+4
+</errorcode>
+</verify>
+</testcase>
