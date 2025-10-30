@@ -50,7 +50,7 @@ proxy
 <strippart>
 s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %HTTPPORT/proxy-line/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 proxy-line
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
