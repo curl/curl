@@ -35,7 +35,7 @@ IMAP SELECT UIDVALIDITY Failure
 <errorcode>
 78
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER
