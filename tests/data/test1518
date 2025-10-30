@@ -46,8 +46,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <strippart>
 
 </strippart>
-<protocol>
-</protocol>
 <stdout>
 res 0
 status 302
