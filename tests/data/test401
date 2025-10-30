@@ -42,7 +42,7 @@ that FTPS
 works
   so does it?
 </upload>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PBSZ 0

@@ -28,7 +28,7 @@ FTP SSL required on non-SSL server
 <errorcode>
 64
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 AUTH SSL
 AUTH TLS
 </protocol>
