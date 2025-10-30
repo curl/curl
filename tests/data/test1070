@@ -48,7 +48,7 @@ Here's 2000 x 'O':
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

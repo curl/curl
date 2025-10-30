@@ -59,7 +59,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 <errorcode>
 52
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
