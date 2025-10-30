@@ -16,7 +16,7 @@ Content-Length: 29
 
 run 1: foobar and so on fun!
 </data>
-<datacheck>
+<datacheck nonewline="yes">
 %repeat[128 x run 1: foobar and so on fun!%0a]%
 </datacheck>
 </reply>
