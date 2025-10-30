@@ -30,7 +30,7 @@ FTP with user and no password
 <verify>
 <protocol crlf="yes">
 USER user
-PASS 
+PASS%spc%
 PWD
 EPSV
 TYPE I
