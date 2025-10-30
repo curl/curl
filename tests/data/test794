@@ -75,7 +75,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter -X IGLOO -d moo --locat
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol nonewline="yes" crlf="yes">
+<protocol crlf="yes" nonewline="yes">
 IGLOO /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
