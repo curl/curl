@@ -45,7 +45,7 @@ RCPT TO:<recipient@example.com> NOTIFY=SUCCESS,FAILURE
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 
