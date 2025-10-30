@@ -64,7 +64,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy crlf="yes">
+<proxy>
 CONNECT remotesite.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: remotesite.com.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic %b64[youare:yourself]b64%
@@ -72,7 +72,7 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol crlf="yes">
+<protocol>
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: remotesite.com.%TESTNUMBER:%HTTPPORT
 Authorization: Basic %b64[iam:myself]b64%
