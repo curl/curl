@@ -629,24 +629,15 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     Curl_sspi_free_identity(p_identity);
   }
 
-  resp = malloc(output_token_len + 1);
+  resp = Curl_memdup0((const char *)output_token, output_token_len);
+  free(output_token);
   if(!resp) {
-    free(output_token);
-
     return CURLE_OUT_OF_MEMORY;
   }
-
-  /* Copy the generated response */
-  memcpy(resp, output_token, output_token_len);
-  resp[output_token_len] = 0;
 
   /* Return the response */
   *outptr = resp;
   *outlen = output_token_len;
-
-  /* Free the response buffer */
-  free(output_token);
-
   return CURLE_OK;
 }
 

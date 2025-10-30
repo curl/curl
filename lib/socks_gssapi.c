@@ -126,7 +126,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   gss_name_t       server = GSS_C_NO_NAME;
   gss_name_t       gss_client_name = GSS_C_NO_NAME;
   unsigned short   us_length;
-  char             *user = NULL;
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
   const char *serviceptr = data->set.str[STRING_PROXY_SERVICE_NAME] ?
                            data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
@@ -327,21 +326,12 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     failf(data, "Failed to determine username.");
     return CURLE_COULDNT_CONNECT;
   }
-  user = malloc(gss_send_token.length + 1);
-  if(!user) {
-    Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
-    gss_release_name(&gss_status, &gss_client_name);
-    gss_release_buffer(&gss_status, &gss_send_token);
-    return CURLE_OUT_OF_MEMORY;
-  }
 
-  memcpy(user, gss_send_token.value, gss_send_token.length);
-  user[gss_send_token.length] = '\0';
+  infof(data, "SOCKS5 server authenticated user %.*s with GSS-API.",
+        (int)gss_send_token.length, (char *)gss_send_token.value);
+
   gss_release_name(&gss_status, &gss_client_name);
   gss_release_buffer(&gss_status, &gss_send_token);
-  infof(data, "SOCKS5 server authenticated user %s with GSS-API.",user);
-  free(user);
-  user = NULL;
 
   /* Do encryption */
   socksreq[0] = 1;    /* GSS-API subnegotiation version */
