@@ -52,7 +52,7 @@ FTPS download with strict timeout and slow data transfer
 <errorcode>
 28
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PBSZ 0
