@@ -43,7 +43,7 @@ HTTP with --resolve and same host name using different cases
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: MiXeDcAsE.cOm:%HTTPPORT
 User-Agent: curl/%VERSION

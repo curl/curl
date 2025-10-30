@@ -33,7 +33,7 @@ HTTP URL with semicolon in password
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user:pass]b64%O3dvcmQ=

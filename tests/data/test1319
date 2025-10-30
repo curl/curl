@@ -63,7 +63,7 @@ pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:se
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret
