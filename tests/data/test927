@@ -34,7 +34,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 EXPN Friends
 QUIT
