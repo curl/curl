@@ -42,7 +42,7 @@ http://user:secret@%HOSTIP:%HTTPPORT/gimme/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /gimme/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user:secret]b64%

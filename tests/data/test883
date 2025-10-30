@@ -46,7 +46,7 @@ POP3 external authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH EXTERNAL
 dXNlcg==

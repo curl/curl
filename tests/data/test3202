@@ -55,7 +55,7 @@ proxy
 <strippart>
 s/^PROXY TCP6 2001:db8:: ::1 (\d*) %HTTP6PORT/proxy-line/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 proxy-line
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT

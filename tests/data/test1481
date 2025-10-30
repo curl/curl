@@ -42,7 +42,7 @@ http://moo/ --libcurl %LOGDIR/test%TESTNUMBER.c --tls-max 1.3 --proxy-tlsv1 -x h
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://moo/ HTTP/1.1
 Host: moo
 User-Agent: curl/%VERSION

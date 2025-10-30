@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/gif/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /gif/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

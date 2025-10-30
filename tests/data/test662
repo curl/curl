@@ -60,7 +60,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://example.com/please/gimme/%TESTNUMBER HTTP/1.1
 Host: example.com
 User-Agent: curl/%VERSION

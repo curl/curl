@@ -36,7 +36,7 @@ ftp://%HOSTIP:%FTPPORT/attempt/to/get/this/%TESTNUMBER --ftp-create-dirs
 <errorcode>
 9
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

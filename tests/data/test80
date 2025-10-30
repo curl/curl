@@ -70,7 +70,7 @@ Proxy-Authorization: Basic %b64[youare:yourself]b64%
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="yes">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 Authorization: Basic %b64[iam:myself]b64%

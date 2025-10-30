@@ -39,14 +39,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 s/^--------------------------[A-Za-z0-9]*/------------------------------/
 s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:<somebody@example.com>
 RCPT TO:<someone@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 Content-Type: multipart/mixed; boundary=----------------------------
 Mime-Version: 1.0
 

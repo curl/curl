@@ -42,7 +42,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://we.want.that.site.com.%TESTNUMBER/?moo=foo HTTP/1.1
 Host: we.want.that.site.com.%TESTNUMBER
 User-Agent: curl/%VERSION

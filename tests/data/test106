@@ -35,7 +35,7 @@ FTP GET with type=A style ASCII URL using %20 codes
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

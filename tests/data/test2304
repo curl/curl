@@ -52,7 +52,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 # PONG with no data and the 32 bit mask
 #
 <verify>
-<protocol nocheck="yes" crlf="yes">
+<protocol crlf="yes" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: websocket/%TESTNUMBER

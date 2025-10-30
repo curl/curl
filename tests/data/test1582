@@ -42,7 +42,7 @@ https://%HOSTIP:%HTTPSPORT/
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 Accept: */*

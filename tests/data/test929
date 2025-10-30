@@ -29,7 +29,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER -X NOOP -I
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 NOOP
 QUIT

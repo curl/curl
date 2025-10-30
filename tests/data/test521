@@ -44,7 +44,7 @@ ftp://%HOSTIP/%TESTNUMBER/ %FTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER xxx
 PASS yyy
 PWD

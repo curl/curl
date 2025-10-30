@@ -74,7 +74,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER %LOGDIR/idfile%TESTNUMBER.txt
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Fake/NotReal/JustATest;foo=baz

@@ -51,7 +51,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H @%LOGDIR/heads%TESTNUMBER.txt
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

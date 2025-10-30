@@ -37,7 +37,7 @@ IMAP custom FETCH with larger literal response (~7KB)
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER

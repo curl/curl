@@ -14,7 +14,7 @@ IDN
 <servercmd>
 CAPA SMTPUTF8
 </servercmd>
-<data>
+<data crlf="yes">
 250-Joe Smith <joe.smith@example.com>
 250-Harry Smith <harry.smith@example.com>
 250 Melvin Smith <melvin.smith@example.com>
@@ -42,7 +42,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Friends -X EXPN
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 EXPN Friends SMTPUTF8
 QUIT
