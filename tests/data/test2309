@@ -54,7 +54,7 @@ password $y$j9T$WUVjiVvDbRAWafDLs6cab1$01NX.oaZKf5lw8MR2Nk9Yaxv4CqbE0IaDF.GpGxPu
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://github.com/ HTTP/1.1
 Host: github.com
 Authorization: Basic %b64[daniel:$y$j9T$WUVjiVvDbRAWafDLs6cab1$01NX.oaZKf5lw8MR2Nk9Yaxv4CqbE0IaDF.GpGxPul1]b64%

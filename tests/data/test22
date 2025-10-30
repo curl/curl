@@ -31,7 +31,7 @@ get HTTP with URL > 10000 bytes
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /%repeat[11000 x a]%/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
