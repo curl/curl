@@ -321,4 +321,39 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
+TCHAR *curlx_win32_fix_long_path(const char *path)
+{
+  TCHAR *result = NULL;
+  TCHAR *fixed = NULL;
+  const TCHAR *target;
+
+  if(!path)
+    return NULL;
+
+#ifdef _UNICODE
+  wchar_t *path_w = curlx_convert_UTF8_to_wchar(path);
+  if(!path_w)
+    return NULL;
+
+  if(fix_excessive_path(path_w, &fixed))
+    target = fixed;
+  else
+    target = path_w;
+
+  result = (_wcsdup)(target);
+  (free)(fixed);
+  curlx_unicodefree(path_w);
+#else
+  if(fix_excessive_path(path, &fixed))
+    target = fixed;
+  else
+    target = path;
+
+  result = (strdup)(target);
+  (free)(fixed);
+#endif
+
+  return result;
+}
+
 #endif /* _WIN32 && !UNDER_CE */

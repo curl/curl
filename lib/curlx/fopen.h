@@ -38,6 +38,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence);
 FILE *curlx_win32_fopen(const char *filename, const char *mode);
 int curlx_win32_stat(const char *path, struct_stat *buffer);
 int curlx_win32_open(const char *filename, int oflag, ...);
+TCHAR *curlx_win32_fix_long_path(const char *path);
 #define CURLX_FOPEN_LOW(fname, mode) curlx_win32_fopen(fname, mode)
 #define curlx_stat(fname, stp)       curlx_win32_stat(fname, stp)
 #define curlx_open                   curlx_win32_open
