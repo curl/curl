@@ -33,7 +33,7 @@ static CURLcode test_lib1501(const char *URL)
   static const int MAX_BLOCKED_TIME_MS = 500;
 
   CURL *curl = NULL;
-  CURLM *mhandle = NULL;
+  CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
   int still_running = 0;
 
@@ -46,11 +46,11 @@ static CURLcode test_lib1501(const char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  multi_init(mhandle);
+  multi_init(multi);
 
-  multi_add_handle(mhandle, curl);
+  multi_add_handle(multi, curl);
 
-  multi_perform(mhandle, &still_running);
+  multi_perform(multi, &still_running);
 
   abort_on_test_timeout_custom(HANG_TIMEOUT);
 
@@ -71,7 +71,7 @@ static CURLcode test_lib1501(const char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -82,7 +82,7 @@ static CURLcode test_lib1501(const char *URL)
     curl_mfprintf(stderr, "ping\n");
     before = curlx_now();
 
-    multi_perform(mhandle, &still_running);
+    multi_perform(multi, &still_running);
 
     abort_on_test_timeout_custom(HANG_TIMEOUT);
 
@@ -100,7 +100,7 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(mhandle);
+  curl_multi_cleanup(multi);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
