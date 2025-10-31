@@ -10,7 +10,7 @@ GET_PARAMETER
 
 # Server-side
 <reply>
-<data1 crlf="yes">
+<data1>
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -31,7 +31,7 @@ speed=ludicrous
 
 </data2>
 
-<data3 crlf="yes">
+<data3>
 RTSP/1.0 204 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
