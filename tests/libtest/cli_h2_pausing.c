@@ -83,7 +83,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 static CURLcode test_cli_h2_pausing(const char *URL)
 {
   struct handle handles[2];
-  CURLM *multi_handle = NULL;
+  CURLM *multi = NULL;
   int still_running = 1, msgs_left, numfds;
   size_t i;
   CURLMsg *msg;
@@ -198,15 +198,15 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     curl_easy_setopt(handles[i].curl, CURLOPT_HTTP_VERSION, http_version);
   }
 
-  multi_handle = curl_multi_init();
-  if(!multi_handle) {
+  multi = curl_multi_init();
+  if(!multi) {
     curl_mfprintf(stderr, "curl_multi_init() failed - bailing out\n");
     result = (CURLcode)2;
     goto cleanup;
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    if(curl_multi_add_handle(multi_handle, handles[i].curl) != CURLM_OK) {
+    if(curl_multi_add_handle(multi, handles[i].curl) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_add_handle() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
@@ -215,7 +215,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
 
   for(rounds = 0;; rounds++) {
     curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
-    if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK) {
+    if(curl_multi_perform(multi, &still_running) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_perform() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
@@ -252,14 +252,14 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       break;
     }
 
-    if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK) {
+    if(curl_multi_poll(multi, NULL, 0, 100, &numfds) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_poll() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
     }
 
     /* !checksrc! disable EQUALSNULL 1 */
-    while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
+    while((msg = curl_multi_info_read(multi, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
           if(msg->easy_handle == handles[i].curl) {
@@ -303,7 +303,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
 cleanup:
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    curl_multi_remove_handle(multi_handle, handles[i].curl);
+    curl_multi_remove_handle(multi, handles[i].curl);
     curl_easy_cleanup(handles[i].curl);
   }
 
@@ -311,7 +311,7 @@ cleanup:
   curl_free(host);
   curl_free(port);
   curl_url_cleanup(cu);
-  curl_multi_cleanup(multi_handle);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   return result;
