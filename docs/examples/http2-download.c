@@ -49,12 +49,12 @@
 #endif
 
 struct transfer {
-  CURL *easy;
-  unsigned int num;
   FILE *out;
+  CURL *easy;
+  int num;
 };
 
-static void dump(const char *text, unsigned int num, unsigned char *ptr,
+static void dump(const char *text, int num, unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -65,7 +65,7 @@ static void dump(const char *text, unsigned int num, unsigned char *ptr,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stderr, "%u %s, %lu bytes (0x%lx)\n",
+  fprintf(stderr, "%d %s, %lu bytes (0x%lx)\n",
           num, text, (unsigned long)size, (unsigned long)size);
 
   for(i = 0; i < size; i += width) {
@@ -106,12 +106,12 @@ static int my_trace(CURL *handle, curl_infotype type,
 {
   const char *text;
   struct transfer *t = (struct transfer *)userp;
-  unsigned int num = t->num;
+  int num = t->num;
   (void)handle;
 
   switch(type) {
   case CURLINFO_TEXT:
-    fprintf(stderr, "== %u Info: %s", num, data);
+    fprintf(stderr, "== [%d] Info: %s", num, data);
     return 0;
   case CURLINFO_HEADER_OUT:
     text = "=> Send header";
@@ -146,6 +146,7 @@ static int setup(struct transfer *t, int num)
 
   easy = t->easy = NULL;
 
+  t->num = num;
   snprintf(filename, sizeof(filename), "dl-%d", num);
   t->out = fopen(filename, "wb");
   if(!t->out) {
@@ -247,6 +248,9 @@ error:
     for(i = 0; i < num_transfers; i++) {
       curl_multi_remove_handle(multi_handle, trans[i].easy);
       curl_easy_cleanup(trans[i].easy);
+
+      if(trans[i].out)
+        fclose(trans[i].out);
     }
     curl_multi_cleanup(multi_handle);
   }

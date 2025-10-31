@@ -215,8 +215,8 @@ static int setup(struct input *t, int num, const char *upload)
   snprintf(filename, sizeof(filename), "dl-%d", num);
   t->out = fopen(filename, "wb");
   if(!t->out) {
-    fprintf(stderr, "error: could not open file %s for writing: %s\n", upload,
-            strerror(errno));
+    fprintf(stderr, "error: could not open file %s for writing: %s\n",
+            upload, strerror(errno));
     return 1;
   }
 
@@ -224,8 +224,8 @@ static int setup(struct input *t, int num, const char *upload)
 
   t->in = fopen(upload, "rb");
   if(!t->in) {
-    fprintf(stderr, "error: could not open file %s for reading: %s\n", upload,
-            strerror(errno));
+    fprintf(stderr, "error: could not open file %s for reading: %s\n",
+            upload, strerror(errno));
     fclose(t->out);
     t->out = NULL;
     return 1;
