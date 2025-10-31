@@ -133,15 +133,8 @@ static int setup(CURL *hnd, const char *url)
   if(!out_download)
     return 1;  /* failed */
 
-  /* write to this file */
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out_download);
-
   /* set the same URL */
   curl_easy_setopt(hnd, CURLOPT_URL, url);
-
-  /* please be verbose */
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
 
   /* HTTP/2 please */
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
@@ -149,6 +142,13 @@ static int setup(CURL *hnd, const char *url)
   /* we use a self-signed test server, skip verification during debugging */
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+
+  /* write to this file */
+  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, out_download);
+
+  /* please be verbose */
+  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, my_trace);
 
 #if CURLPIPE_MULTIPLEX > 0
   /* wait for pipe connection to confirm */
