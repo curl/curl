@@ -211,13 +211,13 @@ static void notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
 /**
  * Invoke curl when a file descriptor is set.
  */
-static void t582_checkFdSet(CURLM *curl, struct t582_Sockets *sockets,
+static void t582_checkFdSet(CURLM *multi, struct t582_Sockets *sockets,
                             fd_set *fdset, int evBitmask, const char *name)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      notifyCurl(curl, sockets->sockets[i], evBitmask, name);
+      notifyCurl(multi, sockets->sockets[i], evBitmask, name);
     }
   }
 }
