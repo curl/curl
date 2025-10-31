@@ -42,19 +42,19 @@ static CURLcode test_lib1908(const char *URL)
 
     if(!ret) {
       /* make a copy and check that this also has alt-svc activated */
-      CURL *also = curl_easy_duphandle(curl);
-      if(also) {
-        ret = curl_easy_perform(also);
+      CURL *curldupe = curl_easy_duphandle(curl);
+      if(curldupe) {
+        ret = curl_easy_perform(curldupe);
         /* we close the second handle first, which makes it store the alt-svc
            file only to get overwritten when the next handle is closed! */
-        curl_easy_cleanup(also);
+        curl_easy_cleanup(curldupe);
       }
     }
 
     curl_easy_reset(curl);
 
     /* using the same file name for the alt-svc cache, this clobbers the
-       content just written from the 'also' handle */
+       content just written from the 'curldupe' handle */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
