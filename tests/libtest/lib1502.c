@@ -36,7 +36,7 @@
 static CURLcode test_lib1502(const char *URL)
 {
   CURL *curl = NULL;
-  CURL *dup;
+  CURL *curldupe;
   CURLM *multi = NULL;
   int still_running;
   CURLcode res = CURLE_OK;
@@ -68,10 +68,10 @@ static CURLcode test_lib1502(const char *URL)
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   easy_setopt(curl, CURLOPT_RESOLVE, dns_cache_list);
 
-  dup = curl_easy_duphandle(curl);
-  if(dup) {
+  curldupe = curl_easy_duphandle(curl);
+  if(curldupe) {
     curl_easy_cleanup(curl);
-    curl = dup;
+    curl = curldupe;
   }
   else {
     curl_slist_free_all(dns_cache_list);
