@@ -107,7 +107,7 @@ static int server_push_callback(CURL *parent,
 static CURLcode test_cli_h2_serverpush(const char *URL)
 {
   CURL *curl = NULL;
-  CURLM *multi_handle;
+  CURLM *multi;
   int transfers = 1; /* we start with one */
   CURLcode result = CURLE_OK;
 
@@ -124,8 +124,8 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
     return (CURLcode)3;
   }
 
-  multi_handle = curl_multi_init();
-  if(!multi_handle) {
+  multi = curl_multi_init();
+  if(!multi) {
     result = (CURLcode)1;
     goto cleanup;
   }
@@ -142,20 +142,20 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
     goto cleanup;
   }
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, server_push_callback);
+  curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &transfers);
 
-  curl_multi_add_handle(multi_handle, curl);
+  curl_multi_add_handle(multi, curl);
 
   do {
     struct CURLMsg *m;
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    CURLMcode mc = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
@@ -167,11 +167,11 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
      */
     do {
       int msgq = 0;
-      m = curl_multi_info_read(multi_handle, &msgq);
+      m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
         CURL *easy = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi_handle, easy);
+        curl_multi_remove_handle(multi, easy);
         curl_easy_cleanup(easy);
       }
     } while(m);
@@ -180,7 +180,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
 cleanup:
 
-  curl_multi_cleanup(multi_handle);
+  curl_multi_cleanup(multi);
 
   if(out_download)
     curlx_fclose(out_download);
