@@ -135,13 +135,13 @@ static int t582_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int t582_checkForCompletion(CURLM *curl, int *success)
+static int t582_checkForCompletion(CURLM *multi, int *success)
 {
   int result = 0;
   *success = 0;
   while(1) {
     int numMessages;
-    CURLMsg *message = curl_multi_info_read(curl, &numMessages);
+    CURLMsg *message = curl_multi_info_read(multi, &numMessages);
     if(!message)
       break;
     if(message->msg == CURLMSG_DONE) {
@@ -196,11 +196,12 @@ static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set* fdset,
   }
 }
 
-static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
+static void notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
                        const char *info)
 {
   int numhandles = 0;
-  CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
+  CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
+                                              &numhandles);
   if(result != CURLM_OK) {
     curl_mfprintf(stderr, "Curl error on %s (%i) %s\n",
                   info, result, curl_multi_strerror(result));
