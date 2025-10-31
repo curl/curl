@@ -31,7 +31,7 @@ struct state {
 };
 
 /* "read" is from the point of the library, it wants data from us */
-static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
+static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e,
                             void *userp)
 {
   struct entry {
@@ -56,7 +56,7 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
   const char *host;
   const char *expire;
   struct state *s = (struct state *)userp;
-  (void)easy;
+  (void)curl;
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
@@ -72,20 +72,20 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
 }
 
 /* verify error from callback */
-static CURLSTScode hstsreadfail(CURL *easy, struct curl_hstsentry *e,
+static CURLSTScode hstsreadfail(CURL *curl, struct curl_hstsentry *e,
                                 void *userp)
 {
-  (void)easy;
+  (void)curl;
   (void)e;
   (void)userp;
   return CURLSTS_FAIL;
 }
 
 /* check that we get the hosts back in the save */
-static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
+static CURLSTScode hstswrite(CURL *curl, struct curl_hstsentry *e,
                              struct curl_index *i, void *userp)
 {
-  (void)easy;
+  (void)curl;
   (void)userp;
   curl_mprintf("[%zu/%zu] %s %s\n", i->index, i->total, e->name, e->expire);
   return CURLSTS_OK;
