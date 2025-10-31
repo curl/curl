@@ -109,7 +109,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   int add_more, waits, ongoing = 0;
   char *host = NULL, *port = NULL;
   long http_version = CURL_HTTP_VERSION_1_1;
-  CURLcode exitcode = (CURLcode)1;
+  CURLcode result = (CURLcode)1;
 
   if(!URL || !libtest_arg2) {
     curl_mfprintf(stderr, "need args: URL proto\n");
@@ -129,7 +129,8 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_set(cu, CURLUPART_URL, URL, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", URL);
@@ -235,12 +236,12 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
 
   if(!tse_found_tls_session) {
     curl_mfprintf(stderr, "CURLINFO_TLS_SSL_PTR not found during run\n");
-    exitcode = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto cleanup;
   }
 
   curl_mfprintf(stderr, "exiting\n");
-  exitcode = CURLE_OK;
+  result = CURLE_OK;
 
 cleanup:
 
@@ -260,8 +261,9 @@ cleanup:
   curl_slist_free_all(resolve);
   curl_free(host);
   curl_free(port);
-  curl_url_cleanup(cu);
+  if(cu)
+    curl_url_cleanup(cu);
   curl_global_cleanup();
 
-  return exitcode;
+  return result;
 }
