@@ -35,7 +35,7 @@ static CURLcode test_lib575(const char *URL)
 {
   CURL *handle = NULL;
   CURL *duphandle = NULL;
-  CURLM *mhandle = NULL;
+  CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
   int still_running = 0;
 
@@ -63,11 +63,11 @@ static CURLcode test_lib575(const char *URL)
   curl_easy_cleanup(handle);
   handle = duphandle;
 
-  multi_init(mhandle);
+  multi_init(multi);
 
-  multi_add_handle(mhandle, handle);
+  multi_add_handle(multi, handle);
 
-  multi_perform(mhandle, &still_running);
+  multi_perform(multi, &still_running);
 
   abort_on_test_timeout();
 
@@ -85,7 +85,7 @@ static CURLcode test_lib575(const char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(mhandle, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -93,7 +93,7 @@ static CURLcode test_lib575(const char *URL)
 
     abort_on_test_timeout();
 
-    multi_perform(mhandle, &still_running);
+    multi_perform(multi, &still_running);
 
     abort_on_test_timeout();
   }
@@ -102,7 +102,7 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(mhandle);
+  curl_multi_cleanup(multi);
   curl_easy_cleanup(handle);
   curl_global_cleanup();
 
