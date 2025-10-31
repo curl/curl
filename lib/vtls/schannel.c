@@ -581,6 +581,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
       curlx_unicodefree(cert_path);
+      if(fInCert)
+        curlx_fclose(fInCert);
       return CURLE_SSL_CERTPROBLEM;
     }
 
