@@ -28,11 +28,11 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-static size_t writecb(char *b, size_t size, size_t nitems, void *p)
+static size_t write_cb(char *b, size_t size, size_t nitems, void *p)
 {
-  CURL *easy = p;
+  CURL *curl = p;
   size_t i;
-  const struct curl_ws_frame *frame = curl_ws_meta(easy);
+  const struct curl_ws_frame *frame = curl_ws_meta(curl);
   fprintf(stderr, "Type: %s\n", frame->flags & CURLWS_BINARY ?
           "binary" : "text");
   fprintf(stderr, "Bytes: %u", (unsigned int)(nitems * size));
@@ -53,7 +53,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com");
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     /* pass the easy handle to the callback */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
 

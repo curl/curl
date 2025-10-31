@@ -50,7 +50,7 @@
 
 struct transfer {
   FILE *out;
-  CURL *easy;
+  CURL *curl;
   int num;
 };
 
@@ -101,13 +101,13 @@ static void dump(const char *text, int num, unsigned char *ptr,
   }
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
+static int my_trace(CURL *curl, curl_infotype type,
                     char *data, size_t size, void *userp)
 {
   const char *text;
   struct transfer *t = (struct transfer *)userp;
   int num = t->num;
-  (void)handle;
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:
@@ -142,9 +142,9 @@ static int my_trace(CURL *handle, curl_infotype type,
 static int setup(struct transfer *t, int num)
 {
   char filename[128];
-  CURL *easy;
+  CURL *curl;
 
-  easy = t->easy = NULL;
+  curl = t->curl = NULL;
 
   t->num = num;
   snprintf(filename, sizeof(filename), "dl-%d", num);
@@ -155,29 +155,29 @@ static int setup(struct transfer *t, int num)
     return 1;
   }
 
-  easy = t->easy = curl_easy_init();
-  if(easy) {
+  curl = t->curl = curl_easy_init();
+  if(curl) {
 
     /* write to this file */
-    curl_easy_setopt(easy, CURLOPT_WRITEDATA, t->out);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, t->out);
 
     /* set the same URL */
-    curl_easy_setopt(easy, CURLOPT_URL, "https://localhost:8443/index.html");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://localhost:8443/index.html");
 
     /* please be verbose */
-    curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, my_trace);
-    curl_easy_setopt(easy, CURLOPT_DEBUGDATA, t);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+    curl_easy_setopt(curl, CURLOPT_DEBUGDATA, t);
 
     /* enlarge the receive buffer for potentially higher transfer speeds */
-    curl_easy_setopt(easy, CURLOPT_BUFFERSIZE, 100000L);
+    curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, 100000L);
 
     /* HTTP/2 please */
-    curl_easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
 #if (CURLPIPE_MULTIPLEX > 0)
     /* wait for pipe connection to confirm */
-    curl_easy_setopt(easy, CURLOPT_PIPEWAIT, 1L);
+    curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 #endif
   }
   return 0;
@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 {
   CURLcode res;
   struct transfer *trans;
-  CURLM *multi_handle = NULL;
+  CURLM *multi = NULL;
   int i;
   int still_running = 0; /* keep number of running handles */
   int num_transfers;
@@ -215,8 +215,8 @@ int main(int argc, char **argv)
   }
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
-  if(!multi_handle)
+  multi = curl_multi_init();
+  if(!multi)
     goto error;
 
   for(i = 0; i < num_transfers; i++) {
@@ -225,17 +225,17 @@ int main(int argc, char **argv)
     }
 
     /* add the individual transfer */
-    curl_multi_add_handle(multi_handle, trans[i].easy);
+    curl_multi_add_handle(multi, trans[i].curl);
   }
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
   do {
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    CURLMcode mc = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
@@ -244,15 +244,15 @@ int main(int argc, char **argv)
 
 error:
 
-  if(multi_handle) {
+  if(multi) {
     for(i = 0; i < num_transfers; i++) {
-      curl_multi_remove_handle(multi_handle, trans[i].easy);
-      curl_easy_cleanup(trans[i].easy);
+      curl_multi_remove_handle(multi, trans[i].curl);
+      curl_easy_cleanup(trans[i].curl);
 
       if(trans[i].out)
         fclose(trans[i].out);
     }
-    curl_multi_cleanup(multi_handle);
+    curl_multi_cleanup(multi);
   }
 
   free(trans);

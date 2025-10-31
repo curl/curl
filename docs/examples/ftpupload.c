@@ -59,7 +59,7 @@
    you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
    do so might give you a crash since a DLL may not use the variable's memory
    when passed in to it from an app like this. */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   unsigned long nread;
   /* in real-world cases, this would probably get this data differently
@@ -123,7 +123,7 @@ int main(void)
     headerlist = curl_slist_append(headerlist, buf_2);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* enable uploading */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);

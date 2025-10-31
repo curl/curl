@@ -69,7 +69,7 @@ static int my_seek(void *userp, curl_off_t offset, int origin)
 }
 
 /* read callback function, fread() look alike */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t nread;
 
@@ -124,7 +124,7 @@ int main(int argc, char **argv)
   curl = curl_easy_init();
   if(curl) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* which file to upload */
     curl_easy_setopt(curl, CURLOPT_READDATA, (void *) fp);

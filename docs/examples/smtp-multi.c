@@ -57,7 +57,7 @@ struct upload_status {
   size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
@@ -89,10 +89,10 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    CURLM *mcurl;
+    CURLM *multi;
 
-    mcurl = curl_multi_init();
-    if(mcurl) {
+    multi = curl_multi_init();
+    if(multi) {
       int still_running = 1;
       struct curl_slist *recipients = NULL;
       struct upload_status upload_ctx = { 0 };
@@ -119,19 +119,19 @@ int main(void)
       /* We are using a callback function to specify the payload (the headers
        * and body of the message). You could just use the CURLOPT_READDATA
        * option to specify a FILE pointer to read from. */
-      curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+      curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
       curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
       curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
       /* Tell the multi stack about our easy handle */
-      curl_multi_add_handle(mcurl, curl);
+      curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(mcurl, &still_running);
+        CURLMcode mc = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(mcurl, NULL, 0, 1000, NULL);
+          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
         if(mc)
           break;
@@ -142,8 +142,8 @@ int main(void)
       curl_slist_free_all(recipients);
 
       /* Always cleanup */
-      curl_multi_remove_handle(mcurl, curl);
-      curl_multi_cleanup(mcurl);
+      curl_multi_remove_handle(multi, curl);
+      curl_multi_cleanup(multi);
     }
     curl_easy_cleanup(curl);
   }

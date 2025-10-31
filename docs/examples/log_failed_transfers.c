@@ -172,14 +172,14 @@ static int mem_addf(struct mem *mem, const char *format, ...)
   return -1;
 }
 
-static int mydebug(CURL *handle, curl_infotype type,
+static int mydebug(CURL *curl, curl_infotype type,
                    char *data, size_t size, void *userdata)
 {
   struct transfer *t = (struct transfer *)userdata;
   static const char s_infotype[CURLINFO_END][3] = {
     "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
 
-  (void)handle;
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:
@@ -198,7 +198,7 @@ static int mydebug(CURL *handle, curl_infotype type,
   return 0;
 }
 
-static size_t mywrite(char *ptr, size_t size, size_t nmemb, void *userdata)
+static size_t write_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
   struct transfer *t = (struct transfer *)userdata;
 
@@ -258,7 +258,7 @@ int main(void)
     curl_easy_setopt(t->curl, CURLOPT_DEBUGDATA, t);
 
     /* Enable writing the body to a file */
-    curl_easy_setopt(t->curl, CURLOPT_WRITEFUNCTION, mywrite);
+    curl_easy_setopt(t->curl, CURLOPT_WRITEFUNCTION, write_cb);
     curl_easy_setopt(t->curl, CURLOPT_WRITEDATA, t);
 
     /* Enable immediate error on HTTP status codes >= 400 in most cases,

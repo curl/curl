@@ -33,7 +33,7 @@
 #include <curl/curl.h>
 
 static struct event_base *base;
-static CURLM *curl_handle;
+static CURLM *multi;
 static struct event *timeout;
 
 struct curl_context {
@@ -67,7 +67,7 @@ static void add_download(const char *url, int num)
 {
   char filename[50];
   FILE *file;
-  CURL *handle;
+  CURL *curl;
 
   snprintf(filename, sizeof(filename), "%d.download", num);
 
@@ -77,11 +77,11 @@ static void add_download(const char *url, int num)
     return;
   }
 
-  handle = curl_easy_init();
-  curl_easy_setopt(handle, CURLOPT_WRITEDATA, file);
-  curl_easy_setopt(handle, CURLOPT_PRIVATE, file);
-  curl_easy_setopt(handle, CURLOPT_URL, url);
-  curl_multi_add_handle(curl_handle, handle);
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, file);
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_multi_add_handle(multi, curl);
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
@@ -90,10 +90,10 @@ static void check_multi_info(void)
   char *done_url;
   CURLMsg *message;
   int pending;
-  CURL *easy_handle;
+  CURL *curl;
   FILE *file;
 
-  while((message = curl_multi_info_read(curl_handle, &pending))) {
+  while((message = curl_multi_info_read(multi, &pending))) {
     switch(message->msg) {
     case CURLMSG_DONE:
       /* Do not use message data after calling curl_multi_remove_handle() and
@@ -101,14 +101,14 @@ static void check_multi_info(void)
          "WARNING: The data the returned pointer points to does not survive
          calling curl_multi_cleanup, curl_multi_remove_handle or
          curl_easy_cleanup." */
-      easy_handle = message->easy_handle;
+      curl = message->easy_handle;
 
-      curl_easy_getinfo(easy_handle, CURLINFO_EFFECTIVE_URL, &done_url);
-      curl_easy_getinfo(easy_handle, CURLINFO_PRIVATE, &file);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &done_url);
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &file);
       printf("%s DONE\n", done_url);
 
-      curl_multi_remove_handle(curl_handle, easy_handle);
-      curl_easy_cleanup(easy_handle);
+      curl_multi_remove_handle(multi, curl);
+      curl_easy_cleanup(curl);
       if(file) {
         fclose(file);
       }
@@ -136,7 +136,7 @@ static void curl_perform(int fd, short event, void *arg)
 
   context = (struct curl_context *) arg;
 
-  curl_multi_socket_action(curl_handle, context->sockfd, flags,
+  curl_multi_socket_action(multi, context->sockfd, flags,
                            &running_handles);
 
   check_multi_info();
@@ -148,7 +148,7 @@ static void on_timeout(evutil_socket_t fd, short events, void *arg)
   (void)fd;
   (void)events;
   (void)arg;
-  curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0,
+  curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
   check_multi_info();
 }
@@ -172,13 +172,13 @@ static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
   return 0;
 }
 
-static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
+static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
                          void *socketp)
 {
   struct curl_context *curl_context;
   int events = 0;
 
-  (void)easy;
+  (void)curl;
   (void)userp;
 
   switch(action) {
@@ -188,7 +188,7 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
     curl_context = socketp ?
       (struct curl_context *) socketp : create_curl_context(s);
 
-    curl_multi_assign(curl_handle, s, (void *) curl_context);
+    curl_multi_assign(multi, s, (void *) curl_context);
 
     if(action != CURL_POLL_IN)
       events |= EV_WRITE;
@@ -207,7 +207,7 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
     if(socketp) {
       event_del(((struct curl_context*) socketp)->event);
       destroy_curl_context((struct curl_context*) socketp);
-      curl_multi_assign(curl_handle, s, NULL);
+      curl_multi_assign(multi, s, NULL);
     }
     break;
   default:
@@ -233,10 +233,10 @@ int main(int argc, char **argv)
   base = event_base_new();
   timeout = evtimer_new(base, on_timeout, NULL);
 
-  curl_handle = curl_multi_init();
-  if(curl_handle) {
-    curl_multi_setopt(curl_handle, CURLMOPT_SOCKETFUNCTION, handle_socket);
-    curl_multi_setopt(curl_handle, CURLMOPT_TIMERFUNCTION, start_timeout);
+  multi = curl_multi_init();
+  if(multi) {
+    curl_multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, handle_socket);
+    curl_multi_setopt(multi, CURLMOPT_TIMERFUNCTION, start_timeout);
 
     while(argc-- > 1) {
       add_download(argv[argc], argc);
@@ -244,7 +244,7 @@ int main(int argc, char **argv)
 
     event_base_dispatch(base);
 
-    curl_multi_cleanup(curl_handle);
+    curl_multi_cleanup(multi);
   }
   event_free(timeout);
   event_base_free(base);

@@ -30,7 +30,7 @@
  * </DESC>
  */
 
-static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *buffer, size_t size, size_t nmemb, void *stream)
 {
   (void)buffer;
   (void)stream;
@@ -54,7 +54,7 @@ int main(void)
      */
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.example.com/");
     /* Define our callback to get called when there is data to be written */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* Switch on full protocol/debug output */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);

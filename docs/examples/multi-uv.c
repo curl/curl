@@ -85,7 +85,7 @@ static void add_download(const char *url, int num, CURLM *multi)
 {
   char filename[50];
   FILE *file;
-  CURL *handle;
+  CURL *curl;
 
   snprintf(filename, sizeof(filename), "%d.download", num);
 
@@ -95,11 +95,11 @@ static void add_download(const char *url, int num, CURLM *multi)
     return;
   }
 
-  handle = curl_easy_init();
-  curl_easy_setopt(handle, CURLOPT_WRITEDATA, file);
-  curl_easy_setopt(handle, CURLOPT_PRIVATE, file);
-  curl_easy_setopt(handle, CURLOPT_URL, url);
-  curl_multi_add_handle(multi, handle);
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+  curl_easy_setopt(curl, CURLOPT_PRIVATE, file);
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_multi_add_handle(multi, curl);
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
@@ -108,7 +108,7 @@ static void check_multi_info(struct curl_context *context)
   char *done_url;
   CURLMsg *message;
   int pending;
-  CURL *easy_handle;
+  CURL *curl;
   FILE *file;
 
   while((message = curl_multi_info_read(context->uv->multi, &pending))) {
@@ -119,14 +119,14 @@ static void check_multi_info(struct curl_context *context)
          "WARNING: The data the returned pointer points to does not survive
          calling curl_multi_cleanup, curl_multi_remove_handle or
          curl_easy_cleanup." */
-      easy_handle = message->easy_handle;
+      curl = message->easy_handle;
 
-      curl_easy_getinfo(easy_handle, CURLINFO_EFFECTIVE_URL, &done_url);
-      curl_easy_getinfo(easy_handle, CURLINFO_PRIVATE, &file);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &done_url);
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &file);
       printf("%s DONE\n", done_url);
 
-      curl_multi_remove_handle(context->uv->multi, easy_handle);
-      curl_easy_cleanup(easy_handle);
+      curl_multi_remove_handle(context->uv->multi, curl);
+      curl_easy_cleanup(curl);
       if(file) {
         fclose(file);
       }
@@ -186,13 +186,13 @@ static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
 }
 
 /* callback from libcurl to update socket activity to wait for */
-static int cb_socket(CURL *easy, curl_socket_t s, int action,
+static int cb_socket(CURL *curl, curl_socket_t s, int action,
                      void *userp, void *socketp)
 {
   struct datauv *uv = (struct datauv *)userp;
   struct curl_context *curl_context;
   int events = 0;
-  (void)easy;
+  (void)curl;
 
   switch(action) {
   case CURL_POLL_IN:

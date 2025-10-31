@@ -35,7 +35,7 @@ struct MemoryStruct {
   size_t size;
 };
 
-static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb,
+static size_t write_cb(void *contents, size_t size, size_t nmemb,
                                   void *userp)
 {
   size_t realsize = size * nmemb;
@@ -75,7 +75,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.org/");
 
     /* send all data to this function  */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* we pass our 'chunk' struct to the callback function */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);

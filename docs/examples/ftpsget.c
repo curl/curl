@@ -36,7 +36,7 @@ struct FtpFile {
   FILE *stream;
 };
 
-static size_t my_fwrite(void *buffer, size_t size, size_t nmemb,
+static size_t write_cb(void *buffer, size_t size, size_t nmemb,
                         void *stream)
 {
   struct FtpFile *out = (struct FtpFile *)stream;
@@ -73,7 +73,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://user@server/home/user/file.txt");
     /* Define our callback to get called when there is data to be written */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     /* Set a pointer to our struct to pass to the callback */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ftpfile);
 

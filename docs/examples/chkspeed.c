@@ -52,7 +52,7 @@
 
 #define CHKSPEED_VERSION "1.0"
 
-static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *data)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   /* we are not interested in the downloaded bytes itself,
      so we only return the size we would have saved ... */
@@ -63,7 +63,7 @@ static size_t WriteCallback(void *ptr, size_t size, size_t nmemb, void *data)
 
 int main(int argc, char *argv[])
 {
-  CURL *curl_handle;
+  CURL *curl;
   CURLcode res;
   int prtall = 0, prtsep = 0, prttime = 0;
   const char *url = URL_1M;
@@ -161,33 +161,33 @@ int main(int argc, char *argv[])
     return (int)res;
 
   /* init the curl session */
-  curl_handle = curl_easy_init();
-  if(curl_handle) {
+  curl = curl_easy_init();
+  if(curl) {
 
     /* specify URL to get */
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* send all data to this function  */
-    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* some servers do not like requests that are made without a user-agent
        field, so we provide one */
-    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT,
+    curl_easy_setopt(curl, CURLOPT_USERAGENT,
                      "libcurl-speedchecker/" CHKSPEED_VERSION);
 
     /* get it! */
-    res = curl_easy_perform(curl_handle);
+    res = curl_easy_perform(curl);
 
     if(CURLE_OK == res) {
       curl_off_t val;
 
       /* check for bytes downloaded */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_SIZE_DOWNLOAD_T, &val);
+      res = curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD_T, &val);
       if((CURLE_OK == res) && (val > 0))
         printf("Data downloaded: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", val);
 
       /* check for total download time */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_TOTAL_TIME_T, &val);
+      res = curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &val);
       if((CURLE_OK == res) && (val > 0))
         printf("Total download time: %" CURL_FORMAT_CURL_OFF_T
                ".%06" CURL_FORMAT_CURL_OFF_T " sec.\n",
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
                val % 1000000);
 
       /* check for average download speed */
-      res = curl_easy_getinfo(curl_handle, CURLINFO_SPEED_DOWNLOAD_T, &val);
+      res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &val);
       if((CURLE_OK == res) && (val > 0))
         printf("Average download speed: "
                "%" CURL_FORMAT_CURL_OFF_T " kbyte/sec.\n",
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 
       if(prtall) {
         /* check for name resolution time */
-        res = curl_easy_getinfo(curl_handle, CURLINFO_NAMELOOKUP_TIME_T, &val);
+        res = curl_easy_getinfo(curl, CURLINFO_NAMELOOKUP_TIME_T, &val);
         if((CURLE_OK == res) && (val > 0))
           printf("Name lookup time: %" CURL_FORMAT_CURL_OFF_T
                  ".%06" CURL_FORMAT_CURL_OFF_T " sec.\n",
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
                  val % 1000000);
 
         /* check for connect time */
-        res = curl_easy_getinfo(curl_handle, CURLINFO_CONNECT_TIME_T, &val);
+        res = curl_easy_getinfo(curl, CURLINFO_CONNECT_TIME_T, &val);
         if((CURLE_OK == res) && (val > 0))
           printf("Connect time: %" CURL_FORMAT_CURL_OFF_T
                  ".%06" CURL_FORMAT_CURL_OFF_T " sec.\n",
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
     }
 
     /* cleanup curl stuff */
-    curl_easy_cleanup(curl_handle);
+    curl_easy_cleanup(curl);
   }
 
   /* we are done with libcurl, so clean it up */

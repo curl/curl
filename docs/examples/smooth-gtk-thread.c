@@ -60,7 +60,7 @@ const char * const urls[]= {
   "90030"
 };
 
-size_t write_file(void *ptr, size_t size, size_t nmemb, FILE *stream)
+size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   return fwrite(ptr, size, nmemb, stream);
 }
@@ -80,7 +80,7 @@ static void run_one(gchar *http, int j)
 
       /* Write to the file */
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, outfile);
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_file);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
       (void)curl_easy_perform(curl);
 
       fclose(outfile);

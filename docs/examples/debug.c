@@ -81,12 +81,12 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fflush(stream);
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
+static int my_trace(CURL *curl, curl_infotype type,
                     char *data, size_t size, void *userp)
 {
   struct data *config = (struct data *)userp;
   const char *text;
-  (void)handle;
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:

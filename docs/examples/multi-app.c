@@ -43,8 +43,8 @@
 
 int main(void)
 {
-  CURL *handles[HANDLECOUNT];
-  CURLM *multi_handle;
+  CURL *curl[HANDLECOUNT];
+  CURLM *multi;
 
   int i;
 
@@ -54,17 +54,17 @@ int main(void)
 
   /* Allocate one curl handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)
-    handles[i] = curl_easy_init();
+    curl[i] = curl_easy_init();
 
   /* set the options (I left out a few, you get the point anyway) */
-  curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "https://example.com");
+  curl_easy_setopt(curl[HTTP_HANDLE], CURLOPT_URL, "https://example.com");
 
-  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_URL, "ftp://example.com");
-  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_UPLOAD, 1L);
+  curl_easy_setopt(curl[FTP_HANDLE], CURLOPT_URL, "ftp://example.com");
+  curl_easy_setopt(curl[FTP_HANDLE], CURLOPT_UPLOAD, 1L);
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
-  if(multi_handle) {
+  multi = curl_multi_init();
+  if(multi) {
 
     int still_running = 1; /* keep number of running handles */
 
@@ -73,14 +73,14 @@ int main(void)
 
     /* add the individual transfers */
     for(i = 0; i < HANDLECOUNT; i++)
-      curl_multi_add_handle(multi_handle, handles[i]);
+      curl_multi_add_handle(multi, curl[i]);
 
     while(still_running) {
-      CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+      CURLMcode mc = curl_multi_perform(multi, &still_running);
 
       if(still_running)
         /* wait for activity, timeout or "nothing" */
-        mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+        mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
       if(mc)
         break;
@@ -88,13 +88,13 @@ int main(void)
 
     /* See how the transfers went */
     /* !checksrc! disable EQUALSNULL 1 */
-    while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
+    while((msg = curl_multi_info_read(multi, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         int idx;
 
         /* Find out which handle this message is about */
         for(idx = 0; idx < HANDLECOUNT; idx++) {
-          int found = (msg->easy_handle == handles[idx]);
+          int found = (msg->easy_handle == curl[idx]);
           if(found)
             break;
         }
@@ -112,14 +112,14 @@ int main(void)
 
     /* remove the transfers */
     for(i = 0; i < HANDLECOUNT; i++)
-      curl_multi_remove_handle(multi_handle, handles[i]);
+      curl_multi_remove_handle(multi, curl[i]);
 
-    curl_multi_cleanup(multi_handle);
+    curl_multi_cleanup(multi);
   }
 
   /* Free the curl handles */
   for(i = 0; i < HANDLECOUNT; i++)
-    curl_easy_cleanup(handles[i]);
+    curl_easy_cleanup(curl[i]);
 
   curl_global_cleanup();
 

@@ -46,13 +46,13 @@ struct state {
 
 /* "read" is from the point of the library, it wants data from us. One domain
    entry per invoke. */
-static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
+static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e,
                             void *userp)
 {
   const char *host;
   const char *expire;
   struct state *s = (struct state *)userp;
-  (void)easy;
+  (void)curl;
   host = preload_hosts[s->index].name;
   expire = preload_hosts[s->index++].exp;
 
@@ -67,10 +67,10 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
   return CURLSTS_OK;
 }
 
-static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
+static CURLSTScode hstswrite(CURL *curl, struct curl_hstsentry *e,
                              struct curl_index *i, void *userp)
 {
-  (void)easy;
+  (void)curl;
   (void)userp; /* we have no custom input */
   printf("[%u/%u] %s %s\n", (unsigned int)i->index, (unsigned int)i->total,
          e->name, e->expire);
