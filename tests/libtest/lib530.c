@@ -286,7 +286,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   struct t530_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct curltime timeout = {0};
@@ -312,22 +312,22 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   /* go verbose */
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, t530_curlSocketCallback);
-  multi_setopt(m, CURLMOPT_SOCKETDATA, &sockets);
+  multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, t530_curlSocketCallback);
+  multi_setopt(multi, CURLMOPT_SOCKETDATA, &sockets);
 
-  multi_setopt(m, CURLMOPT_TIMERFUNCTION, t530_curlTimerCallback);
-  multi_setopt(m, CURLMOPT_TIMERDATA, &timeout);
+  multi_setopt(multi, CURLMOPT_TIMERFUNCTION, t530_curlTimerCallback);
+  multi_setopt(multi, CURLMOPT_TIMERDATA, &timeout);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
-  if(socket_action(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+  if(socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  while(!t530_checkForCompletion(m, &success)) {
+  while(!t530_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
@@ -352,12 +352,12 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    if(t530_checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN,
+    if(t530_checkFdSet(multi, &sockets.read, &readSet, CURL_CSELECT_IN,
                        "read")) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
-    if(t530_checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT,
+    if(t530_checkFdSet(multi, &sockets.write, &writeSet, CURL_CSELECT_OUT,
                        "write")) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
@@ -366,7 +366,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     if(timeout.tv_sec != (time_t)-1 &&
        t530_getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
-      if(socket_action(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+      if(socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         res = TEST_ERR_BAD_TIMEOUT;
         goto test_cleanup;
       }
@@ -384,9 +384,9 @@ test_cleanup:
 
   /* proper cleanup sequence */
   t530_msg("cleanup");
-  curl_multi_remove_handle(m, curl);
+  curl_multi_remove_handle(multi, curl);
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   /* free local memory */
