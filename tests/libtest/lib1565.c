@@ -32,7 +32,7 @@
 #define TIME_BETWEEN_START_SECS 2
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static CURL *pending_handles[CONN_NUM];
+static CURL *pending_curls[CONN_NUM];
 static int pending_num = 0;
 static CURLcode t1565_test_failure = CURLE_OK;
 
@@ -62,7 +62,7 @@ static void *t1565_run_thread(void *ptr)
       goto test_cleanup;
     }
 
-    pending_handles[pending_num] = curl;
+    pending_curls[pending_num] = curl;
     pending_num++;
     curl = NULL;
 
@@ -92,7 +92,7 @@ static CURLcode test_lib1565(const char *URL)
   int i;
   int result;
   CURLcode res = CURLE_OK;
-  CURL *started_handles[CONN_NUM];
+  CURL *started_curls[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
   pthread_t tid = 0;
@@ -150,13 +150,13 @@ static CURLcode test_lib1565(const char *URL)
     pthread_mutex_lock(&lock);
 
     while(pending_num > 0) {
-      res_multi_add_handle(testmulti, pending_handles[pending_num - 1]);
+      res_multi_add_handle(testmulti, pending_curls[pending_num - 1]);
       if(res) {
         pthread_mutex_unlock(&lock);
         goto test_cleanup;
       }
 
-      started_handles[started_num] = pending_handles[pending_num - 1];
+      started_curls[started_num] = pending_curls[pending_num - 1];
       started_num++;
       pending_num--;
     }
@@ -190,9 +190,9 @@ test_cleanup:
 
   curl_multi_cleanup(testmulti);
   for(i = 0; i < pending_num; i++)
-    curl_easy_cleanup(pending_handles[i]);
+    curl_easy_cleanup(pending_curls[i]);
   for(i = 0; i < started_num; i++)
-    curl_easy_cleanup(started_handles[i]);
+    curl_easy_cleanup(started_curls[i]);
   curl_global_cleanup();
 
   return t1565_test_failure;
