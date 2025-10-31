@@ -92,12 +92,12 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
 /**
  * Callback invoked by curl to poll reading / writing of a socket.
  */
-static int t582_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
+static int t582_curlSocketCallback(CURL *curl, curl_socket_t s, int action,
                                    void *userp, void *socketp)
 {
   struct t582_ReadWriteSockets *sockets = userp;
 
-  (void)easy;
+  (void)curl;
   (void)socketp;
 
   if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
