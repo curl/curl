@@ -66,6 +66,7 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
   size_t room = size * nmemb;
+  size_t len;
 
   if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
     return 0;
@@ -73,7 +74,7 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
   data = &payload_text[upload_ctx->bytes_read];
 
-  size_t len = strlen(data);
+  len = strlen(data);
   if(room < len)
     len = room;
   memcpy(ptr, data, len);
