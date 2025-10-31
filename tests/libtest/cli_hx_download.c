@@ -305,7 +305,8 @@ static CURLcode test_cli_hx_download(const char *URL)
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
-      return (CURLcode)2;
+      result = (CURLcode)2;
+      goto optcleanup;
     case 'a':
       abort_paused = 1;
       break;
@@ -352,13 +353,15 @@ static CURLcode test_cli_hx_download(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
-        return (CURLcode)1;
+        result = (CURLcode)1;
+        goto optcleanup;
       }
       break;
     }
     default:
       usage_hx_download("invalid option");
-      return (CURLcode)1;
+      result = (CURLcode)1;
+      goto optcleanup;
     }
   }
   test_argc -= coptind;
@@ -368,13 +371,15 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   if(test_argc != 1) {
     usage_hx_download("not enough arguments");
-    return (CURLcode)2;
+    result = (CURLcode)2;
+    goto optcleanup;
   }
   url = test_argv[0];
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    return (CURLcode)3;
+    result = (CURLcode)3;
+    goto optcleanup;
   }
 
   if(resolve)
@@ -550,9 +555,12 @@ cleanup:
 
   curl_share_cleanup(share);
   curl_slist_free_all(host);
-  free(resolve);
 
   curl_global_cleanup();
+
+optcleanup:
+
+  free(resolve);
 
   return result;
 }
