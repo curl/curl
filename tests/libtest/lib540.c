@@ -36,8 +36,8 @@
 
 static CURL *testeh[2];
 
-static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
-                     struct curl_slist *headers)
+static CURLcode init(int num, CURLM *multi, const char *url,
+                     const char *userpwd, struct curl_slist *headers)
 {
   CURLcode res = CURLE_OK;
 
@@ -75,7 +75,7 @@ static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
   if(res)
     goto init_failed;
 
-  res_multi_add_handle(cm, testeh[num]);
+  res_multi_add_handle(multi, testeh[num]);
   if(res)
     goto init_failed;
 
@@ -89,8 +89,8 @@ init_failed:
   return res; /* failure */
 }
 
-static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
-                     struct curl_slist *headers)
+static CURLcode loop(int num, CURLM *multi, const char *url,
+                     const char *userpwd, struct curl_slist *headers)
 {
   CURLMsg *msg;
   long L;
@@ -99,7 +99,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
   struct timeval T;
   CURLcode res = CURLE_OK;
 
-  res = init(num, cm, url, userpwd, headers);
+  res = init(num, multi, url, userpwd, headers);
   if(res)
     return res;
 
@@ -107,7 +107,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
 
     int M = -99;
 
-    res_multi_perform(cm, &U);
+    res_multi_perform(multi, &U);
     if(res)
       return res;
 
@@ -120,13 +120,13 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
       FD_ZERO(&W);
       FD_ZERO(&E);
 
-      res_multi_fdset(cm, &R, &W, &E, &M);
+      res_multi_fdset(multi, &R, &W, &E, &M);
       if(res)
         return res;
 
       /* At this point, M is guaranteed to be greater or equal than -1. */
 
-      res_multi_timeout(cm, &L);
+      res_multi_timeout(multi, &L);
       if(res)
         return res;
 
@@ -153,7 +153,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
     }
 
     while(1) {
-      msg = curl_multi_info_read(cm, &Q);
+      msg = curl_multi_info_read(multi, &Q);
       if(!msg)
         break;
       if(msg->msg == CURLMSG_DONE) {
@@ -161,7 +161,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
         CURL *e = msg->easy_handle;
         curl_mfprintf(stderr, "R: %d - %s\n", msg->data.result,
                       curl_easy_strerror(msg->data.result));
-        curl_multi_remove_handle(cm, e);
+        curl_multi_remove_handle(multi, e);
         curl_easy_cleanup(e);
         for(i = 0; i < CURL_ARRAYSIZE(testeh); i++) {
           if(testeh[i] == e) {
@@ -184,7 +184,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
 
 static CURLcode test_lib540(const char *URL)
 {
-  CURLM *cm = NULL;
+  CURLM *multi = NULL;
   struct curl_slist *headers = NULL;
   char buffer[246]; /* naively fixed-size */
   CURLcode res = CURLE_OK;
@@ -217,31 +217,31 @@ static CURLcode test_lib540(const char *URL)
     return res;
   }
 
-  res_multi_init(cm);
+  res_multi_init(multi);
   if(res) {
     curl_global_cleanup();
     curl_slist_free_all(headers);
     return res;
   }
 
-  res = loop(0, cm, URL, proxyuserpws, headers);
+  res = loop(0, multi, URL, proxyuserpws, headers);
   if(res)
     goto test_cleanup;
 
   curl_mfprintf(stderr, "lib540: now we do the request again\n");
 
-  res = loop(1, cm, URL, proxyuserpws, headers);
+  res = loop(1, multi, URL, proxyuserpws, headers);
 
 test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
   for(i = 0; i < CURL_ARRAYSIZE(testeh); i++) {
-    curl_multi_remove_handle(cm, testeh[i]);
+    curl_multi_remove_handle(multi, testeh[i]);
     curl_easy_cleanup(testeh[i]);
   }
 
-  curl_multi_cleanup(cm);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   curl_slist_free_all(headers);
