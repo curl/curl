@@ -169,10 +169,10 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
       int msgq = 0;
       m = curl_multi_info_read(multi_handle, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+        CURL *easy = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi_handle, e);
-        curl_easy_cleanup(e);
+        curl_multi_remove_handle(multi_handle, easy);
+        curl_easy_cleanup(easy);
       }
     } while(m);
 
