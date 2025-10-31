@@ -27,7 +27,7 @@
 
 static CURLcode test_lib1905(const char *URL)
 {
-  CURLSH *sh = NULL;
+  CURLSH *share = NULL;
   CURL *curl = NULL;
   int unfinished;
   CURLM *multi;
@@ -39,18 +39,18 @@ static CURLcode test_lib1905(const char *URL)
     curl_global_cleanup();
     return TEST_ERR_MULTI;
   }
-  sh = curl_share_init();
-  if(!sh)
+  share = curl_share_init();
+  if(!share)
     goto cleanup;
 
-  curl_share_setopt(sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-  curl_share_setopt(sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
 
   curl = curl_easy_init();
   if(!curl)
     goto cleanup;
 
-  curl_easy_setopt(curl, CURLOPT_SHARE, sh);
+  curl_easy_setopt(curl, CURLOPT_SHARE, share);
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_COOKIEFILE, libtest_arg2);
   curl_easy_setopt(curl, CURLOPT_COOKIEJAR, libtest_arg2);
@@ -89,7 +89,7 @@ static CURLcode test_lib1905(const char *URL)
   curl_multi_remove_handle(multi, curl);
 cleanup:
   curl_easy_cleanup(curl);
-  curl_share_cleanup(sh);
+  curl_share_cleanup(share);
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
