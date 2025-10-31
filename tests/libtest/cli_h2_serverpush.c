@@ -54,7 +54,7 @@ static int setup_h2_serverpush(CURL *hnd, const char *url)
 
 static FILE *out_push;
 
-/* called when there's an incoming push */
+/* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
                                 CURL *easy,
                                 size_t num_headers,
@@ -66,9 +66,9 @@ static int server_push_callback(CURL *parent,
   int *transfers = (int *)userp;
   char filename[128];
   static unsigned int count = 0;
-  int rv;
 
   (void)parent;
+
   curl_msnprintf(filename, sizeof(filename) - 1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
@@ -76,8 +76,7 @@ static int server_push_callback(CURL *parent,
   if(!out_push) {
     /* if we cannot save it, deny it */
     curl_mfprintf(stderr, "Failed to create output file for push\n");
-    rv = CURL_PUSH_DENY;
-    goto out;
+    return CURL_PUSH_DENY;
   }
 
   /* write to this file */
@@ -98,10 +97,8 @@ static int server_push_callback(CURL *parent,
   }
 
   (*transfers)++; /* one more */
-  rv = CURL_PUSH_OK;
 
-out:
-  return rv;
+  return CURL_PUSH_OK;
 }
 
 /*
@@ -112,7 +109,6 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   CURL *easy;
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
-  struct CURLMsg *m;
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = FALSE;
@@ -123,9 +119,6 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   }
 
   multi_handle = curl_multi_init();
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
-  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
 
   easy = curl_easy_init();
   if(setup_h2_serverpush(easy, URL)) {
@@ -134,8 +127,14 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
     return (CURLcode)1;
   }
 
+  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi_handle, CURLMOPT_PUSHFUNCTION, server_push_callback);
+  curl_multi_setopt(multi_handle, CURLMOPT_PUSHDATA, &transfers);
+
   curl_multi_add_handle(multi_handle, easy);
+
   do {
+    struct CURLMsg *m;
     int still_running; /* keep number of running handles */
     CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
 
