@@ -101,12 +101,12 @@ static CURLcode test_lib678(const char *URL)
   if(!strcmp("check", URL)) {
     CURLcode w = CURLE_OK;
     struct curl_blob blob = {0};
-    CURL *easy = curl_easy_init();
-    if(easy) {
-      w = curl_easy_setopt(easy, CURLOPT_CAINFO_BLOB, &blob);
+    CURL *curl = curl_easy_init();
+    if(curl) {
+      w = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
       if(w)
         curl_mprintf("CURLOPT_CAINFO_BLOB is not supported\n");
-      curl_easy_cleanup(easy);
+      curl_easy_cleanup(curl);
     }
     res = w;
   }
