@@ -9,7 +9,7 @@ followlocation
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 HTTP/1.1 301 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
