@@ -50,7 +50,7 @@ static CURLcode test_lib668(const char *URL)
 {
   static const char testdata[] = "dummy";
 
-  CURL *easy = NULL;
+  CURL *curl = NULL;
   curl_mime *mime = NULL;
   curl_mimepart *part;
   CURLcode res = TEST_ERR_FAILURE;
@@ -65,16 +65,16 @@ static CURLcode test_lib668(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  easy = curl_easy_init();
+  curl = curl_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(easy, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(easy, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(easy, CURLOPT_HEADER, 1L);
+  test_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structures. */
   pooh1.readptr = testdata;
@@ -82,7 +82,7 @@ static CURLcode test_lib668(const char *URL)
   pooh2 = pooh1;
 
   /* Build the mime tree. */
-  mime = curl_mime_init(easy);
+  mime = curl_mime_init(curl);
   part = curl_mime_addpart(mime);
   curl_mime_name(part, "field1");
   /* Early end of data detection can be done because the data size is known. */
@@ -101,16 +101,16 @@ static CURLcode test_lib668(const char *URL)
   curl_mime_filedata(part, libtest_arg2);
 
   /* Bind mime data to its easy handle. */
-  test_setopt(easy, CURLOPT_MIMEPOST, mime);
+  test_setopt(curl, CURLOPT_MIMEPOST, mime);
 
   /* Send data. */
-  res = curl_easy_perform(easy);
+  res = curl_easy_perform(curl);
   if(res != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_perform() failed\n");
   }
 
 test_cleanup:
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_mime_free(mime);
   curl_global_cleanup();
   return res;
