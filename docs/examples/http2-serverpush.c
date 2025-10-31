@@ -225,14 +225,15 @@ int main(int argc, char *argv[])
 
   /* init a multi stack */
   multi_handle = curl_multi_init();
+  if(!multi_handle)
+    goto error;
 
   easy = curl_easy_init();
 
   /* set options */
-  if(setup(easy, url)) {
+  if(!easy || setup(easy, url)) {
     fprintf(stderr, "failed\n");
-    curl_global_cleanup();
-    return 1;
+    goto error;
   }
 
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
@@ -272,7 +273,11 @@ int main(int argc, char *argv[])
 
   } while(transfers); /* as long as we have transfers going */
 
-  curl_multi_cleanup(multi_handle);
+error:
+
+  if(multi_handle)
+    curl_multi_cleanup(multi_handle);
+
   curl_global_cleanup();
 
   fclose(out_download);
