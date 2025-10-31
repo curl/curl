@@ -990,7 +990,7 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
                             (curl_off_t)ws->pending.payload_len,
                             &ws->sendbuf);
   if(result) {
-    CURL_TRC_WS(data, "ws_enc_cntrl(), error addiong head: %d",
+    CURL_TRC_WS(data, "ws_enc_cntrl(), error adding head: %d",
                 result);
     goto out;
   }
