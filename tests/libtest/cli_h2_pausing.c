@@ -80,12 +80,6 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   return realsize;
 }
 
-#define CLI_ERR()                                                             \
-  do {                                                                        \
-    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
-    return (CURLcode)2;                                                       \
-  } while(0)
-
 static CURLcode test_cli_h2_pausing(const char *URL)
 {
   struct handle handles[2];
@@ -187,24 +181,31 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
-      CLI_ERR();
+      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      return (CURLcode)2;
     }
     curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, http_version);
   }
 
   multi_handle = curl_multi_init();
-  if(!multi_handle)
-    CLI_ERR();
+  if(!multi_handle) {
+    curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+    return (CURLcode)2;
+  }
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK)
-      CLI_ERR();
+    if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK) {
+      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      return (CURLcode)2;
+    }
   }
 
   for(rounds = 0;; rounds++) {
     curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
-    if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK)
-      CLI_ERR();
+    if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK) {
+      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      return (CURLcode)2;
+    }
 
     if(!still_running) {
       int as_expected = 1;
@@ -237,8 +238,10 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       break;
     }
 
-    if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK)
-      CLI_ERR();
+    if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK) {
+      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      return (CURLcode)2;
+    }
 
     /* !checksrc! disable EQUALSNULL 1 */
     while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
