@@ -28,21 +28,21 @@
 static CURLcode test_lib1908(const char *URL)
 {
   CURLcode ret = CURLE_OK;
-  CURL *hnd;
+  CURL *curl;
   start_test_timing();
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  if(hnd) {
-    curl_easy_setopt(hnd, CURLOPT_URL, URL);
-    curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
-    curl_easy_setopt(hnd, CURLOPT_ALTSVC, libtest_arg2);
-    ret = curl_easy_perform(hnd);
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(curl, CURLOPT_ALTSVC, libtest_arg2);
+    ret = curl_easy_perform(curl);
 
     if(!ret) {
       /* make a copy and check that this also has alt-svc activated */
-      CURL *also = curl_easy_duphandle(hnd);
+      CURL *also = curl_easy_duphandle(curl);
       if(also) {
         ret = curl_easy_perform(also);
         /* we close the second handle first, which makes it store the alt-svc
@@ -51,11 +51,11 @@ static CURLcode test_lib1908(const char *URL)
       }
     }
 
-    curl_easy_reset(hnd);
+    curl_easy_reset(curl);
 
     /* using the same file name for the alt-svc cache, this clobbers the
        content just written from the 'also' handle */
-    curl_easy_cleanup(hnd);
+    curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
   return ret;
