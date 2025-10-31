@@ -10,7 +10,7 @@ followlocation
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 HTTP/1.1 301 OK swsclose
 Location: moo/testcase/%TESTNUMBER0002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
