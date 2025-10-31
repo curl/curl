@@ -43,11 +43,16 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  CURLcode exitcode = (CURLcode)1;
+  CURLcode result = (CURLcode)1;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
     return (CURLcode)2;
+  }
+
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
   }
 
   multi = curl_multi_init();
@@ -144,7 +149,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   } while(running_handles > 0 || start_count);
 
   curl_mfprintf(stderr, "exiting\n");
-  exitcode = CURLE_OK;
+  result = CURLE_OK;
 
 cleanup:
 
@@ -161,5 +166,7 @@ cleanup:
     curl_multi_cleanup(multi);
   }
 
-  return exitcode;
+  curl_global_cleanup();
+
+  return result;
 }

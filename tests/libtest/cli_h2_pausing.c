@@ -80,21 +80,15 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   return realsize;
 }
 
-#define CLI_ERR()                                                             \
-  do {                                                                        \
-    curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");\
-    return (CURLcode)2;                                                       \
-  } while(0)
-
 static CURLcode test_cli_h2_pausing(const char *URL)
 {
   struct handle handles[2];
-  CURLM *multi_handle;
+  CURLM *multi_handle = NULL;
   int still_running = 1, msgs_left, numfds;
   size_t i;
   CURLMsg *msg;
   int rounds = 0;
-  CURLcode rc = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
@@ -139,25 +133,35 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   }
   url = test_argv[0];
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
   curl_global_trace("ids,time,http/2,http/3");
+
+  memset(handles, 0, sizeof(handles));
 
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   memset(&resolve, 0, sizeof(resolve));
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
@@ -183,24 +187,35 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
-      CLI_ERR();
+      curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
+      result = (CURLcode)2;
+      goto cleanup;
     }
     curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, http_version);
   }
 
   multi_handle = curl_multi_init();
-  if(!multi_handle)
-    CLI_ERR();
+  if(!multi_handle) {
+    curl_mfprintf(stderr, "curl_multi_init() failed - bailing out\n");
+    result = (CURLcode)2;
+    goto cleanup;
+  }
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK)
-      CLI_ERR();
+    if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_add_handle() failed - bailing out\n");
+      result = (CURLcode)2;
+      goto cleanup;
+    }
   }
 
   for(rounds = 0;; rounds++) {
     curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
-    if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK)
-      CLI_ERR();
+    if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_perform() failed - bailing out\n");
+      result = (CURLcode)2;
+      goto cleanup;
+    }
 
     if(!still_running) {
       int as_expected = 1;
@@ -228,13 +243,16 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       if(!as_expected) {
         curl_mfprintf(stderr, "ERROR: handles not in expected state "
                       "after %d rounds\n", rounds);
-        rc = (CURLcode)1;
+        result = (CURLcode)1;
       }
       break;
     }
 
-    if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK)
-      CLI_ERR();
+    if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_poll() failed - bailing out\n");
+      result = (CURLcode)2;
+      goto cleanup;
+    }
 
     /* !checksrc! disable EQUALSNULL 1 */
     while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
@@ -246,8 +264,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
                             "resumed=%d, result %d - wtf?\n", i,
                             handles[i].paused,
                             handles[i].resumed, msg->data.result);
-              rc = (CURLcode)1;
-              goto out;
+              result = (CURLcode)1;
+              goto cleanup;
             }
           }
         }
@@ -278,7 +296,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     }
   }
 
-out:
+cleanup:
+
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     curl_multi_remove_handle(multi_handle, handles[i].h);
     curl_easy_cleanup(handles[i].h);
@@ -291,5 +310,5 @@ out:
   curl_multi_cleanup(multi_handle);
   curl_global_cleanup();
 
-  return rc;
+  return result;
 }

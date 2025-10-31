@@ -26,7 +26,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-static FILE *out_download;
+static FILE *out_download = NULL;
 
 static int setup_h2_serverpush(CURL *hnd, const char *url)
 {
@@ -52,7 +52,7 @@ static int setup_h2_serverpush(CURL *hnd, const char *url)
   return 0; /* all is good */
 }
 
-static FILE *out_push;
+static FILE *out_push = NULL;
 
 /* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
@@ -106,9 +106,10 @@ static int server_push_callback(CURL *parent,
  */
 static CURLcode test_cli_h2_serverpush(const char *URL)
 {
-  CURL *easy;
+  CURL *easy = NULL;
   CURLM *multi_handle;
   int transfers = 1; /* we start with one */
+  CURLcode result = CURLE_OK;
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = FALSE;
@@ -118,13 +119,27 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
     return (CURLcode)2;
   }
 
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
   multi_handle = curl_multi_init();
+  if(!multi_handle) {
+    result = (CURLcode)1;
+    goto cleanup;
+  }
 
   easy = curl_easy_init();
+  if(!easy) {
+    result = (CURLcode)1;
+    goto cleanup;
+  }
+
   if(setup_h2_serverpush(easy, URL)) {
-    curlx_fclose(out_download);
     curl_mfprintf(stderr, "failed\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
 
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
@@ -163,11 +178,16 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   } while(transfers); /* as long as we have transfers going */
 
+cleanup:
+
   curl_multi_cleanup(multi_handle);
 
-  curlx_fclose(out_download);
+  if(out_download)
+    curlx_fclose(out_download);
   if(out_push)
     curlx_fclose(out_push);
 
-  return CURLE_OK;
+  curl_global_cleanup();
+
+  return result;
 }
