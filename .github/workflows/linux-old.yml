@@ -56,7 +56,7 @@ env:
 
 jobs:
   cmake-autotools:
-    name: 'CM & AM'  # cmake & autotools
+    name: 'AM & CM'  # autotools & cmake
     runs-on: 'ubuntu-latest'
     container: 'debian:stretch'
 
