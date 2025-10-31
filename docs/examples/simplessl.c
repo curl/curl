@@ -49,7 +49,7 @@
 
 int main(void)
 {
-  CURL *curl;
+  CURL *curl = NULL;
   CURLcode res;
   FILE *headerfile;
   const char *pPassphrase = NULL;
@@ -69,79 +69,81 @@ int main(void)
   pKeyType  = "PEM";
 #endif
 
-  headerfile = fopen(pHeaderFile, "wb");
-  if(!headerfile)
-    return 1;
-
   res = curl_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    fclose(headerfile);
     return (int)res;
   }
 
+  headerfile = fopen(pHeaderFile, "wb");
+  if(!headerfile)
+    goto error;
+
   curl = curl_easy_init();
-  if(curl) {
-    /* what call to write: */
-    curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://secure.site.example");
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, headerfile);
+  if(!curl)
+    goto error;
+
+  /* what call to write: */
+  curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://secure.site.example");
+  curl_easy_setopt(curl, CURLOPT_HEADERDATA, headerfile);
 
 #ifdef USE_ENGINE
-    /* use crypto engine. nCipher HSM... */
-    if(curl_easy_setopt(curl, CURLOPT_SSLENGINE, "chil") != CURLE_OK) {
-      /* load the crypto engine */
-      fprintf(stderr, "cannot set crypto engine\n");
-      goto error;
-    }
-    if(curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
-      /* set the crypto engine as default */
-      /* only needed for the first time you load
-         an engine in a curl object... */
-      fprintf(stderr, "cannot set crypto engine as default\n");
-      goto error;
-    }
+  /* use crypto engine. nCipher HSM... */
+  if(curl_easy_setopt(curl, CURLOPT_SSLENGINE, "chil") != CURLE_OK) {
+    /* load the crypto engine */
+    fprintf(stderr, "cannot set crypto engine\n");
+    goto error;
+  }
+  if(curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L) != CURLE_OK) {
+    /* set the crypto engine as default */
+    /* only needed for the first time you load
+       an engine in a curl object... */
+    fprintf(stderr, "cannot set crypto engine as default\n");
+    goto error;
+  }
 #endif
 
-    /* cert is stored PEM coded in file... */
-    /* since PEM is default, we needn't set it for PEM */
-    curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+  /* cert is stored PEM coded in file... */
+  /* since PEM is default, we needn't set it for PEM */
+  curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
-    /* set the cert for client authentication */
-    curl_easy_setopt(curl, CURLOPT_SSLCERT, pCertFile);
+  /* set the cert for client authentication */
+  curl_easy_setopt(curl, CURLOPT_SSLCERT, pCertFile);
 
-    /* sorry, for engine we must set the passphrase
-       (if the key has one...) */
-    if(pPassphrase)
-      curl_easy_setopt(curl, CURLOPT_KEYPASSWD, pPassphrase);
+  /* sorry, for engine we must set the passphrase
+     (if the key has one...) */
+  if(pPassphrase)
+    curl_easy_setopt(curl, CURLOPT_KEYPASSWD, pPassphrase);
 
-    /* if we use a key stored in a crypto engine,
-       we must set the key type to "ENG" */
-    curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, pKeyType);
+  /* if we use a key stored in a crypto engine,
+     we must set the key type to "ENG" */
+  curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, pKeyType);
 
-    /* set the private key (file or ID in engine) */
-    curl_easy_setopt(curl, CURLOPT_SSLKEY, pKeyName);
+  /* set the private key (file or ID in engine) */
+  curl_easy_setopt(curl, CURLOPT_SSLKEY, pKeyName);
 
-    /* set the file with the certs validating the server */
-    curl_easy_setopt(curl, CURLOPT_CAINFO, pCACertFile);
+  /* set the file with the certs validating the server */
+  curl_easy_setopt(curl, CURLOPT_CAINFO, pCACertFile);
 
-    /* disconnect if we cannot validate server's cert */
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+  /* disconnect if we cannot validate server's cert */
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
-    /* Check for errors */
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
-
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-  }
+  /* Perform the request, res gets the return code */
+  res = curl_easy_perform(curl);
+  /* Check for errors */
+  if(res != CURLE_OK)
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
 
 error:
 
-  curl_global_cleanup();
+  /* always cleanup */
+  if(curl)
+    curl_easy_cleanup(curl);
 
-  fclose(headerfile);
+  if(headerfile)
+    fclose(headerfile);
+
+  curl_global_cleanup();
 
   return (int)res;
 }
