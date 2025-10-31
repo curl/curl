@@ -5129,6 +5129,10 @@ static CURLcode ossl_apple_verify(struct Curl_cfilter *cf,
     if(conn_config->verifystatus && !octx->reused_session)
       ocsp_len = (long)SSL_get_tlsext_status_ocsp_resp(octx->ssl, &ocsp_data);
 
+    /* SSL_get_tlsext_status_ocsp_resp() returns the length of the OCSP
+       response data or -1 if there is no OCSP response data. */
+    if(ocsp_len < 0)
+      ocsp_len = 0; /* no data available */
     result = Curl_vtls_apple_verify(cf, data, peer, chain.num_certs,
                                     ossl_chain_get_der, &chain,
                                     ocsp_data, ocsp_len);
