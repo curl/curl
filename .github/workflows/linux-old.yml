@@ -16,7 +16,7 @@
 # httrack is one of the smallest downloaders, needed to bootstrap ELTS,
 # and won't conflict with the curl we're building.
 
-name: 'Old Linux'
+name: 'Linux Old'
 
 'on':
   push:
@@ -56,7 +56,7 @@ env:
 
 jobs:
   cmake-autotools:
-    name: 'cmake & autotools'
+    name: 'autotools & cmake'
     runs-on: 'ubuntu-latest'
     container: 'debian:stretch'
 
@@ -84,31 +84,31 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'cmake build-only configure (out-of-tree)'
+      - name: 'CM build-only configure (out-of-tree)'
         run: |
           mkdir bld-1
           cd bld-1
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
 
-      - name: 'cmake build-only build'
+      - name: 'CM build-only build'
         run: VERBOSE=1 make -C bld-1 install
 
-      - name: 'cmake build-only curl -V'
+      - name: 'CM build-only curl -V'
         run: bld-1/src/curl --disable --version
 
-      - name: 'cmake build-only configure log'
+      - name: 'CM build-only configure log'
         if: ${{ !cancelled() }}
         run: cat bld-1/CMakeFiles/CMake*.log 2>/dev/null || true
 
-      - name: 'cmake build-only curl_config.h'
+      - name: 'CM build-only curl_config.h'
         run: |
           echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld-1/lib/curl_config.h | sort || true
 
       # when this job can get a libssh version 0.9.0 or later, this should get
       # that enabled again
-      - name: 'cmake configure (out-of-tree, c-ares, zstd, gssapi)'
+      - name: 'CM configure (out-of-tree, c-ares, zstd, gssapi)'
         run: |
           mkdir bld-cares
           cd bld-cares
@@ -116,37 +116,37 @@ jobs:
             -DCURL_USE_GNUTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
-      - name: 'cmake configure log'
+      - name: 'CM configure log'
         if: ${{ !cancelled() }}
         run: cat bld-cares/CMakeFiles/CMake*.log 2>/dev/null || true
 
-      - name: 'cmake curl_config.h'
+      - name: 'CM curl_config.h'
         run: |
           echo '::group::raw'; cat bld-cares/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld-cares/lib/curl_config.h | sort || true
 
-      - name: 'cmake build'
+      - name: 'CM build'
         run: make -C bld-cares
 
-      - name: 'cmake curl -V'
+      - name: 'CM curl -V'
         run: bld-cares/src/curl --disable --version
 
-      - name: 'cmake install'
+      - name: 'CM install'
         run: make -C bld-cares install
 
-      - name: 'cmake build tests'
+      - name: 'CM build tests'
         run: make -C bld-cares testdeps
 
-      - name: 'cmake run tests'
+      - name: 'CM run tests'
         run: make -C bld-cares test-ci
 
-      - name: 'cmake build examples'
+      - name: 'CM build examples'
         run: make -C bld-cares curl-examples-build
 
-      - name: 'autoreconf'
+      - name: 'AM autoreconf'
         run: autoreconf -fi
 
-      - name: 'autotools configure (out-of-tree, c-ares, zstd, gssapi)'
+      - name: 'AM configure (out-of-tree, c-ares, zstd, gssapi)'
         run: |
           mkdir bld-am
           cd bld-am
@@ -154,23 +154,23 @@ jobs:
             --with-gnutls --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 
-      - name: 'autotools configure log'
+      - name: 'AM configure log'
         if: ${{ !cancelled() }}
         run: cat bld-am/config.log 2>/dev/null || true
 
-      - name: 'autotools curl_config.h'
+      - name: 'AM curl_config.h'
         run: |
           echo '::group::raw'; cat bld-am/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld-am/lib/curl_config.h | sort || true
 
-      - name: 'autotools build'
+      - name: 'AM build'
         run: make -C bld-am
 
-      - name: 'autotools curl -V'
+      - name: 'AM curl -V'
         run: bld-am/src/curl --disable --version
 
-      - name: 'autotools install'
+      - name: 'AM install'
         run: make -C bld-am install
 
-      - name: 'autotools build tests'
+      - name: 'AM build tests'
         run: make -C bld-am/tests all
