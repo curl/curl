@@ -20,7 +20,7 @@ checksrc
  * Violate each rule at least once.
  **/
 int hello; /*------------------------------------------------------------------*/
-int	tab;
+int%tab%tab;
 int trailing_space;
 int a = func ();
 int b = func( b);
