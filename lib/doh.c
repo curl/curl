@@ -1288,7 +1288,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                            de.https_rrs->len, &hrr);
           if(result) {
             infof(data, "Failed to decode HTTPS RR");
-            dnscache_entry_free(dns);
+            Curl_resolv_unlink(data, &dns);
             de_cleanup(&de);
             Curl_doh_cleanup(data);
             return result;
