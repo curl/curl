@@ -30,7 +30,7 @@ static CURLcode test_lib1531(const char *URL)
   static char const testData[] = ".abc\0xyz";
   static curl_off_t const testDataSize = sizeof(testData) - 1;
 
-  CURL *easy;
+  CURL *curl;
   CURLM *multi;
   int still_running; /* keep number of running handles */
   CURLMsg *msg; /* for picking up messages with the transfer status */
@@ -42,18 +42,18 @@ static CURLcode test_lib1531(const char *URL)
   global_init(CURL_GLOBAL_ALL);
 
   /* Allocate one curl handle per transfer */
-  easy = curl_easy_init();
+  curl = curl_easy_init();
 
   /* init a multi stack */
   multi = curl_multi_init();
 
   /* add the individual transfer */
-  curl_multi_add_handle(multi, easy);
+  curl_multi_add_handle(multi, curl);
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(easy, CURLOPT_URL, URL);
-  curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
-  curl_easy_setopt(easy, CURLOPT_POSTFIELDS, testData);
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testData);
 
   /* we start some action by calling perform right away */
   curl_multi_perform(multi, &still_running);
@@ -141,7 +141,7 @@ test_cleanup:
   curl_multi_cleanup(multi);
 
   /* Free the curl handles */
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;
