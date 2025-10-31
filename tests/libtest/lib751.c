@@ -31,14 +31,14 @@
 
 static CURLcode test_lib751(const char *URL)
 {
-  CURL *easies[1000];
+  CURL *curls[1000];
   CURLM *multi;
   CURLcode res = CURLE_FAILED_INIT;
   CURLMcode mres;
   int i;
 
   (void)URL;
-  memset(easies, 0, sizeof(easies));
+  memset(curls, 0, sizeof(curls));
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
   multi = curl_multi_init();
@@ -53,7 +53,7 @@ static CURLcode test_lib751(const char *URL)
       res = CURLE_OUT_OF_MEMORY;
       goto test_cleanup;
     }
-    easies[i] = curl;
+    curls[i] = curl;
 
     res = curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     if(!res)
@@ -75,10 +75,10 @@ test_cleanup:
     curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(res));
 
   for(i = 0; i < 1000; i++) {
-    if(easies[i]) {
-      curl_multi_add_handle(multi, easies[i]);
-      curl_easy_cleanup(easies[i]);
-      easies[i] = NULL;
+    if(curls[i]) {
+      curl_multi_add_handle(multi, curls[i]);
+      curl_easy_cleanup(curls[i]);
+      curls[i] = NULL;
     }
   }
   curl_multi_cleanup(multi);
