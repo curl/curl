@@ -41,7 +41,7 @@ static const char *t1565_url;
 
 static void *t1565_run_thread(void *ptr)
 {
-  CURL *easy = NULL;
+  CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   int i;
 
@@ -50,10 +50,10 @@ static void *t1565_run_thread(void *ptr)
   for(i = 0; i < CONN_NUM; i++) {
     curlx_wait_ms(TIME_BETWEEN_START_SECS * 1000);
 
-    easy_init(easy);
+    easy_init(curl);
 
-    easy_setopt(easy, CURLOPT_URL, t1565_url);
-    easy_setopt(easy, CURLOPT_VERBOSE, 0L);
+    easy_setopt(curl, CURLOPT_URL, t1565_url);
+    easy_setopt(curl, CURLOPT_VERBOSE, 0L);
 
     pthread_mutex_lock(&lock);
 
@@ -62,9 +62,9 @@ static void *t1565_run_thread(void *ptr)
       goto test_cleanup;
     }
 
-    pending_handles[pending_num] = easy;
+    pending_handles[pending_num] = curl;
     pending_num++;
-    easy = NULL;
+    curl = NULL;
 
     pthread_mutex_unlock(&lock);
 
@@ -73,7 +73,7 @@ static void *t1565_run_thread(void *ptr)
 
 test_cleanup:
 
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
 
   pthread_mutex_lock(&lock);
 
