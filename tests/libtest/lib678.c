@@ -99,10 +99,9 @@ static CURLcode test_lib678(const char *URL)
   CURLcode res = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);
   if(!strcmp("check", URL)) {
-    CURL *easy;
     CURLcode w = CURLE_OK;
     struct curl_blob blob = {0};
-    easy = curl_easy_init();
+    CURL *easy = curl_easy_init();
     if(easy) {
       w = curl_easy_setopt(easy, CURLOPT_CAINFO_BLOB, &blob);
       if(w)
