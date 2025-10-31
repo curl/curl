@@ -241,11 +241,12 @@ static CURLcode test_cli_hx_upload(const char *URL)
   int reuse_easy = 0;
   int use_earlydata = 0;
   int announce_length = 0;
-  struct transfer_u *t;
+  struct transfer_u *t = NULL;
   long http_version = CURL_HTTP_VERSION_2_0;
   struct curl_slist *host = NULL;
   const char *resolve = NULL;
   int ch;
+  CURLcode result = CURLE_OK;
 
   (void)URL;
 
@@ -339,7 +340,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
@@ -351,7 +353,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
   transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    return (CURLcode)1;
+    result = (CURLcode)1;
+    goto cleanup;
   }
 
   active_transfers = 0;
@@ -367,18 +370,20 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
   if(reuse_easy) {
     CURL *easy = curl_easy_init();
-    CURLcode rc = CURLE_OK;
     if(!easy) {
       curl_mfprintf(stderr, "failed to init easy handle\n");
-      return (CURLcode)1;
+      result = (CURLcode)1;
+      goto cleanup;
     }
     for(i = 0; i < transfer_count_u; ++i) {
+      CURLcode rc;
       t = &transfer_u[i];
       t->easy = easy;
       if(setup_hx_upload(t->easy, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-        return (CURLcode)1;
+        result = (CURLcode)1;
+        goto cleanup;
       }
 
       curl_mfprintf(stderr, "[t-%zu] STARTING\n", t->idx);
@@ -400,7 +405,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-        return (CURLcode)1;
+        result = (CURLcode)1;
+        goto cleanup;
       }
       curl_multi_add_handle(multi_handle, t->easy);
       t->started = 1;
@@ -486,7 +492,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
                                              host, share, use_earlydata,
                                              announce_length)) {
                 curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-                return (CURLcode)1;
+                result = (CURLcode)1;
+                goto cleanup;
               }
               curl_multi_add_handle(multi_handle, t->easy);
               t->started = 1;
@@ -507,24 +514,29 @@ static CURLcode test_cli_hx_upload(const char *URL)
     curl_multi_cleanup(multi_handle);
   }
 
-  for(i = 0; i < transfer_count_u; ++i) {
-    t = &transfer_u[i];
-    if(t->out) {
-      curlx_fclose(t->out);
-      t->out = NULL;
+cleanup:
+
+  if(transfer_u) {
+    for(i = 0; i < transfer_count_u; ++i) {
+      t = &transfer_u[i];
+      if(t->out) {
+        curlx_fclose(t->out);
+        t->out = NULL;
+      }
+      if(t->easy) {
+        curl_easy_cleanup(t->easy);
+        t->easy = NULL;
+      }
+      if(t->mime) {
+        curl_mime_free(t->mime);
+      }
     }
-    if(t->easy) {
-      curl_easy_cleanup(t->easy);
-      t->easy = NULL;
-    }
-    if(t->mime) {
-      curl_mime_free(t->mime);
-    }
+    free(transfer_u);
   }
-  free(transfer_u);
+
   curl_share_cleanup(share);
   curl_slist_free_all(host);
   curl_global_cleanup();
 
-  return CURLE_OK;
+  return result;
 }
