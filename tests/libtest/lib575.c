@@ -33,8 +33,8 @@
 
 static CURLcode test_lib575(const char *URL)
 {
-  CURL *handle = NULL;
-  CURL *duphandle = NULL;
+  CURL *curl = NULL;
+  CURL *curldupe = NULL;
   CURLM *multi = NULL;
   CURLcode res = CURLE_OK;
   int still_running = 0;
@@ -43,29 +43,29 @@ static CURLcode test_lib575(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(handle);
+  easy_init(curl);
 
-  easy_setopt(handle, CURLOPT_URL, URL);
-  easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(handle);
+  res = curl_easy_perform(curl);
   if(res)
     goto test_cleanup;
 
-  res = curl_easy_perform(handle);
+  res = curl_easy_perform(curl);
   if(res)
     goto test_cleanup;
 
-  duphandle = curl_easy_duphandle(handle);
-  if(!duphandle)
+  curldupe = curl_easy_duphandle(curl);
+  if(!curldupe)
     goto test_cleanup;
-  curl_easy_cleanup(handle);
-  handle = duphandle;
+  curl_easy_cleanup(curl);
+  curl = curldupe;
 
   multi_init(multi);
 
-  multi_add_handle(multi, handle);
+  multi_add_handle(multi, curl);
 
   multi_perform(multi, &still_running);
 
@@ -103,7 +103,7 @@ test_cleanup:
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(handle);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;
