@@ -146,12 +146,12 @@ static int t758_addFd(struct t758_Sockets *sockets, curl_socket_t fd,
 /**
  * Callback invoked by curl to poll reading / writing of a socket.
  */
-static int t758_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
+static int t758_curlSocketCallback(CURL *curl, curl_socket_t s, int action,
                                    void *userp, void *socketp)
 {
   struct t758_ReadWriteSockets *sockets = userp;
 
-  (void)easy;
+  (void)curl;
   (void)socketp;
 
   t758_ctx.socket_calls++;
