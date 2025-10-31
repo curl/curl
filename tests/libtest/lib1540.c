@@ -83,7 +83,7 @@ static size_t t1540_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode test_lib1540(const char *URL)
 {
-  CURL *curls = NULL;
+  CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   struct t1540_transfer_status st;
 
@@ -93,30 +93,30 @@ static CURLcode test_lib1540(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(curls);
-  st.easy = curls; /* to allow callbacks access */
+  easy_init(curl);
+  st.easy = curl; /* to allow callbacks access */
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1540_write_cb);
-  easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, t1540_header_callback);
-  easy_setopt(curls, CURLOPT_HEADERDATA, &st);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1540_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEDATA, &st);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1540_header_callback);
+  easy_setopt(curl, CURLOPT_HEADERDATA, &st);
 
-  easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, please_continue);
-  easy_setopt(curls, CURLOPT_XFERINFODATA, &st);
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);
+  easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, please_continue);
+  easy_setopt(curl, CURLOPT_XFERINFODATA, &st);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = TRUE;
-  test_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curls);
+  res = curl_easy_perform(curl);
 
 test_cleanup:
 
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res; /* return the final return code */
