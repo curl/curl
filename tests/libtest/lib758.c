@@ -235,13 +235,13 @@ t758_set_ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *clientp)
 /**
  * Check for curl completion.
  */
-static int t758_checkForCompletion(CURLM *curl, int *success)
+static int t758_checkForCompletion(CURLM *multi, int *success)
 {
   int result = 0;
   *success = 0;
   while(1) {
     int numMessages;
-    CURLMsg *message = curl_multi_info_read(curl, &numMessages);
+    CURLMsg *message = curl_multi_info_read(multi, &numMessages);
     if(!message)
       break;
     if(message->msg == CURLMSG_DONE) {
@@ -296,11 +296,12 @@ static void t758_updateFdSet(struct t758_Sockets *sockets, fd_set* fdset,
   }
 }
 
-static CURLMcode t758_saction(CURLM *curl, curl_socket_t s,
+static CURLMcode t758_saction(CURLM *multi, curl_socket_t s,
                               int evBitmask, const char *info)
 {
   int numhandles = 0;
-  CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
+  CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
+                                              &numhandles);
   if(result != CURLM_OK) {
     curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
                   t758_tag(), info, result, curl_multi_strerror(result));
@@ -311,7 +312,7 @@ static CURLMcode t758_saction(CURLM *curl, curl_socket_t s,
 /**
  * Invoke curl when a file descriptor is set.
  */
-static CURLMcode t758_checkFdSet(CURLM *curl, struct t758_Sockets *sockets,
+static CURLMcode t758_checkFdSet(CURLM *multi, struct t758_Sockets *sockets,
                                  fd_set *fdset, int evBitmask,
                                  const char *name)
 {
@@ -319,7 +320,7 @@ static CURLMcode t758_checkFdSet(CURLM *curl, struct t758_Sockets *sockets,
   CURLMcode result = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      result = t758_saction(curl, sockets->sockets[i], evBitmask, name);
+      result = t758_saction(multi, sockets->sockets[i], evBitmask, name);
       if(result)
         break;
     }
@@ -331,7 +332,8 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
                          int socket_fail_at)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl = NULL;  CURLM *m = NULL;
+  CURL *curl = NULL;
+  CURLM *m = NULL;
   struct t758_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct curltime timeout = {0};
