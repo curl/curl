@@ -1979,13 +1979,15 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       rc = myssh_in_SFTP_REALPATH(data, sshc);
       break;
     case SSH_SFTP_QUOTE_INIT:
-      rc = myssh_in_SFTP_QUOTE_INIT(data, sshc, sshp);
+      rc = sshp ? myssh_in_SFTP_QUOTE_INIT(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
     case SSH_SFTP_POSTQUOTE_INIT:
       rc = myssh_in_SFTP_POSTQUOTE_INIT(data, sshc);
       break;
     case SSH_SFTP_QUOTE:
-      rc = myssh_in_SFTP_QUOTE(data, sshc, sshp);
+      rc = sshp ? myssh_in_SFTP_QUOTE(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
     case SSH_SFTP_NEXT_QUOTE:
       rc = myssh_in_SFTP_NEXT_QUOTE(data, sshc);
@@ -2115,7 +2117,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
     case SSH_SFTP_FILETIME: {
       sftp_attributes attrs;
-
+      if(!sshp) {
+        result = CURLE_FAILED_INIT;
+        break;
+      }
       attrs = sftp_stat(sshc->sftp_session, sshp->path);
       if(attrs) {
         data->info.filetime = attrs->mtime;
@@ -2129,20 +2134,27 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
     case SSH_SFTP_TRANS_INIT:
       if(data->state.upload)
         myssh_to(data, sshc, SSH_SFTP_UPLOAD_INIT);
-      else {
+      else if(sshp) {
         if(sshp->path[strlen(sshp->path)-1] == '/')
           myssh_to(data, sshc, SSH_SFTP_READDIR_INIT);
         else
           myssh_to(data, sshc, SSH_SFTP_DOWNLOAD_INIT);
       }
+      else
+        result = CURLE_FAILED_INIT;
       break;
 
     case SSH_SFTP_UPLOAD_INIT:
-      rc = myssh_in_UPLOAD_INIT(data, sshc, sshp);
+      rc = sshp ? myssh_in_UPLOAD_INIT(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
 
     case SSH_SFTP_CREATE_DIRS_INIT:
-      if(strlen(sshp->path) > 1) {
+      if(!sshp) {
+        result = CURLE_FAILED_INIT;
+        break;
+      }
+      else if(strlen(sshp->path) > 1) {
         sshc->slash_pos = sshp->path + 1; /* ignore the leading '/' */
         myssh_to(data, sshc, SSH_SFTP_CREATE_DIRS);
       }
@@ -2153,7 +2165,11 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
     case SSH_SFTP_CREATE_DIRS:
       sshc->slash_pos = strchr(sshc->slash_pos, '/');
-      if(sshc->slash_pos) {
+      if(!sshp) {
+        result = CURLE_FAILED_INIT;
+        break;
+      }
+      else if(sshc->slash_pos) {
         *sshc->slash_pos = 0;
 
         infof(data, "Creating directory '%s'", sshp->path);
@@ -2165,6 +2181,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
     case SSH_SFTP_CREATE_DIRS_MKDIR:
       /* 'mode' - parameter is preliminary - default to 0644 */
+      if(!sshp) {
+        result = CURLE_FAILED_INIT;
+        break;
+      }
       rc = sftp_mkdir(sshc->sftp_session, sshp->path,
                       (mode_t)data->set.new_directory_perms);
       *sshc->slash_pos = '/';
@@ -2188,10 +2208,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     case SSH_SFTP_READDIR_INIT:
-      rc = myssh_in_SFTP_READDIR_INIT(data, sshc, sshp);
+      rc = sshp ? myssh_in_SFTP_READDIR_INIT(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
     case SSH_SFTP_READDIR:
-      rc = myssh_in_SFTP_READDIR(data, sshc, sshp);
+      rc = sshp ? myssh_in_SFTP_READDIR(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
     case SSH_SFTP_READDIR_LINK:
       rc = myssh_in_SFTP_READDIR_LINK(data, sshc);
@@ -2203,19 +2225,25 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       rc = myssh_in_SFTP_READDIR_DONE(data, sshc);
       break;
     case SSH_SFTP_DOWNLOAD_INIT:
-      rc = myssh_in_SFTP_DOWNLOAD_INIT(data, sshc, sshp);
+      rc = sshp ? myssh_in_SFTP_DOWNLOAD_INIT(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
     case SSH_SFTP_DOWNLOAD_STAT:
       rc = myssh_in_SFTP_DOWNLOAD_STAT(data, sshc);
       break;
     case SSH_SFTP_CLOSE:
-      rc = myssh_in_SFTP_CLOSE(data, sshc, sshp);
+      rc = sshp ? myssh_in_SFTP_CLOSE(data, sshc, sshp) :
+           CURLE_FAILED_INIT;
       break;
     case SSH_SFTP_SHUTDOWN:
       rc = myssh_in_SFTP_SHUTDOWN(data, sshc);
       break;
 
     case SSH_SCP_TRANS_INIT:
+      if(!sshp) {
+        result = CURLE_FAILED_INIT;
+        break;
+      }
       result = Curl_getworkingpath(data, sshc->homedir, &sshp->path);
       if(result) {
         sshc->actualcode = result;
@@ -2252,7 +2280,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     case SSH_SCP_UPLOAD_INIT:
-
+      if(!sshp) {
+        result = CURLE_FAILED_INIT;
+        break;
+      }
       rc = ssh_scp_init(sshc->scp_session);
       if(rc != SSH_OK) {
         err_msg = ssh_get_error(sshc->ssh_session);
@@ -2832,11 +2863,9 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
   struct SSHPROTO *sshp = Curl_meta_get(data, CURL_META_SSH_EASY);
   (void)dead_connection;
 
-  if(sshc && sshc->ssh_session && sshp) {
+  if(sshc && sshc->ssh_session) {
     /* only if there is a session still around to use! */
-
     myssh_to(data, sshc, SSH_SESSION_DISCONNECT);
-
     result = myssh_block_statemach(data, sshc, sshp, TRUE);
   }
 
@@ -3012,7 +3041,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
 
   DEBUGF(infof(data, "SSH DISCONNECT starts now"));
 
-  if(sshc && sshc->ssh_session && sshp) {
+  if(sshc && sshc->ssh_session) {
     /* only if there is a session still around to use! */
     myssh_to(data, sshc, SSH_SFTP_SHUTDOWN);
     result = myssh_block_statemach(data, sshc, sshp, TRUE);
