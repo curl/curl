@@ -230,7 +230,7 @@ static CURLcode test_lib582(const char *URL)
   FILE *hd_src = NULL;
   int hd;
   struct_stat file_info;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   struct t582_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct curltime timeout = {0};
@@ -298,17 +298,17 @@ static CURLcode test_lib582(const char *URL)
 
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, t582_curlSocketCallback);
-  multi_setopt(m, CURLMOPT_SOCKETDATA, &sockets);
+  multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, t582_curlSocketCallback);
+  multi_setopt(multi, CURLMOPT_SOCKETDATA, &sockets);
 
-  multi_setopt(m, CURLMOPT_TIMERFUNCTION, t582_curlTimerCallback);
-  multi_setopt(m, CURLMOPT_TIMERDATA, &timeout);
+  multi_setopt(multi, CURLMOPT_TIMERFUNCTION, t582_curlTimerCallback);
+  multi_setopt(multi, CURLMOPT_TIMERDATA, &timeout);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
-  while(!t582_checkForCompletion(m, &success)) {
+  while(!t582_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
@@ -332,13 +332,15 @@ static CURLcode test_lib582(const char *URL)
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    t582_checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
-    t582_checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
+    t582_checkFdSet(multi, &sockets.read, &readSet, CURL_CSELECT_IN,
+                    "read");
+    t582_checkFdSet(multi, &sockets.write, &writeSet, CURL_CSELECT_OUT,
+                    "write");
 
     if(timeout.tv_sec != (time_t)-1 &&
        t582_getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
-      notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+      notifyCurl(multi, CURL_SOCKET_TIMEOUT, 0, "timeout");
     }
 
     abort_on_test_timeout();
@@ -353,9 +355,9 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  curl_multi_remove_handle(m, curl);
+  curl_multi_remove_handle(multi, curl);
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   /* close the local file */
