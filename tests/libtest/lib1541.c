@@ -109,7 +109,7 @@ static size_t t1541_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 
 static CURLcode test_lib1541(const char *URL)
 {
-  CURL *curls = NULL;
+  CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   struct t1541_transfer_status st;
 
@@ -119,31 +119,31 @@ static CURLcode test_lib1541(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(curls);
-  st.easy = curls; /* to allow callbacks access */
+  easy_init(curl);
+  st.easy = curl; /* to allow callbacks access */
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, t1541_write_cb);
-  easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, t1541_header_callback);
-  easy_setopt(curls, CURLOPT_HEADERDATA, &st);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1541_write_cb);
+  easy_setopt(curl, CURLOPT_WRITEDATA, &st);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, t1541_header_callback);
+  easy_setopt(curl, CURLOPT_HEADERDATA, &st);
 
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-  res = curl_easy_perform(curls);
+  res = curl_easy_perform(curl);
 
-  check_time(curls, KN(CURLINFO_CONNECT_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_PRETRANSFER_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_POSTTRANSFER_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_STARTTRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_CONNECT_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_PRETRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_POSTTRANSFER_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_STARTTRANSFER_TIME_T), "done");
   /* no SSL, must be 0 */
-  check_time0(curls, KN(CURLINFO_APPCONNECT_TIME_T), "done");
-  check_time(curls, KN(CURLINFO_SPEED_DOWNLOAD_T), "done");
-  check_time(curls, KN(CURLINFO_TOTAL_TIME_T), "done");
+  check_time0(curl, KN(CURLINFO_APPCONNECT_TIME_T), "done");
+  check_time(curl, KN(CURLINFO_SPEED_DOWNLOAD_T), "done");
+  check_time(curl, KN(CURLINFO_TOTAL_TIME_T), "done");
 
 test_cleanup:
 
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res; /* return the final return code */
