@@ -118,7 +118,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
     return (CURLcode)2;
   }
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
 
   multi_handle = curl_multi_init();
 

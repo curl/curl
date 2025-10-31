@@ -143,7 +143,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
 
   multi = curl_multi_init();
   if(!multi) {

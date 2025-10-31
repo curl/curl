@@ -320,7 +320,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
     return (CURLcode)2;
   }
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
   curl_global_trace("ids,time,http/2,http/3");
 
   if(test_argc != 1) {

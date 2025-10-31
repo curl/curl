@@ -126,7 +126,7 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   }
   url = test_argv[0];
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
   curl_global_trace("ids,time");
 
   cu = curl_url();

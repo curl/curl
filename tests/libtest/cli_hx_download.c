@@ -367,7 +367,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   test_argc -= coptind;
   test_argv += coptind;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  curl_global_init(CURL_GLOBAL_ALL);
   curl_global_trace("ids,time,http/2,http/3");
 
   if(test_argc != 1) {
