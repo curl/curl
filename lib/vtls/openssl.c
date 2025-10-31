@@ -3496,6 +3496,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   X509_LOOKUP *lookup = NULL;
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
+  unsigned long x509flags = 0;
 
   CURL_TRC_CF(data, cf, "configuring OpenSSL's x509 trust store");
   if(!store)
@@ -3521,8 +3522,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
       failf(data, "error loading CRL file: %s", ssl_crlfile);
       return CURLE_SSL_CRL_BADFILE;
     }
-    X509_STORE_set_flags(store,
-                         X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
+    x509flags = X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL;
     infof(data, " CRLfile: %s", ssl_crlfile);
   }
 
@@ -3532,18 +3532,20 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
      determine that in a reliable manner.
      https://web.archive.org/web/20190422050538/rt.openssl.org/Ticket/Display.html?id=3621
   */
-  X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
+  x509flags |= X509_V_FLAG_TRUSTED_FIRST;
+
   if(!ssl_config->no_partialchain && !ssl_crlfile) {
     /* Have intermediate certificates in the trust store be treated as
-       trust-anchors, in the same way as self-signed root CA certificates
-       are. This allows users to verify servers using the intermediate cert
-       only, instead of needing the whole chain.
+       trust-anchors, in the same way as self-signed root CA certificates are.
+       This allows users to verify servers using the intermediate cert only,
+       instead of needing the whole chain.
 
        Due to OpenSSL bug https://github.com/openssl/openssl/issues/5081 we
        cannot do partial chains with a CRL check.
     */
-    X509_STORE_set_flags(store, X509_V_FLAG_PARTIAL_CHAIN);
+    x509flags |= X509_V_FLAG_PARTIAL_CHAIN;
   }
+  (void)X509_STORE_set_flags(store, x509flags);
 
   return result;
 }
