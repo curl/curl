@@ -123,8 +123,8 @@ static CURLcode test_run(const char *URL, long option,
   CURLM *multi = NULL;
   CURLM *multi1 = NULL;
 
-  CURL *easy1 = NULL;
-  CURL *easy2 = NULL;
+  CURL *curl1 = NULL;
+  CURL *curl2 = NULL;
 
   unsigned int max_count = 0;
 
@@ -139,13 +139,13 @@ static CURLcode test_run(const char *URL, long option,
   struct curl_waitfd ufds1[10];
   int numfds;
 
-  easy_init(easy1);
-  easy_init(easy2);
+  easy_init(curl1);
+  easy_init(curl2);
 
-  if(set_easy(URL, easy1, option) != CURLE_OK)
+  if(set_easy(URL, curl1, option) != CURLE_OK)
     goto test_cleanup;
 
-  if(set_easy(URL, easy2, option) != CURLE_OK)
+  if(set_easy(URL, curl2, option) != CURLE_OK)
     goto test_cleanup;
 
   multi_init(multi);
@@ -154,8 +154,8 @@ static CURLcode test_run(const char *URL, long option,
   if(option == TEST_USE_HTTP2_MPLEX)
     multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
-  multi_add_handle(multi, easy1);
-  multi_add_handle(multi, easy2);
+  multi_add_handle(multi, curl1);
+  multi_add_handle(multi, curl2);
 
   while(!mc) {
     /* get the count of file descriptors from the transfers */
@@ -293,12 +293,12 @@ static CURLcode test_run(const char *URL, long option,
     }
   }
 
-  curl_multi_remove_handle(multi, easy1);
-  curl_multi_remove_handle(multi, easy2);
+  curl_multi_remove_handle(multi, curl1);
+  curl_multi_remove_handle(multi, curl2);
 
 test_cleanup:
-  curl_easy_cleanup(easy1);
-  curl_easy_cleanup(easy2);
+  curl_easy_cleanup(curl1);
+  curl_easy_cleanup(curl2);
 
   curl_multi_cleanup(multi);
   curl_multi_cleanup(multi1);
