@@ -189,13 +189,13 @@ static int t530_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int t530_checkForCompletion(CURLM *curl, int *success)
+static int t530_checkForCompletion(CURLM *multi, int *success)
 {
   int result = 0;
   *success = 0;
   while(1) {
     int numMessages;
-    CURLMsg *message = curl_multi_info_read(curl, &numMessages);
+    CURLMsg *message = curl_multi_info_read(multi, &numMessages);
     if(!message)
       break;
     if(message->msg == CURLMSG_DONE) {
@@ -250,11 +250,12 @@ static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set* fdset,
   }
 }
 
-static CURLMcode socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
+static CURLMcode socket_action(CURLM *multi, curl_socket_t s, int evBitmask,
                                const char *info)
 {
   int numhandles = 0;
-  CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
+  CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
+                                              &numhandles);
   if(result != CURLM_OK) {
     curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
                   t530_tag(), info, result, curl_multi_strerror(result));
@@ -265,7 +266,7 @@ static CURLMcode socket_action(CURLM *curl, curl_socket_t s, int evBitmask,
 /**
  * Invoke curl when a file descriptor is set.
  */
-static CURLMcode t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
+static CURLMcode t530_checkFdSet(CURLM *multi, struct t530_Sockets *sockets,
                                  fd_set *fdset, int evBitmask,
                                  const char *name)
 {
@@ -273,7 +274,7 @@ static CURLMcode t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
   CURLMcode result = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      result = socket_action(curl, sockets->sockets[i], evBitmask, name);
+      result = socket_action(multi, sockets->sockets[i], evBitmask, name);
       if(result)
         break;
     }
@@ -284,7 +285,8 @@ static CURLMcode t530_checkFdSet(CURLM *curl, struct t530_Sockets *sockets,
 static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl = NULL;  CURLM *m = NULL;
+  CURL *curl = NULL;
+  CURLM *m = NULL;
   struct t530_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct curltime timeout = {0};
