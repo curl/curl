@@ -469,13 +469,13 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
 {
 #if SIZEOF_TIME_T > 4
   t = (t + (curl_off_t)11644473600) * 10000000;
-  ft->dwLowDateTime = (unsigned int) (t & 0xFFFFFFFF);
-  ft->dwHighDateTime = (unsigned int) (t >> 32);
+  ft->dwLowDateTime = (unsigned int)(t & 0xFFFFFFFF);
+  ft->dwHighDateTime = (unsigned int)(t >> 32);
 #else
   unsigned int r, s;
   unsigned int i;
 
-  ft->dwLowDateTime = (unsigned int)t & 0xFFFFFFFF;
+  ft->dwLowDateTime = (unsigned int)(t & 0xFFFFFFFF);
   ft->dwHighDateTime = 0;
 
 # ifndef HAVE_TIME_T_UNSIGNED
