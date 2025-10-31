@@ -49,28 +49,31 @@ static size_t readfunc(char *ptr, size_t size, size_t nmemb, void *stream)
  */
 static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
 {
-  CURLcode result = CURLE_GOT_NOTHING;
   curl_off_t remoteFileSizeByte = -1;
   CURL *curlHandlePtr = curl_easy_init();
 
-  curl_easy_setopt(curlHandlePtr, CURLOPT_VERBOSE, 1L);
+  if(curlHandlePtr) {
+    CURLcode result;
 
-  curl_easy_setopt(curlHandlePtr, CURLOPT_URL, i_remoteFile);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_NOPROGRESS, 1L);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_NOBODY, 1L);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_HEADER, 1L);
-  curl_easy_setopt(curlHandlePtr, CURLOPT_FILETIME, 1L);
+    curl_easy_setopt(curlHandlePtr, CURLOPT_VERBOSE, 1L);
 
-  result = curl_easy_perform(curlHandlePtr);
-  if(CURLE_OK == result) {
-    result = curl_easy_getinfo(curlHandlePtr,
-                               CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                               &remoteFileSizeByte);
-    if(result)
-      return -1;
-    printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
+    curl_easy_setopt(curlHandlePtr, CURLOPT_URL, i_remoteFile);
+    curl_easy_setopt(curlHandlePtr, CURLOPT_NOPROGRESS, 1L);
+    curl_easy_setopt(curlHandlePtr, CURLOPT_NOBODY, 1L);
+    curl_easy_setopt(curlHandlePtr, CURLOPT_HEADER, 1L);
+    curl_easy_setopt(curlHandlePtr, CURLOPT_FILETIME, 1L);
+
+    result = curl_easy_perform(curlHandlePtr);
+    if(CURLE_OK == result) {
+      result = curl_easy_getinfo(curlHandlePtr,
+                                 CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                                 &remoteFileSizeByte);
+      if(result)
+        return -1;
+      printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
+    }
+    curl_easy_cleanup(curlHandlePtr);
   }
-  curl_easy_cleanup(curlHandlePtr);
 
   return remoteFileSizeByte;
 }
