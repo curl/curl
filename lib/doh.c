@@ -1265,7 +1265,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-
       if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
         CURL_TRC_DNS(data, "hostname: %s", dohp->host);
         doh_show(data, &de);
@@ -1274,6 +1273,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       result = doh2ai(&de, dohp->host, dohp->port, &ai);
       if(result) {
         de_cleanup(&de);
+        Curl_doh_cleanup(data);
         return result;
       }
 
@@ -1288,6 +1288,9 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                            de.https_rrs->len, &hrr);
           if(result) {
             infof(data, "Failed to decode HTTPS RR");
+            dnscache_entry_free(dns);
+            de_cleanup(&de);
+            Curl_doh_cleanup(data);
             return result;
           }
           infof(data, "Some HTTPS RR to process");
