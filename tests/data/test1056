@@ -11,7 +11,7 @@ IPv6
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 HTTP/1.1 302 OK swsclose
 Location: http://[::1%259999]:%HTTP6PORT/moo/%TESTNUMBER0002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
