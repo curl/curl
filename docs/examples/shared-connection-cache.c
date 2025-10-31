@@ -28,19 +28,19 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-static void my_lock(CURL *handle, curl_lock_data data,
+static void my_lock(CURL *curl, curl_lock_data data,
                     curl_lock_access laccess, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)laccess;
   (void)useptr;
   fprintf(stderr, "-> Mutex lock\n");
 }
 
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void my_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)useptr;
   fprintf(stderr, "<- Mutex unlock\n");

@@ -86,43 +86,43 @@ static size_t writer(char *data, size_t size, size_t nmemb,
 //  libcurl connection initialization
 //
 
-static bool init(CURL *&conn, const char *url)
+static bool init(CURL *&curl, const char *url)
 {
-  CURLcode code;
+  CURLcode res;
 
-  conn = curl_easy_init();
+  curl = curl_easy_init();
 
-  if(conn == NULL) {
-    fprintf(stderr, "Failed to create CURL connection\n");
+  if(!curl) {
+    fprintf(stderr, "Failed to create CURL handle\n");
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_ERRORBUFFER, errorBuffer);
-  if(code != CURLE_OK) {
-    fprintf(stderr, "Failed to set error buffer [%d]\n", code);
+  res = curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorBuffer);
+  if(res != CURLE_OK) {
+    fprintf(stderr, "Failed to set error buffer [%d]\n", res);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_URL, url);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_URL, url);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_FOLLOWLOCATION, 1L);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set redirect option [%s]\n", errorBuffer);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_WRITEFUNCTION, writer);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set writer [%s]\n", errorBuffer);
     return false;
   }
 
-  code = curl_easy_setopt(conn, CURLOPT_WRITEDATA, &buffer);
-  if(code != CURLE_OK) {
+  res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
+  if(res != CURLE_OK) {
     fprintf(stderr, "Failed to set write data [%s]\n", errorBuffer);
     return false;
   }
@@ -262,7 +262,7 @@ static void parseHtml(const std::string &html,
 
 int main(int argc, char *argv[])
 {
-  CURL *conn = NULL;
+  CURL *curl = NULL;
   CURLcode res;
   std::string title;
 
@@ -277,18 +277,18 @@ int main(int argc, char *argv[])
   if(res)
     return (int)res;
 
-  // Initialize CURL connection
+  // Initialize CURL handle
 
-  if(!init(conn, argv[1])) {
-    fprintf(stderr, "Connection initialization failed\n");
+  if(!init(curl, argv[1])) {
+    fprintf(stderr, "Handle initialization failed\n");
     curl_global_cleanup();
     return EXIT_FAILURE;
   }
 
   // Retrieve content for the URL
 
-  res = curl_easy_perform(conn);
-  curl_easy_cleanup(conn);
+  res = curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
 
   if(res != CURLE_OK) {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);

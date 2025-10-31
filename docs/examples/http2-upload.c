@@ -88,7 +88,7 @@ struct input {
   FILE *in;
   FILE *out;
   size_t bytes_read; /* count up */
-  CURL *easy;
+  CURL *curl;
   int num;
 };
 
@@ -139,7 +139,7 @@ static void dump(const char *text, int num, unsigned char *ptr,
   }
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
+static int my_trace(CURL *curl, curl_infotype type,
                     char *data, size_t size, void *userp)
 {
   char timebuf[60];
@@ -151,7 +151,7 @@ static int my_trace(CURL *handle, curl_infotype type,
   struct timeval tv;
   time_t secs;
   struct tm *now;
-  (void)handle;
+  (void)curl;
 
   gettimeofday(&tv, NULL);
   if(!known_offset) {
@@ -193,7 +193,7 @@ static int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct input *i = userp;
   size_t retcode = fread(ptr, size, nmemb, i->in);
@@ -207,9 +207,9 @@ static int setup(struct input *t, int num, const char *upload)
   char filename[128];
   struct stat file_info;
   curl_off_t uploadsize;
-  CURL *easy;
+  CURL *curl;
 
-  easy = t->easy = NULL;
+  curl = t->curl = NULL;
 
   t->num = num;
   snprintf(filename, sizeof(filename), "dl-%d", num);
@@ -246,40 +246,40 @@ static int setup(struct input *t, int num, const char *upload)
 
   uploadsize = file_info.st_size;
 
-  easy = t->easy = curl_easy_init();
-  if(easy) {
+  curl = t->curl = curl_easy_init();
+  if(curl) {
 
     /* write to this file */
-    curl_easy_setopt(easy, CURLOPT_WRITEDATA, t->out);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, t->out);
 
     /* we want to use our own read function */
-    curl_easy_setopt(easy, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     /* read from this file */
-    curl_easy_setopt(easy, CURLOPT_READDATA, t);
+    curl_easy_setopt(curl, CURLOPT_READDATA, t);
     /* provide the size of the upload */
-    curl_easy_setopt(easy, CURLOPT_INFILESIZE_LARGE, uploadsize);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadsize);
 
     /* send in the URL to store the upload as */
-    curl_easy_setopt(easy, CURLOPT_URL, url);
+    curl_easy_setopt(curl, CURLOPT_URL, url);
 
     /* upload please */
-    curl_easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     /* please be verbose */
-    curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, my_trace);
-    curl_easy_setopt(easy, CURLOPT_DEBUGDATA, t);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+    curl_easy_setopt(curl, CURLOPT_DEBUGDATA, t);
 
     /* HTTP/2 please */
-    curl_easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
     /* we use a self-signed test server, skip verification during debugging */
-    curl_easy_setopt(easy, CURLOPT_SSL_VERIFYPEER, 0L);
-    curl_easy_setopt(easy, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
 #if (CURLPIPE_MULTIPLEX > 0)
     /* wait for pipe connection to confirm */
-    curl_easy_setopt(easy, CURLOPT_PIPEWAIT, 1L);
+    curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 #endif
   }
   return 0;
@@ -292,7 +292,7 @@ int main(int argc, char **argv)
 {
   CURLcode res;
   struct input *trans;
-  CURLM *multi_handle = NULL;
+  CURLM *multi = NULL;
   int i;
   const char *filename = "index.html";
   int still_running = 0; /* keep number of running handles */
@@ -322,8 +322,8 @@ int main(int argc, char **argv)
   }
 
   /* init a multi stack */
-  multi_handle = curl_multi_init();
-  if(!multi_handle)
+  multi = curl_multi_init();
+  if(!multi)
     goto error;
 
   for(i = 0; i < num_transfers; i++) {
@@ -332,20 +332,20 @@ int main(int argc, char **argv)
     }
 
     /* add the individual transfer */
-    curl_multi_add_handle(multi_handle, trans[i].easy);
+    curl_multi_add_handle(multi, trans[i].curl);
   }
 
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
   /* We do HTTP/2 so let's stick to one connection per host */
-  curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS, 1L);
+  curl_multi_setopt(multi, CURLMOPT_MAX_HOST_CONNECTIONS, 1L);
 
   do {
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    CURLMcode mc = curl_multi_perform(multi, &still_running);
 
     if(still_running)
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
     if(mc)
       break;
@@ -354,17 +354,17 @@ int main(int argc, char **argv)
 
 error:
 
-  if(multi_handle) {
+  if(multi) {
     for(i = 0; i < num_transfers; i++) {
-      curl_multi_remove_handle(multi_handle, trans[i].easy);
-      curl_easy_cleanup(trans[i].easy);
+      curl_multi_remove_handle(multi, trans[i].curl);
+      curl_easy_cleanup(trans[i].curl);
 
       if(trans[i].in)
         fclose(trans[i].in);
       if(trans[i].out)
         fclose(trans[i].out);
     }
-    curl_multi_cleanup(multi_handle);
+    curl_multi_cleanup(multi);
   }
 
   free(trans);

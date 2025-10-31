@@ -83,14 +83,14 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fflush(stream);
 }
 
-static int my_trace(CURL *handle, curl_infotype type,
+static int my_trace(CURL *curl, curl_infotype type,
                     unsigned char *data, size_t size,
                     void *userp)
 {
   const char *text;
 
   (void)userp;
-  (void)handle;
+  (void)curl;
 
   switch(type) {
   case CURLINFO_TEXT:
@@ -121,48 +121,48 @@ static int my_trace(CURL *handle, curl_infotype type,
  */
 int main(void)
 {
-  CURL *http_handle;
+  CURL *curl;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)
     return (int)res;
 
-  http_handle = curl_easy_init();
-  if(http_handle) {
+  curl = curl_easy_init();
+  if(curl) {
 
-    CURLM *multi_handle;
+    CURLM *multi;
 
     /* set the options (I left out a few, you get the point anyway) */
-    curl_easy_setopt(http_handle, CURLOPT_URL, "https://www.example.com/");
+    curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-    curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
-    curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     /* init a multi stack */
-    multi_handle = curl_multi_init();
-    if(multi_handle) {
+    multi = curl_multi_init();
+    if(multi) {
 
       int still_running = 0; /* keep number of running handles */
 
       /* add the individual transfers */
-      curl_multi_add_handle(multi_handle, http_handle);
+      curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+        CURLMcode mc = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
         if(mc)
           break;
 
       } while(still_running);
 
-      curl_multi_cleanup(multi_handle);
+      curl_multi_cleanup(multi);
     }
 
-    curl_easy_cleanup(http_handle);
+    curl_easy_cleanup(curl);
   }
 
   curl_global_cleanup();

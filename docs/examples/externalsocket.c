@@ -60,7 +60,7 @@
 #define INADDR_NONE 0xffffffff
 #endif
 
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
   return written;
@@ -143,7 +143,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
     /* send all data to this function  */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* call this function to get a socket */
     curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);

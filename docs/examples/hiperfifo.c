@@ -90,7 +90,7 @@ struct GlobalInfo {
 
 /* Information associated with a specific easy handle */
 struct ConnInfo {
-  CURL *easy;
+  CURL *curl;
   char *url;
   struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
@@ -99,7 +99,7 @@ struct ConnInfo {
 /* Information associated with a specific socket */
 struct SockInfo {
   curl_socket_t sockfd;
-  CURL *easy;
+  CURL *curl;
   int action;
   long timeout;
   struct event ev;
@@ -162,20 +162,18 @@ static void check_multi_info(struct GlobalInfo *g)
   CURLMsg *msg;
   int msgs_left;
   struct ConnInfo *conn;
-  CURL *easy;
-  CURLcode res;
 
   fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
-      easy = msg->easy_handle;
-      res = msg->data.result;
-      curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
-      curl_easy_getinfo(easy, CURLINFO_EFFECTIVE_URL, &eff_url);
+      CURL *curl = msg->easy_handle;
+      CURLcode res = msg->data.result;
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
       fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, res, conn->error);
-      curl_multi_remove_handle(g->multi, easy);
+      curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
-      curl_easy_cleanup(easy);
+      curl_easy_cleanup(curl);
       free(conn);
     }
   }
@@ -240,7 +238,7 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 
   f->sockfd = s;
   f->action = act;
-  f->easy = e;
+  f->curl = e;
   if(event_initialized(&f->ev)) {
     event_del(&f->ev);
   }
@@ -249,13 +247,13 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 }
 
 /* Initialize a new SockInfo structure */
-static void addsock(curl_socket_t s, CURL *easy, int action,
+static void addsock(curl_socket_t s, CURL *curl, int action,
                     struct GlobalInfo *g)
 {
   struct SockInfo *fdp = calloc(1, sizeof(struct SockInfo));
 
   fdp->global = g;
-  setsock(fdp, s, easy, action, g);
+  setsock(fdp, s, curl, action, g);
   curl_multi_assign(g->multi, s, fdp);
 }
 
@@ -317,26 +315,26 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   conn = calloc(1, sizeof(*conn));
   conn->error[0] = '\0';
 
-  conn->easy = curl_easy_init();
-  if(!conn->easy) {
+  conn->curl = curl_easy_init();
+  if(!conn->curl) {
     fprintf(MSG_OUT, "curl_easy_init() failed, exiting!\n");
     exit(2);
   }
   conn->global = g;
   conn->url = strdup(url);
-  curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
-  curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(conn->easy, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1L);
+  curl_easy_setopt(conn->curl, CURLOPT_URL, conn->url);
+  curl_easy_setopt(conn->curl, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(conn->curl, CURLOPT_WRITEDATA, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(conn->curl, CURLOPT_ERRORBUFFER, conn->error);
+  curl_easy_setopt(conn->curl, CURLOPT_PRIVATE, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_NOPROGRESS, 0L);
+  curl_easy_setopt(conn->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
+  curl_easy_setopt(conn->curl, CURLOPT_PROGRESSDATA, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_FOLLOWLOCATION, 1L);
   fprintf(MSG_OUT,
-          "Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->easy);
+          "Adding easy %p to multi %p (%s)\n", conn->curl, g->multi, url);
+  rc = curl_multi_add_handle(g->multi, conn->curl);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
 
   /* note that the add_handle() sets a time-out to trigger soon so that

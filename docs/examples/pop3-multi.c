@@ -47,10 +47,10 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    CURLM *mcurl;
+    CURLM *multi;
 
-    mcurl = curl_multi_init();
-    if(mcurl) {
+    multi = curl_multi_init();
+    if(multi) {
       int still_running = 1;
 
       /* Set username and password */
@@ -61,14 +61,14 @@ int main(void)
       curl_easy_setopt(curl, CURLOPT_URL, "pop3://pop.example.com/1");
 
       /* Tell the multi stack about our easy handle */
-      curl_multi_add_handle(mcurl, curl);
+      curl_multi_add_handle(multi, curl);
 
       do {
-        CURLMcode mc = curl_multi_perform(mcurl, &still_running);
+        CURLMcode mc = curl_multi_perform(multi, &still_running);
 
         if(still_running)
           /* wait for activity, timeout or "nothing" */
-          mc = curl_multi_poll(mcurl, NULL, 0, 1000, NULL);
+          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
         if(mc)
           break;
@@ -76,8 +76,8 @@ int main(void)
       } while(still_running);
 
       /* Always cleanup */
-      curl_multi_remove_handle(mcurl, curl);
-      curl_multi_cleanup(mcurl);
+      curl_multi_remove_handle(multi, curl);
+      curl_multi_cleanup(multi);
     }
     curl_easy_cleanup(curl);
   }

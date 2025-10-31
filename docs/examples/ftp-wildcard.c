@@ -78,7 +78,7 @@ static long file_is_downloaded(void *input)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-static size_t write_it(char *buff, size_t size, size_t nmemb,
+static size_t write_cb(char *buff, size_t size, size_t nmemb,
                        void *cb_data)
 {
   struct callback_data *data = cb_data;
@@ -94,7 +94,7 @@ static size_t write_it(char *buff, size_t size, size_t nmemb,
 int main(int argc, char **argv)
 {
   /* curl easy handle */
-  CURL *handle;
+  CURL *curl;
 
   /* help data */
   struct callback_data data = { 0 };
@@ -105,40 +105,40 @@ int main(int argc, char **argv)
     return (int)res;
 
   /* initialization of easy handle */
-  handle = curl_easy_init();
-  if(!handle) {
+  curl = curl_easy_init();
+  if(!curl) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
 
   /* turn on wildcard matching */
-  curl_easy_setopt(handle, CURLOPT_WILDCARDMATCH, 1L);
+  curl_easy_setopt(curl, CURLOPT_WILDCARDMATCH, 1L);
 
   /* callback is called before download of concrete file started */
-  curl_easy_setopt(handle, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);
+  curl_easy_setopt(curl, CURLOPT_CHUNK_BGN_FUNCTION, file_is_coming);
 
   /* callback is called after data from the file have been transferred */
-  curl_easy_setopt(handle, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
+  curl_easy_setopt(curl, CURLOPT_CHUNK_END_FUNCTION, file_is_downloaded);
 
   /* this callback writes contents into files */
-  curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_it);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
   /* put transfer data into callbacks */
-  curl_easy_setopt(handle, CURLOPT_CHUNK_DATA, &data);
-  curl_easy_setopt(handle, CURLOPT_WRITEDATA, &data);
+  curl_easy_setopt(curl, CURLOPT_CHUNK_DATA, &data);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &data);
 
-  /* curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L); */
+  /* curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L); */
 
   /* set a URL containing wildcard pattern (only in the last part) */
   if(argc == 2)
-    curl_easy_setopt(handle, CURLOPT_URL, argv[1]);
+    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
   else
-    curl_easy_setopt(handle, CURLOPT_URL, "ftp://example.com/test/*");
+    curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/test/*");
 
   /* and start transfer! */
-  res = curl_easy_perform(handle);
+  res = curl_easy_perform(curl);
 
-  curl_easy_cleanup(handle);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
   return (int)res;
 }

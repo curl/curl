@@ -117,7 +117,7 @@ static SYSTEMTIME LOCALTime;
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
-static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
+static size_t write_cb(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
@@ -187,7 +187,7 @@ static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, proxy_user_password);
 
   curl_easy_setopt(curl, CURLOPT_USERAGENT, SYNCTIME_UA);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, SyncTime_CURL_WriteOutput);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 

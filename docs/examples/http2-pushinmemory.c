@@ -66,30 +66,30 @@ static void init_memory(struct Memory *chunk)
   chunk->size = 0;            /* no data at this point */
 }
 
-static void setup(CURL *hnd)
+static void setup(CURL *curl)
 {
   /* set the same URL */
-  curl_easy_setopt(hnd, CURLOPT_URL, "https://localhost:8443/index.html");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://localhost:8443/index.html");
 
   /* HTTP/2 please */
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
 
   /* we use a self-signed test server, skip verification during debugging */
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   /* write data to a struct  */
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   init_memory(&files[0]);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, &files[0]);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &files[0]);
 
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 }
 
 /* called when there is an incoming push */
 static int server_push_callback(CURL *parent,
-                                CURL *easy,
+                                CURL *curl,
                                 size_t num_headers,
                                 struct curl_pushheaders *headers,
                                 void *userp)
@@ -105,7 +105,7 @@ static int server_push_callback(CURL *parent,
 
   /* write to this buffer */
   init_memory(&files[pushindex]);
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, &files[pushindex]);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &files[pushindex]);
   pushindex++;
 
   headp = curl_pushheader_byname(headers, ":path");
@@ -122,7 +122,7 @@ static int server_push_callback(CURL *parent,
  */
 int main(void)
 {
-  CURL *easy;
+  CURL *curl;
   CURLM *multi;
   int transfers = 1; /* we start with one */
   int i;
@@ -134,13 +134,13 @@ int main(void)
   /* init a multi stack */
   multi = curl_multi_init();
 
-  easy = curl_easy_init();
+  curl = curl_easy_init();
 
   /* set options */
-  setup(easy);
+  setup(curl);
 
   /* add the easy transfer */
-  curl_multi_add_handle(multi, easy);
+  curl_multi_add_handle(multi, curl);
 
   curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
   curl_multi_setopt(multi, CURLMOPT_PUSHFUNCTION, server_push_callback);
@@ -167,10 +167,10 @@ int main(void)
       int msgq = 0;
       m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+        curl = m->easy_handle;
         transfers--;
-        curl_multi_remove_handle(multi, e);
-        curl_easy_cleanup(e);
+        curl_multi_remove_handle(multi, curl);
+        curl_easy_cleanup(curl);
       }
     } while(m);
   }
