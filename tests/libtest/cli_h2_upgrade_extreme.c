@@ -37,7 +37,7 @@ static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
 static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
 {
   CURLM *multi = NULL;
-  CURL *easy;
+  CURL *curl;
   CURLMcode mc;
   int running_handles = 0, start_count, numfds;
   CURLMsg *msg;
@@ -64,33 +64,33 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   start_count = 200;
   do {
     if(start_count) {
-      easy = curl_easy_init();
-      if(!easy) {
+      curl = curl_easy_init();
+      if(!curl) {
         curl_mfprintf(stderr, "curl_easy_init failed\n");
         goto cleanup;
       }
-      curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-      curl_easy_setopt(easy, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
-      curl_easy_setopt(easy, CURLOPT_URL, URL);
-      curl_easy_setopt(easy, CURLOPT_NOSIGNAL, 1L);
-      curl_easy_setopt(easy, CURLOPT_AUTOREFERER, 1L);
-      curl_easy_setopt(easy, CURLOPT_FAILONERROR, 1L);
-      curl_easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-      curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_h2_upg_extreme_cb);
-      curl_easy_setopt(easy, CURLOPT_WRITEDATA, NULL);
-      curl_easy_setopt(easy, CURLOPT_HTTPGET, 1L);
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+      curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
+      curl_easy_setopt(curl, CURLOPT_URL, URL);
+      curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+      curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+      curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_h2_upg_extreme_cb);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
+      curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
       curl_msnprintf(range, sizeof(range),
                      "%" CURL_FORMAT_CURL_OFF_TU "-"
                      "%" CURL_FORMAT_CURL_OFF_TU,
                      (curl_off_t)0,
                      (curl_off_t)16384);
-      curl_easy_setopt(easy, CURLOPT_RANGE, range);
+      curl_easy_setopt(curl, CURLOPT_RANGE, range);
 
-      mc = curl_multi_add_handle(multi, easy);
+      mc = curl_multi_add_handle(multi, curl);
       if(mc != CURLM_OK) {
         curl_mfprintf(stderr, "curl_multi_add_handle: %s\n",
                       curl_multi_strerror(mc));
-        curl_easy_cleanup(easy);
+        curl_easy_cleanup(curl);
         goto cleanup;
       }
       --start_count;
