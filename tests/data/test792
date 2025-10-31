@@ -36,7 +36,7 @@ machine %HOSTIP login username password%hex[%00]hex% hello
 <verify>
 <protocol crlf="yes">
 USER username
-PASS%hex[%20]hex%
+PASS%spc%
 PWD
 EPSV
 TYPE I

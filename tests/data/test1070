@@ -57,7 +57,7 @@ Expect: 100-continue
 Content-Length: 2313
 Content-Type: application/x-www-form-urlencoded
 
-This creates 
+This creates%spc%
 </protocol>
 </verify>
 </testcase>
