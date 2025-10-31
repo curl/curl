@@ -30,7 +30,7 @@ static int verbose_u = 1;
 
 struct transfer_u {
   size_t idx;
-  CURL *easy;
+  CURL *curl;
   const char *method;
   char filename[128];
   curl_mime *mime;
@@ -51,11 +51,11 @@ static size_t transfer_count_u = 1;
 static struct transfer_u *transfer_u;
 static int forbid_reuse_u = 0;
 
-static struct transfer_u *get_transfer_for_easy_u(CURL *easy)
+static struct transfer_u *get_transfer_for_easy_u(CURL *curl)
 {
   size_t i;
   for(i = 0; i < transfer_count_u; ++i) {
-    if(easy == transfer_u[i].easy)
+    if(curl == transfer_u[i].curl)
       return &transfer_u[i];
   }
   return NULL;
@@ -142,62 +142,62 @@ static int my_progress_u_cb(void *userdata,
   return 0;
 }
 
-static int setup_hx_upload(CURL *hnd, const char *url, struct transfer_u *t,
+static int setup_hx_upload(CURL *curl, const char *url, struct transfer_u *t,
                            long http_version, struct curl_slist *host,
                            CURLSH *share, int use_earlydata,
                            int announce_length)
 {
-  curl_easy_setopt(hnd, CURLOPT_SHARE, share);
-  curl_easy_setopt(hnd, CURLOPT_URL, url);
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
-  curl_easy_setopt(hnd, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_OBEYCODE);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_u_cb);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
+  curl_easy_setopt(curl, CURLOPT_SHARE, share);
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
+  curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, CURLFOLLOW_OBEYCODE);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_write_u_cb);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, t);
   if(use_earlydata)
-    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
+    curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
 
   if(!strcmp("MIME", t->method)) {
     curl_mimepart *part;
-    t->mime = curl_mime_init(hnd);
+    t->mime = curl_mime_init(curl);
     part = curl_mime_addpart(t->mime);
     curl_mime_name(part, "file");
     curl_mime_data_cb(part, -1, my_read_cb, NULL, NULL, t);
-    curl_easy_setopt(hnd, CURLOPT_MIMEPOST, t->mime);
+    curl_easy_setopt(curl, CURLOPT_MIMEPOST, t->mime);
   }
   else {
     if(!t->method || !strcmp("PUT", t->method))
-      curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
+      curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
     else if(!strcmp("POST", t->method))
-      curl_easy_setopt(hnd, CURLOPT_POST, 1L);
+      curl_easy_setopt(curl, CURLOPT_POST, 1L);
     else {
       curl_mfprintf(stderr, "unsupported method '%s'\n", t->method);
       return 1;
     }
-    curl_easy_setopt(hnd, CURLOPT_READFUNCTION, my_read_cb);
-    curl_easy_setopt(hnd, CURLOPT_READDATA, t);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, my_read_cb);
+    curl_easy_setopt(curl, CURLOPT_READDATA, t);
     if(announce_length)
-      curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, t->send_total);
+      curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, t->send_total);
   }
 
-  curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_u_cb);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
+  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, my_progress_u_cb);
+  curl_easy_setopt(curl, CURLOPT_XFERINFODATA, t);
   if(forbid_reuse_u)
-    curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);
   if(host)
-    curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
+    curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
 
   /* please be verbose */
   if(verbose_u) {
-    curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   }
 
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 
   return 0; /* all is good */
 }
@@ -369,8 +369,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
   }
 
   if(reuse_easy) {
-    CURL *easy = curl_easy_init();
-    if(!easy) {
+    CURL *curl = curl_easy_init();
+    if(!curl) {
       curl_mfprintf(stderr, "failed to init easy handle\n");
       result = (CURLcode)1;
       goto cleanup;
@@ -378,8 +378,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
     for(i = 0; i < transfer_count_u; ++i) {
       CURLcode rc;
       t = &transfer_u[i];
-      t->easy = easy;
-      if(setup_hx_upload(t->easy, url, t, http_version, host, share,
+      t->curl = curl;
+      if(setup_hx_upload(t->curl, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
         result = (CURLcode)1;
@@ -387,12 +387,12 @@ static CURLcode test_cli_hx_upload(const char *URL)
       }
 
       curl_mfprintf(stderr, "[t-%zu] STARTING\n", t->idx);
-      rc = curl_easy_perform(easy);
+      rc = curl_easy_perform(curl);
       curl_mfprintf(stderr, "[t-%zu] DONE -> %d\n", t->idx, rc);
-      t->easy = NULL;
-      curl_easy_reset(easy);
+      t->curl = NULL;
+      curl_easy_reset(curl);
     }
-    curl_easy_cleanup(easy);
+    curl_easy_cleanup(curl);
   }
   else {
     multi_handle = curl_multi_init();
@@ -401,14 +401,14 @@ static CURLcode test_cli_hx_upload(const char *URL)
     n = (max_parallel < transfer_count_u) ? max_parallel : transfer_count_u;
     for(i = 0; i < n; ++i) {
       t = &transfer_u[i];
-      t->easy = curl_easy_init();
-      if(!t->easy || setup_hx_upload(t->easy, url, t, http_version, host,
+      t->curl = curl_easy_init();
+      if(!t->curl || setup_hx_upload(t->curl, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
         result = (CURLcode)1;
         goto cleanup;
       }
-      curl_multi_add_handle(multi_handle, t->easy);
+      curl_multi_add_handle(multi_handle, t->curl);
       t->started = 1;
       ++active_transfers;
       curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
@@ -431,26 +431,26 @@ static CURLcode test_cli_hx_upload(const char *URL)
         int msgq = 0;
         m = curl_multi_info_read(multi_handle, &msgq);
         if(m && (m->msg == CURLMSG_DONE)) {
-          CURL *e = m->easy_handle;
+          CURL *easy = m->easy_handle;
           --active_transfers;
-          curl_multi_remove_handle(multi_handle, e);
-          t = get_transfer_for_easy_u(e);
+          curl_multi_remove_handle(multi_handle, easy);
+          t = get_transfer_for_easy_u(easy);
           if(t) {
             long res_status;
-            curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &res_status);
+            curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &res_status);
             t->done = 1;
             curl_mfprintf(stderr, "[t-%zu] FINISHED, "
                           "result=%d, response=%ld\n",
                           t->idx, m->data.result, res_status);
             if(use_earlydata) {
               curl_off_t sent;
-              curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
+              curl_easy_getinfo(easy, CURLINFO_EARLYDATA_SENT_T, &sent);
               curl_mfprintf(stderr, "[t-%zu] EarlyData: "
                             "%" CURL_FORMAT_CURL_OFF_T "\n", t->idx, sent);
             }
           }
           else {
-            curl_easy_cleanup(e);
+            curl_easy_cleanup(easy);
             curl_mfprintf(stderr, "unknown FINISHED???\n");
           }
         }
@@ -461,8 +461,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
           /* abort paused transfers */
           for(i = 0; i < transfer_count_u; ++i) {
             t = &transfer_u[i];
-            if(!t->done && t->paused && t->easy) {
-              curl_multi_remove_handle(multi_handle, t->easy);
+            if(!t->done && t->paused && t->curl) {
+              curl_multi_remove_handle(multi_handle, t->curl);
               t->done = 1;
               active_transfers--;
               curl_mfprintf(stderr, "[t-%zu] ABORTED\n", t->idx);
@@ -476,7 +476,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
             if(!t->done && t->paused) {
               t->resumed = 1;
               t->paused = 0;
-              curl_easy_pause(t->easy, CURLPAUSE_CONT);
+              curl_easy_pause(t->curl, CURLPAUSE_CONT);
               curl_mfprintf(stderr, "[t-%zu] RESUMED\n", t->idx);
               break;
             }
@@ -487,15 +487,15 @@ static CURLcode test_cli_hx_upload(const char *URL)
           for(i = 0; i < transfer_count_u; ++i) {
             t = &transfer_u[i];
             if(!t->started) {
-              t->easy = curl_easy_init();
-              if(!t->easy || setup_hx_upload(t->easy, url, t, http_version,
+              t->curl = curl_easy_init();
+              if(!t->curl || setup_hx_upload(t->curl, url, t, http_version,
                                              host, share, use_earlydata,
                                              announce_length)) {
                 curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
                 result = (CURLcode)1;
                 goto cleanup;
               }
-              curl_multi_add_handle(multi_handle, t->easy);
+              curl_multi_add_handle(multi_handle, t->curl);
               t->started = 1;
               ++active_transfers;
               curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
@@ -523,9 +523,9 @@ cleanup:
         curlx_fclose(t->out);
         t->out = NULL;
       }
-      if(t->easy) {
-        curl_easy_cleanup(t->easy);
-        t->easy = NULL;
+      if(t->curl) {
+        curl_easy_cleanup(t->curl);
+        t->curl = NULL;
       }
       if(t->mime) {
         curl_mime_free(t->mime);
