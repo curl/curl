@@ -46,7 +46,7 @@ struct handle
   int resumed;
   int errored;
   int fail_write;
-  CURL *h;
+  CURL *curl;
 };
 
 static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
@@ -56,7 +56,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
   curl_off_t totalsize;
 
   (void)data;
-  if(curl_easy_getinfo(handle->h, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+  if(curl_easy_getinfo(handle->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                        &totalsize) == CURLE_OK)
     curl_mfprintf(stderr, "INFO: [%zu] write, "
                   "Content-Length %" CURL_FORMAT_CURL_OFF_T "\n",
@@ -174,24 +174,28 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     handles[i].resumed = 0;
     handles[i].errored = 0;
     handles[i].fail_write = 1;
-    handles[i].h = curl_easy_init();
-    if(!handles[i].h ||
-      curl_easy_setopt(handles[i].h, CURLOPT_WRITEFUNCTION, cb) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_WRITEDATA, &handles[i])
+    handles[i].curl = curl_easy_init();
+    if(!handles[i].curl ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_WRITEFUNCTION, cb)
         != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
+      curl_easy_setopt(handles[i].curl, CURLOPT_WRITEDATA, &handles[i])
         != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
-      curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
-      curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
+      curl_easy_setopt(handles[i].curl, CURLOPT_FOLLOWLOCATION, 1L)
+        != CURLE_OK ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
+        != CURLE_OK ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_SSL_VERIFYPEER, 0L)
+        != CURLE_OK ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_RESOLVE, resolve)
+        != CURLE_OK ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_PIPEWAIT, 1L) != CURLE_OK ||
+      curl_easy_setopt(handles[i].curl, CURLOPT_URL, url) != CURLE_OK) {
       curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
     }
-    curl_easy_setopt(handles[i].h, CURLOPT_HTTP_VERSION, http_version);
+    curl_easy_setopt(handles[i].curl, CURLOPT_HTTP_VERSION, http_version);
   }
 
   multi_handle = curl_multi_init();
@@ -202,7 +206,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK) {
+    if(curl_multi_add_handle(multi_handle, handles[i].curl) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_add_handle() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
@@ -258,7 +262,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     while((msg = curl_multi_info_read(multi_handle, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-          if(msg->easy_handle == handles[i].h) {
+          if(msg->easy_handle == handles[i].curl) {
             if(handles[i].paused != 1 || !handles[i].resumed) {
               curl_mfprintf(stderr, "ERROR: [%zu] done, paused=%d, "
                             "resumed=%d, result %d - wtf?\n", i,
@@ -291,7 +295,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
         curl_mfprintf(stderr, "INFO: [%zu] resumed\n", i);
         handles[i].resumed = 1;
-        curl_easy_pause(handles[i].h, CURLPAUSE_CONT);
+        curl_easy_pause(handles[i].curl, CURLPAUSE_CONT);
       }
     }
   }
@@ -299,8 +303,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
 cleanup:
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
-    curl_multi_remove_handle(multi_handle, handles[i].h);
-    curl_easy_cleanup(handles[i].h);
+    curl_multi_remove_handle(multi_handle, handles[i].curl);
+    curl_easy_cleanup(handles[i].curl);
   }
 
   curl_slist_free_all(resolve);
