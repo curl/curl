@@ -80,7 +80,7 @@ static const char *urls[] = {
   "https://www.un.org",
 };
 
-#define MAX_PARALLEL 10 /* number of simultaneous transfers */
+#define MAX_PARALLEL 10  /* number of simultaneous transfers */
 #define NUM_URLS sizeof(urls)/sizeof(char *)
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
@@ -88,16 +88,18 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   /* take care of the data here, ignored in this example */
   (void)data;
   (void)userp;
-  return n*l;
+  return n * l;
 }
 
 static void add_transfer(CURLM *cm, unsigned int i, int *left)
 {
   CURL *eh = curl_easy_init();
-  curl_easy_setopt(eh, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(eh, CURLOPT_URL, urls[i]);
-  curl_easy_setopt(eh, CURLOPT_PRIVATE, urls[i]);
-  curl_multi_add_handle(cm, eh);
+  if(eh) {
+    curl_easy_setopt(eh, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(eh, CURLOPT_URL, urls[i]);
+    curl_easy_setopt(eh, CURLOPT_PRIVATE, urls[i]);
+    curl_multi_add_handle(cm, eh);
+  }
   (*left)++;
 }
 
