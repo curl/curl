@@ -187,7 +187,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       curl_easy_setopt(handles[i].h, CURLOPT_RESOLVE, resolve) != CURLE_OK ||
       curl_easy_setopt(handles[i].h, CURLOPT_PIPEWAIT, 1L) ||
       curl_easy_setopt(handles[i].h, CURLOPT_URL, url) != CURLE_OK) {
-      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
     }
@@ -196,14 +196,14 @@ static CURLcode test_cli_h2_pausing(const char *URL)
 
   multi_handle = curl_multi_init();
   if(!multi_handle) {
-    curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+    curl_mfprintf(stderr, "curl_multi_init() failed - bailing out\n");
     result = (CURLcode)2;
     goto cleanup;
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     if(curl_multi_add_handle(multi_handle, handles[i].h) != CURLM_OK) {
-      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      curl_mfprintf(stderr, "curl_multi_add_handle() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
     }
@@ -212,7 +212,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   for(rounds = 0;; rounds++) {
     curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
     if(curl_multi_perform(multi_handle, &still_running) != CURLM_OK) {
-      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      curl_mfprintf(stderr, "curl_multi_perform() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
     }
@@ -249,7 +249,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     }
 
     if(curl_multi_poll(multi_handle, NULL, 0, 100, &numfds) != CURLM_OK) {
-      curl_mfprintf(stderr, "something unexpected went wrong - bailing out\n");
+      curl_mfprintf(stderr, "curl_multi_poll() failed - bailing out\n");
       result = (CURLcode)2;
       goto cleanup;
     }
