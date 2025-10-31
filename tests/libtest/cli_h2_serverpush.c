@@ -118,6 +118,8 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
     return (CURLcode)2;
   }
 
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+
   multi_handle = curl_multi_init();
 
   easy = curl_easy_init();
@@ -168,6 +170,8 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   curlx_fclose(out_download);
   if(out_push)
     curlx_fclose(out_push);
+
+  curl_global_cleanup();
 
   return CURLE_OK;
 }

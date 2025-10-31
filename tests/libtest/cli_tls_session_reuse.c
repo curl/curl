@@ -143,6 +143,8 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+
   multi = curl_multi_init();
   if(!multi) {
     curl_mfprintf(stderr, "curl_multi_init failed\n");
@@ -256,6 +258,7 @@ cleanup:
   curl_free(host);
   curl_free(port);
   curl_url_cleanup(cu);
+  curl_global_cleanup();
 
   return exitcode;
 }

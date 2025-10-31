@@ -549,5 +549,7 @@ static CURLcode test_cli_hx_download(const char *URL)
 cleanup:
   free(resolve);
 
+  curl_global_cleanup();
+
   return result;
 }
