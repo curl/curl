@@ -131,12 +131,12 @@ static int t530_addFd(struct t530_Sockets *sockets, curl_socket_t fd,
 /**
  * Callback invoked by curl to poll reading / writing of a socket.
  */
-static int t530_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
+static int t530_curlSocketCallback(CURL *curl, curl_socket_t s, int action,
                                    void *userp, void *socketp)
 {
   struct t530_ReadWriteSockets *sockets = userp;
 
-  (void)easy;
+  (void)curl;
   (void)socketp;
 
   t530_ctx.socket_calls++;
