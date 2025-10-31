@@ -32,7 +32,7 @@ static CURLcode test_lib1501(const char *URL)
      conservative to allow old and slow machines to run this test too */
   static const int MAX_BLOCKED_TIME_MS = 500;
 
-  CURL *handle = NULL;
+  CURL *curl = NULL;
   CURLM *mhandle = NULL;
   CURLcode res = CURLE_OK;
   int still_running = 0;
@@ -41,14 +41,14 @@ static CURLcode test_lib1501(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(handle);
+  easy_init(curl);
 
-  easy_setopt(handle, CURLOPT_URL, URL);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   multi_init(mhandle);
 
-  multi_add_handle(mhandle, handle);
+  multi_add_handle(mhandle, curl);
 
   multi_perform(mhandle, &still_running);
 
@@ -101,7 +101,7 @@ test_cleanup:
   /* undocumented cleanup sequence - type UA */
 
   curl_multi_cleanup(mhandle);
-  curl_easy_cleanup(handle);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;
