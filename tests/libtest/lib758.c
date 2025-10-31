@@ -333,7 +333,7 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   struct t758_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct curltime timeout = {0};
@@ -375,28 +375,28 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
 
   easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, t758_set_ssl_ctx_callback);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, t758_curlSocketCallback);
-  multi_setopt(m, CURLMOPT_SOCKETDATA, &sockets);
+  multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, t758_curlSocketCallback);
+  multi_setopt(multi, CURLMOPT_SOCKETDATA, &sockets);
 
-  multi_setopt(m, CURLMOPT_TIMERFUNCTION, t758_curlTimerCallback);
-  multi_setopt(m, CURLMOPT_TIMERDATA, &timeout);
+  multi_setopt(multi, CURLMOPT_TIMERFUNCTION, t758_curlTimerCallback);
+  multi_setopt(multi, CURLMOPT_TIMERDATA, &timeout);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
-  if(t758_saction(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+  if(t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
-  while(!t758_checkForCompletion(m, &success)) {
+  while(!t758_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
     tv.tv_sec = 10;
 
     if(t758_ctx.fake_async_cert_verification_pending &&
-        !t758_ctx.fake_async_cert_verification_finished) {
+       !t758_ctx.fake_async_cert_verification_finished) {
       if(sockets.read.count || sockets.write.count) {
         t758_msg("during verification there should be no sockets scheduled");
         res = TEST_ERR_MAJOR_BAD;
@@ -408,13 +408,13 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
         goto test_cleanup;
       }
       t758_ctx.fake_async_cert_verification_finished = 1;
-      if(t758_saction(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+      if(t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         t758_msg("spurious retry cert action");
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
       curl_easy_pause(curl, CURLPAUSE_CONT);
-      if(t758_saction(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+      if(t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         t758_msg("unblocking transfer after cert verification finished");
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
@@ -444,12 +444,12 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    if(t758_checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN,
+    if(t758_checkFdSet(multi, &sockets.read, &readSet, CURL_CSELECT_IN,
                        "read")) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
-    if(t758_checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT,
+    if(t758_checkFdSet(multi, &sockets.write, &writeSet, CURL_CSELECT_OUT,
                        "write")) {
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
@@ -458,7 +458,7 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
     if(timeout.tv_sec != (time_t)-1 &&
        t758_getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
-      if(t758_saction(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
+      if(t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         res = TEST_ERR_BAD_TIMEOUT;
         goto test_cleanup;
       }
@@ -481,9 +481,9 @@ test_cleanup:
 
   /* proper cleanup sequence */
   t758_msg("cleanup");
-  curl_multi_remove_handle(m, curl);
+  curl_multi_remove_handle(multi, curl);
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   /* free local memory */
