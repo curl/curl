@@ -159,13 +159,13 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
         break;
       if(msg->msg == CURLMSG_DONE) {
         size_t i;
-        CURL *easy = msg->easy_handle;
+        CURL *curl = msg->easy_handle;
         curl_mfprintf(stderr, "R: %d - %s\n", msg->data.result,
                       curl_easy_strerror(msg->data.result));
-        curl_multi_remove_handle(multi, easy);
-        curl_easy_cleanup(easy);
+        curl_multi_remove_handle(multi, curl);
+        curl_easy_cleanup(curl);
         for(i = 0; i < CURL_ARRAYSIZE(t540_curl); i++) {
-          if(t540_curl[i] == easy) {
+          if(t540_curl[i] == curl) {
             t540_curl[i] = NULL;
             break;
           }
