@@ -33,7 +33,7 @@ static CURLcode test_lib525(const char *URL)
   FILE *hd_src = NULL;
   int hd;
   struct_stat file_info;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   int running;
 
   start_test_timing();
@@ -101,9 +101,9 @@ static CURLcode test_lib525(const char *URL)
      make sure that to pass in a type 'long' argument. */
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
   for(;;) {
     struct timeval interval;
@@ -113,7 +113,7 @@ static CURLcode test_lib525(const char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    multi_perform(m, &running);
+    multi_perform(multi, &running);
 
     abort_on_test_timeout();
 
@@ -124,7 +124,7 @@ static CURLcode test_lib525(const char *URL)
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    multi_fdset(m, &rd, &wr, &exc, &maxfd);
+    multi_fdset(multi, &rd, &wr, &exc, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -137,16 +137,16 @@ test_cleanup:
 
   if(testnum == 529) {
     /* proper cleanup sequence - type PA */
-    curl_multi_remove_handle(m, curl);
-    curl_multi_cleanup(m);
+    curl_multi_remove_handle(multi, curl);
+    curl_multi_cleanup(multi);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
   }
   else { /* testnum == 525 */
     /* proper cleanup sequence - type PB */
-    curl_multi_remove_handle(m, curl);
+    curl_multi_remove_handle(multi, curl);
     curl_easy_cleanup(curl);
-    curl_multi_cleanup(m);
+    curl_multi_cleanup(multi);
     curl_global_cleanup();
   }
 

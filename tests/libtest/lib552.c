@@ -54,7 +54,7 @@ static size_t t552_write_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return amount;
 }
 
-static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
+static curlioerr ioctl_callback(CURL *curl, int cmd, void *clientp)
 {
   (void)clientp;
   if(cmd == CURLIOCMD_RESTARTREAD) {
@@ -63,7 +63,7 @@ static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
     current_offset = 0;
     return CURLIOE_OK;
   }
-  (void)handle;
+  (void)curl;
   return CURLIOE_UNKNOWNCMD;
 }
 

@@ -26,7 +26,7 @@
 #ifndef CURL_DISABLE_WEBSOCKETS
 
 struct ws_data {
-  CURL *easy;
+  CURL *curl;
   char *buf;
   size_t blen;
   size_t nwrites;
@@ -83,7 +83,7 @@ static size_t t2302_write_cb(char *buffer, size_t size, size_t nitems, void *p)
   const struct curl_ws_frame *meta;
   (void)size;
 
-  meta = curl_ws_meta(ws_data->easy);
+  meta = curl_ws_meta(ws_data->curl);
   incoming = add_data(ws_data, buffer, incoming, meta);
 
   if(nitems != incoming)
@@ -106,7 +106,7 @@ static CURLcode test_lib2302(const char *URL)
   if(ws_data.buf) {
     curl = curl_easy_init();
     if(curl) {
-      ws_data.easy = curl;
+      ws_data.curl = curl;
 
       curl_easy_setopt(curl, CURLOPT_URL, URL);
       /* use the callback style */

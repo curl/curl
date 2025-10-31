@@ -39,13 +39,13 @@ struct t586_userdata {
 };
 
 /* lock callback */
-static void t586_test_lock(CURL *handle, curl_lock_data data,
+static void t586_test_lock(CURL *curl, curl_lock_data data,
                            curl_lock_access laccess, void *useptr)
 {
   const char *what;
   struct t586_userdata *user = (struct t586_userdata *)useptr;
 
-  (void)handle;
+  (void)curl;
   (void)laccess;
 
   switch(data) {
@@ -70,11 +70,11 @@ static void t586_test_lock(CURL *handle, curl_lock_data data,
 }
 
 /* unlock callback */
-static void t586_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t586_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
   const char *what;
   struct t586_userdata *user = (struct t586_userdata *)useptr;
-  (void)handle;
+  (void)curl;
   switch(data) {
     case CURL_LOCK_DATA_SHARE:
       what = "share";
