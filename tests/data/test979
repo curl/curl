@@ -10,7 +10,7 @@ HTTP Basic auth
 #
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 go go go
 Content-Length: 8
 Location: http://%HOSTIP:%HTTPPORT/user/%TESTNUMBER0002
@@ -19,7 +19,7 @@ Funny-head: yesyes
 
 notreal
 </data>
-<data2 crlf="yes">
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Content-Type: text/html
@@ -46,7 +46,7 @@ http://first:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER -L -u smith:doggie
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[smith:doggie]b64%

@@ -12,7 +12,7 @@ NTLM
 # Server-side
 <reply>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Negotiate
@@ -24,7 +24,7 @@ This is not the real page
 </data>
 
 # this is returned first since we get no proxy-auth
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 401 Authorization Required
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 34
@@ -34,7 +34,7 @@ Hey you, authenticate or go away!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 200 Things are fine
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -45,7 +45,7 @@ Contents of that page you requested, sir.
 
 # This is supposed to be returned when the server gets the second
 # request.
-<data10>
+<data10 crlf="headers">
 HTTP/1.1 200 Things are fine
 Content-Type: yeah/maybe
 Content-Length: 42
@@ -53,7 +53,7 @@ Content-Length: 42
 Contents of that second request. Differn.
 </data10>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Negotiate
@@ -103,7 +103,7 @@ http://%HOSTIP:%HTTPPORT/path/mine http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER0010
 # Verify data after the test has been "shot"
 <verify>
 
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /path/mine HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

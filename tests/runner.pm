@@ -299,7 +299,7 @@ sub prepro {
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
-    my $data_crlf;
+    my $data_crlf = "";
     my @pshow;
     my @altshow;
     my $plvl;
@@ -351,21 +351,26 @@ sub prepro {
             next;
         }
         if($show) {
-            # The processor does CRLF replacements in the <data*> sections if
-            # necessary since those parts might be read by separate servers.
-            if($s =~ /^ *<data(.*)\>/) {
-                if($1 =~ /crlf="yes"/) {
-                    $data_crlf = 1;
+            # The processor does CRLF replacements in the <data*> and <connect*>
+            # sections if necessary since those parts might be read by separate
+            # servers.
+            if($s =~ /^ *<(data|connect)(.*)\>/) {
+                if($2 =~ /crlf="yes"/) {
+                    $data_crlf = "yes";
+                }
+                elsif($2 =~ /crlf="headers"/) {
+                    $data_crlf = "headers";
                 }
             }
-            elsif(($s =~ /^ *<\/data/) && $data_crlf) {
-                $data_crlf = 0;
+            elsif(($s =~ /^ *<\/(data|connect)/) && $data_crlf ne "") {
+                $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
-            subnewlines(0, \$s) if($data_crlf);
+            subnewlines(1, \$s) if($data_crlf eq "yes");
+            subnewlines(0, \$s) if($data_crlf eq "headers");
             push @out, $s;
         }
     }
@@ -758,7 +763,6 @@ sub singletest_prepare {
                 logmsg " $testnum: IGNORED: Section client=>file has no name attribute\n";
                 return -1;
             }
-            my $fileContent = join('', @inputfile);
 
             # make directories if needed
             my $path = dirname($filename);
@@ -775,11 +779,15 @@ sub singletest_prepare {
             }
             if(open(my $outfile, ">", "$filename")) {
                 binmode $outfile; # for crapage systems, use binary
+
                 if($fileattr{'nonewline'}) {
                     # cut off the final newline
-                    chomp($fileContent);
+                    chomp($inputfile[-1]);
                 }
-                print $outfile $fileContent;
+                if($fileattr{'crlf'}) {
+                    subnewlines(1, \$_) for @inputfile;
+                }
+                print $outfile join('', @inputfile);
                 close($outfile);
             } else {
                 logmsg "ERROR: cannot write $filename\n";
@@ -945,6 +953,10 @@ sub singletest_run {
         if($hash{'nonewline'}) {
             # cut off the final newline from the final line of the stdin data
             chomp($stdintest[-1]);
+        }
+
+        if($hash{'crlf'}) {
+            subnewlines(1, \$_) for @stdintest;
         }
 
         writearray($stdinfile, \@stdintest);

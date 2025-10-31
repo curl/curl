@@ -20,7 +20,7 @@ smtps
 <name>
 SMTPS with redundant explicit SSL request
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

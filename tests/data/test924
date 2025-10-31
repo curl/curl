@@ -9,7 +9,7 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 553-Ambiguous; Possibilities are:
 553-Joe Smith <joe.smith@example.com>
 553-Harry Smith <harry.smith@example.com>

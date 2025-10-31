@@ -22,7 +22,7 @@ REPLY * -ERR AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" +
 REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

@@ -11,7 +11,7 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * 17 EXISTS
 * 2 RECENT
 * OK [UNSEEN 8] Message 8 is first unseen

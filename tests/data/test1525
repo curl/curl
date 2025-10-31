@@ -12,7 +12,7 @@ CURLOPT_PROXYHEADER
 
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 
 </connect>
@@ -58,7 +58,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive

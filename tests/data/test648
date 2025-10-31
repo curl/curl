@@ -23,7 +23,7 @@ smtp
 <name>
 SMTP multipart with transfer content encoders
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

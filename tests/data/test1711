@@ -19,7 +19,7 @@ smtp
 <name>
 Send >64K over SMTP
 </name>
-<file name="%LOGDIR/email%TESTNUMBER">
+<file name="%LOGDIR/email%TESTNUMBER" crlf="yes">
 From: different
 To: another
 

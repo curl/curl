@@ -16,7 +16,7 @@ AUTH CRAM-MD5
 REPLY AUTHENTICATE + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
 REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

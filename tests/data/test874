@@ -18,7 +18,7 @@ RFC6749
 AUTH XOAUTH2
 REPLY AUTH +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

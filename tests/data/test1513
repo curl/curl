@@ -8,7 +8,7 @@ DELAY
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 204 PARTIAL
 X-Comment: partial response to keep the client waiting
 </data>

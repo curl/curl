@@ -23,7 +23,7 @@ smtp
 <name>
 SMTP multipart with file name escaping
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

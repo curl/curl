@@ -14,7 +14,7 @@ HTTP proxy Digest auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<connect>
+<connect crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 35701
@@ -83,7 +83,7 @@ http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
 User-Agent: curl/%VERSION

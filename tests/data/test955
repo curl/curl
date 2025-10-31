@@ -29,7 +29,7 @@ LC_ALL=C.UTF-8
 <name>
 SMTP without SMTPUTF8 support - UTF-8 based sender (local part only)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

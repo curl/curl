@@ -16,7 +16,7 @@ multi
 <servercmd>
 connection-monitor
 </servercmd>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 
 </connect>
@@ -70,7 +70,7 @@ moo
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT machine.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: machine.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic %b64[test%2520:ing%2541]b64%

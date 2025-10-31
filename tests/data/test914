@@ -22,7 +22,7 @@ smtp
 <name>
 SMTP invalid --mail-from
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 

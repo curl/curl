@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP data with dot as first character
 </name>
-<stdin>
+<stdin crlf="yes">
 .This first line starts with a dot
 </stdin>
 <command>

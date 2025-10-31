@@ -9,7 +9,7 @@ INDEX
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 iMenu results		error.host	1
 0Selector 	/bar	bar.foo.invalid	70
 .

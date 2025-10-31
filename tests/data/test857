@@ -10,7 +10,7 @@ RETR
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -20,7 +20,7 @@ To: fake@nowhere
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

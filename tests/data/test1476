@@ -10,7 +10,7 @@ cookies
 # Server-side
 <reply>
 
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
@@ -40,7 +40,7 @@ cookies
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET http://curl.co.UK/ HTTP/1.1
 Host: curl.co.UK
 User-Agent: curl/%VERSION
