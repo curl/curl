@@ -116,6 +116,11 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
     return (CURLcode)2;
   }
 
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
   if(!strcmp("h2", libtest_arg2))
     http_version = CURL_HTTP_VERSION_2;
   else if(!strcmp("h3", libtest_arg2))
@@ -142,8 +147,6 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
   curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
-
-  curl_global_init(CURL_GLOBAL_ALL);
 
   multi = curl_multi_init();
   if(!multi) {

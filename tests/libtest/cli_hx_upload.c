@@ -320,14 +320,18 @@ static CURLcode test_cli_hx_upload(const char *URL)
     return (CURLcode)2;
   }
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl_global_trace("ids,time,http/2,http/3");
-
   if(test_argc != 1) {
     usage_hx_upload("not enough arguments");
     return (CURLcode)2;
   }
   url = test_argv[0];
+
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
+  curl_global_trace("ids,time,http/2,http/3");
 
   if(resolve)
     host = curl_slist_append(NULL, resolve);

@@ -139,7 +139,11 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   }
   url = test_argv[0];
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
   curl_global_trace("ids,time,http/2,http/3");
 
   cu = curl_url();

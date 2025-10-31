@@ -50,7 +50,10 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
     return (CURLcode)2;
   }
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
 
   multi = curl_multi_init();
   if(!multi) {

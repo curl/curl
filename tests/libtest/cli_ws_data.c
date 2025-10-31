@@ -418,6 +418,11 @@ static CURLcode test_cli_ws_data(const char *URL)
 
   (void)URL;
 
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
+
   while((ch = cgetopt(test_argc, test_argv, "12c:hm:M:")) != -1) {
     switch(ch) {
     case '1':
@@ -464,8 +469,6 @@ static CURLcode test_cli_ws_data(const char *URL)
     goto cleanup;
   }
   url = test_argv[0];
-
-  curl_global_init(CURL_GLOBAL_ALL);
 
   if(model == 1)
     res = test_ws_data_m1_echo(url, plen_min, plen_max);
