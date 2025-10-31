@@ -418,11 +418,6 @@ static CURLcode test_cli_ws_data(const char *URL)
 
   (void)URL;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    curl_mfprintf(stderr, "curl_global_init() failed\n");
-    return (CURLcode)3;
-  }
-
   while((ch = cgetopt(test_argc, test_argv, "12c:hm:M:")) != -1) {
     switch(ch) {
     case '1':
@@ -433,8 +428,7 @@ static CURLcode test_cli_ws_data(const char *URL)
       break;
     case 'h':
       test_ws_data_usage(NULL);
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto cleanup;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     case 'c':
       count = (size_t)atol(coptarg);
       break;
@@ -446,8 +440,7 @@ static CURLcode test_cli_ws_data(const char *URL)
       break;
     default:
       test_ws_data_usage("invalid option");
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto cleanup;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
   test_argc -= coptind;
@@ -459,24 +452,27 @@ static CURLcode test_cli_ws_data(const char *URL)
   if(plen_max < plen_min) {
     curl_mfprintf(stderr, "maxlen must be >= minlen, got %zu-%zu\n",
                   plen_min, plen_max);
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto cleanup;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   if(test_argc != 1) {
     test_ws_data_usage(NULL);
-    result = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto cleanup;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   url = test_argv[0];
+
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
 
   if(model == 1)
     result = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
     result = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
-cleanup:
   curl_global_cleanup();
+
   return result;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
