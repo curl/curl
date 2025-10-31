@@ -227,7 +227,7 @@ static void usage_hx_upload(const char *msg)
  */
 static CURLcode test_cli_hx_upload(const char *URL)
 {
-  CURLM *multi_handle;
+  CURLM *multi;
   CURLSH *share;
   const char *url;
   const char *method = "PUT";
@@ -395,8 +395,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
     curl_easy_cleanup(curl);
   }
   else {
-    multi_handle = curl_multi_init();
-    curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+    multi = curl_multi_init();
+    curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
     n = (max_parallel < transfer_count_u) ? max_parallel : transfer_count_u;
     for(i = 0; i < n; ++i) {
@@ -408,7 +408,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
         result = (CURLcode)1;
         goto cleanup;
       }
-      curl_multi_add_handle(multi_handle, t->curl);
+      curl_multi_add_handle(multi, t->curl);
       t->started = 1;
       ++active_transfers;
       curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
@@ -416,12 +416,12 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
     do {
       int still_running; /* keep number of running handles */
-      CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+      CURLMcode mc = curl_multi_perform(multi, &still_running);
       struct CURLMsg *m;
 
       if(still_running) {
         /* wait for activity, timeout or "nothing" */
-        mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+        mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
       }
 
       if(mc)
@@ -429,11 +429,11 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
       do {
         int msgq = 0;
-        m = curl_multi_info_read(multi_handle, &msgq);
+        m = curl_multi_info_read(multi, &msgq);
         if(m && (m->msg == CURLMSG_DONE)) {
           CURL *easy = m->easy_handle;
           --active_transfers;
-          curl_multi_remove_handle(multi_handle, easy);
+          curl_multi_remove_handle(multi, easy);
           t = get_transfer_for_easy_u(easy);
           if(t) {
             long res_status;
@@ -462,7 +462,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
           for(i = 0; i < transfer_count_u; ++i) {
             t = &transfer_u[i];
             if(!t->done && t->paused && t->curl) {
-              curl_multi_remove_handle(multi_handle, t->curl);
+              curl_multi_remove_handle(multi, t->curl);
               t->done = 1;
               active_transfers--;
               curl_mfprintf(stderr, "[t-%zu] ABORTED\n", t->idx);
@@ -495,7 +495,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
                 result = (CURLcode)1;
                 goto cleanup;
               }
-              curl_multi_add_handle(multi_handle, t->curl);
+              curl_multi_add_handle(multi, t->curl);
               t->started = 1;
               ++active_transfers;
               curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
@@ -511,7 +511,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
     } while(active_transfers); /* as long as we have transfers going */
 
     curl_mfprintf(stderr, "all transfers done, cleanup multi\n");
-    curl_multi_cleanup(multi_handle);
+    curl_multi_cleanup(multi);
   }
 
 cleanup:
