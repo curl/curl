@@ -27,7 +27,7 @@
 #include "memdebug.h"
 
 struct t1540_transfer_status {
-  CURL *easy;
+  CURL *curl;
   int halted;
   int counter; /* count write callback invokes */
   int please;  /* number of times xferinfo is called while halted */
@@ -48,7 +48,7 @@ static int please_continue(void *userp,
     st->please++;
     if(st->please == 2) {
       /* waited enough, unpause! */
-      curl_easy_pause(st->easy, CURLPAUSE_CONT);
+      curl_easy_pause(st->curl, CURLPAUSE_CONT);
     }
   }
   curl_mfprintf(stderr, "xferinfo: paused %d\n", st->halted);
@@ -94,7 +94,7 @@ static CURLcode test_lib1540(const char *URL)
   global_init(CURL_GLOBAL_ALL);
 
   easy_init(curl);
-  st.easy = curl; /* to allow callbacks access */
+  st.curl = curl; /* to allow callbacks access */
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1540_write_cb);
