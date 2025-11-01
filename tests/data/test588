@@ -47,8 +47,8 @@ Moooooooooooo
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (\S*)/PORT/
 s/^EPRT \|1\|(\S*)/EPRT \|1\|/
+s/^PORT (\S*)/PORT/
 </strippart>
 <protocol crlf="yes">
 USER anonymous
