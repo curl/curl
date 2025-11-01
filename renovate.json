@@ -92,7 +92,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "/^.github/workflows/linux.yml$/",
-        "/^.github/workflows/linux-http3.yml$/"
+        "/^.github/workflows/http3-linux.yml$/"
       ],
       "matchStrings": [
         "OPENSSL_VERSION: (?<currentValue>.*)\\s"
