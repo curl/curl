@@ -673,7 +673,9 @@ comparisons are made.
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
 
-`crlf=headers` converts newlines to CRLF for protocol header lines.
+`crlf=headers` forces *header* newlines to become CRLF even if not written so
+in the source file. Note that this makes runtests.pl parse and "guess" what is
+a header and what is not in order to apply the CRLF line endings appropriately.
 
 ### `<proxy [nonewline="yes"][crlf="yes"]>`
 
