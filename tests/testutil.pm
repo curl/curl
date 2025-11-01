@@ -166,6 +166,7 @@ sub subnewlines {
 
     if(($$thing =~ /^HTTP\/(1.1|1.0|2|3) [1-5][^\x0d]*\z/) ||
        ($$thing =~ /^(GET|HEAD|POST|PUT|DELETE) \S+ HTTP\/\d+(\.\d+)?/) ||
+       ($$thing =~ /^(SETUP|GET_PARAMETER|OPTIONS|ANNOUNCE|DESCRIBE) \S+ RTSP\/\d+(\.\d+)?/) ||
        (($$thing =~ /^[a-z0-9_-]+: [^\x0d]*\z/i) &&
         # skip curl error messages
         ($$thing !~ /^curl: \(\d+\) /))) {

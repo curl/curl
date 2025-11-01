@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="soft" nonewline="yes">
 POST /path/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
