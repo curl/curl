@@ -51,7 +51,7 @@ line8
 <strip>
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
-<protocol>
+<protocol crlf="soft">
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -61,12 +61,12 @@ Content-Type: multipart/form-data; boundary=----------------------------5dbea401
 
 ------------------------------5dbea401cd8c
 Content-Disposition: form-data; name="field1"
-
-contents1
+%CRLF%
+contents1%CRLF%
 ------------------------------5dbea401cd8c
 Content-Disposition: form-data; name="fileupload"; filename="%DEV_NULL"
 Content-Type: text/x-null;format=x-curl
-
+%CRLF%
 line1
 line2
 line3
@@ -75,7 +75,7 @@ line5
 line6
 line7
 line8
-
+%CRLF%
 ------------------------------5dbea401cd8c--
 </protocol>
 </verify>
