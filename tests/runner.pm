@@ -982,6 +982,9 @@ sub singletest_run {
                 if($keywords{"SLOWDOWN"}) {
                   $timeout = $timeout * 3;
                 }
+                elsif($cmdhash{'option'} =~ /extra-timeout/) {
+                  $timeout = $timeout * 2;
+                }
                 $CMDLINE .= " --max-time $timeout";
             }
         }
