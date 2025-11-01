@@ -33,7 +33,7 @@ http
 <setenv>
 SSL_CERT_FILE
 </setenv>
-<command>
+<command option="no-timeout">
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>

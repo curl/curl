@@ -31,7 +31,7 @@ http
 <setenv>
 SSL_CERT_FILE
 </setenv>
-<command>
+<command option="no-timeout">
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --libcurl %LOGDIR/test%TESTNUMBER.c --data-binary @%LOGDIR/%TESTNUMBER-upload
 </command>
 # "ab\x81""cd\0e\\\"?\r\n\t\x01""fghi%x1Ajklm%xFD"

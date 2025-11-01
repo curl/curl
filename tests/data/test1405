@@ -38,7 +38,7 @@ ftp
 <setenv>
 SSL_CERT_FILE
 </setenv>
-<command>
+<command option="no-timeout">
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q "+*FAIL HARD" --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 </client>
