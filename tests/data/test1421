@@ -55,7 +55,7 @@ Content-Length: 6
 
 -foo-
 </stdout>
-<protocol>
+<protocol crlf="soft">
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
 User-Agent: curl/%VERSION

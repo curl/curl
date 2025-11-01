@@ -74,7 +74,7 @@ the
 # the test HTTP server is blocking until it has read the entire request,
 # including the full request-body before it responds. So in this test the
 # server says 301 and 200 _after_ the entire PUT body has been sent.
-<protocol>
+<protocol crlf="soft">
 PUT /want/%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
