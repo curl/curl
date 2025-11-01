@@ -9,7 +9,7 @@ cookies
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Content-Type: text/plain

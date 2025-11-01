@@ -16,7 +16,7 @@ trailing-dot
 HTTP/1.1 200 OK
 
 </connect>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Strict-Transport-Security: max-age=604800

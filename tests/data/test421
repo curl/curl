@@ -8,7 +8,7 @@ header_json
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 server: nginx
 date: Tue, 07 Mar 2023 15:14:41 GMT
