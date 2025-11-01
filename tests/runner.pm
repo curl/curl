@@ -972,12 +972,17 @@ sub singletest_run {
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
-        if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-timeout/)) {
-            if(use_valgrind() && !$disablevalgrind) {
-              $CMDLINE .= " --max-time 15";
-            }
-            else {
-              $CMDLINE .= " --max-time 5";
+        if(!$keywords{"--libcurl"} &&
+           !$keywords{"TFTP"}) {
+            if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-timeout/)) {
+                my $timeout = 10;
+                if(use_valgrind() && !$disablevalgrind) {
+                  $timeout = 15;
+                }
+                if($keywords{"SLOWDOWN"}) {
+                  $timeout = $timeout * 3;
+                }
+                $CMDLINE .= " --max-time $timeout";
             }
         }
     }
