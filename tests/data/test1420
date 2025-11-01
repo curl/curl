@@ -113,6 +113,7 @@ $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 $_ = '' if /CURLOPT_SSLVERSION/
+$_ = '' if /CURLOPT_TIMEOUT_MS/
 </stripfile>
 </verify>
 </testcase>

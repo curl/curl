@@ -972,6 +972,9 @@ sub singletest_run {
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
+        if($maxtime) {
+            $CMDLINE .= " --max-time $maxtime";
+        }
     }
 
     if(use_valgrind() && !$disablevalgrind) {
