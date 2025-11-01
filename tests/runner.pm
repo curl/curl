@@ -365,7 +365,7 @@ sub prepro {
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
-            subnewlines(0, \$s) if($data_crlf);
+            subnewlines(1, \$s) if($data_crlf);
             push @out, $s;
         }
     }
