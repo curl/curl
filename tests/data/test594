@@ -51,10 +51,10 @@ Moooooooooooo for %TESTNUMBER
 <verify>
 # Strip off parts of the PORT and EPRT commands that might differ
 <strippart>
-s/^PORT (.*)/PORT/
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^PORT (\S*)/PORT/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

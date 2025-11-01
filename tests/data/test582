@@ -34,8 +34,6 @@ Moooooooooooo
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Moooooooooooo
  upload this

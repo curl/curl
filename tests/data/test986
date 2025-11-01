@@ -45,7 +45,7 @@ works
 <errorcode>
 64
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 AUTH SSL
 AUTH TLS
 </protocol>

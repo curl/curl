@@ -38,14 +38,14 @@ FTP PORT download, no data conn and no transient negative reply
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 
 # This test doesn't send a QUIT because the main state machine in multi.c
 # triggers the timeout and sets the CURLE_OPERATION_TIMEDOUT error (28) for
 # which the FTP disconnect code generically has to assume could mean the
 # control the connection and thus it cannot send any command.
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -33,8 +33,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 # 42 - aborted by callback
 <errorcode>
 42
