@@ -13,7 +13,7 @@ APOP
 CAPA APOP
 REPLY welcome +OK curl POP3 server ready to serve <1972.987654321\@curl>
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
