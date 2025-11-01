@@ -8,8 +8,8 @@ SPDX-License-Identifier: curl
 
 curl is a command-line tool for transferring data specified with URL syntax.
 Learn how to use curl by reading [the
-manpage](https://curl.se/docs/manpage.html) or [everything
-curl](https://everything.curl.dev/).
+manpage](https://curl.se/docs/manpage.html) or the detailed guide [Everything
+Curl](https://everything.curl.dev/).
 
 Find out how to install curl by reading [the INSTALL
 document](https://curl.se/docs/install.html).
