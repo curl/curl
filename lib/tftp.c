@@ -241,7 +241,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     state->retry_time = 1;
 
   infof(state->data,
-        "set timeouts for state %d; Total % " FMT_OFF_T ", retry %d maxtry %d",
+        "set timeouts for state %d; Total %" FMT_OFF_T ", retry %d maxtry %d",
         (int)state->state, timeout_ms, state->retry_time, state->retry_max);
 
   /* init RX time */
