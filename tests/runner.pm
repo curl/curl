@@ -299,7 +299,7 @@ sub prepro {
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
-    my $data_crlf;
+    my $data_crlf = "";
     my @pshow;
     my @altshow;
     my $plvl;
@@ -355,17 +355,21 @@ sub prepro {
             # necessary since those parts might be read by separate servers.
             if($s =~ /^ *<data(.*)\>/) {
                 if($1 =~ /crlf="yes"/) {
-                    $data_crlf = 1;
+                    $data_crlf = "yes";
+                }
+                elsif($1 =~ /crlf="headers"/) {
+                    $data_crlf = "headers";
                 }
             }
-            elsif(($s =~ /^ *<\/data/) && $data_crlf) {
-                $data_crlf = 0;
+            elsif(($s =~ /^ *<\/data/) && $data_crlf ne "") {
+                $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
-            subnewlines(1, \$s) if($data_crlf);
+            subnewlines(1, \$s) if($data_crlf eq "yes");
+            subnewlines(0, \$s) if($data_crlf eq "headers");
             push @out, $s;
         }
     }
