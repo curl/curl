@@ -34,7 +34,7 @@ This data will not be sent
 69
 </errorcode>
 <strip>
-^timeout = [5-6]$
+^timeout = [3-6]$
 </strip>
 <protocol>
 opcode = 2
