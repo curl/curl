@@ -22,34 +22,29 @@
 #
 ###########################################################################
 
-# What to call the final executable
-TARGET = example
+SRC ?= https.c
 
-# Which object files that the executable consists of
-OBJS = ftpget.o
+# What to call the final executable
+TARGET ?= example
 
 # What compiler to use
-CC = gcc
+CC ?= gcc
 
-# Compiler flags, -g for debug, -c to make an object file
-CFLAGS = -c -g
+# Compiler flags, -g for debug
+CFLAGS ?= -g
 
-# This should point to a directory that holds libcurl, if it is not
-# in the system's standard lib dir
-# We also set a -L to include the directory where we have the OpenSSL
-# libraries
-LDFLAGS = -L/home/dast/lib -L/usr/local/ssl/lib
+# This should point to a directory that holds libcurl, if it is not in the
+# system's standard lib dir
+# We also set a -L to include the directory where we have the OpenSSL libraries
+LDFLAGS ?= -L/usr/lib -L/usr/local/lib
 
-# We need -lcurl for the curl stuff
 # We need -lsocket and -lnsl when on Solaris
-# We need -lssl and -lcrypto when using libcurl with SSL support
+# We need -lssl and -lcrypto when using libcurl with TLS support
 # We need -lpthread for the pthread example
-LIBS = -lcurl -lsocket -lnsl -lssl -lcrypto
+LIBS ?= -lssl -lcrypto
+# We need -lcurl for the curl stuff
+LIBS := -lcurl $(LIBS)
 
 # Link the target with all objects and libraries
-$(TARGET) : $(OBJS)
-	$(CC) -o $(TARGET) $(OBJS) $(LDFLAGS) $(LIBS)
-
-# Compile the source files into object files
-ftpget.o : ftpget.c
-	$(CC) $(CFLAGS) $<
+$(TARGET) : $(SRC)
+	$(CC) $< $(CFLAGS) $(LDFLAGS) $(LIBS) -o $(TARGET)

@@ -92,12 +92,12 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
 /**
  * Callback invoked by curl to poll reading / writing of a socket.
  */
-static int t582_curlSocketCallback(CURL *easy, curl_socket_t s, int action,
+static int t582_curlSocketCallback(CURL *curl, curl_socket_t s, int action,
                                    void *userp, void *socketp)
 {
   struct t582_ReadWriteSockets *sockets = userp;
 
-  (void)easy;
+  (void)curl;
   (void)socketp;
 
   if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
@@ -135,13 +135,13 @@ static int t582_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 /**
  * Check for curl completion.
  */
-static int t582_checkForCompletion(CURLM *curl, int *success)
+static int t582_checkForCompletion(CURLM *multi, int *success)
 {
   int result = 0;
   *success = 0;
   while(1) {
     int numMessages;
-    CURLMsg *message = curl_multi_info_read(curl, &numMessages);
+    CURLMsg *message = curl_multi_info_read(multi, &numMessages);
     if(!message)
       break;
     if(message->msg == CURLMSG_DONE) {
@@ -196,11 +196,12 @@ static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set* fdset,
   }
 }
 
-static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
+static void notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
                        const char *info)
 {
   int numhandles = 0;
-  CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
+  CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
+                                              &numhandles);
   if(result != CURLM_OK) {
     curl_mfprintf(stderr, "Curl error on %s (%i) %s\n",
                   info, result, curl_multi_strerror(result));
@@ -210,13 +211,13 @@ static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
 /**
  * Invoke curl when a file descriptor is set.
  */
-static void t582_checkFdSet(CURLM *curl, struct t582_Sockets *sockets,
+static void t582_checkFdSet(CURLM *multi, struct t582_Sockets *sockets,
                             fd_set *fdset, int evBitmask, const char *name)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      notifyCurl(curl, sockets->sockets[i], evBitmask, name);
+      notifyCurl(multi, sockets->sockets[i], evBitmask, name);
     }
   }
 }
@@ -225,10 +226,11 @@ static CURLcode test_lib582(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
+  char errbuf[STRERROR_LEN];
   FILE *hd_src = NULL;
   int hd;
   struct_stat file_info;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   struct t582_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct curltime timeout = {0};
@@ -243,16 +245,17 @@ static CURLcode test_lib582(const char *URL)
     return TEST_ERR_USAGE;
   }
 
-  hd_src = fopen(libtest_arg2, "rb");
+  hd_src = curlx_fopen(libtest_arg2, "rb");
   if(!hd_src) {
     curl_mfprintf(stderr, "fopen() failed with error (%d) %s\n",
-                  errno, strerror(errno));
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
     return TEST_ERR_FOPEN;
   }
 
   /* get the file size of the local file */
 #ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
   hd = stat(libtest_arg2, &file_info);
 #else
   hd = fstat(fileno(hd_src), &file_info);
@@ -260,9 +263,9 @@ static CURLcode test_lib582(const char *URL)
   if(hd == -1) {
     /* can't open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
-                  errno, strerror(errno));
+                  errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return TEST_ERR_FSTAT;
   }
   curl_mfprintf(stderr, "Set to upload %" CURL_FORMAT_CURL_OFF_T " bytes\n",
@@ -270,7 +273,7 @@ static CURLcode test_lib582(const char *URL)
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res != CURLE_OK) {
-    fclose(hd_src);
+    curlx_fclose(hd_src);
     return res;
   }
 
@@ -295,17 +298,17 @@ static CURLcode test_lib582(const char *URL)
 
   easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, t582_curlSocketCallback);
-  multi_setopt(m, CURLMOPT_SOCKETDATA, &sockets);
+  multi_setopt(multi, CURLMOPT_SOCKETFUNCTION, t582_curlSocketCallback);
+  multi_setopt(multi, CURLMOPT_SOCKETDATA, &sockets);
 
-  multi_setopt(m, CURLMOPT_TIMERFUNCTION, t582_curlTimerCallback);
-  multi_setopt(m, CURLMOPT_TIMERDATA, &timeout);
+  multi_setopt(multi, CURLMOPT_TIMERFUNCTION, t582_curlTimerCallback);
+  multi_setopt(multi, CURLMOPT_TIMERDATA, &timeout);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
-  while(!t582_checkForCompletion(m, &success)) {
+  while(!t582_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
     struct timeval tv = {0};
@@ -329,13 +332,15 @@ static CURLcode test_lib582(const char *URL)
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    t582_checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
-    t582_checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
+    t582_checkFdSet(multi, &sockets.read, &readSet, CURL_CSELECT_IN,
+                    "read");
+    t582_checkFdSet(multi, &sockets.write, &writeSet, CURL_CSELECT_OUT,
+                    "write");
 
     if(timeout.tv_sec != (time_t)-1 &&
        t582_getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
-      notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+      notifyCurl(multi, CURL_SOCKET_TIMEOUT, 0, "timeout");
     }
 
     abort_on_test_timeout();
@@ -350,13 +355,13 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  curl_multi_remove_handle(m, curl);
+  curl_multi_remove_handle(multi, curl);
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   /* close the local file */
-  fclose(hd_src);
+  curlx_fclose(hd_src);
 
   /* free local memory */
   free(sockets.read.sockets);

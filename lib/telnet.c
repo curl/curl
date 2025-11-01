@@ -60,8 +60,7 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -108,15 +107,15 @@
  */
 typedef enum
 {
-   CURL_TS_DATA = 0,
-   CURL_TS_IAC,
-   CURL_TS_WILL,
-   CURL_TS_WONT,
-   CURL_TS_DO,
-   CURL_TS_DONT,
-   CURL_TS_CR,
-   CURL_TS_SB,   /* sub-option collection */
-   CURL_TS_SE   /* looking for sub-option end */
+  CURL_TS_DATA = 0,
+  CURL_TS_IAC,
+  CURL_TS_WILL,
+  CURL_TS_WONT,
+  CURL_TS_DO,
+  CURL_TS_DONT,
+  CURL_TS_CR,
+  CURL_TS_SB,   /* sub-option collection */
+  CURL_TS_SE    /* looking for sub-option end */
 } TelnetReceive;
 
 struct TELNET {
@@ -164,7 +163,7 @@ static void set_remote_option(struct Curl_easy *data, struct TELNET *tn,
 static void printsub(struct Curl_easy *data,
                      int direction, unsigned char *pointer,
                      size_t length);
-static void suboption(struct Curl_easy *data, struct TELNET *tn);
+static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn);
 static void sendsuboption(struct Curl_easy *data,
                           struct TELNET *tn, int option);
 
@@ -713,7 +712,7 @@ static void printsub(struct Curl_easy *data,
       else /* bad input */
         return;
     }
-    if(length < 1) {
+    if(length <= 1) {
       infof(data, "(Empty suboption?)");
       return;
     }
@@ -732,7 +731,7 @@ static void printsub(struct Curl_easy *data,
       }
     }
     else
-      infof(data, "%d (unknown)", pointer[i]);
+      infof(data, "%d (unknown)", pointer[0]);
 
     switch(pointer[0]) {
     case CURL_TELOPT_NAWS:
@@ -759,8 +758,8 @@ static void printsub(struct Curl_easy *data,
       switch(pointer[0]) {
       case CURL_TELOPT_TTYPE:
       case CURL_TELOPT_XDISPLOC:
-        pointer[length] = 0;
-        infof(data, " \"%s\"", &pointer[2]);
+        infof(data, " \"%.*s\"",
+              (int)((length > 2) ? (length - 2) : 0), &pointer[2]);
         break;
       case CURL_TELOPT_NEW_ENVIRON:
         if(pointer[1] == CURL_TELQUAL_IS) {
@@ -814,7 +813,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       DEBUGF(infof(data, "set a non ASCII username in telnet"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
+    curl_msnprintf(buffer, sizeof(buffer), "USER,%s", data->conn->user);
     beg = curl_slist_append(tn->telnet_vars, buffer);
     if(!beg) {
       curl_slist_free_all(tn->telnet_vars);
@@ -925,14 +924,21 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
   return result;
 }
 
+/* if the option contains an IAC code, it should be escaped in the output, but
+   as we cannot think of any legit way to send that as part of the content we
+   rather just ban its use instead */
+static bool bad_option(const char *data)
+{
+  return !data || !!strchr(data, CURL_IAC);
+}
+
 /*
  * suboption()
  *
  * Look at the sub-option buffer, and try to be helpful to the other
  * side.
  */
-
-static void suboption(struct Curl_easy *data, struct TELNET *tn)
+static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
 {
   struct curl_slist *v;
   unsigned char temp[2048];
@@ -941,56 +947,74 @@ static void suboption(struct Curl_easy *data, struct TELNET *tn)
   int err;
   struct connectdata *conn = data->conn;
 
+  if(!CURL_SB_LEN(tn)) /* ignore empty suboption */
+    return CURLE_OK;
+
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
-      len = strlen(tn->subopt_ttype) + 4 + 2;
-      msnprintf((char *)temp, sizeof(temp),
-                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
-                CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
+      if(bad_option(tn->subopt_ttype))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      if(strlen(tn->subopt_ttype) > 1000) {
+        failf(data, "Tool long telnet TTYPE");
+        return CURLE_SEND_ERROR;
+      }
+      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                           CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
+                           CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC,
+                           CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+
       if(bytes_written < 0) {
         err = SOCKERRNO;
-        failf(data,"Sending data failed (%d)",err);
+        failf(data, "Sending data failed (%d)", err);
+        return CURLE_SEND_ERROR;
       }
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
-      len = strlen(tn->subopt_xdisploc) + 4 + 2;
-      msnprintf((char *)temp, sizeof(temp),
-                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
-                CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
+      if(bad_option(tn->subopt_xdisploc))
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+      if(strlen(tn->subopt_xdisploc) > 1000) {
+        failf(data, "Tool long telnet XDISPLOC");
+        return CURLE_SEND_ERROR;
+      }
+      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                           CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
+                           CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC,
+                           CURL_SE);
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
         err = SOCKERRNO;
         failf(data,"Sending data failed (%d)",err);
+        return CURLE_SEND_ERROR;
       }
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
-      msnprintf((char *)temp, sizeof(temp),
-                "%c%c%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
-                CURL_TELQUAL_IS);
-      len = 4;
-
+      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
+                           CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
+                           CURL_TELQUAL_IS);
       for(v = tn->telnet_vars; v; v = v->next) {
         size_t tmplen = (strlen(v->data) + 1);
+        if(bad_option(v->data))
+          return CURLE_BAD_FUNCTION_ARGUMENT;
         /* Add the variable if it fits */
         if(len + tmplen < (int)sizeof(temp)-6) {
           char *s = strchr(v->data, ',');
           if(!s)
-            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%s", CURL_NEW_ENV_VAR, v->data);
+            len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                  "%c%s", CURL_NEW_ENV_VAR, v->data);
           else {
             size_t vlen = s - v->data;
-            len += msnprintf((char *)&temp[len], sizeof(temp) - len,
-                             "%c%.*s%c%s", CURL_NEW_ENV_VAR,
-                             (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
+            len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                  "%c%.*s%c%s", CURL_NEW_ENV_VAR,
+                                  (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
           }
         }
       }
-      msnprintf((char *)&temp[len], sizeof(temp) - len,
-                "%c%c", CURL_IAC, CURL_SE);
+      curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                     "%c%c", CURL_IAC, CURL_SE);
       len += 2;
       bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
       if(bytes_written < 0) {
@@ -1000,16 +1024,14 @@ static void suboption(struct Curl_easy *data, struct TELNET *tn)
       printsub(data, '>', &temp[2], len-2);
       break;
   }
-  return;
+  return CURLE_OK;
 }
-
 
 /*
  * sendsuboption()
  *
  * Send suboption information to the server side.
  */
-
 static void sendsuboption(struct Curl_easy *data,
                           struct TELNET *tn, int option)
 {
@@ -1063,7 +1085,6 @@ static void sendsuboption(struct Curl_easy *data,
     break;
   }
 }
-
 
 static
 CURLcode telrcv(struct Curl_easy *data,
@@ -1204,7 +1225,9 @@ process_iac:
             CURL_SB_TERM(tn);
 
             printoption(data, "In SUBOPTION processing, RCVD", CURL_IAC, c);
-            suboption(data, tn);   /* handle sub-option */
+            result = suboption(data, tn);   /* handle sub-option */
+            if(result)
+              return result;
             tn->telrcv_state = CURL_TS_IAC;
             goto process_iac;
           }
@@ -1216,7 +1239,9 @@ process_iac:
           CURL_SB_ACCUM(tn, CURL_SE);
           tn->subpointer -= 2;
           CURL_SB_TERM(tn);
-          suboption(data, tn);   /* handle sub-option */
+          result = suboption(data, tn);   /* handle sub-option */
+          if(result)
+            return result;
           tn->telrcv_state = CURL_TS_DATA;
         }
         break;
@@ -1350,7 +1375,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   /* Tell Winsock what events we want to listen to */
   if(WSAEventSelect(sockfd, event_handle, FD_READ|FD_CLOSE) == SOCKET_ERROR) {
     WSACloseEvent(event_handle);
-    return CURLE_OK;
+    return CURLE_RECV_ERROR;
   }
 
   /* The get the Windows file handle for stdin */

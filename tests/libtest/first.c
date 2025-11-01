@@ -137,9 +137,8 @@ static void memory_tracking_init(void)
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = getenv("CURL_MEMLIMIT");
   if(env) {
-    char *endptr;
-    long num = strtol(env, &endptr, 10);
-    if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
+    long num = atol(env);
+    if(num > 0)
       curl_dbg_memlimit(num);
   }
 }

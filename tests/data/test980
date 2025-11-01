@@ -10,7 +10,7 @@ STARTTLS
 # Server-side
 <reply>
 <servercmd>
-CAPA STARTTLS
+CAPA starttls
 AUTH PLAIN
 REPLY STARTTLS 454 currently unavailable\r\n235 Authenticated\r\n250 2.1.0 Sender ok\r\n250 2.1.5 Recipient ok\r\n354 Enter mail\r\n250 2.0.0 Accepted
 REPLY AUTH 535 5.7.8 Authentication credentials invalid
@@ -44,7 +44,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <errorcode>
 8
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 STARTTLS
 </protocol>

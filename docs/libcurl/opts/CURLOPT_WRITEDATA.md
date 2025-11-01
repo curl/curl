@@ -36,7 +36,7 @@ to *fwrite(3)* when writing data.
 The internal CURLOPT_WRITEFUNCTION(3) writes the data to the FILE *
 given with this option, or to stdout if this option has not been set.
 
-If you are using libcurl as a Windows DLL, you **MUST** use a
+If you are using libcurl as a Windows DLL, you must also use
 CURLOPT_WRITEFUNCTION(3) if you set this option or you might experience
 crashes.
 

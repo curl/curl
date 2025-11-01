@@ -30,7 +30,7 @@
 
 #include <curl/curl.h>
 
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
   return written;
@@ -38,58 +38,66 @@ static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 
 int main(void)
 {
-  CURL *curl_handle;
-  static const char *headerfilename = "head.out";
-  FILE *headerfile;
-  static const char *bodyfilename = "body.out";
-  FILE *bodyfile;
+  CURL *curl;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /* init the curl session */
-  curl_handle = curl_easy_init();
+  curl = curl_easy_init();
+  if(curl) {
+    static const char *headerfilename = "head.out";
+    FILE *headerfile;
+    static const char *bodyfilename = "body.out";
+    FILE *bodyfile;
 
-  /* set URL to get */
-  curl_easy_setopt(curl_handle, CURLOPT_URL, "https://example.com");
+    /* set URL to get */
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-  /* no progress meter please */
-  curl_easy_setopt(curl_handle, CURLOPT_NOPROGRESS, 1L);
+    /* no progress meter please */
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-  /* send all data to this function  */
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, write_data);
+    /* send all data to this function  */
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
-  /* open the header file */
-  headerfile = fopen(headerfilename, "wb");
-  if(!headerfile) {
-    curl_easy_cleanup(curl_handle);
-    return -1;
-  }
+    /* open the header file */
+    headerfile = fopen(headerfilename, "wb");
+    if(!headerfile) {
+      curl_easy_cleanup(curl);
+      curl_global_cleanup();
+      return -1;
+    }
 
-  /* open the body file */
-  bodyfile = fopen(bodyfilename, "wb");
-  if(!bodyfile) {
-    curl_easy_cleanup(curl_handle);
+    /* open the body file */
+    bodyfile = fopen(bodyfilename, "wb");
+    if(!bodyfile) {
+      curl_easy_cleanup(curl);
+      fclose(headerfile);
+      curl_global_cleanup();
+      return -1;
+    }
+
+    /* we want the headers be written to this file handle */
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, headerfile);
+
+    /* we want the body be written to this file handle instead of stdout */
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, bodyfile);
+
+    /* get it! */
+    res = curl_easy_perform(curl);
+
+    /* close the header file */
     fclose(headerfile);
-    return -1;
+
+    /* close the body file */
+    fclose(bodyfile);
+
+    /* cleanup curl stuff */
+    curl_easy_cleanup(curl);
   }
 
-  /* we want the headers be written to this file handle */
-  curl_easy_setopt(curl_handle, CURLOPT_HEADERDATA, headerfile);
+  curl_global_cleanup();
 
-  /* we want the body be written to this file handle instead of stdout */
-  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, bodyfile);
-
-  /* get it! */
-  curl_easy_perform(curl_handle);
-
-  /* close the header file */
-  fclose(headerfile);
-
-  /* close the body file */
-  fclose(bodyfile);
-
-  /* cleanup curl stuff */
-  curl_easy_cleanup(curl_handle);
-
-  return 0;
+  return (int)res;
 }

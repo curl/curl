@@ -401,12 +401,12 @@ typedef int (*curl_seek_callback)(void *instream,
 #define CURL_TRAILERFUNC_ABORT 1
 
 typedef size_t (*curl_read_callback)(char *buffer,
-                                      size_t size,
-                                      size_t nitems,
-                                      void *instream);
+                                     size_t size,
+                                     size_t nitems,
+                                     void *instream);
 
 typedef int (*curl_trailer_callback)(struct curl_slist **list,
-                                      void *userdata);
+                                     void *userdata);
 
 typedef enum {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
@@ -1357,7 +1357,8 @@ typedef enum {
   /* Set the krb4/5 security level, this also enables krb4/5 awareness. This
    * is a string, 'clear', 'safe', 'confidential' or 'private'. If the string
    * is set but does not match one of these, 'private' will be used.  */
-  CURLOPT(CURLOPT_KRBLEVEL, CURLOPTTYPE_STRINGPOINT, 63),
+  CURLOPTDEPRECATED(CURLOPT_KRBLEVEL, CURLOPTTYPE_STRINGPOINT, 63,
+                    8.17.0, "removed"),
 
   /* Set if we should verify the peer in ssl handshake, set 1 to verify. */
   CURLOPT(CURLOPT_SSL_VERIFYPEER, CURLOPTTYPE_LONG, 64),
@@ -1952,8 +1953,7 @@ typedef enum {
   /* Pass in a bitmask of "header options" */
   CURLOPT(CURLOPT_HEADEROPT, CURLOPTTYPE_VALUES, 229),
 
-  /* The public key in DER form used to validate the peer public key
-     this option is used only if SSL_VERIFYPEER is true */
+  /* The public key used to validate the peer public key */
   CURLOPT(CURLOPT_PINNEDPUBLICKEY, CURLOPTTYPE_STRINGPOINT, 230),
 
   /* Path to Unix domain socket */

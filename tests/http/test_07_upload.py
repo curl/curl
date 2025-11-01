@@ -671,6 +671,25 @@ class TestUpload:
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
 
+    @pytest.mark.parametrize("proto", ['http/1.1'])
+    def test_07_63_upload_exp100_paused(self, env: Env, httpd, nghttpx, proto):
+        read_delay = 1
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'\
+            f'&read_delay={read_delay}s'
+        upload_size = 128 * 1024
+        client = LocalClient(name='cli_hx_upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', '1',
+             '-S', f'{upload_size}',
+             '-P', '1',
+             '-M', 'MIME',
+             '-r', f'{env.domain1}:{env.port_for(proto)}:127.0.0.1',
+             '-V', proto, url
+        ])
+        r.check_exit_code(0)
+
     # nghttpx is the only server we have that supports TLS early data and
     # has a limit of 16k it announces
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
@@ -693,6 +712,10 @@ class TestUpload:
             pytest.skip("h3 not supported")
         if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
             pytest.skip('failing on macOS CI runners')
+        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('wolfssl'):
+            pytest.skip('h3 wolfssl early data failing on macOS')
+        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('gnutls'):
+            pytest.skip('h3 gnutls early data failing on macOS')
         count = 2
         # we want this test to always connect to nghttpx, since it is
         # the only server we have that supports TLS earlydata

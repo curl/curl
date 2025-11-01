@@ -106,6 +106,12 @@ if test "x$OPT_MBEDTLS" != xno; then
       if false; then
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls mbedx509 mbedcrypto"
       fi
+
+      dnl Check DES support in mbedTLS <4.
+      AC_CHECK_FUNCS(mbedtls_des_crypt_ecb)
+      if test "$ac_cv_func_mbedtls_des_crypt_ecb" = 'yes'; then
+        HAVE_MBEDTLS_DES_CRYPT_ECB=1
+      fi
     fi
 
   fi dnl mbedTLS not disabled

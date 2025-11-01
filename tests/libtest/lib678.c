@@ -30,7 +30,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
   size_t datasize = 0;
   void *data = NULL;
   if(filename) {
-    FILE *fInCert = fopen(filename, "rb");
+    FILE *fInCert = curlx_fopen(filename, "rb");
 
     if(fInCert) {
       long cert_tell = 0;
@@ -48,7 +48,7 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       if((!data) ||
          ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
-      fclose(fInCert);
+      curlx_fclose(fInCert);
       if(!continue_reading) {
         free(data);
         datasize = 0;
@@ -99,15 +99,14 @@ static CURLcode test_lib678(const char *URL)
   CURLcode res = CURLE_OK;
   curl_global_init(CURL_GLOBAL_DEFAULT);
   if(!strcmp("check", URL)) {
-    CURL *e;
     CURLcode w = CURLE_OK;
     struct curl_blob blob = {0};
-    e = curl_easy_init();
-    if(e) {
-      w = curl_easy_setopt(e, CURLOPT_CAINFO_BLOB, &blob);
+    CURL *curl = curl_easy_init();
+    if(curl) {
+      w = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
       if(w)
         curl_mprintf("CURLOPT_CAINFO_BLOB is not supported\n");
-      curl_easy_cleanup(e);
+      curl_easy_cleanup(curl);
     }
     res = w;
   }

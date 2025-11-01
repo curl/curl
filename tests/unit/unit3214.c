@@ -28,21 +28,22 @@
 static void checksize(const char *name, size_t size, size_t allowed)
 {
   if(size > allowed) {
-    fprintf(stderr, "BAD: struct %s is %d bytes, allowed to be %d",
-            name, (int)size, (int)allowed);
-    fprintf(stderr, ": %d bytes too big\n", (int)(size - allowed));
+    curl_mfprintf(stderr, "BAD: struct %s is %zu bytes, "
+                  "allowed to be %zu: %zu bytes too big\n",
+                  name, size, allowed, size - allowed);
     unitfail++;
   }
   else {
-    printf("FINE: struct %s is %d bytes, allowed %d (margin: %d bytes)\n",
-           name, (int)size, (int)allowed, (int)(allowed - size));
+    curl_mprintf("FINE: struct %s is %zu bytes, "
+                 "allowed %zu (margin: %zu bytes)\n",
+                 name, size, allowed, allowed - size);
   }
 }
 
 /* the maximum sizes we allow specific structs to grow to */
 #define MAX_CURL_EASY           5800
 #define MAX_CONNECTDATA         1300
-#define MAX_CURL_MULTI          750
+#define MAX_CURL_MULTI          850
 #define MAX_CURL_HTTPPOST       112
 #define MAX_CURL_SLIST          16
 #define MAX_CURL_KHKEY          24

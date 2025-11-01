@@ -95,7 +95,7 @@ static CURLcode test_lib571(const char *URL)
   char *stream_uri = NULL;
   int request = 1;
 
-  FILE *protofile = fopen(libtest_arg2, "wb");
+  FILE *protofile = curlx_fopen(libtest_arg2, "wb");
   if(!protofile) {
     curl_mfprintf(stderr, "Couldn't open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;
@@ -103,14 +103,14 @@ static CURLcode test_lib571(const char *URL)
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    fclose(protofile);
+    curlx_fclose(protofile);
     return TEST_ERR_MAJOR_BAD;
   }
 
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
-    fclose(protofile);
+    curlx_fclose(protofile);
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -194,7 +194,7 @@ test_cleanup:
   curl_free(stream_uri);
 
   if(protofile)
-    fclose(protofile);
+    curlx_fclose(protofile);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();

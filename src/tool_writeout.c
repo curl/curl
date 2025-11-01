@@ -176,14 +176,14 @@ static int writeTime(FILE *stream, const struct writeoutvar *wovar,
     us %= 1000000;
 
     if(use_json)
-      fprintf(stream, "\"%s\":", wovar->name);
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
 
-    fprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU
-            ".%06" CURL_FORMAT_CURL_OFF_TU, secs, us);
+    curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_TU
+                  ".%06" CURL_FORMAT_CURL_OFF_TU, secs, us);
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
 
   return 1; /* return 1 if anything was written */
@@ -414,7 +414,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   DEBUGASSERT(!valid || strinfo);
   if(valid && strinfo) {
     if(use_json) {
-      fprintf(stream, "\"%s\":", wovar->name);
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
       jsonWriteString(stream, strinfo, FALSE);
     }
     else
@@ -422,7 +422,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
   curl_free((char *)CURL_UNCONST(freestr));
 
@@ -470,17 +470,17 @@ static int writeLong(FILE *stream, const struct writeoutvar *wovar,
 
   if(valid) {
     if(use_json)
-      fprintf(stream, "\"%s\":%ld", wovar->name, longinfo);
+      curl_mfprintf(stream, "\"%s\":%ld", wovar->name, longinfo);
     else {
       if(wovar->id == VAR_HTTP_CODE || wovar->id == VAR_HTTP_CODE_PROXY)
-        fprintf(stream, "%03ld", longinfo);
+        curl_mfprintf(stream, "%03ld", longinfo);
       else
-        fprintf(stream, "%ld", longinfo);
+        curl_mfprintf(stream, "%ld", longinfo);
     }
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
 
   return 1; /* return 1 if anything was written */
@@ -516,13 +516,13 @@ static int writeOffset(FILE *stream, const struct writeoutvar *wovar,
 
   if(valid) {
     if(use_json)
-      fprintf(stream, "\"%s\":", wovar->name);
+      curl_mfprintf(stream, "\"%s\":", wovar->name);
 
-    fprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
+    curl_mfprintf(stream, "%" CURL_FORMAT_CURL_OFF_T, offinfo);
   }
   else {
     if(use_json)
-      fprintf(stream, "\"%s\":null", wovar->name);
+      curl_mfprintf(stream, "\"%s\":null", wovar->name);
   }
 
   return 1; /* return 1 if anything was written */
@@ -615,6 +615,111 @@ static const char *outtime(const char *ptr, /* %time{ ... */
   return ptr;
 }
 
+static void separator(const char *sep, size_t seplen, FILE *stream)
+{
+  while(seplen) {
+    if(*sep == '\\') {
+      switch(sep[1]) {
+      case 'r':
+        fputc('\r', stream);
+        break;
+      case 'n':
+        fputc('\n', stream);
+        break;
+      case 't':
+        fputc('\t', stream);
+        break;
+      case '}':
+        fputc('}', stream);
+        break;
+      case '\0':
+        break;
+      default:
+        /* unknown, just output this */
+        fputc(sep[0], stream);
+        fputc(sep[1], stream);
+        break;
+      }
+      sep += 2;
+      seplen -= 2;
+    }
+    else {
+      fputc(*sep, stream);
+      sep++;
+      seplen--;
+    }
+  }
+}
+
+static void output_header(struct per_transfer *per,
+                          FILE *stream,
+                          const char **pptr)
+{
+  const char *ptr = *pptr;
+  const char *end;
+  end = strchr(ptr, '}');
+  do {
+    if(!end || (end[-1] != '\\'))
+      break;
+    end = strchr(&end[1], '}');
+  } while(end);
+  if(end) {
+    char hname[256]; /* holds the longest header field name */
+    struct curl_header *header;
+    const char *instr;
+    const char *sep = NULL;
+    size_t seplen = 0;
+    size_t vlen = end - ptr;
+    instr = memchr(ptr, ':', vlen);
+    if(instr) {
+      /* instructions follow */
+      if(!strncmp(&instr[1], "all:", 4)) {
+        sep = &instr[5];
+        seplen = end - sep;
+        vlen -= (seplen + 5);
+      }
+    }
+    if(vlen < sizeof(hname)) {
+      memcpy(hname, ptr, vlen);
+      hname[vlen] = 0;
+      if(sep) {
+        /* get headers from all requests */
+        int reqno = 0;
+        size_t indno = 0;
+        bool output = FALSE;
+        do {
+          if(CURLHE_OK == curl_easy_header(per->curl, hname, indno,
+                                           CURLH_HEADER, reqno,
+                                           &header)) {
+            if(output)
+              /* output separator */
+              separator(sep, seplen, stream);
+            fputs(header->value, stream);
+            output = TRUE;
+          }
+          else
+            break;
+          if((header->index + 1) < header->amount)
+            indno++;
+          else {
+            ++reqno;
+            indno = 0;
+          }
+        } while(1);
+      }
+      else {
+        if(CURLHE_OK == curl_easy_header(per->curl, hname, 0,
+                                         CURLH_HEADER, -1, &header))
+          fputs(header->value, stream);
+      }
+    }
+    ptr = end + 1;
+  }
+  else
+    fputs("%header{", stream);
+  *pptr = ptr;
+}
+
 void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                  CURLcode per_result)
 {
@@ -667,13 +772,13 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               break;
             case VAR_STDOUT:
               if(fclose_stream)
-                fclose(stream);
+                curlx_fclose(stream);
               fclose_stream = FALSE;
               stream = stdout;
               break;
             case VAR_STDERR:
               if(fclose_stream)
-                fclose(stream);
+                curlx_fclose(stream);
               fclose_stream = FALSE;
               stream = tool_stderr;
               break;
@@ -691,30 +796,15 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
             }
           }
           else {
-            fprintf(tool_stderr,
-                    "curl: unknown --write-out variable: '%.*s'\n",
-                    (int)vlen, ptr);
+            curl_mfprintf(tool_stderr,
+                          "curl: unknown --write-out variable: '%.*s'\n",
+                          (int)vlen, ptr);
           }
           ptr = end + 1; /* pass the end */
         }
         else if(!strncmp("header{", &ptr[1], 7)) {
           ptr += 8;
-          end = strchr(ptr, '}');
-          if(end) {
-            char hname[256]; /* holds the longest header field name */
-            struct curl_header *header;
-            vlen = end - ptr;
-            if(vlen < sizeof(hname)) {
-              memcpy(hname, ptr, vlen);
-              hname[vlen] = 0;
-              if(CURLHE_OK == curl_easy_header(per->curl, hname, 0,
-                                               CURLH_HEADER, -1, &header))
-                fputs(header->value, stream);
-            }
-            ptr = end + 1;
-          }
-          else
-            fputs("%header{", stream);
+          output_header(per, stream, &ptr);
         }
         else if(!strncmp("time{", &ptr[1], 5)) {
           ptr = outtime(ptr, stream);
@@ -734,12 +824,12 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
               FILE *stream2;
               memcpy(fname, ptr, flen);
               fname[flen] = 0;
-              stream2 = fopen(fname, append ? FOPEN_APPENDTEXT :
-                              FOPEN_WRITETEXT);
+              stream2 = curlx_fopen(fname, append ? FOPEN_APPENDTEXT :
+                                    FOPEN_WRITETEXT);
               if(stream2) {
                 /* only change if the open worked */
                 if(fclose_stream)
-                  fclose(stream);
+                  curlx_fclose(stream);
                 stream = stream2;
                 fclose_stream = TRUE;
               }
@@ -782,6 +872,6 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
     }
   }
   if(fclose_stream)
-    fclose(stream);
+    curlx_fclose(stream);
   curlx_dyn_free(&name);
 }

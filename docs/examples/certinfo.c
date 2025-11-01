@@ -29,7 +29,7 @@
 
 #include <curl/curl.h>
 
-static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
+static size_t write_cb(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
 {
   (void)stream;
   (void)ptr;
@@ -41,13 +41,15 @@ int main(void)
   CURL *curl;
   CURLcode res;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wrfu);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -83,5 +85,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

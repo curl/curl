@@ -81,11 +81,11 @@ static int unslashquote(const char *line, struct dynbuf *param)
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-int parseconfig(const char *filename)
+ParameterError parseconfig(const char *filename, int max_recursive)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
-  int rc = 0;
+  ParameterError err = PARAM_OK;
   struct OperationConfig *config = global->last;
   char *pathalloc = NULL;
 
@@ -93,10 +93,10 @@ int parseconfig(const char *filename)
     /* NULL means load .curlrc from homedir! */
     char *curlrc = findfile(".curlrc", CURLRC_DOTSCORE);
     if(curlrc) {
-      file = fopen(curlrc, FOPEN_READTEXT);
+      file = curlx_fopen(curlrc, FOPEN_READTEXT);
       if(!file) {
         free(curlrc);
-        return 1;
+        return PARAM_READ_ERROR;
       }
       filename = pathalloc = curlrc;
     }
@@ -115,7 +115,7 @@ int parseconfig(const char *filename)
   }
   else {
     if(strcmp(filename, "-"))
-      file = fopen(filename, FOPEN_READTEXT);
+      file = curlx_fopen(filename, FOPEN_READTEXT);
     else
       file = stdin;
   }
@@ -133,12 +133,12 @@ int parseconfig(const char *filename)
     curlx_dyn_init(&pbuf, MAX_CONFIG_LINE_LENGTH);
     DEBUGASSERT(filename);
 
-    while(!rc && my_get_line(file, &buf, &fileerror)) {
+    while(!err && my_get_line(file, &buf, &fileerror)) {
       ParameterError res;
       lineno++;
       line = curlx_dyn_ptr(&buf);
       if(!line) {
-        rc = 1; /* out of memory */
+        err = PARAM_NO_MEM; /* out of memory */
         break;
       }
 
@@ -156,7 +156,7 @@ int parseconfig(const char *filename)
         *line++ = '\0'; /* null-terminate, we have a local copy of the data */
 
 #ifdef DEBUG_CONFIG
-      fprintf(tool_stderr, "GOT: %s\n", option);
+      curl_mfprintf(tool_stderr, "GOT: %s\n", option);
 #endif
 
       /* pass spaces and separator(s) */
@@ -166,9 +166,11 @@ int parseconfig(const char *filename)
       /* the parameter starts here (unless quoted) */
       if(*line == '\"') {
         /* quoted parameter, do the quote dance */
-        rc = unslashquote(++line, &pbuf);
-        if(rc)
+        int rc = unslashquote(++line, &pbuf);
+        if(rc) {
+          err = PARAM_BAD_USE;
           break;
+        }
         param = curlx_dyn_len(&pbuf) ? curlx_dyn_ptr(&pbuf) : CURL_UNCONST("");
       }
       else {
@@ -204,9 +206,9 @@ int parseconfig(const char *filename)
       }
 
 #ifdef DEBUG_CONFIG
-      fprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
+      curl_mfprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
-      res = getparameter(option, param, &usedarg, config);
+      res = getparameter(option, param, &usedarg, config, max_recursive);
       config = global->last;
 
       if(!res && param && *param && !usedarg)
@@ -240,25 +242,30 @@ int parseconfig(const char *filename)
            res != PARAM_VERSION_INFO_REQUESTED &&
            res != PARAM_ENGINES_REQUESTED &&
            res != PARAM_CA_EMBED_REQUESTED) {
-          const char *reason = param2text(res);
-          errorf("%s:%d: '%s' %s",
-                 filename, lineno, option, reason);
-          rc = (int)res;
+          /* only show error in the first level config call */
+          if(max_recursive == CONFIG_MAX_LEVELS) {
+            const char *reason = param2text(res);
+            errorf("%s:%d: '%s' %s", filename, lineno, option, reason);
+          }
+          err = res;
         }
       }
     }
     curlx_dyn_free(&buf);
     curlx_dyn_free(&pbuf);
     if(file != stdin)
-      fclose(file);
+      curlx_fclose(file);
     if(fileerror)
-      rc = 1;
+      err = PARAM_READ_ERROR;
   }
   else
-    rc = 1; /* could not open the file */
+    err = PARAM_READ_ERROR; /* could not open the file */
+
+  if((err == PARAM_READ_ERROR) && filename)
+    errorf("cannot read config from '%s'", filename);
 
   free(pathalloc);
-  return rc;
+  return err;
 }
 
 

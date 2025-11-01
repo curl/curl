@@ -28,6 +28,7 @@
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
+#include "tool_parsecfg.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -222,8 +223,9 @@ size_t tool_mime_stdin_read(char *buffer,
       /* Read from stdin. */
       nitems = fread(buffer, 1, nitems, stdin);
       if(ferror(stdin)) {
+        char errbuf[STRERROR_LEN];
         /* Show error only once. */
-        warnf("stdin: %s", strerror(errno));
+        warnf("stdin: %s", curlx_strerror(errno, errbuf, sizeof(errbuf)));
         return CURL_READFUNC_ABORT;
       }
     }
@@ -247,7 +249,7 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
   if(offset < 0)
     return CURL_SEEKFUNC_CANTSEEK;
   if(!sip->data) {
-    if(fseek(stdin, (long) (offset + sip->origin), SEEK_SET))
+    if(curlx_fseek(stdin, offset + sip->origin, SEEK_SET))
       return CURL_SEEKFUNC_CANTSEEK;
   }
   sip->curpos = offset;
@@ -416,64 +418,63 @@ static int slist_append(struct curl_slist **plist, const char *data)
 }
 
 /* Read headers from a file and append to list. */
-static int read_field_headers(const char *filename, FILE *fp,
-                              struct curl_slist **pheaders)
+static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
 {
-  size_t hdrlen = 0;
-  size_t pos = 0;
-  bool incomment = FALSE;
-  int lineno = 1;
-  char hdrbuf[999] = ""; /* Max. header length + 1. */
+  struct dynbuf line;
+  bool error = FALSE;
+  int err = 0;
 
-  for(;;) {
-    int c = getc(fp);
-    if(c == EOF || (!pos && !ISSPACE(c))) {
-      /* Strip and flush the current header. */
-      while(hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
-        hdrlen--;
-      if(hdrlen) {
-        hdrbuf[hdrlen] = '\0';
-        if(slist_append(pheaders, hdrbuf)) {
-          errorf("Out of memory for field headers");
-          return -1;
-        }
-        hdrlen = 0;
+  curlx_dyn_init(&line, 8092);
+  while(my_get_line(fp, &line, &error)) {
+    const char *ptr = curlx_dyn_ptr(&line);
+    size_t len = curlx_dyn_len(&line);
+    bool folded = FALSE;
+    if(ptr[0] == '#') /* comment */
+      continue;
+    else if(ptr[0] == ' ') /* a continuation from the line before */
+      folded = TRUE;
+    /* trim off trailing CRLFs and whitespaces */
+    while(len && (ISNEWLINE(ptr[len -1]) || ISBLANK(ptr[len - 1])))
+      len--;
+
+    if(!len)
+      continue;
+    curlx_dyn_setlen(&line, len); /* set the new length */
+
+    if(folded && *pheaders) {
+      /* append this new line onto the previous line */
+      struct dynbuf amend;
+      struct curl_slist *l = *pheaders;
+      curlx_dyn_init(&amend, 8092);
+      /* find the last node */
+      while(l && l->next)
+        l = l->next;
+      /* add both parts */
+      if(curlx_dyn_add(&amend, l->data) || curlx_dyn_addn(&amend, ptr, len)) {
+        err = -1;
+        break;
+      }
+      curl_free(l->data);
+      /* we use maprintf here to make it a libcurl alloc, to match the previous
+         curl_slist_append */
+      l->data = curl_maprintf("%s", curlx_dyn_ptr(&amend));
+      curlx_dyn_free(&amend);
+      if(!l->data) {
+        errorf("Out of memory for field headers");
+        err = 1;
       }
     }
-
-    switch(c) {
-    case EOF:
-      if(ferror(fp)) {
-        errorf("Header file %s read error: %s", filename,
-               strerror(errno));
-        return -1;
-      }
-      return 0;    /* Done. */
-    case '\r':
-      continue;    /* Ignore. */
-    case '\n':
-      pos = 0;
-      incomment = FALSE;
-      lineno++;
-      continue;
-    case '#':
-      if(!pos)
-        incomment = TRUE;
+    else {
+      err = slist_append(pheaders, ptr);
+    }
+    if(err) {
+      errorf("Out of memory for field headers");
+      err = -1;
       break;
     }
-
-    pos++;
-    if(!incomment) {
-      if(hdrlen == sizeof(hdrbuf) - 1) {
-        warnf("File %s line %d: header too long (truncated)",
-              filename, lineno);
-        c = ' ';
-      }
-      if(hdrlen <= sizeof(hdrbuf) - 1)
-        hdrbuf[hdrlen++] = (char) c;
-    }
   }
-  /* NOTREACHED */
+  curlx_dyn_free(&line);
+  return err;
 }
 
 static int get_param_part(char endchar,
@@ -563,14 +564,16 @@ static int get_param_part(char endchar,
             endpos--;
         sep = *p;
         *endpos = '\0';
-        fp = fopen(hdrfile, FOPEN_READTEXT);
-        if(!fp)
+        fp = curlx_fopen(hdrfile, FOPEN_READTEXT);
+        if(!fp) {
+          char errbuf[STRERROR_LEN];
           warnf("Cannot read from %s: %s", hdrfile,
-                strerror(errno));
+                curlx_strerror(errno, errbuf, sizeof(errbuf)));
+        }
         else {
-          int i = read_field_headers(hdrfile, fp, &headers);
+          int i = read_field_headers(fp, &headers);
 
-          fclose(fp);
+          curlx_fclose(fp);
           if(i) {
             curl_slist_free_all(headers);
             return -1;

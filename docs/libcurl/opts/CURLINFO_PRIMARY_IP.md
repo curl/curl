@@ -35,9 +35,9 @@ string holding the IP address of the most recent connection done with this
 get a pointer to a memory area that is reused at next request so you need to
 copy the string if you want to keep the information.
 
-The **ip** pointer is NULL or points to private memory. You MUST NOT free - it
-gets freed when you call curl_easy_cleanup(3) on the corresponding curl
-handle.
+The **ip** pointer is NULL or points to private memory. You **must not** free
+it. The memory gets freed automatically when you call curl_easy_cleanup(3) on
+the corresponding curl handle.
 
 # %PROTOCOLS%
 

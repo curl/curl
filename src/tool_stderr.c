@@ -50,12 +50,12 @@ void tool_set_stderr_file(const char *filename)
 
   /* precheck that filename is accessible to lessen the chance that the
      subsequent freopen will fail. */
-  fp = fopen(filename, FOPEN_WRITETEXT);
+  fp = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!fp) {
     warnf("Warning: Failed to open %s", filename);
     return;
   }
-  fclose(fp);
+  curlx_fclose(fp);
 
   /* freopen the actual stderr (stdio.h stderr) instead of tool_stderr since
      the latter may be set to stdout. */

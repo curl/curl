@@ -37,8 +37,7 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -383,29 +382,26 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
   *pnext = tail;
 }
 
-bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
-                              struct Curl_cfilter *discard,
-                              struct Curl_easy *data,
-                              bool destroy_always)
+bool Curl_conn_cf_discard(struct Curl_cfilter **pcf,
+                          struct Curl_easy *data)
 {
-  struct Curl_cfilter **pprev = &cf->next;
+  struct Curl_cfilter *cf = pcf ? *pcf : NULL;
   bool found = FALSE;
-
-  /* remove from sub-chain and destroy */
-  DEBUGASSERT(cf);
-  while(*pprev) {
-    if(*pprev == cf) {
-      *pprev = discard->next;
-      discard->next = NULL;
-      found = TRUE;
-      break;
+  if(cf) {
+    if(cf->conn) {
+      /* unlink if present in connection filter chain */
+      struct Curl_cfilter **pprev = &cf->conn->cfilter[cf->sockindex];
+      while(*pprev) {
+        if(*pprev == *pcf) {
+          *pprev = (*pcf)->next;
+          cf->next = NULL;
+          found = TRUE;
+          break;
+        }
+        pprev = &((*pprev)->next);
+      }
     }
-    pprev = &((*pprev)->next);
-  }
-  if(found || destroy_always) {
-    discard->next = NULL;
-    discard->cft->destroy(discard, data);
-    free(discard);
+    Curl_conn_cf_discard_chain(pcf, data);
   }
   return found;
 }
@@ -546,8 +542,9 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       Curl_pollfds_reset(&cpfds);
       /* In general, we want to send after connect, wait on that. */
       if(sockfd != CURL_SOCKET_BAD)
-        Curl_pollset_set_out_only(data, &ps, sockfd);
-      result = Curl_conn_adjust_pollset(data, data->conn, &ps);
+        result = Curl_pollset_set_out_only(data, &ps, sockfd);
+      if(!result)
+        result = Curl_conn_adjust_pollset(data, data->conn, &ps);
       if(result)
         goto out;
       result = Curl_pollfds_add_ps(&cpfds, &ps);
@@ -936,13 +933,14 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
 
 void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
 {
-  if(data->conn && CONN_SOCK_IDX_VALID(sockindex)) {
-    struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+  struct connectdata *conn = data->conn;
+  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
+    struct Curl_cfilter *cf = conn->cfilter[sockindex];
     if(cf)
       (void)Curl_conn_cf_cntrl(cf, data, TRUE,
                                CF_CTRL_FORGET_SOCKET, 0, NULL);
-    fake_sclose(data->conn->sock[sockindex]);
-    data->conn->sock[sockindex] = CURL_SOCKET_BAD;
+    fake_sclose(conn->sock[sockindex]);
+    conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
 }
 
@@ -968,13 +966,6 @@ CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
   return cf_cntrl_all(data->conn, data, FALSE,
                       CF_CTRL_DATA_SETUP, 0, NULL);
 }
-
-CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
-{
-  return cf_cntrl_all(data->conn, data, FALSE,
-                      CF_CTRL_DATA_IDLE, 0, NULL);
-}
-
 
 CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
 {

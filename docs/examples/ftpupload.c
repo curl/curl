@@ -37,6 +37,9 @@
 #include <io.h>
 #undef stat
 #define stat _stat
+#undef fstat
+#define fstat _fstat
+#define fileno _fileno
 #else
 #include <unistd.h>
 #endif
@@ -56,7 +59,7 @@
    you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
    do so might give you a crash since a DLL may not use the variable's memory
    when passed in to it from an app like this. */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   unsigned long nread;
   /* in real-world cases, this would probably get this data differently
@@ -78,28 +81,39 @@ int main(void)
   CURLcode res;
   FILE *hd_src;
   struct stat file_info;
-  unsigned long fsize;
+  curl_off_t fsize;
 
   struct curl_slist *headerlist = NULL;
-  static const char buf_1 [] = "RNFR " UPLOAD_FILE_AS;
-  static const char buf_2 [] = "RNTO " RENAME_FILE_TO;
+  static const char buf_1[] = "RNFR " UPLOAD_FILE_AS;
+  static const char buf_2[] = "RNTO " RENAME_FILE_TO;
 
-  /* get the file size of the local file */
-  if(stat(LOCAL_FILE, &file_info)) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
-    return 1;
-  }
-  fsize = (unsigned long)file_info.st_size;
-
-  printf("Local file size: %lu bytes.\n", fsize);
-
-  /* get a FILE * of the same file */
+  /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
-  if(!hd_src)
+  if(!hd_src) {
+    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 2;
+  }
+
+  /* to get the file size */
+#ifdef UNDER_CE
+  /* !checksrc! disable BANNEDFUNC 1 */
+  if(stat(LOCAL_FILE, &file_info) != 0) {
+#else
+  if(fstat(fileno(hd_src), &file_info) != 0) {
+#endif
+    fclose(hd_src);
+    return 1; /* cannot continue */
+  }
+  fsize = file_info.st_size;
+
+  printf("Local file size: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", fsize);
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(hd_src);
+    return (int)res;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -109,7 +123,7 @@ int main(void)
     headerlist = curl_slist_append(headerlist, buf_2);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* enable uploading */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -127,8 +141,7 @@ int main(void)
        option you MUST make sure that the type of the passed-in argument is a
        curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
        make sure that to pass in a type 'long' argument. */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     (curl_off_t)fsize);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, fsize);
 
     /* Now run off and do what you have been told! */
     res = curl_easy_perform(curl);
@@ -146,5 +159,5 @@ int main(void)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

@@ -1213,8 +1213,8 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
       if(!s) {
         result = CURLE_OUT_OF_MEMORY;
         break;
-        }
       }
+    }
     else {
       /* Data length specified. */
       size_t len;
@@ -1246,6 +1246,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
 
       data->set.postfieldsize = pfsize;         /* Replace data size. */
       s = cp;
+      cp = NULL;
     }
 
     result = curl_easy_setopt(easy, CURLOPT_POSTFIELDS, s);

@@ -76,6 +76,14 @@ For example, to insert the word hello 100 times:
 
     %repeat[100 x hello]%
 
+## Whitespace
+
+To add significant whitespace characters at the end of the line, or to empty
+lines:
+
+    %spc%
+    %tab%
+
 ## Insert capped epoch days
 
 Mostly to test capped cookie expire dates: `%days[NUM]` inserts the number of
@@ -513,7 +521,6 @@ Features testable here are:
 - `wakeup`
 - `win32`
 - `WinIDN`
-- `wolfssh`
 - `wolfssl`
 - `xattr`
 - `zstd`

@@ -62,6 +62,7 @@ HTTP over proxy-tunnel ignore TE and CL in CONNECT 2xx responses
 </command>
 <features>
 proxy
+verbose-strings
 </features>
 </client>
 
@@ -75,7 +76,7 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="yes">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

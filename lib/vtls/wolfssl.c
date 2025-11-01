@@ -69,7 +69,6 @@
 #include "../select.h"
 #include "../strdup.h"
 #include "x509asn1.h"
-#include "../curl_printf.h"
 #include "../multiif.h"
 
 #include <wolfssl/ssl.h>
@@ -358,12 +357,15 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  size_t nread;
+  size_t nread = 0;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(data);
-  /* OpenSSL catches this case, so should we. */
-  if(!buf)
+  if(!data || (blen < 0)) {
+    wssl->io_result = CURLE_FAILED_INIT;
+    return -1;
+  }
+  if(!buf || !blen)
     return 0;
 
   if((connssl->connecting_state == ssl_connect_2) &&
@@ -1095,9 +1097,6 @@ static CURLcode ssl_version(struct Curl_easy *data,
 }
 
 
-#define QUIC_CIPHERS                                                          \
-  "TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_"               \
-  "POLY1305_SHA256:TLS_AES_128_CCM_SHA256"
 #define QUIC_GROUPS "P-256:P-384:P-521"
 
 CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
@@ -1258,7 +1257,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 #endif
 
-  if(ssl_config->primary.cache_session && (transport != TRNSPRT_QUIC)) {
+  if(Curl_ssl_scache_use(cf, data) && (transport != TRNSPRT_QUIC)) {
     /* Register to get notified when a new session is received */
     wolfSSL_CTX_sess_set_new_cb(wctx->ssl_ctx, wssl_vtls_new_session_cb);
   }
@@ -1317,7 +1316,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 #endif
 
   /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     /* Set session from cache if there is one */
     (void)wssl_setup_session(cf, data, wctx, &alpns,
                              peer->scache_key, sess_reuse_cb);
@@ -1492,11 +1491,10 @@ wssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-  /* Enable RFC2818 checks */
-  if(conn_config->verifyhost) {
-    char *snihost = connssl->peer.sni ?
-      connssl->peer.sni : connssl->peer.hostname;
-    if(wolfSSL_check_domain_name(wssl->ssl, snihost) !=
+  /* Enable RFC2818 checks on domain names. This cannot check
+   * IP addresses which we need to do extra after the handshake. */
+  if(conn_config->verifyhost && connssl->peer.sni) {
+    if(wolfSSL_check_domain_name(wssl->ssl, connssl->peer.sni) !=
        WOLFSSL_SUCCESS) {
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -1547,6 +1545,8 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct wssl_ctx *wssl)
 {
+  WOLFSSL_X509 *x509 = NULL;
+  CURLcode result = CURLE_OK;
 #ifndef CURL_DISABLE_PROXY
   const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
@@ -1558,50 +1558,48 @@ CURLcode Curl_wssl_verify_pinned(struct Curl_cfilter *cf,
 
   if(pinnedpubkey) {
 #ifdef KEEP_PEER_CERT
-    WOLFSSL_X509 *x509;
     const char *x509_der;
     int x509_der_len;
     struct Curl_X509certificate x509_parsed;
     struct Curl_asn1Element *pubkey;
-    CURLcode result;
+
+    result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 
     x509 = wolfSSL_get_peer_certificate(wssl->ssl);
     if(!x509) {
       failf(data, "SSL: failed retrieving server certificate");
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
     }
 
     x509_der = (const char *)wolfSSL_X509_get_der(x509, &x509_der_len);
     if(!x509_der) {
       failf(data, "SSL: failed retrieving ASN.1 server certificate");
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
     }
 
     memset(&x509_parsed, 0, sizeof(x509_parsed));
     if(Curl_parseX509(&x509_parsed, x509_der, x509_der + x509_der_len))
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
 
     pubkey = &x509_parsed.subjectPublicKeyInfo;
     if(!pubkey->header || pubkey->end <= pubkey->header) {
       failf(data, "SSL: failed retrieving public key from server certificate");
-      return CURLE_SSL_PINNEDPUBKEYNOTMATCH;
+      goto end;
     }
 
-    result = Curl_pin_peer_pubkey(data,
-                                  pinnedpubkey,
+    result = Curl_pin_peer_pubkey(data, pinnedpubkey,
                                   (const unsigned char *)pubkey->header,
                                   (size_t)(pubkey->end - pubkey->header));
-    wolfSSL_FreeX509(x509);
-    if(result) {
+    if(result)
       failf(data, "SSL: public key does not match pinned public key");
-      return result;
-    }
 #else
     failf(data, "Library lacks pinning support built-in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
-  return CURLE_OK;
+end:
+  wolfSSL_FreeX509(x509);
+  return result;
 }
 
 #ifdef WOLFSSL_EARLY_DATA
@@ -1633,11 +1631,10 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
         break;
       default: {
         char error_buffer[256];
-        int detail = wolfSSL_get_error(wssl->ssl, err);
         CURL_TRC_CF(data, cf, "SSL send early data, error: '%s'(%d)",
                     wssl_strerror((unsigned long)err, error_buffer,
                                   sizeof(error_buffer)),
-                    detail);
+                    err);
         result = CURLE_SEND_ERROR;
         break;
       }
@@ -1720,6 +1717,25 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
 
   detail = wolfSSL_get_error(wssl->ssl, ret);
   CURL_TRC_CF(data, cf, "wolfSSL_connect() -> %d, detail=%d", ret, detail);
+
+  /* On a successful handshake with an IP address, do an extra check
+   * on the peer certificate */
+  if(ret == WOLFSSL_SUCCESS &&
+     conn_config->verifyhost &&
+     !connssl->peer.sni) {
+    /* we have an IP address as host name. */
+    WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(wssl->ssl);
+    if(!cert) {
+      failf(data, "unable to get peer certificate");
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
+    ret = wolfSSL_X509_check_ip_asc(cert, connssl->peer.hostname, 0);
+    CURL_TRC_CF(data, cf, "check peer certificate for IP match on %s -> %d",
+                connssl->peer.hostname, ret);
+    if(ret != WOLFSSL_SUCCESS)
+      detail = DOMAIN_NAME_MISMATCH;
+    wolfSSL_X509_free(cert);
+  }
 
   if(ret == WOLFSSL_SUCCESS) {
     return CURLE_OK;
@@ -1879,7 +1895,6 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
   char error_buffer[256];
   int nread = -1, err;
   size_t i;
-  int detail;
 
   DEBUGASSERT(wctx);
   if(!wctx->ssl || cf->shutdown) {
@@ -1921,7 +1936,8 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
    * was not complete, we are lacking the close notify from the server. */
   if(send_shutdown) {
     wolfSSL_ERR_clear_error();
-    if(wolfSSL_shutdown(wctx->ssl) == 1) {
+    nread = wolfSSL_shutdown(wctx->ssl);
+    if(nread == 1) {
       CURL_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
       goto out;
@@ -1959,11 +1975,10 @@ static CURLcode wssl_shutdown(struct Curl_cfilter *cf,
     connssl->io_need = CURL_SSL_IO_NEED_SEND;
     break;
   default:
-    detail = wolfSSL_get_error(wctx->ssl, err);
     CURL_TRC_CF(data, cf, "SSL shutdown, error: '%s'(%d)",
                 wssl_strerror((unsigned long)err, error_buffer,
                               sizeof(error_buffer)),
-                detail);
+                err);
     result = CURLE_RECV_ERROR;
     break;
   }
@@ -2055,9 +2070,9 @@ static CURLcode wssl_recv(struct Curl_cfilter *cf,
 size_t Curl_wssl_version(char *buffer, size_t size)
 {
 #if LIBWOLFSSL_VERSION_HEX >= 0x03006000
-  return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
+  return curl_msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
 #elif defined(WOLFSSL_VERSION)
-  return msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
+  return curl_msnprintf(buffer, size, "wolfSSL/%s", WOLFSSL_VERSION);
 #endif
 }
 

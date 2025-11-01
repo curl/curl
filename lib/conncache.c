@@ -45,8 +45,7 @@
 #include "curlx/strparse.h"
 #include "uint-table.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -79,7 +78,7 @@
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
   size_t dest_len; /* total length of destination, including NUL */
-  char *dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
+  char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
 
 
@@ -91,13 +90,13 @@ static void cpool_discard_conn(struct cpool *cpool,
 static struct cpool_bundle *cpool_bundle_create(const char *dest)
 {
   struct cpool_bundle *bundle;
-  size_t dest_len = strlen(dest);
+  size_t dest_len = strlen(dest) + 1;
 
-  bundle = calloc(1, sizeof(*bundle) + dest_len);
+  bundle = calloc(1, sizeof(*bundle) + dest_len - 1);
   if(!bundle)
     return NULL;
   Curl_llist_init(&bundle->conns, NULL);
-  bundle->dest_len = dest_len + 1;
+  bundle->dest_len = dest_len;
   memcpy(bundle->dest, dest, bundle->dest_len);
   return bundle;
 }
@@ -320,7 +319,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
   struct connectdata *oldest_idle = NULL;
   struct cpool_bundle *bundle;
   struct curltime now;
-  timediff_t highscore =- 1;
+  timediff_t highscore = -1;
   timediff_t score;
 
   now = curlx_now();
@@ -532,11 +531,18 @@ static bool cpool_foreach(struct Curl_easy *data,
 bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  unsigned int maxconnects = !data->multi->maxconnects ?
-    (Curl_multi_xfers_running(data->multi) * 4) : data->multi->maxconnects;
+  unsigned int maxconnects;
   struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
+
+  if(!data->multi->maxconnects) {
+    unsigned int running = Curl_multi_xfers_running(data->multi);
+    maxconnects = (running <= UINT_MAX / 4) ? running * 4 : UINT_MAX;
+  }
+  else {
+    maxconnects = data->multi->maxconnects;
+  }
 
   conn->lastused = curlx_now(); /* it was used up until now */
   if(cpool && maxconnects) {
@@ -895,7 +901,7 @@ void Curl_cpool_print(struct cpool *cpool)
   if(!cpool)
     return;
 
-  fprintf(stderr, "=Bundle cache=\n");
+  curl_mfprintf(stderr, "=Bundle cache=\n");
 
   Curl_hash_start_iterate(cpool->dest2bundle, &iter);
 
@@ -906,15 +912,15 @@ void Curl_cpool_print(struct cpool *cpool)
 
     bundle = he->ptr;
 
-    fprintf(stderr, "%s -", he->key);
+    curl_mfprintf(stderr, "%s -", he->key);
     curr = Curl_llist_head(bundle->conns);
     while(curr) {
       conn = Curl_node_elem(curr);
 
-      fprintf(stderr, " [%p %d]", (void *)conn, conn->refcount);
+      curl_mfprintf(stderr, " [%p %d]", (void *)conn, conn->refcount);
       curr = Curl_node_next(curr);
     }
-    fprintf(stderr, "\n");
+    curl_mfprintf(stderr, "\n");
 
     he = Curl_hash_next_element(&iter);
   }

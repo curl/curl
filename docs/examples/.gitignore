@@ -35,7 +35,6 @@ getreferrer
 ghiper
 headerapi
 hiperfifo
-href_extractor
 hsts-preload
 htmltidy
 http-options
@@ -69,6 +68,7 @@ interface
 ipv6
 keepalive
 localport
+log_failed_transfers
 maxconnects
 multi-app
 multi-debugcallback

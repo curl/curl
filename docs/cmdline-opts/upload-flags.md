@@ -4,6 +4,7 @@ SPDX-License-Identifier: curl
 Long: upload-flags
 Arg: <flags>
 Help: IMAP upload behavior
+Protocols: IMAP
 Category: curl output
 Added: 8.13.0
 Multi: single

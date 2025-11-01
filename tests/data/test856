@@ -39,7 +39,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:wrong
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS wrong

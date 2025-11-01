@@ -43,10 +43,10 @@ request MOOO
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 MOOO /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: agent007 license to drill	
+User-Agent: agent007 license to drill%tab%
 Accept: */*
 
 </protocol>

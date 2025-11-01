@@ -1,5 +1,0 @@
-banfunc snprintf
-banfunc sscanf
-banfunc strerror
-banfunc strtol
-banfunc vsnprint

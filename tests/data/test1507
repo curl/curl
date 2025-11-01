@@ -39,7 +39,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:<%TESTNUMBER-realuser@example.com>
 RCPT TO:<%TESTNUMBER-recipient@example.com>

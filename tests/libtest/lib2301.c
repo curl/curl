@@ -42,7 +42,7 @@ static void t2301_websocket(CURL *curl)
 
 static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
 {
-  CURL *easy = p;
+  CURL *curl = p;
   unsigned char *buffer = (unsigned char *)b;
   size_t i;
   size_t sent;
@@ -59,7 +59,7 @@ static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
   if(buffer[0] == 0x89) {
     CURLcode result;
     curl_mfprintf(stderr, "send back a simple PONG\n");
-    result = curl_ws_send(easy, pong, 2, &sent, 0, 0);
+    result = curl_ws_send(curl, pong, 2, &sent, 0, 0);
     if(result)
       nitems = 0;
   }

@@ -40,8 +40,8 @@
 #include "curlx/warnless.h"
 #include "multihandle.h"
 #include "socks.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -50,8 +50,6 @@ static void mev_in_callback(struct Curl_multi *multi, bool value)
 {
   multi->in_callback = value;
 }
-
-#define CURL_MEV_CONN_HASH_SIZE 3
 
 /* Information about a socket for which we inform the libcurl application
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
@@ -509,7 +507,7 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
       goto out;
     }
   }
-  else if(data)
+  else
     Curl_multi_pollset(data, &ps, "ev assess");
   last_ps = mev_get_last_pollset(data, conn);
 
@@ -635,8 +633,6 @@ void Curl_multi_ev_conn_done(struct Curl_multi *multi,
   (void)mev_assess(multi, data, conn);
   Curl_conn_meta_remove(conn, CURL_META_MEV_POLLSET);
 }
-
-#define CURL_MEV_PS_HASH_SLOTS   (991)  /* nice prime */
 
 void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)
 {

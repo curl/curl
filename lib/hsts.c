@@ -32,17 +32,16 @@
 #include "urldata.h"
 #include "llist.h"
 #include "hsts.h"
+#include "curl_fopen.h"
 #include "curl_get_line.h"
 #include "sendf.h"
 #include "parsedate.h"
-#include "fopen.h"
 #include "rename.h"
 #include "share.h"
 #include "strdup.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -308,9 +307,9 @@ static CURLcode hsts_push(struct Curl_easy *data,
     if(result)
       return result;
 
-    msnprintf(e.expire, sizeof(e.expire), "%d%02d%02d %02d:%02d:%02d",
-              stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-              stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+    curl_msnprintf(e.expire, sizeof(e.expire), "%d%02d%02d %02d:%02d:%02d",
+                   stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                   stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
     strcpy(e.expire, UNLIMITED);
@@ -331,14 +330,14 @@ static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
     CURLcode result = Curl_gmtime((time_t)sts->expires, &stamp);
     if(result)
       return result;
-    fprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
-            sts->includeSubDomains ? ".": "", sts->host,
-            stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-            stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
+    curl_mfprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
+                  sts->includeSubDomains ? ".": "", sts->host,
+                  stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                  stamp.tm_hour, stamp.tm_min, stamp.tm_sec);
   }
   else
-    fprintf(fp, "%s%s \"%s\"\n",
-            sts->includeSubDomains ? ".": "", sts->host, UNLIMITED);
+    curl_mfprintf(fp, "%s%s \"%s\"\n",
+                  sts->includeSubDomains ? ".": "", sts->host, UNLIMITED);
   return CURLE_OK;
 }
 
@@ -379,7 +378,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
       if(result)
         break;
     }
-    fclose(out);
+    curlx_fclose(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
@@ -524,25 +523,29 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
   if(!h->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
+    bool eof = FALSE;
     curlx_dyn_init(&buf, MAX_HSTS_LINE);
-    while(Curl_get_line(&buf, fp)) {
-      const char *lineptr = curlx_dyn_ptr(&buf);
-      curlx_str_passblanks(&lineptr);
+    do {
+      result = Curl_get_line(&buf, fp, &eof);
+      if(!result) {
+        const char *lineptr = curlx_dyn_ptr(&buf);
+        curlx_str_passblanks(&lineptr);
 
-      /*
-       * Skip empty or commented lines, since we know the line will have a
-       * trailing newline from Curl_get_line we can treat length 1 as empty.
-       */
-      if((*lineptr == '#') || strlen(lineptr) <= 1)
-        continue;
+        /*
+         * Skip empty or commented lines, since we know the line will have a
+         * trailing newline from Curl_get_line we can treat length 1 as empty.
+         */
+        if((*lineptr == '#') || strlen(lineptr) <= 1)
+          continue;
 
-      hsts_add(h, lineptr);
-    }
+        hsts_add(h, lineptr);
+      }
+    } while(!result && !eof);
     curlx_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    curlx_fclose(fp);
   }
   return result;
 }

@@ -30,10 +30,6 @@
 #ifndef HAVE_GETPASS_R
 /* this file is only for systems without getpass_r() */
 
-#ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-#endif
-
 #ifdef HAVE_TERMIOS_H
 #  include <termios.h>
 #elif defined(HAVE_TERMIO_H)
@@ -178,7 +174,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
 {
   ssize_t nread;
   bool disabled;
-  int fd = open("/dev/tty", O_RDONLY);
+  int fd = curlx_open("/dev/tty", O_RDONLY);
   if(fd == -1)
     fd = STDIN_FILENO; /* use stdin if the tty could not be used */
 

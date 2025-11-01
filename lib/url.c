@@ -80,7 +80,6 @@
 #include "progress.h"
 #include "cookie.h"
 #include "strcase.h"
-#include "strerror.h"
 #include "escape.h"
 #include "share.h"
 #include "content_encoding.h"
@@ -98,7 +97,6 @@
 #include "hsts.h"
 #include "noproxy.h"
 #include "cfilters.h"
-#include "curl_krb5.h"
 #include "idn.h"
 
 /* And now for the protocols */
@@ -126,9 +124,10 @@
 #include "altsvc.h"
 #include "curlx/dynbuf.h"
 #include "headers.h"
+#include "curlx/strerr.h"
 #include "curlx/strparse.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -356,20 +355,26 @@ CURLcode Curl_close(struct Curl_easy **datap)
  * Initialize the UserDefined fields within a Curl_easy.
  * This may be safely called on a new or existing Curl_easy.
  */
-CURLcode Curl_init_userdefined(struct Curl_easy *data)
+void Curl_init_userdefined(struct Curl_easy *data)
 {
   struct UserDefined *set = &data->set;
-  CURLcode result = CURLE_OK;
 
   set->out = stdout;  /* default output to stdout */
   set->in_set = stdin;  /* default input from stdin */
   set->err = stderr;  /* default stderr to stderr */
 
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
   /* use fwrite as default function to store output */
   set->fwrite_func = (curl_write_callback)fwrite;
 
   /* use fread as default function to read input */
   set->fread_func_set = (curl_read_callback)fread;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
   set->is_fread_set = 0;
 
   set->seek_client = ZERO_NULL;
@@ -429,36 +434,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->socks5_gssapi_nec = FALSE;
 #endif
 
-  /* Set the default CA cert bundle/path detected/specified at build time.
-   *
-   * If Schannel is the selected SSL backend then these locations are ignored.
-   * We allow setting CA location for Schannel when explicitly specified by
-   * the user via CURLOPT_CAINFO / --cacert.
-   */
-  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
-#ifdef CURL_CA_BUNDLE
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
-    if(result)
-      return result;
-#ifndef CURL_DISABLE_PROXY
-    result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
-                            CURL_CA_BUNDLE);
-    if(result)
-      return result;
-#endif
-#endif
-#ifdef CURL_CA_PATH
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
-    if(result)
-      return result;
-#ifndef CURL_DISABLE_PROXY
-    result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
-    if(result)
-      return result;
-#endif
-#endif
-  }
-
   /* set default minimum TLS version */
 #ifdef USE_SSL
   Curl_setopt_SSLVERSION(data, CURLOPT_SSLVERSION, CURL_SSLVERSION_DEFAULT);
@@ -500,8 +475,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->ws_raw_mode = FALSE;
   set->ws_no_auto_pong = FALSE;
 #endif
-
-  return result;
 }
 
 /* easy->meta_hash destructor. Should never be called as elements
@@ -525,14 +498,13 @@ static void easy_meta_freeentry(void *p)
 
 CURLcode Curl_open(struct Curl_easy **curl)
 {
-  CURLcode result;
   struct Curl_easy *data;
 
   /* simple start-up: alloc the struct, init it with zeroes and return */
   data = calloc(1, sizeof(struct Curl_easy));
   if(!data) {
     /* this is a serious error */
-    DEBUGF(fprintf(stderr, "Error: calloc of Curl_easy failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: calloc of Curl_easy failed\n"));
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -556,21 +528,10 @@ CURLcode Curl_open(struct Curl_easy **curl)
   Curl_llist_init(&data->state.httphdrs, NULL);
 #endif
   Curl_netrc_init(&data->state.netrc);
+  Curl_init_userdefined(data);
 
-  result = Curl_init_userdefined(data);
-
-  if(result) {
-    curlx_dyn_free(&data->state.headerb);
-    Curl_freeset(data);
-    Curl_req_free(&data->req, data);
-    Curl_hash_destroy(&data->meta_hash);
-    data->magic = 0;
-    free(data);
-    data = NULL;
-  }
-  else
-    *curl = data;
-  return result;
+  *curl = data;
+  return CURLE_OK;
 }
 
 void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
@@ -599,7 +560,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->http_proxy.host.rawalloc); /* http proxy name buffer */
   Curl_safefree(conn->socks_proxy.host.rawalloc); /* socks proxy name buffer */
 #endif
-  Curl_sec_conn_destroy(conn);
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
   Curl_safefree(conn->sasl_authzid);
@@ -902,8 +862,8 @@ static bool url_match_fully_connected(struct connectdata *conn,
                                       struct url_conn_match *m)
 {
   if(!Curl_conn_is_connected(conn, FIRSTSOCKET) ||
-     conn->bits.asks_multiplex) {
-    /* Not yet connected, or not yet decided if it multiplexes. The later
+     conn->bits.upgrade_in_progress) {
+    /* Not yet connected, or a protocol upgrade is in progress. The later
      * happens for HTTP/2 Upgrade: requests that need a response. */
     if(m->may_multiplex) {
       m->seen_pending_conn = TRUE;
@@ -972,15 +932,16 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
 static bool url_match_ssl_use(struct connectdata *conn,
                               struct url_conn_match *m)
 {
-  if(m->needle->handler->flags&PROTOPT_SSL) {
+  if(m->needle->handler->flags & PROTOPT_SSL) {
     /* We are looking for SSL, if `conn` does not do it, not a match. */
     if(!Curl_conn_is_ssl(conn, FIRSTSOCKET))
       return FALSE;
   }
   else if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    /* We are not *requiring* SSL, however `conn` has it. If the
-     * protocol *family* is not the same, not a match. */
-    if(get_protocol_family(conn->handler) != m->needle->handler->protocol)
+    /* If the protocol does not allow reuse of SSL connections OR
+       is of another protocol family, not a match. */
+    if(!(m->needle->handler->flags & PROTOPT_SSL_REUSE) ||
+       (get_protocol_family(conn->handler) != m->needle->handler->protocol))
       return FALSE;
   }
   return TRUE;
@@ -1263,6 +1224,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_connect_config(conn, m))
     return FALSE;
 
+  /* match for destination and protocol? */
   if(!url_match_destination(conn, m))
     return FALSE;
 
@@ -1448,10 +1410,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   /* Initialize the attached xfers bitset */
   Curl_uint_spbset_init(&conn->xfers_attached);
 
-#ifdef HAVE_GSSAPI
-  conn->data_prot = PROT_CLEAR;
-#endif
-
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
     conn->localdev = strdup(data->set.str[STRING_DEVICE]);
@@ -1610,7 +1568,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-#if defined(USE_SSH) && !defined(USE_WOLFSSH)
+#if defined(USE_SSH)
     &Curl_handler_scp,
 #else
     NULL,
@@ -1786,7 +1744,7 @@ static void zonefrom_url(CURLU *uh, struct Curl_easy *data,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
         char buffer[STRERROR_LEN];
         infof(data, "Invalid zoneid: %s; %s", zoneid,
-              Curl_strerror(errno, buffer, sizeof(buffer)));
+              curlx_strerror(errno, buffer, sizeof(buffer)));
 #endif
       }
       else
@@ -1828,8 +1786,9 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
 
   if(data->set.str[STRING_DEFAULT_PROTOCOL] &&
      !Curl_is_absolute_url(data->state.url, NULL, 0, TRUE)) {
-    char *url = aprintf("%s://%s", data->set.str[STRING_DEFAULT_PROTOCOL],
-                        data->state.url);
+    char *url = curl_maprintf("%s://%s",
+                              data->set.str[STRING_DEFAULT_PROTOCOL],
+                              data->state.url);
     if(!url)
       return CURLE_OUT_OF_MEMORY;
     if(data->state.url_alloc)
@@ -2040,7 +1999,7 @@ static CURLcode setup_range(struct Curl_easy *data)
       free(s->range);
 
     if(s->resume_from)
-      s->range = aprintf("%" FMT_OFF_T "-", s->resume_from);
+      s->range = curl_maprintf("%" FMT_OFF_T "-", s->resume_from);
     else
       s->range = strdup(data->set.str[STRING_SET_RANGE]);
 
@@ -2098,9 +2057,10 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   }
 
 #ifdef USE_IPV6
-  conn->destination = aprintf("%u/%d/%s", conn->scope_id, port, hostname);
+  conn->destination = curl_maprintf("%u/%d/%s", conn->scope_id, port,
+                                    hostname);
 #else
-  conn->destination = aprintf("%d/%s", port, hostname);
+  conn->destination = curl_maprintf("%d/%s", port, hostname);
 #endif
   if(!conn->destination)
     return CURLE_OUT_OF_MEMORY;
@@ -2148,7 +2108,8 @@ static char *detect_proxy(struct Curl_easy *data,
   (void)data;
 #endif
 
-  msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy", conn->handler->scheme);
+  curl_msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy",
+                 conn->handler->scheme);
 
   /* read the protocol proxy: */
   proxy = curl_getenv(proxy_env);
@@ -2366,7 +2327,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     if(strcmp("/", path)) {
       is_unix_proxy = TRUE;
       free(host);
-      host = aprintf(UNIX_SOCKET_PREFIX"%s", path);
+      host = curl_maprintf(UNIX_SOCKET_PREFIX"%s", path);
       if(!host) {
         result = CURLE_OUT_OF_MEMORY;
         goto error;
@@ -2714,7 +2675,7 @@ static CURLcode parse_remote_port(struct Curl_easy *data,
     char portbuf[16];
     CURLUcode uc;
     conn->remote_port = data->set.use_port;
-    msnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
+    curl_msnprintf(portbuf, sizeof(portbuf), "%d", conn->remote_port);
     uc = curl_url_set(data->state.uh, CURLUPART_PORT, portbuf, 0);
     if(uc)
       return CURLE_OUT_OF_MEMORY;
@@ -3025,10 +2986,10 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
   else {
     /* check whether the URL's hostname matches */
     size_t hostname_to_match_len;
-    char *hostname_to_match = aprintf("%s%s%s",
-                                      conn->bits.ipv6_ip ? "[" : "",
-                                      conn->host.name,
-                                      conn->bits.ipv6_ip ? "]" : "");
+    char *hostname_to_match = curl_maprintf("%s%s%s",
+                                            conn->bits.ipv6_ip ? "[" : "",
+                                            conn->host.name,
+                                            conn->bits.ipv6_ip ? "]" : "");
     if(!hostname_to_match)
       return CURLE_OUT_OF_MEMORY;
     hostname_to_match_len = strlen(hostname_to_match);
@@ -3326,6 +3287,14 @@ static CURLcode resolve_server(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static void url_move_hostname(struct hostname *dest, struct hostname *src)
+{
+  Curl_safefree(dest->rawalloc);
+  Curl_free_idnconverted_hostname(dest);
+  *dest = *src;
+  memset(src, 0, sizeof(*src));
+}
+
 /*
  * Cleanup the connection `temp`, just allocated for `data`, before using the
  * previously `existing` one for `data`. All relevant info is copied over
@@ -3380,15 +3349,9 @@ static void reuse_conn(struct Curl_easy *data,
    *       used the original hostname in SNI to negotiate? Do we send
    *       requests for another host through the different SNI?
    */
-  Curl_free_idnconverted_hostname(&existing->host);
-  Curl_free_idnconverted_hostname(&existing->conn_to_host);
-  Curl_safefree(existing->host.rawalloc);
-  Curl_safefree(existing->conn_to_host.rawalloc);
-  existing->host = temp->host;
-  temp->host.rawalloc = NULL;
-  temp->host.encalloc = NULL;
-  existing->conn_to_host = temp->conn_to_host;
-  temp->conn_to_host.rawalloc = NULL;
+  url_move_hostname(&existing->host, &temp->host);
+  url_move_hostname(&existing->conn_to_host, &temp->conn_to_host);
+
   existing->conn_to_port = temp->conn_to_port;
   existing->remote_port = temp->remote_port;
   free(existing->hostname_resolve);
@@ -3466,10 +3429,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
   /* Do the unfailable inits first, before checks that may early return */
   Curl_hash_init(&conn->meta_hash, 23,
-               Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
-
-  /* GSSAPI related inits */
-  Curl_sec_conn_init(conn);
+                 Curl_hash_str, curlx_str_key_compare, conn_meta_freeentry);
 
   result = parseurlandfillconn(data, conn);
   if(result)
@@ -3749,7 +3709,7 @@ static CURLcode create_conn(struct Curl_easy *data,
        */
       result = Curl_ssl_conn_config_init(data, conn);
       if(result) {
-        DEBUGF(fprintf(stderr, "Error: init connection ssl config\n"));
+        DEBUGF(curl_mfprintf(stderr, "Error: init connection ssl config\n"));
         goto out;
       }
 

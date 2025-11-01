@@ -225,7 +225,7 @@ typedef CURLcode Curl_bufq_reader(void *reader_ctx,
                                   size_t *pnread);
 
 /**
- * Read date and append it to the end of the buffer queue until the
+ * Read bytes and append them to the end of the buffer queue until the
  * reader returns blocking or the queue is full. A reader returns
  * CURLE_AGAIN to indicate blocking.
  * Returns the total amount of buf read (may be 0) in `pnread` on success.

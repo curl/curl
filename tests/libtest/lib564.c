@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
+#include "testtrace.h"
 #include "memdebug.h"
 
 static CURLcode test_lib564(const char *URL)
@@ -30,7 +31,10 @@ static CURLcode test_lib564(const char *URL)
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   int running;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
+
+  debug_config.nohex = TRUE;
+  debug_config.tracetime = TRUE;
 
   start_test_timing();
 
@@ -39,13 +43,15 @@ static CURLcode test_lib564(const char *URL)
   easy_init(curl);
 
   easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
   easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
   curl_mfprintf(stderr, "Start at URL 0\n");
 
@@ -57,7 +63,7 @@ static CURLcode test_lib564(const char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    multi_perform(m, &running);
+    multi_perform(multi, &running);
 
     abort_on_test_timeout();
 
@@ -68,7 +74,7 @@ static CURLcode test_lib564(const char *URL)
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    multi_fdset(m, &rd, &wr, &exc, &maxfd);
+    multi_fdset(multi, &rd, &wr, &exc, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -82,7 +88,7 @@ test_cleanup:
   /* undocumented cleanup sequence - type UB */
 
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   return res;

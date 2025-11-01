@@ -68,6 +68,10 @@ static CURLcode test_unit2604(const char *arg)
     { "\"\" c", "", "", "", CURLE_QUOTE_ERROR},
     { "foo\"", "foo\"", "", "/", CURLE_OK},
     { "foo \"", "foo", "\"", "/", CURLE_OK},
+    { "   \t\t   \t  ", "", "", "/", CURLE_QUOTE_ERROR},
+    { "              ", "", "", "/", CURLE_QUOTE_ERROR},
+    { "", "", "", "/", CURLE_QUOTE_ERROR},
+    { "       \r \n  ", "\r", "\n  ", "/", CURLE_OK},
     { NULL, NULL, NULL, NULL, CURLE_OK }
   };
 
@@ -83,21 +87,21 @@ static CURLcode test_unit2604(const char *arg)
     char *path;
     const char *cp = i == 0 ? cp0 : list[i].cp;
     CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
-    printf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
-           list[i].cp, list[i].home, list[i].result);
+    curl_mprintf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
+                 list[i].cp, list[i].home, list[i].result);
     if(result != list[i].result) {
-      printf("... returned %d\n", result);
+      curl_mprintf("... returned %d\n", result);
       unitfail++;
     }
     if(!result) {
       if(cp && strcmp(cp, list[i].next)) {
-        printf("... cp points to '%s', not '%s' as expected \n",
-               cp, list[i].next);
+        curl_mprintf("... cp points to '%s', not '%s' as expected \n",
+                     cp, list[i].next);
         unitfail++;
       }
       if(path && strcmp(path, list[i].expect)) {
-        printf("... gave '%s', not '%s' as expected \n",
-               path, list[i].expect);
+        curl_mprintf("... gave '%s', not '%s' as expected \n",
+                     path, list[i].expect);
         unitfail++;
       }
       curl_free(path);

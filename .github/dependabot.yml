@@ -7,4 +7,30 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'weekly'
+      interval: 'monthly'
+    cooldown:
+      default-days: 7
+    groups:
+      actions-deps:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: 'GHA:'
+
+  - package-ecosystem: 'pip'
+    directories:
+      - '/.github/scripts'
+      - '/tests'
+    schedule:
+      interval: 'monthly'
+    cooldown:
+      default-days: 7
+      semver-major-days: 15
+      semver-minor-days: 7
+      semver-patch-days: 3
+    groups:
+      actions-deps:
+        patterns:
+          - '*'
+    commit-message:
+      prefix: 'GHA:'

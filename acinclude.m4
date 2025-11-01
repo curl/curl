@@ -1149,6 +1149,12 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   capath_warning="   (warning: certs not found)"
   check_capath=""
 
+  if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
+    ca_native="Apple SecTrust"
+  else
+    ca_native="no"
+  fi
+
   if test "x$want_ca" != "xno" -a "x$want_ca" != "xunset" -a \
           "x$want_capath" != "xno" -a "x$want_capath" != "xunset"; then
     dnl both given
@@ -1162,6 +1168,10 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     dnl --with-ca-path given
     capath="$want_capath"
     ca="no"
+  elif test "x$ca_native" != "xno"; then
+    # native ca configured, do not look further
+    ca="no"
+    capath="no"
   else
     dnl First try auto-detecting a CA bundle, then a CA path.
     dnl Both auto-detections can be skipped by --without-ca-*
@@ -1474,14 +1484,6 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   if test "$curl_cv_winuwp" = 'yes'; then
     curl_pflags="${curl_pflags} UWP"
   fi
-  case $host in
-    *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
-      curl_pflags="${curl_pflags} UNIX";;
-  esac
-  case $host in
-    *-*-*bsd*)
-      curl_pflags="${curl_pflags} BSD";;
-  esac
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi
@@ -1491,6 +1493,11 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   esac
   if test "x$compiler_id" = 'xGNU_C'; then
     curl_pflags="${curl_pflags} GCC"
+  fi
+  if test "$compiler_id" = "APPLECLANG"; then
+    curl_pflags="${curl_pflags} APPLE-CLANG"
+  elif test "$compiler_id" = "CLANG"; then
+    curl_pflags="${curl_pflags} LLVM-CLANG"
   fi
   case $host_os in
     mingw*) curl_pflags="${curl_pflags} MINGW";;

@@ -20,7 +20,6 @@ name: 'Fuzzer'
       - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
@@ -35,7 +34,11 @@ name: 'Fuzzer'
       - 'plan9/**'
       - 'projects/**'
       - 'tests/data/**'
-      - 'winbuild/**'
+
+concurrency:
+  # Hard-coded workflow name to avoid colliding with curl-fuzzer's group
+  group: curl-fuzz-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions: {}
 

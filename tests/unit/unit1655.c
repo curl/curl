@@ -67,7 +67,7 @@ static CURLcode test_unit1655(const char *arg)
       "this.is.an.otherwise-valid.hostname."
       "with-a-label-of-greater-length-than-the-sixty-three-characters-"
       "specified.in.the.RFCs.";
-    int i;
+    size_t i;
 
     struct test {
       const char *name;
@@ -89,7 +89,7 @@ static CURLcode test_unit1655(const char *arg)
       { max, DOH_OK }                      /* expect buffer overwrite */
     };
 
-    for(i = 0; i < (int)(CURL_ARRAYSIZE(playlist)); i++) {
+    for(i = 0; i < CURL_ARRAYSIZE(playlist); i++) {
       const char *name = playlist[i].name;
       size_t olen = 100000;
       struct demo victim;

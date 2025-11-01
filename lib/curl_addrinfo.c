@@ -53,8 +53,8 @@
 #include "fake_addrinfo.h"
 #include "curlx/inet_pton.h"
 #include "curlx/warnless.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -507,9 +507,11 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
     if(env)
       r_freeaddrinfo(freethis);
     else
+      /* !checksrc! disable BANNEDFUNC 1 */
       freeaddrinfo(freethis);
   }
 #else
+  /* !checksrc! disable BANNEDFUNC 1 */
   freeaddrinfo(freethis);
 #endif
 }
@@ -540,8 +542,10 @@ curl_dbg_getaddrinfo(const char *hostname,
   if(env)
     res = r_getaddrinfo(hostname, service, hints, result);
   else
+    /* !checksrc! disable BANNEDFUNC 1 */
     res = getaddrinfo(hostname, service, hints, result);
 #else
+  /* !checksrc! disable BANNEDFUNC 1 */
   int res = getaddrinfo(hostname, service, hints, result);
 #endif
   if(res == 0)

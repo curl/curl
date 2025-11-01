@@ -18,7 +18,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data1>
-<data2>
+<data2 crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -26,7 +26,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data2>
-<data3>
+<data3 crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -34,7 +34,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data3>
-<data4>
+<data4 crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -48,6 +48,7 @@ file contents should appear once for each file
 <client>
 <features>
 http/3
+verbose-strings
 </features>
 <server>
 http/3

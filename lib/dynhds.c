@@ -26,12 +26,12 @@
 #include "dynhds.h"
 #include "strcase.h"
 
-/* The last 3 #include files should be in this order */
 #ifdef USE_NGHTTP2
 #include <stdint.h>
 #include <nghttp2/nghttp2.h>
 #endif /* USE_NGHTTP2 */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 

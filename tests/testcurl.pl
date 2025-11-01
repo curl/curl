@@ -584,8 +584,10 @@ if(-f "./libcurl.pc") {
     }
 }
 
+my $f;
+
 logit_spaced "display lib/$confheader";
-open(my $f, "<", "lib/$confheader") or die "lib/$confheader: $!";
+open($f, "<", "lib/$confheader") or die "lib/$confheader: $!";
 while(<$f>) {
     print if /^ *#/;
 }
@@ -660,7 +662,7 @@ if(($have_embedded_ares) &&
 
 my $mkcmd = "$make -i" . ($targetos && !$configurebuild ? " $targetos" : "");
 logit "$mkcmd";
-open(my $f, "-|", "$mkcmd 2>&1") or die;
+open($f, "-|", "$mkcmd 2>&1") or die;
 while(<$f>) {
     s/$pwd//g;
     print;

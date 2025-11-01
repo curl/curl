@@ -335,6 +335,7 @@ This is the full list of functions generally banned.
     _mbscat
     _mbsncat
     _tcscat
+    _tcsdup
     _tcsncat
     _waccess
     _wcscat
@@ -361,6 +362,6 @@ This is the full list of functions generally banned.
     strtok_r
     strtol
     strtoul
-    vsnprint
+    vsnprintf
     vsprintf
     wcsdup

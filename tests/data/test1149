@@ -42,7 +42,7 @@ ftp://%HOSTIP:%FTPPORT/list/this/path/%TESTNUMBER/ --ftp-method multicwd --next 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -81,6 +81,8 @@ fail:
 
 /*
 ** callback for CURLOPT_HEADERFUNCTION
+*
+* 'size' is always 1
 */
 size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 {
@@ -116,7 +118,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 
   if(per->config->headerfile && heads->stream) {
     size_t rc = fwrite(ptr, size, nmemb, heads->stream);
-    if(rc != cb)
+    if(rc != nmemb)
       return rc;
     /* flush the stream to send off what we got earlier */
     if(fflush(heads->stream)) {
@@ -164,7 +166,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           }
 #endif
 
-          fwrite(etag_h, size, etag_length, etag_save->stream);
+          fwrite(etag_h, 1, etag_length, etag_save->stream);
           /* terminate with newline */
           fputc('\n', etag_save->stream);
           (void)fflush(etag_save->stream);
@@ -215,8 +217,8 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
             }
 
             if(per->config->output_dir) {
-              outs->filename = aprintf("%s/%s", per->config->output_dir,
-                                       filename);
+              outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
+                                             filename);
               free(filename);
               if(!outs->filename)
                 return CURL_WRITEFUNC_ERROR;
@@ -246,7 +248,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
          hdrcbdata->config->show_headers) {
         /* still awaiting the Content-Disposition header, store the header in
            memory. Since it is not null-terminated, we need an extra dance. */
-        char *clone = aprintf("%.*s", (int)cb, str);
+        char *clone = curl_maprintf("%.*s", (int)cb, str);
         if(clone) {
           struct curl_slist *old = hdrcbdata->headlist;
           hdrcbdata->headlist = curl_slist_append(old, clone);
@@ -293,7 +295,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
       value = memchr(ptr, ':', cb);
     if(value) {
       size_t namelen = value - ptr;
-      fprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", (int)namelen, ptr);
+      curl_mfprintf(outs->stream, BOLD "%.*s" BOLDOFF ":", (int)namelen, ptr);
 #ifndef LINK
       fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
 #else
@@ -459,10 +461,10 @@ static void write_linked_location(CURL *curl, const char *location,
      !strcmp("https", scheme) ||
      !strcmp("ftp", scheme) ||
      !strcmp("ftps", scheme)) {
-    fprintf(stream, "%.*s" LINK "%s" LINKST "%.*s" LINKOFF,
-            space_skipped, location,
-            finalurl,
-            (int)loclen - space_skipped, loc);
+    curl_mfprintf(stream, "%.*s" LINK "%s" LINKST "%.*s" LINKOFF,
+                  space_skipped, location,
+                  finalurl,
+                  (int)loclen - space_skipped, loc);
     goto locdone;
   }
 

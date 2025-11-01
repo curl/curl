@@ -44,7 +44,7 @@ IMAP login authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE LOGIN
 dXNlcg==

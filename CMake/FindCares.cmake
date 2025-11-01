@@ -25,8 +25,8 @@
 #
 # Input variables:
 #
-# - `CARES_INCLUDE_DIR`:   The c-ares include directory.
-# - `CARES_LIBRARY`:       Path to `cares` library.
+# - `CARES_INCLUDE_DIR`:   Absolute path to c-ares include directory.
+# - `CARES_LIBRARY`:       Absolute path to `cares` library.
 #
 # Result variables:
 #

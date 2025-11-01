@@ -5,6 +5,7 @@ Long: doh-cert-status
 Help: Verify DoH server cert status OCSP-staple
 Added: 7.76.0
 Category: dns tls
+Protocols: DNS
 Multi: boolean
 See-also:
   - doh-insecure

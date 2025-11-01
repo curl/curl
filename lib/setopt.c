@@ -55,8 +55,7 @@
 #include "strdup.h"
 #include "escape.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -818,10 +817,10 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
 #if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) ||        \
   defined(TCP_FASTOPEN_CONNECT)
     s->tcp_fastopen = enabled;
+    break;
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
-    break;
   case CURLOPT_SSL_ENABLE_ALPN:
     s->ssl_enable_alpn = enabled;
     break;
@@ -871,7 +870,12 @@ static CURLcode value_range(long *value, long below_error, long min, long max)
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
+#if !defined(CURL_DISABLE_PROXY) || \
+  !defined(CURL_DISABLE_HTTP) || \
+  defined(HAVE_GSSAPI) || \
+  defined(USE_IPV6)
   unsigned long uarg = (unsigned long)arg;
+#endif
   bool set = FALSE;
   CURLcode result = setopt_bool(data, option, arg, &set);
   struct UserDefined *s = &data->set;
@@ -880,7 +884,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
-    return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
+    if(arg != -1)
+      return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
+    s->dns_cache_timeout_ms = -1;
+    break;
 
   case CURLOPT_CA_CACHE_TIMEOUT:
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
@@ -955,7 +962,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_MAXREDIRS:
-    result = value_range(&arg, -1, 0, 0x7fff);
+    result = value_range(&arg, -1, -1, 0x7fff);
     if(result)
       return result;
     s->maxredirs = (short)arg;
@@ -1095,7 +1102,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifdef HAVE_GSSAPI
   case CURLOPT_GSSAPI_DELEGATION:
-    s->gssapi_delegation = (unsigned char)uarg&
+    s->gssapi_delegation = (unsigned char)uarg &
       (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
     break;
 #endif
@@ -1967,15 +1974,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
   case CURLOPT_FTP_ALTERNATIVE_TO_USER:
     return Curl_setstropt(&s->str[STRING_FTP_ALTERNATIVE_TO_USER], ptr);
 
-#ifdef HAVE_GSSAPI
   case CURLOPT_KRBLEVEL:
-    /*
-     * A string that defines the kerberos security level.
-     */
-    result = Curl_setstropt(&s->str[STRING_KRB_LEVEL], ptr);
-    s->krb = !!(s->str[STRING_KRB_LEVEL]);
-    break;
-#endif
+    return CURLE_NOT_BUILT_IN; /* removed in 8.17.0 */
 #endif
   case CURLOPT_URL:
     /*
@@ -2213,6 +2213,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * Set CA info for SSL connection. Specify filename of the CA certificate
      */
+    s->ssl.custom_cafile = TRUE;
     return Curl_setstropt(&s->str[STRING_SSL_CAFILE], ptr);
 
 #ifndef CURL_DISABLE_PROXY
@@ -2221,6 +2222,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set CA info SSL connection for proxy. Specify filename of the
      * CA certificate
      */
+    s->proxy_ssl.custom_cafile = TRUE;
     return Curl_setstropt(&s->str[STRING_SSL_CAFILE_PROXY], ptr);
 
 #endif
@@ -2230,9 +2232,11 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
+      s->ssl.custom_capath = TRUE;
       return Curl_setstropt(&s->str[STRING_SSL_CAPATH], ptr);
+    }
 #endif
     return CURLE_NOT_BUILT_IN;
 #ifndef CURL_DISABLE_PROXY
@@ -2242,9 +2246,11 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * CA certificates which have been prepared using openssl c_rehash utility.
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH))
+    if(Curl_ssl_supports(data, SSLSUPP_CA_PATH)) {
       /* This does not work on Windows. */
+      s->proxy_ssl.custom_capath = TRUE;
       return Curl_setstropt(&s->str[STRING_SSL_CAPATH_PROXY], ptr);
+    }
 #endif
     return CURLE_NOT_BUILT_IN;
 #endif
@@ -2637,8 +2643,15 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      */
     s->fwrite_func = va_arg(param, curl_write_callback);
     if(!s->fwrite_func)
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
       /* When set to NULL, reset to our internal default function */
       s->fwrite_func = (curl_write_callback)fwrite;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
     break;
   case CURLOPT_READFUNCTION:
     /*
@@ -2647,8 +2660,15 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     s->fread_func_set = va_arg(param, curl_read_callback);
     if(!s->fread_func_set) {
       s->is_fread_set = 0;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
       /* When set to NULL, reset to our internal default function */
       s->fread_func_set = (curl_read_callback)fread;
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
     }
     else
       s->is_fread_set = 1;
@@ -2893,8 +2913,10 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
      * Specify entire PEM of the CA certificate
      */
 #ifdef USE_SSL
-    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB))
+    if(Curl_ssl_supports(data, SSLSUPP_CAINFO_BLOB)) {
+      s->ssl.custom_cablob = TRUE;
       return Curl_setblobopt(&s->blobs[BLOB_CAINFO], blob);
+    }
 #endif
     return CURLE_NOT_BUILT_IN;
   case CURLOPT_ISSUERCERT_BLOB:

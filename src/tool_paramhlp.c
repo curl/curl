@@ -119,19 +119,6 @@ ParameterError file2string(char **bufp, FILE *file)
   return PARAM_OK;
 }
 
-static int myfseek(void *stream, curl_off_t offset, int whence)
-{
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
-  return _fseeki64(stream, (__int64)offset, whence);
-#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
-  return fseeko(stream, (off_t)offset, whence);
-#else
-  if(offset > LONG_MAX)
-    return -1;
-  return fseek(stream, (long)offset, whence);
-#endif
-}
-
 ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
                                  curl_off_t starto, curl_off_t endo)
 {
@@ -143,7 +130,7 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
 
     if(starto) {
       if(file != stdin) {
-        if(myfseek(file, starto, SEEK_SET))
+        if(curlx_fseek(file, starto, SEEK_SET))
           return PARAM_READ_ERROR;
         offset = starto;
       }
@@ -475,7 +462,7 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
     else {
       char buffer[32];
       const char *p;
-      msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, str);
+      curl_msnprintf(buffer, sizeof(buffer), "%.*s", (int)plen, str);
 
       p = proto_token(buffer);
 
@@ -584,13 +571,13 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* build a nice-looking prompt */
     if(!i && last)
-      msnprintf(prompt, sizeof(prompt),
-                "Enter %s password for user '%s':",
-                kind, *userpwd);
+      curl_msnprintf(prompt, sizeof(prompt),
+                     "Enter %s password for user '%s':",
+                     kind, *userpwd);
     else
-      msnprintf(prompt, sizeof(prompt),
-                "Enter %s password for user '%s' on URL #%zu:",
-                kind, *userpwd, i + 1);
+      curl_msnprintf(prompt, sizeof(prompt),
+                     "Enter %s password for user '%s' on URL #%zu:",
+                     kind, *userpwd, i + 1);
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
@@ -728,7 +715,7 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
 
 /*
  * Parse the string and modify ssl_version in the val argument. Return PARAM_OK
- * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ * on success, otherwise a parameter error enum.
  *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str

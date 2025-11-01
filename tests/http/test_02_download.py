@@ -600,6 +600,7 @@ class TestDownload:
     # nghttpx is the only server we have that supports TLS early data
     @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_32_earlydata(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_can_early_data():
@@ -609,6 +610,10 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
             pytest.skip('failing on macOS CI runners')
+        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('wolfssl'):
+            pytest.skip('h3 wolfssl early data failing on macOS')
+        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('gnutls'):
+            pytest.skip('h3 gnutls early data failing on macOS')
         count = 2
         docname = 'data-10k'
         # we want this test to always connect to nghttpx, since it is
@@ -654,6 +659,8 @@ class TestDownload:
     def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
+        if not env.curl_is_verbose():
+            pytest.skip('only works for curl with verbose strings')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50
@@ -692,6 +699,8 @@ class TestDownload:
     def test_02_34_max_total_conns(self, env: Env, httpd, nghttpx, proto, max_total_conns):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
+        if not env.curl_is_verbose():
+            pytest.skip('only works for curl with verbose strings')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50

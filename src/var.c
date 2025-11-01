@@ -362,6 +362,7 @@ static ParameterError addvariable(const char *name,
   p = calloc(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
+    /* the null termination byte is already present from above */
 
     p->content = contalloc ? content : memdup0(content, clen);
     if(p->content) {
@@ -446,18 +447,17 @@ ParameterError setvariable(const char *input)
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
-    struct dynbuf fname;
     line++;
-
-    curlx_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
       file = stdin;
     else {
-      file = fopen(line, "rb");
+      file = curlx_fopen(line, "rb");
       if(!file) {
-        errorf("Failed to open %s: %s", line, strerror(errno));
+        char errbuf[STRERROR_LEN];
+        errorf("Failed to open %s: %s", line,
+               curlx_strerror(errno, errbuf, sizeof(errbuf)));
         err = PARAM_READ_ERROR;
       }
     }
@@ -467,9 +467,8 @@ ParameterError setvariable(const char *input)
       if(clen)
         contalloc = TRUE;
     }
-    curlx_dyn_free(&fname);
     if(!use_stdin && file)
-      fclose(file);
+      curlx_fclose(file);
     if(err)
       return err;
   }

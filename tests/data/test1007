@@ -13,6 +13,9 @@ FAILURE
 <server>
 tftp
 </server>
+<features>
+verbose-strings
+</features>
 <name>
 TFTP send with invalid permission on server
 </name>

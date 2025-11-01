@@ -130,7 +130,7 @@ struct formats {
 
 struct errmsg {
   int e_code;
-  const char *e_msg;
+  char e_msg[STRERROR_LEN];
 };
 
 typedef union {
@@ -174,7 +174,7 @@ static struct errmsg errmsgs[] = {
   { TFTP_EBADID,       "Unknown transfer ID" },
   { TFTP_EEXISTS,      "File already exists" },
   { TFTP_ENOUSER,      "No such user" },
-  { -1,                0 }
+  { -1,                "" }
 };
 
 static const struct formats formata[] = {
@@ -548,6 +548,7 @@ static int test_tftpd(int argc, char **argv)
   int flag;
   int rc;
   int error;
+  char errbuf[STRERROR_LEN];
   struct testcase test;
   int result = 0;
   srvr_sockaddr_union_t from;
@@ -607,9 +608,7 @@ static int test_tftpd(int argc, char **argv)
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = util_ultous(ulnum);
+        port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }
@@ -656,7 +655,8 @@ static int test_tftpd(int argc, char **argv)
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     result = 1;
     goto tftpd_cleanup;
   }
@@ -666,7 +666,7 @@ static int test_tftpd(int argc, char **argv)
                 (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     result = 1;
     goto tftpd_cleanup;
   }
@@ -691,8 +691,8 @@ static int test_tftpd(int argc, char **argv)
 #endif /* USE_IPV6 */
   if(rc) {
     error = SOCKERRNO;
-    logmsg("Error binding socket on port %hu (%d) %s", port, error,
-           sstrerror(error));
+    logmsg("Error binding socket on port %hu (%d) %s", port,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     result = 1;
     goto tftpd_cleanup;
   }
@@ -714,7 +714,7 @@ static int test_tftpd(int argc, char **argv)
     if(getsockname(sock, &localaddr.sa, &la_size) < 0) {
       error = SOCKERRNO;
       logmsg("getsockname() failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       sclose(sock);
       goto tftpd_cleanup;
     }
@@ -900,8 +900,10 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   /* Open request dump file. */
   server = fopen(dumpfile, "ab");
   if(!server) {
+    char errbuf[STRERROR_LEN];
     int error = errno;
-    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     logmsg("Error opening file '%s'", dumpfile);
     return -1;
   }
@@ -1007,8 +1009,10 @@ static int tftpd_parse_servercmd(struct testcase *req)
 
   stream = test2fopen(req->testno, logdir);
   if(!stream) {
+    char errbuf[STRERROR_LEN];
     error = errno;
-    logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+    logmsg("fopen() failed with error (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     logmsg("  Couldn't open test file %ld", req->testno);
     return 1; /* done */
   }
@@ -1100,7 +1104,7 @@ static int validate_access(struct testcase *test,
       ptr++;
 
     /* get the number */
-    testno = strtol(ptr, &ptr, 10);
+    testno = atol(ptr);
 
     if(testno > 10000) {
       partno = testno % 10000;
@@ -1108,7 +1112,6 @@ static int validate_access(struct testcase *test,
     }
     else
       partno = 0;
-
 
     logmsg("requested test number %ld part %ld", testno, partno);
 
@@ -1122,8 +1125,10 @@ static int validate_access(struct testcase *test,
       snprintf(partbuf, sizeof(partbuf), "data%ld", partno);
 
     if(!stream) {
+      char errbuf[STRERROR_LEN];
       int error = errno;
-      logmsg("fopen() failed with error (%d) %s", error, strerror(error));
+      logmsg("fopen() failed with error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       logmsg("Couldn't open test file for test: %ld", testno);
       return TFTP_EACCESS;
     }
@@ -1358,7 +1363,7 @@ static void nak(int error)
     if(pe->e_code == error)
       break;
   if(pe->e_code < 0) {
-    pe->e_msg = strerror(error - 100);
+    curlx_strerror(error - 100, pe->e_msg, sizeof(pe->e_msg));
     tp->th_code = TFTP_EUNDEF;   /* set 'undef' errorcode */
   }
   length = (int)strlen(pe->e_msg);

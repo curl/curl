@@ -30,30 +30,8 @@
 #undef realloc
 #undef free
 #ifdef _WIN32
-#undef _tcsdup
+#undef Curl_tcsdup
 #endif
-
-#ifdef CURLDEBUG
-
-#undef send
-#undef recv
-
-#undef socket
-#ifdef HAVE_ACCEPT4
-#undef accept4
-#endif
-#ifdef HAVE_SOCKETPAIR
-#undef socketpair
-#endif
-
-#undef fopen
-#ifdef CURL_FOPEN
-#define fopen(fname, mode) CURL_FOPEN(fname, mode)
-#endif
-#undef fdopen
-#undef fclose
-
-#endif /* CURLDEBUG */
 
 #undef HEADER_CURL_MEMORY_H
 #undef HEADER_CURL_MEMDEBUG_H

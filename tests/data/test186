@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=daniel;type=moo/foo-.4" -F
 <strip>
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
-<protocol>
+<protocol crlf="yes">
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

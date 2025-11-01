@@ -18,11 +18,8 @@ REPLY PASS 633 XXXXXXXX\x00\x00XXXXXXXX
 <server>
 ftp
 </server>
-<features>
-GSS-API
-</features>
 <name>
-FTP with 633 response before gss initialized
+FTP with 633 response to auth
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
@@ -32,7 +29,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 </protocol>

@@ -108,7 +108,7 @@ static void socksd_resetdefaults(void)
 
 static unsigned short shortval(char *value)
 {
-  unsigned long num = strtoul(value, NULL, 10);
+  unsigned long num = (unsigned long)atol(value);
   return num & 0xffff;
 }
 
@@ -209,9 +209,10 @@ static curl_socket_t socksconnect(unsigned short connectport,
   rc = connect(sock, &me.sa, sizeof(me.sa4));
 
   if(rc) {
+    char errbuf[STRERROR_LEN];
     int error = SOCKERRNO;
-    logmsg("Failed connecting to %s:%hu (%d) %s",
-           connectaddr, connectport, error, sstrerror(error));
+    logmsg("Failed connecting to %s:%hu (%d) %s", connectaddr, connectport,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     return CURL_SOCKET_BAD;
   }
   logmsg("Connected fine to %s:%d", connectaddr, connectport);
@@ -621,6 +622,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
     int i;
     ssize_t rc;
     int error = 0;
+    char errbuf[STRERROR_LEN];
     curl_socket_t sockfd = listenfd;
     int maxfd = (int)sockfd;
 
@@ -676,7 +678,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
 
     if(rc < 0) {
       logmsg("select() failed with error (%d) %s",
-             error, sstrerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return FALSE;
     }
 
@@ -685,7 +687,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept() failed with error (%d) %s",
-               error, sstrerror(error));
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       }
       else {
         curl_socket_t remotefd;
@@ -738,6 +740,7 @@ static int test_socksd(int argc, char *argv[])
   int wroteportfile = 0;
   bool juggle_again;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
 
   const char *unix_socket = NULL;
@@ -831,9 +834,7 @@ static int test_socksd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        server_port = util_ultous(ulnum);
+        server_port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }
@@ -850,7 +851,6 @@ static int test_socksd(int argc, char *argv[])
            " --ipv4\n"
            " --ipv6\n"
            " --unix-socket [file]\n"
-           " --bindonly\n"
            " --port [port]\n");
       return 0;
     }
@@ -872,7 +872,7 @@ static int test_socksd(int argc, char *argv[])
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
     logmsg("Error creating socket (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     goto socks5_cleanup;
   }
 
@@ -924,7 +924,8 @@ socks5_cleanup:
 #ifdef USE_UNIX_SOCKETS
   if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
     error = unlink(unix_socket);
-    logmsg("unlink(%s) = %d (%s)", unix_socket, error, strerror(error));
+    logmsg("unlink(%s) = %d (%s)", unix_socket,
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
   }
 #endif
 

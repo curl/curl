@@ -34,9 +34,6 @@
 #define SSH_SUPPRESS_DEPRECATED
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
-#elif defined(USE_WOLFSSH)
-#include <wolfssh/ssh.h>
-#include <wolfssh/wolfsftp.h>
 #endif
 
 #include "curl_path.h"
@@ -123,7 +120,7 @@ typedef enum {
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO {
-  char *path;                  /* the path we operate on */
+  char *path;        /* the path we operate on, at least one byte long */
 #ifdef USE_LIBSSH2
   struct dynbuf readdir_link;
   struct dynbuf readdir;
@@ -211,14 +208,6 @@ struct ssh_conn {
   struct libssh2_agent_publickey *sshagent_identity;
   struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
-#elif defined(USE_WOLFSSH)
-  CURLcode actualcode;        /* the actual error code */
-  WOLFSSH *ssh_session;
-  WOLFSSH_CTX *ctx;
-  word32 handleSz;
-  byte handle[WOLFSSH_MAX_HANDLE];
-  curl_off_t offset;
-  BIT(initialised);
 #endif /* USE_LIBSSH */
   BIT(authed);                /* the connection has been authenticated fine */
   BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if

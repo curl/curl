@@ -49,7 +49,7 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 <errorcode>
 64
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 </protocol>
 </verify>

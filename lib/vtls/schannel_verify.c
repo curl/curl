@@ -46,7 +46,6 @@
 #include "../strerror.h"
 #include "../curlx/winapi.h"
 #include "../curlx/multibyte.h"
-#include "../curl_printf.h"
 #include "hostcheck.h"
 #include "../curlx/version_win32.h"
 
@@ -552,7 +551,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
    * Right now we are only asking for the first preferred alternative name.
    * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
    * (If Windows CE supports that?) and run this section in a loop for each.
-   * https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
+   * https://learn.microsoft.com/windows/win32/api/wincrypt/nf-wincrypt-certgetnamestringa
    * curl: (51) schannel: CertGetNameString() certificate hostname
    * (.google.com) did not match connection (google.com)
    */
@@ -577,7 +576,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
                              conn_hostname, strlen(conn_hostname))) {
         infof(data,
               "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
         result = CURLE_OK;
       }
@@ -612,8 +611,8 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
 
   sspi_status =
     Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-                                     SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                     &pCertContextServer);
+                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                        &pCertContextServer);
 
   if((sspi_status != SEC_E_OK) || !pCertContextServer) {
     char buffer[WINAPI_ERROR_LEN];
@@ -668,13 +667,14 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
       goto cleanup;
     }
     actual_len = cert_get_name_string(data, pCertContextServer,
-                 (LPTSTR)cert_hostname_buff, len, alt_name_info, Win8_compat);
+                                      (LPTSTR)cert_hostname_buff, len,
+                                      alt_name_info, Win8_compat);
 
     /* Sanity check */
     if(actual_len != len) {
       failf(data,
-      "schannel: CertGetNameString() returned certificate "
-      "name information of unexpected size");
+            "schannel: CertGetNameString() returned certificate "
+            "name information of unexpected size");
       goto cleanup;
     }
 
@@ -685,7 +685,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     while(cert_hostname_buff_index < len &&
           cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
           result == CURLE_PEER_FAILED_VERIFICATION) {
-
       char *cert_hostname;
 
       /* Comparing the cert name and the connection hostname encoded as UTF-8
@@ -693,15 +692,14 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
        * (or some equivalent) encoding
        */
       cert_hostname = curlx_convert_tchar_to_UTF8(
-      &cert_hostname_buff[cert_hostname_buff_index]);
+        &cert_hostname_buff[cert_hostname_buff_index]);
       if(!cert_hostname) {
         result = CURLE_OUT_OF_MEMORY;
       }
       else {
         if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
                                conn_hostname, hostlen)) {
-          infof(data,
-                "schannel: connection hostname (%s) validated "
+          infof(data, "schannel: connection hostname (%s) validated "
                 "against certificate name (%s)",
                 conn_hostname, cert_hostname);
           result = CURLE_OK;
@@ -737,6 +735,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   }
 
 cleanup:
+  LocalFree(alt_name_info);
   Curl_safefree(cert_hostname_buff);
 
   if(pCertContextServer)
@@ -889,7 +888,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 NULL,
                                 &pChainContext)) {
       char buffer[WINAPI_ERROR_LEN];
-      failf(data, "schannel: CertGetCertificateChain failed: %s",
+      failf(data, "schannel: failed to get the certificate chain: %s",
             curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       pChainContext = NULL;
       result = CURLE_PEER_FAILED_VERIFICATION;
@@ -910,23 +909,20 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
       if(dwTrustErrorMask) {
         if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_REVOKED");
+          failf(data, "schannel: trust for this certificate or one of "
+                "the certificates in the certificate chain has been revoked");
         else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_PARTIAL_CHAIN");
+          failf(data, "schannel: the certificate chain is incomplete");
         else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_UNTRUSTED_ROOT");
+          failf(data, "schannel: the certificate or certificate chain is "
+                "based on an untrusted root");
         else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_NOT_TIME_VALID");
+          failf(data, "schannel: this certificate or one of the certificates "
+                "in the certificate chain is not time valid");
         else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
+          failf(data, "schannel: the revocation status is unknown");
         else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08lx",
-                dwTrustErrorMask);
+          failf(data, "schannel: error 0x%08lx", dwTrustErrorMask);
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
     }

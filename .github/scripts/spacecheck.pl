@@ -30,7 +30,7 @@ my @tabs = (
     "^m4/zz40-xc-ovr.m4",
     "Makefile\\.(am|example)\$",
     "/mkfile",
-    "\\.(sln|vc)\$",
+    "\\.sln\$",
     "^tests/data/test",
 );
 
@@ -40,11 +40,6 @@ my @mixed_eol = (
 
 my @need_crlf = (
     "\\.(bat|sln)\$",
-    "^winbuild/.+\\.md\$",
-);
-
-my @space_at_eol = (
-    "^tests/data/test",
 );
 
 my @non_ascii_allowed = (
@@ -54,7 +49,7 @@ my @non_ascii_allowed = (
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
 
 my @non_ascii = (
-    ".github/scripts/spellcheck.words",
+    ".github/scripts/pyspelling.words",
     ".mailmap",
     "RELEASE-NOTES",
     "docs/BINDINGS.md",
@@ -130,8 +125,7 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if(!fn_match($filename, @space_at_eol) &&
-       $content =~ /[ \t]\n/) {
+    if($content =~ /[ \t]\n/) {
         my $line;
         for my $l (split(/\n/, $content)) {
             $line++;

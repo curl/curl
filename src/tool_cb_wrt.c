@@ -23,11 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_FCNTL_H
-/* for open() */
-#include <fcntl.h>
-#endif
-
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_cb_wrt.h"
@@ -55,12 +50,13 @@ bool tool_create_output_file(struct OutStruct *outs,
      (config->file_clobber_mode == CLOBBER_DEFAULT &&
       !outs->is_cd_filename)) {
     /* open file for writing */
-    file = fopen(fname, "wb");
+    file = curlx_fopen(fname, "wb");
   }
   else {
     int fd;
     do {
-      fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
+      fd = curlx_open(fname, O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY,
+                      OPENMODE);
       /* Keep retrying in the hope that it is not interrupted sometime */
       /* !checksrc! disable ERRNOVAR 1 */
     } while(fd == -1 && errno == EINTR);
@@ -78,8 +74,9 @@ bool tool_create_output_file(struct OutStruct *outs,
           return FALSE;
         next_num++;
         do {
-          fd = open(curlx_dyn_ptr(&fbuffer),
-                    O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY, OPENMODE);
+          fd = curlx_open(curlx_dyn_ptr(&fbuffer),
+                          O_CREAT | O_WRONLY | O_EXCL | CURL_O_BINARY,
+                          OPENMODE);
           /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
@@ -92,14 +89,16 @@ bool tool_create_output_file(struct OutStruct *outs,
        is not needed because we would have failed earlier, in the while loop
        and `fd` would now be -1 */
     if(fd != -1) {
-      file = fdopen(fd, "wb");
+      file = curlx_fdopen(fd, "wb");
       if(!file)
         close(fd);
     }
   }
 
   if(!file) {
-    warnf("Failed to open the file %s: %s", fname, strerror(errno));
+    char errbuf[STRERROR_LEN];
+    warnf("Failed to open the file %s: %s", fname,
+          curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return FALSE;
   }
   outs->s_isreg = TRUE;

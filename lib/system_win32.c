@@ -106,8 +106,8 @@ CURLcode Curl_win32_init(long flags)
 #endif
     IF_NAMETOINDEX_FN pIfNameToIndex =
       CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll,
-                                          CURL_TEXT("if_nametoindex"))));
+                          GetProcAddress(s_hIpHlpApiDll,
+                                         CURL_TEXT("if_nametoindex")));
 
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
@@ -202,7 +202,7 @@ static HMODULE curl_load_library(LPCTSTR filename)
      and above */
   pLoadLibraryEx =
     CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
-                        (GetProcAddress(hKernel32, LOADLIBARYEX)));
+                        GetProcAddress(hKernel32, LOADLIBARYEX));
 
   /* Detect if there is already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported

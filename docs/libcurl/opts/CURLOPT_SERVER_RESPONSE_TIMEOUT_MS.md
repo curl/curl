@@ -5,6 +5,7 @@ Title: CURLOPT_SERVER_RESPONSE_TIMEOUT_MS
 Section: 3
 Source: libcurl
 See-also:
+  - CURLOPT_SERVER_RESPONSE_TIMEOUT (3)
   - CURLOPT_CONNECTTIMEOUT (3)
   - CURLOPT_LOW_SPEED_LIMIT (3)
   - CURLOPT_TIMEOUT (3)
@@ -33,11 +34,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SERVER_RESPONSE_TIMEOUT_MS,
 
 # DESCRIPTION
 
-Pass a long. Causes libcurl to set a *timeout* period (in milliseconds) on the
-amount of time that the server is allowed to take in order to send a response
-message for a command before the session is considered dead. While libcurl is
-waiting for a response, this value overrides CURLOPT_TIMEOUT(3). It is
-recommended that if used in conjunction with CURLOPT_TIMEOUT(3), you set
+Pass a long. It tells libcurl to wait no longer than *timeout* milliseconds
+for responses on sent commands. If no response is received within this period,
+the connection is considered dead and the transfer fails.
+
+It is recommended that if used in conjunction with CURLOPT_TIMEOUT(3), you set
 CURLOPT_SERVER_RESPONSE_TIMEOUT_MS(3) to a value smaller than
 CURLOPT_TIMEOUT(3).
 
@@ -47,7 +48,7 @@ This is the millisecond version of CURLOPT_SERVER_RESPONSE_TIMEOUT(3).
 
 # DEFAULT
 
-None
+60000 milliseconds
 
 # %PROTOCOLS%
 

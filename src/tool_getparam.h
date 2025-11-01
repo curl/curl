@@ -139,6 +139,7 @@ typedef enum {
   C_KEEPALIVE_TIME,
   C_KEY,
   C_KEY_TYPE,
+  C_KNOWNHOSTS,
   C_KRB,
   C_KRB4,
   C_LIBCURL,
@@ -334,7 +335,6 @@ struct LongShort {
 
 typedef enum {
   PARAM_OK = 0,
-  PARAM_OPTION_AMBIGUOUS,
   PARAM_OPTION_UNKNOWN,
   PARAM_REQUIRES_PARAMETER,
   PARAM_BAD_USE,
@@ -357,6 +357,7 @@ typedef enum {
   PARAM_EXPAND_ERROR, /* --expand problem */
   PARAM_BLANK_STRING,
   PARAM_VAR_SYNTAX, /* --variable syntax error */
+  PARAM_RECURSION,
   PARAM_LAST
 } ParameterError;
 
@@ -367,7 +368,8 @@ const struct LongShort *findshortopt(char letter);
 
 ParameterError getparameter(const char *flag, const char *nextarg,
                             bool *usedarg,
-                            struct OperationConfig *config);
+                            struct OperationConfig *config,
+                            int max_recursive);
 
 #ifdef UNITTESTS
 void parse_cert_parameter(const char *cert_parameter,

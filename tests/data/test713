@@ -38,7 +38,7 @@ ftp://ftp.example.com/%TESTNUMBER --connect-to ::%HOSTIP:%FTPPORT --proxy socks5
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

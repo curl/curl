@@ -25,8 +25,8 @@
 #
 # Input variables:
 #
-# - `NETTLE_INCLUDE_DIR`:   The nettle include directory.
-# - `NETTLE_LIBRARY`:       Path to `nettle` library.
+# - `NETTLE_INCLUDE_DIR`:   Absolute path to nettle include directory.
+# - `NETTLE_LIBRARY`:       Absolute path to `nettle` library.
 #
 # Result variables:
 #

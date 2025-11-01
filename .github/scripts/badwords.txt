@@ -46,6 +46,7 @@ there's:there is
 \. But: Rewrite it somehow?
 \. So : Rewrite without "so" ?
  dir :directory
+sub-director:subdirector
 can't:cannot
 that's:that is
 web page:webpage

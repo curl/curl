@@ -163,11 +163,11 @@ for further information on that format.
 Schannel does not support setting individual TLS 1.2 cipher suites directly.
 It only allows the enabling and disabling of encryption algorithms. These are
 in the form of `CALG_xxx`, see the [Schannel `ALG_ID`
-documentation](https://docs.microsoft.com/windows/desktop/SecCrypto/alg-id)
+documentation](https://learn.microsoft.com/windows/win32/seccrypto/alg-id)
 for a list of these algorithms. Also, (since curl 7.77.0)
 `SCH_USE_STRONG_CRYPTO` can be given to pass that flag to Schannel, lookup the
 [documentation for the Windows version in
-use](https://learn.microsoft.com/en-us/windows/win32/secauthn/cipher-suites-in-schannel)
+use](https://learn.microsoft.com/windows/win32/secauthn/cipher-suites-in-schannel)
 to see how that affects the cipher suite selection. When not specifying the
 `--ciphers` and `--tls13-ciphers` options curl passes this flag by default.
 
@@ -264,7 +264,7 @@ Restrict to only TLS 1.2 with the `CAMELLIA-128-GCM` cipher.
 - [OpenSSL cipher suite names documentation](https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-suite-names)
 - [wolfSSL cipher support documentation](https://www.wolfssl.com/documentation/manuals/wolfssl/chapter04.html#cipher-support)
 - [mbedTLS cipher suites reference](https://mbed-tls.readthedocs.io/projects/api/en/development/api/file/ssl__ciphersuites_8h/)
-- [Schannel cipher suites documentation](https://learn.microsoft.com/en-us/windows/win32/secauthn/cipher-suites-in-schannel)
+- [Schannel cipher suites documentation](https://learn.microsoft.com/windows/win32/secauthn/cipher-suites-in-schannel)
 - [IANA cipher suites list](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-4)
 - [Wikipedia cipher suite article](https://en.wikipedia.org/wiki/Cipher_suite)
 - [GnuTLS Priority Strings](https://gnutls.org/manual/html_node/Priority-Strings.html)

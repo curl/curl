@@ -118,7 +118,7 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  */
 /*      data event                          arg1       arg2     return */
 #define CF_CTRL_DATA_SETUP            4  /* 0          NULL     first fail */
-#define CF_CTRL_DATA_IDLE             5  /* 0          NULL     first fail */
+/* unused now                         5  */
 #define CF_CTRL_DATA_PAUSE            6  /* on/off     NULL     first fail */
 #define CF_CTRL_DATA_DONE             7  /* premature  NULL     ignored */
 #define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
@@ -297,16 +297,12 @@ void Curl_conn_cf_insert_after(struct Curl_cfilter *cf_at,
                                struct Curl_cfilter *cf_new);
 
 /**
- * Discard, e.g. remove and destroy `discard` iff
- * it still is in the filter chain below `cf`. If `discard`
- * is no longer found beneath `cf` return FALSE.
- * if `destroy_always` is TRUE, will call `discard`s destroy
- * function and free it even if not found in the subchain.
+ * Extract filter `*pcf` from its connection filter chain.
+ * Destroy `*pcf`, even if it was not part of the chain and NULL it.
+ * Returns TRUE of cf has been part of chain.
  */
-bool Curl_conn_cf_discard_sub(struct Curl_cfilter *cf,
-                              struct Curl_cfilter *discard,
-                              struct Curl_easy *data,
-                              bool destroy_always);
+bool Curl_conn_cf_discard(struct Curl_cfilter **pcf,
+                          struct Curl_easy *data);
 
 /**
  * Discard all cfilters starting with `*pcf` and clearing it afterwards.
@@ -517,7 +513,7 @@ CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
 
 /**
  * Receive bytes from connection filter `cf` into `bufq`.
- * Convenience wrappter around `Curl_bufq_sipn()`,
+ * Convenience wrapper around `Curl_bufq_sipn()`,
  * so users do not have to implement a callback.
  */
 CURLcode Curl_cf_recv_bufq(struct Curl_cfilter *cf,
@@ -542,12 +538,6 @@ CURLcode Curl_cf_send_bufq(struct Curl_cfilter *cf,
  * a transfer.
  */
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data);
-
-/**
- * Notify connection filters that now would be a good time to
- * perform any idle, e.g. time related, actions.
- */
-CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data);
 
 /**
  * Notify connection filters that the transfer represented by `data`

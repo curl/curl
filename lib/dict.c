@@ -59,9 +59,9 @@
 #include "escape.h"
 #include "progress.h"
 #include "dict.h"
-#include "curl_printf.h"
+
+/* The last 2 #include files should be: */
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 
@@ -144,7 +144,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
   char *sptr;
   va_list ap;
   va_start(ap, fmt);
-  s = vaprintf(fmt, ap); /* returns an allocated string */
+  s = curl_mvaprintf(fmt, ap); /* returns an allocated string */
   va_end(ap);
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */

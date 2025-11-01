@@ -39,24 +39,6 @@
 #endif
 #endif
 
-/* make the tool use the libcurl *printf family */
-# undef printf
-# undef fprintf
-# undef msnprintf
-# undef vprintf
-# undef vfprintf
-# undef mvsnprintf
-# undef aprintf
-# undef vaprintf
-# define printf curl_mprintf
-# define fprintf curl_mfprintf
-# define msnprintf curl_msnprintf
-# define vprintf curl_mvprintf
-# define vfprintf curl_mvfprintf
-# define mvsnprintf curl_mvsnprintf
-# define aprintf curl_maprintf
-# define vaprintf curl_mvaprintf
-
 #define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
 
 #define tool_safefree(ptr)                      \
@@ -75,6 +57,10 @@ struct State {
   curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
   curl_off_t urlidx;    /* index for globbed URLs */
 };
+
+#define FAIL_NONE      0
+#define FAIL_WITH_BODY 1
+#define FAIL_WO_BODY   2
 
 struct OperationConfig {
   struct dynbuf postdata;
@@ -112,6 +98,7 @@ struct OperationConfig {
   char *proxyuserpwd;
   char *proxy;
   char *noproxy;
+  char *knownhosts;
   char *mail_from;
   struct curl_slist *mail_rcpt;
   char *mail_auth;
@@ -209,7 +196,8 @@ struct OperationConfig {
   long httpversion;
   unsigned long socks5_auth;/* auth bitmask for socks5 proxies */
   long req_retry;           /* number of retries */
-  long retry_delay_ms;      /* delay between retries (in milliseconds) */
+  long retry_delay_ms;      /* delay between retries (in milliseconds),
+                               0 means increase exponentially */
   long retry_maxtime_ms;    /* maximum time to keep retrying */
 
   unsigned long mime_options; /* Mime option flags. */
@@ -239,6 +227,7 @@ struct OperationConfig {
   unsigned short porttouse;
   unsigned char ssl_version;     /* 0 - 4, 0 being default */
   unsigned char ssl_version_max; /* 0 - 4, 0 being default */
+  unsigned char fail;            /* NONE, with body, without body */
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
@@ -257,8 +246,6 @@ struct OperationConfig {
   BIT(ftp_append);          /* APPE on ftp */
   BIT(use_ascii);           /* select ASCII or text transfer */
   BIT(autoreferer);         /* automatically set referer */
-  BIT(failonerror);         /* fail on (HTTP) errors */
-  BIT(failwithbody);        /* fail on (HTTP) errors but still store body */
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
   BIT(dirlistonly);         /* only get the FTP dir list */
@@ -352,8 +339,6 @@ struct GlobalConfig {
   FILE *trace_stream;
   char *libcurl;                  /* Output libcurl code to this filename */
   char *ssl_sessions;             /* file to load/save SSL session tickets */
-  char *knownhosts;               /* known host path, if set. curl_free()
-                                     this */
   struct tool_var *variables;
   struct OperationConfig *first;
   struct OperationConfig *current;

@@ -50,14 +50,12 @@
 #include "multiif.h"
 #include "strerror.h"
 #include "select.h"
-#include "strdup.h"
 #include "http2.h"
 #include "progress.h"
 #include "curlx/warnless.h"
 #include "ws.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -857,7 +855,7 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     Curl_set_in_callback(data, FALSE);
     CURL_TRC_READ(data, "cr_in, rewind via set.seek_func -> %d", err);
     if(err) {
-      failf(data, "seek callback returned error %d", (int)err);
+      failf(data, "seek callback returned error %d", err);
       return CURLE_SEND_FAIL_REWIND;
     }
   }
@@ -878,7 +876,14 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     /* If no CURLOPT_READFUNCTION is used, we know that we operate on a
        given FILE * stream and we can actually attempt to rewind that
        ourselves with fseek() */
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
     if(data->state.fread_func == (curl_read_callback)fread) {
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
       int err = fseek(data->state.in, 0, SEEK_SET);
       CURL_TRC_READ(data, "cr_in, rewind via fseek -> %d(%d)",
                     (int)err, (int)errno);
@@ -1436,6 +1441,7 @@ CURLcode Curl_creader_unpause(struct Curl_easy *data)
 
   while(reader) {
     result = reader->crt->cntrl(data, reader, CURL_CRCNTRL_UNPAUSE);
+    CURL_TRC_READ(data, "unpausing %s -> %d", reader->crt->name, result);
     if(result)
       break;
     reader = reader->next;

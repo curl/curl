@@ -16,9 +16,6 @@
  *
  * SPDX-License-Identifier: ISC
  */
-/*
- * Original code by Paul Vixie. "curlified" by Gisle Vanem.
- */
 
 #include "../curl_setup.h"
 

@@ -39,10 +39,10 @@
 #include "netrc.h"
 #include "strcase.h"
 #include "curl_get_line.h"
+#include "curlx/fopen.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -76,30 +76,35 @@ enum found_state {
 static NETRCcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
   NETRCcode ret = NETRC_FILE_MISSING; /* if it cannot open the file */
-  FILE *file = fopen(filename, FOPEN_READTEXT);
+  FILE *file = curlx_fopen(filename, FOPEN_READTEXT);
   struct dynbuf linebuf;
   curlx_dyn_init(&linebuf, MAX_NETRC_LINE);
 
   if(file) {
+    CURLcode result = CURLE_OK;
+    bool eof;
     ret = NETRC_OK;
-    while(Curl_get_line(&linebuf, file)) {
-      CURLcode result;
-      const char *line = curlx_dyn_ptr(&linebuf);
-      /* skip comments on load */
-      curlx_str_passblanks(&line);
-      if(*line == '#')
-        continue;
-      result = curlx_dyn_add(filebuf, line);
-      if(result) {
-        ret = curl2netrc(result);
-        goto done;
+    do {
+      const char *line;
+      result = Curl_get_line(&linebuf, file, &eof);
+      if(!result) {
+        line = curlx_dyn_ptr(&linebuf);
+        /* skip comments on load */
+        curlx_str_passblanks(&line);
+        if(*line == '#')
+          continue;
+        result = curlx_dyn_add(filebuf, line);
       }
-    }
+      if(result) {
+        curlx_dyn_free(filebuf);
+        ret = curl2netrc(result);
+        break;
+      }
+    } while(!eof);
   }
-done:
   curlx_dyn_free(&linebuf);
   if(file)
-    fclose(file);
+    curlx_fclose(file);
   return ret;
 }
 
@@ -357,6 +362,7 @@ out:
   }
   else {
     curlx_dyn_free(filebuf);
+    store->loaded = FALSE;
     if(!specific_login)
       free(login);
     free(password);
@@ -436,7 +442,7 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
         return NETRC_FILE_MISSING; /* no home directory found (or possibly out
                                       of memory) */
 
-      filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
+      filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
         return NETRC_OUT_OF_MEMORY;
@@ -447,7 +453,7 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
-      filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
+      filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
         return NETRC_OUT_OF_MEMORY;

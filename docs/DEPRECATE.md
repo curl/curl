@@ -12,13 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## winbuild build system
-
-curl drops support for the winbuild build method after September 2025.
-
-We recommend migrating to CMake. See the migration guide in
-`docs/INSTALL-CMAKE.md`.
-
 ## Windows CE
 
 Windows CE "mainstream support" ended on October 9, 2018, and "Extended
@@ -60,7 +53,22 @@ We remove support for this OpenSSL version from curl in December 2025.
 OpenSSL and others only ship fixes to paying customers, meaning users of the
 free version risk being vulnerable.
 
-We remove support for this OpenSSL version from curl in June 2026.
+We remove support for this OpenSSL version from curl in December 2025.
+
+## OpenSSL-QUIC
+
+OpenSSL-QUIC is what we call the curl QUIC backend that uses the OpenSSL QUIC
+stack.
+
+ - It is slower and uses more memory than the alternatives and is only
+   experimental in curl.
+ - It gets little attention from OpenSSL and we have no expectation of the
+   major flaws getting corrected anytime soon.
+ - No one has spoken up for keeping it
+ - curl users building with vanilla OpenSSL can still use QUIC through the
+   means of ngtcp2
+
+We remove the OpenSSL-QUIC backend in March 2026.
 
 ## Past removals
 
@@ -79,3 +87,4 @@ We remove support for this OpenSSL version from curl in June 2026.
  - Secure Transport (removed in 8.15.0)
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
+ - winbuild build system (removed in 8.17.0)

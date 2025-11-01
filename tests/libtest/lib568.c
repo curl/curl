@@ -66,7 +66,7 @@ static CURLcode test_lib568(const char *URL)
   curl_free(stream_uri);
   stream_uri = NULL;
 
-  sdp = open(libtest_arg2, O_RDONLY);
+  sdp = curlx_open(libtest_arg2, O_RDONLY);
   if(sdp == -1) {
     curl_mfprintf(stderr, "can't open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
@@ -75,7 +75,7 @@ static CURLcode test_lib568(const char *URL)
   fstat(sdp, &file_info);
   close(sdp);
 
-  sdpf = fopen(libtest_arg2, "rb");
+  sdpf = curlx_fopen(libtest_arg2, "rb");
   if(!sdpf) {
     curl_mfprintf(stderr, "can't fopen %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
@@ -94,7 +94,7 @@ static CURLcode test_lib568(const char *URL)
     goto test_cleanup;
 
   test_setopt(curl, CURLOPT_UPLOAD, 0L);
-  fclose(sdpf);
+  curlx_fclose(sdpf);
   sdpf = NULL;
 
   /* Make sure we can do a normal request now */
@@ -159,7 +159,7 @@ static CURLcode test_lib568(const char *URL)
 test_cleanup:
 
   if(sdpf)
-    fclose(sdpf);
+    curlx_fclose(sdpf);
 
   curl_free(stream_uri);
 

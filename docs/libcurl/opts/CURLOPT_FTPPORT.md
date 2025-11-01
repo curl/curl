@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_FTP_USE_EPRT (3)
   - CURLOPT_FTP_USE_EPSV (3)
+  - CURLOPT_ACCEPTTIMEOUT_MS (3)
 Added-in: 7.1
 ---
 

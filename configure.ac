@@ -128,9 +128,6 @@ CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)".*/\1/p' ${srcdir}/inc
 XC_CHECK_PROG_CC
 CURL_ATOMIC
 
-dnl for --enable-code-coverage
-CURL_COVERAGE
-
 XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($CURLVERSION)
@@ -211,7 +208,7 @@ OPT_SCHANNEL=no
 AC_ARG_WITH(schannel,dnl
 AS_HELP_STRING([--with-schannel],[enable Windows native SSL/TLS]),
   OPT_SCHANNEL=$withval
-  TLSCHOICE="schannel")
+  TLSCHOICE="Schannel")
 
 OPT_AMISSL=no
 AC_ARG_WITH(amissl,dnl
@@ -275,9 +272,15 @@ AC_ARG_WITH(rustls,dnl
 AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to the installation root]),[
   OPT_RUSTLS=$withval
   if test X"$withval" != Xno; then
-    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls"
-    experimental="$experimental rustls"
+    TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Rustls"
+    experimental="$experimental Rustls"
   fi
+])
+
+OPT_APPLE_SECTRUST=$curl_cv_apple
+AC_ARG_WITH(apple-sectrust,dnl
+AS_HELP_STRING([--with-apple-sectrust],[enable Apple OS native certificate verification]),[
+  OPT_APPLE_SECTRUST=$withval
 ])
 
 AC_PATH_PROG(PERL, perl,, $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
@@ -523,6 +526,8 @@ dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
 
 CURL_CHECK_COMPILER
+dnl for --enable-code-coverage
+CURL_COVERAGE
 CURL_CHECK_NATIVE_WINDOWS
 
 curl_cv_wince='no'
@@ -1835,51 +1840,14 @@ if test x"$want_gss" = xyes; then
       gnu_gss=yes
     ],
     [
-      dnl not found, check Heimdal or MIT
-      AC_CHECK_HEADERS([gssapi/gssapi.h], [], [not_mit=1])
+      dnl not found, check for MIT
       AC_CHECK_HEADERS(
-        [gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
+        [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
         [],
-        [not_mit=1],
-        [
-          AC_INCLUDES_DEFAULT
-          #ifdef HAVE_GSSAPI_GSSAPI_H
-          #include <gssapi/gssapi.h>
-          #endif
-        ])
+        [not_mit=1])
       if test "x$not_mit" = "x1"; then
-        dnl MIT not found, check for Heimdal
-        AC_CHECK_HEADER(gssapi.h,
-          [],
-          [
-            dnl no header found, disabling GSS
-            want_gss=no
-            AC_MSG_WARN(disabling GSS-API support since no header files were found)
-          ]
-        )
-      else
-        dnl MIT found
-        dnl check if we have a really old MIT Kerberos version (<= 1.2)
-        AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
-        AC_COMPILE_IFELSE([
-          AC_LANG_PROGRAM([[
-            #include <gssapi/gssapi.h>
-            #include <gssapi/gssapi_generic.h>
-            #include <gssapi/gssapi_krb5.h>
-          ]],[[
-            gss_import_name(
-                            (OM_uint32 *)0,
-                            (gss_buffer_t)0,
-                            GSS_C_NT_HOSTBASED_SERVICE,
-                            (gss_name_t *)0);
-          ]])
-        ],[
-          AC_MSG_RESULT([yes])
-        ],[
-          AC_MSG_RESULT([no])
-          AC_DEFINE(HAVE_OLD_GSSMIT, 1,
-            [if you have an old MIT Kerberos version, lacking GSS_C_NT_HOSTBASED_SERVICE])
-        ])
+        dnl MIT not found
+        AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
       fi
     ]
   )
@@ -1889,7 +1857,7 @@ fi
 if test x"$want_gss" = xyes; then
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
   HAVE_GSSAPI=1
-  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
+  curl_gss_msg="enabled (MIT Kerberos)"
   link_pkgconfig=''
 
   if test -n "$gnu_gss"; then
@@ -1941,6 +1909,18 @@ if test x"$want_gss" = xyes; then
         fi
       fi
     fi
+    gss_version=""
+    if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+      gss_version=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --version | $SED 's/Kerberos 5 release //'`
+    elif test "$PKGCONFIG" != "no"; then
+      gss_version=`$PKGCONFIG --modversion mit-krb5-gssapi`
+    elif test -f "$KRB5CONFIG"; then
+      gss_version=`$KRB5CONFIG --version | $SED 's/Kerberos 5 release //'`
+    fi
+    if test -n "$gss_version"; then
+      AC_MSG_NOTICE([GSS-API MIT Kerberos version detected: $gss_version])
+      AC_DEFINE_UNQUOTED([CURL_KRB5_VERSION], ["$gss_version"], [MIT Kerberos version])
+    fi
   else
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
@@ -1956,8 +1936,6 @@ if test x"$want_gss" = xyes; then
   if test -n "$link_pkgconfig"; then
     if test -n "$gnu_gss"; then
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
-    elif test "x$not_mit" = "x1"; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE heimdal-gssapi"
     else
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
     fi
@@ -2017,6 +1995,7 @@ CURL_WITH_GNUTLS
 CURL_WITH_MBEDTLS
 CURL_WITH_WOLFSSL
 CURL_WITH_RUSTLS
+CURL_WITH_APPLE_SECTRUST
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
@@ -2205,20 +2184,67 @@ dnl **********************************************************************
 dnl Check for libgsasl
 dnl **********************************************************************
 
-AC_ARG_WITH(libgsasl,
-  AS_HELP_STRING([--without-libgsasl],
-  [disable libgsasl support for SCRAM]),
-  with_libgsasl=$withval,
-  with_libgsasl=yes)
-if test $with_libgsasl != "no"; then
-  AC_SEARCH_LIBS(gsasl_init, gsasl,
-    [curl_gsasl_msg="enabled";
-      AC_DEFINE([USE_GSASL], [1], [GSASL support enabled])
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libgsasl"
+OPT_LIBGSASL=no
+AC_ARG_WITH(libgsasl,dnl
+AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points to the libgsasl installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AS_HELP_STRING([--without-libgsasl], [disable libgsasl support for SCRAM]),
+  OPT_LIBGSASL=$withval)
+
+if test "$OPT_LIBGSASL" != no; then
+  dnl backup the pre-libgsasl variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBGSASL" in
+    yes)
+      dnl --with-libgsasl (without path) used
+      CURL_CHECK_PKGCONFIG(libgsasl)
+
+      if test "$PKGCONFIG" != "no"; then
+        LIB_GSASL=`$PKGCONFIG --libs-only-l libgsasl`
+        LD_GSASL=`$PKGCONFIG --libs-only-L libgsasl`
+        CPP_GSASL=`$PKGCONFIG --cflags-only-I libgsasl`
+      else
+        dnl no libgsasl pkg-config found
+        LIB_GSASL="-lgsasl"
+      fi
+      ;;
+    *)
+      dnl use the given --with-libgsasl spot
+      PREFIX_GSASL=$OPT_LIBGSASL
+      ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_GSASL"; then
+    LIB_GSASL="-lgsasl"
+    LD_GSASL=-L${PREFIX_GSASL}/lib$libsuff
+    CPP_GSASL=-I${PREFIX_GSASL}/include
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_GSASL"
+  LDFLAGSPC="$LDFLAGSPC $LD_GSASL"
+  CPPFLAGS="$CPPFLAGS $CPP_GSASL"
+  LIBS="$LIB_GSASL $LIBS"
+
+  AC_CHECK_LIB(gsasl, gsasl_init,
+    [
+      AC_CHECK_HEADERS(gsasl.h,
+        curl_gsasl_msg="enabled"
+        AC_DEFINE(USE_GSASL, 1, [GSASL support enabled])
+        USE_LIBGSASL=1
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libgsasl"
+      )
     ],
-    [curl_gsasl_msg="no      (libgsasl not found)";
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      LDFLAGSPC=$CLEANLDFLAGSPC
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
+      curl_gsasl_msg="no      (libgsasl not found)"
       AC_MSG_WARN([libgsasl was not found])
-    ]
   )
 fi
 AM_CONDITIONAL([USE_GSASL], [test "$curl_gsasl_msg" = "enabled"])
@@ -2243,12 +2269,6 @@ AC_ARG_WITH(libssh,dnl
 AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to the libssh installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh], [enable libssh]),
   OPT_LIBSSH=$withval, OPT_LIBSSH=no)
-
-OPT_WOLFSSH=off
-AC_ARG_WITH(wolfssh,dnl
-AS_HELP_STRING([--with-wolfssh=PATH],[Where to look for wolfssh, PATH points to the wolfSSH installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
-AS_HELP_STRING([--with-wolfssh], [enable wolfssh]),
-  OPT_WOLFSSH=$withval, OPT_WOLFSSH=no)
 
 if test X"$OPT_LIBSSH2" != Xno; then
   dnl backup the pre-libssh2 variables
@@ -2293,8 +2313,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_SSH2"
   LIBS="$LIB_SSH2 $LIBS"
 
-  dnl check for function added in libssh2 version 1.2.8
-  AC_CHECK_LIB(ssh2, libssh2_free)
+  dnl check for function added in libssh2 version 1.9.0
+  AC_CHECK_LIB(ssh2, libssh2_agent_get_identity_path)
 
   AC_CHECK_HEADER(libssh2.h,
     curl_ssh_msg="enabled (libssh2)"
@@ -2407,28 +2427,6 @@ elif test X"$OPT_LIBSSH" != Xno; then
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
-elif test X"$OPT_WOLFSSH" != Xno; then
-  dnl backup the pre-wolfssh variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANLDFLAGSPC="$LDFLAGSPC"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  if test "$OPT_WOLFSSH" != yes; then
-    WOLFCONFIG="$OPT_WOLFSSH/bin/wolfssh-config"
-    WOLFSSH_LIBS=`$WOLFCONFIG --libs`
-    LDFLAGS="$LDFLAGS $WOLFSSH_LIBS"
-    LDFLAGSPC="$LDFLAGSPC $WOLFSSH_LIBS"
-    CPPFLAGS="$CPPFLAGS `$WOLFCONFIG --cflags`"
-  fi
-
-  AC_CHECK_LIB(wolfssh, wolfSSH_Init)
-
-  AC_CHECK_HEADERS(wolfssh/ssh.h,
-    curl_ssh_msg="enabled (wolfSSH)"
-    AC_DEFINE(USE_WOLFSSH, 1, [if wolfSSH is in use])
-    USE_WOLFSSH=1
-  )
 fi
 
 dnl **********************************************************************
@@ -4340,11 +4338,9 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
       AC_CHECK_FUNC(pthread_create, [USE_THREADS_POSIX=1] )
       LIBS="$save_LIBS"
 
-      dnl on HP-UX, life is more complicated...
       case $host in
         *-hp-hpux*)
-          dnl it doesn't actually work without -lpthread
-          USE_THREADS_POSIX=""
+          CFLAGS="$CFLAGS -mt"
           ;;
         *)
           ;;
@@ -5017,8 +5013,8 @@ if test "x$want_ech" != "xno"; then
       ECH_ENABLED_WOLFSSL=1)
   fi
   if test "x$RUSTLS_ENABLED" = "x1"; then
-      ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
-      ECH_ENABLED_RUSTLS=1
+    ECH_SUPPORT="$ECH_SUPPORT rustls-ffi"
+    ECH_ENABLED_RUSTLS=1
   fi
 
   dnl now deal with whatever we found
@@ -5256,10 +5252,11 @@ fi
 use_curl_ntlm_core=no
 
 if test "x$CURL_DISABLE_NTLM" != "x1"; then
-  if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
+  if test "x$HAVE_DES_ECB_ENCRYPT" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
-      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1"; then
+      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1" \
+      -o "x$HAVE_MBEDTLS_DES_CRYPT_ECB" = "x1"; then
     use_curl_ntlm_core=yes
   fi
 
@@ -5318,6 +5315,10 @@ if test "x$OPENSSL_ENABLED" = "x1" -o -n "$SSL_ENABLED"; then
   if test "x$ECH_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
   fi
+fi
+
+if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
 fi
 
 if test "x$want_httpsrr" != "xno"; then
@@ -5457,9 +5458,6 @@ if test "x$USE_LIBSSH" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SCP"
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
 fi
-if test "x$USE_WOLFSSH" = "x1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
-fi
 if test "x$CURL_DISABLE_IPFS" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IPFS IPNS"
 fi
@@ -5575,6 +5573,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Verbose errors:   ${curl_verbose_msg}
   Code coverage:    ${curl_coverage_msg}
   SSPI:             ${curl_sspi_msg}
+  ca native:        ${ca_native}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
   ca cert embed:    ${CURL_CA_EMBED_msg}

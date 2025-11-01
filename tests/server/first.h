@@ -130,7 +130,6 @@ extern void logmsg(const char *msg, ...);
 extern void loghex(unsigned char *buffer, ssize_t len);
 extern unsigned char byteval(char *value);
 extern int win32_init(void);
-extern const char *sstrerror(int err);
 extern FILE *test2fopen(long testno, const char *logdir2);
 extern curl_off_t our_getpid(void);
 extern int write_pidfile(const char *filename);
@@ -148,7 +147,6 @@ extern void restore_signal_handlers(bool keep_sigalrm);
 extern int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
                             struct sockaddr_un *sau);
 #endif
-extern unsigned short util_ultous(unsigned long ulnum);
 extern curl_socket_t sockdaemon(curl_socket_t sock,
                                 unsigned short *listenport,
                                 const char *unix_socket,

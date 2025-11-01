@@ -84,6 +84,7 @@ check_PROGRAMS = \
   ipv6 \
   keepalive \
   localport \
+  log_failed_transfers \
   maxconnects \
   multi-app \
   multi-debugcallback \
@@ -132,6 +133,7 @@ check_PROGRAMS = \
   smtp-tls \
   smtp-vrfy \
   sslbackend \
+  synctime \
   unixsocket \
   url2file \
   urlapi \
@@ -139,10 +141,19 @@ check_PROGRAMS = \
   websocket-cb \
   websocket-updown
 
+# These examples require external dependencies that may be available during
+# the build.
+COMPLICATED_MAY_BUILD = \
+  cacertinmem.c \
+  multi-uv.c \
+  multithread.c \
+  sessioninfo.c \
+  threaded-ssl.c \
+  usercertinmem.c
+
 # These examples require external dependencies that may not be commonly
 # available on POSIX systems, so do not bother attempting to compile them here.
 COMPLICATED_EXAMPLES = \
-  cacertinmem.c \
   crawler.c \
   ephiperfifo.c \
   evhiperfifo.c \
@@ -151,12 +162,6 @@ COMPLICATED_EXAMPLES = \
   htmltidy.c \
   htmltitle.cpp \
   multi-event.c \
-  multi-uv.c \
-  multithread.c \
-  sessioninfo.c \
   smooth-gtk-thread.c \
-  synctime.c \
-  threaded-ssl.c \
-  usercertinmem.c \
   version-check.pl \
   xmlstream.c

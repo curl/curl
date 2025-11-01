@@ -63,9 +63,9 @@ sub extract {
         elsif($syn == 1) {
             if(/^~~~/) {
                 $syn++;
-                print O "/* !checksrc! disable UNUSEDIGNORE all */\n";
+                print O "/* !checksrc! disable BANNEDFUNC all */\n";  # for fopen()
                 print O "/* !checksrc! disable COPYRIGHT all */\n";
-                print O "/* !checksrc! disable FOPENMODE all */\n";
+                print O "/* !checksrc! disable UNUSEDIGNORE all */\n";
                 printf O "#line %d \"$f\"\n", $iline+1;
             }
         }

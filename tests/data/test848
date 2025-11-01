@@ -44,7 +44,7 @@ IMAP plain authentication with alternative authorization identity
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
 c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=

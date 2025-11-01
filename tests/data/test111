@@ -32,7 +32,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -C 2000
 <errorcode>
 36
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

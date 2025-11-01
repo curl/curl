@@ -12,24 +12,24 @@ name: 'Source'
       - master
       - '*/ci'
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
-      - 'winbuild/**'
   pull_request:
     branches:
       - master
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
-      - 'winbuild/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions: {}
 
@@ -38,73 +38,72 @@ jobs:
     name: 'checksrc'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
       - name: 'check'
         run: scripts/checksrc-all.pl
 
-  spellcheck-cmakelint-pytype-ruff:
-    name: 'spellcheck, cmakelint, pytype, ruff'
+  linters:
+    name: 'spellcheck, linters, REUSE'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
-      - name: 'install'
-        env:
-          DEBIAN_FRONTEND: noninteractive
+      - name: 'install prereqs'
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            python3-pip python3-networkx python3-pydot python3-yaml \
-            python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
-            python3-typing-extensions python3-libcst python3-impacket \
-            python3-websockets python3-pytest python3-filelock python3-pytest-xdist
-          python3 -m pip install --break-system-packages cmakelang==0.6.13 pytype==2024.10.11 ruff==0.11.9 codespell==2.4.1
+          python3 -m venv ~/venv
+          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
+            -r .github/scripts/requirements.txt \
+            -r tests/http/requirements.txt \
+            -r tests/requirements.txt
+
+      - name: 'REUSE check'
+        run: |
+          source ~/venv/bin/activate
+          reuse lint
 
       - name: 'codespell'
         run: |
+          source ~/venv/bin/activate
           codespell --version
           .github/scripts/codespell.sh
 
       - name: 'typos'
         run: |
-          /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
+          HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           typos --version
           .github/scripts/typos.sh
 
       - name: 'cmakelint'
-        run: scripts/cmakelint.sh
+        run: |
+          source ~/venv/bin/activate
+          scripts/cmakelint.sh
+
+      - name: 'perlcheck'
+        run: |
+          scripts/perlcheck.sh
 
       - name: 'pytype'
-        run: find . -name '*.py' -exec pytype -j auto -k {} +
+        run: |
+          source ~/venv/bin/activate
+          find . -name '*.py' -exec pytype -j auto -k {} +
 
       - name: 'ruff'
-        run: scripts/pythonlint.sh
-
-  reuse:
-    name: 'REUSE'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          persist-credentials: false
-
-      - name: 'check'
-        uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
+        run: |
+          source ~/venv/bin/activate
+          scripts/pythonlint.sh
 
   complexity:
     name: 'complexity'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
@@ -125,16 +124,18 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 'install prereqs'
-        run: /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
 
       - name: 'zizmor GHA'
+        env:
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --pedantic .github/workflows/*.yml
+          zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
 
       - name: 'shellcheck CI'
         run: |

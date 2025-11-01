@@ -49,8 +49,7 @@
 #include "x509asn1.h"
 #include "../curlx/dynbuf.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -199,7 +198,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   elem->header = beg;
   b = (unsigned char) *beg++;
   elem->constructed = (b & 0x20) != 0;
-  elem->class = (b >> 6) & 3;
+  elem->eclass = (b >> 6) & 3;
   b &= 0x1F;
   if(b == 0x1F)
     return NULL; /* Long tag values not supported here. */
@@ -456,7 +455,7 @@ static CURLcode encodeOID(struct dynbuf *store,
     x = 0;
     do {
       if(x & 0xFF000000)
-        return 0;
+        return CURLE_OK;
       y = *(const unsigned char *) beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
@@ -998,7 +997,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       infof(data, "   ECC Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
       char q[sizeof(len) * 8 / 3 + 1];
-      (void)msnprintf(q, sizeof(q), "%zu", len);
+      (void)curl_msnprintf(q, sizeof(q), "%zu", len);
       if(ssl_push_certinfo(data, certnum, "ECC Public Key", q))
         return 1;
     }
@@ -1033,7 +1032,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
       infof(data, "   RSA Public Key (%zu bits)", len);
     if(data->set.ssl.certinfo) {
       char r[sizeof(len) * 8 / 3 + 1];
-      msnprintf(r, sizeof(r), "%zu", len);
+      curl_msnprintf(r, sizeof(r), "%zu", len);
       if(ssl_push_certinfo(data, certnum, "RSA Public Key", r))
         return 1;
     }

@@ -35,14 +35,14 @@
 #
 # Input variables:
 #
-# - `NGTCP2_INCLUDE_DIR`:               The ngtcp2 include directory.
-# - `NGTCP2_LIBRARY`:                   Path to `ngtcp2` library.
-# - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:  Path to `ngtcp2_crypto_boringssl` library.
-# - `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:     Path to `ngtcp2_crypto_gnutls` library.
-# - `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:   Path to `ngtcp2_crypto_libressl` library.
-# - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Path to `ngtcp2_crypto_ossl` library.
-# - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Path to `ngtcp2_crypto_quictls` library.
-# - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Path to `ngtcp2_crypto_wolfssl` library.
+# - `NGTCP2_INCLUDE_DIR`:               Absolute path to ngtcp2 include directory.
+# - `NGTCP2_LIBRARY`:                   Absolute path to `ngtcp2` library.
+# - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:  Absolute path to `ngtcp2_crypto_boringssl` library.
+# - `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:     Absolute path to `ngtcp2_crypto_gnutls` library.
+# - `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:   Absolute path to `ngtcp2_crypto_libressl` library.
+# - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Absolute path to `ngtcp2_crypto_ossl` library.
+# - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Absolute path to `ngtcp2_crypto_quictls` library.
+# - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Absolute path to `ngtcp2_crypto_wolfssl` library.
 #
 # Result variables:
 #
@@ -86,7 +86,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NGTCP2_FOUND)
-  set(NGTCP2_VERSION "${NGTCP2_libngtcp2_VERSION}")
+  set(NGTCP2_VERSION ${NGTCP2_libngtcp2_VERSION})
   string(REPLACE ";" " " NGTCP2_CFLAGS "${NGTCP2_CFLAGS}")
   message(STATUS "Found NGTCP2 (via pkg-config): ${NGTCP2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()
@@ -104,7 +104,11 @@ else()
   endif()
 
   if(_ngtcp2_crypto_backend)
-    get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+      cmake_path(GET NGTCP2_LIBRARY PARENT_PATH _ngtcp2_library_dir)
+    else()
+      get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
+    endif()
     find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} HINTS ${_ngtcp2_library_dir})
 
     if(${_crypto_library_upper}_LIBRARY)

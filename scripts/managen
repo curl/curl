@@ -66,8 +66,7 @@ my $indent = 4;
 
 # get the long name version, return the manpage string
 sub manpageify {
-    my ($k)=@_;
-    my $l;
+    my ($k, $manpage)=@_;
     my $trail = '';
     # the matching pattern might include a trailing dot that cannot be part of
     # the option name
@@ -75,18 +74,15 @@ sub manpageify {
         # cut off trailing dot
         $trail = ".";
     }
-    my $klong = $k;
-    # quote "bare" minuses in the long name
-    $klong =~ s/-/\\-/g;
-    if($optlong{$k}) {
-        # both short + long
-        $l = "\\fI-".$optlong{$k}.", \\-\\-$klong\\fP$trail";
-    }
-    else {
+    if($manpage) {
+        my $klong = $k;
+        # quote "bare" minuses in the long name
+        $klong =~ s/-/\\-/g;
+
         # only long
-        $l = "\\fI\\-\\-$klong\\fP$trail";
+        return "\\fI\\-\\-$klong\\fP$trail";
     }
-    return $l;
+    return "--$k$trail";
 }
 
 
@@ -245,8 +241,38 @@ sub overrides {
     }
 }
 
+my %protexists = (
+    'DNS' => 1,
+    'FILE' => 1,
+    'FTP' => 1,
+    'FTPS' => 1,
+    'GSS/kerberos' => 1,
+    'HTTP' => 1,
+    'HTTPS' => 1,
+    'IMAP' => 1,
+    'IPFS' => 1,
+    'LDAP' => 1,
+    'MQTT' => 1,
+    'POP3' => 1,
+    'SCP' => 1,
+    'SFTP' => 1,
+    'SMTP' => 1,
+    'SSL' => 2, # deprecated
+    'TELNET' => 1,
+    'TFTP' => 1,
+    'TLS' => 1,
+    );
+
 sub protocols {
-    my ($manpage, $standalone, $data)=@_;
+    my ($f, $line, $manpage, $standalone, $data)=@_;
+    my @e = split(/ +/, $data);
+    for my $pr (@e) {
+        if(!$protexists{$pr}) {
+
+            print STDERR "$f:$line:1:ERROR: unrecognized protocol: $pr\n";
+            exit 2;
+        }
+    }
     if($standalone) {
         return ".SH \"PROTOCOLS\"\n$data\n";
     }
@@ -265,8 +291,8 @@ sub too_old {
     elsif($version =~ /^(\d+)\.(\d+)/) {
         $a = $1 * 1000 + $2 * 10;
     }
-    if($a < 7600) {
-        # we consider everything before 7.60.0 to be too old to mention
+    if($a < 7660) {
+        # we consider everything before 7.66.0 to be too old to mention
         # specific changes for
         return 1;
     }
@@ -477,7 +503,7 @@ sub render {
 
         if($manpage) {
             if(!$quote && $d =~ /--/) {
-                $d =~ s/--([a-z0-9.-]+)/manpageify($1)/ge;
+                $d =~ s/--([a-z0-9.-]+)/manpageify($1, 1)/ge;
             }
 
             # quote minuses in the output
@@ -635,12 +661,14 @@ sub single {
         elsif(/^Experimental: yes/i) {
             $experimental=1;
         }
+        # REUSE-IgnoreStart
         elsif(/^C: (.*)/i) {
             $copyright=$1;
         }
         elsif(/^SPDX-License-Identifier: (.*)/i) {
             $spdx=$1;
         }
+        # REUSE-IgnoreEnd
         elsif(/^Help: *(.*)/i) {
             ;
         }
@@ -671,7 +699,9 @@ sub single {
                 return 2;
             }
             if(!$spdx) {
+                # REUSE-IgnoreStart
                 print STDERR "$f:$line:1:ERROR: no 'SPDX-License-Identifier:' field present\n";
+                # REUSE-IgnoreEnd
                 return 2;
             }
             last;
@@ -720,7 +750,7 @@ sub single {
     }
     my @leading;
     if($protocols) {
-        push @leading, protocols($manpage, $standalone, $protocols);
+        push @leading, protocols($f, $line, $manpage, $standalone, $protocols);
     }
 
     if($standalone) {
@@ -741,7 +771,9 @@ sub single {
         }
         if($scope eq "global") {
             push @desc, "\n" if(!$manpage);
-            push @desc, "${pre}This option is global and does not need to be specified for each use of --next.\n";
+            push @desc,
+                sprintf("${pre}This option is global and does not need to be specified for each use of %s.\n",
+                        manpageify("next", $manpage));
         }
         else {
             print STDERR "$f:$line:1:ERROR: unrecognized scope: '$scope'\n";
@@ -751,11 +783,15 @@ sub single {
 
     my @extra;
     if($multi eq "single") {
-        push @extra, "${pre}If --$long is provided several times, the last set ".
-            "value is used.\n";
+        push @extra,
+            sprintf("${pre}If %s is provided several times, the last set ".
+                    "value is used.\n",
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "append") {
-        push @extra, "${pre}--$long can be used several times in a command line\n";
+        push @extra,
+            sprintf("${pre}%s can be used several times in a command line\n",
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "boolean") {
         my $rev = "no-$long";
@@ -767,20 +803,23 @@ sub single {
         }
         my $dashes = $manpage ? "\\-\\-" : "--";
         push @extra,
-            "${pre}Providing --$long multiple times has no extra effect.\n".
-            "Disable it again with $dashes$rev.\n";
+            sprintf("${pre}Providing %s multiple times has no extra effect.\n".
+                    "Disable it again with $dashes$rev.\n",
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "mutex") {
         push @extra,
-            "${pre}Providing --$long multiple times has no extra effect.\n";
+            sprintf("${pre}Providing %s multiple times has no extra effect.\n",
+                    manpageify($long, $manpage));
     }
     elsif($multi eq "custom") {
         ; # left for the text to describe
     }
     elsif($multi eq "per-URL") {
         push @extra,
-            "${pre}--$long is associated with a single URL. Use it once per URL ".
-            "when you use several URLs in a command line.\n";
+            sprintf("${pre}%s is associated with a single URL. Use it once per URL ".
+                    "when you use several URLs in a command line.\n",
+                    manpageify($long, $manpage));
     }
     else {
         print STDERR "$f:$line:1:ERROR: unrecognized Multi: '$multi'\n";
@@ -804,7 +843,7 @@ sub single {
         if(!$helplong{$k}) {
             print STDERR "$f:$line:1:WARN: see-also a non-existing option: $k\n";
         }
-        my $l = $manpage ? manpageify($k) : "--$k";
+        my $l = manpageify($k, $manpage);
         my $sep = " and";
         if($and && ($i < $and)) {
             $sep = ",";
@@ -814,7 +853,7 @@ sub single {
     }
 
     if($requires) {
-        my $l = $manpage ? manpageify($long) : "--$long";
+        my $l = manpageify($long, $manpage);
         push @foot, "$l requires that libcurl".
             " is built to support $requires.\n";
     }
@@ -827,7 +866,7 @@ sub single {
             if(!$helplong{$k}) {
                 print STDERR "WARN: $f mutexes a non-existing option: $k\n";
             }
-            my $l = $manpage ? manpageify($k) : "--$k";
+            my $l = manpageify($k, $manpage);
             my $sep = ", ";
             if($count == ($num -1)) {
                 $sep = " and ";
@@ -841,6 +880,29 @@ sub single {
     if($examples[0]) {
         my $s ="";
         $s="s" if($examples[1]);
+        foreach my $e (@examples) {
+            my $check = $e;
+            # verify the used options
+            for my $e (split(/ /, $check)) {
+                if($e =~ /^-([^- ])/) {
+                    my $opt = $1;
+                    if(!$optshort{$opt}) {
+                        print STDERR "$f:$line:1:ERROR: unknown option in ".
+                            "example: -$opt\n";
+                        return 2;
+                    }
+                }
+                elsif($e =~ /^--([^ =]*)/) {
+                    my $opt = $1;
+                    $opt =~ s/^expand-//g;
+                    if(!$helplong{$opt}) {
+                        print STDERR "$f:$line:1:ERROR: unknown option in ".
+                            "example: '--$opt'\n";
+                        return 2;
+                    }
+                }
+            }
+        }
         if($manpage) {
             print "\nExample$s:\n";
             print ".nf\n";

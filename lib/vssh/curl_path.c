@@ -28,6 +28,7 @@
 
 #include "curl_path.h"
 #include <curl/curl.h>
+#include "../curlx/strparse.h"
 #include "../curl_memory.h"
 #include "../escape.h"
 #include "../memdebug.h"
@@ -100,36 +101,16 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
   }
   else
     *path = working_path;
+  DEBUGASSERT(*path && (*path)[0]);
 
   return CURLE_OK;
 }
-
-/* The original get_pathname() function came from OpenSSH sftp.c version
-   4.6p1. */
-/*
- * Copyright (c) 2001-2004 Damien Miller <djm@openbsd.org>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
 
 #define MAX_PATHLENGTH 65535 /* arbitrary long */
 
 CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 {
-  const char *cp = *cpp, *end;
-  char quot;
-  unsigned int i;
-  static const char WHITESPACE[] = " \t\r\n";
+  const char *cp = *cpp;
   struct dynbuf out;
   CURLcode result;
 
@@ -142,48 +123,37 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
   curlx_dyn_init(&out, MAX_PATHLENGTH);
 
   /* Ignore leading whitespace */
-  cp += strspn(cp, WHITESPACE);
+  curlx_str_passblanks(&cp);
 
   /* Check for quoted filenames */
   if(*cp == '\"' || *cp == '\'') {
-    quot = *cp++;
+    char quot = *cp++;
 
     /* Search for terminating quote, unescape some chars */
-    for(i = 0; i <= strlen(cp); i++) {
-      if(cp[i] == quot) {  /* Found quote */
-        i++;
-        break;
-      }
-      if(cp[i] == '\0') {  /* End of string */
+    while(*cp != quot) {
+      if(!*cp) /* End of string */
         goto fail;
-      }
-      if(cp[i] == '\\') {  /* Escaped characters */
-        i++;
-        if(cp[i] != '\'' && cp[i] != '\"' &&
-            cp[i] != '\\') {
+
+      if(*cp == '\\') { /* Escaped characters */
+        cp++;
+        if(*cp != '\'' && *cp != '\"' && *cp != '\\')
           goto fail;
-        }
       }
-      result = curlx_dyn_addn(&out, &cp[i], 1);
+      result = curlx_dyn_addn(&out, cp, 1);
       if(result)
         return result;
+      cp++;
     }
+    cp++; /* pass the end quote */
 
     if(!curlx_dyn_len(&out))
       goto fail;
 
-    /* return pointer to second parameter if it exists */
-    *cpp = &cp[i] + strspn(&cp[i], WHITESPACE);
   }
   else {
-    /* Read to end of filename - either to whitespace or terminator */
-    end = strpbrk(cp, WHITESPACE);
-    if(!end)
-      end = strchr(cp, '\0');
-
-    /* return pointer to second parameter if it exists */
-    *cpp = end + strspn(end, WHITESPACE);
-
+    struct Curl_str word;
+    bool content = FALSE;
+    int rc;
     /* Handling for relative path - prepend home directory */
     if(cp[0] == '/' && cp[1] == '~' && cp[2] == '/') {
       result = curlx_dyn_add(&out, homedir);
@@ -192,12 +162,32 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
       if(result)
         return result;
       cp += 3;
+      content = TRUE;
     }
-    /* Copy path name up until first "whitespace" */
-    result = curlx_dyn_addn(&out, cp, (end - cp));
-    if(result)
-      return result;
+    /* Read to end of filename - either to whitespace or terminator */
+    rc = curlx_str_word(&cp, &word, MAX_PATHLENGTH);
+    if(rc) {
+      if(rc == STRE_BIG) {
+        curlx_dyn_free(&out);
+        return CURLE_TOO_LARGE;
+      }
+      else if(!content)
+        /* no path, no word, this is incorrect */
+        goto fail;
+    }
+    else {
+      /* append the word */
+      result = curlx_dyn_addn(&out, curlx_str(&word), curlx_strlen(&word));
+      if(result)
+        return result;
+    }
   }
+  /* skip whitespace */
+  curlx_str_passblanks(&cp);
+
+  /* return pointer to second parameter if it exists */
+  *cpp = cp;
+
   *path = curlx_dyn_ptr(&out);
   return CURLE_OK;
 

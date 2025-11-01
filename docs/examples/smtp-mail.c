@@ -64,11 +64,12 @@ struct upload_status {
   size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
   size_t room = size * nmemb;
+  size_t len;
 
   if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
     return 0;
@@ -76,28 +77,28 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 
   data = &payload_text[upload_ctx->bytes_read];
 
-  if(data) {
-    size_t len = strlen(data);
-    if(room < len)
-      len = room;
-    memcpy(ptr, data, len);
-    upload_ctx->bytes_read += len;
+  len = strlen(data);
+  if(room < len)
+    len = room;
+  memcpy(ptr, data, len);
+  upload_ctx->bytes_read += len;
 
-    return len;
-  }
-
-  return 0;
+  return len;
 }
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *recipients = NULL;
-  struct upload_status upload_ctx = { 0 };
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *recipients = NULL;
+    struct upload_status upload_ctx = { 0 };
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
@@ -120,7 +121,7 @@ int main(void)
     /* We are using a callback function to specify the payload (the headers and
      * body of the message). You could just use the CURLOPT_READDATA option to
      * specify a FILE pointer to read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
@@ -145,6 +146,8 @@ int main(void)
      */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

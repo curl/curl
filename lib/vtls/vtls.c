@@ -43,9 +43,6 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 
 #include "../urldata.h"
 #include "../cfilters.h"
@@ -68,17 +65,21 @@
 #include "../progress.h"
 #include "../share.h"
 #include "../multiif.h"
+#include "../curlx/fopen.h"
 #include "../curlx/timeval.h"
-#include "../curl_md5.h"
 #include "../curl_sha256.h"
 #include "../curlx/warnless.h"
 #include "../curlx/base64.h"
-#include "../curl_printf.h"
 #include "../curlx/inet_pton.h"
 #include "../connect.h"
 #include "../select.h"
-#include "../strdup.h"
+#include "../setopt.h"
 #include "../rand.h"
+#include "../strdup.h"
+
+#ifdef USE_APPLE_SECTRUST
+#include <Security/Security.h>
+#endif
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -292,62 +293,100 @@ static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 
 CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 {
-  data->set.ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH];
-  data->set.ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE];
-  data->set.ssl.primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
-  data->set.ssl.primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
-  data->set.ssl.primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
-  data->set.ssl.primary.cipher_list =
-    data->set.str[STRING_SSL_CIPHER_LIST];
-  data->set.ssl.primary.cipher_list13 =
-    data->set.str[STRING_SSL_CIPHER13_LIST];
-  data->set.ssl.primary.signature_algorithms =
-    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
-  data->set.ssl.primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
-  data->set.ssl.primary.cert_blob = data->set.blobs[BLOB_CERT];
-  data->set.ssl.primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
-  data->set.ssl.primary.curves = data->set.str[STRING_SSL_EC_CURVES];
-#ifdef USE_TLS_SRP
-  data->set.ssl.primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
-  data->set.ssl.primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+  struct ssl_config_data *sslc = &data->set.ssl;
+#if defined(CURL_CA_PATH) || defined(CURL_CA_BUNDLE)
+  struct UserDefined *set = &data->set;
+  CURLcode result;
 #endif
-  data->set.ssl.cert_type = data->set.str[STRING_CERT_TYPE];
-  data->set.ssl.key = data->set.str[STRING_KEY];
-  data->set.ssl.key_type = data->set.str[STRING_KEY_TYPE];
-  data->set.ssl.key_passwd = data->set.str[STRING_KEY_PASSWD];
-  data->set.ssl.primary.clientcert = data->set.str[STRING_CERT];
-  data->set.ssl.key_blob = data->set.blobs[BLOB_KEY];
+
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
+#ifdef USE_APPLE_SECTRUST
+    if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
+      sslc->native_ca_store = TRUE;
+#endif
+#ifdef CURL_CA_PATH
+    if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
+      if(result)
+        return result;
+    }
+    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
+#endif
+#ifdef CURL_CA_BUNDLE
+    if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
+      if(result)
+        return result;
+    }
+#endif
+  }
+  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
+  sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
+  sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
+  sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
+  sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
+  sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST];
+  sslc->primary.signature_algorithms =
+    data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
+  sslc->primary.pinned_key =
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  sslc->primary.cert_blob = data->set.blobs[BLOB_CERT];
+  sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
+  sslc->primary.curves = data->set.str[STRING_SSL_EC_CURVES];
+#ifdef USE_TLS_SRP
+  sslc->primary.username = data->set.str[STRING_TLSAUTH_USERNAME];
+  sslc->primary.password = data->set.str[STRING_TLSAUTH_PASSWORD];
+#endif
+  sslc->cert_type = data->set.str[STRING_CERT_TYPE];
+  sslc->key = data->set.str[STRING_KEY];
+  sslc->key_type = data->set.str[STRING_KEY_TYPE];
+  sslc->key_passwd = data->set.str[STRING_KEY_PASSWD];
+  sslc->primary.clientcert = data->set.str[STRING_CERT];
+  sslc->key_blob = data->set.blobs[BLOB_KEY];
 
 #ifndef CURL_DISABLE_PROXY
-  data->set.proxy_ssl.primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
-  data->set.proxy_ssl.primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
-  data->set.proxy_ssl.primary.cipher_list =
-    data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
-  data->set.proxy_ssl.primary.cipher_list13 =
-    data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
-  data->set.proxy_ssl.primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
-  data->set.proxy_ssl.primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
-  data->set.proxy_ssl.primary.ca_info_blob =
-    data->set.blobs[BLOB_CAINFO_PROXY];
-  data->set.proxy_ssl.primary.issuercert =
-    data->set.str[STRING_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.primary.issuercert_blob =
-    data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY];
-  data->set.proxy_ssl.primary.CRLfile =
-    data->set.str[STRING_SSL_CRLFILE_PROXY];
-  data->set.proxy_ssl.cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
-  data->set.proxy_ssl.key = data->set.str[STRING_KEY_PROXY];
-  data->set.proxy_ssl.key_type = data->set.str[STRING_KEY_TYPE_PROXY];
-  data->set.proxy_ssl.key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
-  data->set.proxy_ssl.primary.clientcert = data->set.str[STRING_CERT_PROXY];
-  data->set.proxy_ssl.key_blob = data->set.blobs[BLOB_KEY_PROXY];
+  sslc = &data->set.proxy_ssl;
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
+#ifdef USE_APPLE_SECTRUST
+    if(!sslc->custom_capath && !sslc->custom_cafile && !sslc->custom_cablob)
+      sslc->native_ca_store = TRUE;
+#endif
+#ifdef CURL_CA_PATH
+    if(!sslc->custom_capath && !set->str[STRING_SSL_CAPATH_PROXY]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY],
+                              CURL_CA_PATH);
+      if(result)
+        return result;
+    }
+    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
+#endif
+#ifdef CURL_CA_BUNDLE
+    if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
+      result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
+                              CURL_CA_BUNDLE);
+      if(result)
+        return result;
+    }
+#endif
+  }
+  sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
+  sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
+  sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];
+  sslc->primary.cert_blob = data->set.blobs[BLOB_CERT_PROXY];
+  sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO_PROXY];
+  sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT_PROXY];
+  sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT_PROXY];
+  sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE_PROXY];
+  sslc->cert_type = data->set.str[STRING_CERT_TYPE_PROXY];
+  sslc->key = data->set.str[STRING_KEY_PROXY];
+  sslc->key_type = data->set.str[STRING_KEY_TYPE_PROXY];
+  sslc->key_passwd = data->set.str[STRING_KEY_PASSWD_PROXY];
+  sslc->primary.clientcert = data->set.str[STRING_CERT_PROXY];
+  sslc->key_blob = data->set.blobs[BLOB_KEY_PROXY];
 #ifdef USE_TLS_SRP
-  data->set.proxy_ssl.primary.username =
-    data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
-  data->set.proxy_ssl.primary.password =
-    data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
+  sslc->primary.username = data->set.str[STRING_TLSAUTH_USERNAME_PROXY];
+  sslc->primary.password = data->set.str[STRING_TLSAUTH_PASSWORD_PROXY];
 #endif
 #endif /* CURL_DISABLE_PROXY */
 
@@ -803,7 +842,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     struct dynbuf buf;
     char unsigned *pem_ptr = NULL;
     size_t left;
-    FILE *fp = fopen(pinnedpubkey, "rb");
+    FILE *fp = curlx_fopen(pinnedpubkey, "rb");
     if(!fp)
       return result;
 
@@ -865,7 +904,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 end:
     curlx_dyn_free(&buf);
     Curl_safefree(pem_ptr);
-    fclose(fp);
+    curlx_fclose(fp);
   }
 
   return result;
@@ -1053,8 +1092,8 @@ static size_t multissl_version(char *buffer, size_t size)
       bool paren = (selected != available_backends[i]);
 
       if(available_backends[i]->version(vb, sizeof(vb))) {
-        p += msnprintf(p, end - p, "%s%s%s%s", (p != backends ? " " : ""),
-                       (paren ? "(" : ""), vb, (paren ? ")" : ""));
+        p += curl_msnprintf(p, end - p, "%s%s%s%s", (p != backends ? " " : ""),
+                            (paren ? "(" : ""), vb, (paren ? ")" : ""));
       }
     }
 
@@ -1325,18 +1364,21 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(connssl);
 
   *done = FALSE;
+
+  if(!connssl->prefs_checked) {
+    if(!ssl_prefs_check(data)) {
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    connssl->prefs_checked = TRUE;
+  }
+
   if(!connssl->peer.hostname) {
     char tls_id[80];
     connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
     result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
     if(result)
       goto out;
-  }
-
-  if(!connssl->prefs_checked) {
-    if(!ssl_prefs_check(data))
-      return CURLE_SSL_CONNECT_ERROR;
-    connssl->prefs_checked = TRUE;
   }
 
   result = connssl->ssl_impl->do_connect(cf, data, done);
@@ -1862,7 +1904,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
       Curl_shutdown_clear(data, sockindex);
       if(!result && !done) /* blocking failed? */
         result = CURLE_SSL_SHUTDOWN_FAILED;
-      Curl_conn_cf_discard_sub(head, cf, data, FALSE);
+      Curl_conn_cf_discard(&cf, data);
       CURL_TRC_CF(data, cf, "shutdown and remove SSL, done -> %d", result);
       break;
     }
@@ -1993,6 +2035,11 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
+    else if(!proto) {
+      DEBUGASSERT(0); /* with length, we need a pointer */
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
     else if((strlen(connssl->negotiated.alpn) != proto_len) ||
             memcmp(connssl->negotiated.alpn, proto, proto_len)) {
       failf(data, "ALPN: asked for '%s' from previous session, but server "
@@ -2014,11 +2061,9 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    connssl->negotiated.alpn = malloc(proto_len + 1);
+    connssl->negotiated.alpn = Curl_memdup0((const char *)proto, proto_len);
     if(!connssl->negotiated.alpn)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(connssl->negotiated.alpn, proto, proto_len);
-    connssl->negotiated.alpn[proto_len] = 0;
   }
 
   if(proto && proto_len) {

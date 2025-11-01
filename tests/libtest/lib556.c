@@ -83,8 +83,9 @@ again:
 #else
         if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
 #endif
+          char errbuf[STRERROR_LEN];
           curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
-                        errno, strerror(errno));
+                        errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
           res = TEST_ERR_FAILURE;
           break;
         }

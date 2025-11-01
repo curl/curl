@@ -20,7 +20,7 @@ checksrc
  * Violate each rule at least once.
  **/
 int hello; /*------------------------------------------------------------------*/
-int	tab;
+int%tab%tab;
 int trailing_space;
 int a = func ();
 int b = func( b);
@@ -47,7 +47,7 @@ func_return() ;
 
 a = sprintf(buffer, "%s", moo);
 
-FILE *f = fopen("filename", "r");
+FILE *f = curlx_fopen("filename", "r");
 
 void startfunc(int a, int b) {
   func();
@@ -74,6 +74,9 @@ void startfunc(int a, int b) {
 
  if(a) b++;
 
+ if(sprintf(buffer, "%s", moo)) {}
+ *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
+
  // CPP comment ?
 
  /* comment doesn't end
@@ -88,7 +91,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:4:82: warning: Longer than 79 columns (LONGLINE)
  int hello; /*------------------------------------------------------------------*/
 ./%LOGDIR/code1185.c:5:4: error: Contains TAB character (TABS)
- int	tab;
+ int%tab%tab;
     ^
 ./%LOGDIR/code1185.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
  int a = func ();
@@ -115,7 +118,7 @@ void startfunc(int a, int b) {
  } else {
  ^
 ./%LOGDIR/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
- if(a == 2){  
+ if(a == 2){%spc%%spc%
            ^
 ./%LOGDIR/code1185.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
  func_return() ;
@@ -124,7 +127,7 @@ void startfunc(int a, int b) {
  a = sprintf(buffer, "%s", moo);
      ^
 ./%LOGDIR/code1185.c:32:11: warning: use of non-binary fopen without FOPEN_* macro: r (FOPENMODE)
- FILE *f = fopen("filename", "r");
+ FILE *f = curlx_fopen("filename", "r");
            ^
 ./%LOGDIR/code1185.c:34:30: warning: wrongly placed open brace (BRACEPOS)
  void startfunc(int a, int b) {
@@ -192,16 +195,22 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:57:7: warning: conditional block on the same line (ONELINECONDITION)
   if(a) b++;
        ^
-./%LOGDIR/code1185.c:59:2: warning: // comment (CPPCOMMENTS)
+./%LOGDIR/code1185.c:59:5: warning: use of sprintf is banned (BANNEDFUNC)
+  if(sprintf(buffer, "%s", moo)) {}
+     ^
+./%LOGDIR/code1185.c:60:25: warning: use of alsobad is banned (BANNEDFUNC)
+  *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
+                         ^
+./%LOGDIR/code1185.c:62:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
- 
+%spc%
  ^
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
- 
+%spc%
  ^
-checksrc: 0 errors and 39 warnings
+checksrc: 0 errors and 41 warnings
 </stdout>
 <errorcode>
 5

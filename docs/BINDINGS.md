@@ -22,7 +22,7 @@ libcurl bindings
 
 [Basic](https://scriptbasic.com/) ScriptBasic bindings written by Peter Verhas
 
-C++: [curlpp](https://github.com/jpbarrette/curlpp/) Written by Jean-Philippe Barrette-LaPierre,
+C++: [curlpp](https://github.com/jpbarrette/curlpp) Written by Jean-Philippe Barrette-LaPierre,
 [curlcpp](https://github.com/JosephP91/curlcpp) by Giuseppe Persico and [C++
 Requests](https://github.com/libcpr/cpr) by Huu Nguyen
 
@@ -75,7 +75,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
 
-[Mono](https://web.archive.org/web/20070606064500/https://forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
+[Mono](https://web.archive.org/web/20070606064500/forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
 [.NET](https://sourceforge.net/projects/libcurl-net/) libcurl-net by Jeffrey Phillips
 
@@ -100,7 +100,7 @@ Bailiff and Bálint Szilakszi,
 
 [PostgreSQL](https://github.com/RekGRpth/pg_curl) - cURL client for PostgreSQL
 
-[PureBasic](https://www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
+[PureBasic](https://web.archive.org/web/20250325015028/www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
 [Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
 
@@ -121,7 +121,7 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 
 [Rust](https://github.com/alexcrichton/curl-rust) curl-rust - by Carl Lerche
 
-[Scheme](https://www.metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
+[Scheme](https://metapaper.net/lisovsky/web/curl/) Bigloo binding by Kirill Lisovsky
 
 [Scilab](https://help.scilab.org/docs/current/fr_FR/getURL.html) binding by Sylvestre Ledru
 

@@ -26,9 +26,6 @@
 
 #include <limits.h>
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -41,8 +38,7 @@
 #include "rand.h"
 #include "escape.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -149,12 +145,6 @@ static CURLcode weak_random(struct Curl_easy *data,
 }
 #endif
 
-#ifdef USE_SSL
-#define _random(x,y,z) Curl_ssl_random(x,y,z)
-#else
-#define _random(x,y,z) weak_random(x,y,z)
-#endif
-
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
                        bool env_override)
 {
@@ -185,7 +175,11 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
 #endif
 
   /* data may be NULL! */
-  return _random(data, (unsigned char *)rnd, sizeof(*rnd));
+#ifdef USE_SSL
+  return Curl_ssl_random(data, (unsigned char *)rnd, sizeof(*rnd));
+#else
+  return weak_random(data, (unsigned char *)rnd, sizeof(*rnd));
+#endif
 }
 
 /*

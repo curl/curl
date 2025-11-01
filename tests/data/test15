@@ -44,7 +44,7 @@ Content-Length: 26
 Repeated nonsense-headers
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER 200 26
 </stdout>
-<protocol>
+<protocol crlf="yes">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

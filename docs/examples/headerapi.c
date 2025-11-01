@@ -40,9 +40,12 @@ int main(void)
 {
   CURL *curl;
 
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
     struct curl_header *header;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* example.com is redirected, so we tell libcurl to follow redirection */
@@ -69,7 +72,7 @@ int main(void)
       do {
         h = curl_easy_nextheader(curl, CURLH_HEADER, -1, prev);
         if(h)
-          printf(" %s: %s (%u)\n", h->name, h->value, (int)h->amount);
+          printf(" %s: %s (%u)\n", h->name, h->value, (unsigned int)h->amount);
         prev = h;
       } while(h);
 
@@ -77,5 +80,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }

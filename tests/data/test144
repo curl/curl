@@ -36,7 +36,7 @@ ftp://%HOSTIP:%FTPPORT/ -P - -l
 ^PORT \d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3},\d{1,3}
 ^EPRT \|1\|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\|\d{1,5}\|
 </strip>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

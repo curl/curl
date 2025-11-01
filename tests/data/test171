@@ -41,7 +41,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://z.x.com/%TESTNUMBER HTTP/1.1
 Host: z.x.com
 User-Agent: curl/%VERSION

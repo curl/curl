@@ -34,7 +34,6 @@
  1.20 SRV and URI DNS records
  1.22 CURLINFO_PAUSE_STATE
  1.25 Expose tried IP addresses that failed
- 1.28 FD_CLOEXEC
  1.30 config file parsing
  1.31 erase secrets from heap/stack after use
  1.32 add asynch getaddrinfo support
@@ -55,6 +54,7 @@
 
  4. FTP
  4.1 HOST
+ 4.2 A fixed directory listing format
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -349,14 +349,6 @@
 
  https://github.com/curl/curl/issues/2126
 
-1.28 FD_CLOEXEC
-
- It sets the close-on-exec flag for the file descriptor, which causes the file
- descriptor to be automatically (and atomically) closed when any of the
- exec-family functions succeed. Should probably be set by default?
-
- https://github.com/curl/curl/issues/2252
-
 1.30 config file parsing
 
  Consider providing an API, possibly in a separate companion library, for
@@ -493,11 +485,21 @@
 
  https://datatracker.ietf.org/doc/html/rfc7151
 
+4.2 A fixed directory listing format
+
+ Since listing the contents of a remove directory with FTP is returning the
+ list in a format and style the server likes without any estblished or even
+ defactor standard existing, it would be a feature to users if curl could
+ parse the directory listing and output a general curl format that is fixed
+ and the same, independent of the server's choice. This would allow users to
+ better and more reliably extract information about remote content via FTP
+ directory listings.
+
 4.6 GSSAPI via Windows SSPI
 
  In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
- via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
- support for GSSAPI authentication via Windows SSPI.
+ via third-party GSS-API libraries, such as MIT Kerberos, also add support
+ for GSSAPI authentication via Windows SSPI.
 
 4.7 STAT for LIST without data connection
 
@@ -531,7 +533,7 @@
 
 5.2 Obey Retry-After in redirects
 
- The Retry-After is said to dicate "the minimum time that the user agent is
+ The Retry-After is said to dictate "the minimum time that the user agent is
  asked to wait before issuing the redirected request" and libcurl does not
  obey this.
 
@@ -860,14 +862,14 @@
  The existing support for the -E/--cert and --key options could be
  extended by supplying a custom certificate and key in PEM format, see:
  - Getting a Certificate for Schannel
-   https://msdn.microsoft.com/en-us/library/windows/desktop/aa375447.aspx
+   https://learn.microsoft.com/windows/win32/secauthn/getting-a-certificate-for-schannel
 
 15.2 Extend support for the --ciphers option
 
  The existing support for the --ciphers option could be extended
  by mapping the OpenSSL/GnuTLS cipher suites to the Schannel APIs, see
  - Specifying Schannel Ciphers and Cipher Strengths
-   https://msdn.microsoft.com/en-us/library/windows/desktop/aa380161.aspx
+   https://learn.microsoft.com/windows/win32/secauthn/specifying-schannel-ciphers-and-cipher-strengths
 
 15.4 Add option to allow abrupt server closure
 

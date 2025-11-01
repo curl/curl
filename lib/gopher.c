@@ -35,14 +35,13 @@
 #include "progress.h"
 #include "gopher.h"
 #include "select.h"
-#include "strdup.h"
 #include "vtls/vtls.h"
 #include "url.h"
 #include "escape.h"
 #include "curlx/warnless.h"
-#include "curl_printf.h"
+
+/* The last 2 #include files should be: */
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 /*
@@ -153,7 +152,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   DEBUGASSERT(path);
 
   if(query)
-    gopherpath = aprintf("%s?%s", path, query);
+    gopherpath = curl_maprintf("%s?%s", path, query);
   else
     gopherpath = strdup(path);
 

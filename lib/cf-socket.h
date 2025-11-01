@@ -48,11 +48,12 @@ struct Curl_sockaddr_ex {
   int protocol;
   unsigned int addrlen;
   union {
-    struct sockaddr addr;
-    struct Curl_sockaddr_storage buff;
-  } _sa_ex_u;
+    struct sockaddr sa;
+    struct Curl_sockaddr_storage buf;
+  } addr;
 };
-#define curl_sa_addr _sa_ex_u.addr
+#define curl_sa_addr addr.sa
+#define curl_sa_addrbuf addr.buf
 
 /*
  * Parse interface option, and return the interface name and the host part.
@@ -80,7 +81,7 @@ int Curl_socket_close(struct Curl_easy *data, struct connectdata *conn,
 /* When you run a program that uses the Windows Sockets API, you may
    experience slow performance when you copy data to a TCP server.
 
-   https://support.microsoft.com/kb/823764
+   https://learn.microsoft.com/troubleshoot/windows-server/networking/slow-performance-copy-data-tcp-server-sockets-api
 
    Work-around: Make the Socket Send Buffer Size Larger Than the Program Send
    Buffer Size
@@ -157,7 +158,7 @@ CURLcode Curl_cf_socket_peek(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              curl_socket_t *psock,
                              const struct Curl_sockaddr_ex **paddr,
-                             struct ip_quadruple *pip);
+                             struct ip_quadruple *pip) WARN_UNUSED_RESULT;
 
 extern struct Curl_cftype Curl_cft_tcp;
 extern struct Curl_cftype Curl_cft_udp;

@@ -38,10 +38,9 @@
    1. USE_OPENSSL
    2. USE_WOLFSSL
    3. USE_GNUTLS
-   4. -
-   5. USE_MBEDTLS
-   6. USE_OS400CRYPTO
-   7. USE_WIN32_CRYPTO
+   4. USE_MBEDTLS
+   5. USE_OS400CRYPTO
+   6. USE_WIN32_CRYPTO
 
    This ensures that:
    - the same SSL branch gets activated throughout this source
@@ -51,23 +50,25 @@
      in NTLM type-3 messages.
  */
 
-#ifdef USE_OPENSSL
-  #include <openssl/opensslconf.h>
-  #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
-    #define USE_OPENSSL_DES
-  #endif
-#elif defined(USE_WOLFSSL)
-  #include <wolfssl/options.h>
-  #ifndef NO_DES3
-    #define USE_OPENSSL_DES
-  #endif
+#ifdef USE_MBEDTLS
+#include <mbedtls/version.h>
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  #error "mbedTLS 3.2.0 or later required"
+#endif
+#endif
+
+#if defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)
+  #define USE_OPENSSL_DES
+#elif defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+  #define USE_OPENSSL_DES
+#elif defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)
+  #define USE_MBEDTLS_DES
 #endif
 
 #ifdef USE_OPENSSL_DES
 
 #ifdef USE_OPENSSL
 #  include <openssl/des.h>
-#  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
 #  ifdef OPENSSL_IS_AWSLC  /* for versions 1.2.0 to 1.30.1 */
@@ -75,8 +76,8 @@
 #  endif
 #  define DESKEY(x) &x
 #else
+#  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
-#  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
 #  include <wolfssl/openssl/rand.h>
 #  ifdef OPENSSL_COEXIST
@@ -96,18 +97,20 @@
 #elif defined(USE_GNUTLS)
 
 #  include <nettle/des.h>
+#  define USE_CURL_DES_SET_ODD_PARITY
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_DES)
 
 #  include <mbedtls/des.h>
 
 #elif defined(USE_OS400CRYPTO)
 #  include "cipher.mih"  /* mih/cipher */
+#  define USE_CURL_DES_SET_ODD_PARITY
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
+#  define USE_CURL_DES_SET_ODD_PARITY
 #else
 #  error "cannot compile NTLM support without a crypto library with DES."
-#  define CURL_NTLM_NOT_SUPPORTED
 #endif
 
 #include "urldata.h"
@@ -117,14 +120,50 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 #include "curl_endian.h"
-#include "curl_des.h"
 #include "curl_md4.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef CURL_NTLM_NOT_SUPPORTED
+#ifdef USE_CURL_DES_SET_ODD_PARITY
+/*
+ * curl_des_set_odd_parity()
+ *
+ * Copyright (C) Steve Holme, <steve_holme@hotmail.com>
+ *
+ * This is used to apply odd parity to the given byte array. It is typically
+ * used by when a cryptography engine does not have its own version.
+ *
+ * The function is a port of the Java based oddParity() function over at:
+ *
+ * https://davenport.sourceforge.net/ntlm.html
+ *
+ * Parameters:
+ *
+ * bytes       [in/out] - The data whose parity bits are to be adjusted for
+ *                        odd parity.
+ * len         [out]    - The length of the data.
+ */
+static void curl_des_set_odd_parity(unsigned char *bytes, size_t len)
+{
+  size_t i;
+
+  for(i = 0; i < len; i++) {
+    unsigned char b = bytes[i];
+
+    bool needs_parity = (((b >> 7) ^ (b >> 6) ^ (b >> 5) ^
+                          (b >> 4) ^ (b >> 3) ^ (b >> 2) ^
+                          (b >> 1)) & 0x01) == 0;
+
+    if(needs_parity)
+      bytes[i] |= 0x01;
+    else
+      bytes[i] &= 0xfe;
+  }
+}
+#endif /* USE_CURL_DES_SET_ODD_PARITY */
+
 /*
 * Turns a 56-bit key into being 64-bit wide.
 */
@@ -139,7 +178,6 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
   key[6] = (char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
   key[7] = (char) ((key_56[6] << 1) & 0xFF);
 }
-#endif
 
 #ifdef USE_OPENSSL_DES
 /*
@@ -172,13 +210,13 @@ static void setup_des_key(const unsigned char *key_56,
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
+  curl_des_set_odd_parity((unsigned char *) key, sizeof(key));
 
   /* Set the key */
   des_set_key(des, (const uint8_t *) key);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_DES)
 
 static bool encrypt_des(const unsigned char *in, unsigned char *out,
                         const unsigned char *key_56)
@@ -214,7 +252,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) ctl.Crypto_Key, ctl.Data_Len);
+  curl_des_set_odd_parity((unsigned char *) ctl.Crypto_Key, ctl.Data_Len);
 
   /* Perform the encryption */
   _CIPHER((_SPCPTR *) &out, &ctl, (_SPCPTR *) &in);
@@ -252,7 +290,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   extend_key_56_to_64(key_56, blob.key);
 
   /* Set the key parity to odd */
-  Curl_des_set_odd_parity((unsigned char *) blob.key, sizeof(blob.key));
+  curl_des_set_odd_parity((unsigned char *) blob.key, sizeof(blob.key));
 
   /* Import the key */
   if(!CryptImportKey(hprov, (BYTE *) &blob, sizeof(blob), 0, 0, &hkey)) {
@@ -305,7 +343,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   des_encrypt(&des, 8, results + 8, plaintext);
   setup_des_key(keys + 14, &des);
   des_encrypt(&des, 8, results + 16, plaintext);
-#elif defined(USE_MBEDTLS) || defined(USE_OS400CRYPTO) ||       \
+#elif defined(USE_MBEDTLS_DES) || defined(USE_OS400CRYPTO) ||   \
   defined(USE_WIN32_CRYPTO)
   encrypt_des(plaintext, results, keys);
   encrypt_des(plaintext, results + 8, keys + 7);
@@ -324,11 +362,9 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
                                    unsigned char *lmbuffer /* 21 bytes */)
 {
   unsigned char pw[14];
-#ifndef CURL_NTLM_NOT_SUPPORTED
   static const unsigned char magic[] = {
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 /* i.e. KGS!@#$% */
   };
-#endif
   size_t len = CURLMIN(strlen(password), 14);
 
   Curl_strntoupper((char *)pw, password, len);
@@ -353,7 +389,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     des_encrypt(&des, 8, lmbuffer, magic);
     setup_des_key(pw + 7, &des);
     des_encrypt(&des, 8, lmbuffer + 8, magic);
-#elif defined(USE_MBEDTLS) || defined(USE_OS400CRYPTO) ||       \
+#elif defined(USE_MBEDTLS_DES) || defined(USE_OS400CRYPTO) ||   \
   defined(USE_WIN32_CRYPTO)
     encrypt_des(magic, lmbuffer, pw);
     encrypt_des(magic, lmbuffer + 8, pw + 7);
@@ -567,14 +603,15 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
     return CURLE_OUT_OF_MEMORY;
 
   /* Create the BLOB structure */
-  msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
-            "%c%c%c%c"           /* NTLMv2_BLOB_SIGNATURE */
-            "%c%c%c%c"           /* Reserved = 0 */
-            "%c%c%c%c%c%c%c%c",  /* Timestamp */
-            NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
-            NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
-            0, 0, 0, 0,
-            LONGQUARTET(tw.dwLowDateTime), LONGQUARTET(tw.dwHighDateTime));
+  curl_msnprintf((char *)ptr + HMAC_MD5_LENGTH, NTLMv2_BLOB_LEN,
+                 "%c%c%c%c"           /* NTLMv2_BLOB_SIGNATURE */
+                 "%c%c%c%c"           /* Reserved = 0 */
+                 "%c%c%c%c%c%c%c%c",  /* Timestamp */
+                 NTLMv2_BLOB_SIGNATURE[0], NTLMv2_BLOB_SIGNATURE[1],
+                 NTLMv2_BLOB_SIGNATURE[2], NTLMv2_BLOB_SIGNATURE[3],
+                 0, 0, 0, 0,
+                 LONGQUARTET(tw.dwLowDateTime),
+                 LONGQUARTET(tw.dwHighDateTime));
 
   memcpy(ptr + 32, challenge_client, 8);
   if(ntlm->target_info_len)

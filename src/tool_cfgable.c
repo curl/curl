@@ -52,7 +52,6 @@ struct OperationConfig *config_alloc(void)
   config->ftp_skip_ip = TRUE;
   config->file_clobber_mode = CLOBBER_DEFAULT;
   config->upload_flags = CURLULFLAG_SEEN;
-  config->retry_delay_ms = RETRY_SLEEP_DEFAULT;
   curlx_dyn_init(&config->postdata, MAX_FILE2MEMORY);
   return config;
 }
@@ -185,11 +184,10 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->ftp_account);
   tool_safefree(config->ftp_alternative_to_user);
   tool_safefree(config->aws_sigv4);
-  tool_safefree(config->proto_str);
-  tool_safefree(config->proto_redir_str);
   tool_safefree(config->ech);
   tool_safefree(config->ech_config);
   tool_safefree(config->ech_public);
+  tool_safefree(config->knownhosts);
 }
 
 void config_free(struct OperationConfig *config)
@@ -259,7 +257,7 @@ static void free_globalconfig(void)
   tool_safefree(global->trace_dump);
 
   if(global->trace_fopened && global->trace_stream)
-    fclose(global->trace_stream);
+    curlx_fclose(global->trace_stream);
   global->trace_stream = NULL;
 
   tool_safefree(global->libcurl);

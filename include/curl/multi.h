@@ -398,6 +398,12 @@ typedef enum {
   /* network has changed, adjust caches/connection reuse */
   CURLOPT(CURLMOPT_NETWORK_CHANGED, CURLOPTTYPE_LONG, 17),
 
+  /* This is the notify callback function pointer */
+  CURLOPT(CURLMOPT_NOTIFYFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 18),
+
+  /* This is the argument passed to the notify callback */
+  CURLOPT(CURLMOPT_NOTIFYDATA, CURLOPTTYPE_OBJECTPOINT, 19),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
@@ -464,7 +470,9 @@ typedef enum {
    * be read via `curl_multi_info_read()`. */
   CURLMINFO_XFERS_DONE = 4,
   /* The total number of easy handles added to the multi handle, ever. */
-  CURLMINFO_XFERS_ADDED = 5
+  CURLMINFO_XFERS_ADDED = 5,
+
+  CURLMINFO_LASTENTRY /* the last unused */
 } CURLMinfo_offt;
 
 /*
@@ -517,6 +525,26 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
                                          struct curl_waitfd *ufds,
                                          unsigned int size,
                                          unsigned int *fd_count);
+
+/*
+ * Notifications dispatched by a multi handle, when enabled.
+ */
+#define CURLMNOTIFY_INFO_READ    0
+#define CURLMNOTIFY_EASY_DONE    1
+
+/*
+ * Callback to install via CURLMOPT_NOTIFYFUNCTION.
+ */
+typedef void (*curl_notify_callback)(CURLM *multi,
+                                     unsigned int notification,
+                                     CURL *easy,
+                                     void *user_data);
+
+CURL_EXTERN CURLMcode curl_multi_notify_disable(CURLM *multi,
+                                                unsigned int notification);
+
+CURL_EXTERN CURLMcode curl_multi_notify_enable(CURLM *multi,
+                                               unsigned int notification);
 
 #ifdef __cplusplus
 } /* end of extern "C" */

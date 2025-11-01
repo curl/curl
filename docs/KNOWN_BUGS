@@ -15,6 +15,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  2. TLS
  2.1 IMAPS connection fails with Rustls error
+ 2.2 Access violation sending client cert with Schannel
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
@@ -37,18 +38,17 @@ problems may have been fixed or changed somewhat since this was written.
  5.2 curl-config --libs contains private details
  5.3 LDFLAGS passed too late making libs linked incorrectly
  5.6 Cygwin: make install installs curl-config.1 twice
- 5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
  5.15 Unicode on Windows
 
  6. Authentication
+ 6.1 Digest auth-int for PUT/POST
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
- 6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -60,15 +60,14 @@ problems may have been fixed or changed somewhat since this was written.
 
  9. SFTP and SCP
  9.1 SFTP does not do CURLOPT_POSTQUOTE correct
- 9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
  9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
- 9.6 wolfssh: all tests fail
 
  10. Connection
  10.1 --interface with link-scoped IPv6 address
  10.2 Does not acknowledge getaddrinfo sorting policy
+ 10.3 SOCKS-SSPI discards the security context
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
@@ -87,6 +86,7 @@ problems may have been fixed or changed somewhat since this was written.
  12.4 LDAPS requests to ActiveDirectory server hang
 
  13. TCP/IP
+ 13.1 telnet code does not handle partial writes properly
  13.2 Trying local ports fails on Windows
 
  15. CMake
@@ -121,6 +121,14 @@ problems may have been fixed or changed somewhat since this was written.
 2.1 IMAPS connection fails with Rustls error
 
  https://github.com/curl/curl/issues/10457
+
+2.2 Access violation sending client cert with Schannel
+
+ When using Schannel to do client certs, curl sets PKCS12_NO_PERSIST_KEY to
+ avoid leaking the private key into the filesystem. Unfortunately that flag
+ instead seems to trigger a crash.
+
+ See https://github.com/curl/curl/issues/17626
 
 2.5 Client cert handling with Issuer DN differs between backends
 
@@ -230,12 +238,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/8839
 
-5.11 configure --with-gssapi with Heimdal is ignored on macOS
-
- ... unless you also pass --with-gssapi-libs
-
- https://github.com/curl/curl/issues/3841
-
 5.12 flaky CI builds
 
  We run many CI builds for each commit and PR on github, and especially a
@@ -301,6 +303,10 @@ problems may have been fixed or changed somewhat since this was written.
 
 6. Authentication
 
+6.1 Digest auth-int for PUT/POST
+
+ We do not support auth-int for Digest using PUT or POST
+
 6.2 MIT Kerberos for Windows build
 
  libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
@@ -333,13 +339,6 @@ problems may have been fixed or changed somewhat since this was written.
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
-
-6.8 Heimdal memory leaks
-
- Running test 2077 and 2078 with curl built to do GSS with Heimdal causes
- valgrind errors (memory leak).
-
- https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 
@@ -400,14 +399,6 @@ problems may have been fixed or changed somewhat since this was written.
  report but it cannot be accepted as-is. See
  https://curl.se/bug/view.cgi?id=748
 
-9.2 wolfssh: publickey auth does not work
-
- When building curl to use the wolfSSH backend for SFTP, the publickey
- authentication does not work. This is simply functionality not written for curl
- yet, the necessary API for make this work is provided by wolfSSH.
-
- See https://github.com/curl/curl/issues/4820
-
 9.3 Remote recursive folder creation with SFTP
 
  On this servers, the curl fails to create directories on the remote server
@@ -428,12 +419,6 @@ problems may have been fixed or changed somewhat since this was written.
  Running SCP and SFTP tests on Cygwin makes this warning message appear.
 
  https://github.com/curl/curl/issues/11244
-
-9.6 wolfssh: all tests fail
-
- Something fundamental stops them all from working properly.
-
- https://github.com/curl/curl/issues/16794
 
 10. Connection
 
@@ -459,6 +444,15 @@ problems may have been fixed or changed somewhat since this was written.
  tries IPv6 addresses first.
 
  https://github.com/curl/curl/issues/16718
+
+
+10.3 SOCKS-SSPI discards the security context
+
+ After a successful SSPI/GSS-API exchange, the function queries and logs the
+ authenticated username and reports the supported data-protection level, but
+ then immediately deletes the negotiated SSPI security context and frees the
+ credentials before returning. The negotiated context is not stored on the
+ connection and is therefore never used to protect later SOCKS5 traffic.
 
 11. Internals
 
@@ -553,6 +547,11 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/9580
 
 13. TCP/IP
+
+13.1 telnet code does not handle partial writes properly
+
+ It probably does not happen too easily because of how slow and infrequent
+ sends are normally performed.
 
 13.2 Trying local ports fails on Windows
 

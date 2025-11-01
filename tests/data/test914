@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:<invalid>
 QUIT

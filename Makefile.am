@@ -34,6 +34,7 @@ CMAKE_DIST =                                    \
  CMake/CurlTests.c                              \
  CMake/FindBrotli.cmake                         \
  CMake/FindCares.cmake                          \
+ CMake/FindGnuTLS.cmake                         \
  CMake/FindGSS.cmake                            \
  CMake/FindLDAP.cmake                           \
  CMake/FindLibgsasl.cmake                       \
@@ -50,7 +51,6 @@ CMAKE_DIST =                                    \
  CMake/FindNettle.cmake                         \
  CMake/FindQuiche.cmake                         \
  CMake/FindRustls.cmake                         \
- CMake/FindWolfSSH.cmake                        \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
  CMake/Macros.cmake                             \
@@ -66,9 +66,6 @@ CMAKE_DIST =                                    \
 
 VC_DIST = projects/README.md projects/generate.bat
 
-WINBUILD_DIST = winbuild/README.md \
- winbuild/MakefileBuild.vc winbuild/Makefile.vc winbuild/makedebug.bat
-
 PLAN9_DIST = plan9/include/mkfile \
  plan9/include/mkfile             \
  plan9/mkfile.proto               \
@@ -80,7 +77,7 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile
 
 EXTRA_DIST = CHANGES.md COPYING RELEASE-NOTES Dockerfile .editorconfig \
- $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST) $(PLAN9_DIST)
+ $(CMAKE_DIST) $(VC_DIST) $(PLAN9_DIST)
 
 DISTCLEANFILES = buildinfo.txt
 

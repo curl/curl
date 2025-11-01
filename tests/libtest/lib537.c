@@ -48,9 +48,11 @@ static void t537_store_errmsg(const char *msg, int err)
 {
   if(!err)
     curl_msnprintf(t537_msgbuff, sizeof(t537_msgbuff), "%s", msg);
-  else
+  else {
+    char errbuf[STRERROR_LEN];
     curl_msnprintf(t537_msgbuff, sizeof(t537_msgbuff), "%s, errno %d, %s", msg,
-                   err, strerror(err));
+                   err, curlx_strerror(err, errbuf, sizeof(errbuf)));
+  }
 }
 
 static void t537_close_file_descriptors(void)
@@ -74,7 +76,7 @@ static int t537_fopen_works(void)
     fpa[i] = NULL;
   }
   for(i = 0; i < 3; i++) {
-    fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
+    fpa[i] = curlx_fopen(DEV_NULL, FOPEN_READTEXT);
     if(!fpa[i]) {
       t537_store_errmsg("fopen failed", errno);
       curl_mfprintf(stderr, "%s\n", t537_msgbuff);
@@ -84,7 +86,7 @@ static int t537_fopen_works(void)
   }
   for(i = 0; i < 3; i++) {
     if(fpa[i])
-      fclose(fpa[i]);
+      curlx_fclose(fpa[i]);
   }
   return ret;
 }
@@ -289,7 +291,7 @@ static int t537_test_rlimit(int keep_open)
 
   /* open a dummy descriptor */
 
-  t537_testfd[0] = open(DEV_NULL, O_RDONLY);
+  t537_testfd[0] = curlx_open(DEV_NULL, O_RDONLY);
   if(t537_testfd[0] < 0) {
     curl_msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     t537_store_errmsg(strbuff, errno);

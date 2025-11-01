@@ -73,8 +73,7 @@ struct ifreq {
  } ifr_ifru;
 };
 
-/* This define was added by Daniel to avoid an extra #ifdef INTERIX in the
-   C code. */
+/* This define exists to avoid an extra #ifdef INTERIX in the C code. */
 
 #define ifr_name ifr_ifrn.ifrn_name /* interface name */
 #define ifr_addr ifr_ifru.ifru_addr /* address */

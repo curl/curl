@@ -25,9 +25,9 @@
 #
 # Input variables:
 #
-# - `LDAP_INCLUDE_DIR`:   The ldap include directory.
-# - `LDAP_LIBRARY`:       Path to `ldap` library.
-# - `LDAP_LBER_LIBRARY`:  Path to `lber` library.
+# - `LDAP_INCLUDE_DIR`:   Absolute path to ldap include directory.
+# - `LDAP_LIBRARY`:       Absolute path to `ldap` library.
+# - `LDAP_LBER_LIBRARY`:  Absolute path to `lber` library.
 #
 # Result variables:
 #
@@ -50,7 +50,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LDAP_FOUND)
-  set(LDAP_VERSION "${LDAP_ldap_VERSION}")
+  set(LDAP_VERSION ${LDAP_ldap_VERSION})
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()

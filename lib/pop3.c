@@ -77,8 +77,8 @@
 #include "curl_md5.h"
 #include "curlx/warnless.h"
 #include "strdup.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -200,7 +200,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   CURLPROTO_POP3,                   /* protocol */
   CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE
 };
 
 #ifdef USE_SSL
@@ -323,8 +323,10 @@ static bool pop3_endofresp(struct Curl_easy *data, struct connectdata *conn,
 
   /* Are we processing CAPA command responses? */
   if(pop3c->state == POP3_CAPA) {
-    /* Do we have the terminating line? */
-    if(len >= 1 && line[0] == '.')
+    /* Do we have the terminating line? Per RFC 2449 this is a line
+       containing only a single dot */
+    if((len == 3 && line[0] == '.' && line[1] == '\r') ||
+       (len == 2 && line[0] == '.' && line[1] == '\n'))
       /* Treat the response as a success */
       *resp = '+';
     else
@@ -600,7 +602,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
 
   /* Convert the calculated 16 octet digest into a 32 byte hex string */
   for(i = 0; i < MD5_DIGEST_LEN; i++)
-    msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
+    curl_msnprintf(&secret[2 * i], 3, "%02x", digest[i]);
 
   result = Curl_pp_sendf(data, &pop3c->pp, "APOP %s %s", conn->user, secret);
 
@@ -876,15 +878,15 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
   /* Do we have an untagged continuation response? */
   if(pop3code == '*') {
     /* Does the server support the STLS capability? */
-    if(len >= 4 && !memcmp(line, "STLS", 4))
+    if(len >= 4 && curl_strnequal(line, "STLS", 4))
       pop3c->tls_supported = TRUE;
 
     /* Does the server support clear text authentication? */
-    else if(len >= 4 && !memcmp(line, "USER", 4))
+    else if(len >= 4 && curl_strnequal(line, "USER", 4))
       pop3c->authtypes |= POP3_TYPE_CLEARTEXT;
 
     /* Does the server support SASL based authentication? */
-    else if(len >= 5 && !memcmp(line, "SASL ", 5)) {
+    else if(len >= 5 && curl_strnequal(line, "SASL ", 5)) {
       pop3c->authtypes |= POP3_TYPE_SASL;
 
       /* Advance past the SASL keyword */
@@ -894,13 +896,10 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
       /* Loop through the data line */
       for(;;) {
         size_t llen;
-        size_t wordlen;
+        size_t wordlen = 0;
         unsigned short mechbit;
 
-        while(len &&
-              (*line == ' ' || *line == '\t' ||
-               *line == '\r' || *line == '\n')) {
-
+        while(len && (ISBLANK(*line) || ISNEWLINE(*line))) {
           line++;
           len--;
         }
@@ -909,9 +908,8 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
           break;
 
         /* Extract the word */
-        for(wordlen = 0; wordlen < len && line[wordlen] != ' ' &&
-              line[wordlen] != '\t' && line[wordlen] != '\r' &&
-              line[wordlen] != '\n';)
+        while(wordlen < len && !ISBLANK(line[wordlen]) &&
+              !ISNEWLINE(line[wordlen]))
           wordlen++;
 
         /* Test the word for a matching authentication mechanism */
@@ -1057,8 +1055,7 @@ static CURLcode pop3_state_user_resp(struct Curl_easy *data, int pop3code,
   }
   else
     /* Send the PASS command */
-    result = Curl_pp_sendf(data, &pop3c->pp, "PASS %s",
-                           conn->passwd ? conn->passwd : "");
+    result = Curl_pp_sendf(data, &pop3c->pp, "PASS %s", conn->passwd);
   if(!result)
     pop3_state(data, POP3_PASS);
 
@@ -1377,17 +1374,16 @@ static CURLcode pop3_perform(struct Curl_easy *data, bool *connected,
 
   DEBUGF(infof(data, "DO phase starts"));
 
-  if(data->req.no_body) {
-    /* Requested no body means no transfer */
-    pop3->transfer = PPTRANSFER_INFO;
-  }
-
-  *dophase_done = FALSE; /* not done yet */
-
-  /* Start the first command in the DO phase */
+  /* Start the first command in the DO phase, may alter data->req.no_body */
   result = pop3_perform_command(data);
   if(result)
     return result;
+
+  if(data->req.no_body)
+    /* Requested no body means no transfer */
+    pop3->transfer = PPTRANSFER_INFO;
+
+  *dophase_done = FALSE; /* not done yet */
 
   /* Run the state-machine */
   result = pop3_multi_statemach(data, dophase_done);

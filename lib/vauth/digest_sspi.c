@@ -112,7 +112,6 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   SecBufferDesc resp_desc;
   SECURITY_STATUS status;
   unsigned long attrs;
-  TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlg)) {
@@ -168,7 +167,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                                    (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    SECPKG_CRED_OUTBOUND, NULL,
                                    p_identity, NULL, NULL,
-                                   &credentials, &expiry);
+                                   &credentials, NULL);
 
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(p_identity);
@@ -197,7 +196,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   status = Curl_pSecFn->InitializeSecurityContext(&credentials, NULL, spn,
                                                   0, 0, 0, &chlg_desc, 0,
                                                   &context, &resp_desc, &attrs,
-                                                  &expiry);
+                                                  NULL);
 
   if(status == SEC_I_COMPLETE_NEEDED ||
      status == SEC_I_COMPLETE_AND_CONTINUE)
@@ -277,7 +276,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
           if(!domain.tchar_ptr)
             return CURLE_OUT_OF_MEMORY;
 
-          dup_domain.tchar_ptr = _tcsdup(domain.tchar_ptr);
+          dup_domain.tchar_ptr = Curl_tcsdup(domain.tchar_ptr);
           if(!dup_domain.tchar_ptr) {
             curlx_unicodefree(domain.tchar_ptr);
             return CURLE_OUT_OF_MEMORY;
@@ -365,7 +364,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   }
 
   /* Store the challenge for use later */
-  digest->input_token = (BYTE *) Curl_memdup(chlg, chlglen + 1);
+  digest->input_token = (BYTE *)Curl_memdup(chlg, chlglen + 1);
   if(!digest->input_token)
     return CURLE_OUT_OF_MEMORY;
 
@@ -474,8 +473,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     if(status == SEC_E_OK)
       output_token_len = chlg_buf[4].cbBuffer;
     else { /* delete the context so a new one can be made */
-      infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx",
-            (long)status);
+      infof(data, "digest_sspi: MakeSignature failed, error 0x%08lx", status);
       Curl_pSecFn->DeleteSecurityContext(digest->http_context);
       Curl_safefree(digest->http_context);
     }
@@ -488,7 +486,6 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     SecBuffer resp_buf;
     SecBufferDesc resp_desc;
     unsigned long attrs;
-    TimeStamp expiry; /* For Windows 9x compatibility of SSPI calls */
     TCHAR *spn;
 
     /* free the copy of user/passwd used to make the previous identity */
@@ -521,6 +518,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
       if(!digest->user) {
         free(output_token);
+        Curl_sspi_free_identity(p_identity);
         return CURLE_OUT_OF_MEMORY;
       }
     }
@@ -530,6 +528,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
       if(!digest->passwd) {
         free(output_token);
+        Curl_sspi_free_identity(p_identity);
         Curl_safefree(digest->user);
         return CURLE_OUT_OF_MEMORY;
       }
@@ -540,7 +539,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                    (TCHAR *)CURL_UNCONST(TEXT(SP_NAME_DIGEST)),
                                    SECPKG_CRED_OUTBOUND, NULL,
                                    p_identity, NULL, NULL,
-                                   &credentials, &expiry);
+                                   &credentials, NULL);
     if(status != SEC_E_OK) {
       Curl_sspi_free_identity(p_identity);
       free(output_token);
@@ -595,7 +594,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                                   ISC_REQ_USE_HTTP_STYLE, 0, 0,
                                                   &chlg_desc, 0,
                                                   digest->http_context,
-                                                  &resp_desc, &attrs, &expiry);
+                                                  &resp_desc, &attrs, NULL);
     curlx_unicodefree(spn);
 
     if(status == SEC_I_COMPLETE_NEEDED ||
@@ -630,24 +629,15 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     Curl_sspi_free_identity(p_identity);
   }
 
-  resp = malloc(output_token_len + 1);
+  resp = Curl_memdup0((const char *)output_token, output_token_len);
+  free(output_token);
   if(!resp) {
-    free(output_token);
-
     return CURLE_OUT_OF_MEMORY;
   }
-
-  /* Copy the generated response */
-  memcpy(resp, output_token, output_token_len);
-  resp[output_token_len] = 0;
 
   /* Return the response */
   *outptr = resp;
   *outlen = output_token_len;
-
-  /* Free the response buffer */
-  free(output_token);
-
   return CURLE_OK;
 }
 

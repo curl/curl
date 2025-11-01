@@ -28,23 +28,23 @@
 static CURLcode test_lib1568(const char *URL)
 {
   CURLcode ret;
-  CURL *hnd;
+  CURL *curl;
   curl_global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(hnd, CURLOPT_HEADER, 1L);
-  curl_easy_setopt(hnd, CURLOPT_USERPWD, "testuser:testpass");
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "lib1568");
-  curl_easy_setopt(hnd, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-  curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-  curl_easy_setopt(hnd, CURLOPT_PORT, strtol(libtest_arg2, NULL, 10));
+  curl = curl_easy_init();
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+  curl_easy_setopt(curl, CURLOPT_USERPWD, "testuser:testpass");
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "lib1568");
+  curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+  curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
+  curl_easy_setopt(curl, CURLOPT_PORT, atol(libtest_arg2));
 
-  ret = curl_easy_perform(hnd);
+  ret = curl_easy_perform(curl);
 
-  curl_easy_cleanup(hnd);
-  hnd = NULL;
+  curl_easy_cleanup(curl);
+  curl = NULL;
 
   curl_global_cleanup();
   return ret;

@@ -94,7 +94,7 @@ static CURLcode test_unit1609(const char *arg)
     },
   };
 
-  int i;
+  size_t i;
   struct Curl_multi *multi = NULL;
   struct Curl_easy *easy = NULL;
   struct curl_slist *list = NULL;
@@ -103,9 +103,9 @@ static CURLcode test_unit1609(const char *arg)
      and also clean cache after the loop. In contrast,for example,
      test 1607 sets up and cleans cache on each iteration. */
 
-  for(i = 0; i < (int)CURL_ARRAYSIZE(tests); ++i) {
-    int j;
-    int addressnum = CURL_ARRAYSIZE(tests[i].address);
+  for(i = 0; i < CURL_ARRAYSIZE(tests); ++i) {
+    size_t j;
+    size_t addressnum = CURL_ARRAYSIZE(tests[i].address);
     struct Curl_addrinfo *addr;
     struct Curl_dns_entry *dns;
     void *entry_id;
@@ -152,31 +152,31 @@ static CURLcode test_unit1609(const char *arg)
       if(addr && !Curl_addr2string(addr->ai_addr, addr->ai_addrlen,
                                    ipaddress, &port)) {
         curl_mfprintf(stderr,
-                      "%s:%d tests[%d] failed. Curl_addr2string failed.\n",
+                      "%s:%d tests[%zu] failed. Curl_addr2string failed.\n",
                       __FILE__, __LINE__, i);
         problem = true;
         break;
       }
 
       if(addr && !tests[i].address[j]) {
-        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                      "is %s but tests[%d].address[%d] is NULL.\n",
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
+                      "is %s but tests[%zu].address[%zu] is NULL.\n",
                       __FILE__, __LINE__, i, ipaddress, i, j);
         problem = true;
         break;
       }
 
       if(!addr && tests[i].address[j]) {
-        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                      "is NULL but tests[%d].address[%d] is %s.\n",
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
+                      "is NULL but tests[%zu].address[%zu] is %s.\n",
                       __FILE__, __LINE__, i, i, j, tests[i].address[j]);
         problem = true;
         break;
       }
 
       if(!curl_strequal(ipaddress, tests[i].address[j])) {
-        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved addr "
-                      "%s is not equal to tests[%d].address[%d] %s.\n",
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved addr "
+                      "%s is not equal to tests[%zu].address[%zu] %s.\n",
                       __FILE__, __LINE__, i, ipaddress, i, j,
                       tests[i].address[j]);
         problem = true;
@@ -184,9 +184,9 @@ static CURLcode test_unit1609(const char *arg)
       }
 
       if(port != tests[i].port) {
-        curl_mfprintf(stderr, "%s:%d tests[%d] failed. the retrieved port "
-                      "for tests[%d].address[%d] is %d "
-                      "but tests[%d].port is %d.\n",
+        curl_mfprintf(stderr, "%s:%d tests[%zu] failed. the retrieved port "
+                      "for tests[%zu].address[%zu] is %d "
+                      "but tests[%zu].port is %d.\n",
                       __FILE__, __LINE__, i, i, j, port, i, tests[i].port);
         problem = true;
         break;

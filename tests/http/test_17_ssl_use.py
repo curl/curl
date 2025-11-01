@@ -186,6 +186,27 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 60, f'{r}'
 
+    # use IP address that is in cert as DNS name (not really legal)
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_17_05_very_bad_ip_addr(self, env: Env, proto,
+                                    httpd, configures_httpd,
+                                    nghttpx, configures_nghttpx):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if env.curl_uses_lib('mbedtls'):
+            pytest.skip("mbedtls falsely verifies a DNS: altname as IP address")
+        if env.curl_uses_lib('wolfssl'):
+            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address")
+        httpd.set_domain1_cred_name('domain1-very-bad')
+        httpd.reload_if_config_changed()
+        if proto == 'h3':
+            nghttpx.set_cred_name('domain1-very-bad')
+            nghttpx.reload_if_config_changed()
+        curl = CurlClient(env=env)
+        url = f'https://127.0.0.1:{env.port_for(proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 60, f'{r}'
+
     # use localhost for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_06_localhost(self, env: Env, proto, httpd, nghttpx):
@@ -367,6 +388,7 @@ class TestSSLUse:
             assert r.exit_code != 0, f'should fail, server={server_ver:04x}, curl=[{curl_min_ver:04x}, {curl_max_ver:04x}]\n{r.dump_logs()}'
 
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_17_10_h3_session_reuse(self, env: Env, httpd, nghttpx):
         if not env.have_h3():
             pytest.skip("h3 not supported")
@@ -432,9 +454,9 @@ class TestSSLUse:
         exp_trace = None
         match_trace = None
         if env.curl_uses_lib('openssl') or env.curl_uses_lib('quictls'):
-            exp_trace = r'.*SSL certificate problem: certificate has expired$'
+            exp_trace = r'.*SSL certificate OpenSSL verify result: certificate has expired.*$'
         elif env.curl_uses_lib('gnutls'):
-            exp_trace = r'.*server verification failed: certificate has expired\..*'
+            exp_trace = r'.*SSL certificate verification failed: certificate has expired\..*'
         elif env.curl_uses_lib('wolfssl'):
             exp_trace = r'.*server verification failed: certificate has expired\.$'
         if exp_trace is not None:

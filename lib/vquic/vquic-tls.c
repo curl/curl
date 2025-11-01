@@ -53,8 +53,7 @@
 #include "../vtls/vtls_scache.h"
 #include "vquic-tls.h"
 
-/* The last 3 #include files should be in this order */
-#include "../curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
 #include "../memdebug.h"
 
@@ -130,7 +129,7 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
 {
 #ifdef USE_OPENSSL
   if(!ctx->ossl.x509_store_setup) {
-    CURLcode result = Curl_ssl_setup_x509_store(cf, data, ctx->ossl.ssl_ctx);
+    CURLcode result = Curl_ssl_setup_x509_store(cf, data, &ctx->ossl);
     if(result)
       return result;
     ctx->ossl.x509_store_setup = TRUE;
@@ -170,7 +169,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
   result = Curl_ossl_check_peer_cert(cf, data, &ctx->ossl, peer);
 #elif defined(USE_GNUTLS)
   if(conn_config->verifyhost) {
-    result = Curl_gtls_verifyserver(data, ctx->gtls.session,
+    result = Curl_gtls_verifyserver(cf, data, ctx->gtls.session,
                                     conn_config, &data->set.ssl, peer,
                                     data->set.str[STRING_SSL_PINNEDPUBLICKEY]);
     if(result)
@@ -179,12 +178,17 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {
-    char *snihost = peer->sni ? peer->sni : peer->hostname;
     WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
-    if(wolfSSL_X509_check_host(cert, snihost, strlen(snihost), 0, NULL)
-          == WOLFSSL_FAILURE) {
+    if(!cert)
+      result = CURLE_OUT_OF_MEMORY;
+    else if(peer->sni &&
+      (wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
+       == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
-    }
+    else if(!peer->sni &&
+      (wolfSSL_X509_check_ip_asc(cert, peer->hostname, 0)
+       == WOLFSSL_FAILURE))
+      result = CURLE_PEER_FAILED_VERIFICATION;
     wolfSSL_X509_free(cert);
   }
   if(!result)

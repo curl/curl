@@ -48,14 +48,14 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 <file name="%LOGDIR/ip%TESTNUMBER">
 IP %HOSTIP
 </file>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
 <limits>
-Allocations: 81
+Allocations: 82
 Maximum allocated: 33400
 </limits>
 </verify>

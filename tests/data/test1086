@@ -23,56 +23,7 @@ REPLY PWD 257 "/"
 REPLY TYPE 200 OK
 </servercmd>
 <data nocheck="yes">
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
-Long chunk of data that couldn't possibly be sent in the time allotted.
+%repeat[50 x Long chunk of data that couldn't possibly be sent in the time allotted.%0a]%
 </data>
 </reply>
 
@@ -98,7 +49,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -m 5
 <errorcode>
 28
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

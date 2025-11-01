@@ -9,12 +9,11 @@ cd "$(dirname "${0}")"/../..
 
 # shellcheck disable=SC2046
 codespell \
-  --skip '.github/scripts/spellcheck.words' \
+  --skip '.github/scripts/pyspelling.words' \
   --skip '.github/scripts/typos.toml' \
   --skip 'docs/THANKS' \
   --skip 'packages/*' \
   --skip 'scripts/wcurl' \
-  --skip 'winbuild/*' \
   --ignore-regex '.*spellchecker:disable-line' \
-  --ignore-words '.github/scripts/codespell-ignore.txt' \
+  --ignore-words '.github/scripts/codespell-ignore.words' \
   $(git ls-files)

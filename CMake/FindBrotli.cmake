@@ -25,9 +25,9 @@
 #
 # Input variables:
 #
-# - `BROTLI_INCLUDE_DIR`:    The brotli include directory.
-# - `BROTLICOMMON_LIBRARY`:  Path to `brotlicommon` library.
-# - `BROTLIDEC_LIBRARY`:     Path to `brotlidec` library.
+# - `BROTLI_INCLUDE_DIR`:    Absolute path to brotli include directory.
+# - `BROTLICOMMON_LIBRARY`:  Absolute path to `brotlicommon` library.
+# - `BROTLIDEC_LIBRARY`:     Absolute path to `brotlidec` library.
 #
 # Result variables:
 #
@@ -51,7 +51,7 @@ endif()
 
 if(BROTLI_FOUND)
   set(Brotli_FOUND TRUE)
-  set(BROTLI_VERSION "${BROTLI_libbrotlicommon_VERSION}")
+  set(BROTLI_VERSION ${BROTLI_libbrotlicommon_VERSION})
   string(REPLACE ";" " " BROTLI_CFLAGS "${BROTLI_CFLAGS}")
   message(STATUS "Found Brotli (via pkg-config): ${BROTLI_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()

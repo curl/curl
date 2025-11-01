@@ -30,7 +30,6 @@
 #include "../strdup.h"
 #include "../urldata.h"
 #include "../curlx/multibyte.h"
-#include "../curl_printf.h"
 #include "../url.h"
 
 /* The last #include files should be: */
@@ -62,11 +61,11 @@ char *Curl_auth_build_spn(const char *service, const char *host,
 
   /* Generate our SPN */
   if(host && realm)
-    spn = aprintf("%s/%s@%s", service, host, realm);
+    spn = curl_maprintf("%s/%s@%s", service, host, realm);
   else if(host)
-    spn = aprintf("%s/%s", service, host);
+    spn = curl_maprintf("%s/%s", service, host);
   else if(realm)
-    spn = aprintf("%s@%s", service, realm);
+    spn = curl_maprintf("%s@%s", service, realm);
 
   /* Return our newly allocated SPN */
   return spn;
@@ -89,7 +88,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
      formulate the SPN instead. */
 
   /* Generate our UTF8 based SPN */
-  utf8_spn = aprintf("%s/%s", service, host);
+  utf8_spn = curl_maprintf("%s/%s", service, host);
   if(!utf8_spn)
     return NULL;
 
@@ -100,7 +99,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   free(utf8_spn);
   if(!tchar_spn)
     return NULL;
-  dupe_tchar_spn = _tcsdup(tchar_spn);
+  dupe_tchar_spn = Curl_tcsdup(tchar_spn);
   curlx_unicodefree(tchar_spn);
   return dupe_tchar_spn;
 }

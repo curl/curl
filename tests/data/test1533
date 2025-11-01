@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <errorcode>
 41
 </errorcode>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

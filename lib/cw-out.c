@@ -35,8 +35,7 @@
 #include "cw-out.h"
 #include "cw-pause.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -404,7 +403,7 @@ static CURLcode cw_out_do_write(struct cw_out_ctx *ctx,
     /* still have buffered data, append and flush */
     result = cw_out_append(ctx, data, otype, buf, blen);
     if(result)
-      return result;
+      goto out;
     result = cw_out_flush_chain(ctx, data, &ctx->buf, flush_all);
     if(result)
       goto out;

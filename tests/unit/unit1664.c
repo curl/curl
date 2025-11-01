@@ -57,26 +57,26 @@ static CURLcode test_unit1664(const char *arg)
   };
 
   int i;
-  printf("curlx_str_word\n");
+  curl_mprintf("curlx_str_word\n");
   for(i = 0; wordparse[i]; i++) {
     struct Curl_str out;
     const char *line = wordparse[i];
     const char *orgline = line;
     int rc = curlx_str_word(&line, &out, 7);
-    printf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
-           i, orgline, rc, (int)out.len, out.str, (int)out.len,
-           (int)(line - orgline));
+    curl_mprintf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
+                 i, orgline, rc, (int)out.len, out.str, (int)out.len,
+                 (int)(line - orgline));
   }
 
-  printf("curlx_str_until\n");
+  curl_mprintf("curlx_str_until\n");
   for(i = 0; wordparse[i]; i++) {
     struct Curl_str out;
     const char *line = wordparse[i];
     const char *orgline = line;
     int rc = curlx_str_until(&line, &out, 7, 'd');
-    printf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
-           i, orgline, rc, (int)out.len, out.str, (int)out.len,
-           (int)(line - orgline));
+    curl_mprintf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
+                 i, orgline, rc, (int)out.len, out.str, (int)out.len,
+                 (int)(line - orgline));
   }
 
   {
@@ -96,15 +96,15 @@ static CURLcode test_unit1664(const char *arg)
       NULL
     };
 
-    printf("curlx_str_quotedword\n");
+    curl_mprintf("curlx_str_quotedword\n");
     for(i = 0; qwords[i]; i++) {
       struct Curl_str out;
       const char *line = qwords[i];
       const char *orgline = line;
       int rc = curlx_str_quotedword(&line, &out, 7);
-      printf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
-             i, orgline, rc, (int)out.len, out.str, (int)out.len,
-             (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, \"%.*s\" [%d], line %d\n",
+                   i, orgline, rc, (int)out.len, out.str, (int)out.len,
+                   (int)(line - orgline));
     }
   }
 
@@ -119,13 +119,13 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_single\n");
+    curl_mprintf("curlx_str_single\n");
     for(i = 0; single[i]; i++) {
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_single(&line, 'a');
-      printf("%u: (\"%s\") %d, line %d\n",
-             i, orgline, rc, (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, line %d\n",
+                   i, orgline, rc, (int)(line - orgline));
     }
   }
   {
@@ -141,13 +141,13 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_singlespace\n");
+    curl_mprintf("curlx_str_singlespace\n");
     for(i = 0; single[i]; i++) {
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_singlespace(&line);
-      printf("%u: (\"%s\") %d, line %d\n",
-             i, orgline, rc, (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, line %d\n",
+                   i, orgline, rc, (int)(line - orgline));
     }
   }
 
@@ -162,13 +162,13 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_single\n");
+    curl_mprintf("curlx_str_single\n");
     for(i = 0; single[i]; i++) {
       const char *line = single[i];
       const char *orgline = line;
       int rc = curlx_str_single(&line, 'a');
-      printf("%u: (\"%s\") %d, line %d\n",
-             i, orgline, rc, (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, line %d\n",
+                   i, orgline, rc, (int)(line - orgline));
     }
   }
   {
@@ -187,14 +187,14 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_number\n");
+    curl_mprintf("curlx_str_number\n");
     for(i = 0; nums[i]; i++) {
       curl_off_t num;
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_number(&line, &num, 1235);
-      printf("%u: (\"%s\") %d, [%u] line %d\n",
-             i, orgline, rc, (int)num, (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+                   i, orgline, rc, num, (int)(line - orgline));
     }
   }
 
@@ -219,7 +219,7 @@ static CURLcode test_unit1664(const char *arg)
       { "12", 10},
       {NULL, 0}
     };
-    printf("curlx_str_number varying max\n");
+    curl_mprintf("curlx_str_number varying max\n");
     for(i = 0; nums[i].str; i++) {
       curl_off_t num;
       const char *line = nums[i].str;
@@ -259,7 +259,7 @@ static CURLcode test_unit1664(const char *arg)
       { "12", 16},
       {NULL, 0}
     };
-    printf("curlx_str_hex varying max\n");
+    curl_mprintf("curlx_str_hex varying max\n");
     for(i = 0; nums[i].str; i++) {
       curl_off_t num;
       const char *line = nums[i].str;
@@ -294,7 +294,7 @@ static CURLcode test_unit1664(const char *arg)
       { "8", 10},
       {NULL, 0}
     };
-    printf("curlx_str_octal varying max\n");
+    curl_mprintf("curlx_str_octal varying max\n");
     for(i = 0; nums[i].str; i++) {
       curl_off_t num;
       const char *line = nums[i].str;
@@ -330,7 +330,7 @@ static CURLcode test_unit1664(const char *arg)
       "999999999999999999",
       NULL
     };
-    printf("curlx_str_number / max\n");
+    curl_mprintf("curlx_str_number / max\n");
     for(i = 0; nums[i]; i++) {
       curl_off_t num;
       const char *line = nums[i];
@@ -356,7 +356,7 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_newline\n");
+    curl_mprintf("curlx_str_newline\n");
     for(i = 0; newl[i]; i++) {
       const char *line = newl[i];
       const char *orgline = line;
@@ -382,14 +382,14 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_hex\n");
+    curl_mprintf("curlx_str_hex\n");
     for(i = 0; nums[i]; i++) {
       curl_off_t num;
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_hex(&line, &num, 0x1235);
-      curl_mprintf("%u: (\"%s\") %d, [%u] line %d\n",
-                   i, orgline, rc, (int)num, (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+                   i, orgline, rc, num, (int)(line - orgline));
     }
   }
 
@@ -409,14 +409,14 @@ static CURLcode test_unit1664(const char *arg)
       "",
       NULL
     };
-    printf("curlx_str_octal\n");
+    curl_mprintf("curlx_str_octal\n");
     for(i = 0; nums[i]; i++) {
       curl_off_t num;
       const char *line = nums[i];
       const char *orgline = line;
       int rc = curlx_str_octal(&line, &num, 01235);
-      curl_mprintf("%u: (\"%s\") %d, [%u] line %d\n",
-                   i, orgline, rc, (int)num, (int)(line - orgline));
+      curl_mprintf("%u: (\"%s\") %d, [%" CURL_FORMAT_CURL_OFF_T "] line %d\n",
+                   i, orgline, rc, num, (int)(line - orgline));
     }
   }
 
@@ -433,7 +433,7 @@ static CURLcode test_unit1664(const char *arg)
       "666666666666666666666",
       NULL
     };
-    printf("curlx_str_octal / max\n");
+    curl_mprintf("curlx_str_octal / max\n");
     for(i = 0; nums[i]; i++) {
       curl_off_t num;
       const char *line = nums[i];
@@ -469,7 +469,7 @@ static CURLcode test_unit1664(const char *arg)
       "ABCDEF",
       NULL
     };
-    printf("curlx_str_hex / max\n");
+    curl_mprintf("curlx_str_hex / max\n");
     for(i = 0; nums[i]; i++) {
       curl_off_t num;
       const char *line = nums[i];

@@ -124,7 +124,7 @@ static CURLcode test_unit1652(const char *arg)
   memset(input, '\0', sizeof(input));
   memset(input, 'A', 2045);
   Curl_infof(easy, "%s", input);
-  fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+  curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
   /* output is input + \n */
   fail_unless(strlen(output) == 2046, "No truncation of infof input");
   fail_unless(verify(output, input) == 0, "No truncation of infof input");
@@ -134,7 +134,7 @@ static CURLcode test_unit1652(const char *arg)
   /* Just over the limit without newline for truncation via '...' */
   memset(input + 2045, 'A', 4);
   Curl_infof(easy, "%s", input);
-  fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+  curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 1");
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 1");
@@ -143,7 +143,7 @@ static CURLcode test_unit1652(const char *arg)
   memset(input + 2045, 'A', 4);
   memset(input + 2045 + 4, '\n', 1);
   Curl_infof(easy, "%s", input);
-  fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+  curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 2");
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 2");
@@ -152,7 +152,7 @@ static CURLcode test_unit1652(const char *arg)
   memset(input, '\0', sizeof(input));
   memset(input, 'A', sizeof(input) - 1);
   Curl_infof(easy, "%s", input);
-  fprintf(stderr, "output len %d: %s", (int)strlen(output), output);
+  curl_mfprintf(stderr, "output len %zu: %s", strlen(output), output);
   fail_unless(strlen(output) == 2047, "Truncation of infof input 3");
   fail_unless(output[sizeof(output) - 1] == '\0',
               "Truncation of infof input 3");

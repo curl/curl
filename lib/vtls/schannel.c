@@ -47,17 +47,18 @@
 #include "../strdup.h"
 #include "../strerror.h"
 #include "../select.h" /* for the socket readiness */
+#include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h" /* for IP addr SNI check */
 #include "../curlx/multibyte.h"
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "../curl_printf.h"
 #include "../multiif.h"
 #include "../system_win32.h"
 #include "../curlx/version_win32.h"
 #include "../rand.h"
 #include "../curlx/strparse.h"
 #include "../progress.h"
+#include "../curl_sha256.h"
 
 /* The last #include file should be: */
 #include "../curl_memory.h"
@@ -109,8 +110,8 @@
 #define CERT_THUMBPRINT_DATA_LEN 20
 
 /* Uncomment to force verbose output
- * #define infof(x, y, ...) printf(y, __VA_ARGS__)
- * #define failf(x, y, ...) printf(y, __VA_ARGS__)
+ * #define infof(x, y, ...) curl_mprintf(y, __VA_ARGS__)
+ * #define failf(x, y, ...) curl_mprintf(y, __VA_ARGS__)
  */
 
 /* Offered when targeting Vista (XP SP2+) */
@@ -139,7 +140,7 @@
 
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
-     https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+     https://learn.microsoft.com/previous-versions/windows/it-pro/windows-server-2012-R2-and-2012/hh831771
    Or mingw-w64 9.0 or upper.
 */
 #if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
@@ -433,7 +434,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
     return CURLE_SSL_CERTPROBLEM;
 
   *sep = TEXT('\0');
-  *store_path = _tcsdup(store_path_start);
+  *store_path = Curl_tcsdup(store_path_start);
   *sep = TEXT('\\');
   if(!*store_path)
     return CURLE_OUT_OF_MEMORY;
@@ -563,7 +564,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                  &cert_store_path, &cert_thumbprint_str);
 
       if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
-        fInCert = fopen(data->set.ssl.primary.clientcert, "rb");
+        fInCert = curlx_fopen(data->set.ssl.primary.clientcert, "rb");
 
       if(result && !fInCert) {
         failf(data, "schannel: Failed to get certificate location"
@@ -580,13 +581,14 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
       curlx_unicodefree(cert_path);
+      if(fInCert)
+        curlx_fclose(fInCert);
       return CURLE_SSL_CERTPROBLEM;
     }
 
     if(fInCert || blob) {
       /* Reading a .P12 or .pfx file, like the example at bottom of
-         https://social.msdn.microsoft.com/Forums/windowsdesktop/
-         en-US/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
+         https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
       */
       CRYPT_DATA_BLOB datablob;
       WCHAR* pszPassword;
@@ -612,7 +614,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         if((!certdata) ||
            ((int) fread(certdata, certsize, 1, fInCert) != 1))
           continue_reading = FALSE;
-        fclose(fInCert);
+        curlx_fclose(fInCert);
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
                 data->set.ssl.primary.clientcert);
@@ -659,7 +661,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                 cert_showfilename_error);
         else
           failf(data, "schannel: Failed to import cert file %s, "
-                "last error is 0x%lx",
+                "last error is 0x%08lx",
                 cert_showfilename_error, errorcode);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -678,7 +680,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
       if(!client_certs[0]) {
         failf(data, "schannel: Failed to get certificate from file %s"
-              ", last error is 0x%lx",
+              ", last error is 0x%08lx",
               cert_showfilename_error, GetLastError());
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
@@ -700,7 +702,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         char *path_utf8 =
           curlx_convert_tchar_to_UTF8(cert_store_path);
         failf(data, "schannel: Failed to open cert store %lx %s, "
-              "last error is 0x%lx",
+              "last error is 0x%08lx",
               cert_store_name,
               (path_utf8 ? path_utf8 : "(unknown)"),
               GetLastError());
@@ -771,7 +773,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     SCH_CREDENTIALS credentials = { 0 };
     TLS_PARAMETERS tls_parameters = { 0 };
-    CRYPTO_SETTINGS crypto_settings[1] = { { 0 } };
+    CRYPTO_SETTINGS crypto_settings[1];
+
+    memset(crypto_settings, 0, sizeof(crypto_settings));
 
     tls_parameters.pDisabledCrypto = crypto_settings;
 
@@ -796,8 +800,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             (TCHAR *)CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &credentials, NULL, NULL,
-                                            &backend->cred->cred_handle,
-                                            &backend->cred->time_stamp);
+                                            &backend->cred->cred_handle, NULL);
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
@@ -818,6 +821,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
       if(result) {
         failf(data, "schannel: Failed setting algorithm cipher list");
+        if(client_certs[0])
+          CertFreeCertificateContext(client_certs[0]);
         return result;
       }
     }
@@ -835,8 +840,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                             (TCHAR *)CURL_UNCONST(UNISP_NAME),
                                             SECPKG_CRED_OUTBOUND, NULL,
                                             &schannel_cred, NULL, NULL,
-                                            &backend->cred->cred_handle,
-                                            &backend->cred->time_stamp);
+                                            &backend->cred->cred_handle, NULL);
   }
 
   if(client_certs[0])
@@ -846,7 +850,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     char buffer[STRERROR_LEN];
     failf(data, "schannel: AcquireCredentialsHandle failed: %s",
           Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-    Curl_safefree(backend->cred);
     switch(sspi_status) {
     case SEC_E_INSUFFICIENT_MEMORY:
       return CURLE_OUT_OF_MEMORY;
@@ -926,7 +929,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->cred = NULL;
 
   /* check for an existing reusable credential handle */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_schannel_cred *old_cred;
     Curl_ssl_scache_lock(data);
     old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
@@ -1039,7 +1042,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   /* Schannel InitializeSecurityContext:
-     https://msdn.microsoft.com/en-us/library/windows/desktop/aa375924.aspx
+     https://learn.microsoft.com/windows/win32/api/rrascfg/nn-rrascfg-ieapproviderconfig
 
      At the moment we do not pass inbuf unless we are using ALPN since we only
      use it for that, and WINE (for which we currently disable ALPN) is giving
@@ -1050,7 +1053,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->req_flags, 0, 0,
     (backend->use_alpn ? &inbuf_desc : NULL),
     0, &backend->ctxt->ctxt_handle,
-    &outbuf_desc, &backend->ret_flags, &backend->ctxt->time_stamp);
+    &outbuf_desc, &backend->ret_flags, NULL);
 
   if(sspi_status != SEC_I_CONTINUE_NEEDED) {
     char buffer[STRERROR_LEN];
@@ -1110,6 +1113,41 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   connssl->connecting_state = ssl_connect_2;
 
   return CURLE_OK;
+}
+
+static CURLcode schannel_error(struct Curl_easy *data,
+                               SECURITY_STATUS sspi_status)
+{
+  char buffer[STRERROR_LEN];
+  switch(sspi_status) {
+  case SEC_E_INSUFFICIENT_MEMORY:
+    failf(data, "schannel: next InitializeSecurityContext failed: %s",
+          Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+    return CURLE_OUT_OF_MEMORY;
+  case SEC_E_WRONG_PRINCIPAL:
+    failf(data, "schannel: SNI or certificate check failed: %s",
+          Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+    return CURLE_PEER_FAILED_VERIFICATION;
+  case SEC_E_UNTRUSTED_ROOT:
+    failf(data, "schannel: %s",
+          Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+    return CURLE_PEER_FAILED_VERIFICATION;
+#if 0
+  case SEC_E_INVALID_HANDLE:
+  case SEC_E_INVALID_TOKEN:
+  case SEC_E_LOGON_DENIED:
+  case SEC_E_TARGET_UNKNOWN:
+  case SEC_E_NO_AUTHENTICATING_AUTHORITY:
+  case SEC_E_INTERNAL_ERROR:
+  case SEC_E_NO_CREDENTIALS:
+  case SEC_E_UNSUPPORTED_FUNCTION:
+  case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
+#endif
+  default:
+    failf(data, "schannel: next InitializeSecurityContext failed: %s",
+          Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 }
 
 static CURLcode
@@ -1259,34 +1297,24 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       &backend->cred->cred_handle, &backend->ctxt->ctxt_handle,
       backend->cred->sni_hostname, backend->req_flags,
       0, 0, &inbuf_desc, 0, NULL,
-      &outbuf_desc, &backend->ret_flags, &backend->ctxt->time_stamp);
+      &outbuf_desc, &backend->ret_flags, NULL);
 
     /* free buffer for received handshake data */
     Curl_safefree(inbuf[0].pvBuffer);
 
     /* check if the handshake was incomplete */
-    if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
+    switch(sspi_status) {
+    case SEC_E_INCOMPLETE_MESSAGE:
       backend->encdata_is_incomplete = TRUE;
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       DEBUGF(infof(data,
                    "schannel: received incomplete message, need more data"));
       return CURLE_OK;
-    }
 
-    /* If the server has requested a client certificate, attempt to continue
-       the handshake without one. This will allow connections to servers which
-       request a client certificate but do not require it. */
-    if(sspi_status == SEC_I_INCOMPLETE_CREDENTIALS &&
-       !(backend->req_flags & ISC_REQ_USE_SUPPLIED_CREDS)) {
-      backend->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
-      connssl->io_need = CURL_SSL_IO_NEED_SEND;
-      DEBUGF(infof(data,
-                   "schannel: a client certificate has been requested"));
-      return CURLE_OK;
-    }
-
-    /* check if the handshake needs to be continued */
-    if(sspi_status == SEC_I_CONTINUE_NEEDED || sspi_status == SEC_E_OK) {
+    case SEC_I_CONTINUE_NEEDED:
+    case SEC_E_OK:
+      /* check if the handshake needs to be continued */
+      result = CURLE_OK;
       for(i = 0; i < 3; i++) {
         /* search for handshake tokens that need to be send */
         if(outbuf[i].BufferType == SECBUFFER_TOKEN && outbuf[i].cbBuffer > 0) {
@@ -1300,47 +1328,35 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
           if(result || (outbuf[i].cbBuffer != written)) {
             failf(data, "schannel: failed to send next handshake data: "
                   "sent %zu of %lu bytes", written, outbuf[i].cbBuffer);
-            return CURLE_SSL_CONNECT_ERROR;
+            result = CURLE_SSL_CONNECT_ERROR;
           }
         }
-
+      }
+      for(i = 0; i < 3; i++) {
         /* free obsolete buffer */
-        if(outbuf[i].pvBuffer) {
+        if(outbuf[i].pvBuffer)
           Curl_pSecFn->FreeContextBuffer(outbuf[i].pvBuffer);
-        }
       }
-    }
-    else {
-      char buffer[STRERROR_LEN];
-      switch(sspi_status) {
-      case SEC_E_INSUFFICIENT_MEMORY:
-        failf(data, "schannel: next InitializeSecurityContext failed: %s",
-              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-        return CURLE_OUT_OF_MEMORY;
-      case SEC_E_WRONG_PRINCIPAL:
-        failf(data, "schannel: SNI or certificate check failed: %s",
-              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-        return CURLE_PEER_FAILED_VERIFICATION;
-      case SEC_E_UNTRUSTED_ROOT:
-        failf(data, "schannel: %s",
-              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-        return CURLE_PEER_FAILED_VERIFICATION;
-#if 0
-      case SEC_E_INVALID_HANDLE:
-      case SEC_E_INVALID_TOKEN:
-      case SEC_E_LOGON_DENIED:
-      case SEC_E_TARGET_UNKNOWN:
-      case SEC_E_NO_AUTHENTICATING_AUTHORITY:
-      case SEC_E_INTERNAL_ERROR:
-      case SEC_E_NO_CREDENTIALS:
-      case SEC_E_UNSUPPORTED_FUNCTION:
-      case SEC_E_APPLICATION_PROTOCOL_MISMATCH:
-#endif
-      default:
-        failf(data, "schannel: next InitializeSecurityContext failed: %s",
-              Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-        return CURLE_SSL_CONNECT_ERROR;
+      if(result)
+        return result;
+      break;
+
+    case SEC_I_INCOMPLETE_CREDENTIALS:
+      if(!(backend->req_flags & ISC_REQ_USE_SUPPLIED_CREDS)) {
+        /* If the server has requested a client certificate, attempt to
+           continue the handshake without one. This will allow connections to
+           servers which request a client certificate but do not require
+           it. */
+        backend->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
+        connssl->io_need = CURL_SSL_IO_NEED_SEND;
+        DEBUGF(infof(data,
+                     "schannel: a client certificate has been requested"));
+        return CURLE_OK;
       }
+      FALLTHROUGH();
+
+    default:
+      return schannel_error(data, sspi_status);
     }
 
     /* check if there was additional remaining encrypted data */
@@ -1516,7 +1532,6 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = CURLE_OK;
   SECURITY_STATUS sspi_status = SEC_E_OK;
   CERT_CONTEXT *ccert_context = NULL;
@@ -1584,7 +1599,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   /* save the current session data for possible reuse */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
     backend->cred->refcount++;
@@ -1690,6 +1705,8 @@ enum schannel_renegotiate_caller_t {
   SCH_RENEG_CALLER_IS_SEND
 };
 
+#define MAX_RENEG_BLOCK_TIME (7 * 1000) /* 7 seconds in milliseconds */
+
 /* This function renegotiates the connection due to a server request received
    by schannel_recv. This function returns CURLE_AGAIN if the renegotiation is
    incomplete. In that case, we remain in the renegotiation (connecting) stage
@@ -1701,7 +1718,6 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   CURLcode result;
   curl_socket_t sockfd;
-  const timediff_t max_renegotiate_ms = 5 * 60 * 1000; /* 5 minutes */
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
@@ -1711,15 +1727,11 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     failf(data, "schannel: unexpected call to schannel_recv_renegotiate");
     return CURLE_SSL_CONNECT_ERROR;
   }
-
+  DEBUGASSERT(caller <= SCH_RENEG_CALLER_IS_SEND);
   if(caller == SCH_RENEG_CALLER_IS_RECV)
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_recv"));
-  else if(caller == SCH_RENEG_CALLER_IS_SEND)
+  else
     SCH_DEV(infof(data, "schannel: renegotiation caller is schannel_send"));
-  else {
-    failf(data, "schannel: unknown caller for schannel_recv_renegotiate");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   sockfd = Curl_conn_cf_get_socket(cf, data);
 
@@ -1746,7 +1758,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     timediff_t elapsed;
 
     elapsed = curlx_timediff(curlx_now(), rs->start_time);
-    if(elapsed >= max_renegotiate_ms) {
+    if(elapsed >= MAX_RENEG_BLOCK_TIME) {
       failf(data, "schannel: renegotiation timeout");
       result = CURLE_SSL_CONNECT_ERROR;
       break;
@@ -1813,12 +1825,12 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
 
       elapsed = curlx_timediff(curlx_now(), rs->start_time);
-      if(elapsed >= max_renegotiate_ms) {
+      if(elapsed >= MAX_RENEG_BLOCK_TIME) {
         failf(data, "schannel: renegotiation timeout");
         result = CURLE_SSL_CONNECT_ERROR;
         break;
       }
-      remaining = max_renegotiate_ms - elapsed;
+      remaining = MAX_RENEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
         timeout = Curl_timeleft(data, NULL, FALSE);
@@ -1945,7 +1957,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   /* copy data into output buffer */
   memcpy(outbuf[1].pvBuffer, buf, len);
 
-  /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
+  /* https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-encryptmessage */
   sspi_status = Curl_pSecFn->EncryptMessage(&backend->ctxt->ctxt_handle, 0,
                                             &outbuf_desc, 0);
 
@@ -2164,7 +2176,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     InitSecBuffer(&inbuf[3], SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&inbuf_desc, inbuf, 4);
 
-    /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx
+    /* https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-decryptmessage
      */
     sspi_status = Curl_pSecFn->DecryptMessage(&backend->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
@@ -2373,7 +2385,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   bool send_shutdown, bool *done)
 {
-  /* See https://msdn.microsoft.com/en-us/library/windows/desktop/aa380138.aspx
+  /* See https://learn.microsoft.com/windows/win32/secauthn/shutting-down-an-schannel-connection
    * Shutting Down an Schannel Connection
    */
   struct ssl_connect_data *connssl = cf->ctx;
@@ -2440,8 +2452,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       0,
       &backend->ctxt->ctxt_handle,
       &outbuf_desc,
-      &backend->ret_flags,
-      &backend->ctxt->time_stamp);
+      &backend->ret_flags, NULL);
 
     if((sspi_status == SEC_E_OK) || (sspi_status == SEC_I_CONTEXT_EXPIRED)) {
       /* send close message which is in output buffer */
@@ -2453,9 +2464,9 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
         if(written < outbuf.cbBuffer) {
+          result = CURLE_SEND_ERROR;
           failf(data, "schannel: failed to send close msg: %s"
                 " (bytes written: %zu)", curl_easy_strerror(result), written);
-          result = CURLE_SEND_ERROR;
           goto out;
         }
         backend->sent_shutdown = TRUE;
@@ -2468,8 +2479,8 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       }
       else {
         if(!backend->recv_connection_closed) {
-          failf(data, "schannel: error sending close msg: %d", result);
           result = CURLE_SEND_ERROR;
+          failf(data, "schannel: error sending close msg: %d", result);
           goto out;
         }
         /* Looks like server already closed the connection.
@@ -2554,10 +2565,17 @@ static int schannel_init(void)
 {
 #if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        (GetProcAddress(GetModuleHandleA("ntdll"),
-                                        "wine_get_version")));
+                        GetProcAddress(GetModuleHandleA("ntdll"),
+                                       "wine_get_version"));
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
   if(p_wine_get_version) {  /* WINE detected */
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0 or upper */
@@ -2580,7 +2598,7 @@ static void schannel_cleanup(void)
 
 static size_t schannel_version(char *buffer, size_t size)
 {
-  return msnprintf(buffer, size, "Schannel");
+  return curl_msnprintf(buffer, size, "Schannel");
 }
 
 static CURLcode schannel_random(struct Curl_easy *data,

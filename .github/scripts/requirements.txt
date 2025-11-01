@@ -1,0 +1,9 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+cmakelang==0.6.13
+codespell==2.4.1
+pytype==2024.10.11
+reuse==6.2.0
+ruff==0.14.1

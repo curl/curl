@@ -51,9 +51,11 @@ static void t518_store_errmsg(const char *msg, int err)
 {
   if(!err)
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s", msg);
-  else
+  else {
+    char errbuf[STRERROR_LEN];
     curl_msnprintf(t518_msgbuff, sizeof(t518_msgbuff), "%s, errno %d, %s", msg,
-                   err, strerror(err));
+                   err, curlx_strerror(err, errbuf, sizeof(errbuf)));
+  }
 }
 
 static void t518_close_file_descriptors(void)
@@ -77,7 +79,7 @@ static int t518_fopen_works(void)
     fpa[i] = NULL;
   }
   for(i = 0; i < 3; i++) {
-    fpa[i] = fopen(DEV_NULL, FOPEN_READTEXT);
+    fpa[i] = curlx_fopen(DEV_NULL, FOPEN_READTEXT);
     if(!fpa[i]) {
       t518_store_errmsg("fopen failed", errno);
       curl_mfprintf(stderr, "%s\n", t518_msgbuff);
@@ -87,7 +89,7 @@ static int t518_fopen_works(void)
   }
   for(i = 0; i < 3; i++) {
     if(fpa[i])
-      fclose(fpa[i]);
+      curlx_fclose(fpa[i]);
   }
   return ret;
 }
@@ -287,7 +289,7 @@ static int t518_test_rlimit(int keep_open)
 
   /* open a dummy descriptor */
 
-  t518_testfd[0] = open(DEV_NULL, O_RDONLY);
+  t518_testfd[0] = curlx_open(DEV_NULL, O_RDONLY);
   if(t518_testfd[0] < 0) {
     curl_msnprintf(strbuff, sizeof(strbuff), "opening of %s failed", DEV_NULL);
     t518_store_errmsg(strbuff, errno);

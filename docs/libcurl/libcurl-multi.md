@@ -166,7 +166,9 @@ get activity on the sockets you have been asked to wait on, or if the timeout
 timer expires.
 
 You can poll curl_multi_info_read(3) to see if any transfer has
-completed, as it then has a message saying so.
+completed, as it then has a message saying so. To know how many transfers are
+currently queued, running, pending or done, you can use the
+curl_multi_get_offt(3) function.
 
 # BLOCKING
 

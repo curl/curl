@@ -29,9 +29,9 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW() */
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -68,7 +68,8 @@ static void curl_dbg_cleanup(void)
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
-    (fclose)(curl_dbg_logfile);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
 }
@@ -78,11 +79,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-#ifdef CURL_FOPEN
-      curl_dbg_logfile = CURL_FOPEN(logname, FOPEN_WRITETEXT);
-#else
-      curl_dbg_logfile = (fopen)(logname, FOPEN_WRITETEXT);
-#endif
+      curl_dbg_logfile = CURLX_FOPEN_LOW(logname, FOPEN_WRITETEXT);
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
@@ -116,8 +113,8 @@ static bool countcheck(const char *func, int line, const char *source)
       curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
                    source, line, func);
       /* log to stderr also */
-      fprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
-              source, line, func);
+      curl_mfprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
+                    source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
       /* !checksrc! disable ERRNOVAR 1 */
       CURL_SETERRNO(ENOMEM);
@@ -311,7 +308,8 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   if(countcheck("socket", line, source))
     return CURL_SOCKET_BAD;
 
-  sockfd = (socket)(domain, type, protocol);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
@@ -328,7 +326,8 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   SEND_TYPE_RETV rc;
   if(countcheck("send", line, source))
     return -1;
-  rc = (send)(sockfd, buf, len, flags);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  rc = send(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
@@ -342,7 +341,8 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   RECV_TYPE_RETV rc;
   if(countcheck("recv", line, source))
     return -1;
-  rc = (recv)(sockfd, buf, len, flags);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  rc = recv(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
                 source, line, (unsigned long)len, (long)rc);
@@ -354,7 +354,8 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
                         curl_socket_t socket_vector[2],
                         int line, const char *source)
 {
-  int res = (socketpair)(domain, type, protocol, socket_vector);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  int res = socketpair(domain, type, protocol, socket_vector);
 
   if(source && (res == 0))
     curl_dbg_log("FD %s:%d socketpair() = "
@@ -371,6 +372,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
@@ -388,7 +390,8 @@ curl_socket_t curl_dbg_accept4(curl_socket_t s, void *saddr, void *saddrlen,
   struct sockaddr *addr = (struct sockaddr *)saddr;
   curl_socklen_t *addrlen = (curl_socklen_t *)saddrlen;
 
-  curl_socket_t sockfd = (accept4)(s, addr, addrlen, flags);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  curl_socket_t sockfd = accept4(s, addr, addrlen, flags);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
     curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
@@ -418,13 +421,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  FILE *res;
-#ifdef CURL_FOPEN
-  res = CURL_FOPEN(file, mode);
-#else
-  res = (fopen)(file, mode);
-#endif
-
+  FILE *res = CURLX_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
                 source, line, file, mode, (void *)res);
@@ -436,7 +433,8 @@ ALLOC_FUNC
 FILE *curl_dbg_fdopen(int filedes, const char *mode,
                       int line, const char *source)
 {
-  FILE *res = (fdopen)(filedes, mode);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  FILE *res = fdopen(filedes, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fdopen(\"%d\",\"%s\") = %p\n",
                  source, line, filedes, mode, (void *)res);
@@ -453,7 +451,8 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
     curl_dbg_log("FILE %s:%d fclose(%p)\n",
                  source, line, (void *)file);
 
-  res = (fclose)(file);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  res = fclose(file);
 
   return res;
 }
@@ -469,7 +468,7 @@ void curl_dbg_log(const char *format, ...)
     return;
 
   va_start(ap, format);
-  nchars = mvsnprintf(buf, sizeof(buf), format, ap);
+  nchars = curl_mvsnprintf(buf, sizeof(buf), format, ap);
   va_end(ap);
 
   if(nchars > (int)sizeof(buf) - 1)

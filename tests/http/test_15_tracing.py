@@ -77,6 +77,8 @@ class TestTracing:
 
     # trace all
     def test_15_04_trace_all(self, env: Env, httpd):
+        if not env.curl_is_verbose():
+            pytest.skip('only works for curl with verbose strings')
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
         r = curl.http_get(url=url, def_tracing=False, extra_args=[

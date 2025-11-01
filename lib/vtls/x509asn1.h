@@ -42,7 +42,7 @@ struct Curl_asn1Element {
   const char *header;         /* Pointer to header byte. */
   const char *beg;            /* Pointer to element data. */
   const char *end;            /* Pointer to 1st byte after element. */
-  unsigned char class;        /* ASN.1 element class. */
+  unsigned char eclass;       /* ASN.1 element class. */
   unsigned char tag;          /* ASN.1 element tag. */
   BIT(constructed);           /* Element is constructed. */
 };

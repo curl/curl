@@ -25,10 +25,10 @@ returned
 tftp
 </server>
 <name>
-TFTP retrieve with mode=i
+TFTP retrieve with mode=octet
 </name>
 <command>
-"tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=i" --use-ascii
+"tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER;mode=octet" --use-ascii
 </command>
 </client>
 

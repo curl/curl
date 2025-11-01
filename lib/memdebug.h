@@ -42,40 +42,15 @@
 #define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
 #undef free
 #define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
-#undef send
-#define send(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
-#undef recv
-#define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
-#undef _tcsdup
+#undef Curl_tcsdup
 #ifdef UNICODE
-#define _tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#define Curl_tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
 #else
-#define _tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define Curl_tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #endif
 #endif /* _WIN32 */
-
-#undef socket
-#define socket(domain,type,protocol) \
-  curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
-#ifdef HAVE_ACCEPT4
-#undef accept4 /* for those with accept4 as a macro */
-#define accept4(sock,addr,len,flags) \
-  curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
-#endif
-#ifdef HAVE_SOCKETPAIR
-#define socketpair(domain,type,protocol,socket_vector) \
-  curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
-                      __LINE__, __FILE__)
-#endif
-
-#undef fopen
-#define fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
-#undef fdopen
-#define fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
-#undef fclose
-#define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
 
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMDEBUG_H */

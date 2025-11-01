@@ -28,18 +28,17 @@
 
 #ifdef USE_RUSTLS
 
-#include "../curl_printf.h"
-
 #include <rustls.h>
 
+#include "../curlx/fopen.h"
 #include "../curlx/inet_pton.h"
+#include "../curlx/strerr.h"
 #include "../urldata.h"
 #include "../sendf.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
 #include "keylog.h"
-#include "../strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
 
@@ -121,7 +120,7 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
     connssl->peer_closed = TRUE;
   *out_n = (uintptr_t)nread;
   CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %d, %zu",
-              len, result, nread);
+              (size_t)len, result, nread);
   return ret;
 }
 
@@ -170,7 +169,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
   else if(io_error) {
     char buffer[STRERROR_LEN];
     failf(data, "reading from socket: %s",
-          Curl_strerror(io_error, buffer, sizeof(buffer)));
+          curlx_strerror(io_error, buffer, sizeof(buffer)));
     *err = CURLE_RECV_ERROR;
     return -1;
   }
@@ -188,16 +187,8 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
 }
 
 /*
- * On each run:
- *  - Read a chunk of bytes from the socket into Rustls' TLS input buffer.
- *  - Tell Rustls to process any new packets.
- *  - Read out as many plaintext bytes from Rustls as possible, until hitting
- *    error, EOF, or EAGAIN/EWOULDBLOCK, or plainbuf/plainlen is filled up.
- *
- * it is okay to call this function with plainbuf == NULL and plainlen == 0. In
- * that case, it will copy bytes from the socket into Rustls' TLS input
- * buffer, and process packets, but will not consume bytes from Rustls'
- * plaintext output buffer.
+ * Filter receive method implementation. `plainbuf` and `plainlen`
+ * are always not NULL/0.
  */
 static CURLcode
 cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -290,7 +281,7 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
     else if(io_error) {
       char buffer[STRERROR_LEN];
       failf(data, "writing to socket: %s",
-            Curl_strerror(io_error, buffer, sizeof(buffer)));
+            curlx_strerror(io_error, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
     if(tlswritten == 0) {
@@ -405,22 +396,24 @@ static int
 read_file_into(const char *filename,
                struct dynbuf *out)
 {
-  FILE *f = fopen(filename, FOPEN_READTEXT);
+  FILE *f = curlx_fopen(filename, FOPEN_READTEXT);
   if(!f) {
     return 0;
   }
 
-  while(!feof(f)) {
+  for(;;) {
     uint8_t buf[256];
     const size_t rr = fread(buf, 1, sizeof(buf), f);
-    if(rr == 0 ||
-       CURLE_OK != curlx_dyn_addn(out, buf, rr)) {
-      fclose(f);
+    if((!rr && !feof(f)) ||
+       curlx_dyn_addn(out, buf, rr)) {
+      curlx_fclose(f);
       return 0;
     }
+    if(rr < sizeof(buf))
+      break;
   }
 
-  return fclose(f) == 0;
+  return curlx_fclose(f) == 0;
 }
 
 static void
@@ -432,7 +425,7 @@ cr_get_selected_ciphers(struct Curl_easy *data,
 {
   const size_t supported_len = *selected_size;
   const size_t default_len = rustls_default_crypto_provider_ciphersuites_len();
-  const struct rustls_supported_ciphersuite *entry;
+  const struct rustls_supported_ciphersuite *entry = NULL;
   const char *ciphers = ciphers12;
   size_t count = 0, default13_count = 0, i, j;
   const char *ptr, *end;
@@ -525,7 +518,7 @@ cr_keylog_log_cb(struct rustls_str label,
   (void)client_random_len;
   DEBUGASSERT(client_random_len == CLIENT_RANDOM_SIZE);
   /* Turning a "rustls_str" into a null delimited "c" string */
-  msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
+  curl_msnprintf(clabel, sizeof(clabel), "%.*s", (int)label.len, label.data);
   Curl_tls_keylog_write(clabel, client_random, secret, secret_len);
 }
 
@@ -753,6 +746,9 @@ init_config_builder_verifier(struct Curl_easy *data,
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build trusted root certificate store");
     result = CURLE_SSL_CACERT_BADFILE;
+    if(result) {
+      goto cleanup;
+    }
   }
 
   verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
@@ -761,7 +757,7 @@ init_config_builder_verifier(struct Curl_easy *data,
     result = init_config_builder_verifier_crl(data,
                                              conn_config,
                                              verifier_builder);
-    if(result != CURLE_OK) {
+    if(result) {
       goto cleanup;
     }
   }
@@ -1110,7 +1106,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     connssl->peer.hostname,
                                     &rconn);
   if(rr != RUSTLS_RESULT_OK) {
-    rustls_failf(data, result, "rustls_client_connection_new");
+    rustls_failf(data, rr, "rustls_client_connection_new");
     return CURLE_COULDNT_CONNECT;
   }
   DEBUGASSERT(rconn);
@@ -1212,13 +1208,14 @@ cr_connect(struct Curl_cfilter *cf,
       }
       if(data->set.ssl.certinfo) {
         size_t num_certs = 0;
+        size_t i;
         while(rustls_connection_get_peer_certificate(rconn, (int)num_certs)) {
           num_certs++;
         }
         result = Curl_ssl_init_certinfo(data, (int)num_certs);
         if(result)
           return result;
-        for(size_t i = 0; i < num_certs; i++) {
+        for(i = 0; i < num_certs; i++) {
           const rustls_certificate *cert;
           const unsigned char *der_data;
           size_t der_len;
@@ -1231,8 +1228,8 @@ cr_connect(struct Curl_cfilter *cf,
             size_t errorlen;
             rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
             failf(data,
-              "Failed getting DER of server certificate #%ld: %.*s", i,
-              (int)errorlen, errorbuf);
+                  "Failed getting DER of server certificate #%zu: %.*s", i,
+                  (int)errorlen, errorbuf);
             return map_error(rresult);
           }
           {
@@ -1315,7 +1312,7 @@ cr_shutdown(struct Curl_cfilter *cf,
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
-  size_t i, nread, nwritten;
+  size_t i, nread = 0, nwritten;
 
   DEBUGASSERT(backend);
   if(!backend->conn || cf->shutdown) {
@@ -1393,7 +1390,7 @@ cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 static size_t cr_version(char *buffer, size_t size)
 {
   const struct rustls_str ver = rustls_version();
-  return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
+  return curl_msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
 static CURLcode

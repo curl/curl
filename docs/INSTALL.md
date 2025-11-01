@@ -15,7 +15,8 @@ libcurl from [source code](https://curl.se/download.html).
 
 ## Building using vcpkg
 
-You can download and install curl and libcurl using the [vcpkg](https://github.com/Microsoft/vcpkg/) dependency manager:
+You can download and install curl and libcurl using
+the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
 
     git clone https://github.com/Microsoft/vcpkg.git
     cd vcpkg
@@ -30,8 +31,8 @@ or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 ## Building from git
 
 If you get your code off a git repository instead of a release tarball, see
-the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in the root directory for specific instructions on how
-to proceed.
+the [GIT-INFO.md](https://github.com/curl/curl/blob/master/GIT-INFO.md) file in
+the root directory for specific instructions on how to proceed.
 
 # Unix
 
@@ -152,6 +153,25 @@ conflicting identical symbol names.
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
 
+### Selecting TLS Trust Anchors Defaults
+
+Verifying a server certificate established a chain of trust that needs to
+start somewhere. Those "root" certificates make the set of Trust Anchors.
+
+While the build system tries to find good defaults on the platform you
+use, you may specify these explicitly. The following options are provided:
+
+ - `--with-ca-bundle=FILE`: the file that libcurl loads default root
+ certificates from.
+ - `--with-ca-path=DIRECTORY`: a directory in which root certificates files
+ are found.
+ - `--with-ca-embed=FILE`: a file read *at build time* and added to `libcurl`.
+ - `--with-ca-fallback`: an OpenSSL specific option for delegating default
+ trust anchor selection to what OpenSSL thinks is best, *if* there are
+no other certificates configured by the application.
+ - `--with-apple-sectrust`: use the system "SecTrust" service on Apple
+ operating systems for verification. (Added in 8.17.0)
+
 ## MultiSSL and HTTP/3
 
 HTTP/3 needs QUIC and QUIC needs TLS. Building libcurl with HTTP/3 and QUIC
@@ -193,9 +213,9 @@ You can build curl with:
  KB140584 is a must for any Windows developer. Especially important is full
  understanding if you are not going to follow the advice given above.
 
- - [How To Use the C Runtime](https://support.microsoft.com/help/94248/how-to-use-the-c-run-time)
- - [Runtime Library Compiler Options](https://docs.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
- - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://docs.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
+ - [How To Use the C Runtime](https://learn.microsoft.com/troubleshoot/developer/visualstudio/cpp/libraries/use-c-run-time)
+ - [Runtime Library Compiler Options](https://learn.microsoft.com/cpp/build/reference/md-mt-ld-use-run-time-library)
+ - [Potential Errors Passing CRT Objects Across DLL Boundaries](https://learn.microsoft.com/cpp/c-runtime-library/potential-errors-passing-crt-objects-across-dll-boundaries)
 
 If your app is misbehaving in some strange way, or it is suffering from memory
 corruption, before asking for further help, please try first to rebuild every
@@ -217,7 +237,7 @@ executable in `/bin/` or you see the configure fail toward the end.
 Download the setup installer from
 [`cygwin`](https://cygwin.com/) to begin. Additional `cygwin`
 packages are needed for the install. For more on installing packages visit
-[`cygwin setup`](https://www.cygwin.com/faq/faq.html#faq.setup.cli).
+[`cygwin setup`](https://cygwin.com/faq/faq.html#faq.setup.cli).
 
 Either run setup-x86_64.exe, then search and select packages individually, or try:
 
@@ -274,28 +294,32 @@ If any error occurs during curl installation, try:
 
 You can use either autotools or cmake:
 
-    ./configure \
-      CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-      AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
-      RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
-      WATT_ROOT=/path/to/djgpp/net/watt \
-      --host=i586-pc-msdosdjgpp \
-      --with-openssl=/path/to/djgpp \
-      --with-zlib=/path/to/djgpp \
-      --without-libpsl \
-      --disable-shared
+```sh
+./configure \
+  CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+  AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
+  RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+  WATT_ROOT=/path/to/djgpp/net/watt \
+  --host=i586-pc-msdosdjgpp \
+  --with-openssl=/path/to/djgpp \
+  --with-zlib=/path/to/djgpp \
+  --without-libpsl \
+  --disable-shared
+```
 
-    cmake . \
-      -DCMAKE_SYSTEM_NAME=DOS \
-      -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-      -DCMAKE_C_COMPILER=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-      -DWATT_ROOT=/path/to/djgpp/net/watt \
-      -DOPENSSL_INCLUDE_DIR=/path/to/djgpp/include \
-      -DOPENSSL_SSL_LIBRARY=/path/to/djgpp/lib/libssl.a \
-      -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
-      -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
-      -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
-      -DCURL_USE_LIBPSL=OFF
+```sh
+cmake . \
+  -DCMAKE_SYSTEM_NAME=DOS \
+  -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
+  -DCMAKE_C_COMPILER=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+  -DWATT_ROOT=/path/to/djgpp/net/watt \
+  -DOPENSSL_INCLUDE_DIR=/path/to/djgpp/include \
+  -DOPENSSL_SSL_LIBRARY=/path/to/djgpp/lib/libssl.a \
+  -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
+  -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
+  -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
+  -DCURL_USE_LIBPSL=OFF
+```
 
 Notes:
 
@@ -309,29 +333,33 @@ Notes:
 
 You can use either autotools or cmake:
 
-    ./configure \
-      CC=/opt/amiga/bin/m68k-amigaos-gcc \
-      AR=/opt/amiga/bin/m68k-amigaos-ar \
-      RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
-      --host=m68k-amigaos \
-      --with-amissl \
-      CFLAGS='-O0 -msoft-float -mcrt=clib2' \
-      CPPFLAGS=-I/path/to/AmiSSL/Developer/include \
-      LDFLAGS=-L/path/to/AmiSSL/Developer/lib/AmigaOS3 \
-      LIBS='-lnet -lm -latomic' \
-      --without-libpsl \
-      --disable-shared
+```sh
+./configure \
+  CC=/opt/amiga/bin/m68k-amigaos-gcc \
+  AR=/opt/amiga/bin/m68k-amigaos-ar \
+  RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
+  --host=m68k-amigaos \
+  --with-amissl \
+  CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+  CPPFLAGS=-I/path/to/AmiSSL/Developer/include \
+  LDFLAGS=-L/path/to/AmiSSL/Developer/lib/AmigaOS3 \
+  LIBS='-lnet -lm -latomic' \
+  --without-libpsl \
+  --disable-shared
+```
 
-    cmake . \
-      -DAMIGA=1 \
-      -DCMAKE_SYSTEM_NAME=Generic \
-      -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
-      -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
-      -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
-      -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
-      -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
-      -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
-      -DCURL_USE_LIBPSL=OFF
+```sh
+cmake . \
+  -DAMIGA=1 \
+  -DCMAKE_SYSTEM_NAME=Generic \
+  -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
+  -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
+  -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
+  -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
+  -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+  -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
+  -DCURL_USE_LIBPSL=OFF
+```
 
 ## Disabling Specific Protocols in Windows builds
 
@@ -347,7 +375,6 @@ If you want to set any of these defines you have the following options:
 
  - Modify `lib/config-win32.h`
  - Modify `lib/curl_setup.h`
- - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -362,7 +389,6 @@ visible to libcurl and curl compilation processes. To set this definition you
 have the following alternatives:
 
  - Modify `lib/config-win32.h`
- - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
 Note: The pre-processor settings can be found using the Visual Studio IDE
@@ -409,18 +435,22 @@ Examples to compile for `aarch64` and API level 29:
 
 with CMake, where `ANDROID_NDK_HOME` points into your NDK:
 
-    cmake . \
-      -DANDROID_ABI=arm64-v8a \
-      -DANDROID_PLATFORM=android-29 \
-      -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
-      -DCURL_ENABLE_SSL=OFF \
-      -DCURL_USE_LIBPSL=OFF
+```sh
+cmake . \
+  -DANDROID_ABI=arm64-v8a \
+  -DANDROID_PLATFORM=android-29 \
+  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+  -DCURL_ENABLE_SSL=OFF \
+  -DCURL_USE_LIBPSL=OFF
+```
 
 with `configure`, on macOS:
 
-```bash
+```sh
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
-export HOST_TAG=darwin-x86_64 # Same tag for Apple Silicon. Other OS values here: https://developer.android.com/ndk/guides/other_build_systems#overview
+# Same tag for Apple Silicon. Other OS values here:
+#   https://developer.android.com/ndk/guides/other_build_systems#overview
+export HOST_TAG=darwin-x86_64
 export TOOLCHAIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG
 export AR=$TOOLCHAIN/bin/llvm-ar
 export AS=$TOOLCHAIN/bin/llvm-as
@@ -444,8 +474,10 @@ install `libssl.a` and `libcrypto.a` to `$TOOLCHAIN/sysroot/usr/lib` and copy
 `include/openssl` to `$TOOLCHAIN/sysroot/usr/include`. Now you can build curl
 for Android using OpenSSL like this:
 
-```bash
-LIBS="-lssl -lcrypto -lc++" # For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive dependencies if you are linking statically.
+```sh
+# For OpenSSL/BoringSSL. In general, you need to the SSL/TLS layer's transitive
+# dependencies if you are linking statically.
+LIBS='-lssl -lcrypto -lc++'
 ./configure --host aarch64-linux-android --with-pic --disable-shared --with-openssl="$TOOLCHAIN/sysroot/usr"
 ```
 
@@ -494,9 +526,7 @@ configure with any options you need. Be sure and specify the `--host` and
 of cross-compiling for the IBM 405GP PowerPC processor using the toolchain on
 Linux.
 
-```bash
-#! /bin/sh
-
+```sh
 export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
 export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
 export AR=ppc_405-ar
@@ -506,11 +536,12 @@ export RANLIB=ppc_405-ranlib
 export CC=ppc_405-gcc
 export NM=ppc_405-nm
 
-./configure --target=powerpc-hardhat-linux
-    --host=powerpc-hardhat-linux
-    --build=i586-pc-linux-gnu
-    --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
-    --exec-prefix=/usr/local
+./configure \
+  --target=powerpc-hardhat-linux
+  --host=powerpc-hardhat-linux
+  --build=i586-pc-linux-gnu
+  --prefix=/opt/hardhat/devkit/ppc/405/target/usr/local
+  --exec-prefix=/usr/local
 ```
 
 The `--prefix` parameter specifies where curl gets installed. If `configure`
@@ -619,22 +650,22 @@ This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
 and runs on, that is not listed, please let us know.
 
-## 104 Operating Systems
+## 109 Operating Systems
 
-    AIX, AmigaOS, Android, ArcoOS, Aros, Atari FreeMiNT, BeOS, Blackberry
-    10, Blackberry Tablet OS, Cell OS, CheriBSD, Chrome OS, Cisco IOS,
-    DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS, Fuchsia,
-    Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I, illumos,
-    Integrity, iOS, ipadOS, IRIX, Linux, Lua RTOS, Mac OS 9, macOS, Maemo,
-    Mbed, Meego, Micrium, MINIX, Minoca, Moblin, MorphOS, MPE/iX, MS-DOS,
-    NCR MP-RAS, NetBSD, Netware, NextStep, Nintendo 3DS Nintendo Switch,
-    NonStop OS, NuttX, OpenBSD, OpenStep, Orbis OS, OS/2, OS21, Plan 9,
-    PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RISC OS, ROS,
-    RTEMS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, software,
-    Solaris, Sortix, SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS,
-    ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks, watchOS, Wear OS,
-    WebOS, Wii system Wii U, Windows CE, Windows, Xbox System, Xenix, z/OS,
-    z/TPF, z/VM, z/VSE, Zephyr
+    AIX, AmigaOS, Android, ArcaOS, Aros, Atari FreeMiNT, Azure Sphere, BeOS,
+    Blackberry 10, Blackberry Tablet OS, Cell OS, Cesium, CheriBSD, Chrome OS,
+    Cisco IOS, DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS,
+    Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I,
+    illumos, Integrity, iOS, ipadOS, IRIX, KasperskyOS, Linux, Lua RTOS,
+    Mac OS 9, macOS, Maemo, Mbed, Meego, Micrium, MINIX, Minoca, Moblin,
+    MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD, Netware, NextStep,
+    Nintendo 3DS, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep,
+    Orbis OS, OS/2, OS21, PikeOS, Plan 9, PlayStation Portable, QNX, Qubes OS,
+    ReactOS, Redox, RISC OS, ROS, RTEMS, Sailfish OS, SCO Unix, Serenity,
+    SINIX-Z, SkyOS, SmartOS, Solaris, Sortix, SunOS, Syllable OS, Symbian,
+    Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS, UnixWare, visionOS, VMS,
+    vxWorks, watchOS, Wear OS, WebOS, Wii System Software, Wii U, Windows,
+    Windows CE, Xbox System, Xenix, z/OS, z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures
 

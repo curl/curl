@@ -200,6 +200,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
     }
 
     if(rc < 0) {
+      char errbuf[STRERROR_LEN];
       error = errno;
       /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
@@ -211,7 +212,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
       }
       logmsg("reading from file descriptor: %d,", filedes);
       logmsg("unrecoverable read() failure (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return -1;
     }
 
@@ -253,13 +254,14 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
     }
 
     if(wc < 0) {
+      char errbuf[STRERROR_LEN];
       error = errno;
       /* !checksrc! disable ERRNOVAR 1 */
       if((error == EINTR) || (error == EAGAIN))
         continue;
       logmsg("writing to file descriptor: %d,", filedes);
       logmsg("unrecoverable write() failure (%d) %s",
-             error, strerror(error));
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       return -1;
     }
 
@@ -371,12 +373,20 @@ static void lograw(unsigned char *buffer, ssize_t len)
 static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
                             ssize_t *buffer_len)
 {
+  curl_off_t value;
+  const char *endp;
+
   if(!read_stdin(buffer, 5))
     return FALSE;
 
   buffer[5] = '\0';
 
-  *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
+  endp = (char *)buffer;
+  if(curlx_str_hex(&endp, &value, 0xfffff)) {
+    logmsg("Failed to decode buffer size");
+    return FALSE;
+  }
+  *buffer_len = (ssize_t)value;
   if(*buffer_len > maxlen) {
     logmsg("Buffer size (%zd bytes) too small for data size error "
            "(%zd bytes)", maxlen, *buffer_len);
@@ -404,16 +414,15 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
  * other handle types supported by WaitForMultipleObjectsEx() as
  * well as disk files, anonymous and names pipes, and character input.
  *
- * https://msdn.microsoft.com/en-us/library/windows/desktop/ms687028.aspx
- * https://msdn.microsoft.com/en-us/library/windows/desktop/ms741572.aspx
+ * https://learn.microsoft.com/windows/win32/api/synchapi/nf-synchapi-waitformultipleobjectsex
+ * https://learn.microsoft.com/windows/win32/api/winsock2/nf-winsock2-wsaenumnetworkevents
  */
 struct select_ws_wait_data {
   HANDLE handle; /* actual handle to wait for during select */
   HANDLE signal; /* internal event to signal handle trigger */
   HANDLE abort;  /* internal event to abort waiting threads */
 };
-#include <process.h>
-static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
+static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
 {
   struct select_ws_wait_data *data;
   HANDLE signal, handle, handles[2];
@@ -452,13 +461,13 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
         size.QuadPart = 0;
         size.LowPart = GetFileSize(handle, &length);
         if((size.LowPart != INVALID_FILE_SIZE) ||
-            (GetLastError() == NO_ERROR)) {
+           (GetLastError() == NO_ERROR)) {
           size.HighPart = (LONG)length;
           /* get the current position within the file */
           pos.QuadPart = 0;
           pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
           if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
-              (GetLastError() == NO_ERROR)) {
+             (GetLastError() == NO_ERROR)) {
             /* compare position with size, abort if not equal */
             if(size.QuadPart == pos.QuadPart) {
               /* sleep and continue waiting */
@@ -557,25 +566,25 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
 
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
-  typedef uintptr_t curl_win_thread_handle_t;
   struct select_ws_wait_data *data;
-  curl_win_thread_handle_t thread;
 
   /* allocate internal waiting data structure */
   data = malloc(sizeof(struct select_ws_wait_data));
   if(data) {
+    HANDLE thread;
+
     data->handle = handle;
     data->signal = signal;
     data->abort = abort;
 
     /* launch waiting thread */
-    thread = _beginthreadex(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
+    thread = CreateThread(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
 
     /* free data if thread failed to launch */
     if(!thread) {
       free(data);
     }
-    return (HANDLE)thread;
+    return thread;
   }
   return NULL;
 }
@@ -940,6 +949,7 @@ static bool juggle(curl_socket_t *sockfdp,
   int maxfd = -99;
   ssize_t rc;
   int error = 0;
+  char errbuf[STRERROR_LEN];
 
   unsigned char buffer[BUFFER_SIZE];
   char data[16];
@@ -1060,7 +1070,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
   if(rc < 0) {
     logmsg("select() failed with error (%d) %s",
-           error, sstrerror(error));
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     return FALSE;
   }
 
@@ -1165,7 +1175,8 @@ static bool juggle(curl_socket_t *sockfdp,
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
-        logmsg("accept() failed with error (%d) %s", error, sstrerror(error));
+        logmsg("accept() failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       }
       else {
         logmsg("====> Client connect");
@@ -1219,6 +1230,7 @@ static int test_sockfilt(int argc, char *argv[])
   bool juggle_again;
   int rc;
   int error;
+  char errbuf[STRERROR_LEN];
   int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
@@ -1279,9 +1291,7 @@ static int test_sockfilt(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        server_port = util_ultous(ulnum);
+        server_port = (unsigned short)atol(argv[arg]);
         arg++;
       }
     }
@@ -1290,15 +1300,13 @@ static int test_sockfilt(int argc, char *argv[])
          doing a passive server-style listening. */
       arg++;
       if(argc > arg) {
-        char *endptr;
-        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (ulnum < 1025UL) || (ulnum > 65535UL)) {
+        int inum = atoi(argv[arg]);
+        if(inum && ((inum < 1025) || (inum > 65535))) {
           fprintf(stderr, "sockfilt: invalid --connect argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_connectport = util_ultous(ulnum);
+        server_connectport = (unsigned short)inum;
         arg++;
       }
     }
@@ -1342,7 +1350,8 @@ static int test_sockfilt(int argc, char *argv[])
 
   if(CURL_SOCKET_BAD == sock) {
     error = SOCKERRNO;
-    logmsg("Error creating socket (%d) %s", error, sstrerror(error));
+    logmsg("Error creating socket (%d) %s",
+           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     write_stdout("FAIL\n", 5);
     goto sockfilt_cleanup;
   }
@@ -1379,8 +1388,8 @@ static int test_sockfilt(int argc, char *argv[])
     }
     if(rc) {
       error = SOCKERRNO;
-      logmsg("Error connecting to port %hu (%d) %s",
-             server_connectport, error, sstrerror(error));
+      logmsg("Error connecting to port %hu (%d) %s", server_connectport,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }

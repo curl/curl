@@ -91,6 +91,7 @@ use serverhelp qw(
 use pathhelp qw(
     exe_ext
     sys_native_current_path
+    shell_quote
     );
 
 use appveyor;
@@ -638,9 +639,6 @@ sub checksystemfeatures {
                         $feature{"oldlibssh"} = 1;
                     }
                 }
-            }
-            if($libcurl =~ /wolfssh/i) {
-                $feature{"wolfssh"} = 1;
             }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {

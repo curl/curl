@@ -25,10 +25,10 @@
 #
 # Input variables:
 #
-# - `MBEDTLS_INCLUDE_DIR`:   The mbedTLS include directory.
-# - `MBEDTLS_LIBRARY`:       Path to `mbedtls` library.
-# - `MBEDX509_LIBRARY`:      Path to `mbedx509` library.
-# - `MBEDCRYPTO_LIBRARY`:    Path to `mbedcrypto` library.
+# - `MBEDTLS_INCLUDE_DIR`:   Absolute path to mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:       Absolute path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:      Absolute path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:    Absolute path to `mbedcrypto` library.
 #
 # Result variables:
 #
@@ -59,7 +59,7 @@ endif()
 
 if(MBEDTLS_FOUND)
   set(MbedTLS_FOUND TRUE)
-  set(MBEDTLS_VERSION "${MBEDTLS_mbedtls_VERSION}")
+  set(MBEDTLS_VERSION ${MBEDTLS_mbedtls_VERSION})
   string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
   message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()

@@ -37,9 +37,10 @@ struct Curl_easy;
 #include "sendf.h"
 #include "strdup.h"
 #include "rand.h"
+#include "curlx/fopen.h"
 #include "curlx/warnless.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -771,20 +772,6 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
   return res;
 }
 
-/* wrap call to fseeko so it matches the calling convention of callback */
-static int fseeko_wrapper(void *stream, curl_off_t offset, int whence)
-{
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
-  return _fseeki64(stream, (__int64)offset, whence);
-#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
-  return fseeko(stream, (off_t)offset, whence);
-#else
-  if(offset > LONG_MAX)
-    return -1;
-  return fseek(stream, (long)offset, whence);
-#endif
-}
-
 /*
  * Curl_getformdata() converts a linked list of "meta data" into a mime
  * structure. The input list is in 'post', while the output is stored in
@@ -868,10 +855,17 @@ CURLcode Curl_getformdata(CURL *data,
                particular, freopen(stdin) by the caller is not guaranteed
                to result as expected. This feature has been kept for backward
                compatibility: use of "-" pseudo filename should be avoided. */
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#endif
             result = curl_mime_data_cb(part, (curl_off_t) -1,
                                        (curl_read_callback) fread,
-                                       fseeko_wrapper,
+                                       curlx_fseek,
                                        NULL, (void *) stdin);
+#if defined(__clang__) && __clang_major__ >= 16
+#pragma clang diagnostic pop
+#endif
           }
           else
             result = curl_mime_filedata(part, file->contents);

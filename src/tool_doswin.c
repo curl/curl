@@ -46,9 +46,10 @@
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
 #elif !defined(__DJGPP__) || (__DJGPP__ < 2)  /* DJGPP 2.0 has _use_lfn() */
-#  define _use_lfn(f) (0)  /* long filenames never available */
+#  define CURL_USE_LFN(f) 0  /* long filenames never available */
 #elif defined(__DJGPP__)
-#  include <fcntl.h>       /* _use_lfn(f) prototype */
+#  include <fcntl.h>         /* for _use_lfn(f) prototype */
+#  define CURL_USE_LFN(f) _use_lfn(f)
 #endif
 
 #ifdef MSDOS
@@ -83,7 +84,7 @@ f:\foo:bar => f:\foo:bar   (flag SANITIZE_ALLOW_PATH)
 
 This function was implemented according to the guidelines in 'Naming Files,
 Paths, and Namespaces' section 'Naming Conventions'.
-https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
+https://learn.microsoft.com/windows/win32/fileio/naming-a-file
 
 Flags
 -----
@@ -314,7 +315,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
     return SANITIZE_ERR_INVALID_PATH;
 
   /* Support for Windows 9X VFAT systems, when available. */
-  if(_use_lfn(file_name)) {
+  if(CURL_USE_LFN(file_name)) {
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
   }
@@ -472,9 +473,8 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 
   /* Rename reserved device names that are known to be accessible without \\.\
      Examples: CON => _CON, CON.EXT => CON_EXT, CON:ADS => CON_ADS
-     https://web.archive.org/web/20160314141551/
-       support.microsoft.com/en-us/kb/74496
-     https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247.aspx
+     https://web.archive.org/web/20160314141551/support.microsoft.com/en-us/kb/74496
+     https://learn.microsoft.com/windows/win32/fileio/naming-a-file
      */
   for(p = fname; p; p = (p == fname && fname != base ? base : NULL)) {
     size_t p_len;
@@ -532,7 +532,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
      identify whether it is a reserved device name and not a regular
      filename. */
 #ifdef MSDOS
-  if(base && ((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
+  if(base && (curlx_stat(base, &st_buf) == 0) && S_ISCHR(st_buf.st_mode)) {
     /* Prepend a '_' */
     size_t blen = strlen(base);
     if(blen) {
@@ -769,14 +769,14 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
                                        &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
-    errorf("accept error: %08lx", GetLastError());
+    errorf("accept error: %d", SOCKERRNO);
     goto ThreadCleanup;
   }
 
-  closesocket(tdata->socket_l); /* sclose here fails test 1498 */
+  sclose(tdata->socket_l);
   tdata->socket_l = CURL_SOCKET_BAD;
   if(shutdown(socket_w, SD_RECEIVE) == SOCKET_ERROR) {
-    errorf("shutdown error: %08lx", GetLastError());
+    errorf("shutdown error: %d", SOCKERRNO);
     goto ThreadCleanup;
   }
   for(;;) {
@@ -785,7 +785,7 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
       break;
     if(n == 0)
       break;
-    nwritten = send(socket_w, buffer, n, 0);
+    nwritten = CURL_SEND(socket_w, buffer, n, 0);
     if(nwritten == SOCKET_ERROR)
       break;
     if((DWORD)nwritten != n)
@@ -809,9 +809,6 @@ ThreadCleanup:
 }
 
 /* The background thread that reads and buffers the true stdin. */
-static HANDLE stdin_thread = NULL;
-static curl_socket_t socket_r = CURL_SOCKET_BAD;
-
 curl_socket_t win32_stdin_read_thread(void)
 {
   int result;
@@ -819,6 +816,8 @@ curl_socket_t win32_stdin_read_thread(void)
   int rc = 0, socksize = 0;
   struct win_thread_data *tdata = NULL;
   SOCKADDR_IN selfaddr;
+  static HANDLE stdin_thread = NULL;
+  static curl_socket_t socket_r = CURL_SOCKET_BAD;
 
   if(socket_r != CURL_SOCKET_BAD) {
     assert(stdin_thread != NULL);
@@ -835,11 +834,9 @@ curl_socket_t win32_stdin_read_thread(void)
     }
     /* Create the listening socket for the thread. When it starts, it will
     * accept our connection and begin writing STDIN data to the connection. */
-    tdata->socket_l = WSASocketW(AF_INET, SOCK_STREAM,
-                                 IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-
+    tdata->socket_l = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(tdata->socket_l == CURL_SOCKET_BAD) {
-      errorf("WSASocketW error: %08lx", GetLastError());
+      errorf("socket() error: %d", SOCKERRNO);
       break;
     }
 
@@ -850,20 +847,20 @@ curl_socket_t win32_stdin_read_thread(void)
     /* Bind to any available loopback port */
     result = bind(tdata->socket_l, (SOCKADDR*)&selfaddr, socksize);
     if(result == SOCKET_ERROR) {
-      errorf("bind error: %08lx", GetLastError());
+      errorf("bind error: %d", SOCKERRNO);
       break;
     }
 
     /* Bind to any available loopback port */
     result = getsockname(tdata->socket_l, (SOCKADDR*)&selfaddr, &socksize);
     if(result == SOCKET_ERROR) {
-      errorf("getsockname error: %08lx", GetLastError());
+      errorf("getsockname error: %d", SOCKERRNO);
       break;
     }
 
     result = listen(tdata->socket_l, 1);
     if(result == SOCKET_ERROR) {
-      errorf("listen error: %08lx", GetLastError());
+      errorf("listen error: %d", SOCKERRNO);
       break;
     }
 
@@ -873,7 +870,7 @@ curl_socket_t win32_stdin_read_thread(void)
                         0, FALSE, DUPLICATE_SAME_ACCESS);
 
     if(!r) {
-      errorf("DuplicateHandle error: %08lx", GetLastError());
+      errorf("DuplicateHandle error: 0x%08lx", GetLastError());
       break;
     }
 
@@ -884,14 +881,14 @@ curl_socket_t win32_stdin_read_thread(void)
     stdin_thread = CreateThread(NULL, 0, win_stdin_thread_func,
                                 tdata, 0, NULL);
     if(!stdin_thread) {
-      errorf("CreateThread error: %08lx", GetLastError());
+      errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
     }
 
     /* Connect to the thread and rearrange our own STDIN handles */
-    socket_r = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if(socket_r == CURL_SOCKET_BAD) {
-      errorf("socket error: %08lx", GetLastError());
+      errorf("socket error: %d", SOCKERRNO);
       break;
     }
 
@@ -899,18 +896,18 @@ curl_socket_t win32_stdin_read_thread(void)
     setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
 
     if(connect(socket_r, (SOCKADDR*)&selfaddr, socksize) == SOCKET_ERROR) {
-      errorf("connect error: %08lx", GetLastError());
+      errorf("connect error: %d", SOCKERRNO);
       break;
     }
 
     if(shutdown(socket_r, SD_SEND) == SOCKET_ERROR) {
-      errorf("shutdown error: %08lx", GetLastError());
+      errorf("shutdown error: %d", SOCKERRNO);
       break;
     }
 
     /* Set the stdin handle to read from the socket. */
     if(SetStdHandle(STD_INPUT_HANDLE, (HANDLE)socket_r) == 0) {
-      errorf("SetStdHandle error: %08lx", GetLastError());
+      errorf("SetStdHandle error: 0x%08lx", GetLastError());
       break;
     }
 
@@ -932,6 +929,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     if(stdin_thread) {
       TerminateThread(stdin_thread, 1);
+      CloseHandle(stdin_thread);
       stdin_thread = NULL;
     }
 

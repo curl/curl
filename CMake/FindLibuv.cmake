@@ -25,8 +25,8 @@
 #
 # Input variables:
 #
-# - `LIBUV_INCLUDE_DIR`:   The libuv include directory.
-# - `LIBUV_LIBRARY`:       Path to `libuv` library.
+# - `LIBUV_INCLUDE_DIR`:   Absolute path to libuv include directory.
+# - `LIBUV_LIBRARY`:       Absolute path to `libuv` library.
 #
 # Result variables:
 #
