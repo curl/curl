@@ -35,7 +35,7 @@ imap
 <setenv>
 SSL_CERT_FILE
 </setenv>
-<command option="no-timeout">
+<command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret --libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 # Need ftp so the FTP options are written in the --libcurl template
