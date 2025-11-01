@@ -1403,7 +1403,7 @@ sub singletest_check {
             }
         }
 
-        if($hash{'crlf'} eq "soft") {
+        if($hash{'crlf'} eq "headers") {
             subnewlines(0, \$_) for @protocol;
         }
         elsif($hash{'crlf'}) {
