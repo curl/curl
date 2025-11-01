@@ -45,7 +45,7 @@ HTTP GET with hostname
 <setenv>
 CURL_DNS_SERVER=127.0.0.1:%DNSPORT
 </setenv>
-<command options="extra-timeout">
+<command option="extra-timeout">
 http://examplehost.example:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
