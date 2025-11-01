@@ -175,16 +175,7 @@ sub subnewlines {
         $prevupdate = 1;
     }
     else {
-        if($$thing =~ /%LF%$/) {
-            $$thing =~ s/%LF%$//;
-            my $thingh = uc unpack('H*', $$thing);
-            $$thing =~ s/\x0d*\x0a/\x0a/;
-        }
-        elsif($$thing =~ /%CRLF%$/) {
-            $$thing =~ s/%CRLF%$//;
-            $$thing =~ s/\x0d*\x0a/\x0d\x0a/;
-        }
-        elsif(($$thing =~ /^\n\z/) && $prevupdate) {
+        if(($$thing =~ /^\n\z/) && $prevupdate) {
             # if there's a blank link after a line we update, we hope it is
             # the empty line following headers
             $$thing =~ s/\x0a/\x0d\x0a/;
