@@ -67,7 +67,7 @@ User-Agent: Http Agent
 Expect: 100-continue
 
 </proxy>
-<protocol crlf="soft">
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*

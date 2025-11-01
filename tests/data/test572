@@ -86,7 +86,7 @@ speed
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol crlf="soft">
+<protocol crlf="headers">
 SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Planes/Trains/Automobiles
