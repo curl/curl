@@ -63,8 +63,8 @@ CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void conn_report_connect_stats(struct Curl_easy *data,
-                                      struct connectdata *conn);
+static void conn_report_connect_stats(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data);
 
 CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
@@ -508,7 +508,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * persist information at the connection. E.g. cf-socket sets the
        * socket and ip related information. */
       cf_cntrl_update_info(data, data->conn);
-      conn_report_connect_stats(data, data->conn);
+      conn_report_connect_stats(cf, data);
       data->conn->keepalive = curlx_now();
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       result = cf_verboseconnect(data, cf);
@@ -518,7 +518,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
     else if(result) {
       CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
                   result);
-      conn_report_connect_stats(data, data->conn);
+      conn_report_connect_stats(cf, data);
       goto out;
     }
 
@@ -1008,10 +1008,9 @@ static void cf_cntrl_update_info(struct Curl_easy *data,
 /**
  * Update connection statistics
  */
-static void conn_report_connect_stats(struct Curl_easy *data,
-                                      struct connectdata *conn)
+static void conn_report_connect_stats(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data)
 {
-  struct Curl_cfilter *cf = conn->cfilter[FIRSTSOCKET];
   if(cf) {
     struct curltime connected;
     struct curltime appconnected;

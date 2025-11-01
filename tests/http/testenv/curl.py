@@ -493,6 +493,80 @@ class ExecResult:
                         f'status #{idx} remote_ip: expected {remote_ip}, '\
                         f'got {x["remote_ip"]}\n{self.dump_stat(x)}'
 
+    def check_stat_positive(self, s, idx, key):
+        assert key in s, f'stat #{idx} "{key}" missing: {s}'
+        assert s[key] > 0, f'stat #{idx} "{key}" not positive: {s}'
+
+    def check_stat_positive_or_0(self, s, idx, key):
+        assert key in s, f'stat #{idx} "{key}" missing: {s}'
+        assert s[key] >= 0, f'stat #{idx} "{key}" not positive: {s}'
+
+    def check_stat_zero(self, s, key):
+        assert key in s, f'stat "{key}" missing: {s}'
+        assert s[key] == 0, f'stat "{key}" not zero: {s}'
+
+    def check_stats_timelines(self):
+        for i in range(len(self._stats)):
+            self.check_stats_timeline(i)
+
+    def check_stats_timeline(self, idx):
+        # check timings reported on a transfer for consistency
+        s = self._stats[idx]
+
+        url = s['url_effective']
+        # connect time is sometimes reported as 0 by openssl-quic (sigh)
+        self.check_stat_positive_or_0(s, idx, 'time_connect')
+        # all stat keys which reporting timings
+        all_keys = {
+            'time_queue', 'time_namelookup',
+            'time_connect', 'time_appconnect',
+            'time_pretransfer', 'time_posttransfer',
+            'time_starttransfer', 'time_total',
+        }
+        # stat keys where we expect a positive value
+        ref_tl = []
+        exact_match = True
+        # redirects mess up the queue time, only count without
+        if s['time_redirect'] == 0:
+            ref_tl += ['time_queue']
+        else:
+            exact_match = False
+        # connect events?
+        if url.startswith('ftp'):
+            # ftp is messy with connect events for its DATA connection
+            exact_match = False
+        elif s['num_connects'] > 0:
+            ref_tl += ['time_namelookup', 'time_connect']
+            if url.startswith('https:'):
+                ref_tl += ['time_appconnect']
+        # what kind of transfer was it?
+        if s['size_upload'] == 0 and s['size_download'] > 0:
+            # this is a download
+            dl_tl = ['time_pretransfer', 'time_starttransfer']
+            if s['size_request'] > 0:
+                dl_tl = ['time_posttransfer'] + dl_tl
+            ref_tl += dl_tl
+        elif s['size_upload'] > 0 and s['size_download'] == 0:
+            # this is an upload
+            ul_tl = ['time_pretransfer', 'time_posttransfer']
+            ref_tl += ul_tl
+        else:
+            # could be a 0-length upload or 0-length download, not sure
+            exact_match = False
+        # always there at the end
+        ref_tl += ['time_total']
+
+        # assert all events in reference timeline are > 0
+        for key in ref_tl:
+            self.check_stat_positive(s, idx, key)
+        if exact_match:
+            # assert all events not in reference timeline are 0
+            for key in [key for key in all_keys if key not in ref_tl]:
+                self.check_stat_zero(s, key)
+        # calculate the timeline that did happen
+        seen_tl = sorted(ref_tl, key=lambda ts: s[ts])
+        assert seen_tl == ref_tl, f'{[f"{ts}: {s[ts]}" for ts in seen_tl]}'
+
     def dump_logs(self):
         lines = ['>>--stdout ----------------------------------------------\n']
         lines.extend(self._stdout)
