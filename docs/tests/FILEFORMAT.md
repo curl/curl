@@ -272,10 +272,6 @@ should be cut off from the data before sending or comparing it.
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
 
-`crlf=yes` forces *header* newlines to become CRLF even if not written so in
-the source file. Note that this makes runtests.pl parse and "guess" what is a
-header and what is not in order to apply the CRLF line endings appropriately.
-
 For FTP file listings, the `<data>` section is be used *only* if you make sure
 that there has been a CWD done first to a directory named `test-[NUM]` where
 `NUM` is the test case number. Otherwise the ftp server cannot know from which
