@@ -18,7 +18,7 @@ AUTH XOAUTH2
 REPLY AUTH +
 REPLY dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

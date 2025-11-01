@@ -18,7 +18,7 @@ RFC5034
 AUTH PLAIN
 REPLY AUTH +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

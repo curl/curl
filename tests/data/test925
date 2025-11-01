@@ -9,7 +9,7 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 252 Send some mail and I'll try my best
 </data>
 </reply>
