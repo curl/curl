@@ -1925,7 +1925,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     result = Curl_conn_get_ip_info(data, data->conn, FIRSTSOCKET,
                                    &is_ipv6, &ipquad);
     if(result)
-      return result;
+      goto error;
 
     (void)Curl_resolv_blocking(data, host_name, ipquad.remote_port,
                                is_ipv6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_V4,
