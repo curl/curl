@@ -20,7 +20,7 @@ Server: the beast that eats naughty clients
 
 </connect>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -28,7 +28,7 @@ Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: the beast that eats naughty clients
 

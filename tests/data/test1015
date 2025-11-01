@@ -10,7 +10,7 @@ HTTP POST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 I am cool swsclose
 Server: Cool server/10.0
 Content-Length: 0

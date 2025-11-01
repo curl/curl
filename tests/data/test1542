@@ -11,7 +11,7 @@ verbose logs
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 0
 

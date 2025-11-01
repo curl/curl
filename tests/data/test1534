@@ -10,7 +10,7 @@ CURLINFO_FILETIME
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.0 200 OK swsclose
 Last-Modified: Thu, 01 Jan 1970 00:00:30 GMT
 Content-Length: 0

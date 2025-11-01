@@ -17,7 +17,7 @@ HTTP/1.1 200 Mighty fine indeed
 imap: sure hit me
 
 </connect>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -26,7 +26,7 @@ body
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

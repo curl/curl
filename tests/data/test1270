@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 Captive Portal
 Server: ohlala/2000
 Date: Tue, 17 Dec 2019 13:08:30 GMT

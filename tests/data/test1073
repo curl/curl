@@ -14,7 +14,7 @@ chunked Transfer-Encoding
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 301 Redirect swsclose
 Server: testcurl
 Content-Type: text/plain
