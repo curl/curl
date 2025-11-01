@@ -1858,7 +1858,8 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
       failf(data, "SSL shutdown timeout");
-      return CURLE_OPERATION_TIMEDOUT;
+      result = CURLE_OPERATION_TIMEDOUT;
+      goto out;
     }
 
     result = connssl->ssl_impl->shut_down(cf, data, send_shutdown, done);
