@@ -361,12 +361,18 @@ static void async_thrdd_rr_done(void *user_data, ares_status_t status,
   thrdd->rr.result = Curl_httpsrr_from_ares(data, dnsrec, &thrdd->rr.hinfo);
 }
 
-static CURLcode async_rr_start(struct Curl_easy *data)
+static CURLcode async_rr_start(struct Curl_easy *data, int port)
 {
   struct async_thrdd_ctx *thrdd = &data->state.async.thrdd;
   int status;
+  char *rrname = NULL;
 
   DEBUGASSERT(!thrdd->rr.channel);
+  if(port != 443) {
+    rrname = curl_maprintf("_%d_.https.%s", port, data->conn->host.name);
+    if(!rrname)
+      return CURLE_OUT_OF_MEMORY;
+  }
   status = ares_init_options(&thrdd->rr.channel, NULL, 0);
   if(status != ARES_SUCCESS) {
     thrdd->rr.channel = NULL;
@@ -383,8 +389,9 @@ static CURLcode async_rr_start(struct Curl_easy *data)
 
   memset(&thrdd->rr.hinfo, 0, sizeof(thrdd->rr.hinfo));
   thrdd->rr.hinfo.port = -1;
+  thrdd->rr.hinfo.rrname = rrname;
   ares_query_dnsrec(thrdd->rr.channel,
-                    data->conn->host.name, ARES_CLASS_IN,
+                    rrname ? rrname : data->conn->host.name, ARES_CLASS_IN,
                     ARES_REC_TYPE_HTTPS,
                     async_thrdd_rr_done, data, NULL);
   CURL_TRC_DNS(data, "Issued HTTPS-RR request for %s", data->conn->host.name);
@@ -454,7 +461,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
   }
 
 #ifdef USE_HTTPSRR_ARES
-  if(async_rr_start(data))
+  if(async_rr_start(data, port))
     infof(data, "Failed HTTPS RR operation");
 #endif
   CURL_TRC_DNS(data, "resolve thread started for of %s:%d", hostname, port);

@@ -206,6 +206,7 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
     }
   }
 out:
+  free(hinfo->rrname);
   return result;
 }
 
