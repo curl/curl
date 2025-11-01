@@ -152,6 +152,7 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
   Curl_safefree(rrinfo->echconfiglist);
   Curl_safefree(rrinfo->ipv4hints);
   Curl_safefree(rrinfo->ipv6hints);
+  Curl_safefree(rrinfo->rrname);
 }
 
 
@@ -206,7 +207,7 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
     }
   }
 out:
-  free(hinfo->rrname);
+  Curl_safefree(hinfo->rrname);
   return result;
 }
 
