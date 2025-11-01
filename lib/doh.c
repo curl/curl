@@ -1219,8 +1219,9 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct doh_probes *dohp = data->state.async.doh;
+  struct dohentry de;
   *dnsp = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
@@ -1233,7 +1234,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   }
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
-    struct dohentry de;
     int slot;
 
     /* Clear any result the might still be there */
@@ -1271,11 +1271,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       }
 
       result = doh2ai(&de, dohp->host, dohp->port, &ai);
-      if(result) {
-        de_cleanup(&de);
-        Curl_doh_cleanup(data);
-        return result;
-      }
+      if(result)
+        goto error;
 
       /* we got a response, create a dns entry. */
       dns = Curl_dnscache_mk_entry(data, ai, dohp->host, 0, dohp->port, FALSE);
@@ -1289,9 +1286,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
           if(result) {
             infof(data, "Failed to decode HTTPS RR");
             Curl_resolv_unlink(data, &dns);
-            de_cleanup(&de);
-            Curl_doh_cleanup(data);
-            return result;
+            goto error;
           }
           infof(data, "Some HTTPS RR to process");
 # ifdef DEBUGBUILD
@@ -1309,14 +1304,15 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
     /* All done */
     data->state.async.done = TRUE;
-    de_cleanup(&de);
-    Curl_doh_cleanup(data);
-    return result;
-
   } /* !dohp->pending */
+  else
+    /* wait for pending DoH transactions to complete */
+    return CURLE_OK;
 
-  /* else wait for pending DoH transactions to complete */
-  return CURLE_OK;
+error:
+  de_cleanup(&de);
+  Curl_doh_cleanup(data);
+  return result;
 }
 
 void Curl_doh_close(struct Curl_easy *data)
