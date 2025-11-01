@@ -36,7 +36,7 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --local-port 44444-45444
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>
-^timeout = [3-6]$
+^timeout = [5-6]$
 </strip>
 <protocol>
 opcode = 1

@@ -957,7 +957,8 @@ sub singletest_run {
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
-        if(!$keywords{"--libcurl"}) {
+        if(!$keywords{"--libcurl"} &&
+           !$keywords{"TFTP"}) {
             if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-timeout/)) {
                 my $timeout = 10;
                 if(use_valgrind() && !$disablevalgrind) {
