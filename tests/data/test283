@@ -28,7 +28,7 @@ tftp://%HOSTIP:%TFTPPORT//invalid-file --tftp-blksize 1024
 69
 </errorcode>
 <strip>
-^timeout = [5-6]$
+^timeout = [3-6]$
 </strip>
 <protocol>
 opcode = 1
