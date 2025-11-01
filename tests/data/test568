@@ -80,7 +80,7 @@ m=video 2232 RTP/AVP 31
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
+<protocol crlf="headers">
 ANNOUNCE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Content-Length: 306

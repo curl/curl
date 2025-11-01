@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol nonewline="yes">
+<protocol crlf="headers" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
