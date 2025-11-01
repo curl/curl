@@ -7,7 +7,7 @@ HTTP custom request
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 Read you
 Content-Length: 29
 Deleted: suppose we got a header like this! ;-)

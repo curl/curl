@@ -7,7 +7,7 @@ HTTP
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html

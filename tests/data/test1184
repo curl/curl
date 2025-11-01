@@ -17,7 +17,7 @@ Server: test tunnel 2000
 
 </connect>
 
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 OK
 Location: http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -30,7 +30,7 @@ Connection: close
 contents
 </data>
 
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 7
 

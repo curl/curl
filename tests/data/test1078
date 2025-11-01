@@ -19,7 +19,7 @@ Server: test tunnel 2000
 
 </connect>
 
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.0 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: ht3p://localhost/
 Content-Length: 62

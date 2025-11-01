@@ -8,7 +8,7 @@ HTTP POST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 403 Go away and swsclose
 Server: test-server/fake
 Content-Type: text/html
