@@ -9,7 +9,7 @@ HTTP
 # Server-side
 <reply>
 
-<data>
+<data crlf="yes">
 HTTP/1.1 301 redirect swsbounce
 Content-Length: 0
 Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER

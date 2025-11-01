@@ -9,7 +9,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="yes" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 0
 

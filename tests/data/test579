@@ -9,7 +9,7 @@ HTTP Digest auth
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 HTTP/1.1 100 Continue
 Server: Microsoft-IIS/5.0
 Date: Sun, 03 Apr 2005 14:57:45 GMT

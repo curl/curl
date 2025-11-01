@@ -10,7 +10,7 @@ RTSP Basic auth
 
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 RTSP/1.0 401 Unauthorized please swsbounce
 Server: RTSPD/libcurl-test
 CSeq: 1

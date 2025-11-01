@@ -17,7 +17,7 @@ AUTH XOAUTH2
 CAPA SASL-IR
 REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

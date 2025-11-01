@@ -14,7 +14,7 @@ SASL AUTH +LOGIN
 AUTH PLAIN
 REPLY LOGIN A002 OK LOGIN completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

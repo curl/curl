@@ -9,9 +9,9 @@ followlocation
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 HTTP/1.1 302 OK swsclose
-Location: ../m o o.html/%TESTNUMBER0002    
+Location: ../m o o.html/%TESTNUMBER0002%repeat[4 x  ]%
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
