@@ -23,9 +23,6 @@
 #
 """Module for extracting test data from the test data folder and other utils."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import logging
 import os
 import re
