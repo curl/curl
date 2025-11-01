@@ -11,7 +11,7 @@ HTTP Digest auth
 
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 WWW-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
