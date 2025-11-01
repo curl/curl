@@ -31,7 +31,7 @@ Session: asdf
 
 </data2>
 
-<data3 crlf="yes">
+<data3 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Cseq: 3

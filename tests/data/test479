@@ -22,7 +22,7 @@ Location: http://b.com/%TESTNUMBER0002
 -foo-
 </data>
 
-<data2 crlf="yes">
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -35,7 +35,7 @@ Connection: close
 target
 </data2>
 
-<datacheck crlf="yes">
+<datacheck crlf="headers">
 HTTP/1.1 301 Follow this you fool
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
