@@ -35,7 +35,7 @@ SSL
 <setenv>
 SSL_CERT_FILE
 </setenv>
-<command option="no-timeout">
+<command>
 http://moo/ --libcurl %LOGDIR/test%TESTNUMBER.c --tls-max 1.3 --proxy-tlsv1 -x http://%HOSTIP:%HTTPPORT
 </command>
 </client>
