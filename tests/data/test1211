@@ -36,10 +36,10 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -P -
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
