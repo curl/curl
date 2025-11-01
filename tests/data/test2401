@@ -55,7 +55,7 @@ server: nghttpx
 via: 1.1 nghttpx
 
 </stdout>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2TLSPORT
 User-Agent: curl/%VERSION

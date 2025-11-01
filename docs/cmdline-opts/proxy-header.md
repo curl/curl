@@ -10,6 +10,7 @@ Category: proxy
 Multi: append
 See-also:
   - proxy
+  - header
 Example:
   - --proxy-header "X-First-Name: Joe" -x http://proxy $URL
   - --proxy-header "User-Agent: surprise" -x http://proxy $URL

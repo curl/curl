@@ -191,7 +191,8 @@ if(MINGW OR MSVC)
   curl_prefill_type_size("LONG_LONG" 8)
   curl_prefill_type_size("__INT64" 8)
   curl_prefill_type_size("CURL_OFF_T" 8)
-  # CURL_SOCKET_T, SIZE_T: 8 for _WIN64, 4 otherwise
+  curl_prefill_type_size("CURL_SOCKET_T" ${CMAKE_SIZEOF_VOID_P})
+  curl_prefill_type_size("SIZE_T" ${CMAKE_SIZEOF_VOID_P})
   # TIME_T: 8 for _WIN64 or UCRT or MSVC and not Windows CE, 4 otherwise
   #   Also 4 for non-UCRT 32-bit when _USE_32BIT_TIME_T is set.
   #   mingw-w64 sets _USE_32BIT_TIME_T unless __MINGW_USE_VC2005_COMPAT is explicit defined.
@@ -200,7 +201,7 @@ if(MINGW OR MSVC)
     set(HAVE_FILE_OFFSET_BITS 0)
     curl_prefill_type_size("OFF_T" 4)
   else()
-    # SSIZE_T: 8 for _WIN64, 4 otherwise
+    curl_prefill_type_size("SSIZE_T" ${CMAKE_SIZEOF_VOID_P})
     set(HAVE_FILE_OFFSET_BITS 1)  # mingw-w64 v3+
     curl_prefill_type_size("OFF_T" 8)  # mingw-w64 v3+
   endif()

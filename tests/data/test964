@@ -37,7 +37,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt user@%hex[%c3%a5%c3%a4%c3%b6]he
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY user@xn--4cab6c.se
 QUIT

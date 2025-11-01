@@ -225,13 +225,13 @@ test_cleanup:
 
 static CURLcode t643_cyclic_add(void)
 {
-  CURL *easy = curl_easy_init();
-  curl_mime *mime = curl_mime_init(easy);
+  CURL *curl = curl_easy_init();
+  curl_mime *mime = curl_mime_init(curl);
   curl_mimepart *part = curl_mime_addpart(mime);
   CURLcode a1 = curl_mime_subparts(part, mime);
 
   if(a1 == CURLE_BAD_FUNCTION_ARGUMENT) {
-    curl_mime *submime = curl_mime_init(easy);
+    curl_mime *submime = curl_mime_init(curl);
     curl_mimepart *subpart = curl_mime_addpart(submime);
 
     curl_mime_subparts(part, submime);
@@ -239,7 +239,7 @@ static CURLcode t643_cyclic_add(void)
   }
 
   curl_mime_free(mime);
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
     /* that should have failed */
     return TEST_ERR_FAILURE;

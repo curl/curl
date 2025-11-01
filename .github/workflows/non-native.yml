@@ -61,7 +61,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            time sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
+            time sudo pkgin -y install cmake ninja-build pkg-config perl brotli mit-krb5 openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
             time cmake -B bld -G Ninja \
               -DCMAKE_INSTALL_PREFIX="$HOME"/curl-install \
               -DCMAKE_UNITY_BUILD=ON \
@@ -138,8 +138,8 @@ jobs:
         include:
           - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
           - { build: 'cmake'    , arch: 'x86_64', compiler: 'clang', options: '-DCMAKE_UNITY_BUILD=OFF', desc: ' !unity !runtests !examples' }
-          - { build: 'autotools', arch: 'arm64', compiler: 'clang' }
-          - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
+          - { build: 'autotools', arch: 'arm64' , compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -164,10 +164,10 @@ jobs:
             # https://ports.freebsd.org/
             if [ "${MATRIX_BUILD}" = 'cmake' ]; then
               time sudo pkg install -y cmake-core ninja perl5 \
-                pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+                pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
             else
               time sudo pkg install -y autoconf automake libtool \
-                pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
+                pkgconf brotli krb5-devel openldap26-client libidn2 libnghttp2 stunnel py311-impacket
               export MAKEFLAGS=-j3
             fi
 

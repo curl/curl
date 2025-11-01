@@ -36,11 +36,11 @@ struct libtest_trace_cfg {
 
 extern struct libtest_trace_cfg debug_config;
 
-int libtest_debug_cb(CURL *handle, curl_infotype type,
+int libtest_debug_cb(CURL *curl, curl_infotype type,
                      char *data, size_t size, void *userp);
 
 /* callback for CURLOPT_DEBUGFUNCTION (client tests) */
-int cli_debug_cb(CURL *handle, curl_infotype type,
+int cli_debug_cb(CURL *curl, curl_infotype type,
                  char *data, size_t size, void *userp);
 
 #endif /* HEADER_LIBTEST_TESTTRACE_H */

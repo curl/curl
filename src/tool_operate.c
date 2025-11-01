@@ -336,6 +336,32 @@ void single_transfer_cleanup(void)
   glob_cleanup(&state->inglob);
 }
 
+/* Helper function for retrycheck.
+ *
+ * This function is a prerequisite check used to determine whether or not some
+ * already downloaded data (ie out->bytes written) can be safely resumed in a
+ * subsequent transfer. The conditions are somewhat pedantic to avoid any risk
+ * of data corruption.
+ *
+ * Specific HTTP limitations (scheme, method, response code, etc) are checked
+ * in retrycheck if this prerequisite check is met.
+ */
+static bool is_outfile_auto_resumable(struct OperationConfig *config,
+                                      struct per_transfer *per,
+                                      CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  return config->use_resume && config->resume_from_current &&
+         config->resume_from >= 0 && outs->init == config->resume_from &&
+         outs->bytes > 0 && outs->filename && outs->s_isreg && outs->fopened &&
+         outs->stream && !ferror(outs->stream) &&
+         !config->customrequest && !per->uploadfile &&
+         (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
+          config->httpreq == TOOL_HTTPREQ_GET) &&
+         /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
+         result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR;
+}
+
 static CURLcode retrycheck(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURLcode result,
@@ -353,7 +379,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
     RETRY_FTP,
     RETRY_LAST /* not used */
   } retry = RETRY_NO;
-  long response = 0;
   if((CURLE_OPERATION_TIMEDOUT == result) ||
      (CURLE_COULDNT_RESOLVE_HOST == result) ||
      (CURLE_COULDNT_RESOLVE_PROXY == result) ||
@@ -368,8 +393,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       retry = RETRY_CONNREFUSED;
   }
   else if((CURLE_OK == result) ||
-          ((config->failonerror || config->failwithbody) &&
-           (CURLE_HTTP_RETURNED_ERROR == result))) {
+          (config->fail && (CURLE_HTTP_RETURNED_ERROR == result))) {
     /* If it returned OK. _or_ failonerror was enabled and it
        returned due to such an error, check for HTTP transient
        errors to retry on. */
@@ -378,6 +402,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     scheme = proto_token(scheme);
     if(scheme == proto_http || scheme == proto_https) {
       /* This was HTTP(S) */
+      long response = 0;
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
       switch(response) {
@@ -387,6 +412,8 @@ static CURLcode retrycheck(struct OperationConfig *config,
       case 502: /* Bad Gateway */
       case 503: /* Service Unavailable */
       case 504: /* Gateway Timeout */
+      case 522: /* Connection Timed Out (Cloudflare) */
+      case 524: /* Proxy Read Timeout (Cloudflare) */
         retry = RETRY_HTTP;
         /*
          * At this point, we have already written data to the output
@@ -404,6 +431,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
   } /* if CURLE_OK */
   else if(result) {
     const char *scheme;
+    long response = 0;
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
     curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
@@ -432,6 +460,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       ": HTTP error",
       ": FTP error"
     };
+    bool truncate = TRUE; /* truncate output file */
 
     if(RETRY_HTTP == retry) {
       curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
@@ -482,7 +511,49 @@ static CURLcode retrycheck(struct OperationConfig *config,
 
     per->retry_remaining--;
 
-    if(outs->bytes && outs->filename && outs->stream) {
+    /* Skip truncation of outfile if auto-resume is enabled for download and
+       the partially received data is good. Only for HTTP GET requests in
+       limited circumstances. */
+    if(is_outfile_auto_resumable(config, per, result)) {
+      long response = 0;
+      struct curl_header *header = NULL;
+      const char *method = NULL, *scheme = NULL;
+
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &method);
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+      curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
+      scheme = proto_token(scheme);
+
+      if((scheme == proto_http || scheme == proto_https) &&
+         method && !strcmp(method, "GET") &&
+         ((response == 206 && config->resume_from) ||
+          (response == 200 &&
+           !curl_easy_header(curl, "Accept-Ranges", 0,
+                             CURLH_HEADER, -1, &header) &&
+           !strcmp(header->value, "bytes")))) {
+
+        notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
+        if(fflush(outs->stream)) {
+          errorf("Failed to flush output file stream");
+          return CURLE_WRITE_ERROR;
+        }
+        if(outs->bytes >= CURL_OFF_T_MAX - outs->init) {
+          errorf("Exceeded maximum supported file size ("
+                 "%" CURL_FORMAT_CURL_OFF_T " + "
+                 "%" CURL_FORMAT_CURL_OFF_T ")",
+                 outs->init, outs->bytes);
+          return CURLE_WRITE_ERROR;
+        }
+        truncate = FALSE;
+        outs->init += outs->bytes;
+        outs->bytes = 0;
+        config->resume_from = outs->init;
+        curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
+                         config->resume_from);
+      }
+    }
+
+    if(truncate && outs->bytes && outs->filename && outs->stream) {
 #ifndef __MINGW32CE__
       struct_stat fileinfo;
 
@@ -513,10 +584,8 @@ static CURLcode retrycheck(struct OperationConfig *config,
         rc = fseek(outs->stream, 0, SEEK_END);
 #else
         /* ftruncate is not available, so just reposition the file
-           to the location we would have truncated it. This will not
-           work properly with large files on 32-bit systems, but
-           most of those will have ftruncate. */
-        rc = fseek(outs->stream, (long)outs->init, SEEK_SET);
+           to the location we would have truncated it. */
+        rc = curlx_fseek(outs->stream, outs->init, SEEK_SET);
 #endif
         if(rc) {
           errorf("Failed seeking to end of file");
@@ -589,7 +658,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       if(result == CURLE_PEER_FAILED_VERIFICATION)
         fputs(CURL_CA_CERT_ERRORMSG, tool_stderr);
     }
-    else if(config->failwithbody) {
+    else if(config->fail == FAIL_WITH_BODY) {
       /* if HTTP response >= 400, return error */
       long code = 0;
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -1963,35 +2032,54 @@ static CURLcode is_using_schannel(int *pusing)
  * environment-specified filename is found then check for CA bundle default
  * filename curl-ca-bundle.crt in the user's PATH.
  *
+ * If the user has set a CA cert/path or disabled peer verification (including
+ * for DoH, so completely disabled) then these locations are ignored.
+ *
  * If Schannel is the selected SSL backend then these locations are ignored.
  * We allow setting CA location for Schannel only when explicitly specified by
  * the user via CURLOPT_CAINFO / --cacert.
  */
-
 static CURLcode cacertpaths(struct OperationConfig *config)
 {
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-  char *env = curl_getenv("CURL_CA_BUNDLE");
+  char *env;
+  CURLcode result;
+  int using_schannel;
+
+  if(!feature_ssl || config->cacert || config->capath ||
+     (config->insecure_ok && (!config->doh_url || config->doh_insecure_ok)))
+    return CURLE_OK;
+
+  result = is_using_schannel(&using_schannel);
+  if(result || using_schannel)
+    return result;
+
+  env = curl_getenv("CURL_CA_BUNDLE");
   if(env) {
     config->cacert = strdup(env);
     curl_free(env);
-    if(!config->cacert)
+    if(!config->cacert) {
+      result = CURLE_OUT_OF_MEMORY;
       goto fail;
+    }
   }
   else {
     env = curl_getenv("SSL_CERT_DIR");
     if(env) {
       config->capath = strdup(env);
       curl_free(env);
-      if(!config->capath)
+      if(!config->capath) {
+        result = CURLE_OUT_OF_MEMORY;
         goto fail;
+      }
     }
     env = curl_getenv("SSL_CERT_FILE");
     if(env) {
       config->cacert = strdup(env);
       curl_free(env);
-      if(!config->cacert)
+      if(!config->cacert) {
+        result = CURLE_OUT_OF_MEMORY;
         goto fail;
+      }
     }
   }
 
@@ -2003,6 +2091,10 @@ static CURLcode cacertpaths(struct OperationConfig *config)
     if(cafile) {
       curlx_fclose(cafile);
       config->cacert = strdup(cacert);
+      if(!config->cacert) {
+        result = CURLE_OUT_OF_MEMORY;
+        goto fail;
+      }
     }
 #elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
   !defined(CURL_DISABLE_CA_SEARCH)
@@ -2014,7 +2106,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 #endif
   return CURLE_OK;
 fail:
-  free(config->capath);
+  Curl_safefree(config->capath);
   return result;
 }
 
@@ -2033,30 +2125,8 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
     return CURLE_FAILED_INIT;
   }
 
-  /* On Windows we cannot set the path to curl-ca-bundle.crt at compile time.
-   * We look for the file in two ways:
-   * 1: look at the environment variable CURL_CA_BUNDLE for a path
-   * 2: if #1 is not found, use the Windows API function SearchPath()
-   *    to find it along the app's path (includes app's dir and CWD)
-   *
-   * We support the environment variable thing for non-Windows platforms
-   * too. Just for the sake of it.
-   */
-  if(feature_ssl &&
-     !config->cacert &&
-     !config->capath &&
-     (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
-    int using_schannel = -1;
-
-    result = is_using_schannel(&using_schannel);
-
-    /* With the addition of CAINFO support for Schannel, this search could
-     * find a certificate bundle that was previously ignored. To maintain
-     * backward compatibility, only perform this search if not using Schannel.
-     */
-    if(!result && !using_schannel)
-      result = cacertpaths(config);
-  }
+  if(!result)
+    result = cacertpaths(config);
 
   if(!result) {
     result = single_transfer(config, share, added, skipped);
@@ -2148,7 +2218,7 @@ CURLcode operate(int argc, argv_item_t argv[])
   if((argc == 1) ||
      (first_arg && strncmp(first_arg, "-q", 2) &&
       strcmp(first_arg, "--disable"))) {
-    parseconfig(NULL); /* ignore possible failure */
+    parseconfig(NULL, CONFIG_MAX_LEVELS); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
     if((argc < 2) && (!global->first->url_list)) {

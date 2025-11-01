@@ -46,7 +46,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-ir
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH LOGIN dXNlcg==
 c2VjcmV0

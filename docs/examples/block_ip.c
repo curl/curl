@@ -301,9 +301,10 @@ int main(void)
   if(!filter)
     return 1;
 
-  if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
     free(filter);
-    return 1;
+    return (int)res;
   }
 
   curl = curl_easy_init();

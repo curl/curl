@@ -41,7 +41,7 @@
 static CURLcode test_lib1592(const char *URL)
 {
   int stillRunning;
-  CURLM *multiHandle = NULL;
+  CURLM *multi = NULL;
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   CURLMcode mres;
@@ -49,7 +49,7 @@ static CURLcode test_lib1592(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  multi_init(multiHandle);
+  multi_init(multi);
 
   easy_init(curl);
 
@@ -88,17 +88,17 @@ static CURLcode test_lib1592(const char *URL)
      this. */
   easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout);
 
-  multi_add_handle(multiHandle, curl);
+  multi_add_handle(multi, curl);
 
   /* This should move the handle from INIT => CONNECT => WAITRESOLVE. */
   curl_mfprintf(stderr, "curl_multi_perform()...\n");
-  multi_perform(multiHandle, &stillRunning);
+  multi_perform(multi, &stillRunning);
   curl_mfprintf(stderr, "curl_multi_perform() succeeded\n");
 
   /* Start measuring how long it takes to remove the handle. */
   curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
   start_test_timing();
-  mres = curl_multi_remove_handle(multiHandle, curl);
+  mres = curl_multi_remove_handle(multi, curl);
   if(mres) {
     curl_mfprintf(stderr,
                   "curl_multi_remove_handle() failed, with code %d\n", mres);
@@ -114,7 +114,7 @@ static CURLcode test_lib1592(const char *URL)
 
 test_cleanup:
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(multiHandle);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   return res;

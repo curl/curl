@@ -575,11 +575,13 @@ class Httpd:
             return
         local_dir = os.path.dirname(inspect.getfile(Httpd))
         out_dir = os.path.join(self.env.gen_dir, 'mod_curltest')
+        in_source = os.path.join(local_dir, 'mod_curltest/mod_curltest.c')
         out_source = os.path.join(out_dir, 'mod_curltest.c')
         if not os.path.exists(out_dir):
             os.mkdir(out_dir)
-        if not os.path.exists(out_source):
-            shutil.copy(os.path.join(local_dir, 'mod_curltest/mod_curltest.c'), out_source)
+        if not os.path.exists(out_source) or \
+                os.stat(in_source).st_mtime > os.stat(out_source).st_mtime:
+            shutil.copy(in_source, out_source)
         p = subprocess.run([
             self.env.apxs, '-c', out_source
         ], capture_output=True, cwd=out_dir)

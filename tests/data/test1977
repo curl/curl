@@ -44,7 +44,7 @@ effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo
 effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo&bar
 </stdout>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

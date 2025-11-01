@@ -54,7 +54,7 @@ funny-head: yesyes
 via: 1.1 nghttpx
 
 </stdout>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST https://%HOSTIP:%HTTP3PORT/2501 HTTP/1.1
 Host: %HOSTIP:%HTTP3PORT
 User-Agent: curl/%VERSION

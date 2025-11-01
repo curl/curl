@@ -34,7 +34,6 @@
 #include "../cfilters.h"
 #include "../cf-socket.h"
 #include "../sendf.h"
-#include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../connect.h"
@@ -625,56 +624,63 @@ struct recv_ctx {
   int pkts;
 };
 
-static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
-                         struct sockaddr_storage *remote_addr,
-                         socklen_t remote_addrlen, int ecn,
-                         void *userp)
+static CURLcode cf_quiche_recv_pkts(const unsigned char *buf, size_t buflen,
+                                    size_t gso_size,
+                                    struct sockaddr_storage *remote_addr,
+                                    socklen_t remote_addrlen, int ecn,
+                                    void *userp)
 {
   struct recv_ctx *r = userp;
   struct cf_quiche_ctx *ctx = r->cf->ctx;
   quiche_recv_info recv_info;
+  size_t pktlen, offset;
   ssize_t nread;
 
   (void)ecn;
-  ++r->pkts;
 
   recv_info.to = (struct sockaddr *)&ctx->q.local_addr;
   recv_info.to_len = ctx->q.local_addrlen;
   recv_info.from = (struct sockaddr *)remote_addr;
   recv_info.from_len = remote_addrlen;
 
-  nread = quiche_conn_recv(ctx->qconn,
-                           (unsigned char *)CURL_UNCONST(pkt), pktlen,
-                           &recv_info);
-  if(nread < 0) {
-    if(QUICHE_ERR_DONE == nread) {
-      if(quiche_conn_is_draining(ctx->qconn)) {
-        CURL_TRC_CF(r->data, r->cf, "ingress, connection is draining");
+  for(offset = 0; offset < buflen; offset += gso_size) {
+    pktlen = ((offset + gso_size) <= buflen) ? gso_size : (buflen - offset);
+    nread = quiche_conn_recv(ctx->qconn,
+                             (unsigned char *)CURL_UNCONST(buf + offset),
+                             pktlen, &recv_info);
+    if(nread < 0) {
+      if(QUICHE_ERR_DONE == nread) {
+        if(quiche_conn_is_draining(ctx->qconn)) {
+          CURL_TRC_CF(r->data, r->cf, "ingress, connection is draining");
+          return CURLE_RECV_ERROR;
+        }
+        if(quiche_conn_is_closed(ctx->qconn)) {
+          CURL_TRC_CF(r->data, r->cf, "ingress, connection is closed");
+          return CURLE_RECV_ERROR;
+        }
+        CURL_TRC_CF(r->data, r->cf, "ingress, quiche is DONE");
+        return CURLE_OK;
+      }
+      else if(QUICHE_ERR_TLS_FAIL == nread) {
+        long verify_ok = SSL_get_verify_result(ctx->tls.ossl.ssl);
+        if(verify_ok != X509_V_OK) {
+          failf(r->data, "SSL certificate problem: %s",
+                X509_verify_cert_error_string(verify_ok));
+          return CURLE_PEER_FAILED_VERIFICATION;
+        }
+        failf(r->data, "ingress, quiche reports TLS fail");
         return CURLE_RECV_ERROR;
       }
-      if(quiche_conn_is_closed(ctx->qconn)) {
-        CURL_TRC_CF(r->data, r->cf, "ingress, connection is closed");
+      else {
+        failf(r->data, "quiche reports error %zd on receive", nread);
         return CURLE_RECV_ERROR;
       }
-      CURL_TRC_CF(r->data, r->cf, "ingress, quiche is DONE");
-      return CURLE_OK;
     }
-    else if(QUICHE_ERR_TLS_FAIL == nread) {
-      long verify_ok = SSL_get_verify_result(ctx->tls.ossl.ssl);
-      if(verify_ok != X509_V_OK) {
-        failf(r->data, "SSL certificate problem: %s",
-              X509_verify_cert_error_string(verify_ok));
-        return CURLE_PEER_FAILED_VERIFICATION;
-      }
+    else if((size_t)nread < pktlen) {
+      CURL_TRC_CF(r->data, r->cf, "ingress, quiche only read %zd/%zu bytes",
+                  nread, pktlen);
     }
-    else {
-      failf(r->data, "quiche_conn_recv() == %zd", nread);
-      return CURLE_RECV_ERROR;
-    }
-  }
-  else if((size_t)nread < pktlen) {
-    CURL_TRC_CF(r->data, r->cf, "ingress, quiche only read %zd/%zu bytes",
-                nread, pktlen);
+    ++r->pkts;
   }
 
   return CURLE_OK;
@@ -696,7 +702,8 @@ static CURLcode cf_process_ingress(struct Curl_cfilter *cf,
   rctx.data = data;
   rctx.pkts = 0;
 
-  result = vquic_recv_packets(cf, data, &ctx->q, 1000, recv_pkt, &rctx);
+  result = vquic_recv_packets(cf, data, &ctx->q, 1000,
+                              cf_quiche_recv_pkts, &rctx);
   if(result)
     return result;
 
@@ -1227,15 +1234,6 @@ static CURLcode cf_quiche_cntrl(struct Curl_cfilter *cf,
       result = cf_quiche_send(cf, data, body, 0, TRUE, &sent);
       CURL_TRC_CF(data, cf, "[%"FMT_PRIu64"] DONE_SEND -> %d, %zu",
                   stream->id, result, sent);
-    }
-    break;
-  }
-  case CF_CTRL_DATA_IDLE: {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    if(stream && !stream->closed) {
-      result = cf_flush_egress(cf, data);
-      if(result)
-        CURL_TRC_CF(data, cf, "data idle, flush egress -> %d", result);
     }
     break;
   }

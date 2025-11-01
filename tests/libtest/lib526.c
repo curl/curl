@@ -49,7 +49,7 @@ static CURLcode test_lib526(const char *URL)
   CURLcode res = CURLE_OK;
   CURL *curl[NUM_HANDLES];
   int running;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   size_t current = 0;
   size_t i;
 
@@ -69,9 +69,9 @@ static CURLcode test_lib526(const char *URL)
     easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
   }
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_add_handle(m, curl[current]);
+  multi_add_handle(multi, curl[current]);
 
   curl_mfprintf(stderr, "Start at URL 0\n");
 
@@ -83,7 +83,7 @@ static CURLcode test_lib526(const char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    multi_perform(m, &running);
+    multi_perform(multi, &running);
 
     abort_on_test_timeout();
 
@@ -99,7 +99,7 @@ static CURLcode test_lib526(const char *URL)
         curl_mfprintf(stderr, "Advancing to URL %zu\n", current);
         if(testnum == 532) {
           /* first remove the only handle we use */
-          curl_multi_remove_handle(m, curl[0]);
+          curl_multi_remove_handle(multi, curl[0]);
 
           /* make us reuse the same handle all the time, and try resetting
              the handle first too */
@@ -109,10 +109,10 @@ static CURLcode test_lib526(const char *URL)
           easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
 
           /* re-add it */
-          multi_add_handle(m, curl[0]);
+          multi_add_handle(multi, curl[0]);
         }
         else {
-          multi_add_handle(m, curl[current]);
+          multi_add_handle(multi, curl[current]);
         }
       }
       else {
@@ -124,7 +124,7 @@ static CURLcode test_lib526(const char *URL)
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    multi_fdset(m, &rd, &wr, &exc, &maxfd);
+    multi_fdset(multi, &rd, &wr, &exc, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -139,10 +139,10 @@ test_cleanup:
     /* proper cleanup sequence - type PB */
 
     for(i = 0; i < CURL_ARRAYSIZE(curl); i++) {
-      curl_multi_remove_handle(m, curl[i]);
+      curl_multi_remove_handle(multi, curl[i]);
       curl_easy_cleanup(curl[i]);
     }
-    curl_multi_cleanup(m);
+    curl_multi_cleanup(multi);
     curl_global_cleanup();
   }
   else if(testnum == 527) {
@@ -155,7 +155,7 @@ test_cleanup:
       for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
         curl_easy_cleanup(curl[i]);
 
-    curl_multi_cleanup(m);
+    curl_multi_cleanup(multi);
     curl_global_cleanup();
 
   }
@@ -164,7 +164,7 @@ test_cleanup:
 
     for(i = 0; i < CURL_ARRAYSIZE(curl); i++)
       curl_easy_cleanup(curl[i]);
-    curl_multi_cleanup(m);
+    curl_multi_cleanup(multi);
     curl_global_cleanup();
   }
 

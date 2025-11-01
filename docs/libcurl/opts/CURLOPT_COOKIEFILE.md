@@ -55,6 +55,9 @@ If you use this option multiple times, you add more files to read cookies
 from. Setting this option to NULL disables the cookie engine and clears the
 list of files to read cookies from.
 
+The cookies are loaded from the specified file(s) when the transfer starts,
+not when this option is set.
+
 # SECURITY CONCERNS
 
 This document previously mentioned how specifying a non-existing file can also

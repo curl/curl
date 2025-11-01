@@ -40,7 +40,6 @@
 #include "../curl_ntlm_core.h"
 #include "../curl_gethostname.h"
 #include "../curlx/multibyte.h"
-#include "../curl_md5.h"
 #include "../curlx/warnless.h"
 #include "../rand.h"
 #include "../vtls/vtls.h"
@@ -788,7 +787,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* ntresplen + size should not be risking an integer overflow here */
   if(ntresplen + size > sizeof(ntlmbuf)) {
     failf(data, "incoming NTLM message too big");
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_TOO_LARGE;
+    goto error;
   }
   DEBUGASSERT(size == (size_t)ntrespoff);
   memcpy(&ntlmbuf[size], ptr_ntresp, ntresplen);
@@ -798,8 +798,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     curl_mfprintf(stderr, "\n   ntresp=");
     ntlm_print_hex(stderr, (char *)&ntlmbuf[ntrespoff], ntresplen);
   });
-
-  free(ntlmv2resp);/* Free the dynamic buffer allocated for NTLMv2 */
 
   DEBUG_OUT({
     curl_mfprintf(stderr, "\n   flags=0x%02.2x%02.2x%02.2x%02.2x 0x%08.8x ",
@@ -811,8 +809,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   /* Make sure that the domain, user and host strings fit in the
      buffer before we copy them there. */
   if(size + userlen + domlen + hostlen >= NTLM_BUFSIZE) {
-    failf(data, "user + domain + hostname too big");
-    return CURLE_OUT_OF_MEMORY;
+    failf(data, "user + domain + hostname too big for NTLM");
+    result = CURLE_TOO_LARGE;
+    goto error;
   }
 
   DEBUGASSERT(size == domoff);
@@ -841,6 +840,9 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   /* Return the binary blob. */
   result = Curl_bufref_memdup(out, ntlmbuf, size);
+
+error:
+  free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */
 
   Curl_auth_cleanup_ntlm(ntlm);
 

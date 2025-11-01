@@ -147,6 +147,9 @@ sub subbase64 {
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }
 
+    $$thing =~ s/%spc%/ /g;   # space
+    $$thing =~ s/%tab%/\t/g;  # horizontal tab
+
     # include a file
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1)/ge;
 }

@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo" --post302
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

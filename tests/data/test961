@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt user@%hex[%c3%a5%c3%a4%c3%b6]he
 <errorcode>
 8
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY user@%hex[%c3%a5%c3%a4%c3%b6]hex%.se
 QUIT

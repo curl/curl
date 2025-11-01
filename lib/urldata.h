@@ -127,7 +127,7 @@ typedef unsigned int curl_prot_t;
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
 /* Default FTP/IMAP etc response timeout in milliseconds */
-#define RESP_TIMEOUT (120*1000)
+#define RESP_TIMEOUT (60*1000)
 
 /* Max string input length is a precaution against abuse and to detect junk
    input easier and better. */
@@ -190,13 +190,8 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
 #  include <gss.h>
-# elif defined HAVE_GSSAPI_GSSAPI_H
-#  include <gssapi/gssapi.h>
 # else
-#  include <gssapi.h>
-# endif
-# ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
-#  include <gssapi/gssapi_generic.h>
+#  include <gssapi/gssapi.h>
 # endif
 #endif
 
@@ -424,12 +419,12 @@ struct hostname {
  * Flags on the keepon member of the Curl_transfer_keeper
  */
 
-#define KEEP_NONE  0
-#define KEEP_RECV  (1<<0)     /* there is or may be data to read */
-#define KEEP_SEND (1<<1)     /* there is or may be data to write */
-#define KEEP_RECV_HOLD (1<<2) /* when set, no reading should be done but there
-                                 might still be data to read */
-#define KEEP_SEND_HOLD (1<<3) /* when set, no writing should be done but there
+#define KEEP_NONE       0
+#define KEEP_RECV       (1<<0) /* there is or may be data to read */
+#define KEEP_SEND       (1<<1) /* there is or may be data to write */
+#define KEEP_RECV_HOLD  (1<<2) /* when set, no reading should be done but there
+                                  might still be data to read */
+#define KEEP_SEND_HOLD  (1<<3) /* when set, no writing should be done but there
                                   might still be data to write */
 #define KEEP_RECV_PAUSE (1<<4) /* reading is paused */
 #define KEEP_SEND_PAUSE (1<<5) /* writing is paused */
@@ -548,10 +543,10 @@ struct Curl_handler {
                      followtype type);
 
   int defport;            /* Default port. */
-  curl_prot_t protocol;  /* See CURLPROTO_* - this needs to be the single
-                            specific protocol bit */
-  curl_prot_t family;    /* single bit for protocol family; basically the
-                            non-TLS name of the protocol this is */
+  curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
+                             specific protocol bit */
+  curl_prot_t family;     /* single bit for protocol family; basically the
+                             non-TLS name of the protocol this is */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 
 };
@@ -579,10 +574,13 @@ struct Curl_handler {
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
-#define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
+#define PROTOPT_WILDCARD (1<<12)    /* protocol supports wildcard matching */
 #define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ASCII) in
                                        username and password */
-#define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
+#define PROTOPT_NOTCPPROXY (1<<14)  /* this protocol cannot proxy over TCP */
+#define PROTOPT_SSL_REUSE (1<<15)   /* this protocol may reuse an existing
+                                       SSL connection in the same family
+                                       without having PROTOPT_SSL. */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
@@ -982,10 +980,7 @@ struct UrlState {
   char *first_host;
   int first_remote_port;
   curl_prot_t first_remote_protocol;
-
-  int retrycount; /* number of retries on a new connection */
   int os_errno;  /* filled in with errno whenever an error occurs */
-  long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
@@ -1105,6 +1100,9 @@ struct UrlState {
 #ifndef CURL_DISABLE_HTTP
   struct http_negotiation http_neg;
 #endif
+  unsigned short followlocation; /* redirect counter */
+  unsigned char retrycount; /* number of retries on a new connection, up to
+                               CONN_MAX_RETRIES */
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
   unsigned int creds_from:2; /* where is the server credentials originating

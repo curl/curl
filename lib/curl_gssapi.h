@@ -51,12 +51,6 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
 void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor);
 
-/* Provide some definitions missing in old headers */
-#ifdef HAVE_OLD_GSSMIT
-#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
-#define NCOMPAT 1
-#endif
-
 /* Define our privacy and integrity protection values */
 #define GSSAUTH_P_NONE      1
 #define GSSAUTH_P_INTEGRITY 2

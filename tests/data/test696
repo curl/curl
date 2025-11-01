@@ -54,7 +54,7 @@ Connection: close
 
 -foo-
 </stdout>
-<protocol>
+<protocol crlf="yes">
 GET /556 HTTP/1.1
 Host: ninja
 

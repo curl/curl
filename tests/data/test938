@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER001
 AUTH PLAIN
 dXNlci5vbmUAdXNlci5vbmUAc2VjcmV0
@@ -57,7 +57,7 @@ RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

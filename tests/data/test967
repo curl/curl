@@ -43,7 +43,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren@%hex[
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY Anv%hex[%c3%a4]hex%ndaren@xn--4cab6c.se SMTPUTF8
 QUIT

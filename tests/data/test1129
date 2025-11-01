@@ -74,7 +74,7 @@ Content-Type: text/html
 
 -foo-
 </stdout>
-<protocol>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

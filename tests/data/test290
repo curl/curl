@@ -30,7 +30,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --max-filesize 30
 <errorcode>
 63
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

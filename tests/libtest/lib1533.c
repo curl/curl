@@ -34,7 +34,7 @@
 #include "memdebug.h"
 
 struct cb_data {
-  CURL *easy_handle;
+  CURL *curl;
   int response_received;
   int paused;
   size_t remaining_bytes;
@@ -42,7 +42,7 @@ struct cb_data {
 
 static void reset_data(struct cb_data *data, CURL *curl)
 {
-  data->easy_handle = curl;
+  data->curl = curl;
   data->response_received = 0;
   data->paused = 0;
   data->remaining_bytes = 3;
@@ -85,7 +85,7 @@ static size_t t1533_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   if(data->paused) {
     /* continue to send request body data */
     data->paused = 0;
-    curl_easy_pause(data->easy_handle, CURLPAUSE_CONT);
+    curl_easy_pause(data->curl, CURLPAUSE_CONT);
   }
 
   return totalsize;

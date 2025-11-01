@@ -43,7 +43,6 @@
 #include "urldata.h"
 
 #include "curlx/base64.h"
-#include "curl_md5.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"
 #include "vtls/vtls.h"

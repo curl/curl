@@ -54,7 +54,7 @@ IMAP DIGEST-MD5 authentication with SASL downgrade
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE DIGEST-MD5
 *

@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 <errorcode>
 19
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

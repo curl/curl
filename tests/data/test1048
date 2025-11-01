@@ -48,7 +48,7 @@ FTP-IPv6 dir list PASV with localhost --interface
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

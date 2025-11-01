@@ -45,7 +45,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 APOP user 7501b4cdc224d469940e65e7b5e4d6eb
 RETR %TESTNUMBER

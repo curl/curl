@@ -331,6 +331,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
   if(sx->start_resolving) {
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
+    DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version, TRUE, &dns);
@@ -432,7 +433,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
   switch(resp[1]) {
   case 90:
     CURL_TRC_CF(data, cf, "SOCKS4%s request granted.", sx->socks4a ? "a" : "");
-    Curl_bufq_reset(&sx->iobuf);
+    Curl_bufq_skip(&sx->iobuf, 8);
     return CURLPX_OK;
   case 91:
     failf(data,
@@ -664,7 +665,7 @@ static CURLproxycode socks5_check_resp0(struct socks_state *sx,
   }
 
   auth_mode = resp[1];
-  Curl_bufq_reset(&sx->iobuf);
+  Curl_bufq_skip(&sx->iobuf, 2);
 
   switch(auth_mode) {
   case 0:
@@ -681,8 +682,12 @@ static CURLproxycode socks5_check_resp0(struct socks_state *sx,
     return CURLPX_GSSAPI_PERMSG;
   case 2:
     /* regular name + password authentication */
-    sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
-    return CURLPX_OK;
+    if(data->set.socks5auth & CURLAUTH_BASIC) {
+      sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
+      return CURLPX_OK;
+    }
+    failf(data, "BASIC authentication proposed but not enabled.");
+    return CURLPX_NO_AUTH;
   case 255:
     failf(data, "No authentication method was acceptable.");
     return CURLPX_NO_AUTH;
@@ -761,13 +766,12 @@ static CURLproxycode socks5_check_auth_resp(struct socks_state *sx,
 
   /* ignore the first (VER) byte */
   auth_status = resp[1];
-  Curl_bufq_reset(&sx->iobuf);
-
   if(auth_status) {
     failf(data, "User was rejected by the SOCKS5 server (%d %d).",
           resp[0], resp[1]);
     return CURLPX_USER_REJECTED;
   }
+  Curl_bufq_skip(&sx->iobuf, 2);
   return CURLPX_OK;
 }
 
@@ -855,6 +859,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   if(sx->start_resolving) {
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
+    DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version, TRUE, &dns);
@@ -1243,8 +1248,10 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 
   if(!sx) {
     cf->ctx = sx = calloc(1, sizeof(*sx));
-    if(!sx)
-      return CURLE_OUT_OF_MEMORY;
+    if(!sx) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
 
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)

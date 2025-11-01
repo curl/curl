@@ -1119,7 +1119,6 @@ void curl_easy_reset(CURL *d)
 
   data->progress.hide = TRUE;
   data->state.current_speed = -1; /* init to negative == impossible */
-  data->state.retrycount = 0;     /* reset the retry counter */
   data->state.recent_conn_id = -1; /* clear remembered connection id */
 
   /* zero out authentication data: */
@@ -1166,7 +1165,8 @@ CURLcode curl_easy_pause(CURL *d, int action)
   send_paused = Curl_xfer_send_is_paused(data);
   send_paused_new = (action & CURLPAUSE_SEND);
 
-  if(send_paused != send_paused_new) {
+  if((send_paused != send_paused_new) ||
+     (send_paused_new != Curl_creader_is_paused(data))) {
     changed = TRUE;
     result = Curl_1st_err(result, Curl_xfer_pause_send(data, send_paused_new));
   }

@@ -58,7 +58,7 @@ http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Basic %b64[foo:bar]b64%

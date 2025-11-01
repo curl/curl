@@ -337,11 +337,6 @@ $write cvh "#ifdef USE_UNIX_SOCKETS"
 $write cvh "#undef USE_UNIX_SOCKETS"
 $write cvh "#endif"
 $!
-$write cvh "#ifndef HAVE_OLD_GSSMIT"
-$write cvh "#define gss_nt_service_name GSS_C_NT_HOSTBASED_SERVICE"
-$write cvh "#endif"
-$!
-$!
 $! Note:
 $! The CURL_EXTERN_SYMBOL is used for platforms that need the compiler
 $! to know about universal symbols.  VMS does not need this support so

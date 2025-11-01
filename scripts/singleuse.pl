@@ -36,7 +36,7 @@
 use strict;
 use warnings;
 
-my $unittests;
+my $unittests="";
 if(@ARGV && $ARGV[0] eq "--unit") {
     $unittests = "tests/unit ";
     shift @ARGV;

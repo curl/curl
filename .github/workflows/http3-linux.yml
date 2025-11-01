@@ -30,8 +30,7 @@ name: 'Linux HTTP/3'
       - 'projects/**'
 
 concurrency:
-  # Hardcoded workflow filename as workflow name above is just Linux again
-  group: http3-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions: {}
@@ -42,7 +41,7 @@ env:
   # handled in renovate.json
   OPENSSL_VERSION: 3.6.0
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
-  LIBRESSL_VERSION: 4.1.1
+  LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.61.4
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
@@ -54,9 +53,9 @@ env:
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
   NGHTTP3_VERSION: 1.12.0
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  NGTCP2_VERSION: 1.16.0
+  NGTCP2_VERSION: 1.17.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  NGHTTP2_VERSION: 1.67.1
+  NGHTTP2_VERSION: 1.68.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   QUICHE_VERSION: 0.24.6
 
@@ -201,7 +200,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
+            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl/build
           cmake --build .
@@ -334,8 +333,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-ngtcp2 --disable-ntlm
-              --with-openssl=/home/runner/openssl/build --enable-ssls-export
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'openssl'
             install_steps: skipall
@@ -343,7 +341,6 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_NGTCP2=ON
               -DCURL_DISABLE_LDAP=ON
-              -DCURL_DISABLE_NTLM=ON
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'libressl'
@@ -351,29 +348,25 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/libressl/build/lib
-              --with-ngtcp2 --disable-ntlm
-              --with-openssl=/home/runner/libressl/build --enable-ssls-export
+              --with-openssl=/home/runner/libressl/build --with-ngtcp2 --enable-ssls-export
               --enable-unity
 
           - name: 'libressl'
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build
-              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON
 
           - name: 'awslc'
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/awslc/build/lib
-              --with-ngtcp2 --disable-ntlm
-              --with-openssl=/home/runner/awslc/build --enable-ssls-export
+              --with-openssl=/home/runner/awslc/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'awslc'
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DBUILD_SHARED_LIBS=OFF
-              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'boringssl'
@@ -381,14 +374,12 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/boringssl/build/lib
-              --with-ngtcp2 --disable-ntlm
-              --with-openssl=/home/runner/boringssl/build --enable-ssls-export
+              --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'boringssl'
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DBUILD_SHARED_LIBS=OFF
-              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'gnutls'
@@ -397,15 +388,13 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
-              --with-ngtcp2
-              --with-gnutls=/home/runner/gnutls/build --enable-ssls-export
+              --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'gnutls'
             install_packages: nettle-dev libp11-kit-dev
             PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
-              -DCURL_USE_GNUTLS=ON
-              -DUSE_NGTCP2=ON -DCURL_DISABLE_NTLM=ON
+              -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'wolfssl'
@@ -413,9 +402,7 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
-              --with-ngtcp2
-              --with-wolfssl=/home/runner/wolfssl/build
-              --enable-ech --enable-ssls-export
+              --with-wolfssl=/home/runner/wolfssl/build --with-ngtcp2 --enable-ech --enable-ssls-export
               --enable-unity
 
           - name: 'wolfssl'
@@ -429,7 +416,6 @@ jobs:
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --disable-ntlm
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
 
           - name: 'openssl-quic'
@@ -437,7 +423,6 @@ jobs:
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
               -DCURL_DISABLE_LDAP=ON
-              -DCURL_DISABLE_NTLM=ON
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'quiche'
@@ -661,8 +646,8 @@ jobs:
             make -C bld V=1
           fi
 
-      - name: 'check curl -V output'
-        run: bld/src/curl -V
+      - name: 'curl -V'
+        run: bld/src/curl --disable -V
 
       - name: 'build tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') }}

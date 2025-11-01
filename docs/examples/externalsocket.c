@@ -60,7 +60,7 @@
 #define INADDR_NONE 0xffffffff
 #endif
 
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
   return written;
@@ -103,14 +103,9 @@ int main(void)
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
-#ifdef _WIN32
-  WSADATA wsaData;
-  int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if(initwsa) {
-    printf("WSAStartup failed: %d\n", initwsa);
-    return 1;
-  }
-#endif
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -148,7 +143,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
     /* send all data to this function  */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* call this function to get a socket */
     curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
@@ -175,8 +170,7 @@ int main(void)
     }
   }
 
-#ifdef _WIN32
-  WSACleanup();
-#endif
+  curl_global_cleanup();
+
   return 0;
 }

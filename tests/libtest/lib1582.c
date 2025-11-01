@@ -23,25 +23,38 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "curl_memory.h"
+#include "memdebug.h"
 
-#ifdef UNDER_CE
-#define system_strdup _strdup
-#else
-#define system_strdup strdup
-#endif
+static CURLcode test_lib1582(const char *URL)
+{
+  CURLcode res;
+  CURL *curl;
 
-#if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(push)
-#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
-#endif
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
-curl_free_callback Curl_cfree = (curl_free_callback)free;
-curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
-curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+  curl = curl_easy_init();
+  if(!curl) {
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-#if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(pop)
-#endif
+  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_NEGOTIATE);
+  test_setopt(curl, CURLOPT_USERPWD, ":");
+  test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+  res = curl_easy_perform(curl);
+
+test_cleanup:
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return res;
+}

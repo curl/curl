@@ -34,7 +34,6 @@ struct Curl_easy;
 #include "urldata.h"
 #include "curlx/warnless.h"
 #include "escape.h"
-#include "strdup.h"
 #include "curlx/strparse.h"
 #include "curl_printf.h"
 

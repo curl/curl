@@ -46,7 +46,6 @@
 #include "../curl_sha256.h"
 #include "../rand.h"
 #include "../curlx/warnless.h"
-#include "../strdup.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -352,6 +351,15 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
     free(scache->peers);
     free(scache);
   }
+}
+
+bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  if(cf_ssl_scache_get(data)) {
+    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+    return ssl_config ? ssl_config->primary.cache_session : FALSE;
+  }
+  return FALSE;
 }
 
 /* Lock shared SSL session data */

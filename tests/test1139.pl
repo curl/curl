@@ -90,7 +90,7 @@ sub scanmdpage {
         }
     }
     foreach my $m (@words) {
-        my @g = grep(/$m/, @m);
+        my @g = grep(/$m\b/, @m);
         if(!$g[0]) {
             print STDERR "Missing mention of $m in $file\n";
             $errors++;

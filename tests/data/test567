@@ -37,7 +37,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
 CSeq: 1
 User-Agent: test%TESTNUMBER

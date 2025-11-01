@@ -631,7 +631,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     else {
       if(req->skip)
         /* we are instructed to not read the entire thing, so we make sure to
-           only read what we're supposed to and NOT read the enire thing the
+           only read what we're supposed to and NOT read the entire thing the
            client wants to send! */
         got = sread(sock, reqbuf + req->offset, req->cl);
       else

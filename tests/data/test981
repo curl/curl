@@ -51,7 +51,7 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 <errorcode>
 8
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 STARTTLS
 </protocol>

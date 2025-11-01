@@ -54,7 +54,7 @@ IMAP DIGEST-MD5 authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE DIGEST-MD5
 dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJpbWFwLzEyNy4wLjAuMSIscmVzcG9uc2U9YmU2MzgyNDkzNjJkN2FhMGUzNTM4NTA3Njc1MWFiNDgscW9wPWF1dGg=

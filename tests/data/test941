@@ -42,14 +42,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 
@@ -61,7 +61,7 @@ converted
 with
 the
 --crlf option
-%repeat[650 x 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789%0a]%
+%repeat[650 x 0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789%0d%0a]%
 .
 </upload>
 </verify>

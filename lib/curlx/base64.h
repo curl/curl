@@ -33,4 +33,8 @@ CURLcode curlx_base64_decode(const char *src,
 
 extern const char Curl_base64encdec[];
 
+/* maximum input length acceptable to base64 encode, here to catch and prevent
+   mistakes */
+#define CURL_MAX_BASE64_INPUT 16000000
+
 #endif /* HEADER_CURL_BASE64_H */

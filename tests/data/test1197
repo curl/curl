@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{method}\n" -L -d "twinkle twinkle lit
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

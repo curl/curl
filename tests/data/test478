@@ -60,7 +60,7 @@ login debbie
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET http://github.com/ HTTP/1.1
 Host: github.com
 Authorization: Basic %b64[debbie:second%0D]b64%

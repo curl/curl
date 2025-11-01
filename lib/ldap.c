@@ -199,7 +199,7 @@ const struct Curl_handler Curl_handler_ldap = {
   PORT_LDAP,                            /* defport */
   CURLPROTO_LDAP,                       /* protocol */
   CURLPROTO_LDAP,                       /* family */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_SSL_REUSE                     /* flags */
 };
 
 #ifdef HAVE_LDAP_SSL
@@ -399,8 +399,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #ifdef LDAP_OPT_X_TLS
     if(conn->ssl_config.verifypeer) {
       /* OpenLDAP SDK supports BASE64 files. */
-      if((data->set.ssl.cert_type) &&
-         (!curl_strequal(data->set.ssl.cert_type, "PEM"))) {
+      if(data->set.ssl.cert_type &&
+         !curl_strequal(data->set.ssl.cert_type, "PEM")) {
         failf(data, "LDAP local: ERROR OpenLDAP only supports PEM cert-type");
         result = CURLE_SSL_CERTPROBLEM;
         goto quit;
@@ -461,7 +461,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
-          "of the OpenLDAP toolkit\n");
+          "of the OpenLDAP toolkit");
     result = CURLE_SSL_CERTPROBLEM;
     goto quit;
 #endif /* LDAP_OPT_X_TLS */
@@ -535,7 +535,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     /* Get the DN and write it to the client */
     {
       char *name;
-      size_t name_len;
+      size_t name_len = 0;
 #ifdef USE_WIN32_LDAP
       TCHAR *dn = ldap_get_dn(server, entryIterator);
       name = curlx_convert_tchar_to_UTF8(dn);
@@ -549,32 +549,20 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #else
       char *dn = name = ldap_get_dn(server, entryIterator);
 #endif
-      name_len = strlen(name);
-
-      result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
-      if(result) {
-        FREE_ON_WINLDAP(name);
-        ldap_memfree(dn);
-        goto quit;
+      if(!name)
+        result = CURLE_FAILED_INIT;
+      else {
+        name_len = strlen(name);
+        result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
       }
-
-      result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
-      if(result) {
-        FREE_ON_WINLDAP(name);
-        ldap_memfree(dn);
-        goto quit;
-      }
-
-      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
-      if(result) {
-        FREE_ON_WINLDAP(name);
-        ldap_memfree(dn);
-
-        goto quit;
-      }
-
+      if(!result)
+        result = Curl_client_write(data, CLIENTWRITE_BODY, name, name_len);
+      if(!result)
+        result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       FREE_ON_WINLDAP(name);
       ldap_memfree(dn);
+      if(result)
+        goto quit;
     }
 
     /* Get the attributes and write them to the client */
@@ -635,7 +623,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           }
 
           if((attr_len > 7) &&
-             (strcmp(";binary", attr + (attr_len - 7)) == 0)) {
+             curl_strequal(";binary", attr + (attr_len - 7)) ) {
             /* Binary attribute, encode to base64. */
             if(vals[i]->bv_len) {
               result = curlx_base64_encode(vals[i]->bv_val, vals[i]->bv_len,

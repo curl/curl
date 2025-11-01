@@ -37,19 +37,19 @@ static const char *ldata_names[] = {
   "NULL",
 };
 
-static void t1554_test_lock(CURL *handle, curl_lock_data data,
+static void t1554_test_lock(CURL *curl, curl_lock_data data,
                             curl_lock_access laccess, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)laccess;
   (void)useptr;
   curl_mprintf("-> Mutex lock %s\n", ldata_names[data]);
 }
 
-static void t1554_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t1554_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)useptr;
   curl_mprintf("<- Mutex unlock %s\n", ldata_names[data]);

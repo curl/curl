@@ -154,11 +154,12 @@ void Curl_pollset_move(struct easy_pollset *to, struct easy_pollset *from);
  */
 CURLcode Curl_pollset_change(struct Curl_easy *data,
                              struct easy_pollset *ps, curl_socket_t sock,
-                             int add_flags, int remove_flags);
+                             int add_flags,
+                             int remove_flags) WARN_UNUSED_RESULT;
 
 CURLcode Curl_pollset_set(struct Curl_easy *data,
                           struct easy_pollset *ps, curl_socket_t sock,
-                          bool do_in, bool do_out);
+                          bool do_in, bool do_out) WARN_UNUSED_RESULT;
 
 #define Curl_pollset_add_in(data, ps, sock) \
           Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)

@@ -36,7 +36,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -l -u user:secret
 <errorcode>
 8
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret

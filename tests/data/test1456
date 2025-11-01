@@ -55,7 +55,7 @@ proxy
 <strippart>
 s/PROXY TCP6 ::1 ::1 (\d+) (\d+)/PROXY TCP6 ::1 ::1 $2/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 PROXY TCP6 ::1 ::1 %HTTP6PORT
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT

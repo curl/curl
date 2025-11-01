@@ -39,44 +39,48 @@
 int main(void)
 {
   CURL *curl;
-  CURLM *mcurl;
-  int still_running = 1;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
-  if(!curl)
-    return 1;
+  if(curl) {
+    CURLM *multi;
 
-  mcurl = curl_multi_init();
-  if(!mcurl)
-    return 2;
+    multi = curl_multi_init();
+    if(multi) {
+      int still_running = 1;
 
-  /* Set username and password */
-  curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
-  curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
+      /* Set username and password */
+      curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
+      curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
-  /* This fetches message 1 from the user's inbox */
-  curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/INBOX/;UID=1");
+      /* This fetches message 1 from the user's inbox */
+      curl_easy_setopt(curl, CURLOPT_URL, "imap://imap.example.com/"
+                       "INBOX/;UID=1");
 
-  /* Tell the multi stack about our easy handle */
-  curl_multi_add_handle(mcurl, curl);
+      /* Tell the multi stack about our easy handle */
+      curl_multi_add_handle(multi, curl);
 
-  do {
-    CURLMcode mc = curl_multi_perform(mcurl, &still_running);
+      do {
+        CURLMcode mc = curl_multi_perform(multi, &still_running);
 
-    if(still_running)
-      /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(mcurl, NULL, 0, 1000, NULL);
+        if(still_running)
+          /* wait for activity, timeout or "nothing" */
+          mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-    if(mc)
-      break;
-  } while(still_running);
+        if(mc)
+          break;
+      } while(still_running);
 
-  /* Always cleanup */
-  curl_multi_remove_handle(mcurl, curl);
-  curl_multi_cleanup(mcurl);
-  curl_easy_cleanup(curl);
+      /* Always cleanup */
+      curl_multi_remove_handle(multi, curl);
+      curl_multi_cleanup(multi);
+    }
+    curl_easy_cleanup(curl);
+  }
+
   curl_global_cleanup();
 
   return 0;

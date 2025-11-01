@@ -59,7 +59,7 @@ http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER/testapi/test HTTP/1.1
 Host: 127.0.0.1:9000
 Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-yyy-date, Signature=cf8dc9a4af903a1a9bb1385d8e2366d780afb501e266436598438395e502d58c

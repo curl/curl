@@ -45,14 +45,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt St%hex[%c3%b6]hex%dmottagaren@%
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com> SMTPUTF8
 RCPT TO:<St%hex[%c3%b6]hex%dmottagaren@xn--4cab6c.se>
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

@@ -37,7 +37,6 @@
 #include "pingpong.h"
 #include "multiif.h"
 #include "vtls/vtls.h"
-#include "strdup.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
@@ -51,8 +50,8 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
   timediff_t timeout_ms; /* in milliseconds */
-  timediff_t response_time = (data->set.server_response_timeout > 0) ?
-    data->set.server_response_timeout : pp->response_time;
+  timediff_t response_time = data->set.server_response_timeout ?
+    data->set.server_response_timeout : RESP_TIMEOUT;
   struct curltime now = curlx_now();
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
@@ -64,7 +63,7 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
      full response to arrive before we bail out */
   timeout_ms = response_time - curlx_timediff(now, pp->response);
 
-  if((data->set.timeout > 0) && !disconnecting) {
+  if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much overall remains */
     timediff_t timeout2_ms = Curl_timeleft(data, &now, FALSE);
     /* pick the lowest number */

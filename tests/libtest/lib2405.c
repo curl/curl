@@ -74,43 +74,43 @@ static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
   return size * nmemb;
 }
 
-static CURLcode set_easy(const char *URL, CURL *easy, long option)
+static CURLcode set_easy(const char *URL, CURL *curl, long option)
 {
   CURLcode res = CURLE_OK;
 
   /* First set the URL that is about to receive our POST. */
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   switch(option) {
   case TEST_USE_HTTP1:
     /* go http1 */
-    easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
     break;
 
   case TEST_USE_HTTP2:
     /* go http2 */
-    easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
     break;
 
   case TEST_USE_HTTP2_MPLEX:
     /* go http2 with multiplexing */
-    easy_setopt(easy, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
-    easy_setopt(easy, CURLOPT_PIPEWAIT, 1L);
+    easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
     break;
   }
 
   /* no peer verify */
-  easy_setopt(easy, CURLOPT_SSL_VERIFYPEER, 0L);
-  easy_setopt(easy, CURLOPT_SSL_VERIFYHOST, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
   /* include headers */
-  easy_setopt(easy, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
   /* empty write function */
-  easy_setopt(easy, CURLOPT_WRITEFUNCTION, emptyWriteFunc);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, emptyWriteFunc);
 
 test_cleanup:
   return res;
@@ -123,8 +123,8 @@ static CURLcode test_run(const char *URL, long option,
   CURLM *multi = NULL;
   CURLM *multi1 = NULL;
 
-  CURL *easy1 = NULL;
-  CURL *easy2 = NULL;
+  CURL *curl1 = NULL;
+  CURL *curl2 = NULL;
 
   unsigned int max_count = 0;
 
@@ -139,13 +139,13 @@ static CURLcode test_run(const char *URL, long option,
   struct curl_waitfd ufds1[10];
   int numfds;
 
-  easy_init(easy1);
-  easy_init(easy2);
+  easy_init(curl1);
+  easy_init(curl2);
 
-  if(set_easy(URL, easy1, option) != CURLE_OK)
+  if(set_easy(URL, curl1, option) != CURLE_OK)
     goto test_cleanup;
 
-  if(set_easy(URL, easy2, option) != CURLE_OK)
+  if(set_easy(URL, curl2, option) != CURLE_OK)
     goto test_cleanup;
 
   multi_init(multi);
@@ -154,8 +154,8 @@ static CURLcode test_run(const char *URL, long option,
   if(option == TEST_USE_HTTP2_MPLEX)
     multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
-  multi_add_handle(multi, easy1);
-  multi_add_handle(multi, easy2);
+  multi_add_handle(multi, curl1);
+  multi_add_handle(multi, curl2);
 
   while(!mc) {
     /* get the count of file descriptors from the transfers */
@@ -293,12 +293,12 @@ static CURLcode test_run(const char *URL, long option,
     }
   }
 
-  curl_multi_remove_handle(multi, easy1);
-  curl_multi_remove_handle(multi, easy2);
+  curl_multi_remove_handle(multi, curl1);
+  curl_multi_remove_handle(multi, curl2);
 
 test_cleanup:
-  curl_easy_cleanup(easy1);
-  curl_easy_cleanup(easy2);
+  curl_easy_cleanup(curl1);
+  curl_easy_cleanup(curl2);
 
   curl_multi_cleanup(multi);
   curl_multi_cleanup(multi1);
@@ -313,7 +313,7 @@ static CURLcode empty_multi_test(void)
 {
   CURLMcode mc = CURLM_OK;
   CURLM *multi = NULL;
-  CURL *easy = NULL;
+  CURL *curl = NULL;
 
   struct curl_waitfd ufds[10];
 
@@ -338,12 +338,12 @@ static CURLcode empty_multi_test(void)
   }
 
   /* calling curl_multi_waitfds() on multi handle with added easy handle. */
-  easy_init(easy);
+  easy_init(curl);
 
-  if(set_easy("http://example.com", easy, TEST_USE_HTTP1) != CURLE_OK)
+  if(set_easy("http://example.com", curl, TEST_USE_HTTP1) != CURLE_OK)
     goto test_cleanup;
 
-  multi_add_handle(multi, easy);
+  multi_add_handle(multi, curl);
 
   mc = curl_multi_waitfds(multi, ufds, 10, &fd_count);
 
@@ -359,10 +359,10 @@ static CURLcode empty_multi_test(void)
     goto test_cleanup;
   }
 
-  curl_multi_remove_handle(multi, easy);
+  curl_multi_remove_handle(multi, curl);
 
 test_cleanup:
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_multi_cleanup(multi);
   return res;
 }

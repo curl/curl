@@ -42,10 +42,6 @@ my @need_crlf = (
     "\\.(bat|sln)\$",
 );
 
-my @space_at_eol = (
-    "^tests/data/test",
-);
-
 my @non_ascii_allowed = (
     '\xC3\xB6',  # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
 );
@@ -53,7 +49,7 @@ my @non_ascii_allowed = (
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
 
 my @non_ascii = (
-    ".github/scripts/spellcheck.words",
+    ".github/scripts/pyspelling.words",
     ".mailmap",
     "RELEASE-NOTES",
     "docs/BINDINGS.md",
@@ -129,8 +125,7 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if(!fn_match($filename, @space_at_eol) &&
-       $content =~ /[ \t]\n/) {
+    if($content =~ /[ \t]\n/) {
         my $line;
         for my $l (split(/\n/, $content)) {
             $line++;

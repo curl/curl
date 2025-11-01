@@ -39,7 +39,7 @@ telnet://%HOSTIP:%HTTPPORT -T %LOGDIR/%TESTNUMBER.txt
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </protocol>

@@ -225,6 +225,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)");
+    gss_release_buffer(&unused_status, &output_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 

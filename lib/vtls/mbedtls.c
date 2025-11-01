@@ -40,14 +40,21 @@
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
   #error "mbedTLS 3.2.0 or later required"
 #endif
+#include <psa/crypto_config.h>
 #include <mbedtls/net_sockets.h>
 #include <mbedtls/ssl.h>
 #include <mbedtls/x509.h>
+#include <mbedtls/psa_util.h>
+
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
+#define CURL_MBEDTLS_DRBG
+#endif
 
 #include <mbedtls/error.h>
+#ifdef CURL_MBEDTLS_DRBG
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
-#include <mbedtls/sha256.h>
+#endif
 #ifdef MBEDTLS_DEBUG
 #include <mbedtls/debug.h>
 #endif
@@ -66,6 +73,7 @@
 #include "../multiif.h"
 #include "mbedtls_threadlock.h"
 #include "../strdup.h"
+#include "../curl_sha256.h"
 
 /* The last 2 #include files should be in this order */
 #include "../curl_memory.h"
@@ -77,8 +85,10 @@
 #endif
 
 struct mbed_ssl_backend_data {
+#ifdef CURL_MBEDTLS_DRBG
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_context entropy;
+#endif
   mbedtls_ssl_context ssl;
   mbedtls_x509_crt cacert;
   mbedtls_x509_crt clicert;
@@ -106,7 +116,7 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
-#ifdef HAS_THREADING_SUPPORT
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
 static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
@@ -144,7 +154,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
   return ret;
 }
 
-#endif /* HAS_THREADING_SUPPORT */
+#endif /* CURL_MBEDTLS_DRBG && HAS_THREADING_SUPPORT */
 
 #ifdef MBEDTLS_DEBUG
 static void mbed_debug(void *context, int level, const char *f_name,
@@ -538,6 +548,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_NOT_BUILT_IN;
   }
 
+#ifdef CURL_MBEDTLS_DRBG
 #ifdef HAS_THREADING_SUPPORT
   mbedtls_ctr_drbg_init(&backend->ctr_drbg);
 
@@ -562,6 +573,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_FAILED_INIT;
   }
 #endif /* HAS_THREADING_SUPPORT */
+#endif /* CURL_MBEDTLS_DRBG */
 
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
@@ -665,6 +677,17 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->key || ssl_config->key_blob) {
     if(ssl_config->key) {
 #ifdef MBEDTLS_FS_IO
+#if MBEDTLS_VERSION_NUMBER >= 0x04000000
+      ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->key,
+                                     ssl_config->key_passwd);
+      if(ret == 0 && !(mbedtls_pk_can_do_psa(&backend->pk,
+                                   PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_ANY_HASH),
+                                   PSA_KEY_USAGE_SIGN_HASH) ||
+                       mbedtls_pk_can_do_psa(&backend->pk,
+                                   MBEDTLS_PK_ALG_ECDSA(PSA_ALG_ANY_HASH),
+                                   PSA_KEY_USAGE_SIGN_HASH)))
+        ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
+#else
       ret = mbedtls_pk_parse_keyfile(&backend->pk, ssl_config->key,
                                      ssl_config->key_passwd,
                                      mbedtls_ctr_drbg_random,
@@ -672,6 +695,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
                        mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
+#endif
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -689,6 +713,18 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       const unsigned char *key_data =
         (const unsigned char *)ssl_key_blob->data;
       const char *passwd = ssl_config->key_passwd;
+#if MBEDTLS_VERSION_NUMBER >= 0x04000000
+      ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
+                                 (const unsigned char *)passwd,
+                                 passwd ? strlen(passwd) : 0);
+      if(ret == 0 && !(mbedtls_pk_can_do_psa(&backend->pk,
+                                   PSA_ALG_RSA_PKCS1V15_SIGN(PSA_ALG_ANY_HASH),
+                                   PSA_KEY_USAGE_SIGN_HASH) ||
+                       mbedtls_pk_can_do_psa(&backend->pk,
+                                   MBEDTLS_PK_ALG_ECDSA(PSA_ALG_ANY_HASH),
+                                   PSA_KEY_USAGE_SIGN_HASH)))
+        ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
+#else
       ret = mbedtls_pk_parse_key(&backend->pk, key_data, ssl_key_blob->len,
                                  (const unsigned char *)passwd,
                                  passwd ? strlen(passwd) : 0,
@@ -697,6 +733,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
                        mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_ECKEY)))
         ret = MBEDTLS_ERR_PK_TYPE_MISMATCH;
+#endif
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
@@ -746,8 +783,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef MBEDTLS_SSL_SESSION_TICKETS
-  /* New in mbedTLS 3.6.1, need to enable, default is now disabled */
+#if defined(MBEDTLS_SSL_SESSION_TICKETS) && \
+  MBEDTLS_VERSION_NUMBER >= 0x03060100 && MBEDTLS_VERSION_NUMBER < 0x04000000
+  /* New in mbedTLS 3.6.1, need to enable, default is now disabled.
+     4.0.0 enabled it by default for TLSv1.3. */
   mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets(&backend->config,
     MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED);
 #endif
@@ -769,8 +808,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ret != CURLE_OK)
     return ret;
 
+#ifdef CURL_MBEDTLS_DRBG
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
+#endif
 
   ret = mbedtls_ssl_setup(&backend->ssl, &backend->config);
   if(ret) {
@@ -818,7 +859,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
 
   /* Check if there is a cached ID we can/should use here! */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     struct Curl_ssl_session *sc_session = NULL;
     CURLcode result;
 
@@ -1045,7 +1086,6 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   mbedtls_ssl_session session;
   bool msession_alloced = FALSE;
   struct Curl_ssl_session *sc_session = NULL;
@@ -1056,7 +1096,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   int ret;
 
   DEBUGASSERT(backend);
-  if(!ssl_config->primary.cache_session)
+  if(!Curl_ssl_scache_use(cf, data))
     return CURLE_OK;
 
   mbedtls_ssl_session_init(&session);
@@ -1272,10 +1312,12 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_safefree(backend->ciphersuites);
     mbedtls_ssl_config_free(&backend->config);
     mbedtls_ssl_free(&backend->ssl);
+#ifdef CURL_MBEDTLS_DRBG
     mbedtls_ctr_drbg_free(&backend->ctr_drbg);
 #ifndef HAS_THREADING_SUPPORT
     mbedtls_entropy_free(&backend->entropy);
-#endif /* HAS_THREADING_SUPPORT */
+#endif /* !HAS_THREADING_SUPPORT */
+#endif
     backend->initialized = FALSE;
   }
 }
@@ -1346,33 +1388,12 @@ static size_t mbedtls_version(char *buffer, size_t size)
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
-#ifdef MBEDTLS_CTR_DRBG_C
-  int ret;
-  mbedtls_entropy_context ctr_entropy;
-  mbedtls_ctr_drbg_context ctr_drbg;
-  mbedtls_entropy_init(&ctr_entropy);
-  mbedtls_ctr_drbg_init(&ctr_drbg);
+  psa_status_t status;
   (void)data;
 
-  ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
-                              &ctr_entropy, NULL, 0);
+  status = psa_generate_random(entropy, length);
 
-  if(!ret)
-    ret = mbedtls_ctr_drbg_random(&ctr_drbg, entropy, length);
-
-  mbedtls_ctr_drbg_free(&ctr_drbg);
-  mbedtls_entropy_free(&ctr_entropy);
-
-  return ret == 0 ? CURLE_OK : CURLE_FAILED_INIT;
-#elif defined(MBEDTLS_HAVEGE_C)
-  mbedtls_havege_state hs;
-  mbedtls_havege_init(&hs);
-  mbedtls_havege_random(&hs, entropy, length);
-  mbedtls_havege_free(&hs);
-  return CURLE_OK;
-#else
-  return CURLE_NOT_BUILT_IN;
-#endif
+  return status == PSA_SUCCESS ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
 static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
@@ -1432,34 +1453,25 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
  */
 static int mbedtls_init(void)
 {
+  psa_status_t status;
+  status = psa_crypto_init();
+  if(status != PSA_SUCCESS)
+    return 0;
   if(!Curl_mbedtlsthreadlock_thread_setup())
     return 0;
-#ifdef HAS_THREADING_SUPPORT
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
   entropy_init_mutex(&ts_entropy);
 #endif
-#ifdef MBEDTLS_USE_PSA_CRYPTO  /* requires mbedTLS 3.6.0+ */
-  {
-    int ret;
-#ifdef HAS_THREADING_SUPPORT
-    Curl_mbedtlsthreadlock_lock_function(0);
-#endif
-    ret = psa_crypto_init();
-#ifdef HAS_THREADING_SUPPORT
-    Curl_mbedtlsthreadlock_unlock_function(0);
-#endif
-    if(ret != PSA_SUCCESS)
-      return 0;
-  }
-#endif /* MBEDTLS_USE_PSA_CRYPTO */
   return 1;
 }
 
 static void mbedtls_cleanup(void)
 {
-#ifdef HAS_THREADING_SUPPORT
+#if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
   entropy_cleanup_mutex(&ts_entropy);
 #endif
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
+  mbedtls_psa_crypto_free();
 }
 
 static bool mbedtls_data_pending(struct Curl_cfilter *cf,
@@ -1479,11 +1491,19 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   unsigned char *sha256sum,
                                   size_t sha256len)
 {
-  (void)sha256len;
-  /* returns 0 on success, otherwise failure */
-  if(mbedtls_sha256(input, inputlen, sha256sum, 0) != 0)
+#if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
+  psa_status_t status;
+  size_t sha256len_actual;
+  status = psa_hash_compute(PSA_ALG_SHA_256, input, inputlen,
+                            sha256sum, sha256len,
+                            &sha256len_actual);
+  if(status != PSA_SUCCESS)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
+#else
+  (void)sha256len;
+  return Curl_sha256it(sha256sum, input, inputlen);
+#endif
 }
 
 static void *mbedtls_get_internals(struct ssl_connect_data *connssl,

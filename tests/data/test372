@@ -35,7 +35,7 @@ proxy
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /binary-zero-in-data-section/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -46,7 +46,7 @@ machine %HOSTIP login user1 password passwd1
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER user1
 PASS passwd1
 PWD

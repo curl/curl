@@ -115,19 +115,19 @@ test_cleanup:
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-static void t3207_test_lock(CURL *handle, curl_lock_data data,
+static void t3207_test_lock(CURL *curl, curl_lock_data data,
                             curl_lock_access laccess, void *useptr)
 {
   curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
-  (void)handle;
+  (void)curl;
   (void)laccess;
   Curl_mutex_acquire(&mutexes[data]);
 }
 
-static void t3207_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t3207_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
   curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
-  (void)handle;
+  (void)curl;
   Curl_mutex_release(&mutexes[data]);
 }
 

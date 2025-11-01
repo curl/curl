@@ -45,7 +45,7 @@ Content-Type: text/plain
 testdata
 4
 </stdout>
-<protocol>
+<protocol crlf="yes">
 GET /1439 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -236,13 +236,8 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
 #  include <gss.h>
-# elif defined HAVE_GSSAPI_GSSAPI_H
-#  include <gssapi/gssapi.h>
 # else
-#  include <gssapi.h>
-# endif
-# ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
-#  include <gssapi/gssapi_generic.h>
+#  include <gssapi/gssapi.h>
 # endif
 #endif
 

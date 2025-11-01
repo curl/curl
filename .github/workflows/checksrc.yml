@@ -12,7 +12,6 @@ name: 'Source'
       - master
       - '*/ci'
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
@@ -22,12 +21,15 @@ name: 'Source'
     branches:
       - master
     paths-ignore:
-      - '**/*.md'
       - '.circleci/**'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
       - 'tests/data/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 permissions: {}
 
@@ -51,7 +53,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 'install'
+      - name: 'install prereqs'
         run: |
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary \
@@ -133,7 +135,7 @@ jobs:
           GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          zizmor --pedantic .github/workflows/*.yml
+          zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
 
       - name: 'shellcheck CI'
         run: |

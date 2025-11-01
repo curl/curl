@@ -74,7 +74,7 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

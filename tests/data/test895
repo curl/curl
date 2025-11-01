@@ -39,7 +39,7 @@ IMAP with --login-options 'AUTH=*'
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN "\"user" "sec\"ret{"
 A003 SELECT %TESTNUMBER

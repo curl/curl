@@ -2037,14 +2037,6 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_MAIL_RCPT_ALLOWFAILS: /* --mail-rcpt-allowfails */
     config->mail_rcpt_allowfails = toggle;
     break;
-  case C_FAIL_WITH_BODY: /* --fail-with-body */
-    config->failwithbody = toggle;
-    if(config->failonerror && config->failwithbody) {
-      errorf("You must select either --fail or "
-             "--fail-with-body, not both.");
-      return PARAM_BAD_USE;
-    }
-    break;
   case C_REMOVE_ON_ERROR: /* --remove-on-error */
     if(config->use_resume && toggle) {
       errorf("--continue-at is mutually exclusive with --remove-on-error");
@@ -2052,13 +2044,15 @@ static ParameterError opt_bool(struct OperationConfig *config,
     }
     config->rm_partial = toggle;
     break;
-  case C_FAIL: /* --fail */
-    config->failonerror = toggle;
-    if(config->failonerror && config->failwithbody) {
-      errorf("You must select either --fail or "
-             "--fail-with-body, not both.");
-      return PARAM_BAD_USE;
-    }
+  case C_FAIL: /* --fail without body */
+    if(toggle && (config->fail == FAIL_WITH_BODY))
+      warnf("--fail deselects --fail-with-body here");
+    config->fail = toggle ? FAIL_WO_BODY : FAIL_NONE;
+    break;
+  case C_FAIL_WITH_BODY: /* --fail-with-body */
+    if(toggle && (config->fail == FAIL_WO_BODY))
+      warnf("--fail-with-body deselects --fail here");
+    config->fail = toggle ? FAIL_WITH_BODY : FAIL_NONE;
     break;
   case C_GLOBOFF: /* --globoff */
     config->globoff = toggle;
@@ -2173,7 +2167,8 @@ static ParameterError opt_bool(struct OperationConfig *config,
 /* opt_file handles file options */
 static ParameterError opt_file(struct OperationConfig *config,
                                const struct LongShort *a,
-                               const char *nextarg)
+                               const char *nextarg,
+                               int max_recursive)
 {
   ParameterError err = PARAM_OK;
   if((nextarg[0] == '-') && nextarg[1]) {
@@ -2195,9 +2190,13 @@ static ParameterError opt_file(struct OperationConfig *config,
     GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
     break;
   case C_CONFIG: /* --config */
-    if(parseconfig(nextarg)) {
-      errorf("cannot read config from '%s'", nextarg);
-      err = PARAM_READ_ERROR;
+    if(--max_recursive < 0) {
+      errorf("Max config file recursion level reached (%u)",
+             CONFIG_MAX_LEVELS);
+      err = PARAM_BAD_USE;
+    }
+    else {
+      err = parseconfig(nextarg, max_recursive);
     }
     break;
   case C_CRLFILE: /* --crlfile */
@@ -2837,7 +2836,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                             const char *nextarg,    /* NULL if unset */
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
-                            struct OperationConfig *config)
+                            struct OperationConfig *config,
+                            int max_recursive)
 {
   const char *parse = NULL;
   bool longopt = FALSE;
@@ -2968,7 +2968,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
               "Maybe ASCII was intended?", nextarg);
       }
       if(ARGTYPE(a->desc) == ARG_FILE)
-        err = opt_file(config, a, nextarg);
+        err = opt_file(config, a, nextarg, max_recursive);
       else /* if(ARGTYPE(a->desc) == ARG_STRG) */
         err = opt_string(config, a, nextarg);
       if(a->desc & ARG_CLEAR)
@@ -3026,7 +3026,8 @@ ParameterError parse_args(int argc, argv_item_t argv[])
           }
         }
 
-        result = getparameter(orig_opt, nextarg, &passarg, config);
+        result = getparameter(orig_opt, nextarg, &passarg, config,
+                              CONFIG_MAX_LEVELS);
 
         unicodefree(nextarg);
         config = global->last;
@@ -3062,7 +3063,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, &used, config);
+      result = getparameter("--url", orig_opt, &used, config, 0);
     }
 
     if(!result) {

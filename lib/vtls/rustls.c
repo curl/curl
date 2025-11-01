@@ -404,8 +404,8 @@ read_file_into(const char *filename,
   for(;;) {
     uint8_t buf[256];
     const size_t rr = fread(buf, 1, sizeof(buf), f);
-    if(rr == 0 ||
-       CURLE_OK != curlx_dyn_addn(out, buf, rr)) {
+    if((!rr && !feof(f)) ||
+       curlx_dyn_addn(out, buf, rr)) {
       curlx_fclose(f);
       return 0;
     }
@@ -518,7 +518,7 @@ cr_keylog_log_cb(struct rustls_str label,
   (void)client_random_len;
   DEBUGASSERT(client_random_len == CLIENT_RANDOM_SIZE);
   /* Turning a "rustls_str" into a null delimited "c" string */
-  curl_msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
+  curl_msnprintf(clabel, sizeof(clabel), "%.*s", (int)label.len, label.data);
   Curl_tls_keylog_write(clabel, client_random, secret, secret_len);
 }
 
@@ -746,6 +746,9 @@ init_config_builder_verifier(struct Curl_easy *data,
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build trusted root certificate store");
     result = CURLE_SSL_CACERT_BADFILE;
+    if(result) {
+      goto cleanup;
+    }
   }
 
   verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
@@ -754,7 +757,7 @@ init_config_builder_verifier(struct Curl_easy *data,
     result = init_config_builder_verifier_crl(data,
                                              conn_config,
                                              verifier_builder);
-    if(result != CURLE_OK) {
+    if(result) {
       goto cleanup;
     }
   }
@@ -1103,7 +1106,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     connssl->peer.hostname,
                                     &rconn);
   if(rr != RUSTLS_RESULT_OK) {
-    rustls_failf(data, result, "rustls_client_connection_new");
+    rustls_failf(data, rr, "rustls_client_connection_new");
     return CURLE_COULDNT_CONNECT;
   }
   DEBUGASSERT(rconn);

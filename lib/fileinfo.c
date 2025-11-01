@@ -26,7 +26,6 @@
 
 #ifndef CURL_DISABLE_FTP
 
-#include "strdup.h"
 #include "fileinfo.h"
 #include "curl_memory.h"
 /* The last #include file should be: */

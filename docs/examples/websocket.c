@@ -64,7 +64,7 @@ static CURLcode ping(CURL *curl, const char *send_payload)
 
 static CURLcode recv_pong(CURL *curl, const char *expected_payload)
 {
-  size_t rlen;
+  size_t rlen = 0;
   const struct curl_ws_frame *meta;
   char buffer[256];
   CURLcode res;
@@ -138,31 +138,34 @@ static CURLcode websocket(CURL *curl)
 int main(int argc, const char *argv[])
 {
   CURL *curl;
-  CURLcode res;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
-  if(!curl) {
-    return 1; /* memory failure */
+  if(curl) {
+    if(argc == 2)
+      curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+    else
+      curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com");
+
+    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
+
+    /* Perform the request, res gets the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+    else {
+      /* connected and ready */
+      res = websocket(curl);
+    }
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
   }
-  if(argc == 2)
-    curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
-  else
-    curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com");
-
-  curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
-
-  /* Perform the request, res gets the return code */
-  res = curl_easy_perform(curl);
-  /* Check for errors */
-  if(res != CURLE_OK)
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
-  else {
-    /* connected and ready */
-    res = websocket(curl);
-  }
-
-  /* always cleanup */
-  curl_easy_cleanup(curl);
+  curl_global_cleanup();
   return (int)res;
 }

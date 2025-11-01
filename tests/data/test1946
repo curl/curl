@@ -10,7 +10,7 @@ curl_easy_header
 <data nocheck="yes">
 HTTP/1.1 302 OK
 Date: Thu, 01 Nov 2001 14:49:00 GMT
-Server:       test with trailing space     
+Server:       test with trailing space%repeat[5 x  ]%
 Content-Type: text/html
 Content-Length: 0
 Set-Cookie: onecookie=data;

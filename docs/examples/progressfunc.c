@@ -53,14 +53,19 @@ static int xferinfo(void *p,
      be used */
   if((curtime - myp->lastruntime) >= MINIMAL_PROGRESS_FUNCTIONALITY_INTERVAL) {
     myp->lastruntime = curtime;
-    fprintf(stderr, "TOTAL TIME: %lu.%06lu\r\n",
-            (unsigned long)(curtime / 1000000),
-            (unsigned long)(curtime % 1000000));
+    fprintf(stderr, "TOTAL TIME: %" CURL_FORMAT_CURL_OFF_T
+            ".%06" CURL_FORMAT_CURL_OFF_T "\r\n",
+            curtime / 1000000,
+            curtime % 1000000);
   }
 
-  fprintf(stderr, "UP: %lu of %lu  DOWN: %lu of %lu\r\n",
-          (unsigned long)ulnow, (unsigned long)ultotal,
-          (unsigned long)dlnow, (unsigned long)dltotal);
+  fprintf(stderr,
+          "UP: "
+          "%" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T "  "
+          "DOWN: "
+          "%" CURL_FORMAT_CURL_OFF_T " of %" CURL_FORMAT_CURL_OFF_T "\r\n",
+          ulnow, ultotal,
+          dlnow, dltotal);
 
   if(dlnow > STOP_DOWNLOAD_AFTER_THIS_MANY_BYTES)
     return 1;
@@ -70,11 +75,15 @@ static int xferinfo(void *p,
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct myprogress prog;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
+    struct myprogress prog;
+
     prog.lastruntime = 0;
     prog.curl = curl;
 
@@ -93,5 +102,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return (int)res;
 }

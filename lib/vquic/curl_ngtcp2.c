@@ -50,7 +50,6 @@
 #include "../url.h"
 #include "../uint-hash.h"
 #include "../sendf.h"
-#include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../cfilters.h"
@@ -300,6 +299,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+#if NGTCP2_VERSION_NUM < 0x011100
 struct cf_ngtcp2_sfind_ctx {
   curl_int64_t stream_id;
   struct h3_stream_ctx *stream;
@@ -328,6 +328,20 @@ cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx, curl_int64_t stream_id)
   Curl_uint_hash_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
   return fctx.stream;
 }
+#else
+static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
+                                                  curl_int64_t stream_id)
+{
+  struct Curl_easy *data =
+    ngtcp2_conn_get_stream_user_data(ctx->qconn, stream_id);
+
+  if(!data) {
+    return NULL;
+  }
+
+  return H3_STREAM_CTX(ctx, data);
+}
+#endif
 
 static void cf_ngtcp2_stream_close(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
@@ -443,17 +457,6 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
                           struct Curl_easy *data,
                           struct pkt_io_ctx *pktx)
 {
-#ifdef NGTCP2_SETTINGS_V2x
-static uint16_t mtu_probes[] = {
-  1472, /* what h2o offers */
-  1452, /* what Caddy offers */
-  1454 - 48, /* The well known MTU used by a domestic optic fiber
-                service in Japan. */
-  1390 - 48, /* Typical Tunneled MTU */
-  1280 - 48, /* IPv6 minimum MTU */
-  1492 - 48, /* PPPoE */
-};
-#endif
   ngtcp2_settings *s = &ctx->settings;
   ngtcp2_transport_params *t = &ctx->transport_params;
 
@@ -471,12 +474,11 @@ static uint16_t mtu_probes[] = {
   s->max_window = 100 * ctx->max_stream_window;
   s->max_stream_window = 10 * ctx->max_stream_window;
   s->no_pmtud = FALSE;
-#ifdef NGTCP2_SETTINGS_V2x
-  s->pmtud_probes = mtu_probes;
-  s->pmtud_probeslen = CURL_ARRAYSIZE(mtu_probes);
-  s->max_tx_udp_payload_size = 64 * 1024; /* mtu_probes[0]; */
+#ifdef NGTCP2_SETTINGS_V3
+  /* try ten times the ngtcp2 defaults here for problems with Caddy */
+  s->glitch_ratelim_burst = 1000 * 10;
+  s->glitch_ratelim_rate = 33 * 10;
 #endif
-
   t->initial_max_data = 10 * ctx->max_stream_window;
   t->initial_max_stream_data_bidi_local = ctx->max_stream_window;
   t->initial_max_stream_data_bidi_remote = ctx->max_stream_window;
@@ -511,6 +513,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 
   ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
                                                     data, &ctx->peer);
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(Curl_trc_is_verbose(data)) {
     const ngtcp2_transport_params *rp;
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
@@ -522,6 +525,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
                (curl_uint64_t)rp->max_udp_payload_size,
                (curl_uint64_t)rp->initial_max_data);
   }
+#endif
 
   /* In case of earlydata, where we simulate being connected, update
    * the handshake time when we really did connect */
@@ -1018,8 +1022,12 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
                                   struct h3_stream_ctx *stream,
                                   const char *buf, size_t blen, bool eos)
 {
-
-  /* If we already encountered an error, skip further writes */
+  /* This function returns no error intentionally, but records
+   * the result at the stream, skipping further writes once the
+   * `result` of the transfer is known.
+   * The stream is subsequently cancelled "higher up" in the filter's
+   * send/recv callbacks. Closing the stream here leads to SEND/RECV
+   * errors in other places that then overwrite the transfer's result. */
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
@@ -1033,8 +1041,12 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
                                struct h3_stream_ctx *stream,
                                const char *buf, size_t blen, bool eos)
 {
-
-  /* If we already encountered an error, skip further writes */
+  /* This function returns no error intentionally, but records
+   * the result at the stream, skipping further writes once the
+   * `result` of the transfer is known.
+   * The stream is subsequently cancelled "higher up" in the filter's
+   * send/recv callbacks. Closing the stream here leads to SEND/RECV
+   * errors in other places that then overwrite the transfer's result. */
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
     /* If the transfer write is errored, we do not want any more data */
@@ -1723,37 +1735,43 @@ denied:
   return result;
 }
 
-static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
-                         struct sockaddr_storage *remote_addr,
-                         socklen_t remote_addrlen, int ecn,
-                         void *userp)
+static CURLcode cf_ngtcp2_recv_pkts(const unsigned char *buf, size_t buflen,
+                                    size_t gso_size,
+                                    struct sockaddr_storage *remote_addr,
+                                    socklen_t remote_addrlen, int ecn,
+                                    void *userp)
 {
   struct pkt_io_ctx *pktx = userp;
   struct cf_ngtcp2_ctx *ctx = pktx->cf->ctx;
   ngtcp2_pkt_info pi;
   ngtcp2_path path;
+  size_t offset, pktlen;
   int rv;
 
   if(ecn)
-    CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, ecn=%x)",
-                pktlen, ecn);
+    CURL_TRC_CF(pktx->data, pktx->cf, "vquic_recv(len=%zu, gso=%zu, ecn=%x)",
+                buflen, gso_size, ecn);
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
                    (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
                    remote_addrlen);
   pi.ecn = (uint8_t)ecn;
 
-  rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi, pkt, pktlen, pktx->ts);
-  if(rv) {
-    CURL_TRC_CF(pktx->data, pktx->cf, "ingress, read_pkt -> %s (%d)",
-                ngtcp2_strerror(rv), rv);
-    cf_ngtcp2_err_set(pktx->cf, pktx->data, rv);
+  for(offset = 0; offset < buflen; offset += gso_size) {
+    pktlen = ((offset + gso_size) <= buflen) ? gso_size : (buflen - offset);
+    rv = ngtcp2_conn_read_pkt(ctx->qconn, &path, &pi,
+                              buf + offset, pktlen, pktx->ts);
+    if(rv) {
+      CURL_TRC_CF(pktx->data, pktx->cf, "ingress, read_pkt -> %s (%d)",
+                  ngtcp2_strerror(rv), rv);
+      cf_ngtcp2_err_set(pktx->cf, pktx->data, rv);
 
-    if(rv == NGTCP2_ERR_CRYPTO)
-      /* this is a "TLS problem", but a failed certificate verification
-         is a common reason for this */
-      return CURLE_PEER_FAILED_VERIFICATION;
-    return CURLE_RECV_ERROR;
+      if(rv == NGTCP2_ERR_CRYPTO)
+        /* this is a "TLS problem", but a failed certificate verification
+           is a common reason for this */
+        return CURLE_PEER_FAILED_VERIFICATION;
+      return CURLE_RECV_ERROR;
+    }
   }
   return CURLE_OK;
 }
@@ -1779,7 +1797,8 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  return vquic_recv_packets(cf, data, &ctx->q, 1000, recv_pkt, pktx);
+  return vquic_recv_packets(cf, data, &ctx->q, 1000,
+                            cf_ngtcp2_recv_pkts, pktx);
 }
 
 /**
@@ -1873,7 +1892,7 @@ static CURLcode read_pkt_to_send(void *userp,
       /* we add the amount of data bytes to the flow windows */
       int rv = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, ndatalen);
       if(rv) {
-        failf(x->data, "nghttp3_conn_add_write_offset returned error: %s\n",
+        failf(x->data, "nghttp3_conn_add_write_offset returned error: %s",
               nghttp3_strerror(rv));
         return CURLE_SEND_ERROR;
       }
@@ -2037,16 +2056,6 @@ static CURLcode cf_ngtcp2_cntrl(struct Curl_cfilter *cf,
       stream->upload_left = Curl_bufq_len(&stream->sendbuf) -
         stream->sendbuf_len_in_flight;
       (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
-    }
-    break;
-  }
-  case CF_CTRL_DATA_IDLE: {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    CURL_TRC_CF(data, cf, "data idle");
-    if(stream && !stream->closed) {
-      result = check_and_set_expiry(cf, data, NULL);
-      if(result)
-        CURL_TRC_CF(data, cf, "data idle, check_and_set_expiry -> %d", result);
     }
     break;
   }
@@ -2363,7 +2372,6 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
                                         void *user_data)
 {
   struct curl_tls_ctx *ctx = user_data;
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 
 #ifdef USE_OPENSSL
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
@@ -2380,7 +2388,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 #endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     /* Enable the session cache because it is a prerequisite for the
      * "new session" callback. Use the "external storage" mode to prevent
      * OpenSSL from creating an internal session cache.
@@ -2396,7 +2404,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_gnutls_configure_client_session failed");
     return CURLE_FAILED_INIT;
   }
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     gnutls_handshake_set_hook_function(ctx->gtls.session,
                                        GNUTLS_HANDSHAKE_ANY, GNUTLS_HOOK_POST,
                                        quic_gtls_handshake_cb);
@@ -2407,7 +2415,7 @@ static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
     return CURLE_FAILED_INIT;
   }
-  if(ssl_config->primary.cache_session) {
+  if(Curl_ssl_scache_use(cf, data)) {
     /* Register to get notified when a new session is received */
     wolfSSL_CTX_sess_set_new_cb(ctx->wssl.ssl_ctx, wssl_quic_new_session_cb);
   }

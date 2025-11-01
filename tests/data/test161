@@ -34,7 +34,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 <verify>
 # This doesn't send QUIT because of known bug:
 # "7.8 Premature transfer end but healthy control channel"
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

@@ -750,7 +750,6 @@ parse_cookie_header(struct Curl_easy *data,
   if(!co->name)
     return CERR_BAD;
 
-  data->req.setcookies++;
   return CERR_OK;
 }
 
@@ -1140,6 +1139,9 @@ Curl_cookie_add(struct Curl_easy *data,
   if(co->expires && (co->expires < ci->next_expiration))
     ci->next_expiration = co->expires;
 
+  if(httpheader)
+    data->req.setcookies++;
+
   return co;
 fail:
   freecookie(co);
@@ -1205,19 +1207,27 @@ struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
     ci->running = FALSE; /* this is not running, this is init */
     if(fp) {
       struct dynbuf buf;
+      bool eof = FALSE;
+      CURLcode result;
       curlx_dyn_init(&buf, MAX_COOKIE_LINE);
-      while(Curl_get_line(&buf, fp)) {
-        const char *lineptr = curlx_dyn_ptr(&buf);
-        bool headerline = FALSE;
-        if(checkprefix("Set-Cookie:", lineptr)) {
-          /* This is a cookie line, get it! */
-          lineptr += 11;
-          headerline = TRUE;
-          curlx_str_passblanks(&lineptr);
-        }
+      do {
+        result = Curl_get_line(&buf, fp, &eof);
+        if(!result) {
+          const char *lineptr = curlx_dyn_ptr(&buf);
+          bool headerline = FALSE;
+          if(checkprefix("Set-Cookie:", lineptr)) {
+            /* This is a cookie line, get it! */
+            lineptr += 11;
+            headerline = TRUE;
+            curlx_str_passblanks(&lineptr);
+          }
 
-        Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL, NULL, TRUE);
-      }
+          (void)Curl_cookie_add(data, ci, headerline, TRUE, lineptr, NULL,
+                                NULL, TRUE);
+          /* File reading cookie failures are not propagated back to the
+             caller because there is no way to do that */
+        }
+      } while(!result && !eof);
       curlx_dyn_free(&buf); /* free the line buffer */
 
       /*
@@ -1585,7 +1595,6 @@ static CURLcode cookie_output(struct Curl_easy *data,
     curlx_fclose(out);
     out = NULL;
     if(tempstore && Curl_rename(tempstore, filename)) {
-      unlink(tempstore);
       error = CURLE_WRITE_ERROR;
       goto error;
     }
@@ -1602,7 +1611,10 @@ static CURLcode cookie_output(struct Curl_easy *data,
 error:
   if(out && !use_stdout)
     curlx_fclose(out);
-  free(tempstore);
+  if(tempstore) {
+    unlink(tempstore);
+    free(tempstore);
+  }
   return error;
 }
 

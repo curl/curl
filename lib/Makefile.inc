@@ -160,7 +160,6 @@ LIB_CFILES =         \
   cookie.c           \
   cshutdn.c          \
   curl_addrinfo.c    \
-  curl_des.c         \
   curl_endian.c      \
   curl_fnmatch.c     \
   curl_fopen.c       \
@@ -290,7 +289,6 @@ LIB_HFILES =         \
   cookie.h           \
   curl_addrinfo.h    \
   curl_ctype.h       \
-  curl_des.h         \
   curl_endian.h      \
   curl_fnmatch.h     \
   curl_fopen.h       \

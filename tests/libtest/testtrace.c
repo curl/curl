@@ -81,7 +81,7 @@ void debug_dump(const char *timebuf, const char *text,
   fflush(stream);
 }
 
-int libtest_debug_cb(CURL *handle, curl_infotype type,
+int libtest_debug_cb(CURL *curl, curl_infotype type,
                      char *data, size_t size, void *userp)
 {
   struct libtest_trace_cfg *trace_cfg = userp;
@@ -89,7 +89,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   char timebuf[20];
   char *timestr;
 
-  (void)handle;
+  (void)curl;
 
   timebuf[0] = '\0';
   timestr = &timebuf[0];
@@ -157,7 +157,7 @@ static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 }
 
 /* callback for CURLOPT_DEBUGFUNCTION (used in client tests) */
-int cli_debug_cb(CURL *handle, curl_infotype type,
+int cli_debug_cb(CURL *curl, curl_infotype type,
                  char *data, size_t size, void *userp)
 {
   FILE *output = stderr;
@@ -166,11 +166,11 @@ int cli_debug_cb(CURL *handle, curl_infotype type,
   char idsbuf[60];
   curl_off_t xfer_id, conn_id;
 
-  (void)handle;
+  (void)curl;
   (void)userp;
 
-  if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
-    if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
+  if(!curl_easy_getinfo(curl, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
+    if(!curl_easy_getinfo(curl, CURLINFO_CONN_ID, &conn_id) &&
        conn_id >= 0) {
       curl_msnprintf(idsbuf, sizeof(idsbuf),
                      "[%" CURL_FORMAT_CURL_OFF_T "-"

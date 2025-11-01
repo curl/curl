@@ -134,6 +134,7 @@ my %warnings = (
     'EQUALSNULL'            => 'if/while comparison with == NULL',
     'ERRNOVAR'              => 'use of bare errno define',
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
+    'FIXME'                 => 'FIXME or TODO comment',
     'FOPENMODE'             => 'fopen needs a macro for the mode string',
     'INCLUDEDUP',           => 'same file is included again',
     'INDENTATION'           => 'wrong start column for code',
@@ -200,6 +201,10 @@ sub readlocalfile {
 
         # Lines starting with '#' are considered comments
         if(/^\s*(#.*)/) {
+            next;
+        }
+        # Skip empty lines
+        elsif($_ eq '') {
             next;
         }
         elsif(/^enable ([A-Z]+)$/) {

@@ -28,19 +28,19 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-static void my_lock(CURL *handle, curl_lock_data data,
+static void my_lock(CURL *curl, curl_lock_data data,
                     curl_lock_access laccess, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)laccess;
   (void)useptr;
   fprintf(stderr, "-> Mutex lock\n");
 }
 
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void my_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  (void)handle;
+  (void)curl;
   (void)data;
   (void)useptr;
   fprintf(stderr, "<- Mutex unlock\n");
@@ -50,6 +50,10 @@ int main(void)
 {
   CURLSH *share;
   int i;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   share = curl_share_init();
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
@@ -63,8 +67,6 @@ int main(void)
   for(i = 0; i < 3; i++) {
     CURL *curl = curl_easy_init();
     if(curl) {
-      CURLcode res;
-
       curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
       /* use the share object */
@@ -83,5 +85,6 @@ int main(void)
   }
 
   curl_share_cleanup(share);
-  return 0;
+  curl_global_cleanup();
+  return (int)res;
 }

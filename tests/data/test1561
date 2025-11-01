@@ -76,7 +76,7 @@ Cookies set over HTTP can't override secure ones
 </command>
 </client>
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
 User-Agent: curl/%VERSION

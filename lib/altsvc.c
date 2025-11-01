@@ -228,14 +228,18 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
   fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
+    bool eof = FALSE;
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_ALTSVC_LINE);
-    while(Curl_get_line(&buf, fp)) {
-      const char *lineptr = curlx_dyn_ptr(&buf);
-      curlx_str_passblanks(&lineptr);
-      if(curlx_str_single(&lineptr, '#'))
-        altsvc_add(asi, lineptr);
-    }
+    do {
+      result = Curl_get_line(&buf, fp, &eof);
+      if(!result) {
+        const char *lineptr = curlx_dyn_ptr(&buf);
+        curlx_str_passblanks(&lineptr);
+        if(curlx_str_single(&lineptr, '#'))
+          altsvc_add(asi, lineptr);
+      }
+    } while(!result && !eof);
     curlx_dyn_free(&buf); /* free the line buffer */
     curlx_fclose(fp);
   }

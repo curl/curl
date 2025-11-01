@@ -69,7 +69,7 @@ jobs:
   #        run: git ls-files -z '*.md' | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
   #
   #      - name: 'check prose'
-  #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC.md|DISTROS.md|curl_mprintf.md|CURLOPT_INTERFACE.md|interface.md' | xargs -0 proselint README
+  #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
   #
   #      # This is for CHECKSRC and files with aggressive exclamation mark needs
   #      - name: 'create second proselint config'
@@ -126,10 +126,10 @@ jobs:
         run: |
           source ~/venv/bin/activate
           # setup the custom wordlist
-          grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
+          grep -v '^#' .github/scripts/pyspelling.words > wordlist.txt
           aspell --version
           pyspelling --version
-          pyspelling --verbose --jobs 5 --config .github/scripts/spellcheck.yaml
+          pyspelling --verbose --jobs 5 --config .github/scripts/pyspelling.yaml
 
   badwords-synopsis:
     name: 'badwords, synopsis'

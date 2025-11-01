@@ -35,7 +35,6 @@
 #include "../urldata.h"
 #include "../hash.h"
 #include "../sendf.h"
-#include "../strdup.h"
 #include "../rand.h"
 #include "../multiif.h"
 #include "../cfilters.h"
@@ -1661,14 +1660,14 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
       ctx->q.last_io = curlx_now();
       rv = nghttp3_conn_add_write_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
-        failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
+        failf(data, "nghttp3_conn_add_write_offset returned error: %s",
               nghttp3_strerror(rv));
         result = CURLE_SEND_ERROR;
         goto out;
       }
       rv = nghttp3_conn_add_ack_offset(ctx->h3.conn, s->id, acked_len);
       if(rv && rv != NGHTTP3_ERR_STREAM_NOT_FOUND) {
-        failf(data, "nghttp3_conn_add_ack_offset returned error: %s\n",
+        failf(data, "nghttp3_conn_add_ack_offset returned error: %s",
               nghttp3_strerror(rv));
         result = CURLE_SEND_ERROR;
         goto out;
@@ -2204,14 +2203,6 @@ static CURLcode cf_osslq_cntrl(struct Curl_cfilter *cf,
       stream->upload_left = Curl_bufq_len(&stream->sendbuf) -
         stream->sendbuf_len_in_flight;
       (void)nghttp3_conn_resume_stream(ctx->h3.conn, stream->s.id);
-    }
-    break;
-  }
-  case CF_CTRL_DATA_IDLE: {
-    struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    CURL_TRC_CF(data, cf, "data idle");
-    if(stream && !stream->closed) {
-      result = check_and_set_expiry(cf, data);
     }
     break;
   }

@@ -29,7 +29,7 @@ jobs:
           APPVEYOR_REPOSITORY: ${{ github.event.repository.full_name }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${APPVEYOR_TARGET_URL}" | sed 's/\/project\//\/api\/projects\//' | xargs -t -n1 curl -s | \
+          echo "${APPVEYOR_TARGET_URL}" | sed 's/\/project\//\/api\/projects\//' | xargs -t -n1 curl -s -- | \
             jq -c '.build.jobs[] | {target_url: ($target_url + "/job/" + .jobId),
                                     context: (.name | sub("^(Environment: )?"; "AppVeyor / ")),
                                     state: (.status | sub("queued"; "pending")

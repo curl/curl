@@ -30,7 +30,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-26
+2
 </errorcode>
 </verify>
 </testcase>

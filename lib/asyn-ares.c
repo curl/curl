@@ -61,7 +61,6 @@
 #include "progress.h"
 #include "curlx/timediff.h"
 #include "httpsrr.h"
-#include "strdup.h"
 
 #include <ares.h>
 #include <ares_version.h> /* really old c-ares did not include this by
@@ -302,11 +301,13 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
 
   if(data->state.async.done) {
     *dns = data->state.async.dns;
-    return CURLE_OK;
+    return ares->result;
   }
 
-  if(Curl_ares_perform(ares->channel, 0) < 0)
-    return CURLE_UNRECOVERABLE_POLL;
+  if(Curl_ares_perform(ares->channel, 0) < 0) {
+    result = CURLE_UNRECOVERABLE_POLL;
+    goto out;
+  }
 
 #ifndef HAVE_CARES_GETADDRINFO
   /* Now that we have checked for any last minute results above, see if there
@@ -371,6 +372,9 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
                  result, *dns ? "" : "not ");
     async_ares_cleanup(data);
   }
+
+out:
+  ares->result = result;
   return result;
 }
 
@@ -512,8 +516,6 @@ static void async_ares_hostbyname_cb(void *user_data,
   (void)timeouts; /* ignored */
 
   if(ARES_EDESTRUCTION == status)
-    /* when this ares handle is getting destroyed, the 'arg' pointer may not
-       be valid so only defer it when we know the 'status' says its fine! */
     return;
 
   if(ARES_SUCCESS == status) {
@@ -793,7 +795,7 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
     /* The stack seems to be IPv6-enabled */
     /* areschannel is already setup in the Curl_open() function */
     CURL_TRC_DNS(data, "asyn-ares: fire off query for A");
-    ares_gethostbyname(ares->channel, hostname, PF_INET,
+    ares_gethostbyname(ares->channel, data->state.async.hostname, PF_INET,
                        async_ares_hostbyname_cb, data);
     CURL_TRC_DNS(data, "asyn-ares: fire off query for AAAA");
     ares->num_pending = 2;

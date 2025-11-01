@@ -47,7 +47,7 @@ WebSockets upgrade only
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nocheck="yes">
+<protocol crlf="yes" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

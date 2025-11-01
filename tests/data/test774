@@ -1,0 +1,25 @@
+<testcase>
+<info>
+<keywords>
+--config
+</keywords>
+</info>
+
+<client>
+<name>
+config file recursively including itself
+</name>
+<file name="%LOGDIR/cmd">
+--config %LOGDIR/cmd
+</file>
+<command>
+http://%HOSTIP:%HTTPPORT/ -K %LOGDIR/cmd
+</command>
+</client>
+
+<verify>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>

@@ -43,7 +43,7 @@ IMAP multiple connection authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user.one secret
 A003 SELECT %TESTNUMBER

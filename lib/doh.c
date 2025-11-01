@@ -458,6 +458,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 
   DEBUGASSERT(conn);
   DEBUGASSERT(!data->state.async.doh);
+  DEBUGASSERT(hostname && hostname[0]);
   if(data->state.async.doh)
     Curl_doh_cleanup(data);
 

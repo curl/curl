@@ -65,6 +65,12 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const char *tls_id,
                                 char **ppeer_key);
 
+/* Return if there is a session cache shall be used.
+ * An ssl session might not be configured or not available for
+ * "connect-only" transfers.
+ */
+bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data);
+
 /* Lock session cache mutex.
  * Call this before calling other Curl_ssl_*session* functions
  * Caller should unlock this mutex as soon as possible, as it may block

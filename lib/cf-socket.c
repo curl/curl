@@ -344,6 +344,8 @@ static CURLcode socket_open(struct Curl_easy *data,
                             struct Curl_sockaddr_ex *addr,
                             curl_socket_t *sockfd)
 {
+  char errbuf[STRERROR_LEN];
+
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   if(data->set.fopensocket) {
@@ -367,9 +369,22 @@ static CURLcode socket_open(struct Curl_easy *data,
     *sockfd = CURL_SOCKET(addr->family, addr->socktype, addr->protocol);
   }
 
-  if(*sockfd == CURL_SOCKET_BAD)
+  if(*sockfd == CURL_SOCKET_BAD) {
     /* no socket, no connection */
+    failf(data, "failed to open socket: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_COULDNT_CONNECT;
+  }
+
+#ifdef HAVE_FCNTL
+  if(fcntl(*sockfd, F_SETFD, FD_CLOEXEC) < 0) {
+    failf(data, "fcntl set CLOEXEC: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    close(*sockfd);
+    *sockfd = CURL_SOCKET_BAD;
+    return CURLE_COULDNT_CONNECT;
+  }
+#endif
 
 #if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(data->conn->scope_id && (addr->family == AF_INET6)) {
@@ -1031,10 +1046,12 @@ static void cf_socket_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   cf->ctx = NULL;
 }
 
-static CURLcode set_local_ip(struct Curl_cfilter *cf,
-                             struct Curl_easy *data)
+static void set_local_ip(struct Curl_cfilter *cf,
+                         struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
+  ctx->ip.local_ip[0] = 0;
+  ctx->ip.local_port = -1;
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&
@@ -1048,23 +1065,18 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
     memset(&ssloc, 0, sizeof(ssloc));
     if(getsockname(ctx->sock, (struct sockaddr*) &ssloc, &slen)) {
       int error = SOCKERRNO;
-      failf(data, "getsockname() failed with errno %d: %s",
+      infof(data, "getsockname() failed with errno %d: %s",
             error, curlx_strerror(error, buffer, sizeof(buffer)));
-      return CURLE_FAILED_INIT;
     }
-    if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
-                         ctx->ip.local_ip, &ctx->ip.local_port)) {
-      failf(data, "ssloc inet_ntop() failed with errno %d: %s",
+    else if(!Curl_addr2string((struct sockaddr*)&ssloc, slen,
+                              ctx->ip.local_ip, &ctx->ip.local_port)) {
+      infof(data, "ssloc inet_ntop() failed with errno %d: %s",
             errno, curlx_strerror(errno, buffer, sizeof(buffer)));
-      return CURLE_FAILED_INIT;
     }
   }
 #else
   (void)data;
-  ctx->ip.local_ip[0] = 0;
-  ctx->ip.local_port = -1;
 #endif
-  return CURLE_OK;
 }
 
 static CURLcode set_remote_ip(struct Curl_cfilter *cf,
@@ -2122,11 +2134,17 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_FTP_ACCEPT_FAILED;
   }
-
-  infof(data, "Connection accepted from server");
-#ifndef HAVE_ACCEPT4
-  (void)curlx_nonblock(s_accepted, TRUE); /* enable non-blocking */
+#if !defined(HAVE_ACCEPT4) && defined(HAVE_FCNTL)
+  if((fcntl(s_accepted, F_SETFD, FD_CLOEXEC) < 0) ||
+     (curlx_nonblock(s_accepted, TRUE) < 0)) {
+    failf(data, "fcntl set CLOEXEC/NONBLOCK: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    Curl_socket_close(data, cf->conn, s_accepted);
+    return CURLE_FTP_ACCEPT_FAILED;
+  }
 #endif
+  infof(data, "Connection accepted from server");
+
   /* Replace any filter on SECONDARY with one listening on this socket */
   ctx->listening = FALSE;
   ctx->accepted = TRUE;

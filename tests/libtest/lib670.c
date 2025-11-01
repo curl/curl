@@ -28,7 +28,7 @@
 #define PAUSE_TIME      5
 
 struct t670_ReadThis {
-  CURL *easy;
+  CURL *curl;
   time_t origin;
   int count;
 };
@@ -79,7 +79,7 @@ static int t670_xferinfo(void *clientp,
     }
 
     if(delta >= PAUSE_TIME)
-      curl_easy_pause(pooh->easy, CURLPAUSE_CONT);
+      curl_easy_pause(pooh->curl, CURLPAUSE_CONT);
   }
 
   return 0;
@@ -106,21 +106,21 @@ static CURLcode test_lib670(const char *URL)
 
   pooh.origin = (time_t) 0;
   pooh.count = 0;
-  pooh.easy = curl_easy_init();
+  pooh.curl = curl_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(pooh.easy, CURLOPT_URL, URL);
+  test_setopt(pooh.curl, CURLOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(pooh.easy, CURLOPT_VERBOSE, 1L);
+  test_setopt(pooh.curl, CURLOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(pooh.easy, CURLOPT_HEADER, 1L);
+  test_setopt(pooh.curl, CURLOPT_HEADER, 1L);
 
   if(testnum == 670 || testnum == 671) {
     curl_mimepart *part;
     /* Build the mime tree. */
-    mime = curl_mime_init(pooh.easy);
+    mime = curl_mime_init(pooh.curl);
     part = curl_mime_addpart(mime);
     res = curl_mime_name(part, testname);
     if(res != CURLE_OK) {
@@ -135,7 +135,7 @@ static CURLcode test_lib670(const char *URL)
 
     /* Bind mime data to its easy handle. */
     if(res == CURLE_OK)
-      test_setopt(pooh.easy, CURLOPT_MIMEPOST, mime);
+      test_setopt(pooh.curl, CURLOPT_MIMEPOST, mime);
   }
   else {
     struct curl_httppost *lastptr = NULL;
@@ -152,10 +152,10 @@ static CURLcode test_lib670(const char *URL)
     }
 
     /* We want to use our own read function. */
-    test_setopt(pooh.easy, CURLOPT_READFUNCTION, t670_read_cb);
+    test_setopt(pooh.curl, CURLOPT_READFUNCTION, t670_read_cb);
 
     /* Send a multi-part formpost. */
-    test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
+    test_setopt(pooh.curl, CURLOPT_HTTPPOST, formpost);
   }
 
   if(testnum == 670 || testnum == 672) {
@@ -163,7 +163,7 @@ static CURLcode test_lib670(const char *URL)
     CURLM *multi;
     /* Use the multi interface. */
     multi = curl_multi_init();
-    mres = curl_multi_add_handle(multi, pooh.easy);
+    mres = curl_multi_add_handle(multi, pooh.curl);
     while(!mres) {
       struct timeval timeout;
       int rc = 0;
@@ -187,7 +187,7 @@ static CURLcode test_lib670(const char *URL)
         }
 
         if(delta >= PAUSE_TIME)
-          curl_easy_pause(pooh.easy, CURLPAUSE_CONT);
+          curl_easy_pause(pooh.curl, CURLPAUSE_CONT);
       }
 
       FD_ZERO(&fdread);
@@ -222,19 +222,19 @@ static CURLcode test_lib670(const char *URL)
         }
       }
 
-    curl_multi_remove_handle(multi, pooh.easy);
+    curl_multi_remove_handle(multi, pooh.curl);
     curl_multi_cleanup(multi);
   }
   else {
     /* Use the easy interface. */
-    test_setopt(pooh.easy, CURLOPT_XFERINFODATA, &pooh);
-    test_setopt(pooh.easy, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
-    test_setopt(pooh.easy, CURLOPT_NOPROGRESS, 0L);
-    res = curl_easy_perform(pooh.easy);
+    test_setopt(pooh.curl, CURLOPT_XFERINFODATA, &pooh);
+    test_setopt(pooh.curl, CURLOPT_XFERINFOFUNCTION, t670_xferinfo);
+    test_setopt(pooh.curl, CURLOPT_NOPROGRESS, 0L);
+    res = curl_easy_perform(pooh.curl);
   }
 
 test_cleanup:
-  curl_easy_cleanup(pooh.easy);
+  curl_easy_cleanup(pooh.curl);
 
   if(testnum == 670 || testnum == 671) {
     curl_mime_free(mime);

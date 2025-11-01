@@ -52,7 +52,7 @@ upload
 
 works?
 </upload>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

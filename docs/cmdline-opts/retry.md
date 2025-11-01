@@ -20,8 +20,8 @@ Example:
 If a transient error is returned when curl tries to perform a transfer, it
 retries this number of times before giving up. Setting the number to 0 makes
 curl do no retries (which is the default). Transient error means either: a
-timeout, an FTP 4xx response code or an HTTP 408, 429, 500, 502, 503 or 504
-response code.
+timeout, an FTP 4xx response code or an HTTP 408, 429, 500, 502, 503, 504, 522
+or 524 response code.
 
 When curl is about to retry a transfer, it first waits one second and then for
 all forthcoming retries it doubles the waiting time until it reaches 10

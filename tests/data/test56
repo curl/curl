@@ -44,7 +44,7 @@ header "Transfer-Encoding: chunked"
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 POST /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: %repeat[99999 x a]%

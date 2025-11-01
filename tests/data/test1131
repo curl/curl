@@ -75,7 +75,7 @@ Content-Type: text/html
 
 FAILURE2
 </stdout>
-<protocol>
+<protocol crlf="yes">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

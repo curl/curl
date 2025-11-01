@@ -33,7 +33,7 @@ Gopher query
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 /the/search/engine	query succeeded/%TESTNUMBER
 </protocol>
 </verify>

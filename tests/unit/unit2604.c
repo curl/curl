@@ -68,6 +68,10 @@ static CURLcode test_unit2604(const char *arg)
     { "\"\" c", "", "", "", CURLE_QUOTE_ERROR},
     { "foo\"", "foo\"", "", "/", CURLE_OK},
     { "foo \"", "foo", "\"", "/", CURLE_OK},
+    { "   \t\t   \t  ", "", "", "/", CURLE_QUOTE_ERROR},
+    { "              ", "", "", "/", CURLE_QUOTE_ERROR},
+    { "", "", "", "/", CURLE_QUOTE_ERROR},
+    { "       \r \n  ", "\r", "\n  ", "/", CURLE_OK},
     { NULL, NULL, NULL, NULL, CURLE_OK }
   };
 

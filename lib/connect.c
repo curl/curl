@@ -123,7 +123,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
      before the connect timeout expires and we must acknowledge whichever
      timeout that is reached first. The total timeout is set per entire
      operation, while the connect timeout is set per connect. */
-  if(data->set.timeout <= 0 && !duringconnect)
+  if((!data->set.timeout || data->set.connect_only) && !duringconnect)
     return 0; /* no timeout in place or checked, return "no limit" */
 
   if(!nowp) {
@@ -131,9 +131,9 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
     nowp = &now;
   }
 
-  if(data->set.timeout > 0) {
+  if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
-                  curlx_timediff(*nowp, data->progress.t_startop);
+      curlx_timediff(*nowp, data->progress.t_startop);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if(!duringconnect)
@@ -158,20 +158,21 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
                          int timeout_ms, struct curltime *nowp)
 {
   struct curltime now;
+  struct connectdata *conn = data->conn;
 
-  DEBUGASSERT(data->conn);
+  DEBUGASSERT(conn);
   if(!nowp) {
     now = curlx_now();
     nowp = &now;
   }
-  data->conn->shutdown.start[sockindex] = *nowp;
-  data->conn->shutdown.timeout_ms = (timeout_ms > 0) ?
+  conn->shutdown.start[sockindex] = *nowp;
+  conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
   /* Set a timer, unless we operate on the admin handle */
-  if(data->mid && (data->conn->shutdown.timeout_ms > 0))
-    Curl_expire_ex(data, nowp, data->conn->shutdown.timeout_ms,
+  if(data->mid)
+    Curl_expire_ex(data, nowp, conn->shutdown.timeout_ms,
                    EXPIRE_SHUTDOWN);
 }
 

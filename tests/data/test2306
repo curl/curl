@@ -24,7 +24,7 @@ Funny-head: yesyes
 </data>
 <data2 nocheck="yes">
 HTTP/1.1 200 OK swsclose
-	Access-Control-Allow-Origin: *
+%tab%Access-Control-Allow-Origin: *
 Connection: Keep-Alive
 Content-Type: text/html; charset=utf-8
 Date: Wed, 10 May 2023 14:58:08 GMT
@@ -54,7 +54,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

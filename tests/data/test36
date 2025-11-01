@@ -52,7 +52,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <errorcode>
 56
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
