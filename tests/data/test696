@@ -55,10 +55,10 @@ Connection: close
 -foo-
 </stdout>
 <protocol crlf="yes">
-GET /696 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 
-GET /696 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 
 </protocol>
