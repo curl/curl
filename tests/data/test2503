@@ -49,7 +49,7 @@ HTTP/3 header-api
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout crlf="yes">
+<stdout crlf="headers">
 HTTP/3 200%spc%
 date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 6

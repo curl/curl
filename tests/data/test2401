@@ -46,7 +46,7 @@ HTTP/2 POST over HTTPS
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout crlf="yes">
+<stdout crlf="headers">
 HTTP/2 201%spc%
 date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 0

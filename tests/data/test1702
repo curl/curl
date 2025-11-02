@@ -56,7 +56,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout crlf="yes">
+<stdout crlf="headers">
 HTTP/1.1 101 Switching Protocols
 Connection: Upgrade
 Upgrade: h2c
