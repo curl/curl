@@ -762,7 +762,6 @@ sub singletest_prepare {
                 logmsg " $testnum: IGNORED: Section client=>file has no name attribute\n";
                 return -1;
             }
-            my $fileContent = join('', @inputfile);
 
             # make directories if needed
             my $path = dirname($filename);
@@ -779,11 +778,15 @@ sub singletest_prepare {
             }
             if(open(my $outfile, ">", "$filename")) {
                 binmode $outfile; # for crapage systems, use binary
+
                 if($fileattr{'nonewline'}) {
                     # cut off the final newline
-                    chomp($fileContent);
+                    chomp($inputfile[-1]);
                 }
-                print $outfile $fileContent;
+                if($fileattr{'crlf'}) {
+                    subnewlines(1, \$_) for @inputfile;
+                }
+                print $outfile join('', @inputfile);
                 close($outfile);
             } else {
                 logmsg "ERROR: cannot write $filename\n";

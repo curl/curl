@@ -616,12 +616,15 @@ parameter is the not negative integer number of seconds for the delay. This
 'delay' attribute is intended for specific test cases, and normally not
 needed.
 
-### `<file name="%LOGDIR/filename" [nonewline="yes"]>`
+### `<file name="%LOGDIR/filename" [nonewline="yes"][crlf="yes"]>`
 This creates the named file with this content before the test case is run,
 which is useful if the test case needs a file to act on.
 
 If `nonewline="yes"` is used, the created file gets the final newline stripped
 off.
+
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
 
 ### `<file1>`
 1 to 4 can be appended to 'file' to create more files.
