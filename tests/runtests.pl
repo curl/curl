@@ -2454,7 +2454,7 @@ while(@ARGV) {
         $jobs=1;
         my $xtra = $1;
         if($xtra =~ s/(\d+)$//) {
-            $jobs = $1;
+            my $jobs_ignore = $1;
         }
     }
     elsif($ARGV[0] eq "-k") {
