@@ -1306,7 +1306,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(0, \$_) for @validstdout;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @validstdout;
+            }
+            else {
+                subnewlines(1, \$_) for @validstdout;
+            }
         }
 
         $res = compare($runnerid, $testnum, $testname, "stdout", \@actual, \@validstdout);

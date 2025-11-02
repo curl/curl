@@ -705,7 +705,7 @@ test.
 If `nonewline` is set, we cut off the trailing newline of this given data
 before comparing with the one actually received by the client
 
-### `<stdout [mode="text"] [nonewline="yes"] [crlf="yes"] [loadfile="filename"]>`
+### `<stdout [mode="text"] [nonewline="yes"] [crlf="yes|headers"] [loadfile="filename"]>`
 This verifies that this data was passed to stdout.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
@@ -716,6 +716,10 @@ before comparing with the one actually received by the client
 
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
+
+`crlf=headers` forces *header* newlines to become CRLF even if not written so
+in the source file. Note that this makes runtests.pl parse and "guess" what is
+a header and what is not in order to apply the CRLF line endings appropriately.
 
 `loadfile="filename"` makes loading the data from an external file.
 
