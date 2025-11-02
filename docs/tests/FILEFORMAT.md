@@ -632,11 +632,14 @@ off.
 
 ### `<file4>`
 
-### `<stdin [nonewline="yes"]>`
+### `<stdin [nonewline="yes"][crlf="yes"]>`
 Pass this given data on stdin to the tool.
 
 If `nonewline` is set, we cut off the trailing newline of this given data
 before comparing with the one actually received by the client
+
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
 
 ## `<disable>`
 

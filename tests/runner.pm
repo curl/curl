@@ -951,6 +951,10 @@ sub singletest_run {
             chomp($stdintest[-1]);
         }
 
+        if($hash{'crlf'}) {
+            subnewlines(1, \$_) for @stdintest;
+        }
+
         writearray($stdinfile, \@stdintest);
 
         $cmdargs .= " <$stdinfile";
