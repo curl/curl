@@ -59,8 +59,8 @@ again:
     size_t nwritten = 0, nread = 0;
 
     curl_msnprintf(request, sizeof(request),
-      "GET /%d HTTP/1.1\r\n"
-      "Host: ninja\r\n\r\n", testnum);
+                   "GET /%d HTTP/1.1\r\n"
+                   "Host: ninja\r\n\r\n", testnum);
 
     sbuf = request;
     sblen = strlen(request);
