@@ -22,7 +22,7 @@ Content-Type: text/html; charset=iso-8859-1
 Content-Length: 0
 
 </data>
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 A OK
 Server: Microsoft-IIS/6.0
 Content-Type: text/html; charset=iso-8859-1
@@ -30,7 +30,7 @@ Content-Length: 3
 
 ok
 </data1>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 100 Continue
 Server: Microsoft-IIS/5.0
 Date: Sun, 03 Apr 2005 14:57:45 GMT

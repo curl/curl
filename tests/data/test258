@@ -24,7 +24,7 @@ Proxy-Connection: close
 Content-Length: 0
 
 </data>
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 A OK
 Server: Microsoft-IIS/6.0
 Content-Type: text/html; charset=iso-8859-1

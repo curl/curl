@@ -31,7 +31,7 @@ Transfer-Encoding: chunked
 
 </connect>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Content-Length: 123
 Transfer-Encoding: chunked

@@ -17,7 +17,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Location: this should be ignored
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -25,7 +25,7 @@ Content-Length: 5
 
 body
 </data2>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 302 OK
 Location: http://example.net/tes t case=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
