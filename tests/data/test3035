@@ -15,7 +15,7 @@ retry
 #
 # the first chunk
 #
-<data nocheck="yes" nonewline="yes">
+<data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 200 OK swsbounce swsclose
 Accept-Ranges: bytes
 Content-Type: text/html
@@ -27,7 +27,7 @@ abcde
 #
 # the second chunk
 #
-<data1 nocheck="yes" nonewline="yes">
+<data1 crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 206 Partial Content swsbounce swsclose
 Content-Type: text/html
 Content-Length: 21
@@ -39,7 +39,7 @@ fghijk
 #
 # some nonsense that curl should ignore as unresumable
 #
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 404 Not Found swsbounce
 Content-Type: text/html
 Content-Length: 5
@@ -50,7 +50,7 @@ body
 #
 # some more nonsense that curl should ignore as unresumable
 #
-<data3 nocheck="yes">
+<data3 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsbounce
 Accept-Ranges: bytes
 Content-Type: text/html

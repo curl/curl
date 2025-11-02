@@ -7,7 +7,7 @@ WebSockets
 
 #
 <reply>
-<data nocheck="yes" nonewline="yes">
+<data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 200 Oblivious
 Server: test-server/fake
 Something: else

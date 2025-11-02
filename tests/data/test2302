@@ -8,7 +8,7 @@ WebSockets
 #
 # Sends a PING + a 5 byte hello TEXT
 <reply>
-<data nocheck="yes" nonewline="yes">
+<data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
 Server: test-server/fake
 Upgrade: websocket

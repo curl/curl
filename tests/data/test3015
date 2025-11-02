@@ -12,7 +12,7 @@ chunked Transfer-Encoding
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 OK
 Date: Sun, 13 Sep 2020 15:00 GMT
 Content-Length: 8

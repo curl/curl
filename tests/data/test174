@@ -8,7 +8,7 @@ HTTP POST
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 foobar swsclose
 Server: Microsoft-IIS/6.0
 Authentication-Info: Passport1.4 tname=MSPAuth,tname=MSPProf,tname=MSPConsent,tname=MSPSecAuth
