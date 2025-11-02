@@ -1456,7 +1456,12 @@ sub singletest_check {
                     chomp($replycheckpart[-1]);
                 }
                 if($replycheckpartattr{'crlf'}) {
-                    subnewlines(0, \$_) for @replycheckpart;
+                    if($replycheckpartattr{'crlf'} eq "headers") {
+                        subnewlines(0, \$_) for @replycheckpart;
+                    }
+                    else {
+                        subnewlines(1, \$_) for @replycheckpart;
+                    }
                 }
                 push(@reply, @replycheckpart);
             }
@@ -1477,7 +1482,12 @@ sub singletest_check {
             normalize_text(\@reply);
         }
         if($replyattr{'crlf'}) {
-            subnewlines(0, \$_) for @reply;
+            if($replyattr{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @reply;
+            }
+            else {
+                subnewlines(1, \$_) for @reply;
+            }
         }
     }
 
