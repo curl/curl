@@ -281,7 +281,7 @@ that there has been a CWD done first to a directory named `test-[NUM]` where
 `NUM` is the test case number. Otherwise the ftp server cannot know from which
 test file to load the list content.
 
-### `<dataNUM [crlf="yes"]>`
+### `<dataNUM [crlf="yes|headers"]>`
 
 Send back this contents instead of the `<data>` one. The `NUM` is set by:
 
@@ -308,7 +308,7 @@ a connect prefix.
 ### `<socks>`
 Address type and address details as logged by the SOCKS proxy.
 
-### `<datacheck [mode="text"] [nonewline="yes"] [crlf="yes"]>`
+### `<datacheck [mode="text"] [nonewline="yes"] [crlf="yes|headers"]>`
 if the data is sent but this is what should be checked afterwards. If
 `nonewline=yes` is set, runtests cuts off the trailing newline from the data
 before comparing with the one actually received by the client.
@@ -316,7 +316,7 @@ before comparing with the one actually received by the client.
 Use the `mode="text"` attribute if the output is in text mode on platforms
 that have a text/binary difference.
 
-### `<datacheckNUM [nonewline="yes"] [mode="text"] [crlf="yes"]>`
+### `<datacheckNUM [nonewline="yes"] [mode="text"] [crlf="yes|headers"]>`
 The contents of numbered `datacheck` sections are appended to the non-numbered
 one.
 
