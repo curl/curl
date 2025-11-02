@@ -50,7 +50,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/out%TESTNUMBER">
+<file name="%LOGDIR/out%TESTNUMBER" crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/
@@ -59,7 +59,7 @@ Server: test-server/
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
-Connection:                                              
+Connection:%repeat[46 x  ]%
    close
 
 </file>
