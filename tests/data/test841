@@ -18,7 +18,7 @@ body
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 * 123 FETCH (BODY[1] {70}
 body
 
