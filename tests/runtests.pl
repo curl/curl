@@ -1403,11 +1403,13 @@ sub singletest_check {
             }
         }
 
-        if($hash{'crlf'} eq "headers") {
-            subnewlines(0, \$_) for @protocol;
-        }
-        elsif($hash{'crlf'}) {
-            subnewlines(1, \$_) for @protocol;
+        if($hash{'crlf'}) {
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @protocol;
+            }
+            else {
+                subnewlines(1, \$_) for @protocol;
+            }
         }
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
