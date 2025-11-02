@@ -10,7 +10,7 @@ ANNOUNCE
 
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Cseq: 1
@@ -29,13 +29,13 @@ s=rtspd SDP
 i=A fake SDP reply
 u=http://www.curl.example.com/fakesdp.ps
 </data2>
-<data3>
+<data3 crlf="headers">
 RTSP/1.0 200 Okie Dokie
 Server: RTSPD/libcurl-test
 Cseq: 3
 
 </data3>
-<data4>
+<data4 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 4

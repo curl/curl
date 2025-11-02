@@ -9,14 +9,14 @@ globbing
 </info>
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 15
 
 the number one
 </data1>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16
