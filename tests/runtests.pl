@@ -1623,7 +1623,12 @@ sub singletest_check {
                 normalize_text(\@generated);
             }
             if($hash{'crlf'}) {
-                subnewlines(0, \$_) for @outfile;
+                if($hash{'crlf'} eq "headers") {
+                    subnewlines(0, \$_) for @outfile;
+                }
+                else {
+                    subnewlines(1, \$_) for @outfile;
+                }
             }
 
             for my $strip (@stripfilepar) {

@@ -727,10 +727,17 @@ that the set limits are not exceeded. Supported limits:
     Allocations: [number of allocation calls]
     Maximum allocated: [maximum concurrent memory allocated]
 
-### `<file name="%LOGDIR/filename" [mode="text"]>`
+### `<file name="%LOGDIR/filename" [mode="text"] [crlf="yes|headers"]>`
 The file's contents must be identical to this after the test is complete. Use
 the mode="text" attribute if the output is in text mode on platforms that have
 a text/binary difference.
+
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
+
+`crlf=headers` forces *header* newlines to become CRLF even if not written so
+in the source file. Note that this makes runtests.pl parse and "guess" what is
+a header and what is not in order to apply the CRLF line endings appropriately.
 
 ### `<file1>`
 1 to 4 can be appended to 'file' to compare more files.
