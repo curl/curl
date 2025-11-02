@@ -329,6 +329,8 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
     head = tmp_head;
     *date_header = curl_maprintf("%s: %s\r\n", date_hdr_key, timestamp);
+    if(!*date_header)
+      goto fail;
   }
   else {
     const char *value;
