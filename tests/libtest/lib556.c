@@ -53,7 +53,7 @@ again:
 
   if(!res) {
     /* we are connected, now get an HTTP document the raw way */
-    char request[256];
+    char request[64];
     const char *sbuf;
     size_t sblen;
     size_t nwritten = 0, nread = 0;
