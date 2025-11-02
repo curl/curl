@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3533
+ Contributors:                 3534
 
 This release includes the following changes:
 
@@ -115,6 +115,7 @@ This release includes the following bugfixes:
  o docs/libcurl: use lowercase must [5]
  o docs: expand on quoting rules for file names in SFTP quote [300]
  o docs: fix/tidy code fences [87]
+ o doh: cleanup resources on error paths [434]
  o doswin: CloseHandle the thread on shutdown [307]
  o easy_getinfo: check magic, Curl_close safety [3]
  o ECH.md: make OpenSSL branch clone instructions work [430]
@@ -171,8 +172,10 @@ This release includes the following bugfixes:
  o http: make Content-Length parser more WHATWG [183]
  o http: only accept ';' as a separator for custom headers [407]
  o http: return error for a second Location: header [393]
+ o http_aws_sigv4: check the return value of curl_maprintf() [381]
  o http_proxy: fix adding custom proxy headers [424]
  o httpsrr: free old pointers when storing new [57]
+ o httpsrr: send HTTPS query to the right target [435]
  o imap: fix custom FETCH commands to handle literal responses [441]
  o imap: parse and use UIDVALIDITY as a number [420]
  o imap: treat capabilities case insensitively [345]
@@ -276,6 +279,7 @@ This release includes the following bugfixes:
  o openssl: better return code checks when logging cert data [342]
  o openssl: call SSL_get_error() with proper error [207]
  o openssl: clear retry flag on x509 error [130]
+ o openssl: combine all the x509-store flags [451]
  o openssl: fail if more than MAX_ALLOWED_CERT_AMOUNT certs [339]
  o openssl: fail the transfer if ossl_certchain() fails [23]
  o openssl: fix build for v1.0.2 [225]
@@ -317,6 +321,7 @@ This release includes the following bugfixes:
  o schannel: fix memory leak [363]
  o schannel: handle Curl_conn_cf_send() errors better [352]
  o schannel: lower the maximum allowed time to block to 7 seconds [333]
+ o schannel: properly close the certfile on error [450]
  o schannel_verify: do not call infof with an appended \n [371]
  o schannel_verify: fix mem-leak in Curl_verify_host [208]
  o schannel_verify: use more human friendly error messages [96]
@@ -352,6 +357,7 @@ This release includes the following bugfixes:
  o socks_sspi: restore non-blocking socket on error paths [48]
  o socks_sspi: use the correct free function [331]
  o socksd: remove --bindonly mention, there is no such option [305]
+ o spelling: fix new finds by typos-cli 1.39.0 [454]
  o src/var: remove dead code [369]
  o ssl-session-cache: check use on config and availability [448]
  o ssl-sessions.md: mark option experimental [12]
@@ -369,6 +375,7 @@ This release includes the following bugfixes:
  o telnet: send failure logged but not returned [175]
  o telnet: use pointer[0] for "unknown" option instead of pointer[i] [217]
  o test1100: fix missing `<protocol>` section [432]
+ o tests/libtest/cli*: fix init/deinit, leaks, and more [455]
  o tests/server: drop pointless memory allocation overrides [219]
  o tests/server: drop unsafe open() override in signal handler (Windows) [151]
  o tftp: check and act on tftp_set_timeouts() returning error [38]
@@ -432,6 +439,7 @@ This release includes the following bugfixes:
  o vquic: sending non-gso packets fix for EAGAIN [265]
  o vtls: alpn setting, check proto parameter [134]
  o vtls: drop duplicate `CURL_SHA256_DIGEST_LENGTH` definition [387]
+ o vtls: properly handle SSL shutdown timeout [433]
  o vtls: remove call to PKCS12_PBE_add() [408]
  o vtls: unify the error handling in ssl_cf_connect(). [413]
  o vtls_int.h: clarify data_pending [124]
@@ -478,9 +486,9 @@ advice from friends like these:
   Christian Schmitz, curl.stunt430, Dalei, Dan Fandrich, Daniel Stenberg,
   Daniel Terhorst-North, dependabot[bot], divinity76 on github,
   Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
-  Evgeny Grin (Karlson2k), fds242 on github, Harry Sintonen, Howard Chu,
-  Ignat Loskutov, Jakub Stasiak, James Fuller, Javier Blazquez, Jicea,
-  jmaggard10 on github, Jochen Sprickerhof, Johannes Schindelin,
+  Evgeny Grin (Karlson2k), fds242 on github, Gunni on github, Harry Sintonen,
+  Howard Chu, Ignat Loskutov, Jakub Stasiak, James Fuller, Javier Blazquez,
+  Jicea, jmaggard10 on github, Jochen Sprickerhof, Johannes Schindelin,
   Jonathan Cardoso Machado, Joseph Birr-Pixton, Joshua Rogers,
   kapsiR on github, kuchara on github, madoe on github, Marc Aldorasi,
   Marcel Raad, Michael Osipov, Michał Petryka, Mitchell Blank Jr,
@@ -490,7 +498,7 @@ advice from friends like these:
   Tatsuhiro Tsujikawa, TheBitBrine, Theo Buehler, Tim Becker, tkzv on github,
   Viktor Szakatas, Viktor Szakats, WangDaLei on github, Xiaoke Wang,
   Yedaya Katsman, 包布丁
-  (68 contributors)
+  (69 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -874,6 +882,7 @@ References to bug reports and discussions on issues:
  [378] = https://curl.se/bug/?i=19169
  [379] = https://curl.se/bug/?i=19163
  [380] = https://curl.se/bug/?i=19168
+ [381] = https://curl.se/bug/?i=9328
  [382] = https://curl.se/bug/?i=19170
  [383] = https://curl.se/bug/?i=19226
  [384] = https://curl.se/bug/?i=19225
@@ -922,6 +931,9 @@ References to bug reports and discussions on issues:
  [429] = https://curl.se/bug/?i=19167
  [430] = https://curl.se/bug/?i=19237
  [432] = https://curl.se/bug/?i=19288
+ [433] = https://curl.se/bug/?i=19323
+ [434] = https://curl.se/bug/?i=19310
+ [435] = https://curl.se/bug/?i=19301
  [438] = https://curl.se/bug/?i=19271
  [439] = https://curl.se/bug/?i=19278
  [441] = https://curl.se/bug/?i=18847
@@ -931,3 +943,7 @@ References to bug reports and discussions on issues:
  [445] = https://curl.se/bug/?i=19240
  [448] = https://curl.se/bug/?i=18983
  [449] = https://curl.se/bug/?i=19148
+ [450] = https://curl.se/bug/?i=19304
+ [451] = https://curl.se/bug/?i=19306
+ [454] = https://curl.se/bug/?i=19312
+ [455] = https://curl.se/bug/?i=19309
