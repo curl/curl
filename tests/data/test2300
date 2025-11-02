@@ -8,7 +8,7 @@ WebSockets
 #
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 101 Switching to WebSockets swsclose
 Server: test-server/fake
 Upgrade: websocket

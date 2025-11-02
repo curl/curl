@@ -10,7 +10,7 @@ flaky
 </info>
 
 <reply>
-<data1001 crlf="yes" nocheck="yes">
+<data1001 crlf="headers" nocheck="yes">
 HTTP/1.1 401 Authorization Required swsclose
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAAAAAAAAAAABAIgAAQIDBAUGBwgAAAAAAAAAAP////8wAAAAAgD3/0F%repeat[21841 x BQUF]%BQUEAAAAA
 Content-Length: 0

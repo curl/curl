@@ -10,7 +10,7 @@ OPTIONS
 
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 1

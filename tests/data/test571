@@ -14,7 +14,7 @@ RTP
 
 # Server-side
 <reply>
-<data1 crlf="yes">
+<data1 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: asdf
@@ -23,7 +23,7 @@ Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 
 </data1>
 
-<data2 crlf="yes">
+<data2 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 2
@@ -41,7 +41,7 @@ Content-Type: fake/evil
 $99
 </data3>
 
-<data4 crlf="yes">
+<data4 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: asdf

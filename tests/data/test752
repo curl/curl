@@ -11,7 +11,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 404 nopes
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -26,7 +26,7 @@ Funny-head: yesyes
 -foo-
 </data>
 
-<datacheck crlf="yes">
+<datacheck crlf="headers">
 HTTP/1.1 404 nopes
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

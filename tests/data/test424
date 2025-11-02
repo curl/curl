@@ -9,7 +9,7 @@
 #
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -23,7 +23,7 @@ Funny-head: yesyes
 Location: http://anotherhost.example:2023/%TESTNUMBER0002?moo.html
 
 </data>
-<data2 crlf="yes" nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
