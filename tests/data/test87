@@ -50,7 +50,7 @@ urlglob with out of range -o #[num] usage
 # survives
 #
 <verify>
-<file name="%LOGDIR/dumpit%TESTNUMBER-#2.dump">
+<file name="%LOGDIR/dumpit%TESTNUMBER-#2.dump" crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 16
