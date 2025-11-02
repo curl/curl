@@ -49,7 +49,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file crlf="yes" name="%LOGDIR/curl_response">
+<file name="%LOGDIR/curl_response" crlf="headers">
 -foo-
 </file>
 </verify>
