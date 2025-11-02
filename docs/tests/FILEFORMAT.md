@@ -686,7 +686,7 @@ test.
 in the source file. Note that this makes runtests.pl parse and "guess" what is
 a header and what is not in order to apply the CRLF line endings appropriately.
 
-### `<proxy [nonewline="yes"][crlf="yes"]>`
+### `<proxy [nonewline="yes"][crlf="yes|headers"]>`
 
 The protocol dump curl should transmit to an HTTP proxy (when the http-proxy
 server is used), if `nonewline` is set, we cut off the trailing newline of

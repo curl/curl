@@ -1570,7 +1570,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(0, \$_) for @proxyprot;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @proxyprot;
+            }
+            else {
+                subnewlines(1, \$_) for @proxyprot;
+            }
         }
 
         $res = compare($runnerid, $testnum, $testname, "proxy", \@out, \@proxyprot);

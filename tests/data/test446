@@ -58,7 +58,7 @@ HSTS with two URLs
 
 <verify>
 # we let it CONNECT to the server to confirm HSTS but deny from there
-<proxy crlf="yes">
+<proxy crlf="headers">
 GET http://this.hsts.example./%TESTNUMBER HTTP/1.1
 Host: this.hsts.example.
 User-Agent: curl/%VERSION
