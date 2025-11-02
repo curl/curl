@@ -43,7 +43,7 @@ SIZE %TESTNUMBER
 REST 0
 QUIT
 </protocol>
-<stdout>
+<stdout crlf="yes">
 Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT
 Content-Length: 42
 Accept-ranges: bytes

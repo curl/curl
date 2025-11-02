@@ -48,7 +48,7 @@ User-Agent: looser/2007
 <errorcode>
 56
 </errorcode>
-<stdout>
+<stdout crlf="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 </stdout>

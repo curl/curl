@@ -56,12 +56,12 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="yes">
 HTTP/1.1 101 Switching Protocols
 Connection: Upgrade
 Upgrade: h2c
 
-HTTP/2 200 
+HTTP/2 200%spc%
 date: Tue, 09 Nov 2010 14:49:00 GMT
 last-modified: Tue, 13 Jun 2000 12:10:00 GMT
 etag: "21025-dc7-39462498"
