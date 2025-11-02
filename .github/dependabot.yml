@@ -11,7 +11,7 @@ updates:
     cooldown:
       default-days: 7
     groups:
-      actions-deps:
+      gha-dependencies:
         patterns:
           - '*'
     commit-message:
@@ -29,7 +29,7 @@ updates:
       semver-minor-days: 7
       semver-patch-days: 3
     groups:
-      actions-deps:
+      pip-dependencies:
         patterns:
           - '*'
     commit-message:
