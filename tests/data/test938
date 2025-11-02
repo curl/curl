@@ -30,7 +30,7 @@ smtp
 <name>
 SMTP multiple connection authentication
 </name>
-<file name="%LOGDIR/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER" crlf="yes">
 mail body
 </file>
 <command>

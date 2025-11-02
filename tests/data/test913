@@ -23,7 +23,7 @@ smtp
 <name>
 SMTP with large message SIZE
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 

@@ -27,7 +27,7 @@ TELNET check of upload with stdout redirected
 GET /ignore/for/%TESTNUMBER HTTP/1.0
 
 </stdin>
-<file name="%LOGDIR/%TESTNUMBER.txt">
+<file name="%LOGDIR/%TESTNUMBER.txt" crlf="yes">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </file>
