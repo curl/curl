@@ -11,7 +11,7 @@ Resume
 
 # Server-side
 <reply>
-<data crlf="headers">
+<data>
 HTTP/1.1 416 Invalid range
 Connection: close
 Content-Length: 0

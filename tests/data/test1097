@@ -11,7 +11,7 @@ HTTP proxy NTLM auth
 
 # Server-side
 <reply>
-<data crlf="headers">
+<data>
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
 Content-Length: 27
@@ -26,7 +26,7 @@ Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
 
 </connect1001>
 
-<datacheck crlf="headers">
+<datacheck>
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
 
