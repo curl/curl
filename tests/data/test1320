@@ -60,7 +60,7 @@ To: another
 body
 .
 </upload>
-<proxy>
+<proxy crlf="headers">
 CONNECT smtp.%TESTNUMBER:%SMTPPORT HTTP/1.1
 Host: smtp.%TESTNUMBER:%SMTPPORT
 User-Agent: curl/%VERSION

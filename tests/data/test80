@@ -63,7 +63,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.0
 Host: test.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic %b64[youare:yourself]b64%

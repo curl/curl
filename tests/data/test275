@@ -64,7 +64,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT remotesite.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: remotesite.com.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic %b64[youare:yourself]b64%

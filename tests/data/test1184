@@ -59,7 +59,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

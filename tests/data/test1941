@@ -54,7 +54,7 @@ http://hello:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT hello:%HTTPPORT HTTP/1.1
 Host: hello:%HTTPPORT
 Proxy-Connection: Keep-Alive

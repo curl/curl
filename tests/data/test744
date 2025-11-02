@@ -62,7 +62,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT foo.host:%HTTPPORT HTTP/1.0
 Host: foo.host:%HTTPPORT
 Proxy-Connection: Keep-Alive

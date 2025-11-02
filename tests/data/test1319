@@ -70,7 +70,7 @@ PASS secret
 RETR %TESTNUMBER
 QUIT
 </protocol>
-<proxy>
+<proxy crlf="headers">
 CONNECT pop.%TESTNUMBER:%POP3PORT HTTP/1.1
 Host: pop.%TESTNUMBER:%POP3PORT
 User-Agent: curl/%VERSION
