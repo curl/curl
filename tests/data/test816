@@ -12,10 +12,10 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data1>
+<data1 crlf="yes">
 * 123 FETCH (FLAGS (\Seen \Deleted))
 </data1>
-<data2>
+<data2 crlf="yes">
 * 123 EXPUNGE
 </data2>
 </reply>

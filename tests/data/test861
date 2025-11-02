@@ -17,7 +17,7 @@ CAPA UIDL USER
 </servercmd>
 # When doing UIDL, we get the default list output hard-coded in the test
 # POP3 server
-<datacheck>
+<datacheck crlf="yes">
 1 1
 2 2
 3 4
