@@ -105,7 +105,6 @@ use testutil qw(
     subsha256base64file
     substrippemfile
     subnewlines
-    subnewlines_reset
     );
 use valgrind;
 
@@ -369,7 +368,6 @@ sub prepro {
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
-            subnewlines_reset();
             subnewlines(1, \$s) if($data_crlf eq "yes");
             subnewlines(0, \$s) if($data_crlf eq "headers");
             push @out, $s;

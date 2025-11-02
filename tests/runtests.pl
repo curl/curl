@@ -1306,7 +1306,6 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines_reset();
             subnewlines(0, \$_) for @validstdout;
         }
 
@@ -1356,7 +1355,6 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines_reset();
             subnewlines(0, \$_) for @validstderr;
         }
 
@@ -1407,11 +1405,9 @@ sub singletest_check {
 
         if($hash{'crlf'}) {
             if($hash{'crlf'} eq "headers") {
-                subnewlines_reset();
                 subnewlines(0, \$_) for @protocol;
             }
             else {
-                subnewlines_reset();
                 subnewlines(1, \$_) for @protocol;
             }
         }
@@ -1455,7 +1451,6 @@ sub singletest_check {
                     chomp($replycheckpart[-1]);
                 }
                 if($replycheckpartattr{'crlf'}) {
-                    subnewlines_reset();
                     subnewlines(0, \$_) for @replycheckpart;
                 }
                 push(@reply, @replycheckpart);
@@ -1477,7 +1472,6 @@ sub singletest_check {
             normalize_text(\@reply);
         }
         if($replyattr{'crlf'}) {
-            subnewlines_reset();
             subnewlines(0, \$_) for @reply;
         }
     }
@@ -1524,7 +1518,6 @@ sub singletest_check {
             }
         }
         if($hash{'crlf'}) {
-            subnewlines_reset();
             subnewlines(1, \$_) for @upload;
         }
         if($hash{'nonewline'}) {
@@ -1572,7 +1565,6 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines_reset();
             subnewlines(0, \$_) for @proxyprot;
         }
 
@@ -1631,7 +1623,6 @@ sub singletest_check {
                 normalize_text(\@generated);
             }
             if($hash{'crlf'}) {
-                subnewlines_reset();
                 subnewlines(0, \$_) for @outfile;
             }
 
