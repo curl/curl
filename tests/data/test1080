@@ -48,7 +48,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 62

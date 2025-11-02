@@ -57,7 +57,7 @@ Accept: */*
 Referer: http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 62

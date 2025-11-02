@@ -51,7 +51,7 @@ HTTP with invalid range then another URL
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes

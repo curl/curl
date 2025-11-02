@@ -58,7 +58,7 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 403 not OK at all
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

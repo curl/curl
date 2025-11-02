@@ -47,7 +47,7 @@ Accept: */*
 <errorcode>
 47
 </errorcode>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/10290002.txt?coolsite=yes
 Content-Length: 62

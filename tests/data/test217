@@ -52,7 +52,7 @@ Proxy-Connection: Keep-Alive
 <errorcode>
 56
 </errorcode>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 000 405

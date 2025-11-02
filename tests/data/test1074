@@ -46,7 +46,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/wantmore/%TES
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.0 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9

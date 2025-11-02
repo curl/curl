@@ -34,7 +34,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --write-out "%{url_effective} %{http_c
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Fake: yes
 Fake: yes

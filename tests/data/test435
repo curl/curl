@@ -51,7 +51,7 @@ Accept: */*
 <stripfile>
 s/local port == (\d+)/local port == [digits]/
 </stripfile>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 0
 
