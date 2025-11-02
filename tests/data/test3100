@@ -10,14 +10,14 @@ RTSP Basic auth
 
 # Server-side
 <reply>
-<data crlf="headers">
+<data crlf="yes">
 RTSP/1.0 401 Unauthorized please swsbounce
 Server: RTSPD/libcurl-test
 CSeq: 1
 WWW-Authenticate: Basic realm="please-auth-me"
 
 </data>
-<data1 crlf="headers">
+<data1 crlf="yes">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 2
@@ -30,7 +30,7 @@ s=rtspd SDP
 i=A fake SDP reply
 u=http://www.curl.example.com/fakesdp.ps
 </data1>
-<datacheck crlf="headers">
+<datacheck crlf="yes">
 RTSP/1.0 401 Unauthorized please swsbounce
 Server: RTSPD/libcurl-test
 CSeq: 1
