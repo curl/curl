@@ -54,14 +54,13 @@ again:
   if(!res) {
     /* we are connected, now get an HTTP document the raw way */
     char request[64];
-    const char *sbuf;
+    const char *sbuf = request;
     size_t sblen;
     size_t nwritten = 0, nread = 0;
 
     sblen = curl_msnprintf(request, sizeof(request),
                            "GET /%d HTTP/1.1\r\n"
                            "Host: ninja\r\n\r\n", testnum);
-    sbuf = request;
 
     do {
       char buf[1024];
