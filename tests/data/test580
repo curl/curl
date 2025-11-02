@@ -20,7 +20,7 @@ Connection: close
 Location: and there's a second one too! / moo.html
 
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 302 eat this!
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
