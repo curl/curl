@@ -40,6 +40,7 @@ BEGIN {
         exerunner
         subbase64
         subnewlines
+        subnewlines_reset
         subsha256base64file
         substrippemfile
     );
@@ -155,6 +156,11 @@ sub subbase64 {
 }
 
 my $prevupdate;  # module scope so it remembers the last value
+
+sub subnewlines_reset {
+    $prevupdate = 0;
+}
+
 sub subnewlines {
     my ($force, $thing) = @_;
 
