@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP multiple invalid (all but one) --mail-rcpt and --mail-rcpt-allowfails
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

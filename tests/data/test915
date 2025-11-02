@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP without --mail-from
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

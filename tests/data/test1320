@@ -32,7 +32,7 @@ proxy
 <name>
 SMTP send tunneled through HTTP proxy
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

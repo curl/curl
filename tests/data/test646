@@ -23,7 +23,7 @@ smtp
 <name>
 SMTP multipart using mime API
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

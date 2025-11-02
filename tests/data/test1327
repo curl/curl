@@ -23,7 +23,7 @@ telnet
 <name>
 TELNET check of upload with stdout redirected
 </name>
-<stdin>
+<stdin crlf="yes">
 GET /ignore/for/%TESTNUMBER HTTP/1.0
 
 </stdin>
