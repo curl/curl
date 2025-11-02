@@ -693,7 +693,7 @@ server is used), if `nonewline` is set, we cut off the trailing newline of
 this given data before comparing with the one actually sent by the client The
 `<strip>` and `<strippart>` rules are applied before comparisons are made.
 
-### `<stderr [mode="text"] [nonewline="yes"] [crlf="yes"]>`
+### `<stderr [mode="text"] [nonewline="yes"] [crlf="yes|headers"]>`
 This verifies that this data was passed to stderr.
 
 Use the mode="text" attribute if the output is in text mode on platforms that
@@ -701,6 +701,10 @@ have a text/binary difference.
 
 `crlf=yes` forces the newlines to become CRLF even if not written so in the
 test.
+
+`crlf=headers` forces *header* newlines to become CRLF even if not written so
+in the source file. Note that this makes runtests.pl parse and "guess" what is
+a header and what is not in order to apply the CRLF line endings appropriately.
 
 If `nonewline` is set, we cut off the trailing newline of this given data
 before comparing with the one actually received by the client

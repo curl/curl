@@ -1360,7 +1360,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(0, \$_) for @validstderr;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @validstderr;
+            }
+            else {
+                subnewlines(1, \$_) for @validstderr;
+            }
         }
 
         $res = compare($runnerid, $testnum, $testname, "stderr", \@actual, \@validstderr);
