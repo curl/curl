@@ -4050,6 +4050,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
   case TRNSPRT_QUIC:
     *pssl_version_min = CURL_SSLVERSION_TLSv1_3;
     if(conn_config->version_max &&
+       (conn_config->version_max != CURL_SSLVERSION_MAX_DEFAULT) &&
        (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
       return CURLE_SSL_CONNECT_ERROR;
@@ -4245,6 +4246,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     const char *ciphers13 = conn_config->cipher_list13;
     if(ciphers13 &&
        (!conn_config->version_max ||
+        (conn_config->version_max == CURL_SSLVERSION_MAX_DEFAULT) ||
         (conn_config->version_max >= CURL_SSLVERSION_MAX_TLSv1_3))) {
       if(!SSL_CTX_set_ciphersuites(octx->ssl_ctx, ciphers13)) {
         failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
