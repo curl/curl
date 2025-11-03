@@ -13,7 +13,7 @@ proxytunnel
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 

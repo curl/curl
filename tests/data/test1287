@@ -24,7 +24,7 @@ contents
 
 # The purpose of this test is to make sure curl ignores headers
 # Content-Length and Transfer-Encoding in a successful CONNECT 2xx reply.
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Content-Length: 123
 Transfer-Encoding: chunked

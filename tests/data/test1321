@@ -12,7 +12,7 @@ HTTP proxy
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 imap: sure hit me
 

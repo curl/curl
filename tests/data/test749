@@ -13,7 +13,7 @@ proxytunnel
 <reply>
 
 # this is returned first since we get no proxy-auth
-<connect>
+<connect crlf="headers">
 HTTP/1.1 400 Bad request
 Connection: close
 

@@ -10,7 +10,7 @@ HSTS
 <reply>
 
 # we use this as response to a CONNECT
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Server: fake
 

@@ -13,7 +13,7 @@ NTLM
 # Server-side
 <reply>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: NTLM
 Content-Length: 16
@@ -23,7 +23,7 @@ data to discard
 </connect>
 
 # this is returned first since we get no proxy-auth
-<connect1001>
+<connect1001 crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 28
@@ -33,7 +33,7 @@ Content-Length: 28
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<connect1002>
+<connect1002 crlf="headers">
 HTTP/1.1 200 Things are fine in proxy land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1

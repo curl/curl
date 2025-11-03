@@ -14,7 +14,7 @@ proxytunnel
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 Connected-fine: sure
 

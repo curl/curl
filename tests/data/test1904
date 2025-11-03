@@ -22,7 +22,7 @@ Content-Length: 9
 
 contents
 </data>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 204 Sure go ahead
 
 </connect>

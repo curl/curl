@@ -12,7 +12,7 @@ CURLOPT_PROXYHEADER
 
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 Server: present
 

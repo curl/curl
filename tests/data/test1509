@@ -14,7 +14,7 @@ proxytunnel
 <servercmd>
 connection-monitor
 </servercmd>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: the beast that eats naughty clients
 

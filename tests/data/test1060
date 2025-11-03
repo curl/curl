@@ -14,7 +14,7 @@ HTTP proxy Digest auth
 <reply>
 
 # this is returned first since we get no proxy-auth
-<connect>
+<connect crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 35701

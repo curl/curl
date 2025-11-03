@@ -16,7 +16,7 @@ multi
 <servercmd>
 connection-monitor
 </servercmd>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 
 </connect>

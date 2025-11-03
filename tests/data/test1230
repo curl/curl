@@ -20,7 +20,7 @@ Content-Length: 9
 mooooooo
 </data>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 welcome dear
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 

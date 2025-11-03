@@ -20,7 +20,7 @@ Set-Cookie: cookie3=data3;
 Location: /%TESTNUMBER0002
 
 </data>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Sure go ahead
 Server: from the connect
 Silly-thing: yes yes
