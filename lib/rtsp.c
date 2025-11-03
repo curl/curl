@@ -298,7 +298,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
     else {
       if(data->set.postfields) {
-        size_t plen = strlen(data->set.postfields);
+        size_t plen = (data->set.postfieldsize >= 0) ?
+          (size_t)data->set.postfieldsize : strlen(data->set.postfields);
         req_clen = (curl_off_t)plen;
         result = Curl_creader_set_buf(data, data->set.postfields, plen);
       }
