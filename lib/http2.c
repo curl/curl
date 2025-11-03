@@ -2128,7 +2128,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
     result = h2_process_pending_input(cf, data);
     if(result)
       return result;
-    CURL_TRC_CF(data, cf, "[0] ingress: nw-in bufferd %zu",
+    CURL_TRC_CF(data, cf, "[0] ingress: nw-in buffered %zu",
                 Curl_bufq_len(&ctx->inbufq));
   }
 
