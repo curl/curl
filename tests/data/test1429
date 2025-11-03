@@ -57,7 +57,7 @@ Funny-head: yesyes
 -foo-
 999
 </stdout>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

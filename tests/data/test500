@@ -48,7 +48,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER
 <file name="%LOGDIR/ip%TESTNUMBER">
 IP %HOSTIP
 </file>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

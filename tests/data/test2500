@@ -50,7 +50,7 @@ HTTP/3 GET:
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET https://localhost:%HTTP3PORT/%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTP3PORT
 User-Agent: curl/%VERSION

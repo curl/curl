@@ -46,7 +46,7 @@ http://first:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER -L
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[first:secret]b64%

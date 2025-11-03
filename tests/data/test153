@@ -91,7 +91,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u testuser:testpass --digest http://%H
 <strip>
 ^Authorization.*cnonce
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -69,7 +69,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 DESCRIBE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
 CSeq: 1
 Accept: application/sdp

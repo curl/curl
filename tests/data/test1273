@@ -69,7 +69,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C - -f
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-

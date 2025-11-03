@@ -174,7 +174,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
 <strippart>
 s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
 </strippart>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

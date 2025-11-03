@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify that the %TESTNUMBER has been resolved to %TESTNUMBER
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

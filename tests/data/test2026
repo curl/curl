@@ -170,7 +170,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER digest basic
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

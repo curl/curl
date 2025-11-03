@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/this/%TESTNUMBER -L
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /this/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

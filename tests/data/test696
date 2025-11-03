@@ -54,7 +54,7 @@ Connection: close
 
 -foo-
 </stdout>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 

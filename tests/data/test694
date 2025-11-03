@@ -103,7 +103,7 @@ http://%HOSTIP:%HTTPPORT/path/mine http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER0010
 # Verify data after the test has been "shot"
 <verify>
 
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /path/mine HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

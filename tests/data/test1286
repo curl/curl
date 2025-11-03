@@ -89,7 +89,7 @@ HTTP GET --digest increasing nonce-count
 <strippart>
 if(s/^(Authorization: Digest )([^\r\n]+)(\r?\n)$//) { $_ = $1 . join(', ', map { s/^(cnonce=)"[a-zA-Z0-9+\/=]+"$/$1REMOVED/; s/^(response=)"[a-f0-9]{32}"$/$1REMOVED/; s/^qop="auth"$/qop=auth/; $_ } sort split(/, */, $2)) . $3; }
 </strippart>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

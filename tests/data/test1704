@@ -47,7 +47,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

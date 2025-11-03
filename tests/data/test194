@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C 87 --fail
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=87-

@@ -45,7 +45,7 @@ http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: google.com:%HTTPPORT
 Accept: */*

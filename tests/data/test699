@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[hej:you]b64%

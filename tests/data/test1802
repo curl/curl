@@ -47,7 +47,7 @@ http://hello/wanted/page -p -x %HOSTIP:%HTTPPORT --header "User-Agent: myapp/1.0
 # Verify data after the test has been "shot"
 <verify>
 
-<protocol crlf="yes">
+<protocol crlf="headers">
 CONNECT hello:80 HTTP/1.1
 Proxy-Connection: Keep-Alive
 User-Agent: Benjamin/2

@@ -67,7 +67,7 @@ HTTP/2 using STREAM_WEIGHTs
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

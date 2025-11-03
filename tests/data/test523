@@ -49,7 +49,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET http://www.example.com:19999/%TESTNUMBER HTTP/1.1
 Host: www.example.com:19999
 Authorization: Basic %b64[xxx:yyy]b64%

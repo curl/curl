@@ -49,7 +49,7 @@ cookies
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: www.host.foo.com
 User-Agent: curl/%VERSION
