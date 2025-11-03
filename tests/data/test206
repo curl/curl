@@ -40,7 +40,7 @@ daniel
 </data2>
 
 # then this is returned when we get proxy-auth
-<connect1000 crlf="headers">
+<connect1000>
 HTTP/1.1 200 OK
 Server: no
 
