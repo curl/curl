@@ -17,7 +17,7 @@ Content-Type: text/html
 
 -foo-
 </data>
-<connect crlf="yes">
+<connect crlf="headers">
 HTTP/1.1 200 fine
 Connection: close
 Content-Length: 0
