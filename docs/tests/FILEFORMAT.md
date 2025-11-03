@@ -83,6 +83,7 @@ lines:
 
     %SP  - space
     %TAB - horizontal tab
+    %CR  - carriage return
 
 ## Insert capped epoch days
 
