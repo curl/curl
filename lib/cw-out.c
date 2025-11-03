@@ -302,6 +302,7 @@ static CURLcode cw_out_buf_flush(struct cw_out_ctx *ctx,
                               &consumed);
     if(result && (result != CURLE_AGAIN))
       return result;
+    result = CURLE_OK;
 
     if(consumed) {
       if(consumed == curlx_dyn_len(&cwbuf->b)) {
