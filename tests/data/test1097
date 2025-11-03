@@ -26,7 +26,7 @@ Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
 
 </connect1001>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 We are fine and cool
 Server: Apache/1.3.27 (Dorw1n) PHP/44.1.2
 
