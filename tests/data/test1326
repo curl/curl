@@ -28,7 +28,7 @@ telnet
 <name>
 TELNET to HTTP server
 </name>
-<stdin crlf="yes">
+<stdin crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </stdin>
