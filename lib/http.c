@@ -4039,13 +4039,13 @@ static CURLcode http_on_response(struct Curl_easy *data,
                 goto out;
             }
             data->state.disableexpect = TRUE;
+            Curl_req_abort_sending(data);
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->state.url);
             if(!data->req.newurl) {
               result = CURLE_OUT_OF_MEMORY;
               goto out;
             }
-            Curl_req_abort_sending(data);
           }
           else if(data->set.http_keep_sending_on_error) {
             infof(data, "HTTP error before end of send, keep sending");
