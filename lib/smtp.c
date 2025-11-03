@@ -205,7 +205,8 @@ const struct Curl_handler Curl_handler_smtp = {
   CURLPROTO_SMTP,                   /* protocol */
   CURLPROTO_SMTP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -235,8 +236,9 @@ const struct Curl_handler Curl_handler_smtps = {
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTPS,                  /* protocol */
   CURLPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL
-  | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS |
+  PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -1439,9 +1441,6 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done)
   *done = FALSE; /* default to not done yet */
   if(!smtpc)
     return CURLE_FAILED_INIT;
-
-  /* We always support persistent connections in SMTP */
-  connkeep(data->conn, "SMTP default");
 
   PINGPONG_SETUP(&smtpc->pp, smtp_pp_statemachine, smtp_endofresp);
 

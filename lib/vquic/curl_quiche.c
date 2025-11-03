@@ -448,7 +448,6 @@ static CURLcode cf_recv_body(struct Curl_cfilter *cf,
     stream->closed = TRUE;
     stream->reset = TRUE;
     stream->send_closed = TRUE;
-    streamclose(cf->conn, "Reset of stream");
     return result;
   }
   return CURLE_OK;
@@ -512,7 +511,6 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
     stream->closed = TRUE;
     stream->reset = TRUE;
     stream->send_closed = TRUE;
-    streamclose(cf->conn, "Reset of stream");
     break;
 
   case QUICHE_H3_EVENT_FINISHED:
@@ -524,7 +522,6 @@ static CURLcode h3_process_event(struct Curl_cfilter *cf,
       stream->resp_hds_complete = TRUE;
     }
     stream->closed = TRUE;
-    streamclose(cf->conn, "End of stream");
     break;
 
   case QUICHE_H3_EVENT_GOAWAY:
@@ -1422,7 +1419,6 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
       }
       cf->connected = TRUE;
       *done = TRUE;
-      connkeep(cf->conn, "HTTP/3 default");
     }
   }
   else if(quiche_conn_is_draining(ctx->qconn)) {

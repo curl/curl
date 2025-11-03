@@ -200,7 +200,8 @@ const struct Curl_handler Curl_handler_pop3 = {
   CURLPROTO_POP3,                   /* protocol */
   CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -230,8 +231,9 @@ const struct Curl_handler Curl_handler_pop3s = {
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3S,                  /* protocol */
   CURLPROTO_POP3,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL
-  | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS |
+  PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -1294,9 +1296,6 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   *done = FALSE; /* default to not done yet */
   if(!pop3c)
     return CURLE_FAILED_INIT;
-
-  /* We always support persistent connections in POP3 */
-  connkeep(conn, "POP3 default");
 
   PINGPONG_SETUP(pp, pop3_statemachine, pop3_endofresp);
 

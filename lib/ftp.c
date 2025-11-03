@@ -271,7 +271,8 @@ const struct Curl_handler Curl_handler_ftp = {
   CURLPROTO_FTP,                   /* family */
   PROTOPT_DUAL | PROTOPT_CLOSEACTION | PROTOPT_NEEDSPWD |
   PROTOPT_NOURLQUERY | PROTOPT_PROXY_AS_HTTP |
-  PROTOPT_WILDCARD | PROTOPT_SSL_REUSE /* flags */
+  PROTOPT_WILDCARD | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE /* flags */
 };
 
 
@@ -303,7 +304,8 @@ const struct Curl_handler Curl_handler_ftps = {
   CURLPROTO_FTPS,                  /* protocol */
   CURLPROTO_FTP,                   /* family */
   PROTOPT_SSL | PROTOPT_DUAL | PROTOPT_CLOSEACTION |
-  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD /* flags */
+  PROTOPT_NEEDSPWD | PROTOPT_NOURLQUERY | PROTOPT_WILDCARD |
+  PROTOPT_CONN_REUSE /* flags */
 };
 #endif
 
@@ -3211,9 +3213,6 @@ static CURLcode ftp_connect(struct Curl_easy *data,
   if(!ftpc)
     return CURLE_FAILED_INIT;
   pp = &ftpc->pp;
-  /* We always support persistent connections on ftp */
-  connkeep(conn, "FTP default");
-
   PINGPONG_SETUP(pp, ftp_pp_statemachine, ftp_endofresp);
 
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
