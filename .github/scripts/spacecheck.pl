@@ -34,10 +34,6 @@ my @tabs = (
     "^tests/data/test",
 );
 
-my @mixed_eol = (
-    "^tests/data/test",
-);
-
 my @need_crlf = (
     "\\.(bat|sln)\$",
 );
@@ -109,8 +105,7 @@ while(my $filename = <$git_ls_files>) {
 
     my $eol = eol_detect($content);
 
-    if($eol eq "" &&
-        !fn_match($filename, @mixed_eol)) {
+    if($eol eq "") {
         push @err, "content: has mixed EOL types";
     }
 
@@ -120,8 +115,7 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($eol ne "lf" && $content ne "" &&
-        !fn_match($filename, @need_crlf) &&
-        !fn_match($filename, @mixed_eol)) {
+        !fn_match($filename, @need_crlf)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
