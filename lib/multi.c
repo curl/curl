@@ -1990,11 +1990,16 @@ static CURLMcode state_performing(struct Curl_easy *data,
       if(!newurl)
         /* typically for HTTP_1_1_REQUIRED error on first flight */
         newurl = strdup(data->state.url);
-      /* if we are to retry, set the result to OK and consider the request
-         as done */
-      retry = TRUE;
-      result = CURLE_OK;
-      data->req.done = TRUE;
+      if(!newurl) {
+        result = CURLE_OUT_OF_MEMORY;
+      }
+      else {
+        /* if we are to retry, set the result to OK and consider the request
+          as done */
+        retry = TRUE;
+        result = CURLE_OK;
+        data->req.done = TRUE;
+      }
     }
     else
       result = ret;
