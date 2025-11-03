@@ -1089,6 +1089,11 @@ sub singletest_shouldrun {
         @what = getpart("client", "features");
     }
 
+    if($checktests && checktest()) {
+        logmsg "Warning: issue(s) found in test data: ${TESTDIR}/test${testnum}\n";
+        $why = "test data file issue";
+    }
+
     # We require a feature to be present
     for(@what) {
         my $f = $_;
@@ -2420,6 +2425,10 @@ while(@ARGV) {
         # execute in scrambled order
         $scrambleorder=1;
     }
+    elsif($ARGV[0] eq "-w") {
+        # verify test data
+        $checktests=1;
+    }
     elsif($ARGV[0] =~ /^-t(.*)/) {
         # torture
         $torture=1;
@@ -2563,6 +2572,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -u       error instead of warning on server unexpectedly alive
   -v       verbose output
   -vc path use this curl only to verify the existing servers
+  -w       check test data
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
   [~num]   like "~5 ~6 ~9" to ignore the result of those tests
