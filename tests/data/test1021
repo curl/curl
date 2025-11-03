@@ -54,7 +54,7 @@ daniel
 
 # then this is returned when we get proxy-auth
 <data1000>
-HTTP/1.1 200 OK swsbounce%CR
+HTTP/1.1 200 OK swsbounce
 Server: no
 %CR
 Nice proxy auth sir!
@@ -72,7 +72,7 @@ Content-Length: 28%CR
 %CR
 HTTP/1.1 200 Things are fine in proxy land%CR
 Server: Microsoft-IIS/5.0%CR
-Content-Type: text/html; charset=iso-8859-1%CR
+Content-Type: text/html; charset=iso-8859-1
 %CR
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
