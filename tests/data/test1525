@@ -25,8 +25,8 @@ ETag: "21025-dc7-39462498"
 
 </data>
 <datacheck>
-HTTP/1.1 200 OK
-
+HTTP/1.1 200 OK%CR
+%CR
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

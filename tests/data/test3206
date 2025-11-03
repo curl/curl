@@ -15,7 +15,7 @@ CUSTOMREQUEST
 %repeat[120 x Testing large IMAP literal with custom FETCH. XXXXXXXXXXXXX%0d]%
 </data>
 <datacheck>
-* 456 FETCH (BODY[TEXT] {7201}
+* 456 FETCH (BODY[TEXT] {7201}%CR
 %repeat[120 x Testing large IMAP literal with custom FETCH. XXXXXXXXXXXXX%0d]%
 </datacheck>
 </reply>

@@ -41,19 +41,19 @@ daniel
 
 # then this is returned when we get proxy-auth
 <connect1000>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK%CR
 Server: no
-
+%CR
 </connect1000>
 
 <datacheck>
-HTTP/1.1 407 Authorization Required to proxy me my dear
-Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
-Content-Length: 33
-
-HTTP/1.1 200 OK
+HTTP/1.1 407 Authorization Required to proxy me my dear%CR
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"%CR
+Content-Length: 33%CR
+%CR
+HTTP/1.1 200 OK%CR
 Server: no
-
+%CR
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7

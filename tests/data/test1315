@@ -46,41 +46,41 @@ dummy data
 -----+\w+
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 845
-Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
-
-------------------------------9ef8d6205763
-Content-Disposition: form-data; name="name"
-
-value
-------------------------------9ef8d6205763
-Content-Disposition: form-data; name="file"
-Content-Type: multipart/mixed; boundary=----------------------------aaaaaaaaaaaa
-
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Type: text/plain
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 845%CR
+Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763%CR
+%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: form-data; name="name"%CR
+%CR
+value%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: form-data; name="file"%CR
+Content-Type: multipart/mixed; boundary=----------------------------aaaaaaaaaaaa%CR
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+%CR
 dummy data
-
-------------------------------9ef8d6205763
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Type: magic/content
-
+%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+Content-Type: magic/content%CR
+%CR
 dummy data
-
-------------------------------9ef8d6205763
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Type: text/plain
-
+%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+%CR
 dummy data
-
-------------------------------aaaaaaaaaaaa--
-
-------------------------------9ef8d6205763--
+%CR
+------------------------------aaaaaaaaaaaa--%CR
+%CR
+------------------------------9ef8d6205763--%CR
 </protocol>
 </verify>
 </testcase>

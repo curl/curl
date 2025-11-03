@@ -18,12 +18,12 @@ Cseq: 1
 </data1>
 
 <data2>
-RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
-Cseq: 2
-Content-Length: 70
-Content-Type: application/sdp
-
+RTSP/1.0 200 OK%CR
+Server: RTSPD/libcurl-test%CR
+Cseq: 2%CR
+Content-Length: 70%CR
+Content-Type: application/sdp%CR
+%CR
 v=0
 s=rtspd SDP
 i=A fake SDP reply

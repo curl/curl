@@ -27,7 +27,7 @@ To: fake@nowhere
 body
 
 --
-  yours sincerely
+  yours sincerely%CR
 </data>
 
 <datacheck>
@@ -37,7 +37,7 @@ To: fake@nowhere
 body
 
 --
-  yours sincerely
+  yours sincerely%CR
 </datacheck>
 </reply>
 
