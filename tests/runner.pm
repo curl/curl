@@ -351,17 +351,18 @@ sub prepro {
             next;
         }
         if($show) {
-            # The processor does CRLF replacements in the <data*> sections if
-            # necessary since those parts might be read by separate servers.
-            if($s =~ /^ *<data(.*)\>/) {
-                if($1 =~ /crlf="yes"/) {
+            # The processor does CRLF replacements in the <data*> and <connect*>
+            # sections if necessary since those parts might be read by separate
+            # servers.
+            if($s =~ /^ *<(data|connect)(.*)\>/) {
+                if($2 =~ /crlf="yes"/) {
                     $data_crlf = "yes";
                 }
-                elsif($1 =~ /crlf="headers"/) {
+                elsif($2 =~ /crlf="headers"/) {
                     $data_crlf = "headers";
                 }
             }
-            elsif(($s =~ /^ *<\/data/) && $data_crlf ne "") {
+            elsif(($s =~ /^ *<\/(data|connect)/) && $data_crlf ne "") {
                 $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");

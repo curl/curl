@@ -300,10 +300,17 @@ to complete a transfer. The response to each request is found in its own data
 section. Validating the entire negotiation sequence can be done by specifying
 a `datacheck` section.
 
-### `<connect>`
+### `<connect [crlf="yes|headers"]>`
 The connect section is used instead of the 'data' for all CONNECT
 requests. The remainder of the rules for the data section then apply but with
 a connect prefix.
+
+`crlf=yes` forces the newlines to become CRLF even if not written so in the
+test.
+
+`crlf=headers` forces *header* newlines to become CRLF even if not written so
+in the source file. Note that this makes runtests.pl parse and "guess" what is
+a header and what is not in order to apply the CRLF line endings appropriately.
 
 ### `<socks>`
 Address type and address details as logged by the SOCKS proxy.
