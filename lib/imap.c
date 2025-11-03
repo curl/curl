@@ -210,9 +210,9 @@ const struct Curl_handler Curl_handler_imap = {
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
   CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION|              /* flags */
-  PROTOPT_URLOPTIONS|
-  PROTOPT_SSL_REUSE
+  PROTOPT_CLOSEACTION |             /* flags */
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -243,7 +243,7 @@ const struct Curl_handler Curl_handler_imaps = {
   CURLPROTO_IMAPS,                  /* protocol */
   CURLPROTO_IMAP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_URLOPTIONS
+  PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -1679,9 +1679,6 @@ static CURLcode imap_connect(struct Curl_easy *data, bool *done)
   *done = FALSE; /* default to not done yet */
   if(!imapc)
     return CURLE_FAILED_INIT;
-
-  /* We always support persistent connections in IMAP */
-  connkeep(data->conn, "IMAP default");
 
   /* Parse the URL options */
   result = imap_parse_url_options(data->conn, imapc);

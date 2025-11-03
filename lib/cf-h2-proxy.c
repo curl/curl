@@ -488,10 +488,6 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
       return result;
   }
 
-  if(ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
-    connclose(cf->conn, "GOAWAY received");
-  }
-
   return CURLE_OK;
 }
 
@@ -1265,7 +1261,7 @@ static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
   if(ctx->tunnel.error == NGHTTP2_REFUSED_STREAM) {
     CURL_TRC_CF(data, cf, "[%d] REFUSED_STREAM, try again on a new "
                 "connection", ctx->tunnel.stream_id);
-    connclose(cf->conn, "REFUSED_STREAM"); /* do not use this anymore */
+    failf(data, "proxy server refused HTTP/2 stream");
     return CURLE_RECV_ERROR; /* trigger Curl_retry_request() later */
   }
   else if(ctx->tunnel.error != NGHTTP2_NO_ERROR) {

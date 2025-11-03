@@ -545,6 +545,47 @@ struct multi_done_ctx {
   BIT(premature);
 };
 
+static bool multi_conn_should_close(struct connectdata *conn,
+                                    struct Curl_easy *data,
+                                    bool premature)
+{
+  /* if conn->bits.close is TRUE, it means that the connection should be
+     closed in spite of everything else. */
+  if(conn->bits.close)
+    return TRUE;
+
+  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
+     forced us to close this connection. This is ignored for requests taking
+     place in a NTLM/NEGOTIATE authentication handshake. */
+  if(data->set.reuse_forbid
+#ifdef USE_NTLM
+     && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
+          conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
+#endif
+#ifdef USE_SPNEGO
+     && !(conn->http_negotiate_state == GSS_AUTHRECV ||
+          conn->proxy_negotiate_state == GSS_AUTHRECV)
+#endif
+     )
+    return TRUE;
+
+  /* Unless this connection is for a "connect-only" transfer, it
+   * needs to be closed if the protocol handler does not support reuse. */
+  if(!data->set.connect_only && conn->handler &&
+     !(conn->handler->flags & PROTOPT_CONN_REUSE))
+    return TRUE;
+
+  /* if premature is TRUE, it means this connection was said to be DONE before
+     the entire request operation is complete and thus we cannot know in what
+     state it is for reusing, so we are forced to close it. In a perfect world
+     we can add code that keep track of if we really must close it here or not,
+     but currently we have no such detail knowledge. */
+  if(premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))
+    return TRUE;
+
+  return FALSE;
+}
+
 static void multi_done_locked(struct connectdata *conn,
                               struct Curl_easy *data,
                               void *userdata)
@@ -585,32 +626,7 @@ static void multi_done_locked(struct connectdata *conn,
   Curl_resolv_unlink(data, &data->state.dns[1]);
   Curl_dnscache_prune(data);
 
-  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
-     forced us to close this connection. This is ignored for requests taking
-     place in a NTLM/NEGOTIATE authentication handshake
-
-     if conn->bits.close is TRUE, it means that the connection should be
-     closed in spite of all our efforts to be nice, due to protocol
-     restrictions in our or the server's end
-
-     if premature is TRUE, it means this connection was said to be DONE before
-     the entire request operation is complete and thus we cannot know in what
-     state it is for reusing, so we are forced to close it. In a perfect world
-     we can add code that keep track of if we really must close it here or not,
-     but currently we have no such detail knowledge.
-  */
-
-  if((data->set.reuse_forbid
-#ifdef USE_NTLM
-      && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
-           conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
-#endif
-#ifdef USE_SPNEGO
-      && !(conn->http_negotiate_state == GSS_AUTHRECV ||
-           conn->proxy_negotiate_state == GSS_AUTHRECV)
-#endif
-     ) || conn->bits.close
-       || (mdctx->premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
+  if(multi_conn_should_close(conn, data, mdctx->premature)) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
     CURL_TRC_M(data, "multi_done, terminating conn #%" FMT_OFF_T " to %s:%d, "
                "forbid=%d, close=%d, premature=%d, conn_multiplex=%d",
@@ -2124,8 +2140,6 @@ static CURLMcode state_do(struct Curl_easy *data,
   }
 
   if(data->set.connect_only && !data->set.connect_only_ws) {
-    /* keep connection open for application to use the socket */
-    connkeep(data->conn, "CONNECT_ONLY");
     multistate(data, MSTATE_DONE);
     rc = CURLM_CALL_MULTI_PERFORM;
   }
