@@ -329,7 +329,7 @@ const struct Curl_handler Curl_handler_smb = {
   PORT_SMB,                             /* defport */
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_CONN_REUSE                    /* flags */
 };
 
 #ifdef USE_SSL
@@ -358,7 +358,7 @@ const struct Curl_handler Curl_handler_smbs = {
   PORT_SMBS,                            /* defport */
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */
-  PROTOPT_SSL                           /* flags */
+  PROTOPT_SSL | PROTOPT_CONN_REUSE      /* flags */
 };
 #endif
 
@@ -512,9 +512,6 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
   smbc->send_buf = malloc(MAX_MESSAGE_SIZE);
   if(!smbc->send_buf)
     return CURLE_OUT_OF_MEMORY;
-
-  /* Multiple requests are allowed with this connection */
-  connkeep(conn, "SMB default");
 
   /* Parse the username, domain, and password */
   slash = strchr(conn->user, '/');

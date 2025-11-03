@@ -2071,7 +2071,7 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
   size_t nread;
 
   if(should_close_session(ctx)) {
-    CURL_TRC_CF(data, cf, "progress ingress, session is closed");
+    CURL_TRC_CF(data, cf, "[0] ingress: session is closed");
     return CURLE_HTTP2;
   }
 
@@ -2128,15 +2128,16 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
     result = h2_process_pending_input(cf, data);
     if(result)
       return result;
-    CURL_TRC_CF(data, cf, "[0] progress ingress: inbufg=%zu",
+    CURL_TRC_CF(data, cf, "[0] ingress: nw-in buffered %zu",
                 Curl_bufq_len(&ctx->inbufq));
   }
 
   if(ctx->conn_closed && Curl_bufq_is_empty(&ctx->inbufq)) {
-    connclose(cf->conn, "GOAWAY received");
+    connclose(cf->conn, ctx->rcvd_goaway ? "server closed with GOAWAY" :
+              "server closed abruptly");
   }
 
-  CURL_TRC_CF(data, cf, "[0] progress ingress: done");
+  CURL_TRC_CF(data, cf, "[0] ingress: done");
   return CURLE_OK;
 }
 

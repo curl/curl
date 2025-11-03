@@ -1364,11 +1364,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->connection_id = -1;    /* no ID */
   conn->remote_port = -1; /* unknown at this point */
 
-  /* Default protocol-independent behavior does not support persistent
-     connections, so we set this to force-close. Protocols that support
-     this need to set this to FALSE in their "curl_do" functions. */
-  connclose(conn, "Default to force-close");
-
   /* Store creation time to help future close decision making */
   conn->created = curlx_now();
 
@@ -1428,6 +1423,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 #ifdef HAVE_GSSAPI
   conn->gssapi_delegation = data->set.gssapi_delegation;
 #endif
+  DEBUGF(infof(data, "alloc connection, bits.close=%d", conn->bits.close));
   return conn;
 error:
 
@@ -2035,11 +2031,13 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   int port;
   CURLcode result;
 
+  DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
   if(conn->handler->setup_connection) {
     result = conn->handler->setup_connection(data, conn);
     if(result)
       return result;
   }
+  DEBUGF(infof(data, "setup connection, bits.close=%d", conn->bits.close));
 
   /* Now create the destination name */
 #ifndef CURL_DISABLE_PROXY
@@ -3664,6 +3662,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* We have decided that we want a new connection. However, we may not
        be able to do that if we have reached the limit of how many
        connections we are allowed to open. */
+    DEBUGF(infof(data, "new connection, bits.close=%d", conn->bits.close));
 
     if(conn->handler->flags & PROTOPT_ALPN) {
       /* The protocol wants it, so set the bits if enabled in the easy handle

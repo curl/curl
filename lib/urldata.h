@@ -567,6 +567,7 @@ struct Curl_handler {
 #define PROTOPT_SSL_REUSE (1<<15)   /* this protocol may reuse an existing
                                        SSL connection in the same family
                                        without having PROTOPT_SSL. */
+#define PROTOPT_CONN_REUSE (1<<16)  /* this protocol can reuse connections */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */

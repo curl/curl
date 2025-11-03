@@ -127,7 +127,6 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
   Curl_httpchunk_init(data, &ts->ch, TRUE);
 
   *pts = ts;
-  connkeep(cf->conn, "HTTP proxy CONNECT");
   return tunnel_reinit(cf, data, ts);
 }
 
@@ -591,7 +590,6 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
           CURL_TRC_CF(data, cf, "CONNECT need to close+open");
           infof(data, "Connect me again please");
           Curl_conn_cf_close(cf, data);
-          connkeep(conn, "HTTP proxy CONNECT");
           result = Curl_conn_cf_connect(cf->next, data, &done);
           goto out;
         }
@@ -612,8 +610,6 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   if(data->info.httpproxycode/100 != 2) {
     /* a non-2xx response and we have no next URL to try. */
     Curl_safefree(data->req.newurl);
-    /* failure, close this connection to avoid reuse */
-    streamclose(conn, "proxy CONNECT failure");
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
     failf(data, "CONNECT tunnel failed, response %d", data->req.httpcode);
     return CURLE_RECV_ERROR;

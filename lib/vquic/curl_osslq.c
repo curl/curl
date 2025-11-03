@@ -1816,7 +1816,6 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "peer verified");
       cf->connected = TRUE;
       *done = TRUE;
-      connkeep(cf->conn, "HTTP/3 default");
     }
   }
   else {
