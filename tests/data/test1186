@@ -47,53 +47,53 @@ foo
 ^(Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 1002
-Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER\".txt"
-Content-Type: mo/foo
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 1002%CR
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32%CR
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER\".txt"%CR
+Content-Type: mo/foo%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER\".txt"
-Content-Type: text/plain
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER\".txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file3"
-Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
-
-Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"
-Content-Type: m/f
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file3"%CR
+Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b%CR
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"%CR
+Content-Type: m/f%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"
-Content-Type: text/plain
-
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER\".txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-
-------------------------------24e78000bd32--
+%CR
+%CR
+------------------------------24e78000bd32--%CR
 </protocol>
 </verify>
 </testcase>

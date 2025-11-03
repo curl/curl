@@ -20,10 +20,10 @@ smtp
 SMTP
 </name>
 <file name="%LOGDIR/mail%TESTNUMBER">
-From: different
-To: another
-
-body
+From: different%CR
+To: another%CR
+%CR
+body%CR
 %repeat[6553 x 0123456789]%
 </file>
 
@@ -43,13 +43,13 @@ DATA
 QUIT
 </protocol>
 <upload>
-From: different
-To: another
-
-body
+From: different%CR
+To: another%CR
+%CR
+body%CR
 %repeat[6553 x 0123456789]%
-
-.
+%CR
+.%CR
 </upload>
 </verify>
 </testcase>

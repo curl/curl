@@ -46,66 +46,66 @@ foo
 ^(Content-Type: multipart/form-data;|-------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 1234
-Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="name"
-
-daniel
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="tool"
-
-curl
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="str1"
-
-@literal
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="str2"
-
-<verbatim;type=xxx/yyy
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file"; filename="fakerfile"
-Content-Type: moo/foobar
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 1234%CR
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32%CR
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="name"%CR
+%CR
+daniel%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="tool"%CR
+%CR
+curl%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="str1"%CR
+%CR
+@literal%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="str2"%CR
+%CR
+<verbatim;type=xxx/yyy%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file"; filename="fakerfile"%CR
+Content-Type: moo/foobar%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER.txt"
-Content-Type: text/plain
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file3"; filename="f\\ak\\er,\an\d;.t%22xt"
-Content-Type: mo/foo
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file3"; filename="f\\ak\\er,\an\d;.t%22xt"%CR
+Content-Type: mo/foo%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file4"; filename="A\AA%22%22\%22ZZZ"
-Content-Type: text/plain
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file4"; filename="A\AA%22%22\%22ZZZ"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32--
+%CR
+------------------------------24e78000bd32--%CR
 </protocol>
 </verify>
 </testcase>

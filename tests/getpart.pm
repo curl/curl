@@ -33,6 +33,7 @@ BEGIN {
     our @EXPORT = qw(
         compareparts
         fulltest
+        checktest
         getpart
         getpartattr
         loadarray
@@ -248,6 +249,18 @@ sub loadtest {
 # Return entire document as list of lines
 sub fulltest {
     return @xml;
+}
+
+sub checktest {
+    my $anyerr = 0;
+
+    for my $i (0 .. $#xml) {
+        if(index($xml[$i], "\r") >= 0) {
+            print STDERR "*** getpart.pm: $xmlfile:$i: 0x0d carriage return found. Use %CR macro instead.\n";
+            $anyerr = 1;
+        }
+    }
+    return $anyerr;
 }
 
 # write the test to the given file

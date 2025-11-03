@@ -20,7 +20,7 @@ Set-Cookie: onecookie=data;
 Set-Cookie: secondcookie=2data;
 Set-Cookie: cookie3=data3;
 Blank:
-Blank2:
+Blank2:%CR
 Location: /%TESTNUMBER0002
 
 </data>

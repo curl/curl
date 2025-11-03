@@ -46,30 +46,30 @@ bar
 ^(Content-Type: multipart/form-data;|------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 432
-Content-Type: multipart/form-data; boundary=----------------------------7c633d5c27ce
-
-------------------------------7c633d5c27ce
-Content-Disposition: form-data; name="name"
-
-daniel
-------------------------------7c633d5c27ce
-Content-Disposition: form-data; name="tool"
-
-curl
-------------------------------7c633d5c27ce
-Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
-Content-Type: text/plain
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 432%CR
+Content-Type: multipart/form-data; boundary=----------------------------7c633d5c27ce%CR
+%CR
+------------------------------7c633d5c27ce%CR
+Content-Disposition: form-data; name="name"%CR
+%CR
+daniel%CR
+------------------------------7c633d5c27ce%CR
+Content-Disposition: form-data; name="tool"%CR
+%CR
+curl%CR
+------------------------------7c633d5c27ce%CR
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo-
 This is a moo-
 bar
-
-------------------------------7c633d5c27ce--
+%CR
+------------------------------7c633d5c27ce--%CR
 </protocol>
 </verify>
 </testcase>

@@ -54,27 +54,27 @@ Accept: */*
 
 </protocol>
 <stdout>
-HTTP/1.1 200 OK
-HTTP/1.1 200 OK
-Server: thebest/1.0
-Server: thebest/1.0
-Content-Type: text/plain
-Content-Type: text/plain
-Content-Length: 6
-Content-Length: 6
-
-
+HTTP/1.1 200 OK%CR
+HTTP/1.1 200 OK%CR
+Server: thebest/1.0%CR
+Server: thebest/1.0%CR
+Content-Type: text/plain%CR
+Content-Type: text/plain%CR
+Content-Length: 6%CR
+Content-Length: 6%CR
+%CR
+%CR
 first
-HTTP/1.1 200 OK
-HTTP/1.1 200 OK
-Server: thebest/1.0
-Server: thebest/1.0
-Content-Type: text/plain
-Content-Type: text/plain
-Content-Length: 7
-Content-Length: 7
-
-
+HTTP/1.1 200 OK%CR
+HTTP/1.1 200 OK%CR
+Server: thebest/1.0%CR
+Server: thebest/1.0%CR
+Content-Type: text/plain%CR
+Content-Type: text/plain%CR
+Content-Length: 7%CR
+Content-Length: 7%CR
+%CR
+%CR
 second
 </stdout>
 </verify>

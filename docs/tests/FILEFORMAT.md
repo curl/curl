@@ -78,6 +78,10 @@ For example, to insert the word hello 100 times:
 
 ## Whitespace
 
+To force CRLF newline, add this macro to the end of the line:
+
+    %CR  - carriage return
+
 To add significant whitespace characters at the end of the line, or to empty
 lines:
 
