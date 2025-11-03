@@ -4,7 +4,7 @@ curl and libcurl 8.17.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3534
+ Contributors:                 3536
 
 This release includes the following changes:
 
@@ -17,7 +17,7 @@ This release includes the following changes:
  o ssl: support Apple SecTrust configurations [240]
  o tool_getparam: add --knownhosts [204]
  o vssh: drop support for wolfSSH [58]
- o wcurl: import v2025.09.27 [182]
+ o wcurl: import v2025.11.04 [431]
  o write-out: make %header{} able to output *all* occurrences of a header [25]
 
 This release includes the following bugfixes:
@@ -69,6 +69,7 @@ This release includes the following bugfixes:
  o cmake: build the "all" examples source list dynamically [245]
  o cmake: clang detection tidy-ups [116]
  o cmake: drop exclamation in comment looking like a name [160]
+ o cmake: fix `HAVE_GNUTLS_SRP` detection after adding local FindGnuTLS module [458]
  o cmake: fix building docs when the base directory contains .3 [18]
  o cmake: fix Linux pre-fill `HAVE_POSIX_STRERROR_R` (when `_CURL_PREFILL=ON`)
  o cmake: fix Linux pre-fills for non-glibc (when `_CURL_PREFILL=ON`) [372]
@@ -101,11 +102,14 @@ This release includes the following bugfixes:
  o curl_threads: delete WinCE fallback branch [233]
  o CURLINFO_FTP_ENTRY_PATH.md: this is for SFTP as well [8]
  o CURLOPT_COOKIEFILE.md: clarify when the cookies are loaded [159]
+ o CURLOPT_COPYPOSTFIELDS.md: used with MQTT and RTSP as well [457]
  o CURLOPT_HEADER/WRITEFUNCTION.md: drop '* size' since size is always 1 [63]
  o CURLOPT_MAXLIFETIME_CONN: make default 24 hours [10]
+ o CURLOPT_POSTFIELDSIZE*: these also work for MQTT and RTSP [395]
  o CURLOPT_SERVER_RESPONSE_TIMEOUT*: add default and see-also [397]
  o CURLOPT_SSL_VERIFYHOST.md: add see-also to two other VERIFYHOST options [32]
  o CURLOPT_TIMECONDITION.md: works for FILE and FTP as well [27]
+ o cw-out: fix EAGAIN handling on pause [452]
  o cw-out: unify the error handling pattern in cw_out_do_write [414]
  o digest_sspi: fix two memory leaks in error branches [77]
  o dist: do not distribute CI.md [29]
@@ -155,7 +159,9 @@ This release includes the following bugfixes:
  o ftp: simplify the 150/126 size scanner [288]
  o gnutls: check conversion of peer cert chain [275]
  o gnutls: fix re-handshake comments [422]
+ o gssapi: make channel binding conditional on GSS_C_CHANNEL_BOUND_FLAG [446]
  o gtls: avoid potential use of uninitialized variable in trace output [83]
+ o gtls: check the return value of gnutls_pubkey_init() [456]
  o header.md: see-also --proxy-header and vice versa [396]
  o hmac: free memory properly on errors [377]
  o hostip: don't store negative resolves due unrelated errors [256]
@@ -165,6 +171,7 @@ This release includes the following bugfixes:
  o http2: cleanup pushed newhandle on fail [260]
  o http2: ingress handling edge cases [259]
  o HTTP3: clarify the status for "old" OpenSSL, not current [394]
+ o http: check the return value of strdup [437]
  o http: fix `-Wunreachable-code` in !websockets !unity builds [443]
  o http: fix `-Wunused-variable` in !alt-svc !proxy !ws builds [442]
  o http: handle user-defined connection headers [165]
@@ -250,6 +257,7 @@ This release includes the following bugfixes:
  o mime: fix unpausing of readers [375]
  o mime: fix use of fseek() [334]
  o multi.h: add CURLMINFO_LASTENTRY [51]
+ o multi: check the return value of strdup() [436]
  o multi_ev: remove unnecessary data check that confuses analysers [167]
  o netrc: when the cached file is discarded, unmark it as loaded [409]
  o nghttp3: return NGHTTP3_ERR_CALLBACK_FAILURE from recv_header [227]
@@ -278,6 +286,7 @@ This release includes the following bugfixes:
  o openssl-quic: ignore unexpected streams opened by server [176]
  o openssl: better return code checks when logging cert data [342]
  o openssl: call SSL_get_error() with proper error [207]
+ o openssl: check CURL_SSLVERSION_MAX_DEFAULT properly [447]
  o openssl: clear retry flag on x509 error [130]
  o openssl: combine all the x509-store flags [451]
  o openssl: fail if more than MAX_ALLOWED_CERT_AMOUNT certs [339]
@@ -307,6 +316,7 @@ This release includes the following bugfixes:
  o quiche: fix verbose message when ip quadruple cannot be obtained. [128]
  o quiche: handle tls fail correctly [266]
  o quiche: when ingress processing fails, return that error code [103]
+ o rtsp: use explicit postfieldsize if specified [401]
  o runtests: tag tests that require curl verbose strings [172]
  o rustls: exit on error [335]
  o rustls: fix clang-tidy warning [107]
@@ -410,6 +420,7 @@ This release includes the following bugfixes:
  o tool_getparam: always disable "lib-ids" for tracing [169]
  o tool_getparam: make --fail and --fail-with-body override each other [293]
  o tool_getparam: warn if provided header looks malformed [179]
+ o tool_ipfs: check the return value of curl_url_get for gwpath [453]
  o tool_ipfs: simplify the ipfs gateway logic [337]
  o tool_msgs: make errorf() show if --show-error [294]
  o tool_operate: improve wording in retry message [37]
@@ -438,6 +449,7 @@ This release includes the following bugfixes:
  o vquic: handling of io improvements [239]
  o vquic: sending non-gso packets fix for EAGAIN [265]
  o vtls: alpn setting, check proto parameter [134]
+ o vtls: check final cfilter node in find_ssl_filter [440]
  o vtls: drop duplicate `CURL_SHA256_DIGEST_LENGTH` definition [387]
  o vtls: properly handle SSL shutdown timeout [433]
  o vtls: remove call to PKCS12_PBE_add() [408]
@@ -484,21 +496,21 @@ advice from friends like these:
   Adam Light, Alexander Blach, Alice Lee Poetics, Andrei Kurushin,
   Andrew Kirillov, Andrew Olsen, And-yW on github, BobodevMm on github, BohwaZ,
   Christian Schmitz, curl.stunt430, Dalei, Dan Fandrich, Daniel Stenberg,
-  Daniel Terhorst-North, dependabot[bot], divinity76 on github,
-  Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
+  Daniel Terhorst-North, dependabot[bot], Devdatta Talele,
+  divinity76 on github, Emilio Pozuelo Monfort, Emre Çalışkan, Ethan Everett,
   Evgeny Grin (Karlson2k), fds242 on github, Gunni on github, Harry Sintonen,
   Howard Chu, Ignat Loskutov, Jakub Stasiak, James Fuller, Javier Blazquez,
   Jicea, jmaggard10 on github, Jochen Sprickerhof, Johannes Schindelin,
   Jonathan Cardoso Machado, Joseph Birr-Pixton, Joshua Rogers,
   kapsiR on github, kuchara on github, madoe on github, Marc Aldorasi,
   Marcel Raad, Michael Osipov, Michał Petryka, Mitchell Blank Jr,
-  Mohamed Daahir, Nir Azkiel, Patrick Monnerat, Pavel P, plv1313 on github,
-  Pocs Norbert, Ray Satiro, renovate[bot], rinsuki on github, Sakthi SK,
-  Samuel Dionne-Riel, Samuel Henrique, Stanislav Fort, Stefan Eissing,
-  Tatsuhiro Tsujikawa, TheBitBrine, Theo Buehler, Tim Becker, tkzv on github,
-  Viktor Szakatas, Viktor Szakats, WangDaLei on github, Xiaoke Wang,
-  Yedaya Katsman, 包布丁
-  (69 contributors)
+  Mohamed Daahir, Nir Azkiel, Patrick Monnerat, Pavel P, pennae on github,
+  Peter Piekarski, plv1313 on github, Pocs Norbert, Ray Satiro, renovate[bot],
+  rinsuki on github, Sakthi SK, Samuel Dionne-Riel, Samuel Henrique,
+  Sergio Durigan Junior, Stanislav Fort, Stefan Eissing, Tatsuhiro Tsujikawa,
+  TheBitBrine, Theo Buehler, Tim Becker, tkzv on github, Viktor Szakatas,
+  Viktor Szakats, WangDaLei on github, Xiaoke Wang, Yedaya Katsman, 包布丁
+  (73 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -683,7 +695,6 @@ References to bug reports and discussions on issues:
  [179] = https://curl.se/bug/?i=18793
  [180] = https://curl.se/bug/?i=18886
  [181] = https://curl.se/bug/?i=18884
- [182] = https://curl.se/bug/?i=18754
  [183] = https://curl.se/bug/?i=18921
  [184] = https://curl.se/bug/?i=18878
  [185] = https://curl.se/bug/?i=18875
@@ -896,11 +907,13 @@ References to bug reports and discussions on issues:
  [392] = https://curl.se/bug/?i=19266
  [393] = https://curl.se/bug/?i=19130
  [394] = https://curl.se/bug/?i=19153
+ [395] = https://curl.se/bug/?i=19346
  [396] = https://curl.se/bug/?i=19259
  [397] = https://curl.se/bug/?i=19258
  [398] = https://curl.se/bug/?i=19252
  [399] = https://curl.se/bug/?i=19206
  [400] = https://curl.se/bug/?i=19208
+ [401] = https://curl.se/bug/?i=19345
  [402] = https://curl.se/bug/?i=19211
  [403] = https://curl.se/bug/?i=19213
  [404] = https://curl.se/bug/?i=18991
@@ -930,20 +943,31 @@ References to bug reports and discussions on issues:
  [428] = https://curl.se/bug/?i=19291
  [429] = https://curl.se/bug/?i=19167
  [430] = https://curl.se/bug/?i=19237
+ [431] = https://curl.se/bug/?i=19353
  [432] = https://curl.se/bug/?i=19288
  [433] = https://curl.se/bug/?i=19323
  [434] = https://curl.se/bug/?i=19310
  [435] = https://curl.se/bug/?i=19301
+ [436] = https://curl.se/bug/?i=19344
+ [437] = https://curl.se/bug/?i=19343
  [438] = https://curl.se/bug/?i=19271
  [439] = https://curl.se/bug/?i=19278
+ [440] = https://curl.se/bug/?i=19229
  [441] = https://curl.se/bug/?i=18847
  [442] = https://curl.se/bug/?i=19276
  [443] = https://curl.se/bug/?i=19275
  [444] = https://curl.se/bug/?i=19274
  [445] = https://curl.se/bug/?i=19240
+ [446] = https://curl.se/bug/?i=19109
+ [447] = https://curl.se/bug/?i=19340
  [448] = https://curl.se/bug/?i=18983
  [449] = https://curl.se/bug/?i=19148
  [450] = https://curl.se/bug/?i=19304
  [451] = https://curl.se/bug/?i=19306
+ [452] = https://curl.se/bug/?i=19334
+ [453] = https://curl.se/bug/?i=19358
  [454] = https://curl.se/bug/?i=19312
  [455] = https://curl.se/bug/?i=19309
+ [456] = https://curl.se/bug/?i=19362
+ [457] = https://curl.se/bug/?i=19351
+ [458] = https://curl.se/bug/?i=19360
