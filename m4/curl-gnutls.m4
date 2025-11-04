@@ -156,6 +156,9 @@ if test "$GNUTLS_ENABLED" = "1"; then
 
   dnl ---
   dnl We require GnuTLS with SRP support.
+  dnl
+  dnl In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
+  dnl Detecting actual TLS-SRP support needs poking the API at runtime.
   dnl ---
   AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
     [
