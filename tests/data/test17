@@ -25,7 +25,7 @@ http
 <name>
 HTTP with config file on stdin
 </name>
- <stdin>
+<stdin>
 #
 # Use a silly request without '--':
 request MOOO
@@ -35,7 +35,7 @@ request MOOO
 #
 # long option *with* '--':
 --max-time 180
- </stdin>
+</stdin>
 <command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>

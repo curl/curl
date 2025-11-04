@@ -39,7 +39,7 @@ http
 <name>
 urlglob with out of range -o #[num] usage
 </name>
- <command option="no-output">
+<command option="no-output">
 "http://%HOSTIP:%HTTPPORT/[%TESTNUMBER0001-%TESTNUMBER0002]" -o "%LOGDIR/dumpit%TESTNUMBER-#2.dump"
 </command>
 </client>

@@ -51,7 +51,7 @@ http
 <name>
 HTTP PUT expect 100-continue with a 400
 </name>
- <command option="no-output">
+<command option="no-output">
 -H "Expect: 100-continue" -T %LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/file%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 --expect100-timeout 99
 </command>
 </client>

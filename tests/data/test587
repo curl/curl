@@ -33,7 +33,7 @@ HTTP multi-part formpost with aborted read callback
 </name>
 # Add a delay to give server time to write its output since we otherwise might
 # not even give it enough time to write its lock file.
- <command delay="1">
+<command delay="1">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

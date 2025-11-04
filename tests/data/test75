@@ -21,7 +21,7 @@ http
 <name>
 HTTP, urlglob retrieval with bad range
 </name>
- <command option="no-output">
+<command option="no-output">
 "http://a-site-never-accessed.example.org/[2-1]" -o "%LOGDIR/weee#1.dump" --stderr -
 </command>
 </client>

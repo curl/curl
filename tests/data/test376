@@ -34,7 +34,7 @@ http
 <name>
 --remove-on-error
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save-%TESTNUMBER --remove-on-error
 </command>
 </client>

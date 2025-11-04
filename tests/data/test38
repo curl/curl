@@ -27,7 +27,7 @@ http
 <name>
 HTTP resume request without server supporting it
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/fewl%TESTNUMBER.txt">

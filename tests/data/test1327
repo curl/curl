@@ -31,7 +31,7 @@ GET /ignore/for/%TESTNUMBER HTTP/1.0
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </file>
- <command option="no-output">
+<command option="no-output">
 telnet://%HOSTIP:%HTTPPORT -T %LOGDIR/%TESTNUMBER.txt
 </command>
 </client>

@@ -50,7 +50,7 @@ http
 <name>
 HTTP POST expect 100-continue with a 404
 </name>
- <command option="no-output">
+<command option="no-output">
 -d @%LOGDIR/file%TESTNUMBER --expect100-timeout 99 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
