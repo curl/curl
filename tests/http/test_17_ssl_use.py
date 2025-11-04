@@ -195,8 +195,9 @@ class TestSSLUse:
             pytest.skip("h3 not supported")
         if env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedtls falsely verifies a DNS: altname as IP address")
-        if env.curl_uses_lib('wolfssl'):
-            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address")
+        if env.curl_uses_lib('wolfssl') and \
+           env.curl_lib_version_before('wolfssl', '5.8.4'):
+            pytest.skip("wolfSSL falsely verifies a DNS: altname as IP address in 5.8.2 and before")
         httpd.set_domain1_cred_name('domain1-very-bad')
         httpd.reload_if_config_changed()
         if proto == 'h3':
