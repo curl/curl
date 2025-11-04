@@ -39,7 +39,6 @@ HTTP AWS_SIGV4 canonical request header sorting test
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Length:.*
 ^Accept:.*
 </strip>
