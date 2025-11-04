@@ -505,6 +505,9 @@ June: we removed support for BearSSL, Secure Transport and msh3
 October: Daniel gets awarded a gold medal by the Swedish Royal Academy of
 Engineering Sciences for his work on curl.
 
+We counted curl having been installed on 110 operating systems and 28 CPU
+architectures.
+
 November:
 
     Public curl releases:         271
