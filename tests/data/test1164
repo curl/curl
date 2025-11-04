@@ -23,7 +23,7 @@ http
 <name>
 HTTP/0.9 GET and all zeroes
 </name>
- <command option="force-output">
+<command option="force-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{size_download}\n' --http0.9
 </command>
 </client>

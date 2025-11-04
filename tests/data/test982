@@ -39,7 +39,7 @@ POP3 STARTTLS pipelined server response
 </name>
 <command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --ssl
- </command>
+</command>
 </client>
 
 #

@@ -26,7 +26,7 @@ http
 <name>
 HTTP POST with *HUGE* request and chunked transfer-encoding
 </name>
- <stdin>
+<stdin>
 #
 data "we post this"
 #
@@ -36,7 +36,7 @@ header "Transfer-Encoding: chunked"
 # Set the user-agent using a short-option:
 -A "%repeat[99999 x a]%"
 #
- </stdin>
+</stdin>
 <command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>

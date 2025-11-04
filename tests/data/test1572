@@ -65,10 +65,10 @@ http
 lib1571
 </tool>
 
- <name>
+<name>
 CURLFOLLOW_OBEYCODE with custom POST method, 308 => custom
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

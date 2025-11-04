@@ -33,10 +33,10 @@ proxy
 http
 socks5
 </server>
- <name>
+<name>
 SOCKS5h with HTTP redirect to hostname too long
- </name>
- <command>
+</name>
+<command>
 --no-progress-meter --location --proxy socks5h://%HOSTIP:%SOCKSPORT http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>

@@ -33,7 +33,7 @@ http
 <name>
 --output using #0
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o '%LOGDIR/base-#0'
 </command>
 </client>

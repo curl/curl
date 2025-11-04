@@ -42,7 +42,7 @@ http
 <name>
 HTTP, urlglob {}-retrieval and -o #[num] usage
 </name>
- <command option="no-output">
+<command option="no-output">
 "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "%LOGDIR/dumpit#1.dump"
 </command>
 </client>

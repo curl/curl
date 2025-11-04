@@ -37,7 +37,7 @@ POP3 require STARTTLS with failing capabilities
 </name>
 <command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --ssl-reqd
- </command>
+</command>
 </client>
 
 #

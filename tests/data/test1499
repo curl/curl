@@ -48,10 +48,10 @@ writedelay: 10
 <server>
 http
 </server>
- <name>
+<name>
 HTTP chunked encoding and chunked trailer, twice
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>

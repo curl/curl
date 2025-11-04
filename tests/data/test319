@@ -40,9 +40,9 @@ http
 <name>
 HTTP GET gobbledigook transfer-encoded data in raw mode
 </name>
- <command option="no-include">
+<command option="no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --raw
- </command>
+</command>
 </client>
 
 #
