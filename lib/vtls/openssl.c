@@ -2904,7 +2904,7 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
   long ossl_ssl_version_min = 0;
   long ossl_ssl_version_max = 0;
 #endif
-  /* it can't be default here */
+  /* it cannot be default here */
   DEBUGASSERT(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT);
   switch(curl_ssl_version_min) {
   case CURL_SSLVERSION_TLSv1: /* TLS 1.x */
