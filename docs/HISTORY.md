@@ -462,7 +462,7 @@ March 31: we started working on a new command line tool for URL parsing and
 manipulations: trurl.
 
 May: added support for HTTP/2 over HTTPS proxy. Refuse to resolve .onion. The
-curl GitHub repository gets its 30,000th star.
+curl GitHub repository reaches 30,000 stars.
 
 August: Dropped support for the NSS library
 
