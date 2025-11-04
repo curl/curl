@@ -934,6 +934,8 @@ if(CURL_USE_GNUTLS)
     list(APPEND CMAKE_REQUIRED_INCLUDES "${GNUTLS_INCLUDE_DIRS}")
     list(APPEND CMAKE_REQUIRED_LIBRARIES "${GNUTLS_LIBRARIES}")
     curl_required_libpaths("${GNUTLS_LIBRARY_DIRS}")
+    # In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
+    # Detecting actual TLS-SRP support needs poking the API at runtime.
     check_symbol_exists("gnutls_srp_verifier" "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
     cmake_pop_check_state()
   endif()
