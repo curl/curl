@@ -1089,11 +1089,6 @@ sub singletest_shouldrun {
         @what = getpart("client", "features");
     }
 
-    if($checktests && checktest()) {
-        logmsg "Warning: issue(s) found in test data: ${TESTDIR}/test${testnum}\n";
-        $why = "test data file issue";
-    }
-
     # We require a feature to be present
     for(@what) {
         my $f = $_;
@@ -1194,6 +1189,10 @@ sub singletest_shouldrun {
                 }
             }
         }
+    }
+
+    if($why && $checktests && checktest()) {
+        logmsg "Warning: issue(s) found in test data: ${TESTDIR}/test${testnum}\n";
     }
 
     return ($why, $errorreturncode);
