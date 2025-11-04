@@ -1291,8 +1291,10 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   do {
     int ret;
 
-    /* Begin Gyrations to get the public key     */
-    gnutls_pubkey_init(&key);
+    /* Begin Gyrations to get the public key */
+    ret = gnutls_pubkey_init(&key);
+    if(ret < 0)
+      break; /* failed */
 
     ret = gnutls_pubkey_import_x509(key, cert, 0);
     if(ret < 0)
