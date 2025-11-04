@@ -11,7 +11,7 @@ flaky
 <reply>
 
 # This is the HTTPS proxy response
-<connect crlf="headers">
+<connect crlf="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -69,7 +69,7 @@ proxy
 
 <strippart>
 s/((https.proxy):(\d+))/$2:12345/
-s/^(User-Agent: curl).*/$1/
+s/^(User-Agent: curl)\S*/$1/
 </strippart>
 <proxy crlf="headers">
 CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
