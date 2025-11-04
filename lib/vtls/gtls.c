@@ -886,7 +886,12 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     infof(data, "Using TLS-SRP username: %s", config->username);
 
     rc = gnutls_srp_allocate_client_credentials(&gtls->srp_client_cred);
-    if(rc != GNUTLS_E_SUCCESS) {
+    if(rc == GNUTLS_E_UNIMPLEMENTED_FEATURE) {
+      failf(data, "GnuTLS: TLS-SRP support not built in: %s",
+            gnutls_strerror(rc));
+      return CURLE_NOT_BUILT_IN;
+    }
+    else if(rc != GNUTLS_E_SUCCESS) {
       failf(data, "gnutls_srp_allocate_client_cred() failed: %s",
             gnutls_strerror(rc));
       return CURLE_OUT_OF_MEMORY;
