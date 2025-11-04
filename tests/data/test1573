@@ -75,9 +75,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
 <protocol crlf="yes">
 IGLOO /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

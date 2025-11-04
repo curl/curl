@@ -59,17 +59,16 @@ proxy
 # opens for us, so we can't compare with a known pre-existing number!
 <strippart>
 s/((https.proxy):(\d+))/$2:12345/
-s/^(User-Agent: curl).*/$1/
 </strippart>
 <proxy crlf="headers">
 CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
 Host: ftp.site.thru.https.proxy:12345
-User-Agent: curl
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
 Host: ftp.site.thru.https.proxy:12345
-User-Agent: curl
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
