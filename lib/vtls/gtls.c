@@ -962,10 +962,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   /* "In GnuTLS 3.6.5, TLS 1.3 is enabled by default" */
   tls13support = !!gnutls_check_version("3.6.5");
 
-  /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
-   * removed if a runtime error indicates that SRP is not supported by this
-   * GnuTLS version */
-
   if(config->version == CURL_SSLVERSION_TLSv1_3) {
     if(!tls13support) {
       failf(data, "This GnuTLS installation does not support TLS 1.3");
