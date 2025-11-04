@@ -61,7 +61,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [Haskell](https://hackage.haskell.org/package/curl) Written by Galois, Inc
 
-[Hollywood](https://web.archive.org/web/20250116185836/https://www.hollywood-mal.com/download.html) hURL by Andreas Falkenhahn
+[Hollywood](https://web.archive.org/web/20250116185836/www.hollywood-mal.com/download.html) hURL by Andreas Falkenhahn
 
 [Java](https://github.com/covers1624/curl4j)
 
