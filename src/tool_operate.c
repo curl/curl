@@ -1025,8 +1025,11 @@ static CURLcode setup_outfile(struct OperationConfig *config,
 
   if(config->output_dir && *config->output_dir) {
     char *d = curl_maprintf("%s/%s", config->output_dir, per->outfile);
-    if(!d)
+    if(!d) {
+      free(per->outfile);
+      per->outfile = NULL;
       return CURLE_WRITE_ERROR;
+    }
     free(per->outfile);
     per->outfile = d;
   }
