@@ -65,7 +65,7 @@ Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, S
 X-Xxx-Date: 19700101T000000Z
 test3: 1234
 test2:
-test_space: t%tab%s  m%tab%   end%repeat[4 x  ]%
+test_space: t%TABs  m%TAB   end%repeat[4 x  ]%
 tesMixCase: MixCase
 
 </protocol>

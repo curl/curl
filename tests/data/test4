@@ -44,7 +44,7 @@ User-Agent: curl/%VERSION
 extra-header: here
 Accept: replaced
 X-Custom-Header:
-X-Test: foo;%spc%
+X-Test: foo;%SP
 X-Test2: foo;
 
 GET /%TESTNUMBER HTTP/1.1
@@ -53,7 +53,7 @@ User-Agent: curl/%VERSION
 extra-header: here
 Accept: replaced
 X-Custom-Header:
-X-Test: foo;%spc%
+X-Test: foo;%SP
 X-Test2: foo;
 
 </protocol>

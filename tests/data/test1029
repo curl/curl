@@ -50,7 +50,7 @@ Content-Length: 62
 Connection: close
 
 This server reply is for testing a simple Location: following
-http://%HOSTIP:%HTTPPORT/we/want/our/data/%TESTNUMBER0002.txt?coolsite=yes http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER 0%spc%
+http://%HOSTIP:%HTTPPORT/we/want/our/data/%TESTNUMBER0002.txt?coolsite=yes http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER 0%SP
 </stdout>
 </verify>
 </testcase>
