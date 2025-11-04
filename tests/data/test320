@@ -66,7 +66,7 @@ Accept: */*
 
 </file>
 <stripfile>
-s/^<p>Connected as user 'jsmith'.*/FINE/
+s/^<p>Connected as user 'jsmith'\S*/FINE/
 s/Protocol version:.*[0-9]//
 s/GNUTLS/GnuTLS/
 s/(AES[-_])\d\d\d([-_]CBC)/$1NNN$2/
