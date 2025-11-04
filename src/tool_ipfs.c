@@ -176,11 +176,8 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   curl_url_get(gatewayurl, CURLUPART_PORT, &gwport, CURLU_URLDECODE);
-  result = curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE);
-  if(result)
+  if(curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE))
     goto clean;
-
-  result = CURLE_URL_MALFORMAT;
 
   /* get the path from user input */
   curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE);
