@@ -100,7 +100,7 @@ my @valid_mozilla_trust_levels = (
                             # for delegates (i.e. it is not a CA).
 );
 
-my $default_signature_algorithms = $opt_s = "MD5";
+my $default_signature_algorithms = $opt_s = "SHA256";
 
 my @valid_signature_algorithms = (
     "MD5",
