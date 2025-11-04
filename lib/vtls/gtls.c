@@ -149,12 +149,16 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   return (ssize_t)nread;
 }
 
-/* gtls_init()
+/**
+ * gtls_init()
  *
  * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
- * are not thread-safe and thus this function itself is not thread-safe and
- * must only be called from within curl_global_init() to keep the thread
- * situation under control!
+ * are not thread-safe (It is thread safe since GnuTLS 3.3.0) and thus this
+ * function itself is not thread-safe and must only be called from within
+ * curl_global_init() to keep the thread situation under control!
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
  */
 static int gtls_init(void)
 {
@@ -165,7 +169,8 @@ static int gtls_init(void)
     gnutls_global_set_log_function(tls_log_func);
     gnutls_global_set_log_level(2);
 #endif
-    gtls_inited = TRUE;
+    if(ret == 1)
+      gtls_inited = TRUE;
   }
   return ret;
 }
@@ -861,20 +866,20 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   unsigned int init_flags;
   int rc;
-  bool sni = TRUE; /* default is SNI enabled */
   const char *prioritylist;
   bool tls13support;
   CURLcode result;
 
-  if(!gtls_inited)
-    gtls_init();
-
-  if(config->version == CURL_SSLVERSION_SSLv2) {
-    failf(data, "GnuTLS does not support SSLv2");
+  if(config->version == CURL_SSLVERSION_SSLv2 ||
+     config->version == CURL_SSLVERSION_SSLv3) {
+    failf(data, "GnuTLS does not support SSLv2 or SSLv3");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  else if(config->version == CURL_SSLVERSION_SSLv3)
-    sni = FALSE; /* SSLv3 has no SNI */
+
+  if(!gtls_inited && gtls_init() == 0) {
+    failf(data, "GnuTLS global initialization failed");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 
   /* allocate a shared creds struct */
   result = Curl_gtls_shared_creds_create(data, &gtls->shared_creds);
@@ -941,7 +946,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(sni && peer->sni) {
+  if(peer->sni) {
     if(gnutls_server_name_set(gtls->session, GNUTLS_NAME_DNS,
                               peer->sni, strlen(peer->sni)) < 0) {
       failf(data, "Failed to set SNI");
@@ -960,12 +965,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   /* Ensure +SRP comes at the *end* of all relevant strings so that it can be
    * removed if a runtime error indicates that SRP is not supported by this
    * GnuTLS version */
-
-  if(config->version == CURL_SSLVERSION_SSLv2 ||
-     config->version == CURL_SSLVERSION_SSLv3) {
-    failf(data, "GnuTLS does not support SSLv2 or SSLv3");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   if(config->version == CURL_SSLVERSION_TLSv1_3) {
     if(!tls13support) {
@@ -1160,7 +1159,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
           if(sess_reuse_cb) {
             result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
             if(result)
-              goto  out;
+              goto out;
           }
           if(do_early_data) {
             /* We only try the ALPN protocol the session used before,
@@ -1451,7 +1450,12 @@ static CURLcode gtls_verify_ocsp_status(struct Curl_easy *data,
     goto out;
   }
 
-  gnutls_ocsp_resp_init(&ocsp_resp);
+  rc = gnutls_ocsp_resp_init(&ocsp_resp);
+  if(rc < 0) {
+    failf(data, "Failed to initialize OCSP response object");
+    result = CURLE_SSL_INVALIDCERTSTATUS;
+    goto out;
+  }
 
   rc = gnutls_ocsp_resp_import(ocsp_resp, &status_request);
   if(rc < 0) {
