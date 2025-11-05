@@ -102,7 +102,7 @@ jobs:
         with:
           environment_variables: MATRIX_ARCH
           operating_system: 'openbsd'
-          version: '7.8'
+          version: '7.7'
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
@@ -122,9 +122,7 @@ jobs:
             bld/src/curl --disable --version
             if [ "${MATRIX_ARCH}" = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --target testdeps
-              # Skip 701, 708: sometimes hangs since upgrading to OpenBSD 7.8 (from 7.7)
-              # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs.
-              export TFLAGS='-j8 !701 !708 !2707'
+              export TFLAGS='-j8 !2707'  # Skip 2707 'ws: Peculiar frame sizes' on suspicion of hangs
               time cmake --build bld --target test-ci
             fi
             echo '::group::build examples'
