@@ -89,9 +89,9 @@ static void print_category(unsigned int category, unsigned int cols)
   }
 
   if(longdesc > cols)
-      longopt = 0; /* avoid wrap-around */
+    longopt = 0; /* avoid wrap-around */
   else if(longopt + longdesc > cols)
-      longopt = cols - longdesc;
+    longopt = cols - longdesc;
 
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
