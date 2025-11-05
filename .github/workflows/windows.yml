@@ -462,6 +462,7 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
             type: 'Debug'
             tflags: 'skipall'
+            chkprefill: ''  # Set it once to silence actionlint
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0

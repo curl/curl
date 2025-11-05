@@ -54,7 +54,7 @@ jobs:
     timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
-      CC: ${{ matrix.build.compiler || 'clang' }}
+      CC: 'clang'
       LDFLAGS: ''
       MATRIX_BUILD: ${{ matrix.build.generate && 'cmake' || 'autotools' }}
       MATRIX_OPTIONS: ${{ matrix.build.options }}
@@ -81,6 +81,7 @@ jobs:
           - name: 'libressl'
             install_steps: libressl
             generator: Xcode
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
             options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
@@ -223,6 +224,7 @@ jobs:
             compiler: clang
             install: brotli zstd
             configure: --without-ssl --with-brotli --with-zstd
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
           - name: '!ssl !debug'
             compiler: gcc-12
             configure: --without-ssl
@@ -538,7 +540,7 @@ jobs:
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
-    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
+    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
     env:
@@ -566,37 +568,11 @@ jobs:
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
         image: [macos-14, macos-15, macos-26]
-        # Can skip these to reduce jobs:
-        #   15.1 has the same default macOS SDK as 15.2 and identical test results.
-        #   15.4 not revealing new fallouts.
-        #xcode: ['15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
-        #xcode: ['15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
-        #xcode: ['15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
         xcode: ['']  # default Xcodes
         macos-version-min: ['']
         build: [autotools, cmake]
         exclude:
           # Combinations not covered by runner images:
-          - { image: macos-14, xcode: '16.0'   }
-          - { image: macos-14, xcode: '16.1'   }
-          - { image: macos-14, xcode: '16.2'   }
-          - { image: macos-14, xcode: '16.3'   }
-          - { image: macos-14, xcode: '16.4'   }
-          - { image: macos-14, xcode: '26.0'   }
-          - { image: macos-15, xcode: '15.0.1' }
-          - { image: macos-15, xcode: '15.1'   }
-          - { image: macos-15, xcode: '15.2'   }
-          - { image: macos-15, xcode: '15.3'   }
-          - { image: macos-15, xcode: '15.4'   }
-          - { image: macos-26, xcode: '15.0.1' }
-          - { image: macos-26, xcode: '15.1'   }
-          - { image: macos-26, xcode: '15.2'   }
-          - { image: macos-26, xcode: '15.3'   }
-          - { image: macos-26, xcode: '15.4'   }
-          - { image: macos-26, xcode: '16.0'   }
-          - { image: macos-26, xcode: '16.1'   }
-          - { image: macos-26, xcode: '16.2'   }
-          - { image: macos-26, xcode: '16.3'   }
           - { image: macos-14, compiler: 'llvm@18' }
           - { image: macos-14, compiler: 'llvm@20' }
           - { image: macos-15, compiler: 'llvm@15' }
@@ -606,7 +582,6 @@ jobs:
           - { image: macos-26, compiler: 'gcc-12' }
           # Reduce build combinations, by dropping less interesting ones
           - { compiler: gcc-13, build: cmake }
-          - { compiler: gcc-14, build: autotools }
           - { compiler: gcc-15, build: autotools }
     steps:
       - name: 'install autotools'
