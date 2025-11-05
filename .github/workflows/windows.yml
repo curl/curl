@@ -421,7 +421,7 @@ jobs:
             sys: 'mingw64'
             dir: 'w64devkit'
             env: 'x86_64'
-            ver: '15.2.0'
+            ver: '15.1.0'
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x64-2.2.0.7z.exe'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
