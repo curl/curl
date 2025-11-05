@@ -131,6 +131,7 @@ my %warnings = (
     'DOBRACE'               => 'A single space between do and open brace',
     'EMPTYLINEBRACE'        => 'Empty line before the open brace',
     'EQUALSNOSPACE'         => 'equals sign without following space',
+    'EQUALSPACE'            => 'equals sign with too many spaces following',
     'EQUALSNULL'            => 'if/while comparison with == NULL',
     'ERRNOVAR'              => 'use of bare errno define',
     'EXCLAMATIONSPACE'      => 'Whitespace after exclamation mark in expression',
@@ -1038,6 +1039,12 @@ sub scanfile {
             checkwarn("NOSPACEEQUALS",
                       $line, length($1)+1, $file, $ol,
                       "no space before equals sign");
+        }
+        # check for equals sign with more than one space after it
+        elsif($nostr =~ /(.*)[a-z0-9] \=  /i) {
+            checkwarn("EQUALSPACE",
+                      $line, length($1)+3, $file, $ol,
+                      "more than one space after equals sign");
         }
 
         # check for plus signs without spaces next to it
