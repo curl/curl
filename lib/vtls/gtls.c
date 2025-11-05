@@ -641,7 +641,6 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
   CURLcode result;
   int rc;
 
-
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
      or no source is provided and we are falling back to OpenSSL's built-in
      default. */
