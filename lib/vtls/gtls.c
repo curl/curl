@@ -72,7 +72,6 @@ static void tls_log_func(int level, const char *str)
     curl_mfprintf(stderr, "|<%d>| %s", level, str);
 }
 #endif
-static bool gtls_inited = FALSE;
 
 #if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x03010a)
 #error "too old GnuTLS version"
@@ -163,24 +162,17 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
 static int gtls_init(void)
 {
   int ret = 1;
-  if(!gtls_inited) {
-    ret = gnutls_global_init() ? 0 : 1;
+  ret = gnutls_global_init() ? 0 : 1;
 #ifdef GTLSDEBUG
-    gnutls_global_set_log_function(tls_log_func);
-    gnutls_global_set_log_level(2);
+  gnutls_global_set_log_function(tls_log_func);
+  gnutls_global_set_log_level(2);
 #endif
-    if(ret == 1)
-      gtls_inited = TRUE;
-  }
   return ret;
 }
 
 static void gtls_cleanup(void)
 {
-  if(gtls_inited) {
-    gnutls_global_deinit();
-    gtls_inited = FALSE;
-  }
+  gnutls_global_deinit();
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -872,11 +864,6 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   if(config->version == CURL_SSLVERSION_SSLv2 ||
      config->version == CURL_SSLVERSION_SSLv3) {
     failf(data, "GnuTLS does not support SSLv2 or SSLv3");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-
-  if(!gtls_inited && gtls_init() == 0) {
-    failf(data, "GnuTLS global initialization failed");
     return CURLE_SSL_CONNECT_ERROR;
   }
 
