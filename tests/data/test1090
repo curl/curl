@@ -30,7 +30,7 @@ Connection: close
 Content-Type: text/plain; charset=us-ascii
 
 0007
-bigger%spc%
+bigger%SP
 0008
 monster
 

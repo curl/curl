@@ -20,7 +20,7 @@ checksrc
  * Violate each rule at least once.
  **/
 int hello; /*------------------------------------------------------------------*/
-int%tab%tab;
+int%TABtab;
 int trailing_space;
 int a = func ();
 int b = func( b);
@@ -91,7 +91,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:4:82: warning: Longer than 79 columns (LONGLINE)
  int hello; /*------------------------------------------------------------------*/
 ./%LOGDIR/code1185.c:5:4: error: Contains TAB character (TABS)
- int%tab%tab;
+ int%TABtab;
     ^
 ./%LOGDIR/code1185.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
  int a = func ();
@@ -118,7 +118,7 @@ void startfunc(int a, int b) {
  } else {
  ^
 ./%LOGDIR/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
- if(a == 2){%spc%%spc%
+ if(a == 2){%SP%SP
            ^
 ./%LOGDIR/code1185.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
  func_return() ;
@@ -205,10 +205,10 @@ void startfunc(int a, int b) {
   // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
-%spc%
+%SP
  ^
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
-%spc%
+%SP
  ^
 checksrc: 0 errors and 41 warnings
 </stdout>

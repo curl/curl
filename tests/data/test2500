@@ -58,7 +58,7 @@ Accept: */*
 
 </protocol>
 <stdout crlf="headers">
-HTTP/3 200%spc%
+HTTP/3 200%SP
 date: Tue, 09 Nov 2010 14:49:00 GMT
 last-modified: Tue, 13 Jun 2000 12:10:00 GMT
 etag: "21025-dc7-39462498"

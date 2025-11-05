@@ -24,7 +24,7 @@ Funny-head: yesyes
 </data>
 <data2 nocheck="yes">
 HTTP/1.1 200 OK swsclose
-%tab%Access-Control-Allow-Origin: *
+%TABAccess-Control-Allow-Origin: *
 Connection: Keep-Alive
 Content-Type: text/html; charset=utf-8
 Date: Wed, 10 May 2023 14:58:08 GMT
