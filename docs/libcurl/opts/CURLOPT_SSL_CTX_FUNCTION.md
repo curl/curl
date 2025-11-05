@@ -136,7 +136,8 @@ int main(void)
 {
   CURL *ch;
   CURLcode rv;
-  char *mypem = /* CA cert in PEM format, replace the XXXs */
+  /* CA cert in PEM format, replace the XXXs */
+  char *mypem =
     "-----BEGIN CERTIFICATE-----\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"
