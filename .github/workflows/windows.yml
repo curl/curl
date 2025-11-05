@@ -417,21 +417,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: 'schannel'  # mingw-w64 13.0
+          - name: 'schannel'  # mingw-w64 12.0
             sys: 'mingw64'
             dir: 'w64devkit'
             env: 'x86_64'
             ver: '15.2.0'
-            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.4.0/w64devkit-x64-2.4.0.7z.exe'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
-            type: 'Release'
-            tflags: 'skiprun'
-          - name: 'schannel'  # mingw-w64 12.0
-            sys: 'mingw64'
-            dir: 'mingw64'
-            env: 'x86_64'
-            ver: '15.0.1'
-            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/15.0.1-snapshot20250406posix-12.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.0.1-snapshot20250406-mingw-w64ucrt-12.0.0-r1.7z'
+            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x64-2.2.0.7z.exe'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
             tflags: 'skiprun'
