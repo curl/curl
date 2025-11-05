@@ -99,9 +99,9 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  ts->authority = /* host:port with IPv6 support */
-    curl_maprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
-                  ipv6_ip ? "]" : "", port);
+  /* host:port with IPv6 support */
+  ts->authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+                                ipv6_ip ? "]" : "", port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
