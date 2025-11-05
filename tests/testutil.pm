@@ -149,8 +149,7 @@ sub subbase64 {
 
     $$thing =~ s/%SP/ /g;    # space
     $$thing =~ s/%TAB/\t/g;  # horizontal tab
-
-    $$thing =~ s/%CR/\r/g;    # carriage return aka \r aka 0x0d
+    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
 
     # include a file
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1)/ge;
