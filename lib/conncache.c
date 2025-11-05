@@ -536,6 +536,9 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
 
+  if(!data)
+    return kept;
+
   if(!data->multi->maxconnects) {
     unsigned int running = Curl_multi_xfers_running(data->multi);
     maxconnects = (running <= UINT_MAX / 4) ? running * 4 : UINT_MAX;
