@@ -1041,7 +1041,7 @@ sub scanfile {
                       "no space before equals sign");
         }
         # check for equals sign with more than one space after it
-        elsif($nostr =~ /(.*)[a-z0-9] \=  /i) {
+        elsif($l =~ /(.*)[a-z0-9] \=  /i) {
             checkwarn("EQUALSPACE",
                       $line, length($1)+3, $file, $ol,
                       "more than one space after equals sign");

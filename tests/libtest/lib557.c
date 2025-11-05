@@ -205,7 +205,7 @@ static int test_signed_short_formatting(void)
   i++; ss_test[i].num = -0x0050 -1; ss_test[i].expected = "-81";
   i++; ss_test[i].num = -0x0005 -1; ss_test[i].expected = "-6";
 
-  i++; ss_test[i].num =  0x0000 -1; ss_test[i].expected = "-1";
+  i++; ss_test[i].num = 0x0000 -1; ss_test[i].expected = "-1";
 
   num_sshort_tests = i;
 
@@ -431,7 +431,7 @@ static int test_signed_int_formatting(void)
   i++; si_test[i].num = -0x0050 -1; si_test[i].expected = "-81";
   i++; si_test[i].num = -0x0005 -1; si_test[i].expected = "-6";
 
-  i++; si_test[i].num =  0x0000 -1; si_test[i].expected = "-1";
+  i++; si_test[i].num = 0x0000 -1; si_test[i].expected = "-1";
 
   num_sint_tests = i;
 
@@ -498,7 +498,7 @@ static int test_signed_int_formatting(void)
   i++; si_test[i].num = -0x00000050 -1; si_test[i].expected = "-81";
   i++; si_test[i].num = -0x00000005 -1; si_test[i].expected = "-6";
 
-  i++; si_test[i].num =  0x00000000 -1; si_test[i].expected = "-1";
+  i++; si_test[i].num = 0x00000000 -1; si_test[i].expected = "-1";
 
   num_sint_tests = i;
 
@@ -581,7 +581,7 @@ static int test_signed_int_formatting(void)
   i++; si_test[i].num = -0x0000000000000070 -1; si_test[i].expected = "-113";
   i++; si_test[i].num = -0x0000000000000007 -1; si_test[i].expected = "-8";
 
-  i++; si_test[i].num =  0x0000000000000000 -1; si_test[i].expected = "-1";
+  i++; si_test[i].num = 0x0000000000000000 -1; si_test[i].expected = "-1";
 
   num_sint_tests = i;
 
@@ -808,7 +808,7 @@ static int test_signed_long_formatting(void)
   i++; sl_test[i].num = -0x0050L -1L; sl_test[i].expected = "-81";
   i++; sl_test[i].num = -0x0005L -1L; sl_test[i].expected = "-6";
 
-  i++; sl_test[i].num =  0x0000L -1L; sl_test[i].expected = "-1";
+  i++; sl_test[i].num = 0x0000L -1L; sl_test[i].expected = "-1";
 
   num_slong_tests = i;
 
@@ -875,7 +875,7 @@ static int test_signed_long_formatting(void)
   i++; sl_test[i].num = -0x00000050L -1L; sl_test[i].expected = "-81";
   i++; sl_test[i].num = -0x00000005L -1L; sl_test[i].expected = "-6";
 
-  i++; sl_test[i].num =  0x00000000L -1L; sl_test[i].expected = "-1";
+  i++; sl_test[i].num = 0x00000000L -1L; sl_test[i].expected = "-1";
 
   num_slong_tests = i;
 
@@ -958,7 +958,7 @@ static int test_signed_long_formatting(void)
   i++; sl_test[i].num = -0x0000000000000070L -1L; sl_test[i].expected = "-113";
   i++; sl_test[i].num = -0x0000000000000007L -1L; sl_test[i].expected = "-8";
 
-  i++; sl_test[i].num =  0x0000000000000000L -1L; sl_test[i].expected = "-1";
+  i++; sl_test[i].num = 0x0000000000000000L -1L; sl_test[i].expected = "-1";
 
   num_slong_tests = i;
 
@@ -1074,7 +1074,7 @@ static int test_curl_off_t_formatting(void)
   i++; co_test[i].num = -0x0000000000000070 -1; co_test[i].expected = "-113";
   i++; co_test[i].num = -0x0000000000000007 -1; co_test[i].expected = "-8";
 
-  i++; co_test[i].num =  0x0000000000000000 -1; co_test[i].expected = "-1";
+  i++; co_test[i].num = 0x0000000000000000 -1; co_test[i].expected = "-1";
 
   num_cofft_tests = i;
 
