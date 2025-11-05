@@ -98,7 +98,7 @@ static void print_category(unsigned int category, unsigned int cols)
       size_t opt = longopt;
       size_t desclen = strlen(helptext[i].desc);
       /* avoid wrap-around */
-      if(cols >= 3 && opt + desclen >= (cols - 2)) {
+      if(cols >= 2 && opt + desclen >= (cols - 2)) {
         if(desclen < (cols - 2))
           opt = (cols - 3) - desclen;
         else
