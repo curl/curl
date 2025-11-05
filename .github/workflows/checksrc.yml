@@ -137,6 +137,13 @@ jobs:
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
 
+      - name: 'actionlint'
+         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
+          actionlint --version
+          actionlint .github/workflows/*.yml
+
       - name: 'shellcheck CI'
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
