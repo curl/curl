@@ -5549,7 +5549,6 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
   char error_buffer[256];
   unsigned long sslerror;
   int buffsize;
-  struct connectdata *conn = cf->conn;
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
   CURLcode result = CURLE_OK;
@@ -5579,7 +5578,7 @@ static CURLcode ossl_recv(struct Curl_cfilter *cf,
       if(cf->sockindex == FIRSTSOCKET)
         /* mark the connection for close if it is indeed the control
            connection */
-        connclose(conn, "TLS close_notify");
+        CURL_TRC_CF(data, cf, "TLS close_notify");
       break;
     case SSL_ERROR_WANT_READ:
       connssl->io_need = CURL_SSL_IO_NEED_RECV;

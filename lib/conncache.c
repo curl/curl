@@ -220,7 +220,6 @@ void Curl_cpool_destroy(struct cpool *cpool)
     while(conn) {
       cpool_remove_conn(cpool, conn);
       sigpipe_apply(cpool->idata, &pipe_st);
-      connclose(conn, "kill all");
       cpool_discard_conn(cpool, cpool->idata, conn, FALSE);
       conn = cpool_get_first(cpool);
     }
