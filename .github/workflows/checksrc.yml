@@ -124,7 +124,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 'install prereqs'
-        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
