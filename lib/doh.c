@@ -79,7 +79,7 @@ static const char *doh_strerror(DOHcode code)
 UNITTEST DOHcode doh_req_encode(const char *host,
                                 DNStype dnstype,
                                 unsigned char *dnsp, /* buffer */
-                                size_t len,  /* buffer size */
+                                size_t len,   /* buffer size */
                                 size_t *olen) /* output length */
 {
   const size_t hostlen = strlen(host);
@@ -158,9 +158,9 @@ UNITTEST DOHcode doh_req_encode(const char *host,
 
   *dnsp++ = 0; /* append zero-length label for root */
 
-  /* There are assigned TYPE codes beyond 255: use range [1..65535]  */
+  /* There are assigned TYPE codes beyond 255: use range [1..65535] */
   *dnsp++ = (unsigned char)(255 & (dnstype >> 8)); /* upper 8 bit TYPE */
-  *dnsp++ = (unsigned char)(255 & dnstype);      /* lower 8 bit TYPE */
+  *dnsp++ = (unsigned char)(255 & dnstype);        /* lower 8 bit TYPE */
 
   *dnsp++ = '\0'; /* upper 8 bit CLASS */
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
@@ -677,7 +677,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
                          struct dohentry *d)
 {
   /* RDATA
-     - A (TYPE 1):  4 bytes
+     - A (TYPE 1): 4 bytes
      - AAAA (TYPE 28): 16 bytes
      - NS (TYPE 2): N bytes
      - HTTPS (TYPE 65): N bytes */
@@ -707,7 +707,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
       return rc;
     break;
   case CURL_DNS_TYPE_DNAME:
-    /* explicit for clarity; just skip; rely on synthesized CNAME  */
+    /* explicit for clarity; just skip; rely on synthesized CNAME */
     break;
   default:
     /* unsupported type, just skip it */

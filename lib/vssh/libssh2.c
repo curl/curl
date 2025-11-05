@@ -3573,9 +3573,9 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
   Curl_pgrsSetDownloadSize(data, -1);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
-    result = scp_perform(data, &connected,  done);
+    result = scp_perform(data, &connected, done);
   else
-    result = sftp_perform(data, &connected,  done);
+    result = sftp_perform(data, &connected, done);
 
   return result;
 }

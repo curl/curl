@@ -1952,7 +1952,7 @@ CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
     len = strlen(spec->entries[i]);
     if(len >= ALPN_NAME_MAX)
       return CURLE_FAILED_INIT;
-    blen = (unsigned  char)len;
+    blen = (unsigned char)len;
     if(off + blen + 1 >= (int)sizeof(buf->data))
       return CURLE_FAILED_INIT;
     buf->data[off++] = blen;

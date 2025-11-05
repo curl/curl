@@ -66,7 +66,6 @@ bool Curl_auth_is_spnego_supported(void)
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
-
   return status == SEC_E_OK;
 }
 

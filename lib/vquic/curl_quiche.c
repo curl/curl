@@ -869,7 +869,6 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!stream)
     return CURLE_RECV_ERROR;
 
-
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     result = Curl_bufq_cread(&stream->recvbuf, buf, len, pnread);
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] read recvbuf(len=%zu) "

@@ -796,7 +796,7 @@ static ssize_t send_callback(nghttp2_session *h2,
     ctx->nw_out_blocked = 1;
     return NGHTTP2_ERR_WOULDBLOCK;
   }
-  return (nwritten  > SSIZE_MAX) ?
+  return (nwritten > SSIZE_MAX) ?
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nwritten;
 }
 
@@ -2558,7 +2558,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   }
 
   /* Send out our SETTINGS and ACKs and such. If that blocks, we
-   * have it buffered and  can count this filter as being connected */
+   * have it buffered and can count this filter as being connected */
   result = h2_progress_egress(cf, data);
   if(result && (result != CURLE_AGAIN))
     goto out;
@@ -2945,7 +2945,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   struct cf_h2_ctx *ctx;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data, conn) <  20);
+  DEBUGASSERT(Curl_conn_http_version(data, conn) < 20);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
   if(result)

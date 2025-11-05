@@ -252,7 +252,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   size_t wlen, nwritten;
   CURLcode result;
 
-  /* If we errored once, we do not invoke the client callback  again */
+  /* If we errored once, we do not invoke the client callback again */
   if(ctx->errored)
     return CURLE_WRITE_ERROR;
 

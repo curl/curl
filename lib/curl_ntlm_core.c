@@ -650,10 +650,10 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
  *
  * Returns CURLE_OK on success.
  */
-CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
-                                      unsigned char *challenge_client,
-                                      unsigned char *challenge_server,
-                                      unsigned char *lmresp)
+CURLcode Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
+                                     unsigned char *challenge_client,
+                                     unsigned char *challenge_server,
+                                     unsigned char *lmresp)
 {
   unsigned char data[16];
   unsigned char hmac_output[16];

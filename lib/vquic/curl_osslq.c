@@ -951,7 +951,8 @@ static int cb_h3_stop_sending(nghttp3_conn *conn, int64_t sid,
 
 static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t sid,
                               uint64_t app_error_code, void *user_data,
-                              void *stream_user_data) {
+                              void *stream_user_data)
+{
   struct Curl_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct Curl_easy *data = stream_user_data;

@@ -274,7 +274,6 @@ static CURLcode make_headers(struct Curl_easy *data,
     }
   }
 
-
   if(*content_sha256_header) {
     tmp_head = curl_slist_append(head, content_sha256_header);
     if(!tmp_head)
@@ -412,7 +411,8 @@ fail:
 static const char *parse_content_sha_hdr(struct Curl_easy *data,
                                          const char *provider1,
                                          size_t plen,
-                                         size_t *value_len) {
+                                         size_t *value_len)
+{
   char key[CONTENT_SHA256_KEY_LEN];
   size_t key_len;
   const char *value;

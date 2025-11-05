@@ -167,7 +167,7 @@ static CURLcode httpsrr_opt(struct Curl_easy *data,
   unsigned short code;
   size_t len = 0;
 
-  code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
+  code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
   return Curl_httpsrr_set(data, hinfo, code, val, len);
 }
 

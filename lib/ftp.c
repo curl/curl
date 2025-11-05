@@ -1115,7 +1115,6 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     port++;
   }
 
-
   /* get the name again after the bind() so that we can extract the
      port number it uses now */
   sslen = sizeof(ss);
@@ -1976,7 +1975,6 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     goto error;
   }
 
-
   /*
    * When this is used from the multi interface, this might've returned with
    * the 'connected' set to FALSE and thus we are now awaiting a non-blocking
@@ -2487,7 +2485,6 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
       125 Data connection already open; Transfer starting. */
 
     data->req.size = -1; /* default unknown size */
-
 
     /*
      * It appears that there are FTP-servers that return size 0 for files when
