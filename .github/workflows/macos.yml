@@ -538,7 +538,7 @@ jobs:
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, built tool, combinations
-    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
+    name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }}"
     runs-on: ${{ matrix.image }}
     timeout-minutes: 10
     env:
