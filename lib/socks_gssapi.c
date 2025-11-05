@@ -132,7 +132,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   const size_t serviceptr_length = strlen(serviceptr);
   gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
 
-
   /*   GSS-API request looks like
    * +----+------+-----+----------------+
    * |VER | MTYP | LEN |     TOKEN      |

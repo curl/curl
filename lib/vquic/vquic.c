@@ -155,7 +155,6 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #endif
 
-
   while((sent = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;

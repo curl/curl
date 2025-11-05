@@ -392,7 +392,8 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
 
 #define GSS_LOG_BUFFER_LEN 1024
 static size_t display_gss_error(OM_uint32 status, int type,
-                                char *buf, size_t len) {
+                                char *buf, size_t len)
+{
   OM_uint32 maj_stat;
   OM_uint32 min_stat;
   OM_uint32 msg_ctx = 0;

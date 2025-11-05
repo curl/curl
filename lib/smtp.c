@@ -1881,7 +1881,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = strdup(fqma[0] == '<' ? fqma + 1  : fqma);
+  char *dup = strdup(fqma[0] == '<' ? fqma + 1 : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 

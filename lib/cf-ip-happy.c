@@ -237,7 +237,7 @@ static CURLcode cf_ip_attempt_connect(struct cf_ip_attempt *a,
                                       bool *connected)
 {
   *connected = a->connected;
-  if(!a->result &&  !*connected) {
+  if(!a->result && !*connected) {
     /* evaluate again */
     a->result = Curl_conn_cf_connect(a->cf, data, connected);
 

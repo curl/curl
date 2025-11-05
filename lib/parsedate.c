@@ -362,7 +362,7 @@ static int parsedate(const char *date, time_t *output)
   time_t t = 0;
   int wdaynum = -1;  /* day of the week number, 0-6 (mon-sun) */
   int monnum = -1;   /* month of the year number, 0-11 */
-  int mdaynum = -1; /* day of month, 1 - 31 */
+  int mdaynum = -1;  /* day of month, 1 - 31 */
   int hournum = -1;
   int minnum = -1;
   int secnum = -1;

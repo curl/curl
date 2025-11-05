@@ -2187,7 +2187,6 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   bool is_unix_proxy = FALSE;
 #endif
 
-
   if(!uhp) {
     result = CURLE_OUT_OF_MEMORY;
     goto error;

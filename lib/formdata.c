@@ -289,7 +289,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
                         HTTPPOST_CALLBACK)) && form->value) {
       /* copy value (without strdup; possibly contains null characters) */
-      size_t clen  = (size_t) form->contentslength;
+      size_t clen = (size_t) form->contentslength;
       if(!clen)
         clen = strlen(form->value) + 1;
 
@@ -547,7 +547,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         retval = CURL_FORMADD_OPTION_TWICE;
       else {
         if(!array_state)
-          avalue  = va_arg(params, char *);
+          avalue = va_arg(params, char *);
         if(avalue) {
           curr->userp = avalue;
           curr->value = avalue; /* this is not strictly true but we derive a

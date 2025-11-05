@@ -2579,7 +2579,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       DEBUGASSERT(data->conn);
       if(data->conn->bits.multiplex)
         /* Check if we can move pending requests to send pipe */
-        process_pending_handles(multi); /*  multiplexed */
+        process_pending_handles(multi); /* multiplexed */
 
       /* Only perform the transfer if there is a good socket to work with.
          Having both BAD is a signal to skip immediately to DONE */

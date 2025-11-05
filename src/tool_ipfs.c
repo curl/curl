@@ -192,7 +192,6 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   if(inputpath && (inputpath[0] == '/') && !inputpath[1])
     *inputpath = '\0';
 
-
   pathbuffer = curl_maprintf("%s%s%s/%s%s", gwpath,
                              has_trailing_slash(gwpath) ? "" : "/",
                              protocol, cid,

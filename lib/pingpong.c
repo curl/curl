@@ -284,7 +284,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       size_t full = curlx_dyn_len(&pp->recvbuf);
 
       /* trim off the "final" leading part */
-      curlx_dyn_tail(&pp->recvbuf, full -  pp->nfinal);
+      curlx_dyn_tail(&pp->recvbuf, full - pp->nfinal);
 
       pp->nfinal = 0; /* now gone */
     }

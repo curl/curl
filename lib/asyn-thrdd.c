@@ -659,7 +659,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
       /* Start at 1ms poll interval */
       thrdd->addr->poll_interval = 1;
     else if(elapsed >= thrdd->addr->interval_end)
-      /* Back-off exponentially if last interval expired  */
+      /* Back-off exponentially if last interval expired */
       thrdd->addr->poll_interval *= 2;
 
     if(thrdd->addr->poll_interval > 250)

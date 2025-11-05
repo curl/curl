@@ -1235,7 +1235,6 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
         break;
     }
 
-
     if(!result)
       result = client_write(data, STRCONST("\n"), NULL, 0, NULL, 0);
     if(!result)
