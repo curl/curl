@@ -87,14 +87,18 @@ static void print_category(unsigned int category, unsigned int cols)
     if(len > longdesc)
       longdesc = len;
   }
-  if(longopt + longdesc > cols)
-    longopt = cols - longdesc;
+
+  if(longdesc > cols)
+      longopt = 0; /* avoid wrap-around */
+  else if(longopt + longdesc > cols)
+      longopt = cols - longdesc;
 
   for(i = 0; helptext[i].opt; ++i)
     if(helptext[i].categories & category) {
       size_t opt = longopt;
       size_t desclen = strlen(helptext[i].desc);
-      if(opt + desclen >= (cols - 2)) {
+      /* avoid wrap-around */
+      if(cols >= 3 && opt + desclen >= (cols - 2)) {
         if(desclen < (cols - 2))
           opt = (cols - 3) - desclen;
         else
