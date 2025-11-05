@@ -81,6 +81,7 @@ jobs:
           - name: 'libressl'
             install_steps: libressl
             generator: Xcode
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
             options: --config Debug
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
@@ -223,6 +224,7 @@ jobs:
             compiler: clang
             install: brotli zstd
             configure: --without-ssl --with-brotli --with-zstd
+            xcode: ''  # default Xcode. Set it once to silence actionlint.
           - name: '!ssl !debug'
             compiler: gcc-12
             configure: --without-ssl
