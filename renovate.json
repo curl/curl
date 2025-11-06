@@ -45,9 +45,10 @@
       "enabled": false
     },
     {
-      "description": "Schedule CodeQL updates on the 10th of each month",
+      "description": "Schedule package updates on the 10th of each month",
       "matchPackageNames": [
-        "/codeql/i"
+        "/codeql/i",
+        "/ruff/i"
       ],
       "groupName": "CodeQL",
       "schedule": [
