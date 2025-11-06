@@ -397,7 +397,7 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   const char **protoset;
   struct dynbuf obuf;
   size_t proto;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
@@ -496,18 +496,17 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   qsort((char *) protoset, protoset_index(protoset, NULL), sizeof(*protoset),
         struplocompare4sort);
 
-  result = curlx_dyn_addn(&obuf, "", 0);
   for(proto = 0; protoset[proto] && !result; proto++)
-    result = curlx_dyn_addf(&obuf, "%s,", protoset[proto]);
+    result = curlx_dyn_addf(&obuf, "%s%s", curlx_dyn_len(&obuf) ? "," : "",
+                            protoset[proto]);
   free((char *) protoset);
-  free(*ostr);
   if(result)
     return PARAM_NO_MEM;
-  curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
   if(!curlx_dyn_len(&obuf)) {
     curlx_dyn_free(&obuf);
     return PARAM_BAD_USE;
   }
+  free(*ostr);
   *ostr = curlx_dyn_ptr(&obuf);
   return PARAM_OK;
 }
