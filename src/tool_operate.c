@@ -1549,6 +1549,7 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 
   curl_multi_socket_action(c->uv->s->multi, c->sockfd, flags,
                            &c->uv->s->still_running);
+  progress_meter(c->uv->s->multi, &c->uv->s->start, FALSE);
 }
 
 /* callback from libuv when timeout expires */
@@ -1561,6 +1562,7 @@ static void on_uv_timeout(uv_timer_t *req)
   if(uv && uv->s) {
     curl_multi_socket_action(uv->s->multi, CURL_SOCKET_TIMEOUT, 0,
                              &uv->s->still_running);
+    progress_meter(uv->s->multi, &uv->s->start, FALSE);
   }
 }
 
@@ -1733,7 +1735,6 @@ static CURLcode check_finished(struct parastate *s)
   int rc;
   CURLMsg *msg;
   bool checkmore = FALSE;
-  progress_meter(s->multi, &s->start, FALSE);
   do {
     msg = curl_multi_info_read(s->multi, &rc);
     if(msg) {
@@ -1875,6 +1876,8 @@ static CURLcode parallel_transfers(CURLSH *share)
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
       if(!s->mcode)
         s->mcode = curl_multi_perform(s->multi, &s->still_running);
+
+      progress_meter(s->multi, &s->start, FALSE);
     }
 
     (void)progress_meter(s->multi, &s->start, TRUE);
