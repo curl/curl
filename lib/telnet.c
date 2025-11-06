@@ -1599,9 +1599,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
 
         total_dl += nread;
-        result = Curl_pgrsSetDownloadCounter(data, total_dl);
-        if(!result)
-          result = telrcv(data, tn, (unsigned char *)buffer, nread);
+        Curl_pgrsSetDownloadCounter(data, total_dl);
+        result = telrcv(data, tn, (unsigned char *)buffer, nread);
         if(result) {
           keepon = FALSE;
           break;

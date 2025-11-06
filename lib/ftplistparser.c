@@ -185,12 +185,10 @@ static void fileinfo_dtor(void *user, void *element)
   Curl_fileinfo_cleanup(element);
 }
 
-CURLcode Curl_wildcard_init(struct WildcardData *wc)
+void Curl_wildcard_init(struct WildcardData *wc)
 {
   Curl_llist_init(&wc->filelist, fileinfo_dtor);
   wc->state = CURLWC_INIT;
-
-  return CURLE_OK;
 }
 
 void Curl_wildcard_dtor(struct WildcardData **wcp)

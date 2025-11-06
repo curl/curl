@@ -95,9 +95,7 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
                   BUFQ_OPT_SOFT_LIMIT);
   Curl_bufq_init(&ts->sendbuf, PROXY_H2_CHUNK_SIZE, H2_TUNNEL_SEND_CHUNKS);
 
-  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
-  if(result)
-    return result;
+  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
 
   /* host:port with IPv6 support */
   ts->authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
