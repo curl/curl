@@ -253,7 +253,6 @@ bool progress_meter(CURLM *multi,
       speed = dls > uls ? dls : uls;
     }
 
-
     if(dlknown && speed) {
       curl_off_t est = all_dltotal / speed;
       curl_off_t left = (all_dltotal - all_dlnow) / speed;

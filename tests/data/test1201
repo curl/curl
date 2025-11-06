@@ -9,7 +9,7 @@ SELECTOR
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 iMenu results		error.host	1
 0Selector /selector/SELECTOR	/bar	bar.foo.invalid	70
 .

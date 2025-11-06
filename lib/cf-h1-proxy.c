@@ -126,7 +126,7 @@ static CURLcode tunnel_init(struct Curl_cfilter *cf,
   curlx_dyn_init(&ts->request_data, DYN_HTTP_REQUEST);
   Curl_httpchunk_init(data, &ts->ch, TRUE);
 
-  *pts =  ts;
+  *pts = ts;
   connkeep(cf->conn, "HTTP proxy CONNECT");
   return tunnel_reinit(cf, data, ts);
 }
@@ -350,7 +350,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
           ISDIGIT(header[9]) && ISDIGIT(header[10]) && ISDIGIT(header[11]) &&
           !ISDIGIT(header[12])) {
     /* store the HTTP code from the proxy */
-    data->info.httpproxycode =  k->httpcode = (header[9] - '0') * 100 +
+    data->info.httpproxycode = k->httpcode = (header[9] - '0') * 100 +
       (header[10] - '0') * 10 + (header[11] - '0');
   }
   return result;

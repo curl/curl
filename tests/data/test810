@@ -10,7 +10,7 @@ SEARCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * SEARCH 1 123 456 %TESTNUMBER
 </data>
 </reply>

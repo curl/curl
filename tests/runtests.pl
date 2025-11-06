@@ -1306,7 +1306,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(0, \$_) for @validstdout;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @validstdout;
+            }
+            else {
+                subnewlines(1, \$_) for @validstdout;
+            }
         }
 
         $res = compare($runnerid, $testnum, $testname, "stdout", \@actual, \@validstdout);
@@ -1355,7 +1360,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(0, \$_) for @validstderr;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @validstderr;
+            }
+            else {
+                subnewlines(1, \$_) for @validstderr;
+            }
         }
 
         $res = compare($runnerid, $testnum, $testname, "stderr", \@actual, \@validstderr);
@@ -1404,7 +1414,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(1, \$_) for @protocol;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @protocol;
+            }
+            else {
+                subnewlines(1, \$_) for @protocol;
+            }
         }
 
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
@@ -1446,7 +1461,12 @@ sub singletest_check {
                     chomp($replycheckpart[-1]);
                 }
                 if($replycheckpartattr{'crlf'}) {
-                    subnewlines(0, \$_) for @replycheckpart;
+                    if($replycheckpartattr{'crlf'} eq "headers") {
+                        subnewlines(0, \$_) for @replycheckpart;
+                    }
+                    else {
+                        subnewlines(1, \$_) for @replycheckpart;
+                    }
                 }
                 push(@reply, @replycheckpart);
             }
@@ -1467,7 +1487,12 @@ sub singletest_check {
             normalize_text(\@reply);
         }
         if($replyattr{'crlf'}) {
-            subnewlines(0, \$_) for @reply;
+            if($replyattr{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @reply;
+            }
+            else {
+                subnewlines(1, \$_) for @reply;
+            }
         }
     }
 
@@ -1560,7 +1585,12 @@ sub singletest_check {
         }
 
         if($hash{'crlf'}) {
-            subnewlines(0, \$_) for @proxyprot;
+            if($hash{'crlf'} eq "headers") {
+                subnewlines(0, \$_) for @proxyprot;
+            }
+            else {
+                subnewlines(1, \$_) for @proxyprot;
+            }
         }
 
         $res = compare($runnerid, $testnum, $testname, "proxy", \@out, \@proxyprot);
@@ -1618,7 +1648,12 @@ sub singletest_check {
                 normalize_text(\@generated);
             }
             if($hash{'crlf'}) {
-                subnewlines(0, \$_) for @outfile;
+                if($hash{'crlf'} eq "headers") {
+                    subnewlines(0, \$_) for @outfile;
+                }
+                else {
+                    subnewlines(1, \$_) for @outfile;
+                }
             }
 
             for my $strip (@stripfilepar) {

@@ -30,7 +30,7 @@ smtp
 <name>
 SMTP OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>

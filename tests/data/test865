@@ -18,7 +18,7 @@ AUTH PLAIN
 REPLY AUTH +
 REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

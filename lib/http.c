@@ -4039,9 +4039,13 @@ static CURLcode http_on_response(struct Curl_easy *data,
                 goto out;
             }
             data->state.disableexpect = TRUE;
+            Curl_req_abort_sending(data);
             DEBUGASSERT(!data->req.newurl);
             data->req.newurl = strdup(data->state.url);
-            Curl_req_abort_sending(data);
+            if(!data->req.newurl) {
+              result = CURLE_OUT_OF_MEMORY;
+              goto out;
+            }
           }
           else if(data->set.http_keep_sending_on_error) {
             infof(data, "HTTP error before end of send, keep sending");
@@ -4077,7 +4081,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
     k->download_done = TRUE;
 
   /* If max download size is *zero* (nothing) we already have
-     nothing and can safely return ok now!  But for HTTP/2, we would
+     nothing and can safely return ok now! But for HTTP/2, we would
      like to call http2_handle_stream_close to properly close a
      stream. In order to do this, we keep reading until we
      close the stream. */

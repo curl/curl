@@ -2646,7 +2646,6 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
       break; /* failed */
     }
 
-
     if(!(((pCertContextServer->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
          (pCertContextServer->cbCertEncoded > 0)))
       break;

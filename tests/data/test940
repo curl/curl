@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP with username and password but no AUTH capability
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>

@@ -28,7 +28,7 @@ smtp
 <setenv>
 SSL_CERT_FILE
 </setenv>
-<file name="%LOGDIR/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 

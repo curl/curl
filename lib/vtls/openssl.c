@@ -2904,6 +2904,8 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
   long ossl_ssl_version_min = 0;
   long ossl_ssl_version_max = 0;
 #endif
+  /* it cannot be default here */
+  DEBUGASSERT(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT);
   switch(curl_ssl_version_min) {
   case CURL_SSLVERSION_TLSv1: /* TLS 1.x */
   case CURL_SSLVERSION_TLSv1_0:
@@ -2922,18 +2924,6 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
 #else
     return CURLE_NOT_BUILT_IN;
 #endif
-  }
-
-  /* CURL_SSLVERSION_DEFAULT means that no option was selected.
-     We do not want to pass 0 to SSL_CTX_set_min_proto_version as
-     it would enable all versions down to the lowest supported by
-     the library.
-     So we skip this, and stay with the library default
-  */
-  if(curl_ssl_version_min != CURL_SSLVERSION_DEFAULT) {
-    if(!SSL_CTX_set_min_proto_version(ctx, ossl_ssl_version_min)) {
-      return CURLE_SSL_CONNECT_ERROR;
-    }
   }
 
   /* ... then, TLS max version */
@@ -2965,9 +2955,9 @@ ossl_set_ssl_version_min_max(struct Curl_cfilter *cf, SSL_CTX *ctx,
     break;
   }
 
-  if(!SSL_CTX_set_max_proto_version(ctx, ossl_ssl_version_max)) {
+  if(!SSL_CTX_set_min_proto_version(ctx, ossl_ssl_version_min) ||
+     !SSL_CTX_set_max_proto_version(ctx, ossl_ssl_version_max))
     return CURLE_SSL_CONNECT_ERROR;
-  }
 
   return CURLE_OK;
 }
@@ -4050,6 +4040,7 @@ static CURLcode ossl_init_method(struct Curl_cfilter *cf,
   case TRNSPRT_QUIC:
     *pssl_version_min = CURL_SSLVERSION_TLSv1_3;
     if(conn_config->version_max &&
+       (conn_config->version_max != CURL_SSLVERSION_MAX_DEFAULT) &&
        (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
       return CURLE_SSL_CONNECT_ERROR;
@@ -4245,6 +4236,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     const char *ciphers13 = conn_config->cipher_list13;
     if(ciphers13 &&
        (!conn_config->version_max ||
+        (conn_config->version_max == CURL_SSLVERSION_MAX_DEFAULT) ||
         (conn_config->version_max >= CURL_SSLVERSION_MAX_TLSv1_3))) {
       if(!SSL_CTX_set_ciphersuites(octx->ssl_ctx, ciphers13)) {
         failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
@@ -5682,10 +5674,8 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
       break;
     }
 
-    if(cf->next)
-      cf = cf->next;
-
-  } while(cf->next);
+    cf = cf->next;
+  } while(cf);
 
   if(!octx) {
     failf(data, "Failed to find the SSL filter");

@@ -24,7 +24,7 @@ smtp
 <name>
 SMTP DSN
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

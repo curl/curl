@@ -16,7 +16,7 @@ AUTH PLAIN
 REPLY AUTHENTICATE +
 REPLY AHVzZXIAc2VjcmV0 A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

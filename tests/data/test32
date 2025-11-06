@@ -42,7 +42,7 @@ HTTP with -d and -G
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

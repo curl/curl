@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP data with single dot-only line
 </name>
-<stdin>
+<stdin crlf="yes">
 .
 </stdin>
 <command>

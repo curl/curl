@@ -666,8 +666,6 @@ jobs:
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        env:
-          TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then

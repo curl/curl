@@ -1265,15 +1265,22 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
           pp->overflow = 0;
         }
 
-        if(data->req.bytecount == size + (curl_off_t)len)
+        if((CURL_OFF_T_MAX - size) < (curl_off_t)len)
+          /* unlikely to actually be a transfer this big, but avoid integer
+             overflow */
+          size = CURL_OFF_T_MAX;
+        else
+          size += len;
+
+        if(data->req.bytecount == size)
           /* All data already transferred (header + literal body) */
           Curl_xfer_setup_nop(data);
         else {
           /* Setup to receive the literal body data.
              maxdownload and transfer size include both header line and
              literal body */
-          data->req.maxdownload = size + len;
-          Curl_xfer_setup_recv(data, FIRSTSOCKET, size + len);
+          data->req.maxdownload = size;
+          Curl_xfer_setup_recv(data, FIRSTSOCKET, size);
         }
         /* End of DO phase */
         imap_state(data, imapc, IMAP_STOP);

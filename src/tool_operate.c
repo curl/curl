@@ -2194,7 +2194,6 @@ static CURLcode run_all_transfers(CURLSH *share,
   global->noprogress = orig_noprogress;
   global->isatty = orig_isatty;
 
-
   return result;
 }
 

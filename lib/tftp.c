@@ -477,7 +477,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
     curl_msnprintf((char *)state->spacket.data + 2,
                    state->blksize,
-                   "%s%c%s%c", filename, '\0',  mode, '\0');
+                   "%s%c%s%c", filename, '\0', mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
 
     /* optional addition of TFTP options */

@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/hello/%TESTNUMBER --compressed
 <strip>
 ^Accept-Encoding:.*
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /hello/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

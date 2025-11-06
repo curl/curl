@@ -10,7 +10,7 @@ LIST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * LIST () "/" /%TESTNUMBER/blurdybloop
 * LIST (\Noselect) "/" /%TESTNUMBER/foo
 * LIST () "/" /%TESTNUMBER/foo/bar

@@ -15,7 +15,7 @@ RFC2449
 <servercmd>
 CAPA TOP USER
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

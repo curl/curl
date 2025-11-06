@@ -657,7 +657,8 @@ cleanup:
 static void
 init_config_builder_alpn(struct Curl_easy *data,
                          const struct ssl_connect_data *connssl,
-                         struct rustls_client_config_builder *config_builder) {
+                         struct rustls_client_config_builder *config_builder)
+{
   struct alpn_proto_buf proto;
   rustls_slice_bytes alpn[ALPN_ENTRIES_MAX];
   size_t i;
@@ -709,7 +710,8 @@ init_config_builder_verifier(struct Curl_easy *data,
                              struct rustls_client_config_builder *builder,
                              const struct ssl_primary_config *conn_config,
                              const struct curl_blob *ca_info_blob,
-                             const char * const ssl_cafile) {
+                             const char * const ssl_cafile)
+{
   const struct rustls_root_cert_store *roots = NULL;
   struct rustls_root_cert_store_builder *roots_builder = NULL;
   struct rustls_web_pki_server_cert_verifier_builder *verifier_builder = NULL;

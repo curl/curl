@@ -19,7 +19,7 @@ lib%TESTNUMBER
 <name>
 SMTP with CRLF-dot-CRLF in data
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

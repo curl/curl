@@ -36,7 +36,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </client>
 
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

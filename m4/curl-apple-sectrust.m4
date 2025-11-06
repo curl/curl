@@ -41,10 +41,10 @@ if test "x$OPT_APPLE_SECTRUST" = xyes; then
   ],[
     build_for_apple="no"
   ])
-  if test "x$build_for_apple" == "xno"; then
+  if test "x$build_for_apple" = "xno"; then
     AC_MSG_ERROR([Apple SecTrust can only be enabled for Apple OS targets])
   fi
-  if test "x$OPENSSL_ENABLED" == "x1" -o "x$GNUTLS_ENABLED" == "x1"; then
+  if test "x$OPENSSL_ENABLED" = "x1" -o "x$GNUTLS_ENABLED" = "x1"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_APPLE_SECTRUST, 1, [enable Apple OS certificate validation])
     APPLE_SECTRUST_ENABLED=1

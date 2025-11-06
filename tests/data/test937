@@ -38,7 +38,7 @@ digest
 <name>
 SMTP DIGEST-MD5 authentication with SASL downgrade
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>

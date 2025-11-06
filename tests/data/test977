@@ -44,7 +44,7 @@ URL with trailing dot and receiving a cookie for the TLD with dot
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://firsthost.me./ HTTP/1.1
 Host: firsthost.me.
 User-Agent: curl/%VERSION

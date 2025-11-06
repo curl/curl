@@ -15,7 +15,7 @@ chunked Transfer-Encoding
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 401 Authorization Required swsclose
 Server: testcurl
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"

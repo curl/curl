@@ -79,7 +79,7 @@ static const char *doh_strerror(DOHcode code)
 UNITTEST DOHcode doh_req_encode(const char *host,
                                 DNStype dnstype,
                                 unsigned char *dnsp, /* buffer */
-                                size_t len,  /* buffer size */
+                                size_t len,   /* buffer size */
                                 size_t *olen) /* output length */
 {
   const size_t hostlen = strlen(host);
@@ -158,9 +158,9 @@ UNITTEST DOHcode doh_req_encode(const char *host,
 
   *dnsp++ = 0; /* append zero-length label for root */
 
-  /* There are assigned TYPE codes beyond 255: use range [1..65535]  */
+  /* There are assigned TYPE codes beyond 255: use range [1..65535] */
   *dnsp++ = (unsigned char)(255 & (dnstype >> 8)); /* upper 8 bit TYPE */
-  *dnsp++ = (unsigned char)(255 & dnstype);      /* lower 8 bit TYPE */
+  *dnsp++ = (unsigned char)(255 & dnstype);        /* lower 8 bit TYPE */
 
   *dnsp++ = '\0'; /* upper 8 bit CLASS */
   *dnsp++ = DNS_CLASS_IN; /* IN - "the Internet" */
@@ -677,7 +677,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
                          struct dohentry *d)
 {
   /* RDATA
-     - A (TYPE 1):  4 bytes
+     - A (TYPE 1): 4 bytes
      - AAAA (TYPE 28): 16 bytes
      - NS (TYPE 2): N bytes
      - HTTPS (TYPE 65): N bytes */
@@ -707,7 +707,7 @@ static DOHcode doh_rdata(const unsigned char *doh,
       return rc;
     break;
   case CURL_DNS_TYPE_DNAME:
-    /* explicit for clarity; just skip; rely on synthesized CNAME  */
+    /* explicit for clarity; just skip; rely on synthesized CNAME */
     break;
   default:
     /* unsupported type, just skip it */
@@ -1219,8 +1219,9 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct doh_probes *dohp = data->state.async.doh;
+  struct dohentry de;
   *dnsp = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
@@ -1233,7 +1234,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   }
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
-    struct dohentry de;
     int slot;
 
     /* Clear any result the might still be there */
@@ -1265,17 +1265,14 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-
       if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
         CURL_TRC_DNS(data, "hostname: %s", dohp->host);
         doh_show(data, &de);
       }
 
       result = doh2ai(&de, dohp->host, dohp->port, &ai);
-      if(result) {
-        de_cleanup(&de);
-        return result;
-      }
+      if(result)
+        goto error;
 
       /* we got a response, create a dns entry. */
       dns = Curl_dnscache_mk_entry(data, ai, dohp->host, 0, dohp->port, FALSE);
@@ -1288,7 +1285,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                            de.https_rrs->len, &hrr);
           if(result) {
             infof(data, "Failed to decode HTTPS RR");
-            return result;
+            Curl_resolv_unlink(data, &dns);
+            goto error;
           }
           infof(data, "Some HTTPS RR to process");
 # ifdef DEBUGBUILD
@@ -1306,14 +1304,15 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
     /* All done */
     data->state.async.done = TRUE;
-    de_cleanup(&de);
-    Curl_doh_cleanup(data);
-    return result;
-
   } /* !dohp->pending */
+  else
+    /* wait for pending DoH transactions to complete */
+    return CURLE_OK;
 
-  /* else wait for pending DoH transactions to complete */
-  return CURLE_OK;
+error:
+  de_cleanup(&de);
+  Curl_doh_cleanup(data);
+  return result;
 }
 
 void Curl_doh_close(struct Curl_easy *data)

@@ -578,7 +578,7 @@ wssl_setup_session(struct Curl_cfilter *cf,
           if(sess_reuse_cb) {
             result = sess_reuse_cb(cf, data, alpns, scs, &do_early_data);
             if(result)
-              goto  out;
+              goto out;
           }
 #ifdef WOLFSSL_EARLY_DATA
           if(do_early_data) {

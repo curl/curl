@@ -1560,7 +1560,6 @@ CURLcode curl_ws_recv(CURL *d, void *buffer,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-
   memset(&ctx, 0, sizeof(ctx));
   ctx.data = data;
   ctx.ws = ws;

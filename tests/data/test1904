@@ -22,7 +22,7 @@ Content-Length: 9
 
 contents
 </data>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 204 Sure go ahead
 
 </connect>
@@ -61,14 +61,14 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

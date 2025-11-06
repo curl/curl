@@ -44,7 +44,7 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /we/want/%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

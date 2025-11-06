@@ -10,7 +10,7 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 250 <recipient@example.com>
 </data>
 </reply>

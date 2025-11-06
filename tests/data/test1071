@@ -14,7 +14,7 @@ HTTP/1.0
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 401 Authorization Required swsclose
 Server: testcurl
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
@@ -29,7 +29,7 @@ Try again on this HTTP 1.0 server!
 
 # This is supposed to be returned when the server gets a
 # Authorization: Digest line passed-in from the client
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.0 200 OK swsclose
 Server: testcurl
 Content-Type: text/plain
@@ -39,7 +39,7 @@ Connection: close
 This IS the real page!
 </data1000>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.0 401 Authorization Required swsclose
 Server: testcurl
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
@@ -86,7 +86,7 @@ four is the number of lines
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

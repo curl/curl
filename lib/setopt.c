@@ -1159,7 +1159,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     s->connect_only_ws = (arg == 2);
     break;
 
-
 #ifdef USE_SSH
   case CURLOPT_SSH_AUTH_TYPES:
     s->ssh_auth_types = (int)arg;
@@ -1683,7 +1682,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
      * If needed, CURLOPT_POSTFIELDSIZE must have been set prior to
-     *  CURLOPT_COPYPOSTFIELDS and not altered later.
+     * CURLOPT_COPYPOSTFIELDS and not altered later.
      */
     if(!ptr || s->postfieldsize == -1)
       result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);

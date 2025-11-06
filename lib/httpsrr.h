@@ -38,6 +38,7 @@
 struct Curl_easy;
 
 struct Curl_https_rrinfo {
+  char *rrname; /* if NULL, the same as the URL hostname */
   /*
    * Fields from HTTPS RR. The only mandatory fields are priority and target.
    * See https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2

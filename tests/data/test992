@@ -26,7 +26,7 @@ smtp
 <name>
 SASL verify default mechanisms are reset by login options
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>

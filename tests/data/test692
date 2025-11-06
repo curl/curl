@@ -9,7 +9,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -42,14 +42,14 @@ http://%HOSTIP:%HTTPPORT/ -JO --output-dir %LOGDIR
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file crlf="yes" name="%LOGDIR/curl_response">
+<file name="%LOGDIR/curl_response" crlf="headers">
 -foo-
 </file>
 </verify>

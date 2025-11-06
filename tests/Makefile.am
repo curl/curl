@@ -178,8 +178,6 @@ checksrc:
 	(cd unit && $(MAKE) checksrc)
 	(cd tunit && $(MAKE) checksrc)
 	(cd server && $(MAKE) checksrc)
-	(cd client && $(MAKE) checksrc)
-	(cd http && $(MAKE) checksrc)
 
 all-local: $(MANFILES) build-certs
 

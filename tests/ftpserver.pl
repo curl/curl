@@ -573,10 +573,10 @@ sub protocolsetup {
             'PBSZ' => '500 PBSZ not implemented',
             'PROT' => '500 PROT not implemented',
             'welcome' => join("",
-            '220-        _   _ ____  _     '."\r\n",
-            '220-    ___| | | |  _ \| |    '."\r\n",
-            '220-   / __| | | | |_) | |    '."\r\n",
-            '220-  | (__| |_| |  _ {| |___ '."\r\n",
+            '220-        _   _ ____  _'."\r\n",
+            '220-    ___| | | |  _ \| |'."\r\n",
+            '220-   / __| | | | |_) | |'."\r\n",
+            '220-  | (__| |_| |  _ {| |___'."\r\n",
             '220    \___|\___/|_| \_\_____|'."\r\n")
         );
     }
@@ -599,10 +599,10 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '        _   _ ____  _     '."\r\n",
-            '    ___| | | |  _ \| |    '."\r\n",
-            '   / __| | | | |_) | |    '."\r\n",
-            '  | (__| |_| |  _ {| |___ '."\r\n",
+            '        _   _ ____  _'."\r\n",
+            '    ___| | | |  _ \| |'."\r\n",
+            '   / __| | | | |_) | |'."\r\n",
+            '  | (__| |_| |  _ {| |___'."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
             '+OK curl POP3 server ready to serve '."\r\n")
         );
@@ -634,10 +634,10 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '        _   _ ____  _     '."\r\n",
-            '    ___| | | |  _ \| |    '."\r\n",
-            '   / __| | | | |_) | |    '."\r\n",
-            '  | (__| |_| |  _ {| |___ '."\r\n",
+            '        _   _ ____  _'."\r\n",
+            '    ___| | | |  _ \| |'."\r\n",
+            '   / __| | | | |_) | |'."\r\n",
+            '  | (__| |_| |  _ {| |___'."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
             '* OK curl IMAP server ready to serve'."\r\n")
         );
@@ -658,10 +658,10 @@ sub protocolsetup {
         );
         %displaytext = (
             'welcome' => join("",
-            '220-        _   _ ____  _     '."\r\n",
-            '220-    ___| | | |  _ \| |    '."\r\n",
-            '220-   / __| | | | |_) | |    '."\r\n",
-            '220-  | (__| |_| |  _ {| |___ '."\r\n",
+            '220-        _   _ ____  _'."\r\n",
+            '220-    ___| | | |  _ \| |'."\r\n",
+            '220-   / __| | | | |_) | |'."\r\n",
+            '220-  | (__| |_| |  _ {| |___'."\r\n",
             '220    \___|\___/|_| \_\_____|'."\r\n")
         );
     }
@@ -2566,12 +2566,12 @@ sub PASV_ftp {
         if($pasvbadip) {
             $p="1,2,3,4";
         }
-        sendcontrol sprintf("227 Entering Passive Mode ($p,%d,%d)\n",
+        sendcontrol sprintf("227 Entering Passive Mode ($p,%d,%d)\r\n",
                             int($pasvport/256), int($pasvport%256));
     }
     else {
         # EPSV reply
-        sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
+        sendcontrol sprintf("229 Entering Passive Mode (|||%d|)\r\n", $pasvport);
     }
 
     logmsg "Client has been notified that DATA conn ".

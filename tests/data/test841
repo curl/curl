@@ -11,14 +11,14 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 + Curl did not used to like this line
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 * 123 FETCH (BODY[1] {70}
 body
 

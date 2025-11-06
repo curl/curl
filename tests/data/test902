@@ -24,7 +24,7 @@ smtp
 <name>
 RFC821-only SMTP server (EHLO not supported)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 

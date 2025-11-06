@@ -99,9 +99,9 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  ts->authority = /* host:port with IPv6 support */
-    curl_maprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
-                  ipv6_ip ? "]" : "", port);
+  /* host:port with IPv6 support */
+  ts->authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+                                ipv6_ip ? "]" : "", port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
@@ -365,7 +365,6 @@ static CURLcode cf_h2_proxy_ctx_init(struct Curl_cfilter *cf,
     goto out;
   }
 
-
   /* all set, traffic will be send on connect */
   result = CURLE_OK;
 
@@ -468,8 +467,8 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Receive data from the "lower" filters, e.g. network until
    * it is time to stop or we have enough data for this stream */
-  while(!ctx->conn_closed &&               /* not closed the connection */
-        !ctx->tunnel.closed &&             /* nor the tunnel */
+  while(!ctx->conn_closed &&                /* not closed the connection */
+        !ctx->tunnel.closed &&              /* nor the tunnel */
         Curl_bufq_is_empty(&ctx->inbufq) && /* and we consumed our input */
         !Curl_bufq_is_full(&ctx->tunnel.recvbuf)) {
 

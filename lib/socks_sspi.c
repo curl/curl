@@ -87,7 +87,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   unsigned long qop;
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
   const char *service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-    data->set.str[STRING_PROXY_SERVICE_NAME]  : "rcmd";
+                        data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
   char *etbuf;
   size_t etbuf_size;
 
@@ -156,7 +156,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, FALSE);
 
   /* As long as we need to keep sending some context info, and there is no  */
-  /* errors, keep sending it...                                            */
+  /* errors, keep sending it...                                             */
   for(;;) {
     TCHAR *sname;
 
@@ -504,7 +504,6 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       result = CURLE_COULDNT_CONNECT;
     goto error;
   }
-
 
   if(!data->set.socks5_gssapi_nec) {
     wrap_desc.cBuffers = 2;

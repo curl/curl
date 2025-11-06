@@ -297,7 +297,6 @@ static void myssh_set_state(struct Curl_easy *data,
     "QUIT"
   };
 
-
   if(sshc->state != nowstate) {
     infof(data, "SSH %p state change from %s to %s (line %d)",
           (void *) sshc, names[sshc->state], names[nowstate],
@@ -2438,7 +2437,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
     }
   } while(!rc && (sshc->state != SSH_STOP));
-
 
   if(rc == SSH_AGAIN) {
     /* we would block, we need to wait for the socket to be ready (in the

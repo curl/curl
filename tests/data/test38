@@ -41,7 +41,7 @@ download on.
 <errorcode>
 33
 </errorcode>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=78-

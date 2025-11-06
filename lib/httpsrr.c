@@ -152,6 +152,7 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
   Curl_safefree(rrinfo->echconfiglist);
   Curl_safefree(rrinfo->ipv4hints);
   Curl_safefree(rrinfo->ipv6hints);
+  Curl_safefree(rrinfo->rrname);
 }
 
 
@@ -166,7 +167,7 @@ static CURLcode httpsrr_opt(struct Curl_easy *data,
   unsigned short code;
   size_t len = 0;
 
-  code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
+  code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
   return Curl_httpsrr_set(data, hinfo, code, val, len);
 }
 
@@ -206,6 +207,7 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
     }
   }
 out:
+  Curl_safefree(hinfo->rrname);
   return result;
 }
 

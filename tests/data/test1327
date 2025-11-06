@@ -23,11 +23,11 @@ telnet
 <name>
 TELNET check of upload with stdout redirected
 </name>
-<stdin>
+<stdin crlf="headers">
 GET /ignore/for/%TESTNUMBER HTTP/1.0
 
 </stdin>
-<file name="%LOGDIR/%TESTNUMBER.txt">
+<file name="%LOGDIR/%TESTNUMBER.txt" crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </file>
@@ -39,7 +39,7 @@ telnet://%HOSTIP:%HTTPPORT -T %LOGDIR/%TESTNUMBER.txt
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </protocol>

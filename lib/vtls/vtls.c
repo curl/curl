@@ -1858,7 +1858,8 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
     if(timeout_ms < 0) {
       /* no need to continue if time is already up */
       failf(data, "SSL shutdown timeout");
-      return CURLE_OPERATION_TIMEDOUT;
+      result = CURLE_OPERATION_TIMEDOUT;
+      goto out;
     }
 
     result = connssl->ssl_impl->shut_down(cf, data, send_shutdown, done);
@@ -1951,7 +1952,7 @@ CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
     len = strlen(spec->entries[i]);
     if(len >= ALPN_NAME_MAX)
       return CURLE_FAILED_INIT;
-    blen = (unsigned  char)len;
+    blen = (unsigned char)len;
     if(off + blen + 1 >= (int)sizeof(buf->data))
       return CURLE_FAILED_INIT;
     buf->data[off++] = blen;

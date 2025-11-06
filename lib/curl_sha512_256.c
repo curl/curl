@@ -344,7 +344,7 @@ static CURL_FORCEINLINE curl_uint64_t Curl_rotr64(curl_uint64_t value,
  * Size of the SHA-512/256 resulting digest in words.
  * This is the final digest size, not intermediate hash.
  */
-#define SHA512_256_DIGEST_SIZE_WORDS (SHA512_256_HASH_SIZE_WORDS  / 2)
+#define SHA512_256_DIGEST_SIZE_WORDS (SHA512_256_HASH_SIZE_WORDS / 2)
 
 /**
  * Size of the SHA-512/256 resulting digest in bytes
@@ -759,7 +759,6 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 }
 
 #endif /* Local SHA-512/256 code */
-
 
 /**
  * Compute SHA-512/256 hash for the given data in one function call

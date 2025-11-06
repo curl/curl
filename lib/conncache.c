@@ -375,7 +375,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
     bundle = cpool_find_bundle(cpool, conn);
     live = bundle ? Curl_llist_count(&bundle->conns) : 0;
     shutdowns = Curl_cshutdn_dest_count(data, conn->destination);
-    while((live  + shutdowns) >= dest_limit) {
+    while((live + shutdowns) >= dest_limit) {
       if(shutdowns) {
         /* close one connection in shutdown right away, if we can */
         if(!Curl_cshutdn_close_oldest(data, conn->destination))

@@ -35,7 +35,7 @@ a few bytes
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /we/want/%TESTNUMBERte%5b%5dst.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

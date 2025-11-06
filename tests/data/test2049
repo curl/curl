@@ -38,7 +38,7 @@ http://www1.example.com:8081/%TESTNUMBER --connect-to ::%HOSTIP:%HTTPPORT --next
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: www1.example.com:8081
 User-Agent: curl/%VERSION

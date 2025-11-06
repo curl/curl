@@ -12,7 +12,7 @@ FAILURE
 # Server-side
 <reply>
 
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 405 Method Not Allowed swsclose
 
 And you should ignore this data.

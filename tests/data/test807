@@ -11,7 +11,7 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * LSUB () "/" /%TESTNUMBER/blurdybloop
 * LSUB (\Noselect) "/" /%TESTNUMBER/foo
 * LSUB () "/" /%TESTNUMBER/foo/bar

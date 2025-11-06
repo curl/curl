@@ -23,7 +23,7 @@ smtp
 <name>
 SMTP with SIZE support
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 

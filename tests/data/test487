@@ -8,7 +8,7 @@ variables
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -41,7 +41,7 @@ Variable using 64dec with bad base64
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /[64dec-fail]/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

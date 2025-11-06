@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP without terminating CRLF
 </name>
-<stdin nonewline="yes">
+<stdin crlf="headers" nonewline="yes">
 From: different
 To: another
 

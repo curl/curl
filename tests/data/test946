@@ -29,7 +29,7 @@ smtp
 <name>
 SMTP OAuth 2.0 (OAUTHBEARER) authentication
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>

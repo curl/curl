@@ -9,7 +9,7 @@ HTTP PUT
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Thu, 01 Nov 2001 14:49:00 GMT
 Content-Type: text/html
@@ -17,7 +17,7 @@ Content-Length: 6
 
 hello
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Thu, 01 Nov 2001 14:49:00 GMT
 Content-Type: text/html
@@ -53,7 +53,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

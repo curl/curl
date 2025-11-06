@@ -847,7 +847,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                                   mbedtls_ssl_list_ciphersuites());
   }
 
-
 #ifdef MBEDTLS_SSL_RENEGOTIATION
   mbedtls_ssl_conf_renegotiation(&backend->config,
                                  MBEDTLS_SSL_RENEGOTIATION_ENABLED);

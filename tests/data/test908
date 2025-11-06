@@ -28,7 +28,7 @@ smtp
 <name>
 SMTP OAuth 2.0 (XOAUTH2) authentication
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>

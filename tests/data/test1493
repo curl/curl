@@ -57,14 +57,14 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/heads%TESTNUMBER">
+<file name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: identity, chunked

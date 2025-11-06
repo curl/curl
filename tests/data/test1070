@@ -8,7 +8,7 @@ HTTP POST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 403 Go away and swsclose
 Server: test-server/fake
 Content-Type: text/html
@@ -57,7 +57,7 @@ Expect: 100-continue
 Content-Length: 2313
 Content-Type: application/x-www-form-urlencoded
 
-This creates%spc%
+This creates%SP
 </protocol>
 </verify>
 </testcase>

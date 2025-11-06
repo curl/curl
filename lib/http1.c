@@ -84,7 +84,7 @@ static ssize_t detect_line(struct h1_req_parser *parser,
                            const char *buf, const size_t buflen,
                            CURLcode *err)
 {
-  const char  *line_end;
+  const char *line_end;
 
   DEBUGASSERT(!parser->line);
   line_end = memchr(buf, '\n', buflen);
@@ -136,7 +136,7 @@ static ssize_t next_line(struct h1_req_parser *parser,
 static CURLcode start_req(struct h1_req_parser *parser,
                           const char *scheme_default, int options)
 {
-  const char  *p, *m, *target, *hv, *scheme, *authority, *path;
+  const char *p, *m, *target, *hv, *scheme, *authority, *path;
   size_t m_len, target_len, hv_len, scheme_len, authority_len, path_len;
   size_t i;
   CURLU *url = NULL;

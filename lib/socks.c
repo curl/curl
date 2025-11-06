@@ -528,7 +528,7 @@ process_state:
       /* socks4a, not resolving locally, sends the hostname.
        * add an invalid address + user + hostname */
       unsigned char buf[4] = { 0, 0, 0, 1 };
-      size_t hlen =  strlen(sx->hostname) + 1; /* including NUL */
+      size_t hlen = strlen(sx->hostname) + 1; /* including NUL */
 
       if(hlen > 255) {
         failf(data, "SOCKS4: too long hostname");

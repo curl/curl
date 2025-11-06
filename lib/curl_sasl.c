@@ -932,10 +932,10 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
                   CURL_SASL_DIGEST, TRUE, NULL);
     sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
                   CURL_SASL_NTLM, Curl_auth_is_ntlm_supported(), NULL);
-    sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs,  TRUE, TRUE,
+    sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs, TRUE, TRUE,
                   data->set.str[STRING_BEARER] ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
-    sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs,  TRUE, TRUE,
+    sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs, TRUE, TRUE,
                   data->set.str[STRING_BEARER] ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
   }

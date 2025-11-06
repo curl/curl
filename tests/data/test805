@@ -25,7 +25,7 @@ IMAP APPEND message
 <command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret
 </command>
-<file name="%LOGDIR/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER" crlf="yes">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
 From: Fred Foobar <foobar@example.COM>
 Subject: afternoon meeting

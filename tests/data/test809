@@ -11,7 +11,7 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * STATUS %TESTNUMBER (MESSAGES 231 UIDNEXT 44292)
 </data>
 </reply>

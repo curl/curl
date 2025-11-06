@@ -1966,7 +1966,6 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   size_t nread;
   char tmp[256];
 
-
   /* Once we have errored, we will return the same error forever */
   if(ctx->errored) {
     CURL_TRC_READ(data, "cr_mime_read(len=%zu) is errored -> %d, eos=0",

@@ -191,7 +191,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
      if an error occurs. */
   if(!beg || !end || beg >= end || !*beg ||
      ((size_t)(end - beg) > CURL_ASN1_MAX) ||
-     lvl >=  CURL_ASN1_MAX_RECURSIONS)
+     lvl >= CURL_ASN1_MAX_RECURSIONS)
     return NULL;
 
   /* Process header byte. */

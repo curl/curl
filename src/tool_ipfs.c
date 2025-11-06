@@ -176,7 +176,9 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   curl_url_get(gatewayurl, CURLUPART_PORT, &gwport, CURLU_URLDECODE);
-  curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE);
+
+  if(curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE))
+    goto clean;
 
   /* get the path from user input */
   curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE);
@@ -191,7 +193,6 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   /* if the input path is just a slash, clear it */
   if(inputpath && (inputpath[0] == '/') && !inputpath[1])
     *inputpath = '\0';
-
 
   pathbuffer = curl_maprintf("%s%s%s/%s%s", gwpath,
                              has_trailing_slash(gwpath) ? "" : "/",

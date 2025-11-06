@@ -51,7 +51,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -96,7 +96,7 @@ jobs:
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -146,7 +146,7 @@ jobs:
         with:
           persist-credentials: false
       - name: '${{ matrix.build }}'
-        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
           CC: '${{ matrix.compiler }}'
           MATRIX_ARCH: '${{ matrix.arch }}'

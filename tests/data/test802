@@ -11,7 +11,7 @@ UIDVALIDITY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 --

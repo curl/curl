@@ -29,7 +29,7 @@
 # Stop on errors and on usage of unset variables.
 set -eu
 
-VERSION="2025.09.27+dev"
+VERSION="2025.11.04"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME

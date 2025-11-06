@@ -6,7 +6,11 @@ SPDX-License-Identifier: curl
 
 # [![curl logo](https://curl.se/logo/curl-logo.svg)](https://curl.se/)
 
-curl is a command-line tool for transferring data specified with URL syntax.
+curl is a command-line tool for transferring data from or to a server using
+URLs. It supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS,
+HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP,
+SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
+
 Learn how to use curl by reading [the
 manpage](https://curl.se/docs/manpage.html) or [everything
 curl](https://everything.curl.dev/).

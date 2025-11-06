@@ -77,8 +77,6 @@
  *
  * Returns: sockets-in-use-bitmap
  */
-
-
 CURLcode Curl_ares_pollset(struct Curl_easy *data,
                            ares_channel channel,
                            struct easy_pollset *ps)

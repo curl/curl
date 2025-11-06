@@ -18,7 +18,7 @@ AUTH CRAM-MD5
 REPLY AUTH + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
 REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

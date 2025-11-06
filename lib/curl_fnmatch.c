@@ -243,7 +243,7 @@ static int setcharset(const unsigned char **p, unsigned char *charset)
     case CURLFNM_SCHS_RIGHTBRLEFTBR:
       if(c == ']')
         return SETCHARSET_OK;
-      state  = CURLFNM_SCHS_DEFAULT;
+      state = CURLFNM_SCHS_DEFAULT;
       charset[c] = 1;
       (*p)++;
       break;

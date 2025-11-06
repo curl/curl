@@ -10,7 +10,7 @@ CURLOPT_PROXY
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -43,7 +43,7 @@ ftp://ftp-site/moo/%TESTNUMBER ftp://ftp-site/moo/%TESTNUMBER --proxy http://%HO
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://ftp-site/moo/%TESTNUMBER HTTP/1.1
 Host: ftp-site:21
 User-Agent: curl/%VERSION
@@ -57,7 +57,7 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6

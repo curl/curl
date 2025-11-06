@@ -9,21 +9,21 @@ globbing
 </info>
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 moo
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 foo
 </data2>
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
@@ -47,7 +47,7 @@ multiple requests using {} in URL
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -64,7 +64,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4

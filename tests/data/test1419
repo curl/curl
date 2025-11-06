@@ -13,14 +13,14 @@ connection reuse
 connection-monitor
 </servercmd>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 200 fine!
 Content-Length: 20
 
 Feel free to get it
 </data>
 
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 OK
 Server: Another one/1.0
 Content-Length: 4
@@ -28,7 +28,7 @@ Content-Length: 4
 boo
 </data3>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 fine!
 Content-Length: 20
 
@@ -51,7 +51,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --anyauth http://%HOSTIP:%HTTPPORT/%TESTNUM
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

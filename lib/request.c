@@ -64,7 +64,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->header = FALSE;
   req->headerline = 0;
   req->headerbytecount = 0;
-  req->allheadercount =  0;
+  req->allheadercount = 0;
   req->deductheadercount = 0;
   req->httpversion_sent = 0;
   req->httpversion = 0;
@@ -132,7 +132,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->writebytecount = 0;
   req->start = t0;
   req->headerbytecount = 0;
-  req->allheadercount =  0;
+  req->allheadercount = 0;
   req->deductheadercount = 0;
   req->headerline = 0;
   req->offset = 0;

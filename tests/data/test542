@@ -16,7 +16,7 @@ that FTP
 works
   so does it?
 </data>
-<datacheck>
+<datacheck crlf="yes">
 Content-Length: 51
 Accept-ranges: bytes
 </datacheck>

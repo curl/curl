@@ -9,7 +9,7 @@
 #
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
@@ -18,7 +18,7 @@ Content-Type: text/html
 Location: https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0002
 
 </data>
-<data2 crlf="yes" nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0

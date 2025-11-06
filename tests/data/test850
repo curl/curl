@@ -10,7 +10,7 @@ RETR
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 

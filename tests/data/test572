@@ -10,7 +10,7 @@ GET_PARAMETER
 
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -18,7 +18,7 @@ CSeq: 1
 
 </data1>
 
-<data2>
+<data2 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -31,7 +31,7 @@ speed=ludicrous
 
 </data2>
 
-<data3>
+<data3 crlf="headers">
 RTSP/1.0 204 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -39,7 +39,7 @@ Cseq: 3
 
 </data3>
 
-<data4>
+<data4 crlf="headers">
 RTSP/1.0 200 Okie Dokie
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -49,7 +49,7 @@ Content-Length: 37
 packets_received: 1000
 jitter: 0.314
 </data4>
-<data5>
+<data5 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: getparams-test
@@ -86,7 +86,7 @@ speed
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
+<protocol crlf="headers">
 SETUP rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Transport: Planes/Trains/Automobiles
