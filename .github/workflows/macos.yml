@@ -217,7 +217,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [clang, llvm@18, gcc-12]
+        compiler: [clang, llvm@18, gcc-13]
         build:
           # autotools
           - name: '!ssl !debug brotli zstd'
@@ -226,7 +226,7 @@ jobs:
             configure: --without-ssl --with-brotli --with-zstd
             xcode: ''  # default Xcode. Set it once to silence actionlint.
           - name: '!ssl !debug'
-            compiler: gcc-12
+            compiler: gcc-13
             configure: --without-ssl
           - name: '!ssl'
             compiler: clang
@@ -320,7 +320,7 @@ jobs:
             install: gnutls nettle krb5
             generate: -DENABLE_DEBUG=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=/opt/homebrew/opt/krb5 -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'aws-lc'
-            compiler: gcc-12
+            compiler: gcc-13
             install: aws-lc
             generate: -DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/opt/homebrew/opt/aws-lc -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
           - name: 'Rustls'
@@ -342,10 +342,10 @@ jobs:
         exclude:
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@18, build: { compiler: 'clang' } }
-          - { compiler: llvm@18, build: { compiler: 'gcc-12' } }
-          - { compiler: gcc-12, build: { compiler: 'clang' } }
-          - { compiler: gcc-12, build: { compiler: 'llvm@18' } }
-          - { compiler: clang, build: { compiler: 'gcc-12' } }
+          - { compiler: llvm@18, build: { compiler: 'gcc-13' } }
+          - { compiler: gcc-13, build: { compiler: 'clang' } }
+          - { compiler: gcc-13, build: { compiler: 'llvm@18' } }
+          - { compiler: clang, build: { compiler: 'gcc-13' } }
           - { compiler: clang, build: { compiler: 'llvm@18' } }
 
     steps:
@@ -557,7 +557,7 @@ jobs:
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-15-arm64-Readme.md
         # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
-        compiler: [gcc-12, gcc-13, gcc-15, llvm@15, llvm@18, llvm@20, clang]
+        compiler: [gcc-13, gcc-14, gcc-15, llvm@15, llvm@18, llvm@20, clang]
         # Xcode support matrix as of 2025-10, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-14: 15.0.1, 15.1, 15.2, 15.3,*15.4
@@ -579,9 +579,9 @@ jobs:
           - { image: macos-15, compiler: 'llvm@20' }
           - { image: macos-26, compiler: 'llvm@15' }
           - { image: macos-26, compiler: 'llvm@18' }
-          - { image: macos-26, compiler: 'gcc-12' }
           # Reduce build combinations, by dropping less interesting ones
-          - { compiler: gcc-13, build: cmake }
+          - { image: macos-26, compiler: 'gcc-13' }
+          - { compiler: gcc-14, build: cmake }
           - { compiler: gcc-15, build: autotools }
     steps:
       - name: 'install autotools'
