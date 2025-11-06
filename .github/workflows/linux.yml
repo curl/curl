@@ -385,7 +385,7 @@ jobs:
         run: |
           pwd
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" | tar -xz
+            --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" | tar -xJ
           mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
           cd filc
           ./setup.sh
