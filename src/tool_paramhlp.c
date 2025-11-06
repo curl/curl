@@ -502,9 +502,14 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   free((char *) protoset);
   curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
   free(*ostr);
+  if(result)
+    return PARAM_NO_MEM;
+  if(!curlx_dyn_len(&obuf)) {
+    curlx_dyn_free(&obuf);
+    return PARAM_BAD_USE;
+  }
   *ostr = curlx_dyn_ptr(&obuf);
-
-  return *ostr ? PARAM_OK : PARAM_NO_MEM;
+  return PARAM_OK;
 }
 
 /**
