@@ -500,10 +500,10 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   for(proto = 0; protoset[proto] && !result; proto++)
     result = curlx_dyn_addf(&obuf, "%s,", protoset[proto]);
   free((char *) protoset);
-  curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
   free(*ostr);
   if(result)
     return PARAM_NO_MEM;
+  curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
   if(!curlx_dyn_len(&obuf)) {
     curlx_dyn_free(&obuf);
     return PARAM_BAD_USE;
