@@ -31,6 +31,9 @@
  * Macros used in operate()
  */
 
+/* return TRUE if the error code is "lethal" */
+bool setopt_bad(CURLcode result);
+
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 /* Associate symbolic names with option values */
@@ -95,67 +98,68 @@ CURLcode tool_setopt_long(CURL *curl, const char *name, CURLoption tag,
                           long lval);
 CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
                           curl_off_t lval);
-CURLcode tool_setopt(CURL *curl, struct OperationConfig *config,
-                     bool str, const char *name, CURLoption tag,
-                     ...);
+CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
+                         const char *name, CURLoption tag,
+                         ...) WARN_UNUSED_RESULT;
+CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...);
 
-#define my_setopt(x,y,z) \
-  tool_setopt(x, config, FALSE, #y, y, z)
+#define my_setopt_ptr(x,y,z)                    \
+  tool_setopt_ptr(x, #y, y, z)
 
-#define my_setopt_long(x,y,z) \
+#define my_setopt_long(x,y,z)                   \
   tool_setopt_long(x, #y, y, z)
 
-#define my_setopt_offt(x,y,z) \
+#define my_setopt_offt(x,y,z)                   \
   tool_setopt_offt(x, #y, y, z)
 
-#define my_setopt_str(x,y,z) \
-  tool_setopt(x, config, TRUE, #y, y, z)
+#define my_setopt_str(x,y,z)                    \
+  tool_setopt_str(x, config, #y, y, z)
 
-#define my_setopt_enum(x,y,z) \
+/* assumes a 'result' variable to use. If the return code is benign it is left
+   in 'result' after this call, otherwise the function returns the error */
+#define MY_SETOPT_STR(x,y,z)                                     \
+  do {                                                           \
+    result = tool_setopt_str(x, config, #y, y, z);               \
+    if(setopt_bad(result))                                       \
+      return result;                                             \
+  } while(0)
+
+#define my_setopt_enum(x,y,z)                           \
   tool_setopt_enum(x, #y, y, setopt_nv_ ## y, z)
 
-#define my_setopt_SSLVERSION(x,y,z) \
+#define my_setopt_SSLVERSION(x,y,z)             \
   tool_setopt_SSLVERSION(x, #y, y, z)
 
-#define my_setopt_bitmask(x,y,z) \
+#define my_setopt_bitmask(x,y,z)                        \
   tool_setopt_bitmask(x, #y, y, setopt_nv_ ## y, z)
 
-#define my_setopt_mimepost(x,y,z) \
+#define my_setopt_mimepost(x,y,z)               \
   tool_setopt_mimepost(x, config, #y, y, z)
 
-#define my_setopt_slist(x,y,z) \
+#define my_setopt_slist(x,y,z)                  \
   tool_setopt_slist(x, #y, y, z)
 
 #else /* CURL_DISABLE_LIBCURL_OPTION */
 
 /* No --libcurl, so pass options directly to library */
 
-#define my_setopt(x,y,z) \
-  curl_easy_setopt(x, y, z)
+#define my_setopt_long(x,y,z) curl_easy_setopt(x, y, (long)(z))
+#define my_setopt_offt(x,y,z) curl_easy_setopt(x, y, (curl_off_t)(z))
+#define my_setopt_ptr(x,y,z) curl_easy_setopt(x, y, z)
+#define my_setopt_str(x,y,z) curl_easy_setopt(x, y, z)
+#define my_setopt_enum(x,y,z) curl_easy_setopt(x, y, z)
+#define my_setopt_SSLVERSION(x,y,z) curl_easy_setopt(x, y, z)
+#define my_setopt_bitmask(x,y,z) curl_easy_setopt(x, y, (long)z)
+#define my_setopt_mimepost(x,y,z) curl_easy_setopt(x, y, z)
+#define my_setopt_slist(x,y,z) curl_easy_setopt(x, y, z)
 
-#define my_setopt_long(x,y,z) \
-  curl_easy_setopt(x, y, (long)(z))
+#define MY_SETOPT_STR(x,y,z)                            \
+  do {                                                  \
+    result = curl_easy_setopt(x, y, z);                 \
+    if(setopt_bad(result))                              \
+      return result;                                    \
+  } while(0)
 
-#define my_setopt_offt(x,y,z) \
-  curl_easy_setopt(x, y, (curl_off_t)(z))
-
-#define my_setopt_str(x,y,z) \
-  curl_easy_setopt(x, y, z)
-
-#define my_setopt_enum(x,y,z) \
-  curl_easy_setopt(x, y, z)
-
-#define my_setopt_SSLVERSION(x,y,z) \
-  curl_easy_setopt(x, y, z)
-
-#define my_setopt_bitmask(x,y,z) \
-  curl_easy_setopt(x, y, (long)z)
-
-#define my_setopt_mimepost(x,y,z) \
-  curl_easy_setopt(x, y, z)
-
-#define my_setopt_slist(x,y,z) \
-  curl_easy_setopt(x, y, z)
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
 
