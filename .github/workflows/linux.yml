@@ -218,7 +218,7 @@ jobs:
           - name: 'Fil-C'
             install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev libldap-dev libkrb5-dev
             install_steps: filc pytest
-            CC: /home/runner/filc/build/bin/clang
+            CC: ${{ github.workspace }}/filc/build/bin/clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH2=ON -DCURL_USE_GSSAPI=ON
 
           - name: 'clang-tidy'
@@ -383,7 +383,6 @@ jobs:
       - name: 'install Fil-C'
         if: ${{ contains(matrix.build.install_steps, 'filc') }}
         run: |
-          pwd
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" | tar -xJ
           mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
