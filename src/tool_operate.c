@@ -2116,22 +2116,21 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
                                     bool *added,
                                     bool *skipped)
 {
-  CURLcode result = CURLE_OK;
+  CURLcode result;
   *added = FALSE;
 
   /* Check we have a url */
   if(!config->url_list || !config->url_list->url) {
     helpf("(%d) no URL specified", CURLE_FAILED_INIT);
-    return CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
   }
-
-  if(!result)
+  else {
     result = cacertpaths(config);
-
-  if(!result) {
-    result = single_transfer(config, share, added, skipped);
-    if(!*added || result)
-      single_transfer_cleanup();
+    if(!result) {
+      result = single_transfer(config, share, added, skipped);
+      if(!*added || result)
+        single_transfer_cleanup();
+    }
   }
 
   return result;
