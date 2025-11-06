@@ -23,11 +23,12 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef CURL_DISABLE_LIBCURL_OPTION
-
 #include "tool_cfgable.h"
 #include "tool_easysrc.h"
 #include "tool_setopt.h"
+
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+
 #include "tool_msgs.h"
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -628,56 +629,79 @@ CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
   return ret;
 }
 
-/* setopt wrapper for setting object and function pointer options */
-CURLcode tool_setopt(CURL *curl, struct OperationConfig *config,
-                     bool str, const char *name, CURLoption tag,
-                     ...)
+/* setopt wrapper for setting object and function pointers */
+CURLcode tool_setopt_ptr(CURL *curl, const char *name, CURLoption tag, ...)
 {
-  va_list arg;
-  CURLcode ret = CURLE_OK;
   void *pval;
-
-  va_start(arg, tag);
+  va_list arg;
+  CURLcode result;
 
   DEBUGASSERT(tag >= CURLOPTTYPE_OBJECTPOINT);
   DEBUGASSERT((tag < CURLOPTTYPE_OFF_T) || (tag >= CURLOPTTYPE_BLOB));
-
   /* we never set _BLOB options in the curl tool */
   DEBUGASSERT(tag < CURLOPTTYPE_BLOB);
 
+  va_start(arg, tag);
   /* argument is an object or function pointer */
   pval = va_arg(arg, void *);
 
-  ret = curl_easy_setopt(curl, tag, pval);
-
-  va_end(arg);
-
-  if(global->libcurl && pval && !ret) {
+  result = curl_easy_setopt(curl, tag, pval);
+  if(global->libcurl && pval && !result) {
     /* we only use this if --libcurl was used */
-
-    if(!str) {
-      /* function pointers are never printable */
-      const char *remark = (tag >= CURLOPTTYPE_FUNCTIONPOINT) ?
-        "function" : "object";
-      ret = easysrc_addf(&easysrc_toohard,
-                         "%s was set to a%s %s pointer", name,
-                         (*remark == 'o' ? "n" : ""), remark);
-    }
-    else {
-      curl_off_t len = ZERO_TERMINATED;
-      char *escaped;
-      if(tag == CURLOPT_POSTFIELDS)
-        len = curlx_dyn_len(&config->postdata);
-      escaped = c_escape(pval, len);
-      if(escaped) {
-        ret = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, \"%s\");",
-                           name, escaped);
-        free(escaped);
-      }
-    }
+    const char *remark = (tag >= CURLOPTTYPE_FUNCTIONPOINT) ?
+      "function" : "object";
+    result = easysrc_addf(&easysrc_toohard,
+                          "%s was set to a%s %s pointer", name,
+                          (*remark == 'o' ? "n" : ""), remark);
   }
 
-  return ret;
+  va_end(arg);
+  return result;
+}
+
+/* setopt wrapper for setting strings */
+CURLcode tool_setopt_str(CURL *curl, struct OperationConfig *config,
+                         const char *name, CURLoption tag, ...)
+{
+  char *str;
+  va_list arg;
+  CURLcode result;
+  DEBUGASSERT(tag >= CURLOPTTYPE_OBJECTPOINT);
+  DEBUGASSERT((tag < CURLOPTTYPE_OFF_T) || (tag >= CURLOPTTYPE_BLOB));
+  DEBUGASSERT(tag < CURLOPTTYPE_BLOB);
+  DEBUGASSERT(tag < CURLOPTTYPE_FUNCTIONPOINT);
+
+  va_start(arg, tag);
+  /* argument is a string */
+  str = va_arg(arg, char *);
+
+  result = curl_easy_setopt(curl, tag, str);
+  if(global->libcurl && str && !result) {
+    /* we only use this if --libcurl was used */
+    curl_off_t len = ZERO_TERMINATED;
+    char *escaped;
+    if(tag == CURLOPT_POSTFIELDS)
+      len = curlx_dyn_len(&config->postdata);
+    escaped = c_escape(str, len);
+    if(escaped) {
+      result = easysrc_addf(&easysrc_code,
+                            "curl_easy_setopt(hnd, %s, \"%s\");",
+                            name, escaped);
+      free(escaped);
+    }
+    else
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  va_end(arg);
+  return result;
 }
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */
+
+/* return TRUE if the error code is "lethal" */
+bool setopt_bad(CURLcode result)
+{
+  return (result && (result != CURLE_NOT_BUILT_IN) &&
+          (result != CURLE_UNKNOWN_OPTION));
+}

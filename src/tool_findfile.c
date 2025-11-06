@@ -87,7 +87,8 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
 }
 
 /*
- * findfile() - return the full path name of the file.
+ * findfile() - returns the full path name of the file. It must be freed with
+ * curl_free().
  *
  * If 'dotscore' is TRUE, then check for the file first with a leading dot
  * and then with a leading underscore.
