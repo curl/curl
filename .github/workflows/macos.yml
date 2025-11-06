@@ -580,6 +580,7 @@ jobs:
           - { image: macos-26, compiler: 'llvm@15' }
           - { image: macos-26, compiler: 'llvm@18' }
           # Reduce build combinations, by dropping less interesting ones
+          - { image: macos-26, compiler: 'gcc-13' }
           - { compiler: gcc-14, build: cmake }
           - { compiler: gcc-15, build: autotools }
     steps:
