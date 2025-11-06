@@ -55,6 +55,8 @@ env:
   RUSTLS_VERSION: 0.15.0
   # handled in renovate.json
   OPENLDAP_VERSION: 2.6.10
+  # renovate: datasource=github-tags depName=pizlonator/fil-c versioning=semver-partial registryUrl=https://github.com
+  FIL_C_VERSION: 0.674
 
 jobs:
   linux:
@@ -212,6 +214,12 @@ jobs:
 
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
+
+          - name: 'Fil-C'
+            install_packages: filc
+            install_steps: pytest openssl-tsan
+            CC: /home/runner/filc/build/bin/clang
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/openssl
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
@@ -371,6 +379,16 @@ jobs:
             krb5-dev libpsl-dev c-ares-dev \
             py3-impacket py3-asn1 py3-six py3-pycryptodomex \
             perl-time-hires openssh stunnel sudo git openssl
+
+      - name: 'install Fil-C'
+        if: ${{ contains(matrix.build.install_steps, 'filc') }}
+        run: |
+          pwd
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/pizlonator/fil-c/releases/download/v${FIL_C_VERSION}/filc-${FIL_C_VERSION}-linux-x86_64.tar.xz" | tar -xz
+          mv "filc-${FIL_C_VERSION}-linux-x86_64" filc
+          cd filc
+          ./setup.sh
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
