@@ -87,7 +87,6 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
   const char *hostname;
   int port;
   bool ipv6_ip;
-  CURLcode result;
 
   ts->state = H2_TUNNEL_INIT;
   ts->stream_id = -1;
