@@ -351,7 +351,7 @@ jobs:
             HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install ${INSTALL_PACKAGES_BREW}
           fi
 
-      - name: 'install prereqs'
+      - name: 'install prereqs (i686)'
         if: ${{ contains(matrix.build.name, 'i686') }}
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -363,7 +363,7 @@ jobs:
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${MATRIX_INSTALL_PACKAGES}
 
-      - name: 'install dependencies'
+      - name: 'install prereqs (alpine)'
         if: ${{ startsWith(matrix.build.container, 'alpine') }}
         run: |
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev \
