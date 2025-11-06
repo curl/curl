@@ -305,10 +305,9 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
 /*
  * Set the number of downloaded bytes so far.
  */
-CURLcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
+void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
   data->progress.dl.cur_size = size;
-  return CURLE_OK;
 }
 
 /*

@@ -232,7 +232,7 @@ static bool auth_digest_get_key_value(const char *chlg, const char *key,
   return FALSE;
 }
 
-static CURLcode auth_digest_get_qop_values(const char *options, int *value)
+static void auth_digest_get_qop_values(const char *options, int *value)
 {
   struct Curl_str out;
   /* Initialise the output */
@@ -248,8 +248,6 @@ static CURLcode auth_digest_get_qop_values(const char *options, int *value)
     if(curlx_str_single(&options, ','))
       break;
   }
-
-  return CURLE_OK;
 }
 
 /*
@@ -377,9 +375,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_BAD_CONTENT_ENCODING;
 
   /* Get the qop-values from the qop-options */
-  result = auth_digest_get_qop_values(qop_options, &qop_values);
-  if(result)
-    return result;
+  auth_digest_get_qop_values(qop_options, &qop_values);
 
   /* We only support auth quality-of-protection */
   if(!(qop_values & DIGEST_QOP_VALUE_AUTH))

@@ -36,9 +36,9 @@ enum Curl_proxy_use {
   HEADER_CONNECT  /* sending CONNECT to a proxy */
 };
 
-CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                         const char **phostname,
-                                         int *pport, bool *pipv6_ip);
+void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+                                     const char **phostname,
+                                     int *pport, bool *pipv6_ip);
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,

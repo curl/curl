@@ -167,9 +167,9 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                         const char **phostname,
-                                         int *pport, bool *pipv6_ip)
+void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+                                     const char **phostname,
+                                     int *pport, bool *pipv6_ip)
 {
   DEBUGASSERT(cf);
   DEBUGASSERT(cf->conn);
@@ -192,8 +192,6 @@ CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
     *pipv6_ip = (strchr(*phostname, ':') != NULL);
   else
     *pipv6_ip = cf->conn->bits.ipv6_ip;
-
-  return CURLE_OK;
 }
 
 struct cf_proxy_ctx {
@@ -214,9 +212,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
-  if(result)
-    goto out;
+  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
 
   authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
                             ipv6_ip ?"]" : "", port);
