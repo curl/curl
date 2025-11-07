@@ -257,7 +257,7 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
 
   if(conn->sock[FIRSTSOCKET] > INT_MAX) {
-    failf(data, "RTMP: The socket value is invalid for rtmp");
+    /* The socket value is invalid for rtmp. */
     return CURLE_FAILED_INIT;
   }
 
