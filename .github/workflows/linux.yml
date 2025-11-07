@@ -217,21 +217,21 @@ jobs:
 
           - name: 'Fil-C'
             install_steps: filc
-            CC: /home/runner/filc/build/bin/filcc
-            generate: -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF
+            CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
+            generate: -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-musl
             image: 'ubuntu-22.04'
 
           - name: 'Fil-C'
             install_steps: filc
-            CC: /home/runner/filc/build/bin/filcc
-            configure: --without-openssl --without-libpsl --with-brotli --with-zstd CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
+            CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
+            configure: --host=x86_64-unknown-linux-musl --without-openssl --without-libpsl --with-brotli --with-zstd CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
             image: 'ubuntu-22.04'
 
           - name: 'Fil-C 2'
             install_packages: musl-dev
             install_steps: filc
-            CC: /home/runner/filc/build/bin/filcc
-            configure: --without-openssl --without-libpsl --with-brotli --with-zstd CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
+            CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
+            configure: --host=x86_64-unknown-linux-musl --without-openssl --without-libpsl --with-brotli --with-zstd CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
             image: 'ubuntu-latest'
 
           - name: 'clang-tidy'
