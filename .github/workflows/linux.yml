@@ -216,7 +216,7 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'Fil-C'
-            install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev libldap-dev libkrb5-dev
+            install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev libldap-dev libkrb5-dev clang
             install_steps: filc pytest
             CC: /home/runner/filc/build/bin/clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH2=ON -DCURL_USE_GSSAPI=ON
