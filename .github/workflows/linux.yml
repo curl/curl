@@ -216,25 +216,23 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'Fil-C'
-            install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev libldap-dev libkrb5-dev
-            install_steps: filc pytest
+            install_steps: filc
             CC: /home/runner/filc/build/bin/filcc
-            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH2=ON -DCURL_USE_GSSAPI=ON
+            generate: -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF
             image: 'ubuntu-22.04'
 
           - name: 'Fil-C'
-            install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev
-            install_steps: filc pytest
+            install_steps: filc
             CC: /home/runner/filc/build/bin/filcc
-            configure: --with-openssl --with-libssh2 --with-libidn2 CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
+            configure: --without-openssl --without-libpsl --with-brotli --with-zstd CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
             image: 'ubuntu-22.04'
 
           - name: 'Fil-C 2'
-            install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev musl-dev
-            install_steps: filc pytest
+            install_packages: musl-dev
+            install_steps: filc
             CC: /home/runner/filc/build/bin/filcc
-            configure: --with-openssl --with-libssh2 --with-libidn2 CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
-            image: 'ubuntu-22.04'
+            configure: --without-openssl --without-libpsl --with-brotli --with-zstd CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
+            image: 'ubuntu-latest'
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
