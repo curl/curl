@@ -67,6 +67,10 @@ libcurl cannot fully protect against attacks where an attacker has write
 access to the same directory where it is directed to save files. This is
 particularly sensitive if you save files using elevated privileges.
 
+libcurl creates the file to store HSTS data in using default file permissions,
+meaning that on *nix systems you may need to restrict your umask to prevent
+other users on the same system to access the file.
+
 # %PROTOCOLS%
 
 # EXAMPLE
