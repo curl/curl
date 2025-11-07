@@ -1619,8 +1619,8 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
 
   if(data->set.ssl.certinfo && chain.certs) {
     if(chain.num_certs > MAX_ALLOWED_CERT_AMOUNT) {
-      failf(data, "%d certificates is more than allowed (%u)",
-             (int)chain.num_certs, MAX_ALLOWED_CERT_AMOUNT);
+      failf(data, "%u certificates is more than allowed (%u)",
+            chain.num_certs, MAX_ALLOWED_CERT_AMOUNT);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
