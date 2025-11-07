@@ -45,19 +45,10 @@
       "enabled": false
     },
     {
-      "description": "Schedule package updates on the 10th of every 3rd month (quarter)",
-      "matchPackageNames": [
-        "/ruff/i"
-      ],
-      "groupName": "quarterly updates (by name)",
-      "schedule": [
-        "* * 10 */3 *"
-      ]
-    },
-    {
       "description": "Schedule package updates on the 10th of each month",
       "matchPackageNames": [
-        "/codeql/i"
+        "/codeql/i",
+        "/ruff/i"
       ],
       "groupName": "monthly updates (by name)",
       "schedule": [
