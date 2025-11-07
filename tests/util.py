@@ -75,8 +75,8 @@ class TestData(object):
 
         log.debug("Parsing file %s", filename)
 
-        with open(filename, "rb") as f:
-            contents = f.read().decode("utf-8")
+        with open(filename, "r", encoding='us-ascii') as f:
+            contents = f.read()
 
         m = REPLY_DATA.search(contents)
         if not m:
@@ -88,5 +88,5 @@ class TestData(object):
 
 if __name__ == '__main__':
     td = TestData("./data")
-    data = td.get_test_data(1)
+    data = td.get_test_data(1451)
     print(data)

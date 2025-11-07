@@ -1078,7 +1078,7 @@ sub singletest_shouldrun {
         $errorreturncode = 2;
     }
 
-    if(loadtest("${TESTDIR}/test${testnum}")) {
+    if(loadtest("${TESTDIR}/test${testnum}", 1)) {
         if($verbose) {
             # this is not a test
             logmsg "RUN: $testnum doesn't look like a test case\n";
@@ -1191,7 +1191,7 @@ sub singletest_shouldrun {
         }
     }
 
-    if($why && $checktests && checktest()) {
+    if($why && $checktests && checktest("${TESTDIR}/test${testnum}")) {
         logmsg "Warning: issue(s) found in test data: ${TESTDIR}/test${testnum}\n";
     }
 
@@ -1980,7 +1980,7 @@ sub singletest {
         ###################################################################
         # Load test file so CI registration can get the right data before the
         # runner is called
-        loadtest("${TESTDIR}/test${testnum}");
+        loadtest("${TESTDIR}/test${testnum}", 1);
 
         ###################################################################
         # Register the test case with the CI environment
@@ -3281,7 +3281,7 @@ if(%skipped && !$short) {
 sub testnumdetails {
     my ($desc, $numlist) = @_;
     foreach my $testnum (split(' ', $numlist)) {
-        if(!loadtest("${TESTDIR}/test${testnum}")) {
+        if(!loadtest("${TESTDIR}/test${testnum}", 1)) {
             my @info_keywords = getpart("info", "keywords");
             my $testname = (getpart("client", "name"))[0];
             chomp $testname;

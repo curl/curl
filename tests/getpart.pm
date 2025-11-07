@@ -217,7 +217,7 @@ sub partexists {
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
-    my ($file)=@_;
+    my ($file, $original)=@_;
 
     if(defined $xmlfile && $file eq $xmlfile) {
         # This test is already loaded
@@ -228,7 +228,12 @@ sub loadtest {
     $xmlfile = "";
 
     if(open(my $xmlh, "<", "$file")) {
-        binmode $xmlh; # for crapage systems, use binary
+        if($original) {
+            binmode $xmlh, ':crlf'
+        }
+        else {
+            binmode $xmlh; # for crapage systems, use binary
+        }
         while(<$xmlh>) {
             push @xml, $_;
         }
@@ -251,16 +256,44 @@ sub fulltest {
     return @xml;
 }
 
-sub checktest {
-    my $anyerr = 0;
+sub eol_detect {
+    my ($content) = @_;
 
-    for my $i (0 .. $#xml) {
-        if(index($xml[$i], "\r") >= 0) {
-            print STDERR "*** getpart.pm: $xmlfile:$i: 0x0d carriage return found. Use %CR macro instead.\n";
-            $anyerr = 1;
+    my $cr = () = $content =~ /\r/g;
+    my $lf = () = $content =~ /\n/g;
+
+    if($cr > 0 && $lf == 0) {
+        return "cr";
+    }
+    elsif($cr == 0 && $lf > 0) {
+        return "lf";
+    }
+    elsif($cr == 0 && $lf == 0) {
+        return "bin";
+    }
+    elsif($cr == $lf) {
+        return "crlf";
+    }
+
+    return "";
+}
+
+sub checktest {
+    my ($file) = @_;
+
+    if(open(my $xmlh, '<', $file)) {
+        binmode $xmlh; # we want the raw data to check original newlines
+        my $content = do { local $/; <$xmlh> };
+        close($xmlh);
+
+        my $eol = eol_detect($content);
+        if($eol eq '') {
+            print STDERR "*** getpart.pm: $xmlfile has mixed newlines. Replace significant carriage return with %CR macro, or convert to consistent newlines.\n";
+            return 1;
         }
     }
-    return $anyerr;
+
+    return 0;
 }
 
 # write the test to the given file

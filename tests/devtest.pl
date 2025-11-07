@@ -176,7 +176,7 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "preprocess") {
         shift @ARGV;
-        loadtest("${TESTDIR}/test${ARGV[0]}");
+        loadtest("${TESTDIR}/test${ARGV[0]}", 1);
         readtestkeywords();
         singletest_preprocess($ARGV[0]);
     }
