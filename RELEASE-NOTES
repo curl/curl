@@ -4,16 +4,33 @@ curl and libcurl 8.17.1
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3536
+ Contributors:                 3535
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o checksrc.pl: detect assign followed by more than one space [26]
+ o cmake: disable `CURL_CA_PATH` auto-detection if `USE_APPLE_SECTRUST=ON` [16]
+ o conncache: silence `-Wnull-dereference` on gcc 14 RISC-V 64 [17]
+ o curl: fix progress meter in parallel mode [15]
+ o docs: fix checksrc `EQUALSPACE` warnings [21]
+ o gnutls: report accurate error when TLS-SRP is not built-in [18]
  o gtls: add return checks and optimize the code [2]
  o lib: cleanup for some typos about spaces and code style [3]
+ o lib: refactor the type of funcs which have useless return and checks [1]
  o m4/sectrust: fix test(1) operator [4]
+ o mbedtls: fix potential use of uninitialized `nread` [8]
+ o openssl: remove code handling default version [28]
+ o osslq: code readability [5]
+ o setopt: when setting bad protocols, don't store them [9]
+ o tool: consider (some) curl_easy_setopt errors fatal [7]
+ o tool_help: add checks to avoid unsigned wrap around [14]
+ o tool_ipfs: check return codes better [20]
+ o tool_operate: remove redundant condition [19]
+ o tool_paramhlp: refuse --proto remove all protocols [10]
+ o wolfSSL: able to differentiate between IP and DNS in alt names [13]
 
 This release includes the following known bugs:
 
@@ -37,11 +54,29 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Thomas Klausner, Viktor Szakats, Xiaoke Wang
-  (4 contributors)
+  Dan Fandrich, Daniel Stenberg, Juliusz Sosinowicz, renovate[bot],
+  Stefan Eissing, Thomas Klausner, Viktor Szakats, Xiaoke Wang
+  (8 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=19386
  [2] = https://curl.se/bug/?i=19366
  [3] = https://curl.se/bug/?i=19370
  [4] = https://curl.se/bug/?i=19371
+ [5] = https://curl.se/bug/?i=19394
+ [7] = https://curl.se/bug/?i=19385
+ [8] = https://curl.se/bug/?i=19393
+ [9] = https://curl.se/bug/?i=19389
+ [10] = https://curl.se/bug/?i=19388
+ [13] = https://curl.se/bug/?i=19364
+ [14] = https://curl.se/bug/?i=19377
+ [15] = https://curl.se/bug/?i=19383
+ [16] = https://curl.se/bug/?i=19380
+ [17] = https://curl.se/bug/?i=19378
+ [18] = https://curl.se/bug/?i=19365
+ [19] = https://curl.se/bug/?i=19381
+ [20] = https://curl.se/bug/?i=19382
+ [21] = https://curl.se/bug/?i=19379
+ [26] = https://curl.se/bug/?i=19375
+ [28] = https://curl.se/bug/?i=19354
