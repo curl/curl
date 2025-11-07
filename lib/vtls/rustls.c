@@ -1130,8 +1130,6 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   Curl_alpn_set_negotiated(cf, data, connssl, protocol, len);
 }
 
-#define MAX_ALLOWED_CERT_AMOUNT 100
-
 /* Given an established network connection, do a TLS handshake.
  *
  * This function will set `*done` to true once the handshake is complete.

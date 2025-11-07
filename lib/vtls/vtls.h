@@ -165,6 +165,7 @@ void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
 #define CURL_X509_STR_MAX  100000
+#define MAX_ALLOWED_CERT_AMOUNT 100
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
 CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
