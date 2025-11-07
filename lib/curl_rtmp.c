@@ -256,6 +256,11 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
   if(!r)
     return CURLE_FAILED_INIT;
 
+  if(conn->sock[FIRSTSOCKET] > INT_MAX) {
+    failf(data, "RTMP: The socket value is invalid for rtmp");
+    return CURLE_FAILED_INIT;
+  }
+
   r->m_sb.sb_socket = (int)conn->sock[FIRSTSOCKET];
 
   /* We have to know if it is a write before we send the
