@@ -1211,8 +1211,13 @@ cr_connect(struct Curl_cfilter *cf,
       if(data->set.ssl.certinfo) {
         size_t num_certs = 0;
         size_t i;
-        while(rustls_connection_get_peer_certificate(rconn, (int)num_certs)) {
+        while(rustls_connection_get_peer_certificate(rconn, num_certs)) {
           num_certs++;
+          if(num_certs > MAX_ALLOWED_CERT_AMOUNT) {
+            failf(data, "%zu certificates is more than allowed (%u)",
+                  num_certs, MAX_ALLOWED_CERT_AMOUNT);
+            return CURLE_SSL_CONNECT_ERROR;
+          }
         }
         result = Curl_ssl_init_certinfo(data, (int)num_certs);
         if(result)

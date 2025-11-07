@@ -1618,19 +1618,27 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   }
 
   if(data->set.ssl.certinfo && chain.certs) {
-    unsigned int i;
-
-    result = Curl_ssl_init_certinfo(data, (int)chain.num_certs);
-    if(result)
+    if(chain.num_certs > MAX_ALLOWED_CERT_AMOUNT) {
+      failf(data, "%u certificates is more than allowed (%u)",
+            chain.num_certs, MAX_ALLOWED_CERT_AMOUNT);
+      result = CURLE_SSL_CONNECT_ERROR;
       goto out;
+    }
+    else {
+      unsigned int i;
 
-    for(i = 0; i < chain.num_certs; i++) {
-      const char *beg = (const char *) chain.certs[i].data;
-      const char *end = beg + chain.certs[i].size;
-
-      result = Curl_extract_certinfo(data, (int)i, beg, end);
+      result = Curl_ssl_init_certinfo(data, (int)chain.num_certs);
       if(result)
         goto out;
+
+      for(i = 0; i < chain.num_certs; i++) {
+        const char *beg = (const char *) chain.certs[i].data;
+        const char *end = beg + chain.certs[i].size;
+
+        result = Curl_extract_certinfo(data, (int)i, beg, end);
+        if(result)
+          goto out;
+      }
     }
   }
 

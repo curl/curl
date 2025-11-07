@@ -349,8 +349,6 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
   return result;
 }
 
-#define MAX_ALLOWED_CERT_AMOUNT 100
-
 static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 {
   CURLcode result;
