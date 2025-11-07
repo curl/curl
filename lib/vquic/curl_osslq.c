@@ -2007,7 +2007,7 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               size_t *pnwritten)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = NULL;
   struct cf_call_data save;
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
@@ -2027,6 +2027,7 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(result)
     goto out;
 
+  stream = H3_STREAM_CTX(ctx, data);
   if(!stream || stream->s.id < 0) {
     nwritten = h3_stream_open(cf, data, buf, len, &result);
     if(nwritten < 0) {
@@ -2103,18 +2104,17 @@ static CURLcode cf_osslq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                               char *buf, size_t len, size_t *pnread)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream;
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
 
-  (void)ctx;
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
-  DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->tls.ossl.ssl);
   DEBUGASSERT(ctx->h3.conn);
   *pnread = 0;
 
+  stream = H3_STREAM_CTX(ctx, data);
   if(!stream) {
     result = CURLE_RECV_ERROR;
     goto out;
