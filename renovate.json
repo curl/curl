@@ -45,12 +45,21 @@
       "enabled": false
     },
     {
-      "description": "Schedule package updates on the 10th of each month",
+      "description": "Schedule package updates on the 10th of every 3rd month (quarter)",
       "matchPackageNames": [
-        "/codeql/i",
         "/ruff/i"
       ],
-      "groupName": "CodeQL",
+      "groupName": "quarterly updates (by name)",
+      "schedule": [
+        "* * 10 */3 *"
+      ]
+    },
+    {
+      "description": "Schedule package updates on the 10th of each month",
+      "matchPackageNames": [
+        "/codeql/i"
+      ],
+      "groupName": "monthly updates (by name)",
       "schedule": [
         "* * 10 * *"
       ]
@@ -60,7 +69,7 @@
       "matchSourceUrls": [
         "**/awslabs/**"
       ],
-      "groupName": "monthly updates",
+      "groupName": "monthly updates (by source URL)",
       "schedule": [
         "* * 10 * *"
       ]
