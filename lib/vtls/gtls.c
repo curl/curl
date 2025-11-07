@@ -1121,7 +1121,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things. We need to do this before constructing the gnutls
      session since we need to set flags depending on the kind of reuse. */
-  if(conn_config->cache_session) {
+  if(conn_config->cache_session && !conn_config->verifystatus) {
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &scs);
     if(result)
       goto out;
