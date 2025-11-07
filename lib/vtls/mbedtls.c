@@ -200,7 +200,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 {
   struct Curl_cfilter *cf = bio;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  size_t nread;
+  size_t nread = 0;
   CURLcode result;
 
   DEBUGASSERT(data);
