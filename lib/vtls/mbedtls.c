@@ -215,6 +215,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
               blen, result, nread);
   if(CURLE_AGAIN == result)
     return MBEDTLS_ERR_SSL_WANT_READ;
+  /* nread is never larger than int here */
   return result ? -1 : (int)nread;
 }
 
