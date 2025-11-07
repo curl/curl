@@ -24,5 +24,8 @@ filename again if it has been modified.
 Specify a "" filename (zero length) to avoid loading/saving and make curl just
 handle the cache in memory.
 
+You may want to restrict your umask to prevent other users on the same system
+to access the created file.
+
 If this option is used several times, curl loads contents from all the
 files but the last one is used for saving.
