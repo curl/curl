@@ -1623,7 +1623,8 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
              (int)chain.num_certs, MAX_ALLOWED_CERT_AMOUNT);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
-    } else {
+    }
+    else {
       unsigned int i;
 
       result = Curl_ssl_init_certinfo(data, (int)chain.num_certs);
