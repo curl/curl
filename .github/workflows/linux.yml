@@ -220,12 +220,14 @@ jobs:
             install_steps: filc pytest
             CC: /home/runner/filc/build/bin/filcc
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_LIBSSH2=ON -DCURL_USE_GSSAPI=ON
+            image: 'ubuntu-22.04'
 
           - name: 'Fil-C'
             install_packages: libssl-dev libnghttp2-dev libssh2-1-dev libidn2-dev
             install_steps: filc pytest
             CC: /home/runner/filc/build/bin/filcc
             configure: --with-openssl --with-libssh2 --with-libidn2
+            image: 'ubuntu-22.04'
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
