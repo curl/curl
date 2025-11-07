@@ -1130,6 +1130,8 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   Curl_alpn_set_negotiated(cf, data, connssl, protocol, len);
 }
 
+#define MAX_ALLOWED_CERT_AMOUNT 100
+
 /* Given an established network connection, do a TLS handshake.
  *
  * This function will set `*done` to true once the handshake is complete.
@@ -1211,8 +1213,13 @@ cr_connect(struct Curl_cfilter *cf,
       if(data->set.ssl.certinfo) {
         size_t num_certs = 0;
         size_t i;
-        while(rustls_connection_get_peer_certificate(rconn, (int)num_certs)) {
+        while(rustls_connection_get_peer_certificate(rconn, num_certs)) {
           num_certs++;
+          if(num_certs > MAX_ALLOWED_CERT_AMOUNT) {
+            failf(data, "%d certificates is more than allowed (%u)",
+                  (int)num_certs, MAX_ALLOWED_CERT_AMOUNT);
+            return CURLE_SSL_CONNECT_ERROR;
+          }
         }
         result = Curl_ssl_init_certinfo(data, (int)num_certs);
         if(result)
