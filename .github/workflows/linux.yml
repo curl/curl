@@ -432,15 +432,26 @@ jobs:
           path: ~/libressl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
-      - name: 'build libressl (filc)'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && steps.cache-libressl-filc.outputs.cache-hit != 'true' }}
+      - name: 'build libressl (filc) rel'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
           export CC=/home/runner/filc/build/bin/filcc
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=Release -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DENABLE_ASM=OFF
-          cmake --build .
+          cmake --build . --verbose
+          cmake --install .
+
+      - name: 'build libressl (filc) def'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
+          cd "libressl-${LIBRESSL_VERSION}"
+          export CC=/home/runner/filc/build/bin/filcc
+          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DENABLE_ASM=OFF
+          cmake --build . --verbose
           cmake --install .
 
       - name: 'cache wolfssl (all)'
@@ -565,7 +576,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC=/home/runner/filc/build/bin/filcc CFLAGS=-O2 ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-secure-memory no-asm no-engine no-module no-dso no-shared
+          CC=/home/runner/filc/build/bin/filcc ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-secure-memory no-asm no-engine no-module no-dso no-shared
           make
           make -j1 install_sw
 
