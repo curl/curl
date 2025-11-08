@@ -376,14 +376,17 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
   status = ares_init_options(&thrdd->rr.channel, NULL, 0);
   if(status != ARES_SUCCESS) {
     thrdd->rr.channel = NULL;
+    free(rrname);
     return CURLE_FAILED_INIT;
   }
 #ifdef CURLDEBUG
   if(getenv("CURL_DNS_SERVER")) {
     const char *servers = getenv("CURL_DNS_SERVER");
     status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
-    if(status)
+    if(status) {
+      free(rrname);
       return CURLE_FAILED_INIT;
+    }
   }
 #endif
 
