@@ -3775,8 +3775,10 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
             bool do_early_data = FALSE;
             if(sess_reuse_cb) {
               result = sess_reuse_cb(cf, data, &alpns, scs, &do_early_data);
-              if(result)
+              if(result) {
+                SSL_SESSION_free(ssl_session);
                 return result;
+              }
             }
             if(do_early_data) {
               /* We only try the ALPN protocol the session used before,
