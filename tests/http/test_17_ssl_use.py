@@ -600,7 +600,7 @@ class TestSSLUse:
 
     @pytest.mark.skipif(condition=not Env.have_openssl(), reason="needs openssl command")
     def test_17_21_capath_valid(self, env: Env, httpd):
-        if env.curl_uses_lib('rustls'):
+        if env.curl_uses_lib('rustls-ffi'):
             pytest.skip('rustls does not support CURLOPT_CAPATH')
         proto = 'http/1.1'
         curl = CurlClient(env=env)
