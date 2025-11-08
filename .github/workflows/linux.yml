@@ -224,6 +224,15 @@ jobs:
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
 
+          - name: 'libressl Fil-C'
+            install_steps: filc libressl-filc
+            CC: /home/runner/filc/build/bin/filcc
+            generate: >-
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
+              -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+              -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
+
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
             install_steps: skipall mbedtls rustls wolfssl-opensslextra
@@ -409,6 +418,27 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
+          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl
+          cmake --build .
+          cmake --install .
+
+      - name: 'cache libressl (filc)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-libressl-filc
+        env:
+          cache-name: cache-libressl-filc
+        with:
+          path: ~/libressl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+
+      - name: 'build libressl (filc)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && steps.cache-libressl-filc.outputs.cache-hit != 'true' }}
+        run: |
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
+          cd "libressl-${LIBRESSL_VERSION}"
+          export CC=/home/runner/filc/build/bin/filcc
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl
           cmake --build .
           cmake --install .
