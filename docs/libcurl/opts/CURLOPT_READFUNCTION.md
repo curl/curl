@@ -36,9 +36,8 @@ Pass a pointer to your callback function, as the prototype shows above.
 
 This callback function gets called by libcurl as soon as it needs to read data
 in order to send it to the peer - like if you ask it to upload or post data to
-the server. The data area pointed at by the pointer *buffer* should be
-filled up with at most *size* multiplied with *nitems* number of bytes
-by your function. *size* is always 1.
+the server. The data area pointed at by the pointer *buffer* should be filled
+up with at most *nitems* number of bytes by your function. *size* is always 1.
 
 Set the *userdata* argument with the CURLOPT_READDATA(3) option.
 
