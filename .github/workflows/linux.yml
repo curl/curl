@@ -215,12 +215,12 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
-          - name: 'Fil-C'
-            install_steps: filc
+          - name: 'openssl Fil-C'
+            install_steps: filc openssl-filc
             CC: /home/runner/filc/build/bin/filcc
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
-              -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/openssl -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
 
@@ -519,6 +519,25 @@ jobs:
           cd "openldap-${OPENLDAP_VERSION}"
           ./configure --enable-static --disable-shared --disable-slapd --prefix=/home/runner/openldap-static
           make install
+
+      - name: 'cache openssl (filc)'
+        if: ${{ contains(matrix.build.install_steps, 'openssl-filc') }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-openssl-filc
+        env:
+          cache-name: cache-openssl-filc
+        with:
+          path: ~/openssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.OPENSSL_VERSION }}
+
+      - name: 'build openssl (filc)'
+        if: ${{ contains(matrix.build.install_steps, 'openssl-filc') && steps.cache-openssl-filc.outputs.cache-hit != 'true' }}
+        run: |
+          git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
+          cd openssl
+          CC=/home/runner/filc/build/bin/filcc ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
+          make
+          make -j1 install_sw
 
       - name: 'cache openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') }}
