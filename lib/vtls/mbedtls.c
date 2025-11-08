@@ -481,8 +481,8 @@ mbed_extract_certinfo(struct Curl_easy *data, const mbedtls_x509_crt *crt)
   for(cur = crt; cur && cert_count < MAX_ALLOWED_CERT_AMOUNT; cur = cur->next)
     cert_count++;
 
-  if(cur != NULL) {
-    infof(data, "Certificate chain truncated to %d certificates", 
+  if(!cur) {
+    infof(data, "Certificate chain truncated to %d certificates",
           MAX_ALLOWED_CERT_AMOUNT);
   }
 
