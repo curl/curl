@@ -193,13 +193,13 @@ jobs:
           - name: 'openssl torture !FTP'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: -t --shallow=25 !FTP
+            tflags: '-t --shallow=25 !FTP'
             torture: true
 
           - name: 'openssl torture FTP'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: -t --shallow=20 FTP
+            tflags: '-t --shallow=20 FTP'
             torture: true
 
           - name: 'openssl i686'
@@ -217,7 +217,7 @@ jobs:
 
           - name: 'libressl Fil-C'
             install_steps: filc libressl-filc pytest
-            tflags: !776
+            tflags: '!776'
             CC: /home/runner/filc/build/bin/filcc
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
@@ -304,12 +304,12 @@ jobs:
           - name: 'event-based'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
-            tflags: -n --test-event '!TLS-SRP'
+            tflags: '-n --test-event !TLS-SRP'
 
           - name: 'duphandle'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
-            tflags: -n --test-duphandle '!TLS-SRP'
+            tflags: '-n --test-duphandle !TLS-SRP'
 
           - name: 'rustls valgrind'
             install_packages: libnghttp2-dev libldap-dev valgrind
@@ -422,7 +422,7 @@ jobs:
           cache-name: cache-libressl-filc
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}-${{ env.FIL_C_VERSION }}
 
       - name: 'build libressl (filc)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && steps.cache-libressl-filc.outputs.cache-hit != 'true' }}
