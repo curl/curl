@@ -215,21 +215,21 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
-          - name: 'openssl Fil-C'
-            install_steps: filc openssl-filc
-            CC: /home/runner/filc/build/bin/filcc
-            generate: >-
-              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl -DCURL_USE_LIBPSL=OFF
-              -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
-              -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
-
           - name: 'libressl Fil-C'
             install_steps: filc libressl-filc
             CC: /home/runner/filc/build/bin/filcc
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
               -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
+              -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+              -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
+
+          - name: 'openssl Fil-C'
+            install_steps: filc openssl-filc
+            CC: /home/runner/filc/build/bin/filcc
+            generate: >-
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
+              -DOPENSSL_ROOT_DIR=/home/runner/openssl -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
 
@@ -439,7 +439,7 @@ jobs:
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
           cd "libressl-${LIBRESSL_VERSION}"
           export CC=/home/runner/filc/build/bin/filcc
-          cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DENABLE_ASM=OFF
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=Release -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DENABLE_ASM=OFF
           cmake --build .
           cmake --install .
 
@@ -565,7 +565,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC=/home/runner/filc/build/bin/filcc ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-secure-memory no-asm no-engine no-module no-dso no-shared
+          CC=/home/runner/filc/build/bin/filcc CFLAGS=-O2 ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-secure-memory no-asm no-engine no-module no-dso no-shared
           make
           make -j1 install_sw
 
