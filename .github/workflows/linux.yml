@@ -219,10 +219,10 @@ jobs:
             install_steps: filc pytest
             CC: /home/runner/filc/build/bin/clang
             generate: >-
-              -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-musl
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
               -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
+              -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
