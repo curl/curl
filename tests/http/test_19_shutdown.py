@@ -68,6 +68,8 @@ class TestShutdown:
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_19_02_check_shutdown(self, env: Env, httpd, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         run_env = os.environ.copy()
@@ -164,6 +166,8 @@ class TestShutdown:
     # check graceful shutdown on multiplexed http
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_19_06_check_shutdown(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_is_debug():

@@ -47,6 +47,8 @@ class TestInfo:
     # download plain file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_16_01_info_download(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
@@ -62,6 +64,8 @@ class TestInfo:
     # download plain file with a 302 redirect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_16_02_info_302_download(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
@@ -78,6 +82,8 @@ class TestInfo:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_16_03_info_upload(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2

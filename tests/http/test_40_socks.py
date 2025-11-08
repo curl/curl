@@ -63,6 +63,8 @@ class TestSocks:
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_40_02_socks_https(self, env: Env, sproto, proto, danted: Dante, httpd):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env, socks_args=[
@@ -78,6 +80,8 @@ class TestSocks:
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_40_03_dl_serial(self, env: Env, httpd, danted, proto, sproto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         count = 3
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env, socks_args=[
@@ -89,6 +93,8 @@ class TestSocks:
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_40_04_ul_serial(self, env: Env, httpd, danted, proto, sproto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 2
         curl = CurlClient(env=env, socks_args=[

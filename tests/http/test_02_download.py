@@ -55,6 +55,8 @@ class TestDownload:
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_01_download_1(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -65,6 +67,8 @@ class TestDownload:
     # download 2 files
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_02_download_2(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -75,6 +79,8 @@ class TestDownload:
     # download 100 files sequentially
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_03_download_sequential(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if (proto == 'http/1.1' or proto == 'h2') and env.curl_uses_lib('mbedtls') and \
@@ -89,6 +95,8 @@ class TestDownload:
     # download 100 files parallel
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_04_download_parallel(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
@@ -112,6 +120,8 @@ class TestDownload:
     # download 500 files sequential
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_05_download_many_sequential(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
@@ -132,6 +142,8 @@ class TestDownload:
     # download 500 files parallel
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_06_download_many_parallel(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h2' and env.curl_uses_lib('mbedtls') and \
@@ -149,6 +161,8 @@ class TestDownload:
     # download files parallel, check connection reuse/multiplex
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_07_download_reuse(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 200
@@ -180,6 +194,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_08_1MB_serial(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 5
@@ -190,6 +206,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_09_1MB_parallel(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 5
@@ -204,6 +222,8 @@ class TestDownload:
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_10_10MB_serial(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 3
@@ -216,6 +236,8 @@ class TestDownload:
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_11_10MB_parallel(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 3
@@ -228,6 +250,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_12_head_serial_https(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 5
@@ -240,6 +264,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['h2'])
     def test_02_13_head_serial_h2c(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 5
@@ -252,6 +278,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_14_not_found(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 5
@@ -266,6 +294,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 5
@@ -280,6 +310,8 @@ class TestDownload:
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     def test_02_20_h2_small_frames(self, env: Env, httpd, configures_httpd):
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         # Test case to reproduce content corruption as observed in
         # https://github.com/curl/curl/issues/10525
         # To reliably reproduce, we need an Apache httpd that supports
@@ -328,6 +360,8 @@ class TestDownload:
     @pytest.mark.parametrize("swin_max", [0, 10*1024])
     def test_02_21_h2_lib_serial(self, env: Env, httpd, pause_offset, swin_max):
         proto = 'h2'
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -349,6 +383,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [100*1023])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_22_lib_parallel_resume(self, env: Env, httpd, nghttpx, proto, pause_offset):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
@@ -369,6 +405,8 @@ class TestDownload:
     # download, several at a time, pause and abort paused
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
@@ -398,6 +436,8 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
@@ -427,6 +467,8 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
@@ -456,6 +498,8 @@ class TestDownload:
     # speed limited download
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_24_speed_limit(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
@@ -485,6 +529,8 @@ class TestDownload:
     # TODO: just uses a single connection for h2/h3. Not sure how to prevent that
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_26_session_shared_reuse(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}/data-100k'
@@ -497,6 +543,8 @@ class TestDownload:
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27a_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -508,6 +556,8 @@ class TestDownload:
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27b_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -519,6 +569,8 @@ class TestDownload:
     # test on paused transfers, based on issue #11982
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_27c_paused_no_cl(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         url = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -529,6 +581,8 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_28_get_compressed(self, env: Env, httpd, nghttpx, proto):
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
@@ -557,6 +611,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_29_h2_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
@@ -574,6 +630,8 @@ class TestDownload:
 
     # download parallel with prior knowledge
     def test_02_30_parallel_prior_knowledge(self, env: Env, httpd):
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         count = 3
         curl = CurlClient(env=env)
         urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
@@ -585,6 +643,8 @@ class TestDownload:
 
     # download parallel with h2 "Upgrade:"
     def test_02_31_parallel_upgrade(self, env: Env, httpd, nghttpx):
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         count = 3
         curl = CurlClient(env=env)
         urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
@@ -605,6 +665,8 @@ class TestDownload:
     def test_02_32_earlydata(self, env: Env, httpd, nghttpx, proto):
         if not env.curl_can_early_data():
             pytest.skip('TLS earlydata not implemented')
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and \
            (not env.have_h3() or not env.curl_can_h3_early_data()):
             pytest.skip("h3 not supported")
@@ -661,6 +723,8 @@ class TestDownload:
             pytest.skip('only works for curl debug builds')
         if not env.curl_is_verbose():
             pytest.skip('only works for curl with verbose strings')
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50
@@ -701,6 +765,8 @@ class TestDownload:
             pytest.skip('only works for curl debug builds')
         if not env.curl_is_verbose():
             pytest.skip('only works for curl with verbose strings')
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 50
@@ -746,6 +812,8 @@ class TestDownload:
     #   to be received, requiring buffering.
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_35_pause_bomb(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
@@ -765,6 +833,8 @@ class TestDownload:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     @pytest.mark.parametrize("url_junk", [1024, 16*1024, 32*1024, 64*1024, 80*1024, 96*1024])
     def test_02_36_looong_urls(self, env: Env, httpd, nghttpx, proto, url_junk):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('quiche'):

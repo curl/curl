@@ -45,6 +45,8 @@ class TestMethods:
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_18_01_delete(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
@@ -59,6 +61,8 @@ class TestMethods:
     # should be accepted
     def test_18_02_delete_h2_special(self, env: Env, httpd, nghttpx):
         proto = 'h2'
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?id=[0-{count-1}]'\
