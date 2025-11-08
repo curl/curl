@@ -479,6 +479,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                    state->blksize,
                    "%s%c%s%c", filename, '\0', mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
+    free(filename);
 
     /* optional addition of TFTP options */
     if(!data->set.tftp_no_options) {
@@ -517,7 +518,6 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
       if(result != CURLE_OK) {
         failf(data, "TFTP buffer too small for options");
-        free(filename);
         return CURLE_TFTP_ILLEGAL;
       }
     }
@@ -537,7 +537,6 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                       (SEND_TYPE_ARG3)sbytes, 0,
                       CURL_SENDTO_ARG5(&remote_addr->curl_sa_addr),
                       (curl_socklen_t)remote_addr->addrlen);
-    free(filename);
     if(senddata != (ssize_t)sbytes) {
       char buffer[STRERROR_LEN];
       failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
