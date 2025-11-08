@@ -218,21 +218,10 @@ jobs:
           - name: 'Fil-C'
             install_steps: filc
             CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
-            generate: -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-musl -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_ZLIB=OFF -DCURL_ZSTD=OFF -DCURL_BROTLI=OFF
-            image: 'ubuntu-latest'
-
-          - name: 'Fil-C'
-            install_steps: filc
-            CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
-            configure: --host=x86_64-unknown-linux-musl --disable-warnings --without-ssl --without-libpsl --without-brotli --without-zstd --without-zlib CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
-            image: 'ubuntu-22.04'
-
-          - name: 'Fil-C 2'
-            install_packages: musl-dev
-            install_steps: filc
-            CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
-            configure: --host=x86_64-unknown-linux-musl --disable-warnings --without-ssl --without-libpsl --without-brotli --without-zstd --without-zlib CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
-            image: 'ubuntu-latest'
+            generate: >-
+              -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-musl
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_ZLIB=OFF
+              -DCURL_ZSTD=OFF -DCURL_BROTLI=OFF
 
           - name: 'clang-tidy'
             install_packages: clang-tidy libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev
@@ -683,7 +672,7 @@ jobs:
           fi
 
       - name: 'single-use function check'
-        if: ${{ contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF') }}
+        if: ${{ (contains(matrix.build.configure, '--disable-unity') || contains(matrix.build.generate, '-DCMAKE_UNITY_BUILD=OFF')) && !contains(matrix.build.install_steps, 'filc') }}
         run: |
           git config --global --add safe.directory "*"
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
