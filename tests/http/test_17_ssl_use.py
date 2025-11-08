@@ -118,6 +118,8 @@ class TestSSLUse:
     # use host name with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_03_trailing_dot(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -133,6 +135,8 @@ class TestSSLUse:
     # use host name with double trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_04_double_dot(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -157,6 +161,8 @@ class TestSSLUse:
     def test_17_05_good_ip_addr(self, env: Env, proto, httpd, nghttpx):
         if env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedTLS does use IP addresses in SNI")
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -174,6 +180,8 @@ class TestSSLUse:
     def test_17_05_bad_ip_addr(self, env: Env, proto,
                                httpd, configures_httpd,
                                nghttpx, configures_nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         httpd.set_domain1_cred_name('domain1-no-ip')
@@ -191,6 +199,8 @@ class TestSSLUse:
     def test_17_05_very_bad_ip_addr(self, env: Env, proto,
                                     httpd, configures_httpd,
                                     nghttpx, configures_nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if env.curl_uses_lib('mbedtls'):
@@ -211,6 +221,8 @@ class TestSSLUse:
     # use localhost for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_06_localhost(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -300,6 +312,8 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_08_cert_status(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_uses_lib('openssl') and \
@@ -421,6 +435,8 @@ class TestSSLUse:
     # use host name server has no certificate for
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_11_wrong_host(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -432,6 +448,8 @@ class TestSSLUse:
     # use host name server has no cert for with --insecure
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_12_insecure(self, env: Env, proto, httpd, nghttpx):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -446,8 +464,8 @@ class TestSSLUse:
     # connect to an expired certificate
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     def test_17_14_expired_cert(self, env: Env, proto, httpd):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         curl = CurlClient(env=env)
         url = f'https://{env.expired_domain}:{env.port_for(proto)}/'
         r = curl.http_get(url=url, alpn_proto=proto)
@@ -572,6 +590,8 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_19_wrong_pin(self, env: Env, proto, httpd):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if env.curl_uses_lib('rustls-ffi'):
@@ -586,6 +606,8 @@ class TestSSLUse:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_20_correct_pin(self, env: Env, proto, httpd):
+        if proto == 'h2' and not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)

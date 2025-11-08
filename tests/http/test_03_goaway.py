@@ -41,6 +41,8 @@ class TestGoAway:
     # download files sequentially with delay, reload server for GOAWAY
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx):
         proto = 'h2'
+        if not env.have_h2_curl():
+            pytest.skip("h2 not supported")
         count = 3
         self.r = None
 
