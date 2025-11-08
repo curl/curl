@@ -310,7 +310,6 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
       if(result)
         return result;
     }
-    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
 #endif
 #ifdef CURL_CA_BUNDLE
     if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE]) {
@@ -322,6 +321,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   }
   sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE];
   sslc->primary.CRLfile = data->set.str[STRING_SSL_CRLFILE];
+  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH];
   sslc->primary.issuercert = data->set.str[STRING_SSL_ISSUERCERT];
   sslc->primary.issuercert_blob = data->set.blobs[BLOB_SSL_ISSUERCERT];
   sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST];
@@ -358,7 +358,6 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
       if(result)
         return result;
     }
-    sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
 #endif
 #ifdef CURL_CA_BUNDLE
     if(!sslc->custom_cafile && !set->str[STRING_SSL_CAFILE_PROXY]) {
@@ -370,6 +369,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
 #endif
   }
   sslc->primary.CAfile = data->set.str[STRING_SSL_CAFILE_PROXY];
+  sslc->primary.CApath = data->set.str[STRING_SSL_CAPATH_PROXY];
   sslc->primary.cipher_list = data->set.str[STRING_SSL_CIPHER_LIST_PROXY];
   sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST_PROXY];
   sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY];

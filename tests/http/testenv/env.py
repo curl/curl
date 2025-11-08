@@ -199,6 +199,16 @@ class EnvConfig:
             ]),
         ]
 
+        self.openssl = 'openssl'
+        p = subprocess.run(args=[self.openssl, 'version'],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            # no openssl in path
+            self.openssl = None
+            self.openssl_version = None
+        else:
+            self.openssl_version = p.stdout.strip()
+
         self.nghttpx = self.config['nghttpx']['nghttpx']
         if len(self.nghttpx.strip()) == 0:
             self.nghttpx = None
@@ -371,6 +381,10 @@ class Env:
     @staticmethod
     def incomplete_reason() -> Optional[str]:
         return Env.CONFIG.get_incomplete_reason()
+
+    @staticmethod
+    def have_openssl() -> bool:
+        return Env.CONFIG.openssl is not None
 
     @staticmethod
     def have_nghttpx() -> bool:
@@ -548,6 +562,8 @@ class Env:
                                               store_dir=ca_dir,
                                               key_type="rsa2048")
                 self._ca.issue_certs(self.CONFIG.cert_specs)
+                if self.have_openssl():
+                    self._ca.create_hashdir(self.openssl)
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -702,6 +718,10 @@ class Env:
     @property
     def curl(self) -> str:
         return self.CONFIG.curl
+
+    @property
+    def openssl(self) -> Optional[str]:
+        return self.CONFIG.openssl
 
     @property
     def httpd(self) -> str:

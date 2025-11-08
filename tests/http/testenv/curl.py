@@ -987,7 +987,8 @@ class CurlClient:
                 pass
             elif insecure:
                 args.append('--insecure')
-            elif active_options and "--cacert" in active_options:
+            elif active_options and ("--cacert" in active_options or \
+                    "--capath" in active_options):
                 pass
             elif u.hostname:
                 args.extend(["--cacert", self.env.ca.cert_file])
