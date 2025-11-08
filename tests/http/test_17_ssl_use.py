@@ -604,7 +604,7 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
-            '--capath', os.path.join(env.gen_dir, 'ca/hashdir')
+            '--capath', env.ca.hashdir
         ])
         assert r.exit_code == 0, f'{r.dump_logs()}'
         assert r.json['HTTPS'] == 'on', f'{r.json}'
@@ -619,4 +619,3 @@ class TestSSLUse:
         ])
         # CURLE_PEER_FAILED_VERIFICATION
         assert r.exit_code == 60, f'{r.dump_logs()}'
-
