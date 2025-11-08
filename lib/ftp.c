@@ -2744,16 +2744,6 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
           free(dir);
           return result;
         }
-        free(ftpc->entrypath);
-        ftpc->entrypath = dir; /* remember this */
-        infof(data, "Entry path is '%s'", ftpc->entrypath);
-        /* also save it where getinfo can access it: */
-        free(data->state.most_recent_ftp_entrypath);
-        data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
-        if(!data->state.most_recent_ftp_entrypath)
-          return CURLE_OUT_OF_MEMORY;
-        ftp_state(data, ftpc, FTP_SYST);
-        return result;
       }
 
       free(ftpc->entrypath);
@@ -2764,6 +2754,11 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
       data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
       if(!data->state.most_recent_ftp_entrypath)
         return CURLE_OUT_OF_MEMORY;
+
+      if(!ftpc->server_os && dir[0] != '/') {
+        ftp_state(data, ftpc, FTP_SYST);
+        return CURLE_OK;
+      }
     }
     else {
       /* could not get the path */
