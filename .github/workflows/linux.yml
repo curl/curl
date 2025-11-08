@@ -440,7 +440,7 @@ jobs:
           cd "libressl-${LIBRESSL_VERSION}"
           export CC=/home/runner/filc/build/bin/filcc
           cmake -B . -G Ninja -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DCMAKE_INSTALL_PREFIX=/home/runner/libressl -DENABLE_ASM=OFF
-          cmake --build . --verbose
+          cmake --build .
           cmake --install .
 
       - name: 'cache wolfssl (all)'
