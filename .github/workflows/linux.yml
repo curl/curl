@@ -304,12 +304,12 @@ jobs:
           - name: 'event-based'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
-            tflags: '-n --test-event !TLS-SRP'
+            tflags: '-n --test-event'
 
           - name: 'duphandle'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
-            tflags: '-n --test-duphandle !TLS-SRP'
+            tflags: '-n --test-duphandle'
 
           - name: 'rustls valgrind'
             install_packages: libnghttp2-dev libldap-dev valgrind
