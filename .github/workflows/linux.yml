@@ -219,6 +219,7 @@ jobs:
             install_steps: filc pytest
             CC: /home/runner/filc/build/bin/clang
             generate: >-
+              -DCMAKE_IGNORE_PREFIX_PATH=/usr \
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
               -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
