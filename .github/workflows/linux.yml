@@ -224,14 +224,14 @@ jobs:
           - name: 'Fil-C'
             install_steps: filc
             CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
-            configure: --host=x86_64-unknown-linux-musl --without-ssl --without-libpsl --without-brotli --without-zstd --without-zlib CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
+            configure: --host=x86_64-unknown-linux-musl --disable-warnings --without-ssl --without-libpsl --without-brotli --without-zstd --without-zlib CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
             image: 'ubuntu-22.04'
 
           - name: 'Fil-C 2'
             install_packages: musl-dev
             install_steps: filc
             CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
-            configure: --host=x86_64-unknown-linux-musl --without-ssl --without-libpsl --without-brotli --without-zstd --without-zlib CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
+            configure: --host=x86_64-unknown-linux-musl --disable-warnings --without-ssl --without-libpsl --without-brotli --without-zstd --without-zlib CPPFLAGS=-I/usr/include LDFLAGS=-L/usr/lib
             image: 'ubuntu-latest'
 
           - name: 'clang-tidy'
