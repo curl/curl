@@ -216,7 +216,7 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'libressl Fil-C'
-            install_steps: filc libressl-filc
+            install_steps: filc libressl-filc pytest
             CC: /home/runner/filc/build/bin/filcc
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
