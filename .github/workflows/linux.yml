@@ -216,11 +216,11 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: 'Fil-C'
-            install_steps: filc libressl pytest
+            install_steps: filc pytest
             CC: /home/runner/filc/build/bin/clang
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
-              -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
+              -DCURL_ENABLE_OPENSSL=OFF -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DUSE_NGHTTP2=OFF -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
 
