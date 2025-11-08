@@ -217,7 +217,7 @@ jobs:
 
           - name: 'Fil-C'
             install_steps: filc pytest
-            CC: /home/runner/filc/build/bin/clang
+            CC: /home/runner/filc/build/bin/filcc
             generate: >-
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
               -DCURL_ENABLE_OPENSSL=OFF -DCURL_USE_LIBPSL=OFF
