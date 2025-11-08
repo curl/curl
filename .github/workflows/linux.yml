@@ -535,7 +535,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
-          CC=/home/runner/filc/build/bin/filcc ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-secure-memory no-asm
+          CC=/home/runner/filc/build/bin/filcc ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests no-secure-memory
           make
           make -j1 install_sw
 
