@@ -432,8 +432,8 @@ jobs:
           path: ~/libressl
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.LIBRESSL_VERSION }}
 
-      - name: 'build libressl (filc) rel'
-        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
+      - name: 'build libressl (filc)'
+        if: ${{ contains(matrix.build.install_steps, 'libressl-filc') && steps.cache-libressl-filc.outputs.cache-hit != 'true' }}
         run: |
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://github.com/libressl/portable/releases/download/v${LIBRESSL_VERSION}/libressl-${LIBRESSL_VERSION}.tar.gz" | tar -xz
