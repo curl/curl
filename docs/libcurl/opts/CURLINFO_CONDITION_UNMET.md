@@ -16,7 +16,7 @@ Added-in: 7.19.4
 
 # NAME
 
-CURLINFO_CONDITION_UNMET - get info on unmet time conditional or 304 HTTP response.
+CURLINFO_CONDITION_UNMET - unmet time conditional or 304 HTTP response
 
 # SYNOPSIS
 

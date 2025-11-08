@@ -16,7 +16,7 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_PRETRANSFER_TIME - get the time until the file transfer start
+CURLINFO_PRETRANSFER_TIME - time to transfer start
 
 # SYNOPSIS
 

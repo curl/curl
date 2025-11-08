@@ -15,7 +15,7 @@ Added-in: 7.10.7
 
 # NAME
 
-CURLINFO_HTTP_CONNECTCODE - get the CONNECT response code
+CURLINFO_HTTP_CONNECTCODE - CONNECT response code
 
 # SYNOPSIS
 

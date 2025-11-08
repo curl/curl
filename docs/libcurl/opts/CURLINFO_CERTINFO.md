@@ -20,7 +20,7 @@ Added-in: 7.19.1
 
 # NAME
 
-CURLINFO_CERTINFO - get the TLS certificate chain
+CURLINFO_CERTINFO - TLS certificate chain
 
 # SYNOPSIS
 

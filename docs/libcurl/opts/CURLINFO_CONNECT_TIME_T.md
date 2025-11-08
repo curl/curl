@@ -16,7 +16,7 @@ Added-in: 7.61.0
 
 # NAME
 
-CURLINFO_CONNECT_TIME_T - get the time until connect
+CURLINFO_CONNECT_TIME_T - time to connect
 
 # SYNOPSIS
 

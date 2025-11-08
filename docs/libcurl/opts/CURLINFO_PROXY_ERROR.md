@@ -16,7 +16,7 @@ Added-in: 7.73.0
 
 # NAME
 
-CURLINFO_PROXY_ERROR - get the detailed (SOCKS) proxy error
+CURLINFO_PROXY_ERROR - detailed (SOCKS) proxy error
 
 # SYNOPSIS
 

@@ -15,7 +15,7 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLINFO_PROTOCOL - get the protocol used in the connection
+CURLINFO_PROTOCOL - protocol used in the connection
 
 # SYNOPSIS
 

@@ -17,7 +17,7 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_LOCAL_PORT - get the latest local port number
+CURLINFO_LOCAL_PORT - latest local port number
 
 # SYNOPSIS
 

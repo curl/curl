@@ -17,7 +17,7 @@ Added-in: 7.61.0
 
 # NAME
 
-CURLINFO_REDIRECT_TIME_T - get the time for all redirection steps
+CURLINFO_REDIRECT_TIME_T - time for all redirection steps
 
 # SYNOPSIS
 

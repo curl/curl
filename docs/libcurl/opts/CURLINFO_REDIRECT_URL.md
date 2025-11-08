@@ -17,7 +17,7 @@ Added-in: 7.18.2
 
 # NAME
 
-CURLINFO_REDIRECT_URL - get the URL a redirect would go to
+CURLINFO_REDIRECT_URL - URL a redirect would go to
 
 # SYNOPSIS
 

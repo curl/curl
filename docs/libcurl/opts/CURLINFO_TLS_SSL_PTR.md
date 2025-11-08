@@ -21,7 +21,7 @@ Added-in: 7.48.0
 
 # NAME
 
-CURLINFO_TLS_SESSION, CURLINFO_TLS_SSL_PTR - get TLS session info
+CURLINFO_TLS_SSL_PTR - TLS session info
 
 # SYNOPSIS
 
