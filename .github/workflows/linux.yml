@@ -217,7 +217,7 @@ jobs:
 
           - name: 'Fil-C'
             install_steps: filc
-            CC: '/home/runner/filc/build/bin/filcc --target=x86_64-unknown-linux-musl'
+            CC: /home/runner/filc/build/bin/filcc
             generate: >-
               -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF -DCMAKE_C_COMPILER_TARGET=x86_64-unknown-linux-musl
               -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_ZLIB=OFF
