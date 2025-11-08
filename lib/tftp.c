@@ -530,8 +530,10 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 #define CURL_SENDTO_ARG5(x) (x)
 #endif
     remote_addr = Curl_conn_get_remote_addr(data, FIRSTSOCKET);
-    if(!remote_addr)
+    if(!remote_addr) {
+      free(filename);
       return CURLE_FAILED_INIT;
+    }
 
     senddata = sendto(state->sockfd, (void *)state->spacket.data,
                       (SEND_TYPE_ARG3)sbytes, 0,
