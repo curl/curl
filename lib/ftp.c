@@ -2757,7 +2757,7 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
 
       if(!ftpc->server_os && dir[0] != '/') {
         ftp_state(data, ftpc, FTP_SYST);
-        return result;
+        return CURLE_OK;
       }
     }
     else {
