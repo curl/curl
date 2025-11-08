@@ -109,7 +109,7 @@ Nothing.
 static size_t header_callback(char *buffer, size_t size,
                               size_t nitems, void *userdata)
 {
-  /* received header is 'nitems' bytes in 'buffer' NOT ZERO TERMINATED */
+  /* received header is 'nitems' bytes in 'buffer' NOT NULL-TERMINATED */
   /* 'userdata' is set with CURLOPT_HEADERDATA */
   return nitems;
 }
