@@ -478,19 +478,18 @@ mbed_extract_certinfo(struct Curl_easy *data, const mbedtls_x509_crt *crt)
   int cert_count = 0;
   int i;
 
-  for(cur = crt; cur && cert_count < MAX_ALLOWED_CERT_AMOUNT; cur = cur->next)
+  for(cur = crt; cur && cert_count <= MAX_ALLOWED_CERT_AMOUNT; cur = cur->next)
     cert_count++;
 
-  if(!cur) {
-    infof(data, "Certificate chain truncated to %d certificates",
+  if(cert_count > MAX_ALLOWED_CERT_AMOUNT) {
+    infof(data, "Certificates is more than allowed (%u), skipping certinfo",
           MAX_ALLOWED_CERT_AMOUNT);
+    return;
   }
 
   result = Curl_ssl_init_certinfo(data, cert_count);
 
-  for(i = 0, cur = crt;
-      result == CURLE_OK && i < cert_count && cur;
-      ++i, cur = cur->next) {
+  for(i = 0, cur = crt; result == CURLE_OK && cur; ++i, cur = cur->next) {
     const char *beg = (const char *) cur->raw.p;
     const char *end = beg + cur->raw.len;
     result = Curl_extract_certinfo(data, i, beg, end);
