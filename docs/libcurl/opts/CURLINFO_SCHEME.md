@@ -17,7 +17,7 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLINFO_SCHEME - get the URL scheme (sometimes called protocol) used in the connection
+CURLINFO_SCHEME - URL scheme used in transfer
 
 # SYNOPSIS
 

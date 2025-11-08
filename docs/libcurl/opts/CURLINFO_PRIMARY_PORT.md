@@ -16,7 +16,7 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_PRIMARY_PORT - get the latest destination port number
+CURLINFO_PRIMARY_PORT - last destination port number
 
 # SYNOPSIS
 

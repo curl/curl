@@ -16,7 +16,7 @@ Added-in: 7.15.2
 
 # NAME
 
-CURLINFO_LASTSOCKET - get the last socket used
+CURLINFO_LASTSOCKET - last socket used
 
 # SYNOPSIS
 

@@ -18,7 +18,7 @@ Added-in: 7.34.0
 
 # NAME
 
-CURLINFO_TLS_SESSION - get TLS session info
+CURLINFO_TLS_SESSION - TLS session info
 
 # SYNOPSIS
 

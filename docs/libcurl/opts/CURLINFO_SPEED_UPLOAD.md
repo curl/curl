@@ -15,7 +15,7 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_SPEED_UPLOAD - get upload speed
+CURLINFO_SPEED_UPLOAD - upload speed
 
 # SYNOPSIS
 

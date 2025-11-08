@@ -16,7 +16,7 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_HEADER_SIZE - get size of retrieved headers
+CURLINFO_HEADER_SIZE - size of response headers
 
 # SYNOPSIS
 

@@ -18,7 +18,7 @@ Added-in: 7.10.8
 
 # NAME
 
-CURLINFO_RESPONSE_CODE - get the last response code
+CURLINFO_RESPONSE_CODE - last response code
 
 # SYNOPSIS
 

@@ -16,7 +16,7 @@ Added-in: 7.45.0
 
 # NAME
 
-CURLINFO_ACTIVESOCKET - get the active socket
+CURLINFO_ACTIVESOCKET - active socket
 
 # SYNOPSIS
 

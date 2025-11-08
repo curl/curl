@@ -17,7 +17,7 @@ Added-in: 7.19.0
 
 # NAME
 
-CURLINFO_PRIMARY_IP - get IP address of last connection
+CURLINFO_PRIMARY_IP - IP address of last connection
 
 # SYNOPSIS
 
