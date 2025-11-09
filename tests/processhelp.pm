@@ -173,11 +173,11 @@ sub pidterm {
                     my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
                     $result =~ s/\r//g;
                     $result =~ s/\n/ | /g;
-                    print "Task info before taskkill: '$result'\n";
+                    print "Task info for $pid before taskkill: '$result'\n";
 
                     $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
                     $result =~ s/\r//g;
-                    print "Task child processes before taskkill:\n";
+                    print "Task child processes for $pid before taskkill:\n";
                     print "$result\n";
 
                     if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
@@ -221,11 +221,11 @@ sub pidkill {
                     my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
                     $result =~ s/\r//g;
                     $result =~ s/\n/ | /g;
-                    print "Task info before taskkill: '$result'\n";
+                    print "Task info for $pid before taskkill: '$result'\n";
 
                     $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
                     $result =~ s/\r//g;
-                    print "Task child processes before taskkill:\n";
+                    print "Task child processes for $pid before taskkill:\n";
                     print "$result\n";
 
                     if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
