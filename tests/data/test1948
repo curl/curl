@@ -60,7 +60,7 @@ Accept: */*
 Content-Length: 22
 
 This is test PUT data
-POST /1948 HTTP/1.1
+POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
 Content-Length: 22
