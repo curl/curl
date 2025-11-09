@@ -175,7 +175,7 @@ sub pidterm {
                     $result =~ s/\n/ | /g;
                     print "Task info before taskkill: '$result'\n";
 
-                    my $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
                     $result =~ s/\r//g;
                     print "Task child processes before taskkill:\n";
                     print "$result\n";
@@ -223,7 +223,7 @@ sub pidkill {
                     $result =~ s/\n/ | /g;
                     print "Task info before taskkill: '$result'\n";
 
-                    my $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
                     $result =~ s/\r//g;
                     print "Task child processes before taskkill:\n";
                     print "$result\n";
