@@ -502,6 +502,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       /* Populate our identity domain */
       if(Curl_override_sspi_http_realm((const char *) digest->input_token,
                                        &identity)) {
+        Curl_sspi_free_identity(&identity);
         free(output_token);
         return CURLE_OUT_OF_MEMORY;
       }
