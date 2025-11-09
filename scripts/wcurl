@@ -29,7 +29,7 @@
 # Stop on errors and on usage of unset variables.
 set -eu
 
-VERSION="2025.11.04"
+VERSION="2025.11.09"
 
 PROGRAM_NAME="$(basename "$0")"
 readonly PROGRAM_NAME
@@ -85,7 +85,7 @@ _EOF_
 # Display an error message and bail out.
 error()
 {
-    printf "%s\n" "$*" > /dev/stderr
+    printf "%s\n" "$*" >&2
     exit 1
 }
 
@@ -118,7 +118,7 @@ readonly PER_URL_PARAMETERS="\
 # characters.
 # 2F = /
 # 5C = \
-readonly UNSAFE_PERCENT_ENCODE="2F 5C"
+readonly UNSAFE_PERCENT_ENCODE="%2F %5C"
 
 # Whether to invoke curl or not.
 DRY_RUN="false"
