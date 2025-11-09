@@ -79,9 +79,10 @@ sub file {
     close(F);
 }
 
-my @files = @ARGV;
-
-foreach my $each (@files) {
+my @filemasks = @ARGV;
+my @cmd = ('git', 'ls-files', @filemasks);
+open(my $git_ls_files, '-|', @cmd) or die "Failed running git ls-files: $!";
+while(my $each = <$git_ls_files>) {
     file($each);
 }
 exit $errors;
