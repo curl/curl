@@ -180,6 +180,7 @@
  21.1 Support rate-limiting
  21.2 Support MQTTS
  21.3 Handle network blocks
+ 21.4 large payloads
 
  22. TFTP
  22.1 TFTP does not convert LF to CRLF for mode=netascii
@@ -1270,16 +1271,24 @@
 
 21.3 Handle network blocks
 
-  Running test suite with
-  `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes several
-  MQTT test cases fail where they should not.
+ Running test suite with `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes
+ several MQTT test cases fail where they should not.
+
+21.4 large payloads
+
+ libcurl unnecessarily allocates heap memory to hold the entire payload to get
+ sent, when the data is already perfectly accessible where it is when
+ `CURLOPT_POSTFIELDS` is used. This is highly inefficient for larger payloads.
+ Additionally, libcurl does not support using the read callback for sending
+ MQTT which is yet another way to avoid having to hold large payload in
+ memory.
 
 22. TFTP
 
 22.1 TFTP does not convert LF to CRLF for mode=netascii
 
- RFC 3617 defines that an TFTP transfer can be done using "netascii"
- mode. curl does not support extracting that mode from the URL nor does it treat
+ RFC 3617 defines that an TFTP transfer can be done using "netascii" mode.
+ curl does not support extracting that mode from the URL nor does it treat
  such transfers specifically. It should probably do LF to CRLF translations
  for them.
 
