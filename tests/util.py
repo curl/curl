@@ -75,7 +75,7 @@ class TestData(object):
 
         log.debug("Parsing file %s", filename)
 
-        with open(filename, "r", encoding='utf-8') as f:
+        with open(filename, "r", encoding='us-ascii') as f:
             contents = f.read()
 
         m = REPLY_DATA.search(contents)
