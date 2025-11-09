@@ -580,6 +580,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       failf(data, "schannel: certificate format compatibility error "
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
+      free(cert_store_path);
       curlx_unicodefree(cert_path);
       if(fInCert)
         curlx_fclose(fInCert);
@@ -597,6 +598,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       int cert_find_flags;
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
+      free(cert_store_path);
       curlx_unicodefree(cert_path);
       if(fInCert) {
         long cert_tell = 0;
