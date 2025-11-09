@@ -167,4 +167,4 @@ jobs:
         run: |
           # shellcheck disable=SC2046
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
-          .github/scripts/badwords.pl $(git ls-files -- src lib include)
+          .github/scripts/badwords.pl $(git ls-files src lib include)
