@@ -21,7 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# by Tetetest and Sukender (Benoit Neil)
 
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
