@@ -169,10 +169,29 @@ sub pidterm {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
                 } else {
-                    # https://ss64.com/nt/taskkill.html
-                    my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
-                    print "Executing: '$cmd'\n";
-                    system($cmd);
+                    # https://ss64.com/nt/tasklist.html
+                    my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
+                    $result =~ s/\r//g;
+                    $result =~ s/\n/ | /g;
+                    print "Task info for $pid before taskkill: '$result'\n";
+
+                    $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result =~ s/\r//g;
+                    print "Task child processes for $pid before taskkill:\n";
+                    print "$result\n";
+
+                    if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
+                        # https://ss64.com/nt/taskkill.html
+                        my $cmd;
+                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
+                            $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
+                        }
+                        else {
+                            $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        }
+                        print "Executing: '$cmd'\n";
+                        system($cmd);
+                    }
                 }
                 return;
             }
@@ -198,10 +217,29 @@ sub pidkill {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
                 } else {
-                    # https://ss64.com/nt/taskkill.html
-                    my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
-                    print "Executing: '$cmd'\n";
-                    system($cmd);
+                    # https://ss64.com/nt/tasklist.html
+                    my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
+                    $result =~ s/\r//g;
+                    $result =~ s/\n/ | /g;
+                    print "Task info for $pid before taskkill: '$result'\n";
+
+                    $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result =~ s/\r//g;
+                    print "Task child processes for $pid before taskkill:\n";
+                    print "$result\n";
+
+                    if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
+                        # https://ss64.com/nt/taskkill.html
+                        my $cmd;
+                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
+                            $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
+                        }
+                        else {
+                            $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        }
+                        print "Executing: '$cmd'\n";
+                        system($cmd);
+                    }
                 }
                 return;
             }
