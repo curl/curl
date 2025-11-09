@@ -7,7 +7,7 @@ HTTP
 </info>
 # Server-side
 <reply>
-<data crlf="headers" nocheck="yes">
+<data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{num_headers}'
 
 # Verify data
 <verify>
-<stdout crlf="headers" nonewline="yes">
+<stdout nonewline="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
