@@ -217,7 +217,7 @@ sub partexists {
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
-    my ($file)=@_;
+    my ($file, $original)=@_;
 
     if(defined $xmlfile && $file eq $xmlfile) {
         # This test is already loaded
@@ -228,7 +228,12 @@ sub loadtest {
     $xmlfile = "";
 
     if(open(my $xmlh, "<", "$file")) {
-        binmode $xmlh; # for crapage systems, use binary
+        if($original) {
+            binmode $xmlh, ':crlf'
+        }
+        else {
+            binmode $xmlh; # for crapage systems, use binary
+        }
         while(<$xmlh>) {
             push @xml, $_;
         }

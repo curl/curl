@@ -1150,7 +1150,7 @@ sub singletest_postcheck {
     }
 
     if($checktests) {
-        loadtest("${TESTDIR}/test${testnum}");  # load the raw original data
+        loadtest("${TESTDIR}/test${testnum}", 1);  # load the raw original data
         if(checktest()) {
             logmsg " $testnum: postcheck FAILED: issue(s) found in test data\n";
             return -1;
@@ -1181,7 +1181,7 @@ sub runner_test_preprocess {
     # ignore any error here--if there were one, it would have been
     # caught during the selection phase and this test would not be
     # running now
-    loadtest("${TESTDIR}/test${testnum}");
+    loadtest("${TESTDIR}/test${testnum}", 1);
     readtestkeywords();
 
     ###################################################################
