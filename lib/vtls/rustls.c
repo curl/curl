@@ -1098,8 +1098,6 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     &backend->config);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build client config");
-    rustls_client_config_builder_free(config_builder);
-    rustls_client_config_free(backend->config);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -1109,6 +1107,8 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     &rconn);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "rustls_client_connection_new");
+    rustls_client_config_free(backend->config);
+    backend->config = NULL;
     return CURLE_COULDNT_CONNECT;
   }
   DEBUGASSERT(rconn);
