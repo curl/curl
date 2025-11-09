@@ -200,12 +200,6 @@ FILE *test2fopen(long testno, const char *logdir2)
   /* first try the alternative, preprocessed, file */
   snprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
   stream = fopen(filename, "rb");
-  if(stream)
-    return stream;
-
-  /* then try the source version */
-  snprintf(filename, sizeof(filename), "%s/data/test%ld", srcpath, testno);
-  stream = fopen(filename, "rb");
 
   return stream;
 }
