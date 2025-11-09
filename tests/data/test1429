@@ -8,18 +8,18 @@ HTTP/0.9
 </info>
 
 <reply>
-<data nocheck="yes">
-HTTP/1.1 999 OK%CR
-Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
-Server: test-server/fake%CR
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT%CR
-ETag: "21025-dc7-39462498"%CR
-Accept-Ranges: bytes%CR
-Content-Length: 6%CR
-Connection: close%CR
-Content-Type: text/html%CR
-Funny-head: yesyes%CR
-%CR
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 999 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
 -foo-
 </data>
 </reply>
