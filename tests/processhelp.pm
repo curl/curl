@@ -176,7 +176,12 @@ sub pidterm {
                     print "Task info before taskkill: '$result'\n";
                     if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
                         # https://ss64.com/nt/taskkill.html
-                        my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
+                            my $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
+                        }
+                        else {
+                            my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        }
                         print "Executing: '$cmd'\n";
                         system($cmd);
                     }
@@ -212,7 +217,12 @@ sub pidkill {
                     print "Task info before taskkill: '$result'\n";
                     if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
                         # https://ss64.com/nt/taskkill.html
-                        my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
+                            my $cmd = "taskkill -f    -pid $pid >$dev_null 2>&1";
+                        }
+                        else {
+                            my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
+                        }
                         print "Executing: '$cmd'\n";
                         system($cmd);
                     }
