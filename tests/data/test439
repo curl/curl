@@ -47,7 +47,7 @@ aws-sigv4 with query
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET /439/?name=me&noval&aim=b%aad&&&weirdo=*.//- HTTP/1.1
+GET /%TESTNUMBER/?name=me&noval&aim=b%aad&&&weirdo=*.//- HTTP/1.1
 Host: fake.fake.fake:8000
 Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=9dd8592929306832a6673d10063491391e486e5f50de4647ea7c2c797277e0a6
 X-Amz-Date: 19700101T000000Z
