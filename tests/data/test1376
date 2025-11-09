@@ -8,14 +8,14 @@ HTTP GET
 
 #
 <reply>
-<data nocheck="yes">
-HTTP/1.1 200 OK%CR
-Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
-Server: test-server/fake%CR
-Content-Length: 6%CR
-Connection: close%CR
-Content-Type: text/html%CR
-%CR
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+
 12345
 </data>
 </reply>
