@@ -66,10 +66,10 @@ jobs:
   #          JSON
   #
   #      - name: 'trim headers off all *.md files'
-  #        run: git ls-files -z '*.md' | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+  #        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
   #
   #      - name: 'check prose'
-  #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
+  #        run: git ls-files '*.md' -z | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
   #
   #      # This is for CHECKSRC and files with aggressive exclamation mark needs
   #      - name: 'create second proselint config'
@@ -109,9 +109,7 @@ jobs:
           persist-credentials: false
 
       - name: 'trim all *.md files in docs/'
-        run: |
-          # shellcheck disable=SC2046
-          .github/scripts/cleancmd.pl $(find docs -name '*.md')
+        run: .github/scripts/cleancmd.pl 'docs/*.md'
 
       - name: 'install'
         run: |
@@ -140,9 +138,7 @@ jobs:
           persist-credentials: false
 
       - name: 'badwords'
-        run: |
-          # shellcheck disable=SC2046
-          .github/scripts/badwords.pl < .github/scripts/badwords.txt $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
+        run: .github/scripts/badwords.pl '**.md' docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400 < .github/scripts/badwords.txt
 
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
