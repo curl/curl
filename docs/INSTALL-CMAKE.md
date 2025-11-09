@@ -221,7 +221,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_EXAMPLES`:                         Build libcurl examples. Default: `ON`
 - `BUILD_LIBCURL_DOCS`:                     Build libcurl man pages. Default: `ON`
 - `BUILD_MISC_DOCS`:                        Build misc man pages (e.g. `curl-config` and `mk-ca-bundle`). Default: `ON`
-- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON` (if target supports shared libs, otherwise `OFF`)
+- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON` (if target platform supports shared libs, otherwise `OFF`)
 - `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF` (turns to `ON`, when building static libcurl only)
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF` (turns to `ON` if `BUILD_SHARED_LIBS` is `OFF`)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
