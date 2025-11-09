@@ -142,7 +142,7 @@ jobs:
       - name: 'badwords'
         run: |
           # shellcheck disable=SC2046
-          .github/scripts/badwords.pl < .github/scripts/badwords.txt $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
+          .github/scripts/badwords.pl $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400 < .github/scripts/badwords.txt
 
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
