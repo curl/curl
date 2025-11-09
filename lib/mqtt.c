@@ -582,6 +582,8 @@ fail:
   return result;
 }
 
+#define MAX_MQTT_MESSAGE_SIZE 0xFFFFFFF
+
 static CURLcode mqtt_publish(struct Curl_easy *data)
 {
   CURLcode result;
@@ -611,6 +613,8 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
 
   remaininglength = payloadlen + 2 + topiclen;
   encodelen = mqtt_encode_len(encodedbytes, remaininglength);
+  if(MAX_MQTT_MESSAGE_SIZE - remaininglength - 1 < encodelen)
+    return CURLE_TOO_LARGE;
 
   /* add the control byte and the encoded remaining length */
   pkt = malloc(remaininglength + 1 + encodelen);
