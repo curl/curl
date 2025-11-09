@@ -8,11 +8,11 @@
 #
 # Server-side
 <reply>
-<data>
-HTTP/1.1 200 OK%CR
-Content-Length: 6%CR
-Content-Type: text/1%CR
-%CR
+<data crlf="headers">
+HTTP/1.1 200 OK
+Content-Length: 6
+Content-Type: text/1
+
 -foo-
 </data>
 </reply>
