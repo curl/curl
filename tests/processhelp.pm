@@ -169,6 +169,11 @@ sub pidterm {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
                 } else {
+                    # https://ss64.com/nt/tasklist.html
+                    my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
+                    $result =~ s/\r//g;
+                    $result =~ s/\n/ | /g;
+                    print "Task info before taskkill: '$result'\n";
                     # https://ss64.com/nt/taskkill.html
                     my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
                     print "Executing: '$cmd'\n";
@@ -198,6 +203,11 @@ sub pidkill {
                 if($has_win32_process) {
                     Win32::Process::KillProcess($pid, 0);
                 } else {
+                    # https://ss64.com/nt/tasklist.html
+                    my $result = `tasklist -v -fo list -fi "PID eq $pid" 2>&1`;
+                    $result =~ s/\r//g;
+                    $result =~ s/\n/ | /g;
+                    print "Task info before taskkill: '$result'\n";
                     # https://ss64.com/nt/taskkill.html
                     my $cmd = "taskkill -f -t -pid $pid >$dev_null 2>&1";
                     print "Executing: '$cmd'\n";
