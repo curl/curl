@@ -598,6 +598,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       int cert_find_flags;
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
+      free(cert_store_path);
       curlx_unicodefree(cert_path);
       if(fInCert) {
         long cert_tell = 0;
@@ -619,7 +620,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         if(!continue_reading) {
           failf(data, "schannel: Failed to read cert file %s",
                 data->set.ssl.primary.clientcert);
-          free(cert_store_path);
           free(certdata);
           return CURLE_SSL_CERTPROBLEM;
         }
@@ -665,7 +665,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
           failf(data, "schannel: Failed to import cert file %s, "
                 "last error is 0x%08lx",
                 cert_showfilename_error, errorcode);
-        free(cert_store_path);
         return CURLE_SSL_CERTPROBLEM;
       }
 
@@ -685,7 +684,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         failf(data, "schannel: Failed to get certificate from file %s"
               ", last error is 0x%08lx",
               cert_showfilename_error, GetLastError());
-        free(cert_store_path);
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
       }
