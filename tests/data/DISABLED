@@ -27,10 +27,6 @@
 # per line.
 # Lines starting with '#' letters are treated as comments.
 #
-# Uses SRP to "a server not supporting it" but modern stunnel versions
-# will silently accept it and remain happy
-323
-#
 594
 836
 882
