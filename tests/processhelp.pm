@@ -174,6 +174,12 @@ sub pidterm {
                     $result =~ s/\r//g;
                     $result =~ s/\n/ | /g;
                     print "Task info before taskkill: '$result'\n";
+
+                    my $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result =~ s/\r//g;
+                    print "Task child processes before taskkill:\n";
+                    print "$result\n";
+
                     if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
                         # https://ss64.com/nt/taskkill.html
                         if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
@@ -215,6 +221,12 @@ sub pidkill {
                     $result =~ s/\r//g;
                     $result =~ s/\n/ | /g;
                     print "Task info before taskkill: '$result'\n";
+
+                    my $result = `powershell -Command "Get-CimInstance -ClassName Win32_Process -Filter 'ParentProcessId=$pid' | Select ProcessId,ParentProcessId,Name,CommandLine"`;
+                    $result =~ s/\r//g;
+                    print "Task child processes before taskkill:\n";
+                    print "$result\n";
+
                     if(!$ENV{'CURL_TEST_NO_TASKKILL'}) {
                         # https://ss64.com/nt/taskkill.html
                         if($ENV{'CURL_TEST_NO_TASKKILL_TREE'}) {
