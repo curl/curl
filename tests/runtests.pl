@@ -1191,7 +1191,7 @@ sub singletest_shouldrun {
         }
     }
 
-    if($why && $checktests && checktest()) {
+    if($why && $checktests && checktest("${TESTDIR}/test${testnum}")) {
         logmsg "Warning: issue(s) found in test data: ${TESTDIR}/test${testnum}\n";
     }
 

@@ -1149,12 +1149,9 @@ sub singletest_postcheck {
         }
     }
 
-    if($checktests) {
-        loadtest("${TESTDIR}/test${testnum}", 1);  # load the raw original data
-        if(checktest()) {
-            logmsg " $testnum: postcheck FAILED: issue(s) found in test data\n";
-            return -1;
-        }
+    if($checktests && checktest("${TESTDIR}/test${testnum}")) {
+        logmsg " $testnum: postcheck FAILED: issue(s) found in test data\n";
+        return -1;
     }
 
     return 0;
