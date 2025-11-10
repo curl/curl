@@ -217,7 +217,7 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
-          - name: 'libressl nghttp2 Fil-C'
+          - name: 'libressl Fil-C'
             install_steps: filc libressl-filc nghttp2-filc pytest
             tflags: '!776'  # adds 1-9 minutes to the test run step, and fails consistently
             CC: /home/runner/filc/build/bin/filcc
