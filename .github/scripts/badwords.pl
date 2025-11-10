@@ -80,7 +80,7 @@ sub file {
 }
 
 my @filemasks = @ARGV;
-open(my $git_ls_files, '-|', ('git', 'ls-files', '--', @filemasks)) or die "Failed running git ls-files: $!";
+open(my $git_ls_files, '-|', 'git', 'ls-files', '--', @filemasks) or die "Failed running git ls-files: $!";
 while(my $each = <$git_ls_files>) {
     file($each);
 }
