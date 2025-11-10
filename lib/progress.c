@@ -67,8 +67,9 @@ static void time2str(char *r, curl_off_t seconds)
    Add suffix k, M, G when suitable... */
 static char *max6data(curl_off_t bytes, char *max6)
 {
-  /* a signed 64-bit value is 8192 petabytes maximum */
-  const char unit[] = { 'k', 'M', 'G', 'T', 'P', 0 };
+  /* a signed 64-bit value is 8192 petabytes maximum, shown as
+     8.0E (exabytes)*/
+  const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
   int k = 0;
   if(bytes < 100000) {
     curl_msnprintf(max6, 7, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
