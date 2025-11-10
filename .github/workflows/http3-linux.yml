@@ -575,7 +575,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
 
       - name: 'build quiche and boringssl'
-        if: ${{ matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true' }}
+        if: ${{ matrix.build.name == 'quiche' }}
         run: |
           cd ~
           git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
@@ -587,6 +587,9 @@ jobs:
           cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
           ln -s libquiche.so target/release/libquiche.so.0
           mkdir -v quiche/deps/boringssl/src/lib
+          echo '-------------------'
+          find target/release -name libcrypto.a -o -name libssl.a
+          echo '-------------------'
           # shellcheck disable=SC2046
           ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
