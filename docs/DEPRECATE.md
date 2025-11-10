@@ -70,6 +70,18 @@ stack.
 
 We remove the OpenSSL-QUIC backend in March 2026.
 
+## RTMP
+
+RTMP in curl is powered by the 3rd party library librtmp.
+
+ - RTMP is barely used by curl users (2.2% in the 2025 survey)
+ - librtmp has no test cases, makes no proper releases and has not had a single
+   commit within the last year
+ - librtmp parses the URL itself and requires non-compliant URLs for this
+ - we have no RTMP tests
+
+Support for RTMP in libcurl gets removed in April 2026.
+
 ## Past removals
 
  - axTLS (removed in 7.63.0)
