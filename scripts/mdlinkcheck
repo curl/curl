@@ -138,13 +138,17 @@ sub checkurl {
     }
 
     print "check $url\n";
-    my $curlcmd="curl -ILfsm10 --retry 2 --retry-delay 5 -A \"Mozilla/curl.se link-probe\"";
     $url =~ s/\+/%2B/g;
-    if($url =~ /[\"\'\n]/) {
-        print STDERR "Bad URL in markdown: %s\n", $url{$url};
+    my @content;
+    if(open(my $fh, '-|', 'curl', '-ILfsm10', '--retry', '2', '--retry-delay', '5',
+                          '-A', 'Mozilla/curl.se link-probe', $url)) {
+        @content = <$fh>;
+        close $fh;
+    }
+    else {
+        print STDERR "FAIL\n";
         return 1; # fail
     }
-    my @content = `$curlcmd \"$url\"`;
     if(!$content[0]) {
         print STDERR "FAIL\n";
         return 1; # fail
