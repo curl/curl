@@ -1373,6 +1373,7 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
     /* this unconditional rejection of control bytes is documented
        API behavior */
     CURLcode res = Curl_urldecode(part, partlen, &decoded, &dlen, REJECT_CTRL);
+    free(part);
     if(res)
       return CURLUE_URLDECODE;
     part = decoded;
