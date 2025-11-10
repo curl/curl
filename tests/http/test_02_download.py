@@ -581,7 +581,9 @@ class TestDownload:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_28_get_compressed(self, env: Env, httpd, nghttpx, proto):
-        if not env.have_h2_curl():
+        if not env.have_compressed_curl():
+            pytest.skip("--compressed not supported")
+        if proto == 'h2' and not env.have_h2_curl():
             pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")

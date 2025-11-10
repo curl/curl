@@ -407,6 +407,12 @@ class Env:
         return 'http3' in Env.CONFIG.curl_props['features']
 
     @staticmethod
+    def have_compressed_curl() -> bool:
+        return 'brotli' in Env.CONFIG.curl_props['libs'] or \
+               'zlib' in Env.CONFIG.curl_props['libs'] or \
+               'zstd' in Env.CONFIG.curl_props['libs']
+
+    @staticmethod
     def curl_uses_lib(libname: str) -> bool:
         return libname.lower() in Env.CONFIG.curl_props['libs']
 
