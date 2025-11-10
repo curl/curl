@@ -40,12 +40,7 @@ if [ -z "$tarball" ]; then
     exit
 fi
 
-i="0"
-
-# shellcheck disable=SC2034
-for dl in curl-*; do
-    i=$((i + 1))
-done
+i="$(find . -maxdepth 1 -type d -name 'curl-*' | wc -l)"
 
 if test "$i" -gt 1; then
     echo "multiple curl-* entries found, disambiguate please"
