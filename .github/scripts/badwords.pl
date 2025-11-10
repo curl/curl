@@ -84,4 +84,5 @@ open(my $git_ls_files, '-|', ('git', 'ls-files', '--', @filemasks)) or die "Fail
 while(my $each = <$git_ls_files>) {
     file($each);
 }
+close $git_ls_files;
 exit $errors;
