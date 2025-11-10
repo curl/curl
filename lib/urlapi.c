@@ -1345,20 +1345,22 @@ static CURLUcode host_encode(const char *host, char **allochost)
 #endif
 
 static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
-                               const char *ptr, char **part,
+                               const char *ptr, char **partp,
                                bool plusdecode, unsigned int flags)
 {
+  CURLUcode uc = CURLUE_OK;
   size_t partlen = strlen(ptr);
   bool urldecode = (flags & CURLU_URLDECODE) ? 1 : 0;
   bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
   bool punycode = (flags & CURLU_PUNYCODE) && (what == CURLUPART_HOST);
   bool depunyfy = (flags & CURLU_PUNY2IDN) && (what == CURLUPART_HOST);
-  *part = Curl_memdup0(ptr, partlen);
-  if(!*part)
+  char *part = Curl_memdup0(ptr, partlen);
+  *partp = NULL;
+  if(!part)
     return CURLUE_OUT_OF_MEMORY;
   if(plusdecode) {
     /* convert + to space */
-    char *plus = *part;
+    char *plus = part;
     size_t i = 0;
     for(i = 0; i < partlen; ++plus, i++) {
       if(*plus == '+')
@@ -1370,46 +1372,43 @@ static CURLUcode urlget_format(const CURLU *u, CURLUPart what,
     size_t dlen;
     /* this unconditional rejection of control bytes is documented
        API behavior */
-    CURLcode res = Curl_urldecode(*part, 0, &decoded, &dlen, REJECT_CTRL);
-    free(*part);
-    if(res) {
-      *part = NULL;
+    CURLcode res = Curl_urldecode(part, partlen, &decoded, &dlen, REJECT_CTRL);
+    free(part);
+    if(res)
       return CURLUE_URLDECODE;
-    }
-    *part = decoded;
+    part = decoded;
     partlen = dlen;
   }
   if(urlencode) {
     struct dynbuf enc;
-    CURLUcode uc;
     curlx_dyn_init(&enc, CURL_MAX_INPUT_LENGTH);
-    uc = urlencode_str(&enc, *part, partlen, TRUE, what == CURLUPART_QUERY);
+    uc = urlencode_str(&enc, part, partlen, TRUE, what == CURLUPART_QUERY);
+    free(part);
     if(uc)
       return uc;
-    free(*part);
-    *part = curlx_dyn_ptr(&enc);
+    part = curlx_dyn_ptr(&enc);
   }
   else if(punycode) {
     if(!Curl_is_ASCII_name(u->host)) {
-      char *allochost = NULL;
-      CURLUcode ret = host_decode(*part, &allochost);
-      if(ret)
-        return ret;
-      free(*part);
-      *part = allochost;
+      char *punyversion = NULL;
+      uc = host_decode(part, &punyversion);
+      free(part);
+      if(uc)
+        return uc;
+      part = punyversion;
     }
   }
   else if(depunyfy) {
     if(Curl_is_ASCII_name(u->host)) {
-      char *allochost = NULL;
-      CURLUcode ret = host_encode(*part, &allochost);
-      if(ret)
-        return ret;
-      free(*part);
-      *part = allochost;
+      char *unpunified = NULL;
+      uc = host_encode(part, &unpunified);
+      free(part);
+      if(uc)
+        return uc;
+      part = unpunified;
     }
   }
-
+  *partp = part;
   return CURLUE_OK;
 }
 
