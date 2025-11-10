@@ -69,26 +69,25 @@ static char *max6data(curl_off_t bytes, char *max6)
 {
   /* a signed 64-bit value is 8192 petabytes maximum, shown as
      8.0E (exabytes)*/
-  const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
-  int k = 0;
-  if(bytes < 100000) {
+  if(bytes < 100000)
     curl_msnprintf(max6, 7, "%6" CURL_FORMAT_CURL_OFF_T, bytes);
-    return max6;
+  else {
+    const char unit[] = { 'k', 'M', 'G', 'T', 'P', 'E', 0 };
+    int k = 0;
+    curl_off_t nbytes;
+    do {
+      nbytes = bytes / 1024;
+      if(nbytes < 1000)
+        break;
+      bytes = nbytes;
+      k++;
+      DEBUGASSERT(unit[k]);
+    } while(unit[k]);
+    /* xxx.yU */
+    curl_msnprintf(max6, 7, "%3" CURL_FORMAT_CURL_OFF_T
+                   ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
+                   (bytes%1024) / (1024/10), unit[k]);
   }
-
-  do {
-    curl_off_t nbytes = bytes / 1024;
-    if(nbytes < 1000) {
-      /* xxx.yU */
-      curl_msnprintf(max6, 7, "%3" CURL_FORMAT_CURL_OFF_T
-                     ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
-                     (bytes%1024) / (1024/10), unit[k]);
-      break;
-    }
-    bytes = nbytes;
-    k++;
-    DEBUGASSERT(unit[k]);
-  } while(unit[k]);
   return max6;
 }
 #endif
