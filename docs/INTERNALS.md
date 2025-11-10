@@ -48,7 +48,7 @@ versions of libs and build tools.
  - GNU Autoconf 2.59
  - GNU Automake 1.7
  - GNU M4       1.4
- - perl         5.8
+ - perl         5.8 (5.22 on Windows)
  - roffit       0.5
  - cmake        3.7
 
