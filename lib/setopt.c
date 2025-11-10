@@ -2169,9 +2169,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set the client IP to send through HAProxy PROXY protocol
      */
     result = Curl_setstropt(&s->str[STRING_HAPROXY_CLIENT_IP], ptr);
-    if(!result)
-      /* enable the HAProxy protocol if an IP is provided */
-      s->haproxyprotocol = !!ptr;
+
+    /* enable the HAProxy protocol if an IP is provided */
+    s->haproxyprotocol = !!s->str[STRING_HAPROXY_CLIENT_IP];
     break;
 
 #endif
