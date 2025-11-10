@@ -91,7 +91,7 @@ jobs:
       - name: 'pytype'
         run: |
           source ~/venv/bin/activate
-          find . -name '*.py' -exec pytype -j auto -k {} +
+          find . -name '*.py' -exec pytype -j auto -k -- {} +
 
       - name: 'ruff'
         run: |
