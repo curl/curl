@@ -88,11 +88,11 @@ sub eol_detect {
 
 my $issues = 0;
 
-open my $git_ls_files, '-|', 'git ls-files' or die "Failed running git ls-files: $!";
+open(my $git_ls_files, '-|', 'git ls-files') or die "Failed running git ls-files: $!";
 while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
-    open my $fh, '<', $filename or die "Cannot open '$filename': $!";
+    open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
     my $content = do { local $/; <$fh> };
     close $fh;
 
