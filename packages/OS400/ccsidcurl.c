@@ -1286,7 +1286,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
         blob.flags = bp->flags | CURL_BLOB_COPY;
         bp = &blob;
       }
-      result = curl_easy_setopt(easy, tag, &blob);
+      result = curl_easy_setopt(easy, tag, bp);
       break;
     }
     FALLTHROUGH();
