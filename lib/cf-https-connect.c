@@ -587,20 +587,22 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
   size_t i;
 
+  ctx = calloc(1, sizeof(*ctx));
+  if(!ctx) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
   DEBUGASSERT(alpnids);
   DEBUGASSERT(alpn_count);
   DEBUGASSERT(alpn_count <= CURL_ARRAYSIZE(ctx->ballers));
   if(!alpn_count || (alpn_count > CURL_ARRAYSIZE(ctx->ballers))) {
     failf(data, "https-connect filter create with unsupported %zu ALPN ids",
           alpn_count);
-    return CURLE_FAILED_INIT;
-  }
-
-  ctx = calloc(1, sizeof(*ctx));
-  if(!ctx) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = CURLE_FAILED_INIT;
     goto out;
   }
+
   for(i = 0; i < alpn_count; ++i)
     cf_hc_baller_assign(&ctx->ballers[i], alpnids[i], def_transport);
   for(; i < CURL_ARRAYSIZE(ctx->ballers); ++i)
