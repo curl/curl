@@ -109,9 +109,7 @@ jobs:
           persist-credentials: false
 
       - name: 'trim all *.md files in docs/'
-        run: |
-          # shellcheck disable=SC2046
-          .github/scripts/cleancmd.pl $(find docs -name '*.md')
+        run: .github/scripts/cleancmd.pl 'docs/*.md'
 
       - name: 'install'
         run: |
