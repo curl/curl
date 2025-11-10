@@ -184,7 +184,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file '{}' \;
+        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file -- '{}' \;
 
       - name: 'build tests'
         run: |

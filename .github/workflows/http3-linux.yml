@@ -587,7 +587,7 @@ jobs:
           cargo build -v --package quiche --release --features ffi,pkg-config-meta,qlog --verbose
           ln -s libquiche.so target/release/libquiche.so.0
           mkdir -v quiche/deps/boringssl/src/lib
-          find target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf '{}' quiche/deps/boringssl/src/lib \;
+          find target/release \( -name libcrypto.a -o -name libssl.a \) -exec ln -vnf -- '{}' quiche/deps/boringssl/src/lib \;
 
           # include dir
           # /home/runner/quiche/quiche/deps/boringssl/src/include
