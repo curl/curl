@@ -240,10 +240,9 @@ static CURLcode rtmp_setup_connection(struct Curl_easy *data,
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if(!RTMP_SetupURL(r, data->state.url)) {
-    RTMP_Free(r);
+  if(!RTMP_SetupURL(r, data->state.url))
+    /* rtmp_conn_dtor() performs the cleanup */
     return CURLE_URL_MALFORMAT;
-  }
   return CURLE_OK;
 }
 
