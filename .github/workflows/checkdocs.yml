@@ -66,10 +66,10 @@ jobs:
   #          JSON
   #
   #      - name: 'trim headers off all *.md files'
-  #        run: git ls-files -z '*.md' | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+  #        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
   #
   #      - name: 'check prose'
-  #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
+  #        run: git ls-files '*.md' -z | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
   #
   #      # This is for CHECKSRC and files with aggressive exclamation mark needs
   #      - name: 'create second proselint config'

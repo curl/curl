@@ -7,7 +7,7 @@ set -eu
 
 cd "$(dirname "${0}")"/../..
 
-git ls-files -z '*.yaml' '*.yml' | xargs -0 -r \
+git ls-files '*.yaml' '*.yml' -z | xargs -0 -r \
 yamllint \
   --format standard \
   --strict \
