@@ -250,6 +250,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                                                   struct kerberos5data *krb5,
                                                   struct bufref *out)
 {
+  CURLcode result = CURLE_OK;
   size_t offset = 0;
   size_t messagelen = 0;
   size_t appdatalen = 0;
@@ -349,9 +350,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
     messagelen += strlen(authzid);
   message = malloc(messagelen);
   if(!message) {
-    free(trailer);
-
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
   }
 
   /* Populate the message with the security layer and client supported receive
@@ -369,10 +369,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Allocate the padding */
   padding = malloc(sizes.cbBlockSize);
   if(!padding) {
-    free(message);
-    free(trailer);
-
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
   }
 
   /* Setup the "authentication data" security buffer */
@@ -393,14 +391,11 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   status = Curl_pSecFn->EncryptMessage(krb5->context, KERB_WRAP_NO_ENCRYPT,
                                        &wrap_desc, 0);
   if(status != SEC_E_OK) {
-    free(padding);
-    free(message);
-    free(trailer);
-
     if(status == SEC_E_INSUFFICIENT_MEMORY)
-      return CURLE_OUT_OF_MEMORY;
-
-    return CURLE_AUTH_ERROR;
+      result = CURLE_OUT_OF_MEMORY;
+    else
+      result = CURLE_AUTH_ERROR;
+    goto out;
   }
 
   /* Allocate the encryption (wrap) buffer */
@@ -408,11 +403,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
                wrap_buf[2].cbBuffer;
   appdata = malloc(appdatalen);
   if(!appdata) {
-    free(padding);
-    free(message);
-    free(trailer);
-
-    return CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
   }
 
   /* Populate the encryption buffer */
@@ -422,10 +414,14 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   offset += wrap_buf[1].cbBuffer;
   memcpy(appdata + offset, wrap_buf[2].pvBuffer, wrap_buf[2].cbBuffer);
 
+out:
   /* Free all of our local buffers */
   free(padding);
   free(message);
   free(trailer);
+
+  if(result)
+    return result;
 
   /* Return the response. */
   Curl_bufref_set(out, appdata, appdatalen, curl_free);
