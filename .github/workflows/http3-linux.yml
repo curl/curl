@@ -564,16 +564,6 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGHTTP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.NGTCP2_VERSION }}-${{ env.NGHTTP3_VERSION }}
           fail-on-cache-miss: true
 
-      - name: 'cache quiche'
-        if: ${{ matrix.build.name == 'quiche' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-quiche
-        env:
-          cache-name: cache-quiche
-        with:
-          path: ~/quiche
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.QUICHE_VERSION }}
-
       - name: 'build quiche and boringssl'
         if: ${{ matrix.build.name == 'quiche' }}
         run: |
