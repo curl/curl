@@ -50,7 +50,7 @@
         "/codeql/i",
         "/ruff/i"
       ],
-      "groupName": "monthly updates (by name)",
+      "groupName": "monthly updates by name",
       "schedule": [
         "* * 10 * *"
       ]
@@ -60,7 +60,7 @@
       "matchSourceUrls": [
         "**/awslabs/**"
       ],
-      "groupName": "monthly updates (by source URL)",
+      "groupName": "monthly updates by URL",
       "schedule": [
         "* * 10 * *"
       ]
