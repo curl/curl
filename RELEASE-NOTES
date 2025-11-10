@@ -43,7 +43,7 @@ This release includes the following bugfixes:
  o pytest: skip H2 tests if feature missing from curl [46]
  o rtmp: fix double-free on URL parse errors [27]
  o rtmp: precaution for a potential integer truncation [54]
- o schannel: fix potental memory leak of cert_store_path on four error paths [23]
+ o schannel: fix memory leak of cert_store_path on four error paths [23]
  o setopt: disable CURLOPT_HAPROXY_CLIENT_IP on NULL [30]
  o setopt: when setting bad protocols, don't store them [9]
  o tests/data: replace hard-coded test numbers with `%TESTNUMBER` [33]
