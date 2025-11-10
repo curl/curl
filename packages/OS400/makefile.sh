@@ -35,8 +35,7 @@ cd "${TOPDIR}" || exit 1
 
 #       Make sure all files are UTF8-encoded.
 
-# shellcheck disable=SC2038
-find "${TOPDIR}" -type f -print | xargs ls -S | while read -r CCSID FILE
+find "${TOPDIR}" -type f -print0 | xargs -0 ls -S -- | while read -r CCSID FILE
 do      if [ "${CCSID}" != 1208 ]
         then    CMD="CPY OBJ('${FILE}') TOOBJ('${FILE}') FROMCCSID(*OBJ)"
                 CMD="${CMD} TOCCSID(1208) DTAFMT(*TEXT) REPLACE(*YES)"
