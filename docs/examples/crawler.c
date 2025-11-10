@@ -232,7 +232,7 @@ int main(void)
               if(is_html(ctype) && mem->size > 100) {
                 if(pending < max_requests &&
                    (complete + pending) < max_total) {
-                  pending += follow_links(multi_curl, mem, url);
+                  pending += follow_links(multi, mem, url);
                   still_running = 1;
                 }
               }
