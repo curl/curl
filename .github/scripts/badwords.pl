@@ -48,7 +48,7 @@ while(<STDIN>) {
     if($_ =~ /^---(.*)/) {
         push @whitelist, $1;
     }
-    elsif($_ =~ /^([^:=]*)([:=])(.*)/) {
+    elsif($_ =~ /^(.*)([:=])(.*)/) {
         my ($bad, $sep, $better)=($1, $2, $3);
         push @w, $bad;
         $alt{$bad} = $better;
