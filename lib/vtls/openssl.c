@@ -269,6 +269,13 @@ static CURLcode pubkey_show(struct Curl_easy *data,
                             int num,
                             const char *type,
                             const char *name,
+                            const BIGNUM *bn) WARN_UNUSED_RESULT;
+
+  static CURLcode pubkey_show(struct Curl_easy *data,
+                            BIO *mem,
+                            int num,
+                            const char *type,
+                            const char *name,
                             const BIGNUM *bn)
 {
   char namebuf[32];
@@ -281,16 +288,12 @@ static CURLcode pubkey_show(struct Curl_easy *data,
 }
 
 #ifdef HAVE_OPAQUE_RSA_DSA_DH
-#define print_pubkey_BN(_type, _name, _num)              \
+#define print_pubkey_BN(_type, _name, _num)             \
   pubkey_show(data, mem, _num, #_type, #_name, _name)
 
 #else
-#define print_pubkey_BN(_type, _name, _num)    \
-do {                              \
-  if(_type->_name) { \
-    pubkey_show(data, mem, _num, #_type, #_name, _type->_name); \
-  } \
-} while(0)
+#define print_pubkey_BN(_type, _name, _num)                     \
+  pubkey_show(data, mem, _num, #_type, #_name, _type->_name)
 #endif
 
 static int asn1_object_dump(const ASN1_OBJECT *a, char *buf, size_t len)
@@ -345,6 +348,133 @@ static CURLcode X509V3_ext(struct Curl_easy *data,
     BIO_free(bio_out);
     if(result)
       break;
+  }
+  return result;
+}
+
+static CURLcode get_pkey_rsa(struct Curl_easy *data,
+                             EVP_PKEY *pubkey, BIO *mem, int i)
+{
+  CURLcode result = CURLE_OK;
+#ifndef HAVE_EVP_PKEY_GET_PARAMS
+#ifdef HAVE_OPAQUE_EVP_PKEY
+  RSA *rsa = EVP_PKEY_get0_RSA(pubkey);
+#else
+  RSA *rsa = pubkey->pkey.rsa;
+#endif /* HAVE_OPAQUE_EVP_PKEY */
+#endif /* !HAVE_EVP_PKEY_GET_PARAMS */
+  {
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
+    DECLARE_PKEY_PARAM_BIGNUM(n);
+    DECLARE_PKEY_PARAM_BIGNUM(e);
+#ifdef HAVE_EVP_PKEY_GET_PARAMS
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_RSA_N, &n);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_RSA_E, &e);
+#else
+    RSA_get0_key(rsa, &n, &e, NULL);
+#endif /* HAVE_EVP_PKEY_GET_PARAMS */
+    BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
+#else
+    BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
+#endif /* HAVE_OPAQUE_RSA_DSA_DH */
+    result = push_certinfo(data, mem, "RSA Public Key", i);
+    if(!result) {
+      result = print_pubkey_BN(rsa, n, i);
+      if(!result)
+        result = print_pubkey_BN(rsa, e, i);
+    }
+    FREE_PKEY_PARAM_BIGNUM(n);
+    FREE_PKEY_PARAM_BIGNUM(e);
+  }
+  return result;
+}
+
+static CURLcode get_pkey_dsa(struct Curl_easy *data,
+                             EVP_PKEY *pubkey, BIO *mem, int i)
+{
+  CURLcode result;
+#ifndef OPENSSL_NO_DSA
+#ifndef HAVE_EVP_PKEY_GET_PARAMS
+#ifdef HAVE_OPAQUE_EVP_PKEY
+  DSA *dsa = EVP_PKEY_get0_DSA(pubkey);
+#else
+  DSA *dsa = pubkey->pkey.dsa;
+#endif /* HAVE_OPAQUE_EVP_PKEY */
+#endif /* !HAVE_EVP_PKEY_GET_PARAMS */
+  {
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
+    DECLARE_PKEY_PARAM_BIGNUM(p);
+    DECLARE_PKEY_PARAM_BIGNUM(q);
+    DECLARE_PKEY_PARAM_BIGNUM(g);
+    DECLARE_PKEY_PARAM_BIGNUM(pub_key);
+#ifdef HAVE_EVP_PKEY_GET_PARAMS
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_P, &p);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_Q, &q);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_G, &g);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_PUB_KEY, &pub_key);
+#else
+    DSA_get0_pqg(dsa, &p, &q, &g);
+    DSA_get0_key(dsa, &pub_key, NULL);
+#endif /* HAVE_EVP_PKEY_GET_PARAMS */
+#endif /* HAVE_OPAQUE_RSA_DSA_DH */
+    result = print_pubkey_BN(dsa, p, i);
+    if(!result)
+      result = print_pubkey_BN(dsa, q, i);
+    if(!result)
+      result = print_pubkey_BN(dsa, g, i);
+    if(!result)
+      result = print_pubkey_BN(dsa, pub_key, i);
+    FREE_PKEY_PARAM_BIGNUM(p);
+    FREE_PKEY_PARAM_BIGNUM(q);
+    FREE_PKEY_PARAM_BIGNUM(g);
+    FREE_PKEY_PARAM_BIGNUM(pub_key);
+  }
+#endif /* !OPENSSL_NO_DSA */
+  return result;
+}
+
+static CURLcode get_pkey_dh(struct Curl_easy *data,
+                            EVP_PKEY *pubkey, BIO *mem, int i)
+{
+  CURLcode result;
+#ifndef HAVE_EVP_PKEY_GET_PARAMS
+#ifdef HAVE_OPAQUE_EVP_PKEY
+  DH *dh = EVP_PKEY_get0_DH(pubkey);
+#else
+  DH *dh = pubkey->pkey.dh;
+#endif /* HAVE_OPAQUE_EVP_PKEY */
+#endif /* !HAVE_EVP_PKEY_GET_PARAMS */
+  {
+#ifdef HAVE_OPAQUE_RSA_DSA_DH
+    DECLARE_PKEY_PARAM_BIGNUM(p);
+    DECLARE_PKEY_PARAM_BIGNUM(q);
+    DECLARE_PKEY_PARAM_BIGNUM(g);
+    DECLARE_PKEY_PARAM_BIGNUM(pub_key);
+#ifdef HAVE_EVP_PKEY_GET_PARAMS
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_P, &p);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_Q, &q);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_G, &g);
+    EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_PUB_KEY, &pub_key);
+#else
+    DH_get0_pqg(dh, &p, &q, &g);
+    DH_get0_key(dh, &pub_key, NULL);
+#endif /* HAVE_EVP_PKEY_GET_PARAMS */
+    result = print_pubkey_BN(dh, p, i);
+    if(!result)
+      result = print_pubkey_BN(dh, q, i);
+    if(!result)
+      result = print_pubkey_BN(dh, g, i);
+#else
+    result = print_pubkey_BN(dh, p, i);
+    if(!result)
+      result = print_pubkey_BN(dh, g, i);
+#endif /* HAVE_OPAQUE_RSA_DSA_DH */
+    if(!result)
+      result = print_pubkey_BN(dh, pub_key, i);
+    FREE_PKEY_PARAM_BIGNUM(p);
+    FREE_PKEY_PARAM_BIGNUM(q);
+    FREE_PKEY_PARAM_BIGNUM(g);
+    FREE_PKEY_PARAM_BIGNUM(pub_key);
   }
   return result;
 }
@@ -477,126 +607,23 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(!pubkey)
       infof(data, "   Unable to load public key");
     else {
-      int pktype;
 #ifdef HAVE_OPAQUE_EVP_PKEY
-      pktype = EVP_PKEY_id(pubkey);
+      int pktype = EVP_PKEY_id(pubkey);
 #else
-      pktype = pubkey->type;
+      int pktype = pubkey->type;
 #endif
       switch(pktype) {
-      case EVP_PKEY_RSA: {
-#ifndef HAVE_EVP_PKEY_GET_PARAMS
-        RSA *rsa;
-#ifdef HAVE_OPAQUE_EVP_PKEY
-        rsa = EVP_PKEY_get0_RSA(pubkey);
-#else
-        rsa = pubkey->pkey.rsa;
-#endif /* HAVE_OPAQUE_EVP_PKEY */
-#endif /* !HAVE_EVP_PKEY_GET_PARAMS */
-
-        {
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
-          DECLARE_PKEY_PARAM_BIGNUM(n);
-          DECLARE_PKEY_PARAM_BIGNUM(e);
-#ifdef HAVE_EVP_PKEY_GET_PARAMS
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_RSA_N, &n);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_RSA_E, &e);
-#else
-          RSA_get0_key(rsa, &n, &e, NULL);
-#endif /* HAVE_EVP_PKEY_GET_PARAMS */
-          BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
-#else
-          BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
-#endif /* HAVE_OPAQUE_RSA_DSA_DH */
-          result = push_certinfo(data, mem, "RSA Public Key", i);
-          if(result)
-            break;
-          print_pubkey_BN(rsa, n, i);
-          print_pubkey_BN(rsa, e, i);
-          FREE_PKEY_PARAM_BIGNUM(n);
-          FREE_PKEY_PARAM_BIGNUM(e);
-        }
-
+      case EVP_PKEY_RSA:
+        result = get_pkey_rsa(data, pubkey, mem, i);
         break;
-      }
+
       case EVP_PKEY_DSA:
-      {
-#ifndef OPENSSL_NO_DSA
-#ifndef HAVE_EVP_PKEY_GET_PARAMS
-        DSA *dsa;
-#ifdef HAVE_OPAQUE_EVP_PKEY
-        dsa = EVP_PKEY_get0_DSA(pubkey);
-#else
-        dsa = pubkey->pkey.dsa;
-#endif /* HAVE_OPAQUE_EVP_PKEY */
-#endif /* !HAVE_EVP_PKEY_GET_PARAMS */
-        {
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
-          DECLARE_PKEY_PARAM_BIGNUM(p);
-          DECLARE_PKEY_PARAM_BIGNUM(q);
-          DECLARE_PKEY_PARAM_BIGNUM(g);
-          DECLARE_PKEY_PARAM_BIGNUM(pub_key);
-#ifdef HAVE_EVP_PKEY_GET_PARAMS
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_P, &p);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_Q, &q);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_G, &g);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_PUB_KEY, &pub_key);
-#else
-          DSA_get0_pqg(dsa, &p, &q, &g);
-          DSA_get0_key(dsa, &pub_key, NULL);
-#endif /* HAVE_EVP_PKEY_GET_PARAMS */
-#endif /* HAVE_OPAQUE_RSA_DSA_DH */
-          print_pubkey_BN(dsa, p, i);
-          print_pubkey_BN(dsa, q, i);
-          print_pubkey_BN(dsa, g, i);
-          print_pubkey_BN(dsa, pub_key, i);
-          FREE_PKEY_PARAM_BIGNUM(p);
-          FREE_PKEY_PARAM_BIGNUM(q);
-          FREE_PKEY_PARAM_BIGNUM(g);
-          FREE_PKEY_PARAM_BIGNUM(pub_key);
-        }
-#endif /* !OPENSSL_NO_DSA */
+        result = get_pkey_dsa(data, pubkey, mem, i);
         break;
-      }
-      case EVP_PKEY_DH: {
-#ifndef HAVE_EVP_PKEY_GET_PARAMS
-        DH *dh;
-#ifdef HAVE_OPAQUE_EVP_PKEY
-        dh = EVP_PKEY_get0_DH(pubkey);
-#else
-        dh = pubkey->pkey.dh;
-#endif /* HAVE_OPAQUE_EVP_PKEY */
-#endif /* !HAVE_EVP_PKEY_GET_PARAMS */
-        {
-#ifdef HAVE_OPAQUE_RSA_DSA_DH
-          DECLARE_PKEY_PARAM_BIGNUM(p);
-          DECLARE_PKEY_PARAM_BIGNUM(q);
-          DECLARE_PKEY_PARAM_BIGNUM(g);
-          DECLARE_PKEY_PARAM_BIGNUM(pub_key);
-#ifdef HAVE_EVP_PKEY_GET_PARAMS
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_P, &p);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_Q, &q);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_FFC_G, &g);
-          EVP_PKEY_get_bn_param(pubkey, OSSL_PKEY_PARAM_PUB_KEY, &pub_key);
-#else
-          DH_get0_pqg(dh, &p, &q, &g);
-          DH_get0_key(dh, &pub_key, NULL);
-#endif /* HAVE_EVP_PKEY_GET_PARAMS */
-          print_pubkey_BN(dh, p, i);
-          print_pubkey_BN(dh, q, i);
-          print_pubkey_BN(dh, g, i);
-#else
-          print_pubkey_BN(dh, p, i);
-          print_pubkey_BN(dh, g, i);
-#endif /* HAVE_OPAQUE_RSA_DSA_DH */
-          print_pubkey_BN(dh, pub_key, i);
-          FREE_PKEY_PARAM_BIGNUM(p);
-          FREE_PKEY_PARAM_BIGNUM(q);
-          FREE_PKEY_PARAM_BIGNUM(g);
-          FREE_PKEY_PARAM_BIGNUM(pub_key);
-        }
+
+      case EVP_PKEY_DH:
+        result = get_pkey_dh(data, pubkey, mem, i);
         break;
-      }
       }
       EVP_PKEY_free(pubkey);
     }
