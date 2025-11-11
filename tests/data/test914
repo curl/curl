@@ -42,7 +42,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<invalid>
+MAIL FROM:%LTinvalid%GT
 QUIT
 </protocol>
 </verify>

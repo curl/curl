@@ -41,8 +41,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<%TESTNUMBER-realuser@example.com>
-RCPT TO:<%TESTNUMBER-recipient@example.com>
+MAIL FROM:%LT%TESTNUMBER-realuser@example.com%GT
+RCPT TO:%LT%TESTNUMBER-recipient@example.com%GT
 DATA
 </protocol>
 <upload>
