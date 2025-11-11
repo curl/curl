@@ -62,6 +62,10 @@ static CURLcode test_unit2605(const char *arg)
     { "2.-3", 100, 0, 0, CURLE_RANGE_ERROR},
     { "-3-2", 100, 0, 0, CURLE_RANGE_ERROR},
     { "101-102", 100, 0, 0, CURLE_RANGE_ERROR},
+    { "0-", 100, 0, 100, CURLE_OK},
+    { "1-", 100, 1, 99, CURLE_OK},
+    { "99-", 100, 99, 1, CURLE_OK},
+    { "100-", 100, 0, 0, CURLE_RANGE_ERROR},
     { NULL, 0, 0, 0, CURLE_OK }
   };
 
