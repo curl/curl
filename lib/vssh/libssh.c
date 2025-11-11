@@ -64,7 +64,7 @@
 #include "../multiif.h"
 #include "../select.h"
 #include "../curlx/warnless.h"
-#include "curl_path.h"
+#include "vssh.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -1329,44 +1329,11 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
       return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
     }
     if(data->state.use_range) {
-      curl_off_t from, to;
-      const char *p = data->state.range;
-      int from_t, to_t;
-
-      from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
-      if(from_t == STRE_OVERFLOW)
-        return myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
-
-      curlx_str_passblanks(&p);
-      (void)curlx_str_single(&p, '-');
-
-      to_t = curlx_str_numblanks(&p, &to);
-      if(to_t == STRE_OVERFLOW)
-        return myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
-
-      if((to_t == STRE_NO_NUM) || (to >= size)) {
-        to = size - 1;
-      }
-
-      if(from_t == STRE_NO_NUM) {
-        /* from is relative to end of file */
-        from = size - to;
-        to = size - 1;
-      }
-      if(from > size) {
-        failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
-              FMT_OFF_T ")", from, size);
-        return myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
-      }
-      if(from > to) {
-        from = to;
-        size = 0;
-      }
-      else {
-        if((to - from) == CURL_OFF_T_MAX)
-          return myssh_to_ERROR(data, sshc, CURLE_RANGE_ERROR);
-        size = to - from + 1;
-      }
+      curl_off_t from;
+      CURLcode result = Curl_ssh_range(data, data->state.range, size,
+                                       &from, &size);
+      if(result)
+        return result;
 
       rc = sftp_seek64(sshc->sftp_file, from);
       if(rc)

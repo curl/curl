@@ -63,7 +63,7 @@
 #include "../select.h"
 #include "../curlx/fopen.h"
 #include "../curlx/warnless.h"
-#include "curl_path.h"
+#include "vssh.h"
 #include "../curlx/strparse.h"
 #include "../curlx/base64.h" /* for base64 encoding/decoding */
 
@@ -1434,42 +1434,11 @@ sftp_download_stat(struct Curl_easy *data,
       return CURLE_BAD_DOWNLOAD_RESUME;
     }
     if(data->state.use_range) {
-      curl_off_t from, to;
-      const char *p = data->state.range;
-      int to_t, from_t;
-
-      from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
-      if(from_t == STRE_OVERFLOW)
-        return CURLE_RANGE_ERROR;
-      curlx_str_passblanks(&p);
-      (void)curlx_str_single(&p, '-');
-
-      to_t = curlx_str_numblanks(&p, &to);
-      if(to_t == STRE_OVERFLOW)
-        return CURLE_RANGE_ERROR;
-      if((to_t == STRE_NO_NUM) /* no "to" value given */
-         || (to >= size)) {
-        to = size - 1;
-      }
-      if(from_t) {
-        /* from is relative to end of file */
-        from = size - to;
-        to = size - 1;
-      }
-      if(from > size) {
-        failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
-              FMT_OFF_T ")", from, (curl_off_t)attrs.filesize);
-        return CURLE_BAD_DOWNLOAD_RESUME;
-      }
-      if(from > to) {
-        from = to;
-        size = 0;
-      }
-      else {
-        if((to - from) == CURL_OFF_T_MAX)
-          return CURLE_RANGE_ERROR;
-        size = to - from + 1;
-      }
+      curl_off_t from;
+      CURLcode result = Curl_ssh_range(data, data->state.range, size,
+                                       &from, &size);
+      if(result)
+        return result;
 
       libssh2_sftp_seek64(sshc->sftp_handle, (libssh2_uint64_t)from);
     }
