@@ -1400,7 +1400,7 @@ static ParameterError parse_range(struct OperationConfig *config,
   if(!curlx_str_number(&nextarg, &value, CURL_OFF_T_MAX) &&
      curlx_str_single(&nextarg, '-')) {
     /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
-       (and will not actually be range by definition). The manpage previously
+       (and will not actually be range by definition). The man page previously
        claimed that to be a good way, why this code is added to work-around
        it. */
     char buffer[32];

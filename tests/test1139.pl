@@ -24,12 +24,12 @@
 ###########################################################################
 #
 # Scan symbols-in-version (which is verified to be correct by test 1119), then
-# verify that each option mention in there that should have its own manpage
+# verify that each option mention in there that should have its own man page
 # actually does.
 #
 # In addition, make sure that every current option to curl_easy_setopt,
 # curl_easy_getinfo and curl_multi_setopt are also mentioned in their
-# corresponding main (index) manpage.
+# corresponding main (index) man page.
 #
 # src/tool_getparam.c lists all options curl can parse
 # docs/curl.1 documents all command line options
@@ -229,8 +229,8 @@ while(<$r>) {
 close($r);
 
 #########################################################################
-# parse the curl.1 manpage, extract all documented command line options
-# The manpage may or may not be rebuilt, so check both possible locations
+# parse the curl.1 man page, extract all documented command line options
+# The man page may or may not be rebuilt, so check both possible locations
 open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") || open($r, "<", "$root/docs/cmdline-opts/curl.1") ||
     die "failed getting curl.1";
 my @manpage; # store all parsed parameters

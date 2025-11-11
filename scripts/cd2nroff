@@ -25,7 +25,7 @@
 
 =begin comment
 
-Converts a curldown file to nroff (manpage).
+Converts a curldown file to nroff (man page).
 
 =end comment
 =cut
@@ -431,7 +431,7 @@ sub single {
         # convert backslash-'<' or '> to just the second character
         $d =~ s/\\([<>])/$1/g;
 
-        # mentions of curl symbols with manpages use italics by default
+        # mentions of curl symbols with man pages use italics by default
         $d =~ s/((lib|)curl([^ ]*\(3\)))/\\fI$1\\fP/gi;
 
         # backticked becomes italics
