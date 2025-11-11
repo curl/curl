@@ -126,6 +126,7 @@ my %warnings = (
     'BRACEPOS'              => 'wrong position for an open brace',
     'BRACEWHILE'            => 'A single space between open brace and while',
     'COMMANOSPACE'          => 'comma without following space',
+    "CLOSEBRACE"            => 'close brace indent level vs line above is off',
     'COMMENTNOSPACEEND'     => 'no space before */',
     'COMMENTNOSPACESTART'   => 'no space following /*',
     'COPYRIGHT'             => 'file missing a copyright statement',
@@ -880,6 +881,21 @@ sub scanfile {
             }
         }
 
+        # when the line starts with a brace
+        if($l =~ /^( *)\}/) {
+            my $tlen = length($1);
+            if($prevl =~ /^( *)(.)/) {
+                my $plen = length($1);
+                my $firstc = $2;
+                # skips the check if the previous line starts with a close
+                # brace since we see the occasional legit use of that oddity
+                if(($tlen + $indent) > $plen && ($firstc ne "}")) {
+                    checkwarn("CLOSEBRACE",
+                              $line, $plen, $file, $prevl,
+                              "Suspicious close brace indentation");
+                }
+            }
+        }
         # check for "} else"
         if($l =~ /^(.*)\} *else/) {
             checkwarn("BRACEELSE",
