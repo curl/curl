@@ -395,20 +395,24 @@ static int wssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 
 static WOLFSSL_BIO_METHOD *wssl_bio_cf_method = NULL;
 
-static void wssl_bio_cf_init_methods(void)
+static int wssl_bio_cf_init_methods(void)
 {
   wssl_bio_cf_method = wolfSSL_BIO_meth_new(WOLFSSL_BIO_MEMORY,
-                                               "wolfSSL CF BIO");
+                                            "wolfSSL CF BIO");
+  if(!wssl_bio_cf_method)
+    return FALSE; /* error */
   wolfSSL_BIO_meth_set_write(wssl_bio_cf_method, &wssl_bio_cf_out_write);
   wolfSSL_BIO_meth_set_read(wssl_bio_cf_method, &wssl_bio_cf_in_read);
   wolfSSL_BIO_meth_set_ctrl(wssl_bio_cf_method, &wssl_bio_cf_ctrl);
   wolfSSL_BIO_meth_set_create(wssl_bio_cf_method, &wssl_bio_cf_create);
   wolfSSL_BIO_meth_set_destroy(wssl_bio_cf_method, &wssl_bio_cf_destroy);
+  return TRUE; /* fine */
 }
 
 static void wssl_bio_cf_free_methods(void)
 {
   wolfSSL_BIO_meth_free(wssl_bio_cf_method);
+  wssl_bio_cf_method = NULL;
 }
 
 #else /* USE_BIO_CHAIN */
@@ -1504,6 +1508,8 @@ wssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   {
     WOLFSSL_BIO *bio;
 
+    if(!wssl_bio_cf_method)
+      return CURLE_FAILED_INIT;
     bio = wolfSSL_BIO_new(wssl_bio_cf_method);
     if(!bio)
       return CURLE_OUT_OF_MEMORY;
@@ -2089,7 +2095,8 @@ static int wssl_init(void)
   Curl_tls_keylog_open();
 #endif
   ret = (wolfSSL_Init() == WOLFSSL_SUCCESS);
-  wssl_bio_cf_init_methods();
+  if(ret)
+    ret = wssl_bio_cf_init_methods();
   return ret;
 }
 
