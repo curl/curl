@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: curl
 #
 back-end:backend
-e-mail:email
+\be-mail[^/]:email
 run-time:runtime
 set-up:setup
 tool chain:toolchain
@@ -36,7 +36,7 @@ aren't:are not
  a IPv4: an IPv4
  a IPv6: an IPv6
  url =URL
-internet\b=Internet
+[^/]internet\b=Internet
 isation:ization
 \bit's:it is
 it'd:it would
@@ -47,12 +47,14 @@ there's:there is
 \. So : Rewrite without "so" ?
  dir :directory
 sub-director:subdirector
+you'd:you would
+you'll:you will
 can't:cannot
 that's:that is
 web page:webpage
 host name\b:hostname
 host names\b:hostnames
-file name\b:filename
+[^;]file name\b:filename
 file names\b:filenames
 \buser name\b:username
 \buser names\b:usernames
@@ -70,7 +72,9 @@ couldn't:could not
 32-bits:32 bits or 32-bit
 \bvery\b:rephrase using an alternative word
 \bCurl\b=curl
+\bcURL\b=curl
 \bLibcurl\b=libcurl
+\bLibCurl\b=libcurl
 ---WWW::Curl
 ---NET::Curl
 ---Curl Corporation
