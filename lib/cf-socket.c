@@ -1799,14 +1799,50 @@ out:
   return result;
 }
 
+#ifdef __linux__
+static void linux_quic_mtu(struct cf_socket_ctx *ctx)
+{
+  int val;
+  switch(ctx->addr.family) {
+#ifdef IP_MTU_DISCOVER
+  case AF_INET:
+    val = IP_PMTUDISC_DO;
+    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
+                     sizeof(val));
+    break;
+#endif
+#ifdef IPV6_MTU_DISCOVER
+  case AF_INET6:
+    val = IPV6_PMTUDISC_DO;
+    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
+                     sizeof(val));
+    break;
+#endif
+  }
+}
+#else
+#define linux_quic_mtu(x)
+#endif
+
+#if defined(UDP_GRO) &&                                                 \
+  (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) &&                  \
+  ((defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_QUICHE))
+static void linux_quic_gro(struct cf_socket_ctx *ctx)
+{
+  int one = 1;
+  (void)setsockopt(ctx->sock, IPPROTO_UDP, UDP_GRO, &one,
+                   (socklen_t)sizeof(one));
+}
+#else
+#define linux_quic_gro(x)
+#endif
+
+
 static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
                                   struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   int rc;
-  int one = 1;
-
-  (void)one;
 
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
@@ -1831,33 +1867,8 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
    * non-blocking socket created by cf_socket_open() to it. Thus, we
    * do not need to call curlx_nonblock() in cf_udp_setup_quic() anymore.
    */
-#ifdef __linux__
-  switch(ctx->addr.family) {
-#ifdef IP_MTU_DISCOVER
-  case AF_INET: {
-    int val = IP_PMTUDISC_DO;
-    (void)setsockopt(ctx->sock, IPPROTO_IP, IP_MTU_DISCOVER, &val,
-                     sizeof(val));
-    break;
-  }
-#endif
-#ifdef IPV6_MTU_DISCOVER
-  case AF_INET6: {
-    int val = IPV6_PMTUDISC_DO;
-    (void)setsockopt(ctx->sock, IPPROTO_IPV6, IPV6_MTU_DISCOVER, &val,
-                     sizeof(val));
-    break;
-  }
-#endif
-  }
-
-#if defined(UDP_GRO) &&                                                       \
-  (defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)) &&                        \
-  ((defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_QUICHE))
-  (void)setsockopt(ctx->sock, IPPROTO_UDP, UDP_GRO, &one,
-                   (socklen_t)sizeof(one));
-#endif
-#endif
+  linux_quic_mtu(ctx);
+  linux_quic_gro(ctx);
 
   return CURLE_OK;
 }
