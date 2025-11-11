@@ -35,7 +35,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com -T -
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<>
+MAIL FROM:%LT%GT
 RCPT TO:<recipient@example.com>
 DATA
 QUIT
