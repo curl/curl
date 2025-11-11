@@ -15,6 +15,7 @@ Example:
   - --limit-rate 100K $URL
   - --limit-rate 1000 $URL
   - --limit-rate 10M $URL
+  - --limit-rate 200K --max-time 60 $URL
 ---
 
 # `--limit-rate`
