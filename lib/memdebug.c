@@ -110,8 +110,7 @@ static bool countcheck(const char *func, int line, const char *source)
   if(memlimit && source) {
     if(!memsize) {
       /* log to file */
-      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
-                   source, line, func);
+      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n", source, line, func);
       /* log to stderr also */
       curl_mfprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
                     source, line, func);
@@ -135,8 +134,11 @@ void *curl_dbg_malloc(size_t wantedsize, int line, const char *source)
 
   DEBUGASSERT(wantedsize != 0);
 
-  if(countcheck("malloc", line, source))
+  if(countcheck("malloc", line, source)) {
+    curl_dbg_log("FAIL %s:%d malloc(%zu) = NULL\n",
+                 source, line, wantedsize);
     return NULL;
+  }
 
   /* alloc at least 64 bytes */
   size = sizeof(struct memdebug) + wantedsize;
@@ -164,8 +166,11 @@ void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
   DEBUGASSERT(wanted_elements != 0);
   DEBUGASSERT(wanted_size != 0);
 
-  if(countcheck("calloc", line, source))
+  if(countcheck("calloc", line, source)) {
+    curl_dbg_log("FAIL %s:%d calloc(%zu,%zu) = NULL\n",
+                 source, line, wanted_elements, wanted_size);
     return NULL;
+  }
 
   /* alloc at least 64 bytes */
   user_size = wanted_size * wanted_elements;
@@ -191,10 +196,13 @@ char *curl_dbg_strdup(const char *str, int line, const char *source)
 
   DEBUGASSERT(str != NULL);
 
-  if(countcheck("strdup", line, source))
-    return NULL;
-
   len = strlen(str) + 1;
+
+  if(countcheck("strdup", line, source)) {
+    curl_dbg_log("FAIL %s:%d strdup(%zu bytes) = NULL\n", source, line,
+                 len);
+    return NULL;
+  }
 
   mem = curl_dbg_malloc(len, 0, NULL); /* NULL prevents logging */
   if(mem)
@@ -216,8 +224,10 @@ wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source)
 
   DEBUGASSERT(str != NULL);
 
-  if(countcheck("wcsdup", line, source))
+  if(countcheck("wcsdup", line, source)) {
+    curl_dbg_log("FAIL %s:%d wcdup() = NULL\n", source, line);
     return NULL;
+  }
 
   wsiz = wcslen(str) + 1;
   bsiz = wsiz * sizeof(wchar_t);
@@ -245,8 +255,11 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 
   DEBUGASSERT(wantedsize != 0);
 
-  if(countcheck("realloc", line, source))
+  if(countcheck("realloc", line, source)) {
+    curl_dbg_log("FAIL %s:%d realloc(%zu) = NULL\n",
+                 source, line, wantedsize);
     return NULL;
+  }
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -305,8 +318,11 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
 {
   curl_socket_t sockfd;
 
-  if(countcheck("socket", line, source))
+  if(countcheck("socket", line, source)) {
+    curl_dbg_log("FAIL %s:%d socket() = [bad]\n",
+                 source, line);
     return CURL_SOCKET_BAD;
+  }
 
   /* !checksrc! disable BANNEDFUNC 1 */
   sockfd = socket(domain, type, protocol);
@@ -324,8 +340,10 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
                              int line, const char *source)
 {
   SEND_TYPE_RETV rc;
-  if(countcheck("send", line, source))
+  if(countcheck("send", line, source)) {
+    curl_dbg_log("FAIL %s:%d send() = -1\n", source, line);
     return -1;
+  }
   /* !checksrc! disable BANNEDFUNC 1 */
   rc = send(sockfd, buf, len, flags);
   if(source)
@@ -339,8 +357,10 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
                              int line, const char *source)
 {
   RECV_TYPE_RETV rc;
-  if(countcheck("recv", line, source))
+  if(countcheck("recv", line, source)) {
+    curl_dbg_log("FAIL %s:%d recv() = -1\n", source, line);
     return -1;
+  }
   /* !checksrc! disable BANNEDFUNC 1 */
   rc = recv(sockfd, buf, len, flags);
   if(source)
@@ -489,5 +509,16 @@ void curl_dbg_log(const char *format, ...)
   if(nchars > 0)
     (fwrite)(buf, 1, (size_t)nchars, curl_dbg_logfile);
 }
+
+void curl_dbg_allow(int line, const char *source, int index)
+{
+  curl_dbg_log("OVERLOOK %s:%d\n", source, line + index);
+}
+
+void curl_dbg_clear(int line, const char *source)
+{
+  curl_dbg_log("RESTART %s:%d\n", source, line);
+}
+
 
 #endif /* CURLDEBUG */

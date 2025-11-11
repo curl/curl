@@ -31,6 +31,7 @@ libtest memory tracking operational
 <verify>
 <file name="%LOGDIR/memdump">
 MEM easy.c: malloc()
+RESTART easy.c:
 MEM lib%TESTNUMBER.c: malloc()
 MEM lib%TESTNUMBER.c: free()
 MEM dynbuf.c: realloc()
@@ -43,10 +44,11 @@ s/^MEM escape.c:\d+ free\(\(nil\)\)[\n]$//
 s/ =.*//
 s/\(.*\)/()/
 s/:\d+/:/
-s:^(MEM |FD )(.*[/\\])(.*):$1$3:
+s:^(MEM |FD |OVERLOOK |RESTART )(.*[/\\])(.*):$1$3:
 s/\r\n/\n/
 s/^MEM getenv.c: realloc\(\)[\n]$//
 s/^MEM getenv.c: free\(\)[\n]$//
+s/^OVERLOOK getenv.c:[\n]$//
 </stripfile>
 </verify>
 

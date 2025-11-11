@@ -733,6 +733,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
   if(!writeinfo)
     return;
 
+  curl_dbg_restart();
   curlx_dyn_init(&name, MAX_WRITEOUT_NAME_LENGTH);
   while(ptr && *ptr && !done) {
     if('%' == *ptr && ptr[1]) {

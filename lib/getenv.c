@@ -70,6 +70,7 @@ static char *GetEnv(const char *variable)
   }
 #else
   char *env = getenv(variable);
+  curl_dbg_overlook(1);
   return (env && env[0]) ? strdup(env) : NULL;
 #endif
 }

@@ -1005,6 +1005,8 @@ CURL_EXTERN ALLOC_FUNC
 CURL_EXTERN void curl_dbg_memdebug(const char *logname);
 CURL_EXTERN void curl_dbg_memlimit(long limit);
 CURL_EXTERN void curl_dbg_log(const char *format, ...) CURL_PRINTF(1, 2);
+CURL_EXTERN void curl_dbg_allow(int line, const char *source, int index);
+CURL_EXTERN void curl_dbg_clear(int line, const char *source);
 
 /* file descriptor manipulators */
 CURL_EXTERN curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
@@ -1090,6 +1092,9 @@ CURL_EXTERN ALLOC_FUNC
 #endif
 #define CURL_SEND send
 #define CURL_RECV recv
+
+#define curl_dbg_overlook(x)
+#define curl_dbg_restart()
 
 #endif /* CURLDEBUG */
 

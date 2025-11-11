@@ -52,5 +52,8 @@
 #endif
 #endif /* _WIN32 */
 
+#define curl_dbg_overlook(x) curl_dbg_allow(__LINE__, __FILE__, x)
+#define curl_dbg_restart() curl_dbg_clear(__LINE__, __FILE__)
+
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMDEBUG_H */

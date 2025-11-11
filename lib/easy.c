@@ -196,9 +196,11 @@ static CURLcode global_init(long flags, bool memoryfuncs)
   easy_init_flags = flags;
 
 #ifdef DEBUGBUILD
-  if(getenv("CURL_GLOBAL_INIT"))
+  if(getenv("CURL_GLOBAL_INIT")) {
     /* alloc data that will leak if *cleanup() is not called! */
     leakpointer = malloc(1);
+    curl_dbg_restart();
+  }
 #endif
 
   return CURLE_OK;

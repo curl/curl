@@ -43,6 +43,7 @@ my $recvs=0;
 my $sockets=0;
 my $verbose=0;
 my $trace=0;
+my $strict;
 
 while(@ARGV) {
     if($ARGV[0] eq "-v") {
@@ -51,6 +52,11 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-t") {
         $trace=1;
+        shift @ARGV;
+    }
+    elsif($ARGV[0] eq "-s") {
+        $strict= $ARGV[1];
+        shift @ARGV;
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-l") {
@@ -79,10 +85,11 @@ my $file = $ARGV[0] || '';
 
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
-    "Options:\n",
-    " -l  memlimit failure displayed\n",
-    " -v  Verbose\n",
-    " -t  Trace\n";
+        "Options:\n",
+        " -l  memlimit failure displayed\n",
+        " -v  Verbose\n",
+        " -s [path] Strict - warn on mallocs after memlimit is reached\n",
+        " -t  Trace\n";
     exit;
 }
 
@@ -124,18 +131,37 @@ my $addrinfos = 0;
 my $source;
 my $linenum;
 my $function;
+my $memwarn = 0;
 
 my $lnum = 0;
+
+my %overlook;
+
 while(<$fileh>) {
     chomp $_;
     my $line = $_;
     $lnum++;
-    if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
+    if($line =~ /^FAIL (.*)/) {
+        # for informational purposes
+    }
+    elsif($line =~ /^RESTART ([^ ]*):(\d*)/) {
+        # allow a new LIMIT after this
+        $memwarn = 0;
+    }
+    elsif($line =~ /^OVERLOOK ([^ ]*):(\d*)/) {
+        $overlook{$1, $2} = 1;
+    }
+    elsif($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
         my $i = $3;
         my ($source, $linenum) = ($1, $2);
-        if($trace && ($i =~ /([^ ]*) reached memlimit/)) {
-            print "LIMIT: $1 returned error at $source:$linenum\n";
+        if($i =~ /([^ ]*) reached memlimit/) {
+            if($trace) {
+                print "LIMIT: $1 returned error at $source:$linenum\n";
+            }
+            if($strict && !$overlook{$source, $linenum}) {
+                $memwarn++;
+            }
         }
     }
     elsif($line =~ /^MEM ([^ ]*):(\d*) (.*)/) {

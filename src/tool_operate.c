@@ -776,6 +776,7 @@ skip:
   free(per->uploadfile);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
+  curl_dbg_restart();
   return result;
 }
 

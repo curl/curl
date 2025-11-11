@@ -549,7 +549,7 @@ sub torture {
             $fail=1;
         }
         else {
-            my @memdata=`$memanalyze "$LOGDIR/$MEMDUMP"`;
+            my @memdata=`$memanalyze -s "$srcdir" "$LOGDIR/$MEMDUMP"`;
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
