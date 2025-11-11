@@ -43,6 +43,7 @@ my $recvs=0;
 my $sockets=0;
 my $verbose=0;
 my $trace=0;
+my $strict=0;
 
 while(@ARGV) {
     if($ARGV[0] eq "-v") {
@@ -51,6 +52,10 @@ while(@ARGV) {
     }
     elsif($ARGV[0] eq "-t") {
         $trace=1;
+        shift @ARGV;
+    }
+    elsif($ARGV[0] eq "-s") {
+        $strict=1;
         shift @ARGV;
     }
     elsif($ARGV[0] eq "-l") {
@@ -79,10 +84,11 @@ my $file = $ARGV[0] || '';
 
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
-    "Options:\n",
-    " -l  memlimit failure displayed\n",
-    " -v  Verbose\n",
-    " -t  Trace\n";
+        "Options:\n",
+        " -l  memlimit failure displayed\n",
+        " -v  Verbose\n",
+        " -s  Strict - warn on mallocs after memlimit is reached\n",
+        " -t  Trace\n";
     exit;
 }
 
@@ -124,6 +130,7 @@ my $addrinfos = 0;
 my $source;
 my $linenum;
 my $function;
+my $memwarn = 0;
 
 my $lnum = 0;
 while(<$fileh>) {
@@ -134,8 +141,13 @@ while(<$fileh>) {
         # new memory limit test prefix
         my $i = $3;
         my ($source, $linenum) = ($1, $2);
-        if($trace && ($i =~ /([^ ]*) reached memlimit/)) {
-            print "LIMIT: $1 returned error at $source:$linenum\n";
+        if($i =~ /([^ ]*) reached memlimit/) {
+            if($trace) {
+                print "LIMIT: $1 returned error at $source:$linenum\n";
+            }
+            if($strict) {
+                $memwarn=1;
+            }
         }
     }
     elsif($line =~ /^MEM ([^ ]*):(\d*) (.*)/) {
@@ -175,6 +187,10 @@ while(<$fileh>) {
             $size = $1;
             $addr = $2;
 
+            if($memwarn) {
+                print "WARN:$source:$linenum malloc($size) after limit\n",
+            }
+
             if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile ($source:$linenum at line $lnum), rebuild curl now\n";
@@ -202,6 +218,10 @@ while(<$fileh>) {
             my $arg1 = $1;
             my $arg2 = $2;
 
+            if($memwarn) {
+                print "WARN:$source:$linenum calloc($size) after limit\n",
+            }
+
             if($sizeataddr{$addr} && $sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
                 print "Mixed debug compile, rebuild curl now\n";
@@ -223,6 +243,10 @@ while(<$fileh>) {
         }
         elsif($function =~ /realloc\((\(nil\)|0x([0-9a-f]*)), (\d*)\) = 0x([0-9a-f]*)/) {
             my ($oldaddr, $newsize, $newaddr) = ($2, $3, $4);
+
+            if($memwarn) {
+                print "WARN:$source:$linenum realloc($size) after limit\n",
+            }
 
             if($oldaddr) {
                 my $oldsize = $sizeataddr{$oldaddr} ? $sizeataddr{$oldaddr} : 0;
@@ -261,6 +285,10 @@ while(<$fileh>) {
             $totalmem += $size;
             $memsum += $size;
 
+            if($memwarn) {
+                print "WARN:$source:$linenum strdup() after limit\n",
+            }
+
             if($trace) {
                 printf("STRDUP: $size bytes at %s, makes totally: %d bytes\n",
                        $getmem{$addr}, $totalmem);
@@ -280,6 +308,10 @@ while(<$fileh>) {
 
             $totalmem += $size;
             $memsum += $size;
+
+            if($memwarn) {
+                print "WARN:$source:$linenum wcsdup() after limit\n",
+            }
 
             if($trace) {
                 printf("WCSDUP: $size bytes at %s, makes totally: %d bytes\n",

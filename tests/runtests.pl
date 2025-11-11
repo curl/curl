@@ -1759,7 +1759,7 @@ sub singletest_check {
             $ok .= "-"; # problem with memory checking
         }
         else {
-            my @memdata=`$memanalyze "$logdir/$MEMDUMP"`;
+            my @memdata=`$memanalyze -s "$logdir/$MEMDUMP"`;
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
