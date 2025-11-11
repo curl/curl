@@ -316,18 +316,6 @@ static void close_secondarysocket(struct Curl_easy *data,
   Curl_conn_cf_discard_all(data, data->conn, SECONDARYSOCKET);
 }
 
-/*
- * NOTE: back in the old days, we added code in the FTP code that made NOBODY
- * requests on files respond with headers passed to the client/stdout that
- * looked like HTTP ones.
- *
- * This approach is not elegant, it causes confusion and is error-prone. It is
- * subject for removal at the next (or at least a future) soname bump. Until
- * then you can test the effects of the removal by undefining the following
- * define named CURL_FTP_HTTPSTYLE_HEAD.
- */
-#define CURL_FTP_HTTPSTYLE_HEAD 1
-
 static void freedirs(struct ftp_conn *ftpc)
 {
   Curl_safefree(ftpc->dirs);
@@ -2114,7 +2102,6 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
           showtime = TRUE;
       }
 
-#ifdef CURL_FTP_HTTPSTYLE_HEAD
       /* If we asked for a time of the file and we actually got one as well,
          we "emulate" an HTTP-style header in our output. */
 
@@ -2155,7 +2142,6 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
         if(result)
           return result;
       } /* end of a ridiculous amount of conditionals */
-#endif
     }
     break;
   default:
@@ -2360,7 +2346,6 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
   }
 
   if(instate == FTP_SIZE) {
-#ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(filesize != -1) {
       char clbuf[128];
       int clbuflen = curl_msnprintf(clbuf, sizeof(clbuf),
@@ -2370,7 +2355,6 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
       if(result)
         return result;
     }
-#endif
     Curl_pgrsSetDownloadSize(data, filesize);
     result = ftp_state_rest(data, ftpc, ftp);
   }
@@ -2397,14 +2381,12 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
   switch(instate) {
   case FTP_REST:
   default:
-#ifdef CURL_FTP_HTTPSTYLE_HEAD
     if(ftpcode == 350) {
       char buffer[24]= { "Accept-ranges: bytes\r\n" };
       result = client_write_header(data, buffer, strlen(buffer));
       if(result)
         return result;
     }
-#endif
     result = ftp_state_prepare_transfer(data, ftpc, ftp);
     break;
 
