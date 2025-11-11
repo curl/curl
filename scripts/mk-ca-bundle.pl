@@ -247,7 +247,9 @@ sub sha256 {
         close(FILE);
     } else {
         # Use OpenSSL command if Perl Digest::SHA modules not available
-        $result = `"$openssl" dgst -r -sha256 "$_[0]"`;
+        open(my $fh, '-|', $openssl, 'dgst', '-r', '-sha256', $_[0]) or die "Failed running openssl on '$_[0]': $!";
+        $result = <$fh>;  # read first line
+        close $fh;
         $result =~ s/^([0-9a-f]{64}) .+/$1/is;
     }
     return $result;
