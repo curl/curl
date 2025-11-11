@@ -313,10 +313,16 @@ if(!$opt_n) {
         if($curl) {
             if($curl =~ /^Protocols:.* https( |$)/m) {
                 report "Get certdata with curl!";
-                my $proto = !$opt_k ? "--proto =https" : "";
-                my $quiet = $opt_q ? "-s" : "";
-                my @out = `curl -Lw %{response_code} $proto $quiet -o "$txt" "$url"`;
-                if(!$? && @out && $out[0] == 200) {
+                my @opts = ();
+                push @opts, '--proto', '=https' if !$opt_k;
+                push @opts, '-s' if $opt_q;
+                my $out = '';
+                if(open(my $fh, '-|', 'curl', '-Lw', '%{response_code}', (@opts), '-o', $txt, $url)) {
+                    $out = <$fh>;  # read first line
+                    chomp $out;
+                    close $fh;
+                }
+                if($out && $out == 200) {
                     $fetched = 1;
                     report "Downloaded $txt";
                 }
