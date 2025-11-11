@@ -143,7 +143,4 @@ bool Curl_xfer_recv_is_paused(struct Curl_easy *data);
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable);
 CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable);
 
-/* Query if transfer has expire timeout TOOFAST set. */
-bool Curl_xfer_is_too_fast(struct Curl_easy *data);
-
 #endif /* HEADER_CURL_TRANSFER_H */

@@ -130,6 +130,7 @@ struct SingleRequest {
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(shutdown);     /* request end will shutdown connection */
   BIT(shutdown_err_ignore); /* errors in shutdown will not fail request */
+  BIT(reader_started); /* client reads have started */
 };
 
 /**
