@@ -145,10 +145,6 @@ sub checkurl {
         @content = <$fh>;
         close $fh;
     }
-    else {
-        print STDERR "FAIL\n";
-        return 1; # fail
-    }
     if(!$content[0]) {
         print STDERR "FAIL\n";
         return 1; # fail
