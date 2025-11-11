@@ -78,5 +78,5 @@ couldn't:could not
 ---WWW::Curl
 ---NET::Curl
 ---Curl Corporation
-\bmanpage[^./&-]:man page
 \bmanpages[^./&-]:man pages
+\bmanpage[^s./&-]:man page
