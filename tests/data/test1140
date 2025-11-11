@@ -11,7 +11,7 @@ documentation
 # Client-side
 <client>
 <name>
-Verify the nroff of manpages
+Verify the nroff of man pages
 </name>
 
 <command type="perl">

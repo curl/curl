@@ -278,7 +278,7 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
  * Desc:    An alternative version of curl_multi_perform() that allows the
  *          application to pass in one of the file descriptors that have been
  *          detected to have "action" on them and let libcurl perform.
- *          See manpage for details.
+ *          See man page for details.
  */
 #define CURL_POLL_NONE   0
 #define CURL_POLL_IN     1

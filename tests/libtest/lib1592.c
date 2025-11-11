@@ -26,7 +26,7 @@
  *
  * This test case checks whether curl_multi_remove_handle() cancels
  * asynchronous DNS resolvers without blocking where possible.  Obviously, it
- * only tests whichever resolver cURL is actually built with.
+ * only tests whichever resolver curl is actually built with.
  */
 
 /* We're willing to wait a very generous two seconds for the removal.  This is

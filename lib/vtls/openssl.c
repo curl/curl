@@ -2395,7 +2395,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
 
         switch(target) {
         case GEN_DNS: /* name/pattern comparison */
-          /* The OpenSSL manpage explicitly says: "In general it cannot be
+          /* The OpenSSL man page explicitly says: "In general it cannot be
              assumed that the data returned by ASN1_STRING_data() is null
              terminated or does not contain embedded nulls." But also that
              "The actual format of the data will depend on the actual string
@@ -4126,7 +4126,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   /* OpenSSL contains code to work around lots of bugs and flaws in various
      SSL-implementations. SSL_CTX_set_options() is used to enabled those
-     work-arounds. The manpage for this option states that SSL_OP_ALL enables
+     work-arounds. The man page for this option states that SSL_OP_ALL enables
      all the work-arounds and that "It is usually safe to use SSL_OP_ALL to
      enable the bug workaround options if compatibility with somewhat broken
      implementations is desired."

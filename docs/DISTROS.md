@@ -188,9 +188,9 @@ unless it is specific to Homebrew's way of packaging software.
 
 *Rolling Release*
 
-- curl: https://github.com/lordmulder/cURL-build-win32
-- curl issues: https://github.com/lordmulder/cURL-build-win32/issues
-- curl patches: https://github.com/lordmulder/cURL-build-win32/tree/master/patch
+- curl: https://github.com/lordmulder/curl-build-win32
+- curl issues: https://github.com/lordmulder/curl-build-win32/issues
+- curl patches: https://github.com/lordmulder/curl-build-win32/tree/master/patch
 
 ## NixOS
 

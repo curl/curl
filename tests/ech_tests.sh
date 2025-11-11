@@ -308,7 +308,7 @@ fi
   echo "have_portsblocked: $have_portsblocked"
 } >> "$logfile"
 
-echo "curl: have $have_curl, cURL command: |$CURL ${CURL_PARAMS[*]}|"
+echo "curl: have $have_curl, curl command: |$CURL ${CURL_PARAMS[*]}|"
 echo "ossl: have: $have_ossl, using: $using_ossl"
 echo "wolf: have: $have_wolf, using: $using_wolf"
 echo "bssl: have: $have_bssl, using: $using_bssl"
