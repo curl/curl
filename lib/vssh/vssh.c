@@ -198,14 +198,12 @@ fail:
 }
 
 CURLcode Curl_ssh_range(struct Curl_easy *data,
-                        const char *range, curl_off_t filesize,
+                        const char *p, curl_off_t filesize,
                         curl_off_t *startp, curl_off_t *sizep)
 {
   curl_off_t from, to;
-  const char *p = range;
-  int to_t, from_t;
-
-  from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
+  int to_t;
+  int from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
   if(from_t == STRE_OVERFLOW)
     return CURLE_RANGE_ERROR;
   curlx_str_passblanks(&p);
@@ -214,8 +212,6 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
   to_t = curlx_str_numblanks(&p, &to);
   if((to_t == STRE_OVERFLOW) || (to_t && from_t))
     return CURLE_RANGE_ERROR;
-  if((to_t == STRE_NO_NUM) || (to >= filesize))
-    to = filesize;
 
   if(from_t) {
     /* from is relative to end of file */
@@ -227,16 +223,18 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
           FMT_OFF_T ")", from, filesize);
     return CURLE_BAD_DOWNLOAD_RESUME;
   }
+  if((to_t == STRE_NO_NUM) || (to >= filesize))
+    to = filesize - 1;
+
   if(from > to) {
-    *startp = to;
-    *sizep = 0;
+    failf(data, "Bad range: start offset larger than end offset");
+    return CURLE_BAD_DOWNLOAD_RESUME;
   }
-  else {
-    if((to - from) == CURL_OFF_T_MAX)
-      return CURLE_RANGE_ERROR;
-    *startp = from;
-    *sizep = to - from + 1;
-  }
+  if((to - from) == CURL_OFF_T_MAX)
+    return CURLE_RANGE_ERROR;
+
+  *startp = from;
+  *sizep = to - from + 1;
   return CURLE_OK;
 }
 
