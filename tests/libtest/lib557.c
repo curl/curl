@@ -1495,9 +1495,9 @@ static int test_oct_hex_formatting(void)
 #endif
 
   if(!errors)
-    curl_mprintf("All curl_mprintf() octal & hexadecimal tests OK!\n");
+    curl_mprintf("All curl_mprintf() octal and hexadecimal tests OK!\n");
   else
-    curl_mprintf("Some curl_mprintf() octal & hexadecimal tests Failed!\n");
+    curl_mprintf("Some curl_mprintf() octal or hexadecimal tests Failed!\n");
 
   return errors;
 }
