@@ -109,7 +109,7 @@ static size_t populate_settings(nghttp2_settings_entry *iv,
 #if NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
   /* If the transfer initiating this connection has a rate-limit lower
    * than the default initial stream window size, set that for the
-   * server to start with. But it should be at least 8k or servers
+   * server to start with. It needs to be at least 8k or servers
    * may be unhappy.
    * Later transfers on this connection without a ratelimit will also
    * start with this, but immediately update to H2_STREAM_WINDOW_SIZE_MAX. */
