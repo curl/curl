@@ -210,25 +210,30 @@ CURLcode Curl_ssh_range(struct Curl_easy *data,
   (void)curlx_str_single(&p, '-');
 
   to_t = curlx_str_numblanks(&p, &to);
-  if((to_t == STRE_OVERFLOW) || (to_t && from_t))
+  if((to_t == STRE_OVERFLOW) || (to_t && from_t) || *p)
     return CURLE_RANGE_ERROR;
 
   if(from_t) {
-    /* from is relative to end of file */
+    /* no start point given, set from relative to end of file */
+    if(!to)
+      /* "-0" is not a fine range */
+      return CURLE_RANGE_ERROR;
+    else if(to > filesize)
+      to = filesize;
     from = filesize - to;
     to = filesize - 1;
   }
   else if(from > filesize) {
     failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
           FMT_OFF_T ")", from, filesize);
-    return CURLE_BAD_DOWNLOAD_RESUME;
+    return CURLE_RANGE_ERROR;
   }
-  if((to_t == STRE_NO_NUM) || (to >= filesize))
+  else if((to_t == STRE_NO_NUM) || (to >= filesize))
     to = filesize - 1;
 
   if(from > to) {
     failf(data, "Bad range: start offset larger than end offset");
-    return CURLE_BAD_DOWNLOAD_RESUME;
+    return CURLE_RANGE_ERROR;
   }
   if((to - from) == CURL_OFF_T_MAX)
     return CURLE_RANGE_ERROR;
