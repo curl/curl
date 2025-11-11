@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "vssh/curl_path.h"
+#include "vssh/vssh.h"
 #include "memdebug.h"
 
 static CURLcode test_unit2604(const char *arg)

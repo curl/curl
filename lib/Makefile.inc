@@ -133,10 +133,10 @@ LIB_VQUIC_HFILES = \
 LIB_VSSH_CFILES =  \
   vssh/libssh.c    \
   vssh/libssh2.c   \
-  vssh/curl_path.c
+  vssh/vssh.c
 
 LIB_VSSH_HFILES =    \
-  vssh/curl_path.h   \
+  vssh/vssh.h        \
   vssh/ssh.h
 
 LIB_CFILES =         \

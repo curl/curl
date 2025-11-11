@@ -26,9 +26,10 @@
 
 #ifdef USE_SSH
 
-#include "curl_path.h"
+#include "vssh.h"
 #include <curl/curl.h>
 #include "../curlx/strparse.h"
+#include "../curl_trc.h"
 #include "../curl_memory.h"
 #include "../escape.h"
 #include "../memdebug.h"
@@ -194,6 +195,52 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 fail:
   curlx_dyn_free(&out);
   return CURLE_QUOTE_ERROR;
+}
+
+CURLcode Curl_ssh_range(struct Curl_easy *data,
+                        const char *p, curl_off_t filesize,
+                        curl_off_t *startp, curl_off_t *sizep)
+{
+  curl_off_t from, to;
+  int to_t;
+  int from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
+  if(from_t == STRE_OVERFLOW)
+    return CURLE_RANGE_ERROR;
+  curlx_str_passblanks(&p);
+  (void)curlx_str_single(&p, '-');
+
+  to_t = curlx_str_numblanks(&p, &to);
+  if((to_t == STRE_OVERFLOW) || (to_t && from_t) || *p)
+    return CURLE_RANGE_ERROR;
+
+  if(from_t) {
+    /* no start point given, set from relative to end of file */
+    if(!to)
+      /* "-0" is not a fine range */
+      return CURLE_RANGE_ERROR;
+    else if(to > filesize)
+      to = filesize;
+    from = filesize - to;
+    to = filesize - 1;
+  }
+  else if(from > filesize) {
+    failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+          FMT_OFF_T ")", from, filesize);
+    return CURLE_RANGE_ERROR;
+  }
+  else if((to_t == STRE_NO_NUM) || (to >= filesize))
+    to = filesize - 1;
+
+  if(from > to) {
+    failf(data, "Bad range: start offset larger than end offset");
+    return CURLE_RANGE_ERROR;
+  }
+  if((to - from) == CURL_OFF_T_MAX)
+    return CURLE_RANGE_ERROR;
+
+  *startp = from;
+  *sizep = to - from + 1;
+  return CURLE_OK;
 }
 
 #endif /* if SSH is used */

@@ -36,7 +36,7 @@
 #include <libssh/sftp.h>
 #endif
 
-#include "curl_path.h"
+#include "vssh.h"
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_SSH_EASY   "meta:proto:ssh:easy"
