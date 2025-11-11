@@ -106,6 +106,18 @@ static size_t populate_settings(nghttp2_settings_entry *iv,
 
   iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
   iv[1].value = H2_STREAM_WINDOW_SIZE_INITIAL;
+#if NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
+  /* If the transfer initiating this connection has a rate-limit lower
+   * than the default initial stream window size, set that for the
+   * server to start with. But it should be at least 8k or servers
+   * may be unhappy.
+   * Later transfers on this connection without a ratelimit will also
+   * start with this, but immediately update to H2_STREAM_WINDOW_SIZE_MAX. */
+  if(data->progress.dl.rlimit.rate_per_s &&
+     (data->progress.dl.rlimit.rate_per_s < H2_STREAM_WINDOW_SIZE_INITIAL))
+    iv[1].value = CURLMAX((uint32_t)data->progress.dl.rlimit.rate_per_s,
+                          8192);
+#endif
 
   iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
   iv[2].value = data->multi->push_cb != NULL;
@@ -296,16 +308,18 @@ static void h2_stream_hash_free(unsigned int id, void *stream)
 static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
                                            struct Curl_easy *data)
 {
+  curl_off_t avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
+                                       curlx_now());
+
   (void)cf;
-  if(data->set.max_recv_speed && data->set.max_recv_speed < INT32_MAX) {
-    /* The transfer should only receive `max_recv_speed` bytes per second.
-     * We restrict the stream's local window size, so that the server cannot
-     * send us "too much" at a time.
-     * This gets less precise the higher the latency. */
-    return (int32_t)data->set.max_recv_speed;
+  if(avail < CURL_OFF_T_MAX) { /* limit in place */
+    if(avail <= 0)
+      return 0;
+    else if(avail < INT32_MAX)
+      return (int32_t)avail;
   }
 #ifdef DEBUGBUILD
-  else {
+  {
     struct cf_h2_ctx *ctx = cf->ctx;
     CURL_TRC_CF(data, cf, "stream_win_max=%d", ctx->stream_win_max);
     return ctx->stream_win_max;
@@ -2006,6 +2020,9 @@ static CURLcode stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   (void)buf;
   (void)len;
   *pnread = 0;
+
+  if(!stream->xfer_result)
+    stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
 
   if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%d] xfer write failed", stream->id);

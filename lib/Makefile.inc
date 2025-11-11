@@ -234,6 +234,7 @@ LIB_CFILES =         \
   progress.c         \
   psl.c              \
   rand.c             \
+  ratelimit.c        \
   rename.c           \
   request.c          \
   rtsp.c             \
@@ -366,6 +367,7 @@ LIB_HFILES =         \
   progress.h         \
   psl.h              \
   rand.h             \
+  ratelimit.h        \
   rename.h           \
   request.h          \
   rtsp.h             \
