@@ -20,7 +20,7 @@ document](https://curl.se/docs/install.html).
 
 libcurl is the library curl is using to do its job. It is readily available to
 be used by your software. Read [the libcurl
-manpage](https://curl.se/libcurl/c/libcurl.html) to learn how.
+man page](https://curl.se/libcurl/c/libcurl.html) to learn how.
 
 ## Open Source
 
