@@ -1333,7 +1333,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
       CURLcode result = Curl_ssh_range(data, data->state.range, size,
                                        &from, &size);
       if(result)
-        return result;
+        return myssh_to_ERROR(data, sshc, result);
 
       rc = sftp_seek64(sshc->sftp_file, from);
       if(rc)
