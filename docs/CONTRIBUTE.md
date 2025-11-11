@@ -111,8 +111,8 @@ projects but someone's gotta do it. It makes things a lot easier if you submit
 a small description of your fix or your new features with every contribution
 so that it can be swiftly added to the package documentation.
 
-Documentation is mostly provided as manpages or plain ASCII files. The
-manpages are rendered from their source files that are usually written using
+Documentation is mostly provided as man pages or plain ASCII files. The
+man pages are rendered from their source files that are usually written using
 markdown. Most HTML files on the website and in the release archives are
 generated from corresponding markdown and ASCII files.
 
@@ -289,7 +289,7 @@ Just ask if this is what you would want. You are required to have posted
 several high quality patches first, before you can be granted push access.
 
 ## Useful resources
- - [Webinar on getting code into cURL](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+ - [Webinar on getting code into curl](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
 
 # Update copyright and license information
 

@@ -73,7 +73,7 @@ Go: [go-curl](https://github.com/andelf/go-curl) by ShuYu Wang
 
 [LibQurl](https://github.com/Qriist/LibQurl) a feature rich AutoHotKey v2 (AHKv2) wrapper around libcurl.
 
-Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-cURL](https://github.com/Lua-cURL) by Jürgen Hötzel
+Lua: [luacurl](https://web.archive.org/web/20201205052437/luacurl.luaforge.net/) by Alexander Marinov, [Lua-curl](https://github.com/Lua-cURL) by Jürgen Hötzel
 
 [Mono](https://web.archive.org/web/20070606064500/forge.novell.com/modules/xfmod/project/?libcurl-mono) Written by Jeffrey Phillips
 
@@ -98,7 +98,7 @@ Bailiff and Bálint Szilakszi,
 
 [PostgreSQL](https://github.com/pramsey/pgsql-http) - HTTP client for PostgreSQL
 
-[PostgreSQL](https://github.com/RekGRpth/pg_curl) - cURL client for PostgreSQL
+[PostgreSQL](https://github.com/RekGRpth/pg_curl) - curl client for PostgreSQL
 
 [PureBasic](https://web.archive.org/web/20250325015028/www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
