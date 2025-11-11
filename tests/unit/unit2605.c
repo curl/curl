@@ -58,6 +58,7 @@ static CURLcode test_unit2605(const char *arg)
     { "+2-3", 100, 0, 0, CURLE_RANGE_ERROR},
     { "2 - 3", 100, 2, 2, CURLE_OK},
     { " 2 - 3", 100, 2, 2, CURLE_RANGE_ERROR}, /* no leading space */
+    { "2 - 3 ", 100, 2, 2, CURLE_RANGE_ERROR}, /* no trailing space */
     { "3-2", 100, 0, 0, CURLE_RANGE_ERROR},
     { "2.-3", 100, 0, 0, CURLE_RANGE_ERROR},
     { "-3-2", 100, 0, 0, CURLE_RANGE_ERROR},
