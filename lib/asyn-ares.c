@@ -88,7 +88,7 @@
 /* How long we are willing to wait for additional parallel responses after
    obtaining a "definitive" one. For old c-ares without getaddrinfo.
 
-   This is intended to equal the c-ares default timeout. cURL always uses that
+   This is intended to equal the c-ares default timeout. curl always uses that
    default value. Unfortunately, c-ares does not expose its default timeout in
    its API, but it is officially documented as 5 seconds.
 
