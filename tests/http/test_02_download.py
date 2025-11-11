@@ -27,11 +27,9 @@
 import difflib
 import filecmp
 import logging
-import math
 import os
 import re
 import sys
-from datetime import timedelta
 import pytest
 
 from testenv import Env, CurlClient, LocalClient
@@ -424,15 +422,17 @@ class TestDownload:
         count = 1
         url = f'https://{env.authority_for(env.domain1, proto)}/data-1m'
         curl = CurlClient(env=env)
-        speed_limit = 384 * 1024
-        min_duration = math.floor((1024 * 1024)/speed_limit)
+        speed_limit = 256 * 1024
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--limit-rate', f'{speed_limit}'
         ])
         r.check_response(count=count, http_status=200)
-        assert r.duration > timedelta(seconds=min_duration), \
-            f'rate limited transfer should take more than {min_duration}s, '\
-            f'not {r.duration}'
+        dl_speed = r.stats[0]['speed_download']
+        # speed limit is only exact on long durations. Ideally this transfer
+        # would take 4 seconds, but it may end just after 3 because then
+        # we have downloaded the rest and will not wait for the rate
+        # limit to increase again.
+        assert dl_speed <= ((1024*1024)/3), f'{r.stats[0]}'
 
     # make extreme parallel h2 upgrades, check invalid conn reuse
     # before protocol switch has happened

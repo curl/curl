@@ -65,7 +65,6 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "multiif.h"
 #include "url.h"
-#include "speedcheck.h"
 #include "curlx/warnless.h"
 #include "http_proxy.h"
 #include "socks.h"
@@ -675,8 +674,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
         return CURLE_RECV_ERROR;
       }
       else if(ev == 0) {
-        if(Curl_pgrsUpdate(data))
-          return CURLE_ABORTED_BY_CALLBACK;
+        result = Curl_pgrsUpdate(data);
         continue; /* just continue in our loop for the timeout duration */
       }
     }
@@ -4344,10 +4342,7 @@ CURLcode ftp_regular_transfer(struct Curl_easy *data,
   bool connected = FALSE;
   data->req.size = -1; /* make sure this is unknown at this point */
 
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   ftpc->ctl_valid = TRUE; /* starts good */
 

@@ -234,6 +234,7 @@ LIB_CFILES =         \
   progress.c         \
   psl.c              \
   rand.c             \
+  ratelimit.c        \
   rename.c           \
   request.c          \
   rtsp.c             \
@@ -249,7 +250,6 @@ LIB_CFILES =         \
   socks.c            \
   socks_gssapi.c     \
   socks_sspi.c       \
-  speedcheck.c       \
   splay.c            \
   strcase.c          \
   strdup.c           \
@@ -366,6 +366,7 @@ LIB_HFILES =         \
   progress.h         \
   psl.h              \
   rand.h             \
+  ratelimit.h        \
   rename.h           \
   request.h          \
   rtsp.h             \
@@ -383,7 +384,6 @@ LIB_HFILES =         \
   sockaddr.h         \
   socketpair.h       \
   socks.h            \
-  speedcheck.h       \
   splay.h            \
   strcase.h          \
   strdup.h           \

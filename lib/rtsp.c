@@ -142,7 +142,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* proto_pollset */
   rtsp_do_pollset,                      /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
   rtsp_rtp_write_resp_hd,               /* write_resp_hd */
@@ -668,8 +668,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* if a request-body has been sent off, we make sure this progress is
        noted properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
+    result = Curl_pgrsUpdate(data);
   }
 out:
   curlx_dyn_free(&req_buffer);

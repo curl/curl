@@ -60,7 +60,6 @@
 #include "sendf.h"
 #include "escape.h"
 #include "file.h"
-#include "speedcheck.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
@@ -415,13 +414,10 @@ static CURLcode file_upload(struct Curl_easy *data,
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
-    else
-      result = Curl_speedcheck(data, curlx_now());
+    result = Curl_pgrsCheck(data);
   }
-  if(!result && Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
+  if(!result)
+    result = Curl_pgrsUpdate(data);
 
 out:
   close(fd);
@@ -620,10 +616,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       if(result)
         goto out;
 
-      if(Curl_pgrsUpdate(data))
-        result = CURLE_ABORTED_BY_CALLBACK;
-      else
-        result = Curl_speedcheck(data, curlx_now());
+      result = Curl_pgrsCheck(data);
       if(result)
         goto out;
     }
@@ -657,8 +650,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 #endif
   }
 
-  if(Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
+  if(!result)
+    result = Curl_pgrsUpdate(data);
 
 out:
   Curl_multi_xfer_buf_release(data, xfer_buf);

@@ -65,7 +65,6 @@
 #include "cw-out.h"
 #include "transfer.h"
 #include "sendf.h"
-#include "speedcheck.h"
 #include "progress.h"
 #include "http.h"
 #include "url.h"
@@ -241,10 +240,9 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
   char *buf, *xfer_buf;
   size_t blen, xfer_blen;
   int maxloops = 10;
-  curl_off_t total_received = 0;
   bool is_multiplex = FALSE;
   bool rcvd_eagain = FALSE;
-  bool is_eos = FALSE;
+  bool is_eos = FALSE, rate_limited = FALSE;
 
   result = Curl_multi_xfer_buf_borrow(data, &xfer_buf, &xfer_blen);
   if(result)
@@ -265,15 +263,21 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     buf = xfer_buf;
     bytestoread = xfer_blen;
 
-    if(bytestoread && data->set.max_recv_speed > 0) {
-      /* In case of speed limit on receiving: if this loop already got
-       * a quarter of the quota, break out. We want to stutter a bit
-       * to keep in the limit, but too small receives will just cost
-       * cpu unnecessarily. */
-      if(total_received && (total_received >= (data->set.max_recv_speed / 4)))
+    if(bytestoread && Curl_rlimit_active(&data->progress.dl.rlimit)) {
+      curl_off_t dl_avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
+                                              curlx_now());
+      /* DEBUGF(infof(data, "dl_rlimit, available=%" FMT_OFF_T, dl_avail));
+       */
+      /* In case of rate limited downloads: if this loop already got
+       * data and less than 16k is left in the limit, break out.
+       * We want to stutter a bit to keep in the limit, but too small
+       * receives will just cost cpu unnecessarily. */
+      if(dl_avail <= 0) {
+        rate_limited = TRUE;
         break;
-      if(data->set.max_recv_speed < (curl_off_t)bytestoread)
-        bytestoread = (size_t)data->set.max_recv_speed;
+      }
+      if(dl_avail < (curl_off_t)bytestoread)
+        bytestoread = (size_t)dl_avail;
     }
 
     rcvd_eagain = FALSE;
@@ -315,7 +319,6 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
       if(k->eos_written) /* already did write this to client, leave */
         break;
     }
-    total_received += blen;
 
     result = Curl_xfer_write_resp(data, buf, blen, is_eos);
     if(result || data->req.done)
@@ -327,13 +330,13 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     if((!is_multiplex && data->req.download_done) || is_eos) {
       data->req.keepon &= ~KEEP_RECV;
     }
-    /* if we are PAUSEd or stopped receiving, leave the loop */
-    if((k->keepon & KEEP_RECV_PAUSE) || !(k->keepon & KEEP_RECV))
+    /* if we stopped receiving, leave the loop */
+    if(!(k->keepon & KEEP_RECV))
       break;
 
   } while(maxloops--);
 
-  if(!is_eos && !Curl_xfer_is_blocked(data) &&
+  if(!is_eos && !rate_limited && CURL_WANT_RECV(data) &&
      (!rcvd_eagain || data_pending(data, rcvd_eagain))) {
     /* Did not read until EAGAIN/EOS or there is still data pending
      * in buffers. Mark as read-again via simulated SELECT results. */
@@ -396,16 +399,13 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
-  if(Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) {
+  if(Curl_req_want_send(data)) {
     result = sendrecv_ul(data);
     if(result)
       goto out;
   }
 
-  if(Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
-  else
-    result = Curl_speedcheck(data, *nowp);
+  result = Curl_pgrsCheck(data);
   if(result)
     goto out;
 
@@ -440,15 +440,13 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
       result = CURLE_PARTIAL_FILE;
       goto out;
     }
-    if(Curl_pgrsUpdate(data)) {
-      result = CURLE_ABORTED_BY_CALLBACK;
-      goto out;
-    }
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if((k->keepon & (KEEP_RECVBITS|KEEP_SENDBITS)) == 0)
+  if((k->keepon & (KEEP_RECV|KEEP_SEND)) == 0)
     data->req.done = TRUE;
+
+  result = Curl_pgrsUpdate(data);
 
 out:
   if(result)
@@ -913,51 +911,30 @@ bool Curl_xfer_is_blocked(struct Curl_easy *data)
 
 bool Curl_xfer_send_is_paused(struct Curl_easy *data)
 {
-  return (data->req.keepon & KEEP_SEND_PAUSE);
+  return Curl_rlimit_is_blocked(&data->progress.ul.rlimit);
 }
 
 bool Curl_xfer_recv_is_paused(struct Curl_easy *data)
 {
-  return (data->req.keepon & KEEP_RECV_PAUSE);
+  return Curl_rlimit_is_blocked(&data->progress.dl.rlimit);
 }
 
 CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
 {
   CURLcode result = CURLE_OK;
-  if(enable) {
-    data->req.keepon |= KEEP_SEND_PAUSE;
-  }
-  else {
-    data->req.keepon &= ~KEEP_SEND_PAUSE;
-    if(Curl_creader_is_paused(data))
-      result = Curl_creader_unpause(data);
-  }
+  Curl_rlimit_block(&data->progress.ul.rlimit, enable, curlx_now());
+  if(!enable && Curl_creader_is_paused(data))
+    result = Curl_creader_unpause(data);
   return result;
 }
 
 CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
 {
   CURLcode result = CURLE_OK;
-  if(enable) {
-    data->req.keepon |= KEEP_RECV_PAUSE;
-  }
-  else {
-    data->req.keepon &= ~KEEP_RECV_PAUSE;
-    if(Curl_cwriter_is_paused(data))
-      result = Curl_cwriter_unpause(data);
-  }
+  Curl_rlimit_block(&data->progress.dl.rlimit, enable, curlx_now());
+  if(!enable && Curl_cwriter_is_paused(data))
+    result = Curl_cwriter_unpause(data);
   Curl_conn_ev_data_pause(data, enable);
+  Curl_pgrsRecvPause(data, enable);
   return result;
-}
-
-bool Curl_xfer_is_too_fast(struct Curl_easy *data)
-{
-  struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
-  while(e) {
-    struct time_node *n = Curl_node_elem(e);
-    e = Curl_node_next(e);
-    if(n->eid == EXPIRE_TOOFAST)
-      return TRUE;
-  }
-  return FALSE;
 }
