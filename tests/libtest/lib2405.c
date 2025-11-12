@@ -49,7 +49,7 @@
     goto test_cleanup; \
   } \
   else if(fd_count != expected_fds) { \
-    curl_mfprintf(stderr, "Max number of waitfds: %d not as expected: %d\n", \
+    curl_mfprintf(stderr, "Max number of waitfds: %u not as expected: %u\n", \
       fd_count, expected_fds); \
     res = TEST_ERR_FAILURE; \
     goto test_cleanup; \
@@ -69,7 +69,7 @@ enum {
 };
 
 static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
-    void *data) {
+                             void *data) {
   (void)ptr; (void)data;
   return size * nmemb;
 }
@@ -218,7 +218,7 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return at least the number "
-                    "of fds needed\n");
+                    "of fds needed (%u vs. %u)\n", fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
     }
@@ -236,7 +236,8 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return the amount of fds "
-                    "needed if enough isn't passed in.\n");
+                    "needed if enough isn't passed in (%u vs. %u).\n",
+                    fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
     }
@@ -263,7 +264,8 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return the amount of fds "
-                    "needed if enough isn't passed in.\n");
+                    "needed if enough isn't passed in (%u vs. %u).\n",
+                    fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
     }
@@ -275,7 +277,7 @@ static CURLcode test_run(const char *URL, long option,
     mc = curl_multi_poll(multi1, ufds, fd_count, 500, &numfds);
 
     if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_poll() failed, code %d.\\n", mc);
+      curl_mfprintf(stderr, "curl_multi_poll() failed, code %d.\n", mc);
       res = TEST_ERR_FAILURE;
       break;
     }
