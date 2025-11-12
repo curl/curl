@@ -1366,7 +1366,7 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
   }
 
   *okay = TRUE;
-  return 0; /* success */
+  return CURLE_OK; /* success */
 
 fail:
   /* failure, clear up the allocated chain and return NULL */
