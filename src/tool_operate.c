@@ -310,10 +310,11 @@ static CURLcode pre_transfer(struct per_transfer *per)
 #ifdef DEBUGBUILD
     /* allow dedicated test cases to override */
     {
-      char *ev = getenv("CURL_UPLOAD_SIZE");
+      const char *ev = getenv("CURL_UPLOAD_SIZE");
       if(ev) {
-        int sz = atoi(ev);
-        uploadfilesize = (curl_off_t)sz;
+        curl_off_t sz;
+        curlx_str_number(&ev, &sz, CURL_OFF_T_MAX);
+        uploadfilesize = sz;
       }
     }
 #endif
