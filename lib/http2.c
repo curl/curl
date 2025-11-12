@@ -45,6 +45,7 @@
 #include "curlx/strparse.h"
 #include "transfer.h"
 #include "curlx/dynbuf.h"
+#include "curlx/warnless.h"
 #include "headers.h"
 
 /* The last 3 #include files should be in this order */
@@ -539,10 +540,12 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
      * in the H1 request and we upgrade from there. This stream
      * is opened implicitly as #1. */
     uint8_t binsettings[H2_BINSETTINGS_LEN];
-    ssize_t binlen; /* length of the binsettings data */
+    ssize_t rclen;
+    size_t binlen; /* length of the binsettings data */
 
-    binlen = populate_binsettings(binsettings, data);
-    if(binlen <= 0) {
+    rclen = populate_binsettings(binsettings, data);
+
+    if(!curlx_sztouz(rclen, &binlen) ||!binlen) {
       failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
       result = CURLE_FAILED_INIT;
       goto out;
@@ -554,7 +557,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     DEBUGASSERT(stream);
     stream->id = 1;
     /* queue SETTINGS frame (again) */
-    rc = nghttp2_session_upgrade2(ctx->h2, binsettings, (size_t)binlen,
+    rc = nghttp2_session_upgrade2(ctx->h2, binsettings, binlen,
                                   data->state.httpreq == HTTPREQ_HEAD,
                                   NULL);
     if(rc) {
@@ -627,16 +630,16 @@ static CURLcode h2_process_pending_input(struct Curl_cfilter *cf,
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   const unsigned char *buf;
-  size_t blen;
+  size_t blen, nread;
   ssize_t rv;
 
   while(Curl_bufq_peek(&ctx->inbufq, &buf, &blen)) {
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
-    if(rv < 0) {
+    if(!curlx_sztouz(rv, &nread)) {
       failf(data, "nghttp2 recv error %zd: %s", rv, nghttp2_strerror((int)rv));
       return CURLE_HTTP2;
     }
-    Curl_bufq_skip(&ctx->inbufq, (size_t)rv);
+    Curl_bufq_skip(&ctx->inbufq, nread);
     if(Curl_bufq_is_empty(&ctx->inbufq)) {
       break;
     }
@@ -1804,16 +1807,17 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   size_t blen;
   struct SingleRequest *k = &data->req;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
-  ssize_t binlen; /* length of the binsettings data */
+  ssize_t rc;
+  size_t binlen; /* length of the binsettings data */
 
-  binlen = populate_binsettings(binsettings, data);
-  if(binlen <= 0) {
+  rc = populate_binsettings(binsettings, data);
+  if(!curlx_sztouz(rc, &binlen) || !binlen) {
     failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
     curlx_dyn_free(req);
     return CURLE_FAILED_INIT;
   }
 
-  result = curlx_base64url_encode((const char *)binsettings, (size_t)binlen,
+  result = curlx_base64url_encode((const char *)binsettings, binlen,
                                   &base64, &blen);
   if(result) {
     curlx_dyn_free(req);
@@ -2173,15 +2177,16 @@ out:
   return result;
 }
 
-static ssize_t cf_h2_body_send(struct Curl_cfilter *cf,
+static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                struct h2_stream_ctx *stream,
                                const void *buf, size_t blen, bool eos,
-                               CURLcode *err)
+                               size_t *pnwritten)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  size_t nwritten;
+  CURLcode result;
 
+  *pnwritten = 0;
   if(stream->closed) {
     if(stream->resp_hds_complete) {
       /* Server decided to close the stream after having sent us a final
@@ -2193,31 +2198,29 @@ static ssize_t cf_h2_body_send(struct Curl_cfilter *cf,
                   "on closed stream with response", stream->id);
       if(eos)
         stream->body_eos = TRUE;
-      *err = CURLE_OK;
-      return (ssize_t)blen;
+      *pnwritten = blen;
+      return CURLE_OK;
     }
     /* Server closed before we got a response, this is an error */
     infof(data, "stream %u closed", stream->id);
-    *err = CURLE_SEND_ERROR;
-    return -1;
+    return CURLE_SEND_ERROR;
   }
 
-  *err = Curl_bufq_write(&stream->sendbuf, buf, blen, &nwritten);
-  if(*err)
-    return -1;
+  result = Curl_bufq_write(&stream->sendbuf, buf, blen, pnwritten);
+  if(result)
+    return result;
 
-  if(eos && (blen == nwritten))
+  if(eos && (blen == *pnwritten))
     stream->body_eos = TRUE;
 
   if(eos || !Curl_bufq_is_empty(&stream->sendbuf)) {
     /* resume the potentially suspended stream */
     int rv = nghttp2_session_resume_data(ctx->h2, stream->id);
-    if(nghttp2_is_fatal(rv)) {
-      *err = CURLE_SEND_ERROR;
-      return -1;
-    }
+    if(nghttp2_is_fatal(rv))
+      return CURLE_SEND_ERROR;
   }
-  return (ssize_t)nwritten;
+
+  return CURLE_OK;
 }
 
 static CURLcode h2_submit(struct h2_stream_ctx **pstream,
@@ -2234,7 +2237,8 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_priority_spec pri_spec;
-  ssize_t nwritten;
+  ssize_t rc;
+  size_t nwritten;
   CURLcode result = CURLE_OK;
 
   *pnwritten = 0;
@@ -2244,10 +2248,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, &result);
-  if(nwritten < 0)
+  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, &result);
+  if(!curlx_sztouz(rc, &nwritten))
     goto out;
-  *pnwritten = (size_t)nwritten;
+  *pnwritten = nwritten;
   if(!stream->h1.done) {
     /* need more data */
     goto out;
@@ -2321,8 +2325,9 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   bodylen = len - *pnwritten;
 
   if(bodylen || eos) {
-    ssize_t n = cf_h2_body_send(cf, data, stream, body, bodylen, eos, &result);
-    if(n >= 0)
+    size_t n;
+    result = cf_h2_body_send(cf, data, stream, body, bodylen, eos, &n);
+    if(!result)
       *pnwritten += n;
     else if(result == CURLE_AGAIN)
       result = CURLE_OK;
@@ -2347,7 +2352,6 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
   struct cf_call_data save;
-  ssize_t nwritten;
   CURLcode result = CURLE_OK, r2;
 
   CF_DATA_SAVE(save, cf, data);
@@ -2364,21 +2368,19 @@ static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * being able to flush stream->sendbuf. Make a 0-length write
      * to trigger flushing again.
      * If this works, we report to have written `len` bytes. */
+    size_t n;
     DEBUGASSERT(eos);
-    nwritten = cf_h2_body_send(cf, data, stream, buf, 0, eos, &result);
-    CURL_TRC_CF(data, cf, "[%d] cf_body_send last CHUNK -> %zd, %d, eos=%d",
-                stream->id, nwritten, result, eos);
-    if(nwritten < 0) {
+    result = cf_h2_body_send(cf, data, stream, buf, 0, eos, &n);
+    CURL_TRC_CF(data, cf, "[%d] cf_body_send last CHUNK -> %d, %zu, eos=%d",
+                stream->id, result, n, eos);
+    if(result)
       goto out;
-    }
     *pnwritten = len;
   }
   else {
-    nwritten = cf_h2_body_send(cf, data, stream, buf, len, eos, &result);
-    CURL_TRC_CF(data, cf, "[%d] cf_body_send(len=%zu) -> %zd, %d, eos=%d",
-                stream->id, len, nwritten, result, eos);
-    if(nwritten >= 0)
-      *pnwritten = (size_t)nwritten;
+    result = cf_h2_body_send(cf, data, stream, buf, len, eos, pnwritten);
+    CURL_TRC_CF(data, cf, "[%d] cf_body_send(len=%zu) -> %d, %zu, eos=%d",
+                stream->id, len, result, *pnwritten, eos);
   }
 
   /* Call the nghttp2 send loop and flush to write ALL buffered data,

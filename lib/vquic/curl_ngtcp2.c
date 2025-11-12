@@ -1320,32 +1320,25 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
+static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct h3_stream_ctx *stream,
-                                  CURLcode *err)
+                                  size_t *pnread)
 {
-  ssize_t nread = -1;
-
   (void)cf;
+  *pnread = 0;
   if(stream->reset) {
     failf(data, "HTTP/3 stream %" FMT_PRId64 " reset by server", stream->id);
-    *err = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
-    goto out;
+    return data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
   }
   else if(!stream->resp_hds_complete) {
     failf(data,
           "HTTP/3 stream %" FMT_PRId64 " was closed cleanly, but before "
           "getting all response header fields, treated as error",
           stream->id);
-    *err = CURLE_HTTP3;
-    goto out;
+    return CURLE_HTTP3;
   }
-  *err = CURLE_OK;
-  nread = 0;
-
-out:
-  return nread;
+  return CURLE_OK;
 }
 
 /* incoming data frames on the h3 stream */
@@ -1393,9 +1386,7 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
   else if(stream->closed) {
-    ssize_t nread = recv_closed_stream(cf, data, stream, &result);
-    if(nread > 0)
-      *pnread = (size_t)nread;
+    result = recv_closed_stream(cf, data, stream, pnread);
     goto out;
   }
   result = CURLE_AGAIN;

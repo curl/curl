@@ -268,7 +268,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
 
   DEBUGASSERT(blen >= nwritten);
   ts->nsent += nwritten;
-  Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)nwritten);
+  Curl_debug(data, CURLINFO_HEADER_OUT, buf, nwritten);
 
 out:
   if(result)

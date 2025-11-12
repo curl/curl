@@ -847,7 +847,7 @@ static int tunnel_recv_callback(nghttp2_session *session, uint8_t flags,
 #endif
   }
   /* tunnel.recbuf has soft limit, any success MUST add all data */
-  DEBUGASSERT((size_t)nwritten == len);
+  DEBUGASSERT(nwritten == len);
   return 0;
 }
 

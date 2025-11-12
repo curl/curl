@@ -290,3 +290,38 @@ size_t curlx_sitouz(int sinum)
 #  pragma warning(pop)
 #endif
 }
+
+size_t curlx_uitouz(unsigned int uinum)
+{
+  return (size_t)uinum;
+}
+
+size_t curlx_sotouz_range(curl_off_t sonum, size_t uzmin, size_t uzmax)
+{
+  if(sonum < 0)
+    return uzmin;
+#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
+  if(sonum > SIZE_MAX)
+    return uzmax;
+#endif
+  return CURLMIN(CURLMAX((size_t)sonum, uzmin), uzmax);
+}
+
+bool curlx_sztouz(ssize_t sznum, size_t *puznum)
+{
+  if(sznum < 0) {
+    *puznum = 0;
+    return FALSE;
+  }
+  *puznum = (size_t)sznum;
+  return TRUE;
+}
+
+curl_off_t curlx_uztoso(size_t uznum)
+{
+#if SIZEOF_SIZE_T >= SIZEOF_CURL_OFF_T
+  if(uznum > (size_t)CURL_OFF_T_MAX)
+    return CURL_OFF_T_MAX;
+#endif
+  return (curl_off_t)uznum;
+}

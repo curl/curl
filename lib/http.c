@@ -2222,9 +2222,11 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
       result = Curl_creader_set_null(data);
     }
     else if(data->set.postfields) {
-      if(postsize > 0)
-        result = Curl_creader_set_buf(data, data->set.postfields,
-                                      (size_t)postsize);
+      size_t plen = curlx_sotouz_range(postsize, 0, SIZE_MAX);
+      if(plen == SIZE_MAX)
+        return CURLE_OUT_OF_MEMORY;
+      else if(plen)
+        result = Curl_creader_set_buf(data, data->set.postfields, plen);
       else
         result = Curl_creader_set_null(data);
     }

@@ -160,9 +160,9 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
     if(result)
       break;
 
-    Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written);
 
-    if((size_t)bytes_written != write_len) {
+    if(bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
          the size left and try again! */
       write_len -= bytes_written;
