@@ -2587,9 +2587,12 @@ static int schannel_init(void)
 #pragma clang diagnostic pop
 #endif
   if(p_wine_get_version) {  /* WINE detected */
+    curl_off_t ver = 0;
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
     /* Assume ALPN support with WINE 6.0 or upper */
-    s_win_has_alpn = wine_version && atoi(wine_version) >= 6;
+    if(wine_version)
+      curlx_str_number(&wine_version, &ver, 20);
+    s_win_has_alpn = (ver >= 6);
   }
   else {
     /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
