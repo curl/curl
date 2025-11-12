@@ -48,7 +48,7 @@ RCPT TO:%LTrecipient.one@example.com%GT
 RCPT TO:%LTrecipient.two@example.com%GT
 RCPT TO:%LTrecipient.three@example.com%GT
 RCPT TO:%LTrecipient.four@example.com%GT
-RCPT TO:<invalid.five>
+RCPT TO:%LTinvalid.five%GT
 DATA
 QUIT
 </protocol>

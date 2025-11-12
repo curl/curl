@@ -46,7 +46,7 @@ EHLO %TESTNUMBER
 MAIL FROM:%LTsender@example.com%GT
 RCPT TO:%LTrecipient.one@example.com%GT
 RCPT TO:%LTrecipient.two@example.com%GT
-RCPT TO:<invalid.three>
+RCPT TO:%LTinvalid.three%GT
 RCPT TO:%LTrecipient.four@example.com%GT
 RCPT TO:%LTrecipient.five@example.com%GT
 DATA

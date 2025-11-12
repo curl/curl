@@ -44,7 +44,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:%LTsender@example.com%GT
-RCPT TO:<invalid.one>
+RCPT TO:%LTinvalid.one%GT
 QUIT
 </protocol>
 </verify>

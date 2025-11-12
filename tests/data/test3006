@@ -48,11 +48,11 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:%LTsender@example.com%GT
-RCPT TO:<invalid.one>
-RCPT TO:<invalid.two>
-RCPT TO:<invalid.three>
-RCPT TO:<invalid.four>
-RCPT TO:<invalid.five>
+RCPT TO:%LTinvalid.one%GT
+RCPT TO:%LTinvalid.two%GT
+RCPT TO:%LTinvalid.three%GT
+RCPT TO:%LTinvalid.four%GT
+RCPT TO:%LTinvalid.five%GT
 QUIT
 </protocol>
 </verify>

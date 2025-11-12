@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt invalid --mail-from sender@exam
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 MAIL FROM:%LTsender@example.com%GT
-RCPT TO:<invalid>
+RCPT TO:%LTinvalid%GT
 QUIT
 </protocol>
 </verify>
