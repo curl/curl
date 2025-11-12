@@ -579,6 +579,9 @@ deleted.
 ### `<command [option="no-q/no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
 
+If the command spans multiple lines, they are concatenated with a space added
+between them.
+
 Note that the URL that gets passed to the server actually controls what data
 that is returned. The last slash in the URL must be followed by a number. That
 number (N) is used by the test-server to load test case N and return the data
