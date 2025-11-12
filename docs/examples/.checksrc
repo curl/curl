@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: curl
 
+allowfunc atoi
+allowfunc atol
 allowfunc fclose
 allowfunc fdopen
 allowfunc fopen
