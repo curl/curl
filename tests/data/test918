@@ -46,8 +46,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient.one@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient.one@example.com%GT
 RCPT TO:<invalid>
 QUIT
 </protocol>

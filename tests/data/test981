@@ -33,10 +33,10 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
-From: Fred Foobar <foobar@example.COM>
+From: Fred Foobar %LTfoobar@example.COM%GT
 Subject: afternoon meeting
 To: joe@example.com
-Message-Id: <B27397-0100000@example.COM>
+Message-Id: %LTB27397-0100000@example.COM%GT
 MIME-Version: 1.0
 Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 

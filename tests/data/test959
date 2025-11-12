@@ -50,7 +50,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@%hex[%c3%a5%c3%a4%c3%b6]hex%.se>
+MAIL FROM:%LTsender@%hex[%c3%a5%c3%a4%c3%b6]hex%.se%GT
 QUIT
 </protocol>
 </verify>

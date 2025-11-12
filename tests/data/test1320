@@ -48,8 +48,8 @@ smtp://smtp.%TESTNUMBER:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com 
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>

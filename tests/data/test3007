@@ -43,7 +43,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
+MAIL FROM:%LTsender@example.com%GT
 RCPT TO:<invalid.one>
 QUIT
 </protocol>

@@ -49,7 +49,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<Avs%hex[%c3%a4]hex%ndaren@example.com>
+MAIL FROM:%LTAvs%hex[%c3%a4]hex%ndaren@example.com%GT
 QUIT
 </protocol>
 </verify>

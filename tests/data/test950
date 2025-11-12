@@ -11,7 +11,7 @@ VRFY
 # Server-side
 <reply>
 <data crlf="yes">
-250 <recipient@example.com>
+250 %LTrecipient@example.com%GT
 </data>
 </reply>
 

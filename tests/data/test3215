@@ -31,7 +31,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt "<recipient@example.com> NOTIFY=SUCCESS,FAILURE" --mail-from "<sender@example.com> RET=HDRS" -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt "%LTrecipient@example.com%GT NOTIFY=SUCCESS,FAILURE" --mail-from "%LTsender@example.com%GT RET=HDRS" -T -
 </command>
 </client>
 
@@ -40,8 +40,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt "<recipient@example.com> NOTIFY
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com> RET=HDRS
-RCPT TO:<recipient@example.com> NOTIFY=SUCCESS,FAILURE
+MAIL FROM:%LTsender@example.com%GT RET=HDRS
+RCPT TO:%LTrecipient@example.com%GT NOTIFY=SUCCESS,FAILURE
 DATA
 QUIT
 </protocol>

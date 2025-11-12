@@ -46,15 +46,15 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail
 EHLO %TESTNUMBER001
 AUTH PLAIN
 dXNlci5vbmUAdXNlci5vbmUAc2VjcmV0
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 EHLO %TESTNUMBER002
 AUTH PLAIN
 dXNlci50d28AdXNlci50d28Ac2VjcmV0
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
