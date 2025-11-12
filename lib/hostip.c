@@ -904,8 +904,10 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 
 #ifndef USE_RESOLVE_ON_IPS
   /* allowed to convert, hostname is IP address, then NULL means error */
-  if(is_ipaddr)
+  if(is_ipaddr) {
+    keep_negative = FALSE;
     goto error;
+  }
 #endif
 
   /* Really need a resolver for hostname. */
