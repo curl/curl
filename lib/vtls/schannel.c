@@ -2579,7 +2579,7 @@ static int schannel_init(void)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
-  WIN_GET_VERSION_FN p_wine_get_version =
+  WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
                         GetProcAddress(GetModuleHandleA("ntdll"),
                                        "wine_get_version"));
