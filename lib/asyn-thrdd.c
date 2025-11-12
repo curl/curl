@@ -660,8 +660,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   else {
     /* poll for name lookup done with exponential backoff up to 250ms */
     /* should be fine even if this converts to 32-bit */
-    timediff_t elapsed = curlx_timediff(curlx_now(),
-                                       data->progress.t_startsingle);
+    timediff_t elapsed = curlx_timediff_ms(curlx_now(),
+                                           data->progress.t_startsingle);
     if(elapsed < 0)
       elapsed = 0;
 
@@ -711,7 +711,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
     result = Curl_pollset_add_in(data, ps, thrdd->addr->sock_pair[0]);
 #else
     timediff_t milli;
-    timediff_t ms = curlx_timediff(curlx_now(), thrdd->addr->start);
+    timediff_t ms = curlx_timediff_ms(curlx_now(), thrdd->addr->start);
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)

@@ -413,8 +413,8 @@ evaluate:
       more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
 #endif
     do_more = more_possible &&
-              (curlx_timediff(now, bs->last_attempt_started) >=
-              bs->attempt_delay_ms);
+              (curlx_timediff_ms(now, bs->last_attempt_started) >=
+               bs->attempt_delay_ms);
     if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
                   "start next attempt");
@@ -460,7 +460,7 @@ evaluate:
     else if(inconclusive) {
       /* tried all addresses, no success but some where inconclusive.
        * Let's restart the inconclusive ones. */
-      timediff_t since_ms = curlx_timediff(now, bs->last_attempt_started);
+      timediff_t since_ms = curlx_timediff_ms(now, bs->last_attempt_started);
       timediff_t delay_ms = bs->attempt_delay_ms - since_ms;
       if(delay_ms <= 0) {
         CURL_TRC_CF(data, cf, "all attempts inconclusive, restarting one");
@@ -505,10 +505,10 @@ out:
     bool more_possible;
 
     /* when do we need to be called again? */
-    next_expire_ms = Curl_timeleft(data, &now, TRUE);
+    next_expire_ms = Curl_timeleft_ms(data, &now, TRUE);
     if(next_expire_ms <= 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-            curlx_timediff(now, data->progress.t_startsingle));
+            curlx_timediff_ms(now, data->progress.t_startsingle));
       return CURLE_OPERATION_TIMEDOUT;
     }
 
@@ -519,7 +519,7 @@ out:
 #endif
     if(more_possible) {
       timediff_t expire_ms, elapsed_ms;
-      elapsed_ms = curlx_timediff(now, bs->last_attempt_started);
+      elapsed_ms = curlx_timediff_ms(now, bs->last_attempt_started);
       expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
       next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
       if(next_expire_ms <= 0) {
@@ -682,7 +682,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
           proxy_name ? "via " : "",
           proxy_name ? proxy_name : "",
           proxy_name ? " " : "",
-          curlx_timediff(curlx_now(), data->progress.t_startsingle),
+          curlx_timediff_ms(curlx_now(), data->progress.t_startsingle),
           curl_easy_strerror(result));
   }
 
@@ -707,7 +707,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   if(!dns)
     return CURLE_FAILED_INIT;
 
-  if(Curl_timeleft(data, NULL, TRUE) < 0) {
+  if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
     /* a precaution, no need to continue if time already is up */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;

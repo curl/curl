@@ -476,7 +476,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
            maximum time allowed for retrying, then exit the retries right
            away */
         if(config->retry_maxtime_ms) {
-          timediff_t ms = curlx_timediff(curlx_now(), per->retrystart);
+          timediff_t ms = curlx_timediff_ms(curlx_now(), per->retrystart);
 
           if((CURL_OFF_T_MAX - sleeptime < ms) ||
              (ms + sleeptime > config->retry_maxtime_ms)) {
@@ -713,7 +713,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
      time */
   if(per->retry_remaining &&
      (!config->retry_maxtime_ms ||
-      (curlx_timediff(curlx_now(), per->retrystart) <
+      (curlx_timediff_ms(curlx_now(), per->retrystart) <
        config->retry_maxtime_ms)) ) {
     result = retrycheck(config, per, result, retryp, delay);
     if(!result && *retryp)
@@ -1984,7 +1984,7 @@ static CURLcode serial_transfers(CURLSH *share)
     if(per && global->ms_per_transfer) {
       /* how long time did the most recent transfer take in number of
          milliseconds */
-      timediff_t milli = curlx_timediff(curlx_now(), start);
+      timediff_t milli = curlx_timediff_ms(curlx_now(), start);
       if(milli < global->ms_per_transfer) {
         notef("Transfer took %" CURL_FORMAT_CURL_OFF_T " ms, "
               "waits %ldms as set by --rate",

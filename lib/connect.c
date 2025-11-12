@@ -101,7 +101,7 @@ enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
 #endif
 
 /*
- * Curl_timeleft() returns the amount of milliseconds left allowed for the
+ * Curl_timeleft_ms() returns the amount of milliseconds left allowed for the
  * transfer/connection. If the value is 0, there is no timeout (ie there is
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
@@ -110,9 +110,9 @@ enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
  * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
-timediff_t Curl_timeleft(struct Curl_easy *data,
-                         struct curltime *nowp,
-                         bool duringconnect)
+timediff_t Curl_timeleft_ms(struct Curl_easy *data,
+                            struct curltime *nowp,
+                            bool duringconnect)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
@@ -133,7 +133,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 
   if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
-      curlx_timediff(*nowp, data->progress.t_startop);
+      curlx_timediff_ms(*nowp, data->progress.t_startop);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if(!duringconnect)
@@ -144,7 +144,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
     timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
       data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
     ctimeleft_ms = ctimeout_ms -
-                   curlx_timediff(*nowp, data->progress.t_startsingle);
+                   curlx_timediff_ms(*nowp, data->progress.t_startsingle);
     if(!ctimeleft_ms)
       ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
     if(!timeleft_ms)
@@ -191,7 +191,7 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
     nowp = &now;
   }
   left_ms = conn->shutdown.timeout_ms -
-            curlx_timediff(*nowp, conn->shutdown.start[sockindex]);
+            curlx_timediff_ms(*nowp, conn->shutdown.start[sockindex]);
   return left_ms ? left_ms : -1;
 }
 

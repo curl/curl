@@ -733,7 +733,7 @@ wssl_cached_x509_store_expired(const struct Curl_easy *data,
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   struct curltime now = curlx_now();
-  timediff_t elapsed_ms = curlx_timediff(now, mb->time);
+  timediff_t elapsed_ms = curlx_timediff_ms(now, mb->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)

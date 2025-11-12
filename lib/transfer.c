@@ -422,18 +422,18 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
     goto out;
 
   if(k->keepon) {
-    if(0 > Curl_timeleft(data, nowp, FALSE)) {
+    if(Curl_timeleft_ms(data, nowp, FALSE) < 0) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              curlx_timediff(*nowp, data->progress.t_startsingle),
+              curlx_timediff_ms(*nowp, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              curlx_timediff(*nowp, data->progress.t_startsingle),
+              curlx_timediff_ms(*nowp, data->progress.t_startsingle),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;

@@ -228,7 +228,7 @@ int Curl_socketpair(int domain, int type, int protocol,
       if(nread == -1) {
         int sockerr = SOCKERRNO;
         /* Do not block forever */
-        if(curlx_timediff(curlx_now(), start) > (60 * 1000))
+        if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
           goto error;
         if(
 #ifdef USE_WINSOCK

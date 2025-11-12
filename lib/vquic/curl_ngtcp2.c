@@ -517,11 +517,11 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   if(Curl_trc_is_verbose(data)) {
     const ngtcp2_transport_params *rp;
     rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
-    CURL_TRC_CF(data, cf, "handshake complete after %dms, remote transport["
-                "max_udp_payload=%" FMT_PRIu64
+    CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T
+                "ms, remote transport[max_udp_payload=%" FMT_PRIu64
                 ", initial_max_data=%" FMT_PRIu64
                 "]",
-               (int)curlx_timediff(ctx->handshake_at, ctx->started_at),
+               curlx_timediff_ms(ctx->handshake_at, ctx->started_at),
                (curl_uint64_t)rp->max_udp_payload_size,
                (curl_uint64_t)rp->initial_max_data);
   }
@@ -2722,7 +2722,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
-      timediff_t ms = curlx_timediff(ctx->q.first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_timediff_ms(ctx->q.first_byte_at, ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -2783,7 +2783,7 @@ static bool cf_ngtcp2_conn_is_alive(struct Curl_cfilter *cf,
    * it will close the connection when it expires. */
   rp = ngtcp2_conn_get_remote_transport_params(ctx->qconn);
   if(rp && rp->max_idle_timeout) {
-    timediff_t idletime_ms = curlx_timediff(curlx_now(), ctx->q.last_io);
+    timediff_t idletime_ms = curlx_timediff_ms(curlx_now(), ctx->q.last_io);
     if(idletime_ms > 0) {
       uint64_t max_idle_ms =
         (uint64_t)(rp->max_idle_timeout / NGTCP2_MILLISECONDS);

@@ -299,7 +299,7 @@ cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle)
 
     if(!CONN_INUSE(conn)) {
       /* Set higher score for the age passed since the connection was used */
-      score = curlx_timediff(now, conn->lastused);
+      score = curlx_timediff_ms(now, conn->lastused);
 
       if(score > highscore) {
         highscore = score;
@@ -336,7 +336,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
       if(CONN_INUSE(conn) || conn->bits.close || conn->connect_only)
         continue;
       /* Set higher score for the age passed since the connection was used */
-      score = curlx_timediff(now, conn->lastused);
+      score = curlx_timediff_ms(now, conn->lastused);
       if(score > highscore) {
         highscore = score;
         oldest_idle = conn;
@@ -745,7 +745,7 @@ void Curl_cpool_prune_dead(struct Curl_easy *data)
 
   rctx.now = curlx_now();
   CPOOL_LOCK(cpool, data);
-  elapsed = curlx_timediff(rctx.now, cpool->last_cleanup);
+  elapsed = curlx_timediff_ms(rctx.now, cpool->last_cleanup);
 
   if(elapsed >= 1000L) {
     while(cpool_foreach(data, cpool, &rctx, cpool_reap_dead_cb))

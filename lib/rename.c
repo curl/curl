@@ -54,7 +54,7 @@ int Curl_rename(const char *oldpath, const char *newpath)
       curlx_unicodefree(tchar_newpath);
       break;
     }
-    diff = curlx_timediff(curlx_now(), start);
+    diff = curlx_timediff_ms(curlx_now(), start);
     if(diff < 0 || diff > max_wait_ms) {
       curlx_unicodefree(tchar_oldpath);
       curlx_unicodefree(tchar_newpath);

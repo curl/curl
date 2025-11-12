@@ -49,7 +49,7 @@ static CURLcode test_lib1564(const char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = curlx_now();
 
-  if(curlx_timediff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timediff_ms(time_after_wait, time_before_wait) < 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -66,7 +66,7 @@ static CURLcode test_lib1564(const char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = curlx_now();
 
-  if(curlx_timediff(time_after_wait, time_before_wait) > 500) {
+  if(curlx_timediff_ms(time_after_wait, time_before_wait) > 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too late\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -81,7 +81,7 @@ static CURLcode test_lib1564(const char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = curlx_now();
 
-  if(curlx_timediff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timediff_ms(time_after_wait, time_before_wait) < 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -99,7 +99,7 @@ static CURLcode test_lib1564(const char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = curlx_now();
 
-  if(curlx_timediff(time_after_wait, time_before_wait) > 500) {
+  if(curlx_timediff_ms(time_after_wait, time_before_wait) > 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too late\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;
@@ -114,7 +114,7 @@ static CURLcode test_lib1564(const char *URL)
   multi_poll(multi, NULL, 0, 1000, &numfds);
   time_after_wait = curlx_now();
 
-  if(curlx_timediff(time_after_wait, time_before_wait) < 500) {
+  if(curlx_timediff_ms(time_after_wait, time_before_wait) < 500) {
     curl_mfprintf(stderr, "%s:%d curl_multi_poll returned too early\n",
                   __FILE__, __LINE__);
     res = TEST_ERR_MAJOR_BAD;

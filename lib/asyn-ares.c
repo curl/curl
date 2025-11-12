@@ -317,7 +317,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
      /* This is only set to non-zero if the timer was started. */
      && (ares->happy_eyeballs_dns_time.tv_sec
          || ares->happy_eyeballs_dns_time.tv_usec)
-     && (curlx_timediff(curlx_now(), ares->happy_eyeballs_dns_time)
+     && (curlx_timediff_ms(curlx_now(), ares->happy_eyeballs_dns_time)
          >= HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -394,47 +394,47 @@ CURLcode Curl_async_await(struct Curl_easy *data,
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
   CURLcode result = CURLE_OK;
-  timediff_t timeout;
+  timediff_t timeout_ms;
   struct curltime now = curlx_now();
 
   DEBUGASSERT(entry);
   *entry = NULL; /* clear on entry */
 
-  timeout = Curl_timeleft(data, &now, TRUE);
-  if(timeout < 0) {
+  timeout_ms = Curl_timeleft_ms(data, &now, TRUE);
+  if(timeout_ms < 0) {
     /* already expired! */
     connclose(data->conn, "Timed out before name resolve started");
     return CURLE_OPERATION_TIMEDOUT;
   }
-  if(!timeout)
-    timeout = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve timeout */
+  if(!timeout_ms)
+    timeout_ms = CURL_TIMEOUT_RESOLVE * 1000; /* default name resolve */
 
   /* Wait for the name resolve query to complete. */
   while(!result) {
-    struct timeval *tvp, tv, store;
-    int itimeout;
-    timediff_t timeout_ms;
+    struct timeval *real_timeout, time_buf, max_timeout;
+    int itimeout_ms;
+    timediff_t call_timeout_ms;
 
 #if TIMEDIFF_T_MAX > INT_MAX
-    itimeout = (timeout > INT_MAX) ? INT_MAX : (int)timeout;
+    itimeout_ms = (timeout_ms > INT_MAX) ? INT_MAX : (int)timeout_ms;
 #else
-    itimeout = (int)timeout;
+    itimeout_ms = (int)timeout_ms;
 #endif
 
-    store.tv_sec = itimeout/1000;
-    store.tv_usec = (itimeout%1000)*1000;
+    max_timeout.tv_sec = itimeout_ms/1000;
+    max_timeout.tv_usec = (itimeout_ms%1000)*1000;
 
-    tvp = ares_timeout(ares->channel, &store, &tv);
+    real_timeout = ares_timeout(ares->channel, &max_timeout, &time_buf);
 
     /* use the timeout period ares returned to us above if less than one
        second is left, otherwise just use 1000ms to make sure the progress
        callback gets called frequent enough */
-    if(!tvp->tv_sec)
-      timeout_ms = (timediff_t)(tvp->tv_usec/1000);
+    if(!real_timeout->tv_sec)
+      call_timeout_ms = (timediff_t)(real_timeout->tv_usec/1000);
     else
-      timeout_ms = 1000;
+      call_timeout_ms = 1000;
 
-    if(Curl_ares_perform(ares->channel, timeout_ms) < 0)
+    if(Curl_ares_perform(ares->channel, call_timeout_ms) < 0)
       return CURLE_UNRECOVERABLE_POLL;
 
     result = Curl_async_is_resolved(data, entry);
@@ -445,16 +445,16 @@ CURLcode Curl_async_await(struct Curl_easy *data,
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
       struct curltime now2 = curlx_now();
-      timediff_t timediff = curlx_timediff(now2, now); /* spent time */
-      if(timediff <= 0)
-        timeout -= 1; /* always deduct at least 1 */
-      else if(timediff > timeout)
-        timeout = -1;
+      timediff_t elapsed_ms = curlx_timediff_ms(now2, now); /* spent time */
+      if(elapsed_ms <= 0)
+        timeout_ms -= 1; /* always deduct at least 1 */
+      else if(elapsed_ms > timeout_ms)
+        timeout_ms = -1;
       else
-        timeout -= timediff;
+        timeout_ms -= elapsed_ms;
       now = now2; /* for next loop */
     }
-    if(timeout < 0)
+    if(timeout_ms < 0)
       result = CURLE_OPERATION_TIMEDOUT;
   }
 

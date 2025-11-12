@@ -544,7 +544,7 @@ static bool gtls_shared_creds_expired(const struct Curl_easy *data,
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   struct curltime now = curlx_now();
-  timediff_t elapsed_ms = curlx_timediff(now, sc->time);
+  timediff_t elapsed_ms = curlx_timediff_ms(now, sc->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
