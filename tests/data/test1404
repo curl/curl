@@ -31,7 +31,7 @@ Mime
 http
 </server>
 <name>
---libcurl plus -F with 3 files, one with explicit type & encoder
+--libcurl plus -F with 3 files, one with explicit type and encoder
 </name>
 <setenv>
 SSL_CERT_FILE
