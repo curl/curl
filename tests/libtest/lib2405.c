@@ -68,7 +68,7 @@ enum {
   TEST_USE_HTTP2_MPLEX
 };
 
-static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
+static size_t emptyWriteFunc(char *ptr, size_t size, size_t nmemb,
                              void *data) {
   (void)ptr; (void)data;
   return size * nmemb;
