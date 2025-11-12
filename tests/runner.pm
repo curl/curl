@@ -804,10 +804,13 @@ sub singletest_run {
     my ($testnum, $testtimings) = @_;
 
     # get the command line options to use
-    my ($cmd, @blaha)= getpart("client", "command");
-    if($cmd) {
-        # make some nice replace operations
+    my $cmd;
+    my @cmd = getpart("client", "command");
+    if(@cmd) {
+        # allow splitting the command-line to multiple lines
+        $cmd = join(' ', @cmd);
         $cmd =~ s/\n//g; # no newlines please
+        chomp $cmd; # no newlines please
         # substitute variables in the command line
     }
     else {
