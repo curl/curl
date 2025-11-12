@@ -21,7 +21,7 @@ Content-Length: 9
 
 contents
 </data>
-<connect crlf="headers"t>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 
 </connect>
