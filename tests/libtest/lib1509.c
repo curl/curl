@@ -25,10 +25,23 @@
 
 #include "memdebug.h"
 
-size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream);
-size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream);
-
 static size_t realHeaderSize = 0;
+
+static size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream)
+{
+  fwrite(ptr, size, nmemb, stream);
+  return nmemb * size;
+}
+
+static size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream)
+{
+  (void)ptr;
+  (void)stream;
+
+  realHeaderSize += size * nmemb;
+
+  return nmemb * size;
+}
 
 static CURLcode test_lib1509(const char *URL)
 {
@@ -43,8 +56,8 @@ static CURLcode test_lib1509(const char *URL)
 
   easy_setopt(curl, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
 
-  easy_setopt(curl, CURLOPT_WRITEFUNCTION, *WriteOutput);
-  easy_setopt(curl, CURLOPT_HEADERFUNCTION, *WriteHeader);
+  easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteOutput);
+  easy_setopt(curl, CURLOPT_HEADERFUNCTION, WriteHeader);
 
   easy_setopt(curl, CURLOPT_HEADER, 1L);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -78,20 +91,4 @@ test_cleanup:
   curl_global_cleanup();
 
   return res;
-}
-
-size_t WriteOutput(char *ptr, size_t size, size_t nmemb, void *stream)
-{
-  fwrite(ptr, size, nmemb, stream);
-  return nmemb * size;
-}
-
-size_t WriteHeader(char *ptr, size_t size, size_t nmemb, void *stream)
-{
-  (void)ptr;
-  (void)stream;
-
-  realHeaderSize += size * nmemb;
-
-  return nmemb * size;
 }
