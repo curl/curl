@@ -1767,7 +1767,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
     curl_socket_t readfd, writefd;
     timediff_t elapsed;
 
-    elapsed = curlx_timediff(curlx_now(), rs->start_time);
+    elapsed = curlx_timediff_ms(curlx_now(), rs->start_time);
     if(elapsed >= MAX_RENEG_BLOCK_TIME) {
       failf(data, "schannel: renegotiation timeout");
       result = CURLE_SSL_CONNECT_ERROR;
@@ -1834,7 +1834,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
         break;
       }
 
-      elapsed = curlx_timediff(curlx_now(), rs->start_time);
+      elapsed = curlx_timediff_ms(curlx_now(), rs->start_time);
       if(elapsed >= MAX_RENEG_BLOCK_TIME) {
         failf(data, "schannel: renegotiation timeout");
         result = CURLE_SSL_CONNECT_ERROR;
@@ -2798,7 +2798,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
     now = curlx_now();
-    elapsed_ms = curlx_timediff(now, share->time);
+    elapsed_ms = curlx_timediff_ms(now, share->time);
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }

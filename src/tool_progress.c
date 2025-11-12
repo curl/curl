@@ -156,7 +156,7 @@ bool progress_meter(CURLM *multi,
     return FALSE;
 
   now = curlx_now();
-  diff = curlx_timediff(now, stamp);
+  diff = curlx_timediff_ms(now, stamp);
 
   if(!header) {
     header = TRUE;
@@ -169,7 +169,7 @@ bool progress_meter(CURLM *multi,
     char time_total[10];
     char time_spent[10];
     char buffer[3][6];
-    curl_off_t spent = curlx_timediff(now, *start)/1000;
+    curl_off_t spent = curlx_timediff_ms(now, *start)/1000;
     char dlpercen[4]="--";
     char ulpercen[4]="--";
     struct per_transfer *per;
@@ -236,13 +236,13 @@ bool progress_meter(CURLM *multi,
       curl_off_t uls;
       if(indexwrapped) {
         /* 'speedindex' is the oldest stored data */
-        deltams = curlx_timediff(now, speedstore[speedindex].stamp);
+        deltams = curlx_timediff_ms(now, speedstore[speedindex].stamp);
         dl = all_dlnow - speedstore[speedindex].dl;
         ul = all_ulnow - speedstore[speedindex].ul;
       }
       else {
         /* since the beginning */
-        deltams = curlx_timediff(now, *start);
+        deltams = curlx_timediff_ms(now, *start);
         dl = all_dlnow;
         ul = all_ulnow;
       }

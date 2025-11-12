@@ -3150,7 +3150,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
         return CURLE_OPERATION_TIMEDOUT;
       }
     }
-    else if(curlx_timediff(now, dis) > 1000) {
+    else if(curlx_timediff_ms(now, dis) > 1000) {
       /* disconnect timeout */
       failf(data, "Disconnect timed out");
       result = CURLE_OK;

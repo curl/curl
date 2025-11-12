@@ -654,16 +654,16 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         /* If nothing updated the timeout, we decrease it by the spent time.
          * If it was updated, it has the new timeout time stored already.
          */
-        timediff_t timediff = curlx_timediff(curlx_now(), before);
-        if(timediff > 0) {
+        timediff_t spent_ms = curlx_timediff_ms(curlx_now(), before);
+        if(spent_ms > 0) {
 #if DEBUG_EV_POLL
         curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
                       "time spent %ldms\n", ev->ms, (long)timediff);
 #endif
-          if(timediff > ev->ms)
+          if(spent_ms > ev->ms)
             ev->ms = 0;
           else
-            ev->ms -= (long)timediff;
+            ev->ms -= (long)spent_ms;
         }
       }
     }

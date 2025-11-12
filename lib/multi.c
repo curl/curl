@@ -1749,22 +1749,22 @@ static bool multi_handle_timeout(struct Curl_easy *data,
       since = data->progress.t_startop;
     if(data->mstate == MSTATE_RESOLVING)
       failf(data, "Resolving timed out after %" FMT_TIMEDIFF_T
-            " milliseconds", curlx_timediff(*now, since));
+            " milliseconds", curlx_timediff_ms(*now, since));
     else if(data->mstate == MSTATE_CONNECTING)
       failf(data, "Connection timed out after %" FMT_TIMEDIFF_T
-            " milliseconds", curlx_timediff(*now, since));
+            " milliseconds", curlx_timediff_ms(*now, since));
     else {
       struct SingleRequest *k = &data->req;
       if(k->size != -1) {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " out of %"
               FMT_OFF_T " bytes received",
-              curlx_timediff(*now, since), k->bytecount, k->size);
+              curlx_timediff_ms(*now, since), k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
               " milliseconds with %" FMT_OFF_T " bytes received",
-              curlx_timediff(*now, since), k->bytecount);
+              curlx_timediff_ms(*now, since), k->bytecount);
       }
     }
     *result = CURLE_OPERATION_TIMEDOUT;
@@ -3410,13 +3410,13 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     if(multi->timetree &&
        curlx_timediff_us(multi->timetree->key, now) > 0) {
       /* some time left before expiration */
-      timediff_t diff = curlx_timediff_ceil(multi->timetree->key, now);
+      timediff_t diff_ms = curlx_timediff_ceil_ms(multi->timetree->key, now);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       data = Curl_splayget(multi->timetree);
 #endif
       /* this should be safe even on 32-bit archs, as we do not use that
          overly long timeouts */
-      *timeout_ms = (long)diff;
+      *timeout_ms = (long)diff_ms;
     }
     else {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -3574,7 +3574,7 @@ multi_addtimeout(struct Curl_easy *data,
     /* find the correct spot in the list */
     for(e = Curl_llist_head(timeoutlist); e; e = Curl_node_next(e)) {
       struct time_node *check = Curl_node_elem(e);
-      timediff_t diff = curlx_timediff(check->time, node->time);
+      timediff_t diff = curlx_timediff_ms(check->time, node->time);
       if(diff > 0)
         break;
       prev = e;
@@ -3625,7 +3625,7 @@ void Curl_expire_ex(struct Curl_easy *data,
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    timediff_t diff = curlx_timediff(set, *curr_expire);
+    timediff_t diff = curlx_timediff_ms(set, *curr_expire);
     int rc;
 
     if(diff > 0) {

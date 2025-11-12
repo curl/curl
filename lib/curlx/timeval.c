@@ -220,7 +220,7 @@ struct curltime curlx_now(void)
  *
  * @unittest: 1323
  */
-timediff_t curlx_timediff(struct curltime newer, struct curltime older)
+timediff_t curlx_timediff_ms(struct curltime newer, struct curltime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000))
@@ -234,7 +234,8 @@ timediff_t curlx_timediff(struct curltime newer, struct curltime older)
  * Returns: time difference in number of milliseconds, rounded up.
  * For too large diffs it returns max value.
  */
-timediff_t curlx_timediff_ceil(struct curltime newer, struct curltime older)
+timediff_t curlx_timediff_ceil_ms(struct curltime newer,
+                                  struct curltime older)
 {
   timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
   if(diff >= (TIMEDIFF_T_MAX/1000))

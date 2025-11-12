@@ -317,7 +317,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
      /* This is only set to non-zero if the timer was started. */
      && (ares->happy_eyeballs_dns_time.tv_sec
          || ares->happy_eyeballs_dns_time.tv_usec)
-     && (curlx_timediff(curlx_now(), ares->happy_eyeballs_dns_time)
+     && (curlx_timediff_ms(curlx_now(), ares->happy_eyeballs_dns_time)
          >= HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -445,13 +445,13 @@ CURLcode Curl_async_await(struct Curl_easy *data,
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
       struct curltime now2 = curlx_now();
-      timediff_t timediff = curlx_timediff(now2, now); /* spent time */
-      if(timediff <= 0)
+      timediff_t elapsed_ms = curlx_timediff_ms(now2, now); /* spent time */
+      if(elapsed_ms <= 0)
         timeout_ms -= 1; /* always deduct at least 1 */
-      else if(timediff > timeout_ms)
+      else if(elapsed_ms > timeout_ms)
         timeout_ms = -1;
       else
-        timeout_ms -= timediff;
+        timeout_ms -= elapsed_ms;
       now = now2; /* for next loop */
     }
     if(timeout_ms < 0)

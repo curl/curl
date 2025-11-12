@@ -461,7 +461,7 @@ void ws_close(CURL *curl);
 #define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
 
 #define exe_test_timedout(T,Y,Z) do {                                   \
-  timediff_t timediff = curlx_timediff(curlx_now(), tv_test_start);     \
+  timediff_t timediff = curlx_timediff_ms(curlx_now(), tv_test_start);  \
   if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \

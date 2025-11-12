@@ -101,7 +101,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->timeout_ms) {
     struct curltime now = curlx_now();
-    long msdelta = (long)curlx_timediff(now, per->start);
+    long msdelta = (long)curlx_timediff_ms(now, per->start);
 
     if(msdelta > config->timeout_ms)
       /* timeout */

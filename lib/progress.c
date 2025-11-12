@@ -271,7 +271,7 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
     return 0;
 
   /* The time it took us to have `bytes` */
-  took_ms = curlx_timediff_ceil(now, d->limit.start);
+  took_ms = curlx_timediff_ceil_ms(now, d->limit.start);
 
   /* The time it *should* have taken us to have `bytes`
    * when obeying the bytes_per_sec speed_limit. */
@@ -311,14 +311,14 @@ void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
 {
   /* do not set a new stamp unless the time since last update is long enough */
   if(data->set.max_recv_speed) {
-    if(curlx_timediff(now, data->progress.dl.limit.start) >=
+    if(curlx_timediff_ms(now, data->progress.dl.limit.start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.dl.limit.start = now;
       data->progress.dl.limit.start_size = data->progress.dl.cur_size;
     }
   }
   if(data->set.max_send_speed) {
-    if(curlx_timediff(now, data->progress.ul.limit.start) >=
+    if(curlx_timediff_ms(now, data->progress.ul.limit.start) >=
        MIN_RATE_LIMIT_PERIOD) {
       data->progress.ul.limit.start = now;
       data->progress.ul.limit.start_size = data->progress.ul.cur_size;
@@ -424,7 +424,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
       checkindex = (p->speeder_c >= CURR_TIME) ? p->speeder_c%CURR_TIME : 0;
 
       /* Figure out the exact time for the time span */
-      span_ms = curlx_timediff(now, p->speeder_time[checkindex]);
+      span_ms = curlx_timediff_ms(now, p->speeder_time[checkindex]);
       if(span_ms == 0)
         span_ms = 1; /* at least one millisecond MUST have passed */
 

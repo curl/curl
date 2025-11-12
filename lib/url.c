@@ -655,7 +655,7 @@ static bool conn_maxage(struct Curl_easy *data,
   timediff_t age_ms;
 
   if(data->set.conn_max_idle_ms) {
-    age_ms = curlx_timediff(now, conn->lastused);
+    age_ms = curlx_timediff_ms(now, conn->lastused);
     if(age_ms > data->set.conn_max_idle_ms) {
       infof(data, "Too old connection (%" FMT_TIMEDIFF_T
             " ms idle, max idle is %" FMT_TIMEDIFF_T " ms), disconnect it",
@@ -665,7 +665,7 @@ static bool conn_maxage(struct Curl_easy *data,
   }
 
   if(data->set.conn_max_age_ms) {
-    age_ms = curlx_timediff(now, conn->created);
+    age_ms = curlx_timediff_ms(now, conn->created);
     if(age_ms > data->set.conn_max_age_ms) {
       infof(data,
             "Too old connection (created %" FMT_TIMEDIFF_T
@@ -750,7 +750,7 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct curltime *now)
 {
   CURLcode result = CURLE_OK;
-  if(curlx_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+  if(curlx_timediff_ms(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
     return result;
 
   /* briefly attach for action */
@@ -3275,7 +3275,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
   else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          curlx_timediff(curlx_now(), data->progress.t_startsingle));
+          curlx_timediff_ms(curlx_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else if(result) {

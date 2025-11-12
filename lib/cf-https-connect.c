@@ -215,12 +215,13 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   reply_ms = cf_hc_baller_reply_ms(winner, data);
   if(reply_ms >= 0)
     CURL_TRC_CF(data, cf, "connect+handshake %s: %dms, 1st data: %dms",
-                winner->name, (int)curlx_timediff(curlx_now(),
-                                                  winner->started), reply_ms);
+                winner->name,
+                (int)curlx_timediff_ms(curlx_now(),
+                                       winner->started), reply_ms);
   else
     CURL_TRC_CF(data, cf, "deferred handshake %s: %dms",
-                winner->name, (int)curlx_timediff(curlx_now(),
-                                                  winner->started));
+                winner->name, (int)curlx_timediff_ms(curlx_now(),
+                                                     winner->started));
 
   /* install the winning filter below this one. */
   cf->next = winner->cf;
@@ -269,7 +270,7 @@ static bool time_to_start_next(struct Curl_cfilter *cf,
                 ctx->ballers[idx].name);
     return TRUE;
   }
-  elapsed_ms = curlx_timediff(now, ctx->started);
+  elapsed_ms = curlx_timediff_ms(now, ctx->started);
   if(elapsed_ms >= ctx->hard_eyeballs_timeout_ms) {
     CURL_TRC_CF(data, cf, "hard timeout of %" FMT_TIMEDIFF_T "ms reached, "
                 "starting %s",

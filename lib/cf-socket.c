@@ -1428,7 +1428,7 @@ static void win_update_sndbuf_size(struct cf_socket_ctx *ctx)
   DWORD ideallen;
   struct curltime n = curlx_now();
 
-  if(curlx_timediff(n, ctx->last_sndbuf_query_at) > 1000) {
+  if(curlx_timediff_ms(n, ctx->last_sndbuf_query_at) > 1000) {
     if(!WSAIoctl(ctx->sock, SIO_IDEAL_SEND_BACKLOG_QUERY, 0, 0,
                   &ideal, sizeof(ideal), &ideallen, 0, 0) &&
        ideal != ctx->sndbuf_size &&
@@ -1701,7 +1701,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     return CURLE_OK;
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
-      timediff_t ms = curlx_timediff(ctx->first_byte_at, ctx->started_at);
+      timediff_t ms = curlx_timediff_ms(ctx->first_byte_at, ctx->started_at);
       *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
@@ -2037,7 +2037,7 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
     timeout_ms = other_ms;
   else {
     /* subtract elapsed time */
-    timeout_ms -= curlx_timediff(now, ctx->started_at);
+    timeout_ms -= curlx_timediff_ms(now, ctx->started_at);
     if(!timeout_ms)
       /* avoid returning 0 as that means no timeout! */
       timeout_ms = -1;

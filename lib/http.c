@@ -4938,7 +4938,7 @@ static CURLcode cr_exp100_read(struct Curl_easy *data,
     *eos = FALSE;
     return CURLE_READ_ERROR;
   case EXP100_AWAITING_CONTINUE:
-    ms = curlx_timediff(curlx_now(), ctx->start);
+    ms = curlx_timediff_ms(curlx_now(), ctx->start);
     if(ms < data->set.expect_100_timeout) {
       DEBUGF(infof(data, "cr_exp100_read, AWAITING_CONTINUE, not expired"));
       data->req.keepon &= ~KEEP_SEND;

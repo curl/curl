@@ -200,7 +200,7 @@ dnscache_entry_is_stale(void *datap, void *hc)
 
   if(dns->timestamp.tv_sec || dns->timestamp.tv_usec) {
     /* get age in milliseconds */
-    timediff_t age = curlx_timediff(prune->now, dns->timestamp);
+    timediff_t age = curlx_timediff_ms(prune->now, dns->timestamp);
     if(!dns->addr)
       age *= 2; /* negative entries age twice as fast */
     if(age >= prune->max_age_ms)
@@ -1175,8 +1175,8 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = curlx_timediff(curlx_now(),
-                                            data->conn->created) / 1000;
+    timediff_t elapsed_secs = curlx_timediff_ms(curlx_now(),
+                                                data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);

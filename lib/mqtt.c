@@ -847,7 +847,7 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
      !mq->pingsent &&
      data->set.upkeep_interval_ms > 0) {
     struct curltime t = curlx_now();
-    timediff_t diff = curlx_timediff(t, mq->lastTime);
+    timediff_t diff = curlx_timediff_ms(t, mq->lastTime);
 
     if(diff > data->set.upkeep_interval_ms) {
       /* 0xC0 is PINGREQ, and 0x00 is remaining length */

@@ -291,7 +291,7 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
   sigpipe_apply(data, &pipe_st);
 
   while(Curl_llist_head(&cshutdn->list)) {
-    timediff_t timespent;
+    timediff_t spent_ms;
     int remain_ms;
 
     cshutdn_perform(cshutdn, data);
@@ -302,14 +302,14 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
     }
 
     /* wait for activity, timeout or "nothing" */
-    timespent = curlx_timediff(curlx_now(), started);
-    if(timespent >= (timediff_t)timeout_ms) {
+    spent_ms = curlx_timediff_ms(curlx_now(), started);
+    if(spent_ms >= (timediff_t)timeout_ms) {
       CURL_TRC_M(data, "[SHUTDOWN] shutdown finished, %s",
                 (timeout_ms > 0) ? "timeout" : "best effort done");
       break;
     }
 
-    remain_ms = timeout_ms - (int)timespent;
+    remain_ms = timeout_ms - (int)spent_ms;
     if(cshutdn_wait(cshutdn, data, remain_ms)) {
       CURL_TRC_M(data, "[SHUTDOWN] shutdown finished, aborted");
       break;

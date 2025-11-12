@@ -122,7 +122,7 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct cf_test_ctx *ctx = cf->ctx;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   infof(data, "%04dms: cf[%s] destroyed",
-        (int)curlx_timediff(curlx_now(), current_tr->started), ctx->id);
+        (int)curlx_timediff_ms(curlx_now(), current_tr->started), ctx->id);
 #else
   (void)data;
 #endif
@@ -139,7 +139,7 @@ static CURLcode cf_test_connect(struct Curl_cfilter *cf,
 
   (void)data;
   *done = FALSE;
-  duration_ms = curlx_timediff(curlx_now(), ctx->started);
+  duration_ms = curlx_timediff_ms(curlx_now(), ctx->started);
   if(duration_ms >= ctx->fail_delay_ms) {
     infof(data, "%04dms: cf[%s] fail delay reached",
           (int)duration_ms, ctx->id);
@@ -218,7 +218,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
     ctx->stats->creations++;
   }
 
-  created_at = curlx_timediff(ctx->started, current_tr->started);
+  created_at = curlx_timediff_ms(ctx->started, current_tr->started);
   if(ctx->stats->creations == 1)
     ctx->stats->first_created = created_at;
   ctx->stats->last_created = created_at;
@@ -245,7 +245,7 @@ static void check_result(const struct test_case *tc,
   char msg[256];
   timediff_t duration_ms;
 
-  duration_ms = curlx_timediff(tr->ended, tr->started);
+  duration_ms = curlx_timediff_ms(tr->ended, tr->started);
   curl_mfprintf(stderr, "%d: test case took %dms\n", tc->id, (int)duration_ms);
 
   if(tr->result != tc->exp_result
@@ -267,7 +267,7 @@ static void check_result(const struct test_case *tc,
     fail(msg);
   }
 
-  duration_ms = curlx_timediff(tr->ended, tr->started);
+  duration_ms = curlx_timediff_ms(tr->ended, tr->started);
   if(duration_ms < tc->min_duration_ms) {
     curl_msprintf(msg, "%d: expected min duration of %dms, but took %dms",
                   tc->id, (int)tc->min_duration_ms, (int)duration_ms);
