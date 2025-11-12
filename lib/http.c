@@ -1302,7 +1302,6 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     /* Clear auth if this redirects to a different port number or protocol,
        unless permitted */
     if(!data->set.allow_auth_to_other_hosts && (type != FOLLOW_FAKE)) {
-      char *portnum;
       int port;
       bool clear = FALSE;
 
@@ -1310,13 +1309,18 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         /* a custom port is used */
         port = (int)data->set.use_port;
       else {
+        curl_off_t value;
+        char *portnum;
+        const char *p;
         uc = curl_url_get(data->state.uh, CURLUPART_PORT, &portnum,
                           CURLU_DEFAULT_PORT);
         if(uc) {
           free(follow_url);
           return Curl_uc_to_curlcode(uc);
         }
-        port = atoi(portnum);
+        p = portnum;
+        curlx_str_number(&p, &value, 0xffff);
+        port = (int)value;
         free(portnum);
       }
       if(port != data->info.conn_remote_port) {
