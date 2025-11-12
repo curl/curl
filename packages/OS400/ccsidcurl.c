@@ -361,7 +361,7 @@ curl_slist_append_ccsid(struct curl_slist *list,
   if(!data)
     return curl_slist_append(list, data);
 
-  s = dynconvert(ASCII_CCSID, data, -1, ccsid);
+  s = dynconvert(ASCII_CCSID, data, -1, ccsid, NULL);
 
   if(!s)
     return (struct curl_slist *) NULL;
