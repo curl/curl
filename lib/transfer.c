@@ -209,11 +209,7 @@ static CURLcode xfer_recv_resp(struct Curl_easy *data,
     blen = 0;
   }
 
-  if(!blen) {
-    /* want nothing more */
-    result = CURLE_OK;
-  }
-  else {
+  if(blen) {
     result = Curl_xfer_recv(data, buf, blen, pnread);
     if(result)
       return result;
