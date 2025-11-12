@@ -26,7 +26,14 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient.one@example.com --mail-rcpt invalid --mail-rcpt recipient.three@example.com --mail-rcpt sTrAnGe --mail-rcpt recipient.five@example.com --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
+--mail-rcpt recipient.one@example.com
+--mail-rcpt invalid
+--mail-rcpt recipient.three@example.com
+--mail-rcpt sTrAnGe
+--mail-rcpt recipient.five@example.com
+--mail-from sender@example.com
+-T -
 </command>
 </client>
 
