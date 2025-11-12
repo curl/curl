@@ -35,7 +35,7 @@ cd "${TOPDIR}" || exit 1
 
 #       Make sure all files are UTF8-encoded.
 
-find "${TOPDIR}" -type f -print | while read -r CCSID FILE
+find "${TOPDIR}" -type f | while read -r CCSID FILE
 do      if [ "${CCSID}" != 1208 ]
         then    CMD="CPY OBJ('${FILE}') TOOBJ('${FILE}') FROMCCSID(*OBJ)"
                 CMD="${CMD} TOCCSID(1208) DTAFMT(*TEXT) REPLACE(*YES)"
