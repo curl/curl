@@ -3,6 +3,7 @@
 <keywords>
 multi
 HTTP
+HTTP/2
 </keywords>
 </info>
 
@@ -27,17 +28,20 @@ Funny-head: yesyes
 
 # Client-side
 <client>
+<features>
+http/2
+</features>
 <server>
-http
+http/2
 </server>
 <tool>
-lib%TESTNUMBER
+lib2405
 </tool>
 <name>
-checking curl_multi_waitfds functionality
+checking curl_multi_waitfds functionality (HTTP/2)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+http://%HOSTIP:%HTTP2PORT/%TESTNUMBER
 </command>
 </client>
 
