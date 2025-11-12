@@ -113,30 +113,31 @@ struct connectdata;
  */
 
 bool Curl_secure_context(struct connectdata *conn, const char *host);
-struct Cookie *Curl_cookie_add(struct Curl_easy *data,
-                               struct CookieInfo *c, bool header,
-                               bool noexpiry, const char *lineptr,
-                               const char *domain, const char *path,
-                               bool secure);
-int Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
-                        const char *host, struct Curl_llist *list);
+CURLcode Curl_cookie_add(struct Curl_easy *data,
+                         struct CookieInfo *c, bool header,
+                         bool noexpiry, const char *lineptr,
+                         const char *domain, const char *path,
+                         bool secure) WARN_UNUSED_RESULT;
+CURLcode Curl_cookie_getlist(struct Curl_easy *data, struct connectdata *conn,
+                             bool *okay, const char *host,
+                             struct Curl_llist *list) WARN_UNUSED_RESULT;
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 
 #if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_COOKIES)
 #define Curl_cookie_list(x) NULL
-#define Curl_cookie_loadfiles(x) Curl_nop_stmt
-#define Curl_cookie_init(x,y,z,w) NULL
+#define Curl_cookie_loadfiles(x) CURLE_OK
+#define Curl_cookie_init() NULL
+#define Curl_cookie_run(x) Curl_nop_stmt
 #define Curl_cookie_cleanup(x) Curl_nop_stmt
 #define Curl_flush_cookies(x,y) Curl_nop_stmt
 #else
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);
 void Curl_cookie_cleanup(struct CookieInfo *c);
-struct CookieInfo *Curl_cookie_init(struct Curl_easy *data,
-                                    const char *file, struct CookieInfo *inc,
-                                    bool newsession);
+struct CookieInfo *Curl_cookie_init(void);
 struct curl_slist *Curl_cookie_list(struct Curl_easy *data);
-void Curl_cookie_loadfiles(struct Curl_easy *data);
+CURLcode Curl_cookie_loadfiles(struct Curl_easy *data) WARN_UNUSED_RESULT;
+void Curl_cookie_run(struct Curl_easy *data);
 #endif
 
 #endif /* HEADER_CURL_COOKIE_H */

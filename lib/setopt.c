@@ -1537,6 +1537,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 static CURLcode cookielist(struct Curl_easy *data,
                            const char *ptr)
 {
+  CURLcode result = CURLE_OK;
   if(!ptr)
     return CURLE_OK;
 
@@ -1558,14 +1559,15 @@ static CURLcode cookielist(struct Curl_easy *data,
   }
   else if(curl_strequal(ptr, "RELOAD")) {
     /* reload cookies from file */
-    Curl_cookie_loadfiles(data);
+    return Curl_cookie_loadfiles(data);
   }
   else {
     if(!data->cookies) {
       /* if cookie engine was not running, activate it */
-      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+      data->cookies = Curl_cookie_init();
       if(!data->cookies)
         return CURLE_OUT_OF_MEMORY;
+      data->state.cookie_engine = TRUE;
     }
 
     /* general protection against mistakes and abuse */
@@ -1575,15 +1577,15 @@ static CURLcode cookielist(struct Curl_easy *data,
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     if(checkprefix("Set-Cookie:", ptr))
       /* HTTP Header format line */
-      Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
-                      NULL, TRUE);
+      result = Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11,
+                               NULL, NULL, TRUE);
     else
       /* Netscape format line */
-      Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
-                      NULL, TRUE);
+      result = Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
+                               NULL, TRUE);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode cookiefile(struct Curl_easy *data,
@@ -1797,11 +1799,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
        * Activate the cookie parser. This may or may not already
        * have been made.
        */
-      struct CookieInfo *newcookies =
-        Curl_cookie_init(data, NULL, data->cookies, s->cookiesession);
-      if(!newcookies)
+      if(!data->cookies)
+        data->cookies = Curl_cookie_init();
+      if(!data->cookies)
         result = CURLE_OUT_OF_MEMORY;
-      data->cookies = newcookies;
+      else
+        data->state.cookie_engine = TRUE;
     }
     break;
 

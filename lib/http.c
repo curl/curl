@@ -2463,10 +2463,12 @@ static CURLcode http_cookies(struct Curl_easy *data,
     int count = 0;
 
     if(data->cookies && data->state.cookie_engine) {
+      bool okay;
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : data->conn->host.name;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      if(!Curl_cookie_getlist(data, data->conn, host, &list)) {
+      result = Curl_cookie_getlist(data, data->conn, &okay, host, &list);
+      if(!result && okay) {
         struct Curl_llist_node *n;
         size_t clen = 8; /* hold the size of the generated Cookie: header */
 
@@ -3471,11 +3473,12 @@ static CURLcode http_header_s(struct Curl_easy *data,
     const char *host = data->state.aptr.cookiehost ?
       data->state.aptr.cookiehost : conn->host.name;
     const bool secure_context = Curl_secure_context(conn, host);
+    CURLcode result;
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-    Curl_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
-                    data->state.up.path, secure_context);
+    result = Curl_cookie_add(data, data->cookies, TRUE, FALSE, v, host,
+                             data->state.up.path, secure_context);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-    return CURLE_OK;
+    return result;
   }
 #endif
 #ifndef CURL_DISABLE_HSTS

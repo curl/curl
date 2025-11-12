@@ -97,7 +97,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     case CURL_LOCK_DATA_COOKIE:
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       if(!share->cookies) {
-        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE);
+        share->cookies = Curl_cookie_init();
         if(!share->cookies)
           res = CURLSHE_NOMEM;
       }
