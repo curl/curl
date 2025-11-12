@@ -895,8 +895,10 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       case 6:
         /* To take care or not of the 8th bit in data exchange */
         if(curl_strnequal(option, "BINARY", 6)) {
-          int binary_option = atoi(arg);
-          if(binary_option != 1) {
+          const char *p = arg;
+          curl_off_t binary_option;
+          if(!curlx_str_number(&p, &binary_option, 1) &&
+             (binary_option != 1)) {
             tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
             tn->him_preferred[CURL_TELOPT_BINARY] = CURL_NO;
           }
