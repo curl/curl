@@ -34,7 +34,11 @@ http
 -w with url.* variables
 </name>
 <command option="no-include">
-"http://uuuu:pppp@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff" "h55p://hello2000:1/%TESTNUMBER?qqqq#ffff" "local host" "http://u22u:p22p@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff" -w '%{url.host}+%{url.path}+%{url.scheme}+%{url.user}+%{url.password}+%{url.port}+%{url.query}+%{url.fragment}\n'
+"http://uuuu:pppp@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff"
+"h55p://hello2000:1/%TESTNUMBER?qqqq#ffff"
+"local host"
+"http://u22u:p22p@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff"
+-w '%{url.host}+%{url.path}+%{url.scheme}+%{url.user}+%{url.password}+%{url.port}+%{url.query}+%{url.fragment}\n'
 </command>
 </client>
 
