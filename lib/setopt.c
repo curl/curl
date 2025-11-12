@@ -1689,22 +1689,20 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     if(!ptr || s->postfieldsize == -1)
       result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);
     else {
+      size_t pflen;
+
       if(s->postfieldsize < 0)
         return CURLE_BAD_FUNCTION_ARGUMENT;
-#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
-      /*
-       *  Check that requested length does not overflow the size_t type.
-       */
-      else if(s->postfieldsize > SIZE_MAX)
+      pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
+      if(pflen == SIZE_MAX)
         return CURLE_OUT_OF_MEMORY;
-#endif
       else {
         /* Allocate even when size == 0. This satisfies the need of possible
            later address compare to detect the COPYPOSTFIELDS mode, and to
            mark that postfields is used rather than read function or form
            data.
         */
-        char *p = Curl_memdup0(ptr, (size_t)s->postfieldsize);
+        char *p = Curl_memdup0(ptr, pflen);
         if(!p)
           return CURLE_OUT_OF_MEMORY;
         else {

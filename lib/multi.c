@@ -3879,10 +3879,10 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   }
 
   if(!data->multi->xfer_buf) {
-    data->multi->xfer_buf = malloc((size_t)data->set.buffer_size);
+    data->multi->xfer_buf = malloc(curlx_uitouz(data->set.buffer_size));
     if(!data->multi->xfer_buf) {
-      failf(data, "could not allocate xfer_buf of %zu bytes",
-            (size_t)data->set.buffer_size);
+      failf(data, "could not allocate xfer_buf of %u bytes",
+            data->set.buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
     data->multi->xfer_buf_len = data->set.buffer_size;
@@ -3932,10 +3932,11 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
   }
 
   if(!data->multi->xfer_ulbuf) {
-    data->multi->xfer_ulbuf = malloc((size_t)data->set.upload_buffer_size);
+    data->multi->xfer_ulbuf =
+      malloc(curlx_uitouz(data->set.upload_buffer_size));
     if(!data->multi->xfer_ulbuf) {
-      failf(data, "could not allocate xfer_ulbuf of %zu bytes",
-            (size_t)data->set.upload_buffer_size);
+      failf(data, "could not allocate xfer_ulbuf of %u bytes",
+            data->set.upload_buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
     data->multi->xfer_ulbuf_len = data->set.upload_buffer_size;

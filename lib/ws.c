@@ -41,6 +41,7 @@
 #include "select.h"
 #include "curlx/nonblock.h"
 #include "curlx/strparse.h"
+#include "curlx/warnless.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
@@ -489,12 +490,13 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
   size_t inlen;
   size_t nwritten;
   CURLcode result;
-  curl_off_t remain = dec->payload_len - dec->payload_offset;
+  size_t remain = curlx_sotouz_range(dec->payload_len - dec->payload_offset,
+                                     0, SIZE_MAX);
 
   (void)data;
   while(remain && Curl_bufq_peek(inraw, &inbuf, &inlen)) {
-    if((curl_off_t)inlen > remain)
-      inlen = (size_t)remain;
+    if(inlen > remain)
+      inlen = remain;
     result = write_cb(inbuf, inlen, dec->frame_age, dec->frame_flags,
                       dec->payload_offset, dec->payload_len,
                       write_ctx, &nwritten);
@@ -502,9 +504,10 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
       return result;
     Curl_bufq_skip(inraw, nwritten);
     dec->payload_offset += nwritten;
-    remain = dec->payload_len - dec->payload_offset;
-    CURL_TRC_WS(data, "passed %zu bytes payload, %"
-                FMT_OFF_T " remain", nwritten, remain);
+    remain = curlx_sotouz_range(dec->payload_len - dec->payload_offset,
+                                0, SIZE_MAX);
+    CURL_TRC_WS(data, "passed %zu bytes payload, %zu remain",
+                nwritten, remain);
   }
 
   return remain ? CURLE_AGAIN : CURLE_OK;
@@ -651,16 +654,13 @@ static curl_off_t ws_payload_remain(curl_off_t payload_total,
                                     curl_off_t payload_offset,
                                     size_t payload_buffered)
 {
-  curl_off_t remain = payload_total - payload_offset;
+  curl_off_t buffered, remain = payload_total - payload_offset;
   if((payload_total < 0) || (payload_offset < 0) || (remain < 0))
     return -1;
-#if SIZEOF_SIZE_T >= SIZEOF_CURL_OFF_T
-  if(payload_buffered > (size_t)CURL_OFF_T_MAX)
+  buffered = curlx_uztoso(payload_buffered);
+  if(remain < buffered)
     return -1;
-#endif
-  if(remain < (curl_off_t)payload_buffered)
-    return -1;
-  return remain - (curl_off_t)payload_buffered;
+  return remain - buffered;
 }
 
 static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
@@ -947,7 +947,7 @@ static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
                                      struct bufq *out, size_t *pnwritten)
 {
   CURLcode result;
-  size_t i, len, n;
+  size_t i, len, n, remain;
 
   *pnwritten = 0;
   if(Curl_bufq_is_full(out))
@@ -955,8 +955,9 @@ static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
 
   /* not the most performant way to do this */
   len = buflen;
-  if((curl_off_t)len > enc->payload_remain)
-    len = (size_t)enc->payload_remain;
+  remain = curlx_sotouz_range(enc->payload_remain, 0, SIZE_MAX);
+  if(remain < len)
+    len = remain;
 
   for(i = 0; i < len; ++i) {
     unsigned char c = buf[i] ^ enc->mask[enc->xori];
@@ -1167,8 +1168,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
     if(ws->enc.payload_remain) {
       CURL_TRC_WS(data, "current frame, %" FMT_OFF_T " remaining",
                   ws->enc.payload_remain);
-      if(ws->enc.payload_remain < (curl_off_t)blen)
-        blen = (size_t)ws->enc.payload_remain;
+      blen = curlx_sotouz_range(ws->enc.payload_remain, 0, blen);
     }
 
     result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);

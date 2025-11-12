@@ -209,20 +209,7 @@ static size_t get_max_body_write_len(struct Curl_easy *data, curl_off_t limit)
 {
   if(limit != -1) {
     /* How much more are we allowed to write? */
-    curl_off_t remain_diff;
-    remain_diff = limit - data->req.bytecount;
-    if(remain_diff < 0) {
-      /* already written too much! */
-      return 0;
-    }
-#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
-    else if(remain_diff > SSIZE_MAX) {
-      return SIZE_MAX;
-    }
-#endif
-    else {
-      return (size_t)remain_diff;
-    }
+    return curlx_sotouz_range(limit - data->req.bytecount, 0, SIZE_MAX);
   }
   return SIZE_MAX;
 }
@@ -678,11 +665,7 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   }
   /* respect length limitations */
   if(ctx->total_len >= 0) {
-    curl_off_t remain = ctx->total_len - ctx->read_len;
-    if(remain <= 0)
-      blen = 0;
-    else if(remain < (curl_off_t)blen)
-      blen = (size_t)remain;
+    blen = curlx_sotouz_range(ctx->total_len - ctx->read_len, 0, blen);
   }
   nread = 0;
   if(ctx->read_cb && blen) {
@@ -1363,9 +1346,9 @@ static CURLcode cr_buf_resume_from(struct Curl_easy *data,
   /* already started reading? */
   if(ctx->index)
     return CURLE_READ_ERROR;
-  if(offset <= 0)
+  boffset = curlx_sotouz_range(offset, 0, SIZE_MAX);
+  if(!boffset)
     return CURLE_OK;
-  boffset = (size_t)offset;
   if(boffset > ctx->blen)
     return CURLE_READ_ERROR;
 
