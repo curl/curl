@@ -34,7 +34,8 @@ SMTP multiple connection authentication
 mail body
 </file>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T %LOGDIR/upload%TESTNUMBER -: smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T %LOGDIR/upload%TESTNUMBER
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T %LOGDIR/upload%TESTNUMBER -:
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T %LOGDIR/upload%TESTNUMBER
 </command>
 </client>
 

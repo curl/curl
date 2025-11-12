@@ -44,7 +44,9 @@ HTTP POST with split initial request send
 CURL_SMALLREQSEND=100
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/%repeat[30 x 012345679]%/%TESTNUMBER -H "%repeat[30 x 012345679]%: 300" -d "Mr. Sherlock Holmes, who was usually very late in the mornings, save upon those not infrequent occasions when he was up all night, was seated at the breakfast table." -w '%{size_upload}\n'
+http://%HOSTIP:%HTTPPORT/%repeat[30 x 012345679]%/%TESTNUMBER -H "%repeat[30 x 012345679]%: 300"
+-d "Mr. Sherlock Holmes, who was usually very late in the mornings, save upon those not infrequent occasions when he was up all night, was seated at the breakfast table."
+-w '%{size_upload}\n'
 </command>
 </client>
 

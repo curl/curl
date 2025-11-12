@@ -37,7 +37,10 @@ http
 SSL_CERT_FILE
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content;encoder=8bit,%LOGDIR/test%TESTNUMBER.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2' --libcurl %LOGDIR/test%TESTNUMBER.c
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+-F name=value
+-F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content;encoder=8bit,%LOGDIR/test%TESTNUMBER.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2'
+--libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER.txt">

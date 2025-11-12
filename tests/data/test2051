@@ -31,7 +31,9 @@ Connect to specific host: Reuse existing connections if possible
 </name>
 
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n" --next --connect-to ::%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n" --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n" --next --connect-to ::%HOSTIP:%HTTPPORT
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n" --next
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>
 

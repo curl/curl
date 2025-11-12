@@ -32,7 +32,11 @@ http
 </name>
 
 <command>
-http://www.example.com:%HTTPPORT/%TESTNUMBER --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
+http://www.example.com:%HTTPPORT/%TESTNUMBER
+--resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n"
+--next
+--resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT
+http://www.example.com:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>
 
