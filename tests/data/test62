@@ -29,7 +29,10 @@ http
 HTTP, send cookies when using custom Host:
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?hoge=fuga -b %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.host.foo.com"
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?hoge=fuga
+-b %LOGDIR/jar%TESTNUMBER.txt
+-H "Host: www.host.foo.com"
 </command>
 <file name="%LOGDIR/jar%TESTNUMBER.txt">
 # Netscape HTTP Cookie File
