@@ -23,8 +23,7 @@ sftp
 SFTP dir and empty file
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: --insecure sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/
---next
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: --insecure sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/ --next
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: --insecure sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.dir/emptyfile.txt
 </command>
 </client>
