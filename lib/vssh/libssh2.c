@@ -727,30 +727,20 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  static const char * const hostkey_method_ssh_ed25519
-    = "ssh-ed25519";
-  static const char * const hostkey_method_ssh_ecdsa_521
-    = "ecdsa-sha2-nistp521";
-  static const char * const hostkey_method_ssh_ecdsa_384
-    = "ecdsa-sha2-nistp384";
-  static const char * const hostkey_method_ssh_ecdsa_256
-    = "ecdsa-sha2-nistp256";
-  static const char * const hostkey_method_ssh_rsa_all
-    = "rsa-sha2-256,rsa-sha2-512,ssh-rsa";
-  static const char * const hostkey_method_ssh_dss
-    = "ssh-dss";
-
-  const char *hostkey_method = NULL;
-  struct connectdata *conn = data->conn;
-  struct libssh2_knownhost* store = NULL;
-  const char *kh_name_end = NULL;
-  size_t kh_name_size = 0;
-  int port = 0;
+  static const char hostkey_method_ssh_ed25519[] = "ssh-ed25519";
+  static const char hostkey_method_ssh_ecdsa_521[] = "ecdsa-sha2-nistp521";
+  static const char hostkey_method_ssh_ecdsa_384[] = "ecdsa-sha2-nistp384";
+  static const char hostkey_method_ssh_ecdsa_256[] = "ecdsa-sha2-nistp256";
+  static const char hostkey_method_ssh_rsa_all[] =
+    "rsa-sha2-256,rsa-sha2-512,ssh-rsa";
+  static const char hostkey_method_ssh_dss[] = "ssh-dss";
   bool found = FALSE;
 
   if(sshc->kh &&
      !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] &&
      !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_SHA256]) {
+    struct libssh2_knownhost *store = NULL;
+    struct connectdata *conn = data->conn;
     /* lets try to find our host in the known hosts file */
     while(!libssh2_knownhost_get(sshc->kh, &store, store)) {
       /* For non-standard ports, the name will be enclosed in */
@@ -758,7 +748,9 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
       if(store) {
         if(store->name) {
           if(store->name[0] == '[') {
-            kh_name_end = strstr(store->name, "]:");
+            int port = 0;
+            size_t kh_name_size = 0;
+            const char *kh_name_end = strstr(store->name, "]:");
             if(!kh_name_end) {
               infof(data, "Invalid host pattern %s in %s",
                     store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
@@ -788,6 +780,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
 
     if(found) {
       int rc;
+      const char *hostkey_method = NULL;
       infof(data, "Found host %s in %s",
             conn->host.name, data->set.str[STRING_SSH_KNOWNHOSTS]);
 
