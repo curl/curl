@@ -381,14 +381,19 @@ static CURLcode test_lib2405(const char *URL)
   if(res != CURLE_OK)
     goto test_cleanup;
 
-  /* HTTP1, expected 2 waitfds - one for each transfer */
-  test_run_check(TEST_USE_HTTP1, 2);
+  if(testnum == 2405) {
+    /* HTTP1, expected 2 waitfds - one for each transfer */
+    test_run_check(TEST_USE_HTTP1, 2);
+  }
+#ifdef USE_HTTP2
+  else { /* 2407 */
+    /* HTTP2, expected 2 waitfds - one for each transfer */
+    test_run_check(TEST_USE_HTTP2, 2);
 
-  /* HTTP2, expected 2 waitfds - one for each transfer */
-  test_run_check(TEST_USE_HTTP2, 2);
-
-  /* HTTP2 with multiplexing, expected 1 waitfds - one for all transfers */
-  test_run_check(TEST_USE_HTTP2_MPLEX, 1);
+    /* HTTP2 with multiplexing, expected 1 waitfds - one for all transfers */
+    test_run_check(TEST_USE_HTTP2_MPLEX, 1);
+  }
+#endif
 
 test_cleanup:
   curl_global_cleanup();
