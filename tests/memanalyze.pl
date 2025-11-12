@@ -137,7 +137,15 @@ while(<$fileh>) {
     chomp $_;
     my $line = $_;
     $lnum++;
-    if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
+    if($line =~ /^FAIL (.*)/) {
+        my $err = $1;
+        # for informational purposes
+        if($memwarn > 1) {
+            # the first FAIL is not a problem
+            print "WARN: $err after limit\n",
+        }
+    }
+    elsif($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
         my $i = $3;
         my ($source, $linenum) = ($1, $2);
@@ -146,7 +154,7 @@ while(<$fileh>) {
                 print "LIMIT: $1 returned error at $source:$linenum\n";
             }
             if($strict) {
-                $memwarn=1;
+                $memwarn++;
             }
         }
     }
