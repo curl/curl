@@ -166,9 +166,12 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
   slash = strchr(check, '/');
   /* if the slash is part of this token, use it */
   if(slash) {
-    /* if the bits variable gets a crazy value here, that is fine as
-       the value will then be rejected in the cidr function */
-    bits = (unsigned int)atoi(slash + 1);
+    curl_off_t value;
+    const char *p = &slash[1];
+    if(curlx_str_number(&p, &value, 128) || *p)
+      return FALSE;
+    /* a too large value is rejected in the cidr function below */
+    bits = (unsigned int)value;
     *slash = 0; /* null-terminate there */
   }
   if(type == TYPE_IPV6)
