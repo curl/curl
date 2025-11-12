@@ -748,19 +748,21 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data,
       if(store) {
         if(store->name) {
           if(store->name[0] == '[') {
-            int port = 0;
+            curl_off_t port;
             size_t kh_name_size = 0;
+            const char *p;
             const char *kh_name_end = strstr(store->name, "]:");
             if(!kh_name_end) {
               infof(data, "Invalid host pattern %s in %s",
                     store->name, data->set.str[STRING_SSH_KNOWNHOSTS]);
               continue;
             }
-            port = atoi(kh_name_end + 2);
-            if(kh_name_end && (port == conn->remote_port)) {
+            p = kh_name_end + 2; /* start of port number */
+            if(!curlx_str_number(&p, &port, 0xffff) &&
+               (kh_name_end && (port == conn->remote_port))) {
               kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
               if(strncmp(store->name + 1,
-                 conn->host.name, kh_name_size) == 0) {
+                         conn->host.name, kh_name_size) == 0) {
                 found = TRUE;
                 break;
               }
