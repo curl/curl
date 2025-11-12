@@ -558,10 +558,12 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     data->state.infilesize = 0;
 
   /* If there is a list of cookie files to read, do it now! */
-  Curl_cookie_loadfiles(data);
+  result = Curl_cookie_loadfiles(data);
+  if(!result)
+    Curl_cookie_run(data); /* activate */
 
   /* If there is a list of host pairs to deal with */
-  if(data->state.resolve)
+  if(!result && data->state.resolve)
     result = Curl_loadhostpairs(data);
 
   /* If there is a list of hsts files to read */

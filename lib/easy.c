@@ -1010,10 +1010,10 @@ CURL *curl_easy_duphandle(CURL *d)
   if(data->cookies && data->state.cookie_engine) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
-    outcurl->cookies = Curl_cookie_init(outcurl, NULL, outcurl->cookies,
-                                        data->set.cookiesession);
+    outcurl->cookies = Curl_cookie_init();
     if(!outcurl->cookies)
       goto fail;
+    outcurl->state.cookie_engine = TRUE;
   }
 
   if(data->state.cookielist) {
