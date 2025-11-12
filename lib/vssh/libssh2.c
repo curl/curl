@@ -3129,7 +3129,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
-    timediff_t left = 1000;
+    timediff_t left_ms = 1000;
     struct curltime now = curlx_now();
 
     result = ssh_statemachine(data, sshc, sshp, &block);
@@ -3144,8 +3144,8 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
       if(result)
         break;
 
-      left = Curl_timeleft(data, NULL, FALSE);
-      if(left < 0) {
+      left_ms = Curl_timeleft_ms(data, NULL, FALSE);
+      if(left_ms < 0) {
         failf(data, "Operation timed out");
         return CURLE_OPERATION_TIMEDOUT;
       }
@@ -3168,7 +3168,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
         fd_write = sock;
       /* wait for the socket to become ready */
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
-                              left > 1000 ? 1000 : left);
+                              left_ms > 1000 ? 1000 : left_ms);
     }
   }
 

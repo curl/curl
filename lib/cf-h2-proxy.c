@@ -1073,7 +1073,6 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   struct cf_call_data save;
-  timediff_t check;
   struct tunnel_stream *ts = &ctx->tunnel;
 
   if(cf->connected) {
@@ -1098,8 +1097,7 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(ts->authority);
 
-  check = Curl_timeleft(data, NULL, TRUE);
-  if(check <= 0) {
+  if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
     failf(data, "Proxy CONNECT aborted due to timeout");
     result = CURLE_OPERATION_TIMEDOUT;
     goto out;

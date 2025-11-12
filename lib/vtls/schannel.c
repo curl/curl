@@ -1827,7 +1827,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     for(;;) {
       int what;
-      timediff_t timeout, remaining;
+      timediff_t timeout_ms, remaining;
 
       if(Curl_pgrsUpdate(data)) {
         result = CURLE_ABORTED_BY_CALLBACK;
@@ -1843,31 +1843,31 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       remaining = MAX_RENEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
-        timeout = Curl_timeleft(data, NULL, FALSE);
+        timeout_ms = Curl_timeleft_ms(data, NULL, FALSE);
 
-        if(timeout < 0) {
+        if(timeout_ms < 0) {
           result = CURLE_OPERATION_TIMEDOUT;
           break;
         }
 
         /* the blocking is in intervals so that the progress function can be
            called every second */
-        if(!timeout || timeout > 1000)
-          timeout = 1000;
+        if(!timeout_ms || timeout_ms > 1000)
+          timeout_ms = 1000;
 
-        if(timeout > remaining)
-          timeout = remaining;
+        if(timeout_ms > remaining)
+          timeout_ms = remaining;
       }
       else
-        timeout = 0;
+        timeout_ms = 0;
 
       SCH_DEV(infof(data, "schannel: renegotiation wait until socket is"
                     "%s%s for up to %" FMT_TIMEDIFF_T " ms",
                     ((readfd != CURL_SOCKET_BAD) ? " readable" : ""),
                     ((writefd != CURL_SOCKET_BAD) ? " writeable" : ""),
-                    timeout));
+                    timeout_ms));
 
-      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout);
+      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, timeout_ms);
 
       if(what > 0 && (what & (CURL_CSELECT_IN | CURL_CSELECT_OUT))) {
         SCH_DEV(infof(data, "schannel: renegotiation socket %s%s",
@@ -1997,7 +1997,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     while(len > *pnwritten) {
       size_t this_write = 0;
       int what;
-      timediff_t timeout_ms = Curl_timeleft(data, NULL, FALSE);
+      timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, FALSE);
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(data, "schannel: timed out sending data "

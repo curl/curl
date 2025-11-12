@@ -3217,7 +3217,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 {
   struct hostname *ehost;
   int eport;
-  timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+  timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
   const char *peertype = "host";
   CURLcode result;
 

@@ -65,13 +65,13 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 
   if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much overall remains */
-    timediff_t timeout2_ms = Curl_timeleft(data, &now, FALSE);
+    timediff_t timeout2_ms = Curl_timeleft_ms(data, &now, FALSE);
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
   }
 
   if(disconnecting) {
-    timediff_t total_left_ms = Curl_timeleft(data, NULL, FALSE);
+    timediff_t total_left_ms = Curl_timeleft_ms(data, NULL, FALSE);
     timeout_ms = CURLMIN(timeout_ms, CURLMAX(total_left_ms, 0));
   }
 

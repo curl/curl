@@ -1739,7 +1739,7 @@ static bool multi_handle_timeout(struct Curl_easy *data,
                                  CURLcode *result)
 {
   bool connect_timeout = data->mstate < MSTATE_DO;
-  timediff_t timeout_ms = Curl_timeleft(data, now, connect_timeout);
+  timediff_t timeout_ms = Curl_timeleft_ms(data, now, connect_timeout);
   if(timeout_ms < 0) {
     /* Handle timed out */
     struct curltime since;

@@ -2020,7 +2020,7 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
-  timediff_t other;
+  timediff_t other_ms;
   struct curltime now;
 
 #ifndef CURL_DISABLE_FTP
@@ -2030,11 +2030,11 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
 
   now = curlx_now();
   /* check if the generic timeout possibly is set shorter */
-  other = Curl_timeleft(data, &now, FALSE);
-  if(other && (other < timeout_ms))
-    /* note that this also works fine for when other happens to be negative
+  other_ms = Curl_timeleft_ms(data, &now, FALSE);
+  if(other_ms && (other_ms < timeout_ms))
+    /* note that this also works fine for when other_ms happens to be negative
        due to it already having elapsed */
-    timeout_ms = other;
+    timeout_ms = other_ms;
   else {
     /* subtract elapsed time */
     timeout_ms -= curlx_timediff(now, ctx->started_at);
