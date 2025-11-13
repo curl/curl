@@ -106,6 +106,11 @@ the include instruction:
 
     %include filename%
 
+Or, a variant of the above where the file is loaded as a newline-agnostic
+text file, and `%CR`, `%SP`, `%TAB` macros are expanded after inclusion:
+
+    %includetext filename%
+
 ## Conditional lines
 
 Lines in the test file can be made to appear conditionally on a specific

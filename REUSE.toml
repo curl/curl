@@ -35,6 +35,7 @@ path = [
   "RELEASE-NOTES",
   "renovate.json",
   "tests/certs/**",
+  "tests/data/data**",
   "tests/data/test**",
   "tests/valgrind.supp",
 ]

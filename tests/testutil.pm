@@ -100,8 +100,11 @@ sub clearlogs {
 #######################################################################
 
 sub includefile {
-    my ($f) = @_;
+    my ($f, $text) = @_;
     open(F, "<$f");
+    if($text) {
+        binmode F, ':crlf';
+    }
     my @a = <F>;
     close(F);
     return join("", @a);
@@ -147,12 +150,15 @@ sub subbase64 {
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }
 
+    # include a file, expand space macros
+    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
+
     $$thing =~ s/%SP/ /g;    # space
     $$thing =~ s/%TAB/\t/g;  # horizontal tab
     $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
 
     # include a file
-    $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1)/ge;
+    $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1, 0)/ge;
 }
 
 my $prevupdate;  # module scope so it remembers the last value
