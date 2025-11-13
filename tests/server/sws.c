@@ -450,12 +450,13 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
             portp = strchr(doc, ':');
 
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
-            int inum = atoi(portp + 1);
-            if((inum <= 0) || (inum > 65535))
+            const char *pval = portp + 1;
+            curl_off_t num;
+            if(curlx_str_number(&pval, &num, 0xffff) ||
+               (num <= 0) || (num > 65535))
               logmsg("Invalid CONNECT port received");
             else
-              req->connect_port = (unsigned short)inum;
-
+              req->connect_port = (unsigned short)num;
           }
           logmsg("Port number: %d, test case number: %ld",
                  req->connect_port, req->testno);
