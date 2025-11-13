@@ -186,6 +186,9 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     /* get the number after it */
     if(ptr) {
       FILE *stream;
+      const char *pval;
+      curl_off_t testnum;
+
       if((strlen(doc) + strlen(request)) < 200)
         logmsg("Got request: %s %s %s/%d.%d",
                request, doc, prot_str, prot_major, prot_minor);
@@ -211,7 +214,9 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
-      req->testno = atol(ptr);
+      pval = ptr;
+      if(!curlx_str_number(&pval, &testnum, INT_MAX))
+        req->testno = (long)testnum;
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;
