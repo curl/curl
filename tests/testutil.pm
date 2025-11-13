@@ -110,6 +110,8 @@ sub includefile {
 sub subbase64 {
     my ($thing) = @_;
 
+    $$thing =~ s/%includeexpand ([^%]*)%[\n\r]+/includefile($1)/ge;
+
     # cut out the base64 piece
     while($$thing =~ s/%b64\[(.*?)\]b64%/%%B64%%/i) {
         my $d = $1;
