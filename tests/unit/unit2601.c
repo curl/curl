@@ -85,7 +85,7 @@ static void check_bufq(size_t pool_spares,
   struct bufq q;
   struct bufc_pool pool;
   size_t max_len = chunk_size * max_chunks;
-  CURLcode result;
+  CURLcode res;
   ssize_t i;
   size_t n2;
   size_t nwritten, nread;
@@ -105,20 +105,20 @@ static void check_bufq(size_t pool_spares,
   fail_unless(q.spare == NULL, "init: spare not NULL");
   fail_unless(Curl_bufq_len(&q) == 0, "init: bufq length != 0");
 
-  result = Curl_bufq_write(&q, test_data, wsize, &n2);
+  res = Curl_bufq_write(&q, test_data, wsize, &n2);
   fail_unless(n2 <= wsize, "write: wrong size returned");
-  fail_unless(result == CURLE_OK, "write: wrong result returned");
+  fail_unless(res == CURLE_OK, "write: wrong result returned");
 
   /* write empty bufq full */
   nwritten = 0;
   Curl_bufq_reset(&q);
   while(!Curl_bufq_is_full(&q)) {
-    result = Curl_bufq_write(&q, test_data, wsize, &n2);
-    if(!result) {
+    res = Curl_bufq_write(&q, test_data, wsize, &n2);
+    if(!res) {
       nwritten += n2;
     }
-    else if(result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "write-loop: unexpected result");
+    else if(res != CURLE_AGAIN) {
+      fail_unless(res == CURLE_AGAIN, "write-loop: unexpected result");
       break;
     }
   }
@@ -132,12 +132,12 @@ static void check_bufq(size_t pool_spares,
   /* read full bufq empty */
   nread = 0;
   while(!Curl_bufq_is_empty(&q)) {
-    result = Curl_bufq_read(&q, test_data, rsize, &n2);
-    if(!result) {
+    res = Curl_bufq_read(&q, test_data, rsize, &n2);
+    if(!res) {
       nread += n2;
     }
-    else if(result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "read-loop: unexpected result");
+    else if(res != CURLE_AGAIN) {
+      fail_unless(res == CURLE_AGAIN, "read-loop: unexpected result");
       break;
     }
   }
@@ -153,14 +153,14 @@ static void check_bufq(size_t pool_spares,
   }
 
   for(i = 0; i < 1000; ++i) {
-    result = Curl_bufq_write(&q, test_data, wsize, &n2);
-    if(result && result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "rw-loop: unexpected write result");
+    res = Curl_bufq_write(&q, test_data, wsize, &n2);
+    if(res && res != CURLE_AGAIN) {
+      fail_unless(res == CURLE_AGAIN, "rw-loop: unexpected write result");
       break;
     }
-    result = Curl_bufq_read(&q, test_data, rsize, &n2);
-    if(result && result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "rw-loop: unexpected read result");
+    res = Curl_bufq_read(&q, test_data, rsize, &n2);
+    if(res && res != CURLE_AGAIN) {
+      fail_unless(res == CURLE_AGAIN, "rw-loop: unexpected read result");
       break;
     }
   }
@@ -170,9 +170,9 @@ static void check_bufq(size_t pool_spares,
   Curl_bufq_init2(&q, chunk_size, max_chunks, (opts|BUFQ_OPT_SOFT_LIMIT));
   nwritten = 0;
   while(!Curl_bufq_is_full(&q)) {
-    result = Curl_bufq_write(&q, test_data, wsize, &n2);
-    if(result || n2 != wsize) {
-      fail_unless(!result && n2 == wsize, "write should be complete");
+    res = Curl_bufq_write(&q, test_data, wsize, &n2);
+    if(res || n2 != wsize) {
+      fail_unless(!res && n2 == wsize, "write should be complete");
       break;
     }
     nwritten += n2;
@@ -184,15 +184,15 @@ static void check_bufq(size_t pool_spares,
     fail_if(TRUE, "write: bufq full but nwritten wrong");
   }
   /* do one more write on a full bufq, should work */
-  result = Curl_bufq_write(&q, test_data, wsize, &n2);
-  fail_unless(!result && n2 == wsize, "write should be complete");
+  res = Curl_bufq_write(&q, test_data, wsize, &n2);
+  fail_unless(!res && n2 == wsize, "write should be complete");
   nwritten += n2;
   /* see that we get all out again */
   nread = 0;
   while(!Curl_bufq_is_empty(&q)) {
-    result = Curl_bufq_read(&q, test_data, rsize, &n2);
-    if(result) {
-      fail_unless(result, "read-loop: unexpected fail");
+    res = Curl_bufq_read(&q, test_data, rsize, &n2);
+    if(res) {
+      fail_unless(res, "read-loop: unexpected fail");
       break;
     }
     nread += n2;
@@ -211,12 +211,12 @@ static CURLcode test_unit2601(const char *arg)
 
   struct bufq q;
   size_t n;
-  CURLcode result;
+  CURLcode res;
   unsigned char buf[16*1024];
 
   Curl_bufq_init(&q, 8*1024, 12);
-  result = Curl_bufq_read(&q, buf, 128, &n);
-  fail_unless(result && result == CURLE_AGAIN, "read empty fail");
+  res = Curl_bufq_read(&q, buf, 128, &n);
+  fail_unless(res && res == CURLE_AGAIN, "read empty fail");
   Curl_bufq_free(&q);
 
   check_bufq(0, 1024, 4, 128, 128, BUFQ_OPT_NONE);

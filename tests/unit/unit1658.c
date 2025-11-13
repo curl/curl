@@ -48,11 +48,11 @@ extern void doh_print_httpsrr(struct Curl_easy *data,
  */
 
 static char rrbuffer[256];
-static void rrresults(struct Curl_https_rrinfo *rr, CURLcode result)
+static void rrresults(struct Curl_https_rrinfo *rr, CURLcode res)
 {
   char *p = rrbuffer;
   char *pend = rrbuffer + sizeof(rrbuffer);
-  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)result);
+  curl_msnprintf(rrbuffer, sizeof(rrbuffer), "r:%d|", (int)res);
   p += strlen(rrbuffer);
 
   if(rr) {
@@ -502,7 +502,7 @@ static CURLcode test_unit1658(const char *arg)
     }
   };
 
-  CURLcode result = CURLE_OUT_OF_MEMORY;
+  CURLcode res = CURLE_OUT_OF_MEMORY;
   CURL *easy;
 
   easy = curl_easy_init();
@@ -516,10 +516,10 @@ static CURLcode test_unit1658(const char *arg)
 
       curl_mprintf("test %u: %s\n", i, t[i].name);
 
-      result = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
+      res = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
 
       /* create an output */
-      rrresults(hrr, result);
+      rrresults(hrr, res);
 
       /* is the output the expected? */
       if(strcmp(rrbuffer, t[i].expect)) {
