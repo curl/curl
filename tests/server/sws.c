@@ -2096,7 +2096,7 @@ static int test_sws(int argc, char *argv[])
       arg++;
       if(argc > arg) {
         opt = argv[arg];
-        if(curlx_str_number(&opt, &num, 0xffff) || num < 1025) {
+        if(curlx_str_number(&opt, &num, 0xffff)) {
           fprintf(stderr, "sws: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
