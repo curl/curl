@@ -27,7 +27,7 @@
 
 static CURLcode test_lib1908(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode res = TEST_ERR_MAJOR_BAD;
   CURL *curl;
   start_test_timing();
 
