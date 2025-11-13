@@ -801,7 +801,7 @@ static int test_mqttd(int argc, char *argv[])
       arg++;
       if(argc > arg) {
         opt = argv[arg];
-        if(curlx_str_number(&opt, &num, 0xffff) || num < 1025) {
+        if(curlx_str_number(&opt, &num, 0xffff)) {
           fprintf(stderr, "mqttd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
