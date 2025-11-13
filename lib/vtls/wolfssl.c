@@ -1633,23 +1633,18 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
                 blen, rc, nwritten);
     if(rc < 0) {
       int err = wolfSSL_get_error(wssl->ssl, rc);
+      char error_buffer[256];
       switch(err) {
       case WOLFSSL_ERROR_NONE: /* just did not get anything */
       case WOLFSSL_ERROR_WANT_READ:
       case WOLFSSL_ERROR_WANT_WRITE:
         result = CURLE_AGAIN;
         break;
-      default: {
-        char error_buffer[256];
-        CURL_TRC_CF(data, cf, "SSL send early data, error: '%s'(%d)",
-                    wssl_strerror((unsigned long)err, error_buffer,
-                                  sizeof(error_buffer)),
-                    err);
-        result = CURLE_SEND_ERROR;
-        break;
       }
-      }
-      goto out;
+      CURL_TRC_CF(data, cf, "SSL send early data, error: '%s'(%d)",
+                  wssl_strerror((unsigned long)err, error_buffer,
+                                sizeof(error_buffer)), err);
+      return CURLE_SEND_ERROR;
     }
 
     Curl_bufq_skip(&connssl->earlydata, (size_t)nwritten);
@@ -1659,7 +1654,6 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
   if(!Curl_ssl_cf_is_proxy(cf))
     Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
   infof(data, "SSL sending %zu bytes of early data", connssl->earlydata_skip);
-out:
   return result;
 }
 #endif /* WOLFSSL_EARLY_DATA */
