@@ -106,12 +106,6 @@ static void socksd_resetdefaults(void)
   strcpy(s_config.password, "password");
 }
 
-static unsigned short shortval(char *value)
-{
-  unsigned long num = (unsigned long)atol(value);
-  return num & 0xffff;
-}
-
 static void socksd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
@@ -122,6 +116,8 @@ static void socksd_getconfig(void)
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
       char value[260];
+      const char *opt;
+      curl_off_t num;
       if(sscanf(buffer, "%31s %259s", key, value) == 2) {
         if(!strcmp(key, "version")) {
           s_config.version = byteval(value);
@@ -140,7 +136,7 @@ static void socksd_getconfig(void)
           logmsg("backend [%s] set", s_config.addr);
         }
         else if(!strcmp(key, "backendport")) {
-          s_config.port = shortval(value);
+          s_config.port = (unsigned long)atol(value) & 0xffff;
           logmsg("backendport [%d] set", s_config.port);
         }
         else if(!strcmp(key, "user")) {
@@ -754,6 +750,8 @@ static int test_socksd(int argc, char *argv[])
   server_port = 8905;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("socksd IPv4%s\n",
 #ifdef USE_IPV6
@@ -834,7 +832,9 @@ static int test_socksd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        server_port = (unsigned short)atol(argv[arg]);
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          server_port = (unsigned short)num;
         arg++;
       }
     }

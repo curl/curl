@@ -132,12 +132,6 @@ void logmsg(const char *msg, ...)
   }
 }
 
-unsigned char byteval(char *value)
-{
-  unsigned int num = (unsigned int)atoi(value);
-  return num & 0xff;
-}
-
 #ifdef _WIN32
 /* use instead of perror() on generic Windows */
 static void win32_perror(const char *msg)

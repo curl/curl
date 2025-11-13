@@ -81,6 +81,8 @@ static void mqttd_getconfig(void)
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
       char value[32];
+      const char *opt;
+      curl_off_t num;
       if(sscanf(buffer, "%31s %31s", key, value) == 2) {
         if(!strcmp(key, "version")) {
           m_config.version = byteval(value);
@@ -734,6 +736,8 @@ static int test_mqttd(int argc, char *argv[])
   server_port = 1883; /* MQTT default port */
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("mqttd IPv4%s\n",
 #ifdef USE_IPV6
@@ -787,13 +791,13 @@ static int test_mqttd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        int inum = atoi(argv[arg]);
-        if(inum && ((inum < 1025) || (inum > 65535))) {
+        opt = argv[arg];
+        if(curlx_str_number(&opt, &num, 0xffff) || num < 1025) {
           fprintf(stderr, "mqttd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_port = (unsigned short)inum;
+        server_port = (unsigned short)num;
         arg++;
       }
     }

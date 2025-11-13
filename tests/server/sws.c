@@ -2005,6 +2005,8 @@ static int test_sws(int argc, char *argv[])
   serverlogslocked = 0;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       puts("sws IPv4"
 #ifdef USE_IPV6
@@ -2082,13 +2084,13 @@ static int test_sws(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        int inum = atoi(argv[arg]);
-        if(inum && ((inum < 1025) || (inum > 65535))) {
+        opt = argv[arg];
+        if(curlx_str_number(&opt, &num, 0xffff) || num < 1025) {
           fprintf(stderr, "sws: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        port = (unsigned short)inum;
+        port = (unsigned short)num;
         arg++;
       }
     }

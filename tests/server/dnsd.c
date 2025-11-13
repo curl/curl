@@ -399,6 +399,8 @@ static int test_dnsd(int argc, char **argv)
   serverlogslocked = 0;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--verbose", argv[arg])) {
       arg++;
       /* nothing yet */
@@ -450,7 +452,9 @@ static int test_dnsd(int argc, char **argv)
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        port = (unsigned short)atoi(argv[arg]);
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          port = (unsigned short)num;
         arg++;
       }
     }

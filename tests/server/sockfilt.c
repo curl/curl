@@ -1240,6 +1240,8 @@ static int test_sockfilt(int argc, char *argv[])
   server_port = 8999;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("sockfilt IPv4%s\n",
 #ifdef USE_IPV6
@@ -1291,7 +1293,9 @@ static int test_sockfilt(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        server_port = (unsigned short)atol(argv[arg]);
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          server_port = (unsigned short)num;
         arg++;
       }
     }
