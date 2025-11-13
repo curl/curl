@@ -582,20 +582,6 @@ Command line to run.
 If the command spans multiple lines, they are concatenated with a space added
 between them.
 
-Note that the URL that gets passed to the server actually controls what data
-that is returned. The last slash in the URL must be followed by the macoro
-`%TESTNUMBER`. This macro returns the test number, that is used by the
-test-server to load the current test case and return the data that is defined
-within the `<reply><data></data></reply>` section.
-
-If there is no test number found above, the HTTP test server uses the number
-following the last dot in the given hostname (made so that a CONNECT can still
-pass on test number) so that "foo.bar.123" gets treated as test case 123. Also
-use `%TESTNUMBER` here to address the current test case. Alternatively, if an
-IPv6 address is provided to CONNECT, the last hexadecimal group in the address
-is used as the test number. For example the address "[1234::ff]" would be
-treated as test case 255.
-
 Set `type="perl"` to write the test case as a perl script. It implies that
 there is no memory debugging and valgrind gets shut off for this test.
 
