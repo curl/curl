@@ -35,7 +35,7 @@ Vary: Accept-Encoding%CR
 Content-Type: text/html; charset=ISO-8859-1%CR
 Transfer-Encoding: deflate, chunked%CR
 %CR
-%includeexpand %SRCDIR/data/payload-xml%
+%includetext %SRCDIR/data/payload-xml%
 </datacheck>
 
 </reply>
