@@ -308,6 +308,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   int prot_major = 0;
   int prot_minor = 0;
   char *end = strstr(line, end_of_headers);
+  const char *pval;
+  curl_off_t num;
 
   req->callcount++;
 
@@ -391,7 +393,9 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
 
         ptr++; /* skip the slash */
 
-        req->testno = atol(ptr);
+        pval = ptr;
+        if(!curlx_str_number(&pval, &num, INT_MAX))
+          req->testno = (long)num;
 
         if(req->testno > 10000) {
           req->partno = req->testno % 10000;
@@ -450,8 +454,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
             portp = strchr(doc, ':');
 
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
-            const char *pval = portp + 1;
-            curl_off_t num;
+            pval = portp + 1;
             if(curlx_str_number(&pval, &num, 0xffff) ||
                (num <= 0) || (num > 65535))
               logmsg("Invalid CONNECT port received");
@@ -492,8 +495,13 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     /* check for a Testno: header with the test case number */
     char *testno = strstr(line, "\nTestno: ");
     if(testno) {
-      req->testno = atol(&testno[9]);
-      logmsg("Found test number %ld in Testno: header!", req->testno);
+      pval = &testno[9];
+      if(!curlx_str_number(&pval, &num, INT_MAX)) {
+        req->testno = (long)num;
+        logmsg("Found test number %ld in Testno: header!", req->testno);
+      }
+      else
+        logmsg("No Testno: number");
     }
     else {
       logmsg("No Testno: header");
@@ -518,7 +526,9 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
-      req->testno = atol(ptr);
+      pval = ptr;
+      if(!curlx_str_number(&pval, &num, INT_MAX))
+        req->testno = (long)num;
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;
