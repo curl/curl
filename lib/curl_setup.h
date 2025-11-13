@@ -493,7 +493,6 @@
 #    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
 #    undef  fstat
 #    define fstat(fdes,stp)              _fstati64(fdes, stp)
-#    undef  stat
 #    define struct_stat                  struct _stati64
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
