@@ -151,7 +151,7 @@ sub subbase64 {
     }
 
     # include a file, expand space macros
-    $$thing =~ s/%includeexpand ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
+    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
 
     $$thing =~ s/%SP/ /g;    # space
     $$thing =~ s/%TAB/\t/g;  # horizontal tab

@@ -106,10 +106,10 @@ the include instruction:
 
     %include filename%
 
-Or, a variant of the above where certain macros are expanded after inclusion
-(`%CR`, `%SP`, `%TAB`):
+Or, a variant of the above where the file is loaded as a newline-agnostic
+text file, and `%CR`, `%SP`, `%TAB` macros are expanded after inclusion:
 
-    %includeexpand filename%
+    %includetext filename%
 
 ## Conditional lines
 
