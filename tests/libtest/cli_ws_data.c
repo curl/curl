@@ -411,7 +411,7 @@ static void test_ws_data_usage(const char *msg)
 static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
   const char *url;
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch, model = 2;
@@ -472,13 +472,13 @@ static CURLcode test_cli_ws_data(const char *URL)
   }
 
   if(model == 1)
-    result = test_ws_data_m1_echo(url, plen_min, plen_max);
+    res = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
-    result = test_ws_data_m2_echo(url, count, plen_min, plen_max);
+    res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
   curl_global_cleanup();
 
-  return result;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

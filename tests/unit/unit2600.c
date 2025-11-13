@@ -84,7 +84,7 @@ struct test_case {
   int exp_cf6_creations;
   timediff_t min_duration_ms;
   timediff_t max_duration_ms;
-  CURLcode exp_result;
+  CURLcode exp_res;
   const char *pref_family;
 };
 
@@ -96,7 +96,7 @@ struct ai_family_stats {
 };
 
 struct test_result {
-  CURLcode result;
+  CURLcode res;
   struct curltime started;
   struct curltime ended;
   struct ai_family_stats cf4;
@@ -189,13 +189,13 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   struct cf_test_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
   timediff_t created_at;
-  CURLcode result;
+  CURLcode res;
 
   (void)data;
   (void)conn;
   ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
-    result = CURLE_OUT_OF_MEMORY;
+    res = CURLE_OUT_OF_MEMORY;
     goto out;
   }
   ctx->idx = test_idx++;
@@ -224,19 +224,19 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
   ctx->stats->last_created = created_at;
   infof(data, "%04dms: cf[%s] created", (int)created_at, ctx->id);
 
-  result = Curl_cf_create(&cf, &cft_test, ctx);
-  if(result)
+  res = Curl_cf_create(&cf, &cft_test, ctx);
+  if(res)
     goto out;
 
   Curl_expire(data, ctx->fail_delay_ms, EXPIRE_TIMEOUT);
 
 out:
-  *pcf = (!result) ? cf : NULL;
-  if(result) {
+  *pcf = (!res) ? cf : NULL;
+  if(res) {
     free(cf);
     free(ctx);
   }
-  return result;
+  return res;
 }
 
 static void check_result(const struct test_case *tc,
@@ -248,12 +248,12 @@ static void check_result(const struct test_case *tc,
   duration_ms = curlx_timediff_ms(tr->ended, tr->started);
   curl_mfprintf(stderr, "%d: test case took %dms\n", tc->id, (int)duration_ms);
 
-  if(tr->result != tc->exp_result
-    && CURLE_OPERATION_TIMEDOUT != tr->result) {
+  if(tr->res != tc->exp_res
+    && CURLE_OPERATION_TIMEDOUT != tr->res) {
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",
-                  tc->id, tc->exp_result, tr->result);
+                  tc->id, tc->exp_res, tr->res);
     fail(msg);
   }
   if(tr->cf4.creations != tc->exp_cf4_creations) {
@@ -326,7 +326,7 @@ static void test_connect(CURL *easy, const struct test_case *tc)
   tr.cf4.family = "v4";
 
   tr.started = curlx_now();
-  tr.result = curl_easy_perform(easy);
+  tr.res = curl_easy_perform(easy);
   tr.ended = curlx_now();
 
   curl_easy_setopt(easy, CURLOPT_RESOLVE, NULL);

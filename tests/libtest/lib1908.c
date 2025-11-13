@@ -27,7 +27,7 @@
 
 static CURLcode test_lib1908(const char *URL)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode res = TEST_ERR_MAJOR_BAD;
   CURL *curl;
   start_test_timing();
 
@@ -38,13 +38,13 @@ static CURLcode test_lib1908(const char *URL)
     curl_easy_setopt(curl, CURLOPT_URL, URL);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(curl, CURLOPT_ALTSVC, libtest_arg2);
-    ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
 
-    if(!ret) {
+    if(!res) {
       /* make a copy and check that this also has alt-svc activated */
       CURL *curldupe = curl_easy_duphandle(curl);
       if(curldupe) {
-        ret = curl_easy_perform(curldupe);
+        res = curl_easy_perform(curldupe);
         /* we close the second handle first, which makes it store the alt-svc
            file only to get overwritten when the next handle is closed! */
         curl_easy_cleanup(curldupe);
@@ -58,5 +58,5 @@ static CURLcode test_lib1908(const char *URL)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return ret;
+  return res;
 }

@@ -56,7 +56,7 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
   const char *payload;
 
   if(!URL || !libtest_arg2) {
@@ -78,16 +78,16 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-pingpong");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
-    result = curl_easy_perform(curl);
-    curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", result);
-    if(result == CURLE_OK)
-      result = pingpong(curl, payload);
+    res = curl_easy_perform(curl);
+    curl_mfprintf(stderr, "curl_easy_perform() returned %u\n", res);
+    if(res == CURLE_OK)
+      res = pingpong(curl, payload);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return result;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

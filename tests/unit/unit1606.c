@@ -53,7 +53,7 @@ static int runawhile(struct Curl_easy *easy,
 {
   int counter = 1;
   struct curltime now = {1, 0};
-  CURLcode result;
+  CURLcode res;
   int finaltime;
 
   curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
@@ -63,8 +63,8 @@ static int runawhile(struct Curl_easy *easy,
   do {
     /* fake the current transfer speed */
     easy->progress.current_speed = speed;
-    result = Curl_speedcheck(easy, now);
-    if(result)
+    res = Curl_speedcheck(easy, now);
+    if(res)
       break;
     /* step the time */
     now.tv_sec = ++counter;

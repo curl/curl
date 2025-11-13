@@ -109,7 +109,7 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
   CURL *curl = NULL;
   CURLM *multi;
   int transfers = 1; /* we start with one */
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = FALSE;
@@ -126,19 +126,19 @@ static CURLcode test_cli_h2_serverpush(const char *URL)
 
   multi = curl_multi_init();
   if(!multi) {
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
 
   curl = curl_easy_init();
   if(!curl) {
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
 
   if(setup_h2_serverpush(curl, URL)) {
     curl_mfprintf(stderr, "failed\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
 
@@ -189,5 +189,5 @@ cleanup:
 
   curl_global_cleanup();
 
-  return result;
+  return res;
 }

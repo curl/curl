@@ -29,9 +29,9 @@ static CURLcode recv_any(CURL *curl)
   size_t rlen;
   const struct curl_ws_frame *meta;
   char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(result)
-    return result;
+  CURLcode res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  if(res)
+    return res;
 
   curl_mfprintf(stderr, "recv_any: got %zu bytes rflags %x\n", rlen,
                 meta->flags);

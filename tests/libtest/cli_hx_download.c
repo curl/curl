@@ -63,7 +63,7 @@ struct transfer_d {
   int resumed;
   int done;
   int checked_ssl;
-  CURLcode result;
+  CURLcode res;
 };
 
 static size_t transfer_count_d = 1;
@@ -296,7 +296,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   size_t max_host_conns = 0;
   size_t max_total_conns = 0;
   int fresh_connect = 0;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   (void)URL;
 
@@ -307,7 +307,7 @@ static CURLcode test_cli_hx_download(const char *URL)
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
-      result = (CURLcode)2;
+      res = (CURLcode)2;
       goto optcleanup;
     case 'a':
       abort_paused = 1;
@@ -362,14 +362,14 @@ static CURLcode test_cli_hx_download(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
-        result = (CURLcode)1;
+        res = (CURLcode)1;
         goto optcleanup;
       }
       break;
     }
     default:
       usage_hx_download("invalid option");
-      result = (CURLcode)1;
+      res = (CURLcode)1;
       goto optcleanup;
     }
   }
@@ -380,14 +380,14 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   if(test_argc != 1) {
     usage_hx_download("not enough arguments");
-    result = (CURLcode)2;
+    res = (CURLcode)2;
     goto optcleanup;
   }
   url = test_argv[0];
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    result = (CURLcode)3;
+    res = (CURLcode)3;
     goto optcleanup;
   }
 
@@ -397,7 +397,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -410,7 +410,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
 
@@ -438,7 +438,7 @@ static CURLcode test_cli_hx_download(const char *URL)
        setup_hx_download(t->curl, url, t, http_version, host, share,
                          use_earlydata, fresh_connect)) {
       curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-      result = (CURLcode)1;
+      res = (CURLcode)1;
       goto cleanup;
     }
     curl_multi_add_handle(multi, t->curl);
@@ -469,9 +469,9 @@ static CURLcode test_cli_hx_download(const char *URL)
         t = get_transfer_for_easy_d(easy);
         if(t) {
           t->done = 1;
-          t->result = m->data.result;
+          t->res = m->data.result;
           curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
-                        t->idx, t->result);
+                        t->idx, t->res);
           if(use_earlydata) {
             curl_off_t sent;
             curl_easy_getinfo(easy, CURLINFO_EARLYDATA_SENT_T, &sent);
@@ -521,7 +521,7 @@ static CURLcode test_cli_hx_download(const char *URL)
               setup_hx_download(t->curl, url, t, http_version, host, share,
                                 use_earlydata, fresh_connect)) {
               curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-              result = (CURLcode)1;
+              res = (CURLcode)1;
               goto cleanup;
             }
             curl_multi_add_handle(multi, t->curl);
@@ -554,8 +554,8 @@ cleanup:
         curl_easy_cleanup(t->curl);
         t->curl = NULL;
       }
-      if(t->result)
-        result = t->result;
+      if(t->res)
+        res = t->res;
       else /* on success we expect ssl to have been checked */
         assert(t->checked_ssl);
     }
@@ -571,5 +571,5 @@ optcleanup:
 
   free(resolve);
 
-  return result;
+  return res;
 }

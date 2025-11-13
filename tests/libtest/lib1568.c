@@ -27,15 +27,15 @@
 
 static CURLcode test_lib1568(const char *URL)
 {
-  CURLcode ret = TEST_ERR_MAJOR_BAD;
+  CURLcode res = TEST_ERR_MAJOR_BAD;
   CURL *curl;
   curl_off_t port;
 
   if(curlx_str_number(&libtest_arg2, &port, 0xffff))
-    return ret;
+    return res;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK)
-    return ret;
+    return res;
 
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, URL);
@@ -47,10 +47,10 @@ static CURLcode test_lib1568(const char *URL)
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(curl, CURLOPT_PORT, (long)port);
 
-  ret = curl_easy_perform(curl);
+  res = curl_easy_perform(curl);
 
   curl_easy_cleanup(curl);
 
   curl_global_cleanup();
-  return ret;
+  return res;
 }

@@ -44,7 +44,7 @@
 
 struct testparams {
   unsigned int flags; /* ORed flags as above. */
-  CURLcode result; /* Code that should be returned by curl_easy_perform(). */
+  CURLcode res; /* Code that should be returned by curl_easy_perform(). */
 };
 
 static const struct testparams testparams[] = {
@@ -102,14 +102,14 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1L : 0L);
   hasbody = 0;
   res = curl_easy_perform(curl);
-  if(res != p->result) {
+  if(res != p->res) {
     curl_mprintf("%zu: bad error code (%d): resume=%s, fail=%s, http416=%s, "
                  "content-range=%s, expected=%d\n", num, res,
                  (p->flags & F_RESUME) ? "yes": "no",
                  (p->flags & F_FAIL) ? "yes": "no",
                  (p->flags & F_HTTP416) ? "yes": "no",
                  (p->flags & F_CONTENTRANGE) ? "yes": "no",
-                 p->result);
+                 p->res);
     return 1;
   }
   if(hasbody && (p->flags & F_IGNOREBODY)) {

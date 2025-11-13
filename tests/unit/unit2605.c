@@ -36,7 +36,7 @@ static CURLcode test_unit2605(const char *arg)
     curl_off_t filesize;
     curl_off_t start;
     curl_off_t size;
-    CURLcode result;
+    CURLcode res;
   };
 
   int i;
@@ -78,16 +78,16 @@ static CURLcode test_unit2605(const char *arg)
     for(i = 0; list[i].r; i++) {
       curl_off_t start;
       curl_off_t size;
-      CURLcode result;
+      CURLcode res;
       curl_mprintf("%u: '%s' (file size: %" FMT_OFF_T ")\n",
                    i, list[i].r, list[i].filesize);
-      result = Curl_ssh_range(curl, list[i].r, list[i].filesize,
-                              &start, &size);
-      if(result != list[i].result) {
-        curl_mprintf("... returned %d\n", result);
+      res = Curl_ssh_range(curl, list[i].r, list[i].filesize,
+                           &start, &size);
+      if(res != list[i].res) {
+        curl_mprintf("... returned %d\n", res);
         unitfail++;
       }
-      if(!result) {
+      if(!res) {
         if(start != list[i].start) {
           curl_mprintf("... start (%" FMT_OFF_T ") was not %" FMT_OFF_T " \n",
                        start, list[i].start);
