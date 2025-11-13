@@ -34,10 +34,10 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 --mail-rcpt recipient@example.com
 --mail-from sender@example.com
 -F "=(;type=multipart/alternative"
--F "= %LTbody%GTThis is the html version%LT/body%GT;headers=X-test1: this is a header;type=text/html;headers=X-test2: this is another header "
+-F "= <body>This is the html version</body>;headers=X-test1: this is a header;type=text/html;headers=X-test2: this is another header "
 -F "=This is the plain text version;headers=@%LOGDIR/headers%TESTNUMBER"
 -F "=)"
--F "=@%LOGDIR/test%TESTNUMBER.txt;headers=%LT%LOGDIR/headers%TESTNUMBER"
+-F "=@%LOGDIR/test%TESTNUMBER.txt;headers=<%LOGDIR/headers%TESTNUMBER"
 -H "From: different"
 -H "To: another"
 -H "Reply-To: %LTfollowup@example.com%GT"

@@ -28,7 +28,7 @@ IMAP APPEND multipart using mime API
 <command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
 -F "=(;type=multipart/alternative"
--F "= %LTbody%GTThis is the html version%LT/body%GT;type=text/html"
+-F "= <body>This is the html version</body>;type=text/html"
 -F "=This is the plain text version"
 -F "=)"
 -F "=@%LOGDIR/test%TESTNUMBER.txt"
