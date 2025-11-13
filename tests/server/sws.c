@@ -2105,13 +2105,13 @@ static int test_sws(int argc, char *argv[])
     else if(!strcmp("--keepalive", argv[arg])) {
       arg++;
       if(argc > arg) {
-        int inum = atoi(argv[arg]);
-        if(inum && (inum > 65535)) {
+        opt = argv[arg];
+        if(curlx_str_number(&opt, &num, 0xffff)) {
           fprintf(stderr, "sws: invalid --keepalive argument (%s), must "
                   "be number of seconds\n", argv[arg]);
           return 0;
         }
-        keepalive_secs = (unsigned short)inum;
+        keepalive_secs = (unsigned short)num;
         arg++;
       }
     }
