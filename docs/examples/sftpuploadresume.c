@@ -65,8 +65,7 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
 
     res = curl_easy_perform(curl);
     if(CURLE_OK == res) {
-      res = curl_easy_getinfo(curl,
-                              CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                               &remoteFileSizeByte);
       if(res)
         return -1;
