@@ -53,9 +53,10 @@ static int prereq_callback(void *clientp,
 
 static CURLcode test_lib2082(const char *URL)  /* libprereq */
 {
-  struct prcs prereq_cb;
-  CURLcode ret = CURLE_OK;
+  CURLcode res = TEST_ERR_MAJOR_BAD;
   CURL *curl = NULL;
+
+  struct prcs prereq_cb;
 
   prereq_cb.prereq_retcode = CURL_PREREQFUNC_OK;
   prereq_cb.ipv6 = 0;
@@ -83,11 +84,11 @@ static CURLcode test_lib2082(const char *URL)  /* libprereq */
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     }
 
-    ret = curl_easy_perform(curl);
-    if(ret) {
+    res = curl_easy_perform(curl);
+    if(res) {
       curl_mfprintf(stderr,
                     "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                    __FILE__, __LINE__, ret, curl_easy_strerror(ret));
+                    __FILE__, __LINE__, res, curl_easy_strerror(res));
       goto test_cleanup;
     }
   }
@@ -96,5 +97,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return ret;
+  return res;
 }

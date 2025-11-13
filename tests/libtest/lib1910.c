@@ -27,7 +27,7 @@
 
 static CURLcode test_lib1910(const char *URL)
 {
-  CURLcode ret = CURLE_OK;
+  CURLcode res = TEST_ERR_MAJOR_BAD;
   CURL *curl;
   start_test_timing();
 
@@ -39,9 +39,9 @@ static CURLcode test_lib1910(const char *URL)
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user\nname:pass\nword");
-    ret = curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return ret;
+  return res;
 }
