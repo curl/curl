@@ -1304,13 +1304,13 @@ static int test_sockfilt(int argc, char *argv[])
          doing a passive server-style listening. */
       arg++;
       if(argc > arg) {
-        int inum = atoi(argv[arg]);
-        if(inum && ((inum < 1025) || (inum > 65535))) {
+        opt = argv[arg];
+        if(curlx_str_number(&opt, &num, 0xffff) || num < 1025) {
           fprintf(stderr, "sockfilt: invalid --connect argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_connectport = (unsigned short)inum;
+        server_connectport = (unsigned short)num;
         arg++;
       }
     }
