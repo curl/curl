@@ -38,6 +38,7 @@ CURLX_C = \
   ../../lib/curlx/fopen.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/strerr.c \
+  ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/version_win32.c \
