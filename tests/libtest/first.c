@@ -127,7 +127,7 @@ int cgetopt(int argc, const char * const argv[], const char *optstring)
 #ifdef CURLDEBUG
 static void memory_tracking_init(void)
 {
-  char *env;
+  const char *env;
   /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
   env = getenv("CURL_MEMDEBUG");
   if(env) {
@@ -137,9 +137,9 @@ static void memory_tracking_init(void)
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
   env = getenv("CURL_MEMLIMIT");
   if(env) {
-    long num = atol(env);
-    if(num > 0)
-      curl_dbg_memlimit(num);
+    curl_off_t num;
+    if(!curlx_str_number(&env, &num, LONG_MAX) && num > 0)
+      curl_dbg_memlimit((long)num);
   }
 }
 #else
@@ -215,7 +215,7 @@ int main(int argc, const char **argv)
   CURLcode result;
   entry_func_t entry_func;
   const char *entry_name;
-  char *env;
+  const char *env;
   size_t tmp;
 
   CURLX_SET_BINMODE(stdout);
@@ -271,11 +271,13 @@ int main(int argc, const char **argv)
   if(argc > 5)
     libtest_arg4 = argv[5];
 
+  testnum = 0;
   env = getenv("CURL_TESTNUM");
-  if(env)
-    testnum = atoi(env);
-  else
-    testnum = 0;
+  if(env) {
+    curl_off_t num;
+    if(!curlx_str_number(&env, &num, INT_MAX) && num > 0)
+      testnum = (int)num;
+  }
 
   result = entry_func(URL);
   curl_mfprintf(stderr, "Test ended with result %d\n", result);
