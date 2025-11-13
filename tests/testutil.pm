@@ -110,8 +110,6 @@ sub includefile {
 sub subbase64 {
     my ($thing) = @_;
 
-    $$thing =~ s/%includeexpand ([^%]*)%[\n\r]+/includefile($1)/ge;
-
     # cut out the base64 piece
     while($$thing =~ s/%b64\[(.*?)\]b64%/%%B64%%/i) {
         my $d = $1;
@@ -148,6 +146,9 @@ sub subbase64 {
         my $d2 = $d + 60;
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }
+
+    # include a file, expand space macros
+    $$thing =~ s/%includeexpand ([^%]*)%[\n\r]+/includefile($1)/ge;
 
     $$thing =~ s/%SP/ /g;    # space
     $$thing =~ s/%TAB/\t/g;  # horizontal tab

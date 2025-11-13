@@ -107,7 +107,7 @@ the include instruction:
     %include filename%
 
 Or, a variant of the above where certain macros are expanded after inclusion
-(`%CR`, `%SP`, `%TAB`, `%b64`, `%hex`, `%repeat`, `%days`):
+(`%CR`, `%SP`, `%TAB`):
 
     %includeexpand filename%
 
