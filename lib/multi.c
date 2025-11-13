@@ -424,7 +424,7 @@ static bool multi_admin_update_timer(struct Curl_multi *multi,
 {
   if(multi->admin_timer_active &&
      multi->admin_timeout_ms &&
-     (curlx_timediff(now, multi->admin_timer_start) >=
+     (curlx_timediff_ms(now, multi->admin_timer_start) >=
         multi->admin_timeout_ms)) {
     multi->admin_timer_start = now;
     Curl_expire(multi->admin, multi->admin_timeout_ms, EXPIRE_TIMEOUT);
