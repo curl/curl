@@ -890,7 +890,7 @@ sub scanfile {
                 if(($tlen + $indent) > $plen && ($firstc ne "}")) {
                     checkwarn("CLOSEBRACE",
                               $line, $plen, $file, $prevl,
-                              "Suspicious close brace indentation ($firstc)");
+                              "Suspicious close brace indentation");
                 }
             }
         }
