@@ -1,17 +1,21 @@
-curl and libcurl 8.17.1
+curl and libcurl 8.18.0
 
  Public curl releases:         272
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3536
+ Contributors:                 3537
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o _PROGRESS.md: add the E unit, mention kibibyte [24]
  o asyn-thrdd: release rrname if ares_init_options fails [41]
+ o autotools: drop autoconf <2.59 compatibility code (zz60-xc-ovr) [70]
+ o ccsidcurl: make curl_mime_data_ccsid() use the converted size [74]
+ o cf-https-connect: allocate ctx at first in cf_hc_create() [79]
  o checksrc.pl: detect assign followed by more than one space [26]
  o cmake: adjust defaults for target platforms not supporting shared libs [35]
  o cmake: disable `CURL_CA_PATH` auto-detection if `USE_APPLE_SECTRUST=ON` [16]
@@ -26,39 +30,63 @@ This release includes the following bugfixes:
  o digest_sspi: properly free sspi identity [12]
  o docs: fix checksrc `EQUALSPACE` warnings [21]
  o docs: mention umask need when curl creates files [56]
+ o examples/crawler: fix variable [92]
  o ftp: refactor a piece of code by merging the repeated part [40]
+ o ftp: remove #ifdef for define that is always defined [76]
  o gnutls: report accurate error when TLS-SRP is not built-in [18]
  o gtls: add return checks and optimize the code [2]
  o gtls: skip session resumption when verifystatus is set
+ o hostip: don't store negative lookup on OOM [61]
+ o http: replace atoi use in Curl_http_follow with curlx_str_number [65]
  o INSTALL-CMAKE.md: document static option defaults more [37]
+ o krb5_sspi: unify a part of error handling [80]
  o lib: cleanup for some typos about spaces and code style [3]
  o lib: fix gssapi.h include on IBMi [55]
  o lib: refactor the type of funcs which have useless return and checks [1]
+ o libssh2: cleanup ssh_force_knownhost_key_type [64]
+ o libssh2: replace atoi() in ssh_force_knownhost_key_type [63]
  o m4/sectrust: fix test(1) operator [4]
  o mbedtls: fix potential use of uninitialized `nread` [8]
+ o mk-ca-bundle.pl: use `open()` with argument list to replace backticks [71]
  o mqtt: reject overly big messages [39]
+ o noproxy: replace atoi with curlx_str_number [67]
  o openssl: release ssl_session if sess_reuse_cb fails [43]
  o openssl: remove code handling default version [28]
+ o OS400/ccsidcurl: fix curl_easy_setopt_ccsid for non-converted blobs [94]
+ o OS400/makefile.sh: fix shellcheck warning SC2038 [86]
  o osslq: code readability [5]
+ o progress: show fewer digits [78]
  o pytest: skip H2 tests if feature missing from curl [46]
  o rtmp: fix double-free on URL parse errors [27]
  o rtmp: precaution for a potential integer truncation [54]
+ o rustls: fix a potential memory issue [81]
  o schannel: fix memory leak of cert_store_path on four error paths [23]
+ o scripts: fix shellcheck SC2046 warnings [90]
+ o scripts: use end-of-options marker in `find -exec` commands [87]
  o setopt: disable CURLOPT_HAPROXY_CLIENT_IP on NULL [30]
  o setopt: when setting bad protocols, don't store them [9]
+ o sftp: fix range downloads in both SSH backends [82]
+ o socks_sspi: use free() not FreeContextBuffer() [93]
+ o telnet: replace atoi for BINARY handling with curlx_str_number [66]
+ o test2045: replace HTML multi-line comment markup with `#` comments [36]
+ o test363: delete stray character (typo) from a section tag [52]
  o tests/data: replace hard-coded test numbers with `%TESTNUMBER` [33]
+ o tests/data: support using native newlines on disk, drop `.gitattributes` [91]
  o tests/server: do not fall back to original data file in `test2fopen()` [32]
  o tftp: release filename if conn_get_remote_addr fails [42]
  o tool: consider (some) curl_easy_setopt errors fatal [7]
  o tool_help: add checks to avoid unsigned wrap around [14]
  o tool_ipfs: check return codes better [20]
  o tool_operate: remove redundant condition [19]
+ o tool_operate: use curlx_str_number intead of atoi [68]
  o tool_paramhlp: refuse --proto remove all protocols [10]
  o urlapi: fix mem-leaks in curl_url_get error paths [22]
+ o verify-release: update to avoid shellcheck warning SC2034 [88]
  o vtls: fix CURLOPT_CAPATH use [51]
  o vtls: handle possible malicious certs_num from peer [53]
  o wcurl: import v2025.11.09 [29]
  o wolfSSL: able to differentiate between IP and DNS in alt names [13]
+ o wolfssl: avoid NULL dereference in OOM situation [77]
 
 This release includes the following known bugs:
 
@@ -82,10 +110,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kirillov, Brad King, Dan Fandrich, Daniel Stenberg, Jiyong Yang,
-  Juliusz Sosinowicz, renovate[bot], Samuel Henrique, Stanislav Fort,
-  Stefan Eissing, Thomas Klausner, Viktor Szakats, Xiaoke Wang
-  (13 contributors)
+  Andrew Kirillov, Brad King, Dan Fandrich, Daniel Stenberg,
+  Fd929c2CE5fA on github, Gisle Vanem, Jiyong Yang, Juliusz Sosinowicz,
+  Leonardo Taccari, Patrick Monnerat, Ray Satiro, renovate[bot],
+  Samuel Henrique, Stanislav Fort, Stefan Eissing, Thomas Klausner,
+  Viktor Szakats, Xiaoke Wang
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -110,6 +140,7 @@ References to bug reports and discussions on issues:
  [21] = https://curl.se/bug/?i=19379
  [22] = https://curl.se/bug/?i=19440
  [23] = https://curl.se/bug/?i=19423
+ [24] = https://curl.se/bug/?i=19502
  [25] = https://curl.se/bug/?i=19439
  [26] = https://curl.se/bug/?i=19375
  [27] = https://curl.se/bug/?i=19438
@@ -119,6 +150,7 @@ References to bug reports and discussions on issues:
  [32] = https://curl.se/bug/?i=19429
  [33] = https://curl.se/bug/?i=19427
  [35] = https://curl.se/bug/?i=19420
+ [36] = https://curl.se/bug/?i=19498
  [37] = https://curl.se/bug/?i=19419
  [39] = https://curl.se/bug/?i=19415
  [40] = https://curl.se/bug/?i=19411
@@ -131,7 +163,33 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=19404
  [50] = https://curl.se/bug/?i=19406
  [51] = https://curl.se/bug/?i=19401
+ [52] = https://curl.se/bug/?i=19490
  [53] = https://curl.se/bug/?i=19397
  [54] = https://curl.se/bug/?i=19399
  [55] = https://curl.se/bug/?i=19336
  [56] = https://curl.se/bug/?i=19396
+ [61] = https://curl.se/bug/?i=19484
+ [63] = https://curl.se/bug/?i=19479
+ [64] = https://curl.se/bug/?i=19479
+ [65] = https://curl.se/bug/?i=19478
+ [66] = https://curl.se/bug/?i=19477
+ [67] = https://curl.se/bug/?i=19475
+ [68] = https://curl.se/bug/?i=19480
+ [70] = https://curl.se/bug/?i=19464
+ [71] = https://curl.se/bug/?i=19461
+ [74] = https://curl.se/bug/?i=19465
+ [76] = https://curl.se/bug/?i=19463
+ [77] = https://curl.se/bug/?i=19459
+ [78] = https://curl.se/bug/?i=19431
+ [79] = https://curl.se/bug/?i=19454
+ [80] = https://curl.se/bug/?i=19452
+ [81] = https://curl.se/bug/?i=19425
+ [82] = https://curl.se/bug/?i=19460
+ [86] = https://curl.se/bug/?i=19451
+ [87] = https://curl.se/bug/?i=19450
+ [88] = https://curl.se/bug/?i=19449
+ [90] = https://curl.se/bug/?i=19432
+ [91] = https://curl.se/bug/?i=19398
+ [92] = https://curl.se/bug/?i=19446
+ [93] = https://curl.se/bug/?i=19445
+ [94] = https://curl.se/bug/?i=19444
