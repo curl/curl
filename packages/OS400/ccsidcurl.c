@@ -296,7 +296,7 @@ curl_easy_escape_ccsid(CURL *handle, const char *string, int length,
     /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
     return (char *) NULL;
-    }
+  }
 
   s = dynconvert(ASCII_CCSID, string, length ? length : -1, sccsid, NULL);
 
@@ -327,7 +327,7 @@ curl_easy_unescape_ccsid(CURL *handle, const char *string, int length,
     /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
     return (char *) NULL;
-    }
+  }
 
   s = dynconvert(ASCII_CCSID, string, length ? length : -1, sccsid, NULL);
 
@@ -728,7 +728,7 @@ Curl_formadd_convert(struct curl_forms *forms,
   if(l < 0) {
     free(cp);
     return -1;
-    }
+  }
 
   cp2 = realloc(cp, l);         /* Shorten buffer to the string size. */
 
@@ -810,10 +810,10 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!tforms) {
         result = CURL_FORMADD_MEMORY;
         break;
-        }
+      }
 
       lforms = tforms;
-      }
+    }
 
     /* Get next option. */
 
@@ -823,7 +823,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       option = forms->option;
       value = forms->value;
       forms++;
-      }
+    }
     else {
       /* Get option from arguments. */
 
@@ -845,7 +845,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!forms) {
         forms = va_arg(arg, struct curl_forms *);
         continue;
-        }
+      }
 
       result = CURL_FORMADD_ILLEGAL_ARRAY;
       break;
@@ -862,11 +862,11 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!forms) {
         value = va_arg(arg, char *);
         nameccsid = (unsigned int) va_arg(arg, long);
-        }
+      }
       else {
         nameccsid = (unsigned int) forms->value;
         forms++;
-        }
+      }
 
       break;
 
@@ -879,11 +879,11 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!forms) {
         value = va_arg(arg, char *);
         contentccsid = (unsigned int) va_arg(arg, long);
-        }
+      }
       else {
         contentccsid = (unsigned int) forms->value;
         forms++;
-        }
+      }
 
       break;
 
@@ -942,7 +942,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(Curl_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0) {
         result = CURL_FORMADD_MEMORY;
         break;
-        }
+      }
 
       contentx = -1;
       lengthx = -1;
@@ -954,16 +954,16 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!Curl_is_formadd_string(option)) {
         result = CURL_FORMADD_UNKNOWN_OPTION;
         break;
-        }
+      }
 
       if(!forms) {
         value = va_arg(arg, char *);
         ccsid = (unsigned int) va_arg(arg, long);
-        }
+      }
       else {
         ccsid = (unsigned int) forms->value;
         forms++;
-        }
+      }
 
       /* Do the conversion. */
 
@@ -972,17 +972,17 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(Curl_formadd_convert(lforms, nargs, -1, ccsid) < 0) {
         result = CURL_FORMADD_MEMORY;
         break;
-        }
+      }
 
       value = lforms[nargs].value;
-      }
+    }
 
     if(result != CURL_FORMADD_OK)
       break;
 
     lforms[nargs].value = value;
     lforms[nargs++].option = option;
-    }
+  }
 
   va_end(arg);
 
@@ -1047,7 +1047,7 @@ Curl_formget_callback_ccsid(void *arg, const char *buf, size_t len)
   if(l < 0) {
     free(b);
     return (size_t) -1;
-    }
+  }
 
   ret = (*p->append)(p->arg, b, l);
   free(b);

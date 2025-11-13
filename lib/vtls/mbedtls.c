@@ -1350,6 +1350,7 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(nread > 0)
     *pnread = (size_t)nread;
   else {
+    char errorbuf[128];
     CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
                 buffersize, -nread);
     switch(nread) {
@@ -1369,13 +1370,11 @@ static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
       result = CURLE_OK;
       break;
-    default: {
-      char errorbuf[128];
+    default:
       mbedtls_strerror(nread, errorbuf, sizeof(errorbuf));
       failf(data, "ssl_read returned: (-0x%04X) %s", -nread, errorbuf);
       result = CURLE_RECV_ERROR;
       break;
-    }
     }
   }
   return result;

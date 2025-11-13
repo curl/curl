@@ -716,7 +716,7 @@ static CURLcode http2_send_ping(struct Curl_cfilter *cf,
   if(rc) {
     failf(data, "nghttp2_submit_ping() failed: %s(%d)",
           nghttp2_strerror(rc), rc);
-   return CURLE_HTTP2;
+    return CURLE_HTTP2;
   }
 
   rc = nghttp2_session_send(ctx->h2);
