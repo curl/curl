@@ -81,10 +81,15 @@ static void mqttd_getconfig(void)
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
       char value[32];
+      const char *pval;
+      curl_off_t num;
       if(sscanf(buffer, "%31s %31s", key, value) == 2) {
         if(!strcmp(key, "version")) {
-          m_config.version = byteval(value);
-          logmsg("version [%d] set", m_config.version);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            m_config.version = (unsigned char)num;
+            logmsg("version [%d] set", m_config.version);
+          }
         }
         else if(!strcmp(key, "PUBLISH-before-SUBACK")) {
           logmsg("PUBLISH-before-SUBACK set");
@@ -95,12 +100,18 @@ static void mqttd_getconfig(void)
           m_config.short_publish = TRUE;
         }
         else if(!strcmp(key, "error-CONNACK")) {
-          m_config.error_connack = byteval(value);
-          logmsg("error-CONNACK = %d", m_config.error_connack);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            m_config.error_connack = (unsigned char)num;
+            logmsg("error-CONNACK = %d", m_config.error_connack);
+          }
         }
         else if(!strcmp(key, "Testnum")) {
-          m_config.testnum = atoi(value);
-          logmsg("testnum = %d", m_config.testnum);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, INT_MAX)) {
+            m_config.testnum = (int)num;
+            logmsg("testnum = %d", m_config.testnum);
+          }
         }
         else if(!strcmp(key, "excessive-remaining")) {
           logmsg("excessive-remaining set");
@@ -734,6 +745,8 @@ static int test_mqttd(int argc, char *argv[])
   server_port = 1883; /* MQTT default port */
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("mqttd IPv4%s\n",
 #ifdef USE_IPV6
@@ -787,13 +800,13 @@ static int test_mqttd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        int inum = atoi(argv[arg]);
-        if(inum && ((inum < 1025) || (inum > 65535))) {
+        opt = argv[arg];
+        if(curlx_str_number(&opt, &num, 0xffff) || num < 1025) {
           fprintf(stderr, "mqttd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        server_port = (unsigned short)inum;
+        server_port = (unsigned short)num;
         arg++;
       }
     }

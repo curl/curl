@@ -106,12 +106,6 @@ static void socksd_resetdefaults(void)
   strcpy(s_config.password, "password");
 }
 
-static unsigned short shortval(char *value)
-{
-  unsigned long num = (unsigned long)atol(value);
-  return num & 0xffff;
-}
-
 static void socksd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
@@ -122,26 +116,40 @@ static void socksd_getconfig(void)
     while(fgets(buffer, sizeof(buffer), fp)) {
       char key[32];
       char value[260];
+      const char *pval;
+      curl_off_t num;
       if(sscanf(buffer, "%31s %259s", key, value) == 2) {
         if(!strcmp(key, "version")) {
-          s_config.version = byteval(value);
-          logmsg("version [%d] set", s_config.version);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.version = (unsigned char)num;
+            logmsg("version [%d] set", s_config.version);
+          }
         }
         else if(!strcmp(key, "nmethods_min")) {
-          s_config.nmethods_min = byteval(value);
-          logmsg("nmethods_min [%d] set", s_config.nmethods_min);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.nmethods_min = (unsigned char)num;
+            logmsg("nmethods_min [%d] set", s_config.nmethods_min);
+          }
         }
         else if(!strcmp(key, "nmethods_max")) {
-          s_config.nmethods_max = byteval(value);
-          logmsg("nmethods_max [%d] set", s_config.nmethods_max);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.nmethods_max = (unsigned char)num;
+            logmsg("nmethods_max [%d] set", s_config.nmethods_max);
+          }
         }
         else if(!strcmp(key, "backend")) {
           strcpy(s_config.addr, value);
           logmsg("backend [%s] set", s_config.addr);
         }
         else if(!strcmp(key, "backendport")) {
-          s_config.port = shortval(value);
-          logmsg("backendport [%d] set", s_config.port);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xffff)) {
+            s_config.port = (unsigned short)num;
+            logmsg("backendport [%d] set", s_config.port);
+          }
         }
         else if(!strcmp(key, "user")) {
           strcpy(s_config.user, value);
@@ -157,12 +165,18 @@ static void socksd_getconfig(void)
            o  X'02' USERNAME/PASSWORD
         */
         else if(!strcmp(key, "method")) {
-          s_config.responsemethod = byteval(value);
-          logmsg("method [%d] set", s_config.responsemethod);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.responsemethod = (unsigned char)num;
+            logmsg("method [%d] set", s_config.responsemethod);
+          }
         }
         else if(!strcmp(key, "response")) {
-          s_config.connectrep = byteval(value);
-          logmsg("response [%d] set", s_config.connectrep);
+          pval = value;
+          if(!curlx_str_number(&pval, &num, 0xff)) {
+            s_config.connectrep = (unsigned char)num;
+            logmsg("response [%d] set", s_config.connectrep);
+          }
         }
       }
     }
@@ -754,6 +768,8 @@ static int test_socksd(int argc, char *argv[])
   server_port = 8905;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("socksd IPv4%s\n",
 #ifdef USE_IPV6
@@ -786,8 +802,12 @@ static int test_socksd(int argc, char *argv[])
     }
     else if(!strcmp("--backendport", argv[arg])) {
       arg++;
-      if(argc > arg)
-        backendport = (unsigned short)atoi(argv[arg++]);
+      if(argc > arg) {
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          backendport = (unsigned short)num;
+        arg++;
+      }
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
@@ -834,7 +854,9 @@ static int test_socksd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        server_port = (unsigned short)atol(argv[arg]);
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          server_port = (unsigned short)num;
         arg++;
       }
     }

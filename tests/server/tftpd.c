@@ -561,6 +561,8 @@ static int test_tftpd(int argc, char **argv)
   serverlogslocked = 0;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("tftpd IPv4%s\n",
 #ifdef USE_IPV6
@@ -608,7 +610,9 @@ static int test_tftpd(int argc, char **argv)
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        port = (unsigned short)atol(argv[arg]);
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          port = (unsigned short)num;
         arg++;
       }
     }
@@ -1095,6 +1099,8 @@ static int validate_access(struct testcase *test,
     char partbuf[80]="data";
     long partno;
     long testno;
+    const char *pval;
+    curl_off_t num;
     FILE *stream;
 
     ptr++; /* skip the slash */
@@ -1104,7 +1110,13 @@ static int validate_access(struct testcase *test,
       ptr++;
 
     /* get the number */
-    testno = atol(ptr);
+    pval = ptr;
+    if(!curlx_str_number(&pval, &num, INT_MAX))
+      testno = (long)num;
+    else {
+      logmsg("tftpd: failed to read the test number from '%s'", filename);
+      return TFTP_EACCESS;
+    }
 
     if(testno > 10000) {
       partno = testno % 10000;

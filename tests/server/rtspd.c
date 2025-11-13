@@ -165,6 +165,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
             &prot_major,
             &prot_minor) == 5) {
     char *ptr;
+    const char *pval;
+    curl_off_t testnum;
 
     if(!strcmp(prot_str, "HTTP")) {
       req->protocol = RPROT_HTTP;
@@ -211,7 +213,14 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       while(*ptr && !ISDIGIT(*ptr))
         ptr++;
 
-      req->testno = atol(ptr);
+      pval = ptr;
+      if(!curlx_str_number(&pval, &testnum, INT_MAX))
+        req->testno = (long)testnum;
+      else {
+        req->protocol = RPROT_NONE;
+        logmsg("rtspd: failed to read the test number from '%s'", doc);
+        return 1;
+      }
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;
@@ -359,8 +368,13 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1)))
-            req->testno = atol(portp + 1);
+          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
+            pval = portp + 1;
+            if(!curlx_str_number(&pval, &testnum, INT_MAX))
+              req->testno = (long)testnum;
+            else
+              req->testno = DOCNUMBER_CONNECT;
+          }
           else
             req->testno = DOCNUMBER_CONNECT;
         }
@@ -1006,6 +1020,8 @@ static int test_rtspd(int argc, char *argv[])
   serverlogslocked = 0;
 
   while(argc > arg) {
+    const char *opt;
+    curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("rtspd IPv4%s"
              "\n"
@@ -1055,7 +1071,9 @@ static int test_rtspd(int argc, char *argv[])
     else if(!strcmp("--port", argv[arg])) {
       arg++;
       if(argc > arg) {
-        port = (unsigned short)atol(argv[arg]);
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          port = (unsigned short)num;
         arg++;
       }
     }
