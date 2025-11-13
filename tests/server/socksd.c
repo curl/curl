@@ -802,8 +802,12 @@ static int test_socksd(int argc, char *argv[])
     }
     else if(!strcmp("--backendport", argv[arg])) {
       arg++;
-      if(argc > arg)
-        backendport = (unsigned short)atoi(argv[arg++]);
+      if(argc > arg) {
+        opt = argv[arg];
+        if(!curlx_str_number(&opt, &num, 0xffff))
+          backendport = (unsigned short)num;
+        arg++;
+      }
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
