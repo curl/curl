@@ -165,6 +165,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
             &prot_major,
             &prot_minor) == 5) {
     char *ptr;
+    const char *pval;
+    curl_off_t testnum;
 
     if(!strcmp(prot_str, "HTTP")) {
       req->protocol = RPROT_HTTP;
@@ -186,8 +188,6 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     /* get the number after it */
     if(ptr) {
       FILE *stream;
-      const char *pval;
-      curl_off_t testnum;
 
       if((strlen(doc) + strlen(request)) < 200)
         logmsg("Got request: %s %s %s/%d.%d",
@@ -364,8 +364,13 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           /* if the host name starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
-          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1)))
-            req->testno = atol(portp + 1);
+          if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
+            pval = portp + 1;
+            if(!curlx_str_number(&pval, &testnum, INT_MAX))
+              req->testno = (long)testnum;
+            else
+              req->testno = DOCNUMBER_CONNECT;
+          }
           else
             req->testno = DOCNUMBER_CONNECT;
         }
