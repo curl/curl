@@ -78,7 +78,7 @@ This release includes the following bugfixes:
  o tool_help: add checks to avoid unsigned wrap around [14]
  o tool_ipfs: check return codes better [20]
  o tool_operate: remove redundant condition [19]
- o tool_operate: use curlx_str_number intead of atoi [68]
+ o tool_operate: use curlx_str_number instead of atoi [68]
  o tool_paramhlp: refuse --proto remove all protocols [10]
  o urlapi: fix mem-leaks in curl_url_get error paths [22]
  o verify-release: update to avoid shellcheck warning SC2034 [88]
