@@ -141,8 +141,9 @@ static CURLcode url_proto_and_rewrite(char **url,
       curl_url_set(uh, CURLUPART_URL, *url,
                    CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(!uc) {
-      if(!curl_url_get(uh, CURLUPART_SCHEME, &schemep,
-                       CURLU_DEFAULT_SCHEME)) {
+      uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                        CURLU_DEFAULT_SCHEME);
+      if(!uc) {
 #ifdef CURL_DISABLE_IPFS
         (void)config;
 #else
@@ -162,6 +163,8 @@ static CURLcode url_proto_and_rewrite(char **url,
           proto = proto_token(schemep);
         curl_free(schemep);
       }
+      else if(uc == CURLUE_OUT_OF_MEMORY)
+        result = CURLE_OUT_OF_MEMORY;
     }
     else if(uc == CURLUE_OUT_OF_MEMORY)
       result = CURLE_OUT_OF_MEMORY;
