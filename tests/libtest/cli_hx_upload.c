@@ -252,6 +252,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
 
   while((ch = cgetopt(test_argc, test_argv, "aefhlm:n:A:F:M:P:r:RS:V:"))
         != -1) {
+    const char *opt = coptarg;
+    curl_off_t num;
     switch(ch) {
     case 'h':
       usage_hx_upload(NULL);
@@ -269,22 +271,27 @@ static CURLcode test_cli_hx_upload(const char *URL)
       announce_length = 1;
       break;
     case 'm':
-      max_parallel = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        max_parallel = (size_t)num;
       break;
     case 'n':
-      transfer_count_u = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        transfer_count_u = (size_t)num;
       break;
     case 'A':
-      abort_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        abort_offset = (size_t)num;
       break;
     case 'F':
-      fail_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        fail_offset = (size_t)num;
       break;
     case 'M':
       method = coptarg;
       break;
     case 'P':
-      pause_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        pause_offset = (size_t)num;
       break;
     case 'r':
       resolve = coptarg;
@@ -293,7 +300,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
       reuse_easy = 1;
       break;
     case 'S':
-      send_total = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        send_total = (size_t)num;
       break;
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
