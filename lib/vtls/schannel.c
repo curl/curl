@@ -2588,8 +2588,11 @@ static int schannel_init(void)
 #endif
   if(p_wine_get_version) {  /* WINE detected */
     const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
+    curl_off_t wine_version_num;
     /* Assume ALPN support with WINE 6.0 or upper */
-    s_win_has_alpn = wine_version && atoi(wine_version) >= 6;
+    s_win_has_alpn = wine_version &&
+       !curlx_str_number(&wine_version, &wine_version_num, ULONG_MAX) &&
+       wine_version_num >= 6;
   }
   else {
     /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
