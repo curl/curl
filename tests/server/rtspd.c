@@ -188,7 +188,6 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
     /* get the number after it */
     if(ptr) {
       FILE *stream;
-
       if((strlen(doc) + strlen(request)) < 200)
         logmsg("Got request: %s %s %s/%d.%d",
                request, doc, prot_str, prot_major, prot_minor);
