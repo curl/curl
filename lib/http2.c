@@ -545,7 +545,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
 
     rclen = populate_binsettings(binsettings, data);
 
-    if(!curlx_sztouz(rclen, &binlen) ||!binlen) {
+    if(!curlx_sztouz(rclen, &binlen) || !binlen) {
       failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
       result = CURLE_FAILED_INIT;
       goto out;
@@ -2178,10 +2178,10 @@ out:
 }
 
 static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               struct h2_stream_ctx *stream,
-                               const void *buf, size_t blen, bool eos,
-                               size_t *pnwritten)
+                                struct Curl_easy *data,
+                                struct h2_stream_ctx *stream,
+                                const void *buf, size_t blen, bool eos,
+                                size_t *pnwritten)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   CURLcode result;
