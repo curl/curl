@@ -217,6 +217,11 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       pval = ptr;
       if(!curlx_str_number(&pval, &testnum, INT_MAX))
         req->testno = (long)testnum;
+      else {
+        req->protocol = RPROT_NONE;
+        logmsg("rtspd: failed to read the test number from '%s'", doc);
+        return 1;
+      }
 
       if(req->testno > 10000) {
         req->partno = req->testno % 10000;

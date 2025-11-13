@@ -1099,6 +1099,8 @@ static int validate_access(struct testcase *test,
     char partbuf[80]="data";
     long partno;
     long testno;
+    const char *pval;
+    curl_off_t testnum;
     FILE *stream;
 
     ptr++; /* skip the slash */
@@ -1108,7 +1110,13 @@ static int validate_access(struct testcase *test,
       ptr++;
 
     /* get the number */
-    testno = atol(ptr);
+    pval = ptr;
+    if(!curlx_str_number(&pval, &testnum, INT_MAX))
+      testno = (long)testnum;
+    else {
+      logmsg("tftpd: failed to read the test number from '%s'", filename);
+      return TFTP_EACCESS;
+    }
 
     if(testno > 10000) {
       partno = testno % 10000;
