@@ -1100,7 +1100,7 @@ static int validate_access(struct testcase *test,
     long partno;
     long testno;
     const char *pval;
-    curl_off_t testnum;
+    curl_off_t num;
     FILE *stream;
 
     ptr++; /* skip the slash */
@@ -1111,8 +1111,8 @@ static int validate_access(struct testcase *test,
 
     /* get the number */
     pval = ptr;
-    if(!curlx_str_number(&pval, &testnum, INT_MAX))
-      testno = (long)testnum;
+    if(!curlx_str_number(&pval, &num, INT_MAX))
+      testno = (long)num;
     else {
       logmsg("tftpd: failed to read the test number from '%s'", filename);
       return TFTP_EACCESS;
