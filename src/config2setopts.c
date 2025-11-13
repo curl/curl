@@ -137,30 +137,34 @@ static CURLcode url_proto_and_rewrite(char **url,
   DEBUGASSERT(url && *url);
   if(uh) {
     char *schemep = NULL;
-    if(!curl_url_set(uh, CURLUPART_URL, *url,
-                     CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME) &&
-       !curl_url_get(uh, CURLUPART_SCHEME, &schemep,
-                     CURLU_DEFAULT_SCHEME)) {
+    CURLUcode uc =
+      curl_url_set(uh, CURLUPART_URL, *url,
+                   CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
+    if(!uc) {
+      if(!curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                       CURLU_DEFAULT_SCHEME)) {
 #ifdef CURL_DISABLE_IPFS
-      (void)config;
+        (void)config;
 #else
-      if(curl_strequal(schemep, proto_ipfs) ||
-         curl_strequal(schemep, proto_ipns)) {
-        result = ipfs_url_rewrite(uh, schemep, url, config);
-        /* short-circuit proto_token, we know it is ipfs or ipns */
-        if(curl_strequal(schemep, proto_ipfs))
-          proto = proto_ipfs;
-        else if(curl_strequal(schemep, proto_ipns))
-          proto = proto_ipns;
-        if(result)
-          config->synthetic_error = TRUE;
-      }
-      else
+        if(curl_strequal(schemep, proto_ipfs) ||
+           curl_strequal(schemep, proto_ipns)) {
+          result = ipfs_url_rewrite(uh, schemep, url, config);
+          /* short-circuit proto_token, we know it is ipfs or ipns */
+          if(curl_strequal(schemep, proto_ipfs))
+            proto = proto_ipfs;
+          else if(curl_strequal(schemep, proto_ipns))
+            proto = proto_ipns;
+          if(result)
+            config->synthetic_error = TRUE;
+        }
+        else
 #endif /* !CURL_DISABLE_IPFS */
-        proto = proto_token(schemep);
-
-      curl_free(schemep);
+          proto = proto_token(schemep);
+        curl_free(schemep);
+      }
     }
+    else if(uc == CURLUE_OUT_OF_MEMORY)
+      result = CURLE_OUT_OF_MEMORY;
     curl_url_cleanup(uh);
   }
   else
