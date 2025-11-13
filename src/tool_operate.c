@@ -2287,17 +2287,27 @@ CURLcode operate(int argc, argv_item_t argv[])
         }
 
         if(!result) {
-          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-          curl_share_setopt(share, CURLSHOPT_SHARE,
-                            CURL_LOCK_DATA_SSL_SESSION);
+          CURLSHcode shres = curl_share_setopt(share, CURLSHOPT_SHARE,
+                                               CURL_LOCK_DATA_COOKIE);
+          if(!shres)
+            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
+                                      CURL_LOCK_DATA_DNS);
+          if(!shres)
+            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
+                                      CURL_LOCK_DATA_SSL_SESSION);
           /* Running parallel, use the multi connection cache */
-          if(!global->parallel)
-            curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
-          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
-          curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
-
-          if(global->ssl_sessions && feature_ssls_export)
+          if(!global->parallel && !shres)
+            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
+                                      CURL_LOCK_DATA_CONNECT);
+          if(!shres)
+            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
+                                      CURL_LOCK_DATA_PSL);
+          if(!shres)
+            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
+                                      CURL_LOCK_DATA_HSTS);
+          if(shres)
+            result = CURLE_FAILED_INIT;
+          else if(global->ssl_sessions && feature_ssls_export)
             result = tool_ssls_load(global->first, share,
                                     global->ssl_sessions);
 
