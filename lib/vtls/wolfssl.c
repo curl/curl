@@ -868,9 +868,9 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     }
   }
   else {
-   /* We never share the CTX's store, use it. */
-   WOLFSSL_X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ssl_ctx);
-   result = wssl_populate_x509_store(cf, data, store, wssl);
+    /* We never share the CTX's store, use it. */
+    WOLFSSL_X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ssl_ctx);
+    result = wssl_populate_x509_store(cf, data, store, wssl);
   }
 
   return result;
@@ -1389,8 +1389,8 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
         }
       }
       else {
-       trying_ech_now = 1;
-       infof(data, "ECH: ECHConfig from command line");
+        trying_ech_now = 1;
+        infof(data, "ECH: ECHConfig from command line");
       }
     }
     else {

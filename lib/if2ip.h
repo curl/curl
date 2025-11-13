@@ -62,15 +62,15 @@ struct ifreq {
     char ifrn_name[IFNAMSIZ]; /* if name, e.g. "en0" */
   } ifr_ifrn;
 
- union {
-   struct sockaddr ifru_addr;
-   struct sockaddr ifru_broadaddr;
-   struct sockaddr ifru_netmask;
-   struct sockaddr ifru_hwaddr;
-   short ifru_flags;
-   int ifru_metric;
-   int ifru_mtu;
- } ifr_ifru;
+  union {
+    struct sockaddr ifru_addr;
+    struct sockaddr ifru_broadaddr;
+    struct sockaddr ifru_netmask;
+    struct sockaddr ifru_hwaddr;
+    short ifru_flags;
+    int ifru_metric;
+    int ifru_mtu;
+  } ifr_ifru;
 };
 
 /* This define exists to avoid an extra #ifdef INTERIX in the C code. */
