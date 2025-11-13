@@ -2200,6 +2200,36 @@ static CURLcode run_all_transfers(CURLSH *share,
   return result;
 }
 
+static CURLcode share_setopt(CURLSH *share, int opt)
+{
+  CURLSHcode shres = curl_share_setopt(share, CURLSHOPT_SHARE, opt);
+  if(!shres || (shres == CURLSHE_NOT_BUILT_IN))
+    return CURLE_OK;
+  return CURLE_FAILED_INIT;
+}
+
+static CURLcode share_setup(CURLSH *share)
+{
+  CURLcode result = CURLE_OK;
+  int i;
+  static int options[7] = {
+    CURL_LOCK_DATA_COOKIE,
+    CURL_LOCK_DATA_DNS,
+    CURL_LOCK_DATA_SSL_SESSION,
+    CURL_LOCK_DATA_PSL,
+    CURL_LOCK_DATA_HSTS,
+    0, /* 5 might be set below */
+    0
+  };
+  /* Running parallel, use the multi connection cache */
+  if(!global->parallel)
+    options[5] = CURL_LOCK_DATA_CONNECT;
+  for(i = 0; !result && options[i]; i++)
+    result = share_setopt(share, options[i]);
+  return result;
+}
+
+
 CURLcode operate(int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
@@ -2286,61 +2316,42 @@ CURLcode operate(int argc, argv_item_t argv[])
           result = CURLE_OUT_OF_MEMORY;
         }
 
+        if(!result)
+          result = share_setup(share);
+
+        if(!result && global->ssl_sessions && feature_ssls_export)
+          result = tool_ssls_load(global->first, share,
+                                  global->ssl_sessions);
+
         if(!result) {
-          CURLSHcode shres = curl_share_setopt(share, CURLSHOPT_SHARE,
-                                               CURL_LOCK_DATA_COOKIE);
-          if(!shres)
-            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
-                                      CURL_LOCK_DATA_DNS);
-          if(!shres)
-            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
-                                      CURL_LOCK_DATA_SSL_SESSION);
-          /* Running parallel, use the multi connection cache */
-          if(!global->parallel && !shres)
-            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
-                                      CURL_LOCK_DATA_CONNECT);
-          if(!shres)
-            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
-                                      CURL_LOCK_DATA_PSL);
-          if(!shres)
-            shres = curl_share_setopt(share, CURLSHOPT_SHARE,
-                                      CURL_LOCK_DATA_HSTS);
-          if(shres)
-            result = CURLE_FAILED_INIT;
-          else if(global->ssl_sessions && feature_ssls_export)
-            result = tool_ssls_load(global->first, share,
-                                    global->ssl_sessions);
+          /* Get the required arguments for each operation */
+          do {
+            result = get_args(operation, count++);
 
-          if(!result) {
-            /* Get the required arguments for each operation */
-            do {
-              result = get_args(operation, count++);
+            operation = operation->next;
+          } while(!result && operation);
 
-              operation = operation->next;
-            } while(!result && operation);
+          /* Set the current operation pointer */
+          global->current = global->first;
 
-            /* Set the current operation pointer */
-            global->current = global->first;
+          /* now run! */
+          result = run_all_transfers(share, result);
 
-            /* now run! */
-            result = run_all_transfers(share, result);
-
-            if(global->ssl_sessions && feature_ssls_export) {
-              CURLcode r2 = tool_ssls_save(global->first, share,
-                                           global->ssl_sessions);
-              if(r2 && !result)
-                result = r2;
-            }
+          if(global->ssl_sessions && feature_ssls_export) {
+            CURLcode r2 = tool_ssls_save(global->first, share,
+                                         global->ssl_sessions);
+            if(r2 && !result)
+              result = r2;
           }
+        }
 
-          curl_share_cleanup(share);
-          if(global->libcurl) {
-            /* Cleanup the libcurl source output */
-            easysrc_cleanup();
+        curl_share_cleanup(share);
+        if(global->libcurl) {
+          /* Cleanup the libcurl source output */
+          easysrc_cleanup();
 
-            /* Dump the libcurl code if previously enabled */
-            dumpeasysrc();
-          }
+          /* Dump the libcurl code if previously enabled */
+          dumpeasysrc();
         }
       }
       else
