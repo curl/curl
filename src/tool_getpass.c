@@ -60,15 +60,12 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   long sts;
   short chan;
 
-  /* MSK, 23-JAN-2004, iosbdef.h was not in VAX V7.2 or CC 6.4  */
-  /* distribution so I created this. May revert back later to */
-  /* struct _iosb iosb;                                        */
-  struct _iosb
-     {
-     short int iosb$w_status; /* status     */
-     short int iosb$w_bcnt;   /* byte count */
-     int       unused;        /* unused     */
-     } iosb;
+  /* iosbdef.h was not in VAX V7.2 or CC 6.4  */
+  struct _isb {
+    short int iosb$w_status; /* status     */
+    short int iosb$w_bcnt;   /* byte count */
+    int unused;              /* unused     */
+  } iosb;
 
   $DESCRIPTOR(ttdesc, "TT");
 
