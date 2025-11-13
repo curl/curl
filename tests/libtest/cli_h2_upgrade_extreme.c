@@ -43,7 +43,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   CURLMsg *msg;
   int msgs_in_queue;
   char range[128];
-  CURLcode result = (CURLcode)1;
+  CURLcode res = (CURLcode)1;
 
   if(!URL) {
     curl_mfprintf(stderr, "need URL as argument\n");
@@ -149,7 +149,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
   } while(running_handles > 0 || start_count);
 
   curl_mfprintf(stderr, "exiting\n");
-  result = CURLE_OK;
+  res = CURLE_OK;
 
 cleanup:
 
@@ -168,5 +168,5 @@ cleanup:
 
   curl_global_cleanup();
 
-  return result;
+  return res;
 }

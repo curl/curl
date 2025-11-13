@@ -57,10 +57,10 @@ static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
   curl_mfprintf(stderr, "\n");
   (void)size;
   if(buffer[0] == 0x89) {
-    CURLcode result;
+    CURLcode res;
     curl_mfprintf(stderr, "send back a simple PONG\n");
-    result = curl_ws_send(curl, pong, 2, &sent, 0, 0);
-    if(result)
+    res = curl_ws_send(curl, pong, 2, &sent, 0, 0);
+    if(res)
       nitems = 0;
   }
   if(nitems != incoming)

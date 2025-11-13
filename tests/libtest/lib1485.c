@@ -29,7 +29,7 @@ struct t1485_transfer_status {
   CURL *curl;
   curl_off_t out_len;
   size_t hd_line;
-  CURLcode result;
+  CURLcode res;
   int http_status;
 };
 
@@ -39,7 +39,7 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
   struct t1485_transfer_status *st = (struct t1485_transfer_status *)userp;
   const char *hd = ptr;
   size_t len = size * nmemb;
-  CURLcode result;
+  CURLcode res;
 
   (void)fwrite(ptr, size, nmemb, stdout);
   ++st->hd_line;
@@ -47,22 +47,22 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
     curl_off_t clen;
     long httpcode = 0;
     /* end of a response */
-    result = curl_easy_getinfo(st->curl, CURLINFO_RESPONSE_CODE, &httpcode);
+    res = curl_easy_getinfo(st->curl, CURLINFO_RESPONSE_CODE, &httpcode);
     curl_mfprintf(stderr, "header_callback, get status: %ld, %d\n",
-                  httpcode, result);
+                  httpcode, res);
     if(httpcode < 100 || httpcode >= 1000) {
       curl_mfprintf(stderr, "header_callback, invalid status: %ld, %d\n",
-                    httpcode, result);
+                    httpcode, res);
       return CURLE_WRITE_ERROR;
     }
     st->http_status = (int)httpcode;
     if(st->http_status >= 200 && st->http_status < 300) {
-      result = curl_easy_getinfo(st->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                                 &clen);
+      res = curl_easy_getinfo(st->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                              &clen);
       curl_mfprintf(stderr, "header_callback, info Content-Length: "
-                    "%" CURL_FORMAT_CURL_OFF_T ", %d\n", clen, result);
-      if(result) {
-        st->result = result;
+                    "%" CURL_FORMAT_CURL_OFF_T ", %d\n", clen, res);
+      if(res) {
+        st->res = res;
         return CURLE_WRITE_ERROR;
       }
       if(clen < 0) {

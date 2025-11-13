@@ -29,7 +29,6 @@ struct t1541_transfer_status {
   CURL *curl;
   int hd_count;
   int bd_count;
-  CURLcode result;
 };
 
 #define KN(a)   a, #a

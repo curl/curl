@@ -86,7 +86,7 @@ static void usage_upload_pausing(const char *msg)
 static CURLcode test_cli_upload_pausing(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
@@ -136,22 +136,22 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   memset(&resolve, 0, sizeof(resolve));
@@ -162,7 +162,7 @@ static CURLcode test_cli_upload_pausing(const char *URL)
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "out of memory\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   /* We want to use our own read function. */
@@ -190,14 +190,14 @@ static CURLcode test_cli_upload_pausing(const char *URL)
      curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb) != CURLE_OK ||
      curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK) {
     curl_mfprintf(stderr, "something unexpected went wrong - bailing out!\n");
-    result = (CURLcode)2;
+    res = (CURLcode)2;
     goto cleanup;
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
 
-  result = curl_easy_perform(curl);
+  res = curl_easy_perform(curl);
 
 cleanup:
 
@@ -210,5 +210,5 @@ cleanup:
     curl_url_cleanup(cu);
   curl_global_cleanup();
 
-  return result;
+  return res;
 }

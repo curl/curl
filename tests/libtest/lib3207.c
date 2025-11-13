@@ -37,7 +37,7 @@
 struct Ctx {
   const char *URL;
   CURLSH *share;
-  CURLcode result;
+  CURLcode res;
   size_t thread_id;
   struct curl_slist *contents;
 };
@@ -109,7 +109,7 @@ static unsigned int test_thread(void *ptr)
   }
 
 test_cleanup:
-  ctx->result = res;
+  ctx->res = res;
   return 0;
 }
 
@@ -192,15 +192,15 @@ static CURLcode test_lib3207(const char *URL)
     ctx[i].share = share;
     ctx[i].URL = URL;
     ctx[i].thread_id = i;
-    ctx[i].result = CURLE_OK;
+    ctx[i].res = CURLE_OK;
     ctx[i].contents = NULL;
   }
 
   execute(share, ctx);
 
   for(i = 0; i < CURL_ARRAYSIZE(ctx); i++) {
-    if(ctx[i].result) {
-      res = ctx[i].result;
+    if(ctx[i].res) {
+      res = ctx[i].res;
     }
     else {
       struct curl_slist *item = ctx[i].contents;
