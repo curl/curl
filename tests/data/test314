@@ -35,7 +35,7 @@ Content-Type: text/html; charset=ISO-8859-1%CR
 Content-Encoding: br%CR
 Content-Length: 1056%CR
 %CR
-%includetext %SRCDIR/data/payload-xml%
+%includetext %SRCDIR/data/data-xml1%
 </datacheck>
 
 </reply>
