@@ -229,7 +229,7 @@ sub loadtest {
 
     if(open(my $xmlh, "<", "$file")) {
         if($original) {
-            binmode $xmlh, ':crlf'
+            binmode $xmlh, ':crlf';
         }
         else {
             binmode $xmlh; # for crapage systems, use binary
