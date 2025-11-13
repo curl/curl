@@ -36,6 +36,10 @@ static CURLcode test_lib591(const char *URL)
   int msgs_left;
   CURLMsg *msg;
   FILE *upload = NULL;
+  curl_off_t accept_timeout;
+
+  if(curlx_str_number(&libtest_arg2, &accept_timeout, 65535))
+    return TEST_ERR_MAJOR_BAD;
 
   start_test_timing();
 
@@ -72,7 +76,7 @@ static CURLcode test_lib591(const char *URL)
   easy_setopt(curl, CURLOPT_FTPPORT, "-");
 
   /* server connection timeout */
-  easy_setopt(curl, CURLOPT_ACCEPTTIMEOUT_MS, atol(libtest_arg2)*1000);
+  easy_setopt(curl, CURLOPT_ACCEPTTIMEOUT_MS, (long)(accept_timeout * 1000));
 
   multi_init(multi);
 

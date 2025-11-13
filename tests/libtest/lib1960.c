@@ -79,16 +79,17 @@ static CURLcode test_lib1960(const char *URL)
   int status;
   curl_socket_t client_fd = CURL_SOCKET_BAD;
   struct sockaddr_in serv_addr;
-  unsigned short port;
+  curl_off_t port;
 
   if(!strcmp("check", URL))
     return CURLE_OK; /* no output makes it not skipped */
 
-  port = (unsigned short)atoi(libtest_arg3);
+  if(curlx_str_number(&libtest_arg3, &port, 0xffff))
+    return res;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
+    return res;
   }
 
   /*
@@ -103,7 +104,7 @@ static CURLcode test_lib1960(const char *URL)
   }
 
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(port);
+  serv_addr.sin_port = htons((unsigned short)port);
 
   if(my_inet_pton(AF_INET, libtest_arg2, &serv_addr.sin_addr) <= 0) {
     curl_mfprintf(stderr, "inet_pton failed\n");
