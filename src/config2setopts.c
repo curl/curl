@@ -161,6 +161,8 @@ static CURLcode url_proto_and_rewrite(char **url,
 
       curl_free(schemep);
     }
+    else
+      result = CURLE_OUT_OF_MEMORY;
     curl_url_cleanup(uh);
   }
   else
