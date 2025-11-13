@@ -60,15 +60,14 @@ static size_t read_cb(char *buf, size_t nitems, size_t buflen, void *p)
   struct read_ctx *ctx = p;
   size_t len = nitems * buflen;
   size_t left = ctx->blen - ctx->nsent;
-  CURLcode result;
+  CURLcode res;
 
   if(!ctx->nsent) {
     /* On first call, set the FRAME information to be used (it defaults
      * to CURLWS_BINARY otherwise). */
-    result = curl_ws_start_frame(ctx->curl, CURLWS_TEXT,
-                                 (curl_off_t)ctx->blen);
-    if(result) {
-      fprintf(stderr, "error starting frame: %d\n", result);
+    res = curl_ws_start_frame(ctx->curl, CURLWS_TEXT, (curl_off_t)ctx->blen);
+    if(res) {
+      fprintf(stderr, "error starting frame: %d\n", res);
       return CURL_READFUNC_ABORT;
     }
   }
