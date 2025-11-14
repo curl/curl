@@ -118,6 +118,22 @@ jobs:
       - name: 'check scores'
         run: ./scripts/top-complexity
 
+  xmllint:
+    name: 'xmllint'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 'install prereqs'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
+            libxml2-utils
+
+      - name: 'check'
+        run: git grep -z -l -i -F '<?xml' | xargs -0 -r xmllint --format >/dev/null
+
   miscchecks:
     name: 'misc checks'
     runs-on: ubuntu-latest
@@ -161,9 +177,6 @@ jobs:
 
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
-
-      - name: 'xmllint'
-        run: git grep -z -l -i -F '<?xml' | xargs -0 -r xmllint --format >/dev/null
 
       # we allow some extra in source code
       - name: 'badwords'
