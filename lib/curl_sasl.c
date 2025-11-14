@@ -96,7 +96,7 @@ unsigned short Curl_sasl_decode_mech(const char *ptr, size_t maxlen,
 
   for(i = 0; mechtable[i].name; i++) {
     if(maxlen >= mechtable[i].len &&
-       !memcmp(ptr, mechtable[i].name, mechtable[i].len)) {
+       curl_strnequal(ptr, mechtable[i].name, mechtable[i].len)) {
       if(len)
         *len = mechtable[i].len;
 
