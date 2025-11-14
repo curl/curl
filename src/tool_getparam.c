@@ -2876,7 +2876,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     /* is there an '=' ? */
     if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
        !curlx_str_single(&p, '=') ) {
-      /* there's an equal sign */
+      /* there is an equal sign */
       char tempword[MAX_OPTION_LEN + 1];
       memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
       tempword[curlx_strlen(&out)] = 0;
