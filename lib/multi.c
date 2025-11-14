@@ -1038,7 +1038,7 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
 
   case MSTATE_RESOLVING:
     result = Curl_resolv_pollset(data, ps);
-    /* connection filters are not involved in this phase. It's ok if we get no
+    /* connection filters are not involved in this phase. It is OK if we get no
      * sockets to wait for. Resolving can wake up from other sources. */
     expect_sockets = FALSE;
     break;

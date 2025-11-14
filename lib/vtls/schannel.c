@@ -1809,7 +1809,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
      * data needs to be sent then we block for a writeable socket that should
      * be writeable immediately except for OS resource constraints. For caller
      * send if handshake data needs to be received then we block for a readable
-     * socket, which could take some time, but it's more likely the user has
+     * socket, which could take some time, but it is more likely the user has
      * called recv since they had called it prior (only recv can start
      * renegotiation and probably the user is going to call it again to get
      * more of their data before calling send).
