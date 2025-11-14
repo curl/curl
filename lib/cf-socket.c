@@ -133,13 +133,15 @@ static void nosigpipe(struct Curl_cfilter *cf,
                       curl_socket_t sockfd)
 {
   int onoff = 1;
-  (void)data;
   if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE,
                 (void *)&onoff, sizeof(onoff)) < 0) {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
     char buffer[STRERROR_LEN];
     CURL_TRC_CF(data, cf, "Could not set SO_NOSIGPIPE: %s",
                 curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
+#else
+    (void)cf;
+    (void)data;
 #endif
   }
 }
