@@ -120,17 +120,9 @@ jobs:
 
   xmllint:
     name: 'xmllint'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: macos-latest
+    timeout-minutes: 1
     steps:
-      - name: 'install prereqs'
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get -o Dpkg::Use-Pty=0 update
-          sudo rm -f /var/lib/man-db/auto-update
-          sudo apt-get -o Dpkg::Use-Pty=0 install \
-            libxml2-utils
-
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
