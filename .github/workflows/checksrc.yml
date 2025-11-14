@@ -128,7 +128,8 @@ jobs:
           persist-credentials: false
 
       - name: 'check'
-        run: git grep -i -n -F '<?xml' | cut -d: -f1-2 | grep ':1$' | cut -d: -f1 | xargs -r xmllint --format >/dev/null
+        # Look for an XML prolog in the first line
+        run: "git grep -i -n -F '<?xml' | cut -d: -f1-2 | grep ':1$' | cut -d: -f1 | xargs -r xmllint --format >/dev/null"
 
   miscchecks:
     name: 'misc checks'
