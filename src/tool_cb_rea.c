@@ -60,7 +60,7 @@ static bool waitfd(int waitms, int fd)
   struct timeval timeout;
 
   if(fd >= FD_SETSIZE)
-    /* can't wait! */
+    /* cannot wait! */
     return FALSE;
 
   /* wait this long at the most */

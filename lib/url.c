@@ -2752,7 +2752,7 @@ static CURLcode override_login(struct Curl_easy *data,
       }
       else {
         if(!(conn->handler->flags&PROTOPT_USERPWDCTRL)) {
-          /* if the protocol can't handle control codes in credentials, make
+          /* if the protocol cannot handle control codes in credentials, make
              sure there are none */
           if(str_has_ctrl(*userp) || str_has_ctrl(*passwdp)) {
             failf(data, "control code detected in .netrc credentials");
