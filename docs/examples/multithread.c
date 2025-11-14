@@ -43,20 +43,26 @@
   https://curl.se/libcurl/c/threadsafe.html
 
 */
-static char *urls[NUMT]= {
+static const char * const urls[NUMT]= {
   "https://curl.se/",
   "ftp://example.com/",
   "https://example.net/",
   "www.example"
 };
 
+struct targ {
+  const char *url;
+};
+
+
 static void *pull_one_url(const void *p)
 {
   CURL *curl;
+  targ *targ = p;
 
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, (const char *)p);
+    curl_easy_setopt(curl, CURLOPT_URL, targ->url);
     (void)curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
   }
@@ -75,6 +81,7 @@ int main(void)
 {
   CURLcode res;
   pthread_t tid[NUMT];
+  struct targ targs[NUMT];
   int i;
 
   /* Must initialize libcurl before any threads are started */
@@ -83,10 +90,12 @@ int main(void)
     return (int)res;
 
   for(i = 0; i < NUMT; i++) {
-    int error = pthread_create(&tid[i],
-                               NULL, /* default attributes please */
-                               pull_one_url,
-                               (void *)urls[i]);
+    int error;
+    targs[i].url = urls[i];
+    error = pthread_create(&tid[i],
+                           NULL, /* default attributes please */
+                           pull_one_url,
+                           (void *)&targs[i]);
     if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
