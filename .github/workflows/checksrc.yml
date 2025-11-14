@@ -162,6 +162,9 @@ jobs:
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
 
+      - name: 'xmllint'
+        run: git grep -z -l -i -F '<?xml' | xargs -0 -r xmllint --format >/dev/null
+
       # we allow some extra in source code
       - name: 'badwords'
         run: grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | .github/scripts/badwords.pl src lib include
