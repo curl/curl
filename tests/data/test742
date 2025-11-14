@@ -40,10 +40,10 @@ socks5
 http
 </server>
 <name>
-SOCKS5-hostname with max length credentials and max host name length
+SOCKS5-hostname with max length credentials and max hostname length
 </name>
 
-# target a port that won't work without the SOCKS magic
+# target a port that does not work without the SOCKS magic
 <command>
 http://%repeat[254 x c]%:%HTTPPORT -x socks5h://%repeat[255 x a]%:%repeat[255 x b]%@%HOSTIP:%SOCKSPORT
 </command>

@@ -716,7 +716,7 @@ class TestDownload:
         if proto == 'h3' and env.curl_uses_lib('quiche'):
             pytest.skip("quiche fails from 16k onwards")
         curl = CurlClient(env=env)
-        # url is longer than 'url_len'
+        # 'url' is longer than 'url_len'
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?{"x"*(url_junk)}'
         r = curl.http_download(urls=[url], alpn_proto=proto)
         if url_junk <= 1024:

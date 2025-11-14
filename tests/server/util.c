@@ -97,7 +97,7 @@ void logmsg(const char *msg, ...)
   }
   sec = epoch_offset + tv.tv_sec;
   /* !checksrc! disable BANNEDFUNC 1 */
-  now = localtime(&sec); /* not thread safe but we don't care */
+  now = localtime(&sec); /* not thread safe but we do not care */
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
@@ -227,7 +227,7 @@ int write_pidfile(const char *filename)
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write pid file: %s (%d) %s", filename,
+    logmsg("Could not write pid file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
@@ -243,7 +243,7 @@ int write_portfile(const char *filename, int port)
   FILE *portfile = fopen(filename, "wb");
   if(!portfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write port file: %s (%d) %s", filename,
+    logmsg("Could not write port file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }

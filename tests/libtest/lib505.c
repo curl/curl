@@ -63,7 +63,7 @@ static CURLcode test_lib505(const char *URL)
   /* get the file size of the local file */
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
-    /* can't open file, bail out */
+    /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
@@ -132,7 +132,7 @@ static CURLcode test_lib505(const char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE_LARGE,
                    (curl_off_t)file_info.st_size);
 
-  /* Now run off and do what you've been told! */
+  /* Now run off and do what you have been told! */
   res = curl_easy_perform(curl);
 
 test_cleanup:

@@ -33,7 +33,7 @@ ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
 Moooooooooooo
-don't upload this
+do not upload this
 </file>
 </client>
 

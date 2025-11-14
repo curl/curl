@@ -139,7 +139,7 @@ Expect: 100-continue%CR
 %CR
 8a%CR
 ------------------------------%CR
-Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"%CR
+Content-Disposition: form-data; name="sendfile alternative"; filename="filename 2 "%CR
 %CR
 d%CR
 1%CR

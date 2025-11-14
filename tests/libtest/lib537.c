@@ -143,7 +143,7 @@ static int t537_test_rlimit(int keep_open)
       curl_mfprintf(stderr, "raising soft limit up to OPEN_MAX\n");
       rl.rlim_cur = OPEN_MAX;
       if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-        /* on failure don't abort just issue a warning */
+        /* on failure do not abort just issue a warning */
         t537_store_errmsg("setrlimit() failed", errno);
         curl_mfprintf(stderr, "%s\n", t537_msgbuff);
         t537_msgbuff[0] = '\0';
@@ -154,7 +154,7 @@ static int t537_test_rlimit(int keep_open)
     curl_mfprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
     if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      /* on failure don't abort just issue a warning */
+      /* on failure do not abort just issue a warning */
       t537_store_errmsg("setrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t537_msgbuff);
       t537_msgbuff[0] = '\0';
@@ -182,7 +182,7 @@ static int t537_test_rlimit(int keep_open)
    * test 537 is all about testing libcurl functionality
    * when the system has nearly exhausted the number of
    * available file descriptors. Test 537 will try to run
-   * with a very small number of file descriptors available.
+   * with a small number of file descriptors available.
    * This implies that any file descriptor which is open
    * when the test runs will have a number in the high range
    * of whatever the system supports.
@@ -243,7 +243,7 @@ static int t537_test_rlimit(int keep_open)
     t537_num_open.rlim_max = nitems;
   }
 
-  /* verify that we won't overflow size_t in malloc() */
+  /* verify that we do not overflow size_t in malloc() */
 
   if((size_t)(t537_num_open.rlim_max) > ((size_t)-1) / sizeof(*t537_testfd)) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t537_num_open.rlim_max);
@@ -343,7 +343,7 @@ static int t537_test_rlimit(int keep_open)
       curl_mfprintf(stderr, "shrinking array for %s file descriptors\n",
                     strbuff);
 
-      /* we don't care if we can't shrink it */
+      /* we do not care if we cannot shrink it */
 
       tmpfd = realloc(t537_testfd,
                       sizeof(*t537_testfd) * (size_t)(t537_num_open.rlim_max));

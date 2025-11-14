@@ -29,7 +29,7 @@
 use strict;
 use warnings;
 
-# we may get the dir roots pointed out
+# we may get the directory roots pointed out
 my $root=$ARGV[0] || ".";
 my $buildroot=$ARGV[1] || ".";
 my $manpge = "$buildroot/docs/libcurl/libcurl-errors.3";
@@ -79,7 +79,7 @@ sub scanmanpage {
 }
 
 
-opendir(my $dh, $curlh) || die "Can't opendir $curlh: $!";
+opendir(my $dh, $curlh) || die "Cannot opendir $curlh: $!";
 my @hfiles = grep { /\.h$/ } readdir($dh);
 closedir $dh;
 

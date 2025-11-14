@@ -150,7 +150,7 @@ extern curl_socket_t sockdaemon(curl_socket_t sock,
                                 bool bind_only);
 
 /* global variables */
-static const char *srcpath = "."; /* pointing to the test dir */
+static const char *srcpath = "."; /* pointing to the test directory */
 static const char *pidname = NULL;
 static const char *portname = NULL; /* none by default */
 static const char *serverlogfile = NULL;

@@ -26,7 +26,7 @@ http
 proxy
 </features>
 <name>
-SOCKS5 proxy with too long user name
+SOCKS5 proxy with too long username
 </name>
 
 # it should never connect to the target server

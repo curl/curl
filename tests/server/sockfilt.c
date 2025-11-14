@@ -901,7 +901,7 @@ static bool disc_handshake(void)
          * The only other messages that could occur here are PING and PORT,
          * and both of them occur at the start of a test when nothing should be
          * trying to DISC. Therefore, we should not ever get here, but if we
-         * do, it's probably due to some kind of unclean shutdown situation so
+         * do, it is probably due to some kind of unclean shutdown situation so
          * us shutting down is what we probably ought to be doing, anyway.
          */
         return FALSE;
@@ -970,7 +970,7 @@ static bool juggle(curl_socket_t *sockfdp,
 
     /* server mode */
     sockfd = listenfd;
-    /* there's always a socket to wait for */
+    /* there is always a socket to wait for */
 #ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
@@ -991,7 +991,7 @@ static bool juggle(curl_socket_t *sockfdp,
       maxfd = 0; /* stdin */
     }
     else {
-      /* there's always a socket to wait for */
+      /* there is always a socket to wait for */
 #ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"
@@ -1150,7 +1150,7 @@ static bool juggle(curl_socket_t *sockfdp,
   if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
     ssize_t nread_socket;
     if(*mode == PASSIVE_LISTEN) {
-      /* there's no stream set up yet, this is an indication that there's a
+      /* there is no stream set up yet, this is an indication that there is a
          client connecting. */
       curl_socket_t newfd = accept(sockfd, NULL, NULL);
       if(CURL_SOCKET_BAD == newfd) {
