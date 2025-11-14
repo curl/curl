@@ -123,7 +123,7 @@ my %serverportfile;# all server port filenames, identified by server id
 my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
-my %doesntrun;    # servers that don't work, identified by pidfile
+my %doesntrun;    # servers that do not work, identified by pidfile
 my %PORT = (nolisten => 47); # port we use for a local non-listening service
 my $server_response_maxtime=13;
 my $httptlssrv = find_httptlssrv();
@@ -369,7 +369,7 @@ sub startnew {
         die "error: exec() has returned";
     }
 
-    # Ugly hack but ssh client and gnutls-serv don't support pid files
+    # Ugly hack but ssh client and gnutls-serv do not support pid files
     if($fakepidfile) {
         if(open(my $out, ">", "$pidfile")) {
             print $out $child . "\n";
@@ -1110,7 +1110,7 @@ sub runhttpserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1189,7 +1189,7 @@ sub runhttp2server {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0, 0);
     }
@@ -1250,7 +1250,7 @@ sub runhttp3server {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1316,7 +1316,7 @@ sub runhttpsserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1360,7 +1360,7 @@ sub runhttpsserver {
 
     if($httpspid <= 0 || !pidexists($httpspid)) {
         # it is NOT alive
-        # don't call stopserver since that will also kill the dependent
+        # do not call stopserver since that will also kill the dependent
         # server that has already been started properly
         $doesntrun{$pidfile} = 1;
         $httpspid = $pid2 = 0;
@@ -1397,7 +1397,7 @@ sub runhttptlsserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1460,7 +1460,7 @@ sub runpingpongserver {
     my $pidfile = $serverpidfile{$server};
     my $portfile = $serverportfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
@@ -1531,7 +1531,7 @@ sub runsecureserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1564,7 +1564,7 @@ sub runsecureserver {
 
     if($protospid <= 0 || !pidexists($protospid)) {
         # it is NOT alive
-        # don't call stopserver since that will also kill the dependent
+        # do not call stopserver since that will also kill the dependent
         # server that has already been started properly
         $doesntrun{$pidfile} = 1;
         $protospid = $pid2 = 0;
@@ -1602,7 +1602,7 @@ sub runtftpserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1673,7 +1673,7 @@ sub rundnsserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1746,7 +1746,7 @@ sub runrtspserver {
     my $pidfile = $serverpidfile{$server};
     my $portfile = $serverportfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1816,7 +1816,7 @@ sub runsshserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1934,7 +1934,7 @@ sub runmqttserver {
     my $pidfile = $serverpidfile{$server};
     my $portfile = $serverportfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
@@ -1996,7 +1996,7 @@ sub runsocksserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -2079,7 +2079,7 @@ sub rundictserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -2140,7 +2140,7 @@ sub runsmbserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -2201,7 +2201,7 @@ sub runnegtelnetserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # don't retry if the server doesn't work
+    # do not retry if the server doesn't work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -3027,7 +3027,7 @@ sub startservers {
             }
         }
         else {
-            warn "we don't support a server for $what";
+            warn "we do not support a server for $what";
             return ("no server for $what", 4);
         }
     }

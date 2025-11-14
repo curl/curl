@@ -79,7 +79,7 @@ class TestData(object):
         if not m:
             raise Exception("Couldn't find a <reply><data> section")
 
-        # Left-strip the data so we don't get a newline before our data.
+        # Left-strip the data so we do not get a newline before our data.
         return m.group(1).lstrip()
 
 

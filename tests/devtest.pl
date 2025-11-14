@@ -24,7 +24,7 @@
 ###########################################################################
 
 # This script is intended for developers to test some internals of the
-# runtests.pl harness. Don't try to use this unless you know what you're
+# runtests.pl harness. Do not try to use this unless you know what you are
 # doing!
 
 # An example command-line that starts a test http server for test 11 and waits

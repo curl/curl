@@ -36,7 +36,7 @@
 # Forward slashes are simpler processed in Perl, do not require extra escaping
 # for shell (unlike back slashes) and accepted by Windows native programs, so
 # all functions return paths with only forward slashes.
-# All returned paths don't contain any duplicated slashes, only single slashes
+# All returned paths do not contain any duplicated slashes, only single slashes
 # are used as directory separators on output.
 # On non-Windows platforms functions acts as transparent wrappers for similar
 # Perl's functions or return unmodified string (depending on functionality),

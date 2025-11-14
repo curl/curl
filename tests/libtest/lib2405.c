@@ -223,7 +223,7 @@ static CURLcode test_run(const char *URL, long option,
       break;
     }
 
-    /* checking case when we don't have enough space for waitfds */
+    /* checking case when we do not have enough space for waitfds */
     mc = curl_multi_waitfds(multi, ufds1, fd_count - 1, &fd_count_chk);
 
     if(mc != CURLM_OUT_OF_MEMORY) {

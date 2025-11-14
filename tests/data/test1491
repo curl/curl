@@ -14,7 +14,7 @@ FILE
 file
 </server>
 <name>
-file:// don't overwrite self with --skip-existing
+file:// do not overwrite self with --skip-existing
 </name>
 <command option="no-output">
 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt -o %LOGDIR/test%TESTNUMBER.txt --skip-existing

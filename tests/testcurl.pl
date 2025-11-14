@@ -49,10 +49,10 @@
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
 # --notes=[notes]          More human-readable information about this configuration
-# --nocvsup                Don't pull from git even though it is a git tree
-# --nogitpull              Don't pull from git even though it is a git tree
-# --nobuildconf            Don't run autoreconf -fi
-# --noconfigure            Don't run configure
+# --nocvsup                Do not pull from git even though it is a git tree
+# --nogitpull              Do not pull from git even though it is a git tree
+# --nobuildconf            Do not run autoreconf -fi
+# --noconfigure            Do not run configure
 # --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[filename]       Filename to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.

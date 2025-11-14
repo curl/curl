@@ -233,7 +233,7 @@ sub singletest_logmsg {
 }
 
 #######################################################################
-# Stop buffering log messages, but don't touch them
+# Stop buffering log messages, but do not touch them
 sub singletest_unbufferlogs {
     undef $singletest_bufferedrunner;
 }
@@ -276,7 +276,7 @@ sub catch_usr1 {
 }
 
 eval {
-    # some msys2 perl versions don't define SIGUSR1
+    # some msys2 perl versions do not define SIGUSR1
     $SIG{USR1} = \&catch_usr1;
 };
 $SIG{PIPE} = 'IGNORE';  # these errors are captured in the read/write calls
@@ -293,7 +293,7 @@ foreach my $protocol (('ftp', 'http', 'ftps', 'https', 'no', 'all')) {
     delete $ENV{uc($proxy)} if($ENV{uc($proxy)});
 }
 
-# make sure we don't get affected by other variables that control our
+# make sure we do not get affected by other variables that control our
 # behavior
 
 delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
@@ -356,7 +356,7 @@ sub cleardir {
     opendir(my $dh, $dir) ||
         return 0; # can't open dir
     while($file = readdir($dh)) {
-        # Don't clear the $PIDDIR or $LOCKDIR since those need to live beyond
+        # Do not clear the $PIDDIR or $LOCKDIR since those need to live beyond
         # one test
         if(($file !~ /^(\.|\.\.)\z/) &&
             "$file" ne $PIDDIR && "$file" ne $LOCKDIR) {
@@ -1982,7 +1982,7 @@ sub singletest {
         ###################################################################
         # Restore environment variables that were modified in a previous run.
         # Test definition may instruct to (un)set environment vars.
-        # This is done this early so that leftover variables don't affect
+        # This is done this early so that leftover variables do not affect
         # starting servers or CI registration.
         # restore_test_env(1);
 
@@ -2665,7 +2665,7 @@ if($valgrind) {
 
         # since valgrind 2.1.x, '--tool' option is mandatory
         # use it, if it is supported by the version installed on the system
-        # (this happened in 2003, so we could probably don't need to care about
+        # (this happened in 2003, so we could probably do not need to care about
         # that old version any longer and just delete this check)
         runclient("valgrind --help 2>&1 | grep -- --tool >$dev_null 2>&1");
         if(($? >> 8)) {
@@ -2680,7 +2680,7 @@ if($valgrind) {
         close($curlh);
 
         # valgrind 3 renamed the --logfile option to --log-file!!!
-        # (this happened in 2005, so we could probably don't need to care about
+        # (this happened in 2005, so we could probably do not need to care about
         # that old version any longer and just delete this check)
         my $ver=join(' ', runclientoutput("valgrind --version"));
         # cut off all but digits and dots
@@ -3096,7 +3096,7 @@ while() {
     }
 
     # See if a test runner needs attention
-    # If we could be running more tests, don't wait so we can schedule a new
+    # If we could be running more tests, do not wait so we can schedule a new
     # one immediately. If all runners are busy, wait a fraction of a second
     # for one to finish so we can still loop around to check the abort flag.
     my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0.1 : 1.0;
@@ -3231,9 +3231,9 @@ foreach my $runnerid (values %runnerids) {
 }
 
 # Kill the runners
-# There is a race condition here since we don't know exactly when the runners
-# have each finished shutting themselves down, but we're about to exit so it
-# doesn't make much difference.
+# There is a race condition here since we do not know exactly when the runners
+# have each finished shutting themselves down, but we are about to exit so it
+# does not make much difference.
 foreach my $runnerid (values %runnerids) {
     runnerac_shutdown($runnerid);
     sleep 0;  # give runner a context switch so it can shut itself down

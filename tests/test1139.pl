@@ -126,7 +126,7 @@ while(<$r>) {
         }
         elsif($rem) {
             # $opt was removed in $rem
-            # so don't check for that
+            # so do not check for that
         }
         else {
             if($type eq "OPT") {

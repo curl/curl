@@ -197,7 +197,7 @@ for my $e (sort @syms) {
 # now scan through all symbols that were present in the symbols-in-versions
 # but not in the headers
 #
-# If the symbols were marked 'removed' in symbols-in-versions we don't output
+# If the symbols were marked 'removed' in symbols-in-versions we do not output
 # anything about it since that is perfectly fine.
 #
 

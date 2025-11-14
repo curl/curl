@@ -171,7 +171,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         self.ctd = TestData(test_data_directory)
 
         # Override smbComNtCreateAndX so we can pretend to have files which
-        # don't exist.
+        # do not exist.
         self.hookSmbCommand(imp_smb.SMB.SMB_COM_NT_CREATE_ANDX,
                             self.create_and_x)
 

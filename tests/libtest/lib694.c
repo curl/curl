@@ -64,7 +64,7 @@ static CURLcode test_lib694(const char *URL)
       curl_mprintf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
     }
 
-    /* set a new URL for the second, so that we don't restart NTLM */
+    /* set a new URL for the second, so that we do not restart NTLM */
     test_setopt(curl, CURLOPT_URL, libtest_arg2);
   } while(!res && ++count < 2);
 
