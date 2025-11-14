@@ -1141,10 +1141,10 @@ static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
 static bool should_urlencode(struct Curl_str *service_name)
 {
   /*
-   * These services require unmodified (not additionally url encoded) URL
+   * These services require unmodified (not additionally URL-encoded) URL
    * paths.
    * should_urlencode == true is equivalent to should_urlencode_uri_path
-   * from the AWS SDK. Urls are already normalized by the curl url parser
+   * from the AWS SDK. Urls are already normalized by the curl URL parser
    */
 
   if(curlx_str_cmp(service_name, "s3") ||
