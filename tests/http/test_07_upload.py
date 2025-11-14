@@ -263,15 +263,18 @@ class TestUpload:
         r.check_response(count=count, http_status=200)
         self.check_download(r, count, fdata, curl)
 
-    # upload large data parallel to a URL that denies uploads
+    # upload single large data to a URL that fails uploads, causing RESETs
+    # (We used to do this for 20 parallel transfers, but the triggered
+    #  stream resets make nghttpx drop the connection after several, which
+    #  then gives a non-deterministic number of completely failed transfers)
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_07_22_upload_parallel_fail(self, env: Env, httpd, nghttpx, proto):
+    def test_07_22_upload_fail(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h2' and not env.have_h2_curl():
             pytest.skip("h2 not supported")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        count = 20
+        count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
             f'/curltest/tweak?status=400&delay=5ms&chunks=1&body_error=reset&id=[0-{count-1}]'
