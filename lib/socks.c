@@ -308,7 +308,7 @@ static CURLproxycode socks4_req_add_user(struct socks_state *sx,
       return CURLPX_SEND_REQUEST;
   }
   else {
-    /* empty user name */
+    /* empty username */
     unsigned char b = 0;
     result = Curl_bufq_write(&sx->iobuf, &b, 1, &nwritten);
     if(result || (nwritten != 1))
