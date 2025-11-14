@@ -62,7 +62,7 @@ struct rtspd_httprequest {
   long testno;       /* test number found in the request */
   long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
-  bool auth_req;  /* authentication required, don't wait for body unless
+  bool auth_req;  /* authentication required, do not wait for body unless
                      there's an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
@@ -285,7 +285,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
               if(num < 0)
                 logmsg("negative pipe size ignored");
               else if(num > 0)
-                req->pipe = num-1; /* decrease by one since we don't count the
+                req->pipe = num-1; /* decrease by one since we do not count the
                                       first request in this number */
             }
             else if(sscanf(ptr, "skip: %d", &num) == 1) {
@@ -389,7 +389,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   }
 
   if(!end) {
-    /* we don't have a complete request yet! */
+    /* we do not have a complete request yet! */
     logmsg("rtspd_ProcessRequest returned without a complete request");
     return 0; /* not complete yet */
   }
@@ -416,8 +416,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       return 1; /* done */
 
     if((req->cl == 0) && !CURL_STRNICMP("Content-Length:", line, 15)) {
-      /* If we don't ignore content-length, we read it and we read the whole
-         request including the body before we return. If we've been told to
+      /* If we do not ignore content-length, we read it and we read the whole
+         request including the body before we return. If we have been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
       curl_off_t clen;

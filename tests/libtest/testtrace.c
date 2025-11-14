@@ -105,7 +105,7 @@ int libtest_debug_cb(CURL *curl, curl_infotype type,
     }
     secs = epoch_offset + tv.tv_sec;
     /* !checksrc! disable BANNEDFUNC 1 */
-    now = localtime(&secs);  /* not thread safe but we don't care */
+    now = localtime(&secs);  /* not thread safe but we do not care */
     curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
                    now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   }

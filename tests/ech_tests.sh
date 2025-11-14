@@ -25,7 +25,7 @@
 #
 
 # Run some tests against servers we know to support ECH (CF, defo.ie, etc.).
-# as well as some we know don't do ECH but have an HTTPS RR, and finally some
+# as well as some we know do not do ECH but have an HTTPS RR, and finally some
 # for which neither is the case.
 
 # TODO: Translate this into something that approximates a valid curl test:-)
@@ -790,7 +790,7 @@ if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
   turl="https://tcd.ie"
   echo "cli_test with $turl"
   echo "cli_test with $turl" >> "$logfile"
-  # the params below don't matter much here as we'll fail anyway
+  # the params below do not matter much here as we will fail anyway
   echconfiglist=$(get_ech_configlist defo.ie)
   goodecl=$echconfiglist
   badecl="$goodecl"

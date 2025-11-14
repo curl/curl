@@ -59,7 +59,7 @@ struct sws_httprequest {
   long testno;       /* test number found in the request */
   long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
-  bool auth_req;  /* authentication required, don't wait for body unless
+  bool auth_req;  /* authentication required, do not wait for body unless
                      there's an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
@@ -76,7 +76,7 @@ struct sws_httprequest {
   int prot_version;  /* HTTP version * 10 */
   int callcount;  /* times sws_ProcessRequest() gets called */
   bool skipall;   /* skip all incoming data */
-  bool noexpect;  /* refuse Expect: (don't read the body) */
+  bool noexpect;  /* refuse Expect: (do not read the body) */
   bool connmon;   /* monitor the state of the connection, log disconnects */
   bool upgrade;   /* test case allows upgrade */
   bool upgrade_request; /* upgrade request found and allowed */
@@ -485,7 +485,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   }
 
   if(!end) {
-    /* we don't have a complete request yet! */
+    /* we do not have a complete request yet! */
     logmsg("request not complete yet");
     return 0; /* not complete yet */
   }
@@ -558,8 +558,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       return 1; /* done */
 
     if((req->cl == 0) && !CURL_STRNICMP("Content-Length:", line, 15)) {
-      /* If we don't ignore content-length, we read it and we read the whole
-         request including the body before we return. If we've been told to
+      /* If we do not ignore content-length, we read it and we read the whole
+         request including the body before we return. If we have been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
       curl_off_t clen;

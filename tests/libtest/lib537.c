@@ -143,7 +143,7 @@ static int t537_test_rlimit(int keep_open)
       curl_mfprintf(stderr, "raising soft limit up to OPEN_MAX\n");
       rl.rlim_cur = OPEN_MAX;
       if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-        /* on failure don't abort just issue a warning */
+        /* on failure do not abort just issue a warning */
         t537_store_errmsg("setrlimit() failed", errno);
         curl_mfprintf(stderr, "%s\n", t537_msgbuff);
         t537_msgbuff[0] = '\0';
@@ -154,7 +154,7 @@ static int t537_test_rlimit(int keep_open)
     curl_mfprintf(stderr, "raising soft limit up to hard limit\n");
     rl.rlim_cur = rl.rlim_max;
     if(setrlimit(RLIMIT_NOFILE, &rl) != 0) {
-      /* on failure don't abort just issue a warning */
+      /* on failure do not abort just issue a warning */
       t537_store_errmsg("setrlimit() failed", errno);
       curl_mfprintf(stderr, "%s\n", t537_msgbuff);
       t537_msgbuff[0] = '\0';
@@ -343,7 +343,7 @@ static int t537_test_rlimit(int keep_open)
       curl_mfprintf(stderr, "shrinking array for %s file descriptors\n",
                     strbuff);
 
-      /* we don't care if we can't shrink it */
+      /* we do not care if we cannot shrink it */
 
       tmpfd = realloc(t537_testfd,
                       sizeof(*t537_testfd) * (size_t)(t537_num_open.rlim_max));

@@ -190,7 +190,7 @@ sub runner_init {
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
             eval {
-                # some msys2 perl versions don't define SIGUSR1, also missing from Win32 Perl
+                # some MSYS2 Perl versions do not define SIGUSR1, also missing from Win32 Perl
                 $SIG{USR1} = 'IGNORE';
             };
 
@@ -234,7 +234,7 @@ sub runner_init {
         # Create our pid directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
 
-        # Don't create a separate process
+        # Do not create a separate process
         $thisrunnerid = "integrated";
     }
 

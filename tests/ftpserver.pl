@@ -2930,7 +2930,7 @@ sub customize {
             @auth_mechs = split(/ /, $1);
         }
         elsif($_ =~ /NOSAVE/) {
-            # don't actually store the file we upload - to be used when
+            # do not actually store the file we upload - to be used when
             # uploading insanely huge amounts
             $nosave = 1;
             logmsg "FTPD: NOSAVE prevents saving of uploaded data\n";
