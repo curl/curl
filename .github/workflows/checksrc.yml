@@ -164,4 +164,4 @@ jobs:
 
       # we allow some extra in source code
       - name: 'badwords'
-        run: grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | .github/scripts/badwords.pl src lib include
+        run: grep -Ev '(\\bwill| url )' .github/scripts/badwords.txt | .github/scripts/badwords.pl src lib include

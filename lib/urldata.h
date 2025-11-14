@@ -238,7 +238,7 @@ struct ssl_backend_data;
 struct Curl_ssl_scache_entry;
 
 struct ssl_primary_config {
-  char *CApath;          /* certificate dir (does not work on Windows) */
+  char *CApath;          /* certificate directory (does not work on Windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
   char *clientcert;

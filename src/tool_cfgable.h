@@ -248,7 +248,7 @@ struct OperationConfig {
   BIT(autoreferer);         /* automatically set referer */
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
-  BIT(dirlistonly);         /* only get the FTP dir list */
+  BIT(dirlistonly);         /* only get the FTP directory list */
   BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
                                when following redirects, even when hostname
                                changed */
