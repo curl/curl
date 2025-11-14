@@ -45,7 +45,7 @@ there's:there is
 ^(And|So|But) = Rewrite it somehow?
 \. But: Rewrite it somehow?
 \. So : Rewrite without "so" ?
- dir :directory
+ dir [^=]:directory
 sub-director:subdirector
 you'd:you would
 you'll:you will
