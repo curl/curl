@@ -85,8 +85,7 @@ int main(void)
         break;
       }
 
-    /* if there are still transfers, loop */
-    } while(still_running);
+    } while(still_running);  /* if there are still transfers, loop */
   }
 }
 ~~~
