@@ -1574,8 +1574,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
     Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
     Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
 
-    /* this sends an FTP-like "header" to the header callback so that the
-       current directory can be read very similar to how it is read when
+    /* this sends an FTP-like "header" to the header callback so that
+       the current directory can be read similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
     free(tmp);
@@ -1860,7 +1860,7 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
       return SSH_NO_ERROR;
     }
     if(date > UINT_MAX)
-      /* because the liubssh API can't deal with a larger value */
+      /* because the liubssh API cannot deal with a larger value */
       date = UINT_MAX;
     if(!strncmp(cmd, "atime", 5))
       sshc->quote_attrs->atime = (uint32_t)date;

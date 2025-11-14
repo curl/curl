@@ -504,7 +504,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     return CURLE_OK;
 
   if(abort_upload) {
-    /* We'd like to abort the upload - but should we? */
+    /* We would like to abort the upload - but should we? */
 #ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {
@@ -1716,7 +1716,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
           curlx_str_untilnl(&p, &val, MAX_HTTP_RESP_HEADER_SIZE);
           curlx_str_trimblanks(&val);
           if(!curlx_strlen(&val))
-            /* no content, don't send this */
+            /* no content, do not send this */
             continue;
         }
         else
@@ -2404,7 +2404,7 @@ static CURLcode http_add_content_hds(struct Curl_easy *data,
        (data->req.authneg ||
         !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
-         although it is not very wise to actually set your own */
+         although it is not wise to actually set your own */
       result = curlx_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
                               req_clen);
     }
@@ -4018,7 +4018,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
        *
        * The check for close above is done simply because of something
        * else has already deemed the connection to get closed then
-       * something else should've considered the big picture and we
+       * something else should have considered the big picture and we
        * avoid this check.
        *
        */
@@ -4187,7 +4187,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
                   (p[2] - '0');
                 /* RFC 9112 requires a single space following the status code,
-                   but the browsers don't so let's not insist */
+                   but the browsers do not so let's not insist */
                 fine_statusline = TRUE;
               }
             }

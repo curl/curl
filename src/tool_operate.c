@@ -2252,7 +2252,7 @@ CURLcode operate(int argc, argv_item_t argv[])
       strcmp(first_arg, "--disable"))) {
     parseconfig(NULL, CONFIG_MAX_LEVELS); /* ignore possible failure */
 
-    /* If we had no arguments then make sure a url was specified in .curlrc */
+    /* If we had no arguments then make sure a URL was specified in .curlrc */
     if((argc < 2) && (!global->first->url_list)) {
       helpf(NULL);
       result = CURLE_FAILED_INIT;

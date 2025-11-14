@@ -140,8 +140,8 @@ static int mem_addf(struct mem *mem, const char *format, ...)
   /* we need about 100 chars or less to write 95% of lines */
   x = 128;
 
-  /* first try: there's probably enough memory to write everything.
-     second try: there's definitely enough memory to write everything. */
+  /* first try: there is probably enough memory to write everything.
+     second try: there is definitely enough memory to write everything. */
   for(i = 0; i < 2; ++i) {
     if(x < 0 || mem_need(mem, (size_t)x + 1) < 0)
       break;

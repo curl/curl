@@ -277,7 +277,7 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
           blen = ntail;
         }
       }
-      /* avoid curl_strequal because the host name is not null-terminated */
+      /* avoid curl_strequal because the hostname is not null-terminated */
       if((hlen == ntail) && curl_strnequal(hostname, sts->host, hlen))
         return sts;
     }

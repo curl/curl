@@ -160,7 +160,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
       break;
     }
     else {
-      /* Lower-case digits. Can't use the set from mprintf.c since this
+      /* Lower-case digits. Cannot use the set from mprintf.c since this
          needs to work as a curlx function */
       static const unsigned char ldigits[] = "0123456789abcdef";
 

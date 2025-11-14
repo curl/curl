@@ -20,7 +20,12 @@ use warnings;
 my @whitelist;
 my %alt;
 my %exactcase;
+my $skip_indented = 1;
 
+if($ARGV[0] eq "-a") {
+    shift @ARGV;
+    $skip_indented = 0;
+}
 my %wl;
 if($ARGV[0] eq "-w") {
     shift @ARGV;
@@ -68,7 +73,7 @@ sub file {
         my $in = $_;
         $l++;
         chomp $in;
-        if($in =~ /^    /) {
+        if($skip_indented && $in =~ /^    /) {
             next;
         }
         # remove the link part

@@ -97,7 +97,7 @@ int main(void)
                            pull_one_url,
                            (void *)&targs[i]);
     if(error)
-      fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
+      fprintf(stderr, "Could not run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }

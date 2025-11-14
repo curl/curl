@@ -874,7 +874,7 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    /* Start up the thread. We don't bother keeping a reference to it
+    /* Start up the thread. We do not bother keeping a reference to it
        because it runs until program termination. From here on out all reads
        from the stdin handle or file descriptor 0 will be reading from the
        socket that is fed by the thread. */

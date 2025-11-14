@@ -275,7 +275,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 
   file->fd = fd;
   if(!data->state.upload && (fd == -1)) {
-    failf(data, "Couldn't open file %s", data->state.up.path);
+    failf(data, "Could not open file %s", data->state.up.path);
     file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }

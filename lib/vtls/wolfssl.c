@@ -1725,7 +1725,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
   if(ret == WOLFSSL_SUCCESS &&
      conn_config->verifyhost &&
      !connssl->peer.sni) {
-    /* we have an IP address as host name. */
+    /* we have an IP address as hostname. */
     WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(wssl->ssl);
     if(!cert) {
       failf(data, "unable to get peer certificate");

@@ -1037,7 +1037,7 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
      * that needs to be encoded into the buffer */
     if(buflen < ws->sendbuf_payload) {
       /* We have been called with LESS buffer data than before. This
-       * is not how it's supposed too work. */
+       * is not how it is supposed too work. */
       failf(data, "[WS] curl_ws_send() called with smaller 'buflen' than "
             "bytes already buffered in previous call, %zu vs %zu",
             buflen, ws->sendbuf_payload);
