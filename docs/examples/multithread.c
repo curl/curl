@@ -43,7 +43,7 @@
   https://curl.se/libcurl/c/threadsafe.html
 
 */
-static const char * const urls[NUMT]= {
+static char *urls[NUMT]= {
   "https://curl.se/",
   "ftp://example.com/",
   "https://example.net/",
@@ -86,7 +86,7 @@ int main(void)
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
-                               (char *)(const void *)urls[i]);
+                               (void *)urls[i]);
     if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
