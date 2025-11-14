@@ -404,6 +404,9 @@ typedef enum {
   /* This is the argument passed to the notify callback */
   CURLOPT(CURLMOPT_NOTIFYDATA, CURLOPTTYPE_OBJECTPOINT, 19),
 
+  /* timer interval in milliseconds for CURLMNOTIFY_TIMER. */
+  CURLOPT(CURLMOPT_NOTIFYTIMER_MS, CURLOPTTYPE_LONG, 19),
+
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
 
@@ -531,6 +534,7 @@ CURL_EXTERN CURLMcode curl_multi_waitfds(CURLM *multi,
  */
 #define CURLMNOTIFY_INFO_READ    0
 #define CURLMNOTIFY_EASY_DONE    1
+#define CURLMNOTIFY_TIMER        2
 
 /*
  * Callback to install via CURLMOPT_NOTIFYFUNCTION.

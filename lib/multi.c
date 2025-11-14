@@ -274,9 +274,6 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->admin->multi = multi;
   multi->admin->state.internal = TRUE;
   Curl_llist_init(&multi->admin->state.timeoutlist, NULL);
-  /* admin handle can run a repeating timer, by default disabled */
-  multi->admin_timeout_ms = 500;
-  multi->admin_timer_active = FALSE;
 
 #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
@@ -419,20 +416,6 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-static bool multi_admin_update_timer(struct Curl_multi *multi,
-                                     struct curltime now)
-{
-  if(multi->admin_timer_active &&
-     multi->admin_timeout_ms &&
-     (curlx_timediff_ms(now, multi->admin_timer_start) >=
-        multi->admin_timeout_ms)) {
-    multi->admin_timer_start = now;
-    Curl_expire(multi->admin, multi->admin_timeout_ms, EXPIRE_TIMEOUT);
-    return TRUE;
-  }
-  return FALSE;
-}
-
 CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 {
   CURLMcode rc;
@@ -522,7 +505,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 
   /* on first added handle, start admin timer */
   if(multi->xfers_total_ever == 1)
-    multi_admin_update_timer(multi, curlx_now());
+    Curl_mntfy_update_timer(multi, curlx_now());
 
   /* Necessary in event based processing, where dirty handles trigger
    * a timeout callback invocation. */
@@ -2407,9 +2390,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
   Curl_uint_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
-    if(multi_admin_update_timer(multi, *nowp)) {
-      CURL_TRC_M(data, "timer expired");
-    }
+    Curl_mntfy_update_timer(multi, *nowp);
     Curl_cshutdn_perform(&multi->cshutdn, multi->admin, CURL_SOCKET_TIMEOUT);
     return CURLM_OK;
   }
@@ -3324,6 +3305,13 @@ CURLMcode curl_multi_setopt(CURLM *m,
     break;
   case CURLMOPT_NOTIFYDATA:
     multi->ntfy.ntfy_cb_data = va_arg(param, void *);
+    break;
+  case CURLMOPT_NOTIFYTIMER_MS:
+    uarg = va_arg(param, unsigned long);
+    if(uarg <= UINT_MAX)
+      res = Curl_mntfy_set_timer_ms(multi, (unsigned int)uarg);
+    else
+      res = CURLM_BAD_FUNCTION_ARGUMENT;
     break;
   default:
     res = CURLM_UNKNOWN_OPTION;

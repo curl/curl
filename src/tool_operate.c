@@ -1550,7 +1550,6 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 
   curl_multi_socket_action(c->uv->s->multi, c->sockfd, flags,
                            &c->uv->s->still_running);
-  progress_meter(c->uv->s->multi, &c->uv->s->start, FALSE);
 }
 
 /* callback from libuv when timeout expires */
@@ -1563,7 +1562,8 @@ static void on_uv_timeout(uv_timer_t *req)
   if(uv && uv->s) {
     curl_multi_socket_action(uv->s->multi, CURL_SOCKET_TIMEOUT, 0,
                              &uv->s->still_running);
-    progress_meter(uv->s->multi, &uv->s->start, FALSE);
+    if(!uv->s->still_running && !uv->s->more_transfers)
+      uv_stop(uv->loop);
   }
 }
 
@@ -1584,6 +1584,8 @@ static int cb_timeout(CURLM *multi, long timeout_ms, void *userp)
     uv_timer_start(&uv->timeout, on_uv_timeout, timeout_ms,
                    0); /* do not repeat */
   }
+  if(!uv->s->still_running && !uv->s->more_transfers)
+    uv_stop(uv->loop);
   return 0;
 }
 
@@ -1706,6 +1708,7 @@ static CURLcode parallel_event(struct parastate *s)
     }
   }
 
+  progress_meter(s->multi, &s->start, TRUE);
   result = s->result;
 
   /* Make sure to return some kind of error if there was a multi problem */
@@ -1813,6 +1816,9 @@ static void mnotify(CURLM *multi, unsigned int notification,
     if(result && !s->result)
       s->result = result;
     break;
+  case CURLMNOTIFY_TIMER:
+    progress_meter(s->multi, &s->start, FALSE);
+    break;
   default:
     break;
   }
@@ -1838,6 +1844,7 @@ static CURLcode parallel_transfers(CURLSH *share)
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYFUNCTION, mnotify);
   (void)curl_multi_setopt(s->multi, CURLMOPT_NOTIFYDATA, s);
   (void)curl_multi_notify_enable(s->multi, CURLMNOTIFY_INFO_READ);
+  (void)curl_multi_notify_enable(s->multi, CURLMNOTIFY_TIMER);
 
   result = add_parallel_transfers(s->multi, s->share,
                                   &s->more_transfers, &s->added_transfers);
@@ -1877,8 +1884,6 @@ static CURLcode parallel_transfers(CURLSH *share)
       s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
       if(!s->mcode)
         s->mcode = curl_multi_perform(s->multi, &s->still_running);
-
-      progress_meter(s->multi, &s->start, FALSE);
     }
 
     (void)progress_meter(s->multi, &s->start, TRUE);

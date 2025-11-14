@@ -161,9 +161,6 @@ struct Curl_multi {
   long last_timeout_ms;        /* the last timeout value set via timer_cb */
   struct curltime last_expire_ts; /* timestamp of last expiry */
 
-  timediff_t admin_timeout_ms; /* timeout for admin handle runs */
-  struct curltime admin_timer_start; /* timestamp of last admin expire set */
-
 #ifdef USE_WINSOCK
   WSAEVENT wsa_event; /* Winsock event used for waits */
 #else
@@ -193,7 +190,6 @@ struct Curl_multi {
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
   BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
-  BIT(admin_timer_active);     /* if admin timer is running */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif
