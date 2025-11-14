@@ -342,7 +342,7 @@ static CURLcode write_resp_raw(struct Curl_cfilter *cf,
 
   if(nwritten < memlen) {
     /* This MUST not happen. Our recbuf is dimensioned to hold the
-     * full max_stream_window and then some for this very reason. */
+     * full max_stream_window and then some for this reason. */
     DEBUGASSERT(0);
     return CURLE_RECV_ERROR;
   }

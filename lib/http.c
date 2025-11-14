@@ -2404,7 +2404,7 @@ static CURLcode http_add_content_hds(struct Curl_easy *data,
        (data->req.authneg ||
         !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
-         although it is not very wise to actually set your own */
+         although it is not wise to actually set your own */
       result = curlx_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
                               req_clen);
     }

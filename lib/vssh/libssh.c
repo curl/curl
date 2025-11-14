@@ -1574,8 +1574,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
     Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
     Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
 
-    /* this sends an FTP-like "header" to the header callback so that the
-       current directory can be read very similar to how it is read when
+    /* this sends an FTP-like "header" to the header callback so that
+       the current directory can be read similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
     free(tmp);
