@@ -55,10 +55,10 @@ struct targ {
 };
 
 
-static void *pull_one_url(const void *p)
+static void *pull_one_url(void *p)
 {
   CURL *curl;
-  targ *targ = p;
+  struct targ *targ = p;
 
   curl = curl_easy_init();
   if(curl) {
