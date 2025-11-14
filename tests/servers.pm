@@ -118,8 +118,8 @@ use testutil qw(
     );
 
 
-my %serverpidfile; # all server pid file names, identified by server id
-my %serverportfile;# all server port file names, identified by server id
+my %serverpidfile; # all server pid filenames, identified by server id
+my %serverportfile;# all server port filenames, identified by server id
 my $sshdvernum;  # for socks server, ssh daemon version number
 my $sshdverstr;  # for socks server, ssh daemon version string
 my $sshderror;   # for socks server, ssh daemon version error
@@ -225,7 +225,7 @@ sub initserverconfig {
 }
 
 #######################################################################
-# Load serverpidfile and serverportfile hashes with file names for all
+# Load serverpidfile and serverportfile hashes with filenames for all
 # possible servers.
 #
 sub init_serverpidfile_hash {
@@ -774,13 +774,13 @@ sub verifysftp {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $verified = 0;
-    # Find out sftp client canonical file name
+    # Find out sftp client canonical filename
     my $sftp = find_sftp();
     if(!$sftp) {
         logmsg "RUN: SFTP server cannot find $sftpexe\n";
         return -1;
     }
-    # Find out ssh client canonical file name
+    # Find out ssh client canonical filename
     my $ssh = find_ssh();
     if(!$ssh) {
         logmsg "RUN: SFTP server cannot find $sshexe\n";

@@ -21,7 +21,7 @@ Mime
 smtp
 </server>
 <name>
-SMTP multipart with file name escaping
+SMTP multipart with filename escaping
 </name>
 <stdin crlf="yes">
 From: different

@@ -36,7 +36,7 @@ FUNVALUE=contents%TESTNUMBER
 VALUE2=curl
 </setenv>
 <name>
-variable expand the file name with --expand-output
+variable expand the filename with --expand-output
 </name>
 <file name="%LOGDIR/cmd">
 --variable %FUNVALUE

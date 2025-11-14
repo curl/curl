@@ -31,7 +31,7 @@ use strict;
 use warnings;
 use File::Basename;
 
-# get the file name first
+# get the filename first
 my $symbolsinversions=shift @ARGV;
 
 # we may get the dir roots pointed out

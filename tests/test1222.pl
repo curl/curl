@@ -259,7 +259,7 @@ if(!glob("$libdocdir/*.3")) {
     exit 0;
 }
 
-# Get header file names,
+# Get header filenames,
 opendir(my $dh, $incdir) || die "Can't opendir $incdir";
 my @hfiles = grep { /\.h$/ } readdir($dh);
 closedir $dh;
