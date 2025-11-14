@@ -35,7 +35,7 @@ aren't:are not
  a ftp: an ftp
  a IPv4: an IPv4
  a IPv6: an IPv6
- url =URL
+ url [^=]=URL
 [^/]internet\b=Internet
 isation:ization
 \bit's:it is
@@ -54,7 +54,7 @@ that's:that is
 web page:webpage
 host name\b:hostname
 host names\b:hostnames
-[^;]file name\b:filename
+[^;<]file name\b:filename
 file names\b:filenames
 \buser name\b:username
 \buser names\b:usernames
