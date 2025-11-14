@@ -2084,7 +2084,7 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->doh_insecure_ok = toggle;
     break;
   case C_LIST_ONLY: /* --list-only */
-    config->dirlistonly = toggle; /* only list the names of the FTP dir */
+    config->dirlistonly = toggle; /* only list names of the FTP directory */
     break;
   case C_MANUAL: /* --manual */
     if(toggle)   /* --no-manual shows no manual... */
