@@ -142,7 +142,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   else if(!wcsncmp(fbuf, L"\\\\.\\", 4))
     fbuf[2] = '?';
   else if(!wcsncmp(fbuf, L"\\\\.", 3) || !wcsncmp(fbuf, L"\\\\?", 3)) {
-    /* Unexpected, not UNC. The formatting doc doesn't allow this AFAICT. */
+    /* Unexpected, not UNC. The formatting doc does not allow this AFAICT. */
     goto cleanup;
   }
   else {
