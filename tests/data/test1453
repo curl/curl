@@ -27,7 +27,7 @@ tftp://%HOSTIP:%NOLISTENPORT/%repeat[503 x a]%z
 #
 # Verify data after the test has been "shot"
 <verify>
-# TFTP file name too long
+# TFTP filename too long
 <errorcode>
 71
 </errorcode>

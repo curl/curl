@@ -54,7 +54,7 @@
 # --nobuildconf            Don't run autoreconf -fi
 # --noconfigure            Don't run configure
 # --runtestopts=[options]  Options to pass to runtests.pl
-# --setup=[file name]      File name to read setup from (deprecated)
+# --setup=[filename]       Filename to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
 #
 # if [curl-daily-name] is omitted, a 'curl' git directory is assumed.

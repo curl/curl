@@ -131,7 +131,7 @@ static void memory_tracking_init(void)
   /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
   env = getenv("CURL_MEMDEBUG");
   if(env) {
-    /* use the value as file name */
+    /* use the value as filename */
     curl_dbg_memdebug(env);
   }
   /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */

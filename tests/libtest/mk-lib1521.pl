@@ -174,7 +174,7 @@ MOO
     ;
 
 if(!$ARGV[0]) {
-    die "missing target file name";
+    die "missing target filename";
 }
 
 use File::Temp qw/ :mktemp  /;

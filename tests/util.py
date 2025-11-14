@@ -66,7 +66,7 @@ class TestData(object):
         self.data_folder = data_folder
 
     def get_test_data(self, test_number):
-        # Create the test file name
+        # Create the test filename
         filename = os.path.join(self.data_folder,
                                 "test{0}".format(test_number))
 

@@ -104,11 +104,11 @@ my $port = 8921;               # default primary listener port
 my $listenaddr = '127.0.0.1';  # default address for listener port
 
 #**********************************************************************
-# global vars used for file names
+# global vars used for filenames
 #
-my $PORTFILE="ftpserver.port"; # server port file name
+my $PORTFILE="ftpserver.port"; # server port filename
 my $portfile;           # server port file path
-my $pidfile;            # server pid file name
+my $pidfile;            # server pid filename
 my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
 my $mainsockf_logfile;  # log file for primary connection sockfilt process
 my $datasockf_pidfile;  # pid file for secondary connection sockfilt process

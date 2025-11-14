@@ -107,7 +107,7 @@ my $error;
 my @cfgarr;
 
 #***************************************************************************
-# Returns a path of the given file name in the log directory (PiddirPath)
+# Returns a path of the given filename in the log directory (PiddirPath)
 #
 sub pp {
     my $file = $_[0];
@@ -201,7 +201,7 @@ while(@ARGV) {
 #
 
 #***************************************************************************
-# Default ssh daemon pid file name & directory
+# Default ssh daemon pid filename & directory
 #
 if($pidfile) {
     # Use our pidfile directory to store server config files
@@ -214,7 +214,7 @@ else {
 }
 
 #***************************************************************************
-# ssh and sftp server log file names
+# ssh and sftp server log filenames
 #
 $sshdlog = server_logfilename($logdir, 'ssh', $ipvnum, $idnum);
 $sftplog = server_logfilename($logdir, 'sftp', $ipvnum, $idnum);
@@ -242,7 +242,7 @@ if($error) {
 
 
 #***************************************************************************
-# Find out ssh daemon canonical file name
+# Find out ssh daemon canonical filename
 #
 my $sshd = find_sshd();
 if(!$sshd) {
@@ -293,7 +293,7 @@ if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
 
 
 #***************************************************************************
-# Find out sftp server plugin canonical file name
+# Find out sftp server plugin canonical filename
 #
 my $sftpsrv = find_sftpsrv();
 if(!$sftpsrv) {
@@ -304,7 +304,7 @@ logmsg "sftp server plugin found $sftpsrv\n" if($verbose);
 
 
 #***************************************************************************
-# Find out sftp client canonical file name
+# Find out sftp client canonical filename
 #
 my $sftp = find_sftp();
 if(!$sftp) {
@@ -315,7 +315,7 @@ logmsg "sftp client found $sftp\n" if($verbose);
 
 
 #***************************************************************************
-# Find out ssh keygen canonical file name
+# Find out ssh keygen canonical filename
 #
 my $sshkeygen = find_sshkeygen();
 if(!$sshkeygen) {
@@ -326,7 +326,7 @@ logmsg "ssh keygen found $sshkeygen\n" if($verbose);
 
 
 #***************************************************************************
-# Find out ssh client canonical file name
+# Find out ssh client canonical filename
 #
 my $ssh = find_ssh();
 if(!$ssh) {

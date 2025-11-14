@@ -53,7 +53,7 @@ static CURLcode test_lib1908(const char *URL)
 
     curl_easy_reset(curl);
 
-    /* using the same file name for the alt-svc cache, this clobbers the
+    /* using the same filename for the alt-svc cache, this clobbers the
        content just written from the 'curldupe' handle */
     curl_easy_cleanup(curl);
   }
