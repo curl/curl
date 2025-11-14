@@ -204,31 +204,31 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   } lptr;
 
 #ifdef DEBUGBUILD
-  const char *timestr = getenv("CURL_TIME");
-  if(timestr) {
-    curl_off_t val;
-    curlx_str_number(&timestr, &val, TIME_T_MAX);
-    switch(info) {
-    case CURLINFO_LOCAL_PORT:
-      *param_longp = (long)val;
-      return CURLE_OK;
-    default:
-      break;
-    }
-  }
+  const char *envstr;
+
   /* use another variable for this to allow different values */
-  timestr = getenv("CURL_DEBUG_SIZE");
-  if(timestr) {
-    curl_off_t val;
-    curlx_str_number(&timestr, &val, LONG_MAX);
-    switch(info) {
-    case CURLINFO_HEADER_SIZE:
-    case CURLINFO_REQUEST_SIZE:
+  switch(info) {
+  case CURLINFO_LOCAL_PORT:
+    envstr = getenv("CURL_TIME");
+    if(envstr) {
+      curl_off_t val;
+      curlx_str_number(&envstr, &val, TIME_T_MAX);
       *param_longp = (long)val;
       return CURLE_OK;
-    default:
-      break;
     }
+    break;
+  case CURLINFO_HEADER_SIZE:
+  case CURLINFO_REQUEST_SIZE:
+    envstr = getenv("CURL_DEBUG_SIZE");
+    if(envstr) {
+      curl_off_t val;
+      curlx_str_number(&envstr, &val, LONG_MAX);
+      *param_longp = (long)val;
+      return CURLE_OK;
+    }
+    break;
+  default:
+    break;
   }
 #endif
 
@@ -381,28 +381,29 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
                              curl_off_t *param_offt)
 {
 #ifdef DEBUGBUILD
-  const char *timestr = getenv("CURL_TIME");
-  if(timestr) {
-    curl_off_t val;
-    curlx_str_number(&timestr, &val, CURL_OFF_T_MAX);
-
-    switch(info) {
-    case CURLINFO_TOTAL_TIME_T:
-    case CURLINFO_NAMELOOKUP_TIME_T:
-    case CURLINFO_CONNECT_TIME_T:
-    case CURLINFO_APPCONNECT_TIME_T:
-    case CURLINFO_PRETRANSFER_TIME_T:
-    case CURLINFO_POSTTRANSFER_TIME_T:
-    case CURLINFO_QUEUE_TIME_T:
-    case CURLINFO_STARTTRANSFER_TIME_T:
-    case CURLINFO_REDIRECT_TIME_T:
-    case CURLINFO_SPEED_DOWNLOAD_T:
-    case CURLINFO_SPEED_UPLOAD_T:
+  const char *envstr;
+  switch(info) {
+  case CURLINFO_TOTAL_TIME_T:
+  case CURLINFO_NAMELOOKUP_TIME_T:
+  case CURLINFO_CONNECT_TIME_T:
+  case CURLINFO_APPCONNECT_TIME_T:
+  case CURLINFO_PRETRANSFER_TIME_T:
+  case CURLINFO_POSTTRANSFER_TIME_T:
+  case CURLINFO_QUEUE_TIME_T:
+  case CURLINFO_STARTTRANSFER_TIME_T:
+  case CURLINFO_REDIRECT_TIME_T:
+  case CURLINFO_SPEED_DOWNLOAD_T:
+  case CURLINFO_SPEED_UPLOAD_T:
+    envstr = getenv("CURL_TIME");
+    if(envstr) {
+      curl_off_t val;
+      curlx_str_number(&envstr, &val, CURL_OFF_T_MAX);
       *param_offt = (curl_off_t)val;
       return CURLE_OK;
-    default:
-      break;
     }
+    break;
+  default:
+    break;
   }
 #endif
   switch(info) {
@@ -480,26 +481,28 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
                                double *param_doublep)
 {
 #ifdef DEBUGBUILD
-  const char *timestr = getenv("CURL_TIME");
-  if(timestr) {
-    curl_off_t val;
-    curlx_str_number(&timestr, &val, CURL_OFF_T_MAX);
+  const char *envstr;
 
-    switch(info) {
-    case CURLINFO_TOTAL_TIME:
-    case CURLINFO_NAMELOOKUP_TIME:
-    case CURLINFO_CONNECT_TIME:
-    case CURLINFO_APPCONNECT_TIME:
-    case CURLINFO_PRETRANSFER_TIME:
-    case CURLINFO_STARTTRANSFER_TIME:
-    case CURLINFO_REDIRECT_TIME:
-    case CURLINFO_SPEED_DOWNLOAD:
-    case CURLINFO_SPEED_UPLOAD:
+  switch(info) {
+  case CURLINFO_TOTAL_TIME:
+  case CURLINFO_NAMELOOKUP_TIME:
+  case CURLINFO_CONNECT_TIME:
+  case CURLINFO_APPCONNECT_TIME:
+  case CURLINFO_PRETRANSFER_TIME:
+  case CURLINFO_STARTTRANSFER_TIME:
+  case CURLINFO_REDIRECT_TIME:
+  case CURLINFO_SPEED_DOWNLOAD:
+  case CURLINFO_SPEED_UPLOAD:
+    envstr = getenv("CURL_TIME");
+    if(envstr) {
+      curl_off_t val;
+      curlx_str_number(&envstr, &val, CURL_OFF_T_MAX);
       *param_doublep = (double)val;
       return CURLE_OK;
-    default:
-      break;
     }
+    break;
+  default:
+    break;
   }
 #endif
   switch(info) {
