@@ -50,7 +50,8 @@ isation:ization
 ^(And|So|But) = Rewrite it somehow?
 \. But: Rewrite it somehow?
 \. So : Rewrite without "so" ?
- dir [^=]:directory
+ dir [^=]=directory
+ Dir [^=]=Directory
 sub-director:subdirector
 web page:webpage
 host name\b:hostname
