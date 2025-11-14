@@ -504,7 +504,7 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
     return CURLE_OK;
 
   if(abort_upload) {
-    /* We'd like to abort the upload - but should we? */
+    /* We would like to abort the upload - but should we? */
 #ifdef USE_NTLM
     if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
        (data->state.authhost.picked == CURLAUTH_NTLM)) {

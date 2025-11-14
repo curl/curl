@@ -340,7 +340,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
     /* What was the previous action the transfer had regarding this socket?
      * If the transfer is new to the socket, disregard the information
      * in `last_poll`, because the socket might have been destroyed and
-     * reopened. We'd have cleared the sh_entry for that, but the socket
+     * reopened. We would have cleared the sh_entry for that, but the socket
      * might still be mentioned in the hashed pollsets. */
     last_action = 0;
     if(first_time) {
