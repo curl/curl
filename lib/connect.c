@@ -116,6 +116,7 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
+  timediff_t ctimeout_ms;
   struct curltime now;
 
   /* The duration of a connect and the total transfer are calculated from two
@@ -136,20 +137,19 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
       curlx_timediff_ms(*nowp, data->progress.t_startop);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
-    if(!duringconnect)
-      return timeleft_ms; /* no connect check, this is it */
   }
 
-  if(duringconnect) {
-    timediff_t ctimeout_ms = (data->set.connecttimeout > 0) ?
-      data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
-    ctimeleft_ms = ctimeout_ms -
-                   curlx_timediff_ms(*nowp, data->progress.t_startsingle);
-    if(!ctimeleft_ms)
-      ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
-    if(!timeleft_ms)
-      return ctimeleft_ms; /* no general timeout, this is it */
-  }
+  if(!duringconnect)
+    return timeleft_ms; /* no connect check, this is it */
+  ctimeout_ms = (data->set.connecttimeout > 0) ?
+    data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
+  ctimeleft_ms = ctimeout_ms -
+    curlx_timediff_ms(*nowp, data->progress.t_startsingle);
+  if(!ctimeleft_ms)
+    ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
+  if(!timeleft_ms)
+    return ctimeleft_ms; /* no general timeout, this is it */
+
   /* return minimal time left or max amount already expired */
   return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
 }
