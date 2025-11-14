@@ -506,7 +506,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
 
   rc = nghttp2_session_callbacks_new(&cbs);
   if(rc) {
-    failf(data, "Couldn't initialize nghttp2 callbacks");
+    failf(data, "Could not initialize nghttp2 callbacks");
     goto out;
   }
 
@@ -530,7 +530,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   /* The nghttp2 session is not yet setup, do it */
   rc = h2_client_new(cf, cbs);
   if(rc) {
-    failf(data, "Couldn't initialize nghttp2");
+    failf(data, "Could not initialize nghttp2");
     goto out;
   }
   ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;

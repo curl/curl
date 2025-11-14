@@ -1867,7 +1867,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     }
 
     if(!*str) {
-      failf(data, "Couldn't interpret the 227-response");
+      failf(data, "Could not interpret the 227-response");
       return CURLE_FTP_WEIRD_227_FORMAT;
     }
 
@@ -2202,7 +2202,7 @@ static CURLcode ftp_state_type_resp(struct Curl_easy *data,
     /* "sasserftpd" and "(u)r(x)bot ftpd" both responds with 226 after a
        successful 'TYPE I'. While that is not as RFC959 says, it is still a
        positive response code and we allow that. */
-    failf(data, "Couldn't set desired mode");
+    failf(data, "Could not set desired mode");
     return CURLE_FTP_COULDNT_SET_TYPE;
   }
   if(ftpcode != 200)
@@ -2392,7 +2392,7 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 
   case FTP_RETR_REST:
     if(ftpcode != 350) {
-      failf(data, "Couldn't use REST");
+      failf(data, "Could not use REST");
       result = CURLE_FTP_COULDNT_USE_REST;
     }
     else {

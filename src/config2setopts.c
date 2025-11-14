@@ -212,11 +212,11 @@ static CURLcode ssh_setopts(struct OperationConfig *config, CURL *curl)
       config->knownhosts = known;
     }
     else if(!config->hostpubmd5 && !config->hostpubsha256) {
-      errorf("Couldn't find a known_hosts file");
+      errorf("Could not find a known_hosts file");
       return CURLE_FAILED_INIT;
     }
     else
-      warnf("Couldn't find a known_hosts file");
+      warnf("Could not find a known_hosts file");
   }
   return CURLE_OK; /* ignore if SHA256 did not work */
 }

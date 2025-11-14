@@ -2740,7 +2740,7 @@ static CURLcode override_login(struct Curl_easy *data,
                                       data->set.str[STRING_NETRC_FILE]);
       if(ret && ((ret == NETRC_NO_MATCH) ||
                  (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
-        infof(data, "Couldn't find host %s in the %s file; using defaults",
+        infof(data, "Could not find host %s in the %s file; using defaults",
               conn->host.name,
               (data->set.str[STRING_NETRC_FILE] ?
                data->set.str[STRING_NETRC_FILE] : ".netrc"));
