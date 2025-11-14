@@ -90,7 +90,7 @@ int main(void)
   /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
   if(!hd_src) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    printf("Could not open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 2;
   }
 

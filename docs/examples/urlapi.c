@@ -42,7 +42,7 @@ int main(void)
   if(res)
     return (int)res;
 
-  /* init Curl URL */
+  /* init curl URL */
   urlp = curl_url();
   uc = curl_url_set(urlp, CURLUPART_URL,
                     "http://example.com/path/index.html", 0);

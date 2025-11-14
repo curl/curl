@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Very simple RTSP request sending OPTIONS.
+ * Simple RTSP request sending OPTIONS.
  * </DESC>
  */
 #include <stdio.h>
