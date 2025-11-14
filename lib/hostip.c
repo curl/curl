@@ -956,7 +956,7 @@ out:
     /* we got a response, create a dns entry, add to cache, return */
     dns = Curl_dnscache_mk_entry(data, addr, hostname, 0, port, FALSE);
     if(!dns || Curl_dnscache_add(data, dns)) {
-      /* this is OOM or similar, don't store such negative resolves */
+      /* this is OOM or similar, do not store such negative resolves */
       keep_negative = FALSE;
       goto error;
     }

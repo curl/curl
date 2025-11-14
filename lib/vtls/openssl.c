@@ -5154,7 +5154,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 #endif
 
   if(data->set.ssl.certinfo && !octx->reused_session) {
-    /* asked to gather certificate info. Reused sessions don't have cert
+    /* asked to gather certificate info. Reused sessions do not have cert
        chains */
     result = ossl_certchain(data, octx->ssl);
     if(result)
@@ -5684,7 +5684,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 
   cert = SSL_get1_peer_certificate(octx->ssl);
   if(!cert)
-    /* No server certificate, don't do channel binding */
+    /* No server certificate, do not do channel binding */
     return CURLE_OK;
 
   if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {

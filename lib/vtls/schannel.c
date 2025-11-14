@@ -1286,7 +1286,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* The socket must be writeable (or a poll error occurred) before we call
        InitializeSecurityContext to continue processing the received TLS
-       records. This is because that function is not idempotent and we don't
+       records. This is because that function is not idempotent and we do not
        support partial save/resume sending replies of handshake tokens. */
     if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
       SCH_DEV(infof(data, "schannel: handshake waiting for writeable socket"));
