@@ -94,7 +94,7 @@ sub file {
                 }
 
                 print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
-                printf STDERR " %4d | $in\n", $l;
+                printf STDERR " %4d | %s\n", $l, $in;
                 printf STDERR "      | %*s^%s\n", length($p), " ",
                     "~" x (length($w)-1);
                 printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};
