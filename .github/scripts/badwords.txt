@@ -47,8 +47,6 @@ there's:there is
 \. So : Rewrite without "so" ?
  dir [^=]:directory
 sub-director:subdirector
-you'd:you would
-you'll:you will
 can't:cannot
 that's:that is
 web page:webpage
