@@ -60,7 +60,6 @@ file names\b:filenames
 \buser names\b:usernames
 \bpass phrase:passphrase
 didn't:did not
-doesn't:does not
 won't:will not
 couldn't:could not
 \bwill\b:rewrite to present tense
