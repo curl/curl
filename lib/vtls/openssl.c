@@ -1688,7 +1688,7 @@ static CURLcode client_cert(struct Curl_easy *data,
         failf(data,
               "could not load PEM client certificate from %s, " OSSL_PACKAGE
               " error %s, "
-              "(no key found, wrong pass phrase, or wrong file format?)",
+              "(no key found, wrong passphrase, or wrong file format?)",
               (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
@@ -1708,7 +1708,7 @@ static CURLcode client_cert(struct Curl_easy *data,
         failf(data,
               "could not load ASN1 client certificate from %s, " OSSL_PACKAGE
               " error %s, "
-              "(no key found, wrong pass phrase, or wrong file format?)",
+              "(no key found, wrong passphrase, or wrong file format?)",
               (cert_blob ? "CURLOPT_SSLCERT_BLOB" : cert_file),
               ossl_strerror(ERR_get_error(), error_buffer,
                             sizeof(error_buffer)) );
