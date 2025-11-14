@@ -50,14 +50,13 @@ static const char * const urls[NUMT]= {
   "www.example"
 };
 
-static void *pull_one_url(void *pindex)
+static void *pull_one_url(void *p)
 {
   CURL *curl;
 
   curl = curl_easy_init();
   if(curl) {
-    int i = *(int *)pindex;
-    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+    curl_easy_setopt(curl, CURLOPT_URL, (const char *)p);
     (void)curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
   }
@@ -87,7 +86,7 @@ int main(void)
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
-                               (void *)&i);
+                               (void *)urls[i]);
     if(error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
     else
