@@ -2123,7 +2123,7 @@ static CURLcode transfer_per_config(struct OperationConfig *config,
   CURLcode result;
   *added = FALSE;
 
-  /* Check we have a url */
+  /* Check we have a URL */
   if(!config->url_list || !config->url_list->url) {
     helpf("(%d) no URL specified", CURLE_FAILED_INIT);
     result = CURLE_FAILED_INIT;

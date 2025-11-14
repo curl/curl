@@ -149,8 +149,8 @@ struct ssh_conn {
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
 
-  char *homedir;              /* when doing SFTP we figure out home dir in the
-                                 connect phase */
+  char *homedir;              /* when doing SFTP we figure out home directory
+                                 in the connect phase */
   /* end of READDIR stuff */
 
   int secondCreateDirs;         /* counter use by the code to see if the

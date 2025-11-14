@@ -957,7 +957,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
   else if(!strncmp(cmd, "mkdir ", 6)) {
     if(*cp)
       return_quote_error(data, sshc);
-    /* create dir */
+    /* create directory */
     myssh_state(data, sshc, SSH_SFTP_QUOTE_MKDIR);
     return result;
   }
@@ -980,7 +980,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
   else if(!strncmp(cmd, "rmdir ", 6)) {
     if(*cp)
       return_quote_error(data, sshc);
-    /* delete dir */
+    /* delete directory */
     myssh_state(data, sshc, SSH_SFTP_QUOTE_RMDIR);
     return result;
   }
@@ -2275,9 +2275,9 @@ static CURLcode ssh_state_sftp_create_dirs_mkdir(struct Curl_easy *data,
   ++sshc->slash_pos;
   if(rc < 0) {
     /*
-     * Abort if failure was not that the dir already exists or the
-     * permission was denied (creation might succeed further down the
-     * path) - retry on unspecific FAILURE also
+     * Abort if failure was not that the directory already exists or
+     * the permission was denied (creation might succeed further down
+     * the path) - retry on unspecific FAILURE also
      */
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
     if((sftperr != LIBSSH2_FX_FILE_ALREADY_EXISTS) &&
@@ -3528,7 +3528,7 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
 
   data->req.size = -1; /* make sure this is unknown at this point */
-  sshc->secondCreateDirs = 0;   /* reset the create dir attempt state
+  sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
                                    variable */
 
   Curl_pgrsSetUploadCounter(data, 0);
