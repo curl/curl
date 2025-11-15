@@ -191,7 +191,7 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: sshserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: sshserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }

@@ -176,7 +176,7 @@ while(@ARGV) {
         $mtls = 1;
     }
     else {
-        print STDERR "\nWarning: secureserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: secureserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }
