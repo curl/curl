@@ -65,7 +65,7 @@ else { # "vernum" case
         $curlconfigversion = "illegal value";
     }
 
-    # Strip off the -DEV and -rc suffixes from the curl version if they're there
+    # Strip off the -DEV and -rc suffixes from the curl version if they are there
     $version =~ s/-\w*$//;
 }
 close CURLCONFIG;

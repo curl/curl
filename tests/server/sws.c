@@ -414,7 +414,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       }
 
       if(req->testno == DOCNUMBER_NOTHING) {
-        /* didn't find any in the first scan, try alternative test case
+        /* did not find any in the first scan, try alternative test case
            number placements */
         static char doc[MAXDOCNAMELEN];
         if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
@@ -1955,7 +1955,7 @@ static int service_connection(curl_socket_t *msgsock,
   if(req->connect_request) {
     /* a CONNECT request, setup and talk the tunnel */
     if(!is_proxy) {
-      logmsg("received CONNECT but isn't running as proxy!");
+      logmsg("received CONNECT but not running as proxy!");
       return 1;
     }
     else {
