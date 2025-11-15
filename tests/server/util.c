@@ -227,7 +227,7 @@ int write_pidfile(const char *filename)
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write pid file: %s (%d) %s", filename,
+    logmsg("Could not write pid file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
@@ -243,7 +243,7 @@ int write_portfile(const char *filename, int port)
   FILE *portfile = fopen(filename, "wb");
   if(!portfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write port file: %s (%d) %s", filename,
+    logmsg("Could not write port file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }

@@ -447,7 +447,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
     snprintf(outfile, sizeof(outfile), "%s/upload.%ld", logdir, test->testno);
     test->ofile = open(outfile, O_CREAT|O_RDWR|CURL_O_BINARY, 0777);
     if(test->ofile == -1) {
-      logmsg("Couldn't create and/or open file %s for upload!", outfile);
+      logmsg("Could not create and/or open file %s for upload!", outfile);
       return -1; /* failure! */
     }
   }
@@ -1017,7 +1017,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
     error = errno;
     logmsg("fopen() failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("  Couldn't open test file %ld", req->testno);
+    logmsg("  Could not open test file %ld", req->testno);
     return 1; /* done */
   }
   else {
@@ -1141,7 +1141,7 @@ static int validate_access(struct testcase *test,
       int error = errno;
       logmsg("fopen() failed with error (%d) %s",
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      logmsg("Couldn't open test file for test: %ld", testno);
+      logmsg("Could not open test file for test: %ld", testno);
       return TFTP_EACCESS;
     }
     else {

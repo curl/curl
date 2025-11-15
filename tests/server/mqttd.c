@@ -572,7 +572,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         error = errno;
         logmsg("fopen() failed with error (%d) %s",
                error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-        logmsg("Couldn't open test file %ld", testno);
+        logmsg("Could not open test file %ld", testno);
         goto end;
       }
       error = getpart(&data, &datalen, "reply", "data", stream);
