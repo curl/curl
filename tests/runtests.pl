@@ -853,7 +853,7 @@ sub checksystemfeatures {
         }
         if($feature{"threaded-resolver"} && !$valgrind) {
             die "cannot run torture tests since curl was built with the ".
-                "threaded resolver, and we aren't running with valgrind";
+                "threaded resolver, and we are not running with valgrind";
         }
     }
 

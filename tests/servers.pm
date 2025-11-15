@@ -427,7 +427,7 @@ sub protoport {
 
 
 #######################################################################
-# Stop a test server along with pids which aren't in the %run hash yet.
+# Stop a test server along with pids which are not in the %run hash yet.
 # This also stops all servers which are relative to the given one.
 #
 sub stopserver {

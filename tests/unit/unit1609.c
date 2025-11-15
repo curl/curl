@@ -85,7 +85,7 @@ static CURLcode test_unit1609(const char *arg)
   };
 
   static const struct testcase tests[] = {
-    /* spaces aren't allowed, for now */
+    /* spaces are not allowed, for now */
     { "test.com:80:127.0.0.1",
       "test.com", 80, { "127.0.0.1", }
     },
