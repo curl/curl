@@ -354,7 +354,7 @@ sub cleardir {
 
     # Get all files
     opendir(my $dh, $dir) ||
-        return 0; # can't open dir
+        return 0; # cannot open dir
     while($file = readdir($dh)) {
         # Do not clear the $PIDDIR or $LOCKDIR since those need to live beyond
         # one test
@@ -848,11 +848,11 @@ sub checksystemfeatures {
 
     if($torture) {
         if(!$feature{"TrackMemory"}) {
-            die "can't run torture tests since curl was built without ".
+            die "cannot run torture tests since curl was built without ".
                 "TrackMemory feature (--enable-curldebug)";
         }
         if($feature{"threaded-resolver"} && !$valgrind) {
-            die "can't run torture tests since curl was built with the ".
+            die "cannot run torture tests since curl was built with the ".
                 "threaded resolver, and we aren't running with valgrind";
         }
     }
@@ -2351,7 +2351,7 @@ while(@ARGV) {
 
         # Particularly useful when you introduce a crashing bug somewhere in
         # the development version as then it will not be able to run any tests
-        # since it can't verify the servers!
+        # since it cannot verify the servers!
 
         $VCURL=shell_quote($ARGV[1]);
         shift @ARGV;
@@ -2815,7 +2815,7 @@ sub disabledtests {
 
 if($TESTCASES eq "all") {
     # Get all commands and find out their test numbers
-    opendir(DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
+    opendir(DIR, $TESTDIR) || die "cannot opendir $TESTDIR: $!";
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir(DIR);
 
@@ -2919,7 +2919,7 @@ sub displaylogs {
     my ($runnerid, $testnum)=@_;
     my $logdir = getrunnerlogdir($runnerid);
     opendir(DIR, "$logdir") ||
-        die "can't open dir: $!";
+        die "cannot open dir: $!";
     my @logs = readdir(DIR);
     closedir(DIR);
 

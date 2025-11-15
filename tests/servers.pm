@@ -362,7 +362,7 @@ sub startnew {
 
         # Put an "exec" in front of the command so that the child process
         # keeps this child's process ID.
-        exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        exec("exec $cmd") || die "Cannot exec() $cmd: $!";
 
         # exec() should never return back here to this process. We protect
         # ourselves by calling die() just in case something goes really bad.
@@ -400,7 +400,7 @@ sub startnew {
         if(checkdied($child)) {
             logmsg "startnew: child process has died, server might start up\n"
                 if($verbose);
-            # We can't just abort waiting for the server with a
+            # We cannot just abort waiting for the server with a
             # return (-1,-1);
             # because the server might have forked and could still start
             # up normally. Instead, just reduce the amount of time we remain
@@ -523,7 +523,7 @@ sub getexternalproxyflags {
 #######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
 # assign requested address")
 #
 sub verifyhttp {
@@ -610,7 +610,7 @@ sub verifyhttp {
 #######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
 # assign requested address")
 #
 sub verifyftp {
@@ -677,7 +677,7 @@ sub verifyftp {
 #######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
 # assign requested address")
 #
 sub verifyrtsp {
@@ -807,7 +807,7 @@ sub verifysftp {
 # Verify that the non-stunnel HTTP TLS extensions capable server that runs
 # on $ip, $port is our server.  This also implies that we can speak with it,
 # as there might be occasions when the server runs fine but we cannot talk
-# to it ("Failed to connect to ::1: Can't assign requested address")
+# to it ("Failed to connect to ::1: Cannot assign requested address")
 #
 sub verifyhttptls {
     my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
@@ -902,7 +902,7 @@ sub verifypid {
 #######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
 # assign requested address")
 #
 sub verifysmb {
@@ -962,7 +962,7 @@ sub verifysmb {
 #######################################################################
 # Verify that the server that runs on $ip, $port is our server.  This also
 # implies that we can speak with it, as there might be occasions when the
-# server runs fine but we cannot talk to it ("Failed to connect to ::1: Can't
+# server runs fine but we cannot talk to it ("Failed to connect to ::1: Cannot
 # assign requested address")
 #
 sub verifytelnet {
@@ -1808,7 +1808,7 @@ sub runsshserver {
     my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
 
     if(!$USER) {
-        logmsg "Can't start ssh server due to lack of USER name\n";
+        logmsg "Cannot start ssh server due to lack of USER name\n";
         return (4, 0, 0, 0);
     }
 
@@ -2584,7 +2584,7 @@ sub startservers {
         elsif($what =~ /^(ftp|imap|pop3|smtp)s$/) {
             my $cproto = $1;
             if(!$stunnel) {
-                # we can't run ftps tests without stunnel
+                # we cannot run ftps tests without stunnel
                 return ("no stunnel", 4);
             }
             if($runcert{$what} && ($runcert{$what} ne $certfile)) {
@@ -2624,7 +2624,7 @@ sub startservers {
         }
         elsif($what eq "https" || $what eq "https-mtls") {
             if(!$stunnel) {
-                # we can't run https tests without stunnel
+                # we cannot run https tests without stunnel
                 return ("no stunnel", 4);
             }
             if($runcert{$what} && ($runcert{$what} ne $certfile)) {
@@ -2759,7 +2759,7 @@ sub startservers {
         }
         elsif($what eq "gophers") {
             if(!$stunnel) {
-                # we can't run TLS tests without stunnel
+                # we cannot run TLS tests without stunnel
                 return ("no stunnel", 4);
             }
             if($runcert{'gophers'} && ($runcert{'gophers'} ne $certfile)) {
@@ -2803,7 +2803,7 @@ sub startservers {
         }
         elsif($what eq "https-proxy") {
             if(!$stunnel) {
-                # we can't run https-proxy tests without stunnel
+                # we cannot run https-proxy tests without stunnel
                 return ("no stunnel", 4);
             }
             if($runcert{'https-proxy'} &&
@@ -2834,7 +2834,7 @@ sub startservers {
         }
         elsif($what eq "httptls") {
             if(!$httptlssrv) {
-                # for now, we can't run http TLS-EXT tests without gnutls-serv
+                # for now, we cannot run http TLS-EXT tests without gnutls-serv
                 return ("no gnutls-serv (with SRP support)", 4);
             }
             if($run{'httptls'} &&
@@ -2856,7 +2856,7 @@ sub startservers {
         }
         elsif($what eq "httptls-ipv6") {
             if(!$httptlssrv) {
-                # for now, we can't run http TLS-EXT tests without gnutls-serv
+                # for now, we cannot run http TLS-EXT tests without gnutls-serv
                 return ("no gnutls-serv", 4);
             }
             if($run{'httptls-ipv6'} &&

@@ -45,7 +45,7 @@ my $error = 0;
 sub cmdfiles {
     my ($dir)=@_;
 
-    opendir(my $dh, $dir) || die "Can't opendir $dir: $!";
+    opendir(my $dh, $dir) || die "Cannot opendir $dir: $!";
     my @opts = grep { /[a-z0-9].*\.md$/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
 

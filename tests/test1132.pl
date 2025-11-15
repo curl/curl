@@ -83,7 +83,7 @@ sub scanfile {
     return 0;
 }
 
-opendir(my $dh, $dir) || die "can't opendir $dir: $!";
+opendir(my $dh, $dir) || die "cannot opendir $dir: $!";
 my @cfiles = grep { /\.c\z/ && -f "$dir/$_" } readdir($dh);
 closedir $dh;
 

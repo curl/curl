@@ -214,7 +214,7 @@ sub runner_init {
             # handle IPC calls
             event_loop();
 
-            # Can't rely on logmsg here in case it's buffered
+            # Cannot rely on logmsg here in case it's buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
 
             # To reach this point, either the controller has sent
@@ -885,7 +885,7 @@ sub singletest_run {
                 chomp $dis[0] if($dis[0]);
                 if($dis[0] eq "test-duphandle") {
                     # marked to not run with duphandle
-                    logmsg " $testnum: IGNORED: Can't run test-duphandle\n";
+                    logmsg " $testnum: IGNORED: Cannot run test-duphandle\n";
                     return (-1, 0, 0, "", "", 0);
                 }
             }
@@ -1144,7 +1144,7 @@ sub singletest_postcheck {
             logmsg "postcheck $cmd\n" if($verbose);
             my $rc = runclient("$cmd");
             # Must run the postcheck command in torture mode in order
-            # to clean up, but the result can't be relied upon.
+            # to clean up, but the result cannot be relied upon.
             if($rc != 0 && !$torture) {
                 logmsg " $testnum: postcheck FAILED\n";
                 return -1;
@@ -1376,7 +1376,7 @@ sub runnerar {
 ###################################################################
 # Returns runner ID if a response from an async call is ready or error
 # First value is ready, second is error, however an error case shows up
-# as ready in Linux, so you can't trust it.
+# as ready in Linux, so you cannot trust it.
 # argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {

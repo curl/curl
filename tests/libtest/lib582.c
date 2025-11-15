@@ -78,7 +78,7 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
     sockets->max_count = 20;
   }
   else if(sockets->count >= sockets->max_count) {
-    /* this can't happen in normal cases */
+    /* this cannot happen in normal cases */
     curl_mfprintf(stderr, "too many file handles error\n");
     exit(2);
   }
@@ -256,7 +256,7 @@ static CURLcode test_lib582(const char *URL)
   /* get the file size of the local file */
   hd = fstat(fileno(hd_src), &file_info);
   if(hd == -1) {
-    /* can't open file, bail out */
+    /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);
