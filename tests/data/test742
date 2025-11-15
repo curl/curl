@@ -40,7 +40,7 @@ socks5
 http
 </server>
 <name>
-SOCKS5-hostname with max length credentials and max host name length
+SOCKS5-hostname with max length credentials and max hostname length
 </name>
 
 # target a port that won't work without the SOCKS magic

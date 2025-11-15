@@ -30,7 +30,7 @@ connection-monitor
 http
 </server>
 <name>
-Reusing HTTP proxy connection for two different host names
+Reusing HTTP proxy connection for two different hostnames
 </name>
 <command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/ http://different.remote.haxx.se.%TESTNUMBER:8990

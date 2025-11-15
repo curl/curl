@@ -41,7 +41,7 @@ https
 socks5unix
 </server>
 <name>
-HTTPS GET with host name using SOCKS5h via Unix sockets
+HTTPS GET with hostname using SOCKS5h via Unix sockets
 </name>
 <command>
 https://this.is.a.host.name:%HTTPSPORT/%TESTNUMBER --insecure --proxy socks5h://localhost%SOCKSUNIXPATH

@@ -34,7 +34,7 @@ Debug
 http
 </server>
 <name>
-alt-svc using host name with trailing dot on host from file
+alt-svc using hostname with trailing dot on host from file
 </name>
 <setenv>
 # make Debug-curl accept Alt-Svc over plain HTTP

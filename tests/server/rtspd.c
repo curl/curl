@@ -362,10 +362,10 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */
 
         if(!strncmp(doc, "bad", 3))
-          /* if the host name starts with bad, we fake an error here */
+          /* if the hostname starts with bad, we fake an error here */
           req->testno = DOCNUMBER_BADCONNECT;
         else if(!strncmp(doc, "test", 4)) {
-          /* if the host name starts with test, the port number used in the
+          /* if the hostname starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {

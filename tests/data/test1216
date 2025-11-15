@@ -28,7 +28,7 @@ This server says moo
 http
 </server>
 <name>
-HTTP cookie domains tailmatching the host name
+HTTP cookie domains tailmatching the hostname
 </name>
 <command>
 http://example.fake/c/%TESTNUMBER http://bexample.fake/c/%TESTNUMBER -b %LOGDIR/injar%TESTNUMBER -x %HOSTIP:%HTTPPORT

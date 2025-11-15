@@ -119,13 +119,13 @@ static CURLcode test_unit1654(const char *arg)
                           ALPN_h2, "6.example.net", 80);
   fail_if(res, "Curl_altsvc_parse(9) failed!");
 
-  /* missing port in host name */
+  /* missing port in hostname */
   res = Curl_altsvc_parse(curl, asi,
                           "h2=\"example.net\"; ma=\"180\";\r\n",
                           ALPN_h2, "7.example.net", 80);
   fail_if(res, "Curl_altsvc_parse(10) failed!");
 
-  /* illegal port in host name */
+  /* illegal port in hostname */
   res = Curl_altsvc_parse(curl, asi,
                           "h2=\"example.net:70000\"; ma=\"180\";\r\n",
                           ALPN_h2, "8.example.net", 80);

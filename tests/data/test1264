@@ -16,7 +16,7 @@ HTTP GET
 http
 </features>
 <name>
-HTTP URL with space in host name
+HTTP URL with space in hostname
 </name>
 <command>
 -g "http://127.0.0.1 www.example.com/we/want/%TESTNUMBER"

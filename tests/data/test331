@@ -37,7 +37,7 @@ Funny-head: yesyes swsclose
 http
 </server>
 <name>
-HTTP with cookie using host name 'moo'
+HTTP with cookie using hostname 'moo'
 </name>
 <command>
 -x http://%HOSTIP:%HTTPPORT http://moo/we/want/%TESTNUMBER -b none http://moo/we/want/%TESTNUMBER0002

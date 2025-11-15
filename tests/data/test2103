@@ -24,7 +24,7 @@ dns
 override-dns
 </features>
 <name>
-HTTP GET with bad host name
+HTTP GET with bad hostname
 </name>
 <setenv>
 CURL_DNS_SERVER=127.0.0.1:%DNSPORT
