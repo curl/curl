@@ -2437,7 +2437,7 @@ static int test_sws(int argc, char *argv[])
               goto sws_cleanup;
           }
 
-          /* Reset the request, unless we're still in the middle of reading */
+          /* Reset the request, unless we are still in the middle of reading */
           if(rc && !req->upgrade_request)
             /* Note: resetting the HTTP request here can cause problems if:
              * 1) req->skipall is TRUE,
@@ -2448,7 +2448,7 @@ static int test_sws(int argc, char *argv[])
              * data (in service_connection()) as the first data received on
              * this new HTTP request and report "** Unusual request" (skipall
              * would have otherwise caused that data to be ignored). Normally,
-             * that socket will be closed by the client and there won't be any
+             * that socket will be closed by the client and there will not be any
              * stale data to cause this, but stranger things have happened (see
              * issue #11678).
              */

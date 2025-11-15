@@ -135,7 +135,7 @@ class Negotiator(object):
         """
         buffer = bytearray()
 
-        # If we keep receiving negotiation sequences, we won't fill the buffer.
+        # If we keep receiving negotiation sequences, we will not fill the buffer.
         # Keep looping while we can, and until we have something to give back
         # to the caller.
         while len(buffer) == 0:
