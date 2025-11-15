@@ -32,7 +32,7 @@ ftp
 lib525
 </tool>
 <name>
-FTP PORT upload using multi interface, EPRT doesn't work
+FTP PORT upload using multi interface, EPRT does not work
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER

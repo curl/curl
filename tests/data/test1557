@@ -15,7 +15,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-Remove easy handle in pending connections doesn't leave dangling entry
+Remove easy handle in pending connections does not leave dangling entry
 </name>
 <command>
 hostname.invalid

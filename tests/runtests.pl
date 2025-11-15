@@ -970,7 +970,7 @@ sub citest_starttestrun {
         $AZURE_RUN_ID = azure_create_test_run($ACURL);
         logmsg "Azure Run ID: $AZURE_RUN_ID\n" if($verbose);
     }
-    # Appveyor doesn't require anything here
+    # Appveyor does not require anything here
 }
 
 
@@ -1010,7 +1010,7 @@ sub citest_finishtestrun {
     if(azure_check_environment() && $AZURE_RUN_ID) {
         $AZURE_RUN_ID = azure_update_test_run($ACURL, $AZURE_RUN_ID);
     }
-    # Appveyor doesn't require anything here
+    # Appveyor does not require anything here
 }
 
 
@@ -1090,7 +1090,7 @@ sub singletest_shouldrun {
     if(loadtest("${TESTDIR}/test${testnum}", 1)) {
         if($verbose) {
             # this is not a test
-            logmsg "RUN: $testnum doesn't look like a test case\n";
+            logmsg "RUN: $testnum does not look like a test case\n";
         }
         $why = "no test";
     }

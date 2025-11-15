@@ -12,7 +12,7 @@ HTTP proxy Digest auth
 </info>
 # Server-side
 <reply>
-# The stupid test server doesn't response anything at all until the full
+# The stupid test server does not response anything at all until the full
 # request has been sent, and then of course the full POST has already been
 # sent!
 <data>

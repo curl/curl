@@ -25,7 +25,7 @@ body
 imap
 </server>
 <name>
-IMAP doesn't perform SELECT if reusing the same mailbox
+IMAP does not perform SELECT if reusing the same mailbox
 </name>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=456/;SECTION=2.3' -u user:secret

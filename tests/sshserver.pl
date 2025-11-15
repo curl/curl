@@ -406,7 +406,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
    (! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f)) ||
    (! -e pp($cliprvkeyf)) || (! -s pp($cliprvkeyf)) ||
    (! -e pp($clipubkeyf)) || (! -s pp($clipubkeyf))) {
-    # Make sure all files are gone so ssh-keygen doesn't complain
+    # Make sure all files are gone so ssh-keygen does not complain
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
 
@@ -435,7 +435,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
     display_file_top(pp($cliprvkeyf)) if($verbose);
-    # Make sure that permissions are restricted so openssh doesn't complain
+    # Make sure that permissions are restricted so openssh does not complain
     chmod 0600, pp($hstprvkeyf);
     chmod 0600, pp($cliprvkeyf);
     if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {

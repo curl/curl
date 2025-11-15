@@ -142,7 +142,7 @@ cleanup:
   return test_failure;
 }
 
-#else /* without pthread or Windows, this test doesn't work */
+#else /* without pthread or Windows, this test does not work */
 static CURLcode test_lib3026(const char *URL)
 {
   curl_version_info_data *ver;

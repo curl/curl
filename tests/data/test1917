@@ -21,7 +21,7 @@ hello
 # Client-side
 <client>
 
-# require HTTP too as otherwise CURLOPT_POST doesn't exist
+# require HTTP too as otherwise CURLOPT_POST does not exist
 <features>
 mqtt
 http

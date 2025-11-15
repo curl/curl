@@ -81,7 +81,7 @@ void startfunc(int a, int b) {
 
  // CPP comment ?
 
- /* comment doesn't end
+ /* comment does not end
 
 </file>
 </client>

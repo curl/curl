@@ -21,7 +21,7 @@ http
 </server>
 <setenv>
 #
-# Set a home that doesn't have a ".ipfs" folder. %PWD should be good.
+# Set a home that does not have a ".ipfs" folder. %PWD should be good.
 # This is to prevent the automatic gateway detection from finding a gateway file in your home folder.
 HOME=%PWD
 </setenv>

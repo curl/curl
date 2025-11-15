@@ -72,10 +72,10 @@ sub scanfile {
         }
         else {
             if(!$memdebug) {
-                print STDERR "$file doesn't include \"memdebug.h\"!\n";
+                print STDERR "$file does not include \"memdebug.h\"!\n";
             }
             if(!$curlmem) {
-                print STDERR "$file doesn't include \"curl_memory.h\"!\n";
+                print STDERR "$file does not include \"curl_memory.h\"!\n";
             }
             return 1;
         }

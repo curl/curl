@@ -16,7 +16,7 @@ file
 <name>
 GET a directory using file://
 </name>
-<!-- doesn't work on win32, see #6379 -->
+<!-- does not work on win32, see #6379 -->
 <features>
 !win32
 </features>

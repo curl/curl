@@ -217,7 +217,7 @@ foreach my $veropt (('-version', '-V')) {
             $ver_minor = $2;
         }
         elsif($verstr =~ /^sslVersion.*fips *= *yes/) {
-            # the fips option causes an error if stunnel doesn't support it
+            # the fips option causes an error if stunnel does not support it
             $fips_support = 1;
             last
         }
@@ -304,7 +304,7 @@ if($stunnel_version >= 400) {
             print $stunconf "verifyChain = yes\n";
         }
         if($fips_support) {
-            # disable fips in case OpenSSL doesn't support it
+            # disable fips in case OpenSSL does not support it
             print $stunconf "fips = no\n";
         }
         if(!$tstunnel_windows) {
