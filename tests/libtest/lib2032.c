@@ -123,7 +123,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
     int maxfd = -99;
     bool found_new_socket = FALSE;
 
-    /* Start a new handle if we aren't at the max */
+    /* Start a new handle if we are not at the max */
     if(state == ReadyForNewHandle) {
       easy_init(ntlm_curls[num_handles]);
 
@@ -204,7 +204,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
       interval.tv_sec = 0;
       interval.tv_usec = 5000;
 
-      /* if there's no timeout and we get here on the last handle, we may
+      /* if there is no timeout and we get here on the last handle, we may
          already have read the last part of the stream so waiting makes no
          sense */
       if(!running && num_handles == MAX_EASY_HANDLES) {

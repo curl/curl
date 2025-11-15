@@ -43,7 +43,7 @@ SSL
 http
 </server>
 <name>
-HTTP with NTLM with too long user name
+HTTP with NTLM with too long username
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser%repeat[1100 x A]%:testpass --ntlm

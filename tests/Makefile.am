@@ -84,7 +84,7 @@ EXTRA_DIST =        \
  valgrind.supp      \
  $(TESTSCRIPTS)
 
-# we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
+# we have two variables here to make sure DIST_SUBDIRS will not get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
 if BUILD_UNITTESTS
@@ -108,7 +108,7 @@ curl:
 TEST_COMMON =
 
 if CROSSCOMPILING
-TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
+TEST = @echo "NOTICE: we cannot run the tests when cross-compiling!"
 PYTEST = $(TEST)
 else # if not cross-compiling:
 

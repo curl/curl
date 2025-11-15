@@ -35,7 +35,7 @@ body
 imap
 </server>
 <name>
-IMAP custom request doesn't check continuation data
+IMAP custom request does not check continuation data
 </name>
 <command>
  imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/ -u user:secret -X 'FETCH 123 BODY[1]'

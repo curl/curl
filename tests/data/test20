@@ -17,7 +17,7 @@ non-existing host
 http
 </features>
 <name>
-attempt connect to non-existing host name
+attempt connect to non-existing hostname
 </name>
 <command>
 --ipv4 non-existing-host.haxx.se.

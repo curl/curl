@@ -186,13 +186,13 @@ static CURLcode test_unit1307(const char *arg)
     { "[[:foo:]]",                "bar",                    NOMATCH|MAC_FAIL},
     { "[[:foo:]]",                "f]",         MATCH|LINUX_NOMATCH|MAC_FAIL},
 
-    { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
+    { "curl[[:blank:]];-)",       "curl ;-)",               MATCH },
     { "*[[:blank:]]*",            " ",                      MATCH },
     { "*[[:blank:]]*",            "",                       NOMATCH },
     { "*[[:blank:]]*",            "hi, im_Pavel",           MATCH },
 
     /* common using */
-    { "filename.dat",             "filename.dat",           MATCH },
+    { "Filename.dat",             "Filename.dat",           MATCH },
     { "*curl*",                   "lets use curl!!",        MATCH },
     { "filename.txt",             "filename.dat",           NOMATCH },
     { "*.txt",                    "text.txt",               MATCH },

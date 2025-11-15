@@ -48,7 +48,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
---retry and -f on a HTTP 404 response
+--retry and -f on an HTTP 404 response
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -f --retry 1

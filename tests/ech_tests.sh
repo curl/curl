@@ -25,7 +25,7 @@
 #
 
 # Run some tests against servers we know to support ECH (CF, defo.ie, etc.).
-# as well as some we know don't do ECH but have an HTTPS RR, and finally some
+# as well as some we know do not do ECH but have an HTTPS RR, and finally some
 # for which neither is the case.
 
 # TODO: Translate this into something that approximates a valid curl test:-)
@@ -36,9 +36,9 @@
 
 # set -x
 
-# Exit with an error if there's an active ech stanza in ~/.curlrc
-# as that'd likely skew some results (e.g. turning a fail into a
-# success or vice versa)
+# Exit with an error if there is an active ech stanza in ~/.curlrc
+# as that would likely skew some results (e.g. turning a fail into
+# a success or vice versa)
 : "${CURL_CFG_FILE=$HOME/.curlrc}"
 active_ech=$(grep ech "$CURL_CFG_FILE" | grep -v "#.*ech")
 if [[ "$active_ech" != "" ]]; then
@@ -88,7 +88,7 @@ declare -A neither_targets=(
 # Variables that can be over-ridden from environment
 #
 
-# Top of curl test tree, assume we're there
+# Top of curl test tree, assume we are there
 : "${CTOP:=.}"
 
 # Place to put test log output
@@ -214,7 +214,7 @@ if [ ! -d "$LTOP" ]; then
   mkdir -p "$LTOP"
 fi
 if [ ! -d "$LTOP" ]; then
-  echo "Can't see $LTOP for logs - exiting"
+  echo "Cannot see $LTOP for logs - exiting"
   exit 1
 fi
 logfile=$LTOP/${BINNAME}_$NOW.log
@@ -223,7 +223,7 @@ echo "-----" > "$logfile"
 echo "Running $0 at $NOW" >> "$logfile"
 echo "Running $0 at $NOW"
 
-# check we have the binaries needed and which TLS library we'll be using
+# check we have the binaries needed and which TLS library we will be using
 if [ -f "$OSSL"/libssl.so ]; then
   have_ossl="yes"
 fi
@@ -254,8 +254,8 @@ wolf_cnt=$($CURL "${CURL_PARAMS[@]}" -V 2> /dev/null | grep -c wolfSSL)
 if ((wolf_cnt == 1)); then
   using_wolf="yes"
   # for some reason curl+wolfSSL dislikes certs that are ok
-  # for browsers, so we'll test using "insecure" mode (-k)
-  # but that's ok here as we're only interested in ECH testing
+  # for browsers, so we will test using "insecure" mode (-k)
+  # but that is ok here as we are only interested in ECH testing
   CURL_PARAMS+=(-k)
 fi
 # check if we have dig and it knows https or not
@@ -274,7 +274,7 @@ digout=$($digcmd https defo.ie)
 if [[ $digout != "1 . "* ]]; then
   digout=$($digcmd -t TYPE65 defo.ie)
   if [[ $digout == "1 . "* ]]; then
-    # we're good
+    # we are good
     have_presout="yes"
   fi
 else
@@ -282,7 +282,7 @@ else
 fi
 
 # Check if ports other than 443 are blocked from this
-# vantage point (I run tests in a n/w where that's
+# vantage point (I run tests in a n/w where that is
 # sadly true sometimes;-)
 # echo "Checking if ports other than 443 are maybe blocked"
 not443testurl="https://draft-13.esni.defo.ie:9413/"
@@ -317,7 +317,7 @@ echo "dig command: |$digcmd|"
 echo "ports != 443 blocked: $have_portsblocked"
 
 if [[ "$have_curl" == "no" ]]; then
-  echo "Can't proceed without curl - exiting"
+  echo "Cannot proceed without curl - exiting"
   exit 32
 fi
 
@@ -379,7 +379,7 @@ if [[ "$using_ossl" == "yes" ]]; then
       continue
     fi
     if [[ "$host" == "cloudflare-ech.com" ]]; then
-      echo "Skipping $host as they've blocked PN override"
+      echo "Skipping $host as they have blocked PN override"
       continue
     fi
     path=${ech_targets[$targ]}
@@ -472,9 +472,9 @@ for targ in "${!neither_targets[@]}"; do
   echo "" >> "$logfile"
 done
 
-# Check various command line options, if we're good so far
+# Check various command line options, if we are good so far
 if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
-  # use this test URL as it'll tell us if things worked
+  # use this test URL as it will tell us if things worked
   turl="https://defo.ie/ech-check.php"
   echo "cli_test with $turl"
   echo "cli_test with $turl" >> "$logfile"
@@ -490,8 +490,8 @@ fi
 
 fi # skip
 
-# Check combinations of command line options, if we're good so far
-# Most of this only works for OpenSSL, which is ok, as we're checking
+# Check combinations of command line options, if we are good so far
+# Most of this only works for OpenSSL, which is ok, as we are checking
 # the argument handling here, not the ECH protocol
 if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
   # ech can be hard, true, grease or false
@@ -786,11 +786,11 @@ if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]; then
   cli_test "$turl" 1 1 --ech true --ech pn:"$goodpn"
   [ "$allgood" != "yes" ] && echo "$LINENO"
 
-  # a target URL that doesn't support ECH
+  # a target URL that does not support ECH
   turl="https://tcd.ie"
   echo "cli_test with $turl"
   echo "cli_test with $turl" >> "$logfile"
-  # the params below don't matter much here as we'll fail anyway
+  # the params below do not matter much here as we will fail anyway
   echconfiglist=$(get_ech_configlist defo.ie)
   goodecl=$echconfiglist
   badecl="$goodecl"
@@ -1083,13 +1083,13 @@ else
   echo "NOT all good, log in $logfile"
 fi
 
-# send a mail to root (will be fwd'd) but just once every 24 hours
+# send a mail to root (will be forwarded) but just once every 24 hours
 # 'cause we only really need "new" news
 itsnews="yes"
 age_of_news=0
 if [ -f "$LTOP"/bad_runs ]; then
   age_of_news=$(fileage "$LTOP"/bad_runs)
-  # only consider news "new" if we haven't mailed today
+  # only consider news "new" if we have not mailed today
   if ((age_of_news < 24*3600)); then
     itsnews="no"
   fi

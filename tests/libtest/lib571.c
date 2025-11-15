@@ -97,7 +97,7 @@ static CURLcode test_lib571(const char *URL)
 
   FILE *protofile = curlx_fopen(libtest_arg2, "wb");
   if(!protofile) {
-    curl_mfprintf(stderr, "Couldn't open the protocol dump file\n");
+    curl_mfprintf(stderr, "Could not open the protocol dump file\n");
     return TEST_ERR_MAJOR_BAD;
   }
 

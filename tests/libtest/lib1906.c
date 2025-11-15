@@ -54,7 +54,7 @@ static CURLcode test_lib1906(const char *URL)
   }
   res = CURLE_OK;  /* reset for next use */
 
-  /* print the used url */
+  /* print the used URL */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
   curl_mfprintf(stderr, "curlu now: <%s>\n", url_after);
   curl_free(url_after);
@@ -69,7 +69,7 @@ static CURLcode test_lib1906(const char *URL)
                   "curl_easy_perform returned %d: <%s>, <%s>\n",
                   res, curl_easy_strerror(res), error_buffer);
 
-  /* print url */
+  /* print URL */
   curl_url_get(curlu, CURLUPART_URL, &url_after, 0);
   curl_mfprintf(stderr, "curlu now: <%s>\n", url_after);
 

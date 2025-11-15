@@ -14,8 +14,8 @@ HTTP/1.0 401 BAD BOY
 Server: swsclose
 Content-Type: text/html
 
-This contains a response code >= 400, so curl shouldn't display this.  Even
-though it's a response code that triggers authentication, we're not using
+This contains a response code >= 400, so curl should not display this.  Even
+though it is a response code that triggers authentication, we are not using
 authentication so we should still fail.
 </data>
 </reply>

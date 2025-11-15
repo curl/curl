@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "doh.h" /* from the lib dir */
+#include "doh.h"
 
 static CURLcode test_unit1655(const char *arg)
 {

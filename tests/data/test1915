@@ -32,7 +32,7 @@ http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-# 7 CURLE_COULDNT_CONNECT (expected since there's nothing listening there)
+# 7 CURLE_COULDNT_CONNECT (expected since there is nothing listening there)
 # 42 CURLE_ABORTED_BY_CALLBACK
 <errorcode>
 42

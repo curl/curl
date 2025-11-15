@@ -55,7 +55,7 @@ if(!$CAPREFIX) {
 } elsif(! -f "$CAPREFIX-ca.cacert" ||
         ! -f "$CAPREFIX-ca.key") {
 
-    if($OPENSSL eq basename($OPENSSL)) {  # has no dir component
+    if($OPENSSL eq basename($OPENSSL)) {  # has no directory component
         # find openssl in PATH
         my $found = 0;
         foreach(File::Spec->path()) {

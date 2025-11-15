@@ -106,7 +106,7 @@ Content-Length: 690%CR
 Content-Type: multipart/form-data; boundary=----------------------------%CR
 %CR
 ------------------------------%CR
-Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"%CR
+Content-Disposition: form-data; name="sendfile alternative"; filename="filename 2 "%CR
 %CR
 dummy
 %CR

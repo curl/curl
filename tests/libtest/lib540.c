@@ -27,7 +27,7 @@
  * argv1 = URL
  * argv2 = proxy
  * argv3 = proxyuser:password
- * argv4 = host name to use for the custom Host: header
+ * argv4 = hostname to use for the custom Host: header
  */
 
 #include "first.h"

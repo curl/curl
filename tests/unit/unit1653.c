@@ -173,7 +173,7 @@ static CURLcode test_unit1653(const char *arg)
   free_and_clear(ipv6port);
   curl_url_cleanup(u);
 
-  /* Incorrect zone index syntax, but the port extractor doesn't care */
+  /* Incorrect zone index syntax, but the port extractor does not care */
   u = curl_url();
   if(!u)
     goto fail;

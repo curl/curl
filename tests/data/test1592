@@ -16,7 +16,7 @@ timing-dependent
 lib%TESTNUMBER
 </tool>
 <name>
-HTTP request, remove handle while resolving, don't block
+HTTP request, remove handle while resolving, do not block
 </name>
 
 <command>

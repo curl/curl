@@ -36,7 +36,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-HTTP over proxy with IDN host name
+HTTP over proxy with IDN hostname
 </name>
 <command>
 http://www.%hex[%c3%a5%c3%a4%c3%b6]hex%.se/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT http://www.gro%hex[%c3%9f]hex%e.de/page/%TESTNUMBER

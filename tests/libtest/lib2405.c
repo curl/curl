@@ -223,7 +223,7 @@ static CURLcode test_run(const char *URL, long option,
       break;
     }
 
-    /* checking case when we don't have enough space for waitfds */
+    /* checking case when we do not have enough space for waitfds */
     mc = curl_multi_waitfds(multi, ufds1, fd_count - 1, &fd_count_chk);
 
     if(mc != CURLM_OUT_OF_MEMORY) {
@@ -236,7 +236,7 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return the amount of fds "
-                    "needed if enough isn't passed in (%u vs. %u).\n",
+                    "needed if enough is not passed in (%u vs. %u).\n",
                     fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
@@ -264,7 +264,7 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return the amount of fds "
-                    "needed if enough isn't passed in (%u vs. %u).\n",
+                    "needed if enough is not passed in (%u vs. %u).\n",
                     fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;

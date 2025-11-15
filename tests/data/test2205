@@ -23,7 +23,7 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT with very long user name
+MQTT with 64 KiB long username
 </name>
 <file name="%LOGDIR/input%TESTNUMBER">
 user = %repeat[65536 x a]%:fakepasswd

@@ -12,7 +12,7 @@ HTTP GET
 HTTP/1.0 404 BAD BOY swsclose
 Content-Type: text/html
 
-This silly page doesn't reaaaaaly exist so you should not get it.
+This silly page does not reaaaaaly exist so you should not get it.
 </data>
 </reply>
 

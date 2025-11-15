@@ -72,10 +72,10 @@ sub scanfile {
         }
         else {
             if(!$memdebug) {
-                print STDERR "$file doesn't include \"memdebug.h\"!\n";
+                print STDERR "$file does not include \"memdebug.h\"!\n";
             }
             if(!$curlmem) {
-                print STDERR "$file doesn't include \"curl_memory.h\"!\n";
+                print STDERR "$file does not include \"curl_memory.h\"!\n";
             }
             return 1;
         }
@@ -83,7 +83,7 @@ sub scanfile {
     return 0;
 }
 
-opendir(my $dh, $dir) || die "can't opendir $dir: $!";
+opendir(my $dh, $dir) || die "cannot opendir $dir: $!";
 my @cfiles = grep { /\.c\z/ && -f "$dir/$_" } readdir($dh);
 closedir $dh;
 

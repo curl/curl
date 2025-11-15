@@ -190,7 +190,7 @@ sub runner_init {
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
             eval {
-                # some msys2 perl versions don't define SIGUSR1, also missing from Win32 Perl
+                # some MSYS2 Perl versions do not define SIGUSR1, also missing from Win32 Perl
                 $SIG{USR1} = 'IGNORE';
             };
 
@@ -214,7 +214,7 @@ sub runner_init {
             # handle IPC calls
             event_loop();
 
-            # Can't rely on logmsg here in case it's buffered
+            # Cannot rely on logmsg here in case it is buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
 
             # To reach this point, either the controller has sent
@@ -234,7 +234,7 @@ sub runner_init {
         # Create our pid directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
 
-        # Don't create a separate process
+        # Do not create a separate process
         $thisrunnerid = "integrated";
     }
 
@@ -522,7 +522,7 @@ sub torture {
         delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
 
         if(-r "core") {
-            # there's core file present now!
+            # there is core file present now!
             logmsg " core dumped\n";
             $dumped_core = 1;
             $fail = 2;
@@ -542,8 +542,8 @@ sub torture {
             }
         }
 
-        # verify that it returns a proper error code, doesn't leak memory
-        # and doesn't core dump
+        # verify that it returns a proper error code, does not leak memory
+        # and does not core dump
         if(($ret & 255) || ($ret >> 8) >= 128) {
             logmsg " system() returned $ret\n";
             $fail=1;
@@ -885,7 +885,7 @@ sub singletest_run {
                 chomp $dis[0] if($dis[0]);
                 if($dis[0] eq "test-duphandle") {
                     # marked to not run with duphandle
-                    logmsg " $testnum: IGNORED: Can't run test-duphandle\n";
+                    logmsg " $testnum: IGNORED: Cannot run test-duphandle\n";
                     return (-1, 0, 0, "", "", 0);
                 }
             }
@@ -1059,7 +1059,7 @@ sub singletest_clean {
 
     if(!$dumped_core) {
         if(-r "core") {
-            # there's core file present now!
+            # there is core file present now!
             $dumped_core = 1;
         }
     }
@@ -1144,7 +1144,7 @@ sub singletest_postcheck {
             logmsg "postcheck $cmd\n" if($verbose);
             my $rc = runclient("$cmd");
             # Must run the postcheck command in torture mode in order
-            # to clean up, but the result can't be relied upon.
+            # to clean up, but the result cannot be relied upon.
             if($rc != 0 && !$torture) {
                 logmsg " $testnum: postcheck FAILED\n";
                 return -1;
@@ -1317,7 +1317,7 @@ sub controlleripccall {
     # Get the name of the function from the reference
     my $cv = svref_2object($funcref);
     my $gv = $cv->GV;
-    # Prepend the name to the function arguments so it's marshalled along with them
+    # Prepend the name to the function arguments so it is marshalled along with them
     unshift @_, $gv->NAME;
     # Marshall the arguments into a flat string
     my $margs = freeze \@_;
@@ -1368,7 +1368,7 @@ sub runnerar {
     my $resarrayref = thaw $buf;
 
     # First argument is runner ID
-    # TODO: remove this; it's unneeded since it's passed in
+    # TODO: remove this; it is unneeded since it is passed in
     unshift @$resarrayref, $runnerid;
     return @$resarrayref;
 }
@@ -1376,7 +1376,7 @@ sub runnerar {
 ###################################################################
 # Returns runner ID if a response from an async call is ready or error
 # First value is ready, second is error, however an error case shows up
-# as ready in Linux, so you can't trust it.
+# as ready in Linux, so you cannot trust it.
 # argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {
@@ -1402,7 +1402,7 @@ sub runnerar_ready {
     my $e_in = $r_in;
     if(select(my $r_out=$r_in, undef, my $e_out=$e_in, $blocking) >= 1) {
         for my $fd (0..$maxfileno) {
-            # Return an error condition first in case it's both
+            # Return an error condition first in case it is both
             if(vec($e_out, $fd, 1)) {
                 return (undef, $idbyfileno{$fd});
             }

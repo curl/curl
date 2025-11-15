@@ -1,7 +1,7 @@
 <testcase>
 #
 # This test is exactly like 525 but the server rejects the EPRT command.
-# Written up to make sure that there's nothing in the multi interface
+# Written up to make sure that there is nothing in the multi interface
 # active connection case that differs between PORT and EPRT use
 #
 <info>
@@ -32,7 +32,7 @@ ftp
 lib525
 </tool>
 <name>
-FTP PORT upload using multi interface, EPRT doesn't work
+FTP PORT upload using multi interface, EPRT does not work
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER %LOGDIR/upload%TESTNUMBER

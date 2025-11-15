@@ -150,7 +150,7 @@ static void *t506_test_fire(void *ptr)
   code = curl_easy_perform(curl);
   if(code) {
     int i = 0;
-    curl_mfprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
+    curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
                   tdata->url, i, code);
   }
 

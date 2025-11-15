@@ -42,7 +42,7 @@ IMAP cleanup before a connection was created
 lib%TESTNUMBER
 </tool>
 
-# this MUST use a host name that doesn't resolve
+# this MUST use a hostname that does not resolve
 <command>
 imap://non-existing-host.haxx.se:%IMAPPORT/%TESTNUMBER
 </command>

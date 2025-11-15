@@ -28,7 +28,7 @@ red.onion
 #
 # Verify data after the test has been "shot"
 <verify>
-# Couldn't resolve host name
+# Could not resolve hostname
 <errorcode>
 6
 </errorcode>

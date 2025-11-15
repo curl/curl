@@ -50,7 +50,7 @@ static size_t line_length(const char *buffer, int bytestocheck)
   }
   if(*buffer != '\n') {
     /*
-     * We didn't find a new line so the last byte must be a
+     * We did not find a new line so the last byte must be a
      * '\0' character inserted by fgets() which we should not
      * count.
      */

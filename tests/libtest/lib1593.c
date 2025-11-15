@@ -41,7 +41,7 @@ static CURLcode test_lib1593(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
-  /* Some TIMEVALUE; it doesn't matter. */
+  /* Some TIMEVALUE; it does not matter. */
   easy_setopt(curl, CURLOPT_TIMEVALUE, 1566210680L);
 
   header = curl_slist_append(NULL, "If-Modified-Since:");

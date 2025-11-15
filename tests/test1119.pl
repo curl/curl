@@ -47,7 +47,7 @@ if(!$rc) {
     $Cpreprocessor = 'cpp';
 }
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root=$ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
@@ -93,7 +93,7 @@ sub scanheader {
 sub scanallheaders {
     my $d = "$root/include/curl";
     opendir(my $dh, $d) ||
-        die "Can't opendir: $!";
+        die "Cannot opendir: $!";
     my @headers = grep { /.h\z/ } readdir($dh);
     closedir $dh;
     foreach my $h (@headers) {
@@ -126,7 +126,7 @@ sub checkmanpage {
 sub scanman_md_dir {
     my ($d) = @_;
     opendir(my $dh, $d) ||
-        die "Can't opendir: $!";
+        die "Cannot opendir: $!";
     my @mans = grep { /.md\z/ } readdir($dh);
     closedir $dh;
     for my $m (@mans) {
@@ -197,7 +197,7 @@ for my $e (sort @syms) {
 # now scan through all symbols that were present in the symbols-in-versions
 # but not in the headers
 #
-# If the symbols were marked 'removed' in symbols-in-versions we don't output
+# If the symbols were marked 'removed' in symbols-in-versions we do not output
 # anything about it since that is perfectly fine.
 #
 

@@ -56,7 +56,7 @@ proxy
 <verify>
 
 # The second CONNECT will be made to the dynamic port number the FTP server
-# opens for us, so we can't compare with a known pre-existing number!
+# opens for us, so we cannot compare with a known pre-existing number!
 <strippart>
 s/((https.proxy):(\d+))/$2:12345/
 </strippart>

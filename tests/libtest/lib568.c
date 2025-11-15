@@ -68,7 +68,7 @@ static CURLcode test_lib568(const char *URL)
 
   sdp = curlx_open(libtest_arg2, O_RDONLY);
   if(sdp == -1) {
-    curl_mfprintf(stderr, "can't open %s\n", libtest_arg2);
+    curl_mfprintf(stderr, "cannot open %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
@@ -77,7 +77,7 @@ static CURLcode test_lib568(const char *URL)
 
   sdpf = curlx_fopen(libtest_arg2, "rb");
   if(!sdpf) {
-    curl_mfprintf(stderr, "can't fopen %s\n", libtest_arg2);
+    curl_mfprintf(stderr, "cannot fopen %s\n", libtest_arg2);
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
