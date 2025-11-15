@@ -2419,7 +2419,7 @@ static int test_sws(int argc, char *argv[])
 
             if(!req->open)
               /* When instructed to close connection after server-reply we
-                 wait a very small amount of time before doing so. If this
+                 wait a small amount of time before doing so. If this
                  is not done client might get an ECONNRESET before reading
                  a single byte of server-reply. */
               curlx_wait_ms(50);

@@ -279,7 +279,7 @@ class TestProxy:
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
     def test_10_10_reuse_proxy(self, env: Env, httpd, nghttpx_fwd, tunnel):
-        # url twice via https: proxy separated with '--next', will reuse
+        # URL twice via https: proxy separated with '--next', will reuse
         if tunnel == 'h2' and not env.have_h2_curl():
             pytest.skip("h2 not supported")
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):

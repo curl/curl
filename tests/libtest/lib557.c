@@ -1413,7 +1413,7 @@ static int test_float_formatting(void)
   curl_msnprintf(buf, sizeof(buf), "%.*f", 0, 9.2987654);
   errors += string_check(buf, "9");
 
-  /* very large precisions easily turn into system specific outputs so we only
+  /* large precisions easily turn into system specific outputs so we only
      check the output buffer length here as we know the internal limit */
 
   curl_msnprintf(buf, sizeof(buf), "%.*f", (1 << 30), 9.2987654);

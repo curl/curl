@@ -182,7 +182,7 @@ static int t537_test_rlimit(int keep_open)
    * test 537 is all about testing libcurl functionality
    * when the system has nearly exhausted the number of
    * available file descriptors. Test 537 will try to run
-   * with a very small number of file descriptors available.
+   * with a small number of file descriptors available.
    * This implies that any file descriptor which is open
    * when the test runs will have a number in the high range
    * of whatever the system supports.

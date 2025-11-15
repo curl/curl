@@ -34,7 +34,7 @@ ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </client>
 
 #
-# Verify with no gateway url and no auto detection
+# Verify with no gateway URL and no auto detection
 <verify>
 <errorcode>
 37
