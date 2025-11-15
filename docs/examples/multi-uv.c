@@ -160,12 +160,19 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 /* callback from libuv when timeout expires */
 static void on_uv_timeout(uv_timer_t *req)
 {
-  struct curl_context *context = (struct curl_context *) req->data;
-  if(context) {
-    int running_handles;
-    curl_multi_socket_action(context->uv->multi, CURL_SOCKET_TIMEOUT, 0,
-                             &running_handles);
-    check_multi_info(context);
+  /* get the datauv struct from the timer handle */
+  struct datauv *uv = (struct datauv *)req;
+  int running_handles;
+
+  curl_multi_socket_action(uv->multi, CURL_SOCKET_TIMEOUT, 0,
+                           &running_handles);
+
+  /* We do not have a curl_context here, so we need to check messages
+     differently. Create a temporary context just for the check. */
+  if(running_handles) {
+    struct curl_context temp_context;
+    temp_context.uv = uv;
+    check_multi_info(&temp_context);
   }
 }
 
