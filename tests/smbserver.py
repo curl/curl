@@ -23,9 +23,6 @@
 #
 """Server for testing SMB."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import argparse
 import logging
 import os
@@ -33,14 +30,10 @@ import signal
 import sys
 import tempfile
 import threading
+import configparser
 
 # Import our curl test data helper
 from util import ClosingFileHandler, TestData
-
-if sys.version_info.major >= 3:
-    import configparser
-else:
-    import ConfigParser as configparser
 
 # impacket needs to be installed in the Python environment
 try:
