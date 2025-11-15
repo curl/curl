@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "doh.h" /* from the lib dir */
+#include "doh.h"
 
 /* DoH + HTTPSRR are required */
 #if !defined(CURL_DISABLE_DOH) && defined(USE_HTTPSRR)
