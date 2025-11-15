@@ -119,7 +119,7 @@ sub checkref {
     }
 }
 
-# option-looking words that aren't options
+# option-looking words that are not options
 my %allownonref = (
     'CURLINFO_TEXT' => 1,
     'CURLINFO_HEADER_IN' => 1,

@@ -23,7 +23,7 @@ Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
-These data aren't actually sent to the client
+These data are not actually sent to the client
 </data>
 </reply>
 

@@ -123,7 +123,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
     int maxfd = -99;
     bool found_new_socket = FALSE;
 
-    /* Start a new handle if we aren't at the max */
+    /* Start a new handle if we are not at the max */
     if(state == ReadyForNewHandle) {
       easy_init(ntlm_curls[num_handles]);
 
