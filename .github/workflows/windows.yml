@@ -479,7 +479,6 @@ jobs:
           install: >-
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install }}
-            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'python3' || '' }}
 
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
