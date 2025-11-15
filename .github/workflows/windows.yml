@@ -248,7 +248,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
-            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'python3' || '' }}
+            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'mingw-w64-${{ matrix.env }}-python3' || '' }}
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
