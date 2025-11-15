@@ -75,5 +75,5 @@ file names\b:filenames
 ---WWW::Curl
 ---NET::Curl
 ---Curl Corporation
-\bmanpages[^./&:-]:man pages
-\bmanpage[^si./&:-]:man page
+\bmanpages[^./;=&{:-]:man pages
+\bmanpage[^si./;=&{:-]:man page
