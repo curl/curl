@@ -257,7 +257,7 @@ static CURLMcode socket_action(CURLM *multi, curl_socket_t s, int evBitmask,
   CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
                                               &numhandles);
   if(result != CURLM_OK) {
-    curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
+    curl_mfprintf(stderr, "%s curl error on %s (%i) %s\n",
                   t530_tag(), info, result, curl_multi_strerror(result));
   }
   return result;
@@ -365,7 +365,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
 
     if(timeout.tv_sec != (time_t)-1 &&
        t530_getMicroSecondTimeout(&timeout) == 0) {
-      /* Curl's timer has elapsed. */
+      /* curl's timer has elapsed. */
       if(socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         res = TEST_ERR_BAD_TIMEOUT;
         goto test_cleanup;

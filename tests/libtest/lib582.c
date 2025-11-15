@@ -203,7 +203,7 @@ static void notifyCurl(CURLM *multi, curl_socket_t s, int evBitmask,
   CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
                                               &numhandles);
   if(result != CURLM_OK) {
-    curl_mfprintf(stderr, "Curl error on %s (%i) %s\n",
+    curl_mfprintf(stderr, "curl error on %s (%i) %s\n",
                   info, result, curl_multi_strerror(result));
   }
 }
@@ -334,7 +334,7 @@ static CURLcode test_lib582(const char *URL)
 
     if(timeout.tv_sec != (time_t)-1 &&
        t582_getMicroSecondTimeout(&timeout) == 0) {
-      /* Curl's timer has elapsed. */
+      /* curl's timer has elapsed. */
       notifyCurl(multi, CURL_SOCKET_TIMEOUT, 0, "timeout");
     }
 

@@ -49,7 +49,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </client>
 
 #
-# PONG with no data and the 32 bit mask
+# PONG with no data and the 32-bit mask
 #
 <verify>
 <protocol crlf="headers" nocheck="yes">

@@ -303,7 +303,7 @@ static CURLMcode t758_saction(CURLM *multi, curl_socket_t s,
   CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
                                               &numhandles);
   if(result != CURLM_OK) {
-    curl_mfprintf(stderr, "%s Curl error on %s (%i) %s\n",
+    curl_mfprintf(stderr, "%s curl error on %s (%i) %s\n",
                   t758_tag(), info, result, curl_multi_strerror(result));
   }
   return result;
@@ -457,7 +457,7 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
 
     if(timeout.tv_sec != (time_t)-1 &&
        t758_getMicroSecondTimeout(&timeout) == 0) {
-      /* Curl's timer has elapsed. */
+      /* curl's timer has elapsed. */
       if(t758_saction(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         res = TEST_ERR_BAD_TIMEOUT;
         goto test_cleanup;
