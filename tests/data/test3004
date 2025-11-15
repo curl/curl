@@ -43,12 +43,12 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient.one@example.com>
-RCPT TO:<recipient.two@example.com>
-RCPT TO:<invalid.three>
-RCPT TO:<recipient.four@example.com>
-RCPT TO:<recipient.five@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient.one@example.com%GT
+RCPT TO:%LTrecipient.two@example.com%GT
+RCPT TO:%LTinvalid.three%GT
+RCPT TO:%LTrecipient.four@example.com%GT
+RCPT TO:%LTrecipient.five@example.com%GT
 DATA
 QUIT
 </protocol>

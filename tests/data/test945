@@ -42,8 +42,8 @@ mail body
 <protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH EXTERNAL =
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>

@@ -11,9 +11,9 @@ CUSTOMREQUEST
 # Server-side
 <reply>
 <data crlf="yes">
-250-Joe Smith <joe.smith@example.com>
-250-Harry Smith <harry.smith@example.com>
-250 Melvin Smith <melvin.smith@example.com>
+250-Joe Smith %LTjoe.smith@example.com%GT
+250-Harry Smith %LTharry.smith@example.com%GT
+250 Melvin Smith %LTmelvin.smith@example.com%GT
 </data>
 </reply>
 
