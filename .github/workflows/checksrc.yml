@@ -176,4 +176,4 @@ jobs:
 
       # we allow some extra in source code
       - name: 'badwords'
-        run: grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include
+        run: grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples
