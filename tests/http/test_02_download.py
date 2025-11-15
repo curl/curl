@@ -508,7 +508,7 @@ class TestDownload:
         speed_limit = 384 * 1024
         min_duration = math.floor((1024 * 1024)/speed_limit)
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
-            '--limit-rate', f'{speed_limit}'
+            '-Z', '--limit-rate', f'{speed_limit}'
         ])
         r.check_response(count=count, http_status=200)
         assert r.duration > timedelta(seconds=min_duration), \
