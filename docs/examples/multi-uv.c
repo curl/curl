@@ -162,13 +162,13 @@ static void on_uv_timeout(uv_timer_t *req)
 {
   struct datauv *uv;
   int running_handles;
-  
+
   /* get the datauv struct from the timer handle */
   uv = (struct datauv *)((char *)req - offsetof(struct datauv, timeout));
-  
+
   curl_multi_socket_action(uv->multi, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
-  
+
   /* We don't have a curl_context here, so we need to check messages
      differently. Create a temporary context just for the check. */
   if(running_handles) {
