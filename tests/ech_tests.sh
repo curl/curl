@@ -379,7 +379,7 @@ if [[ "$using_ossl" == "yes" ]]; then
       continue
     fi
     if [[ "$host" == "cloudflare-ech.com" ]]; then
-      echo "Skipping $host as they've blocked PN override"
+      echo "Skipping $host as they have blocked PN override"
       continue
     fi
     path=${ech_targets[$targ]}

@@ -34,7 +34,7 @@ use File::Basename;
 # get the filename first
 my $symbolsinversions=shift @ARGV;
 
-# we may get the dir roots pointed out
+# we may get the directory roots pointed out
 my @manpages=@ARGV;
 my $errors = 0;
 
@@ -148,7 +148,7 @@ sub scanmanpage {
     open(my $m, "<", "$file") ||
         die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
-        # This is a man page for libcurl. It requires an example unless it's
+        # This is a man page for libcurl. It requires an example unless it is
         # considered deprecated.
         $reqex = 1 unless defined $deprecated{'CURL'.$2};
         if($1 eq "CURL") {
@@ -372,7 +372,7 @@ sub scanmanpage {
 allsymbols();
 
 if(!$symbol{'CURLALTSVC_H1'}) {
-    print STDERR "didn't get the symbols-in-version!\n";
+    print STDERR "did not get the symbols-in-version!\n";
     exit;
 }
 

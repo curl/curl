@@ -2703,7 +2703,7 @@ if($gdbthis) {
 # clear and create logging directory:
 #
 
-# TODO: figure how to get around this. This dir is needed for checksystemfeatures()
+# TODO: figure how to get around this. This directory is needed for checksystemfeatures()
 # Maybe create & use & delete a temporary directory in that function
 cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
@@ -2914,7 +2914,7 @@ sub displaylogs {
     my @logs = readdir(DIR);
     closedir(DIR);
 
-    logmsg "== Contents of files in the $logdir/ dir after test $testnum\n";
+    logmsg "== Contents of files in the $logdir/ directory after test $testnum\n";
     foreach my $log (sort @logs) {
         if($log =~ /\.(\.|)$/) {
             next; # skip "." and ".."

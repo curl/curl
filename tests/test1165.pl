@@ -37,7 +37,7 @@ my %file;
 # the DISABLE options that are documented
 my %docs;
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root=$ARGV[0] || ".";
 my $DOCS="CURL-DISABLE.md";
 

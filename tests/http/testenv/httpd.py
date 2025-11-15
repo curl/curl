@@ -100,9 +100,9 @@ class Httpd:
             raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
         self._mods_dir = p.stdout.strip()
         if self._mods_dir is None:
-            raise Exception('apache modules dir cannot be found')
+            raise Exception('apache modules directory cannot be found')
         if not os.path.exists(self._mods_dir):
-            raise Exception(f'apache modules dir does not exist: {self._mods_dir}')
+            raise Exception(f'apache modules directory does not exist: {self._mods_dir}')
         self._maybe_running = False
         self.ports = {}
         self._rmf(self._error_log)

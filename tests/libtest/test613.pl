@@ -29,7 +29,7 @@ use warnings;
 use Time::Local;
 
 if($#ARGV < 1) {
-    print "Usage: $0 prepare|postprocess dir [logfile]\n";
+    print "Usage: $0 prepare|postprocess directory [logfile]\n";
     exit 1;
 }
 

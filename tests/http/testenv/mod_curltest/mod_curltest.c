@@ -45,8 +45,8 @@ static int curltest_sslinfo_handler(request_rec *r);
 AP_DECLARE_MODULE(curltest) =
 {
   STANDARD20_MODULE_STUFF,
-  NULL, /* func to create per dir config */
-  NULL,  /* func to merge per dir config */
+  NULL, /* func to create per directory config */
+  NULL,  /* func to merge per directory config */
   NULL, /* func to create per server config */
   NULL,  /* func to merge per server config */
   NULL,              /* command handlers */

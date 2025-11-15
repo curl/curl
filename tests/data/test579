@@ -66,7 +66,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-small chunked HTTP POSTs with digest auth. and progress callback
+small chunked HTTP POSTs with digest auth and progress callback
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER

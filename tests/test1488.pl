@@ -48,7 +48,7 @@ if(!$rc) {
     $Cpreprocessor = 'cpp';
 }
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root=$ARGV[0] || ".";
 
 # need an include directory when building out-of-tree

@@ -28,7 +28,7 @@ use warnings;
 
 my $sort = 0;
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root = shift @ARGV;
 while(defined $root) {
 

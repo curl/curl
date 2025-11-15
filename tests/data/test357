@@ -8,7 +8,7 @@ Expect: 100-continue
 </info>
 # Server-side
 <reply>
-# 417 means the server didn't like the Expect header
+# 417 means the server did not like the Expect header
 <data>
 HTTP/1.1 417 BAD swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
