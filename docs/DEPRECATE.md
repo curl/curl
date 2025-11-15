@@ -23,12 +23,6 @@ Making the new minimum target Windows version Vista / Server 2008.
 
 In March 2026, we drop support for all c-ares versions before 1.16.0.
 
-
-OpenSSL and others only ship fixes to paying customers, meaning users of the
-free version risk being vulnerable.
-
-We remove support for this OpenSSL version from curl in December 2025.
-
 ## OpenSSL-QUIC
 
 OpenSSL-QUIC is what we call the curl QUIC backend that uses the OpenSSL QUIC
