@@ -46,7 +46,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-Connection reuse with IDN host name
+Connection reuse with IDN hostname
 </name>
 
 <command>

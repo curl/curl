@@ -33,7 +33,7 @@ Content-Length: 0
 http
 </server>
 <name>
-HTTP with --resolve and same host name using different cases
+HTTP with --resolve and same hostname using different cases
 </name>
 <command>
 --resolve MiXeDcAsE.cOm:%HTTPPORT:%HOSTIP http://MiXeDcAsE.cOm:%HTTPPORT/%TESTNUMBER http://mixedcase.com:%HTTPPORT/%TESTNUMBER0001

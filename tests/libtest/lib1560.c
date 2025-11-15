@@ -399,7 +399,7 @@ static const struct testcase get_parts_list[] ={
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_IPV6},
   {"http://[ab.be]/x", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_BAD_IPV6},
-  /* URL without host name */
+  /* URL without hostname */
   {"http://a:b@/x", "",
    CURLU_DEFAULT_SCHEME, 0, CURLUE_NO_HOST},
   {"boing:80",
@@ -641,7 +641,7 @@ static const struct urltestcase get_url_list[] = {
   {"mailto:infobot@example.com?body=send%20current-issue", "", 0, 0,
    CURLUE_UNSUPPORTED_SCHEME},
   {"about:80", "https://about:80/", CURLU_DEFAULT_SCHEME, 0, CURLUE_OK},
-  /* percent encoded host names */
+  /* percent encoded hostnames */
   {"http://example.com%40127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://example.com%21127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
   {"http://example.com%3f127.0.0.1/", "", 0, 0, CURLUE_BAD_HOSTNAME},
@@ -1069,7 +1069,7 @@ static const struct setcase set_parts_list[] = {
    "scheme=https,user=   @:,host=foobar,",
    "https://%20%20%20%40%3A@foobar/",
    0, CURLU_URLENCODE, CURLUE_OK, CURLUE_OK},
-  /* Setting a host name with spaces is not OK: */
+  /* Setting a hostname with spaces is not OK: */
   {NULL,
    "scheme=https,host=  ,path= ,user= ,password= ,query= ,fragment= ,",
    "[nothing]",

@@ -40,7 +40,7 @@ http
 socks5unix
 </server>
 <name>
-HTTP GET with host name using SOCKS5h via Unix sockets
+HTTP GET with hostname using SOCKS5h via Unix sockets
 </name>
 <command>
 http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost%SOCKSUNIXPATH
