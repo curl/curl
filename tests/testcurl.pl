@@ -66,7 +66,7 @@ use warnings;
 use Cwd;
 use File::Spec;
 
-# Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
+# Turn on warnings (equivalent to -w, which cannot be used with /usr/bin/env)
 #BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $git $pwd $build $buildlog
@@ -777,7 +777,7 @@ else {
             close($log);
             chdir "$pwd/$build";
         }
-        logit_spaced "cross-compiling, can't run tests";
+        logit_spaced "cross-compiling, cannot run tests";
     }
     # dummy message to feign success
     print "TESTDONE: 1 tests out of 0 (dummy message)\n";

@@ -59,7 +59,7 @@ static CURLcode test_lib525(const char *URL)
   hd = fstat(fileno(hd_src), &file_info);
 #endif
   if(hd == -1) {
-    /* can't open file, bail out */
+    /* cannot open file, bail out */
     curl_mfprintf(stderr, "fstat() failed with error (%d) %s\n",
                   errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     curl_mfprintf(stderr, "Error opening file '%s'\n", libtest_arg2);

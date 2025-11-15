@@ -190,8 +190,8 @@ class Negotiator(object):
             log.debug("Client can do")
             self.state = self.DO
         elif byte_int == NegTokens.DONT:
-            # Client is indicating they can't do an option
-            log.debug("Client can't do")
+            # Client is indicating they cannot do an option
+            log.debug("Client cannot do")
             self.state = self.DONT
         else:
             # Received an unexpected byte. Stop negotiations

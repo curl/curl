@@ -54,10 +54,10 @@ static CURLcode test_unit1605(const char *arg)
   char *esc;
 
   esc = curl_easy_escape(easy, "", -1);
-  fail_unless(esc == NULL, "negative string length can't work");
+  fail_unless(esc == NULL, "negative string length cannot work");
 
   esc = curl_easy_unescape(easy, "%41%41%41%41", -1, &len);
-  fail_unless(esc == NULL, "negative string length can't work");
+  fail_unless(esc == NULL, "negative string length cannot work");
 
   UNITTEST_END(t1605_stop(easy))
 }

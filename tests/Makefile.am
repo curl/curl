@@ -108,7 +108,7 @@ curl:
 TEST_COMMON =
 
 if CROSSCOMPILING
-TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
+TEST = @echo "NOTICE: we cannot run the tests when cross-compiling!"
 PYTEST = $(TEST)
 else # if not cross-compiling:
 

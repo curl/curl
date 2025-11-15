@@ -32,7 +32,7 @@ LC_ALL=C.UTF-8
 HTTP over proxy with malformatted IDN hostname
 </name>
 
-# This hostname contains an invalid UTF-8 byte sequence that can't be
+# This hostname contains an invalid UTF-8 byte sequence that cannot be
 # converted into an IDN name
 <stdin>
 url = "http://invalid-utf8-%hex[%e2%90]hex%.local/page/%TESTNUMBER"
