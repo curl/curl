@@ -175,5 +175,6 @@ jobs:
         run: .github/scripts/yamlcheck.sh
 
       - name: 'badwords'
-        # we allow some extra in source code
-        run: "grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples"
+        run: |
+          # we allow some extra in source code
+          grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples
