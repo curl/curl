@@ -23,14 +23,6 @@ Making the new minimum target Windows version Vista / Server 2008.
 
 In March 2026, we drop support for all c-ares versions before 1.16.0.
 
-## OpenSSL 1.0.2
-
-OpenSSL and others only ship fixes for this version to paying customers,
-meaning users of the free version risk being vulnerable.
-
-We remove support for this OpenSSL version from curl in December 2025.
-
-## OpenSSL 1.1.1
 
 OpenSSL and others only ship fixes to paying customers, meaning users of the
 free version risk being vulnerable.
@@ -84,3 +76,4 @@ Support for RTMP in libcurl gets removed in April 2026.
  - winbuild build system (removed in 8.17.0)
  - Windows CE (removed in 8.18.0)
  - Support for Visual Studio 2008 (removed in 8.18.0)
+ - OpenSSL 1.1.1 and older (removed in 8.18.0)
