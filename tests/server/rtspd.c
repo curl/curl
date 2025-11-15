@@ -63,7 +63,7 @@ struct rtspd_httprequest {
   long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
   bool auth_req;  /* authentication required, do not wait for body unless
-                     there's an Authorization header */
+                     there is an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */

@@ -183,7 +183,7 @@ sub subnewlines {
     }
     else {
         if(($$thing =~ /^\n\z/) && $prevupdate) {
-            # if there's a blank link after a line we update, we hope it is
+            # if there is a blank link after a line we update, we hope it is
             # the empty line following headers
             $$thing =~ s/\x0a/\x0d\x0a/;
         }

@@ -644,7 +644,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_write);
     FD_ZERO(&fds_err);
 
-    /* there's always a socket to wait for */
+    /* there is always a socket to wait for */
 #ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"

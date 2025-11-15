@@ -204,7 +204,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
       interval.tv_sec = 0;
       interval.tv_usec = 5000;
 
-      /* if there's no timeout and we get here on the last handle, we may
+      /* if there is no timeout and we get here on the last handle, we may
          already have read the last part of the stream so waiting makes no
          sense */
       if(!running && num_handles == MAX_EASY_HANDLES) {

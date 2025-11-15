@@ -420,7 +420,7 @@ if($totalmem) {
         $addr = $_;
         $size = $sizeataddr{$addr};
         if($size > 0) {
-            print "At $addr, there's $size bytes.\n";
+            print "At $addr, there is $size bytes.\n";
             print " allocated by ".$getmem{$addr}."\n";
         }
     }
