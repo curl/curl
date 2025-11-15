@@ -68,24 +68,16 @@ class TestCaddy:
         env.make_data_file(indir=env.gen_dir, fname="data-10m", fsize=10*1024*1024)
 
     # download 1 file
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_01_download_1(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto)
         r.check_response(count=1, http_status=200)
 
     # download 1MB files sequentially
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_02_download_1mb_sequential(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
         count = 50
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
@@ -93,12 +85,8 @@ class TestCaddy:
         r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 1MB files parallel
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_03_download_1mb_parallel(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
@@ -114,12 +102,8 @@ class TestCaddy:
 
     # download 5MB files sequentially
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_08_04a_download_10mb_sequential(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
         count = 40
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data5.data?[0-{count-1}]'
@@ -128,12 +112,8 @@ class TestCaddy:
 
     # download 10MB files sequentially
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_08_04b_download_10mb_sequential(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
@@ -142,12 +122,8 @@ class TestCaddy:
 
     # download 10MB files parallel
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_05_download_1mb_parallel(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
         if proto == 'http/1.1' and env.curl_uses_lib('mbedtls'):
             pytest.skip("mbedtls 3.6.0 fails on 50 connections with: "
                         "ssl_handshake returned: (-0x7F00) SSL - Memory allocation failed")
@@ -165,12 +141,8 @@ class TestCaddy:
             assert r.total_connects == 1, r.dump_logs()
 
     # post data parallel, check that they were echoed
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_06_post_parallel(self, env: Env, httpd, caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         # limit since we use a separate connection in h1
         count = 20
         data = '0123456789'
@@ -184,12 +156,8 @@ class TestCaddy:
             assert respdata == [data]
 
     # put large file, check that they length were echoed
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_07_put_large(self, env: Env, httpd, caddy, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         # limit since we use a separate connection in h1<
         count = 1
         fdata = os.path.join(env.gen_dir, 'data-10m')
@@ -202,15 +170,12 @@ class TestCaddy:
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
 
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_08_08_earlydata(self, env: Env, httpd, caddy, proto):
         if not env.curl_can_early_data():
             pytest.skip('TLS earlydata not implemented')
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and \
-           (not env.have_h3() or not env.curl_can_h3_early_data()):
-            pytest.skip("h3 not supported")
+        if proto == 'h3' and not env.curl_can_h3_early_data():
+            pytest.skip("h3 early data not supported")
         count = 2
         docname = 'data10k.data'
         url = f'https://{env.domain1}:{caddy.port}/{docname}'

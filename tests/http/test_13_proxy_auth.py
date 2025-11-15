@@ -121,11 +121,9 @@ class TestProxyAuth:
                         reason='curl lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
+    @pytest.mark.parametrize("tunnel", Env.http_h1_h2_protos())
     def test_13_07_tunnels_no_auth(self, env: Env, httpd, configures_httpd, nghttpx_fwd, proto, tunnel):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
         self.httpd_configure(env, httpd)
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
@@ -143,11 +141,9 @@ class TestProxyAuth:
                         reason='curl lacks HTTPS-proxy support')
     @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs curl verbose strings")
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    @pytest.mark.parametrize("tunnel", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
+    @pytest.mark.parametrize("tunnel", Env.http_h1_h2_protos())
     def test_13_08_tunnels_auth(self, env: Env, httpd, configures_httpd, nghttpx_fwd, proto, tunnel):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
         self.httpd_configure(env, httpd)
         if tunnel == 'h2' and not env.curl_uses_lib('nghttp2'):
             pytest.skip('only supported with nghttp2')
