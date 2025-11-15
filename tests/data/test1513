@@ -29,7 +29,7 @@ lib%TESTNUMBER
 return failure immediately from progress callback
 </name>
 
-# this server/host won't be used for real
+# this server/host will not be used for real
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>

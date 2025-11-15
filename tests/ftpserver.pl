@@ -2765,7 +2765,7 @@ sub datasockf_state {
     }
     elsif($state eq 'PASSIVE_NODATACONN') {
         # Data sockfilter bound port without listening,
-        # client won't be able to establish data connection.
+        # client will not be able to establish data connection.
         $datasockf_state = $state;
         $datasockf_mode = 'passive';
         $datasockf_runs = 'yes';

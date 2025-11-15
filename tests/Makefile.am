@@ -84,7 +84,7 @@ EXTRA_DIST =        \
  valgrind.supp      \
  $(TESTSCRIPTS)
 
-# we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
+# we have two variables here to make sure DIST_SUBDIRS will not get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
 if BUILD_UNITTESTS
