@@ -36,8 +36,8 @@ won't:will not
 you'd:you would
 you'll:you will
 you're:you are
-you've:you have
-You've:You have
+you've=you have
+You've=You have
  a html: an html
  a http: an http
  a ftp: an ftp
