@@ -111,7 +111,7 @@ static CURLcode test_lib1565(const char *URL)
   if(!result)
     tid_valid = true;
   else {
-    curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
+    curl_mfprintf(stderr, "%s:%d Could not create thread, errno %d\n",
                   __FILE__, __LINE__, result);
     goto test_cleanup;
   }

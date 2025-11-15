@@ -77,7 +77,7 @@ class TestData(object):
 
         m = REPLY_DATA.search(contents)
         if not m:
-            raise Exception("Couldn't find a <reply><data> section")
+            raise Exception("Could not find a <reply><data> section")
 
         # Left-strip the data so we do not get a newline before our data.
         return m.group(1).lstrip()

@@ -776,7 +776,7 @@ sub checksystemfeatures {
         displaylogcontent("$curlverout");
         logmsg "contents of $curlvererr: \n";
         displaylogcontent("$curlvererr");
-        die "couldn't get curl's version";
+        die "Could not get curl's version";
     }
 
     if(-r "../lib/curl_config.h") {
@@ -2381,7 +2381,7 @@ while(@ARGV) {
         # load additional reasons to skip tests
         shift @ARGV;
         my $exclude_file = $ARGV[0];
-        open(my $fd, "<", $exclude_file) or die "Couldn't open '$exclude_file': $!";
+        open(my $fd, "<", $exclude_file) or die "Could not open '$exclude_file': $!";
         while(my $line = <$fd>) {
             next if($line =~ /^#/);
             chomp $line;

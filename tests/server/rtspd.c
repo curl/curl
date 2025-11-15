@@ -238,7 +238,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         int error = errno;
         logmsg("fopen() failed with error (%d) %s",
                error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-        logmsg("Couldn't open test file %ld", req->testno);
+        logmsg("Could not open test file %ld", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
       }
@@ -810,7 +810,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       error = errno;
       logmsg("fopen() failed with error (%d) %s",
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      logmsg("Couldn't open test file");
+      logmsg("Could not open test file");
       return 0;
     }
     else {
@@ -834,7 +834,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       error = errno;
       logmsg("fopen() failed with error (%d) %s",
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      logmsg("Couldn't open test file");
+      logmsg("Could not open test file");
       free(ptr);
       return 0;
     }
@@ -876,7 +876,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     logmsg("fopen() failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     logmsg("Error opening file '%s'", responsedump);
-    logmsg("couldn't create logfile '%s'", responsedump);
+    logmsg("could not create logfile '%s'", responsedump);
     free(ptr);
     free(cmd);
     return -1;

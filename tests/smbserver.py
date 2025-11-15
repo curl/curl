@@ -311,7 +311,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
         log.debug("[SMB] Get server path '%s'", requested_filename)
 
         if requested_filename not in [VERIFIED_REQ]:
-            raise SmbError(STATUS_NO_SUCH_FILE, "Couldn't find the file")
+            raise SmbError(STATUS_NO_SUCH_FILE, "Could not find the file")
 
         fid, filename = tempfile.mkstemp()
         log.debug("[SMB] Created %s (%d) for storing '%s'",

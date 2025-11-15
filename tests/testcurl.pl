@@ -548,7 +548,7 @@ sub findinpath {
 
 my $make = findinpath("gmake", "make", "nmake");
 if(!$make) {
-    mydie "Couldn't find make in the PATH";
+    mydie "Could not find make in the PATH";
 }
 # force to 'nmake' for VC builds
 $make = "nmake" if($targetos =~ /vc/);

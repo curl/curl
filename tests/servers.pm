@@ -185,7 +185,7 @@ sub getfreeport {
                                  Type      => SOCK_STREAM,
                                  Reuse     => 1,
                                  Listen    => 10 )
-        or die "Couldn't create tcp server socket: $@\n";
+        or die "Could not create tcp server socket: $@\n";
 
     return $server->sockport();
 }
@@ -596,7 +596,7 @@ sub verifyhttp {
         $pid = 0+$1;
     }
     elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
+        # curl: (6) Could not resolve hostname '::1'
         logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
         return -1;
     }
@@ -739,7 +739,7 @@ sub verifyrtsp {
         $pid = 0+$1;
     }
     elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
+        # curl: (6) Could not resolve hostname '::1'
         logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
         return -1;
     }
@@ -874,7 +874,7 @@ sub verifyhttptls {
         return $pid;
     }
     elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
+        # curl: (6) Could not resolve hostname '::1'
         logmsg "RUN: failed to resolve host (https://$ip:$port/verifiedserver)\n";
         return -1;
     }

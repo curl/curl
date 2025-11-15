@@ -208,7 +208,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
     error = errno;
     logmsg("fopen() failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("  Couldn't open test file %ld", req->testno);
+    logmsg("  Could not open test file %ld", req->testno);
     req->open = FALSE; /* closes connection */
     return 1; /* done */
   }

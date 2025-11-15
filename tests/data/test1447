@@ -28,7 +28,7 @@ Provide illegal proxy name
 #
 # Verify data after the test has been "shot"
 <verify>
-# Couldn't resolve proxy name
+# Could not resolve proxy name
 <errorcode>
 5
 </errorcode>
