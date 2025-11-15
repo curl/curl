@@ -29,7 +29,7 @@
  * only tests whichever resolver curl is actually built with.
  */
 
-/* We are willing to wait a very generous two seconds for the removal.  This is
+/* We are willing to wait a generous two seconds for the removal.  This is
    as low as we can go while still easily supporting SIGALRM timing for the
    non-threaded blocking resolver.  It does not matter that much because when
    the test passes, we never wait this long. We set it much higher via
@@ -72,7 +72,7 @@ static CURLcode test_lib1592(const char *URL)
        curl_multi_remove_handle() call does finish well within our test
        timeout.
 
-       But, it is very unlikely that the resolver request will take any time at
+       But, it is unlikely that the resolver request will take any time at
        all because we have not been able to configure the resolver to use an
        non-responsive DNS server.  At least we exercise the flow.
        */

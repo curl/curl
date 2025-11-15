@@ -2965,7 +2965,7 @@ sub displaylogs {
             next; # skip valgrindNnn of other tests
         }
         if(($log =~ /^test$testnum$/)) {
-            next; # skip test$testnum since it can be very big
+            next; # skip test$testnum since it can be big
         }
         logmsg "=== Start of file $log\n";
         displaylogcontent("$logdir/$log");

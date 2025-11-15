@@ -1870,8 +1870,8 @@ sub runsshserver {
 
     # once it is known that the ssh server is alive, sftp server
     # verification is performed actually connecting to it, authenticating
-    # and performing a very simple remote command.  This verification is
-    # tried only one time.
+    # and performing a simple remote command.  This verification is tried
+    # only one time.
 
     $sshdlog = server_logfilename($LOGDIR, 'ssh', $ipvnum, $idnum);
     $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
@@ -3188,7 +3188,7 @@ sub subvariables {
     # The purpose of FTPTIME2 is to provide times that can be
     # used for time-out tests and that would work on most hosts as these
     # adjust for the startup/check time for this particular host. We needed to
-    # do this to make the test suite run better on very slow hosts.
+    # do this to make the test suite run better on slow hosts.
     my $ftp2 = $ftpchecktime * 8;
 
     $$thing =~ s/${prefix}FTPTIME2/$ftp2/g;

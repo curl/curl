@@ -32,7 +32,7 @@
 # protocols simultaneously.
 #
 # It is meant to exercise curl, it is not meant to be a fully working
-# or even very standard compliant server.
+# or even overly standard compliant server.
 #
 # You may optionally specify port on the command line, otherwise it'll
 # default to port 8921.
@@ -147,15 +147,15 @@ my %displaytext;   # text returned to client before callback runs
 #
 my $ctrldelay;     # set if server should throttle ctrl stream
 my $datadelay;     # set if server should throttle data stream
-my $retrweirdo;    # set if ftp server should use RETRWEIRDO
-my $retrnosize;    # set if ftp server should use RETRNOSIZE
-my $retrsize;      # set if ftp server should use RETRSIZE
-my $pasvbadip;     # set if ftp server should use PASVBADIP
-my $nosave;        # set if ftp server should not save uploaded data
-my $nodataconn;    # set if ftp srvr does not establish or accepts data channel
-my $nodataconn425; # set if ftp srvr does not establish data ch and replies 425
-my $nodataconn421; # set if ftp srvr does not establish data ch and replies 421
-my $nodataconn150; # set if ftp srvr does not establish data ch and replies 150
+my $retrweirdo;    # set if FTP server should use RETRWEIRDO
+my $retrnosize;    # set if FTP server should use RETRNOSIZE
+my $retrsize;      # set if FTP server should use RETRSIZE
+my $pasvbadip;     # set if FTP server should use PASVBADIP
+my $nosave;        # set if FTP server should not save uploaded data
+my $nodataconn;    # set if FTP srvr does not establish or accepts data channel
+my $nodataconn425; # set if FTP srvr does not establish data ch and replies 425
+my $nodataconn421; # set if FTP srvr does not establish data ch and replies 421
+my $nodataconn150; # set if FTP srvr does not establish data ch and replies 150
 my $storeresp;
 my $postfetch;
 my @capabilities;  # set if server supports capability commands
@@ -166,7 +166,7 @@ my %customcount;   #
 my %delayreply;    #
 
 #**********************************************************************
-# global variables for to test ftp wildcardmatching or other test that
+# global variables for to test FTP wildcardmatching or other test that
 # need flexible LIST responses.. and corresponding files.
 # $ftptargetdir is keeping the fake "name" of LIST directory.
 #
@@ -174,7 +174,7 @@ my $ftplistparserstate;
 my $ftptargetdir="";
 
 #**********************************************************************
-# global variables used when running a ftp server to keep state info
+# global variables used when running a FTP server to keep state info
 # relative to the secondary or data sockfilt process. Values of these
 # variables should only be modified using datasockf_state() sub, given
 # that they are closely related and relationship is a bit awkward.
