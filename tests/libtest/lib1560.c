@@ -996,7 +996,7 @@ static const struct setcase set_parts_list[] = {
    0, /* set */
    CURLUE_OK, CURLUE_BAD_HOSTNAME},
   {"https://example.com/",
-   "host=0xff,", /* '++' there's no automatic URL decode when setting this
+   "host=0xff,", /* '++' there is no automatic URL decode when setting this
                   part */
    "https://0xff/",
    0, /* get */
@@ -1016,7 +1016,7 @@ static const struct setcase set_parts_list[] = {
    "https://example.com/",
    0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_BAD_SCHEME},
   {"https://example.com/",
-   /* Set a 41 bytes scheme. That's too long so the old scheme remains set. */
+   /* Set a 41 bytes scheme. That is too long so the old scheme remains set. */
    "scheme=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbc,",
    "https://example.com/",
    0, CURLU_NON_SUPPORT_SCHEME, CURLUE_OK, CURLUE_BAD_SCHEME},

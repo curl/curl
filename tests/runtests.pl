@@ -331,7 +331,7 @@ if($ENV{"NGHTTPX"}) {
 my $disttests = "";
 sub get_disttests {
     # If a non-default $TESTDIR is being used there may not be any
-    # Makefile.am in which case there's nothing to do.
+    # Makefile.am in which case there is nothing to do.
     open(my $dh, "<", "$TESTDIR/Makefile.am") or return;
     while(<$dh>) {
         chomp $_;
@@ -1214,7 +1214,7 @@ sub singletest_count {
     my ($testnum, $why) = @_;
 
     if($why && !$listonly) {
-        # there's a problem, count it as "skipped"
+        # there is a problem, count it as "skipped"
         $skipped{$why}++;
         $teststat[$testnum]=$why; # store reason for this test case
 
@@ -1403,7 +1403,7 @@ sub singletest_check {
         # Verify the sent request
         my @out = loadarray("$logdir/$SERVERIN");
 
-        # check if there's any attributes on the verify/protocol section
+        # check if there is any attributes on the verify/protocol section
         my %hash = getpartattr("verify", "protocol");
 
         if($hash{'nonewline'}) {
@@ -1573,7 +1573,7 @@ sub singletest_check {
     my @proxyprot = getpart("verify", "proxy");
     if(@proxyprot) {
         # Verify the sent proxy request
-        # check if there's any attributes on the verify/protocol section
+        # check if there is any attributes on the verify/protocol section
         my %hash = getpartattr("verify", "proxy");
 
         if($hash{'nonewline'}) {

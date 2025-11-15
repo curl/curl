@@ -60,7 +60,7 @@ static CURLcode test_lib1945(const char *URL)
   /* ignores any content */
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, t1945_write_cb);
 
-  /* if there's a proxy set, use it */
+  /* if there is a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
     curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);

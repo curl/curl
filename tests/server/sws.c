@@ -60,7 +60,7 @@ struct sws_httprequest {
   long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
   bool auth_req;  /* authentication required, do not wait for body unless
-                     there's an Authorization header */
+                     there is an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
@@ -340,7 +340,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       if(http && sscanf(http, "HTTP/%d.%d",
                         &prot_major,
                         &prot_minor) == 2) {
-        /* between the request keyword and HTTP/ there's a path */
+        /* between the request keyword and HTTP/ there is a path */
         httppath = line + strlen(request);
         npath = http - httppath;
 

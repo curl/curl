@@ -522,7 +522,7 @@ sub torture {
         delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
 
         if(-r "core") {
-            # there's core file present now!
+            # there is core file present now!
             logmsg " core dumped\n";
             $dumped_core = 1;
             $fail = 2;
@@ -1059,7 +1059,7 @@ sub singletest_clean {
 
     if(!$dumped_core) {
         if(-r "core") {
-            # there's core file present now!
+            # there is core file present now!
             $dumped_core = 1;
         }
     }
