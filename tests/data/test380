@@ -32,7 +32,7 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 ftp
 </server>
 <name>
-pick netrc password based on user name in URL
+pick netrc password based on username in URL
 </name>
 
 <command>
