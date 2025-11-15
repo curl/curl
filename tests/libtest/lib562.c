@@ -64,7 +64,7 @@ static CURLcode test_lib562(const char *URL)
   /* specify target */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* Now run off and do what you've been told! */
+  /* Now run off and do what you have been told! */
   res = curl_easy_perform(curl);
 
 test_cleanup:

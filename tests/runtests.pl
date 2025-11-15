@@ -469,7 +469,7 @@ sub parseprotocols {
 
     # Generate a "proto-ipv6" version of each protocol to match the
     # IPv6 <server> name and a "proto-unix" to match the variant which
-    # uses Unix domain sockets. This works even if support isn't
+    # uses Unix domain sockets. This works even if support is not
     # compiled in because the <features> test will fail.
     push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
 
@@ -1229,7 +1229,7 @@ sub singletest_count {
         return -1;
     }
 
-    # At this point we've committed to run this test
+    # At this point we have committed to run this test
     logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
 
     # name of the test
@@ -3088,7 +3088,7 @@ while() {
         }
     }
 
-    # See if we've completed all the tests
+    # See if we have completed all the tests
     if(!scalar(%runnersrunning)) {
         # No runners are running; we must be done
         scalar(@runtests) && die 'Internal error: still have tests to run';
@@ -3131,7 +3131,7 @@ while() {
                         next;
                     }
 
-                    $total++; # number of tests we've run
+                    $total++; # number of tests we have run
                     $executed++;
 
                     if($error>0) {

@@ -310,7 +310,7 @@ static struct tftphdr *rw_init(int x)
 {
   newline = 0;                    /* init crlf flag */
   prevchar = -1;
-  bfs[0].counter = BF_ALLOC;     /* pass out the first buffer */
+  bfs[0].counter = BF_ALLOC;      /* pass out the first buffer */
   current = 0;
   bfs[1].counter = BF_FREE;
   nextone = x;                    /* ahead or behind? */
@@ -339,7 +339,7 @@ static int readit(struct testcase *test, struct tftphdr * volatile *dpp,
   current = !current;             /* "incr" current */
 
   b = &bfs[current];              /* look at new buffer */
-  if(b->counter == BF_FREE)      /* if it's empty */
+  if(b->counter == BF_FREE)       /* if empty */
     read_ahead(test, convert);    /* fill it */
 
   *dpp = &b->buf.hdr;             /* set caller's ptr */
@@ -360,7 +360,7 @@ static void read_ahead(struct testcase *test,
   struct tftphdr *dp;
 
   b = &bfs[nextone];              /* look at "next" buffer */
-  if(b->counter != BF_FREE)      /* nop if not free */
+  if(b->counter != BF_FREE)       /* nop if not free */
     return;
   nextone = !nextone;             /* "incr" next buffer ptr */
 

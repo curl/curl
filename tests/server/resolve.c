@@ -128,7 +128,7 @@ static int test_resolve(int argc, char *argv[])
 #endif
 
   if(rc)
-    printf("Resolving %s '%s' didn't work\n", ipv_inuse, host);
+    printf("Resolving %s '%s' did not work\n", ipv_inuse, host);
 
   return !!rc;
 }

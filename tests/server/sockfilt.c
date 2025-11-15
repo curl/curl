@@ -901,7 +901,7 @@ static bool disc_handshake(void)
          * The only other messages that could occur here are PING and PORT,
          * and both of them occur at the start of a test when nothing should be
          * trying to DISC. Therefore, we should not ever get here, but if we
-         * do, it's probably due to some kind of unclean shutdown situation so
+         * do, it is probably due to some kind of unclean shutdown situation so
          * us shutting down is what we probably ought to be doing, anyway.
          */
         return FALSE;

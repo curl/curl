@@ -106,7 +106,7 @@ static CURLcode test_lib3102(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* Set the HTTPS url to retrieve. */
+  /* Set the HTTPS URL to retrieve. */
   test_setopt(curl, CURLOPT_URL, URL);
 
   /* Capture certificate information */

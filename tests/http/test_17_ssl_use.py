@@ -115,7 +115,7 @@ class TestSSLUse:
             else:
                 assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}\n{r.dump_logs()}'
 
-    # use host name with trailing dot, verify handshake
+    # use hostname with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_03_trailing_dot(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)
@@ -128,7 +128,7 @@ class TestSSLUse:
             # the SNI the server received is without trailing dot
             assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
 
-    # use host name with double trailing dot, verify handshake
+    # use hostname with double trailing dot, verify handshake
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_04_double_dot(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)
@@ -404,7 +404,7 @@ class TestSSLUse:
                 reused_session = True
         assert reused_session, f'{r}\n{r.dump_logs()}'
 
-    # use host name server has no certificate for
+    # use hostname server has no certificate for
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_11_wrong_host(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)
@@ -413,7 +413,7 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 60, f'{r}'
 
-    # use host name server has no cert for with --insecure
+    # use hostname server has no cert for with --insecure
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_17_12_insecure(self, env: Env, proto, httpd, nghttpx):
         curl = CurlClient(env=env)

@@ -398,7 +398,7 @@ static int curltest_tweak_handler(request_rec *r)
           }
         }
         else if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's url globbing */
+          /* just an id for repeated requests with curl's URL globbing */
           request_id = val;
           continue;
         }
@@ -606,7 +606,7 @@ static int curltest_put_handler(request_rec *r)
         *s = '\0';
         val = s + 1;
         if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's url globbing */
+          /* just an id for repeated requests with curl's URL globbing */
           request_id = val;
           continue;
         }
@@ -804,7 +804,7 @@ static int curltest_sslinfo_handler(request_rec *r)
         *s = '\0';
         val = s + 1;
         if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's url globbing */
+          /* just an id for repeated requests with curl's URL globbing */
           request_id = val;
           continue;
         }

@@ -208,7 +208,7 @@ static void usage_hx_upload(const char *msg)
     curl_mfprintf(stderr, "%s\n", msg);
   curl_mfprintf(stderr,
     "usage: [options] url\n"
-    "  upload to a url with following options:\n"
+    "  upload to a URL with following options:\n"
     "  -a         abort paused transfer\n"
     "  -e         use TLS earlydata\n"
     "  -m number  max parallel uploads\n"

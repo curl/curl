@@ -214,7 +214,7 @@ sub runner_init {
             # handle IPC calls
             event_loop();
 
-            # Cannot rely on logmsg here in case it's buffered
+            # Cannot rely on logmsg here in case it is buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
 
             # To reach this point, either the controller has sent
@@ -1317,7 +1317,7 @@ sub controlleripccall {
     # Get the name of the function from the reference
     my $cv = svref_2object($funcref);
     my $gv = $cv->GV;
-    # Prepend the name to the function arguments so it's marshalled along with them
+    # Prepend the name to the function arguments so it is marshalled along with them
     unshift @_, $gv->NAME;
     # Marshall the arguments into a flat string
     my $margs = freeze \@_;
@@ -1368,7 +1368,7 @@ sub runnerar {
     my $resarrayref = thaw $buf;
 
     # First argument is runner ID
-    # TODO: remove this; it's unneeded since it's passed in
+    # TODO: remove this; it is unneeded since it is passed in
     unshift @$resarrayref, $runnerid;
     return @$resarrayref;
 }
@@ -1402,7 +1402,7 @@ sub runnerar_ready {
     my $e_in = $r_in;
     if(select(my $r_out=$r_in, undef, my $e_out=$e_in, $blocking) >= 1) {
         for my $fd (0..$maxfileno) {
-            # Return an error condition first in case it's both
+            # Return an error condition first in case it is both
             if(vec($e_out, $fd, 1)) {
                 return (undef, $idbyfileno{$fd});
             }

@@ -256,7 +256,7 @@ static void usage_hx_download(const char *msg)
     curl_mfprintf(stderr, "%s\n", msg);
   curl_mfprintf(stderr,
     "usage: [options] url\n"
-    "  download a url with following options:\n"
+    "  download a URL with following options:\n"
     "  -a         abort paused transfer\n"
     "  -m number  max parallel downloads\n"
     "  -e         use TLS early data when possible\n"
