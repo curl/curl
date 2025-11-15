@@ -30,7 +30,7 @@
 # An example command-line that starts a test http server for test 11 and waits
 # for the user before stopping it:
 #   ./devtest.pl --verbose serverfortest https echo "Started https" protoport https preprocess 11 pause echo Stopping stopservers echo Done
-# curl can connect to the server while it's running like this:
+# curl can connect to the server while it is running like this:
 #   curl -vkL https://localhost:<protoport>/11
 
 use strict;
@@ -94,7 +94,7 @@ sub parseprotocols {
 
     # Generate a "proto-ipv6" version of each protocol to match the
     # IPv6 <server> name and a "proto-unix" to match the variant which
-    # uses Unix domain sockets. This works even if support isn't
+    # uses Unix domain sockets. This works even if support is not
     # compiled in because the <features> test will fail.
     push @protocols, map(("$_-ipv6", "$_-unix"), @protocols);
 

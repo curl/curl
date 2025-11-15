@@ -174,7 +174,7 @@ my $ftplistparserstate;
 my $ftptargetdir="";
 
 #**********************************************************************
-# global variables used when running a FTP server to keep state info
+# global variables used when running an FTP server to keep state info
 # relative to the secondary or data sockfilt process. Values of these
 # variables should only be modified using datasockf_state() sub, given
 # that they are closely related and relationship is a bit awkward.
