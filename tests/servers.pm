@@ -2677,7 +2677,7 @@ sub startservers {
             }
         }
         elsif($what eq "http/2") {
-            # http/2 server proxies to a http server
+            # http/2 server proxies to an HTTP server
             if($run{'http/2'} &&
                !responsive_http_server("https", $verbose, 0, protoport('http2tls'))) {
                 logmsg "* restarting unresponsive HTTP/2 server\n";
@@ -2718,7 +2718,7 @@ sub startservers {
             }
         }
         elsif($what eq "http/3") {
-            # http/3 server proxies to a http server
+            # http/3 server proxies to an HTTP server
             if($run{'http/3'} &&
                !responsive_http_server("https", $verbose, 0, protoport('http3'), 1)) {
                 logmsg "* restarting unresponsive HTTP/3 server\n";
