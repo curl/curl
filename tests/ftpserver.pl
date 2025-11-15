@@ -152,10 +152,10 @@ my $retrnosize;    # set if ftp server should use RETRNOSIZE
 my $retrsize;      # set if ftp server should use RETRSIZE
 my $pasvbadip;     # set if ftp server should use PASVBADIP
 my $nosave;        # set if ftp server should not save uploaded data
-my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
-my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
-my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
-my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
+my $nodataconn;    # set if ftp srvr does not establish or accepts data channel
+my $nodataconn425; # set if ftp srvr does not establish data ch and replies 425
+my $nodataconn421; # set if ftp srvr does not establish data ch and replies 421
+my $nodataconn150; # set if ftp srvr does not establish data ch and replies 150
 my $storeresp;
 my $postfetch;
 my @capabilities;  # set if server supports capability commands
@@ -768,7 +768,7 @@ sub EHLO_smtp {
     my @data;
 
     # TODO: Get the IP address of the client connection to use in the
-    # EHLO response when the client doesn't specify one but for now use
+    # EHLO response when the client does not specify one but for now use
     # 127.0.0.1
     if(!$client) {
         $client = "[127.0.0.1]";
@@ -823,7 +823,7 @@ sub HELO_smtp {
     my ($client) = @_;
 
     # TODO: Get the IP address of the client connection to use in the HELO
-    # response when the client doesn't specify one but for now use 127.0.0.1
+    # response when the client does not specify one but for now use 127.0.0.1
     if(!$client) {
         $client = "[127.0.0.1]";
     }
@@ -864,7 +864,7 @@ sub MAIL_smtp {
             }
         }
 
-        # this server doesn't "validate" MAIL FROM addresses
+        # this server does not "validate" MAIL FROM addresses
         if(length($from)) {
             my @found;
             my $valid = 1;

@@ -1110,7 +1110,7 @@ sub runhttpserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1189,7 +1189,7 @@ sub runhttp2server {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0, 0);
     }
@@ -1250,7 +1250,7 @@ sub runhttp3server {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1316,7 +1316,7 @@ sub runhttpsserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1397,7 +1397,7 @@ sub runhttptlsserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1460,7 +1460,7 @@ sub runpingpongserver {
     my $pidfile = $serverpidfile{$server};
     my $portfile = $serverportfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
@@ -1531,7 +1531,7 @@ sub runsecureserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1602,7 +1602,7 @@ sub runtftpserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1673,7 +1673,7 @@ sub rundnsserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1746,7 +1746,7 @@ sub runrtspserver {
     my $pidfile = $serverpidfile{$server};
     my $portfile = $serverportfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1816,7 +1816,7 @@ sub runsshserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -1934,7 +1934,7 @@ sub runmqttserver {
     my $pidfile = $serverpidfile{$server};
     my $portfile = $serverportfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0);
     }
@@ -1996,7 +1996,7 @@ sub runsocksserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -2079,7 +2079,7 @@ sub rundictserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -2140,7 +2140,7 @@ sub runsmbserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }
@@ -2201,7 +2201,7 @@ sub runnegtelnetserver {
 
     my $pidfile = $serverpidfile{$server};
 
-    # do not retry if the server doesn't work
+    # do not retry if the server does not work
     if($doesntrun{$pidfile}) {
         return (2, 0, 0, 0);
     }

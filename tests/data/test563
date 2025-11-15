@@ -38,7 +38,7 @@ proxy
 <setenv>
 ftp_proxy=http://%HOSTIP:%HTTPPORT/
 </setenv>
-# note that we need quotes around the URL below to make sure the shell doesn't
+# note that we need quotes around the URL below to make sure the shell does not
 # treat the semicolon as a separator!
 <command>
 "ftp://%HOSTIP:23456/%TESTNUMBER;type=A" %FTPPORT

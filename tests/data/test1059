@@ -42,7 +42,7 @@ ftp://test-number:%TESTNUMBER/wanted/page -p -x %HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-# The server doesn't implement CONNECT for ftp, so this must be a failure test
+# The server does not implement CONNECT for ftp, so this must be a failure test
 <errorcode>
 56
 </errorcode>

@@ -198,7 +198,7 @@ test_cleanup:
   return t1565_test_failure;
 }
 
-#else /* without pthread, this test doesn't work */
+#else /* without pthread, this test does not work */
 static CURLcode test_lib1565(const char *URL)
 {
   (void)URL;

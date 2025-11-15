@@ -195,7 +195,7 @@ sub dirsepadd {
 
 #######################################################################
 # Quote an argument for passing safely to a Bourne shell
-# This does the same thing as String::ShellQuote but doesn't need a package.
+# This does the same thing as String::ShellQuote but does not need a package.
 #
 sub shell_quote {
     my ($s)=@_;

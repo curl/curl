@@ -542,8 +542,8 @@ sub torture {
             }
         }
 
-        # verify that it returns a proper error code, doesn't leak memory
-        # and doesn't core dump
+        # verify that it returns a proper error code, does not leak memory
+        # and does not core dump
         if(($ret & 255) || ($ret >> 8) >= 128) {
             logmsg " system() returned $ret\n";
             $fail=1;
