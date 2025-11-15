@@ -118,7 +118,7 @@ commands:
 executors:
   ubuntu:
     machine:
-      image: ubuntu-2004:2024.01.1
+      image: ubuntu-2204:2025.09.1
 
 jobs:
   basic:
@@ -161,7 +161,7 @@ jobs:
 
   arm:
     machine:
-      image: ubuntu-2004:2024.01.1
+      image: ubuntu-2204:2025.09.1
     resource_class: arm.medium
     steps:
       - checkout
@@ -172,7 +172,7 @@ jobs:
 
   arm-cares:
     machine:
-      image: ubuntu-2004:2024.01.1
+      image: ubuntu-2204:2025.09.1
     resource_class: arm.medium
     steps:
       - checkout
