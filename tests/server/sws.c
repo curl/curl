@@ -2448,9 +2448,9 @@ static int test_sws(int argc, char *argv[])
              * data (in service_connection()) as the first data received on
              * this new HTTP request and report "** Unusual request" (skipall
              * would have otherwise caused that data to be ignored). Normally,
-             * that socket will be closed by the client and there will not be any
-             * stale data to cause this, but stranger things have happened (see
-             * issue #11678).
+             * that socket will be closed by the client and there will not be
+             * any stale data to cause this, but stranger things have happened
+             * (see issue #11678).
              */
             init_httprequest(req);
         } while(rc > 0);
