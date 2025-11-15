@@ -6,7 +6,7 @@ Long: cookie
 Arg: <data|filename>
 Protocols: HTTP
 Help: Send cookies from string/load from file
-Category: http
+Category: http common
 Added: 4.9
 Multi: append
 See-also:

@@ -5,7 +5,7 @@ Long: user
 Short: u
 Arg: <user:password>
 Help: Server user and password
-Category: important auth
+Category: important auth common
 Added: 4.0
 Multi: single
 See-also:

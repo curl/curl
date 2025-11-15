@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: compressed
 Help: Request compressed response
 Protocols: HTTP
-Category: http
+Category: http common
 Added: 7.10
 Multi: boolean
 See-also:
