@@ -34,7 +34,7 @@
 # src/tool_getparam.c lists all options curl can parse
 # docs/curl.1 documents all command line options
 # src/tool_listhelp.c outputs all options with curl -h
-# - make sure they're all in sync
+# - make sure they are all in sync
 #
 # Output all deviances to stderr.
 

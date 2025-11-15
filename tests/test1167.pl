@@ -77,7 +77,7 @@ sub scanenums {
     while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
         if(/^#(line|) (\d+) \"(.*)\"/) {
-            # if the included file isn't in our incdir, then we skip this section
+            # if the included file is not in our incdir, then we skip this section
             # until next #line
             #
             if($3 !~ /^$incdir/) {
