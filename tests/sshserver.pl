@@ -230,7 +230,7 @@ my $loglevel = $debugprotocol?'DEBUG3':'DEBUG2';
 # Validate username
 #
 if(!$username) {
-    $error = 'Will not run ssh server without a user name';
+    $error = 'Will not run ssh server without a username';
 }
 elsif($username eq 'root') {
     $error = 'Will not run ssh server as root to mitigate security risks';

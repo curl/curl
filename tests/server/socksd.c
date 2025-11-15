@@ -42,7 +42,7 @@
  *                              state
  * "nmethods_max [number: 3]" - the minimum numberf NMETHODS the client must
  *                              state
- * "user [string]" - the user name that must match (if method is 2)
+ * "user [string]" - the username that must match (if method is 2)
  * "password [string]" - the password that must match (if method is 2)
  * "backend [IPv4]" - numerical IPv4 address of backend to connect to
  * "backendport [number:0]" - TCP port of backend to connect to. 0 means use

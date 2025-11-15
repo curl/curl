@@ -57,7 +57,7 @@ crypto
 digest
 </features>
 <name>
-HTTP with Digest authorization with user name needing escape
+HTTP with Digest authorization with username needing escape
 </name>
 <command>
 http://%5cuser%22:password@%HOSTIP:%HTTPPORT/%TESTNUMBER --digest
