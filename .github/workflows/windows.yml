@@ -74,6 +74,7 @@ jobs:
             libzstd-devel
             libnghttp2-devel
             ${{ matrix.install }}
+            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'python3' || '' }}
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -234,6 +235,7 @@ jobs:
             libnghttp2-devel
             libpsl-devel
             ${{ matrix.install }}
+            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'python3' || '' }}
 
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         if: ${{ matrix.sys != 'msys' }}
@@ -246,6 +248,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
+            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'python3' || '' }}
 
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -476,6 +479,7 @@ jobs:
           install: >-
             mingw-w64-${{ matrix.env }}-libpsl
             ${{ matrix.install }}
+            ${{ !contains(matrix.tflags, 'skipall') && !contains(matrix.tflags, 'skiprun') && 'python3' || '' }}
 
       - name: 'cache compiler (gcc ${{ matrix.ver }}-${{ matrix.env }})'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
