@@ -494,7 +494,7 @@ add_ciphers:
     for(j = 0; j < default_len; j++) {
       entry = rustls_default_crypto_provider_ciphersuites_get(j);
       if(rustls_supported_ciphersuite_protocol_version(entry) ==
-          RUSTLS_TLS_VERSION_TLSV1_3)
+         RUSTLS_TLS_VERSION_TLSV1_3)
         continue;
 
       /* No duplicates allowed (so selected cannot overflow) */
