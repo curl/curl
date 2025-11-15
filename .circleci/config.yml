@@ -47,20 +47,6 @@ commands:
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
             sudo python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
-  install-wolfssl:
-    steps:
-      - run:
-          command: |
-            # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-            WOLFSSL_VERSION=5.8.0
-            echo "Installing wolfSSL $WOLFSSL_VERSION"
-            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-              --location "https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VERSION-stable.tar.gz" | tar -xz
-            cd wolfssl-$WOLFSSL_VERSION-stable
-            ./autogen.sh
-            ./configure --disable-dependency-tracking --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
-            make install
-
   configure:
     steps:
       - run:
