@@ -17,9 +17,9 @@ Proxy-Authenticate: Basic realm="Squid proxy-caching web server"
 Server: swsclose
 Content-Type: text/html
 
-Even though it's the response code that triggers authentication, we're
-using NTLM and the server isn't, so we should fail.  We know the server
-isn't because there's no Proxy-Authorization: NTLM header
+Even though it is the response code that triggers authentication, we are
+using NTLM and the server is not, so we should fail.  We know the server
+is not because there is no Proxy-Authorization: NTLM header
 </data1001>
 </reply>
 

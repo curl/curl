@@ -26,7 +26,7 @@ FTP PASV upload resume from end of empty file
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
-this is the *****cr@p******** that we're gonna upload
+this is the *****cr@p******** that we are gonna upload
 
 worx?
 </file>
@@ -45,7 +45,7 @@ STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>
-this is the *****cr@p******** that we're gonna upload
+this is the *****cr@p******** that we are gonna upload
 
 worx?
 </upload>

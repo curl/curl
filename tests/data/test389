@@ -40,7 +40,7 @@ local-http
 <command>
 -4 http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost
+# Ensure that we are running on localhost
 </client>
 
 #

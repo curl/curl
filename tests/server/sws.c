@@ -545,7 +545,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   /* **** Persistence ****
    *
    * If the request is an HTTP/1.0 one, we close the connection unconditionally
-   * when we're done.
+   * when we are done.
    *
    * If the request is an HTTP/1.1 one, we MUST check for a "Connection:"
    * header that might say "close". If it does, we close a connection when
@@ -883,7 +883,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
   else {
     if(req->skip)
       /* we are instructed to not read the entire thing, so we make sure to
-         only read what we're supposed to and NOT read the entire thing the
+         only read what we are supposed to and NOT read the entire thing the
          client wants to send! */
       got = sread(sock, reqbuf + req->offset, req->cl);
     else

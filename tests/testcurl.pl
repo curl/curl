@@ -84,7 +84,7 @@ $runtestopts='';
 $version='2024-11-28';
 $fixed=0;
 
-# Determine if we're running from git or a canned copy of curl,
+# Determine if we are running from git or a canned copy of curl,
 # or if we got a specific target option or setup file option.
 $CURLDIR="curl";
 if(-f ".git/config") {

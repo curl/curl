@@ -3332,7 +3332,7 @@ while(1) {
                     $check = 0;
                 }
 
-                # only perform this if we're not faking a reply
+                # only perform this if we are not faking a reply
                 my $func = $commandfunc{uc($FTPCMD)};
                 if($func) {
                     &$func($FTPARG, $FTPCMD);

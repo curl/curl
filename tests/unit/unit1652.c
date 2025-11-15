@@ -37,7 +37,7 @@ static char output[4096];
 
 /*
  * This debugf callback is simply dumping the string into the static buffer
- * for the unit test to inspect. Since we know that we're only dealing with
+ * for the unit test to inspect. Since we know that we are only dealing with
  * text we can afford the luxury of skipping the type check here.
  */
 static int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,

@@ -1889,7 +1889,7 @@ sub runsshserver {
         logmsg "RUN: failed to verify the $srvrname server on $port\n";
         return (5, 0, 0, 0);
     }
-    # we're happy, no need to loop anymore!
+    # we are happy, no need to loop anymore!
     $doesntrun{$pidfile} = 0;
 
     my $hostfile;

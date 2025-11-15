@@ -26,7 +26,7 @@ Q- What did 0 say to 8? A- Nice Belt!
 http
 </server>
 
-# we're actually more interested in any compression support but this is the
+# we are actually more interested in any compression support but this is the
 # best we can do right now
 <features>
 libz

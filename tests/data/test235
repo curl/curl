@@ -25,7 +25,7 @@ FTP resumed upload but no file present remotely
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
-this is the *****crap******** that we're gonna upload
+this is the *****crap******** that we are gonna upload
 
 worx?
 </file>
@@ -44,7 +44,7 @@ STOR %TESTNUMBER
 QUIT
 </protocol>
 <upload>
-this is the *****crap******** that we're gonna upload
+this is the *****crap******** that we are gonna upload
 
 worx?
 </upload>
