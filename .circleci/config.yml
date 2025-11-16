@@ -129,7 +129,7 @@ commands:
             echo '------------------------------'
             cat /etc/ssh/ssh_config || true
             echo '------------------------------'
-            sudo sed -i 's/StrictHostKeyChecking yes/StrictHostKeyChecking no/g'
+            sudo sed -i 's/StrictHostKeyChecking no/StrictHostKeyChecking yes/g' /etc/ssh/ssh_config
             echo '------------------------------'
             cat /etc/ssh/ssh_config || true
             echo '------------------------------'
