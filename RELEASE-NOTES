@@ -56,6 +56,7 @@ This release includes the following bugfixes:
  o lib: eliminate size_t casts [112]
  o lib: fix gssapi.h include on IBMi [55]
  o lib: refactor the type of funcs which have useless return and checks [1]
+ o libtests: replace `atoi()` with `curlx_str_number()` [120]
  o libssh2: cleanup ssh_force_knownhost_key_type [64]
  o libssh2: replace atoi() in ssh_force_knownhost_key_type [63]
  o limit-rate: add example using --limit-rate and --max-time together [89]
@@ -124,9 +125,9 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
- o Builds using VS2008
  o OpenSSL-QUIC
  o Support for c-ares versions before 1.16.0
+ o Support for Windows XP/2003
 
  See https://curl.se/dev/deprecate.html
 
@@ -243,3 +244,4 @@ References to bug reports and discussions on issues:
  [112] = https://curl.se/bug/?i=19495
  [118] = https://curl.se/bug/?i=19493
  [119] = https://curl.se/bug/?i=19483
+ [120] = https://curl.se/bug/?i=19506
