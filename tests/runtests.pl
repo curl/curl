@@ -632,8 +632,9 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
-                # Make an attempt to detect if default libssh configuration files
-                # end up setting `StrictHostKeyChecking no`.
+                # Detect simple cases of default libssh configuration files ending up
+                # setting `StrictHostKeyChecking no`. include files, quoted values,
+                # '=value' format not implemented.
                 $feature{"badlibssh"} = 0;
                 foreach my $libssh_configfile (('/etc/ssh/ssh_config', $ENV{'HOME'} . '/.ssh/config')) {
                     if(open(my $fd, '<', $libssh_configfile)) {
