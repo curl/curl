@@ -632,15 +632,19 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
-                if(open(my $fd, '<', '/etc/ssh/ssh_config')) {
-                    while(my $line = <$fd>) {
-                        chomp $line;
-                        if($line =~ /^\s*StrictHostKeyChecking\s+no\s*$/) {
-                            $feature{"badlibssh"} = 1;
-                            last;
+                # Make an attempt to detect if default libssh configuration files
+                # end up setting `StrictHostKeyChecking no`.
+                $feature{"badlibssh"} = 0;
+                foreach my $libssh_configfile (('/etc/ssh/ssh_config', $ENV{'HOME'} . '/.ssh/config')) {
+                    if(open(my $fd, '<', $libssh_configfile)) {
+                        while(my $line = <$fd>) {
+                            chomp $line;
+                            if($line =~ /^\s*StrictHostKeyChecking\s+(yes|no)\s*$/) {
+                                $feature{"badlibssh"} = ($1 eq 'no' ? 1 : 0);
+                            }
                         }
+                        close($fd);
                     }
-                    close($fd);
                 }
             }
         }
