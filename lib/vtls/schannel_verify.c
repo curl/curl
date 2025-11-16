@@ -197,6 +197,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
                   actual_content_type, ca_file_text);
             result = CURLE_SSL_CACERT_BADFILE;
             more_certs = 0;
+            CertFreeCertificateContext(cert_context);
           }
           else {
             add_cert_result =
