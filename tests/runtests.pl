@@ -632,6 +632,13 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
+                if($1 =~ /(\d+)\.(\d+).(\d+)/) {
+                    my $v = $1 * 100 + $2 * 10 + $3;
+                    if($v < 94) {
+                        # before 0.9.4
+                        $feature{"oldlibssh"} = 1;
+                    }
+                }
             }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
