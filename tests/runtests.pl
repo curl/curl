@@ -632,11 +632,20 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
-                if($1 =~ /(\d+)\.(\d+).(\d+)/) {
-                    my $v = $1 * 100 + $2 * 10 + $3;
-                    if($v < 94) {
-                        # before 0.9.4
-                        $feature{"oldlibssh"} = 1;
+                # Detect simple cases of default libssh configuration files ending up
+                # setting `StrictHostKeyChecking no`. include files, quoted values,
+                # '=value' format not implemented.
+                $feature{"badlibssh"} = 0;
+                foreach my $libssh_configfile (('/etc/ssh/ssh_config', $ENV{'HOME'} . '/.ssh/config')) {
+                    if(open(my $fd, '<', $libssh_configfile)) {
+                        while(my $line = <$fd>) {
+                            chomp $line;
+                            if($line =~ /^\s*StrictHostKeyChecking\s+(yes|no)\s*$/) {
+                                $feature{"badlibssh"} = ($1 eq 'no' ? 1 : 0);
+                                last;  # Do as openssh and libssh
+                            }
+                        }
+                        close($fd);
                     }
                 }
             }

@@ -14,7 +14,7 @@ sftp
 </server>
 <features>
 sftp
-!oldlibssh
+!badlibssh
 </features>
 <name>
 SFTP with corrupted known_hosts
@@ -30,7 +30,8 @@ R93Ey5VtBeBblYTRlFXBWJgKFcTKBRJ/O4qBZwbUgt10AHj31i6h8NehfT19tR8wG/YCmj3KtYLHmwdz
 
 # Verify data after the test has been "shot"
 <verify>
-# old libssh installs return the wrong thing
+# badlibssh configurations return the wrong thing: 67 CURLE_LOGIN_DENIED,
+# instead of 60 CURLE_PEER_FAILED_VERIFICATION.
 <errorcode>
 60
 </errorcode>
