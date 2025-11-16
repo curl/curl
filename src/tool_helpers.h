@@ -28,5 +28,6 @@
 const char *param2text(ParameterError error);
 int SetHTTPrequest(HttpReq req, HttpReq *store);
 void customrequest_helper(HttpReq req, char *method);
+bool has_whitespace(const char *str);
 
 #endif /* HEADER_CURL_TOOL_HELPERS_H */

@@ -878,6 +878,10 @@ CURLcode config2setopts(struct OperationConfig *config,
   }
 
   if(use_proto == proto_http || use_proto == proto_https) {
+    if(config->customrequest_has_ws && config->customrequest) {
+      errorf("invalid HTTP method: whitespace is not allowed in -X/--request");
+      return CURLE_FAILED_INIT;
+    }
     result = http_setopts(config, curl);
     if(!result)
       result = cookie_setopts(config, curl);

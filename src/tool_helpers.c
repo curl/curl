@@ -120,3 +120,18 @@ void customrequest_helper(HttpReq req, char *method)
           "the way you want. Consider using -I/--head instead.");
   }
 }
+
+bool has_whitespace(const char *str)
+{
+  const unsigned char *ptr = (const unsigned char *)str;
+
+  if(!ptr)
+    return FALSE;
+
+  while(*ptr) {
+    if(ISSPACE(*ptr))
+      return TRUE;
+    ptr++;
+  }
+  return FALSE;
+}

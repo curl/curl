@@ -31,12 +31,7 @@ reject whitespace in custom HTTP method
 <verify>
 <stderr mode="text">
 curl: invalid HTTP method: whitespace is not allowed in -X/--request
-curl: option -X: is badly used here
-%if manual
-curl: try 'curl --help' or 'curl --manual' for more information
-%else
-curl: try 'curl --help' for more information
-%endif
+curl: (2) Failed initialization
 </stderr>
 <errorcode>
 2

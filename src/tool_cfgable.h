@@ -324,6 +324,7 @@ struct OperationConfig {
   BIT(rm_partial);                /* on error, remove partially written output
                                      files */
   BIT(skip_existing);
+  BIT(customrequest_has_ws);      /* remember if -X has whitespace */
 };
 
 #ifdef _WIN32
