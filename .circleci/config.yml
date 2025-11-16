@@ -126,7 +126,13 @@ commands:
             # Revert a CircleCI-specific local setting that makes test 1459
             # return 67 (CURLE_LOGIN_DENIED) instead of the
             # expected 60 (CURLE_PEER_FAILED_VERIFICATION).
+            echo '------------------------------'
+            cat /etc/ssh/ssh_config || true
+            echo '------------------------------'
             echo 'StrictHostKeyChecking yes' | sudo tee -a /etc/ssh/ssh_config >/dev/null
+            echo '------------------------------'
+            cat /etc/ssh/ssh_config || true
+            echo '------------------------------'
             make -j3 V=1 test-ci TFLAGS='-j14'
 
 executors:
