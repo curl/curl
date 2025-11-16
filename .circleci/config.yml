@@ -96,6 +96,7 @@ commands:
   build:
     steps:
       - run: make -j3 V=1
+      - run: src/curl --disable --version
       - run: make -j3 V=1 examples
 
   test:
