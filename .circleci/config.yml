@@ -73,7 +73,7 @@ commands:
           command: |
             autoreconf -fi
             ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
-              --with-openssl --with-libssh \
+              --without-ssl --with-libssh \
               || { tail -1000 config.log; false; }
 
   configure-cares:
