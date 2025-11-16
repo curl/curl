@@ -642,7 +642,7 @@ sub checksystemfeatures {
                             chomp $line;
                             if($line =~ /^\s*StrictHostKeyChecking\s+(yes|no)\s*$/) {
                                 $feature{"badlibssh"} = ($1 eq 'no' ? 1 : 0);
-                                last;
+                                last;  # Do as openssh and libssh
                             }
                         }
                         close($fd);
