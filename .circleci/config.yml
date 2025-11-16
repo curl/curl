@@ -73,7 +73,7 @@ commands:
           command: |
             autoreconf -fi
             ./configure --disable-dependency-tracking --enable-option-checking=fatal --enable-unity --enable-werror --enable-warnings \
-              --without-ssl --with-libssh \
+              --with-openssl --with-libssh \
               || { tail -1000 config.log; false; }
 
   configure-cares:
@@ -105,34 +105,10 @@ commands:
       - run:
           command: |
             source ~/venv/bin/activate
-            make -j3 V=1 test-ci TFLAGS='-j14'
-
-  test-libssh-fixup:
-    steps:
-      - run:
-          command: |
-            source ~/venv/bin/activate
             # Revert a CircleCI-specific local setting that makes test 1459
             # return 67 (CURLE_LOGIN_DENIED) instead of the
             # expected 60 (CURLE_PEER_FAILED_VERIFICATION).
             echo 'StrictHostKeyChecking yes' >> ~/.ssh/config
-            make -j3 V=1 test-ci TFLAGS='-j14'
-
-  test-libssh-fixup-sudo:
-    steps:
-      - run:
-          command: |
-            source ~/venv/bin/activate
-            # Revert a CircleCI-specific local setting that makes test 1459
-            # return 67 (CURLE_LOGIN_DENIED) instead of the
-            # expected 60 (CURLE_PEER_FAILED_VERIFICATION).
-            echo '------------------------------'
-            cat /etc/ssh/ssh_config || true
-            echo '------------------------------'
-            sudo sed -i 's/StrictHostKeyChecking no/StrictHostKeyChecking yes/g' /etc/ssh/ssh_config
-            echo '------------------------------'
-            cat /etc/ssh/ssh_config || true
-            echo '------------------------------'
             make -j3 V=1 test-ci TFLAGS='-j14'
 
 executors:
@@ -179,59 +155,6 @@ jobs:
       - build
       - test
 
-  libssh-2004:
-    machine:
-      image: ubuntu-2004:2024.01.1
-    steps:
-      - checkout
-      - install-deps
-      - install-libssh
-      - configure-libssh
-      - build
-      - test
-
-  libssh-fixup:
-    executor: ubuntu
-    steps:
-      - checkout
-      - install-deps
-      - install-libssh
-      - configure-libssh
-      - build
-      - test-libssh-fixup
-
-  libssh-2004-fixup:
-    machine:
-      image: ubuntu-2004:2024.01.1
-    steps:
-      - checkout
-      - install-deps
-      - install-libssh
-      - configure-libssh
-      - build
-      - test-libssh-fixup
-
-  libssh-fixup-sudo:
-    executor: ubuntu
-    steps:
-      - checkout
-      - install-deps
-      - install-libssh
-      - configure-libssh
-      - build
-      - test-libssh-fixup-sudo
-
-  libssh-2004-fixup-sudo:
-    machine:
-      image: ubuntu-2004:2024.01.1
-    steps:
-      - checkout
-      - install-deps
-      - install-libssh
-      - configure-libssh
-      - build
-      - test-libssh-fixup-sudo
-
   arm:
     machine:
       image: ubuntu-2204:2025.09.1
@@ -267,11 +190,6 @@ workflows:
   openssl-libssh:
     jobs:
       - libssh
-      - libssh-2004
-      - libssh-fixup
-      - libssh-2004-fixup
-      - libssh-fixup-sudo
-      - libssh-2004-fixup-sudo
 
   openssl-no-proxy:
     jobs:
