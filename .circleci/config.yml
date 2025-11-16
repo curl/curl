@@ -105,6 +105,13 @@ commands:
       - run:
           command: |
             source ~/venv/bin/activate
+            make -j3 V=1 test-ci TFLAGS='-j14'
+
+  test-libssh-fixup:
+    steps:
+      - run:
+          command: |
+            source ~/venv/bin/activate
             # Revert a CircleCI-specific local setting that makes test 1459
             # return 67 (CURLE_LOGIN_DENIED) instead of the
             # expected 60 (CURLE_PEER_FAILED_VERIFICATION).
@@ -166,6 +173,27 @@ jobs:
       - build
       - test
 
+  libssh-fixup:
+    executor: ubuntu
+    steps:
+      - checkout
+      - install-deps
+      - install-libssh
+      - configure-libssh
+      - build
+      - test-libssh-fixup
+
+  libssh-2004-fixup:
+    machine:
+      image: ubuntu-2004:2024.01.1
+    steps:
+      - checkout
+      - install-deps
+      - install-libssh
+      - configure-libssh
+      - build
+      - test-libssh-fixup
+
   arm:
     machine:
       image: ubuntu-2204:2025.09.1
@@ -202,6 +230,8 @@ workflows:
     jobs:
       - libssh
       - libssh-2004
+      - libssh-fixup
+      - libssh-2004-fixup
 
   openssl-no-proxy:
     jobs:
