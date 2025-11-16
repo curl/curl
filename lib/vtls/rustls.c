@@ -586,7 +586,7 @@ init_config_builder(struct Curl_easy *data,
   }
 #endif /* USE_ECH */
 
-  cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
+  cipher_suites = malloc(sizeof(*cipher_suites) * (cipher_suites_len));
   if(!cipher_suites) {
     result = CURLE_OUT_OF_MEMORY;
     goto cleanup;
