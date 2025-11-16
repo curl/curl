@@ -166,6 +166,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
 
         cert_blob.pbData = (BYTE *)CURL_UNCONST(begin_cert_ptr);
         cert_blob.cbData = cert_size;
+        /* Caution: CryptQueryObject() is deprecated */
         if(!CryptQueryObject(CERT_QUERY_OBJECT_BLOB,
                              &cert_blob,
                              CERT_QUERY_CONTENT_FLAG_CERT,
@@ -204,7 +205,6 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
                                                cert_context,
                                                CERT_STORE_ADD_ALWAYS,
                                                NULL);
-            CertFreeCertificateContext(cert_context);
             if(!add_cert_result) {
               char buffer[WINAPI_ERROR_LEN];
               failf(data,
@@ -219,6 +219,21 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
             else {
               num_certs++;
             }
+          }
+
+          switch(actual_content_type) {
+          case CERT_QUERY_CONTENT_CERT:
+          case CERT_QUERY_CONTENT_SERIALIZED_CERT:
+            CertFreeCertificateContext(cert_context);
+            break;
+          case CERT_QUERY_CONTENT_CRL:
+          case CERT_QUERY_CONTENT_SERIALIZED_CRL:
+            CertFreeCRLContext((PCCRL_CONTEXT)cert_context);
+            break;
+          case CERT_QUERY_CONTENT_CTL:
+          case CERT_QUERY_CONTENT_SERIALIZED_CTL:
+            CertFreeCTLContext((PCCTL_CONTEXT)cert_context);
+            break;
           }
         }
       }
