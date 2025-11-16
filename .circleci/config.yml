@@ -46,7 +46,8 @@ commands:
       - run:
           command: |
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
-            sudo python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+            python3 -m venv ~/venv
+            ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
   configure:
     steps:
@@ -101,7 +102,10 @@ commands:
 
   test:
     steps:
-      - run: make -j3 V=1 test-ci TFLAGS='-j14'
+      - run:
+          command: |
+            source ~/venv/bin/activate
+            make -j3 V=1 test-ci TFLAGS='-j14'
 
 executors:
   ubuntu:
