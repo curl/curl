@@ -105,6 +105,10 @@ commands:
       - run:
           command: |
             source ~/venv/bin/activate
+            # Revert a CircleCI-specific local setting that makes test 1459
+            # return 67 (CURLE_LOGIN_DENIED) instead of the
+            # expected 60 (CURLE_PEER_FAILED_VERIFICATION).
+            echo 'StrictHostKeyChecking yes' >> ~/.ssh/config
             make -j3 V=1 test-ci TFLAGS='-j14'
 
 executors:
