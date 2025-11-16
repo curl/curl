@@ -632,12 +632,15 @@ sub checksystemfeatures {
             }
             if($libcurl =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
-                if($1 =~ /(\d+)\.(\d+).(\d+)/) {
-                    my $v = $1 * 100 + $2 * 10 + $3;
-                    if($v < 94) {
-                        # before 0.9.4
-                        $feature{"oldlibssh"} = 1;
+                if(open(my $fd, '<', '/etc/ssh/ssh_config')) {
+                    while(my $line = <$fd>) {
+                        chomp $line;
+                        if($line =~ /^\s*StrictHostKeyChecking\s+no\s*$/) {
+                            $feature{"badlibssh"} = 1;
+                            last;
+                        }
                     }
+                    close($fd);
                 }
             }
         }
