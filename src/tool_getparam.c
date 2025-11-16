@@ -81,6 +81,21 @@ static ParameterError getstrn(char **str, const char *val,
   return PARAM_OK;
 }
 
+static bool has_whitespace(const char *str)
+{
+  const unsigned char *ptr = (const unsigned char *)str;
+
+  if(!ptr)
+    return FALSE;
+
+  while(*ptr) {
+    if(ISSPACE(*ptr))
+      return TRUE;
+    ptr++;
+  }
+  return FALSE;
+}
+
 /* this array MUST be alphasorted based on the 'lname' */
 static const struct LongShort aliases[]= {
   {"abstract-unix-socket",       ARG_FILE, ' ', C_ABSTRACT_UNIX_SOCKET},
@@ -2778,6 +2793,11 @@ static ParameterError opt_string(struct OperationConfig *config,
   case C_REQUEST: /* --request */
     /* set custom request */
     err = getstr(&config->customrequest, nextarg, DENY_BLANK);
+    if(!err && has_whitespace(config->customrequest)) {
+      errorf("invalid HTTP method: whitespace is not allowed in -X/--request");
+      tool_safefree(config->customrequest);
+      err = PARAM_BAD_USE;
+    }
     break;
   case C_SPEED_TIME: /* --speed-time */
     /* low speed time */

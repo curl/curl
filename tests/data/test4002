@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+cmdline
+--request
+http2
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+http/2
+</features>
+<name>
+reject whitespace in custom HTTP method
+</name>
+<command>
+-X "GET 123" --http2 http://127.0.0.1/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+curl: invalid HTTP method: whitespace is not allowed in -X/--request
+curl: option -X: is badly used here
+%if manual
+curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
+</stderr>
+<errorcode>
+2
+</errorcode>
+</verify>
+</testcase>
