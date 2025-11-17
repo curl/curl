@@ -35,7 +35,7 @@
 #include <curl/curl.h>
 
 /* curl write callback, to fill tidy's input buffer...  */
-uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
+static uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 {
   uint r;
   r = size * nmemb;
@@ -44,7 +44,7 @@ uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 }
 
 /* Traverse the document tree */
-void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
+static void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 {
   TidyNode child;
   for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
@@ -72,7 +72,6 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
     dumpNode(doc, child, indent + 4); /* recursive */
   }
 }
-
 
 int main(int argc, char **argv)
 {
