@@ -94,7 +94,11 @@
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), getenv(), etc. */
+#define _CRT_SECURE_NO_WARNINGS  /* for __sys_errlist(), __sys_nerr(),
+                                    _wfopen(), _wopen(), freopen(), getenv(),
+                                    gmtime(), sprintf(), strcpy(), wcscpy(),
+                                    wcsncpy()
+                                    in tests: localtime(), open(), sscanf() */
 #endif
 #endif /* _MSC_VER */
 
