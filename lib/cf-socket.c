@@ -166,17 +166,6 @@ static void nosigpipe(struct Curl_cfilter *cf,
 #define KEEPALIVE_FACTOR(x)
 #endif
 
-/* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
-#if defined(USE_WINSOCK) && !defined(SIO_KEEPALIVE_VALS)
-#define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
-
-struct tcp_keepalive {
-  u_long onoff;
-  u_long keepalivetime;
-  u_long keepaliveinterval;
-};
-#endif
-
 static void
 tcpkeepalive(struct Curl_cfilter *cf,
              struct Curl_easy *data,
@@ -217,6 +206,17 @@ tcpkeepalive(struct Curl_cfilter *cf,
                   sockfd, SOCKERRNO);
     }
 #else /* Windows < 10.0.16299 */
+
+/* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
+#ifndef SIO_KEEPALIVE_VALS
+#define SIO_KEEPALIVE_VALS  _WSAIOW(IOC_VENDOR,4)
+struct tcp_keepalive {
+  u_long onoff;
+  u_long keepalivetime;
+  u_long keepaliveinterval;
+};
+#endif
+
     struct tcp_keepalive vals;
     DWORD dummy;
     vals.onoff = 1;
