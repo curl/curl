@@ -51,7 +51,7 @@ int main(void)
   /* extract hostname from the parsed URL */
   uc = curl_url_get(h, CURLUPART_HOST, &host, 0);
   if(!uc) {
-    printf("Host name: %s\n", host);
+    printf("Hostname: %s\n", host);
     curl_free(host);
   }
 

@@ -248,7 +248,7 @@ struct OperationConfig {
   BIT(autoreferer);         /* automatically set referer */
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
-  BIT(dirlistonly);         /* only get the FTP dir list */
+  BIT(dirlistonly);         /* only get the FTP directory list */
   BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
                                when following redirects, even when hostname
                                changed */
@@ -326,7 +326,7 @@ struct OperationConfig {
   BIT(skip_existing);
 };
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 struct termout {
   wchar_t *buf;
   DWORD len;
@@ -343,7 +343,7 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   struct termout term;
 #endif
   timediff_t ms_per_transfer;     /* start next transfer after (at least) this

@@ -1940,7 +1940,7 @@ nomem:
         if(!n)
           bad = TRUE; /* empty hostname is not okay */
         else if(!urlencode) {
-          /* if the host name part was not URL encoded here, it was set ready
+          /* if the hostname part was not URL encoded here, it was set ready
              URL encoded so we need to decode it to check */
           size_t dlen;
           char *decoded = NULL;

@@ -282,23 +282,22 @@ if test "x$OPT_OPENSSL" != xno; then
       AC_MSG_RESULT([no])
     ])
 
-    AC_MSG_CHECKING([for OpenSSL >= v3])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #include <openssl/opensslv.h>
-      ]],[[
-        #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
-        return 0;
-        #else
-        #error older than 3
-        #endif
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      ssl_msg="OpenSSL v3+"
-    ],[
-      AC_MSG_RESULT([no])
-    ])
+    if test "$ssl_msg" = 'OpenSSL'; then
+      AC_MSG_CHECKING([for OpenSSL >= v3])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          #include <openssl/opensslv.h>
+        ]],[[
+          #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+          return 0;
+          #else
+          #error older than 3
+          #endif
+        ]])
+      ],[],[
+        AC_MSG_ERROR([OpenSSL 3.0.0 or upper required.])
+      ])
+    fi
   fi
 
   dnl is this OpenSSL (fork) providing the original QUIC API?

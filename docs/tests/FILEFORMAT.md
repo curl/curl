@@ -504,7 +504,7 @@ Features testable here are:
 - `large-size` (size_t is larger than 32-bit)
 - `libssh2`
 - `libssh`
-- `oldlibssh` (versions before 0.9.4)
+- `badlibssh` (libssh configuration incompatible with the test suite)
 - `libz`
 - `local-http`. The HTTP server runs on 127.0.0.1
 - `manual`

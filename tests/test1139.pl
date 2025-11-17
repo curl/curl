@@ -34,14 +34,14 @@
 # src/tool_getparam.c lists all options curl can parse
 # docs/curl.1 documents all command line options
 # src/tool_listhelp.c outputs all options with curl -h
-# - make sure they're all in sync
+# - make sure they are all in sync
 #
 # Output all deviances to stderr.
 
 use strict;
 use warnings;
 
-# we may get the dir roots pointed out
+# we may get the directory roots pointed out
 my $root=$ARGV[0] || ".";
 my $buildroot=$ARGV[1] || ".";
 my $syms = "$root/docs/libcurl/symbols-in-versions";
@@ -126,7 +126,7 @@ while(<$r>) {
         }
         elsif($rem) {
             # $opt was removed in $rem
-            # so don't check for that
+            # so do not check for that
         }
         else {
             if($type eq "OPT") {

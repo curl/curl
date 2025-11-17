@@ -80,7 +80,7 @@ CURLcode urlerr_cvt(CURLUcode ucode)
 
 /*
  * Adds the filename to the URL if it does not already have one.
- * url will be freed before return if the returned pointer is different
+ * URL will be freed before return if the returned pointer is different
  */
 CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
 {
@@ -211,7 +211,7 @@ CURLcode get_url_file_name(char **filename, const char *url)
       else {
         /* no slash => empty string, use default */
         *filename = strdup("curl_response");
-        warnf("No remote file name, uses \"%s\"", *filename);
+        warnf("No remote filename, uses \"%s\"", *filename);
       }
 
       curl_free(path);

@@ -1283,7 +1283,7 @@ static bool url_match_result(bool result, void *userdata)
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
-    /* We've seen a single-use, existing connection to the destination and
+    /* We have seen a single-use, existing connection to the destination and
      * no multiplexed one. It seems safe to assume that the server does
      * not support multiplexing. */
     match->wait_pipe = FALSE;
@@ -2740,7 +2740,7 @@ static CURLcode override_login(struct Curl_easy *data,
                                       data->set.str[STRING_NETRC_FILE]);
       if(ret && ((ret == NETRC_NO_MATCH) ||
                  (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
-        infof(data, "Couldn't find host %s in the %s file; using defaults",
+        infof(data, "Could not find host %s in the %s file; using defaults",
               conn->host.name,
               (data->set.str[STRING_NETRC_FILE] ?
                data->set.str[STRING_NETRC_FILE] : ".netrc"));
@@ -2752,7 +2752,7 @@ static CURLcode override_login(struct Curl_easy *data,
       }
       else {
         if(!(conn->handler->flags&PROTOPT_USERPWDCTRL)) {
-          /* if the protocol can't handle control codes in credentials, make
+          /* if the protocol cannot handle control codes in credentials, make
              sure there are none */
           if(str_has_ctrl(*userp) || str_has_ctrl(*passwdp)) {
             failf(data, "control code detected in .netrc credentials");

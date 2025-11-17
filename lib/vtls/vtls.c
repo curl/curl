@@ -772,8 +772,9 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
   /* only do this if pinnedpubkey starts with "sha256//", length 8 */
   if(!strncmp(pinnedpubkey, "sha256//", 8)) {
     CURLcode encode;
-    size_t encodedlen = 0;
-    char *encoded = NULL, *pinkeycopy, *begin_pos, *end_pos;
+    char *cert_hash = NULL;
+    const char *pinned_hash, *end_pos;
+    size_t cert_hash_len = 0, pinned_hash_len;
     unsigned char *sha256sumdigest;
 
     if(!Curl_ssl->sha256sum) {
@@ -790,50 +791,37 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
     if(!encode)
       encode = curlx_base64_encode((char *)sha256sumdigest,
-                                   CURL_SHA256_DIGEST_LENGTH, &encoded,
-                                   &encodedlen);
+                                   CURL_SHA256_DIGEST_LENGTH,
+                                   &cert_hash, &cert_hash_len);
     Curl_safefree(sha256sumdigest);
 
     if(encode)
       return encode;
 
-    infof(data, " public key hash: sha256//%s", encoded);
+    infof(data, " public key hash: sha256//%s", cert_hash);
 
-    /* it starts with sha256//, copy so we can modify it */
-    pinkeycopy = strdup(pinnedpubkey);
-    if(!pinkeycopy) {
-      Curl_safefree(encoded);
-      return CURLE_OUT_OF_MEMORY;
-    }
-    /* point begin_pos to the copy, and start extracting keys */
-    begin_pos = pinkeycopy;
-    do {
-      end_pos = strstr(begin_pos, ";sha256//");
-      /*
-       * if there is an end_pos, null-terminate, otherwise it will go to the
-       * end of the original string
-       */
-      if(end_pos)
-        end_pos[0] = '\0';
+    pinned_hash = pinnedpubkey;
+    while(pinned_hash &&
+          !strncmp(pinned_hash, "sha256//", (sizeof("sha256//")-1))) {
+      pinned_hash = pinned_hash + (sizeof("sha256//")-1);
+      end_pos = strchr(pinned_hash, ';');
+      pinned_hash_len = end_pos ?
+                        (size_t)(end_pos - pinned_hash) : strlen(pinned_hash);
 
-      /* compare base64 sha256 digests, 8 is the length of "sha256//" */
-      if(encodedlen == strlen(begin_pos + 8) &&
-         !memcmp(encoded, begin_pos + 8, encodedlen)) {
+      /* compare base64 sha256 digests" */
+      if(cert_hash_len == pinned_hash_len &&
+         !memcmp(cert_hash, pinned_hash, cert_hash_len)) {
+        DEBUGF(infof(data, "public key hash matches pinned value"));
         result = CURLE_OK;
         break;
       }
 
-      /*
-       * change back the null-terminator we changed earlier,
-       * and look for next begin
-       */
-      if(end_pos) {
-        end_pos[0] = ';';
-        begin_pos = strstr(end_pos, "sha256//");
-      }
-    } while(end_pos && begin_pos);
-    Curl_safefree(encoded);
-    Curl_safefree(pinkeycopy);
+      DEBUGF(infof(data, "public key hash does not match 'sha256//%.*s'",
+                   (int)pinned_hash_len, pinned_hash));
+      /* next one or we are at the end */
+      pinned_hash = end_pos ? (end_pos + 1) : NULL;
+    }
+    Curl_safefree(cert_hash);
   }
   else {
     long filesize;
@@ -1435,7 +1423,7 @@ static CURLcode ssl_cf_connect_deferred(struct Curl_cfilter *cf,
     result = ssl_cf_set_earlydata(cf, data, buf, blen);
     if(result)
       return result;
-    /* we buffered any early data we'd like to send. Actually
+    /* we buffered any early data we would like to send. Actually
      * do the connect now which sends it and performs the handshake. */
     connssl->earlydata_state = ssl_earlydata_sending;
     connssl->earlydata_skip = Curl_bufq_len(&connssl->earlydata);

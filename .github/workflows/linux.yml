@@ -329,10 +329,10 @@ jobs:
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
 
-          - name: 'Slackware openssl gssapi gcc'
-            # These are essentially the same flags used to build the curl Slackware package
+          - name: 'Slackware !ssl gssapi gcc'
+            # Flags used to build the curl Slackware package, except OpenSSL 1.1.0:
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
-            configure: --enable-debug --with-openssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
+            configure: --enable-debug --without-ssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
             # Docker Hub image that `container-job` executes in
             container: 'andy5995/slackware-build-essential:15.0'
 
@@ -439,6 +439,7 @@ jobs:
           cmake --install .
 
       - name: 'cache nghttp2 (filc)'
+        if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-nghttp2-filc
         env:
@@ -579,7 +580,7 @@ jobs:
       - name: 'build openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true' }}
         run: |
-          git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
+          git clone --quiet --depth 1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
           CC=clang CFLAGS='-fsanitize=thread' LDFLAGS='-fsanitize=thread' ./config --prefix=/home/runner/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make

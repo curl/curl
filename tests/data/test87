@@ -46,8 +46,7 @@ urlglob with out of range -o #[num] usage
 
 #
 # Verify data after the test has been "shot". Note that the command line
-# will write both responses into the same file name so only the second
-# survives
+# writes both responses into the same filename so only the second survives
 #
 <verify>
 <file name="%LOGDIR/dumpit%TESTNUMBER-#2.dump" crlf="headers">

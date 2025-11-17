@@ -39,7 +39,7 @@ lib%TESTNUMBER
 <command>
 https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
 </command>
-# Ensure that we're running on localhost because we're checking the host name
+# Ensure that we are running on localhost because we are checking the hostname
 <precheck>
 %LIBTESTS lib%TESTNUMBER check
 </precheck>

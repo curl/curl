@@ -60,7 +60,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.29';
+my $version = '1.30';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -100,7 +100,7 @@ my @valid_mozilla_trust_levels = (
                             # for delegates (i.e. it is not a CA).
 );
 
-my $default_signature_algorithms = $opt_s = "MD5";
+my $default_signature_algorithms = $opt_s = "SHA256";
 
 my @valid_signature_algorithms = (
     "MD5",
@@ -357,7 +357,7 @@ if(!$opt_n) {
             report "LWP is not available (LWP::UserAgent not found)";
             exit 1;
         }
-        my $ua  = new LWP::UserAgent(agent => "$0/$version");
+        my $ua = new LWP::UserAgent(agent => "$0/$version");
         $ua->env_proxy();
         $resp = $ua->mirror($url, $txt);
         if($resp && $resp->code eq '304') {

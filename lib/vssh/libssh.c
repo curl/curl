@@ -1137,14 +1137,13 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
       attrs = sftp_stat(sshc->sftp_session, sshp->path);
       if(attrs) {
         curl_off_t size = attrs->size;
+        sftp_attributes_free(attrs);
         if(size < 0) {
           failf(data, "Bad file size (%" FMT_OFF_T ")", size);
           rc = myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
           return rc;
         }
-        data->state.resume_from = attrs->size;
-
-        sftp_attributes_free(attrs);
+        data->state.resume_from = size;
       }
       else {
         data->state.resume_from = 0;
@@ -1574,8 +1573,8 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
     Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
     Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
 
-    /* this sends an FTP-like "header" to the header callback so that the
-       current directory can be read very similar to how it is read when
+    /* this sends an FTP-like "header" to the header callback so that
+       the current directory can be read similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
     free(tmp);
@@ -1677,7 +1676,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
   else if(!strncmp(cmd, "mkdir ", 6)) {
     if(*cp)
       return return_quote_error(data, sshc);
-    /* create dir */
+    /* create directory */
     myssh_to(data, sshc, SSH_SFTP_QUOTE_MKDIR);
     return SSH_NO_ERROR;
   }
@@ -1703,7 +1702,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
     return SSH_NO_ERROR;
   }
   else if(!strncmp(cmd, "rmdir ", 6)) {
-    /* delete dir */
+    /* delete directory */
     if(*cp)
       return return_quote_error(data, sshc);
     myssh_to(data, sshc, SSH_SFTP_QUOTE_RMDIR);
@@ -1860,7 +1859,7 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
       return SSH_NO_ERROR;
     }
     if(date > UINT_MAX)
-      /* because the liubssh API can't deal with a larger value */
+      /* because the liubssh API cannot deal with a larger value */
       date = UINT_MAX;
     if(!strncmp(cmd, "atime", 5))
       sshc->quote_attrs->atime = (uint32_t)date;
@@ -2157,9 +2156,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       ++sshc->slash_pos;
       if(rc < 0) {
         /*
-         * Abort if failure was not that the dir already exists or the
-         * permission was denied (creation might succeed further down the
-         * path) - retry on unspecific FAILURE also
+         * Abort if failure was not that the directory already exists or
+         * the permission was denied (creation might succeed further down
+         * the path) - retry on unspecific FAILURE also
          */
         err = sftp_get_error(sshc->sftp_session);
         if((err != SSH_FX_FILE_ALREADY_EXISTS) &&
@@ -2744,7 +2743,7 @@ static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
   data->req.size = -1;          /* make sure this is unknown at this point */
 
   sshc->actualcode = CURLE_OK;  /* reset error code */
-  sshc->secondCreateDirs = 0;   /* reset the create dir attempt state
+  sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
                                    variable */
 
   Curl_pgrsSetUploadCounter(data, 0);

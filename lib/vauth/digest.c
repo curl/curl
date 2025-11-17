@@ -216,7 +216,7 @@ static bool auth_digest_get_key_value(const char *chlg, const char *key,
       if(curlx_str_cmp(&name, key)) {
         /* if this is our key, return the value */
         if(curlx_strlen(&data) >= buflen)
-          /* doesn't fit */
+          /* does not fit */
           return FALSE;
         memcpy(buf, curlx_str(&data), curlx_strlen(&data));
         buf[curlx_strlen(&data)] = 0;

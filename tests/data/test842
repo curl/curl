@@ -40,7 +40,7 @@ IMAP OAuth 2.0 (OAUTHBEARER) authentication
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user --oauth2-bearer mF_9.B5f-4.1JqM
 </command>
-# The protocol section doesn't support ways of specifying the raw data in the
+# The protocol section does not support ways of specifying the raw data in the
 # base64 encoded message so we must assert this
 </client>
 

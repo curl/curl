@@ -117,7 +117,7 @@ static bool countcheck(const char *func, int line, const char *source)
                     source, line, func);
       fflush(curl_dbg_logfile); /* because it might crash now */
       /* !checksrc! disable ERRNOVAR 1 */
-      CURL_SETERRNO(ENOMEM);
+      errno = ENOMEM;
       return TRUE; /* RETURN ERROR! */
     }
     else

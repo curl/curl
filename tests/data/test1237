@@ -24,7 +24,7 @@ Content-Type: text/html
 http
 </server>
 <name>
-URL with 1000+ letter user name + password
+URL with 1000+ letter username + password
 </name>
 <command>
 "%repeat[1000 x A]%:%repeat[1002 x B]%@%HOSTIP:%HTTPPORT/%TESTNUMBER"

@@ -176,7 +176,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     goto clean;
   /* inputpath might be NULL or a valid pointer now */
 
-  /* set gateway parts in input url */
+  /* set gateway parts in input URL */
   if(curl_url_set(uh, CURLUPART_SCHEME, gwscheme, CURLU_URLENCODE) ||
      curl_url_set(uh, CURLUPART_HOST, gwhost, CURLU_URLENCODE) ||
      curl_url_set(uh, CURLUPART_PORT, gwport, CURLU_URLENCODE))

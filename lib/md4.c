@@ -133,12 +133,7 @@ static int MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-#ifdef __MINGW32CE__
-  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(data),
-                (unsigned int) size, 0);
-#else
   CryptHashData(ctx->hHash, (const BYTE *)data, (unsigned int) size, 0);
-#endif
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)

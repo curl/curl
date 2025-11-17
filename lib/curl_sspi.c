@@ -62,11 +62,7 @@ CURLcode Curl_sspi_global_init(void)
   /* If security interface is not yet initialized try to do this */
   if(!Curl_pSecFn) {
     /* Get pointer to Security Service Provider Interface dispatch table */
-#ifdef __MINGW32CE__
-    Curl_pSecFn = InitSecurityInterfaceW();
-#else
     Curl_pSecFn = InitSecurityInterface();
-#endif
     if(!Curl_pSecFn)
       return CURLE_FAILED_INIT;
   }

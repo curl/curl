@@ -200,7 +200,7 @@ Building for Windows XP is required as a minimum.
 
 You can build curl with:
 
-- Microsoft Visual Studio 2008 v9.0 or later (`_MSC_VER >= 1500`)
+- Microsoft Visual Studio 2010 v10.0 or later (`_MSC_VER >= 1600`)
 - MinGW-w64 3.0 or later (`__MINGW64_VERSION_MAJOR >= 3`)
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
@@ -650,7 +650,7 @@ This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
 and runs on, that is not listed, please let us know.
 
-## 109 Operating Systems
+## 108 Operating Systems
 
     AIX, AmigaOS, Android, ArcaOS, Aros, Atari FreeMiNT, Azure Sphere, BeOS,
     Blackberry 10, Blackberry Tablet OS, Cell OS, Cesium, CheriBSD, Chrome OS,
@@ -665,7 +665,7 @@ and runs on, that is not listed, please let us know.
     SINIX-Z, SkyOS, SmartOS, Solaris, Sortix, SunOS, Syllable OS, Symbian,
     Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS, UnixWare, visionOS, VMS,
     vxWorks, watchOS, Wear OS, WebOS, Wii System Software, Wii U, Windows,
-    Windows CE, Xbox System, Xenix, z/OS, z/TPF, z/VM, z/VSE, Zephyr
+    Xbox System, Xenix, z/OS, z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures
 

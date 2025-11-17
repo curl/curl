@@ -4,10 +4,13 @@ curl and libcurl 8.18.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3537
+ Contributors:                 3541
 
 This release includes the following changes:
 
+ o build: drop support for VS2008 (Windows) [62]
+ o build: drop Windows CE / CeGCC support [69]
+ o openssl: bump minimum OpenSSL version to 3.0.0 [60]
 
 This release includes the following bugfixes:
 
@@ -16,12 +19,19 @@ This release includes the following bugfixes:
  o autotools: drop autoconf <2.59 compatibility code (zz60-xc-ovr) [70]
  o ccsidcurl: make curl_mime_data_ccsid() use the converted size [74]
  o cf-https-connect: allocate ctx at first in cf_hc_create() [79]
+ o cf-socket: trace ignored errors [97]
  o checksrc.pl: detect assign followed by more than one space [26]
  o cmake: adjust defaults for target platforms not supporting shared libs [35]
  o cmake: disable `CURL_CA_PATH` auto-detection if `USE_APPLE_SECTRUST=ON` [16]
+ o code: minor indent fixes before closing braces [107]
+ o config2setopts: bail out if curl_url_get() returns OOM [102]
+ o config2setopts: exit if curl_url_set() fails on OOM [105]
  o conncache: silence `-Wnull-dereference` on gcc 14 RISC-V 64 [17]
+ o connect: reshuffle Curl_timeleft_ms to avoid 'redundant condition' [100]
+ o cookie: propagate errors better, cleanup the internal API [118]
  o cshutdn: acknowledge FD_SETSIZE for shutdown descriptors [25]
  o curl: fix progress meter in parallel mode [15]
+ o curl_setup.h: drop stray `#undef stat` (Windows) [103]
  o CURLINFO: remove 'get' and 'get the' from each short desc [50]
  o CURLINFO_SCHEME/PROTOCOL: they return the "scheme" for a "transfer" [48]
  o CURLINFO_TLS_SSL_PTR.md: remove CURLINFO_TLS_SESSION text [49]
@@ -31,8 +41,10 @@ This release includes the following bugfixes:
  o docs: fix checksrc `EQUALSPACE` warnings [21]
  o docs: mention umask need when curl creates files [56]
  o examples/crawler: fix variable [92]
+ o examples/multithread: fix race condition [101]
  o ftp: refactor a piece of code by merging the repeated part [40]
  o ftp: remove #ifdef for define that is always defined [76]
+ o getinfo: improve perf in debug mode [99]
  o gnutls: report accurate error when TLS-SRP is not built-in [18]
  o gtls: add return checks and optimize the code [2]
  o gtls: skip session resumption when verifystatus is set
@@ -41,12 +53,16 @@ This release includes the following bugfixes:
  o INSTALL-CMAKE.md: document static option defaults more [37]
  o krb5_sspi: unify a part of error handling [80]
  o lib: cleanup for some typos about spaces and code style [3]
+ o lib: eliminate size_t casts [112]
  o lib: fix gssapi.h include on IBMi [55]
  o lib: refactor the type of funcs which have useless return and checks [1]
+ o libtests: replace `atoi()` with `curlx_str_number()` [120]
  o libssh2: cleanup ssh_force_knownhost_key_type [64]
  o libssh2: replace atoi() in ssh_force_knownhost_key_type [63]
+ o limit-rate: add example using --limit-rate and --max-time together [89]
  o m4/sectrust: fix test(1) operator [4]
  o mbedtls: fix potential use of uninitialized `nread` [8]
+ o mk-ca-bundle.pl: default to SHA256 fingerprints with `-t` option [73]
  o mk-ca-bundle.pl: use `open()` with argument list to replace backticks [71]
  o mqtt: reject overly big messages [39]
  o noproxy: replace atoi with curlx_str_number [67]
@@ -59,8 +75,12 @@ This release includes the following bugfixes:
  o pytest: skip H2 tests if feature missing from curl [46]
  o rtmp: fix double-free on URL parse errors [27]
  o rtmp: precaution for a potential integer truncation [54]
+ o runtests: detect bad libssh differently for test 1459 [11]
+ o runtests: drop Python 2 support remains [45]
  o rustls: fix a potential memory issue [81]
+ o rustls: minor adjustment of sizeof() [38]
  o schannel: fix memory leak of cert_store_path on four error paths [23]
+ o schannel: replace atoi() with curlx_str_number() [119]
  o scripts: fix shellcheck SC2046 warnings [90]
  o scripts: use end-of-options marker in `find -exec` commands [87]
  o setopt: disable CURLOPT_HAPROXY_CLIENT_IP on NULL [30]
@@ -68,25 +88,32 @@ This release includes the following bugfixes:
  o sftp: fix range downloads in both SSH backends [82]
  o socks_sspi: use free() not FreeContextBuffer() [93]
  o telnet: replace atoi for BINARY handling with curlx_str_number [66]
+ o test07_22: fix flakiness [95]
  o test2045: replace HTML multi-line comment markup with `#` comments [36]
  o test363: delete stray character (typo) from a section tag [52]
  o tests/data: replace hard-coded test numbers with `%TESTNUMBER` [33]
  o tests/data: support using native newlines on disk, drop `.gitattributes` [91]
  o tests/server: do not fall back to original data file in `test2fopen()` [32]
+ o tests/server: replace `atoi()` and `atol()` with `curlx_str_number()` [110]
  o tftp: release filename if conn_get_remote_addr fails [42]
  o tool: consider (some) curl_easy_setopt errors fatal [7]
  o tool_help: add checks to avoid unsigned wrap around [14]
  o tool_ipfs: check return codes better [20]
+ o tool_operate: exit on curl_share_setopt errors [108]
  o tool_operate: remove redundant condition [19]
  o tool_operate: use curlx_str_number instead of atoi [68]
  o tool_paramhlp: refuse --proto remove all protocols [10]
  o urlapi: fix mem-leaks in curl_url_get error paths [22]
  o verify-release: update to avoid shellcheck warning SC2034 [88]
+ o vquic-tls/gnutls: call Curl_gtls_verifyserver unconditionally [96]
  o vtls: fix CURLOPT_CAPATH use [51]
  o vtls: handle possible malicious certs_num from peer [53]
+ o vtls: pinned key check [98]
  o wcurl: import v2025.11.09 [29]
  o wolfSSL: able to differentiate between IP and DNS in alt names [13]
  o wolfssl: avoid NULL dereference in OOM situation [77]
+ o wolfssl: fix a potential memory leak of session [6]
+ o wolfssl: simplify wssl_send_earlydata [111]
 
 This release includes the following known bugs:
 
@@ -98,24 +125,22 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
- o Builds using VS2008
- o OpenSSL 1.x support
  o OpenSSL-QUIC
  o Support for c-ares versions before 1.16.0
  o Support for Windows XP/2003
- o Windows CE support
 
  See https://curl.se/dev/deprecate.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andrew Kirillov, Brad King, Dan Fandrich, Daniel Stenberg,
-  Fd929c2CE5fA on github, Gisle Vanem, Jiyong Yang, Juliusz Sosinowicz,
-  Leonardo Taccari, Patrick Monnerat, Ray Satiro, renovate[bot],
+  Aleksandr Sergeev, Andrew Kirillov, Brad King, Dan Fandrich, Daniel McCarney,
+  Daniel Stenberg, Fd929c2CE5fA on github, Gisle Vanem, Jiyong Yang,
+  Juliusz Sosinowicz, Leonardo Taccari, nait-furry, Nick Korepanov,
+  Patrick Monnerat, pelioro on hackerone, Ray Satiro, renovate[bot],
   Samuel Henrique, Stanislav Fort, Stefan Eissing, Thomas Klausner,
   Viktor Szakats, Xiaoke Wang
-  (18 contributors)
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -124,10 +149,12 @@ References to bug reports and discussions on issues:
  [3] = https://curl.se/bug/?i=19370
  [4] = https://curl.se/bug/?i=19371
  [5] = https://curl.se/bug/?i=19394
+ [6] = https://curl.se/bug/?i=19555
  [7] = https://curl.se/bug/?i=19385
  [8] = https://curl.se/bug/?i=19393
  [9] = https://curl.se/bug/?i=19389
  [10] = https://curl.se/bug/?i=19388
+ [11] = https://curl.se/bug/?i=19557
  [12] = https://curl.se/bug/?i=19426
  [13] = https://curl.se/bug/?i=19364
  [14] = https://curl.se/bug/?i=19377
@@ -152,11 +179,13 @@ References to bug reports and discussions on issues:
  [35] = https://curl.se/bug/?i=19420
  [36] = https://curl.se/bug/?i=19498
  [37] = https://curl.se/bug/?i=19419
+ [38] = https://hackerone.com/reports/3427460
  [39] = https://curl.se/bug/?i=19415
  [40] = https://curl.se/bug/?i=19411
  [41] = https://curl.se/bug/?i=19410
  [42] = https://curl.se/bug/?i=19409
  [43] = https://curl.se/bug/?i=19405
+ [45] = https://curl.se/bug/?i=19544
  [46] = https://curl.se/bug/?i=19412
  [47] = https://curl.se/bug/?i=19402
  [48] = https://curl.se/bug/?i=19403
@@ -168,15 +197,19 @@ References to bug reports and discussions on issues:
  [54] = https://curl.se/bug/?i=19399
  [55] = https://curl.se/bug/?i=19336
  [56] = https://curl.se/bug/?i=19396
+ [60] = https://curl.se/bug/?i=18330
  [61] = https://curl.se/bug/?i=19484
+ [62] = https://curl.se/bug/?i=17931
  [63] = https://curl.se/bug/?i=19479
  [64] = https://curl.se/bug/?i=19479
  [65] = https://curl.se/bug/?i=19478
  [66] = https://curl.se/bug/?i=19477
  [67] = https://curl.se/bug/?i=19475
  [68] = https://curl.se/bug/?i=19480
+ [69] = https://curl.se/bug/?i=17927
  [70] = https://curl.se/bug/?i=19464
  [71] = https://curl.se/bug/?i=19461
+ [73] = https://curl.se/bug/?i=19359
  [74] = https://curl.se/bug/?i=19465
  [76] = https://curl.se/bug/?i=19463
  [77] = https://curl.se/bug/?i=19459
@@ -188,8 +221,27 @@ References to bug reports and discussions on issues:
  [86] = https://curl.se/bug/?i=19451
  [87] = https://curl.se/bug/?i=19450
  [88] = https://curl.se/bug/?i=19449
+ [89] = https://curl.se/bug/?i=19473
  [90] = https://curl.se/bug/?i=19432
  [91] = https://curl.se/bug/?i=19398
  [92] = https://curl.se/bug/?i=19446
  [93] = https://curl.se/bug/?i=19445
  [94] = https://curl.se/bug/?i=19444
+ [95] = https://curl.se/bug/?i=19530
+ [96] = https://curl.se/bug/?i=19531
+ [97] = https://curl.se/bug/?i=19520
+ [98] = https://curl.se/bug/?i=19529
+ [99] = https://curl.se/bug/?i=19525
+ [100] = https://curl.se/bug/?i=19523
+ [101] = https://curl.se/bug/?i=19524
+ [102] = https://curl.se/bug/?i=19518
+ [103] = https://curl.se/bug/?i=19519
+ [105] = https://curl.se/bug/?i=19517
+ [107] = https://curl.se/bug/?i=19512
+ [108] = https://curl.se/bug/?i=19513
+ [110] = https://curl.se/bug/?i=19510
+ [111] = https://curl.se/bug/?i=19509
+ [112] = https://curl.se/bug/?i=19495
+ [118] = https://curl.se/bug/?i=19493
+ [119] = https://curl.se/bug/?i=19483
+ [120] = https://curl.se/bug/?i=19506

@@ -287,13 +287,10 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
   *buf = '\0';
 
 #ifdef _WIN32
-#ifndef UNDER_CE
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
     SNPRINTF(buf, buflen, "%s", sys_errlist[err]);
-  else
-#endif
-  {
+  else {
     if(
 #ifdef USE_WINSOCK
       !get_winsock_error(err, buf, buflen) &&
@@ -350,7 +347,7 @@ const char *curlx_strerror(int err, char *buf, size_t buflen)
     *p = '\0';
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
 #ifdef _WIN32
   if(old_win_err != GetLastError())

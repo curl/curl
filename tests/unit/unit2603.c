@@ -51,6 +51,7 @@ static void check_eq(const char *s, const char *exp_s, const char *name)
 struct tcase {
   const char **input;
   const char *default_scheme;
+  const char *custom_method;
   const char *method;
   const char *scheme;
   const char *authority;
@@ -74,7 +75,7 @@ static void parse_success(const struct tcase *t)
     buflen = strlen(buf);
     in_len += buflen;
     nread = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
-                                   0, &err);
+                                   t->custom_method, 0, &err);
     if(nread < 0) {
       curl_mfprintf(stderr, "got err %d parsing: '%s'\n", err, buf);
       fail("error consuming");
@@ -122,10 +123,10 @@ static CURLcode test_unit2603(const char *arg)
     NULL,
   };
   static const struct tcase TEST1a = {
-    T1_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 0
+    T1_INPUT, NULL, NULL, "GET", NULL, NULL, "/path", 1, 0
   };
   static const struct tcase TEST1b = {
-    T1_INPUT, "https", "GET", "https", NULL, "/path", 1, 0
+    T1_INPUT, "https", NULL, "GET", "https", NULL, "/path", 1, 0
   };
 
   static const char *T2_INPUT[] = {
@@ -136,7 +137,7 @@ static CURLcode test_unit2603(const char *arg)
     NULL,
   };
   static const struct tcase TEST2 = {
-    T2_INPUT, NULL, "GET", NULL, NULL, "/path", 1, 8
+    T2_INPUT, NULL, NULL, "GET", NULL, NULL, "/path", 1, 8
   };
 
   static const char *T3_INPUT[] = {
@@ -145,7 +146,7 @@ static CURLcode test_unit2603(const char *arg)
     NULL,
   };
   static const struct tcase TEST3a = {
-    T3_INPUT, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0
+    T3_INPUT, NULL, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0
   };
 
   static const char *T4_INPUT[] = {
@@ -155,7 +156,7 @@ static CURLcode test_unit2603(const char *arg)
     NULL,
   };
   static const struct tcase TEST4a = {
-    T4_INPUT, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
+    T4_INPUT, NULL, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
   };
 
   static const char *T5_INPUT[] = {
@@ -165,7 +166,7 @@ static CURLcode test_unit2603(const char *arg)
     NULL,
   };
   static const struct tcase TEST5a = {
-    T5_INPUT, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
+    T5_INPUT, NULL, NULL, "OPTIONS", NULL, NULL, "*", 2, 3
   };
 
   static const char *T6_INPUT[] = {
@@ -173,7 +174,19 @@ static CURLcode test_unit2603(const char *arg)
     NULL,
   };
   static const struct tcase TEST6a = {
-    T6_INPUT, NULL, "PUT", NULL, NULL, "/path", 1, 3
+    T6_INPUT, NULL, NULL, "PUT", NULL, NULL, "/path", 1, 3
+  };
+
+  /* test a custom method with space, #19543 */
+  static const char *T7_INPUT[] = {
+    "IN SANE /path HTTP/1.1\r\nContent-Length: 0\r\n\r\n",
+    NULL,
+  };
+  static const struct tcase TEST7a = {
+    T7_INPUT, NULL, NULL, "IN", NULL, NULL, "SANE /path", 1, 0
+  };
+  static const struct tcase TEST7b = {
+    T7_INPUT, NULL, "IN SANE", "IN SANE", NULL, NULL, "/path", 1, 0
   };
 
   parse_success(&TEST1a);
@@ -183,6 +196,8 @@ static CURLcode test_unit2603(const char *arg)
   parse_success(&TEST4a);
   parse_success(&TEST5a);
   parse_success(&TEST6a);
+  parse_success(&TEST7a);
+  parse_success(&TEST7b);
 #endif
 
   UNITTEST_END_SIMPLE

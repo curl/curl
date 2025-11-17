@@ -280,7 +280,7 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
     should_ms = (timediff_t) (1000 * bytes / bytes_per_sec);
   }
   else {
-    /* very large `bytes`, first calc the seconds it should have taken.
+    /* large `bytes`, first calc the seconds it should have taken.
      * if that is small enough, convert to milliseconds. */
     should_ms = (timediff_t) (bytes / bytes_per_sec);
     if(should_ms < TIMEDIFF_T_MAX/1000)

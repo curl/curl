@@ -35,12 +35,11 @@ esac
 
 if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2022' ]; then
   openssl_root_win="C:/OpenSSL-v35${openssl_suffix}"
+  openssl_root="$(cygpath "${openssl_root_win}")"
 elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
   openssl_root_win="C:/OpenSSL-v30${openssl_suffix}"
-else
-  openssl_root_win="C:/OpenSSL-v111${openssl_suffix}"
+  openssl_root="$(cygpath "${openssl_root_win}")"
 fi
-openssl_root="$(cygpath "${openssl_root_win}")"
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   # Set env CHKPREFILL to the value '_chkprefill' to compare feature detection
@@ -76,7 +75,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       -DCURL_USE_OPENSSL="${OPENSSL}" \
       -DCURL_USE_LIBPSL=OFF \
       ${options} \
-      || { cat ${root}/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
+      || { cat "${root}"/_bld/CMakeFiles/CMake* 2>/dev/null; false; }
     [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] && cd ..
   done
   if [ -d _bld_chkprefill ] && ! diff -u _bld/lib/curl_config.h _bld_chkprefill/lib/curl_config.h; then
@@ -93,9 +92,11 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "Windows/${VC_VERSION}/curl-all.sln"
+    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "-property:Platform=${PLAT}" "Windows/${VC_VERSION}/curl-all.sln"
   )
-  curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
+  [ "${PLAT}" = 'x64' ] && platdir='Win64' || platdir='Win32'
+  [[ "${PRJ_CFG}" = *'Debug'* ]] && binsuffix='d' || binsuffix=''
+  curl="build/${platdir}/${VC_VERSION}/${PRJ_CFG}/curl${binsuffix}.exe"
 fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file -- '{}' \;

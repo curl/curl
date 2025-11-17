@@ -180,7 +180,7 @@ int r_getaddrinfo(const char *node,
         curl_mfprintf(stderr, "ares_set_servers_ports_csv failed: %d", rc);
         /* Cleanup */
         ares_destroy(channel);
-        return EAI_MEMORY; /* we can't run */
+        return EAI_MEMORY; /* we cannot run */
       }
     }
   }

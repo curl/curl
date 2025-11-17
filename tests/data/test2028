@@ -12,7 +12,7 @@ NTLM
 <reply>
 
 <!-- Alternate the order that Digest and NTLM headers appear in responses to
-ensure that the order doesn't matter. -->
+ensure that the order does not matter. -->
 
 <!-- First request has Digest auth, wrong password -->
 <data100 crlf="headers">

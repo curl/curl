@@ -45,12 +45,8 @@ class TestInfo:
         env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
 
     # download plain file
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_16_01_info_download(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         count = 2
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
@@ -62,12 +58,8 @@ class TestInfo:
             self.check_stat(idx, s, r, dl_size=30, ul_size=0)
 
     # download plain file with a 302 redirect
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_16_02_info_302_download(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         count = 2
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json.302?[0-{count-1}]'
@@ -80,12 +72,8 @@ class TestInfo:
         for idx, s in enumerate(r.stats):
             self.check_stat(idx, s, r, dl_size=30, ul_size=0)
 
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_16_03_info_upload(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         count = 2
         fdata = os.path.join(env.gen_dir, 'data-100k')
         fsize = 100 * 1024

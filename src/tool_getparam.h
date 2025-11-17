@@ -379,7 +379,7 @@ void parse_cert_parameter(const char *cert_parameter,
 
 ParameterError parse_args(int argc, argv_item_t argv[]);
 
-#if defined(UNICODE) && defined(_WIN32) && !defined(UNDER_CE)
+#if defined(UNICODE) && defined(_WIN32)
 
 #define convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))

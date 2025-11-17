@@ -275,7 +275,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
 
   file->fd = fd;
   if(!data->state.upload && (fd == -1)) {
-    failf(data, "Couldn't open file %s", data->state.up.path);
+    failf(data, "Could not open file %s", data->state.up.path);
     file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
@@ -572,7 +572,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from) {
     if(!S_ISDIR(statbuf.st_mode)) {
-#if defined(__AMIGA__) || defined(__MINGW32CE__)
+#ifdef __AMIGA__
       if(data->state.resume_from !=
           lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
 #else

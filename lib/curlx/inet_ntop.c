@@ -72,9 +72,9 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
   len = strlen(tmp);
   if(len == 0 || len >= size) {
 #ifdef USE_WINSOCK
-    CURL_SETERRNO(WSAEINVAL);
+    errno = WSAEINVAL;
 #else
-    CURL_SETERRNO(ENOSPC);
+    errno = ENOSPC;
 #endif
     return NULL;
   }
@@ -160,7 +160,7 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
       break;
     }
     else {
-      /* Lower-case digits. Can't use the set from mprintf.c since this
+      /* Lower-case digits. Cannot use the set from mprintf.c since this
          needs to work as a curlx function */
       static const unsigned char ldigits[] = "0123456789abcdef";
 
@@ -186,9 +186,9 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
    */
   if((size_t)(tp - tmp) > size) {
 #ifdef USE_WINSOCK
-    CURL_SETERRNO(WSAEINVAL);
+    errno = WSAEINVAL;
 #else
-    CURL_SETERRNO(ENOSPC);
+    errno = ENOSPC;
 #endif
     return NULL;
   }
@@ -215,7 +215,7 @@ char *curlx_inet_ntop(int af, const void *src, char *buf, size_t size)
   case AF_INET6:
     return inet_ntop6((const unsigned char *)src, buf, size);
   default:
-    CURL_SETERRNO(SOCKEAFNOSUPPORT);
+    errno = SOCKEAFNOSUPPORT;
     return NULL;
   }
 }

@@ -29,7 +29,7 @@ SSL
 https
 </server>
 <name>
-HTTPS GET with very long request header
+HTTPS GET with 49 KB long request header
 </name>
 # 14 characters repeated 3500 times makes 49000 bytes
 <file name="%LOGDIR/file%TESTNUMBER">

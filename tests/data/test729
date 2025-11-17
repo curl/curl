@@ -23,7 +23,7 @@ http
 socks4
 </server>
 <name>
-SOCKS4 with very long proxy user name
+SOCKS4 with long proxy username
 </name>
 <command>
 http://fake --limit-rate 1 -x socks4a://%repeat[1015 x a]%@%HOSTIP:%SOCKSPORT

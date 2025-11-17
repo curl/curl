@@ -1213,7 +1213,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
         file = curlx_fopen(nextarg, FOPEN_READTEXT);
       }
       if(!file) {
-        warnf("Couldn't read file \"%s\" "
+        warnf("Could not read file \"%s\" "
               "specified for \"--ech ecl:\" option",
               nextarg);
         return PARAM_BAD_USE; /*  */
@@ -2084,7 +2084,7 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->doh_insecure_ok = toggle;
     break;
   case C_LIST_ONLY: /* --list-only */
-    config->dirlistonly = toggle; /* only list the names of the FTP dir */
+    config->dirlistonly = toggle; /* only list names of the FTP directory */
     break;
   case C_MANUAL: /* --manual */
     if(toggle)   /* --no-manual shows no manual... */
@@ -2876,7 +2876,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     /* is there an '=' ? */
     if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
        !curlx_str_single(&p, '=') ) {
-      /* there's an equal sign */
+      /* there is an equal sign */
       char tempword[MAX_OPTION_LEN + 1];
       memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
       tempword[curlx_strlen(&out)] = 0;

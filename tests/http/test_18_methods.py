@@ -43,12 +43,8 @@ class TestMethods:
         env.make_data_file(indir=indir, fname="data-1m", fsize=1024*1024)
 
     # download 1 file
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_18_01_delete(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?id=[0-{count-1}]'
@@ -59,10 +55,9 @@ class TestMethods:
     # - HEADER frame with 204 and eos=0
     # - 10ms later DATA frame length=0 and eos=1
     # should be accepted
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_18_02_delete_h2_special(self, env: Env, httpd, nghttpx):
         proto = 'h2'
-        if not env.have_h2_curl():
-            pytest.skip("h2 not supported")
         count = 1
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak?id=[0-{count-1}]'\

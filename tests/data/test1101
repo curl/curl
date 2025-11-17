@@ -28,7 +28,7 @@ boo
 http
 </server>
 <name>
-NO_PROXY test, with user name in URL
+NO_PROXY test, with username in URL
 </name>
 
 <setenv>

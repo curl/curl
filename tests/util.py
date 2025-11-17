@@ -23,9 +23,6 @@
 #
 """Module for extracting test data from the test data folder and other utils."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
-
 import logging
 import os
 import re
@@ -69,7 +66,7 @@ class TestData(object):
         self.data_folder = data_folder
 
     def get_test_data(self, test_number):
-        # Create the test file name
+        # Create the test filename
         filename = os.path.join(self.data_folder,
                                 "test{0}".format(test_number))
 
@@ -80,9 +77,9 @@ class TestData(object):
 
         m = REPLY_DATA.search(contents)
         if not m:
-            raise Exception("Couldn't find a <reply><data> section")
+            raise Exception("Could not find a <reply><data> section")
 
-        # Left-strip the data so we don't get a newline before our data.
+        # Left-strip the data so we do not get a newline before our data.
         return m.group(1).lstrip()
 
 

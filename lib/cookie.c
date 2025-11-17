@@ -458,7 +458,7 @@ parse_cookie_header(struct Curl_easy *data,
        */
 
       if(!co->name) {
-        /* The very first name/value pair is the actual cookie name */
+        /* The first name/value pair is the actual cookie name */
         if(!sep)
           /* Bad name/value pair. */
           return CURLE_OK;

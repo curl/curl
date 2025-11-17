@@ -80,11 +80,7 @@ again:
 
       if(nread) {
         /* send received stuff to stdout */
-#ifdef UNDER_CE
-        if((size_t)fwrite(buf, sizeof(buf[0]), nread, stdout) != nread) {
-#else
         if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
-#endif
           char errbuf[STRERROR_LEN];
           curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
                         errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));

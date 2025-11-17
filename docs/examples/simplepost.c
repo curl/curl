@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Very simple HTTP POST
+ * Simple HTTP POST
  * </DESC>
  */
 #include <stdio.h>

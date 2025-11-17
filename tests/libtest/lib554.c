@@ -90,7 +90,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
                           CURLFORM_COPYNAME, "sendfile alternative",
                           CURLFORM_STREAM, &pooh,
                           CURLFORM_CONTENTLEN, (curl_off_t)pooh.sizeleft,
-                          CURLFORM_FILENAME, "file name 2",
+                          CURLFORM_FILENAME, "filename 2 ",
                           CURLFORM_END);
   }
 

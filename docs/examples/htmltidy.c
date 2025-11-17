@@ -50,7 +50,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
   for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
     ctmbstr name = tidyNodeGetName(child);
     if(name) {
-      /* if it has a name, then it's an HTML tag ... */
+      /* if it has a name, then it is an HTML tag ... */
       TidyAttr attr;
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
@@ -62,7 +62,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       printf(">\n");
     }
     else {
-      /* if it does not have a name, then it's probably text, cdata, etc... */
+      /* if it does not have a name, then it is probably text, cdata, etc... */
       TidyBuffer buf;
       tidyBufInit(&buf);
       tidyNodeGetText(doc, child, &buf);

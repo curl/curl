@@ -68,7 +68,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
-    /* If the site you are connecting to uses a different host name that what
+    /* If the site you are connecting to uses a different hostname that what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl refuses to connect. You can skip this
      * check, but it makes the connection insecure. */

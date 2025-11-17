@@ -506,7 +506,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
 
   rc = nghttp2_session_callbacks_new(&cbs);
   if(rc) {
-    failf(data, "Couldn't initialize nghttp2 callbacks");
+    failf(data, "Could not initialize nghttp2 callbacks");
     goto out;
   }
 
@@ -530,7 +530,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   /* The nghttp2 session is not yet setup, do it */
   rc = h2_client_new(cf, cbs);
   if(rc) {
-    failf(data, "Couldn't initialize nghttp2");
+    failf(data, "Could not initialize nghttp2");
     goto out;
   }
   ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
@@ -972,7 +972,7 @@ static int push_promise(struct Curl_cfilter *cf,
 
     rv = set_transfer_url(newhandle, &heads);
     if(rv) {
-      CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, failed to set url -> %d",
+      CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, failed to set URL -> %d",
                   frame->promised_stream_id, rv);
       discard_newhandle(cf, newhandle);
       rv = CURL_PUSH_DENY;
@@ -2248,7 +2248,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, &result);
+  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+                              !data->state.http_ignorecustom ?
+                              data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                              0, &result);
   if(!curlx_sztouz(rc, &nwritten))
     goto out;
   *pnwritten = nwritten;

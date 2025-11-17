@@ -62,8 +62,8 @@ struct rtspd_httprequest {
   long testno;       /* test number found in the request */
   long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
-  bool auth_req;  /* authentication required, don't wait for body unless
-                     there's an Authorization header */
+  bool auth_req;  /* authentication required, do not wait for body unless
+                     there is an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
@@ -238,7 +238,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
         int error = errno;
         logmsg("fopen() failed with error (%d) %s",
                error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-        logmsg("Couldn't open test file %ld", req->testno);
+        logmsg("Could not open test file %ld", req->testno);
         req->open = FALSE; /* closes connection */
         return 1; /* done */
       }
@@ -285,7 +285,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
               if(num < 0)
                 logmsg("negative pipe size ignored");
               else if(num > 0)
-                req->pipe = num-1; /* decrease by one since we don't count the
+                req->pipe = num-1; /* decrease by one since we do not count the
                                       first request in this number */
             }
             else if(sscanf(ptr, "skip: %d", &num) == 1) {
@@ -362,10 +362,10 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
           req->open = FALSE; /* HTTP 1.0 closes connection by default */
 
         if(!strncmp(doc, "bad", 3))
-          /* if the host name starts with bad, we fake an error here */
+          /* if the hostname starts with bad, we fake an error here */
           req->testno = DOCNUMBER_BADCONNECT;
         else if(!strncmp(doc, "test", 4)) {
-          /* if the host name starts with test, the port number used in the
+          /* if the hostname starts with test, the port number used in the
              CONNECT line will be used as test number! */
           char *portp = strchr(doc, ':');
           if(portp && (*(portp + 1) != '\0') && ISDIGIT(*(portp + 1))) {
@@ -389,7 +389,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   }
 
   if(!end) {
-    /* we don't have a complete request yet! */
+    /* we do not have a complete request yet! */
     logmsg("rtspd_ProcessRequest returned without a complete request");
     return 0; /* not complete yet */
   }
@@ -403,7 +403,7 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
   /* **** Persistence ****
    *
    * If the request is an HTTP/1.0 one, we close the connection unconditionally
-   * when we're done.
+   * when we are done.
    *
    * If the request is an HTTP/1.1 one, we MUST check for a "Connection:"
    * header that might say "close". If it does, we close a connection when
@@ -416,8 +416,8 @@ static int rtspd_ProcessRequest(struct rtspd_httprequest *req)
       return 1; /* done */
 
     if((req->cl == 0) && !CURL_STRNICMP("Content-Length:", line, 15)) {
-      /* If we don't ignore content-length, we read it and we read the whole
-         request including the body before we return. If we've been told to
+      /* If we do not ignore content-length, we read it and we read the whole
+         request including the body before we return. If we have been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
       curl_off_t clen;
@@ -645,7 +645,7 @@ static int rtspd_get_request(curl_socket_t sock, struct rtspd_httprequest *req)
     else {
       if(req->skip)
         /* we are instructed to not read the entire thing, so we make sure to
-           only read what we're supposed to and NOT read the entire thing the
+           only read what we are supposed to and NOT read the entire thing the
            client wants to send! */
         got = sread(sock, reqbuf + req->offset, req->cl);
       else
@@ -810,7 +810,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       error = errno;
       logmsg("fopen() failed with error (%d) %s",
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      logmsg("Couldn't open test file");
+      logmsg("Could not open test file");
       return 0;
     }
     else {
@@ -834,7 +834,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
       error = errno;
       logmsg("fopen() failed with error (%d) %s",
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      logmsg("Couldn't open test file");
+      logmsg("Could not open test file");
       free(ptr);
       return 0;
     }
@@ -876,7 +876,7 @@ static int rtspd_send_doc(curl_socket_t sock, struct rtspd_httprequest *req)
     logmsg("fopen() failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
     logmsg("Error opening file '%s'", responsedump);
-    logmsg("couldn't create logfile '%s'", responsedump);
+    logmsg("could not create logfile '%s'", responsedump);
     free(ptr);
     free(cmd);
     return -1;

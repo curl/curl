@@ -119,7 +119,7 @@ static void *t586_test_fire(void *ptr)
   code = curl_easy_perform(curl);
   if(code != CURLE_OK) {
     int i = 0;
-    curl_mfprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
+    curl_mfprintf(stderr, "perform URL '%s' repeat %d failed, curlcode %d\n",
                   tdata->url, i, code);
   }
 

@@ -559,7 +559,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             }
           }
           else {
-            /* IPv6 host name */
+            /* IPv6 hostname */
             if(curlx_str_until(&p, &dsthost, MAX_IPADR_LEN, ']') ||
                curlx_str_single(&p, ']')) {
               infof(data, "Bad alt-svc IPv6 hostname, ignoring.");

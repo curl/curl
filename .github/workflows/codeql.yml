@@ -39,6 +39,7 @@ permissions: {}
 
 jobs:
   gha_python:
+    if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'GHA and Python'
     runs-on: ubuntu-latest
     permissions:
@@ -58,6 +59,7 @@ jobs:
         uses: github/codeql-action/analyze@014f16e7ab1402f30e7c3329d33797e7948572db # v4.31.3
 
   c:
+    if: ${{ github.repository_owner == 'curl' || github.event_name != 'schedule' }}
     name: 'C'
     runs-on: ${{ matrix.platform == 'Linux' && 'ubuntu-latest' || 'windows-2022' }}
     permissions:

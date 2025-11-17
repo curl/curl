@@ -135,7 +135,7 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
         offset = starto;
       }
       else
-        /* we can't seek stdin, read 'starto' bytes and throw them away */
+        /* we cannot seek stdin, read 'starto' bytes and throw them away */
         throwaway = starto;
     }
 

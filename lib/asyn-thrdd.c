@@ -473,7 +473,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
 err_exit:
   CURL_TRC_DNS(data, "resolve thread failed init: %d", err);
   async_thrdd_destroy(data);
-  CURL_SETERRNO(err);
+  errno = err;
   return FALSE;
 }
 

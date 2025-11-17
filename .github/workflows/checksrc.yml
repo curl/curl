@@ -103,10 +103,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
-
       - name: 'install pmccabe'
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -115,8 +111,24 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             pmccabe
 
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
       - name: 'check scores'
         run: ./scripts/top-complexity
+
+  xmllint:
+    name: 'xmllint'
+    runs-on: macos-latest
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'check'
+        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint >/dev/null
 
   miscchecks:
     name: 'misc checks'
@@ -162,6 +174,7 @@ jobs:
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
 
-      # we allow some extra in source code
       - name: 'badwords'
-        run: grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | .github/scripts/badwords.pl src lib include
+        run: |
+          # we allow some extra in source code
+          grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples

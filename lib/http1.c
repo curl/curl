@@ -134,7 +134,9 @@ static ssize_t next_line(struct h1_req_parser *parser,
 }
 
 static CURLcode start_req(struct h1_req_parser *parser,
-                          const char *scheme_default, int options)
+                          const char *scheme_default,
+                          const char *custom_method,
+                          int options)
 {
   const char *p, *m, *target, *hv, *scheme, *authority, *path;
   size_t m_len, target_len, hv_len, scheme_len, authority_len, path_len;
@@ -144,9 +146,15 @@ static CURLcode start_req(struct h1_req_parser *parser,
 
   DEBUGASSERT(!parser->req);
   /* line must match: "METHOD TARGET HTTP_VERSION" */
-  p = memchr(parser->line, ' ', parser->line_len);
-  if(!p || p == parser->line)
-    goto out;
+  if(custom_method && custom_method[0] &&
+     !strncmp(custom_method, parser->line, strlen(custom_method))) {
+    p = parser->line + strlen(custom_method);
+  }
+  else {
+    p = memchr(parser->line, ' ', parser->line_len);
+    if(!p || p == parser->line)
+      goto out;
+  }
 
   m = parser->line;
   m_len = p - parser->line;
@@ -258,8 +266,9 @@ out:
 
 ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
                                const char *buf, size_t buflen,
-                               const char *scheme_default, int options,
-                               CURLcode *err)
+                               const char *scheme_default,
+                               const char *custom_method,
+                               int options, CURLcode *err)
 {
   ssize_t nread = 0, n;
 
@@ -285,7 +294,7 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
         goto out;
     }
     else if(!parser->req) {
-      *err = start_req(parser, scheme_default, options);
+      *err = start_req(parser, scheme_default, custom_method, options);
       if(*err) {
         nread = -1;
         goto out;

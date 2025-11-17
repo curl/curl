@@ -114,7 +114,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
       res = curl_mime_data_cb(part, datasize, t643_read_cb,
                               NULL, NULL, &pooh);
     if(!res)
-      res = curl_mime_filename(part, "file name 2");
+      res = curl_mime_filename(part, "filename 2 ");
   }
 
   if(res)

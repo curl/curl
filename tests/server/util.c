@@ -97,7 +97,7 @@ void logmsg(const char *msg, ...)
   }
   sec = epoch_offset + tv.tv_sec;
   /* !checksrc! disable BANNEDFUNC 1 */
-  now = localtime(&sec); /* not thread safe but we don't care */
+  now = localtime(&sec); /* not thread safe but we do not care */
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
@@ -227,7 +227,7 @@ int write_pidfile(const char *filename)
   pidfile = fopen(filename, "wb");
   if(!pidfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write pid file: %s (%d) %s", filename,
+    logmsg("Could not write pid file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
@@ -243,7 +243,7 @@ int write_portfile(const char *filename, int port)
   FILE *portfile = fopen(filename, "wb");
   if(!portfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write port file: %s (%d) %s", filename,
+    logmsg("Could not write port file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
@@ -333,7 +333,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 static DWORD thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
@@ -344,7 +344,6 @@ static HWND hidden_main_window = NULL;
  * The first time this is called it will set got_exit_signal to one and
  * store in exit_signal the signal that triggered its execution.
  */
-#ifndef UNDER_CE
 /*
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
@@ -387,11 +386,10 @@ static void exit_signal_handler(int signum)
 #endif
   }
   (void)signal(signum, exit_signal_handler);
-  CURL_SETERRNO(old_errno);
+  errno = old_errno;
 }
-#endif
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -439,7 +437,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -519,7 +517,6 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
-#ifndef UNDER_CE
 static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
                                bool restartable)
 {
@@ -549,7 +546,6 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   return oldhdlr;
 #endif
 }
-#endif
 
 void install_signal_handlers(bool keep_sigalrm)
 {
@@ -608,12 +604,10 @@ void install_signal_handlers(bool keep_sigalrm)
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef _WIN32
-#ifndef UNDER_CE
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
-#endif
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   thread_main_window = CreateThread(NULL, 0, &main_window_loop,
                                     GetModuleHandle(NULL), 0, &thread_main_id);
   if(!thread_main_window || !thread_main_id)
@@ -653,10 +647,8 @@ void restore_signal_handlers(bool keep_sigalrm)
     (void)set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32
-#ifndef UNDER_CE
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#endif
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {

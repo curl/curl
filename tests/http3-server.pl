@@ -102,7 +102,7 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: http3-server.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: http3-server.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }

@@ -20,7 +20,12 @@ use warnings;
 my @whitelist;
 my %alt;
 my %exactcase;
+my $skip_indented = 1;
 
+if($ARGV[0] eq "-a") {
+    shift @ARGV;
+    $skip_indented = 0;
+}
 my %wl;
 if($ARGV[0] eq "-w") {
     shift @ARGV;
@@ -68,7 +73,7 @@ sub file {
         my $in = $_;
         $l++;
         chomp $in;
-        if($in =~ /^    /) {
+        if($skip_indented && $in =~ /^    /) {
             next;
         }
         # remove the link part
@@ -94,7 +99,7 @@ sub file {
                 }
 
                 print STDERR  "$f:$l:$c: error: found bad word \"$w\"\n";
-                printf STDERR " %4d | $in\n", $l;
+                printf STDERR " %4d | %s\n", $l, $in;
                 printf STDERR "      | %*s^%s\n", length($p), " ",
                     "~" x (length($w)-1);
                 printf STDERR " maybe use \"%s\" instead?\n", $alt{$w};

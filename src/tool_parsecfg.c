@@ -100,10 +100,10 @@ ParameterError parseconfig(const char *filename, int max_recursive)
       }
       filename = pathalloc = curlrc;
     }
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
     else {
       char *fullp;
-      /* check for .curlrc then _curlrc in the dir of the executable */
+      /* check for .curlrc then _curlrc in the directory of the executable */
       file = tool_execpath(".curlrc", &fullp);
       if(!file)
         file = tool_execpath("_curlrc", &fullp);

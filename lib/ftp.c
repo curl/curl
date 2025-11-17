@@ -1867,7 +1867,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     }
 
     if(!*str) {
-      failf(data, "Couldn't interpret the 227-response");
+      failf(data, "Could not interpret the 227-response");
       return CURLE_FTP_WEIRD_227_FORMAT;
     }
 
@@ -2202,7 +2202,7 @@ static CURLcode ftp_state_type_resp(struct Curl_easy *data,
     /* "sasserftpd" and "(u)r(x)bot ftpd" both responds with 226 after a
        successful 'TYPE I'. While that is not as RFC959 says, it is still a
        positive response code and we allow that. */
-    failf(data, "Couldn't set desired mode");
+    failf(data, "Could not set desired mode");
     return CURLE_FTP_COULDNT_SET_TYPE;
   }
   if(ftpcode != 200)
@@ -2392,7 +2392,7 @@ static CURLcode ftp_state_rest_resp(struct Curl_easy *data,
 
   case FTP_RETR_REST:
     if(ftpcode != 350) {
-      failf(data, "Couldn't use REST");
+      failf(data, "Could not use REST");
       result = CURLE_FTP_COULDNT_USE_REST;
     }
     else {
@@ -2537,7 +2537,7 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
   }
   else {
     if((instate == FTP_LIST) && (ftpcode == 450)) {
-      /* simply no matching files in the dir listing */
+      /* simply no matching files in the directory listing */
       ftp->transfer = PPTRANSFER_NONE; /* do not download anything */
       ftp_state(data, ftpc, FTP_STOP); /* this phase is over */
     }
@@ -3052,7 +3052,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
   case FTP_MKD:
     if((ftpcode/100 != 2) && !ftpc->count3--) {
-      /* failure to MKD the dir */
+      /* failure to MKD the directory */
       failf(data, "Failed to MKD dir: %03d", ftpcode);
       result = CURLE_REMOTE_ACCESS_DENIED;
     }
@@ -3306,14 +3306,10 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       }
     }
     if(ftpc->prevpath)
-      infof(data, "Remembering we are in dir \"%s\"", ftpc->prevpath);
+      infof(data, "Remembering we are in directory \"%s\"", ftpc->prevpath);
   }
 
   /* shut down the socket to inform the server we are done */
-
-#ifdef UNDER_CE
-  shutdown(conn->sock[SECONDARYSOCKET], 2);  /* SD_BOTH */
-#endif
 
   if(Curl_conn_is_setup(conn, SECONDARYSOCKET)) {
     if(!result && ftpc->dont_check && data->req.maxdownload > 0) {
@@ -4192,7 +4188,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
 
         ftpc->dirs[0].start = 0;
         ftpc->dirs[0].len = (int)dirlen;
-        ftpc->dirdepth = 1; /* we consider it to be a single dir */
+        ftpc->dirdepth = 1; /* we consider it to be a single directory */
         fileName = slashPos + 1; /* rest is filename */
       }
       else
@@ -4208,7 +4204,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
       size_t dirAlloc = numof_slashes(rawPath);
 
       if(dirAlloc >= FTP_MAX_DIR_DEPTH)
-        /* suspiciously deep dir hierarchy */
+        /* suspiciously deep directory hierarchy */
         return CURLE_URL_MALFORMAT;
 
       if(dirAlloc) {
