@@ -216,7 +216,6 @@ static const struct algo algs[] = {
   CIPHEROPTION(CALG_MAC),
   CIPHEROPTION(CALG_RSA_SIGN),
   CIPHEROPTION(CALG_DSS_SIGN),
-/* ifdefs for the options that are defined conditionally in wincrypt.h */
   CIPHEROPTION(CALG_NO_SIGN),
   CIPHEROPTION(CALG_RSA_KEYX),
   CIPHEROPTION(CALG_DES),
