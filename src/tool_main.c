@@ -65,7 +65,7 @@ int vms_show = 0;
 #else
 #define CURL_USED
 #endif
-static const char CURL_USED min_stack[] = "$STACK:16384";
+static const char CURL_USED min_stack[] = "$STACK:32768";
 #endif
 
 #ifdef __MINGW32__
