@@ -158,8 +158,8 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(!temp)
         goto cleanup;
 
-      wcsncpy_s(temp, needed, L"\\\\?\\UNC\\", 8);
-      wcscpy_s(temp + 8, needed, fbuf + 2);
+      wcsncpy(temp, L"\\\\?\\UNC\\", 8);
+      wcscpy(temp + 8, fbuf + 2);
     }
     else {
       /* "\\?\" + full path + null */
@@ -171,8 +171,8 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(!temp)
         goto cleanup;
 
-      wcsncpy_s(temp, needed, L"\\\\?\\", 4);
-      wcscpy_s(temp + 4, needed, fbuf);
+      wcsncpy(temp, L"\\\\?\\", 4);
+      wcscpy(temp + 4, fbuf);
     }
 
     (free)(fbuf);
