@@ -2248,7 +2248,10 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, &result);
+  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+                              !data->state.http_ignorecustom ?
+                              data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                              0, &result);
   if(!curlx_sztouz(rc, &nwritten))
     goto out;
   *pnwritten = nwritten;

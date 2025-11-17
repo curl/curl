@@ -25,6 +25,7 @@
 ###########################################################################
 #
 import logging
+import re
 import pytest
 
 from testenv import Env
@@ -293,3 +294,24 @@ class TestBasic:
         r = curl.http_download(urls=[url1, url2], alpn_proto=proto, with_stats=True)
         assert len(r.stats) == 2
         assert r.total_connects == 2, f'{r.dump_logs()}'
+
+    # use a custom method containing a space
+    # check that h2/h3 did send that in the :method pseudo header. #19543
+    @pytest.mark.skipif(condition=not Env.curl_is_verbose(), reason="needs verbosecurl")
+    @pytest.mark.parametrize("proto", Env.http_protos())
+    def test_01_20_method_space(self, env: Env, proto, httpd):
+        curl = CurlClient(env=env)
+        method = 'IN SANE'
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
+        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
+                               extra_args=['-X', method])
+        assert len(r.stats) == 1
+        if proto == 'h2' or proto == 'h3':
+            r.check_response(http_status=0)
+            re_m = re.compile(r'.*\[:method: ([^\]]+)\].*')
+            lines = [line for line in r.trace_lines if re_m.match(line)]
+            assert len(lines) == 1, f'{r.dump_logs()}'
+            m = re_m.match(lines[0])
+            assert m.group(1) == method, f'{r.dump_logs()}'
+        else:
+            r.check_response(http_status=400)

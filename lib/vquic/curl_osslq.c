@@ -1900,7 +1900,10 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, err);
+  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+                                    !data->state.http_ignorecustom ?
+                                    data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                                    0, err);
   if(nwritten < 0)
     goto out;
   if(!stream->h1.done) {
