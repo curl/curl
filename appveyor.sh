@@ -89,6 +89,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${OPENSSL}" = 'ON' ] && { PATH="${openssl_root}:$PATH"; cp "${openssl_root}"/*.dll "_bld/src/${PRJ_CFG}"; }
   curl="_bld/src/${PRJ_CFG}/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
+  env | sort || true
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
