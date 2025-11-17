@@ -47,8 +47,8 @@
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 static int j = 0;
-static gint num_urls = 9; /* Just make sure this is less than urls[]*/
-static const char * const urls[]= {
+static gint num_urls = 9; /* Just make sure this is less than urls[] */
+static const char * const urls[] = {
   "90022",
   "90023",
   "90024",
@@ -155,9 +155,7 @@ static void *create_thread(void *progress_bar)
   /* [Un]Comment this out to kill the program rather than pushing close. */
   /* gtk_main_quit(); */
 
-
   return NULL;
-
 }
 
 static gboolean cb_delete(GtkWidget *window, gpointer data)
