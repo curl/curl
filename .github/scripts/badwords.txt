@@ -22,6 +22,7 @@ haven't:have not
 i'm:I am
 isn't:is not
 it'd:it would
+might've:might have
 needn't:need not
 should've:should have
 shouldn't:should not
@@ -38,6 +39,7 @@ we're:we are
 we've:we have
 weren't:were not
 won't:will not
+would've:would have
 wouldn't:would not
 you'd:you would
 you'll:you will
