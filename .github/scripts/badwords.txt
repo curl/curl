@@ -19,6 +19,7 @@ didn't:did not
 doesn't:does not
 don't=do not
 haven't:have not
+i'd:I would
 i'm:I am
 i've:I have
 isn't:is not
