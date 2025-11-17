@@ -16,11 +16,11 @@ From File: curl_gnv_build_steps.txt
 
  SPDX-License-Identifier: ISC
 
-Currently building Curl using GNV takes longer than building Curl via DCL.
+Currently building curl using GNV takes longer than building curl via DCL.
 The GNV procedure actually uses the same configure and makefiles that
 Unix builds use.
 
-Building CURL on OpenVMS using GNV requires GNV V2.1-2 or the updated
+Building curl on OpenVMS using GNV requires GNV V2.1-2 or the updated
 images that are available via anonymous FTP at encompasserve.org in the gnv
 directory.  It also requires the GNV Bash 4.2.45 kit as an update from the
 same location or from the sourceforge.net GNV project.
@@ -100,7 +100,7 @@ Note to builders:
 
 GNV currently has a bug where configure scripts take a long time to run.
 Some of the configure steps take a while to complete, and on a 600 Mhz
-DS10 with IDE disks, taking an hour to run the CURL configure is normal.
+DS10 with IDE disks, taking an hour to run the curl configure is normal.
 
 The following messages can be ignored and may get fixed in a future version
 of GNV.  The GNV$*.OPT files are used to find the libraries as many have

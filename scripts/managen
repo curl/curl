@@ -538,7 +538,7 @@ sub render {
         exit 3;
     }
     if($quote) {
-        # don't leave the quote "hanging"
+        # do not leave the quote "hanging"
         push @desc, ".fi\n" if($manpage);
     }
     if($tablemode) {
@@ -1052,7 +1052,7 @@ sub sourcecategories {
     my ($dir) = @_;
     my %cats;
     open(H, "<$dir/../../src/tool_help.h") ||
-        die "can't find the header file";
+        die "cannot find the header file";
     while(<H>) {
         if(/^\#define CURLHELP_([A-Z0-9]*)/) {
             $cats{lc($1)}++;

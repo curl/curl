@@ -259,7 +259,7 @@ This package is built on with the OpenSSL version listed below and requires
 the shared images from the HP OpenSSL product that is kitted with that
 version or a compatible later version.
 
-For Alpha and IA64 platforms, see the url below to register to get the
+For Alpha and IA64 platforms, see the URL below to register to get the
 download URL.  The kit will be HP 1.4-467 or later.
   https://h41379.www4.hpe.com/openvms/products/ssl/ssl.html
 
@@ -269,10 +269,10 @@ download URLs provided and put in CPQ-VAXVMS-SSL-V0101-B-1.PCSI-DCX_VAXEXE
 If your system can not be upgraded to a compatible version of OpenSSL, then
 you can extract the two shared images from the kit and place them in the
 [vms$common.gnv.lib]directory of the volume that you are installing GNV and
-or GNV compatible components like Curl.
+or GNV compatible components like curl.
 
 If GNV is installed, you must run the GNV startup procedure before these steps
-and before installing Curl.
+and before installing curl.
 
 
   1.  make sure that [vms$common.gnv.lib] exists by using the following
@@ -387,7 +387,7 @@ $!
 $ if f$search("[.src]curl-tool_main.o") .nes. ""
 $ then
 $!  From src/makefile.inc:
-$!  # libcurl has sources that provide functions named curlx_* that aren't
+$!  # libcurl has sources that provide functions named curlx_* that are not
 $!  # part of the official API, but we reuse the code here to avoid
 $!  # duplication.
 $!
