@@ -95,10 +95,6 @@
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), strdup(),
                                       unlink() */
 #endif
-#define close  _close
-#define fileno _fileno
-#define strdup _strdup
-#define unlink _unlink
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for __sys_errlist(), __sys_nerr(),

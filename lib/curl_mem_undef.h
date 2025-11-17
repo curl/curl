@@ -25,9 +25,6 @@
 /* Unset redefined system symbols. */
 
 #undef strdup
-#ifdef _WIN32
-#define _strdup
-#endif
 #undef malloc
 #undef calloc
 #undef realloc
