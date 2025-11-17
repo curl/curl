@@ -149,13 +149,6 @@ static void nosigpipe(struct Curl_cfilter *cf,
 #define nosigpipe(x,y,z) Curl_nop_stmt
 #endif
 
-#if defined(USE_WINSOCK) && \
-    defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
-/*  Win 10, v 1709 (10.0.16299) and later can use SetSockOpt TCP_KEEP____
- *  so should use seconds */
-#define CURL_WINSOCK_KEEP_SSO
-#endif
-
 #if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
    (defined(__DragonFly__) && __DragonFly_version < 500702) || \
@@ -183,8 +176,9 @@ tcpkeepalive(struct Curl_cfilter *cf,
   }
   else {
 #ifdef USE_WINSOCK
-/* Windows 10, version 1709 (10.0.16299) and later versions */
-#ifdef CURL_WINSOCK_KEEP_SSO
+/* Windows 10, version 1709 (10.0.16299) and later versions can use
+   SetSockOpt TCP_KEEP_* */
+#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
     optval = curlx_sltosi(data->set.tcp_keepidle);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                 (const char *)&optval, sizeof(optval)) < 0) {
