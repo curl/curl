@@ -1137,14 +1137,13 @@ static int myssh_in_UPLOAD_INIT(struct Curl_easy *data,
       attrs = sftp_stat(sshc->sftp_session, sshp->path);
       if(attrs) {
         curl_off_t size = attrs->size;
+        sftp_attributes_free(attrs);
         if(size < 0) {
           failf(data, "Bad file size (%" FMT_OFF_T ")", size);
           rc = myssh_to_ERROR(data, sshc, CURLE_BAD_DOWNLOAD_RESUME);
           return rc;
         }
-        data->state.resume_from = attrs->size;
-
-        sftp_attributes_free(attrs);
+        data->state.resume_from = size;
       }
       else {
         data->state.resume_from = 0;
