@@ -55,7 +55,7 @@ while(@ARGV) {
         print <<HELP
 Usage: cd2nroff [options] [file.md]
 
--d <dir> Write the output to the file name from the meta-data in the
+-d <dir> Write the output to the filename from the meta-data in the
          specified directory, instead of writing to stdout
 -e <ext> If -d is used, this option can provide an added "extension", arbitrary
          text really, to append to the file name.

@@ -31,7 +31,7 @@ version=${2:-unknown}
 tag=$(echo "curl-$version" | tr '.' '_')
 commit=${3}
 if [ -n "$commit" ] && [ -r "docs/tarball-commit.txt.dist" ]; then
-  # If commit is given, then the tag likely doesn't actually exist
+  # If commit is given, then the tag likely does not actually exist
   tag="$(cat docs/tarball-commit.txt.dist)"
 fi
 

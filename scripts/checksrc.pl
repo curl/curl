@@ -181,7 +181,7 @@ sub readskiplist {
 
 # Reads the .checksrc in $dir for any extended warnings to enable locally.
 # Currently there is no support for disabling warnings from the standard set,
-# and since that's already handled via !checksrc! commands there is probably
+# and since that is already handled via !checksrc! commands there is probably
 # little use to add it.
 sub readlocalfile {
     my ($file) = @_;

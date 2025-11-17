@@ -401,9 +401,9 @@ my $currentdate = scalar gmtime($filedate);
 
 my $format = $opt_t ? "plain text and " : "";
 if($stdout) {
-    open(CRT, '> -') or die "Couldn't open STDOUT: $!\n";
+    open(CRT, '> -') or die "Could not open STDOUT: $!\n";
 } else {
-    open(CRT,">$crt.~") or die "Couldn't open $crt.~: $!\n";
+    open(CRT,">$crt.~") or die "Could not open $crt.~: $!\n";
 }
 print CRT <<EOT;
 ##
@@ -442,7 +442,7 @@ my @precert;
 my $cka_value;
 my $valid = 0;
 
-open(TXT,"$txt") or die "Couldn't open $txt: $!\n";
+open(TXT,"$txt") or die "Could not open $txt: $!\n";
 while(<TXT>) {
     if(/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
         print CRT;
@@ -629,25 +629,25 @@ while(<TXT>) {
                     $pipe = "|$openssl x509 -" . $hash . " -fingerprint -noout -inform PEM";
                     if(!$stdout) {
                         $pipe .= " >> $crt.~";
-                        close(CRT) or die "Couldn't close $crt.~: $!";
+                        close(CRT) or die "Could not close $crt.~: $!";
                     }
-                    open(TMP, $pipe) or die "Couldn't open openssl pipe: $!";
+                    open(TMP, $pipe) or die "Could not open openssl pipe: $!";
                     print TMP $pem;
-                    close(TMP) or die "Couldn't close openssl pipe: $!";
+                    close(TMP) or die "Could not close openssl pipe: $!";
                     if(!$stdout) {
-                        open(CRT, ">>$crt.~") or die "Couldn't open $crt.~: $!";
+                        open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
                     }
                 }
                 $pipe = "|$openssl x509 -text -inform PEM";
                 if(!$stdout) {
                     $pipe .= " >> $crt.~";
-                    close(CRT) or die "Couldn't close $crt.~: $!";
+                    close(CRT) or die "Could not close $crt.~: $!";
                 }
-                open(TMP, $pipe) or die "Couldn't open openssl pipe: $!";
+                open(TMP, $pipe) or die "Could not open openssl pipe: $!";
                 print TMP $pem;
-                close(TMP) or die "Couldn't close openssl pipe: $!";
+                close(TMP) or die "Could not close openssl pipe: $!";
                 if(!$stdout) {
-                    open(CRT, ">>$crt.~") or die "Couldn't open $crt.~: $!";
+                    open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
                 }
             }
             report "Processed: $caname" if($opt_v);
@@ -655,8 +655,8 @@ while(<TXT>) {
         }
     }
 }
-close(TXT) or die "Couldn't close $txt: $!\n";
-close(CRT) or die "Couldn't close $crt.~: $!\n";
+close(TXT) or die "Could not close $txt: $!\n";
+close(CRT) or die "Could not close $crt.~: $!\n";
 unless($stdout) {
     if($opt_b && -e $crt) {
         my $bk = 1;
