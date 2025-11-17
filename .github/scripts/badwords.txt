@@ -23,6 +23,7 @@ isn't:is not
 it'd:it would
 needn't:need not
 should've:should have
+shouldn't:should not
 that's:that is
 there's:there is
 they'd:They would
@@ -35,6 +36,7 @@ we'll:we will
 we're:we are
 we've:we have
 won't:will not
+wouldn't:would not
 you'd:you would
 you'll:you will
 you're:you are
