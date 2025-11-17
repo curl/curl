@@ -76,7 +76,7 @@ if test "x$OPT_OPENSSL" != xno; then
       PREFIX_OPENSSL=$OPT_OPENSSL
 
       dnl Try pkg-config even when cross-compiling.  Since we
-      dnl specify PKG_CONFIG_LIBDIR we're only looking where
+      dnl specify PKG_CONFIG_LIBDIR we are only looking where
       dnl the user told us to look
       OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
       if test -f "$OPENSSL_PCDIR/openssl.pc"; then
@@ -316,7 +316,7 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
-      dnl when the ssl shared libs were found in a path that the run-time
+      dnl when the ssl shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
       if test "x$cross_compiling" != "xyes"; then

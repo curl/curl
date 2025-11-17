@@ -157,7 +157,7 @@ if test "x$OPT_RUSTLS" != xno; then
     check_for_ca_bundle=1
 
     if test -n "$LIB_RUSTLS"; then
-      dnl when shared libs were found in a path that the run-time
+      dnl when shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to
       dnl CURL_LIBRARY_PATH so that further configure tests do not
       dnl fail due to this

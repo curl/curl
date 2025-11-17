@@ -328,7 +328,7 @@ AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
 )
 AC_SUBST(VSFTPD)
 
-dnl we'd like a httpd as test server
+dnl we would like an httpd as test server
 dnl
 HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
@@ -378,7 +378,7 @@ fi
 AC_SUBST(HTTPD)
 AC_SUBST(APXS)
 
-dnl we'd like a dante as test socks server
+dnl we would like a dante as test socks server
 dnl
 DANTED_ENABLED="maybe"
 AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
@@ -1500,7 +1500,7 @@ if test X"$OPT_BROTLI" != Xno; then
 
   if test "$HAVE_BROTLI" = "1"; then
     if test -n "$DIR_BROTLI"; then
-      dnl when the brotli shared libs were found in a path that the run-time
+      dnl when the brotli shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
@@ -1589,7 +1589,7 @@ if test X"$OPT_ZSTD" != Xno; then
 
   if test "$HAVE_ZSTD" = "1"; then
     if test -n "$DIR_ZSTD"; then
-      dnl when the zstd shared lib were found in a path that the run-time
+      dnl when the zstd shared lib were found in a path that the runtime
       dnl linker does not search through, we need to add it to
       dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
       dnl this
@@ -2286,7 +2286,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
   if test "$USE_LIBSSH2" = "1"; then
     if test -n "$DIR_SSH2"; then
-      dnl when the libssh2 shared libs were found in a path that the run-time
+      dnl when the libssh2 shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
@@ -2366,7 +2366,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
       LIBS="-liphlpapi $LIBS"
     fi
     if test -n "$DIR_SSH"; then
-      dnl when the libssh shared libs were found in a path that the run-time
+      dnl when the libssh shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
@@ -2514,7 +2514,7 @@ fi
 if test x$CURL_DISABLE_LDAP != x1; then
   dnl Add to library path if needed
   if test -n "$DIR_LDAP"; then
-    dnl when the ldap shared lib were found in a path that the run-time
+    dnl when the ldap shared lib were found in a path that the runtime
     dnl linker does not search through, we need to add it to
     dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
     dnl this
@@ -3955,7 +3955,7 @@ if test -z "$PERL" -a x"$FISH_FUNCTIONS_DIR" != x; then
 fi
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
-dnl Now check for the very most basic headers. Then we can use these
+dnl Now check for the most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
   sys/types.h \
@@ -4053,7 +4053,7 @@ AC_CHECK_TYPE(long long,
 )
 
 if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
-  AC_MSG_ERROR([64 bit curl_off_t is required])
+  AC_MSG_ERROR([64-bit curl_off_t is required])
 fi
 
 # check for ssize_t
@@ -4908,7 +4908,7 @@ AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
     AC_MSG_RESULT(yes)
 )
 
-dnl only check for HSTS if there's SSL present
+dnl only check for HSTS if there is SSL present
 if test -n "$SSL_ENABLED"; then
   dnl ************************************************************
   dnl switch on/off hsts
@@ -5029,9 +5029,9 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
       if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
         AC_MSG_RESULT(yes)
       else
-        dnl WebSockets requires >32 bit curl_off_t
+        dnl WebSockets requires >32-bit curl_off_t
         AC_MSG_RESULT(no)
-        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
+        AC_MSG_WARN([WebSockets disabled due to lack of >32-bit curl_off_t])
         AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
         CURL_DISABLE_WEBSOCKETS=1
       fi

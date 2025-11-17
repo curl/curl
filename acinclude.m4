@@ -820,7 +820,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   ])
 
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
-  dnl until library linking and run-time checks for clock_gettime succeed.
+  dnl until library linking and runtime checks for clock_gettime succeed.
 ])
 
 dnl CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
@@ -1085,8 +1085,8 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
   if test "x$cross_compiling" != xyes; then
 
     dnl just run a program to verify that the libs checked for previous to this
-    dnl point also is available run-time!
-    AC_MSG_CHECKING([run-time libs availability])
+    dnl point also is available runtime!
+    AC_MSG_CHECKING([runtime libs availability])
     CURL_RUN_IFELSE([
       int main(void)
       {
@@ -1095,7 +1095,7 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
     ],
     AC_MSG_RESULT([fine]),
     AC_MSG_RESULT([failed])
-    AC_MSG_ERROR([one or more libs available at link-time are not available run-time. Libs used at link-time: $LIBS])
+    AC_MSG_ERROR([one or more libs available at link-time are not available runtime. Libs used at link-time: $LIBS])
     )
 
     dnl if this test fails, configure has already stopped
@@ -1566,7 +1566,7 @@ TEST EINVAL TEST
 dnl CURL_DARWIN_CFLAGS
 dnl
 dnl Set -Werror=partial-availability to detect possible breaking code
-dnl with very low deployment targets.
+dnl with low deployment targets.
 dnl
 
 AC_DEFUN([CURL_DARWIN_CFLAGS], [
@@ -1583,7 +1583,7 @@ AC_DEFUN([CURL_DARWIN_CFLAGS], [
 dnl CURL_SUPPORTS_BUILTIN_AVAILABLE
 dnl
 dnl Check to see if the compiler supports __builtin_available. This built-in
-dnl compiler function first appeared in Apple LLVM 9.0.0. It's so new that, at
+dnl compiler function first appeared in Apple LLVM 9.0.0. It is so new that, at
 dnl the time this macro was written, the function was not yet documented. Its
 dnl purpose is to return true if the code is running under a certain OS version
 dnl or later.

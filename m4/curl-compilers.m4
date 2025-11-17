@@ -555,7 +555,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       HP_UX_C)
         #
-        dnl Disallow run-time dereferencing of null pointers
+        dnl Disallow runtime dereferencing of null pointers
         tmp_CFLAGS="$tmp_CFLAGS -z"
         dnl Disable some remarks
         dnl #4227: padding struct with n bytes to align member

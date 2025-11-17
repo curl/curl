@@ -35,7 +35,7 @@ dnl -------------------------------------------------
 dnl This is done to prevent Libtool 1.5.X from doing
 dnl unnecessary C++, Fortran and Java tests when only
 dnl using C language and reduce resulting configure
-dnl script by nearly 300 Kb.
+dnl script by nearly 300 KB.
 
 m4_ifdef([AC_LIBTOOL_LANG_CXX_CONFIG],
   [m4_undefine([AC_LIBTOOL_LANG_CXX_CONFIG])])

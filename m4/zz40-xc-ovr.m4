@@ -448,7 +448,7 @@ dnl -------------------------------------------------
 dnl Public macro.
 dnl
 dnl This macro emits shell code which does some
-dnl very basic checks related with the availability
+dnl basic checks related with the availability
 dnl of some commands and utilities needed to allow
 dnl configure script bootstrapping itself when using
 dnl these to figure out other settings. Also emits
@@ -602,7 +602,7 @@ dnl overrides the auto-detected one.
 dnl
 dnl Strictly speaking the check is done in two steps. The
 dnl first, which does the actual check, takes place in
-dnl XC_CONFIGURE_PREAMBLE macro and happens very early in
+dnl XC_CONFIGURE_PREAMBLE macro and happens early in
 dnl generated configure script. The second one shows and
 dnl logs the result of the check into config.log at a later
 dnl configure stage. Placement of this second stage in
