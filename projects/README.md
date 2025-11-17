@@ -105,7 +105,7 @@ that:
  3. Navigate to 'Configuration Properties > Debugging > Environment'
  4. Add `PATH='Path to DLL';C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem`
 
-... where 'Path to DLL` is the configuration specific path. For example the
+... where `Path to DLL` is the configuration specific path. For example the
 following configurations in Visual Studio 2010 might be:
 
 DLL Debug - DLL OpenSSL (Win32):
@@ -119,7 +119,7 @@ DLL Debug - DLL OpenSSL (x64):
     C:\Windows;C:\Windows\System32\Wbem
 
 If you are using a configuration that uses multiple third-party library DLLs
-(such as DLL Debug - DLL OpenSSL - DLL libssh2) then 'Path to DLL' need to
+(such as `DLL Debug - DLL OpenSSL - DLL libssh2`) then 'Path to DLL' need to
 contain the path to both of these.
 
 ## Notes
