@@ -234,8 +234,6 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
           case CERT_QUERY_CONTENT_SERIALIZED_CTL:
             CertFreeCTLContext((PCCTL_CONTEXT)cert_context);
             break;
-          default:
-            break;
           }
         }
       }
