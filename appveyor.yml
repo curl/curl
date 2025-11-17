@@ -44,21 +44,6 @@ environment:
 
   matrix:
 
-    # generated VisualStudioSolution-based builds
-
-    - job_name: 'VisualStudioSolution VS2010, Debug, x86, Schannel, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
-      BUILD_SYSTEM: VisualStudioSolution
-      VC_VERSION: VC10
-      PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
-      PLAT: 'Win32'
-    - job_name: 'VisualStudioSolution VS2013, Debug, x64, Schannel, Build-only'
-      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      BUILD_SYSTEM: VisualStudioSolution
-      VC_VERSION: VC12
-      PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
-      PLAT: 'x64'
-
     # generated CMake-based Visual Studio builds
 
     - job_name: 'CM VS2022, Release, x64, OpenSSL 3.5, Shared, Build-tests'
@@ -160,6 +145,21 @@ environment:
       TARGET: '-A x64'
       PRJ_CFG: Debug
       HTTP_ONLY: 'ON'
+
+    # generated VisualStudioSolution-based builds
+
+    - job_name: 'VisualStudioSolution VS2010, Debug, x86, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
+      BUILD_SYSTEM: VisualStudioSolution
+      PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
+      PLAT: 'Win32'
+      VC_VERSION: VC10
+    - job_name: 'VisualStudioSolution VS2013, Debug, x64, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      BUILD_SYSTEM: VisualStudioSolution
+      PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
+      PLAT: 'x64'
+      VC_VERSION: VC12
 
 install:
   - ps: $env:PATH = "C:/msys64/usr/bin;$env:PATH"
