@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)

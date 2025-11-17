@@ -25,11 +25,9 @@
  * multi interface and debug callback
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 #define TRUE 1

@@ -25,9 +25,9 @@
  * Demonstrate curl_easy_send() and curl_easy_recv() usage.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* Avoid warning in FD_SET() with pre-2020 Cygwin/MSYS releases:

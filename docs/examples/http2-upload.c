@@ -45,7 +45,6 @@
 #include <unistd.h>
 #endif
 
-/* curl stuff */
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
