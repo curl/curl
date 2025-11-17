@@ -225,7 +225,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
       optval = curlx_sltosi(data->set.tcp_keepintvl);
       KEEPALIVE_FACTOR(optval);
       vals.keepaliveinterval = (u_long)optval;
-      if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID) &vals, sizeof(vals),
+      if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID)&vals, sizeof(vals),
                   NULL, 0, &dummy, NULL, NULL) != 0) {
         CURL_TRC_CF(data, cf, "Failed to set SIO_KEEPALIVE_VALS on fd "
                     "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
