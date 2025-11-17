@@ -4587,15 +4587,12 @@ static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
     if(result)
       goto out;
   }
-  req->authority = strdup(curlx_dyn_ptr(&buf));
-  if(!req->authority)
-    goto out;
-  result = CURLE_OK;
-
+  req->authority = curlx_dyn_ptr(&buf);
 out:
   free(host);
   free(port);
-  curlx_dyn_free(&buf);
+  if(result)
+    curlx_dyn_free(&buf);
   return result;
 }
 
@@ -4609,41 +4606,32 @@ static CURLcode req_assign_url_path(struct httpreq *req, CURLU *url)
   path = query = NULL;
   curlx_dyn_init(&buf, DYN_HTTP_REQUEST);
 
-  uc = curl_url_get(url, CURLUPART_PATH, &path, CURLU_PATH_AS_IS);
+  uc = curl_url_get(url, CURLUPART_PATH, &path, 0);
   if(uc)
     goto out;
   uc = curl_url_get(url, CURLUPART_QUERY, &query, 0);
   if(uc && uc != CURLUE_NO_QUERY)
     goto out;
 
-  if(!path && !query) {
-    req->path = NULL;
-  }
-  else if(path && !query) {
+  if(!query) {
     req->path = path;
     path = NULL;
   }
   else {
-    if(path) {
-      result = curlx_dyn_add(&buf, path);
-      if(result)
-        goto out;
-    }
-    if(query) {
+    result = curlx_dyn_add(&buf, path);
+    if(!result)
       result = curlx_dyn_addf(&buf, "?%s", query);
-      if(result)
-        goto out;
-    }
-    req->path = strdup(curlx_dyn_ptr(&buf));
-    if(!req->path)
+    if(result)
       goto out;
+    req->path = curlx_dyn_ptr(&buf);
   }
   result = CURLE_OK;
 
 out:
   free(path);
   free(query);
-  curlx_dyn_free(&buf);
+  if(result)
+    curlx_dyn_free(&buf);
   return result;
 }
 
