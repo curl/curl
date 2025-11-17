@@ -196,7 +196,6 @@ tcpkeepalive(struct Curl_cfilter *cf,
 /* Windows 10, version 1709 (10.0.16299) and later versions */
 #ifdef CURL_WINSOCK_KEEP_SSO
     optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                 (const char *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
@@ -204,7 +203,6 @@ tcpkeepalive(struct Curl_cfilter *cf,
                   sockfd, SOCKERRNO);
     }
     optval = curlx_sltosi(data->set.tcp_keepintvl);
-    KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
                 (const char *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
