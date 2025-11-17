@@ -177,7 +177,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
   else {
 #ifdef USE_WINSOCK
 /* Windows 10, version 1709 (10.0.16299) and later versions can use
-   SetSockOpt TCP_KEEP_* */
+   setsockopt() TCP_KEEP_... */
 #if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
     optval = curlx_sltosi(data->set.tcp_keepidle);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
@@ -200,8 +200,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
                   "%" FMT_SOCKET_T ": errno %d",
                   sockfd, SOCKERRNO);
     }
-#else /* Windows < 10.0.16299 */
-
+#else /* !TCP_KEEP_... */
 /* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
 #ifndef SIO_KEEPALIVE_VALS
 #define SIO_KEEPALIVE_VALS  _WSAIOW(IOC_VENDOR,4)
@@ -211,7 +210,6 @@ struct tcp_keepalive {
   u_long keepaliveinterval;
 };
 #endif
-
     struct tcp_keepalive vals;
     DWORD dummy;
     vals.onoff = 1;
@@ -226,7 +224,7 @@ struct tcp_keepalive {
       CURL_TRC_CF(data, cf, "Failed to set SIO_KEEPALIVE_VALS on fd "
                   "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
-#endif
+#endif /* TCP_KEEP_... */
 #else /* !USE_WINSOCK */
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
