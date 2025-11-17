@@ -297,6 +297,7 @@ class TestBasic:
 
     # use a custom method containing a space
     # check that h2/h3 did send that in the :method pseudo header. #19543
+    @pytest.mark.skipif(condition=not Env.curl_is_debug(), reason="needs curl debug")
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_01_20_method_space(self, env: Env, proto, httpd):
         curl = CurlClient(env=env)
