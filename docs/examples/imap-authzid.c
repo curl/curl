@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Retrieve emails from a shared IMAP mailbox
  * </DESC>

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * POP3 example showing how to retrieve only the headers of an email
  * </DESC>
