@@ -184,21 +184,21 @@ tcpkeepalive(struct Curl_cfilter *cf,
                                     VERSION_GREATER_THAN_EQUAL)) {
       optval = curlx_sltosi(data->set.tcp_keepidle);
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
-                  (const char *)&optval, sizeof(optval)) < 0) {
+                    (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
                     "%" FMT_SOCKET_T ": errno %d",
                     sockfd, SOCKERRNO);
       }
       optval = curlx_sltosi(data->set.tcp_keepintvl);
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
-                  (const char *)&optval, sizeof(optval)) < 0) {
+                    (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
                     "%" FMT_SOCKET_T ": errno %d",
                     sockfd, SOCKERRNO);
       }
       optval = curlx_sltosi(data->set.tcp_keepcnt);
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
-                  (const char *)&optval, sizeof(optval)) < 0) {
+                    (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPCNT on fd "
                     "%" FMT_SOCKET_T ": errno %d",
                     sockfd, SOCKERRNO);
