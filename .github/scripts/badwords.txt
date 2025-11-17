@@ -20,10 +20,12 @@ doesn't:does not
 don't=do not
 haven't:have not
 i'd:I would
+i'll:I will
 i'm:I am
 i've:I have
 isn't:is not
 it'd:it would
+it'll:it will
 might've:might have
 needn't:need not
 should've:should have
