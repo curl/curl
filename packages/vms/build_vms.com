@@ -1,6 +1,6 @@
 $! BUILD_VMS.COM
 $!
-$! I've taken the original build_vms.com, supplied by Nico Baggus, if
+$! I have taken the original build_vms.com, supplied by Nico Baggus, if
 $! memory serves me correctly, and made some modifications.
 $!
 $! SSL support is controlled by logical names.  If SSL$INCLUDE is

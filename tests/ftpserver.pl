@@ -989,7 +989,7 @@ sub DATA_smtp {
         }
 
         if($nosave) {
-            print $file "$ulsize bytes would've been stored here\n";
+            print $file "$ulsize bytes would have been stored here\n";
         }
 
         close($file);
@@ -1336,7 +1336,7 @@ sub APPEND_imap {
         }
 
         if($nosave) {
-            print $file "$size bytes would've been stored here\n";
+            print $file "$size bytes would have been stored here\n";
         }
 
         close($file);
@@ -2439,7 +2439,7 @@ sub STOR_ftp {
         }
     }
     if($nosave) {
-        print $file "$ulsize bytes would've been stored here\n";
+        print $file "$ulsize bytes would have been stored here\n";
     }
     close($file);
     close_dataconn($disc);
