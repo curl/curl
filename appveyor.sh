@@ -95,7 +95,8 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
     msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "-property:Platform=${PLAT}" "Windows/${VC_VERSION}/curl-all.sln"
   )
   [ "${PLAT}" = 'x64' ] && platdir='Win64' || platdir='Win32'
-  curl="build/${platdir}/${VC_VERSION}/${PRJ_CFG}/curld.exe"
+  [[ "${PRJ_CFG}" = *'Debug'* ]] && binsuffix='d' || binsuffix=''
+  curl="build/${platdir}/${VC_VERSION}/${PRJ_CFG}/curl${binsuffix}.exe"
 fi
 
 find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file -- '{}' \;
