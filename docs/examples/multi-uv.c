@@ -36,7 +36,6 @@
 
 /* Requires: USE_LIBUV */
 
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <uv.h>
