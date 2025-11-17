@@ -192,7 +192,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
                 sockfd, SOCKERRNO);
   }
   else {
-#ifdef SIO_KEEPALIVE_VALS /* Windows */
+#ifdef USE_WINSOCK
 /* Windows 10, version 1709 (10.0.16299) and later versions */
 #ifdef CURL_WINSOCK_KEEP_SSO
     optval = curlx_sltosi(data->set.tcp_keepidle);
@@ -232,7 +232,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
                   "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #endif
-#else /* !Windows */
+#else /* !USE_WINSOCK */
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
@@ -301,7 +301,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
                   "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #endif
-#endif
+#endif /* USE_WINSOCK */
   }
 }
 
