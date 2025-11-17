@@ -1625,8 +1625,8 @@ static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
     if(rc != -1) {
       BIO_get_mem_ptr(bio_out, &biomem);
       result = curlx_dyn_addn(d, biomem->data, biomem->length);
-      BIO_free(bio_out);
     }
+    BIO_free(bio_out);
   }
   return result;
 }
