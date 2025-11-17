@@ -399,11 +399,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
       result = CURLE_WRITE_ERROR;
 
     if(result && tempstore)
-#ifdef _WIN32
-      _unlink(tempstore);
-#else
       unlink(tempstore);
-#endif
   }
   free(tempstore);
   return result;
