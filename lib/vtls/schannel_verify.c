@@ -220,23 +220,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
               num_certs++;
             }
           }
-
-          switch(actual_content_type) {
-          case CERT_QUERY_CONTENT_CERT:
-          case CERT_QUERY_CONTENT_SERIALIZED_CERT:
-            CertFreeCertificateContext(cert_context);
-            break;
-          case CERT_QUERY_CONTENT_CRL:
-          case CERT_QUERY_CONTENT_SERIALIZED_CRL:
-            CertFreeCRLContext(cert_context);
-            break;
-          case CERT_QUERY_CONTENT_CTL:
-          case CERT_QUERY_CONTENT_SERIALIZED_CTL:
-            CertFreeCTLContext(cert_context);
-            break;
-          default:
-            break;
-          }
+          CertFreeCertificateContext(cert_context);
         }
       }
     }
