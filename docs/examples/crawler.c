@@ -20,14 +20,15 @@
  *
  * SPDX-License-Identifier: curl
  *
- * To compile:
- *   gcc crawler.c $(pkg-config --cflags --libs libxml-2.0 libcurl)
- *
- */
+ ***************************************************************************/
 /* <DESC>
  * Web crawler based on curl and libxml2 to stress-test curl with
  * hundreds of concurrent connections to various servers.
  * </DESC>
+ */
+/*
+ * To compile:
+ *   gcc crawler.c $(pkg-config --cflags --libs libxml-2.0 libcurl)
  */
 #include <libxml/HTMLparser.h>
 #include <libxml/xpath.h>
