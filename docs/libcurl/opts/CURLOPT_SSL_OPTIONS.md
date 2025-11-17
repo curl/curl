@@ -100,7 +100,7 @@ Tell libcurl to try sending application data as TLS1.3 early data. This option
 is supported for GnuTLS, wolfSSL, quictls and OpenSSL (but not BoringSSL
 or AWS-LC). It works on TCP and QUIC connections using ngtcp2.
 This option works on a best effort basis,
-in cases when it wasn't possible to send early data the request is resent
+in cases when it was not possible to send early data the request is resent
 normally post-handshake.
 This option does not work when using QUIC.
 (Added in 8.11.0 for GnuTLS and 8.13.0 for wolfSSL, quictls and OpenSSL)
