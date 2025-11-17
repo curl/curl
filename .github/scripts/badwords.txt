@@ -21,6 +21,7 @@ don't=do not
 i'm:I am
 isn't:is not
 it'd:it would
+needn't:need not
 should've:should have
 that's:that is
 there's:there is
