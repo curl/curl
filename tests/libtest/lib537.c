@@ -243,7 +243,7 @@ static int t537_test_rlimit(int keep_open)
     t537_num_open.rlim_max = nitems;
   }
 
-  /* verify that we will not overflow size_t in malloc() */
+  /* verify that we do not overflow size_t in malloc() */
 
   if((size_t)(t537_num_open.rlim_max) > ((size_t)-1) / sizeof(*t537_testfd)) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t537_num_open.rlim_max);

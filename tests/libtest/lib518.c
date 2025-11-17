@@ -248,7 +248,7 @@ static int t518_test_rlimit(int keep_open)
 
   t518_num_open.rlim_max = NUM_OPEN;
 
-  /* verify that we will not overflow size_t in malloc() */
+  /* verify that we do not overflow size_t in malloc() */
 
   if((size_t)(t518_num_open.rlim_max) > ((size_t)-1) / sizeof(*t518_testfd)) {
     tutil_rlim2str(strbuff1, sizeof(strbuff1), t518_num_open.rlim_max);

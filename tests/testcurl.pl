@@ -33,8 +33,8 @@
 # at a regular interval. The output is suitable to be mailed to
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
-# otherwise).  The most current build status (with a reasonable backlog) will
-# be published on the curl site, at https://curl.se/auto/
+# otherwise).  The most current build status (with a reasonable backlog) is
+# published on the curl site, at https://curl.se/auto/
 
 # USAGE:
 # testcurl.pl [options] [curl-daily-name] > output
@@ -362,7 +362,7 @@ logit "date = $timestamp";  # When the test build starts
 
 $str1066os = undef;
 
-# Make $pwd to become the path without newline. We will use that in order to cut
+# Make $pwd to become the path without newline. We use that in order to cut
 # off that path from all possible logs and error messages etc.
 $pwd = getcwd();
 
