@@ -93,9 +93,9 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
     cd projects
     ./generate.bat "${VC_VERSION}"
-    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "-property:Platform=${PLATFORM}" "Windows/${VC_VERSION}/curl-all.sln"
+    msbuild.exe -maxcpucount "-property:Configuration=${PRJ_CFG}" "-property:Platform=${PLAT}" "Windows/${VC_VERSION}/curl-all.sln"
   )
-  [ "${PLATFORM}" = 'x64' ] && platdir='Win64' || platdir='Win32'
+  [ "${PLAT}" = 'x64' ] && platdir='Win64' || platdir='Win32'
   curl="build/${platdir}/${VC_VERSION}/${PRJ_CFG}/curld.exe"
 fi
 
