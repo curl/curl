@@ -314,5 +314,3 @@ class TestBasic:
             assert m.group(1) == method, f'{r.dump_logs()}'
         else:
             r.check_response(http_status=400)
-
-
