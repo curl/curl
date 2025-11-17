@@ -45,10 +45,10 @@
 
 #define NUMT 4
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-int j = 0;
-gint num_urls = 9; /* Just make sure this is less than urls[]*/
-const char * const urls[]= {
+static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+static int j = 0;
+static gint num_urls = 9; /* Just make sure this is less than urls[] */
+static const char * const urls[] = {
   "90022",
   "90023",
   "90024",
@@ -60,7 +60,7 @@ const char * const urls[]= {
   "90030"
 };
 
-size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   return fwrite(ptr, size, nmemb, stream);
 }
@@ -89,7 +89,7 @@ static void run_one(gchar *http, int j)
   }
 }
 
-void *pull_one_url(void *NaN)
+static void *pull_one_url(void *NaN)
 {
   /* protect the reading and increasing of 'j' with a mutex */
   pthread_mutex_lock(&lock);
@@ -109,7 +109,7 @@ void *pull_one_url(void *NaN)
 }
 
 
-gboolean pulse_bar(gpointer data)
+static gboolean pulse_bar(gpointer data)
 {
   gdk_threads_enter();
   gtk_progress_bar_pulse(GTK_PROGRESS_BAR (data));
@@ -121,7 +121,7 @@ gboolean pulse_bar(gpointer data)
   return TRUE;
 }
 
-void *create_thread(void *progress_bar)
+static void *create_thread(void *progress_bar)
 {
   pthread_t tid[NUMT];
   int i;
@@ -155,9 +155,7 @@ void *create_thread(void *progress_bar)
   /* [Un]Comment this out to kill the program rather than pushing close. */
   /* gtk_main_quit(); */
 
-
   return NULL;
-
 }
 
 static gboolean cb_delete(GtkWidget *window, gpointer data)
