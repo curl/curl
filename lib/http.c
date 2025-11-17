@@ -4558,12 +4558,12 @@ out:
 
 static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
 {
-  char *user, *pass, *host, *port;
+  char *host, *port;
   struct dynbuf buf;
   CURLUcode uc;
   CURLcode result = CURLE_URL_MALFORMAT;
 
-  user = pass = host = port = NULL;
+  host = port = NULL;
   curlx_dyn_init(&buf, DYN_HTTP_REQUEST);
 
   uc = curl_url_get(url, CURLUPART_HOST, &host, 0);
@@ -4578,28 +4578,7 @@ static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
   uc = curl_url_get(url, CURLUPART_PORT, &port, CURLU_NO_DEFAULT_PORT);
   if(uc && uc != CURLUE_NO_PORT)
     goto out;
-  uc = curl_url_get(url, CURLUPART_USER, &user, 0);
-  if(uc && uc != CURLUE_NO_USER)
-    goto out;
-  if(user) {
-    uc = curl_url_get(url, CURLUPART_PASSWORD, &pass, 0);
-    if(uc && uc != CURLUE_NO_PASSWORD)
-      goto out;
-  }
 
-  if(user) {
-    result = curlx_dyn_add(&buf, user);
-    if(result)
-      goto out;
-    if(pass) {
-      result = curlx_dyn_addf(&buf, ":%s", pass);
-      if(result)
-        goto out;
-    }
-    result = curlx_dyn_add(&buf, "@");
-    if(result)
-      goto out;
-  }
   result = curlx_dyn_add(&buf, host);
   if(result)
     goto out;
@@ -4614,8 +4593,6 @@ static CURLcode req_assign_url_authority(struct httpreq *req, CURLU *url)
   result = CURLE_OK;
 
 out:
-  free(user);
-  free(pass);
   free(host);
   free(port);
   curlx_dyn_free(&buf);
