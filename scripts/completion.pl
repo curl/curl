@@ -84,8 +84,8 @@ sub parse_main_opts {
     @files = readdir($dir_handle);
     closedir($dir_handle) || die "Unable to close handle on dir: $opts_dir due to error: $!";
 
-    # We want regular files that end with .md and don't start with an underscore
-    # Edge case: MANPAGE.md doesn't start with an underscore but also isn't documentation for an option
+    # We want regular files that end with .md and do not start with an underscore
+    # Edge case: MANPAGE.md does not start with an underscore but also is not documentation for an option
     @files = grep { $_ =~ /\.md$/i && !/^_/ && -f "$opts_dir/$_" && $_ ne "MANPAGE.md" } @files;
 
     for my $file (@files) {
@@ -145,8 +145,8 @@ sub parse_main_opts {
         push(@list, $option);
     }
 
-    # Sort longest first, because zsh won't complete an option listed
-    # after one that's a prefix of it. When length is equal, fall back
+    # Sort longest first, because zsh does not complete an option listed
+    # after one that is a prefix of it. When length is equal, fall back
     # to stringwise cmp.
     @list = sort {
         $a =~ /([^=]*)/; my $ma = $1;
