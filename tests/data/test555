@@ -1,6 +1,6 @@
 <testcase>
 # NOTE: this test case is a duplicate of 547 but the tool is built to use the
-# multi interface instead of easy, but that shouldn't be noticeable at all in
+# multi interface instead of easy, but that should not be noticeable at all in
 # this file!
 <info>
 <keywords>

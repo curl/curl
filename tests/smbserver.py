@@ -76,7 +76,7 @@ class ShutdownHandler(threading.Thread):
         signal.signal(signal.SIGTERM, self._sighandler)
 
     def __exit__(self, *_):
-        # Call for shutdown just in case it wasn't done already
+        # Call for shutdown just in case it was not done already
         self.shutdown_event.set()
         # Wait for thread, and therefore also the server, to finish
         self.join()
@@ -408,7 +408,7 @@ def setup_logging(options):
         handler.setLevel(logging.DEBUG)
         root_logger.addHandler(handler)
     else:
-        # The logfile wasn't specified. Add a stdout logger.
+        # The logfile was not specified. Add a stdout logger.
         add_stdout = True
 
     if options.verbose:

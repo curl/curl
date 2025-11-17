@@ -29,7 +29,7 @@ Content-Type: text/html
 http
 </server>
 <name>
---etag-compare that gets a 304 back shouldn't overwrite the file
+--etag-compare that gets a 304 back should not overwrite the file
 </name>
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/output%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER

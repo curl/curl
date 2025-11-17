@@ -317,7 +317,7 @@ sub processexists {
 
 #######################################################################
 # killpid attempts to gracefully stop processes in the given pid list
-# with a SIGTERM signal and SIGKILLs those which haven't died on time.
+# with a SIGTERM signal and SIGKILLs those which have not died on time.
 #
 sub killpid {
     my ($verbose, $pidlist) = @_;

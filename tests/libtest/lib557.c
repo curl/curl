@@ -1108,7 +1108,7 @@ static int test_curl_off_t_formatting(void)
 static int string_check_low(int linenumber, char *buf, const char *buf2)
 {
   if(strcmp(buf, buf2)) {
-    /* they shouldn't differ */
+    /* they should not differ */
     curl_mprintf("sprintf line %d failed:\nwe      '%s'\nsystem: '%s'\n",
                  linenumber, buf, buf2);
     return 1;
@@ -1121,7 +1121,7 @@ static int strlen_check_low(int linenumber, char *buf, size_t len)
 {
   size_t buflen = strlen(buf);
   if(len != buflen) {
-    /* they shouldn't differ */
+    /* they should not differ */
     curl_mprintf("sprintf strlen:%d failed:\nwe '%zu'\nsystem: '%zu'\n",
                  linenumber, buflen, len);
     return 1;

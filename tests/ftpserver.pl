@@ -3342,7 +3342,7 @@ while(1) {
         }
 
         if($check) {
-            logmsg "$FTPCMD wasn't handled!\n";
+            logmsg "$FTPCMD was not handled!\n";
             if($proto eq 'pop3') {
                 sendcontrol "-ERR $FTPCMD is not dealt with!\r\n";
             }

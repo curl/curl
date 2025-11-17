@@ -242,7 +242,7 @@ sub singletest_unbufferlogs {
 # Clear the buffered log messages & stop buffering after returning them
 sub singletest_dumplogs {
     if(!defined $singletest_bufferedrunner) {
-        # probably not multiprocess mode and logs weren't buffered
+        # probably not multiprocess mode and logs were not buffered
         return undef;
     }
     my $logsref = $singletest_logs{$singletest_bufferedrunner};
