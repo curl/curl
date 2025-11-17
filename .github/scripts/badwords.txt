@@ -20,6 +20,7 @@ doesn't:does not
 don't=do not
 haven't:have not
 i'm:I am
+i've:I have
 isn't:is not
 it'd:it would
 might've:might have
