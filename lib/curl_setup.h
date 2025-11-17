@@ -91,7 +91,9 @@
 #pragma warning(disable:4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
 #ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
+#if 0
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
+#endif
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for __sys_errlist(), __sys_nerr(),
