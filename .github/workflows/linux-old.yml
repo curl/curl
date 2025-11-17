@@ -11,7 +11,7 @@
 # is still supported (as of this writing).
 # stretch has ELTS support from Freexian until 2027-06-30
 # For ELTS info see https://www.freexian.com/lts/extended/docs/how-to-use-extended-lts/
-# The Debian key will expire 2025-05-20, after which package signature
+# The Debian key expires 2025-05-20, after which package signature
 # verification may need to be disabled.
 # httrack is one of the smallest downloaders, needed to bootstrap ELTS,
 # and doesn not conflict with the curl we are building.
