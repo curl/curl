@@ -647,7 +647,7 @@ jobs:
           rm ~/rustls/librustls.zip
 
       - name: 'build rustls'
-        # Note: we don't check cache-hit here. If the cache is hit, we still need to dpkg install the deb.
+        # Note: we do not check cache-hit here. If the cache is hit, we need to dpkg install the deb.
         if: ${{ contains(matrix.build.install_steps, 'rustls') }}
         run: sudo dpkg -i ~/rustls/"librustls_${RUSTLS_VERSION}_amd64.deb"
 
