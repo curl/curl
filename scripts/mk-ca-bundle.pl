@@ -92,7 +92,7 @@ my @valid_mozilla_trust_purposes = (
 my @valid_mozilla_trust_levels = (
     "TRUSTED_DELEGATOR",    # CAs
     "NOT_TRUSTED",          # Don't trust these certs.
-    "MUST_VERIFY_TRUST",    # This explicitly tells us that it ISN'T a CA but is
+    "MUST_VERIFY_TRUST",    # This explicitly tells us that it IS NOT a CA but is
                             # otherwise ok. In other words, this should tell the
                             # app to ignore any other sources that claim this is
                             # a CA.
@@ -154,7 +154,7 @@ sub warning_message() {
         print "  2) Default to 'release', but more recent updates may be found in other trees\n";
         print "  3) certdata.txt file format may change, lag time to update this script\n";
         print "  4) Generally unwise to blindly trust CAs without manual review & verification\n";
-        print "  5) Mozilla apps use additional security checks aren't represented in certdata\n";
+        print "  5) Mozilla apps use additional security checks are not represented in certdata\n";
         print "  6) Use of this script will make a security engineer grind his teeth and\n";
         print "     swear at you.  ;)\n";
         exit;
@@ -241,7 +241,7 @@ sub parse_csv_param($$@) {
 sub sha256 {
     my $result;
     if($Digest::SHA::VERSION || $Digest::SHA::PurePerl::VERSION) {
-        open(FILE, $_[0]) or die "Can't open '$_[0]': $!";
+        open(FILE, $_[0]) or die "Could not open '$_[0]': $!";
         binmode(FILE);
         $result = $MOD_SHA->new(256)->addfile(*FILE)->hexdigest;
         close(FILE);
