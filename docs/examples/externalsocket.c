@@ -26,8 +26,8 @@
  * </DESC>
  */
 #ifdef _WIN32
-#ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for strerror() */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for strerror() */
 #endif
 #endif
 #ifdef _MSC_VER

@@ -57,8 +57,8 @@
  * it with --synctime. By default, it only display the webserver's clock.
  */
 #ifdef _WIN32
-#ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for _snprintf(), fopen(), gmtime(),
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), gmtime(),
                                     localtime(), sscanf() */
 #endif
 #endif
