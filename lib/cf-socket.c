@@ -176,9 +176,10 @@ tcpkeepalive(struct Curl_cfilter *cf,
   }
   else {
 #ifdef USE_WINSOCK
-/* Windows 10, version 1709 (10.0.16299) and later versions can use
-   setsockopt() TCP_KEEP* */
+/* Offered by mingw-w64 v12+. MS SDK ~10+/~VS2017+. */
 #if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+    /* Windows 10, version 1709 (10.0.16299) and later versions can use
+       setsockopt() TCP_KEEP*. Older versions return with failure. */
     if(curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       optval = curlx_sltosi(data->set.tcp_keepidle);
