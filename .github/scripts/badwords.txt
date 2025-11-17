@@ -18,6 +18,7 @@ couldn't:could not
 didn't:did not
 doesn't:does not
 don't=do not
+haven't:have not
 i'm:I am
 isn't:is not
 it'd:it would
@@ -35,6 +36,7 @@ we'd:we would
 we'll:we will
 we're:we are
 we've:we have
+weren't:were not
 won't:will not
 wouldn't:would not
 you'd:you would
