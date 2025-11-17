@@ -146,8 +146,8 @@ static CURLcode start_req(struct h1_req_parser *parser,
 
   DEBUGASSERT(!parser->req);
   /* line must match: "METHOD TARGET HTTP_VERSION" */
-  if(custom_method && !strncmp(custom_method, parser->line,
-                               strlen(custom_method))) {
+  if(custom_method && custom_method[0] &&
+     !strncmp(custom_method, parser->line, strlen(custom_method))) {
     p = parser->line + strlen(custom_method);
   }
   else {
