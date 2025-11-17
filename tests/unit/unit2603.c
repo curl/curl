@@ -177,7 +177,7 @@ static CURLcode test_unit2603(const char *arg)
     T6_INPUT, NULL, NULL, "PUT", NULL, NULL, "/path", 1, 3
   };
 
-  /* test a custom method with space, #19543
+  /* test a custom method with space, #19543 */
   static const char *T7_INPUT[] = {
     "IN SANE /path HTTP/1.1\r\nContent-Length: 0\r\n\r\n",
     NULL,
