@@ -516,7 +516,7 @@ $ endif
 $!
 $!
 $! CC /LIST, LINK /MAP, and MESSAGE /LIST are defaults in batch mode,
-$! so be explicit when they're not desired.
+$! so be explicit when they are not desired.
 $!
 $
 $ if list .eq. 0
@@ -744,7 +744,7 @@ $   endif
 $   if ((f$search(ossl_lib1) .eqs. "") .or. -
         (f$search(ossl_lib2) .eqs. ""))
 $   then
-$       write sys$output "Can't find OpenSSL ''msg':"
+$       write sys$output "Cannot find OpenSSL ''msg':"
 $       write sys$output "   ''ossl_lib1'"
 $       write sys$output "   ''ossl_lib2'"
 $       goto Common_Exit
@@ -943,7 +943,7 @@ $   reset = f$search( "reset", 1)
 $Loop:
 $   file = f$search( search, 1)
 $   if file .eqs. "" then goto EndLoop
-$!  Skip a name if it's in the P4 exclusion list.
+$!  Skip a name if it is in the P4 exclusion list.
 $   if (p4 .nes. "")
 $   then
 $       name__ = "," + -
@@ -1016,7 +1016,7 @@ $   endif
 $ ENDSUBROUTINE   ! Compile
 $!
 $! Do a diff of the file specified in P1 with that in P2.  If different
-$! copy P1 to P2.  This also covers if P2 doesn't exist, but not if P2
+$! copy P1 to P2.  This also covers if P2 does not exist, but not if P2
 $! is an invalid filespec.
 $!
 $MoveIfDiff:  subroutine

@@ -33,7 +33,7 @@
  * will turn on some CRTL features that are not enabled by default.
  *
  * The CRTL features can also be turned on via logical names, but that
- * impacts all programs and some aren't ready, willing, or able to handle
+ * impacts all programs and some are not ready, willing, or able to handle
  * those settings.
  *
  * On VMS versions that are too old to use the feature setting API, this
