@@ -34,10 +34,13 @@
 int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef _CRT_NONSTDC_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup() */
 #endif
+#endif
+
+#ifdef _WIN32
 #if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600  /* Requires Windows Vista */

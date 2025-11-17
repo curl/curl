@@ -25,7 +25,7 @@
  * Simple HTTP GET that stores the headers in a separate file
  * </DESC>
  */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
 #endif

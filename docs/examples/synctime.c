@@ -56,7 +56,7 @@
  * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
  */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), gmtime(),
                                     localtime(), sscanf() */

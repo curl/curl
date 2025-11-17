@@ -25,7 +25,7 @@
  * Multiplexed HTTP/2 downloads over a single connection
  * </DESC>
  */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), strerror() */
 #endif

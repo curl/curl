@@ -31,7 +31,7 @@
  * The transfer's log is written to disk only if the transfer fails.
  *
  */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror(), vsnprintf() */
 #endif
