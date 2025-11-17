@@ -74,7 +74,7 @@ if test "x$OPT_GNUTLS" != xno; then
         addlib=-lgnutls
         addld=-L$OPT_GNUTLS/lib$libsuff
         addcflags=-I$OPT_GNUTLS/include
-        version="" # we just don't know
+        version="" # we just do not know
         gtlslib=$OPT_GNUTLS/lib$libsuff
       fi
     fi
@@ -118,7 +118,7 @@ if test "x$OPT_GNUTLS" != xno; then
         check_for_ca_bundle=1
         if test -n "$gtlslib"; then
           dnl when shared libs were found in a path that the run-time
-          dnl linker doesn't search through, we need to add it to
+          dnl linker does not search through, we need to add it to
           dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
           dnl due to this
           if test "x$cross_compiling" != "xyes"; then

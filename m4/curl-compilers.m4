@@ -119,7 +119,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     compiler_ver="$clangver"
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
     if test "$appleclang" = '1' && test "$oldapple" = '0'; then
-      dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
+      dnl Starting with Xcode 7 / clang 3.7, Apple clang does not tell its upstream version
       if   test "$compiler_num" -ge '1700'; then compiler_num='1901'
       elif test "$compiler_num" -ge '1600'; then compiler_num='1700'
       elif test "$compiler_num" -ge '1500'; then compiler_num='1600'

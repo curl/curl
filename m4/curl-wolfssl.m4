@@ -161,7 +161,7 @@ if test "x$OPT_WOLFSSL" != xno; then
 
       if test -n "$wolfssllibpath"; then
         dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
+        dnl linker does not search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
@@ -172,7 +172,7 @@ if test "x$OPT_WOLFSSL" != xno; then
       fi
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE wolfssl"
     else
-      AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or doesn't work])
+      AC_MSG_ERROR([--with-wolfssl but wolfSSL was not found or does not work])
     fi
 
   fi dnl wolfSSL not disabled

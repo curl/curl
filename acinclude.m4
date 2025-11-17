@@ -1122,7 +1122,7 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_ARG_WITH(ca-bundle,
 AS_HELP_STRING([--with-ca-bundle=FILE],
   [Absolute path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
+AS_HELP_STRING([--without-ca-bundle], [Do not use a default CA bundle]),
   [
     want_ca="$withval"
     if test "x$want_ca" = "xyes"; then
@@ -1136,7 +1136,7 @@ AS_HELP_STRING([--with-ca-path=DIRECTORY],
 their filenames in a hash format. This option can be used with the OpenSSL, \
 GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
-AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
+AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
   [
     want_capath="$withval"
     if test "x$want_capath" = "xyes"; then
@@ -1255,7 +1255,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   AC_MSG_CHECKING([whether to use OpenSSL's built-in CA store])
   AC_ARG_WITH(ca-fallback,
 AS_HELP_STRING([--with-ca-fallback], [Use OpenSSL's built-in CA store])
-AS_HELP_STRING([--without-ca-fallback], [Don't use OpenSSL's built-in CA store]),
+AS_HELP_STRING([--without-ca-fallback], [Do not use OpenSSL's built-in CA store]),
   [
     if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
@@ -1283,7 +1283,7 @@ AC_DEFUN([CURL_CHECK_CA_EMBED], [
   AC_ARG_WITH(ca-embed,
 AS_HELP_STRING([--with-ca-embed=FILE],
   [Absolute path to a file containing CA certificates to embed in the curl tool (example: /etc/ca-bundle.crt)])
-AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle in the curl tool]),
+AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the curl tool]),
   [
     want_ca_embed="$withval"
     if test "x$want_ca_embed" = "xyes"; then

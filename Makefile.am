@@ -111,7 +111,7 @@ pytest: test
 pytest-ci: test
 
 test:
-	@echo "NOTICE: we can't run the tests when cross-compiling!"
+	@echo "NOTICE: we cannot run the tests when cross-compiling!"
 
 else
 
