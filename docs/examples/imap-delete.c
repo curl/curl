@@ -25,8 +25,8 @@
  * Delete an IMAP folder
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to delete an existing mailbox folder

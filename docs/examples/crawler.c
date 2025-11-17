@@ -29,15 +29,16 @@
  * hundreds of concurrent connections to various servers.
  * </DESC>
  */
-
 #include <libxml/HTMLparser.h>
 #include <libxml/xpath.h>
 #include <libxml/uri.h>
-#include <curl/curl.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <signal.h>
+
+#include <curl/curl.h>
 
 /* Parameters */
 static int max_con = 200;

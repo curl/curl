@@ -25,8 +25,8 @@
  * Obtain POP3 message statistics
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to obtain message statistics using

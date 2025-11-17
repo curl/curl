@@ -25,8 +25,8 @@
  * POP3 example showing how to retrieve only the headers of an email
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to retrieve only the headers of a mail

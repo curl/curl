@@ -36,7 +36,6 @@
 #include <string.h>
 #include <errno.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX

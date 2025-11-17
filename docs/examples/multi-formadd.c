@@ -25,12 +25,10 @@
  * using the multi interface to do a multipart formpost without blocking
  * </DESC>
  */
-
 /*
- * Warning: this example uses the deprecated form api. See "multi-post.c"
- *          for a similar example using the mime api.
+ * Warning: this example uses the deprecated form API. See "multi-post.c"
+ *          for a similar example using the mime API.
  */
-
 #include <stdio.h>
 #include <string.h>
 

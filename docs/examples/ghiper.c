@@ -55,14 +55,15 @@
  callback.
 
 */
-
 #include <glib.h>
-#include <sys/stat.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sys/stat.h>
+
 #include <curl/curl.h>
 
 #define MSG_OUT g_print   /* Change to "g_error" to write to stderr */

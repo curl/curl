@@ -28,10 +28,11 @@
 /*
  * LibTidy => https://www.html-tidy.org/
  */
-
 #include <stdio.h>
+
 #include <tidy/tidy.h>
 #include <tidy/tidybuffio.h>
+
 #include <curl/curl.h>
 
 /* curl write callback, to fill tidy's input buffer...  */

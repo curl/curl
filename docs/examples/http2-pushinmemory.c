@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 struct Memory {

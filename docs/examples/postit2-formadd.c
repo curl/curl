@@ -25,7 +25,6 @@
  * HTTP Multipart formpost with file upload and two additional parts.
  * </DESC>
  */
-
 /*
  * Example code that uploads a filename 'foo' to a remote script that accepts
  * "HTML form based" (as described in RFC 1738) uploads using HTTP POST.
@@ -41,7 +40,6 @@
  * <input type="submit" value="send" name="submit">
  * </form>
  */
-
 #include <stdio.h>
 #include <string.h>
 

@@ -26,11 +26,9 @@
  * transfers in parallel.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 /*

@@ -25,8 +25,8 @@
  * Delete POP3 emails
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to delete an existing mail using
