@@ -148,10 +148,17 @@ environment:
 
     # generated VisualStudioSolution-based builds
 
-    - job_name: 'VisualStudioSolution VS2013, Debug, x86, Schannel, Build-only'
+    - job_name: 'VisualStudioSolution VS2010, Release, x86, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
+      BUILD_SYSTEM: VisualStudioSolution
+      PRJ_CFG: 'DLL Release - DLL Windows SSPI - DLL WinIDN'
+      PLAT: 'Win32'
+      VC_VERSION: VC10
+    - job_name: 'VisualStudioSolution VS2013, Debug, x64, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
+      PLAT: 'x64'
       VC_VERSION: VC12
 
 install:
