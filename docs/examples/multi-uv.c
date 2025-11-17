@@ -159,11 +159,9 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 /* callback from libuv when timeout expires */
 static void on_uv_timeout(uv_timer_t *req)
 {
-  struct datauv *uv;
-  int running_handles;
-
   /* get the datauv struct from the timer handle */
-  uv = (struct datauv *)((char *)req - offsetof(struct datauv, timeout));
+  struct datauv *uv = (struct datauv *)req;
+  int running_handles;
 
   curl_multi_socket_action(uv->multi, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
