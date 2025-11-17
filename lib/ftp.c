@@ -1902,7 +1902,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.proxy) {
     /* This connection uses a proxy and we need to connect to the proxy again
-     * here. We do not want to rely on a former host lookup that might've
+     * here. We do not want to rely on a former host lookup that might have
      * expired now, instead we remake the lookup here and now! */
     struct ip_quadruple ipquad;
     bool is_ipv6;
@@ -1964,7 +1964,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   }
 
   /*
-   * When this is used from the multi interface, this might've returned with
+   * When this is used from the multi interface, this might have returned with
    * the 'connected' set to FALSE and thus we are now awaiting a non-blocking
    * connect to connect.
    */

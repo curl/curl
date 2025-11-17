@@ -30,7 +30,7 @@
  *
  * This test was added after the HTTPS-using-multi-interface with OpenSSL
  * regression of 7.19.1 to hopefully prevent this embarrassing mistake from
- * appearing again... Unfortunately the bug wasn't triggered by this test,
+ * appearing again... Unfortunately the bug was not triggered by this test,
  * which presumably is because the connect to a local server is too
  * fast/different compared to the real/distant servers we saw the bug happen
  * with.

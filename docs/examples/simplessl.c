@@ -103,7 +103,7 @@ int main(void)
 #endif
 
   /* cert is stored PEM coded in file... */
-  /* since PEM is default, we needn't set it for PEM */
+  /* since PEM is default, we need not set it for PEM */
   curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
   /* set the cert for client authentication */

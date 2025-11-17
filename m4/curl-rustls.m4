@@ -127,9 +127,9 @@ if test "x$OPT_RUSTLS" != xno; then
       dnl use the values pkg-config reported.  This is here
       dnl instead of below with CPPFLAGS and LDFLAGS because we only
       dnl learn about this via pkg-config.  If we only have
-      dnl the argument to --with-rustls we don't know what
+      dnl the argument to --with-rustls we do not know what
       dnl additional libs may be necessary.  Hope that we
-      dnl don't need any.
+      dnl do not need any.
       LIBS="$SSL_LIBS $LIBS"
       link_pkgconfig=1
       ssl_msg="Rustls"
@@ -157,7 +157,7 @@ if test "x$OPT_RUSTLS" != xno; then
     check_for_ca_bundle=1
 
     if test -n "$LIB_RUSTLS"; then
-      dnl when shared libs were found in a path that the run-time
+      dnl when shared libs were found in a path that the runtime
       dnl linker does not search through, we need to add it to
       dnl CURL_LIBRARY_PATH so that further configure tests do not
       dnl fail due to this

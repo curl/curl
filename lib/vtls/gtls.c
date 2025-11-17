@@ -691,7 +691,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   /* we always unconditionally get the session id here, as even if we
      already got it from the cache and asked to use it in the connection, it
-     might've been rejected and then a new one is in use now and we need to
+     might have been rejected and then a new one is in use now and we need to
      detect that. */
 
   /* get the session ID data size */

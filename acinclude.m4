@@ -820,7 +820,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   ])
 
   dnl Definition of HAVE_CLOCK_GETTIME_MONOTONIC is intentionally postponed
-  dnl until library linking and run-time checks for clock_gettime succeed.
+  dnl until library linking and runtime checks for clock_gettime succeed.
 ])
 
 dnl CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW
@@ -1085,8 +1085,8 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
   if test "x$cross_compiling" != xyes; then
 
     dnl just run a program to verify that the libs checked for previous to this
-    dnl point also is available run-time!
-    AC_MSG_CHECKING([run-time libs availability])
+    dnl point also is available runtime!
+    AC_MSG_CHECKING([runtime libs availability])
     CURL_RUN_IFELSE([
       int main(void)
       {
@@ -1095,7 +1095,7 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
     ],
     AC_MSG_RESULT([fine]),
     AC_MSG_RESULT([failed])
-    AC_MSG_ERROR([one or more libs available at link-time are not available run-time. Libs used at link-time: $LIBS])
+    AC_MSG_ERROR([one or more libs available at link-time are not available runtime. Libs used at link-time: $LIBS])
     )
 
     dnl if this test fails, configure has already stopped
@@ -1122,7 +1122,7 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
   AC_ARG_WITH(ca-bundle,
 AS_HELP_STRING([--with-ca-bundle=FILE],
   [Absolute path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
+AS_HELP_STRING([--without-ca-bundle], [Do not use a default CA bundle]),
   [
     want_ca="$withval"
     if test "x$want_ca" = "xyes"; then
@@ -1136,7 +1136,7 @@ AS_HELP_STRING([--with-ca-path=DIRECTORY],
 their filenames in a hash format. This option can be used with the OpenSSL, \
 GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
-AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
+AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
   [
     want_capath="$withval"
     if test "x$want_capath" = "xyes"; then
@@ -1255,7 +1255,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   AC_MSG_CHECKING([whether to use OpenSSL's built-in CA store])
   AC_ARG_WITH(ca-fallback,
 AS_HELP_STRING([--with-ca-fallback], [Use OpenSSL's built-in CA store])
-AS_HELP_STRING([--without-ca-fallback], [Don't use OpenSSL's built-in CA store]),
+AS_HELP_STRING([--without-ca-fallback], [Do not use OpenSSL's built-in CA store]),
   [
     if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
@@ -1283,7 +1283,7 @@ AC_DEFUN([CURL_CHECK_CA_EMBED], [
   AC_ARG_WITH(ca-embed,
 AS_HELP_STRING([--with-ca-embed=FILE],
   [Absolute path to a file containing CA certificates to embed in the curl tool (example: /etc/ca-bundle.crt)])
-AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle in the curl tool]),
+AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the curl tool]),
   [
     want_ca_embed="$withval"
     if test "x$want_ca_embed" = "xyes"; then
@@ -1566,7 +1566,7 @@ TEST EINVAL TEST
 dnl CURL_DARWIN_CFLAGS
 dnl
 dnl Set -Werror=partial-availability to detect possible breaking code
-dnl with very low deployment targets.
+dnl with low deployment targets.
 dnl
 
 AC_DEFUN([CURL_DARWIN_CFLAGS], [
@@ -1583,7 +1583,7 @@ AC_DEFUN([CURL_DARWIN_CFLAGS], [
 dnl CURL_SUPPORTS_BUILTIN_AVAILABLE
 dnl
 dnl Check to see if the compiler supports __builtin_available. This built-in
-dnl compiler function first appeared in Apple LLVM 9.0.0. It's so new that, at
+dnl compiler function first appeared in Apple LLVM 9.0.0. It is so new that, at
 dnl the time this macro was written, the function was not yet documented. Its
 dnl purpose is to return true if the code is running under a certain OS version
 dnl or later.

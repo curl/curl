@@ -254,7 +254,7 @@ sub scanmanpage {
         if($_ =~ /(.*)\\f([^BIP])/) {
             my ($pre, $format) = ($1, $2);
             if($pre !~ /\\\z/) {
-                # only if there wasn't another backslash before the \f
+                # only if there was not another backslash before the \f
                 print STDERR "$file:$line suspicious \\f format!\n";
                 $errors++;
             }

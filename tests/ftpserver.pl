@@ -34,8 +34,8 @@
 # It is meant to exercise curl, it is not meant to be a fully working
 # or even overly standard compliant server.
 #
-# You may optionally specify port on the command line, otherwise it'll
-# default to port 8921.
+# You may optionally specify port on the command line, otherwise it
+# defaults to port 8921.
 #
 # All socket/network/TCP related stuff is done by the 'sockfilt' program.
 #
@@ -989,7 +989,7 @@ sub DATA_smtp {
         }
 
         if($nosave) {
-            print $file "$ulsize bytes would've been stored here\n";
+            print $file "$ulsize bytes would have been stored here\n";
         }
 
         close($file);
@@ -1336,7 +1336,7 @@ sub APPEND_imap {
         }
 
         if($nosave) {
-            print $file "$size bytes would've been stored here\n";
+            print $file "$size bytes would have been stored here\n";
         }
 
         close($file);
@@ -2439,7 +2439,7 @@ sub STOR_ftp {
         }
     }
     if($nosave) {
-        print $file "$ulsize bytes would've been stored here\n";
+        print $file "$ulsize bytes would have been stored here\n";
     }
     close($file);
     close_dataconn($disc);
@@ -3342,7 +3342,7 @@ while(1) {
         }
 
         if($check) {
-            logmsg "$FTPCMD wasn't handled!\n";
+            logmsg "$FTPCMD was not handled!\n";
             if($proto eq 'pop3') {
                 sendcontrol "-ERR $FTPCMD is not dealt with!\r\n";
             }

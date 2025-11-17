@@ -175,7 +175,7 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     curlx_dyn_reset(&ts->rcvbuf);
     curlx_dyn_reset(&ts->request_data);
     /* restore the protocol pointer */
-    data->info.httpcode = 0; /* clear it as it might've been used for the
+    data->info.httpcode = 0; /* clear it as it might have been used for the
                                 proxy */
     /* If a proxy-authorization header was used for the proxy, then we should
        make sure that it is not accidentally used for the document request

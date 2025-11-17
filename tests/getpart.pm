@@ -115,7 +115,7 @@ sub getpartattr {
             }
             last;
         }
-        # detect end of section when part wasn't found
+        # detect end of section when part was not found
         elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
             last;
         }
@@ -242,7 +242,7 @@ sub loadtest {
     else {
         # failure
         if($warning) {
-            print STDERR "file $file wouldn't open!\n";
+            print STDERR "file $file would not open!\n";
         }
         return 1;
     }
@@ -310,7 +310,7 @@ sub savetest {
     else {
         # failure
         if($warning) {
-            print STDERR "file $file wouldn't open!\n";
+            print STDERR "file $file would not open!\n";
         }
         return 1;
     }

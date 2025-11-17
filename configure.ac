@@ -25,7 +25,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
 
-dnl We don't know the version number "statically" so we use a dash here
+dnl We do not know the version number "statically" so we use a dash here
 AC_INIT([curl], [-], [a suitable curl mailing list: https://curl.se/mail/])
 
 XC_OVR_ZZ50
@@ -328,7 +328,7 @@ AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
 )
 AC_SUBST(VSFTPD)
 
-dnl we'd like a httpd as test server
+dnl we would like an httpd as test server
 dnl
 HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
@@ -378,7 +378,7 @@ fi
 AC_SUBST(HTTPD)
 AC_SUBST(APXS)
 
-dnl we'd like a dante as test socks server
+dnl we would like a dante as test socks server
 dnl
 DANTED_ENABLED="maybe"
 AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
@@ -1368,7 +1368,7 @@ else
     [
       dnl zlib.h was found
       HAVE_ZLIB_H="1"
-      dnl if the lib wasn't found already, try again with the new paths
+      dnl if the lib was not found already, try again with the new paths
       if test "$HAVE_LIBZ" != "1"; then
         AC_CHECK_LIB(z, gzread,
           [
@@ -1500,8 +1500,8 @@ if test X"$OPT_BROTLI" != Xno; then
 
   if test "$HAVE_BROTLI" = "1"; then
     if test -n "$DIR_BROTLI"; then
-      dnl when the brotli shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the brotli shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
@@ -1589,8 +1589,8 @@ if test X"$OPT_ZSTD" != Xno; then
 
   if test "$HAVE_ZSTD" = "1"; then
     if test -n "$DIR_ZSTD"; then
-      dnl when the zstd shared lib were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to
+      dnl when the zstd shared lib were found in a path that the runtime
+      dnl linker does not search through, we need to add it to
       dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
       dnl this
 
@@ -1836,7 +1836,7 @@ if test x"$want_gss" = xyes; then
         CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
       fi
       if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl krb5-config does not have --libs-only-L or similar, put everything
         dnl into LIBS
         gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
         LIBS="$gss_libs $LIBS"
@@ -1845,7 +1845,7 @@ if test x"$want_gss" = xyes; then
         LIBS="$gss_libs $LIBS"
         link_pkgconfig=1
       elif test -f "$KRB5CONFIG"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl krb5-config does not have --libs-only-L or similar, put everything
         dnl into LIBS
         gss_libs=`$KRB5CONFIG --libs gssapi`
         LIBS="$gss_libs $LIBS"
@@ -2286,8 +2286,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
   if test "$USE_LIBSSH2" = "1"; then
     if test -n "$DIR_SSH2"; then
-      dnl when the libssh2 shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the libssh2 shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
@@ -2366,8 +2366,8 @@ elif test X"$OPT_LIBSSH" != Xno; then
       LIBS="-liphlpapi $LIBS"
     fi
     if test -n "$DIR_SSH"; then
-      dnl when the libssh shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the libssh shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
@@ -2420,7 +2420,7 @@ case "$OPT_LDAP" in
     want_ldap="yes"
     ;;
   off)
-    dnl no --with-ldap option given, don't change anything
+    dnl no --with-ldap option given, do not change anything
     want_ldap="default"
     ;;
   *)
@@ -2477,7 +2477,7 @@ if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
 
     if test "$ldap_lib_ok" = "no"; then
       if test -n "$ldap_askedfor"; then
-        AC_MSG_ERROR([couldn't detect the LDAP libraries])
+        AC_MSG_ERROR([could not detect the LDAP libraries])
       fi
       AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
       AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
@@ -2495,7 +2495,7 @@ if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
     case X-"$curl_cv_ldap_LIBS" in
       X-unknown)
         if test -n "$ldap_askedfor"; then
-          AC_MSG_ERROR([couldn't detect the LDAP libraries])
+          AC_MSG_ERROR([could not detect the LDAP libraries])
         fi
         AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
@@ -2514,8 +2514,8 @@ fi
 if test x$CURL_DISABLE_LDAP != x1; then
   dnl Add to library path if needed
   if test -n "$DIR_LDAP"; then
-    dnl when the ldap shared lib were found in a path that the run-time
-    dnl linker doesn't search through, we need to add it to
+    dnl when the ldap shared lib were found in a path that the runtime
+    dnl linker does not search through, we need to add it to
     dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
     dnl this
 
@@ -2527,8 +2527,8 @@ if test x$CURL_DISABLE_LDAP != x1; then
   fi
 
   if test "$LBERLIBNAME"; then
-    dnl If name is "no" then don't define this library at all
-    dnl (it's only needed if libldap.so's dependencies are broken).
+    dnl If name is "no" then do not define this library at all
+    dnl (it is only needed if libldap.so's dependencies are broken).
     dnl Skip this check if we already determined we need both libraries above
     if test "$LBERLIBNAME" != "no" -a "$ldap_lib_ok" != "yes"; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
@@ -3789,7 +3789,7 @@ if test X"$want_quiche" != Xno; then
         )
       ],
         dnl not found, revert back to clean variables
-        AC_MSG_ERROR([couldn't use quiche])
+        AC_MSG_ERROR([could not use quiche])
     )
   else
     dnl no quiche pkg-config found, deal with it
@@ -3955,7 +3955,7 @@ if test -z "$PERL" -a x"$FISH_FUNCTIONS_DIR" != x; then
 fi
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
-dnl Now check for the very most basic headers. Then we can use these
+dnl Now check for the most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
   sys/types.h \
@@ -4053,7 +4053,7 @@ AC_CHECK_TYPE(long long,
 )
 
 if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
-  AC_MSG_ERROR([64 bit curl_off_t is required])
+  AC_MSG_ERROR([64-bit curl_off_t is required])
 fi
 
 # check for ssize_t
@@ -4297,7 +4297,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
           ;;
       esac
 
-      dnl if it wasn't found without lib, search for it in pthread lib
+      dnl if it was not found without lib, search for it in pthread lib
       if test "$USE_THREADS_POSIX" != "1"; then
         # assign PTHREAD for pkg-config use
         PTHREAD=" -pthread"
@@ -4908,7 +4908,7 @@ AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
     AC_MSG_RESULT(yes)
 )
 
-dnl only check for HSTS if there's SSL present
+dnl only check for HSTS if there is SSL present
 if test -n "$SSL_ENABLED"; then
   dnl ************************************************************
   dnl switch on/off hsts
@@ -5029,9 +5029,9 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
       if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
         AC_MSG_RESULT(yes)
       else
-        dnl WebSockets requires >32 bit curl_off_t
+        dnl WebSockets requires >32-bit curl_off_t
         AC_MSG_RESULT(no)
-        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
+        AC_MSG_WARN([WebSockets disabled due to lack of >32-bit curl_off_t])
         AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
         CURL_DISABLE_WEBSOCKETS=1
       fi

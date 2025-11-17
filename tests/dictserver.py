@@ -140,7 +140,7 @@ def setup_logging(options):
         handler.setLevel(logging.DEBUG)
         root_logger.addHandler(handler)
     else:
-        # The logfile wasn't specified. Add a stdout logger.
+        # The logfile was not specified. Add a stdout logger.
         add_stdout = True
 
     if options.verbose:

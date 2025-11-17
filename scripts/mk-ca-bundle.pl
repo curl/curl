@@ -91,7 +91,7 @@ my @valid_mozilla_trust_purposes = (
 
 my @valid_mozilla_trust_levels = (
     "TRUSTED_DELEGATOR",    # CAs
-    "NOT_TRUSTED",          # Don't trust these certs.
+    "NOT_TRUSTED",          # Do not trust these certs.
     "MUST_VERIFY_TRUST",    # This explicitly tells us that it IS NOT a CA but is
                             # otherwise ok. In other words, this should tell the
                             # app to ignore any other sources that claim this is

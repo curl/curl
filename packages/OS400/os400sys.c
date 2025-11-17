@@ -702,7 +702,7 @@ Curl_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
   result = ldap_get_values_len(ld, entry, cp);
   free(cp);
 
-  /* Result data are binary in nature, so they haven't been
+  /* Result data are binary in nature, so they have not been
      converted to EBCDIC. Therefore do not convert. */
 
   return result;

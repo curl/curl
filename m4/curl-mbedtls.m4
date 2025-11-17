@@ -92,8 +92,8 @@ if test "x$OPT_MBEDTLS" != xno; then
       LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
 
       if test -n "$mbedtlslib"; then
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
+        dnl when shared libs were found in a path that the runtime
+        dnl linker does not search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then

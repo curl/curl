@@ -44,7 +44,7 @@
  *
  * o We want FTP-SSL support, which means that a connection that starts with
  *   plain sockets needs to be able to "go SSL" in the midst. This would also
- *   require some nasty perl stuff I'd rather avoid.
+ *   require some nasty perl stuff I would rather avoid.
  *
  * (Source originally based on sws.c)
  */

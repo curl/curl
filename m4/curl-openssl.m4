@@ -76,7 +76,7 @@ if test "x$OPT_OPENSSL" != xno; then
       PREFIX_OPENSSL=$OPT_OPENSSL
 
       dnl Try pkg-config even when cross-compiling.  Since we
-      dnl specify PKG_CONFIG_LIBDIR we're only looking where
+      dnl specify PKG_CONFIG_LIBDIR we are only looking where
       dnl the user told us to look
       OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
       if test -f "$OPENSSL_PCDIR/openssl.pc"; then
@@ -132,9 +132,9 @@ if test "x$OPT_OPENSSL" != xno; then
       dnl use the values pkg-config reported.  This is here
       dnl instead of below with CPPFLAGS and LDFLAGS because we only
       dnl learn about this via pkg-config.  If we only have
-      dnl the argument to --with-openssl we don't know what
+      dnl the argument to --with-openssl we do not know what
       dnl additional libs may be necessary.  Hope that we
-      dnl don't need any.
+      dnl do not need any.
       LIBS="$SSL_LIBS $LIBS"
     fi
   fi
@@ -153,7 +153,7 @@ if test "x$OPT_OPENSSL" != xno; then
       LDFLAGSPC="$CLEANLDFLAGSPC -L$LIB_OPENSSL"
     fi
     if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
-      # only set this if pkg-config wasn't used
+      # only set this if pkg-config was not used
       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
     fi
     # Linking previously failed, try extra paths from --with-openssl or
@@ -316,8 +316,8 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
-      dnl when the ssl shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the ssl shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
       if test "x$cross_compiling" != "xyes"; then
         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
@@ -391,7 +391,7 @@ AS_HELP_STRING([--enable-openssl-auto-load-config],[Enable automatic loading of 
 AS_HELP_STRING([--disable-openssl-auto-load-config],[Disable automatic loading of OpenSSL configuration]),
   [ if test X"$enableval" = X"no"; then
       AC_MSG_NOTICE([automatic loading of OpenSSL configuration disabled])
-      AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration won't be loaded automatically])
+      AC_DEFINE(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG, 1, [if the OpenSSL configuration will not be loaded automatically])
     fi
   ])
 
