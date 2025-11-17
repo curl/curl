@@ -148,7 +148,7 @@ struct bf {
   tftphdr_storage_t buf;  /* room for data packet */
 };
 
-#define BF_ALLOC -3       /* alloc'd but not yet filled */
+#define BF_ALLOC -3       /* allocated but not yet filled */
 #define BF_FREE  -2       /* free */
 
 #define opcode_RRQ   1
@@ -417,7 +417,7 @@ static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
   current = !current;             /* switch to other buffer */
   if(bfs[current].counter != BF_FREE)     /* if not free */
     write_behind(test, convert);          /* flush it */
-  bfs[current].counter = BF_ALLOC;        /* mark as alloc'd */
+  bfs[current].counter = BF_ALLOC;        /* mark as allocated */
   *dpp = &bfs[current].buf.hdr;
   return ct;                      /* this is a lie of course */
 }

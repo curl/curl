@@ -34,8 +34,8 @@
 # It is meant to exercise curl, it is not meant to be a fully working
 # or even overly standard compliant server.
 #
-# You may optionally specify port on the command line, otherwise it'll
-# default to port 8921.
+# You may optionally specify port on the command line, otherwise it
+# defaults to port 8921.
 #
 # All socket/network/TCP related stuff is done by the 'sockfilt' program.
 #

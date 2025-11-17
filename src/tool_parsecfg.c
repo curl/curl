@@ -54,7 +54,7 @@ static int unslashquote(const char *line, struct dynbuf *param)
       /* default is to output the letter after the backslash */
       switch(out = *line) {
       case '\0':
-        continue; /* this'll break out of the loop */
+        continue; /* this breaks out of the loop */
       case 't':
         out = '\t';
         break;
