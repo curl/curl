@@ -236,7 +236,7 @@ static void set_features(void)
   set_feature_default("DECC$EXEC_FILEATTR_INHERITANCE", 2);
 #endif
 
-  /* Don't display trailing dot after files without type */
+  /* Do not display trailing dot after files without type */
   set_feature_default("DECC$READDIR_DROPDOTNOTYPE", ENABLE);
 
   /* For standard output channels buffer output until terminator */

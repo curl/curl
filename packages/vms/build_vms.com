@@ -45,14 +45,14 @@ $!    LIST      Create C compiler listings and linker maps.
 $!                 /list/show=(expan,includ)/machine
 $!    FULLLIST  Full detailed listing.
 $!                 /list/show=(all, nomessages)/machine
-$!    NOHPSSL   Don't use HP SSL, even if available.
+$!    NOHPSSL   Do not use HP SSL, even if available.
 $!              Note, you must match the pointer size that the OpenSSL
 $!              shared image expects.  This procedure will select the
 $!              correct HP OpenSSL image.
-$!    NOSSL     Don't use any SSL, even if available.
+$!    NOSSL     Do not use any SSL, even if available.
 $!    OSSLOLB   Use OpenSSL object libraries (.OLB), even if shared
 $!              images (.EXE) are available.
-$!    NOZLIB    Don't use GNV$ZLIB shared image even if available.
+$!    NOZLIB    Do not use GNV$ZLIB shared image even if available.
 $!    REALCLEAN Delete product files for all host architectures.  (No
 $!              build done.)  Alias for CLEAN_ALL
 $!
