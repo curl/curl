@@ -583,6 +583,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     /* Allocate our new context handle */
     digest->http_context = calloc(1, sizeof(CtxtHandle));
     if(!digest->http_context) {
+      Curl_pSecFn->FreeCredentialsHandle(&credentials);
       curlx_unicodefree(spn);
       Curl_sspi_free_identity(p_identity);
       free(output_token);
