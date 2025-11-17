@@ -1629,7 +1629,7 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   /* only save the cookie file if a transfer was started (data->state.url is
      set), as otherwise the cookies were not completely initialized and there
-     might be cookie files that weren't loaded so saving the file is the wrong
+     might be cookie files that were not loaded so saving the file is the wrong
      thing. */
   if(data->set.str[STRING_COOKIEJAR] && data->state.url) {
     /* if we have a destination file for all the cookies to get dumped to */
