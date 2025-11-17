@@ -252,9 +252,15 @@ static const struct algo algs[] = {
   CIPHEROPTION(CALG_SHA_384),
   CIPHEROPTION(CALG_SHA_512),
   CIPHEROPTION(CALG_ECDH),
+/* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
+#ifdef CALG_ECMQV
   CIPHEROPTION(CALG_ECMQV),
+#endif
   CIPHEROPTION(CALG_ECDSA),
+/* Offered by mingw-w64 v7+. MS SDK 7.0A+. */
+#ifdef CALG_ECDH_EPHEM
   CIPHEROPTION(CALG_ECDH_EPHEM),
+#endif
   {NULL, 0},
 };
 
