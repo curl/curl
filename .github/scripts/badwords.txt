@@ -28,6 +28,7 @@ they'd:They would
 they'll:They will
 they're:They are
 they've:They have
+wasn't:was not
 we'd:we would
 we'll:we will
 we're:we are
