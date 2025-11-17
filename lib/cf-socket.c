@@ -182,8 +182,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
        setsockopt() TCP_KEEP*. Older versions return with failure. */
     if(curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
-      CURL_TRC_CF(data, cf, "Using TCP_KEEP* on fd "
-                  "%" FMT_SOCKET_T, sockfd);
+      CURL_TRC_CF(data, cf, "Set TCP_KEEP* on fd=%" FMT_SOCKET_T, sockfd);
       optval = curlx_sltosi(data->set.tcp_keepidle);
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                     (const char *)&optval, sizeof(optval)) < 0) {
