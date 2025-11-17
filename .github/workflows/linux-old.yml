@@ -14,7 +14,7 @@
 # The Debian key will expire 2025-05-20, after which package signature
 # verification may need to be disabled.
 # httrack is one of the smallest downloaders, needed to bootstrap ELTS,
-# and won't conflict with the curl we're building.
+# and doesn not conflict with the curl we are building.
 
 name: 'Linux Old'
 
@@ -74,7 +74,7 @@ jobs:
           apt-get -o Dpkg::Use-Pty=0 update
           apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libgnutls28-dev libc-ares-dev libkrb5-dev libldap2-dev librtmp-dev stunnel4 groff
           # GitHub's actions/checkout needs newer glibc and libstdc++. The latter also depends on
-          # gcc-8-base, but it doesn't actually seem used in our situation and isn't available in
+          # gcc-8-base, but it does not actually seem used in our situation and is not available in
           # the main repo, so force the install.
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
