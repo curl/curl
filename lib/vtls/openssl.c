@@ -1214,6 +1214,7 @@ static int engineload(struct Curl_easy *data,
       failf(data, "unable to set client certificate [%s]",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)));
+      X509_free(params.cert);
       return 0;
     }
     X509_free(params.cert); /* we do not need the handle any more... */
