@@ -25,6 +25,13 @@
  * Multiplexed HTTP/2 uploads over a single connection
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for '_snprintf(), fopen(), localtime(),
+                                    strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +45,16 @@
 #include <unistd.h>
 #endif
 
+/* curl stuff */
+#include <curl/curl.h>
+
+#ifndef CURLPIPE_MULTIPLEX
+/* This little trick makes sure that we do not enable pipelining for libcurls
+   old enough to not have this symbol. It is _not_ defined to zero in a recent
+   libcurl header. */
+#define CURLPIPE_MULTIPLEX 0L
+#endif
+
 #ifdef _WIN32
 #undef stat
 #define stat _stat
@@ -48,16 +65,6 @@
 
 #if defined(_MSC_VER) && (_MSC_VER < 1900)
 #define snprintf _snprintf
-#endif
-
-/* curl stuff */
-#include <curl/curl.h>
-
-#ifndef CURLPIPE_MULTIPLEX
-/* This little trick makes sure that we do not enable pipelining for libcurls
-   old enough to not have this symbol. It is _not_ defined to zero in a recent
-   libcurl header. */
-#define CURLPIPE_MULTIPLEX 0L
 #endif
 
 #ifdef _MSC_VER

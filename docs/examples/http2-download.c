@@ -25,14 +25,16 @@
  * Multiplexed HTTP/2 downloads over a single connection
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
-#endif
 
 /* curl stuff */
 #include <curl/curl.h>
@@ -42,6 +44,10 @@
    old enough to not have this symbol. It is _not_ defined to zero in a recent
    libcurl header. */
 #define CURLPIPE_MULTIPLEX 0L
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
 #endif
 
 struct transfer {

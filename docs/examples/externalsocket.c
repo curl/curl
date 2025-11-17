@@ -25,6 +25,11 @@
  * Pass in a custom socket for libcurl to use.
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for strerror() */
+#endif
+#endif
 #ifdef _MSC_VER
 #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */

@@ -25,6 +25,12 @@
  * Shows HTTPS usage with client certs and optional ssl engine use.
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 
 #include <curl/curl.h>

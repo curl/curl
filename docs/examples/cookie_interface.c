@@ -25,6 +25,11 @@
  * Import and export cookies with COOKIELIST.
  * </DESC>
  */
+#ifdef _WIN32
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf() */
+#endif
+#endif
 
 #include <stdio.h>
 #include <string.h>
