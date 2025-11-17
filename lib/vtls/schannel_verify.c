@@ -226,12 +226,12 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
           case CERT_QUERY_CONTENT_SERIALIZED_CERT:
             CertFreeCertificateContext(cert_context);
             break;
-          case: CERT_QUERY_CONTENT_CRL:
-          case: CERT_QUERY_CONTENT_SERIALIZED_CRL:
+          case CERT_QUERY_CONTENT_CRL:
+          case CERT_QUERY_CONTENT_SERIALIZED_CRL:
             CertFreeCRLContext(cert_context);
             break;
-          case: CERT_QUERY_CONTENT_CTL:
-          case: CERT_QUERY_CONTENT_SERIALIZED_CTL:
+          case CERT_QUERY_CONTENT_CTL:
+          case CERT_QUERY_CONTENT_SERIALIZED_CTL:
             CertFreeCTLContext(cert_context);
             break;
           default:
