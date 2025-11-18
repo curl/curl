@@ -244,7 +244,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    result = _wopen(target, oflag, pmode);
+    errno = _wsopen_s(&result, target, oflag, 0, pmode);
     curlx_unicodefree(filename_w);
   }
   else
@@ -255,7 +255,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  result = _open(target, oflag, pmode);
+  errno = _sopen_s(&result, target, oflag, 0, pmode);
 #endif
 
   (free)(fixed);
@@ -276,7 +276,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
       target = fixed;
     else
       target = filename_w;
-    result = _wfopen(target, mode_w);
+    errno = _wfopen_s(&result, target, mode_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -288,8 +288,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = fopen(target, mode);
+  errno = fopen_s(&result, target, mode);
 #endif
 
   (free)(fixed);
