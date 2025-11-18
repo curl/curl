@@ -1974,7 +1974,9 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       conn->remote_port = (unsigned short)port;
   }
 
-  (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
+  uc = curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
+  if(uc && (uc != CURLUE_NO_QUERY))
+    return CURLE_OUT_OF_MEMORY;
 
 #ifdef USE_IPV6
   if(data->set.scope_id)
