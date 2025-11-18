@@ -372,9 +372,9 @@ ParameterError getparameter(const char *flag, const char *nextarg,
                             int max_recursive);
 
 #ifdef UNITTESTS
-void parse_cert_parameter(const char *cert_parameter,
-                          char **certname,
-                          char **passphrase);
+ParameterError parse_cert_parameter(const char *cert_parameter,
+                                    char **certname,
+                                    char **passphrase);
 #endif
 
 ParameterError parse_args(int argc, argv_item_t argv[]);
