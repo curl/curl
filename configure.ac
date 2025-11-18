@@ -1108,6 +1108,22 @@ AS_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
     AC_MSG_RESULT(no)
 )
 
+AC_MSG_CHECKING([whether to use libbacktrace])
+AC_ARG_WITH(backtrace,
+AS_HELP_STRING([--enable-backtrace],[use libbacktrace when linking]),
+[ case "$enableval" in
+  yes)
+    LIBS="-lbacktrace $LIBS"
+    AC_DEFINE(USE_BACKTRACE, 1, [if libbacktrace is in use])
+    AC_MSG_RESULT(yes)
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
+  esac ],
+    AC_MSG_RESULT(no)
+)
+
 CURL_CHECK_LIB_XNET
 
 dnl gethostbyname without lib or in the nsl lib?

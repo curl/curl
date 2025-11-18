@@ -31,6 +31,10 @@
 #include "urldata.h"
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
 
+#ifdef USE_BACKTRACE
+#include "backtrace.h"
+#endif
+
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
@@ -58,6 +62,9 @@ FILE *curl_dbg_logfile = NULL;
 static bool registered_cleanup = FALSE; /* atexit registered cleanup */
 static bool memlimit = FALSE; /* enable memory limit */
 static long memsize = 0;  /* set number of mallocs allowed */
+#ifdef USE_BACKTRACE
+struct backtrace_state *btstate;
+#endif
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
@@ -73,6 +80,33 @@ static void curl_dbg_cleanup(void)
   }
   curl_dbg_logfile = NULL;
 }
+#ifdef USE_BACKTRACE
+static void error_callback(void *data, const char *message, int error_number)
+{
+  (void)data;
+  if(error_number == -1)
+    curl_dbg_log("compile with -g\n\n");
+  else
+    curl_dbg_log("Backtrace error %d: %s\n", error_number, message);
+}
+
+static int full_callback(void *data, uintptr_t pc, const char *pathname,
+                         int line_number, const char *function)
+{
+  (void)data;
+  (void)pc;
+  if(pathname || function || line_number)
+    curl_dbg_log("BT %s:%d -- %s\n", pathname, line_number, function);
+  return 0;
+}
+
+static void dump_bt(void)
+{
+  backtrace_full(btstate, 0, full_callback, error_callback, NULL);
+}
+#else
+#define dump_bt() /* nothing to do */
+#endif
 
 /* this sets the log filename */
 void curl_dbg_memdebug(const char *logname)
@@ -88,6 +122,9 @@ void curl_dbg_memdebug(const char *logname)
       setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
   }
+#ifdef USE_BACKTRACE
+  btstate = backtrace_create_state(NULL, 0, error_callback, NULL);
+#endif
   if(!registered_cleanup)
     registered_cleanup = !atexit(curl_dbg_cleanup);
 }
@@ -115,6 +152,7 @@ static bool countcheck(const char *func, int line, const char *source)
       /* log to stderr also */
       curl_mfprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
                     source, line, func);
+      dump_bt();
       fflush(curl_dbg_logfile); /* because it might crash now */
       /* !checksrc! disable ERRNOVAR 1 */
       errno = ENOMEM;
