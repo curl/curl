@@ -464,10 +464,11 @@ parse_cookie_header(struct Curl_easy *data,
           return CURLE_OK;
 
         strstore(&co->name, curlx_str(&name), curlx_strlen(&name));
-        strstore(&co->value, curlx_str(&val), curlx_strlen(&val));
-        done = TRUE;
+        if(co->name)
+          strstore(&co->value, curlx_str(&val), curlx_strlen(&val));
         if(!co->name || !co->value)
-          return CURLE_OK;
+          return CURLE_OUT_OF_MEMORY;
+        done = TRUE;
 
         if(invalid_octets(co->value) || invalid_octets(co->name)) {
           infof(data, "invalid octets in name/value, cookie dropped");
