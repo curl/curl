@@ -463,6 +463,7 @@ libWebSocket
 libz
 libzstd
 LineageOS
+linter
 linux
 lldb
 ln
@@ -981,6 +982,7 @@ Xbox
 XDG
 xdigit
 Xilinx
+xmllint
 XP
 Xtensa
 XYZ

@@ -6,6 +6,7 @@ HTTP
 HTTP FORMPOST
 HTTP file upload
 --libcurl
+notxml
 </keywords>
 </info>
 

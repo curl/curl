@@ -6,6 +6,7 @@ POP3
 Clear Text
 LIST
 --libcurl
+notxml
 </keywords>
 </info>
 

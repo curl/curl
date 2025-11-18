@@ -4,6 +4,7 @@
 HTTP
 HTTP POST
 --data-urlencode
+notxml
 </keywords>
 </info>
 

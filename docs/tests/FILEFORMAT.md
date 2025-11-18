@@ -239,7 +239,7 @@ When running a unit test and the keywords include `unittest`, the `<tool>`
 section can be left empty to use the standard unit test tool name `unitN` where
 `N` is the test number.
 
-The `text-ci` make target automatically skips test with the `flaky` keyword.
+The `test-ci` make target automatically skips test with the `flaky` keyword.
 
 Tests that have strict timing dependencies have the `timing-dependent` keyword.
 These are intended to eventually be treated specially on CI builds which are
@@ -247,6 +247,11 @@ often run on overloaded machines with unpredictable timing.
 
 Tests using non-7-bit-ASCII characters must provide them with `%hex[]` or
 similar.
+
+In most cases test files comply with the XML format, and pass xmllint cleanly.
+If the data file uses the `&` character, or has other, non-compliant content,
+and making it XML-compliant is not possible or unpractical, use the `notxml`
+keyword to exclude it from linter checks.
 
 ## `<reply>`
 

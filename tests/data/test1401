@@ -7,6 +7,7 @@ HTTP Basic auth
 HTTP set cookie
 cookies
 --libcurl
+notxml
 </keywords>
 </info>
 

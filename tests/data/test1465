@@ -4,6 +4,7 @@
 HTTP
 HTTP POST
 --libcurl
+notxml
 </keywords>
 </info>
 

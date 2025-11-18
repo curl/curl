@@ -5,6 +5,7 @@ HTTP
 HTTP/3
 multi
 verbose logs
+notxml
 </keywords>
 </info>
 

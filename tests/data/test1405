@@ -6,6 +6,7 @@ FTP
 post-quote
 pre-quote
 --libcurl
+notxml
 </keywords>
 </info>
 # Server-side
