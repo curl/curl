@@ -130,7 +130,10 @@ while(<$fileh>) {
     chomp $_;
     my $line = $_;
     $lnum++;
-    if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
+    if($line =~ /^BT/) {
+        # back-trace, ignore
+    }
+    elsif($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
         my $i = $3;
         my ($source, $linenum) = ($1, $2);
