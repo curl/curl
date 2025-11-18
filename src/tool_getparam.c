@@ -414,8 +414,10 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
   }
   /* deal with escaped chars; find unescaped colon if it exists */
   certname_place = malloc(param_length + 1);
-  if(!certname_place)
-    return PARAM_NO_MEM;
+  if(!certname_place) {
+    err = PARAM_NO_MEM;
+    goto done;
+  }
 
   *certname = certname_place;
   param_place = cert_parameter;
@@ -482,7 +484,7 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
   }
 done:
   if(err) {
-    free(*certname);
+    tool_safefree(*certname);
   }
   else
     *certname_place = '\0';
