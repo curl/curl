@@ -3,6 +3,7 @@
 <keywords>
 CURLOPT_CURLU
 CURLINFO_EFFECTIVE_URL
+notxml
 </keywords>
 </info>
 

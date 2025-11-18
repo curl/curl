@@ -5,6 +5,7 @@
 <keywords>
 SMTP
 --libcurl
+notxml
 </keywords>
 </info>
 

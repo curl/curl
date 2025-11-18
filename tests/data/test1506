@@ -4,6 +4,7 @@
 HTTP
 multi
 verbose logs
+notxml
 </keywords>
 </info>
 

@@ -6,6 +6,7 @@ IMAP
 Clear Text
 FETCH
 --libcurl
+notxml
 </keywords>
 </info>
 

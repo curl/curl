@@ -5,6 +5,7 @@ HTTP
 HTTP POST
 --data-urlencode
 --url-query
+notxml
 </keywords>
 </info>
 
