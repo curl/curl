@@ -6,7 +6,6 @@ allowfunc accept
 allowfunc fprintf
 allowfunc freeaddrinfo
 allowfunc getaddrinfo
-allowfunc open
 allowfunc printf
 allowfunc recv
 allowfunc send

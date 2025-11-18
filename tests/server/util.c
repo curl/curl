@@ -27,6 +27,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef _WIN32
+#include <share.h>
+#endif
+
 /* This function returns a pointer to STATIC memory. It converts the given
  * binary lump to a hex formatted string usable for output in logs or
  * whatever.
@@ -359,13 +363,17 @@ static void exit_signal_handler(int signum)
     (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
+    int fd = -1;
 #ifdef _WIN32
-#define OPENMODE S_IREAD | S_IWRITE
+    if(!_sopen_s(&fd, serverlogfile, O_WRONLY | O_CREAT | O_APPEND,
+                 _SH_DENYNO, S_IREAD | S_IWRITE) &&
+       fd != -1) {
 #else
-#define OPENMODE S_IRUSR | S_IWUSR
-#endif
-    int fd = open(serverlogfile, O_WRONLY | O_CREAT | O_APPEND, OPENMODE);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    fd = open(serverlogfile,
+              O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
     if(fd != -1) {
+#endif
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
       close(fd);
