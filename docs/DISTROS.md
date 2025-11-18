@@ -225,8 +225,8 @@ can also be used on other distributions
 ## OpenBSD
 
 - curl: https://github.com/openbsd/ports/tree/master/net/curl
-- curl patches: https://github.com/openbsd/ports/tree/master/net/curl/patches
 - curl issues: https://www.openbsd.org/mail.html (ports mailing list)
+- curl patches: https://github.com/openbsd/ports/tree/master/net/curl/patches
 
 ## OpenEmbedded / Yocto Project
 
