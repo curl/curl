@@ -554,8 +554,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   if(!result && data->state.resolve)
     result = Curl_loadhostpairs(data);
 
-  /* If there is a list of hsts files to read */
-  Curl_hsts_loadfiles(data);
+  if(!result)
+    /* If there is a list of hsts files to read */
+    result = Curl_hsts_loadfiles(data);
 
   if(!result) {
     /* Allow data->set.use_port to set which port to use. This needs to be
@@ -608,7 +609,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * basically anything through an HTTP proxy we cannot limit this based on
    * protocol.
    */
-  if(data->set.str[STRING_USERAGENT]) {
+  if(!result && data->set.str[STRING_USERAGENT]) {
     free(data->state.aptr.uagent);
     data->state.aptr.uagent =
       curl_maprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
