@@ -59,7 +59,7 @@ CURLcode Curl_hsts_loadfile(struct Curl_easy *data,
                             struct hsts *h, const char *file);
 CURLcode Curl_hsts_loadcb(struct Curl_easy *data,
                           struct hsts *h);
-void Curl_hsts_loadfiles(struct Curl_easy *data);
+CURLcode Curl_hsts_loadfiles(struct Curl_easy *data);
 #else
 #define Curl_hsts_cleanup(x)
 #define Curl_hsts_loadcb(x,y) CURLE_OK
