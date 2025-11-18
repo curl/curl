@@ -1805,6 +1805,8 @@ if test x"$want_gss" = xyes; then
         [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
         [],
         [not_mit=1])
+      dnl Optional header for channel binding
+      AC_CHECK_HEADERS([gssapi/gssapi_ext.h])
       if test "x$not_mit" = "x1"; then
         dnl MIT not found
         AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
