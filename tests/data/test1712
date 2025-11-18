@@ -1,0 +1,32 @@
+<testcase>
+<info>
+<keywords>
+curl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+manual
+</features>
+
+<name>
+Verify curl -h with table category
+</name>
+
+<command>
+-h table:tAbLe
+</command>
+</client>
+
+<verify>
+<errorcode>
+0
+</errorcode>
+<stdout mode="text">
+table: Table format category (use table:<category>)
+</stdout>
+</verify>
+</testcase>

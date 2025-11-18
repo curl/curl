@@ -252,6 +252,7 @@ void tool_help(const char *category)
       "Use \"--help all\" to list all options"
 #ifdef USE_MANUAL
       "\nUse \"--help [option]\" to view documentation for a given option"
+      "\nUse \"--help table:<category>\" to table format category overview"
 #endif
       ;
     puts("Usage: curl [options...] <url>");
@@ -261,9 +262,13 @@ void tool_help(const char *category)
     puts(category_note2);
   }
   /* Lets print everything if "all" was provided */
-  else if(curl_strequal(category, "all"))
+  else if(curl_strequal(category, "all") ||
+          curl_strequal(category, "table:all"))
     /* Print everything */
-    print_category(CURLHELP_ALL, cols);
+    if(curl_strequal(category, "all"))
+      print_category(CURLHELP_ALL, cols);
+    else
+      tool_table(CURLHELP_ALL, cols);
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
