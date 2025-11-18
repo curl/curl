@@ -248,6 +248,11 @@ often run on overloaded machines with unpredictable timing.
 Tests using non-7-bit-ASCII characters must provide them with `%hex[]` or
 similar.
 
+In most cases test files comply with the XML format, and pass xmlint cleanly.
+If the data file uses the `&` character, or has other, non-compliant content,
+and making it XML-compliant is not possible or unpractical, use the `notxml`
+keyword to exclude it from linter checks.
+
 ## `<reply>`
 
 ### `<data [nocheck="yes"] [sendzero="yes"] [hex="yes"] [nonewline="yes"] [crlf="yes|headers"]>`
