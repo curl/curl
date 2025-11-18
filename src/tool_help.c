@@ -125,14 +125,11 @@ static int get_category_content(const char *category, unsigned int cols)
 
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
-      if(table_flag) {
-        curl_mprintf("%s: %s table\n", categories[i].opt, categories[i].desc);
+      curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
+      if(table_flag)
         tool_table(categories[i].category, cols);
-      }
-      else {
-        curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
+      else
         print_category(categories[i].category, cols);
-      }
       return 0;
     }
   return 1;
@@ -254,6 +251,7 @@ void tool_help(const char *category)
       "Use \"--help all\" to list all options"
 #ifdef USE_MANUAL
       "\nUse \"--help [option]\" to view documentation for a given option"
+      "\nUse \"--help table:<category>\" to table format category overview"
 #endif
       ;
     puts("Usage: curl [options...] <url>");
@@ -263,9 +261,13 @@ void tool_help(const char *category)
     puts(category_note2);
   }
   /* Lets print everything if "all" was provided */
-  else if(curl_strequal(category, "all"))
+  else if(curl_strequal(category, "all") ||
+          curl_strequal(category, "table:all"))
     /* Print everything */
-    print_category(CURLHELP_ALL, cols);
+    if(curl_strequal(category, "all"))
+      print_category(CURLHELP_ALL, cols);
+    else
+      tool_table(CURLHELP_ALL, cols);
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();

@@ -52,6 +52,7 @@ imap, ldap, output, pop3, post, proxy, scp, sftp, smtp, ssh, table, telnet,%SP
 tftp, timeout, tls, upload, verbose.
 Use "--help all" to list all options
 Use "--help [option]" to view documentation for a given option
+Use "--help table:<category>" to table format category overview
 </stdout>
 </verify>
 </testcase>
