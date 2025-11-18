@@ -980,7 +980,8 @@ sub singletest_run {
             if(use_valgrind() && !$disablevalgrind) {
               $timeout = 15;
             }
-            if($keywords{"SLOWDOWN"}) {
+            if($keywords{"SLOWDOWN"} ||
+               $keywords{"SLOWDOWNDATA"}) {
               $timeout = $timeout * 3;
             }
             elsif($cmdhash{'option'}) {
