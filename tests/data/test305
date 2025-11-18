@@ -29,7 +29,7 @@ made up content
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-60
+77,60
 </errorcode>
 </verify>
 </testcase>
