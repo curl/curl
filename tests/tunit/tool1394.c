@@ -27,17 +27,17 @@
 
 #include "memdebug.h" /* LAST include file */
 
-struct cert1394 {
-  const char *param;
-  const char *cert;
-  const char *passwd;
-};
-
 static CURLcode test_tool1394(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static const struct cert1394 values[] = {
+  struct cert {
+    const char *param;
+    const char *cert;
+    const char *passwd;
+  };
+
+  static const struct cert values[] = {
     /* -E parameter */        /* exp. cert name */  /* exp. passphrase */
     {"foo:bar:baz",            "foo",                "bar:baz"},
     {"foo\\:bar:baz",          "foo:bar",            "baz"},
@@ -72,7 +72,7 @@ static CURLcode test_tool1394(const char *arg)
 #endif
     {NULL, NULL, NULL}
   };
-  const struct cert1394 *p;
+  const struct cert *p;
   char *certname, *passphrase;
   ParameterError err;
   for(p = &values[0]; p->param; p++) {
