@@ -97,8 +97,7 @@
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for __sys_errlist, __sys_nerr, _open(),
                                     _wfopen(), _wopen(), fopen(), freopen(),
-                                    getenv(), gmtime(), mbstowcs(), sprintf(),
-                                    strcpy(), wcstombs(),
+                                    getenv(), gmtime(), sprintf(), strcpy(),
                                     in tests: localtime(), open(), sscanf() */
 #endif
 #endif /* _MSC_VER */

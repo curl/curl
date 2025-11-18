@@ -52,6 +52,7 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 {
   char *p;
   wchar_t wbuf[256];
+  DWORD wlen;
 
   if(!buflen)
     return NULL;
@@ -62,23 +63,18 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
   /* We return the local codepage version of the error string because if it is
      output to the user's terminal it will likely be with functions which
      expect the local codepage (eg fprintf, failf, infof). */
-  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                    LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
-    size_t written = wcstombs(buf, wbuf, buflen - 1);
-    if(written != (size_t)-1)
-      buf[written] = '\0';
-    else
-      *buf = '\0';
-  }
-
-  /* Truncate multiple lines */
-  p = strchr(buf, '\n');
-  if(p) {
-    if(p > buf && *(p-1) == '\r')
-      *(p-1) = '\0';
-    else
-      *p = '\0';
+  wlen = FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                         FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                        LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL);
+  if(wlen && !wcstombs_s(NULL, buf, buflen, wbuf, wlen)) {
+    /* Truncate multiple lines */
+    p = strchr(buf, '\n');
+    if(p) {
+      if(p > buf && *(p-1) == '\r')
+        *(p-1) = '\0';
+      else
+        *p = '\0';
+    }
   }
 
   return *buf ? buf : NULL;
