@@ -24,19 +24,19 @@ versions of libs and build tools.
 
  We aim to support these or later versions.
 
- - OpenSSL      3.0.0
- - LibreSSL     2.9.1
- - GnuTLS       3.1.10
- - mbedTLS      3.2.0
- - zlib         1.2.5.2
- - libssh2      1.9.0
- - c-ares       1.6.0
- - libssh       0.9.0
- - libidn2      2.0.0
- - wolfSSL      3.4.6
- - OpenLDAP     2.0
- - MIT Kerberos 1.3
- - nghttp2      1.15.0
+ - OpenSSL      3.0.0 (2021-09-07)
+ - LibreSSL     2.9.1 (2019-04-22)
+ - GnuTLS       3.1.10 (2013-03-22)
+ - mbedTLS      3.2.0 (2022-07-11)
+ - zlib         1.2.5.2 (2011-12-11)
+ - libssh2      1.9.0 (2019-06-20)
+ - c-ares       1.6.0 (2008-12-09)
+ - libssh       0.9.0 (2019-06-28)
+ - libidn2      2.0.0 (2017-03-29)
+ - wolfSSL      3.4.6 (2017-09-22)
+ - OpenLDAP     2.0 (2000-08-01)
+ - MIT Kerberos 1.3 (2003-07-31)
+ - nghttp2      1.15.0 (2016-09-25)
 
 ## Build tools
 
