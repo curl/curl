@@ -139,11 +139,10 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   char *gopherpath;
   char *path = data->state.up.path;
   char *query = data->state.up.query;
-  char *sel = NULL;
-  char *sel_org = NULL;
+  const char *buf = NULL;
+  char *buf_alloc = NULL;
+  size_t nwritten, buf_len;
   timediff_t timeout_ms;
-  ssize_t k;
-  size_t amount, len;
   int what;
 
   *done = TRUE; /* unconditionally */
@@ -161,8 +160,8 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
   /* Create selector. Degenerate cases: / and /1 => convert to "" */
   if(strlen(gopherpath) <= 2) {
-    sel = (char *)CURL_UNCONST("");
-    len = strlen(sel);
+    buf = "";
+    buf_len = 0;
     free(gopherpath);
   }
   else {
@@ -173,30 +172,28 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     newp += 2;
 
     /* ... and finally unescape */
-    result = Curl_urldecode(newp, 0, &sel, &len, REJECT_ZERO);
+    result = Curl_urldecode(newp, 0, &buf_alloc, &buf_len, REJECT_ZERO);
     free(gopherpath);
     if(result)
       return result;
-    sel_org = sel;
+    buf = buf_alloc;
   }
 
-  k = curlx_uztosz(len);
+  for(; buf_len;) {
 
-  for(;;) {
-    /* Break out of the loop if the selector is empty because OpenSSL and/or
-       LibreSSL fail with errno 0 if this is the case. */
-    if(strlen(sel) < 1)
-      break;
-
-    result = Curl_xfer_send(data, sel, k, FALSE, &amount);
+    result = Curl_xfer_send(data, buf, buf_len, FALSE, &nwritten);
     if(!result) { /* Which may not have written it all! */
-      result = Curl_client_write(data, CLIENTWRITE_HEADER, sel, amount);
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, nwritten);
       if(result)
         break;
 
-      k -= amount;
-      sel += amount;
-      if(k < 1)
+      if(nwritten > buf_len) {
+        DEBUGASSERT(0);
+        break;
+      }
+      buf_len -= nwritten;
+      buf += nwritten;
+      if(!buf_len)
         break; /* but it did write it all */
     }
     else
@@ -227,10 +224,10 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  free(sel_org);
+  free(buf_alloc);
 
   if(!result)
-    result = Curl_xfer_send(data, "\r\n", 2, FALSE, &amount);
+    result = Curl_xfer_send(data, "\r\n", 2, FALSE, &nwritten);
   if(result) {
     failf(data, "Failed sending Gopher request");
     return result;
