@@ -60,7 +60,7 @@ void tool_set_stderr_file(const char *filename)
   /* freopen the actual stderr (stdio.h stderr) instead of tool_stderr since
      the latter may be set to stdout. */
   /* !checksrc! disable STDERR 1 */
-  fp = freopen(filename, FOPEN_WRITETEXT, stderr);
+  fp = curlx_freopen(filename, FOPEN_WRITETEXT, stderr);
   if(!fp) {
     /* stderr may have been closed by freopen. there is nothing to be done. */
     DEBUGASSERT(0);
