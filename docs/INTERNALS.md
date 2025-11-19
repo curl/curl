@@ -26,7 +26,7 @@ versions of libs and build tools.
 
  - OpenSSL      3.0.0 (2021-09-07)
  - LibreSSL     2.9.1 (2019-04-22)
- - GnuTLS       3.1.10 (2013-03-22)
+ - GnuTLS       3.6.5 (2018-12-01)
  - mbedTLS      3.2.0 (2022-07-11)
  - zlib         1.2.5.2 (2011-12-11)
  - libssh2      1.9.0 (2019-06-20)
