@@ -180,7 +180,7 @@ regression test suite.
 
 Lists all test case names.
 
-## `--max-time=[seconds]`
+## `-m=[seconds]`
 
 Set timeout for curl commands in tests
 

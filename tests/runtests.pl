@@ -2421,7 +2421,7 @@ while(@ARGV) {
         $short=1;
         $automakestyle=1;
     }
-    elsif($ARGV[0] =~ /--max-time=(\d+)/) {
+    elsif($ARGV[0] =~ /-m=(\d+)/) {
         my ($num)=($1);
         $maxtime=$num;
     }
@@ -2567,7 +2567,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -k       keep stdout and stderr files present after tests
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
-  --max-time=[seconds] set timeout for curl commands in tests
+  -m=[seconds] set timeout for curl commands in tests
   -n       no valgrind
   --no-debuginfod disable the valgrind debuginfod functionality
   -o variable=value set internal variable to the specified value
