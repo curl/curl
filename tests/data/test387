@@ -30,7 +30,7 @@ libz
 <name>
 Response with overly long compression chain
 </name>
-<command option="4x-timeout">
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -sS --tr-encoding
 </command>
 </client>
