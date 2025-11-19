@@ -3046,7 +3046,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
            following (URL) argument to start with -. */
         stillflags = FALSE;
       else {
-        const char *nextarg = NULL;
+        char *nextarg = NULL;
         if(i < (argc - 1)) {
           nextarg = convert_tchar_to_UTF8(argv[i + 1]);
           if(!nextarg) {
@@ -3058,7 +3058,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
         result = getparameter(orig_opt, nextarg, &passarg, config,
                               CONFIG_MAX_LEVELS);
 
-        unicodefree(CURL_UNCONST(nextarg));
+        unicodefree(nextarg);
         config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
           /* Reset result as PARAM_NEXT_OPERATION is only used here and not
