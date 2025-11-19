@@ -149,7 +149,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
     curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
-  _tcsncpy(dup_domain.tchar_ptr, domain.tchar_ptr, domlen);
+  _tcsncpy_s(dup_domain.tchar_ptr, domlen + 1, domain.tchar_ptr, domlen);
   *(dup_domain.tchar_ptr + domlen) = TEXT('\0');
   identity->Domain = dup_domain.tbyte_ptr;
   identity->DomainLength = curlx_uztoul(domlen);
