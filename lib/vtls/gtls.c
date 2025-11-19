@@ -73,7 +73,7 @@ static void tls_log_func(int level, const char *str)
 }
 #endif
 
-#if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x03010a)
+#if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x030605)
 #error "too old GnuTLS version"
 #endif
 
@@ -767,10 +767,8 @@ int Curl_glts_get_ietf_proto(gnutls_session_t session)
     return CURL_IETF_PROTO_TLS1_1;
   case GNUTLS_TLS1_2:
     return CURL_IETF_PROTO_TLS1_2;
-#if GNUTLS_VERSION_NUMBER >= 0x030603
   case GNUTLS_TLS1_3:
     return CURL_IETF_PROTO_TLS1_3;
-#endif
   default:
     return CURL_IETF_PROTO_UNKNOWN;
   }
@@ -1841,51 +1839,8 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   rc = (int)gnutls_x509_crt_check_hostname(x509_cert,
                                            peer->sni ? peer->sni :
                                            peer->hostname);
-#if GNUTLS_VERSION_NUMBER < 0x030306
-  /* Before 3.3.6, gnutls_x509_crt_check_hostname() did not check IP
-     addresses. */
-  if(!rc) {
-#ifdef USE_IPV6
-    #define use_addr in6_addr
-#else
-    #define use_addr in_addr
-#endif
-    unsigned char addrbuf[sizeof(struct use_addr)];
-    size_t addrlen = 0;
-
-    if(curlx_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
-      addrlen = 4;
-#ifdef USE_IPV6
-    else if(curlx_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
-      addrlen = 16;
-#endif
-
-    if(addrlen) {
-      unsigned char certaddr[sizeof(struct use_addr)];
-      int i;
-
-      for(i = 0; ; i++) {
-        size_t certaddrlen = sizeof(certaddr);
-        int ret = gnutls_x509_crt_get_subject_alt_name(x509_cert, i, certaddr,
-                                                       &certaddrlen, NULL);
-        /* If this happens, it was not an IP address. */
-        if(ret == GNUTLS_E_SHORT_MEMORY_BUFFER)
-          continue;
-        if(ret < 0)
-          break;
-        if(ret != GNUTLS_SAN_IPADDRESS)
-          continue;
-        if(certaddrlen == addrlen && !memcmp(addrbuf, certaddr, addrlen)) {
-          rc = 1;
-          break;
-        }
-      }
-    }
-  }
-#endif
-
   result = (!rc && config->verifyhost) ?
-           CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
+    CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
   gtls_msg_verify_result(data, peer, x509_cert, rc, config->verifyhost);
   if(result)
     goto out;
