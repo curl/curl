@@ -574,8 +574,7 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
 }
 
 void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
-                               curl_socket_t s,
-                               bool *run_cpool)
+                               curl_socket_t s)
 {
   struct mev_sh_entry *entry;
 
@@ -606,7 +605,7 @@ void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
     }
 
     if(entry->conn)
-      *run_cpool = TRUE;
+      Curl_multi_mark_dirty(multi->admin);
   }
 }
 

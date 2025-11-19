@@ -102,9 +102,9 @@ static void move_pending_to_connect(struct Curl_multi *multi,
 static CURLMcode add_next_timeout(struct curltime now,
                                   struct Curl_multi *multi,
                                   struct Curl_easy *d);
-static CURLMcode multi_timeout(struct Curl_multi *multi,
-                               struct curltime *expire_time,
-                               long *timeout_ms);
+static void multi_timeout(struct Curl_multi *multi,
+                          struct curltime *expire_time,
+                          long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
 #ifdef DEBUGBUILD
@@ -274,11 +274,13 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->admin->multi = multi;
   multi->admin->state.internal = TRUE;
   Curl_llist_init(&multi->admin->state.timeoutlist, NULL);
+
 #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
     multi->admin->set.verbose = TRUE;
 #endif
   Curl_uint_tbl_add(&multi->xfers, multi->admin, &multi->admin->mid);
+  Curl_uint_bset_add(&multi->process, multi->admin->mid);
 
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
@@ -414,7 +416,6 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-
 CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 {
   CURLMcode rc;
@@ -501,6 +502,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 
   /* Make sure the new handle will run */
   Curl_multi_mark_dirty(data);
+
   /* Necessary in event based processing, where dirty handles trigger
    * a timeout callback invocation. */
   rc = Curl_update_timer(multi);
@@ -1420,7 +1422,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
    * poll. Collecting the sockets may install new timers by protocols
    * and connection filters.
    * Use the shorter one of the internal and the caller requested timeout. */
-  (void)multi_timeout(multi, &expire_time, &timeout_internal);
+  multi_timeout(multi, &expire_time, &timeout_internal);
   if((timeout_internal >= 0) && (timeout_internal < (long)timeout_ms))
     timeout_ms = (int)timeout_internal;
 
@@ -1541,7 +1543,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     long sleep_ms = 0;
 
     /* Avoid busy-looping when there is nothing particular to wait for */
-    if(!curl_multi_timeout(multi, &sleep_ms) && sleep_ms) {
+    multi_timeout(multi, &expire_time, &sleep_ms);
+    if(sleep_ms) {
       if(sleep_ms > timeout_ms)
         sleep_ms = timeout_ms;
       /* when there are no easy handles in the multi, this holds a -1
@@ -2382,6 +2385,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
    * again during processing, triggering a re-run later. */
   Curl_uint_bset_remove(&multi->dirty, data->mid);
 
+  if(data == multi->admin) {
+    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, CURL_SOCKET_TIMEOUT);
+    return CURLM_OK;
+  }
+
   do {
     /* A "stream" here is a logical stream if the protocol can handle that
        (HTTP/2), or the full connection for older protocols */
@@ -2794,19 +2802,13 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
         Curl_uint_bset_remove(&multi->dirty, mid);
         continue;
       }
-      if(data != multi->admin) {
-        /* admin handle is processed below */
-        sigpipe_apply(data, &pipe_st);
-        result = multi_runsingle(multi, &now, data);
-        if(result)
-          returncode = result;
-      }
+      sigpipe_apply(data, &pipe_st);
+      result = multi_runsingle(multi, &now, data);
+      if(result)
+        returncode = result;
     }
     while(Curl_uint_bset_next(&multi->process, mid, &mid));
   }
-
-  sigpipe_apply(multi->admin, &pipe_st);
-  Curl_cshutdn_perform(&multi->cshutdn, multi->admin, CURL_SOCKET_TIMEOUT);
   sigpipe_restore(&pipe_st);
 
   if(multi_ischanged(m, TRUE))
@@ -3061,7 +3063,6 @@ struct multi_run_ctx {
   struct curltime now;
   size_t run_xfers;
   SIGPIPE_MEMBER(pipe_st);
-  bool run_cpool;
 };
 
 static void multi_mark_expired_as_dirty(struct multi_run_ctx *mrc)
@@ -3111,12 +3112,7 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
       if(data) {
         CURL_TRC_M(data, "multi_run_dirty");
 
-        if(data == multi->admin) {
-          Curl_uint_bset_remove(&multi->dirty, mid);
-          mrc->run_cpool = TRUE;
-          continue;
-        }
-        else if(!Curl_uint_bset_contains(&multi->process, mid)) {
+        if(!Curl_uint_bset_contains(&multi->process, mid)) {
           /* We are no longer processing this transfer */
           Curl_uint_bset_remove(&multi->dirty, mid);
           continue;
@@ -3169,13 +3165,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       /* Reassess event status of all active transfers */
       result = Curl_multi_ev_assess_xfer_bset(multi, &multi->process);
     }
-    mrc.run_cpool = TRUE;
     goto out;
   }
 
   if(s != CURL_SOCKET_TIMEOUT) {
     /* Mark all transfers of that socket as dirty */
-    Curl_multi_ev_dirty_xfers(multi, s, &mrc.run_cpool);
+    Curl_multi_ev_dirty_xfers(multi, s);
   }
   else {
     /* Asked to run due to time-out. Clear the 'last_expire_ts' variable to
@@ -3184,7 +3179,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
        handles the case when the application asks libcurl to run the timeout
        prematurely. */
     memset(&multi->last_expire_ts, 0, sizeof(multi->last_expire_ts));
-    mrc.run_cpool = TRUE;
   }
 
   multi_mark_expired_as_dirty(&mrc);
@@ -3204,10 +3198,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   }
 
 out:
-  if(mrc.run_cpool) {
-    sigpipe_apply(multi->admin, &mrc.pipe_st);
-    Curl_cshutdn_perform(&multi->cshutdn, multi->admin, s);
-  }
   sigpipe_restore(&mrc.pipe_st);
 
   if(multi_ischanged(multi, TRUE))
@@ -3376,9 +3366,9 @@ static bool multi_has_dirties(struct Curl_multi *multi)
   return FALSE;
 }
 
-static CURLMcode multi_timeout(struct Curl_multi *multi,
-                               struct curltime *expire_time,
-                               long *timeout_ms)
+static void multi_timeout(struct Curl_multi *multi,
+                          struct curltime *expire_time,
+                          long *timeout_ms)
 {
   static const struct curltime tv_zero = {0, 0};
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -3387,13 +3377,13 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 
   if(multi->dead) {
     *timeout_ms = 0;
-    return CURLM_OK;
+    return;
   }
 
   if(multi_has_dirties(multi)) {
     *expire_time = curlx_now();
     *timeout_ms = 0;
-    return CURLM_OK;
+    return;
   }
   else if(multi->timetree) {
     /* we have a tree of expire times */
@@ -3444,8 +3434,6 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     }
   }
 #endif
-
-  return CURLM_OK;
 }
 
 CURLMcode curl_multi_timeout(CURLM *m,
@@ -3461,7 +3449,8 @@ CURLMcode curl_multi_timeout(CURLM *m,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  return multi_timeout(multi, &expire_time, timeout_ms);
+  multi_timeout(multi, &expire_time, timeout_ms);
+  return CURLM_OK;
 }
 
 /*
@@ -3477,9 +3466,7 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
 
   if(!multi->timer_cb || multi->dead)
     return CURLM_OK;
-  if(multi_timeout(multi, &expire_ts, &timeout_ms)) {
-    return CURLM_OK;
-  }
+  multi_timeout(multi, &expire_ts, &timeout_ms);
 
   if(timeout_ms < 0 && multi->last_timeout_ms < 0) {
     /* nothing to do */
@@ -3818,6 +3805,7 @@ CURLMcode curl_multi_get_offt(CURLM *m,
                               curl_off_t *pvalue)
 {
   struct Curl_multi *multi = m;
+  unsigned int n;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -3825,15 +3813,17 @@ CURLMcode curl_multi_get_offt(CURLM *m,
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
   switch(info) {
-  case CURLMINFO_XFERS_CURRENT: {
-    unsigned int n = Curl_uint_tbl_count(&multi->xfers);
+  case CURLMINFO_XFERS_CURRENT:
+    n = Curl_uint_tbl_count(&multi->xfers);
     if(n && multi->admin)
       --n;
     *pvalue = (curl_off_t)n;
     return CURLM_OK;
-  }
   case CURLMINFO_XFERS_RUNNING:
-    *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->process);
+    n = Curl_uint_bset_count(&multi->process);
+    if(n && Curl_uint_bset_contains(&multi->process, multi->admin->mid))
+      --n;
+    *pvalue = (curl_off_t)n;
     return CURLM_OK;
   case CURLMINFO_XFERS_PENDING:
     *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->pending);
@@ -4019,7 +4009,7 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
 struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
                                       unsigned int mid)
 {
-  struct Curl_easy *data = mid ? Curl_uint_tbl_get(&multi->xfers, mid) : NULL;
+  struct Curl_easy *data = Curl_uint_tbl_get(&multi->xfers, mid);
   if(data && GOOD_EASY_HANDLE(data))
     return data;
   CURL_TRC_M(multi->admin, "invalid easy handle in xfer table for mid=%u",
