@@ -770,6 +770,8 @@ jobs:
             if [[ "${MATRIX_INSTALL_PACKAGES}" = *'libgss-dev'* ]]; then
               TFLAGS+=' ~2077 ~2078'  # memory leaks from Curl_auth_decode_spnego_message() -> gss_init_sec_context()
             fi
+          elif [ "${TEST_TARGET}" != 'test-ci' ]; then
+            TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
           fi
           [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
