@@ -2168,7 +2168,7 @@ static CURLcode ssh_state_sftp_quote_rmdir(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
-    failf(data, "rmdir \"%s\ command failed: %s",
+    failf(data, "rmdir \"%s\" command failed: %s",
           sshc->quote_path1, sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
