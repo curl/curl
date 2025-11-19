@@ -66,7 +66,7 @@ static void parse_success(const struct tcase *t)
   const char *buf;
   size_t buflen, i, in_len, in_consumed;
   CURLcode err;
-  ssize_t nread;
+  size_t nread;
 
   Curl_h1_req_parse_init(&p, 1024);
   in_len = in_consumed = 0;
@@ -74,14 +74,14 @@ static void parse_success(const struct tcase *t)
     buf = t->input[i];
     buflen = strlen(buf);
     in_len += buflen;
-    nread = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
-                                   t->custom_method, 0, &err);
-    if(nread < 0) {
+    err = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
+                                 t->custom_method, 0, &nread);
+    if(err) {
       curl_mfprintf(stderr, "got err %d parsing: '%s'\n", err, buf);
       fail("error consuming");
     }
     in_consumed += (size_t)nread;
-    if((size_t)nread != buflen) {
+    if(nread != buflen) {
       if(!p.done) {
         curl_mfprintf(stderr, "only %zd/%zu consumed for: '%s'\n",
                       nread, buflen, buf);

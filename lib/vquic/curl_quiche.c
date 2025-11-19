@@ -977,7 +977,6 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   struct dynhds h2_headers;
   quiche_h3_header *nva = NULL;
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
 
   *pnwritten = 0;
   if(!stream) {
@@ -991,11 +990,12 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
   DEBUGASSERT(stream);
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, blen, NULL,
+
+  result = Curl_h1_req_parse_read(&stream->h1, buf, blen, NULL,
                                     !data->state.http_ignorecustom ?
                                     data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                                    0, &result);
-  if(nwritten < 0)
+                                    0, pnwritten);
+  if(result)
     goto out;
   if(!stream->h1.done) {
     /* need more data */
@@ -1025,7 +1025,6 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
     nva[i].value_len = e->valuelen;
   }
 
-  *pnwritten = (size_t)nwritten;
   buf += *pnwritten;
   blen -= *pnwritten;
 

@@ -2237,7 +2237,6 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_priority_spec pri_spec;
-  ssize_t rc;
   size_t nwritten;
   CURLcode result = CURLE_OK;
 
@@ -2248,11 +2247,11 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
-                              !data->state.http_ignorecustom ?
-                              data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                              0, &result);
-  if(!curlx_sztouz(rc, &nwritten))
+  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+                                  !data->state.http_ignorecustom ?
+                                  data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                                  0, &nwritten);
+  if(result)
     goto out;
   *pnwritten = nwritten;
   if(!stream->h1.done) {

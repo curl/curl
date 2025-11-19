@@ -1872,10 +1872,10 @@ out:
   return result;
 }
 
-static ssize_t h3_stream_open(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const void *buf, size_t len,
-                              CURLcode *err)
+static CURLcode h3_stream_open(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               const void *buf, size_t len,
+                               size_t *pnwritten)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = NULL;
@@ -1884,27 +1884,27 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   nghttp3_nv *nva = NULL;
   int rc = 0;
   unsigned int i;
-  ssize_t nwritten = -1;
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
+  CURLcode result;
 
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
 
-  *err = h3_data_setup(cf, data);
-  if(*err)
+  result = h3_data_setup(cf, data);
+  if(result)
     goto out;
   stream = H3_STREAM_CTX(ctx, data);
   DEBUGASSERT(stream);
   if(!stream) {
-    *err = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto out;
   }
 
-  nwritten = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
-                                    !data->state.http_ignorecustom ?
-                                    data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                                    0, err);
-  if(nwritten < 0)
+  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+                                  !data->state.http_ignorecustom ?
+                                  data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                                  0, pnwritten);
+  if(result)
     goto out;
   if(!stream->h1.done) {
     /* need more data */
@@ -1912,19 +1912,16 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   }
   DEBUGASSERT(stream->h1.req);
 
-  *err = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
-  if(*err) {
-    nwritten = -1;
+  result = Curl_http_req_to_h2(&h2_headers, stream->h1.req, data);
+  if(result)
     goto out;
-  }
   /* no longer needed */
   Curl_h1_req_parse_free(&stream->h1);
 
   nheader = Curl_dynhds_count(&h2_headers);
   nva = malloc(sizeof(nghttp3_nv) * nheader);
   if(!nva) {
-    *err = CURLE_OUT_OF_MEMORY;
-    nwritten = -1;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -1938,11 +1935,11 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   }
 
   DEBUGASSERT(stream->s.id == -1);
-  *err = cf_osslq_stream_open(&stream->s, ctx->tls.ossl.ssl, 0,
-                              &ctx->stream_bufcp, data);
-  if(*err) {
+  result = cf_osslq_stream_open(&stream->s, ctx->tls.ossl.ssl, 0,
+                                &ctx->stream_bufcp, data);
+  if(result) {
     failf(data, "cannot get bidi streams");
-    *err = CURLE_SEND_ERROR;
+    result = CURLE_SEND_ERROR;
     goto out;
   }
 
@@ -1983,8 +1980,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
                   stream->s.id, rc, nghttp3_strerror(rc));
       break;
     }
-    *err = CURLE_SEND_ERROR;
-    nwritten = -1;
+    result = CURLE_SEND_ERROR;
     goto out;
   }
 
@@ -2002,7 +1998,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
 out:
   free(nva);
   Curl_dynhds_free(&h2_headers);
-  return nwritten;
+  return result;
 }
 
 static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -2012,7 +2008,6 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = NULL;
   struct cf_call_data save;
-  ssize_t nwritten;
   CURLcode result = CURLE_OK;
 
   (void)eos; /* use to end stream */
@@ -2032,13 +2027,12 @@ static CURLcode cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   stream = H3_STREAM_CTX(ctx, data);
   if(!stream || stream->s.id < 0) {
-    nwritten = h3_stream_open(cf, data, buf, len, &result);
-    if(nwritten < 0) {
+    result = h3_stream_open(cf, data, buf, len, pnwritten);
+    if(result) {
       CURL_TRC_CF(data, cf, "failed to open stream -> %d", result);
       goto out;
     }
     stream = H3_STREAM_CTX(ctx, data);
-    *pnwritten = (size_t)nwritten;
   }
   else if(stream->closed) {
     if(stream->resp_hds_complete) {
