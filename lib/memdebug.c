@@ -29,7 +29,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
-#include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW() */
+#include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"
@@ -424,7 +424,19 @@ FILE *curl_dbg_fopen(const char *file, const char *mode,
   FILE *res = CURLX_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
-                source, line, file, mode, (void *)res);
+                 source, line, file, mode, (void *)res);
+
+  return res;
+}
+
+ALLOC_FUNC
+FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
+                       int line, const char *source)
+{
+  FILE *res = CURLX_FREOPEN_LOW(file, mode, fh);
+  if(source)
+    curl_dbg_log("FILE %s:%d freopen(\"%s\",\"%s\",%p) = %p\n",
+                 source, line, file, mode, (void *)fh, (void *)res);
 
   return res;
 }

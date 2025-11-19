@@ -1042,6 +1042,9 @@ CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fopen(const char *file, const char *mode,
                        int line, const char *source);
 CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
+                         int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 

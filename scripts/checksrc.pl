@@ -106,6 +106,7 @@ my %banfunc = (
     "fclose" => 1,
     "fdopen" => 1,
     "fopen" => 1,
+    "freopen" => 1,
     "open" => 1,
     "stat" => 1,
     );
@@ -961,7 +962,7 @@ sub scanfile {
         }
 
         # scan for use of non-binary fopen without the macro
-        if($l =~ /^(.*\W)(curlx_fopen|CURLX_FOPEN_LOW)\s*\([^,]*, *\"([^"]*)/) {
+        if($l =~ /^(.*\W)(curlx_fopen|CURLX_FOPEN_LOW|curlx_freopen|CURLX_FREOPEN_LOW)\s*\([^,]*, *\"([^"]*)/) {
             my $mode = $3;
             if($mode !~ /b/) {
                 checkwarn("FOPENMODE",
