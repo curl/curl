@@ -260,13 +260,14 @@ void tool_help(const char *category)
     /* allow multiple options to be passed */
     bool splitcat = FALSE;
     const char *splitCategory = strstr(category, ",");
-    char categoryBuf[256];
     const char *categoryOpts = NULL;
-    if(splitCategory != NULL) {
+    char categoryBuf[256];
+    size_t len;
+    if(!(!splitCategory)) {
       splitcat = TRUE;
       categoryOpts = splitCategory + 1;
       /* truncate category at comma position */
-      size_t len = (size_t)(splitCategory - category);
+      len = (size_t)(splitCategory - category);
       if(len >= sizeof(categoryBuf))
         len = sizeof(categoryBuf) - 1;
       memcpy(categoryBuf, category, len);
