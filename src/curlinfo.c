@@ -236,6 +236,13 @@ static const char *disabled[]={
 #else
   "OFF"
 #endif
+  ,
+  "ssl-sessions: "
+#ifdef USE_SSLS_EXPORT
+  "ON"
+#else
+  "OFF"
+#endif
 };
 
 int main(int argc, char **argv)
