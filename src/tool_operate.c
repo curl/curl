@@ -2249,7 +2249,7 @@ CURLcode operate(int argc, argv_item_t argv[])
     }
   }
 
-  unicodefree(first_arg);
+  unicodefree(CURL_UNCONST(first_arg));
 
   if(!result) {
     /* Parse the command line arguments */
