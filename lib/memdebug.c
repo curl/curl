@@ -424,7 +424,7 @@ FILE *curl_dbg_fopen(const char *file, const char *mode,
   FILE *res = CURLX_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
-                source, line, file, mode, (void *)res);
+                 source, line, file, mode, (void *)res);
 
   return res;
 }
@@ -436,7 +436,7 @@ FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
   FILE *res = CURLX_FREOPEN_LOW(file, mode, fh);
   if(source)
     curl_dbg_log("FILE %s:%d freopen(\"%s\",\"%s\",%p) = %p\n",
-                source, line, file, mode, (void *)fh, (void *)res);
+                 source, line, file, mode, (void *)fh, (void *)res);
 
   return res;
 }
