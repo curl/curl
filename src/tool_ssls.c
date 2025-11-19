@@ -80,8 +80,8 @@ CURLcode tool_ssls_load(struct OperationConfig *config,
   i = imported = 0;
   while(my_get_line(fp, &buf, &error)) {
     ++i;
-    curl_free(shmac);
-    curl_free(sdata);
+    tool_safefree(shmac);
+    tool_safefree(sdata);
     line = curlx_dyn_ptr(&buf);
 
     c = memchr(line, ':', strlen(line));
