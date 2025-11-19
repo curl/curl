@@ -92,7 +92,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
   if(uh) {
     char *ptr;
     uerr = curl_url_set(uh, CURLUPART_URL, *inurlp,
-                    CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME);
+                        CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
       goto fail;
