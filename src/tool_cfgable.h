@@ -29,6 +29,7 @@
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
 #include "var.h"
+#include "memdebug.h" /* keep this as LAST include */
 
 /* the type we use for storing a single boolean bit */
 #ifndef BIT

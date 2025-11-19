@@ -80,8 +80,8 @@ CURLcode tool_ssls_load(struct OperationConfig *config,
   i = imported = 0;
   while(my_get_line(fp, &buf, &error)) {
     ++i;
-    curl_free(shmac);
-    curl_free(sdata);
+    tool_safefree(shmac);
+    tool_safefree(sdata);
     line = curlx_dyn_ptr(&buf);
 
     c = memchr(line, ':', strlen(line));
@@ -125,8 +125,8 @@ out:
   if(fp)
     curlx_fclose(fp);
   curlx_dyn_free(&buf);
-  curl_free(shmac);
-  curl_free(sdata);
+  free(shmac);
+  free(sdata);
   return r;
 }
 
@@ -165,7 +165,7 @@ static CURLcode tool_ssls_exp(CURL *easy, void *userptr,
     goto out;
   if(EOF == fputc(':', ctx->fp))
     goto out;
-  curl_free(enc);
+  tool_safefree(enc);
   r = curlx_base64_encode((const char *)sdata, sdata_len, &enc, &enc_len);
   if(r)
     goto out;
@@ -179,7 +179,7 @@ static CURLcode tool_ssls_exp(CURL *easy, void *userptr,
 out:
   if(r)
     warnf("Warning: error saving SSL session for '%s': %d", session_key, r);
-  curl_free(enc);
+  free(enc);
   return r;
 }
 
