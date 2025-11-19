@@ -14,6 +14,7 @@ Example:
   - --help all
   - --help --insecure
   - --help -f
+  - --help -f,--insecure
 ---
 
 # `--help`
@@ -23,7 +24,7 @@ Usage help. Provide help for the subject given as an optional argument.
 If no argument is provided, curl displays the most important command line
 arguments.
 
-The argument can either be a **category** or a **command line option**. When a
+The argument can either be a **category** or a **command line option(s)**. When a
 category is provided, curl shows all command line options within the given
 category. Specify category `all` to list all available options.
 
@@ -32,7 +33,7 @@ If `category` is specified, curl displays all available help categories.
 If the provided subject is instead an existing command line option, specified
 either in its short form with a single dash and a single letter, or in the
 long form with two dashes and a longer name, curl displays a help text for
-that option in the terminal.
+that option in the terminal. Comma separate multiple options.
 
 The help output is extensive for some options.
 

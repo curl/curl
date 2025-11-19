@@ -1,0 +1,30 @@
+<testcase>
+<info>
+<keywords>
+curl
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<features>
+manual
+</features>
+
+<name>
+Verify curl -h -f,--badone
+</name>
+<command>
+--help -f,--badone
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+0
+</errorcode>
+</verify>
+</testcase>

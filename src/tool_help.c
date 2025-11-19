@@ -236,7 +236,8 @@ void tool_help(const char *category)
     const char *category_note2 =
       "Use \"--help all\" to list all options"
 #ifdef USE_MANUAL
-      "\nUse \"--help [option]\" to view documentation for a given option"
+      "\nUse \"--help [option],[option],... \" to view documentation for a "
+      "given option"
 #endif
       ;
     puts("Usage: curl [options...] <url>");
@@ -256,6 +257,22 @@ void tool_help(const char *category)
 #ifdef USE_MANUAL
     /* command line option help */
     const struct LongShort *a = NULL;
+    /* allow multiple options to be passed */
+    bool splitcat = FALSE;
+    const char *splitCategory = strstr(category, ",");
+    char categoryBuf[256];
+    const char *categoryOpts = NULL;
+    if(splitCategory != NULL) {
+      splitcat = TRUE;
+      categoryOpts = splitCategory + 1;
+      /* truncate category at comma position */
+      size_t len = (size_t)(splitCategory - category);
+      if(len >= sizeof(categoryBuf))
+        len = sizeof(categoryBuf) - 1;
+      memcpy(categoryBuf, category, len);
+      categoryBuf[len] = '\0';
+      category = categoryBuf;
+    }
     if(category[1] == '-') {
       const char *lookup = &category[2];
       bool noflagged = FALSE;
@@ -291,6 +308,8 @@ void tool_help(const char *category)
         showhelp("\nALL OPTIONS\n", cmdbuf, "\n    -");
 #endif
     }
+    if(splitcat == TRUE)
+      tool_help(categoryOpts);
 #else
     curl_mfprintf(tool_stderr, "Cannot comply. "
                   "This curl was built without built-in manual\n");

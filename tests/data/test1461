@@ -52,7 +52,7 @@ auth, connection, curl, deprecated, dns, file, ftp, global, http, imap, ldap,%SP
 output, pop3, post, proxy, scp, sftp, smtp, ssh, telnet, tftp, timeout, tls,%SP
 upload, verbose.
 Use "--help all" to list all options
-Use "--help [option]" to view documentation for a given option
+Use "--help [option],[option],... " to view documentation for a given option
 </stdout>
 </verify>
 </testcase>
