@@ -417,7 +417,7 @@ static const struct Curl_cwtype ftp_cw_lc = {
 
 #endif /* CURL_PREFER_LF_LINEENDS */
 
-static CURLcode getftpresponse(struct Curl_easy *data, ssize_t *nread,
+static CURLcode getftpresponse(struct Curl_easy *data, size_t *nread,
                                int *ftpcode);
 
 /***********************************************************************
@@ -431,7 +431,7 @@ static CURLcode ftp_check_ctrl_on_data_wait(struct Curl_easy *data,
   struct connectdata *conn = data->conn;
   curl_socket_t ctrl_sock = conn->sock[FIRSTSOCKET];
   struct pingpong *pp = &ftpc->pp;
-  ssize_t nread;
+  size_t nread;
   int ftpcode;
   bool response = FALSE;
 
@@ -602,7 +602,7 @@ static CURLcode ftp_readresp(struct Curl_easy *data,
  *
  */
 static CURLcode getftpresponse(struct Curl_easy *data,
-                               ssize_t *nreadp, /* return number of bytes
+                               size_t *nreadp, /* return number of bytes
                                                    read */
                                int *ftpcodep) /* return the ftp-code */
 {
@@ -3225,7 +3225,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   struct FTP *ftp = Curl_meta_get(data, CURL_META_FTP_EASY);
   struct ftp_conn *ftpc = Curl_conn_meta_get(data->conn, CURL_META_FTP_CONN);
   struct pingpong *pp;
-  ssize_t nread;
+  size_t nread;
   int ftpcode;
   CURLcode result = CURLE_OK;
 
@@ -3437,7 +3437,7 @@ CURLcode ftp_sendquote(struct Curl_easy *data,
   item = quote;
   while(item) {
     if(item->data) {
-      ssize_t nread;
+      size_t nread;
       char *cmd = item->data;
       bool acceptfail = FALSE;
       CURLcode result;
