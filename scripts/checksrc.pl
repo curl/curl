@@ -106,6 +106,7 @@ my %banfunc = (
     "fclose" => 1,
     "fdopen" => 1,
     "fopen" => 1,
+    "freopen" => 1,
     "open" => 1,
     "stat" => 1,
     );
