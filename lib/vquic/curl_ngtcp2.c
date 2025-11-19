@@ -1513,7 +1513,6 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   nghttp3_nv *nva = NULL;
   int rc = 0;
   unsigned int i;
-  size_t nwritten = -1;
   nghttp3_data_reader reader;
   nghttp3_data_reader *preader = NULL;
   CURLcode result;
@@ -1534,10 +1533,9 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
   result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
                                   !data->state.http_ignorecustom ?
                                   data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                                  0, &nwritten);
+                                  0, pnwritten);
   if(result)
     goto out;
-  *pnwritten = nwritten;
 
   if(!stream->h1.done) {
     /* need more data */
