@@ -497,6 +497,9 @@ jobs:
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           TFLAGS="-j20 ${TFLAGS}"
+          if [ "${TEST_TARGET}" != 'test-ci' ]; then
+            TFLAGS+=' --buildinfo'  # only test-ci sets this by default, set it manually for test-torture
+          fi
           source ~/venv/bin/activate
           if [[ "${MATRIX_INSTALL_STEPS}" = *'codeset-test'* ]]; then
             locale || true
