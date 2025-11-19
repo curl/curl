@@ -2226,7 +2226,7 @@ static CURLcode share_setup(CURLSH *share)
 CURLcode operate(int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
-  char *first_arg;
+  const char *first_arg;
 
   first_arg = argc > 1 ? convert_tchar_to_UTF8(argv[1]) : NULL;
 
@@ -2249,7 +2249,7 @@ CURLcode operate(int argc, argv_item_t argv[])
     }
   }
 
-  unicodefree(first_arg);
+  unicodefree(CURL_UNCONST(first_arg));
 
   if(!result) {
     /* Parse the command line arguments */
