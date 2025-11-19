@@ -282,6 +282,40 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   return result;
 }
 
+FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
+{
+  FILE *result = NULL;
+  TCHAR *fixed = NULL;
+  const TCHAR *target = NULL;
+
+#ifdef _UNICODE
+  wchar_t *filename_w = curlx_convert_UTF8_to_wchar(filename);
+  wchar_t *mode_w = curlx_convert_UTF8_to_wchar(mode);
+  if(filename_w && mode_w) {
+    if(fix_excessive_path(filename_w, &fixed))
+      target = fixed;
+    else
+      target = filename_w;
+    result = _wfreopen(target, mode_w, fp);
+  }
+  else
+    /* !checksrc! disable ERRNOVAR 1 */
+    errno = EINVAL;
+  curlx_unicodefree(filename_w);
+  curlx_unicodefree(mode_w);
+#else
+  if(fix_excessive_path(filename, &fixed))
+    target = fixed;
+  else
+    target = filename;
+  /* !checksrc! disable BANNEDFUNC 1 */
+  result = freopen(target, mode, fp);
+#endif
+
+  (free)(fixed);
+  return result;
+}
+
 int curlx_win32_stat(const char *path, struct_stat *buffer)
 {
   int result = -1;
