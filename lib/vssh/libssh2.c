@@ -2213,9 +2213,9 @@ static CURLcode ssh_state_sftp_quote_statvfs(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
-    Curl_safefree(sshc->quote_path1);
     failf(data, "statvfs \"%s\" failed: %s",
           sshc->quote_path1, sftp_libssh2_strerror(sftperr));
+    Curl_safefree(sshc->quote_path1);
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
