@@ -1058,6 +1058,7 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #warning "XMEMNEW defined DEBUG"
+#define XMEMNEW 9
 #define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
 #define curlx_calloc(nbelem,size) \
@@ -1093,6 +1094,7 @@ CURL_EXTERN ALLOC_FUNC
 
 #if !defined(WITHOUT_LIBCURL) && !defined(BUILDING_CURLTOOL)
 #warning "XMEMNEW defined CURLALLOC"
+#define XMEMNEW 2
 #define curlx_strdup(ptr)         Curl_cstrdup(ptr)
 #define curlx_malloc(size)        Curl_cmalloc(size)
 #define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
@@ -1100,6 +1102,7 @@ CURL_EXTERN ALLOC_FUNC
 #define curlx_free(ptr)           Curl_cfree(ptr)
 #else /* WITHOUT_LIBCURL || BUILDING_CURLTOOL */
 #warning "XMEMNEW defined DEFAULT"
+#define XMEMNEW 1
 #ifdef _WIN32
 #define curlx_strdup(ptr)         _strdup(ptr)
 #else
