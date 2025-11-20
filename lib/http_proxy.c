@@ -270,7 +270,7 @@ out:
     Curl_http_req_free(req);
     req = NULL;
   }
-  free(authority);
+  curlx_free(authority);
   *preq = req;
   return result;
 }
@@ -386,7 +386,7 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
 
   (void)data;
   CURL_TRC_CF(data, cf, "destroy");
-  free(ctx);
+  curlx_free(ctx);
 }
 
 static void http_proxy_cf_close(struct Curl_cfilter *cf,
@@ -425,7 +425,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -437,7 +437,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   Curl_conn_cf_insert_after(cf_at, cf);
 
 out:
-  free(ctx);
+  curlx_free(ctx);
   return result;
 }
 

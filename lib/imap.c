@@ -617,8 +617,8 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
   result = imap_sendf(data, imapc, "LOGIN %s %s", user ? user : "",
                       passwd ? passwd : "");
 
-  free(user);
-  free(passwd);
+  curlx_free(user);
+  curlx_free(passwd);
 
   if(!result)
     imap_state(data, imapc, IMAP_LOGIN);
@@ -751,14 +751,14 @@ static CURLcode imap_perform_list(struct Curl_easy *data,
   else {
     /* Make sure the mailbox is in the correct atom format if necessary */
     char *mailbox = imap->mailbox ? imap_atom(imap->mailbox, TRUE)
-                                  : strdup("");
+                                  : curlx_strdup("");
     if(!mailbox)
       return CURLE_OUT_OF_MEMORY;
 
     /* Send the LIST command */
     result = imap_sendf(data, imapc, "LIST \"%s\" *", mailbox);
 
-    free(mailbox);
+    curlx_free(mailbox);
   }
 
   if(!result)
@@ -797,7 +797,7 @@ static CURLcode imap_perform_select(struct Curl_easy *data,
   /* Send the SELECT command */
   result = imap_sendf(data, imapc, "SELECT %s", mailbox);
 
-  free(mailbox);
+  curlx_free(mailbox);
 
   if(!result)
     imap_state(data, imapc, IMAP_SELECT);
@@ -947,7 +947,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data,
 
 cleanup:
   curlx_dyn_free(&flags);
-  free(mailbox);
+  curlx_free(mailbox);
 
   if(!result)
     imap_state(data, imapc, IMAP_APPEND);
@@ -1338,7 +1338,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
     else {
       /* Note the currently opened mailbox on this connection */
       DEBUGASSERT(!imapc->mailbox);
-      imapc->mailbox = strdup(imap->mailbox);
+      imapc->mailbox = curlx_strdup(imap->mailbox);
       if(!imapc->mailbox)
         return CURLE_OUT_OF_MEMORY;
 
@@ -1967,7 +1967,7 @@ static void imap_easy_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   imap_easy_reset(imap);
-  free(imap);
+  curlx_free(imap);
 }
 
 static void imap_conn_dtor(void *key, size_t klen, void *entry)
@@ -1978,7 +1978,7 @@ static void imap_conn_dtor(void *key, size_t klen, void *entry)
   Curl_pp_disconnect(&imapc->pp);
   curlx_dyn_free(&imapc->dyn);
   Curl_safefree(imapc->mailbox);
-  free(imapc);
+  curlx_free(imapc);
 }
 
 static CURLcode imap_setup_connection(struct Curl_easy *data,
@@ -1988,7 +1988,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   struct pingpong *pp;
   struct IMAP *imap;
 
-  imapc = calloc(1, sizeof(*imapc));
+  imapc = curlx_calloc(1, sizeof(*imapc));
   if(!imapc)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2005,7 +2005,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  imap = calloc(1, sizeof(struct IMAP));
+  imap = curlx_calloc(1, sizeof(struct IMAP));
   if(!imap ||
      Curl_meta_set(data, CURL_META_IMAP_EASY, imap, imap_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -2078,7 +2078,7 @@ static char *imap_atom(const char *str, bool escape_only)
   nclean = strcspn(str, "() {%*]\\\"");
   if(len == nclean)
     /* nothing to escape, return a strdup */
-    return strdup(str);
+    return curlx_strdup(str);
 
   curlx_dyn_init(&line, 2000);
 
@@ -2258,7 +2258,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
     result = Curl_urldecode(begin, ptr - begin, &value, &valuelen,
                             REJECT_CTRL);
     if(result) {
-      free(name);
+      curlx_free(name);
       return result;
     }
 
@@ -2279,7 +2279,7 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
           imap->uidvalidity = (unsigned int)num;
           imap->uidvalidity_set = TRUE;
         }
-        free(value);
+        curlx_free(value);
       }
       else if(curl_strequal(name, "UID") && !imap->uid) {
         imap->uid = value;
@@ -2294,15 +2294,15 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
         imap->partial = value;
       }
       else {
-        free(name);
-        free(value);
+        curlx_free(name);
+        curlx_free(value);
         return CURLE_URL_MALFORMAT;
       }
     }
     else
       /* blank? */
-      free(value);
-    free(name);
+      curlx_free(value);
+    curlx_free(name);
   }
 
   /* Does the URL contain a query parameter? Only valid when we have a mailbox
@@ -2346,7 +2346,7 @@ static CURLcode imap_parse_custom_request(struct Curl_easy *data,
         params++;
 
       if(*params) {
-        imap->custom_params = strdup(params);
+        imap->custom_params = curlx_strdup(params);
         imap->custom[params - imap->custom] = '\0';
 
         if(!imap->custom_params)

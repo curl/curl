@@ -168,7 +168,7 @@ static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
     Curl_uint32_hash_destroy(&ctx->streams);
     memset(ctx, 0, sizeof(*ctx));
   }
-  free(ctx);
+  curlx_free(ctx);
 }
 
 static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
@@ -276,7 +276,7 @@ static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
   struct h2_stream_ctx *stream;
 
   (void)ctx;
-  stream = calloc(1, sizeof(*stream));
+  stream = curlx_calloc(1, sizeof(*stream));
   if(!stream)
     return NULL;
 
@@ -299,7 +299,7 @@ static void free_push_headers(struct h2_stream_ctx *stream)
 {
   size_t i;
   for(i = 0; i < stream->push_headers_used; i++)
-    free(stream->push_headers[i]);
+    curlx_free(stream->push_headers[i]);
   Curl_safefree(stream->push_headers);
   stream->push_headers_used = 0;
 }
@@ -310,7 +310,7 @@ static void h2_stream_ctx_free(struct h2_stream_ctx *stream)
   Curl_h1_req_parse_free(&stream->h1);
   Curl_dynhds_free(&stream->resp_trailers);
   free_push_headers(stream);
-  free(stream);
+  curlx_free(stream);
 }
 
 static void h2_stream_hash_free(unsigned int id, void *stream)
@@ -952,7 +952,7 @@ fail:
     return rc;
 
   if(data->state.url_alloc)
-    free(data->state.url);
+    curlx_free(data->state.url);
   data->state.url_alloc = TRUE;
   data->state.url = url;
   return 0;
@@ -1642,15 +1642,15 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                                         stream_id, NGHTTP2_PROTOCOL_ERROR);
         rc = NGHTTP2_ERR_CALLBACK_FAILURE;
       }
-      free(check);
+      curlx_free(check);
       if(rc)
         return rc;
     }
 
     if(!stream->push_headers) {
       stream->push_headers_alloc = 10;
-      stream->push_headers = malloc(stream->push_headers_alloc *
-                                    sizeof(char *));
+      stream->push_headers = curlx_malloc(stream->push_headers_alloc *
+                                          sizeof(char *));
       if(!stream->push_headers)
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       stream->push_headers_used = 0;
@@ -1665,8 +1665,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
         return NGHTTP2_ERR_CALLBACK_FAILURE;
       }
       stream->push_headers_alloc *= 2;
-      headp = realloc(stream->push_headers,
-                      stream->push_headers_alloc * sizeof(char *));
+      headp = curlx_realloc(stream->push_headers,
+                            stream->push_headers_alloc * sizeof(char *));
       if(!headp) {
         free_push_headers(stream);
         return NGHTTP2_ERR_CALLBACK_FAILURE;
@@ -1859,7 +1859,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
                           "Upgrade: %s\r\n"
                           "HTTP2-Settings: %s\r\n",
                           NGHTTP2_CLEARTEXT_PROTO_VERSION_ID, base64);
-  free(base64);
+  curlx_free(base64);
 
   k->upgr101 = UPGR101_H2;
   data->conn->bits.upgrade_in_progress = TRUE;
@@ -2881,7 +2881,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(data->conn);
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
   cf_h2_ctx_init(ctx, via_h1_upgrade);
@@ -2909,7 +2909,7 @@ static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
   cf_h2_ctx_init(ctx, via_h1_upgrade);
