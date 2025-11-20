@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "${CURL_DEBUG_MACROS}")
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "BUILDING_CURLTOOL" "${CURL_DEBUG_MACROS}")
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
