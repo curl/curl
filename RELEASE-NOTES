@@ -39,7 +39,7 @@ This release includes the following bugfixes:
  o cookie: return error on OOM [131]
  o cshutdn: acknowledge FD_SETSIZE for shutdown descriptors [25]
  o curl: fix progress meter in parallel mode [15]
- o curl_sasl: make Curl_sasl_decode_mech compare case insenstively [160]
+ o curl_sasl: make Curl_sasl_decode_mech compare case insensitively [160]
  o curl_setup.h: document more funcs flagged by `_CRT_SECURE_NO_WARNINGS` [124]
  o curl_setup.h: drop stray `#undef stat` (Windows) [103]
  o CURLINFO: remove 'get' and 'get the' from each short desc [50]
