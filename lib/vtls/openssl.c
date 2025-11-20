@@ -4853,8 +4853,9 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   if(!verified) {
     /* no trust established, report the OpenSSL status */
-    failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
-          X509_verify_cert_error_string(ossl_verify), ossl_verify);
+    if(strict)
+      failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
+            X509_verify_cert_error_string(ossl_verify), ossl_verify);
     result = CURLE_PEER_FAILED_VERIFICATION;
     if(conn_config->verifypeer)
       goto out;
