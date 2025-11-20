@@ -55,7 +55,7 @@ target_include_directories(${BUNDLE} PRIVATE
   "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h", curlx
   "${CMAKE_CURRENT_SOURCE_DIR}"          # for the generated bundle source to find included test sources
 )
-target_compile_definitions(${BUNDLE} PRIVATE "CURL_STANDARD_ALLOC" ${CURL_DEBUG_MACROS})
+target_compile_definitions(${BUNDLE} PRIVATE ${CURL_DEBUG_MACROS})
 set_target_properties(${BUNDLE} PROPERTIES OUTPUT_NAME "${BUNDLE}" PROJECT_LABEL "Test ${BUNDLE}" UNITY_BUILD OFF C_CLANG_TIDY "")
 
 curl_add_clang_tidy_test_target("${BUNDLE}-clang-tidy" ${BUNDLE} ${FIRST_C} ${UTILS_C} ${TESTS_C})
