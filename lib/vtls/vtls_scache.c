@@ -104,10 +104,10 @@ static void cf_ssl_scache_session_ldestroy(void *udata, void *obj)
 {
   struct Curl_ssl_session *s = obj;
   (void)udata;
-  free(CURL_UNCONST(s->sdata));
-  free(CURL_UNCONST(s->quic_tp));
-  free((void *)s->alpn);
-  free(s);
+  curlx_free(CURL_UNCONST(s->sdata));
+  curlx_free(CURL_UNCONST(s->quic_tp));
+  curlx_free((void *)s->alpn);
+  curlx_free(s);
 }
 
 CURLcode
@@ -131,15 +131,15 @@ Curl_ssl_session_create2(void *sdata, size_t sdata_len,
   struct Curl_ssl_session *s;
 
   if(!sdata || !sdata_len) {
-    free(sdata);
+    curlx_free(sdata);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   *psession = NULL;
-  s = calloc(1, sizeof(*s));
+  s = curlx_calloc(1, sizeof(*s));
   if(!s) {
-    free(sdata);
-    free(quic_tp);
+    curlx_free(sdata);
+    curlx_free(quic_tp);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -151,7 +151,7 @@ Curl_ssl_session_create2(void *sdata, size_t sdata_len,
   s->quic_tp = quic_tp;
   s->quic_tp_len = quic_tp_len;
   if(alpn) {
-    s->alpn = strdup(alpn);
+    s->alpn = curlx_strdup(alpn);
     if(!s->alpn) {
       cf_ssl_scache_session_ldestroy(NULL, s);
       return CURLE_OUT_OF_MEMORY;
@@ -231,7 +231,7 @@ cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
 
   DEBUGASSERT(!peer->ssl_peer_key);
   if(ssl_peer_key) {
-    peer->ssl_peer_key = strdup(ssl_peer_key);
+    peer->ssl_peer_key = curlx_strdup(ssl_peer_key);
     if(!peer->ssl_peer_key)
       goto out;
     peer->hmac_set = FALSE;
@@ -246,17 +246,17 @@ cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
     goto out;
   }
   if(clientcert) {
-    peer->clientcert = strdup(clientcert);
+    peer->clientcert = curlx_strdup(clientcert);
     if(!peer->clientcert)
       goto out;
   }
   if(srp_username) {
-    peer->srp_username = strdup(srp_username);
+    peer->srp_username = curlx_strdup(srp_username);
     if(!peer->srp_username)
       goto out;
   }
   if(srp_password) {
-    peer->srp_password = strdup(srp_password);
+    peer->srp_password = curlx_strdup(srp_password);
     if(!peer->srp_password)
       goto out;
   }
@@ -315,13 +315,13 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
   size_t i;
 
   *pscache = NULL;
-  peers = calloc(max_peers, sizeof(*peers));
+  peers = curlx_calloc(max_peers, sizeof(*peers));
   if(!peers)
     return CURLE_OUT_OF_MEMORY;
 
-  scache = calloc(1, sizeof(*scache));
+  scache = curlx_calloc(1, sizeof(*scache));
   if(!scache) {
-    free(peers);
+    curlx_free(peers);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -348,8 +348,8 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
     for(i = 0; i < scache->peer_count; ++i) {
       cf_ssl_scache_clear_peer(&scache->peers[i]);
     }
-    free(scache->peers);
-    free(scache);
+    curlx_free(scache->peers);
+    curlx_free(scache);
   }
 }
 
@@ -675,7 +675,7 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
         /* remember peer_key for future lookups */
         CURL_TRC_SSLS(data, "peer entry %zu key recovered: %s",
                       i, ssl_peer_key);
-        scache->peers[i].ssl_peer_key = strdup(ssl_peer_key);
+        scache->peers[i].ssl_peer_key = curlx_strdup(ssl_peer_key);
         if(!scache->peers[i].ssl_peer_key) {
           result = CURLE_OUT_OF_MEMORY;
           goto out;
