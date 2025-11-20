@@ -42,7 +42,7 @@ void r_freeaddrinfo(struct addrinfo *cahead)
 
   for(ca = cahead; ca; ca = canext) {
     canext = ca->ai_next;
-    free(ca);
+    curlx_free(ca);
   }
 }
 
@@ -90,7 +90,7 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct addrinfo) + ss_size + namelen);
+    ca = curlx_malloc(sizeof(struct addrinfo) + ss_size + namelen);
     if(!ca) {
       r_freeaddrinfo(cafirst);
       return NULL;

@@ -451,7 +451,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
     struct Curl_addrinfo **nodes;
     infof(data, "Shuffling %i addresses", num_addrs);
 
-    nodes = malloc(num_addrs*sizeof(*nodes));
+    nodes = curlx_malloc(num_addrs*sizeof(*nodes));
     if(nodes) {
       int i;
       unsigned int *rnd;
@@ -463,7 +463,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
         nodes[i] = nodes[i-1]->ai_next;
       }
 
-      rnd = malloc(rnd_size);
+      rnd = curlx_malloc(rnd_size);
       if(rnd) {
         /* Fisher-Yates shuffle */
         if(Curl_rand(data, (unsigned char *)rnd, rnd_size) == CURLE_OK) {
@@ -482,11 +482,11 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
           nodes[num_addrs-1]->ai_next = NULL;
           *addr = nodes[0];
         }
-        free(rnd);
+        curlx_free(rnd);
       }
       else
         result = CURLE_OUT_OF_MEMORY;
-      free(nodes);
+      curlx_free(nodes);
     }
     else
       result = CURLE_OUT_OF_MEMORY;
@@ -519,7 +519,7 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
     hostlen = strlen(hostname);
 
   /* Create a new cache entry */
-  dns = calloc(1, sizeof(struct Curl_dns_entry) + hostlen);
+  dns = curlx_calloc(1, sizeof(struct Curl_dns_entry) + hostlen);
   if(!dns)
     return NULL;
 
@@ -609,7 +609,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   struct sockaddr_in6 sa6;
   unsigned char ipv6[16];
   unsigned short port16 = (unsigned short)(port & 0xffff);
-  ca = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1);
+  ca = curlx_calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1);
   if(!ca)
     return NULL;
 
@@ -658,7 +658,7 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
     return NULL;
   memcpy(&sa.sin_addr, &ipv4, sizeof(ipv4));
 
-  ca = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1);
+  ca = curlx_calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen + 1);
   if(!ca)
     return NULL;
   ca->ai_flags     = 0;
@@ -1178,10 +1178,10 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns)
 #ifdef USE_HTTPSRR
   if(dns->hinfo) {
     Curl_httpsrr_cleanup(dns->hinfo);
-    free(dns->hinfo);
+    curlx_free(dns->hinfo);
   }
 #endif
-  free(dns);
+  curlx_free(dns);
 }
 
 /*

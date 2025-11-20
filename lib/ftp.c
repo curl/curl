@@ -1419,7 +1419,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   result = Curl_pp_sendf(data, &ftpc->pp, "%s", cmd);
-  free(cmd);
+  curlx_free(cmd);
 
   if(!result)
     ftp_state(data, ftpc, FTP_LIST);
@@ -1770,12 +1770,12 @@ static CURLcode ftp_control_addr_dup(struct Curl_easy *data,
      not the ftp host. */
 #ifndef CURL_DISABLE_PROXY
   if(conn->bits.tunnel_proxy || conn->bits.socksproxy)
-    *newhostp = strdup(conn->host.name);
+    *newhostp = curlx_strdup(conn->host.name);
   else
 #endif
   if(!Curl_conn_get_ip_info(data, conn, FIRSTSOCKET, &is_ipv6, &ipquad) &&
      *ipquad.remote_ip)
-    *newhostp = strdup(ipquad.remote_ip);
+    *newhostp = curlx_strdup(ipquad.remote_ip);
   else {
     /* failed to get the remote_ip of the DATA connection */
     failf(data, "unable to get peername of DATA connection");
@@ -1934,7 +1934,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !newhost[0]) {
-      free(newhost);
+      curlx_free(newhost);
       result = ftp_control_addr_dup(data, &newhost);
       if(result)
         goto error;
@@ -1956,7 +1956,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
   if(result) {
     if(ftpc->count1 == 0 && ftpcode == 229) {
-      free(newhost);
+      curlx_free(newhost);
       return ftp_epsv_disable(data, ftpc, conn);
     }
 
@@ -1973,9 +1973,9 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(data, dns->addr, newhost, connectport);
 
-  free(conn->secondaryhostname);
+  curlx_free(conn->secondaryhostname);
   conn->secondary_port = newport;
-  conn->secondaryhostname = strdup(newhost);
+  conn->secondaryhostname = curlx_strdup(newhost);
   if(!conn->secondaryhostname) {
     result = CURLE_OUT_OF_MEMORY;
     goto error;
@@ -1985,7 +1985,7 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
   ftp_state(data, ftpc, FTP_STOP); /* this phase is completed */
 
 error:
-  free(newhost);
+  curlx_free(newhost);
   return result;
 }
 
@@ -2723,17 +2723,17 @@ static CURLcode ftp_pwd_resp(struct Curl_easy *data,
       if(!ftpc->server_os && dir[0] != '/') {
         result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SYST");
         if(result) {
-          free(dir);
+          curlx_free(dir);
           return result;
         }
       }
 
-      free(ftpc->entrypath);
+      curlx_free(ftpc->entrypath);
       ftpc->entrypath = dir; /* remember this */
       infof(data, "Entry path is '%s'", ftpc->entrypath);
       /* also save it where getinfo can access it: */
-      free(data->state.most_recent_ftp_entrypath);
-      data->state.most_recent_ftp_entrypath = strdup(ftpc->entrypath);
+      curlx_free(data->state.most_recent_ftp_entrypath);
+      data->state.most_recent_ftp_entrypath = curlx_strdup(ftpc->entrypath);
       if(!data->state.most_recent_ftp_entrypath)
         return CURLE_OUT_OF_MEMORY;
 
@@ -2961,18 +2961,18 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
         /* Force OS400 name format 1. */
         result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
         if(result) {
-          free(os);
+          curlx_free(os);
           return result;
         }
         /* remember target server OS */
-        free(ftpc->server_os);
+        curlx_free(ftpc->server_os);
         ftpc->server_os = os;
         ftp_state(data, ftpc, FTP_NAMEFMT);
         break;
       }
       /* Nothing special for the target server. */
       /* remember target server OS */
-      free(ftpc->server_os);
+      curlx_free(ftpc->server_os);
       ftpc->server_os = os;
     }
     else {
@@ -3277,7 +3277,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
      * the error path) */
     ftpc->ctl_valid = FALSE; /* mark control connection as bad */
     connclose(conn, "FTP: out of memory!"); /* mark for connection closure */
-    free(ftpc->prevpath);
+    curlx_free(ftpc->prevpath);
     ftpc->prevpath = NULL; /* no path remembering */
   }
   else { /* remember working directory for connection reuse */
@@ -3288,7 +3288,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
       else {
         size_t pathLen = strlen(ftpc->rawpath);
 
-        free(ftpc->prevpath);
+        curlx_free(ftpc->prevpath);
 
         if(!ftpc->cwdfail) {
           if(data->set.ftp_filemethod == FTPFILE_NOCWD)
@@ -3757,7 +3757,7 @@ static void wc_data_dtor(void *ptr)
   struct ftp_wc *ftpwc = ptr;
   if(ftpwc && ftpwc->parser)
     Curl_ftp_parselist_data_free(&ftpwc->parser);
-  free(ftpwc);
+  curlx_free(ftpwc);
 }
 
 static CURLcode init_wc_data(struct Curl_easy *data,
@@ -3777,14 +3777,14 @@ static CURLcode init_wc_data(struct Curl_easy *data,
       wildcard->state = CURLWC_CLEAN;
       return ftp_parse_url_path(data, ftpc, ftp);
     }
-    wildcard->pattern = strdup(last_slash);
+    wildcard->pattern = curlx_strdup(last_slash);
     if(!wildcard->pattern)
       return CURLE_OUT_OF_MEMORY;
     last_slash[0] = '\0'; /* cut file from path */
   }
   else { /* there is only 'wildcard pattern' or nothing */
     if(path[0]) {
-      wildcard->pattern = strdup(path);
+      wildcard->pattern = curlx_strdup(path);
       if(!wildcard->pattern)
         return CURLE_OUT_OF_MEMORY;
       path[0] = '\0';
@@ -3799,7 +3799,7 @@ static CURLcode init_wc_data(struct Curl_easy *data,
      resources for wildcard transfer */
 
   /* allocate ftp protocol specific wildcard data */
-  ftpwc = calloc(1, sizeof(struct ftp_wc));
+  ftpwc = curlx_calloc(1, sizeof(struct ftp_wc));
   if(!ftpwc) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -3825,7 +3825,7 @@ static CURLcode init_wc_data(struct Curl_easy *data,
     goto fail;
   }
 
-  wildcard->path = strdup(ftp->path);
+  wildcard->path = curlx_strdup(ftp->path);
   if(!wildcard->path) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -3846,7 +3846,7 @@ static CURLcode init_wc_data(struct Curl_easy *data,
 fail:
   if(ftpwc) {
     Curl_ftp_parselist_data_free(&ftpwc->parser);
-    free(ftpwc);
+    curlx_free(ftpwc);
   }
   Curl_safefree(wildcard->pattern);
   wildcard->dtor = ZERO_NULL;
@@ -3904,7 +3904,7 @@ static CURLcode wc_statemach(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
 
       /* switch default ftp->path and tmp_path */
-      free(ftp->pathalloc);
+      curlx_free(ftp->pathalloc);
       ftp->pathalloc = ftp->path = tmp_path;
 
       infof(data, "Wildcard - START of \"%s\"", finfo->filename);
@@ -4179,7 +4179,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
         if(dirlen == 0)
           dirlen = 1;
 
-        ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
+        ftpc->dirs = curlx_calloc(1, sizeof(ftpc->dirs[0]));
         if(!ftpc->dirs)
           return CURLE_OUT_OF_MEMORY;
 
@@ -4205,7 +4205,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data,
         return CURLE_URL_MALFORMAT;
 
       if(dirAlloc) {
-        ftpc->dirs = calloc(dirAlloc, sizeof(ftpc->dirs[0]));
+        ftpc->dirs = curlx_calloc(dirAlloc, sizeof(ftpc->dirs[0]));
         if(!ftpc->dirs)
           return CURLE_OUT_OF_MEMORY;
 
@@ -4372,7 +4372,7 @@ static void ftp_easy_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   Curl_safefree(ftp->pathalloc);
-  free(ftp);
+  curlx_free(ftp);
 }
 
 static void ftp_conn_dtor(void *key, size_t klen, void *entry)
@@ -4387,7 +4387,7 @@ static void ftp_conn_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(ftpc->prevpath);
   Curl_safefree(ftpc->server_os);
   Curl_pp_disconnect(&ftpc->pp);
-  free(ftpc);
+  curlx_free(ftpc);
 }
 
 static void type_url_check(struct Curl_easy *data, struct FTP *ftp)
@@ -4426,19 +4426,19 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct ftp_conn *ftpc;
 
-  ftp = calloc(1, sizeof(*ftp));
+  ftp = curlx_calloc(1, sizeof(*ftp));
   if(!ftp ||
      Curl_meta_set(data, CURL_META_FTP_EASY, ftp, ftp_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  ftpc = calloc(1, sizeof(*ftpc));
+  ftpc = curlx_calloc(1, sizeof(*ftpc));
   if(!ftpc ||
      Curl_conn_meta_set(conn, CURL_META_FTP_CONN, ftpc, ftp_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   /* clone connection related data that is FTP specific */
   if(data->set.str[STRING_FTP_ACCOUNT]) {
-    ftpc->account = strdup(data->set.str[STRING_FTP_ACCOUNT]);
+    ftpc->account = curlx_strdup(data->set.str[STRING_FTP_ACCOUNT]);
     if(!ftpc->account) {
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);
       return CURLE_OUT_OF_MEMORY;
@@ -4446,7 +4446,7 @@ static CURLcode ftp_setup_connection(struct Curl_easy *data,
   }
   if(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]) {
     ftpc->alternative_to_user =
-      strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
+      curlx_strdup(data->set.str[STRING_FTP_ALTERNATIVE_TO_USER]);
     if(!ftpc->alternative_to_user) {
       Curl_safefree(ftpc->account);
       Curl_conn_meta_remove(conn, CURL_META_FTP_CONN);

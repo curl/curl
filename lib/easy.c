@@ -200,7 +200,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
     /* alloc data that will leak if *cleanup() is not called! */
-    leakpointer = malloc(1);
+    leakpointer = curlx_malloc(1);
 #endif
 
   return CURLE_OK;
@@ -299,7 +299,7 @@ void curl_global_cleanup(void)
   Curl_ssh_cleanup();
 
 #ifdef DEBUGBUILD
-  free(leakpointer);
+  curlx_free(leakpointer);
 #endif
 
   easy_init_flags = 0;
@@ -480,7 +480,7 @@ static int events_socket(CURL *easy,      /* easy handle */
           prev->next = nxt;
         else
           ev->list = nxt;
-        free(m);
+        curlx_free(m);
         infof(data, "socket cb: socket %" FMT_SOCKET_T " REMOVED", s);
       }
       else {
@@ -506,7 +506,7 @@ static int events_socket(CURL *easy,      /* easy handle */
       DEBUGASSERT(0);
     }
     else {
-      m = malloc(sizeof(struct socketmonitor));
+      m = curlx_malloc(sizeof(struct socketmonitor));
       if(m) {
         m->next = ev->list;
         m->socket.fd = s;
@@ -929,7 +929,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   i = STRING_COPYPOSTFIELDS;
   if(src->set.str[i]) {
     if(src->set.postfieldsize == -1)
-      dst->set.str[i] = strdup(src->set.str[i]);
+      dst->set.str[i] = curlx_strdup(src->set.str[i]);
     else
       /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
       dst->set.str[i] = Curl_memdup(src->set.str[i],
@@ -970,7 +970,7 @@ CURL *curl_easy_duphandle(CURL *d)
 
   if(!GOOD_EASY_HANDLE(data))
     goto fail;
-  outcurl = calloc(1, sizeof(struct Curl_easy));
+  outcurl = curlx_calloc(1, sizeof(struct Curl_easy));
   if(!outcurl)
     goto fail;
 
@@ -1024,14 +1024,14 @@ CURL *curl_easy_duphandle(CURL *d)
 #endif
 
   if(data->state.url) {
-    outcurl->state.url = strdup(data->state.url);
+    outcurl->state.url = curlx_strdup(data->state.url);
     if(!outcurl->state.url)
       goto fail;
     outcurl->state.url_alloc = TRUE;
   }
 
   if(data->state.referer) {
-    outcurl->state.referer = strdup(data->state.referer);
+    outcurl->state.referer = curlx_strdup(data->state.referer);
     if(!outcurl->state.referer)
       goto fail;
     outcurl->state.referer_alloc = TRUE;
@@ -1075,13 +1075,13 @@ fail:
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
-    free(outcurl->cookies);
+    curlx_free(outcurl->cookies);
 #endif
     curlx_dyn_free(&outcurl->state.headerb);
     Curl_altsvc_cleanup(&outcurl->asi);
     Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
-    free(outcurl);
+    curlx_free(outcurl);
   }
 
   return NULL;

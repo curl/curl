@@ -317,7 +317,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     return CURLE_TOO_LARGE;
   }
 
-  hs = calloc(1, sizeof(*hs) + hlen);
+  hs = curlx_calloc(1, sizeof(*hs) + hlen);
   if(!hs)
     return CURLE_OUT_OF_MEMORY;
   memcpy(hs->buffer, header, hlen);
@@ -336,7 +336,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   }
   else {
     failf(data, "Invalid response header");
-    free(hs);
+    curlx_free(hs);
   }
   return result;
 }
@@ -417,7 +417,7 @@ CURLcode Curl_headers_cleanup(struct Curl_easy *data)
   for(e = Curl_llist_head(&data->state.httphdrs); e; e = n) {
     struct Curl_header_store *hs = Curl_node_elem(e);
     n = Curl_node_next(e);
-    free(hs);
+    curlx_free(hs);
   }
   headers_reset(data);
   return CURLE_OK;
