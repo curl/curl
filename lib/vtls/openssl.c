@@ -4557,7 +4557,7 @@ static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
   X509 *issuer = NULL;
   BIO *fp = NULL;
   char err_buf[256]="";
-  bool strict = (conn_config->verifypeer || conn_config->verifyhost);
+  bool verify_enabled = (conn_config->verifypeer || conn_config->verifyhost);
   CURLcode result = CURLE_OK;
 
   /* e.g. match issuer name with provided issuer certificate */
@@ -4581,7 +4581,7 @@ static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
     }
 
     if(BIO_read_filename(fp, conn_config->issuercert) <= 0) {
-      if(strict)
+      if(verify_enabled)
         failf(data, "SSL: Unable to open issuer cert (%s)",
               conn_config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
@@ -4592,7 +4592,7 @@ static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
   if(fp) {
     issuer = PEM_read_bio_X509(fp, NULL, ZERO_NULL, NULL);
     if(!issuer) {
-      if(strict)
+      if(verify_enabled)
         failf(data, "SSL: Unable to read issuer cert (%s)",
               conn_config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
@@ -4600,7 +4600,7 @@ static CURLcode ossl_check_issuer(struct Curl_cfilter *cf,
     }
 
     if(X509_check_issued(issuer, server_cert) != X509_V_OK) {
-      if(strict)
+      if(verify_enabled)
         failf(data, "SSL: Certificate issuer check failed (%s)",
               conn_config->issuercert);
       result = CURLE_SSL_ISSUER_ERROR;
@@ -4648,8 +4648,6 @@ static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 X509 *server_cert)
 {
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  bool strict = (conn_config->verifypeer || conn_config->verifyhost);
   BIO *mem = NULL;
   struct dynbuf dname;
   char err_buf[256] = "";
@@ -4686,12 +4684,8 @@ static CURLcode ossl_infof_cert(struct Curl_cfilter *cf,
   (void)BIO_reset(mem);
 
   result = x509_name_oneline(X509_get_issuer_name(server_cert), &dname);
-  if(result) {
-    if(strict)
-      failf(data, "SSL: could not get X509-issuer name");
-    result = CURLE_PEER_FAILED_VERIFICATION;
+  if(result) /* should be only fatal stuff like OOM */
     goto out;
-  }
   infof(data, "  issuer: %s", curlx_dyn_ptr(&dname));
 
 out:
@@ -4788,7 +4782,6 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   CURLcode result = CURLE_OK;
   long ossl_verify;
-  bool strict = (conn_config->verifypeer || conn_config->verifyhost);
   X509 *server_cert;
   bool verified = FALSE;
 #ifdef USE_APPLE_SECTRUST
@@ -4805,7 +4798,8 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!server_cert) {
-    if(!strict)
+    /* no verification at all, this maybe acceptable */
+    if(!(conn_config->verifypeer || conn_config->verifyhost))
       goto out;
 
     failf(data, "SSL: could not get peer certificate");
@@ -4825,6 +4819,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     if(result)
       goto out;
   }
+  /* `verifyhost` is either OK or not requested from here on */
 
   ossl_verify = SSL_get_verify_result(octx->ssl);
   ssl_config->certverifyresult = ossl_verify;
@@ -4853,11 +4848,12 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
 
   if(!verified) {
     /* no trust established, report the OpenSSL status */
-    failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
-          X509_verify_cert_error_string(ossl_verify), ossl_verify);
-    result = CURLE_PEER_FAILED_VERIFICATION;
-    if(conn_config->verifypeer)
+    if(conn_config->verifypeer) {
+      failf(data, "SSL certificate OpenSSL verify result: %s (%ld)",
+            X509_verify_cert_error_string(ossl_verify), ossl_verify);
+      result = CURLE_PEER_FAILED_VERIFICATION;
       goto out;
+    }
     infof(data, " SSL certificate verification failed, continuing anyway!");
   }
 
