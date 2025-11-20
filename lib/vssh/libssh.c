@@ -605,7 +605,7 @@ static int myssh_in_SFTP_READDIR(struct Curl_easy *data,
       }
       result = Curl_client_write(data, CLIENTWRITE_BODY,
                                  tmpLine, sshc->readdir_len + 1);
-      free(tmpLine);
+      curlx_free(tmpLine);
 
       if(result) {
         myssh_to(data, sshc, SSH_STOP);
@@ -787,7 +787,7 @@ static int myssh_in_SFTP_QUOTE_STATVFS(struct Curl_easy *data,
 
     if(!result) {
       result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-      free(tmp);
+      curlx_free(tmp);
     }
     if(result) {
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
@@ -1478,8 +1478,8 @@ static int myssh_in_SFTP_REALPATH(struct Curl_easy *data,
   if(!sshc->homedir)
     return myssh_to_ERROR(data, sshc, CURLE_COULDNT_CONNECT);
 
-  free(data->state.most_recent_ftp_entrypath);
-  data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+  curlx_free(data->state.most_recent_ftp_entrypath);
+  data->state.most_recent_ftp_entrypath = curlx_strdup(sshc->homedir);
   if(!data->state.most_recent_ftp_entrypath)
     return myssh_to_ERROR(data, sshc, CURLE_OUT_OF_MEMORY);
 
@@ -1577,7 +1577,7 @@ static int myssh_in_SFTP_QUOTE(struct Curl_easy *data,
        the current directory can be read similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-    free(tmp);
+    curlx_free(tmp);
     if(result) {
       myssh_to(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
@@ -2529,7 +2529,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   Curl_safefree(sshp->path);
-  free(sshp);
+  curlx_free(sshp);
 }
 
 static void myssh_conn_dtor(void *key, size_t klen, void *entry)
@@ -2538,7 +2538,7 @@ static void myssh_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   sshc_cleanup(sshc);
-  free(sshc);
+  curlx_free(sshc);
 }
 
 /*
@@ -2550,7 +2550,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   struct SSHPROTO *sshp;
   struct ssh_conn *sshc;
 
-  sshc = calloc(1, sizeof(*sshc));
+  sshc = curlx_calloc(1, sizeof(*sshc));
   if(!sshc)
     return CURLE_OUT_OF_MEMORY;
 
@@ -2559,7 +2559,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   if(Curl_conn_meta_set(conn, CURL_META_SSH_CONN, sshc, myssh_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  sshp = calloc(1, sizeof(*sshp));
+  sshp = curlx_calloc(1, sizeof(*sshp));
   if(!sshp ||
      Curl_meta_set(data, CURL_META_SSH_EASY, sshp, myssh_easy_dtor))
     return CURLE_OUT_OF_MEMORY;

@@ -181,7 +181,7 @@ kbd_callback(const char *name, int name_len, const char *instruction,
 #endif  /* CURL_LIBSSH2_DEBUG */
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
-    responses[0].text = strdup(conn->passwd);
+    responses[0].text = curlx_strdup(conn->passwd);
     responses[0].length =
       responses[0].text == NULL ? 0 : curlx_uztoui(strlen(conn->passwd));
   }
@@ -635,12 +635,12 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
       failf(data,
             "Denied establishing ssh session: mismatch sha256 fingerprint. "
             "Remote %s is not equal to %s", fingerprint_b64, pubkey_sha256);
-      free(fingerprint_b64);
+      curlx_free(fingerprint_b64);
       myssh_state(data, sshc, SSH_SESSION_FREE);
       return CURLE_PEER_FAILED_VERIFICATION;
     }
 
-    free(fingerprint_b64);
+    curlx_free(fingerprint_b64);
 
     infof(data, "SHA256 checksum match");
   }
@@ -881,7 +881,7 @@ static CURLcode sftp_quote(struct Curl_easy *data,
        the current directory can be read similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-    free(tmp);
+    curlx_free(tmp);
     if(!result)
       myssh_state(data, sshc, SSH_SFTP_NEXT_QUOTE);
     return result;
@@ -1204,7 +1204,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
     sshc->rsa_pub = sshc->rsa = NULL;
 
     if(data->set.str[STRING_SSH_PRIVATE_KEY])
-      sshc->rsa = strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
+      sshc->rsa = curlx_strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
     else {
       /* To ponder about: should really the lib be messing about with the
          HOME environment variable etc? */
@@ -1218,7 +1218,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
         if(!sshc->rsa)
           out_of_memory = TRUE;
         else if(curlx_stat(sshc->rsa, &sbuf)) {
-          free(sshc->rsa);
+          curlx_free(sshc->rsa);
           sshc->rsa = curl_maprintf("%s/.ssh/id_dsa", home);
           if(!sshc->rsa)
             out_of_memory = TRUE;
@@ -1226,19 +1226,19 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
             Curl_safefree(sshc->rsa);
           }
         }
-        free(home);
+        curlx_free(home);
       }
       if(!out_of_memory && !sshc->rsa) {
         /* Nothing found; try the current dir. */
-        sshc->rsa = strdup("id_rsa");
+        sshc->rsa = curlx_strdup("id_rsa");
         if(sshc->rsa && curlx_stat(sshc->rsa, &sbuf)) {
-          free(sshc->rsa);
-          sshc->rsa = strdup("id_dsa");
+          curlx_free(sshc->rsa);
+          sshc->rsa = curlx_strdup("id_dsa");
           if(sshc->rsa && curlx_stat(sshc->rsa, &sbuf)) {
-            free(sshc->rsa);
+            curlx_free(sshc->rsa);
             /* Out of guesses. Set to the empty string to avoid
              * surprising info messages. */
-            sshc->rsa = strdup("");
+            sshc->rsa = curlx_strdup("");
           }
         }
       }
@@ -1252,7 +1252,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
     if(data->set.str[STRING_SSH_PUBLIC_KEY]
        /* treat empty string the same way as NULL */
        && data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
-      sshc->rsa_pub = strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
+      sshc->rsa_pub = curlx_strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
       if(!sshc->rsa_pub)
         out_of_memory = TRUE;
     }
@@ -1936,12 +1936,12 @@ static CURLcode ssh_state_sftp_realpath(struct Curl_easy *data,
 
   myssh_state(data, sshc, SSH_STOP);
   if(rc > 0) {
-    free(sshc->homedir);
-    sshc->homedir = strdup(sshp->readdir_filename);
+    curlx_free(sshc->homedir);
+    sshc->homedir = curlx_strdup(sshp->readdir_filename);
     if(!sshc->homedir)
       return CURLE_OUT_OF_MEMORY;
-    free(data->state.most_recent_ftp_entrypath);
-    data->state.most_recent_ftp_entrypath = strdup(sshc->homedir);
+    curlx_free(data->state.most_recent_ftp_entrypath);
+    data->state.most_recent_ftp_entrypath = curlx_strdup(sshc->homedir);
     if(!data->state.most_recent_ftp_entrypath)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -2251,7 +2251,7 @@ static CURLcode ssh_state_sftp_quote_statvfs(struct Curl_easy *data,
     }
 
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
-    free(tmp);
+    curlx_free(tmp);
     if(result) {
       myssh_state(data, sshc, SSH_SFTP_CLOSE);
       sshc->nextstate = SSH_NO_STATE;
@@ -3177,7 +3177,7 @@ static void myssh_easy_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(sshp->path);
   curlx_dyn_free(&sshp->readdir);
   curlx_dyn_free(&sshp->readdir_link);
-  free(sshp);
+  curlx_free(sshp);
 }
 
 static void myssh_conn_dtor(void *key, size_t klen, void *entry)
@@ -3186,7 +3186,7 @@ static void myssh_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   sshc_cleanup(sshc, NULL, TRUE);
-  free(sshc);
+  curlx_free(sshc);
 }
 
 /*
@@ -3199,14 +3199,14 @@ static CURLcode ssh_setup_connection(struct Curl_easy *data,
   struct SSHPROTO *sshp;
   (void)conn;
 
-  sshc = calloc(1, sizeof(*sshc));
+  sshc = curlx_calloc(1, sizeof(*sshc));
   if(!sshc)
     return CURLE_OUT_OF_MEMORY;
 
   if(Curl_conn_meta_set(conn, CURL_META_SSH_CONN, sshc, myssh_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  sshp = calloc(1, sizeof(*sshp));
+  sshp = curlx_calloc(1, sizeof(*sshp));
   if(!sshp)
     return CURLE_OUT_OF_MEMORY;
 
