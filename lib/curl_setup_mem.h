@@ -49,7 +49,7 @@
 
 #else /* !CURLDEBUG */
 
-#ifndef CURL_STANDARD_ALLOC
+#if !defined(CURL_STANDARD_ALLOC) || defined(CURL_STANDARD_LOCAL_OVERRIDE)
 /*#warning "XMEMNEW defined CURLALLOC"*/
 #define XMEMNEW 2
 #undef curlx_strdup

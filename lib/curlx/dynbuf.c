@@ -26,6 +26,9 @@
 #include "dynbuf.h"
 #include "../curl_printf.h"
 #ifdef BUILDING_LIBCURL
+#define CURL_STANDARD_LOCAL_OVERRIDE
+#include "../curl_setup_mem.h"
+#undef CURL_STANDARD_LOCAL_OVERRIDE
 #include "../curl_memory.h"
 #endif
 #include "../memdebug.h"
