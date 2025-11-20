@@ -125,8 +125,8 @@ out:
   if(fp)
     curlx_fclose(fp);
   curlx_dyn_free(&buf);
-  free(shmac);
-  free(sdata);
+  curlx_free(shmac);
+  curlx_free(sdata);
   return r;
 }
 
@@ -179,7 +179,7 @@ static CURLcode tool_ssls_exp(CURL *easy, void *userptr,
 out:
   if(r)
     warnf("Warning: error saving SSL session for '%s': %d", session_key, r);
-  free(enc);
+  curlx_free(enc);
   return r;
 }
 

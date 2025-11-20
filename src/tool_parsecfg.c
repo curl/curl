@@ -95,7 +95,7 @@ ParameterError parseconfig(const char *filename, int max_recursive)
     if(curlrc) {
       file = curlx_fopen(curlrc, FOPEN_READTEXT);
       if(!file) {
-        free(curlrc);
+        curlx_free(curlrc);
         return PARAM_READ_ERROR;
       }
       filename = pathalloc = curlrc;
@@ -264,7 +264,7 @@ ParameterError parseconfig(const char *filename, int max_recursive)
   if((err == PARAM_READ_ERROR) && filename)
     errorf("cannot read config from '%s'", filename);
 
-  free(pathalloc);
+  curlx_free(pathalloc);
   return err;
 }
 

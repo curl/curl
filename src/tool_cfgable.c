@@ -36,7 +36,7 @@ struct GlobalConfig *global;
 struct OperationConfig *config_alloc(void)
 {
   struct OperationConfig *config =
-    calloc(1, sizeof(struct OperationConfig));
+    curlx_calloc(1, sizeof(struct OperationConfig));
   if(!config)
     return NULL;
 
@@ -199,7 +199,7 @@ void config_free(struct OperationConfig *config)
     struct OperationConfig *prev = last->prev;
 
     free_config_fields(last);
-    free(last);
+    curlx_free(last);
 
     last = prev;
   }
@@ -236,12 +236,12 @@ CURLcode globalconf_init(void)
 
       if(result) {
         errorf("error retrieving curl library information");
-        free(global->first);
+        curlx_free(global->first);
       }
     }
     else {
       errorf("error initializing curl library");
-      free(global->first);
+      curlx_free(global->first);
     }
   }
   else {
@@ -263,7 +263,7 @@ static void free_globalconfig(void)
   tool_safefree(global->ssl_sessions);
   tool_safefree(global->libcurl);
 #ifdef _WIN32
-  free(global->term.buf);
+  curlx_free(global->term.buf);
 #endif
 }
 

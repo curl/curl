@@ -35,7 +35,7 @@ char *strdup(const char *str)
 
   len = strlen(str) + 1;
 
-  newstr = malloc(len);
+  newstr = curlx_malloc(len);
   if(!newstr)
     return (char *)NULL;
 
@@ -46,7 +46,7 @@ char *strdup(const char *str)
 
 char *memdup0(const char *data, size_t len)
 {
-  char *p = malloc(len + 1);
+  char *p = curlx_malloc(len + 1);
   if(!p)
     return NULL;
   if(len)
