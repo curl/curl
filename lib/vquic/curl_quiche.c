@@ -47,6 +47,7 @@
 #include "../transfer.h"
 #include "../url.h"
 #include "../curlx/inet_pton.h"
+#include "../curlx/warnless.h"
 #include "../vtls/openssl.h"
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
@@ -408,12 +409,9 @@ static CURLcode stream_resp_read(void *reader_ctx,
     return CURLE_RECV_ERROR;
 
   nread = quiche_h3_recv_body(ctx->h3c, ctx->qconn, stream->id, buf, len);
-  if(nread >= 0) {
-    *pnread = (size_t)nread;
-    return CURLE_OK;
-  }
-  else
+  if(!curlx_sztouz(nread, pnread))
     return CURLE_AGAIN;
+  return CURLE_OK;
 }
 
 static CURLcode cf_recv_body(struct Curl_cfilter *cf,
@@ -633,8 +631,8 @@ static CURLcode cf_quiche_recv_pkts(const unsigned char *buf, size_t buflen,
   struct recv_ctx *r = userp;
   struct cf_quiche_ctx *ctx = r->cf->ctx;
   quiche_recv_info recv_info;
-  size_t pktlen, offset;
-  ssize_t nread;
+  size_t pktlen, offset, nread;
+  ssize_t rv;
 
   (void)ecn;
 
@@ -645,11 +643,11 @@ static CURLcode cf_quiche_recv_pkts(const unsigned char *buf, size_t buflen,
 
   for(offset = 0; offset < buflen; offset += gso_size) {
     pktlen = ((offset + gso_size) <= buflen) ? gso_size : (buflen - offset);
-    nread = quiche_conn_recv(ctx->qconn,
-                             (unsigned char *)CURL_UNCONST(buf + offset),
-                             pktlen, &recv_info);
-    if(nread < 0) {
-      if(QUICHE_ERR_DONE == nread) {
+    rv = quiche_conn_recv(ctx->qconn,
+                          (unsigned char *)CURL_UNCONST(buf + offset),
+                          pktlen, &recv_info);
+    if(!curlx_sztouz(rv, &nread)) {
+      if(QUICHE_ERR_DONE == rv) {
         if(quiche_conn_is_draining(ctx->qconn)) {
           CURL_TRC_CF(r->data, r->cf, "ingress, connection is draining");
           return CURLE_RECV_ERROR;
@@ -661,7 +659,7 @@ static CURLcode cf_quiche_recv_pkts(const unsigned char *buf, size_t buflen,
         CURL_TRC_CF(r->data, r->cf, "ingress, quiche is DONE");
         return CURLE_OK;
       }
-      else if(QUICHE_ERR_TLS_FAIL == nread) {
+      else if(QUICHE_ERR_TLS_FAIL == rv) {
         long verify_ok = SSL_get_verify_result(ctx->tls.ossl.ssl);
         if(verify_ok != X509_V_OK) {
           failf(r->data, "SSL certificate problem: %s",
@@ -672,12 +670,12 @@ static CURLcode cf_quiche_recv_pkts(const unsigned char *buf, size_t buflen,
         return CURLE_RECV_ERROR;
       }
       else {
-        failf(r->data, "quiche reports error %zd on receive", nread);
+        failf(r->data, "quiche reports error %zd on receive", rv);
         return CURLE_RECV_ERROR;
       }
     }
-    else if((size_t)nread < pktlen) {
-      CURL_TRC_CF(r->data, r->cf, "ingress, quiche only read %zd/%zu bytes",
+    else if(nread < pktlen) {
+      CURL_TRC_CF(r->data, r->cf, "ingress, quiche only read %zu/%zu bytes",
                   nread, pktlen);
     }
     ++r->pkts;
@@ -728,18 +726,17 @@ static CURLcode read_pkt_to_send(void *userp,
 {
   struct read_ctx *x = userp;
   struct cf_quiche_ctx *ctx = x->cf->ctx;
-  ssize_t n;
+  ssize_t rv;
 
   *pnread = 0;
-  n = quiche_conn_send(ctx->qconn, buf, buflen, &x->send_info);
-  if(n == QUICHE_ERR_DONE)
+  rv = quiche_conn_send(ctx->qconn, buf, buflen, &x->send_info);
+  if(rv == QUICHE_ERR_DONE)
     return CURLE_AGAIN;
 
-  if(n < 0) {
-    failf(x->data, "quiche_conn_send returned %zd", n);
+  if(!curlx_sztouz(rv, pnread)) {
+    failf(x->data, "quiche_conn_send returned %zd", rv);
     return CURLE_SEND_ERROR;
   }
-  *pnread = (size_t)n;
   return CURLE_OK;
 }
 
@@ -924,12 +921,12 @@ static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
                                     size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  ssize_t nwritten;
+  ssize_t rv;
 
   *pnwritten = 0;
-  nwritten = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
-                                 (uint8_t *)CURL_UNCONST(buf), len, eos);
-  if(nwritten == QUICHE_H3_ERR_DONE || (nwritten == 0 && len > 0)) {
+  rv = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
+                           (uint8_t *)CURL_UNCONST(buf), len, eos);
+  if(rv == QUICHE_H3_ERR_DONE || (rv == 0 && len > 0)) {
     /* Blocked on flow control and should HOLD sending. But when do we open
      * again? */
     if(!quiche_conn_stream_writable(ctx->qconn, stream->id, len)) {
@@ -939,28 +936,27 @@ static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
     }
     return CURLE_AGAIN;
   }
-  else if(nwritten == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
+  else if(rv == QUICHE_H3_TRANSPORT_ERR_INVALID_STREAM_STATE) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                 "-> invalid stream state", stream->id, len);
     return CURLE_HTTP3;
   }
-  else if(nwritten == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
+  else if(rv == QUICHE_H3_TRANSPORT_ERR_FINAL_SIZE) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
                 "-> exceeds size", stream->id, len);
     return CURLE_SEND_ERROR;
   }
-  else if(nwritten < 0) {
+  else if(!curlx_sztouz(rv, pnwritten)) {
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send_body(len=%zu) "
-                "-> quiche err %zd", stream->id, len, nwritten);
+                "-> quiche err %zd", stream->id, len, rv);
     return CURLE_SEND_ERROR;
   }
   else {
-    if(eos && (len == (size_t)nwritten))
+    if(eos && (len == *pnwritten))
       stream->send_closed = TRUE;
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] send body(len=%zu, "
-                "eos=%d) -> %zd",
-                stream->id, len, stream->send_closed, nwritten);
-    *pnwritten = (size_t)nwritten;
+                "eos=%d) -> %zu",
+                stream->id, len, stream->send_closed, *pnwritten);
     return CURLE_OK;
   }
 }
@@ -1068,15 +1064,15 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   }
 
   if(blen) {  /* after the headers, there was request BODY data */
-    size_t bwritten;
+    size_t nwritten;
     CURLcode r2 = CURLE_OK;
 
-    r2 = cf_quiche_send_body(cf, data, stream, buf, blen, eos, &bwritten);
+    r2 = cf_quiche_send_body(cf, data, stream, buf, blen, eos, &nwritten);
     if(r2 && (CURLE_AGAIN != r2)) {  /* real error, fail */
       result = r2;
     }
-    else if(bwritten > 0) {
-      *pnwritten += (size_t)bwritten;
+    else if(nwritten > 0) {
+      *pnwritten += nwritten;
     }
   }
 

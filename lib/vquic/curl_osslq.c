@@ -777,7 +777,7 @@ static CURLcode write_resp_raw(struct Curl_cfilter *cf,
     return result;
 
   if(!flow)
-    stream->recv_buf_nonflow += (size_t)nwritten;
+    stream->recv_buf_nonflow += nwritten;
 
   if(nwritten < memlen) {
     /* This MUST not happen. Our recbuf is dimensioned to hold the
