@@ -27,8 +27,6 @@
 #include "url.h" /* for Curl_safefree */
 #include "memdebug.h" /* LAST include file */
 
-#include "memdebugx.h"
-
 struct etest {
   const char *input;
   size_t ilen;

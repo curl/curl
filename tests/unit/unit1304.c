@@ -25,6 +25,8 @@
 #include "netrc.h"
 #include "memdebug.h" /* LAST include file */
 
+#include "memdebugx.h"
+
 #ifndef CURL_DISABLE_NETRC
 
 static void t1304_stop(char **password, char **login)
