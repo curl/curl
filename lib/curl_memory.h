@@ -53,32 +53,4 @@
  * trigger weird memory related issues at runtime.
  *
  */
-
-#ifndef CURLDEBUG
-
-#undef XMEM
-#define XMEM 2
-/*#warning "XMEM => 2 (curl_memory.h)"*/
-
-/*
- * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
- * realloc and free, along with others, in memdebug.h in a different
- * way although still using memory callbacks forward declared above.
- * When using the 'memory tracking' system (CURLDEBUG defined) we do
- * not define here the five memory functions given that definitions
- * from memdebug.h are the ones that shall be used.
- */
-
-#undef strdup
-#define strdup(ptr) Curl_cstrdup(ptr)
-#undef malloc
-#define malloc(size) Curl_cmalloc(size)
-#undef calloc
-#define calloc(nbelem,size) Curl_ccalloc(nbelem, size)
-#undef realloc
-#define realloc(ptr,size) Curl_crealloc(ptr, size)
-#undef free
-#define free(ptr) Curl_cfree(ptr)
-
-#endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMORY_H */
