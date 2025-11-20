@@ -66,6 +66,7 @@
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
+#include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"
 #include "curlx/warnless.h"
@@ -81,21 +82,27 @@
 
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
-enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
+enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
 {
   if(len == 2) {
-    if(curl_strnequal(name, "h1", 2))
+    if(!memcmp(name, "h1", 2))
       return ALPN_h1;
-    if(curl_strnequal(name, "h2", 2))
+    if(!memcmp(name, "h2", 2))
       return ALPN_h2;
-    if(curl_strnequal(name, "h3", 2))
+    if(!memcmp(name, "h3", 2))
       return ALPN_h3;
   }
   else if(len == 8) {
-    if(curl_strnequal(name, "http/1.1", 8))
+    if(!memcmp(name, "http/1.1", 8))
       return ALPN_h1;
   }
   return ALPN_none; /* unknown, probably rubbish input */
+}
+
+enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
+{
+  return Curl_alpn2alpnid((const unsigned char *)curlx_str(cstr),
+                          curlx_strlen(cstr));
 }
 
 #endif

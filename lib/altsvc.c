@@ -136,10 +136,8 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                                     size_t srcport,
                                     size_t dstport)
 {
-  enum alpnid dstalpnid =
-    Curl_alpn2alpnid(curlx_str(dstalpn), curlx_strlen(dstalpn));
-  enum alpnid srcalpnid =
-    Curl_alpn2alpnid(curlx_str(srcalpn), curlx_strlen(srcalpn));
+  enum alpnid dstalpnid = Curl_str2alpnid(dstalpn);
+  enum alpnid srcalpnid = Curl_str2alpnid(srcalpn);
   if(!srcalpnid || !dstalpnid)
     return NULL;
   return altsvc_createid(curlx_str(srchost), curlx_strlen(srchost),
@@ -545,8 +543,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   do {
     if(!curlx_str_single(&p, '=')) {
       /* [protocol]="[host][:port], [protocol]="[host][:port]" */
-      enum alpnid dstalpnid =
-        Curl_alpn2alpnid(curlx_str(&alpn), curlx_strlen(&alpn));
+      enum alpnid dstalpnid = Curl_str2alpnid(&alpn);
       if(!curlx_str_single(&p, '\"')) {
         struct Curl_str dsthost;
         curl_off_t port = 0;
