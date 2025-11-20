@@ -586,7 +586,7 @@ init_config_builder(struct Curl_easy *data,
   }
 #endif /* USE_ECH */
 
-  cipher_suites = malloc(sizeof(*cipher_suites) * (cipher_suites_len));
+  cipher_suites = curlx_malloc(sizeof(*cipher_suites) * (cipher_suites_len));
   if(!cipher_suites) {
     result = CURLE_OUT_OF_MEMORY;
     goto cleanup;
@@ -643,7 +643,7 @@ init_config_builder(struct Curl_easy *data,
 
 cleanup:
   if(cipher_suites) {
-    free(cipher_suites);
+    curlx_free(cipher_suites);
   }
   if(custom_provider_builder) {
     rustls_crypto_provider_builder_free(custom_provider_builder);
@@ -1004,7 +1004,7 @@ init_config_builder_ech(struct Curl_easy *data,
 cleanup:
   /* if we base64 decoded, we can free now */
   if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
-    free(ech_config);
+    curlx_free(ech_config);
   }
   if(dns) {
     Curl_resolv_unlink(data, &dns);
