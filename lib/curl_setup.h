@@ -1092,7 +1092,7 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_SEND send
 #define CURL_RECV recv
 
-#if !defined(WITHOUT_LIBCURL) && !defined(BUILDING_CURLTOOL)
+#if !defined(WITHOUT_LIBCURL) && !defined(CURL_STANDARD_ALLOC)
 #warning "XMEMNEW defined CURLALLOC"
 #define XMEMNEW 2
 #define curlx_strdup(ptr)         Curl_cstrdup(ptr)
@@ -1100,7 +1100,7 @@ CURL_EXTERN ALLOC_FUNC
 #define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
 #define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
 #define curlx_free(ptr)           Curl_cfree(ptr)
-#else /* WITHOUT_LIBCURL || BUILDING_CURLTOOL */
+#else /* WITHOUT_LIBCURL || CURL_STANDARD_ALLOC */
 #warning "XMEMNEW defined DEFAULT"
 #define XMEMNEW 1
 #ifdef _WIN32
@@ -1112,7 +1112,7 @@ CURL_EXTERN ALLOC_FUNC
 #define curlx_calloc(nbelem,size) calloc(nbelem, size)
 #define curlx_realloc(ptr,size)   realloc(ptr, size)
 #define curlx_free(ptr)           free(ptr)
-#endif /* !WITHOUT_LIBCURL && !BUILDING_CURLTOOL */
+#endif /* !WITHOUT_LIBCURL && !CURL_STANDARD_ALLOC */
 
 #ifdef _WIN32
 #ifdef UNICODE
