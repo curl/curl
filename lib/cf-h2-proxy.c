@@ -42,6 +42,7 @@
 #include "multiif.h"
 #include "sendf.h"
 #include "select.h"
+#include "curlx/warnless.h"
 #include "cf-h2-proxy.h"
 
 /* The last 2 #include files should be in this order */
@@ -408,32 +409,30 @@ static CURLcode proxy_h2_nw_out_flush(struct Curl_cfilter *cf,
  * This function returns 0 if it succeeds, or -1 and error code will
  * be assigned to *err.
  */
-static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          CURLcode *err)
+static CURLcode proxy_h2_process_pending_input(struct Curl_cfilter *cf,
+                                               struct Curl_easy *data)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   const unsigned char *buf;
-  size_t blen;
+  size_t blen, nread;
   ssize_t rv;
 
   while(Curl_bufq_peek(&ctx->inbufq, &buf, &blen)) {
 
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     CURL_TRC_CF(data, cf, "[0] %zu bytes to nghttp2 -> %zd", blen, rv);
-    if(rv < 0) {
+    if(!curlx_sztouz(rv, &nread)) {
       failf(data,
             "process_pending_input: nghttp2_session_mem_recv() returned "
             "%zd:%s", rv, nghttp2_strerror((int)rv));
-      *err = CURLE_RECV_ERROR;
-      return -1;
+      return CURLE_RECV_ERROR;
     }
-    else if(!rv) {
+    else if(!nread) {
       /* nghttp2 does not want to process more, but has no error. This
        * probably cannot happen, but be safe. */
       break;
     }
-    Curl_bufq_skip(&ctx->inbufq, (size_t)rv);
+    Curl_bufq_skip(&ctx->inbufq, nread);
     if(Curl_bufq_is_empty(&ctx->inbufq)) {
       CURL_TRC_CF(data, cf, "[0] all data in connection buffer processed");
       break;
@@ -443,8 +442,7 @@ static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
                   "in connection buffer", Curl_bufq_len(&ctx->inbufq));
     }
   }
-
-  return 0;
+  return CURLE_OK;
 }
 
 static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
@@ -458,7 +456,8 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
     CURL_TRC_CF(data, cf, "[0] process %zu bytes in connection buffer",
                 Curl_bufq_len(&ctx->inbufq));
-    if(proxy_h2_process_pending_input(cf, data, &result) < 0)
+    result = proxy_h2_process_pending_input(cf, data);
+    if(result)
       return result;
   }
 
@@ -484,7 +483,8 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
 
-    if(proxy_h2_process_pending_input(cf, data, &result))
+    result = proxy_h2_process_pending_input(cf, data);
+    if(result)
       return result;
   }
 
@@ -1483,7 +1483,7 @@ static bool proxy_h2_connisalive(struct Curl_cfilter *cf,
     *input_pending = FALSE;
     result = Curl_cf_recv_bufq(cf->next, data, &ctx->inbufq, 0, &nread);
     if(!result) {
-      if(proxy_h2_process_pending_input(cf, data, &result) < 0)
+      if(proxy_h2_process_pending_input(cf, data))
         /* immediate error, considered dead */
         alive = FALSE;
       else {
