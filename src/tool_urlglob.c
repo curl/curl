@@ -154,8 +154,8 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
         goto error;
       }
 
-      elem[size] =
-        curlx_strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
+      elem[size] = curlx_strdup(curlx_dyn_ptr(&glob->buf) ?
+                                curlx_dyn_ptr(&glob->buf) : "");
       if(!elem[size]) {
         result = globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
         goto error;
@@ -387,7 +387,8 @@ static CURLcode add_glob(struct URLGlob *glob, size_t pos)
     struct URLPattern *np = NULL;
     glob->palloc *= 2;
     if(glob->pnum < 255) { /* avoid ridiculous amounts */
-      np = curlx_realloc(glob->pattern, glob->palloc * sizeof(struct URLPattern));
+      np = curlx_realloc(glob->pattern,
+                         glob->palloc * sizeof(struct URLPattern));
       if(!np)
         return globerror(glob, NULL, pos, CURLE_OUT_OF_MEMORY);
     }
