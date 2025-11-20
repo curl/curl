@@ -79,14 +79,5 @@
 #undef free
 #define free(ptr) Curl_cfree(ptr)
 
-#ifdef _WIN32
-#undef Curl_tcsdup
-#ifdef UNICODE
-#define Curl_tcsdup(ptr) Curl_wcsdup(ptr)
-#else
-#define Curl_tcsdup(ptr) Curl_cstrdup(ptr)
-#endif
-#endif /* _WIN32 */
-
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMORY_H */

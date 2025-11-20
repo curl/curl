@@ -46,14 +46,5 @@
 #undef free
 #define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
 
-#ifdef _WIN32
-#undef Curl_tcsdup
-#ifdef UNICODE
-#define Curl_tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
-#else
-#define Curl_tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#endif
-#endif /* _WIN32 */
-
 #endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMDEBUG_H */
