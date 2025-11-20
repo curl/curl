@@ -32,9 +32,6 @@
 #undef calloc
 #undef realloc
 #undef free
-#ifdef _WIN32
-#undef Curl_tcsdup
-#endif
 
 #undef HEADER_CURL_MEMORY_H
 #undef HEADER_CURL_MEMDEBUG_H
