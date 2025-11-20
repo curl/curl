@@ -300,3 +300,7 @@ CURLcode curlx_dyn_setlen(struct dynbuf *s, size_t set)
   s->bufr[s->leng] = 0;
   return CURLE_OK;
 }
+
+#ifdef BUILDING_LIBCURL
+#include "../curl_setup_mem.h"
+#endif
