@@ -149,11 +149,10 @@ struct Curl_multi {
   struct cshutdn cshutdn; /* connection shutdown handling */
   struct cpool cpool;     /* connection pool (bundles) */
 
-  long max_host_connections; /* if >0, a fixed limit of the maximum number
-                                of connections per host */
-
-  long max_total_connections; /* if >0, a fixed limit of the maximum number
-                                 of connections in total */
+  size_t max_host_connections; /* if >0, a fixed limit of the maximum number
+                                  of connections per host */
+  size_t max_total_connections; /* if >0, a fixed limit of the maximum number
+                                   of connections in total */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;

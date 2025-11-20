@@ -333,6 +333,18 @@ bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum)
   return TRUE;
 }
 
+
+bool curlx_sltouz(long slnum, size_t *puznum)
+{
+  if(slnum < 0) {
+    *puznum = 0;
+    return FALSE;
+  }
+  /* We error in curl_setup.h if SIZEOF_LONG > SIZEOF_SIZE_T */
+  *puznum = (size_t)slnum;
+  return TRUE;
+}
+
 curl_off_t curlx_uztoso(size_t uznum)
 {
 #if SIZEOF_SIZE_T >= SIZEOF_CURL_OFF_T

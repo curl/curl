@@ -3271,10 +3271,12 @@ CURLMcode curl_multi_setopt(CURLM *m,
       multi->maxconnects = (unsigned int)uarg;
     break;
   case CURLMOPT_MAX_HOST_CONNECTIONS:
-    multi->max_host_connections = va_arg(param, long);
+    if(!curlx_sltouz(va_arg(param, long), &multi->max_host_connections))
+      res = CURLM_BAD_FUNCTION_ARGUMENT;
     break;
   case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-    multi->max_total_connections = va_arg(param, long);
+    if(!curlx_sltouz(va_arg(param, long), &multi->max_total_connections))
+      res = CURLM_BAD_FUNCTION_ARGUMENT;
     break;
     /* options formerly used for pipelining */
   case CURLMOPT_MAX_PIPELINE_LENGTH:
