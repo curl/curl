@@ -48,7 +48,7 @@ static void *curl_thread_create_thunk(void *arg)
   unsigned int (*func)(void *) = ac->func;
   void *real_arg = ac->arg;
 
-  free(ac);
+  curlx_free(ac);
 
   (*func)(real_arg);
 
@@ -58,8 +58,8 @@ static void *curl_thread_create_thunk(void *arg)
 curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
                                  (CURL_STDCALL *func) (void *), void *arg)
 {
-  curl_thread_t t = malloc(sizeof(pthread_t));
-  struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
+  curl_thread_t t = curlx_malloc(sizeof(pthread_t));
+  struct Curl_actual_call *ac = curlx_malloc(sizeof(struct Curl_actual_call));
   int rc;
   if(!(ac && t))
     goto err;
@@ -76,8 +76,8 @@ curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
   return t;
 
 err:
-  free(t);
-  free(ac);
+  curlx_free(t);
+  curlx_free(ac);
   return curl_thread_t_null;
 }
 
@@ -85,7 +85,7 @@ void Curl_thread_destroy(curl_thread_t *hnd)
 {
   if(*hnd != curl_thread_t_null) {
     pthread_detach(**hnd);
-    free(*hnd);
+    curlx_free(*hnd);
     *hnd = curl_thread_t_null;
   }
 }
@@ -94,7 +94,7 @@ int Curl_thread_join(curl_thread_t *hnd)
 {
   int ret = (pthread_join(**hnd, NULL) == 0);
 
-  free(*hnd);
+  curlx_free(*hnd);
   *hnd = curl_thread_t_null;
 
   return ret;

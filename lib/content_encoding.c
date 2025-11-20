@@ -95,15 +95,15 @@ static voidpf
 zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
 {
   (void)opaque;
-  /* not a typo, keep it calloc() */
-  return (voidpf) calloc(items, size);
+  /* not a typo, keep it curlx_calloc() */
+  return (voidpf)curlx_calloc(items, size);
 }
 
 static void
 zfree_cb(voidpf opaque, voidpf ptr)
 {
   (void)opaque;
-  free(ptr);
+  curlx_free(ptr);
 }
 
 static CURLcode

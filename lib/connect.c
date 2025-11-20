@@ -527,7 +527,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -544,7 +544,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
 out:
   *pcf = result ? NULL : cf;
   if(ctx) {
-    free(ctx);
+    curlx_free(ctx);
   }
   return result;
 }

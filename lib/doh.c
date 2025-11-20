@@ -269,7 +269,7 @@ static void doh_probe_dtor(void *key, size_t klen, void *e)
     struct doh_request *doh_req = e;
     curl_slist_free_all(doh_req->req_hds);
     curlx_dyn_free(&doh_req->resp_body);
-    free(e);
+    curlx_free(e);
   }
 }
 
@@ -296,7 +296,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
 
   *pmid = UINT32_MAX;
 
-  doh_req = calloc(1, sizeof(*doh_req));
+  doh_req = curlx_calloc(1, sizeof(*doh_req));
   if(!doh_req)
     return CURLE_OUT_OF_MEMORY;
   doh_req->dnstype = dnstype;
@@ -462,12 +462,12 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
   data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
-  data->state.async.hostname = strdup(hostname);
+  data->state.async.hostname = curlx_strdup(hostname);
   if(!data->state.async.hostname)
     return CURLE_OUT_OF_MEMORY;
 
   /* start clean, consider allocating this struct on demand */
-  data->state.async.doh = dohp = calloc(1, sizeof(struct doh_probes));
+  data->state.async.doh = dohp = curlx_calloc(1, sizeof(struct doh_probes));
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
@@ -518,7 +518,7 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
                            qname ? qname : hostname, data->set.str[STRING_DOH],
                            data->multi,
                            &dohp->probe_resp[DOH_SLOT_HTTPS_RR].probe_mid);
-    free(qname);
+    curlx_free(qname);
     if(result)
       goto error;
     dohp->pending++;
@@ -963,7 +963,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       addrtype = AF_INET;
     }
 
-    ai = calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
+    ai = curlx_calloc(1, sizeof(struct Curl_addrinfo) + ss_size + hostlen);
     if(!ai) {
       result = CURLE_OUT_OF_MEMORY;
       break;
@@ -1130,7 +1130,7 @@ UNITTEST CURLcode doh_resp_decode_httpsrr(struct Curl_easy *data,
   *hrr = NULL;
   if(len <= 2)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
+  lhrr = curlx_calloc(1, sizeof(struct Curl_https_rrinfo));
   if(!lhrr)
     return CURLE_OUT_OF_MEMORY;
   lhrr->priority = doh_get16bit(cp, 0);

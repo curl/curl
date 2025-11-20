@@ -143,7 +143,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
        */
       cf->next = NULL;
       cf->cft->destroy(cf, data);
-      free(cf);
+      curlx_free(cf);
       cf = cfn;
     }
   }
@@ -332,7 +332,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(cft);
-  cf = calloc(1, sizeof(*cf));
+  cf = curlx_calloc(1, sizeof(*cf));
   if(!cf)
     goto out;
 

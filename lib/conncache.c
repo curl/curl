@@ -92,7 +92,7 @@ static struct cpool_bundle *cpool_bundle_create(const char *dest)
   struct cpool_bundle *bundle;
   size_t dest_len = strlen(dest) + 1;
 
-  bundle = calloc(1, sizeof(*bundle) + dest_len - 1);
+  bundle = curlx_calloc(1, sizeof(*bundle) + dest_len - 1);
   if(!bundle)
     return NULL;
   Curl_llist_init(&bundle->conns, NULL);
@@ -104,7 +104,7 @@ static struct cpool_bundle *cpool_bundle_create(const char *dest)
 static void cpool_bundle_destroy(struct cpool_bundle *bundle)
 {
   DEBUGASSERT(!Curl_llist_count(&bundle->conns));
-  free(bundle);
+  curlx_free(bundle);
 }
 
 /* Add a connection to a bundle */
