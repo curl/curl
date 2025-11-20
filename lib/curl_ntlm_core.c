@@ -437,7 +437,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
   CURLcode result;
   if(len > SIZE_MAX/2) /* avoid integer overflow */
     return CURLE_OUT_OF_MEMORY;
-  pw = len ? malloc(len * 2) : (unsigned char *)strdup("");
+  pw = len ? curlx_malloc(len * 2) : (unsigned char *)curlx_strdup("");
   if(!pw)
     return CURLE_OUT_OF_MEMORY;
 
@@ -448,7 +448,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
   if(!result)
     memset(ntbuffer + 16, 0, 21 - 16);
 
-  free(pw);
+  curlx_free(pw);
 
   return result;
 }
@@ -525,7 +525,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
     return CURLE_OUT_OF_MEMORY;
 
   identity_len = (userlen + domlen) * 2;
-  identity = malloc(identity_len + 1);
+  identity = curlx_malloc(identity_len + 1);
 
   if(!identity)
     return CURLE_OUT_OF_MEMORY;
@@ -535,7 +535,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
 
   result = Curl_hmacit(&Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
                        ntlmv2hash);
-  free(identity);
+  curlx_free(identity);
 
   return result;
 }
@@ -598,7 +598,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   len = HMAC_MD5_LENGTH + NTLMv2_BLOB_LEN;
 
   /* Allocate the response */
-  ptr = calloc(1, len);
+  ptr = curlx_calloc(1, len);
   if(!ptr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -622,7 +622,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
                        NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
-    free(ptr);
+    curlx_free(ptr);
     return result;
   }
 

@@ -208,7 +208,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = calloc(1, sizeof(*ctx));
+    ctx = curlx_calloc(1, sizeof(*ctx));
     if(!ctx) {
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -225,7 +225,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     else if(ctx->have_ntlm)
       ctx->sent = STUB_GSS_NTLM1;
     else {
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MECH;
       return GSS_S_FAILURE;
     }
@@ -236,7 +236,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
 
   token = Curl_gss_alloc(length);
   if(!token) {
-    free(ctx);
+    curlx_free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -250,14 +250,14 @@ stub_gss_init_sec_context(OM_uint32 *min,
                                     &target_desc, &name_type);
     if(GSS_ERROR(major_status)) {
       Curl_gss_free(token);
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
       Curl_gss_free(token);
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
@@ -273,7 +273,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
 
   if(used >= length) {
     Curl_gss_free(token);
-    free(ctx);
+    curlx_free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -308,7 +308,7 @@ stub_gss_delete_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  free(*context);
+  curlx_free(*context);
   *context = NULL;
   *min = 0;
 

@@ -144,7 +144,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   dup_user.tchar_ptr = NULL;
 
   /* Setup the identity's domain and length */
-  dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
+  dup_domain.tchar_ptr = curlx_malloc(sizeof(TCHAR) * (domlen + 1));
   if(!dup_domain.tchar_ptr) {
     curlx_unicodefree(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
