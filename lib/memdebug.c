@@ -526,7 +526,7 @@ void curl_dbg_log(const char *format, ...)
     nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0)
-    (fwrite)(buf, 1, (size_t)nchars, curl_dbg_logfile);
+    fwrite(buf, 1, (size_t)nchars, curl_dbg_logfile);
 }
 
 #endif /* CURLDEBUG */
