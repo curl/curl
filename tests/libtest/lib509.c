@@ -95,10 +95,11 @@ static CURLcode test_lib509(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses strdup() */
+  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses curlx_strdup() */
 
   asize = (int)sizeof(a);
-  str = curl_easy_escape(curl, (const char *)a, asize); /* uses realloc() */
+  /* uses curlx_realloc() */
+  str = curl_easy_escape(curl, (const char *)a, asize);
 
   if(seen)
     curl_mprintf("Callbacks were invoked!\n");
