@@ -1281,11 +1281,11 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));
   if(randlen >= sizeof(keyval)) {
-    free(randstr);
+    curlx_free(randstr);
     return CURLE_FAILED_INIT;
   }
   strcpy(keyval, randstr);
-  free(randstr);
+  curlx_free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
       result = curlx_dyn_addf(req, "%s: %s\r\n", heads[i].name,
@@ -1305,7 +1305,7 @@ static void ws_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_bufq_free(&ws->recvbuf);
   Curl_bufq_free(&ws->sendbuf);
-  free(ws);
+  curlx_free(ws);
 }
 
 /*
@@ -1325,7 +1325,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     size_t chunk_size = WS_CHUNK_SIZE;
-    ws = calloc(1, sizeof(*ws));
+    ws = curlx_calloc(1, sizeof(*ws));
     if(!ws)
       return CURLE_OUT_OF_MEMORY;
 #ifdef DEBUGBUILD

@@ -577,7 +577,7 @@ static void oldap_easy_dtor(void *key, size_t klen, void *entry)
   struct ldapreqinfo *lr = entry;
   (void)key;
   (void)klen;
-  free(lr);
+  curlx_free(lr);
 }
 
 static void oldap_conn_dtor(void *key, size_t klen, void *entry)
@@ -589,7 +589,7 @@ static void oldap_conn_dtor(void *key, size_t klen, void *entry)
     ldap_unbind_ext(li->ld, NULL, NULL);
     li->ld = NULL;
   }
-  free(li);
+  curlx_free(li);
 }
 
 static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
@@ -606,7 +606,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 
   (void)done;
 
-  li = calloc(1, sizeof(struct ldapconninfo));
+  li = curlx_calloc(1, sizeof(struct ldapconninfo));
   if(!li) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -697,7 +697,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   result = oldap_perform_bind(data, OLDAP_BIND);
 
 out:
-  free(hosturl);
+  curlx_free(hosturl);
   return result;
 }
 
@@ -1023,7 +1023,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
     goto out;
   }
 
-  lr = calloc(1, sizeof(struct ldapreqinfo));
+  lr = curlx_calloc(1, sizeof(struct ldapreqinfo));
   if(!lr ||
      Curl_meta_set(data, CURL_META_LDAP_EASY, lr, oldap_easy_dtor)) {
     ldap_abandon_ext(li->ld, msgid, NULL, NULL);
@@ -1219,7 +1219,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
           if(!result)
             result = client_write(data, STRCONST(": "), val_b64, val_b64_sz,
                                   STRCONST("\n"));
-          free(val_b64);
+          curlx_free(val_b64);
         }
         else
           result = client_write(data, STRCONST(" "),

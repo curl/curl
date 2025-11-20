@@ -100,7 +100,7 @@ static void cl_reset_writer(struct Curl_easy *data)
   while(writer) {
     data->req.writer_stack = writer->next;
     writer->cwt->do_close(data, writer);
-    free(writer);
+    curlx_free(writer);
     writer = data->req.writer_stack;
   }
 }
@@ -112,7 +112,7 @@ static void cl_reset_reader(struct Curl_easy *data)
   while(reader) {
     data->req.reader_stack = reader->next;
     reader->crt->do_close(data, reader);
-    free(reader);
+    curlx_free(reader);
     reader = data->req.reader_stack;
   }
 }
@@ -374,7 +374,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
   void *p;
 
   DEBUGASSERT(cwt->cwriter_size >= sizeof(struct Curl_cwriter));
-  p = calloc(1, cwt->cwriter_size);
+  p = curlx_calloc(1, cwt->cwriter_size);
   if(!p)
     goto out;
 
@@ -387,7 +387,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
 out:
   *pwriter = result ? NULL : writer;
   if(result)
-    free(writer);
+    curlx_free(writer);
   return result;
 }
 
@@ -396,7 +396,7 @@ void Curl_cwriter_free(struct Curl_easy *data,
 {
   if(writer) {
     writer->cwt->do_close(data, writer);
-    free(writer);
+    curlx_free(writer);
   }
 }
 
@@ -938,7 +938,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
   void *p;
 
   DEBUGASSERT(crt->creader_size >= sizeof(struct Curl_creader));
-  p = calloc(1, crt->creader_size);
+  p = curlx_calloc(1, crt->creader_size);
   if(!p)
     goto out;
 
@@ -951,7 +951,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
 out:
   *preader = result ? NULL : reader;
   if(result)
-    free(reader);
+    curlx_free(reader);
   return result;
 }
 
@@ -959,7 +959,7 @@ void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader)
 {
   if(reader) {
     reader->crt->do_close(data, reader);
-    free(reader);
+    curlx_free(reader);
   }
 }
 

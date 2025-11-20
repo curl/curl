@@ -277,8 +277,8 @@ static NETRCcode parsenetrc(struct store_netrc *store,
             our_login = !Curl_timestrcmp(login, tok);
           else {
             our_login = TRUE;
-            free(login);
-            login = strdup(tok);
+            curlx_free(login);
+            login = curlx_strdup(tok);
             if(!login) {
               retcode = NETRC_OUT_OF_MEMORY; /* allocation failed */
               goto out;
@@ -288,8 +288,8 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           keyword = NONE;
         }
         else if(keyword == PASSWORD) {
-          free(password);
-          password = strdup(tok);
+          curlx_free(password);
+          password = curlx_strdup(tok);
           if(!password) {
             retcode = NETRC_OUT_OF_MEMORY; /* allocation failed */
             goto out;
@@ -346,7 +346,7 @@ out:
   if(!retcode) {
     if(!password && our_login) {
       /* success without a password, set a blank one */
-      password = strdup("");
+      password = curlx_strdup("");
       if(!password)
         retcode = NETRC_OUT_OF_MEMORY; /* out of memory */
     }
@@ -364,8 +364,8 @@ out:
     curlx_dyn_free(filebuf);
     store->loaded = FALSE;
     if(!specific_login)
-      free(login);
-    free(password);
+      curlx_free(login);
+    curlx_free(password);
   }
 
   return retcode;
@@ -444,25 +444,25 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
 
       filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
       if(!filealloc) {
-        free(homea);
+        curlx_free(homea);
         return NETRC_OUT_OF_MEMORY;
       }
     }
     retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
-    free(filealloc);
+    curlx_free(filealloc);
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
       filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
-        free(homea);
+        curlx_free(homea);
         return NETRC_OUT_OF_MEMORY;
       }
       retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
-      free(filealloc);
+      curlx_free(filealloc);
     }
 #endif
-    free(homea);
+    curlx_free(homea);
   }
   else
     retcode = parsenetrc(store, host, loginp, passwordp, netrcfile);

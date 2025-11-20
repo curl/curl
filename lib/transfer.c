@@ -479,7 +479,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
      is allowed to be changed by the user between transfers */
   if(data->set.uh) {
     CURLUcode uc;
-    free(data->set.str[STRING_SET_URL]);
+    curlx_free(data->set.str[STRING_SET_URL]);
     uc = curl_url_get(data->set.uh,
                       CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
@@ -574,7 +574,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(data->state.wildcardmatch) {
       struct WildcardData *wc;
       if(!data->wildcard) {
-        data->wildcard = calloc(1, sizeof(struct WildcardData));
+        data->wildcard = curlx_calloc(1, sizeof(struct WildcardData));
         if(!data->wildcard)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -597,7 +597,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * protocol.
    */
   if(!result && data->set.str[STRING_USERAGENT]) {
-    free(data->state.aptr.uagent);
+    curlx_free(data->state.aptr.uagent);
     data->state.aptr.uagent =
       curl_maprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!data->state.aptr.uagent)
@@ -629,7 +629,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
 /* Returns CURLE_OK *and* sets '*url' if a request retry is wanted.
 
-   NOTE: that the *url is malloc()ed. */
+   NOTE: that the *url is curlx_malloc()ed. */
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 {
   struct connectdata *conn = data->conn;
@@ -680,7 +680,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     }
     infof(data, "Connection died, retrying a fresh connect (retry count: %d)",
           data->state.retrycount);
-    *url = strdup(data->state.url);
+    *url = curlx_strdup(data->state.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 

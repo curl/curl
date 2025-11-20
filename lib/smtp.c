@@ -646,7 +646,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
                              utf8 ? " SMTPUTF8" : "");
 
       Curl_free_idnconverted_hostname(&host);
-      free(address);
+      curlx_free(address);
     }
     else {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
@@ -722,11 +722,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
          worry about that and reply with a 501 error */
       from = curl_maprintf("<%s>%s", address, suffix);
 
-    free(address);
+    curlx_free(address);
   }
   else
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
-    from = strdup("<>");
+    from = curlx_strdup("<>");
 
   if(!from) {
     result = CURLE_OUT_OF_MEMORY;
@@ -763,11 +763,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
         /* An invalid mailbox was provided but we will simply let the server
            worry about it */
         auth = curl_maprintf("<%s>%s", address, suffix);
-      free(address);
+      curlx_free(address);
     }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
-      auth = strdup("<>");
+      auth = curlx_strdup("<>");
 
     if(!auth) {
       result = CURLE_OUT_OF_MEMORY;
@@ -848,9 +848,9 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
                                : "");          /* included in our envelope  */
 
 out:
-  free(from);
-  free(auth);
-  free(size);
+  curlx_free(from);
+  curlx_free(auth);
+  curlx_free(size);
 
   if(!result)
     smtp_state(data, smtpc, SMTP_MAIL);
@@ -892,7 +892,7 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
                            address, suffix);
 
   Curl_free_idnconverted_hostname(&host);
-  free(address);
+  curlx_free(address);
 
   if(!result)
     smtp_state(data, smtpc, SMTP_RCPT);
@@ -1716,7 +1716,7 @@ static void smtp_easy_dtor(void *key, size_t klen, void *entry)
   struct SMTP *smtp = entry;
   (void)key;
   (void)klen;
-  free(smtp);
+  curlx_free(smtp);
 }
 
 static void smtp_conn_dtor(void *key, size_t klen, void *entry)
@@ -1726,7 +1726,7 @@ static void smtp_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_pp_disconnect(&smtpc->pp);
   Curl_safefree(smtpc->domain);
-  free(smtpc);
+  curlx_free(smtpc);
 }
 
 static CURLcode smtp_setup_connection(struct Curl_easy *data,
@@ -1736,14 +1736,14 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
   struct SMTP *smtp;
   CURLcode result = CURLE_OK;
 
-  smtpc = calloc(1, sizeof(*smtpc));
+  smtpc = curlx_calloc(1, sizeof(*smtpc));
   if(!smtpc ||
      Curl_conn_meta_set(conn, CURL_META_SMTP_CONN, smtpc, smtp_conn_dtor)) {
      result = CURLE_OUT_OF_MEMORY;
      goto out;
   }
 
-  smtp = calloc(1, sizeof(*smtp));
+  smtp = curlx_calloc(1, sizeof(*smtp));
   if(!smtp ||
      Curl_meta_set(data, CURL_META_SMTP_EASY, smtp, smtp_easy_dtor))
     result = CURLE_OUT_OF_MEMORY;
@@ -1877,7 +1877,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = strdup(fqma[0] == '<' ? fqma + 1 : fqma);
+  char *dup = curlx_strdup(fqma[0] == '<' ? fqma + 1 : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 

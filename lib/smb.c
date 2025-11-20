@@ -451,7 +451,7 @@ static void smb_easy_dtor(void *key, size_t klen, void *entry)
   /* `req->path` points to somewhere in `struct smb_conn` which is
    * kept at the connection meta. If the connection is destroyed first,
    * req->path points to free'd memory. */
-  free(req);
+  curlx_free(req);
 }
 
 static void smb_conn_dtor(void *key, size_t klen, void *entry)
@@ -463,7 +463,7 @@ static void smb_conn_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(smbc->domain);
   Curl_safefree(smbc->recv_buf);
   Curl_safefree(smbc->send_buf);
-  free(smbc);
+  curlx_free(smbc);
 }
 
 /* this should setup things in the connection, not in the easy
@@ -475,13 +475,13 @@ static CURLcode smb_setup_connection(struct Curl_easy *data,
   struct smb_request *req;
 
   /* Initialize the connection state */
-  smbc = calloc(1, sizeof(*smbc));
+  smbc = curlx_calloc(1, sizeof(*smbc));
   if(!smbc ||
      Curl_conn_meta_set(conn, CURL_META_SMB_CONN, smbc, smb_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   /* Initialize the request state */
-  req = calloc(1, sizeof(*req));
+  req = curlx_calloc(1, sizeof(*req));
   if(!req ||
      Curl_meta_set(data, CURL_META_SMB_EASY, req, smb_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -506,10 +506,10 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
 
   /* Initialize the connection state */
   smbc->state = SMB_CONNECTING;
-  smbc->recv_buf = malloc(MAX_MESSAGE_SIZE);
+  smbc->recv_buf = curlx_malloc(MAX_MESSAGE_SIZE);
   if(!smbc->recv_buf)
     return CURLE_OUT_OF_MEMORY;
-  smbc->send_buf = malloc(MAX_MESSAGE_SIZE);
+  smbc->send_buf = curlx_malloc(MAX_MESSAGE_SIZE);
   if(!smbc->send_buf)
     return CURLE_OUT_OF_MEMORY;
 
@@ -520,14 +520,14 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
 
   if(slash) {
     smbc->user = slash + 1;
-    smbc->domain = strdup(conn->user);
+    smbc->domain = curlx_strdup(conn->user);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
     smbc->domain[slash - conn->user] = 0;
   }
   else {
     smbc->user = conn->user;
-    smbc->domain = strdup(conn->host.name);
+    smbc->domain = curlx_strdup(conn->host.name);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1246,8 +1246,8 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
     return result;
 
   /* Parse the path for the share */
-  smbc->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
-  free(path);
+  smbc->share = curlx_strdup((*path == '/' || *path == '\\') ? path + 1 : path);
+  curlx_free(path);
   if(!smbc->share)
     return CURLE_OUT_OF_MEMORY;
 

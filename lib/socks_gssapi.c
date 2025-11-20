@@ -151,8 +151,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                        (gss_OID) GSS_C_NULL_OID, &server);
   }
   else {
-    service.value = malloc(serviceptr_length +
-                           strlen(conn->socks_proxy.host.name) + 2);
+    service.value = curlx_malloc(serviceptr_length +
+                                 strlen(conn->socks_proxy.host.name) + 2);
     if(!service.value)
       return CURLE_OUT_OF_MEMORY;
     service.length = serviceptr_length +
@@ -277,7 +277,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     us_length = ntohs(us_length);
 
     gss_recv_token.length = us_length;
-    gss_recv_token.value = malloc(gss_recv_token.length);
+    gss_recv_token.value = curlx_malloc(gss_recv_token.length);
     if(!gss_recv_token.value) {
       failf(data,
             "Could not allocate memory for GSS-API authentication "
@@ -464,7 +464,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   us_length = ntohs(us_length);
 
   gss_recv_token.length = us_length;
-  gss_recv_token.value = malloc(gss_recv_token.length);
+  gss_recv_token.value = curlx_malloc(gss_recv_token.length);
   if(!gss_recv_token.value) {
     Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
     return CURLE_OUT_OF_MEMORY;
