@@ -276,7 +276,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
           if(!domain.tchar_ptr)
             return CURLE_OUT_OF_MEMORY;
 
-          dup_domain.tchar_ptr = Curl_tcsdup(domain.tchar_ptr);
+          dup_domain.tchar_ptr = curlx_tcsdup(domain.tchar_ptr);
           if(!dup_domain.tchar_ptr) {
             curlx_unicodefree(domain.tchar_ptr);
             return CURLE_OUT_OF_MEMORY;

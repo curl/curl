@@ -427,7 +427,7 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
     return CURLE_SSL_CERTPROBLEM;
 
   *sep = TEXT('\0');
-  *store_path = Curl_tcsdup(store_path_start);
+  *store_path = curlx_tcsdup(store_path_start);
   *sep = TEXT('\\');
   if(!*store_path)
     return CURLE_OUT_OF_MEMORY;

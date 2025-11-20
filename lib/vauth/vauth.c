@@ -99,7 +99,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
   free(utf8_spn);
   if(!tchar_spn)
     return NULL;
-  dupe_tchar_spn = Curl_tcsdup(tchar_spn);
+  dupe_tchar_spn = curlx_tcsdup(tchar_spn);
   curlx_unicodefree(tchar_spn);
   return dupe_tchar_spn;
 }
