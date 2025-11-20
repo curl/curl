@@ -23,11 +23,11 @@
  ***************************************************************************/
 #ifdef XMEM
 #if XMEM == 1
-#warning "XMEM defined DEFAULT"
+/*#warning "XMEM defined DEFAULT"*/
 #elif XMEM == 2
-#warning "XMEM defined CURLALLOC"
+/*#warning "XMEM defined CURLALLOC"*/
 #elif XMEM == 9
-#warning "XMEM defined DEBUG"
+/*#warning "XMEM defined DEBUG"*/
 #else
 #define X_STRINGIFY(x) #x
 #define X_TOSTRING(x) X_STRINGIFY(x)
