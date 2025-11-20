@@ -555,6 +555,7 @@ if test "$compiler_id" = "INTEL_UNIX_C"; then
 fi
 
 CURL_CFLAG_EXTRAS=""
+want_werror="no"
 if test X"$want_werror" = Xyes; then
   CURL_CFLAG_EXTRAS="-Werror"
   if test "$compiler_id" = "GNU_C"; then
