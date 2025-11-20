@@ -26,6 +26,7 @@
 
 #undef XMEM
 #define XMEM 1
+#warning "XMEM => 1 (curl_mem_undef.h)"
 
 #undef strdup
 #undef malloc
