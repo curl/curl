@@ -373,8 +373,8 @@ static CURLcode file_upload(struct Curl_easy *data,
     goto out;
 
   while(!result && !eos) {
-    size_t nread;
-    ssize_t nwrite;
+    size_t nread, nwritten;
+    ssize_t rv;
     size_t readcount;
 
     result = Curl_client_read(data, xfer_ulbuf, xfer_ulblen, &readcount, &eos);
@@ -403,13 +403,12 @@ static CURLcode file_upload(struct Curl_easy *data,
       sendbuf = xfer_ulbuf;
 
     /* write the data to the target */
-    nwrite = write(fd, sendbuf, nread);
-    if((size_t)nwrite != nread) {
+    rv = write(fd, sendbuf, nread);
+    if(!curlx_sztouz(rv, &nwritten) || (nwritten != nread)) {
       result = CURLE_SEND_ERROR;
       break;
     }
-
-    bytecount += nread;
+    bytecount += nwritten;
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
