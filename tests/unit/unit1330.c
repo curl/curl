@@ -29,7 +29,7 @@ static CURLcode test_unit1330(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  char *ptr = malloc(1330);
+  char *ptr = curlx_malloc(1330);
   Curl_safefree(ptr);
 
   UNITTEST_END_SIMPLE

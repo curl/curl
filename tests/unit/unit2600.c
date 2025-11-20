@@ -126,7 +126,7 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 #else
   (void)data;
 #endif
-  free(ctx);
+  curlx_free(ctx);
   cf->ctx = NULL;
 }
 
@@ -193,7 +193,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     res = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -233,8 +233,8 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
 out:
   *pcf = (!res) ? cf : NULL;
   if(res) {
-    free(cf);
-    free(ctx);
+    curlx_free(cf);
+    curlx_free(ctx);
   }
   return res;
 }

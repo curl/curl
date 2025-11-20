@@ -133,7 +133,7 @@ static CURLcode test_unit1395(const char *arg)
     }
     else
       curl_mfprintf(stderr, "Test %u: OK\n", i);
-    free(out);
+    curlx_free(out);
   }
 
   fail_if(fails, "output mismatched");
