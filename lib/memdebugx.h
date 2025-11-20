@@ -25,29 +25,29 @@
 #define X_TOSTRING(x) X_STRINGIFY(x)
 #ifdef XMEM
 #if XMEM == 1
-/*#warning "XMEM defined DEFAULT"*/
+#warning "XMEM defined DEFAULT"
 #elif XMEM == 2
-/*#warning "XMEM defined CURLALLOC"*/
+#warning "XMEM defined CURLALLOC"
 #elif XMEM == 9
-/*#warning "XMEM defined DEBUG"*/
+#warning "XMEM defined DEBUG"
 #else
-/*#warning "XMEM defined unknown " X_TOSTRING(XMEM)*/
+#warning "XMEM defined unknown " X_TOSTRING(XMEM)
 #endif
 #else
-/*#warning "XMEM not defined"*/
+#warning "XMEM not defined"
 #endif
 #ifdef XMEMNEW
 #if XMEMNEW == 1
-/*#warning "XMEMNEW defined DEFAULT"*/
+#warning "XMEMNEW defined DEFAULT"
 #elif XMEMNEW == 2
-/*#warning "XMEMNEW defined CURLALLOC"*/
+#warning "XMEMNEW defined CURLALLOC"
 #elif XMEMNEW == 9
-/*#warning "XMEMNEW defined DEBUG"*/
+#warning "XMEMNEW defined DEBUG"
 #else
-/*#warning "XMEMNEW defined unknown " X_TOSTRING(XMEMNEW)*/
+#warning "XMEMNEW defined unknown " X_TOSTRING(XMEMNEW)
 #endif
 #else
-/*#warning "XMEMNEW not defined"*/
+#warning "XMEMNEW not defined"
 #endif
 #if (XMEM != XMEMNEW)
 #error "ERROR: new macros do not match the old overrides"
