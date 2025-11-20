@@ -21,18 +21,3 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/* Unset redefined system symbols. */
-
-#undef XMEM
-#define XMEM 1
-/*#warning "XMEM => 1 (curl_mem_undef.h)"*/
-
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-
-#undef HEADER_CURL_MEMORY_H
-#undef HEADER_CURL_MEMDEBUG_H

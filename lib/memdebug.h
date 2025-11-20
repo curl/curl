@@ -23,29 +23,4 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-/*
- * CAUTION: this header is designed to work when included by the app-side
- * as well as the library. Do not mix with library internals!
- */
-
-#ifdef CURLDEBUG
-
-#undef XMEM
-#define XMEM 9
-/*#warning "XMEM => 9 (memdebug.h)"*/
-
-/* Set this symbol on the command-line, recompile all lib-sources */
-#undef strdup
-#define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#undef malloc
-#define malloc(size) curl_dbg_malloc(size, __LINE__, __FILE__)
-#undef calloc
-#define calloc(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
-#undef realloc
-#define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
-#undef free
-#define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
-
-#endif /* CURLDEBUG */
 #endif /* HEADER_CURL_MEMDEBUG_H */
