@@ -50,7 +50,11 @@
 #else /* !CURLDEBUG */
 
 #if !defined(CURL_STANDARD_ALLOC) || defined(CURL_STANDARD_LOCAL_OVERRIDE)
+#ifdef CURL_STANDARD_LOCAL_OVERRIDE
+/*#warning "XMEMNEW defined CURLALLOC LOCAL OVERRIDE"*/
+#else
 /*#warning "XMEMNEW defined CURLALLOC"*/
+#endif
 #define XMEMNEW 2
 #undef curlx_strdup
 #define curlx_strdup(ptr)         Curl_cstrdup(ptr)
