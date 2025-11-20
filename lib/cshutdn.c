@@ -414,8 +414,7 @@ void Curl_cshutdn_add(struct cshutdn *cshutdn,
                       size_t conns_in_pool)
 {
   struct Curl_easy *data = cshutdn->multi->admin;
-  size_t max_total = (cshutdn->multi->max_total_connections > 0) ?
-                     (size_t)cshutdn->multi->max_total_connections : 0;
+  size_t max_total = cshutdn->multi->max_total_connections;
 
   /* Add the connection to our shutdown list for non-blocking shutdown
    * during multi processing. */

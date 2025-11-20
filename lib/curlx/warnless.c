@@ -329,7 +329,23 @@ bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum)
     return FALSE;
   }
 #endif
-  *puznum = (size_t)sonum;
+  return TRUE;
+}
+
+
+bool curlx_sltouz(long slnum, size_t *puznum)
+{
+  if(slnum < 0) {
+    *puznum = 0;
+    return FALSE;
+  }
+#if SIZEOF_LONG > SIZEOF_SIZE_T
+  if(slnum > SIZE_MAX) {
+    *puznum = 0;
+    return FALSE;
+  }
+#endif
+  *puznum = (size_t)slnum;
   return TRUE;
 }
 

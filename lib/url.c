@@ -3690,7 +3690,7 @@ static CURLcode create_conn(struct Curl_easy *data,
           CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
                      "max connection limit");
         else {
-          infof(data, "No connections available, total of %ld reached.",
+          infof(data, "No connections available, total of %zu reached.",
                 data->multi->max_total_connections);
           connections_available = FALSE;
         }
