@@ -135,14 +135,14 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_pSecFn->FreeContextBuffer(SecurityPackage);
 
   /* Allocate our response buffer */
-  output_token = malloc(token_max);
+  output_token = curlx_malloc(token_max);
   if(!output_token)
     return CURLE_OUT_OF_MEMORY;
 
   /* Generate our SPN */
   spn = Curl_auth_build_spn(service, data->conn->host.name, NULL);
   if(!spn) {
-    free(output_token);
+    curlx_free(output_token);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -150,8 +150,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     /* Populate our identity structure */
     result = Curl_create_sspi_identity(userp, passwdp, &identity);
     if(result) {
-      free(spn);
-      free(output_token);
+      curlx_free(spn);
+      curlx_free(output_token);
       return result;
     }
 
@@ -171,8 +171,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
   if(status != SEC_E_OK) {
     Curl_sspi_free_identity(p_identity);
-    free(spn);
-    free(output_token);
+    curlx_free(spn);
+    curlx_free(output_token);
     return CURLE_LOGIN_DENIED;
   }
 
@@ -208,8 +208,8 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
 
     Curl_pSecFn->FreeCredentialsHandle(&credentials);
     Curl_sspi_free_identity(p_identity);
-    free(spn);
-    free(output_token);
+    curlx_free(spn);
+    curlx_free(output_token);
 
     if(status == SEC_E_INSUFFICIENT_MEMORY)
       return CURLE_OUT_OF_MEMORY;
@@ -233,7 +233,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   Curl_sspi_free_identity(p_identity);
 
   /* Free the SPN */
-  free(spn);
+  curlx_free(spn);
 
   return result;
 }
@@ -282,7 +282,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
             return CURLE_OUT_OF_MEMORY;
           }
 
-          free(identity->Domain);
+          curlx_free(identity->Domain);
           identity->Domain = dup_domain.tbyte_ptr;
           identity->DomainLength = curlx_uztoul(_tcslen(dup_domain.tchar_ptr));
           dup_domain.tchar_ptr = NULL;
@@ -429,7 +429,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
   /* Allocate the output buffer according to the max token size as indicated
      by the security package */
-  output_token = malloc(token_max);
+  output_token = curlx_malloc(token_max);
   if(!output_token) {
     return CURLE_OUT_OF_MEMORY;
   }
@@ -495,7 +495,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     if(userp && *userp) {
       /* Populate our identity structure */
       if(Curl_create_sspi_identity(userp, passwdp, &identity)) {
-        free(output_token);
+        curlx_free(output_token);
         return CURLE_OUT_OF_MEMORY;
       }
 
@@ -503,7 +503,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       if(Curl_override_sspi_http_realm((const char *) digest->input_token,
                                        &identity)) {
         Curl_sspi_free_identity(&identity);
-        free(output_token);
+        curlx_free(output_token);
         return CURLE_OUT_OF_MEMORY;
       }
 
@@ -515,20 +515,20 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       p_identity = NULL;
 
     if(userp) {
-      digest->user = strdup(userp);
+      digest->user = curlx_strdup(userp);
 
       if(!digest->user) {
-        free(output_token);
+        curlx_free(output_token);
         Curl_sspi_free_identity(p_identity);
         return CURLE_OUT_OF_MEMORY;
       }
     }
 
     if(passwdp) {
-      digest->passwd = strdup(passwdp);
+      digest->passwd = curlx_strdup(passwdp);
 
       if(!digest->passwd) {
-        free(output_token);
+        curlx_free(output_token);
         Curl_sspi_free_identity(p_identity);
         Curl_safefree(digest->user);
         return CURLE_OUT_OF_MEMORY;
@@ -543,7 +543,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                    &credentials, NULL);
     if(status != SEC_E_OK) {
       Curl_sspi_free_identity(p_identity);
-      free(output_token);
+      curlx_free(output_token);
 
       return CURLE_LOGIN_DENIED;
     }
@@ -575,18 +575,18 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
 
       Curl_sspi_free_identity(p_identity);
-      free(output_token);
+      curlx_free(output_token);
 
       return CURLE_OUT_OF_MEMORY;
     }
 
     /* Allocate our new context handle */
-    digest->http_context = calloc(1, sizeof(CtxtHandle));
+    digest->http_context = curlx_calloc(1, sizeof(CtxtHandle));
     if(!digest->http_context) {
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
       curlx_unicodefree(spn);
       Curl_sspi_free_identity(p_identity);
-      free(output_token);
+      curlx_free(output_token);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -610,7 +610,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
 
       Curl_sspi_free_identity(p_identity);
-      free(output_token);
+      curlx_free(output_token);
 
       Curl_safefree(digest->http_context);
 
@@ -632,7 +632,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
   }
 
   resp = Curl_memdup0((const char *)output_token, output_token_len);
-  free(output_token);
+  curlx_free(output_token);
   if(!resp) {
     return CURLE_OUT_OF_MEMORY;
   }

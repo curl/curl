@@ -131,12 +131,12 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
 
-      free(spn);
+      curlx_free(spn);
 
       return CURLE_AUTH_ERROR;
     }
 
-    free(spn);
+    curlx_free(spn);
   }
 
   if(chlg64 && *chlg64) {
