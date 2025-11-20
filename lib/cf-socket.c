@@ -1432,7 +1432,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
-  ssize_t nwritten;
+  ssize_t rv;
   size_t orig_len = len;
   CURLcode result = CURLE_OK;
 
@@ -1463,15 +1463,15 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
-    nwritten = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
-                      &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
+    rv = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
+                &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
     cf->conn->bits.tcp_fastopen = FALSE;
   }
   else
 #endif
-    nwritten = swrite(ctx->sock, buf, len);
+    rv = swrite(ctx->sock, buf, len);
 
-  if(nwritten < 0) {
+  if(!curlx_sztouz(rv, pnwritten)) {
     int sockerr = SOCKERRNO;
 
     if(
@@ -1498,8 +1498,6 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = CURLE_SEND_ERROR;
     }
   }
-  else
-    *pnwritten = (size_t)nwritten;
 
 #ifdef USE_WINSOCK
   if(!result)
@@ -1517,7 +1515,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t rv;
 
   *pnread = 0;
 #ifdef DEBUGBUILD
@@ -1538,9 +1536,9 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 #endif
 
-  nread = sread(ctx->sock, buf, len);
+  rv = sread(ctx->sock, buf, len);
 
-  if(nread < 0) {
+  if(!curlx_sztouz(rv, pnread)) {
     int sockerr = SOCKERRNO;
 
     if(
@@ -1566,8 +1564,6 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = CURLE_RECV_ERROR;
     }
   }
-  else
-    *pnread = (size_t)nread;
 
   CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
   if(!result && !ctx->got_first_byte) {
