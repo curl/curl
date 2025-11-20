@@ -44,13 +44,13 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
       if(continue_reading)
         continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
       if(continue_reading)
-        data = malloc(datasize + 1);
+        data = curlx_malloc(datasize + 1);
       if((!data) ||
          ((int)fread(data, datasize, 1, fInCert) != 1))
         continue_reading = FALSE;
       curlx_fclose(fInCert);
       if(!continue_reading) {
-        free(data);
+        curlx_free(data);
         datasize = 0;
         data = NULL;
       }
@@ -86,7 +86,7 @@ static CURLcode test_cert_blob(const char *url, const char *cafile)
     blob.len = certsize;
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
-    free(certdata);
+    curlx_free(certdata);
     code = curl_easy_perform(curl);
   }
   curl_easy_cleanup(curl);

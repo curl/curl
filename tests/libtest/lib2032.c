@@ -92,7 +92,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
   size_t urllen = strlen(URL) + 4 + 1;
-  char *full_url = malloc(urllen);
+  char *full_url = curlx_malloc(urllen);
 
   start_test_timing();
 
@@ -108,7 +108,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    free(full_url);
+    curlx_free(full_url);
     return res;
   }
 
@@ -230,7 +230,7 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  free(full_url);
+  curlx_free(full_url);
 
   return res;
 }

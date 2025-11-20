@@ -40,7 +40,7 @@ static CURLcode test_lib558(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  ptr = malloc(558);
+  ptr = curlx_malloc(558);
   Curl_safefree(ptr);
 
   asize = (int)sizeof(a);
