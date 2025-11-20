@@ -167,7 +167,6 @@ if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
 endif()
 
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
-set(CURL_WERROR OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Build curl executable" ON)
 get_property(_has_shared GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
