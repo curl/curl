@@ -25,7 +25,7 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifndef HAVE_STRDUP
-char *strdup(const char *str)
+char *tool_strdup(const char *str)
 {
   size_t len;
   char *newstr;
