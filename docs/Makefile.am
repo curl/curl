@@ -108,6 +108,7 @@ EXTRA_DIST =                                    \
  INTERNALS.md                                   \
  IPFS.md                                        \
  KNOWN_BUGS                                     \
+ KNOWN_RISKS.md                                 \
  MAIL-ETIQUETTE.md                              \
  MANUAL.md                                      \
  options-in-versions                            \
