@@ -64,9 +64,9 @@ static void t1620_parse(
                 "options should be equal to exp_options");
   }
 
-  free(userstr);
-  free(passwdstr);
-  free(options);
+  curlx_free(userstr);
+  curlx_free(passwdstr);
+  curlx_free(options);
 }
 
 static CURLcode test_unit1620(const char *arg)
