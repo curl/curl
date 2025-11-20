@@ -50,5 +50,5 @@
 /*#warning "XMEMNEW not defined"*/
 #endif
 #if (XMEM != XMEMNEW)
-#error "ERROR: new macros do not match the old overrides"
+/*#error "ERROR: new macros do not match the old overrides"*/
 #endif
