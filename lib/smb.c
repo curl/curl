@@ -1246,7 +1246,8 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
     return result;
 
   /* Parse the path for the share */
-  smbc->share = curlx_strdup((*path == '/' || *path == '\\') ? path + 1 : path);
+  smbc->share = curlx_strdup((*path == '/' || *path == '\\')
+                             ? path + 1 : path);
   curlx_free(path);
   if(!smbc->share)
     return CURLE_OUT_OF_MEMORY;

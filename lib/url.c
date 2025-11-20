@@ -3454,7 +3454,8 @@ static CURLcode create_conn(struct Curl_easy *data,
 
 #ifdef USE_UNIX_SOCKETS
   if(data->set.str[STRING_UNIX_SOCKET_PATH]) {
-    conn->unix_domain_socket = curlx_strdup(data->set.str[STRING_UNIX_SOCKET_PATH]);
+    conn->unix_domain_socket =
+      curlx_strdup(data->set.str[STRING_UNIX_SOCKET_PATH]);
     if(!conn->unix_domain_socket) {
       result = CURLE_OUT_OF_MEMORY;
       goto out;

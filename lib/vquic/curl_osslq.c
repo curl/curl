@@ -1520,7 +1520,8 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
       }
       ctx->poll_items = tmpptr;
 
-      tmpptr = curlx_realloc(ctx->curl_items, nmax * sizeof(struct Curl_easy *));
+      tmpptr = curlx_realloc(ctx->curl_items,
+                             nmax * sizeof(struct Curl_easy *));
       if(!tmpptr) {
         curlx_free(ctx->curl_items);
         ctx->curl_items = NULL;
