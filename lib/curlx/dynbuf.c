@@ -302,5 +302,6 @@ CURLcode curlx_dyn_setlen(struct dynbuf *s, size_t set)
 }
 
 #ifdef BUILDING_LIBCURL
+/* !checksrc! disable INCLUDEDUP 1 */
 #include "../curl_setup_mem.h"
 #endif
