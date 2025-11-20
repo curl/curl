@@ -25,6 +25,7 @@
  ***************************************************************************/
 #define CURL_NO_OLDIES
 #define CURL_DISABLE_DEPRECATION
+#define CURL_STANDARD_ALLOC
 
 /* Now include the curl_setup.h file from libcurl's private libdir (the source
    version, but that might include "curl_config.h" from the build directory so
