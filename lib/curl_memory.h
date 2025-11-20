@@ -58,7 +58,7 @@
 
 #undef XMEM
 #define XMEM 2
-/*#warning "XMEM => 2 (curl_memory.h)"*/
+#warning "XMEM => 2 (curl_memory.h)"
 
 /*
  * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
