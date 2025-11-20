@@ -33,7 +33,7 @@
 
 #undef XMEM
 #define XMEM 9
-#warning "XMEM => 9 (memdebug.h)"
+/*#warning "XMEM => 9 (memdebug.h)"*/
 
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
