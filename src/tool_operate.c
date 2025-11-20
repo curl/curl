@@ -204,7 +204,7 @@ static struct per_transfer *transfersl; /* last node */
 static CURLcode add_per_transfer(struct per_transfer **per)
 {
   struct per_transfer *p;
-  p = calloc(1, sizeof(struct per_transfer));
+  p = curlx_calloc(1, sizeof(struct per_transfer));
   if(!p)
     return CURLE_OUT_OF_MEMORY;
   if(!transfers)
@@ -246,7 +246,7 @@ static struct per_transfer *del_per_transfer(struct per_transfer *per)
   else
     transfersl = p;
 
-  free(per);
+  curlx_free(per);
 
   return n;
 }
@@ -770,10 +770,10 @@ skip:
 
   curl_easy_cleanup(per->curl);
   if(outs->alloc_filename)
-    free(outs->filename);
-  free(per->url);
-  free(per->outfile);
-  free(per->uploadfile);
+    curlx_free(outs->filename);
+  curlx_free(per->url);
+  curlx_free(per->outfile);
+  curlx_free(per->uploadfile);
   curl_slist_free_all(per->hdrcbdata.headlist);
   per->hdrcbdata.headlist = NULL;
   return result;
@@ -785,7 +785,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
     /* Check if config->cert is a PKCS#11 URI and set the config->cert_type if
      * necessary */
     if(config->cert && !config->cert_type && is_pkcs11_uri(config->cert)) {
-      config->cert_type = strdup("ENG");
+      config->cert_type = curlx_strdup("ENG");
       if(!config->cert_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -793,7 +793,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
     /* Check if config->key is a PKCS#11 URI and set the config->key_type if
      * necessary */
     if(config->key && !config->key_type && is_pkcs11_uri(config->key)) {
-      config->key_type = strdup("ENG");
+      config->key_type = curlx_strdup("ENG");
       if(!config->key_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -802,7 +802,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
      * config->proxy_type if necessary */
     if(config->proxy_cert && !config->proxy_cert_type &&
        is_pkcs11_uri(config->proxy_cert)) {
-      config->proxy_cert_type = strdup("ENG");
+      config->proxy_cert_type = curlx_strdup("ENG");
       if(!config->proxy_cert_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -811,7 +811,7 @@ static CURLcode set_cert_types(struct OperationConfig *config)
      * config->proxy_key_type if necessary */
     if(config->proxy_key && !config->proxy_key_type &&
        is_pkcs11_uri(config->proxy_key)) {
-      config->proxy_key_type = strdup("ENG");
+      config->proxy_key_type = curlx_strdup("ENG");
       if(!config->proxy_key_type)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -844,7 +844,7 @@ static CURLcode append2query(struct OperationConfig *config,
       if(uerr)
         result = urlerr_cvt(uerr);
       else {
-        free(per->url); /* free previous URL */
+        curlx_free(per->url); /* free previous URL */
         per->url = updated; /* use our new URL instead! */
       }
     }
@@ -1022,7 +1022,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     char *d = curl_maprintf("%s/%s", config->output_dir, per->outfile);
     if(!d)
       return CURLE_WRITE_ERROR;
-    free(per->outfile);
+    curlx_free(per->outfile);
     per->outfile = d;
   }
   /* Create the directory hierarchy, if not pre-existent to a multiple
@@ -1264,7 +1264,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
     per->etag_save = etag_first; /* copy the whole struct */
     if(state->uploadfile) {
-      per->uploadfile = strdup(state->uploadfile);
+      per->uploadfile = curlx_strdup(state->uploadfile);
       if(!per->uploadfile ||
          SetHTTPrequest(TOOL_HTTPREQ_PUT, &config->httpreq)) {
         tool_safefree(per->uploadfile);
@@ -1300,7 +1300,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     if(glob_inuse(&state->urlglob))
       result = glob_next_url(&per->url, &state->urlglob);
     else if(!state->urlidx) {
-      per->url = strdup(u->url);
+      per->url = curlx_strdup(u->url);
       if(!per->url)
         result = CURLE_OUT_OF_MEMORY;
     }
@@ -1312,7 +1312,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
       return result;
 
     if(u->outfile) {
-      per->outfile = strdup(u->outfile);
+      per->outfile = curlx_strdup(u->outfile);
       if(!per->outfile)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -1586,7 +1586,7 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 {
   struct contextuv *c;
 
-  c = (struct contextuv *) malloc(sizeof(*c));
+  c = (struct contextuv *)curlx_malloc(sizeof(*c));
 
   c->sockfd = sockfd;
   c->uv = uv;
@@ -1600,7 +1600,7 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 static void close_cb(uv_handle_t *handle)
 {
   struct contextuv *c = (struct contextuv *) handle->data;
-  free(c);
+  curlx_free(c);
 }
 
 static void destroy_context(struct contextuv *c)
@@ -2053,7 +2053,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
 
   env = curl_getenv("CURL_CA_BUNDLE");
   if(env) {
-    config->cacert = strdup(env);
+    config->cacert = curlx_strdup(env);
     curl_free(env);
     if(!config->cacert) {
       result = CURLE_OUT_OF_MEMORY;
@@ -2063,7 +2063,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
   else {
     env = curl_getenv("SSL_CERT_DIR");
     if(env) {
-      config->capath = strdup(env);
+      config->capath = curlx_strdup(env);
       curl_free(env);
       if(!config->capath) {
         result = CURLE_OUT_OF_MEMORY;
@@ -2072,7 +2072,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
     }
     env = curl_getenv("SSL_CERT_FILE");
     if(env) {
-      config->cacert = strdup(env);
+      config->cacert = curlx_strdup(env);
       curl_free(env);
       if(!config->cacert) {
         result = CURLE_OUT_OF_MEMORY;
@@ -2088,7 +2088,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
     FILE *cafile = tool_execpath("curl-ca-bundle.crt", &cacert);
     if(cafile) {
       curlx_fclose(cafile);
-      config->cacert = strdup(cacert);
+      config->cacert = curlx_strdup(cacert);
       if(!config->cacert) {
         result = CURLE_OUT_OF_MEMORY;
         goto fail;

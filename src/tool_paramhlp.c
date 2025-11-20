@@ -36,7 +36,7 @@
 
 struct getout *new_getout(struct OperationConfig *config)
 {
-  struct getout *node = calloc(1, sizeof(struct getout));
+  struct getout *node = curlx_calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
     static int outnum = 0;
@@ -401,7 +401,7 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
-  protoset = malloc((proto_count + 1) * sizeof(*protoset));
+  protoset = curlx_malloc((proto_count + 1) * sizeof(*protoset));
   if(!protoset)
     return PARAM_NO_MEM;
 
@@ -499,14 +499,14 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   for(proto = 0; protoset[proto] && !result; proto++)
     result = curlx_dyn_addf(&obuf, "%s%s", curlx_dyn_len(&obuf) ? "," : "",
                             protoset[proto]);
-  free((char *) protoset);
+  curlx_free((char *)protoset);
   if(result)
     return PARAM_NO_MEM;
   if(!curlx_dyn_len(&obuf)) {
     curlx_dyn_free(&obuf);
     return PARAM_BAD_USE;
   }
-  free(*ostr);
+  curlx_free(*ostr);
   *ostr = curlx_dyn_ptr(&obuf);
   return PARAM_OK;
 }
@@ -592,7 +592,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       return CURLE_OUT_OF_MEMORY;
 
     /* return the new string */
-    free(*userpwd);
+    curlx_free(*userpwd);
     *userpwd = curlx_dyn_ptr(&dyn);
   }
 

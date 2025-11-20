@@ -45,7 +45,7 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
   pat->globindex = -1;
   pat->c.set.size = 0;
   pat->c.set.idx = 0;
-  pat->c.set.elem = malloc(sizeof(char *));
+  pat->c.set.elem = curlx_malloc(sizeof(char *));
 
   if(!pat->c.set.elem)
     return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
@@ -137,10 +137,10 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
 
       if(!palloc) {
         palloc = 5; /* a reasonable default */
-        elem = malloc(palloc * sizeof(char *));
+        elem = curlx_malloc(palloc * sizeof(char *));
       }
       else if(size >= palloc) {
-        char **arr = realloc(elem, palloc * 2 * sizeof(char *));
+        char **arr = curlx_realloc(elem, palloc * 2 * sizeof(char *));
         if(!arr) {
           result = globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
           goto error;
@@ -155,7 +155,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
       }
 
       elem[size] =
-        strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
+        curlx_strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
       if(!elem[size]) {
         result = globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
         goto error;
@@ -206,7 +206,7 @@ error:
     for(i = 0; i < size; i++)
       tool_safefree(elem[i]);
   }
-  free(elem);
+  curlx_free(elem);
   return result;
 }
 
@@ -387,7 +387,7 @@ static CURLcode add_glob(struct URLGlob *glob, size_t pos)
     struct URLPattern *np = NULL;
     glob->palloc *= 2;
     if(glob->pnum < 255) { /* avoid ridiculous amounts */
-      np = realloc(glob->pattern, glob->palloc * sizeof(struct URLPattern));
+      np = curlx_realloc(glob->pattern, glob->palloc * sizeof(struct URLPattern));
       if(!np)
         return globerror(glob, NULL, pos, CURLE_OUT_OF_MEMORY);
     }
@@ -491,7 +491,7 @@ CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
 
   memset(glob, 0, sizeof(struct URLGlob));
   curlx_dyn_init(&glob->buf, 1024*1024);
-  glob->pattern = malloc(2 * sizeof(struct URLPattern));
+  glob->pattern = curlx_malloc(2 * sizeof(struct URLPattern));
   if(!glob->pattern)
     return CURLE_OUT_OF_MEMORY;
   glob->palloc = 2;
@@ -617,7 +617,7 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
   }
 
   *globbed =
-    strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
+    curlx_strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
   if(!*globbed)
     return CURLE_OUT_OF_MEMORY;
 
