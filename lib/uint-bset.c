@@ -49,14 +49,14 @@ CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax)
 
   DEBUGASSERT(bset->init == CURL_UINT_BSET_MAGIC);
   if(nslots != bset->nslots) {
-    curl_uint64_t *slots = calloc(nslots, sizeof(curl_uint64_t));
+    curl_uint64_t *slots = curlx_calloc(nslots, sizeof(curl_uint64_t));
     if(!slots)
       return CURLE_OUT_OF_MEMORY;
 
     if(bset->slots) {
       memcpy(slots, bset->slots,
              (CURLMIN(nslots, bset->nslots) * sizeof(curl_uint64_t)));
-      free(bset->slots);
+      curlx_free(bset->slots);
     }
     bset->slots = slots;
     bset->nslots = nslots;
@@ -69,7 +69,7 @@ CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax)
 void Curl_uint_bset_destroy(struct uint_bset *bset)
 {
   DEBUGASSERT(bset->init == CURL_UINT_BSET_MAGIC);
-  free(bset->slots);
+  curlx_free(bset->slots);
   memset(bset, 0, sizeof(*bset));
 }
 

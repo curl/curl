@@ -54,12 +54,12 @@ struct mntfy_chunk {
 
 static struct mntfy_chunk *mnfty_chunk_create(void)
 {
-  return calloc(1, sizeof(struct mntfy_chunk));
+  return curlx_calloc(1, sizeof(struct mntfy_chunk));
 }
 
 static void mnfty_chunk_destroy(struct mntfy_chunk *chunk)
 {
-  free(chunk);
+  curlx_free(chunk);
 }
 
 static void mnfty_chunk_reset(struct mntfy_chunk *chunk)

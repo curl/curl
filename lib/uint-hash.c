@@ -70,7 +70,7 @@ static struct uint_hash_entry *uint_hash_mk_entry(unsigned int id, void *value)
   struct uint_hash_entry *e;
 
   /* allocate the struct for the hash entry */
-  e = malloc(sizeof(*e));
+  e = curlx_malloc(sizeof(*e));
   if(e) {
     e->id = id;
     e->next = NULL;
@@ -95,7 +95,7 @@ static void uint_hash_entry_destroy(struct uint_hash *h,
                                     struct uint_hash_entry *e)
 {
   uint_hash_entry_clear(h, e);
-  free(e);
+  curlx_free(e);
 }
 
 static void uint_hash_entry_unlink(struct uint_hash *h,
@@ -126,7 +126,7 @@ bool Curl_uint_hash_set(struct uint_hash *h, unsigned int id, void *value)
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == CURL_UINTHASHINIT);
   if(!h->table) {
-    h->table = calloc(h->slots, sizeof(*he));
+    h->table = curlx_calloc(h->slots, sizeof(*he));
     if(!h->table)
       return FALSE; /* OOM */
   }

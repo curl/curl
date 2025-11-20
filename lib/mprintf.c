@@ -1177,7 +1177,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   }
   if(curlx_dyn_len(info.b))
     return curlx_dyn_ptr(info.b);
-  return strdup("");
+  return curlx_strdup("");
 }
 
 char *curl_maprintf(const char *format, ...)

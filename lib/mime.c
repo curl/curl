@@ -357,13 +357,13 @@ static char *strippath(const char *fullfile)
 {
   char *filename;
   char *base;
-  filename = strdup(fullfile); /* duplicate since basename() may ruin the
-                                  buffer it works on */
+  filename = curlx_strdup(fullfile); /* duplicate since basename() may ruin
+                                        the buffer it works on */
   if(!filename)
     return NULL;
-  base = strdup(basename(filename));
+  base = curlx_strdup(basename(filename));
 
-  free(filename); /* free temporary buffer */
+  curlx_free(filename); /* free temporary buffer */
 
   return base; /* returns an allocated string or NULL ! */
 }
@@ -1190,9 +1190,9 @@ void curl_mime_free(curl_mime *mime)
       part = mime->firstpart;
       mime->firstpart = part->nextpart;
       Curl_mime_cleanpart(part);
-      free(part);
+      curlx_free(part);
     }
-    free(mime);
+    curlx_free(mime);
   }
 }
 
@@ -1282,7 +1282,7 @@ curl_mime *curl_mime_init(void *easy)
 {
   curl_mime *mime;
 
-  mime = (curl_mime *) malloc(sizeof(*mime));
+  mime = (curl_mime *)curlx_malloc(sizeof(*mime));
 
   if(mime) {
     mime->parent = NULL;
@@ -1294,7 +1294,7 @@ curl_mime *curl_mime_init(void *easy)
                        (unsigned char *) &mime->boundary[MIME_BOUNDARY_DASHES],
                        MIME_RAND_BOUNDARY_CHARS + 1)) {
       /* failed to get random separator, bail out */
-      free(mime);
+      curlx_free(mime);
       return NULL;
     }
     mimesetstate(&mime->state, MIMESTATE_BEGIN, NULL);
@@ -1319,7 +1319,7 @@ curl_mimepart *curl_mime_addpart(curl_mime *mime)
   if(!mime)
     return NULL;
 
-  part = (curl_mimepart *) malloc(sizeof(*part));
+  part = (curl_mimepart *)curlx_malloc(sizeof(*part));
 
   if(part) {
     Curl_mime_initpart(part);
@@ -1345,7 +1345,7 @@ CURLcode curl_mime_name(curl_mimepart *part, const char *name)
   Curl_safefree(part->name);
 
   if(name) {
-    part->name = strdup(name);
+    part->name = curlx_strdup(name);
     if(!part->name)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1362,7 +1362,7 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
   Curl_safefree(part->filename);
 
   if(filename) {
-    part->filename = strdup(filename);
+    part->filename = curlx_strdup(filename);
     if(!part->filename)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1415,7 +1415,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
     if(curlx_stat(filename, &sbuf))
       result = CURLE_READ_ERROR;
     else {
-      part->data = strdup(filename);
+      part->data = curlx_strdup(filename);
       if(!part->data)
         result = CURLE_OUT_OF_MEMORY;
       else {
@@ -1438,7 +1438,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
           result = CURLE_OUT_OF_MEMORY;
         else {
           result = curl_mime_filename(part, base);
-          free(base);
+          curlx_free(base);
         }
       }
     }
@@ -1455,7 +1455,7 @@ CURLcode curl_mime_type(curl_mimepart *part, const char *mimetype)
   Curl_safefree(part->mimetype);
 
   if(mimetype) {
-    part->mimetype = strdup(mimetype);
+    part->mimetype = curlx_strdup(mimetype);
     if(!part->mimetype)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1696,7 +1696,7 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
     if(hdr)
       *slp = hdr;
     else
-      free(s);
+      curlx_free(s);
   }
 
   return hdr ? CURLE_OK : CURLE_OUT_OF_MEMORY;

@@ -364,7 +364,7 @@ void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)
 {
   DEBUGASSERT(cpfds);
   if(cpfds->allocated_pfds) {
-    free(cpfds->pfds);
+    curlx_free(cpfds->pfds);
   }
   memset(cpfds, 0, sizeof(*cpfds));
 }
@@ -374,13 +374,13 @@ static CURLcode cpfds_increase(struct curl_pollfds *cpfds, unsigned int inc)
   struct pollfd *new_fds;
   unsigned int new_count = cpfds->count + inc;
 
-  new_fds = calloc(new_count, sizeof(struct pollfd));
+  new_fds = curlx_calloc(new_count, sizeof(struct pollfd));
   if(!new_fds)
     return CURLE_OUT_OF_MEMORY;
 
   memcpy(new_fds, cpfds->pfds, cpfds->count * sizeof(struct pollfd));
   if(cpfds->allocated_pfds)
-    free(cpfds->pfds);
+    curlx_free(cpfds->pfds);
   cpfds->pfds = new_fds;
   cpfds->count = new_count;
   cpfds->allocated_pfds = TRUE;
@@ -521,7 +521,7 @@ void Curl_pollset_init(struct easy_pollset *ps)
 
 struct easy_pollset *Curl_pollset_create(void)
 {
-  struct easy_pollset *ps = calloc(1, sizeof(*ps));
+  struct easy_pollset *ps = curlx_calloc(1, sizeof(*ps));
   if(ps)
     Curl_pollset_init(ps);
   return ps;
@@ -533,11 +533,11 @@ void Curl_pollset_cleanup(struct easy_pollset *ps)
   DEBUGASSERT(ps->init == CURL_EASY_POLLSET_MAGIC);
 #endif
   if(ps->sockets != ps->def_sockets) {
-    free(ps->sockets);
+    curlx_free(ps->sockets);
     ps->sockets = ps->def_sockets;
   }
   if(ps->actions != ps->def_actions) {
-    free(ps->actions);
+    curlx_free(ps->actions);
     ps->actions = ps->def_actions;
   }
   ps->count = CURL_ARRAYSIZE(ps->def_sockets);
@@ -614,21 +614,21 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
                  ps->count, new_count);
       if(new_count <= ps->count)
         return CURLE_OUT_OF_MEMORY;
-      nsockets = calloc(new_count, sizeof(nsockets[0]));
+      nsockets = curlx_calloc(new_count, sizeof(nsockets[0]));
       if(!nsockets)
         return CURLE_OUT_OF_MEMORY;
-      nactions = calloc(new_count, sizeof(nactions[0]));
+      nactions = curlx_calloc(new_count, sizeof(nactions[0]));
       if(!nactions) {
-        free(nsockets);
+        curlx_free(nsockets);
         return CURLE_OUT_OF_MEMORY;
       }
       memcpy(nsockets, ps->sockets, ps->count * sizeof(ps->sockets[0]));
       memcpy(nactions, ps->actions, ps->count * sizeof(ps->actions[0]));
       if(ps->sockets != ps->def_sockets)
-        free(ps->sockets);
+        curlx_free(ps->sockets);
       ps->sockets = nsockets;
       if(ps->actions != ps->def_actions)
-        free(ps->actions);
+        curlx_free(ps->actions);
       ps->actions = nactions;
       ps->count = new_count;
     }
@@ -668,7 +668,7 @@ int Curl_pollset_poll(struct Curl_easy *data,
   if(!ps->n)
     return curlx_wait_ms(timeout_ms);
 
-  pfds = calloc(ps->n, sizeof(*pfds));
+  pfds = curlx_calloc(ps->n, sizeof(*pfds));
   if(!pfds)
     return -1;
 
@@ -689,7 +689,7 @@ int Curl_pollset_poll(struct Curl_easy *data,
   }
 
   result = Curl_poll(pfds, npfds, timeout_ms);
-  free(pfds);
+  curlx_free(pfds);
   return result;
 }
 
