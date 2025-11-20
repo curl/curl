@@ -1057,6 +1057,22 @@ CURL_EXTERN ALLOC_FUNC
 #define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
 #define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
+#warning "XMEMNEW defined DEBUG"
+#define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
+#define curlx_calloc(nbelem,size) \
+                              curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define curlx_realloc(ptr,size)   \
+                              curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
+
 #else /* !CURLDEBUG */
 
 #define sclose(x) CURL_SCLOSE(x)
@@ -1074,6 +1090,30 @@ CURL_EXTERN ALLOC_FUNC
 #endif
 #define CURL_SEND send
 #define CURL_RECV recv
+
+#ifndef WITHOUT_LIBCURL
+#warning "XMEMNEW defined CURLALLOC"
+#define curlx_strdup(ptr)         Curl_cstrdup(ptr)
+#define curlx_malloc(size)        Curl_cmalloc(size)
+#define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
+#define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
+#define curlx_free(ptr)           Curl_cfree(ptr)
+#else /* WITHOUT_LIBCURL */
+#warning "XMEMNEW defined DEFAULT"
+#define curlx_strdup(ptr)         strdup(ptr)
+#define curlx_malloc(size)        malloc(size)
+#define curlx_calloc(nbelem,size) calloc(nbelem, size)
+#define curlx_realloc(ptr,size)   realloc(ptr, size)
+#define curlx_free(ptr)           free(ptr)
+#endif /* !WITHOUT_LIBCURL */
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         Curl_wcsdup(ptr)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
 
 #endif /* CURLDEBUG */
 
