@@ -105,13 +105,13 @@ HEAD
 static voidpf zalloc_func(voidpf opaque, unsigned int items, unsigned int size)
 {
   (void)opaque;
-  /* not a typo, keep it calloc() */
-  return (voidpf) calloc(items, size);
+  /* not a typo, keep it curlx_calloc() */
+  return (voidpf)curlx_calloc(items, size);
 }
 static void zfree_func(voidpf opaque, voidpf ptr)
 {
   (void)opaque;
-  free(ptr);
+  curlx_free(ptr);
 }
 
 #define HEADERLEN 10
@@ -136,7 +136,7 @@ void hugehelp(void)
   if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
 
-  buf = malloc(BUF_SIZE);
+  buf = curlx_malloc(BUF_SIZE);
   if(buf) {
     while(1) {
       z.avail_out = BUF_SIZE;
@@ -150,7 +150,7 @@ void hugehelp(void)
       else
         break;    /* error */
     }
-    free(buf);
+    curlx_free(buf);
   }
   inflateEnd(&z);
 }
@@ -176,7 +176,7 @@ void showhelp(const char *trigger, const char *arg, const char *endarg)
   if(inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
 
-  buf = malloc(BUF_SIZE);
+  buf = curlx_malloc(BUF_SIZE);
   if(buf) {
     while(1) {
       z.avail_out = BUF_SIZE;
@@ -192,7 +192,7 @@ void showhelp(const char *trigger, const char *arg, const char *endarg)
       else
         break;    /* error */
     }
-    free(buf);
+    curlx_free(buf);
   }
   inflateEnd(&z);
 }
