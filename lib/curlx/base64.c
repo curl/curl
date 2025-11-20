@@ -275,3 +275,7 @@ CURLcode curlx_base64url_encode(const uint8_t *inputbuff, size_t insize,
 {
   return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
 }
+
+#ifdef BUILDING_LIBCURL
+#include "../curl_setup_mem.h"
+#endif
