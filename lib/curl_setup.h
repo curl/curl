@@ -1100,7 +1100,11 @@ CURL_EXTERN ALLOC_FUNC
 #define curlx_free(ptr)           Curl_cfree(ptr)
 #else /* WITHOUT_LIBCURL || BUILDING_CURLTOOL */
 #warning "XMEMNEW defined DEFAULT"
+#ifdef _WIN32
+#define curlx_strdup(ptr)         _strdup(ptr)
+#else
 #define curlx_strdup(ptr)         strdup(ptr)
+#endif
 #define curlx_malloc(size)        malloc(size)
 #define curlx_calloc(nbelem,size) calloc(nbelem, size)
 #define curlx_realloc(ptr,size)   realloc(ptr, size)
