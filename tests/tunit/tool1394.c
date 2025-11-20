@@ -122,9 +122,9 @@ static CURLcode test_tool1394(const char *arg)
       }
     }
     if(certname)
-      free(certname);
+      curlx_free(certname);
     if(passphrase)
-      free(passphrase);
+      curlx_free(passphrase);
   }
 
   UNITTEST_END_SIMPLE
