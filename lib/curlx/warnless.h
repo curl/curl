@@ -69,6 +69,10 @@ curl_off_t curlx_uztoso(size_t uznum);
 /* Convert a ssize_t to size_t, return FALSE if negative and set 0 */
 bool curlx_sztouz(ssize_t sznum, size_t *puznum);
 
+/* Convert a curl_off_t to size_t, return FALSE if negative or
+ * too large and set 0 */
+bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum);
+
 #ifdef _WIN32
 #undef  read
 #define read(fd, buf, count)  (ssize_t)_read(fd, buf, curlx_uztoui(count))
