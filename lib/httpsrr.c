@@ -37,7 +37,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
+static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
                                     unsigned char *alpns)
 {
   /*
@@ -49,7 +49,7 @@ static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
   int idnum = 0;
 
   while(len > 0) {
-    size_t tlen = (size_t) *cp++;
+    size_t tlen = *cp++;
     enum alpnid id;
     len--;
     if(tlen > len)
@@ -84,7 +84,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     CURL_TRC_DNS(data, "HTTPS RR MANDATORY left to implement");
     break;
   case HTTPS_RR_CODE_ALPN: /* str_list */
-    result = httpsrr_decode_alpn((const char *)val, vlen, hi->alpns);
+    result = httpsrr_decode_alpn(val, vlen, hi->alpns);
     CURL_TRC_DNS(data, "HTTPS RR ALPN: %u %u %u %u",
                  hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
     break;
