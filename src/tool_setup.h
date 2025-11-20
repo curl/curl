@@ -68,6 +68,8 @@ extern FILE *tool_stderr;
 
 #ifndef HAVE_STRDUP
 #include "tool_strdup.h"
+#undef Curl_strdup
+#define Curl_strdup tool_strdup
 #endif
 
 #ifndef tool_nop_stmt
