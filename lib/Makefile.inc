@@ -354,6 +354,7 @@ LIB_HFILES =         \
   llist.h            \
   macos.h            \
   memdebug.h         \
+  memdebugx.h        \
   mime.h             \
   mqtt.h             \
   multihandle.h      \
