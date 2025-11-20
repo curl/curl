@@ -192,7 +192,7 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   if(result)
     return result;
   mq->lastTime = curlx_now();
-  Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);
+  Curl_debug(data, CURLINFO_HEADER_OUT, buf, n);
   if(len != n) {
     size_t nsend = len - n;
     if(curlx_dyn_len(&mq->sendbuf)) {
@@ -602,10 +602,11 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
     DEBUGF(infof(data, "mqtt_publish without payload, return bad arg"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  if(postfieldsize < 0)
+  if(!curlx_sotouz_fits(postfieldsize, &payloadlen)) {
+    if(postfieldsize > 0) /* off_t does not fit into size_t */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     payloadlen = strlen(payload);
-  else
-    payloadlen = (size_t)postfieldsize;
+  }
 
   result = mqtt_get_topic(data, &topic, &topiclen);
   if(result)

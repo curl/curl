@@ -317,6 +317,22 @@ bool curlx_sztouz(ssize_t sznum, size_t *puznum)
   return TRUE;
 }
 
+bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum)
+{
+  if(sonum < 0) {
+    *puznum = 0;
+    return FALSE;
+  }
+#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
+  if(sonum > SIZE_MAX) {
+    *puznum = 0;
+    return FALSE;
+  }
+#endif
+  *puznum = (size_t)sonum;
+  return TRUE;
+}
+
 curl_off_t curlx_uztoso(size_t uznum)
 {
 #if SIZEOF_SIZE_T >= SIZEOF_CURL_OFF_T
