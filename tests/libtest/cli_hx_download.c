@@ -346,8 +346,8 @@ static CURLcode test_cli_hx_download(const char *URL)
         pause_offset = (size_t)num;
       break;
     case 'r':
-      free(resolve);
-      resolve = strdup(coptarg);
+      curlx_free(resolve);
+      resolve = curlx_strdup(coptarg);
       break;
     case 'T':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
@@ -407,7 +407,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
+  transfer_d = curlx_calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
     res = (CURLcode)1;
@@ -559,7 +559,7 @@ cleanup:
       else /* on success we expect ssl to have been checked */
         assert(t->checked_ssl);
     }
-    free(transfer_d);
+    curlx_free(transfer_d);
   }
 
   curl_share_cleanup(share);
@@ -569,7 +569,7 @@ cleanup:
 
 optcleanup:
 
-  free(resolve);
+  curlx_free(resolve);
 
   return res;
 }
