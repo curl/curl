@@ -34,6 +34,7 @@
 #include "../bufq.h"
 #include "../curlx/dynbuf.h"
 #include "../curlx/fopen.h"
+#include "../curlx/warnless.h"
 #include "../cfilters.h"
 #include "../curl_trc.h"
 #include "curl_ngtcp2.h"
@@ -128,7 +129,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
 #ifdef HAVE_SENDMSG
   struct iovec msg_iov;
   struct msghdr msg = {0};
-  ssize_t sent;
+  ssize_t rv;
 #if defined(__linux__) && defined(UDP_SEGMENT)
   uint8_t msg_ctrl[32];
   struct cmsghdr *cm;
@@ -155,11 +156,11 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #endif
 
-  while((sent = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
+  while((rv = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
 
-  if(sent == -1) {
+  if(!curlx_sztouz(rv, psent)) {
     switch(SOCKERRNO) {
     case EAGAIN:
 #if EAGAIN != SOCKEWOULDBLOCK
@@ -172,41 +173,41 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     case EIO:
       if(pktlen > gsolen) {
         /* GSO failure */
-        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", sent,
+        infof(data, "sendmsg() returned %zd (errno %d); disable GSO", rv,
               SOCKERRNO);
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
       FALLTHROUGH();
     default:
-      failf(data, "sendmsg() returned %zd (errno %d)", sent, SOCKERRNO);
+      failf(data, "sendmsg() returned %zd (errno %d)", rv, SOCKERRNO);
       result = CURLE_SEND_ERROR;
       goto out;
     }
   }
-  else if(pktlen != (size_t)sent) {
-    failf(data, "sendmsg() sent only %zd/%zu bytes", sent, pktlen);
+  else if(pktlen != *psent) {
+    failf(data, "sendmsg() sent only %zu/%zu bytes", *psent, pktlen);
     result = CURLE_SEND_ERROR;
     goto out;
   }
 #else
-  ssize_t sent;
+  ssize_t rv;
   (void)gsolen;
 
   *psent = 0;
 
-  while((sent = CURL_SEND(qctx->sockfd, (const char *)pkt,
-                          (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
+  while((rv = CURL_SEND(qctx->sockfd, (const char *)pkt,
+                        (SEND_TYPE_ARG3)pktlen, 0)) == -1 &&
         SOCKERRNO == SOCKEINTR)
     ;
 
-  if(sent == -1) {
+  if(!curlx_sztouz(rv, psent)) {
     if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
       result = CURLE_AGAIN;
       goto out;
     }
     else {
-      failf(data, "send() returned %zd (errno %d)", sent, SOCKERRNO);
+      failf(data, "send() returned %zd (errno %d)", rv, SOCKERRNO);
       if(SOCKERRNO != SOCKEMSGSIZE) {
         result = CURLE_SEND_ERROR;
         goto out;
@@ -217,7 +218,6 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #endif
   (void)cf;
-  *psent = pktlen;
 
 out:
   return result;
@@ -506,7 +506,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     while((rc = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
-    if(rc == -1) {
+    if(!curlx_sztouz(rc, &nread)) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         goto out;
       }
@@ -525,7 +525,6 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       goto out;
     }
 
-    nread = (size_t)rc;
     total_nread += nread;
     ++calls;
 
@@ -559,19 +558,19 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
   int bufsize = (int)sizeof(buf);
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen = sizeof(remote_addr);
-  size_t total_nread, pkts, calls = 0;
-  ssize_t nread;
+  size_t total_nread, pkts, calls = 0, nread;
+  ssize_t rv;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(max_pkts > 0);
   for(pkts = 0, total_nread = 0; pkts < max_pkts;) {
-    while((nread = recvfrom(qctx->sockfd, (char *)buf, bufsize, 0,
-                            (struct sockaddr *)&remote_addr,
-                            &remote_addrlen)) == -1 &&
+    while((rv = recvfrom(qctx->sockfd, (char *)buf, bufsize, 0,
+                         (struct sockaddr *)&remote_addr,
+                         &remote_addrlen)) == -1 &&
           (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
       ;
-    if(nread == -1) {
+    if(!curlx_sztouz(rv, &nread)) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
         CURL_TRC_CF(data, cf, "ingress, recvfrom -> EAGAIN");
         goto out;
@@ -586,16 +585,16 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
       }
       curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
-                  nread, SOCKERRNO, errstr);
+                  rv, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
 
     ++pkts;
     ++calls;
-    total_nread += (size_t)nread;
-    result = recv_cb(buf, (size_t)nread, (size_t)nread,
-                     &remote_addr, remote_addrlen, 0, userp);
+    total_nread += nread;
+    result = recv_cb(buf, nread, nread, &remote_addr, remote_addrlen,
+                     0, userp);
     if(result)
       goto out;
   }
