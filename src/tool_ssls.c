@@ -30,8 +30,6 @@
 #include "tool_ssls.h"
 #include "tool_parsecfg.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 /* The maximum line length for an ecoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
 

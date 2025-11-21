@@ -78,7 +78,6 @@ if($c)
 
     print <<HEAD
 #include <zlib.h>
-#include <memdebug.h> /* keep this as LAST include */
 static const unsigned char hugehelpgz[] = {
   /* This mumbo-jumbo is the huge help text compressed with gzip.
      Thanks to this operation, the size of this data shrank from $gzip
