@@ -29,17 +29,33 @@
 
 
 #define CURL_US_PER_SEC      1000000
+#define CURL_RLIMIT_MIN_CHUNK (16 * 1024)
+#define CURL_RLIMIT_MAX_STEPS 2   /* 500ms interval */
 
 void Curl_rlimit_init(struct Curl_rlimit *r,
                       curl_off_t rate_per_s,
                       curl_off_t burst_per_s,
                       struct curltime ts)
 {
+  curl_off_t rate_steps;
+
   DEBUGASSERT(rate_per_s >= 0);
   DEBUGASSERT(burst_per_s >= rate_per_s || !burst_per_s);
-  r->rate_per_s = rate_per_s;
-  r->burst_per_s = burst_per_s;
-  r->tokens = rate_per_s;
+  r->step_us = CURL_US_PER_SEC;
+  r->rate_per_step = rate_per_s;
+  r->burst_per_step = burst_per_s;
+  /* On rates that are multiples of CURL_RLIMIT_MIN_CHUNK, we reduce
+   * the interval `step_us` from 1 second to smaller steps with at
+   * most CURL_RLIMIT_MAX_STEPS.
+   * Smaller means more CPU, but also more precision. */
+  rate_steps = rate_per_s / CURL_RLIMIT_MIN_CHUNK;
+  rate_steps = CURLMIN(rate_steps, CURL_RLIMIT_MAX_STEPS);
+  if(rate_steps >= 2) {
+    r->step_us /= rate_steps;
+    r->rate_per_step /= rate_steps;
+    r->burst_per_step /= rate_steps;
+  }
+  r->tokens = r->rate_per_step;
   r->spare_us = 0;
   r->ts = ts;
   r->blocked = FALSE;
@@ -47,14 +63,14 @@ void Curl_rlimit_init(struct Curl_rlimit *r,
 
 void Curl_rlimit_start(struct Curl_rlimit *r, struct curltime ts)
 {
-  r->tokens = r->rate_per_s;
+  r->tokens = r->rate_per_step;
   r->spare_us = 0;
   r->ts = ts;
 }
 
 bool Curl_rlimit_active(struct Curl_rlimit *r)
 {
-  return (r->rate_per_s > 0) || r->blocked;
+  return (r->rate_per_step > 0) || r->blocked;
 }
 
 bool Curl_rlimit_is_blocked(struct Curl_rlimit *r)
@@ -65,10 +81,10 @@ bool Curl_rlimit_is_blocked(struct Curl_rlimit *r)
 static void ratelimit_update(struct Curl_rlimit *r,
                              struct curltime ts)
 {
-  timediff_t elapsed_us, elapsed_s;
+  timediff_t elapsed_us, elapsed_steps;
   curl_off_t token_gain;
 
-  DEBUGASSERT(r->rate_per_s);
+  DEBUGASSERT(r->rate_per_step);
   if((r->ts.tv_sec == ts.tv_sec) && (r->ts.tv_usec == ts.tv_usec))
     return;
 
@@ -81,26 +97,26 @@ static void ratelimit_update(struct Curl_rlimit *r,
   }
 
   elapsed_us += r->spare_us;
-  if(elapsed_us < CURL_US_PER_SEC)
+  if(elapsed_us < r->step_us)
     return;
 
   /* we do the update */
   r->ts = ts;
-  elapsed_s = elapsed_us / CURL_US_PER_SEC;
-  r->spare_us = elapsed_us % CURL_US_PER_SEC;
+  elapsed_steps = elapsed_us / r->step_us;
+  r->spare_us = elapsed_us % r->step_us;
 
   /* How many tokens did we gain since the last update? */
-  if(r->rate_per_s > (CURL_OFF_T_MAX / elapsed_s))
+  if(r->rate_per_step > (CURL_OFF_T_MAX / elapsed_steps))
     token_gain = CURL_OFF_T_MAX;
   else {
-    token_gain = r->rate_per_s * elapsed_s;
+    token_gain = r->rate_per_step * elapsed_steps;
   }
 
   /* Limit the token again by the burst rate per second (if set), so we
    * do not suddenly have a huge number of tokens after inactivity. */
   r->tokens += token_gain;
-  if(r->burst_per_s && (r->tokens > r->burst_per_s)) {
-    r->tokens = r->burst_per_s;
+  if(r->burst_per_step && (r->tokens > r->burst_per_step)) {
+    r->tokens = r->burst_per_step;
   }
 }
 
@@ -109,7 +125,7 @@ curl_off_t Curl_rlimit_avail(struct Curl_rlimit *r,
 {
   if(r->blocked)
     return 0;
-  else if(r->rate_per_s) {
+  else if(r->rate_per_step) {
     ratelimit_update(r, ts);
     return r->tokens;
   }
@@ -121,7 +137,7 @@ void Curl_rlimit_drain(struct Curl_rlimit *r,
                        size_t tokens,
                        struct curltime ts)
 {
-  if(r->blocked || !r->rate_per_s)
+  if(r->blocked || !r->rate_per_step)
     return;
 
   ratelimit_update(r, ts);
@@ -146,15 +162,15 @@ timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
 {
   timediff_t wait_us, elapsed_us;
 
-  if(r->blocked || !r->rate_per_s)
+  if(r->blocked || !r->rate_per_step)
     return 0;
   ratelimit_update(r, ts);
   if(r->tokens > 0)
     return 0;
 
-  /* How many seconds will it take tokens to become positive again?
+  /* How much time will it take tokens to become positive again?
    * Deduct `spare_us` and check against already elapsed time */
-  wait_us = (1 + (-r->tokens / r->rate_per_s)) * CURL_US_PER_SEC;
+  wait_us = (1 + (-r->tokens / r->rate_per_step)) * r->step_us;
   wait_us -= r->spare_us;
 
   elapsed_us = curlx_timediff_us(ts, r->ts);

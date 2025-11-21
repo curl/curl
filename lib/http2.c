@@ -184,9 +184,9 @@ static uint32_t cf_h2_initial_win_size(struct Curl_easy *data)
   /* If the transfer has a rate-limit lower than the default initial
    * stream window size, use that. It needs to be at least 8k or servers
    * may be unhappy. */
-  if(data->progress.dl.rlimit.rate_per_s &&
-     (data->progress.dl.rlimit.rate_per_s < H2_STREAM_WINDOW_SIZE_INITIAL))
-    return CURLMAX((uint32_t)data->progress.dl.rlimit.rate_per_s, 8192);
+  if(data->progress.dl.rlimit.rate_per_step &&
+     (data->progress.dl.rlimit.rate_per_step < H2_STREAM_WINDOW_SIZE_INITIAL))
+    return CURLMAX((uint32_t)data->progress.dl.rlimit.rate_per_step, 8192);
 #endif
   return H2_STREAM_WINDOW_SIZE_INITIAL;
 }
