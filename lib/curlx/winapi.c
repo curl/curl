@@ -66,9 +66,7 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
   wlen = FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
                          FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
                         LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL);
-  if(wlen) {
-    (void)wcstombs_s(NULL, buf, buflen, wbuf, wlen);
-
+  if(wlen && !wcstombs_s(NULL, buf, buflen, wbuf, wlen)) {
     /* Truncate multiple lines */
     p = strchr(buf, '\n');
     if(p) {
