@@ -28,10 +28,6 @@
 #include <openssl/crypto.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* DllMain() must only be defined for Windows DLL builds. */
 #if defined(_WIN32) && !defined(CURL_STATICLIB)
 

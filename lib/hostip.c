@@ -62,10 +62,6 @@
 #include "easy_lock.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if defined(CURLRES_SYNCH) &&                   \
   defined(HAVE_ALARM) &&                        \
   defined(SIGALRM) &&                           \

@@ -34,10 +34,6 @@
 #include "sendf.h"
 #include "cw-pause.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /* body dynbuf sizes */
 #define CW_PAUSE_BUF_CHUNK         (16 * 1024)

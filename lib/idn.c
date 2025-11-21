@@ -45,10 +45,6 @@
 #endif
 #endif  /* USE_LIBIDN2 */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* for macOS and iOS targets */
 #ifdef USE_APPLE_IDN
 #include <unicode/uidna.h>

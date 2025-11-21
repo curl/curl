@@ -45,10 +45,6 @@
 #include "curlx/inet_pton.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define DEBUG_AND_VERBOSE
 #endif

@@ -94,10 +94,6 @@
 #include "curlx/base64.h"
 #include "connect.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_WIN32_LDAP
 #define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
 #define curl_ldap_num_t ULONG

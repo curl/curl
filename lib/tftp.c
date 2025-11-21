@@ -64,10 +64,6 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* RFC2348 allows the block size to be negotiated */
 #define TFTP_BLKSIZE_DEFAULT 512
 #define TFTP_OPTION_BLKSIZE "blksize"

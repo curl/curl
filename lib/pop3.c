@@ -78,10 +78,6 @@
 #include "curlx/warnless.h"
 #include "strdup.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Authentication type flags */
 #define POP3_TYPE_CLEARTEXT (1 << 0)
 #define POP3_TYPE_APOP      (1 << 1)

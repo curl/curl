@@ -30,10 +30,6 @@
 #include "headers.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
 /* Generate the curl_header struct for the user. This function MUST assign all

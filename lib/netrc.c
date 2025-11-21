@@ -42,10 +42,6 @@
 #include "curlx/fopen.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Get user and password from .netrc when given a machine name */
 
 enum host_lookup_state {

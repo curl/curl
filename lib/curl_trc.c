@@ -47,10 +47,6 @@
 #include "vtls/vtls.h"
 #include "vquic/vquic.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static void trc_write(struct Curl_easy *data, curl_infotype type,
                       const char *ptr, size_t size)
 {

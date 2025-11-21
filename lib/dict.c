@@ -60,11 +60,6 @@
 #include "progress.h"
 #include "dict.h"
 
-/* The last 2 #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
 #define DICT_MATCH3 "/FIND:"

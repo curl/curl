@@ -33,10 +33,6 @@
 #include "system_win32.h"
 #include "curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Pointer to SSPI dispatch table */
 PSecurityFunctionTable Curl_pSecFn = NULL;
 

@@ -32,10 +32,6 @@
 #include "http_digest.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Test example headers:
 
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"

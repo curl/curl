@@ -81,10 +81,6 @@
 #include <wincrypt.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;

@@ -41,10 +41,6 @@
 #include "strdup.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define MAX_HSTS_LINE 4095
 #define MAX_HSTS_HOSTLEN 2048
 #define MAX_HSTS_DATELEN 256

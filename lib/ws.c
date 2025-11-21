@@ -43,10 +43,6 @@
 #include "curlx/strparse.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /***
     RFC 6455 Section 5.2

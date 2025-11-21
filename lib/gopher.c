@@ -40,10 +40,6 @@
 #include "escape.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
  * Forward declarations.
  */

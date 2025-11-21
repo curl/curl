@@ -72,10 +72,6 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
 #endif

@@ -59,10 +59,6 @@
 #include <wincrypt.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Please keep the SSL backend-specific #if branches in this order:
  *
  * 1. USE_OPENSSL

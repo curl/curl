@@ -50,10 +50,6 @@
 #include "curl_share.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 #ifdef CURLRES_SYNCH
 

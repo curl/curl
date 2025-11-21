@@ -32,10 +32,6 @@
 #include "http1.h"
 #include "urlapi-int.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 #define H1_MAX_URL_LEN   (8*1024)
 

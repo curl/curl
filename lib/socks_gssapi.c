@@ -37,10 +37,6 @@
 #include "curlx/warnless.h"
 #include "strdup.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

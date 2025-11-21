@@ -37,10 +37,6 @@ struct Curl_easy;
 #include "curlx/strparse.h"
 #include "curl_printf.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* for ABI-compatibility with previous versions */
 char *curl_escape(const char *string, int inlength)
 {

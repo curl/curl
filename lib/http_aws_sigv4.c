@@ -39,10 +39,6 @@
 
 #include <time.h>
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #include "slist.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)                \

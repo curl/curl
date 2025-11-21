@@ -50,10 +50,6 @@ struct Curl_easy;
 #include "slist.h"
 #include "curlx/dynbuf.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef _WIN32
 #  ifndef R_OK
 #  define R_OK 4

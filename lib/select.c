@@ -46,10 +46,6 @@
 #include "curlx/wait.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifndef HAVE_POLL
 /*
  * This is a wrapper around select() to aid in Windows compatibility. A

@@ -31,10 +31,6 @@
 #include "psl.h"
 #include "curl_share.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 void Curl_psl_destroy(struct PslCache *pslcache)
 {
   if(pslcache->psl) {

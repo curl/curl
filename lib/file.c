@@ -68,10 +68,6 @@
 #include "curlx/warnless.h"
 #include "curl_range.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if defined(_WIN32) || defined(MSDOS)
 #define DOS_FILESYSTEM 1
 #elif defined(__amigaos4__)

@@ -49,10 +49,6 @@
 #include "curl_sspi.h"
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 CURLcode Curl_input_ntlm(struct Curl_easy *data,
                          bool proxy,         /* if proxy or not */
                          const char *header) /* rest of the www-authenticate:

@@ -81,10 +81,6 @@
 #include "headers.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
     !defined(CURL_DISABLE_IMAP)
 /*

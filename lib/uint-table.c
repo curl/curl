@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "uint-table.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_TBL_MAGIC  0x62757473
 #endif

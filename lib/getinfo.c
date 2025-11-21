@@ -34,10 +34,6 @@
 #include "progress.h"
 #include "curlx/strparse.h"
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
  * Initialize statistical and informational data.
  *

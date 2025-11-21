@@ -31,10 +31,6 @@
 #endif
 
 #include "strdup.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #ifndef HAVE_STRDUP
 char *Curl_strdup(const char *str)

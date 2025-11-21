@@ -78,10 +78,6 @@
 #include "curlx/warnless.h"
 #include "curl_ctype.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_IMAP_EASY   "meta:proto:imap:easy"

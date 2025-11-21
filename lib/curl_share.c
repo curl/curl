@@ -34,10 +34,6 @@
 #include "hsts.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 CURLSH *
 curl_share_init(void)
 {

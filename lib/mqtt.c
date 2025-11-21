@@ -40,10 +40,6 @@
 #include "multiif.h"
 #include "rand.h"
 
-/* The last 2 #includes file should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* first byte is command.
    second byte is for flags. */
 #define MQTT_MSG_CONNECT    0x10

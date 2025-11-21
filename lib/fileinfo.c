@@ -27,9 +27,6 @@
 #ifndef CURL_DISABLE_FTP
 
 #include "fileinfo.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 struct fileinfo *Curl_fileinfo_alloc(void)
 {

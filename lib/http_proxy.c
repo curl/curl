@@ -44,10 +44,6 @@
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
                                   struct dynhds *hds)

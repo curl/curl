@@ -41,10 +41,6 @@
 #include "escape.h"
 #include "urlapi-int.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define DNS_CLASS_IN 0x01
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS

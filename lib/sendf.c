@@ -55,10 +55,6 @@
 #include "curlx/warnless.h"
 #include "ws.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static CURLcode do_init_writer_stack(struct Curl_easy *data);
 

@@ -32,10 +32,6 @@
 #include "curl_sspi.h"
 #include "curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifndef HAVE_IF_NAMETOINDEX
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;

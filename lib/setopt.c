@@ -55,10 +55,6 @@
 #include "strdup.h"
 #include "escape.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
   if(secs < 0)

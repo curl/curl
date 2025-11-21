@@ -37,10 +37,6 @@
 #include "curlx/strparse.h"
 #include "curl_memrchr.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef _WIN32
   /* MS-DOS/Windows style drive prefix, eg c: in c:foo */
 #define STARTS_WITH_DRIVE_PREFIX(str) \

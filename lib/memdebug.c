@@ -35,10 +35,6 @@
 #include "backtrace.h"
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 struct memdebug {
   size_t size;
   union {

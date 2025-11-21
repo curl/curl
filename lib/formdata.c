@@ -40,10 +40,6 @@ struct Curl_easy;
 #include "curlx/fopen.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 #define HTTPPOST_PTRNAME CURL_HTTPPOST_PTRNAME
 #define HTTPPOST_FILENAME CURL_HTTPPOST_FILENAME

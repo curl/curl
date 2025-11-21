@@ -33,11 +33,7 @@
 #include <curl/curl.h>
 
 #include "curl_hmac.h"
-#include "curl_memory.h"
 #include "curlx/warnless.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /*
  * Generic HMAC algorithm.

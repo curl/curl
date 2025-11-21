@@ -32,10 +32,6 @@
 #include "curlx/multibyte.h"
 #include "curlx/timeval.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* return 0 on success, 1 on error */
 int Curl_rename(const char *oldpath, const char *newpath)
 {

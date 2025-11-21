@@ -42,10 +42,6 @@
 #include "strdup.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"

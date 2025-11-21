@@ -28,10 +28,6 @@
 
 #include "hash.h"
 #include "llist.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD

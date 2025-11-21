@@ -26,10 +26,6 @@
 #include "uint-bset.h"
 #include "uint-spbset.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_SPBSET_MAGIC  0x70737362
 #endif

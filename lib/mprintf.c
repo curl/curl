@@ -27,10 +27,6 @@
 #include "curl_printf.h"
 #include "curlx/strparse.h"
 
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE

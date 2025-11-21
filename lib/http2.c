@@ -48,10 +48,6 @@
 #include "curlx/warnless.h"
 #include "headers.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if (NGHTTP2_VERSION_NUM < 0x010c00)
 #error too old nghttp2 version, upgrade!
 #endif

@@ -126,10 +126,6 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_NGHTTP2
 static void data_priority_cleanup(struct Curl_easy *data);
 #else

@@ -122,10 +122,6 @@
 #include "curl_endian.h"
 #include "curl_md4.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_CURL_DES_SET_ODD_PARITY
 /*
  * curl_des_set_odd_parity()

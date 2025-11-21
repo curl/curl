@@ -60,10 +60,6 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define SUBBUFSIZE 512
 
 #define CURL_SB_CLEAR(x)  x->subpointer = x->subbuffer

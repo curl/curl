@@ -31,10 +31,6 @@
 #include <nghttp2/nghttp2.h>
 #endif /* USE_NGHTTP2 */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static struct dynhds_entry *
 entry_new(const char *name, size_t namelen,

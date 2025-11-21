@@ -33,10 +33,6 @@
 #include "sendf.h"
 #include "strdup.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
                                     unsigned char *alpns)
 {

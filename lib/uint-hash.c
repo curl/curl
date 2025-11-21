@@ -27,10 +27,6 @@
 #include <curl/curl.h>
 
 #include "uint-hash.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD

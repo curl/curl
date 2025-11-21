@@ -54,10 +54,6 @@
 #include "socks.h"
 #include "urlapi-int.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* initial multi->xfers table size for a full multi */
 #define CURL_XFER_TABLE_SIZE    512
 

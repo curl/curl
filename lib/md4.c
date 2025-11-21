@@ -71,10 +71,6 @@
 #include <nettle/md4.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
