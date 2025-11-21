@@ -30,7 +30,6 @@
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
 #include "tool_util.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /* only acknowledge colon or equals as separators if the option was not
    specified with an initial dash! */

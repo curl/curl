@@ -28,8 +28,6 @@
 #include "tool_cb_prg.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #define WARN_PREFIX "Warning: "
 #define NOTE_PREFIX "Note: "
 #define ERROR_PREFIX "curl: "

@@ -28,7 +28,6 @@
 #include "tool_urlglob.h"
 #include "tool_vms.h"
 #include "tool_strdup.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 static CURLcode globerror(struct URLGlob *glob, const char *err,
                           size_t pos, CURLcode error)

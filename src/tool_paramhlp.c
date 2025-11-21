@@ -32,8 +32,6 @@
 #include "tool_util.h"
 #include "tool_version.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct getout *new_getout(struct OperationConfig *config)
 {
   struct getout *node = curlx_calloc(1, sizeof(struct getout));

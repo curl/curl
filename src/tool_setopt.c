@@ -30,7 +30,6 @@
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 
 #include "tool_msgs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /* Lookup tables for converting setopt values back to symbols */
 /* For enums, values may be in any order. */
