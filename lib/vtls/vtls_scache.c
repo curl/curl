@@ -47,10 +47,6 @@
 #include "../rand.h"
 #include "../curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 static bool cf_ssl_peer_key_is_global(const char *peer_key);
 

@@ -42,10 +42,6 @@
 #include "cipher_suite.h"
 #include "x509asn1.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 struct rustls_ssl_backend_data
 {
   const struct rustls_client_config *config;

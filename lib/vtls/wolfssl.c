@@ -75,10 +75,6 @@
 #include <wolfssl/error-ssl.h>
 #include "wolfssl.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
 #define USE_ECH_WOLFSSL
 #endif

@@ -60,10 +60,6 @@
 #include "../progress.h"
 #include "../curl_sha256.h"
 
-/* The last #include file should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
  * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These
  * messages are extra verbose and intended for curl developers debugging

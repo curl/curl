@@ -75,10 +75,6 @@
 #include "../strdup.h"
 #include "../curl_sha256.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* ALPN for http2 */
 #if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)
 #  define HAS_ALPN_MBEDTLS

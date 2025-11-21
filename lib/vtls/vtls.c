@@ -81,10 +81,6 @@
 #include <Security/Security.h>
 #endif
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 #define CLONE_STRING(var)                    \
   do {                                       \

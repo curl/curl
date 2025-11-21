@@ -59,9 +59,6 @@
 #include "../curlx/warnless.h"
 #include "x509asn1.h"
 #include "../multiif.h"
-#include "../curl_memory.h"
-/* The last #include file should be: */
-#include "../memdebug.h"
 
 /* Enable GnuTLS debugging by defining GTLSDEBUG */
 /*#define GTLSDEBUG */

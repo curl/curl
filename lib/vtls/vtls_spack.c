@@ -32,10 +32,6 @@
 #include "vtls_spack.h"
 #include "../strdup.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff
 #endif

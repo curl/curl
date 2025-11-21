@@ -132,10 +132,6 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 
 #include "../curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
 #endif

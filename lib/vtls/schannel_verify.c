@@ -49,10 +49,6 @@
 #include "hostcheck.h"
 #include "../curlx/version_win32.h"
 
-/* The last #include file should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */

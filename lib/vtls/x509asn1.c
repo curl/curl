@@ -49,10 +49,6 @@
 #include "x509asn1.h"
 #include "../curlx/dynbuf.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
  * Constants.
  */
