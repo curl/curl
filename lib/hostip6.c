@@ -53,10 +53,6 @@
 #include "curlx/inet_pton.h"
 #include "connect.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef CURLRES_SYNCH
 
 #ifdef DEBUG_ADDRINFO
