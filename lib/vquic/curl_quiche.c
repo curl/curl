@@ -52,10 +52,6 @@
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /* HTTP/3 error values defined in RFC 9114, ch. 8.1 */
 #define CURL_H3_NO_ERROR  (0x0100)
 

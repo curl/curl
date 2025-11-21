@@ -71,10 +71,6 @@
 
 #include "../curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 #define QUIC_MAX_STREAMS (256*1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
