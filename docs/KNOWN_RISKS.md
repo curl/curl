@@ -35,9 +35,10 @@ The command line tool and its options should be used and be expected to work
 as documented. Relying on undocumented functions or side-effects is unreliable
 as they may cause problems or get changed behavior between releases.
 
-For several command line options you can confuse either curl or the involved
+For several command line options, you can confuse either curl or the involved
 server endpoint by using characters or byte sequences for the option that are
-not expected. For example line feeds and carriage returns.
+not expected. For example, adding line feeds and/or carriage returns to inputs
+can produce unexpected, invalid, or insecure results.
 
 ## API misuse
 
