@@ -95,9 +95,8 @@
                                       unlink(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for _open(), _wfopen(), _wopen(), fopen(),
-                                    freopen(), getenv(), gmtime(), sprintf(),
-                                    strcpy(),
+#define _CRT_SECURE_NO_WARNINGS  /* for _open(), fopen(), freopen(), getenv(),
+                                    gmtime(), sprintf(), strcpy(),
                                     in tests: localtime(), open(), sscanf() */
 #endif
 #endif /* _MSC_VER */
