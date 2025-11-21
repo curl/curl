@@ -73,7 +73,6 @@ static CURLcode test_lib1912(const char *URL)
       print_err(o->name, "CURLOT_OBJECT");
       error++;
     }
-    /* TODO: no typecheck for CURLOPTTYPE_BLOB types? */
   }
 #endif
   (void)URL;
