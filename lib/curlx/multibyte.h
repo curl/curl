@@ -44,11 +44,8 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  *
  * Allocated memory should be free'd with curlx_unicodefree().
  *
- * Note: Because these are curlx functions their memory usage is not tracked
- * by the curl memory tracker memdebug. you will notice that curlx
- * function-like macros call free and strdup in parentheses, eg (strdup)(ptr),
- * and that is to ensure that the curl memdebug override macros do not replace
- * them.
+ * Use system allocators to avoid infinite recursion when called by curl's
+ * memory tracker memdebug functions.
  */
 
 #if defined(UNICODE) && defined(_WIN32)
@@ -65,8 +62,8 @@ typedef union {
 
 #else
 
-#define curlx_convert_UTF8_to_tchar(ptr) (strdup)(ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) (strdup)(ptr)
+#define curlx_convert_UTF8_to_tchar(ptr) strdup(ptr)
+#define curlx_convert_tchar_to_UTF8(ptr) strdup(ptr)
 
 typedef union {
   char                *tchar_ptr;
@@ -78,6 +75,6 @@ typedef union {
 #endif /* UNICODE && _WIN32 */
 
 /* the purpose of this macro is to free() without being traced by memdebug */
-#define curlx_unicodefree(ptr) (free)(ptr)
+#define curlx_unicodefree(ptr) free(ptr)
 
 #endif /* HEADER_CURL_MULTIBYTE_H */
