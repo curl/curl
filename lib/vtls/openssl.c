@@ -4834,9 +4834,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
     infof(data, "SSL certificate verified via OpenSSL.");
 
 #ifdef USE_APPLE_SECTRUST
-  if(!verified &&
-     conn_config->verifypeer && ssl_config->native_ca_store &&
-     (ossl_verify == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY)) {
+  if(!verified && conn_config->verifypeer && ssl_config->native_ca_store) {
     /* we verify using Apple SecTrust *unless* OpenSSL already verified.
      * This may happen if the application intercepted the OpenSSL callback
      * and installed its own. */
