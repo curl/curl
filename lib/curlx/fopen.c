@@ -309,7 +309,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
       target = fixed;
     else
       target = filename_w;
-    result = _wfreopen(target, mode_w, fp);
+    errno = _wfreopen_s(&result, target, mode_w, fp);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -321,8 +321,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = freopen(target, mode, fp);
+  errno = freopen_s(&result, target, mode, fp);
 #endif
 
   (free)(fixed);
