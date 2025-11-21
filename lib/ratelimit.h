@@ -50,8 +50,9 @@
  */
 
 struct Curl_rlimit {
-  curl_off_t rate_per_s;  /* rate tokens are generated per second */
-  curl_off_t burst_per_s; /* burst rate of tokens per second */
+  curl_off_t rate_per_step; /* rate tokens are generated per step us */
+  curl_off_t burst_per_step; /* burst rate of tokens per step us */
+  timediff_t step_us;     /* microseconds between token increases */
   curl_off_t tokens;      /* tokens available in the next second */
   timediff_t spare_us;    /* microseconds unaffecting tokens */
   struct curltime ts;     /* time of the last update */
