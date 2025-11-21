@@ -162,11 +162,13 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
         goto cleanup;
 
       if(wcsncpy_s(temp, needed, L"\\\\?\\UNC\\", 8)) {
-        (free)(temp);
+        /* !checksrc! disable BANNEDFUNC 1 */
+        free(temp);
         goto cleanup;
       }
       if(wcscpy_s(temp + 8, needed, fbuf + 2)) {
-        (free)(temp);
+        /* !checksrc! disable BANNEDFUNC 1 */
+        free(temp);
         goto cleanup;
       }
     }
@@ -182,11 +184,13 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
         goto cleanup;
 
       if(wcsncpy_s(temp, needed, L"\\\\?\\", 4)) {
-        (free)(temp);
+        /* !checksrc! disable BANNEDFUNC 1 */
+        free(temp);
         goto cleanup;
       }
       if(wcscpy_s(temp + 4, needed, fbuf)) {
-        (free)(temp);
+        /* !checksrc! disable BANNEDFUNC 1 */
+        free(temp);
         goto cleanup;
       }
     }
