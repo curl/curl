@@ -29,9 +29,7 @@
 #define CURL_STANDARD_LOCAL_OVERRIDE
 #include "../curl_setup_mem.h"
 #undef CURL_STANDARD_LOCAL_OVERRIDE
-#include "../curl_memory.h"
 #endif
-#include "../memdebug.h"
 
 #define MIN_FIRST_ALLOC 32
 
