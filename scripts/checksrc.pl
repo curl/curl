@@ -89,6 +89,7 @@ my %banfunc = (
     "mbstowcs" => 1,
     "wcstombs" => 1,
     "_wfopen" => 1,
+    "_wfreopen" => 1,
     "_wopen" => 1,
     "LoadLibrary" => 1,
     "LoadLibraryA" => 1,
