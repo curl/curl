@@ -72,7 +72,7 @@
 #include "curlx/warnless.h"
 #include "conncache.h"
 #include "multihandle.h"
-#include "share.h"
+#include "curl_share.h"
 #include "http_proxy.h"
 #include "socks.h"
 

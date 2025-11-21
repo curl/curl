@@ -65,7 +65,7 @@
 #include "http_aws_sigv4.h"
 #include "url.h"
 #include "urlapi-int.h"
-#include "share.h"
+#include "curl_share.h"
 #include "hostip.h"
 #include "dynhds.h"
 #include "http.h"

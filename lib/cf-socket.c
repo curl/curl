@@ -75,7 +75,7 @@
 #include "conncache.h"
 #include "multihandle.h"
 #include "rand.h"
-#include "share.h"
+#include "curl_share.h"
 #include "strdup.h"
 #include "system_win32.h"
 #include "curlx/version_win32.h"

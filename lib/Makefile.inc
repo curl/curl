@@ -311,6 +311,7 @@ LIB_HFILES =         \
   curl_setup_once.h  \
   curl_sha256.h      \
   curl_sha512_256.h  \
+  curl_share.h       \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
@@ -375,7 +376,6 @@ LIB_HFILES =         \
   setup-os400.h      \
   setup-vms.h        \
   setup-win32.h      \
-  share.h            \
   sigpipe.h          \
   slist.h            \
   smb.h              \

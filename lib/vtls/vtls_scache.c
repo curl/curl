@@ -41,7 +41,7 @@
 #include "../strcase.h"
 #include "../url.h"
 #include "../llist.h"
-#include "../share.h"
+#include "../curl_share.h"
 #include "../curl_trc.h"
 #include "../curl_sha256.h"
 #include "../rand.h"

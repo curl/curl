@@ -33,7 +33,7 @@
 #include "connect.h"
 #include "progress.h"
 #include "easyif.h"
-#include "share.h"
+#include "curl_share.h"
 #include "psl.h"
 #include "multiif.h"
 #include "multi_ev.h"
