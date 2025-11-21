@@ -491,10 +491,12 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
 
 cleanup:
   if(found_base64) {
-    (free)(found_base64);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    free(found_base64); /* allocated by libssh, deallocate with system free */
   }
   if(known_base64) {
-    (free)(known_base64);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    free(known_base64); /* allocated by libssh, deallocate with system free */
   }
   if(hash)
     ssh_clean_pubkey_hash(&hash);

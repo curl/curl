@@ -396,7 +396,8 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
       char *abspath = realpath(path, NULL);
       if(abspath) {
         CURLcode r = curlx_dyn_addf(buf, ":%s-%s", name, abspath);
-        (free)(abspath); /* allocated by libc, free without memdebug */
+        /* !checksrc! disable BANNEDFUNC 1 */
+        free(abspath); /* allocated by libc, free without memdebug */
         return r;
       }
       *is_local = TRUE;
