@@ -29,9 +29,8 @@
  * libcurl and that it works unconditionally no matter how libcurl is built,
  * nothing more.
  *
- * Do not include memdebug.h in this source file, and do not use directly
- * memory related functions in this file except those used inside custom
- * memory callbacks which should be calling 'the real thing'.
+ * Do not use directly memory related functions in this file except those used
+ * inside custom memory callbacks which should be calling 'the real thing'.
  */
 
 static int seen;
@@ -39,31 +38,36 @@ static int seen;
 static void *custom_calloc(size_t nmemb, size_t size)
 {
   seen++;
-  return (calloc)(nmemb, size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return calloc(nmemb, size);
 }
 
 static void *custom_malloc(size_t size)
 {
   seen++;
-  return (malloc)(size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return malloc(size);
 }
 
 static char *custom_strdup(const char *ptr)
 {
   seen++;
-  return (strdup)(ptr);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return strdup(ptr);
 }
 
 static void *custom_realloc(void *ptr, size_t size)
 {
   seen++;
-  return (realloc)(ptr, size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return realloc(ptr, size);
 }
 
 static void custom_free(void *ptr)
 {
   seen++;
-  (free)(ptr);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  free(ptr);
 }
 
 
