@@ -109,9 +109,10 @@ jobs:
             # MultiSSL
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix c-ares)/lib/pkgconfig:$(brew --prefix mbedtls)/lib/pkgconfig:$(brew --prefix rustls-ffi)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
             cmake -B _bld1 -G Ninja -DENABLE_DEBUG=ON \
+              -DCMAKE_C_FLAGS=-DCURL_DISABLE_TYPECHECK \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON \
-              -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCMAKE_C_FLAGS=-DCURL_DISABLE_TYPECHECK
+              -DCURL_DISABLE_VERBOSE_STRINGS=ON
             cmake --build _bld1
             cmake --build _bld1 --target testdeps
             cmake --build _bld1 --target curl-examples-build
@@ -119,6 +120,7 @@ jobs:
             # HTTP/3
             export PKG_CONFIG_PATH; PKG_CONFIG_PATH="$(brew --prefix libnghttp3)/lib/pkgconfig:$(brew --prefix libngtcp2)/lib/pkgconfig:$(brew --prefix gsasl)/lib/pkgconfig"
             cmake -B _bld2 -G Ninja \
+              -DCMAKE_C_FLAGS=-DCURL_DISABLE_TYPECHECK \
               -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR="$(brew --prefix openssl)" -DUSE_NGTCP2=ON \
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
