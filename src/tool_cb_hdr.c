@@ -36,8 +36,6 @@
 #include "tool_libinfo.h"
 #include "tool_strdup.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 static char *parse_filename(const char *ptr, size_t len);
 
 #ifdef _WIN32

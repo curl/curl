@@ -38,8 +38,6 @@
 #include "tool_util.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifndef _WIN32
 /* Wait up to a number of milliseconds for socket activity. This function
    waits on read activity on a file descriptor that is not a socket which

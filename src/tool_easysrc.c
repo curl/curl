@@ -31,8 +31,6 @@
 #include "tool_easysrc.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 /* global variable definitions, for easy-interface source code generation */
 
 struct slist_wc *easysrc_decl; /* Variable declarations */

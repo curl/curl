@@ -28,7 +28,6 @@
 #include "tool_paramhlp.h"
 #include "tool_main.h"
 #include "tool_msgs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 static struct GlobalConfig globalconf;
 struct GlobalConfig *global;

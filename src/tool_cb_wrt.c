@@ -28,8 +28,6 @@
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef _WIN32
 #define OPENMODE S_IREAD | S_IWRITE
 #else

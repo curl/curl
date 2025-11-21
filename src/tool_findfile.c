@@ -36,8 +36,6 @@
 #include "tool_findfile.h"
 #include "tool_cfgable.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct finder {
   const char *env;
   const char *append;

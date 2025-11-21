@@ -28,7 +28,6 @@
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_ipfs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /* input string ends in slash? */
 static bool has_trailing_slash(const char *input)

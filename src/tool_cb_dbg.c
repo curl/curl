@@ -28,8 +28,6 @@
 #include "tool_cb_dbg.h"
 #include "tool_util.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 static void dump(const char *timebuf, const char *idsbuf, const char *text,
                  FILE *stream, const unsigned char *ptr, size_t size,
                  trace tracetype, curl_infotype infotype);

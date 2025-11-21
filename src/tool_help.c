@@ -33,8 +33,6 @@
 #include "tool_cfgable.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct category_descriptors {
   const char *opt;
   const char *desc;

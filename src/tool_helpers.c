@@ -27,7 +27,6 @@
 #include "tool_msgs.h"
 #include "tool_getparam.h"
 #include "tool_helpers.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /*
 ** Helper functions that are used from more than one source file.
