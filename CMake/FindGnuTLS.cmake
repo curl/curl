@@ -25,32 +25,29 @@
 #
 # Input variables:
 #
-# - `GNUTLS_INCLUDE_DIR`:   Absolute path to GnuTLS include directory.
-# - `GNUTLS_LIBRARY`:       Absolute path to `gnutls` library.
+# - `GNUTLS_INCLUDE_DIR`:  Absolute path to GnuTLS include directory.
+# - `GNUTLS_LIBRARY`:      Absolute path to `gnutls` library.
 #
-# Result variables:
+# Defines:
 #
-# - `GNUTLS_FOUND`:         System has GnuTLS.
-# - `GNUTLS_INCLUDE_DIRS`:  The GnuTLS include directories.
-# - `GNUTLS_LIBRARIES`:     The GnuTLS library names.
-# - `GNUTLS_LIBRARY_DIRS`:  The GnuTLS library directories.
-# - `GNUTLS_PC_REQUIRES`:   The GnuTLS pkg-config packages.
-# - `GNUTLS_CFLAGS`:        Required compiler flags.
-# - `GNUTLS_VERSION`:       Version of GnuTLS.
+# - `GNUTLS_FOUND`:        System has GnuTLS.
+# - `GNUTLS_VERSION`:      Version of GnuTLS.
+# - `CURL::gnutls`:        GnuTLS library target.
 
-set(GNUTLS_PC_REQUIRES "gnutls")
+set(_gnutls_pc_requires "gnutls")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED GNUTLS_INCLUDE_DIR AND
    NOT DEFINED GNUTLS_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(GNUTLS ${GNUTLS_PC_REQUIRES})
+  pkg_check_modules(_gnutls ${_gnutls_pc_requires})
 endif()
 
-if(GNUTLS_FOUND)
+if(_gnutls_FOUND)
   set(GnuTLS_FOUND TRUE)
-  string(REPLACE ";" " " GNUTLS_CFLAGS "${GNUTLS_CFLAGS}")
-  message(STATUS "Found GnuTLS (via pkg-config): ${GNUTLS_INCLUDE_DIRS} (found version \"${GNUTLS_VERSION}\")")
+  set(GNUTLS_FOUND TRUE)
+  set(GNUTLS_VERSION ${_gnutls_VERSION})
+  message(STATUS "Found GnuTLS (via pkg-config): ${_gnutls_INCLUDE_DIRS} (found version \"${GNUTLS_VERSION}\")")
 else()
   find_path(GNUTLS_INCLUDE_DIR NAMES "gnutls/gnutls.h")
   find_library(GNUTLS_LIBRARY NAMES "gnutls" "libgnutls")
@@ -75,9 +72,25 @@ else()
   )
 
   if(GNUTLS_FOUND)
-    set(GNUTLS_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
-    set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
+    set(_gnutls_INCLUDE_DIRS ${GNUTLS_INCLUDE_DIR})
+    set(_gnutls_LIBRARIES    ${GNUTLS_LIBRARY})
   endif()
 
   mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
+endif()
+
+if(GNUTLS_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_gnutls_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::gnutls)
+    add_library(CURL::gnutls INTERFACE IMPORTED)
+    set_target_properties(CURL::gnutls PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_gnutls_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_gnutls_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_gnutls_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_gnutls_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_gnutls_LIBRARIES}")
+  endif()
 endif()
