@@ -32,10 +32,6 @@
 
 #include "../curl_setup.h"
 
-#ifdef _WIN32
-#include <share.h>  /* for _SH_DENYNO */
-#endif
-
 #include "fopen.h"
 
 int curlx_fseek(void *stream, curl_off_t offset, int whence)
@@ -52,6 +48,8 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 }
 
 #ifdef _WIN32
+
+#include <share.h>  /* for _SH_DENYNO */
 
 #include "multibyte.h"
 
