@@ -627,6 +627,9 @@
 #endif
 #endif
 
+#if SIZEOF_LONG > SIZEOF_SIZE_T
+#error "unexpected: 'long' is larger than 'size_t'"
+#endif
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */

@@ -340,12 +340,7 @@ bool curlx_sltouz(long slnum, size_t *puznum)
     *puznum = 0;
     return FALSE;
   }
-#if SIZEOF_LONG > SIZEOF_SIZE_T
-  if(slnum > SIZE_MAX) {
-    *puznum = 0;
-    return FALSE;
-  }
-#endif
+  /* We error in curl_setup.h if SIZEOF_LONG > SIZEOF_SIZE_T */
   *puznum = (size_t)slnum;
   return TRUE;
 }
