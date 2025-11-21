@@ -124,6 +124,7 @@ jobs:
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
             cmake --build _bld2
             cmake --build _bld2 --target testdeps
+            cmake --build _bld2 --target curl-examples-build
 
             _bld1/src/curl --disable --version
             _bld2/src/curl --disable --version
