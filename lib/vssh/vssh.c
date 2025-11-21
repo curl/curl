@@ -30,9 +30,7 @@
 #include <curl/curl.h>
 #include "../curlx/strparse.h"
 #include "../curl_trc.h"
-#include "../curl_memory.h"
 #include "../escape.h"
-#include "../memdebug.h"
 
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 
