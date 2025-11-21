@@ -26,6 +26,9 @@
 
 #ifndef CURL_DISABLE_MQTT
 extern const struct Curl_handler Curl_handler_mqtt;
+#ifdef USE_SSL
+extern const struct Curl_handler Curl_handler_mqtts;
+#endif
 #endif
 
 #endif /* HEADER_CURL_MQTT_H */
