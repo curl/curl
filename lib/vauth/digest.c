@@ -44,10 +44,6 @@
 #include "../curlx/strparse.h"
 #include "../rand.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #ifndef USE_WINDOWS_SSPI
 #define SESSION_ALGO 1 /* for algos with this bit set */
 

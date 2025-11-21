@@ -37,10 +37,6 @@
 #include "../curl_gssapi.h"
 #include "../sendf.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

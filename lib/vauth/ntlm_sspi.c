@@ -36,10 +36,6 @@
 #include "../sendf.h"
 #include "../strdup.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
  * Curl_auth_is_ntlm_supported()
  *

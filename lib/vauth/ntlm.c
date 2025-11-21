@@ -48,10 +48,6 @@
 #include "vauth.h"
 #include "../curl_endian.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024

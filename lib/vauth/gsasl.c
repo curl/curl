@@ -36,10 +36,6 @@
 
 #include <gsasl.h>
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
                                   const char *mech,
                                   struct gsasldata *gsasl)

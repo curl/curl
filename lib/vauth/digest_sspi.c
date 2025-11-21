@@ -41,10 +41,6 @@
 #include "../strcase.h"
 #include "../strerror.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
 * Curl_auth_is_digest_supported()
 *

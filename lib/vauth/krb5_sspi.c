@@ -36,10 +36,6 @@
 #include "../curlx/multibyte.h"
 #include "../sendf.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 /*
  * Curl_auth_is_gssapi_supported()
  *
