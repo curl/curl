@@ -123,7 +123,7 @@ jobs:
               -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON
             cmake --build _bld2
-            cmake --build _bld1 --target testdeps
+            cmake --build _bld2 --target testdeps
 
             _bld1/src/curl --disable --version
             _bld2/src/curl --disable --version
