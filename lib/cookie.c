@@ -42,10 +42,6 @@
 #include "llist.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static void strstore(char **str, const char *newstr, size_t len);
 
 /* number of seconds in 400 days */

@@ -42,10 +42,6 @@
 #include "select.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static void cshutdn_run_conn_handler(struct Curl_easy *data,
                                      struct connectdata *conn)

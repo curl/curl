@@ -31,10 +31,6 @@
 #include "rand.h"
 #include "curl_fopen.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
   The dirslash() function breaks a null-terminated pathname string into
   directory and filename components then returns the directory component up

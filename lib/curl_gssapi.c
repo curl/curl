@@ -51,10 +51,6 @@
 #endif
 #endif /* DEBUGBUILD */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef __GNUC__
 #define CURL_ALIGN8  __attribute__((aligned(8)))
 #else
