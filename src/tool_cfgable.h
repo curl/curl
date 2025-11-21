@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-#include <curl/mprintf.h>
 #include "tool_setup.h"
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
