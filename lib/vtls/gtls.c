@@ -1689,8 +1689,7 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
       infof(data, "  SSL certificate verified by GnuTLS");
 
 #ifdef USE_APPLE_SECTRUST
-    if(!verified && ssl_config->native_ca_store &&
-       (verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)) {
+    if(!verified && ssl_config->native_ca_store) {
       result = glts_apple_verify(cf, data, peer, &chain, &verified);
       if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
         goto out; /* unexpected error */
