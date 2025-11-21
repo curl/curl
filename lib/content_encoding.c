@@ -52,10 +52,6 @@
 #include "http.h"
 #include "content_encoding.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define CONTENT_ENCODING_DEFAULT  "identity"
 
 #ifndef CURL_DISABLE_HTTP

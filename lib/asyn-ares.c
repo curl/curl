@@ -104,10 +104,6 @@
 #define HTTPSRR_WORKS
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define CARES_TIMEOUT_PER_ATTEMPT 2000
 
 static int ares_ver = 0;

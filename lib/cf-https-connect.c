@@ -38,10 +38,6 @@
 #include "select.h"
 #include "vquic/vquic.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 typedef enum {
   CF_HC_INIT,
   CF_HC_CONNECT,

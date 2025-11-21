@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "bufq.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static bool chunk_is_empty(const struct buf_chunk *chunk)
 {
   return chunk->r_offset >= chunk->w_offset;

@@ -76,10 +76,6 @@
 #include "http_proxy.h"
 #include "socks.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)

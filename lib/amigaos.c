@@ -42,10 +42,6 @@
 #  endif
 #endif
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef HAVE_PROTO_BSDSOCKET_H
 
 #ifdef __amigaos4__

@@ -37,10 +37,6 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static void cf_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
 

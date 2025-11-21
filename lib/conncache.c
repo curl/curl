@@ -45,10 +45,6 @@
 #include "curlx/strparse.h"
 #include "uint-table.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)
 

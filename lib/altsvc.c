@@ -42,10 +42,6 @@
 #include "curlx/strparse.h"
 #include "connect.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define MAX_ALTSVC_LINE 4095
 #define MAX_ALTSVC_DATELEN 256
 #define MAX_ALTSVC_HOSTLEN 2048

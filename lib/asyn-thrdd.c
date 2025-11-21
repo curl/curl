@@ -72,10 +72,6 @@
 #endif
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /*
  * Curl_async_global_init()

@@ -45,10 +45,6 @@
 #include "curlx/warnless.h"
 #include "cf-h2-proxy.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define PROXY_H2_CHUNK_SIZE  (16*1024)
 
 #define PROXY_HTTP2_HUGE_WINDOW_SIZE (100 * 1024 * 1024)

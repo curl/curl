@@ -53,9 +53,6 @@
 #include "select.h"
 #include "curl_share.h"
 #include "url.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /***********************************************************************
  * Only for builds using asynchronous name resolves

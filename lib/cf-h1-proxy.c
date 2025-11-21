@@ -46,10 +46,6 @@
 #include "multiif.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 typedef enum {
     H1_TUNNEL_INIT,     /* init/default/no tunnel state */

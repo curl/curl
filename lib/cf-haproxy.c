@@ -34,10 +34,6 @@
 #include "multiif.h"
 #include "select.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 typedef enum {
     HAPROXY_INIT,     /* init/default/no tunnel state */
