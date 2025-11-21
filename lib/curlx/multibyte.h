@@ -62,8 +62,13 @@ typedef union {
 
 #else
 
+#ifdef _WIN32
+#define curlx_convert_UTF8_to_tchar(ptr) _strdup(ptr)
+#define curlx_convert_tchar_to_UTF8(ptr) _strdup(ptr)
+#else
 #define curlx_convert_UTF8_to_tchar(ptr) strdup(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) strdup(ptr)
+#endif
 
 typedef union {
   char                *tchar_ptr;
