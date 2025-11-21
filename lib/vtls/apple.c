@@ -50,10 +50,6 @@
 #include <Security/Security.h>
 #endif
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 #ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
