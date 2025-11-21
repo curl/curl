@@ -41,7 +41,7 @@
 #include "progress.h"
 #include "content_encoding.h"
 #include "strcase.h"
-#include "share.h"
+#include "curl_share.h"
 #include "vtls/vtls.h"
 #include "curlx/warnless.h"
 #include "sendf.h"

@@ -47,7 +47,7 @@
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
-#include "share.h"
+#include "curl_share.h"
 #include "url.h"
 
 /* The last 2 #include files should be in this order */
