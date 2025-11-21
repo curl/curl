@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Danieal Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -100,6 +100,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
     goto cleanup;
   if(!needed || needed >= max_path_len)
     goto cleanup;
+  /* !checksrc! disable BANNEDFUNC 1 */
   ibuf = malloc(needed * sizeof(wchar_t));
   if(!ibuf)
     goto cleanup;
@@ -121,6 +122,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   /* skip paths that are not excessive and do not need modification */
   if(needed <= MAX_PATH)
     goto cleanup;
+  /* !checksrc! disable BANNEDFUNC 1 */
   fbuf = malloc(needed * sizeof(wchar_t));
   if(!fbuf)
     goto cleanup;
@@ -154,6 +156,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
+      /* !checksrc! disable BANNEDFUNC 1 */
       temp = malloc(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
@@ -173,6 +176,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
+      /* !checksrc! disable BANNEDFUNC 1 */
       temp = malloc(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
@@ -187,6 +191,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       }
     }
 
+    /* !checksrc! disable BANNEDFUNC 1 */
     free(fbuf);
     fbuf = temp;
   }
@@ -197,6 +202,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
     goto cleanup;
   if(!needed || needed >= max_path_len)
     goto cleanup;
+  /* !checksrc! disable BANNEDFUNC 1 */
   obuf = malloc(needed);
   if(!obuf)
     goto cleanup;
@@ -212,8 +218,10 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
 #endif
 
 cleanup:
+  /* !checksrc! disable BANNEDFUNC 1 */
   free(fbuf);
 #ifndef _UNICODE
+  /* !checksrc! disable BANNEDFUNC 2 */
   free(ibuf);
   free(obuf);
 #endif
@@ -257,6 +265,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
 #endif
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   free(fixed);
   return result;
 }
@@ -290,6 +299,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   errno = fopen_s(&result, target, mode);
 #endif
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   free(fixed);
   return result;
 }
@@ -328,6 +338,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
   errno = freopen_s(&result, target, mode, fp);
 #endif
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   free(fixed);
   return result;
 }
@@ -367,6 +378,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 #endif
 #endif
 
+  /* !checksrc! disable BANNEDFUNC 1 */
   free(fixed);
   return result;
 }
