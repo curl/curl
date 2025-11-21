@@ -26,8 +26,6 @@
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 
-#include "memdebug.h" /* LAST include file */
-
 #if defined(_WIN32) || defined(MSDOS)
 static char *getflagstr(int flags)
 {
