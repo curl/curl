@@ -329,6 +329,7 @@ bool curlx_sotouz_fits(curl_off_t sonum, size_t *puznum)
     return FALSE;
   }
 #endif
+  *puznum = (size_t)sonum;
   return TRUE;
 }
 
