@@ -244,7 +244,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    errno = _wsopen_s(&result, target, oflag, 0, pmode);
+    errno = _wsopen_s(&result, target, oflag, _SH_DENYNO, pmode);
     curlx_unicodefree(filename_w);
   }
   else
@@ -255,7 +255,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  errno = _sopen_s(&result, target, oflag, 0, pmode);
+  errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
 #endif
 
   (free)(fixed);
