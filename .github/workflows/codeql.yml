@@ -111,9 +111,10 @@ jobs:
             cmake -B _bld1 -G Ninja -DENABLE_DEBUG=ON \
               -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_RUSTLS=ON -DCURL_USE_WOLFSSL=ON \
               -DUSE_LIBRTMP=ON -DCURL_USE_GSASL=ON -DCURL_USE_GSSAPI=ON -DUSE_SSLS_EXPORT=ON -DUSE_ECH=ON -DENABLE_ARES=ON \
-              -DCURL_DISABLE_VERBOSE_STRINGS=ON
+              -DCURL_DISABLE_VERBOSE_STRINGS=ON -DCMAKE_C_FLAGS=-DCURL_DISABLE_TYPECHECK
             cmake --build _bld1
             cmake --build _bld1 --target curlinfo
+            cmake --build _bld1 --target libtests
             cmake --build _bld1 --target servers
             cmake --build _bld1 --target tunits
             cmake --build _bld1 --target units
