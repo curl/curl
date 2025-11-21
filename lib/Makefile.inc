@@ -172,6 +172,7 @@ LIB_CFILES =         \
   curl_rtmp.c        \
   curl_sasl.c        \
   curl_sha512_256.c  \
+  curl_share.c       \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
@@ -242,7 +243,6 @@ LIB_CFILES =         \
   sendf.c            \
   setopt.c           \
   sha256.c           \
-  share.c            \
   slist.c            \
   smb.c              \
   smtp.c             \
@@ -311,6 +311,7 @@ LIB_HFILES =         \
   curl_setup_once.h  \
   curl_sha256.h      \
   curl_sha512_256.h  \
+  curl_share.h       \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
@@ -376,7 +377,6 @@ LIB_HFILES =         \
   setup-os400.h      \
   setup-vms.h        \
   setup-win32.h      \
-  share.h            \
   sigpipe.h          \
   slist.h            \
   smb.h              \

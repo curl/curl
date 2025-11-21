@@ -50,7 +50,7 @@
 #include "hostip.h"
 #include "hash.h"
 #include "rand.h"
-#include "share.h"
+#include "curl_share.h"
 #include "url.h"
 #include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"

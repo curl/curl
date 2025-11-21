@@ -38,7 +38,7 @@
 #include "conncache.h"
 #include "http_negotiate.h"
 #include "http_ntlm.h"
-#include "share.h"
+#include "curl_share.h"
 #include "sigpipe.h"
 #include "connect.h"
 #include "select.h"
