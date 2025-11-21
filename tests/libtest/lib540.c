@@ -32,8 +32,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURL *t540_curl[2];
 
 static CURLcode init(int num, CURLM *multi, const char *url,

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t1517_WriteThis {
   const char *readptr;
   size_t sizeleft;

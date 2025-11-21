@@ -28,8 +28,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char t547_uploadthis[] = "this is the blurb we want to upload\n";
 #define T547_DATALEN (sizeof(t547_uploadthis)-1)
 

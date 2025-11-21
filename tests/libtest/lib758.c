@@ -31,7 +31,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifdef USE_OPENSSL
 

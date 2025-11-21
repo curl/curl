@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testutil.h"
-#include "memdebug.h"
 
 /*
  * Test the Client->Server ANNOUNCE functionality (PUT style)

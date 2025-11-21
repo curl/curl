@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
-#include "memdebugx.h"
-
 static CURLcode test_lib1559(const char *URL)
 {
   static const int EXCESSIVE = 10*1000*1000;

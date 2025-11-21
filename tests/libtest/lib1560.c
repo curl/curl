@@ -35,8 +35,6 @@
 #define USE_IDN
 #endif
 
-#include "memdebug.h" /* LAST include file */
-
 static int checkparts(CURLU *u, const char *in, const char *wanted,
                       unsigned int getflags)
 {

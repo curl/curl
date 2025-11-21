@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define THREADS 2
 
 /* struct containing data of a thread */

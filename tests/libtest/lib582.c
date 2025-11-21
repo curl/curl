@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t582_Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */

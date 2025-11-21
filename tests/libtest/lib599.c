@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static int t599_progress_callback(void *clientp, double dltotal,
                                   double dlnow, double ultotal, double ulnow)
 {

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static void proxystat(CURL *curl)
 {
   long wasproxy;

@@ -33,8 +33,6 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#include "memdebug.h"
-
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"

@@ -26,8 +26,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 struct pair {
   const char *in;
   CURLcode *exp;
