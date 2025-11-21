@@ -25,8 +25,6 @@
 
 #include "uint-hash.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static void t1616_mydtor(unsigned int id, void *elem)
 {
   int *ptr = (int *)elem;
