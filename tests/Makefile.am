@@ -25,7 +25,6 @@
 # scripts used in test cases
 TESTSCRIPTS = \
  test1119.pl  \
- test1132.pl  \
  test1135.pl  \
  test1139.pl  \
  test1140.pl  \
