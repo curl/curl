@@ -151,7 +151,7 @@ jobs:
           mkdir bld-am
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
-            --without-sssl --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
+            --without-ssl --enable-ares --without-libssh2 --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../curl-install-am
 
       - name: 'AM configure log'
