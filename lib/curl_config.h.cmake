@@ -160,7 +160,7 @@
 /* disables TFTP */
 #cmakedefine CURL_DISABLE_TFTP 1
 
-/* disables curl_easy_setopt() type checking */
+/* disables curl_easy_setopt()/curl_easy_getinfo() type checking */
 #cmakedefine CURL_DISABLE_TYPECHECK 1
 
 /* disables verbose strings */
