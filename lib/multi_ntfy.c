@@ -43,7 +43,14 @@ struct mntfy_entry {
   unsigned int type;
 };
 
+#define CURLMNOTIFY_LAST        CURLMNOTIFY_TIMER
 #define CURL_MNTFY_CHUNK_SIZE   128
+
+static const char * const mntfy_names[]={
+  "INFO_READ",
+  "EASY_DONE",
+  "TIMER",
+};
 
 struct mntfy_chunk {
   struct mntfy_chunk *next;
@@ -118,8 +125,8 @@ static void mntfy_chunk_dispatch_all(struct Curl_multi *multi,
       /* only when notification has not been disabled in the meantime */
       if(data && Curl_uint_bset_contains(&multi->ntfy.enabled, e->type)) {
         /* this may cause new notifications to be added! */
-        CURL_TRC_M(multi->admin, "[NTFY] dispatch %d to xfer %u",
-                   e->type, e->mid);
+        CURL_TRC_M(multi->admin, "[NTFY] dispatch %s to xfer %u",
+                   mntfy_names[e->type], e->mid);
         multi->ntfy.ntfy_cb(multi, e->type, data, multi->ntfy.ntfy_cb_data);
       }
       /* once dispatched, safe to increment */
@@ -133,11 +140,13 @@ void Curl_mntfy_init(struct Curl_multi *multi)
 {
   memset(&multi->ntfy, 0, sizeof(multi->ntfy));
   Curl_uint_bset_init(&multi->ntfy.enabled);
+  multi->ntfy.timer_interval_ms = 1000;
+  multi->ntfy.timer_active = FALSE;
 }
 
 CURLMcode Curl_mntfy_resize(struct Curl_multi *multi)
 {
-  if(Curl_uint_bset_resize(&multi->ntfy.enabled, CURLMNOTIFY_EASY_DONE + 1))
+  if(Curl_uint_bset_resize(&multi->ntfy.enabled, CURLMNOTIFY_LAST + 1))
     return CURLM_OUT_OF_MEMORY;
   return CURLM_OK;
 }
@@ -153,19 +162,75 @@ void Curl_mntfy_cleanup(struct Curl_multi *multi)
   Curl_uint_bset_destroy(&multi->ntfy.enabled);
 }
 
+static void mntfy_start_timer(struct Curl_multi *multi)
+{
+  if(!multi->ntfy.timer_active) {
+    multi->ntfy.timer_start = curlx_now();
+    Curl_expire(multi->admin, multi->ntfy.timer_interval_ms, EXPIRE_TIMEOUT);
+    multi->ntfy.timer_active = TRUE;
+  }
+}
+
+static void mntfy_stop_timer(struct Curl_multi *multi)
+{
+  if(multi->ntfy.timer_active) {
+    Curl_expire_done(multi->admin, EXPIRE_TIMEOUT);
+    multi->ntfy.timer_active = FALSE;
+  }
+}
+
+CURLMcode Curl_mntfy_set_timer_ms(struct Curl_multi *multi,
+                                  unsigned int ms)
+{
+  if(ms <= 0)
+    return CURLM_BAD_FUNCTION_ARGUMENT;
+  multi->ntfy.timer_interval_ms = ms;
+  if(multi->ntfy.timer_active) {
+    mntfy_stop_timer(multi);
+    mntfy_start_timer(multi);
+  }
+  return CURLM_OK;
+}
+
+void Curl_mntfy_update_timer(struct Curl_multi *multi,
+                             struct curltime now)
+{
+  if(multi->ntfy.timer_active &&
+     (curlx_timediff_ms(now, multi->ntfy.timer_start) >=
+        multi->ntfy.timer_interval_ms)) {
+    multi->ntfy.timer_start = now;
+    Curl_expire(multi->admin, multi->ntfy.timer_interval_ms, EXPIRE_TIMEOUT);
+    CURLM_NTFY(multi->admin, CURLMNOTIFY_TIMER);
+  }
+}
+
 CURLMcode Curl_mntfy_enable(struct Curl_multi *multi, unsigned int type)
 {
-  if(type > CURLMNOTIFY_EASY_DONE)
+  if(type > CURLMNOTIFY_LAST)
     return CURLM_UNKNOWN_OPTION;
   Curl_uint_bset_add(&multi->ntfy.enabled, type);
+  switch(type) {
+  case CURLMNOTIFY_TIMER:
+    mntfy_start_timer(multi);
+    break;
+  default:
+    break;
+  }
   return CURLM_OK;
 }
 
 CURLMcode Curl_mntfy_disable(struct Curl_multi *multi, unsigned int type)
 {
-  if(type > CURLMNOTIFY_EASY_DONE)
+  if(type > CURLMNOTIFY_LAST)
     return CURLM_UNKNOWN_OPTION;
   Curl_uint_bset_remove(&multi->ntfy.enabled, type);
+  switch(type) {
+  case CURLMNOTIFY_TIMER:
+    mntfy_stop_timer(multi);
+    break;
+  default:
+    break;
+  }
   return CURLM_OK;
 }
 
@@ -176,7 +241,7 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
      Curl_uint_bset_contains(&multi->ntfy.enabled, type)) {
     /* append to list of outstanding notifications */
     struct mntfy_chunk *tail = mntfy_non_full_tail(&multi->ntfy);
-  CURL_TRC_M(data, "[NTFY] add %d for xfer %u", type, data->mid);
+  CURL_TRC_M(data, "[NTFY] add %s for xfer %u", mntfy_names[type], data->mid);
     if(tail)
       mntfy_chunk_append(tail, data, type);
     else
