@@ -45,8 +45,6 @@
 #include <rustls.h>
 #endif
 
-#include "memdebug.h"
-
 static int verbose_d = 1;
 
 struct transfer_d {
