@@ -140,36 +140,37 @@ AC_SUBST(VERSIONNUM)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls} )"
-    curl_ssh_msg="no      (--with-{libssh,libssh2})"
-   curl_zlib_msg="no      (--with-zlib)"
- curl_brotli_msg="no      (--with-brotli)"
-   curl_zstd_msg="no      (--with-zstd)"
-    curl_gss_msg="no      (--with-gssapi)"
-  curl_gsasl_msg="no      (--with-gsasl)"
-curl_tls_srp_msg="no      (--enable-tls-srp)"
-    curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
-   curl_ipv6_msg="no      (--enable-ipv6)"
-curl_unix_sockets_msg="no      (--enable-unix-sockets)"
-    curl_idn_msg="no      (--with-{libidn2,winidn})"
-   curl_docs_msg="enabled (--disable-docs)"
- curl_manual_msg="no      (--enable-manual)"
-curl_libcurl_msg="enabled (--disable-libcurl-option)"
-curl_verbose_msg="enabled (--disable-verbose)"
-   curl_sspi_msg="no      (--enable-sspi)"
-   curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
-  curl_ldaps_msg="no      (--enable-ldaps)"
-   curl_ipfs_msg="no      (--enable-ipfs)"
-   curl_rtsp_msg="no      (--enable-rtsp)"
-   curl_rtmp_msg="no      (--with-librtmp)"
-    curl_psl_msg="no      (--with-libpsl)"
- curl_altsvc_msg="enabled (--disable-alt-svc)"
-curl_headers_msg="enabled (--disable-headers-api)"
-   curl_hsts_msg="enabled (--disable-hsts)"
-    ssl_backends=
-     curl_h1_msg="enabled (internal)"
-     curl_h2_msg="no      (--with-nghttp2)"
-     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic)"
+         curl_ssl_msg="no       (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls} )"
+         curl_ssh_msg="no       (--with-{libssh,libssh2})"
+        curl_zlib_msg="no       (--with-zlib)"
+      curl_brotli_msg="no       (--with-brotli)"
+        curl_zstd_msg="no       (--with-zstd)"
+         curl_gss_msg="no       (--with-gssapi)"
+       curl_gsasl_msg="no       (--with-gsasl)"
+     curl_tls_srp_msg="no       (--enable-tls-srp)"
+         curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
+        curl_ipv6_msg="no       (--enable-ipv6)"
+curl_unix_sockets_msg="no       (--enable-unix-sockets)"
+         curl_idn_msg="no       (--with-{libidn2,winidn})"
+        curl_docs_msg="enabled  (--disable-docs)"
+      curl_manual_msg="no       (--enable-manual)"
+     curl_libcurl_msg="enabled  (--disable-libcurl-option)"
+   curl_typecheck_msg="enabled  (--disable-typecheck)"
+     curl_verbose_msg="enabled  (--disable-verbose)"
+        curl_sspi_msg="no       (--enable-sspi)"
+        curl_ldap_msg="no       (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
+       curl_ldaps_msg="no       (--enable-ldaps)"
+        curl_ipfs_msg="no       (--enable-ipfs)"
+        curl_rtsp_msg="no       (--enable-rtsp)"
+        curl_rtmp_msg="no       (--with-librtmp)"
+         curl_psl_msg="no       (--with-libpsl)"
+      curl_altsvc_msg="enabled  (--disable-alt-svc)"
+     curl_headers_msg="enabled  (--disable-headers-api)"
+        curl_hsts_msg="enabled  (--disable-hsts)"
+         ssl_backends=
+          curl_h1_msg="enabled  (internal)"
+          curl_h2_msg="no       (--with-nghttp2)"
+          curl_h3_msg="no       (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -4346,6 +4347,26 @@ AC_CHECK_HEADER(dirent.h,
 CURL_CONVERT_INCLUDE_TO_ISYSTEM
 
 dnl ************************************************************
+dnl disable curl_easy_setopt()/curl_easy_getinfo() type checking
+dnl
+AC_MSG_CHECKING([whether to enable curl_easy_setopt()/curl_easy_getinfo() type checking])
+AC_ARG_ENABLE(typecheck,
+AS_HELP_STRING([--enable-typecheck],[Enable type checking (default)])
+AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
+    curl_typecheck_msg="no"
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable verbose text strings
 dnl
 AC_MSG_CHECKING([whether to enable verbose strings])
@@ -5521,6 +5542,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
   Built-in manual:  ${curl_manual_msg}
   --libcurl option: ${curl_libcurl_msg}
+  Type checking:    ${curl_typecheck_msg}
   Verbose errors:   ${curl_verbose_msg}
   Code coverage:    ${curl_coverage_msg}
   SSPI:             ${curl_sspi_msg}

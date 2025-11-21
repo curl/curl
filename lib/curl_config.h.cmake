@@ -151,7 +151,7 @@
 /* disabled WebSocket */
 #cmakedefine CURL_DISABLE_WEBSOCKETS 1
 
-/* disables use of socketpair for curl_multi_poll */
+/* disables use of socketpair for curl_multi_poll() */
 #cmakedefine CURL_DISABLE_SOCKETPAIR 1
 
 /* disables TELNET */
@@ -159,6 +159,9 @@
 
 /* disables TFTP */
 #cmakedefine CURL_DISABLE_TFTP 1
+
+/* disables curl_easy_setopt()/curl_easy_getinfo() type checking */
+#cmakedefine CURL_DISABLE_TYPECHECK 1
 
 /* disables verbose strings */
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1

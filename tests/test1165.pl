@@ -86,7 +86,7 @@ sub scan_cmake_config_h {
     scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
 }
 
-my %whitelisted = ("CURL_DISABLE_TYPECHECK" => 1);
+my %whitelisted = ('CURL_DISABLE_DEPRECATION' => 1);
 
 sub scan_file {
     my ($source)=@_;
@@ -114,6 +114,7 @@ sub scan_dir {
 }
 
 sub scan_sources {
+    scan_dir("$root/include/curl");
     scan_dir("$root/src");
     scan_dir("$root/lib");
     scan_dir("$root/lib/vtls");
