@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-# Possible not what we want, but cannot test, just silence the warnings
+# Possibly not what we want, but cannot test, just silence the warnings
 allowfunc calloc
 allowfunc free
 allowfunc malloc

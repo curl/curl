@@ -597,7 +597,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
     curlx_free(newblob);
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
+      failf(data, "Error importing CA cert blob - mbedTLS: (-0x%04X) %s",
             -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -609,12 +609,12 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "Error reading CA cert file %s - mbedTLS: (-0x%04X) %s",
             ssl_cafile, -ret, errorbuf);
       return CURLE_SSL_CACERT_BADFILE;
     }
 #else
-    failf(data, "mbedtls: functions that use the file system not built in");
+    failf(data, "mbedTLS: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
@@ -625,14 +625,14 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading ca cert path %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "Error reading CA cert path %s - mbedTLS: (-0x%04X) %s",
             ssl_capath, -ret, errorbuf);
 
       if(verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
 #else
-    failf(data, "mbedtls: functions that use the file system not built in");
+    failf(data, "mbedTLS: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
@@ -652,7 +652,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
       return CURLE_SSL_CERTPROBLEM;
     }
 #else
-    failf(data, "mbedtls: functions that use the file system not built in");
+    failf(data, "mbedTLS: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
@@ -710,7 +710,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CERTPROBLEM;
       }
 #else
-      failf(data, "mbedtls: functions that use the file system not built in");
+      failf(data, "mbedTLS: functions that use the file system not built in");
       return CURLE_NOT_BUILT_IN;
 #endif
     }
@@ -766,13 +766,13 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
       return CURLE_SSL_CRL_BADFILE;
     }
 #else
-    failf(data, "mbedtls: functions that use the file system not built in");
+    failf(data, "mbedTLS: functions that use the file system not built in");
     return CURLE_NOT_BUILT_IN;
 #endif
   }
 #else
   if(ssl_crlfile) {
-    failf(data, "mbedtls: crl support not built in");
+    failf(data, "mbedTLS: CRL support not built in");
     return CURLE_NOT_BUILT_IN;
   }
 #endif
@@ -1161,7 +1161,7 @@ static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   *pnwritten = 0;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
-  /* mbedtls is picky when a mbedtls_ssl_write) was previously blocked.
+  /* mbedTLS is picky when a mbedtls_ssl_write() was previously blocked.
    * It requires to be called with the same amount of bytes again, or it
    * will lose bytes, e.g. reporting all was sent but they were not.
    * Remember the blocked length and use that when set. */
