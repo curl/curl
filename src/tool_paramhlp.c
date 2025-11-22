@@ -650,14 +650,6 @@ long delegation(const char *str)
   return CURLGSSAPI_DELEGATION_NONE;
 }
 
-/*
- * my_useragent: returns allocated string with default user agent
- */
-static char *my_useragent(void)
-{
-  return strdup(CURL_NAME "/" CURL_VERSION);
-}
-
 #define isheadersep(x) ((((x)==':') || ((x)==';')))
 
 /*
@@ -704,15 +696,6 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   /* Check if we have a password for the given proxy user */
   if(!result && config->proxyuserpwd)
     result = checkpasswd("proxy", i, last, &config->proxyuserpwd);
-
-  /* Check if we have a user agent */
-  if(!result && !config->useragent) {
-    config->useragent = my_useragent();
-    if(!config->useragent) {
-      errorf("out of memory");
-      result = CURLE_OUT_OF_MEMORY;
-    }
-  }
 
   return result;
 }
