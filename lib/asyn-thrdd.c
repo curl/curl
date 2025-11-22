@@ -730,24 +730,20 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 /*
  * Curl_async_getaddrinfo() - for platforms without getaddrinfo
  */
-struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
-                                             const char *hostname,
-                                             int port,
-                                             int ip_version,
-                                             int *waitp)
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
+                                const char *hostname,
+                                int port,
+                                int ip_version,
+                                struct Curl_addrinfo **addrp)
 {
-  (void)ip_version;
-  *waitp = 0; /* default to synchronous response */
+  *addrp = NULL;
 
   /* fire up a new resolver thread! */
-  if(async_thrdd_init(data, hostname, port, ip_version, NULL)) {
-    *waitp = 1; /* expect asynchronous response */
-    return NULL;
-  }
+  if(async_thrdd_init(data, hostname, port, ip_version, NULL))
+    return CURLE_OK;
 
   failf(data, "getaddrinfo() thread failed");
-
-  return NULL;
+  return CURLE_FAILED_INIT;
 }
 
 #else /* !HAVE_GETADDRINFO */
@@ -755,15 +751,13 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 /*
  * Curl_async_getaddrinfo() - for getaddrinfo
  */
-struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
-                                             const char *hostname,
-                                             int port,
-                                             int ip_version,
-                                             int *waitp)
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data,
+                                const char *hostname,
+                                int port,
+                                int ip_version)
 {
   struct addrinfo hints;
   int pf = PF_INET;
-  *waitp = 0; /* default to synchronous response */
 
   CURL_TRC_DNS(data, "init threaded resolve of %s:%d", hostname, port);
 #ifdef CURLRES_IPV6
@@ -785,14 +779,12 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
     SOCK_STREAM : SOCK_DGRAM;
 
   /* fire up a new resolver thread! */
-  if(async_thrdd_init(data, hostname, port, ip_version, &hints)) {
-    *waitp = 1; /* expect asynchronous response */
-    return NULL;
-  }
+  if(async_thrdd_init(data, hostname, port, ip_version, &hints))
+    /* expect asynchronous response */
+    return CURLE_OK;
 
   failf(data, "getaddrinfo() thread failed to start");
-  return NULL;
-
+  return CURLE_FAILED_INIT;
 }
 
 #endif /* !HAVE_GETADDRINFO */

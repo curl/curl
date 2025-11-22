@@ -844,7 +844,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   int respwait = 0;
   bool is_ipaddr;
   size_t hostname_len;
-  bool keep_negative = TRUE; /* cache a negative result */
+  bool keep_negative = FALSE; /* cache a negative result */
+  CURLcode result = CURLE_COULDNT_RESOLVE_HOST;
 
   *entry = NULL;
 
@@ -890,7 +891,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                                   data->set.resolver_start_client);
     Curl_set_in_callback(data, FALSE);
     if(st) {
-      keep_negative = FALSE;
       goto error;
     }
   }
@@ -903,7 +903,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
 #ifndef USE_RESOLVE_ON_IPS
   /* allowed to convert, hostname is IP address, then NULL means error */
   if(is_ipaddr) {
-    keep_negative = FALSE;
     goto error;
   }
 #endif
@@ -921,7 +920,10 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   }
 #ifndef CURL_DISABLE_DOH
   else if(!is_ipaddr && allowDOH && data->set.doh) {
-    addr = Curl_doh(data, hostname, port, ip_version, &respwait);
+    result = Curl_doh(data, hostname, port, ip_version);
+    if(result)
+      goto error;
+    respwait = TRUE;
   }
 #endif
   else {
@@ -930,7 +932,10 @@ CURLcode Curl_resolv(struct Curl_easy *data,
       goto error;
 
 #ifdef CURLRES_ASYNCH
-    addr = Curl_async_getaddrinfo(data, hostname, port, ip_version, &respwait);
+    result = Curl_async_getaddrinfo(data, hostname, port, ip_version);
+    if(result)
+      goto error;
+    respwait = TRUE;
 #else
     respwait = 0; /* no async waiting here */
     addr = Curl_sync_getaddrinfo(data, hostname, port, ip_version);
@@ -941,6 +946,7 @@ out:
   /* We either have found a `dns` or looked up the `addr`
    * or `respwait` is set for an async operation.
    * Everything else is a failure to resolve. */
+  keep_negative = TRUE;
   if(dns) {
     if(!dns->addr) {
       infof(data, "Negative DNS entry");
@@ -974,7 +980,7 @@ error:
   Curl_async_shutdown(data);
   if(keep_negative)
     store_negative_resolve(data, hostname, port);
-  return CURLE_COULDNT_RESOLVE_HOST;
+  return result;
 }
 
 CURLcode Curl_resolv_blocking(struct Curl_easy *data,

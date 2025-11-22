@@ -110,19 +110,13 @@ CURLcode Curl_async_await(struct Curl_easy *data,
 /*
  * Curl_async_getaddrinfo() - when using this resolver
  *
- * Returns name information about the given hostname and port number. If
- * successful, the 'hostent' is returned and the fourth argument will point to
- * memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
+ * Starts a name resolve for the given hostname and port number.
  *
  * Each resolver backend must of course make sure to return data in the
  * correct format to comply with this.
  */
-struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
-                                             const char *hostname,
-                                             int port,
-                                             int ip_version,
-                                             int *waitp);
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
+                                int port, int ip_version);
 
 #ifdef USE_ARES
 /* common functions for c-ares and threaded resolver with HTTPSRR */
