@@ -37,6 +37,7 @@
 #include "tool_cb_see.h"
 #include "tool_cb_dbg.h"
 #include "tool_helpers.h"
+#include "tool_version.h"
 
 #define BUFFER_SIZE 102400L
 
@@ -874,7 +875,8 @@ CURLcode config2setopts(struct OperationConfig *config,
 
   if(proto_http || proto_rtsp) {
     MY_SETOPT_STR(curl, CURLOPT_REFERER, config->referer);
-    MY_SETOPT_STR(curl, CURLOPT_USERAGENT, config->useragent);
+    MY_SETOPT_STR(curl, CURLOPT_USERAGENT, config->useragent ?
+                  config->useragent : CURL_NAME "/" CURL_VERSION);
   }
 
   if(use_proto == proto_http || use_proto == proto_https) {
