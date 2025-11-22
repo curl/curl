@@ -1199,7 +1199,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     if(u->infile) {
       if(!config->globoff && !glob_inuse(&state->inglob))
         result = glob_url(&state->inglob, u->infile, &state->upnum, err);
-      if(!state->uploadfile) {
+      if(!result && !state->uploadfile) {
         if(glob_inuse(&state->inglob))
           result = glob_next_url(&state->uploadfile, &state->inglob);
         else if(!state->upidx) {
