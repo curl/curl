@@ -47,7 +47,7 @@ static void voutf(const char *prefix,
   char buffer[1024];
   size_t termw = get_terminal_columns();
   size_t prefw = strlen(prefix);
-  size_t width = termw > prefw ? termw - prefw : 0;
+  size_t width = termw > prefw ? termw - prefw : SIZE_MAX;
   DEBUGASSERT(!strchr(fmt, '\n'));
   len = curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
   ptr = buffer;
