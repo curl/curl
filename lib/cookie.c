@@ -31,7 +31,7 @@
 #include "psl.h"
 #include "sendf.h"
 #include "slist.h"
-#include "share.h"
+#include "curl_share.h"
 #include "strcase.h"
 #include "curl_fopen.h"
 #include "curl_get_line.h"

@@ -29,7 +29,7 @@
 #ifdef USE_LIBPSL
 
 #include "psl.h"
-#include "share.h"
+#include "curl_share.h"
 
 /* The last 2 #include files should be in this order */
 #include "curl_memory.h"

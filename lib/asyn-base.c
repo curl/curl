@@ -51,7 +51,7 @@
 #include "hash.h"
 #include "multiif.h"
 #include "select.h"
-#include "share.h"
+#include "curl_share.h"
 #include "url.h"
 #include "curl_memory.h"
 /* The last #include file should be: */

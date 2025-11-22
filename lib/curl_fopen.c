@@ -93,11 +93,14 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   CURLcode result = CURLE_WRITE_ERROR;
   unsigned char randbuf[41];
   char *tempstore = NULL;
+#ifndef _WIN32
   struct_stat sb;
+#endif
   int fd = -1;
   char *dir = NULL;
   *tempname = NULL;
 
+#ifndef _WIN32
   *fh = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
@@ -105,6 +108,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     return CURLE_OK;
   }
   curlx_fclose(*fh);
+#endif
   *fh = NULL;
 
   result = Curl_rand_alnum(data, randbuf, sizeof(randbuf));
@@ -125,13 +129,16 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   }
 
   result = CURLE_WRITE_ERROR;
-#if (defined(ANDROID) || defined(__ANDROID__)) && \
+#ifdef _WIN32
+  fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
+                  S_IREAD | S_IWRITE);
+#elif (defined(ANDROID) || defined(__ANDROID__)) && \
   (defined(__i386__) || defined(__arm__))
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  (mode_t)(0600 | sb.st_mode));
+                  (mode_t)(S_IRUSR | S_IWUSR | sb.st_mode));
 #else
   fd = curlx_open(tempstore, O_WRONLY | O_CREAT | O_EXCL,
-                  0600 | sb.st_mode);
+                  S_IRUSR | S_IWUSR | sb.st_mode);
 #endif
   if(fd == -1)
     goto fail;
