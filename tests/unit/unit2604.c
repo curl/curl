@@ -79,7 +79,7 @@ static CURLcode test_unit2604(const char *arg)
 #pragma GCC diagnostic pop
 #endif
 
-  char *cp0 = calloc(1, too_long + 1);
+  char *cp0 = curlx_calloc(1, too_long + 1);
   fail_unless(cp0, "could not alloc too long value");
   memset(cp0, 'a', too_long);
 
@@ -108,7 +108,7 @@ static CURLcode test_unit2604(const char *arg)
     }
   }
 
-  free(cp0);
+  curlx_free(cp0);
 
 #endif
 

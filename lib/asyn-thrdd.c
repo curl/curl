@@ -136,7 +136,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
 
   if(destroy) {
     Curl_mutex_destroy(&addr_ctx->mutx);
-    free(addr_ctx->hostname);
+    curlx_free(addr_ctx->hostname);
     if(addr_ctx->res)
       Curl_freeaddrinfo(addr_ctx->res);
 #ifndef CURL_DISABLE_SOCKETPAIR
@@ -145,7 +145,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
 #endif
     wakeup_close(addr_ctx->sock_pair[0]);
 #endif
-    free(addr_ctx);
+    curlx_free(addr_ctx);
   }
   *paddr_ctx = NULL;
 }
@@ -156,7 +156,7 @@ addr_ctx_create(struct Curl_easy *data,
                 const char *hostname, int port,
                 const struct addrinfo *hints)
 {
-  struct async_thrdd_addr_ctx *addr_ctx = calloc(1, sizeof(*addr_ctx));
+  struct async_thrdd_addr_ctx *addr_ctx = curlx_calloc(1, sizeof(*addr_ctx));
   if(!addr_ctx)
     return NULL;
 
@@ -186,7 +186,7 @@ addr_ctx_create(struct Curl_easy *data,
   /* Copying hostname string because original can be destroyed by parent
    * thread during gethostbyname execution.
    */
-  addr_ctx->hostname = strdup(hostname);
+  addr_ctx->hostname = curlx_strdup(hostname);
   if(!addr_ctx->hostname)
     goto err_exit;
 
@@ -376,7 +376,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
   status = ares_init_options(&thrdd->rr.channel, NULL, 0);
   if(status != ARES_SUCCESS) {
     thrdd->rr.channel = NULL;
-    free(rrname);
+    curlx_free(rrname);
     return CURLE_FAILED_INIT;
   }
 #ifdef CURLDEBUG
@@ -384,7 +384,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
     const char *servers = getenv("CURL_DNS_SERVER");
     status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
     if(status) {
-      free(rrname);
+      curlx_free(rrname);
       return CURLE_FAILED_INIT;
     }
   }
@@ -435,8 +435,8 @@ static bool async_thrdd_init(struct Curl_easy *data,
   data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
-  free(data->state.async.hostname);
-  data->state.async.hostname = strdup(hostname);
+  curlx_free(data->state.async.hostname);
+  data->state.async.hostname = curlx_strdup(hostname);
   if(!data->state.async.hostname)
     goto err_exit;
 

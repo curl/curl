@@ -282,7 +282,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
-      free(ntlm->target_info); /* replace any previous data */
+      curlx_free(ntlm->target_info); /* replace any previous data */
       ntlm->target_info = Curl_memdup(&type2[target_info_offset],
                                       target_info_len);
       if(!ntlm->target_info)
@@ -842,7 +842,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   result = Curl_bufref_memdup(out, ntlmbuf, size);
 
 error:
-  free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */
+  curlx_free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */
 
   Curl_auth_cleanup_ntlm(ntlm);
 

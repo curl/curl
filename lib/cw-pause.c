@@ -52,7 +52,7 @@ struct cw_pause_buf {
 
 static struct cw_pause_buf *cw_pause_buf_create(int type, size_t buflen)
 {
-  struct cw_pause_buf *cwbuf = calloc(1, sizeof(*cwbuf));
+  struct cw_pause_buf *cwbuf = curlx_calloc(1, sizeof(*cwbuf));
   if(cwbuf) {
     cwbuf->type = type;
     if(type & CLIENTWRITE_BODY)
@@ -68,7 +68,7 @@ static void cw_pause_buf_free(struct cw_pause_buf *cwbuf)
 {
   if(cwbuf) {
     Curl_bufq_free(&cwbuf->b);
-    free(cwbuf);
+    curlx_free(cwbuf);
   }
 }
 

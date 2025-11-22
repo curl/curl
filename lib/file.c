@@ -149,7 +149,7 @@ static void file_easy_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   file_cleanup(file);
-  free(file);
+  curlx_free(file);
 }
 
 static CURLcode file_setup_connection(struct Curl_easy *data,
@@ -158,7 +158,7 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
   struct FILEPROTO *filep;
   (void)conn;
   /* allocate the FILE specific struct */
-  filep = calloc(1, sizeof(*filep));
+  filep = curlx_calloc(1, sizeof(*filep));
   if(!filep ||
      Curl_meta_set(data, CURL_META_FILE_EASY, filep, file_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -270,7 +270,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
   #endif
 #endif
-  free(file->freepath);
+  curlx_free(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;

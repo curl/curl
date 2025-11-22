@@ -632,7 +632,7 @@ async_ares_node2addr(struct ares_addrinfo_node *node)
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct Curl_addrinfo) + ss_size);
+    ca = curlx_malloc(sizeof(struct Curl_addrinfo) + ss_size);
     if(!ca) {
       error = EAI_MEMORY;
       break;
@@ -742,14 +742,14 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
   data->state.async.dns = NULL;     /* clear */
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
-  data->state.async.hostname = strdup(hostname);
+  data->state.async.hostname = curlx_strdup(hostname);
   if(!data->state.async.hostname)
     return NULL;
 #ifdef USE_HTTPSRR
   if(port != 443) {
     rrname = curl_maprintf("_%d_.https.%s", port, hostname);
     if(!rrname) {
-      free(data->state.async.hostname);
+      curlx_free(data->state.async.hostname);
       return NULL;
     }
   }

@@ -28,6 +28,10 @@
 #define CURL_NO_OLDIES
 #endif
 
+#ifndef CURL_STANDARD_ALLOC
+#define CURL_STANDARD_ALLOC
+#endif
+
 /*
  * curl_setup.h may define preprocessor macros such as _FILE_OFFSET_BITS and
  * _LARGE_FILES in order to support files larger than 2 GB. On platforms
@@ -68,6 +72,8 @@ extern FILE *tool_stderr;
 
 #ifndef HAVE_STRDUP
 #include "tool_strdup.h"
+#undef Curl_strdup
+#define Curl_strdup tool_strdup
 #endif
 
 #ifndef tool_nop_stmt

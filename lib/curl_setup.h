@@ -957,7 +957,7 @@ extern curl_calloc_callback Curl_ccalloc;
  * This macro also assigns NULL to given pointer when free'd.
  */
 #define Curl_safefree(ptr) \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { curlx_free((ptr)); (ptr) = NULL;} while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
 
@@ -1093,6 +1093,8 @@ CURL_EXTERN ALLOC_FUNC
 
 #endif /* CURLDEBUG */
 
+#include "curl_setup_mem.h"
+
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
   defined(__ANDROID_API__) && (__ANDROID_API__ < 21)
@@ -1181,6 +1183,8 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
    Define to the empty string to be on the safe side. */
 #  define CURL_INLINE /* empty */
 #endif
+
+#define XMEM 1
 
 #endif /* HEADER_CURL_SETUP_H */
 

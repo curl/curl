@@ -121,14 +121,15 @@ static int t758_addFd(struct t758_Sockets *sockets, curl_socket_t fd,
    * Allocate array storage when required.
    */
   if(!sockets->sockets) {
-    sockets->sockets = malloc(sizeof(curl_socket_t) * 20U);
+    sockets->sockets = curlx_malloc(sizeof(curl_socket_t) * 20U);
     if(!sockets->sockets)
       return 1;
     sockets->max_count = 20;
   }
   else if(sockets->count + 1 > sockets->max_count) {
-    curl_socket_t *ptr = realloc(sockets->sockets, sizeof(curl_socket_t) *
-                                 (sockets->max_count + 20));
+    curl_socket_t *ptr = curlx_realloc(sockets->sockets,
+                                       sizeof(curl_socket_t) *
+                                       (sockets->max_count + 20));
     if(!ptr)
       /* cleanup in test_cleanup */
       return 1;
@@ -487,8 +488,8 @@ test_cleanup:
   curl_global_cleanup();
 
   /* free local memory */
-  free(sockets.read.sockets);
-  free(sockets.write.sockets);
+  curlx_free(sockets.read.sockets);
+  curlx_free(sockets.write.sockets);
   t758_msg("done");
 
   return res;

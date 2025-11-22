@@ -42,7 +42,7 @@
 #define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
 
 #define tool_safefree(ptr)                      \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { curlx_free((ptr)); (ptr) = NULL;} while(0)
 
 extern struct GlobalConfig *global;
 

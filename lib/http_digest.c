@@ -152,20 +152,20 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     }
   }
   if(!tmp)
-    path = (unsigned char *)strdup((const char *) uripath);
+    path = (unsigned char *)curlx_strdup((const char *) uripath);
 
   if(!path)
     return CURLE_OUT_OF_MEMORY;
 
   result = Curl_auth_create_digest_http_message(data, userp, passwdp, request,
                                                 path, digest, &response, &len);
-  free(path);
+  curlx_free(path);
   if(result)
     return result;
 
   *allocuserpwd = curl_maprintf("%sAuthorization: Digest %s\r\n",
                                 proxy ? "Proxy-" : "", response);
-  free(response);
+  curlx_free(response);
   if(!*allocuserpwd)
     return CURLE_OUT_OF_MEMORY;
 
