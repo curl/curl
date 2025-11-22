@@ -242,6 +242,12 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
 #  else
 #   include <gssapi/gssapi.h>
 #  endif
+#  ifdef HAVE_GSSAPI_GSSAPI_KRB5_H
+#   include <gssapi/gssapi_krb5.h>
+#  endif
+# endif
+# ifdef GSS_C_CHANNEL_BOUND_FLAG
+#  define CURL_GSSAPI_HAS_CHANNEL_BINDING
 # endif
 #endif
 
