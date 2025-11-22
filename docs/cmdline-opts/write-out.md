@@ -5,7 +5,7 @@ Long: write-out
 Short: w
 Arg: <format>
 Help: Output FORMAT after completion
-Category: verbose
+Category: verbose common
 Added: 6.5
 Multi: single
 See-also:

@@ -5,7 +5,7 @@ Long: insecure
 Short: k
 Help: Allow insecure server connections
 Protocols: TLS SFTP SCP
-Category: tls sftp scp ssh
+Category: tls sftp scp ssh common
 Added: 7.10
 Multi: boolean
 See-also:

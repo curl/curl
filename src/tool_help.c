@@ -44,6 +44,7 @@ struct category_descriptors {
 static const struct category_descriptors categories[] = {
   /* important is left out because it is the default help page */
   {"auth", "Authentication methods", CURLHELP_AUTH},
+  {"common", "Common options", CURLHELP_COMMON},
   {"connection", "Manage connections", CURLHELP_CONNECTION},
   {"curl", "The command line tool itself", CURLHELP_CURL},
   {"deprecated", "Legacy", CURLHELP_DEPRECATED},
@@ -62,6 +63,7 @@ static const struct category_descriptors categories[] = {
   {"sftp", "SFTP protocol", CURLHELP_SFTP},
   {"smtp", "SMTP protocol", CURLHELP_SMTP},
   {"ssh", "SSH protocol", CURLHELP_SSH},
+  {"table", "Table format category (use table:<category>)", 0},
   {"telnet", "TELNET protocol", CURLHELP_TELNET},
   {"tftp", "TFTP protocol", CURLHELP_TFTP},
   {"timeout", "Timeouts and delays", CURLHELP_TIMEOUT},
@@ -112,10 +114,26 @@ static void print_category(unsigned int category, unsigned int cols)
 static int get_category_content(const char *category, unsigned int cols)
 {
   unsigned int i;
+
+  /* Checking for table. */
+  bool table_flag = FALSE;
+
+  /* Check and handle table:<category> syntax. */
+  if(curl_strnequal(category, "table", 5)) {
+    const char *table_category = category + 5;
+    table_flag = TRUE; /* Use tool_table(). */
+
+    /* Set category, defaulting to common. */
+    category = (!*table_category) ? "common" : table_category + 1;
+  }
+
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
-      print_category(categories[i].category, cols);
+      if(table_flag)
+        tool_table(categories[i].category, cols);
+      else
+        print_category(categories[i].category, cols);
       return 0;
     }
   return 1;
@@ -237,6 +255,7 @@ void tool_help(const char *category)
       "Use \"--help all\" to list all options"
 #ifdef USE_MANUAL
       "\nUse \"--help [option]\" to view documentation for a given option"
+      "\nUse \"--help table:<category>\" to table format category overview"
 #endif
       ;
     puts("Usage: curl [options...] <url>");
@@ -246,9 +265,13 @@ void tool_help(const char *category)
     puts(category_note2);
   }
   /* Lets print everything if "all" was provided */
-  else if(curl_strequal(category, "all"))
+  else if(curl_strequal(category, "all") ||
+          curl_strequal(category, "table:all"))
     /* Print everything */
-    print_category(CURLHELP_ALL, cols);
+    if(curl_strequal(category, "all"))
+      print_category(CURLHELP_ALL, cols);
+    else
+      tool_table(CURLHELP_ALL, cols);
   /* Lets handle the string "category" differently to not print an errormsg */
   else if(curl_strequal(category, "category"))
     get_categories();
@@ -408,4 +431,95 @@ void tool_list_engines(void)
   /* Cleanup the list of engines */
   curl_slist_free_all(engines);
   curl_easy_cleanup(curl);
+}
+
+/* Output table from category. */
+void tool_table(unsigned int category, unsigned int cols)
+{
+  size_t i, c, j, found, opt_idx, current, lng_spc, count = 0;
+  size_t max_len = 0;
+  const char *e_sp;
+
+  /* Count options in category. */
+  for(i = 0; helptext[i].opt; ++i) {
+    if(!(helptext[i].categories & category))
+      continue;
+
+    if(helptext[i].categories & category) {
+      /* Use length of longest description or option to set col width. */
+      if(max_len < strlen(helptext[i].desc) ||
+         max_len < strlen(helptext[i].opt)) {
+        max_len = (strlen(helptext[i].desc) > strlen(helptext[i].opt)) ?
+          strlen(helptext[i].desc) : strlen(helptext[i].opt);
+      }
+      count++;
+    }
+  }
+
+  /* Set j based on longest description or option length. */
+  j = cols/(max_len + 1);
+  if(j > 8)
+    j = 8;
+  else if(j == 0)
+    j = 1;
+
+  /* Print option and description in table format. */
+  current = 0;
+  for(i = 0; helptext[i].opt; ++i) {
+    if(!(helptext[i].categories & category))
+      continue;
+
+    if(current % j == 0) {
+      /* Empty line to distinguish table head and data. */
+      if(current > 0)
+        puts("");
+
+      /* Option row. */
+      for(c = 0; c < j && (current + c) < count; c++) {
+        /* Print option as table head. */
+        found = 0;
+        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
+          if(helptext[opt_idx].categories & category) {
+            if(found == current + c) {
+              /* Equate option space to left align. */
+              e_sp = helptext[opt_idx].opt +
+                strspn(helptext[opt_idx].opt, " ");
+              /* Use space before long or short option to align. */
+              lng_spc = (int)(e_sp - helptext[opt_idx].opt);
+              /* Output, left aligning option name. */
+              curl_mprintf("%-*s ", (int)(max_len),
+                     helptext[opt_idx].opt + lng_spc);
+              break;
+            }
+            found++;
+          }
+      }
+      puts("");
+
+      /* Print separator. */
+      for(c = 0; c < j && (current + c) < count; c++) {
+        for(opt_idx = 0; opt_idx < max_len; opt_idx++)
+          putchar('-');
+        putchar(' ');
+      }
+      puts("");
+
+      /* Description row. */
+      for(c = 0; c < j && (current + c) < count; c++) {
+        /* Print description as table data. */
+        found = 0;
+        for(opt_idx = 0; helptext[opt_idx].opt; ++opt_idx)
+          if(helptext[opt_idx].categories & category) {
+            if(found == current + c) {
+              /* Output description. */
+              curl_mprintf("%-*s ", (int)(max_len), helptext[opt_idx].desc);
+              break;
+            }
+            found++;
+          }
+      }
+      puts("");
+    }
+    current++;
+  }
 }
