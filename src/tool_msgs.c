@@ -42,13 +42,14 @@ static void voutf(const char *prefix,
                   const char *fmt,
                   va_list ap)
 {
-  size_t width = (get_terminal_columns() - strlen(prefix));
   size_t len;
   char *ptr;
   char buffer[1024];
+  size_t termw = get_terminal_columns();
+  size_t prefw = strlen(prefix);
+  size_t width = termw > prefw ? termw - prefw : 0;
   DEBUGASSERT(!strchr(fmt, '\n'));
-  (void)curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
-  len = strlen(buffer);
+  len = curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
   ptr = buffer;
   while(len > 0) {
     fputs(prefix, tool_stderr);
