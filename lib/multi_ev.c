@@ -508,7 +508,7 @@ static CURLMcode mev_assess(struct Curl_multi *multi,
     }
   }
   else
-    Curl_multi_pollset(data, &ps, "ev assess");
+    Curl_multi_pollset(data, &ps);
   last_ps = mev_get_last_pollset(data, conn);
 
   if(!last_ps && ps.n) {

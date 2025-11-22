@@ -80,10 +80,9 @@
 #define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
- * each active transfer. We use HTTP/3 flow control and only ACK
- * when we take things out of the buffer.
+ * each active transfer.
  * Chunk size is large enough to take a full DATA frame */
-#define H3_STREAM_WINDOW_SIZE (128 * 1024)
+#define H3_STREAM_WINDOW_SIZE (64 * 1024)
 #define H3_STREAM_CHUNK_SIZE   (16 * 1024)
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
@@ -242,6 +241,7 @@ struct h3_stream_ctx {
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
   curl_uint64_t error3; /* HTTP/3 stream error code */
   curl_off_t upload_left; /* number of request bytes left to upload */
+  uint64_t download_unacked; /* bytes not acknowledged yet */
   int status_code; /* HTTP status code */
   CURLcode xfer_result; /* result from xfer_resp_write(_hd) */
   BIT(resp_hds_complete); /* we have a complete, final response */
@@ -472,7 +472,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->handshake_timeout = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout * NGTCP2_MILLISECONDS : QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = 100 * ctx->max_stream_window;
-  s->max_stream_window = 10 * ctx->max_stream_window;
+  s->max_stream_window = ctx->max_stream_window;
   s->no_pmtud = FALSE;
 #ifdef NGTCP2_SETTINGS_V3
   /* try ten times the ngtcp2 defaults here for problems with Caddy */
@@ -1057,6 +1057,35 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
   }
 }
 
+static void cf_ngtcp2_ack_stream(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct h3_stream_ctx *stream)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  struct curltime now = curlx_now();
+  curl_off_t avail;
+  uint64_t ack_len = 0;
+
+  /* How many byte to ack on the stream? */
+
+  /* how much does rate limiting allow us to acknowledge? */
+  avail = Curl_rlimit_avail(&data->progress.dl.rlimit, now);
+  if(avail == CURL_OFF_T_MAX) { /* no rate limit, ack all */
+    ack_len = stream->download_unacked;
+  }
+  else if(avail > 0) {
+    ack_len = CURLMIN(stream->download_unacked, (uint64_t)avail);
+  }
+
+  if(ack_len) {
+    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] ACK %" PRIu64
+                "/%" PRIu64 " bytes of DATA", stream->id,
+                ack_len, stream->download_unacked);
+    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, ack_len);
+    stream->download_unacked -= ack_len;
+  }
+}
+
 static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
                            const uint8_t *buf, size_t blen,
                            void *user_data, void *stream_user_data)
@@ -1073,13 +1102,15 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
     return NGHTTP3_ERR_CALLBACK_FAILURE;
 
   h3_xfer_write_resp(cf, data, stream, (const char *)buf, blen, FALSE);
-  if(blen) {
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] ACK %zu bytes of DATA",
-                stream->id, blen);
-    ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, blen);
-    ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
-  }
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] DATA len=%zu", stream->id, blen);
+
+  ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
+  if(UINT64_MAX - blen < stream->download_unacked)
+    stream->download_unacked = UINT64_MAX; /* unlikely */
+  else
+    stream->download_unacked += blen;
+
+  cf_ngtcp2_ack_stream(cf, data, stream);
   return 0;
 }
 
@@ -1373,6 +1404,8 @@ static CURLcode cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = CURLE_RECV_ERROR;
     goto out;
   }
+
+  cf_ngtcp2_ack_stream(cf, data, stream);
 
   if(cf_progress_ingress(cf, data, &pktx)) {
     result = CURLE_RECV_ERROR;
