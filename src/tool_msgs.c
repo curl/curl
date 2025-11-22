@@ -47,7 +47,8 @@ static void voutf(const char *prefix,
   char *ptr;
   char buffer[1024];
   DEBUGASSERT(!strchr(fmt, '\n'));
-  len = curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
+  (void)curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
+  len = strlen(buffer);
   ptr = buffer;
   while(len > 0) {
     fputs(prefix, tool_stderr);
