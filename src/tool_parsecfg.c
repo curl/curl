@@ -81,7 +81,8 @@ static int unslashquote(const char *line, struct dynbuf *param)
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-ParameterError parseconfig(const char *filename, int max_recursive)
+ParameterError parseconfig(const char *filename, int max_recursive,
+                           char **resolved)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
@@ -264,6 +265,11 @@ ParameterError parseconfig(const char *filename, int max_recursive)
   if((err == PARAM_READ_ERROR) && filename)
     errorf("cannot read config from '%s'", filename);
 
+  if(!err && resolved) {
+    *resolved = strdup(filename);
+    if(!*resolved)
+      err = PARAM_NO_MEM;
+  }
   free(pathalloc);
   return err;
 }

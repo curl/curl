@@ -2225,7 +2225,7 @@ static ParameterError opt_file(struct OperationConfig *config,
       err = PARAM_BAD_USE;
     }
     else {
-      err = parseconfig(nextarg, max_recursive);
+      err = parseconfig(nextarg, max_recursive, NULL);
     }
     break;
   case C_CRLFILE: /* --crlfile */

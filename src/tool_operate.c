@@ -2227,6 +2227,8 @@ CURLcode operate(int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
   const char *first_arg;
+  char *curlrc_path = NULL;
+  bool found_curlrc = FALSE;
 
   first_arg = argc > 1 ? convert_tchar_to_UTF8(argv[1]) : NULL;
 
@@ -2240,7 +2242,8 @@ CURLcode operate(int argc, argv_item_t argv[])
   if((argc == 1) ||
      (first_arg && strncmp(first_arg, "-q", 2) &&
       strcmp(first_arg, "--disable"))) {
-    parseconfig(NULL, CONFIG_MAX_LEVELS); /* ignore possible failure */
+    if(!parseconfig(NULL, CONFIG_MAX_LEVELS, &curlrc_path))
+      found_curlrc = TRUE;
 
     /* If we had no arguments then make sure a URL was specified in .curlrc */
     if((argc < 2) && (!global->first->url_list)) {
@@ -2254,6 +2257,11 @@ CURLcode operate(int argc, argv_item_t argv[])
   if(!result) {
     /* Parse the command line arguments */
     ParameterError res = parse_args(argc, argv);
+    if(found_curlrc) {
+      /* After parse_args so notef knows the verbosity */
+      notef("Read config file from '%s'", curlrc_path);
+      free(curlrc_path);
+    }
     if(res) {
       result = CURLE_OK;
 
