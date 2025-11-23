@@ -1,0 +1,10 @@
+{
+  "name": "curl",
+  "version": "8.17.0",
+  "description": "Utility for sending and recieving data from websites.",
+  "build": "cd /tmp/curl && cmake . && make",
+  "binary_dir": "src/",
+  "binary_name": "curl",
+  "dependencies": [],
+  "os": ["macos", "linux"]
+}
