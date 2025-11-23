@@ -258,6 +258,10 @@ class TestSSLUse:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
+        # see wolfSSL/wolfssl#9462
+        if env.curl_uses_lib('wolfssl') and env.curl_lib_version('wolfssl') == '5.8.4' \
+           and ciphers13 and 'TLS_CHACHA20_POLY1305_SHA256' in ciphers13:
+            pytest.skip('wolfSSL 5.8.4 is borked on ARM with CHACHA20')
         if env.curl_uses_lib('gnutls'):
             pytest.skip('GnuTLS does not support setting ciphers')
         elif env.curl_uses_lib('boringssl'):

@@ -1043,61 +1043,68 @@ static CURLcode client_certificate(struct Curl_easy *data,
 
 static CURLcode ssl_version(struct Curl_easy *data,
                             struct ssl_primary_config *conn_config,
-                            struct wssl_ctx *wctx)
+                            struct wssl_ctx *wctx,
+                            int *min_version, int *max_version)
 {
   int res;
+  *min_version = *max_version = 0;
   switch(conn_config->version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
-    res = wolfSSL_CTX_set_min_proto_version(wctx->ssl_ctx, TLS1_VERSION);
+    *min_version = TLS1_VERSION;
     break;
   case CURL_SSLVERSION_TLSv1_1:
-    res = wolfSSL_CTX_set_min_proto_version(wctx->ssl_ctx, TLS1_1_VERSION);
+    *min_version = TLS1_1_VERSION;
     break;
   case CURL_SSLVERSION_TLSv1_2:
-    res = wolfSSL_CTX_set_min_proto_version(wctx->ssl_ctx, TLS1_2_VERSION);
+    *min_version = TLS1_2_VERSION;
     break;
 #ifdef WOLFSSL_TLS13
   case CURL_SSLVERSION_TLSv1_3:
-    res = wolfSSL_CTX_set_min_proto_version(wctx->ssl_ctx, TLS1_3_VERSION);
+    *min_version = TLS1_3_VERSION;
     break;
 #endif
   default:
     failf(data, "wolfSSL: unsupported minimum TLS version value");
     return CURLE_SSL_CONNECT_ERROR;
   }
-  if(res != WOLFSSL_SUCCESS) {
-    failf(data, "wolfSSL: failed set the minimum TLS version");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   switch(conn_config->version_max) {
 #ifdef WOLFSSL_TLS13
   case CURL_SSLVERSION_MAX_TLSv1_3:
-    res = wolfSSL_CTX_set_max_proto_version(wctx->ssl_ctx, TLS1_3_VERSION);
+    *max_version = TLS1_3_VERSION;
     break;
 #endif
   case CURL_SSLVERSION_MAX_TLSv1_2:
-    res = wolfSSL_CTX_set_max_proto_version(wctx->ssl_ctx, TLS1_2_VERSION);
+    *max_version = TLS1_2_VERSION;
     break;
   case CURL_SSLVERSION_MAX_TLSv1_1:
-    res = wolfSSL_CTX_set_max_proto_version(wctx->ssl_ctx, TLS1_1_VERSION);
+    *max_version = TLS1_1_VERSION;
     break;
   case CURL_SSLVERSION_MAX_TLSv1_0:
-    res = wolfSSL_CTX_set_max_proto_version(wctx->ssl_ctx, TLS1_VERSION);
+    *max_version = TLS1_VERSION;
     break;
   case CURL_SSLVERSION_MAX_DEFAULT:
   case CURL_SSLVERSION_MAX_NONE:
-    res = WOLFSSL_SUCCESS;
     break;
   default:
     failf(data, "wolfSSL: unsupported maximum TLS version value");
     return CURLE_SSL_CONNECT_ERROR;
   }
+
+  res = wolfSSL_CTX_set_min_proto_version(wctx->ssl_ctx, *min_version);
   if(res != WOLFSSL_SUCCESS) {
-    failf(data, "wolfSSL: failed set the maximum TLS version");
+    failf(data, "wolfSSL: failed set the minimum TLS version");
     return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  if(*max_version) {
+    res = wolfSSL_CTX_set_max_proto_version(wctx->ssl_ctx, *max_version);
+    if(res != WOLFSSL_SUCCESS) {
+      failf(data, "wolfSSL: failed set the maximum TLS version");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
   return CURLE_OK;
 }
@@ -1126,6 +1133,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
 #endif
   CURLcode result = CURLE_FAILED_INIT;
   unsigned char transport;
+  int tls_min, tls_max;
 
   DEBUGASSERT(!wctx->ssl_ctx);
   DEBUGASSERT(!wctx->ssl);
@@ -1159,7 +1167,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     goto out;
   }
 
-  result = ssl_version(data, conn_config, wctx);
+  result = ssl_version(data, conn_config, wctx, &tls_min, &tls_max);
   if(result)
     goto out;
 
@@ -1183,12 +1191,14 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     struct dynbuf c;
     curlx_dyn_init(&c, MAX_CIPHER_LEN);
 
-    if(ciphers13)
-      result = curlx_dyn_add(&c, ciphers13);
-    else
-      result = wssl_add_default_ciphers(TRUE, &c);
+    if(!tls_max || (tls_max >= TLS1_3_VERSION)) {
+      if(ciphers13)
+        result = curlx_dyn_add(&c, ciphers13);
+      else
+        result = wssl_add_default_ciphers(TRUE, &c);
+    }
 
-    if(!result) {
+    if(!result && (tls_min < TLS1_3_VERSION)) {
       if(ciphers12) {
         if(curlx_dyn_len(&c))
           result = curlx_dyn_addn(&c, ":", 1);
