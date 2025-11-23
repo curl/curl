@@ -40,7 +40,7 @@ env:
   # renovate: datasource=github-tags depName=libressl/portable versioning=semver registryUrl=https://github.com
   LIBRESSL_VERSION: 4.2.1
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  WOLFSSL_VERSION: 5.8.4
+  WOLFSSL_VERSION: 5.8.2
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   MBEDTLS_VERSION: 4.0.0
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver:^3.0.0 registryUrl=https://github.com
