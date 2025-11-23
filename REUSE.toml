@@ -43,3 +43,10 @@ SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"
 # If there is licensing/copyright information in or next to these files, prefer that
 precedence = "closest"
+
+[[annotations]]
+path = [".ghpkg"]
+SPDX-FileCopyrightText = "2025 Frothy7650"
+SPDX-License-Identifier = "MIT"
+precedence = "closest"
+
