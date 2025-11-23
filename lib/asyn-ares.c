@@ -748,10 +748,8 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 #ifdef USE_HTTPSRR
   if(port != 443) {
     rrname = curl_maprintf("_%d_.https.%s", port, hostname);
-    if(!rrname) {
-      free(data->state.async.hostname);
+    if(!rrname)
       return NULL;
-    }
   }
 #endif
 
