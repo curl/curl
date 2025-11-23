@@ -96,7 +96,7 @@ jobs:
         if: ${{ matrix.build.configure }}
         run: |
           # shellcheck disable=SC2181,SC2034
-          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && cd $(brew --repository homebrew/core) && git checkout f6c6293 Formula/wolfssl.rb && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
 
       - name: 'toolchain versions'
         run: |
