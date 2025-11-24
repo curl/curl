@@ -347,7 +347,7 @@ Curl_he2ai(const struct hostent *he, int port)
 #endif
 
 /*
- * Curl_ip2addr()
+ * ip2addr()
  *
  * This function takes an Internet address, in binary form, as input parameter
  * along with its address family and the string version of the address, and it
@@ -355,8 +355,9 @@ Curl_he2ai(const struct hostent *he, int port)
  * given address/host
  */
 
-struct Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
+static CURLcode
+ip2addr(struct Curl_addrinfo **addrp,
+        int af, const void *inaddr, const char *hostname, int port)
 {
   struct Curl_addrinfo *ai;
   size_t addrsize;
@@ -369,6 +370,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
   DEBUGASSERT(inaddr && hostname);
 
   namelen = strlen(hostname) + 1;
+  *addrp = NULL;
 
   if(af == AF_INET)
     addrsize = sizeof(struct sockaddr_in);
@@ -377,12 +379,12 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addrsize = sizeof(struct sockaddr_in6);
 #endif
   else
-    return NULL;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* allocate memory to hold the struct, the address and the name */
   ai = calloc(1, sizeof(struct Curl_addrinfo) + addrsize + namelen);
   if(!ai)
-    return NULL;
+    return CURLE_OUT_OF_MEMORY;
   /* put the address after the struct */
   ai->ai_addr = (void *)((char *)ai + sizeof(struct Curl_addrinfo));
   /* then put the name after the address */
@@ -412,29 +414,46 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     break;
 #endif
   }
-
-  return ai;
+  *addrp = ai;
+  return CURLE_OK;
 }
 
 /*
  * Given an IPv4 or IPv6 dotted string address, this converts it to a proper
  * allocated Curl_addrinfo struct and returns it.
  */
-struct Curl_addrinfo *Curl_str2addr(char *address, int port)
+CURLcode Curl_str2addr(const char *address, int port,
+                       struct Curl_addrinfo **addrp)
 {
   struct in_addr in;
   if(curlx_inet_pton(AF_INET, address, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(AF_INET, &in, address, port);
+    return ip2addr(addrp, AF_INET, &in, address, port);
 #ifdef USE_IPV6
   {
     struct in6_addr in6;
     if(curlx_inet_pton(AF_INET6, address, &in6) > 0)
       /* This is a dotted IPv6 address ::1-style */
-      return Curl_ip2addr(AF_INET6, &in6, address, port);
+      return ip2addr(addrp, AF_INET6, &in6, address, port);
   }
 #endif
-  return NULL; /* bad input format */
+  return CURLE_BAD_FUNCTION_ARGUMENT; /* bad input format */
+}
+
+bool Curl_is_ipaddr(const char *address)
+{
+  struct in_addr in;
+  if(curlx_inet_pton(AF_INET, address, &in) > 0)
+    return TRUE;
+#ifdef USE_IPV6
+  {
+    struct in6_addr in6;
+    if(curlx_inet_pton(AF_INET6, address, &in6) > 0)
+      /* This is a dotted IPv6 address ::1-style */
+      return TRUE;
+  }
+#endif
+  return FALSE;
 }
 
 #ifdef USE_UNIX_SOCKETS

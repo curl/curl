@@ -76,10 +76,8 @@ struct Curl_addrinfo *
 Curl_he2ai(const struct hostent *he, int port);
 #endif
 
-struct Curl_addrinfo *
-Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);
-
-struct Curl_addrinfo *Curl_str2addr(char *dotted, int port);
+bool Curl_is_ipaddr(const char *address);
+CURLcode Curl_str2addr(const char *dotted, int port, struct Curl_addrinfo **);
 
 #ifdef USE_UNIX_SOCKETS
 struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
