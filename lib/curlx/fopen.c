@@ -49,9 +49,9 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #ifdef _WIN32
 
-#include <share.h>  /* for _SH_DENYNO */
-
 #include "multibyte.h"
+
+#include <share.h>  /* for _SH_DENYNO */
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
