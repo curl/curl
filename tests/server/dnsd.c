@@ -102,7 +102,7 @@ static int store_incoming(const unsigned char *data, size_t size,
   snprintf(dumpfile, sizeof(dumpfile), "%s/dnsd.input", logdir);
 
   /* Open request dump file. */
-  server = fopen(dumpfile, "ab");
+  server = curlx_fopen(dumpfile, "ab");
   if(!server) {
     char errbuf[STRERROR_LEN];
     int error = errno;
@@ -325,7 +325,7 @@ static void read_instructions(void)
   char file[256];
   FILE *f;
   snprintf(file, sizeof(file), "%s/" INSTRUCTIONS, logdir);
-  f = fopen(file, FOPEN_READTEXT);
+  f = curlx_fopen(file, FOPEN_READTEXT);
   if(f) {
     char buf[256];
     ancount_aaaa = ancount_a = 0;

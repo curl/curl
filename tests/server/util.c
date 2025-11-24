@@ -115,7 +115,7 @@ void logmsg(const char *msg, ...)
   va_end(ap);
 
   do {
-    logfp = fopen(serverlogfile, "ab");
+    logfp = curlx_fopen(serverlogfile, "ab");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!logfp && (errno == EINTR));
   if(logfp) {
@@ -193,7 +193,7 @@ FILE *test2fopen(long testno, const char *logdir2)
   char filename[256];
   /* first try the alternative, preprocessed, file */
   snprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
-  stream = fopen(filename, "rb");
+  stream = curlx_fopen(filename, "rb");
 
   return stream;
 }
@@ -224,7 +224,7 @@ int write_pidfile(const char *filename)
   curl_off_t pid;
 
   pid = our_getpid();
-  pidfile = fopen(filename, "wb");
+  pidfile = curlx_fopen(filename, "wb");
   if(!pidfile) {
     char errbuf[STRERROR_LEN];
     logmsg("Could not write pid file: %s (%d) %s", filename,
@@ -240,7 +240,7 @@ int write_pidfile(const char *filename)
 /* store the used port number in a file */
 int write_portfile(const char *filename, int port)
 {
-  FILE *portfile = fopen(filename, "wb");
+  FILE *portfile = curlx_fopen(filename, "wb");
   if(!portfile) {
     char errbuf[STRERROR_LEN];
     logmsg("Could not write port file: %s (%d) %s", filename,
@@ -261,7 +261,7 @@ void set_advisor_read_lock(const char *filename)
   int res;
 
   do {
-    lockfile = fopen(filename, "wb");
+    lockfile = curlx_fopen(filename, "wb");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {

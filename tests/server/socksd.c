@@ -108,7 +108,7 @@ static void socksd_resetdefaults(void)
 
 static void socksd_getconfig(void)
 {
-  FILE *fp = fopen(configfile, FOPEN_READTEXT);
+  FILE *fp = curlx_fopen(configfile, FOPEN_READTEXT);
   socksd_resetdefaults();
   if(fp) {
     char buffer[512];
@@ -470,7 +470,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   {
     FILE *dump;
-    dump = fopen(reqlogfile, "ab");
+    dump = curlx_fopen(reqlogfile, "ab");
     if(dump) {
       int i;
       fprintf(dump, "atyp %u =>", type);

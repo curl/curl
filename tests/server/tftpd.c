@@ -910,7 +910,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
 
   /* Open request dump file. */
-  server = fopen(dumpfile, "ab");
+  server = curlx_fopen(dumpfile, "ab");
   if(!server) {
     char errbuf[STRERROR_LEN];
     int error = errno;
