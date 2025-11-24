@@ -46,13 +46,13 @@ versions of libs and build tools.
  we use a few "build tools" and we make sure that we remain functional with
  these versions:
 
- - GNU Libtool  1.4.2
- - GNU Autoconf 2.59
- - GNU Automake 1.7
- - GNU M4       1.4
- - perl         5.8 (5.22 on Windows)
- - roffit       0.5
- - cmake        3.7
+ - GNU libtool  1.4.2 (2001-09-11)
+ - GNU autoconf 2.59 (2003-11-06)
+ - GNU automake 1.7 (2002-09-25)
+ - GNU m4       1.4 (2007-09-21)
+ - perl         5.8 (2002-07-19), on Windows: 5.22 (2015-06-01)
+ - roffit       0.5 (2004-02-03)
+ - cmake        3.7 (2016-11-11)
 
 Library Symbols
 ===============
