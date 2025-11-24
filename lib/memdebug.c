@@ -63,7 +63,7 @@ static bool registered_cleanup = FALSE; /* atexit registered cleanup */
 static bool memlimit = FALSE; /* enable memory limit */
 static long memsize = 0;  /* set number of mallocs allowed */
 #ifdef USE_BACKTRACE
-struct backtrace_state *btstate;
+static struct backtrace_state *btstate;
 #endif
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
