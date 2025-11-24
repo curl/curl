@@ -51,7 +51,6 @@ versions of libs and build tools.
  - GNU automake 1.7 (2002-09-25)
  - GNU m4       1.4 (2007-09-21)
  - perl         5.8 (2002-07-19), on Windows: 5.22 (2015-06-01)
- - roffit       0.5 (2004-02-03)
  - cmake        3.7 (2016-11-11)
 
 Library Symbols
