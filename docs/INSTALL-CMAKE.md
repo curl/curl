@@ -355,6 +355,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
@@ -411,6 +412,8 @@ Details via CMake
 - `LDAP_INCLUDE_DIR`:                       Absolute path to LDAP include directory.
 - `LDAP_LIBRARY`:                           Absolute path to `ldap` library.
 - `LDAP_LBER_LIBRARY`:                      Absolute path to `lber` library.
+- `LIBBACKTRACE_INCLUDE_DIR`:               Absolute path to libbacktrace include directory (https://github.com/ianlancetaylor/libbacktrace).
+- `LIBBACKTRACE_LIBRARY`:                   Absolute path to `libbacktrace` library.
 - `LIBGSASL_INCLUDE_DIR`:                   Absolute path to libgsasl include directory.
 - `LIBGSASL_LIBRARY`:                       Absolute path to `libgsasl` library.
 - `LIBIDN2_INCLUDE_DIR`:                    Absolute path to libidn2 include directory.

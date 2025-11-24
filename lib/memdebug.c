@@ -63,7 +63,7 @@ static bool registered_cleanup = FALSE; /* atexit registered cleanup */
 static bool memlimit = FALSE; /* enable memory limit */
 static long memsize = 0;  /* set number of mallocs allowed */
 #ifdef USE_BACKTRACE
-struct backtrace_state *btstate;
+static struct backtrace_state *btstate;
 #endif
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
@@ -81,7 +81,8 @@ static void curl_dbg_cleanup(void)
   curl_dbg_logfile = NULL;
 }
 #ifdef USE_BACKTRACE
-static void error_callback(void *data, const char *message, int error_number)
+static void error_bt_callback(void *data, const char *message,
+                              int error_number)
 {
   (void)data;
   if(error_number == -1)
@@ -102,7 +103,7 @@ static int full_callback(void *data, uintptr_t pc, const char *pathname,
 
 static void dump_bt(void)
 {
-  backtrace_full(btstate, 0, full_callback, error_callback, NULL);
+  backtrace_full(btstate, 0, full_callback, error_bt_callback, NULL);
 }
 #else
 #define dump_bt() /* nothing to do */
@@ -123,7 +124,7 @@ void curl_dbg_memdebug(const char *logname)
 #endif
   }
 #ifdef USE_BACKTRACE
-  btstate = backtrace_create_state(NULL, 0, error_callback, NULL);
+  btstate = backtrace_create_state(NULL, 0, error_bt_callback, NULL);
 #endif
   if(!registered_cleanup)
     registered_cleanup = !atexit(curl_dbg_cleanup);

@@ -1421,6 +1421,21 @@ if(CURL_USE_GSSAPI)
   endif()
 endif()
 
+# libbacktrace
+option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires build with TrackMemory and DWARF debug information." OFF)
+if(CURL_USE_LIBBACKTRACE)
+  if(NOT ENABLE_CURLDEBUG)
+    message(FATAL_ERROR "libbacktrace requires TrackMemory enabled")
+  endif()
+  if(NOT CMAKE_BUILD_TYPE MATCHES "(Debug|RelWithDebInfo)")
+    message(FATAL_ERROR "libbacktrace requires debug information")
+  endif()
+  find_package(Libbacktrace REQUIRED)
+  list(APPEND CURL_LIBS ${LIBBACKTRACE_LIBRARIES})
+  include_directories(SYSTEM ${LIBBACKTRACE_INCLUDE_DIRS})
+  set(USE_BACKTRACE ON)
+endif()
+
 # libuv
 option(CURL_USE_LIBUV "Use libuv for event-based tests" OFF)
 if(CURL_USE_LIBUV)
