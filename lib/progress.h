@@ -26,6 +26,7 @@
 
 #include "curlx/timeval.h"
 
+struct Curl_easy;
 
 typedef enum {
   TIMER_NONE,
