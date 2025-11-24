@@ -763,6 +763,8 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
                          variables, CURL_ARRAYSIZE(variables),
                          sizeof(variables[0]), matchvar);
           }
+          else
+            break;
           if(wv) {
             switch(wv->id) {
             case VAR_ONERROR:
