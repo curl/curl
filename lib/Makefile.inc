@@ -172,6 +172,7 @@ LIB_CFILES =         \
   curl_rtmp.c        \
   curl_sasl.c        \
   curl_sha512_256.c  \
+  curl_share.c       \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
@@ -241,7 +242,6 @@ LIB_CFILES =         \
   sendf.c            \
   setopt.c           \
   sha256.c           \
-  share.c            \
   slist.c            \
   smb.c              \
   smtp.c             \
