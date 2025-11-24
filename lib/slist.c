@@ -58,7 +58,8 @@ static struct curl_slist *slist_get_last(struct curl_slist *list)
  * If an error occurs, NULL is returned and the string argument is NOT
  * released.
  */
-struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
+struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
+                                           const char *data)
 {
   struct curl_slist     *last;
   struct curl_slist     *new_item;
@@ -70,7 +71,7 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list, char *data)
     return NULL;
 
   new_item->next = NULL;
-  new_item->data = data;
+  new_item->data = CURL_UNCONST(data);
 
   /* if this is the first item, then new_item *is* the list */
   if(!list)
