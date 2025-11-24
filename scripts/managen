@@ -854,7 +854,7 @@ sub single {
 
     if($requires) {
         my $l = manpageify($long, $manpage);
-        push @foot, "$l requires that libcurl".
+        push @foot, "For $l to work, it requires that the underlying libcurl".
             " is built to support $requires.\n";
     }
     if($mutexed) {
