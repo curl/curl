@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: curl
 
 allowfunc accept
-allowfunc fclose
 allowfunc fprintf
 allowfunc freeaddrinfo
 allowfunc getaddrinfo
