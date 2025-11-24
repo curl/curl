@@ -406,9 +406,8 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
       goto out;
   }
 
-  if(Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
-  else
+  result = Curl_pgrsUpdate(data);
+  if(!result)
     result = Curl_speedcheck(data, *nowp);
   if(result)
     goto out;
@@ -450,9 +449,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   if((k->keepon & (KEEP_RECV|KEEP_SEND)) == 0)
     data->req.done = TRUE;
 
-  if(Curl_pgrsUpdate(data)) {
-    result = CURLE_ABORTED_BY_CALLBACK;
-  }
+  result = Curl_pgrsUpdate(data);
 
 out:
   if(result)

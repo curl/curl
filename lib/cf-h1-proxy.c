@@ -384,8 +384,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       /* socket buffer drained, return */
       return CURLE_OK;
 
-    if(Curl_pgrsUpdate(data))
-      return CURLE_ABORTED_BY_CALLBACK;
+    if(!result)
+      result = Curl_pgrsUpdate(data);
 
     if(result) {
       ts->keepon = KEEPON_DONE;
@@ -565,10 +565,8 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
       /* read what is there */
       CURL_TRC_CF(data, cf, "CONNECT receive");
       result = recv_CONNECT_resp(cf, data, ts, &done);
-      if(Curl_pgrsUpdate(data)) {
-        result = CURLE_ABORTED_BY_CALLBACK;
-        goto out;
-      }
+      if(!result)
+        result = Curl_pgrsUpdate(data);
       /* error or not complete yet. return for more multi-multi */
       if(result || !done)
         goto out;

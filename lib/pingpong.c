@@ -122,9 +122,8 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 
   if(block) {
     /* if we did not wait, we do not have to spend time on this now */
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
-    else
+    result = Curl_pgrsUpdate(data);
+    if(!result)
       result = Curl_speedcheck(data, curlx_now());
 
     if(result)

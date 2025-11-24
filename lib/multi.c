@@ -2244,9 +2244,8 @@ static CURLMcode state_ratelimiting(struct Curl_easy *data,
   CURLMcode rc = CURLM_OK;
   DEBUGASSERT(data->conn);
   /* if both rates are within spec, resume transfer */
-  if(Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
-  else
+  result = Curl_pgrsUpdate(data);
+  if(!result)
     result = Curl_speedcheck(data, *nowp);
 
   if(result) {
@@ -2722,16 +2721,18 @@ statemachine_end:
         rc = CURLM_CALL_MULTI_PERFORM;
       }
       /* if there is still a connection to use, call the progress function */
-      else if(data->conn && Curl_pgrsUpdate(data)) {
-        /* aborted due to progress callback return code must close the
-           connection */
-        result = CURLE_ABORTED_BY_CALLBACK;
-        streamclose(data->conn, "Aborted by callback");
+      else if(data->conn) {
+        result = Curl_pgrsUpdate(data);
+        if(result) {
+          /* aborted due to progress callback return code must close the
+             connection */
+          streamclose(data->conn, "Aborted by callback");
 
-        /* if not yet in DONE state, go there, otherwise COMPLETED */
-        multistate(data, (data->mstate < MSTATE_DONE) ?
-                   MSTATE_DONE : MSTATE_COMPLETED);
-        rc = CURLM_CALL_MULTI_PERFORM;
+          /* if not yet in DONE state, go there, otherwise COMPLETED */
+          multistate(data, (data->mstate < MSTATE_DONE) ?
+                     MSTATE_DONE : MSTATE_COMPLETED);
+          rc = CURLM_CALL_MULTI_PERFORM;
+        }
       }
     }
 

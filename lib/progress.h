@@ -47,14 +47,18 @@ int Curl_pgrsDone(struct Curl_easy *data);
 void Curl_pgrsStartNow(struct Curl_easy *data);
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);
-void Curl_pgrsReset(struct Curl_easy *data);
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
-int Curl_pgrsUpdate(struct Curl_easy *data);
+
+CURLcode Curl_pgrsUpdate(struct Curl_easy *data);
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
 
+/* Reset sizes and couners for up- and download. */
+void Curl_pgrsReset(struct Curl_easy *data);
+/* Reset sizes for up- and download. */
 void Curl_pgrsResetTransferSizes(struct Curl_easy *data);
+
 struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer);
 /**
  * Update progress timer with the elapsed time from its start to `timestamp`.

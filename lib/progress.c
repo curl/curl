@@ -119,8 +119,16 @@ int Curl_pgrsDone(struct Curl_easy *data)
      * hidden */
     curl_mfprintf(data->set.err, "\n");
 
-  data->progress.speeder_c = 0; /* reset the progress meter display */
   return 0;
+}
+
+void Curl_pgrsReset(struct Curl_easy *data)
+{
+  Curl_pgrsSetUploadCounter(data, 0);
+  Curl_pgrsSetDownloadCounter(data, 0);
+  Curl_pgrsSetUploadSize(data, -1);
+  Curl_pgrsSetDownloadSize(data, -1);
+  data->progress.speeder_c = 0; /* reset speed records */
 }
 
 /* reset the known transfer sizes */
@@ -273,14 +281,6 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
     data->progress.ul.total_size = 0;
     data->progress.ul_size_known = FALSE;
   }
-}
-
-void Curl_pgrsReset(struct Curl_easy *data)
-{
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
 }
 
 void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent)
@@ -500,7 +500,7 @@ static void progress_meter(struct Curl_easy *data)
  * Curl_pgrsUpdate() returns 0 for success or the value returned by the
  * progress callback!
  */
-static int pgrsupdate(struct Curl_easy *data, bool showprogress)
+static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
   if(!data->progress.hide) {
     if(data->set.fxferinfo) {
@@ -514,9 +514,11 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
                                    data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result)
+        if(result) {
           failf(data, "Callback aborted");
-        return result;
+          return CURLE_ABORTED_BY_CALLBACK;
+        }
+        return CURLE_OK;
       }
     }
     else if(data->set.fprogress) {
@@ -530,9 +532,11 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
                                    (double)data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result)
+        if(result) {
           failf(data, "Callback aborted");
-        return result;
+          return CURLE_ABORTED_BY_CALLBACK;
+        }
+        return CURLE_OK;
       }
     }
 
@@ -540,10 +544,10 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
       progress_meter(data);
   }
 
-  return 0;
+  return CURLE_OK;
 }
 
-int Curl_pgrsUpdate(struct Curl_easy *data)
+CURLcode Curl_pgrsUpdate(struct Curl_easy *data)
 {
   struct curltime now = curlx_now(); /* what time is it */
   bool showprogress = progress_calc(data, now);

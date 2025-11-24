@@ -675,8 +675,7 @@ static CURLcode getftpresponse(struct Curl_easy *data,
         return CURLE_RECV_ERROR;
       }
       else if(ev == 0) {
-        if(Curl_pgrsUpdate(data))
-          return CURLE_ABORTED_BY_CALLBACK;
+        result = Curl_pgrsUpdate(data);
         continue; /* just continue in our loop for the timeout duration */
       }
     }

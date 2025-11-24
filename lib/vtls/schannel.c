@@ -1811,10 +1811,9 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       int what;
       timediff_t timeout_ms, remaining;
 
-      if(Curl_pgrsUpdate(data)) {
-        result = CURLE_ABORTED_BY_CALLBACK;
+      result = Curl_pgrsUpdate(data);
+      if(result)
         break;
-      }
 
       elapsed = curlx_timediff_ms(curlx_now(), rs->start_time);
       if(elapsed >= MAX_RENEG_BLOCK_TIME) {

@@ -668,8 +668,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* if a request-body has been sent off, we make sure this progress is
        noted properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
+    result = Curl_pgrsUpdate(data);
   }
 out:
   curlx_dyn_free(&req_buffer);

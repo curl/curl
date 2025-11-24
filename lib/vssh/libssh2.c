@@ -3135,10 +3135,9 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
       break;
 
     if(!disconnect) {
-      if(Curl_pgrsUpdate(data))
-        return CURLE_ABORTED_BY_CALLBACK;
-
-      result = Curl_speedcheck(data, now);
+      result = Curl_pgrsUpdate(data);
+      if(!result)
+        result = Curl_speedcheck(data, now);
       if(result)
         break;
 
