@@ -329,6 +329,7 @@ static const struct LongShort aliases[]= {
   {"ssl-sessions",               ARG_FILE|ARG_TLS, ' ', C_SSL_SESSIONS},
   {"sslv2",                      ARG_NONE|ARG_DEPR, '2', C_SSLV2},
   {"sslv3",                      ARG_NONE|ARG_DEPR, '3', C_SSLV3},
+  {"status",                     ARG_BOOL, ' ', C_STATUS},
   {"stderr",                     ARG_FILE, ' ', C_STDERR},
   {"styled-output",              ARG_BOOL, ' ', C_STYLED_OUTPUT},
   {"suppress-connect-headers",   ARG_BOOL, ' ', C_SUPPRESS_CONNECT_HEADERS},
@@ -2028,6 +2029,9 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_SSL_REVOKE_BEST_EFFORT: /* --ssl-revoke-best-effort */
     config->ssl_revoke_best_effort = toggle;
+    break;
+  case C_STATUS: /* --status */
+    config->show_status_only = toggle;
     break;
   case C_TCP_FASTOPEN: /* --tcp-fastopen */
     config->tcp_fastopen = toggle;

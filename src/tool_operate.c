@@ -751,6 +751,12 @@ static CURLcode post_per_transfer(struct per_transfer *per,
       setfiletime(filetime, outs->filename);
   }
 skip:
+  /* Write status code only if --status flag is set */
+  if(config->show_status_only && !result) {
+    long code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+    curl_mprintf("%ld\n", code);
+  }
   /* Write the --write-out data before cleanup but after result is final */
   if(config->writeout)
     ourWriteOut(config, per, result);
@@ -1318,6 +1324,9 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
 
     outs->out_null = u->out_null;
+    /* If --status is set, suppress normal output */
+    if(config->show_status_only)
+      outs->out_null = TRUE;
     if(!outs->out_null &&
        (u->useremote || (per->outfile && strcmp("-", per->outfile)))) {
       result = setup_outfile(config, per, outs, skipped);

@@ -278,6 +278,7 @@ DPAGES = \
   ssl.md \
   sslv2.md \
   sslv3.md \
+  status.md \
   stderr.md \
   styled-output.md \
   suppress-connect-headers.md \
