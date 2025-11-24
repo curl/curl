@@ -153,14 +153,20 @@ while(<$fileh>) {
     }
     elsif($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
-        my $i = $3;
-        my ($source, $linenum) = ($1, $2);
+        my ($source, $linenum, $i) = ($1, $2, $3);
         if($i =~ /([^ ]*) reached memlimit/) {
             if($trace) {
                 print "LIMIT: $1 returned error at $source:$linenum\n";
             }
-            if($strict && !$overlook{$source, $linenum}) {
-                $memwarn++;
+            if(!$overlook{$source, $linenum}) {
+                if($strict) {
+                    # make next occurance cause problem
+                    $memwarn++;
+                }
+                elsif($memwarn) {
+                    print "ERROR: Previously ignored OOM\n";
+                    print "ERROR: here $source:$linenum\n";
+                }
             }
         }
     }
