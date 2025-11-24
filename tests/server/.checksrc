@@ -4,7 +4,6 @@
 
 allowfunc accept
 allowfunc fclose
-allowfunc fopen
 allowfunc fprintf
 allowfunc freeaddrinfo
 allowfunc getaddrinfo
