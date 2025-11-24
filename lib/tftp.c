@@ -59,7 +59,6 @@
 #include "multiif.h"
 #include "url.h"
 #include "strcase.h"
-#include "speedcheck.h"
 #include "select.h"
 #include "escape.h"
 #include "curlx/strerr.h"
@@ -1298,9 +1297,7 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
     /* The multi code does not have this logic for the DOING state so we
        provide it for TFTP since it may do the entire transfer in this
        state. */
-    result = Curl_pgrsUpdate(data);
-    if(!result)
-      result = Curl_speedcheck(data, curlx_now());
+    result = Curl_pgrsCheck(data);
   }
   return result;
 }

@@ -250,7 +250,6 @@ LIB_CFILES =         \
   socks.c            \
   socks_gssapi.c     \
   socks_sspi.c       \
-  speedcheck.c       \
   splay.c            \
   strcase.c          \
   strdup.c           \
@@ -385,7 +384,6 @@ LIB_HFILES =         \
   sockaddr.h         \
   socketpair.h       \
   socks.h            \
-  speedcheck.h       \
   splay.h            \
   strcase.h          \
   strdup.h           \

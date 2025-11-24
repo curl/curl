@@ -88,7 +88,6 @@
 #include "select.h"
 #include "multiif.h"
 #include "easyif.h"
-#include "speedcheck.h"
 #include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"
@@ -3903,7 +3902,6 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
   result = Curl_req_start(&data->req, data);
   if(!result) {
-    Curl_speedinit(data);
     Curl_pgrsReset(data);
   }
   return result;

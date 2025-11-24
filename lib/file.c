@@ -60,7 +60,6 @@
 #include "sendf.h"
 #include "escape.h"
 #include "file.h"
-#include "speedcheck.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
@@ -412,9 +411,7 @@ static CURLcode file_upload(struct Curl_easy *data,
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
-    result = Curl_pgrsUpdate(data);
-    if(!result)
-      result = Curl_speedcheck(data, curlx_now());
+    result = Curl_pgrsCheck(data);
   }
   if(!result)
     result = Curl_pgrsUpdate(data);
@@ -616,9 +613,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       if(result)
         goto out;
 
-      result = Curl_pgrsUpdate(data);
-      if(!result)
-        result = Curl_speedcheck(data, curlx_now());
+      result = Curl_pgrsCheck(data);
       if(result)
         goto out;
     }

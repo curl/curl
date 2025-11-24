@@ -43,7 +43,6 @@
 #include "select.h"
 #include "curlx/warnless.h"
 #include "curlx/wait.h"
-#include "speedcheck.h"
 #include "conncache.h"
 #include "multihandle.h"
 #include "sigpipe.h"
@@ -2244,9 +2243,7 @@ static CURLMcode state_ratelimiting(struct Curl_easy *data,
   CURLMcode rc = CURLM_OK;
   DEBUGASSERT(data->conn);
   /* if both rates are within spec, resume transfer */
-  result = Curl_pgrsUpdate(data);
-  if(!result)
-    result = Curl_speedcheck(data, *nowp);
+  result = Curl_pgrsCheck(data);
 
   if(result) {
     if(!(data->conn->handler->flags & PROTOPT_DUAL) &&

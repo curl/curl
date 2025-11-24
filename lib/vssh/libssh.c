@@ -54,7 +54,6 @@
 #include "../http.h"               /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
-#include "../speedcheck.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"
@@ -2488,9 +2487,7 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
       break;
 
     if(!disconnect) {
-      result = Curl_pgrsUpdate(data);
-      if(!result)
-        result = Curl_speedcheck(data, now);
+      result = Curl_pgrsCheck(data);
       if(result)
         break;
 

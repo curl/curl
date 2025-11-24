@@ -51,8 +51,15 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
 
+/* perform progress update, invoking callbacks at intervals */
 CURLcode Curl_pgrsUpdate(struct Curl_easy *data);
+/* perform progress update, no callbacks invoked */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
+/* perform progress update with callbacks and speed checks */
+CURLcode Curl_pgrsCheck(struct Curl_easy *data);
+
+/* Inform progress/speedcheck about receive pausing */
+void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable);
 
 /* Reset sizes and couners for up- and download. */
 void Curl_pgrsReset(struct Curl_easy *data);
@@ -69,5 +76,10 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
                       struct curltime timestamp);
 
 void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent);
+
+#ifdef UNITTESTS
+UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
+                                  struct curltime *pnow);
+#endif
 
 #endif /* HEADER_CURL_PROGRESS_H */

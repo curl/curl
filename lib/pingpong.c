@@ -33,7 +33,6 @@
 #include "sendf.h"
 #include "select.h"
 #include "progress.h"
-#include "speedcheck.h"
 #include "pingpong.h"
 #include "multiif.h"
 #include "vtls/vtls.h"
@@ -122,10 +121,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
 
   if(block) {
     /* if we did not wait, we do not have to spend time on this now */
-    result = Curl_pgrsUpdate(data);
-    if(!result)
-      result = Curl_speedcheck(data, curlx_now());
-
+    result = Curl_pgrsCheck(data);
     if(result)
       return result;
   }

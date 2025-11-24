@@ -65,7 +65,6 @@
 #include "cw-out.h"
 #include "transfer.h"
 #include "sendf.h"
-#include "speedcheck.h"
 #include "progress.h"
 #include "http.h"
 #include "url.h"
@@ -406,9 +405,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
       goto out;
   }
 
-  result = Curl_pgrsUpdate(data);
-  if(!result)
-    result = Curl_speedcheck(data, *nowp);
+  result = Curl_pgrsCheck(data);
   if(result)
     goto out;
 
@@ -938,5 +935,6 @@ CURLcode Curl_xfer_pause_recv(struct Curl_easy *data, bool enable)
   if(!enable && Curl_cwriter_is_paused(data))
     result = Curl_cwriter_unpause(data);
   Curl_conn_ev_data_pause(data, enable);
+  Curl_pgrsRecvPause(data, enable);
   return result;
 }
