@@ -88,6 +88,7 @@ my %banfunc = (
     "wcsncpy" => 1,
     "mbstowcs" => 1,
     "wcstombs" => 1,
+    "_open" => 1,
     "_wfopen" => 1,
     "_wfreopen" => 1,
     "_wopen" => 1,
