@@ -369,6 +369,7 @@ static void exit_signal_handler(int signum)
                  _SH_DENYNO, S_IREAD | S_IWRITE) &&
        fd != -1) {
 #else
+    /* !checksrc! disable BANNEDFUNC 1 */
     fd = open(serverlogfile,
               O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
     if(fd != -1) {
