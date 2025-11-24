@@ -37,6 +37,7 @@ CMAKE_DIST =                                    \
  CMake/FindGnuTLS.cmake                         \
  CMake/FindGSS.cmake                            \
  CMake/FindLDAP.cmake                           \
+ CMake/FindLibbacktrace.cmake                   \
  CMake/FindLibgsasl.cmake                       \
  CMake/FindLibidn2.cmake                        \
  CMake/FindLibpsl.cmake                         \
