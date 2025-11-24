@@ -820,10 +820,10 @@ struct Progress {
   struct curltime t_startqueue;
   struct curltime t_acceptdata;
 
-#define CURR_TIME (5 + 1) /* 6 entries for 5 seconds */
+#define CURL_SPEED_RECORDS (5 + 1) /* 6 entries for 5 seconds */
 
-  curl_off_t speeder[ CURR_TIME ];
-  struct curltime speeder_time[ CURR_TIME ];
+  curl_off_t speed_amount[ CURL_SPEED_RECORDS ];
+  struct curltime speed_time[ CURL_SPEED_RECORDS ];
   unsigned char speeder_c;
   BIT(hide);
   BIT(ul_size_known);

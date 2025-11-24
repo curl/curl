@@ -308,28 +308,26 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
   p->ul.speed = trspeed(p->ul.cur_size, p->timespent);
 
   if(!p->speeder_c) { /* no previous record exists */
-    p->speeder[0] = p->dl.cur_size + p->ul.cur_size;
-    p->speeder_time[0] = now;
+    p->speed_amount[0] = p->dl.cur_size + p->ul.cur_size;
+    p->speed_time[0] = now;
     p->speeder_c++;
     /* use the overall average at the start */
     p->current_speed = p->ul.speed + p->dl.speed;
     p->lastshow = now.tv_sec;
     return TRUE;
   }
+  /* We have at least one record now. Where to put the next and
+   * where is the latest one? */
+  i_next = p->speeder_c % CURL_SPEED_RECORDS;
+  i_latest = (i_next > 0) ? (i_next - 1) : (CURL_SPEED_RECORDS - 1);
 
-  /* Where we would put the next record, where is the latest
-     and where is the oldest. Initially, all will be 0. */
-  i_next = p->speeder_c % CURR_TIME;
-  i_latest = (i_next > 0) ? (i_next - 1) : (CURR_TIME - 1);
-
-  /* Make a new record only when we had a single one before or when
-   * some time has passed. Too frequent calls otherwise ruin the history. */
-  if((p->speeder_c == 1) ||
-     (curlx_timediff_ms(now, p->speeder_time[i_latest]) >= 1000)) {
+  /* Make a new record only when some time has passed.
+   * Too frequent calls otherwise ruin the history. */
+  if(curlx_timediff_ms(now, p->speed_time[i_latest]) >= 1000) {
     p->speeder_c++;
     i_latest = i_next;
-    p->speeder[i_latest] = p->dl.cur_size + p->ul.cur_size;
-    p->speeder_time[i_latest] = now;
+    p->speed_amount[i_latest] = p->dl.cur_size + p->ul.cur_size;
+    p->speed_time[i_latest] = now;
   }
   else if(data->req.done) {
     /* When a transfer is done, and we did not have a current speed
@@ -337,8 +335,8 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
      * we have. The last chunk of data, when rate limiting, would increase
      * reported speed since it no longer measures a full second. */
     if(!p->current_speed) {
-      p->speeder[i_latest] = p->dl.cur_size + p->ul.cur_size;
-      p->speeder_time[i_latest] = now;
+      p->speed_amount[i_latest] = p->dl.cur_size + p->ul.cur_size;
+      p->speed_time[i_latest] = now;
     }
   }
   else {
@@ -346,14 +344,14 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
     return FALSE;
   }
 
-  i_oldest = (p->speeder_c < CURR_TIME) ? 0 :
-             ((i_latest + 1) % CURR_TIME);
+  i_oldest = (p->speeder_c < CURL_SPEED_RECORDS) ? 0 :
+             ((i_latest + 1) % CURL_SPEED_RECORDS);
 
   /* How much we transferred between oldest and current records */
-  amount = p->speeder[i_latest]- p->speeder[i_oldest];
+  amount = p->speed_amount[i_latest]- p->speed_amount[i_oldest];
   /* How long this took */
-  duration_ms = curlx_timediff_ms(p->speeder_time[i_latest],
-                                  p->speeder_time[i_oldest]);
+  duration_ms = curlx_timediff_ms(p->speed_time[i_latest],
+                                  p->speed_time[i_oldest]);
   if(duration_ms <= 0)
     duration_ms = 1;
 
