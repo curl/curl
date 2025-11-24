@@ -82,9 +82,9 @@ static CURLcode test_lib655(const char *URL)
 
   /* this should fail */
   res = curl_easy_perform(curl);
-  if(res != CURLE_COULDNT_RESOLVE_HOST) {
+  if(res != CURLE_ABORTED_BY_CALLBACK) {
     curl_mfprintf(stderr, "curl_easy_perform should have returned "
-                  "CURLE_COULDNT_RESOLVE_HOST but instead returned error %d\n",
+                  "CURLE_ABORTED_BY_CALLBACK but instead returned error %d\n",
                   res);
     if(res == CURLE_OK)
       res = TEST_ERR_FAILURE;
