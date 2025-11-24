@@ -445,13 +445,13 @@ static ssize_t write_behind(struct testcase *test, int convert)
   if(!test->ofile) {
     char outfile[256];
     snprintf(outfile, sizeof(outfile), "%s/upload.%ld", logdir, test->testno);
-    test->ofile = open(outfile, O_CREAT | O_RDWR | CURL_O_BINARY,
+    test->ofile = curlx_open(outfile, O_CREAT | O_RDWR | CURL_O_BINARY,
 #ifdef _WIN32
-                       S_IREAD | S_IWRITE
+                             S_IREAD | S_IWRITE
 #else
-                       S_IRUSR | S_IWUSR | S_IXUSR |
-                       S_IRGRP | S_IWGRP | S_IXGRP |
-                       S_IROTH | S_IWOTH | S_IXOTH
+                             S_IRUSR | S_IWUSR | S_IXUSR |
+                             S_IRGRP | S_IWGRP | S_IXGRP |
+                             S_IROTH | S_IWOTH | S_IXOTH
 #endif
                        );
     if(test->ofile == -1) {
@@ -910,7 +910,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
 
   /* Open request dump file. */
-  server = fopen(dumpfile, "ab");
+  server = curlx_fopen(dumpfile, "ab");
   if(!server) {
     char errbuf[STRERROR_LEN];
     int error = errno;
@@ -963,7 +963,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
   if(*cp || !mode) {
     nak(TFTP_EBADOP);
-    fclose(server);
+    curlx_fclose(server);
     return 3;
   }
 
@@ -975,7 +975,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
       *cp = (char)tolower((int)*cp);
 
   /* store input protocol */
-  fclose(server);
+  curlx_fclose(server);
 
   for(pf = formata; pf->f_mode; pf++)
     if(strcmp(pf->f_mode, mode) == 0)
@@ -1036,7 +1036,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-    fclose(stream);
+    curlx_fclose(stream);
     if(error) {
       logmsg("getpart() failed with error (%d)", error);
       return 1; /* done */
@@ -1155,7 +1155,7 @@ static int validate_access(struct testcase *test,
     else {
       size_t count;
       int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
-      fclose(stream);
+      curlx_fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         return TFTP_EACCESS;

@@ -178,7 +178,7 @@ static bool socket_domain_is_ip(void)
 /* parse the file on disk that might have a test number for us */
 static int parse_cmdfile(struct sws_httprequest *req)
 {
-  FILE *f = fopen(cmdfile, FOPEN_READTEXT);
+  FILE *f = curlx_fopen(cmdfile, FOPEN_READTEXT);
   if(f) {
     int testnum = DOCNUMBER_NOTHING;
     char buf[256];
@@ -188,7 +188,7 @@ static int parse_cmdfile(struct sws_httprequest *req)
         req->testno = testnum;
       }
     }
-    fclose(f);
+    curlx_fclose(f);
   }
   return 0;
 }
@@ -220,7 +220,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-    fclose(stream);
+    curlx_fclose(stream);
     if(error) {
       logmsg("getpart() failed with error (%d)", error);
       req->open = FALSE; /* closes connection */
@@ -734,7 +734,7 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
     return;
 
   do {
-    dump = fopen(dumpfile, "ab");
+    dump = curlx_fopen(dumpfile, "ab");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
@@ -766,7 +766,7 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  res = fclose(dump);
+  res = curlx_fclose(dump);
   if(res)
     logmsg("Error closing file %s error (%d) %s", dumpfile,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -1050,7 +1050,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
     }
     else {
       error = getpart(&ptr, &count, "reply", partbuf, stream);
-      fclose(stream);
+      curlx_fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         return 0;
@@ -1075,7 +1075,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
     else {
       /* get the custom server control "commands" */
       error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
-      fclose(stream);
+      curlx_fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         free(ptr);
@@ -1104,7 +1104,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   else
     sws_prevbounce = FALSE;
 
-  dump = fopen(responsedump, "ab");
+  dump = curlx_fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
     logmsg("fopen() failed with error (%d) %s",
@@ -1158,7 +1158,7 @@ retry:
     }
   } while((count > 0) && !got_exit_signal);
 
-  res = fclose(dump);
+  res = curlx_fclose(dump);
   if(res)
     logmsg("Error closing file %s error (%d) %s", responsedump,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
