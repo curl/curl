@@ -53,7 +53,6 @@
 #include "../http.h" /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
-#include "../speedcheck.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"
@@ -3135,10 +3134,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
       break;
 
     if(!disconnect) {
-      if(Curl_pgrsUpdate(data))
-        return CURLE_ABORTED_BY_CALLBACK;
-
-      result = Curl_speedcheck(data, now);
+      result = Curl_pgrsCheck(data);
       if(result)
         break;
 
@@ -3534,10 +3530,7 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
   sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
                                    variable */
 
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "unitcheck.h"
 
-#include "speedcheck.h"
+#include "progress.h"
 #include "urldata.h"
 
 static CURLcode t1606_setup(struct Curl_easy **easy)
@@ -58,12 +58,12 @@ static int runawhile(struct Curl_easy *easy,
 
   curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
   curl_easy_setopt(easy, CURLOPT_LOW_SPEED_TIME, time_limit);
-  Curl_speedinit(easy);
+  Curl_pgrsReset(easy);
 
   do {
     /* fake the current transfer speed */
     easy->progress.current_speed = speed;
-    res = Curl_speedcheck(easy, now);
+    res = pgrs_speedcheck(easy, &now);
     if(res)
       break;
     /* step the time */

@@ -156,6 +156,7 @@ typedef unsigned int curl_prot_t;
 #include "curlx/dynbuf.h"
 #include "dynhds.h"
 #include "request.h"
+#include "ratelimit.h"
 #include "netrc.h"
 
 /* On error return, the value of `pnwritten` has no meaning */
@@ -426,30 +427,11 @@ struct hostname {
 #define KEEP_NONE       0
 #define KEEP_RECV       (1<<0) /* there is or may be data to read */
 #define KEEP_SEND       (1<<1) /* there is or may be data to write */
-#define KEEP_RECV_HOLD  (1<<2) /* when set, no reading should be done but there
-                                  might still be data to read */
-#define KEEP_SEND_HOLD  (1<<3) /* when set, no writing should be done but there
-                                  might still be data to write */
-#define KEEP_RECV_PAUSE (1<<4) /* reading is paused */
-#define KEEP_SEND_PAUSE (1<<5) /* writing is paused */
 
-/* KEEP_SEND_TIMED is set when the transfer should attempt sending
- * at timer (or other) events. A transfer waiting on a timer will
-  * remove KEEP_SEND to suppress POLLOUTs of the connection.
-  * Adding KEEP_SEND_TIMED will then attempt to send whenever the transfer
-  * enters the "readwrite" loop, e.g. when a timer fires.
-  * This is used in HTTP for 'Expect: 100-continue' waiting. */
-#define KEEP_SEND_TIMED (1<<6)
-
-#define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
-#define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
-
-/* transfer wants to send is not PAUSE or HOLD */
-#define CURL_WANT_SEND(data) \
-  (((data)->req.keepon & KEEP_SENDBITS) == KEEP_SEND)
-/* transfer receive is not on PAUSE or HOLD */
-#define CURL_WANT_RECV(data) \
-  (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
+/* transfer wants to send */
+#define CURL_WANT_SEND(data) ((data)->req.keepon & KEEP_SEND)
+/* transfer wants to receive */
+#define CURL_WANT_RECV(data) ((data)->req.keepon & KEEP_RECV)
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
@@ -805,16 +787,11 @@ struct PureInfo {
   BIT(used_proxy); /* the transfer used a proxy */
 };
 
-struct pgrs_measure {
-  struct curltime start; /* when measure started */
-  curl_off_t start_size; /* the 'cur_size' the measure started at */
-};
-
 struct pgrs_dir {
   curl_off_t total_size; /* total expected bytes */
   curl_off_t cur_size; /* transferred bytes so far */
   curl_off_t speed; /* bytes per second transferred */
-  struct pgrs_measure limit;
+  struct Curl_rlimit rlimit; /* speed limiting / pausing */
 };
 
 struct Progress {
@@ -843,10 +820,10 @@ struct Progress {
   struct curltime t_startqueue;
   struct curltime t_acceptdata;
 
-#define CURR_TIME (5 + 1) /* 6 entries for 5 seconds */
+#define CURL_SPEED_RECORDS (5 + 1) /* 6 entries for 5 seconds */
 
-  curl_off_t speeder[ CURR_TIME ];
-  struct curltime speeder_time[ CURR_TIME ];
+  curl_off_t speed_amount[ CURL_SPEED_RECORDS ];
+  struct curltime speed_time[ CURL_SPEED_RECORDS ];
   unsigned char speeder_c;
   BIT(hide);
   BIT(ul_size_known);
