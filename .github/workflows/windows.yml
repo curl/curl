@@ -368,7 +368,7 @@ jobs:
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 10
+        timeout-minutes: ${{ contains(matrix.tflags, '-t') && 20 || 10 }}
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
