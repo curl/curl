@@ -81,7 +81,8 @@ static void curl_dbg_cleanup(void)
   curl_dbg_logfile = NULL;
 }
 #ifdef USE_BACKTRACE
-static void error_callback(void *data, const char *message, int error_number)
+static void error_backtrace_cb(void *data, const char *message,
+                               int error_number)
 {
   (void)data;
   if(error_number == -1)
@@ -102,7 +103,7 @@ static int full_callback(void *data, uintptr_t pc, const char *pathname,
 
 static void dump_bt(void)
 {
-  backtrace_full(btstate, 0, full_callback, error_callback, NULL);
+  backtrace_full(btstate, 0, full_callback, error_backtrace_cb, NULL);
 }
 #else
 #define dump_bt() /* nothing to do */
@@ -123,7 +124,7 @@ void curl_dbg_memdebug(const char *logname)
 #endif
   }
 #ifdef USE_BACKTRACE
-  btstate = backtrace_create_state(NULL, 0, error_callback, NULL);
+  btstate = backtrace_create_state(NULL, 0, error_backtrace_cb, NULL);
 #endif
   if(!registered_cleanup)
     registered_cleanup = !atexit(curl_dbg_cleanup);
