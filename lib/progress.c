@@ -275,6 +275,14 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
+void Curl_pgrsReset(struct Curl_easy *data)
+{
+  Curl_pgrsSetUploadCounter(data, 0);
+  Curl_pgrsSetDownloadCounter(data, 0);
+  Curl_pgrsSetUploadSize(data, -1);
+  Curl_pgrsSetDownloadSize(data, -1);
+}
+
 void Curl_pgrsEarlyData(struct Curl_easy *data, curl_off_t sent)
 {
     data->progress.earlydata_sent = sent;

@@ -3884,7 +3884,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
-  /* if this is a pushed stream, we need this: */
   CURLcode result;
 
   if(conn) {
@@ -3905,8 +3904,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   result = Curl_req_start(&data->req, data);
   if(!result) {
     Curl_speedinit(data);
-    Curl_pgrsSetUploadCounter(data, 0);
-    Curl_pgrsSetDownloadCounter(data, 0);
+    Curl_pgrsReset(data);
   }
   return result;
 }

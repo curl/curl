@@ -3534,10 +3534,7 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
   sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
                                    variable */
 
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);

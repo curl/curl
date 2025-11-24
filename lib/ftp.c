@@ -4344,10 +4344,7 @@ CURLcode ftp_regular_transfer(struct Curl_easy *data,
   bool connected = FALSE;
   data->req.size = -1; /* make sure this is unknown at this point */
 
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   ftpc->ctl_valid = TRUE; /* starts good */
 

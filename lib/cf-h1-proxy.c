@@ -671,8 +671,7 @@ out:
     /* The real request will follow the CONNECT, reset request partially */
     Curl_req_soft_reset(&data->req, data);
     Curl_client_reset(data);
-    Curl_pgrsSetUploadCounter(data, 0);
-    Curl_pgrsSetDownloadCounter(data, 0);
+    Curl_pgrsReset(data);
 
     tunnel_free(cf, data);
   }

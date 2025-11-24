@@ -47,6 +47,7 @@ int Curl_pgrsDone(struct Curl_easy *data);
 void Curl_pgrsStartNow(struct Curl_easy *data);
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size);
+void Curl_pgrsReset(struct Curl_easy *data);
 
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size);
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size);
