@@ -963,7 +963,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
   if(*cp || !mode) {
     nak(TFTP_EBADOP);
-    fclose(server);
+    curlx_fclose(server);
     return 3;
   }
 
@@ -975,7 +975,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
       *cp = (char)tolower((int)*cp);
 
   /* store input protocol */
-  fclose(server);
+  curlx_fclose(server);
 
   for(pf = formata; pf->f_mode; pf++)
     if(strcmp(pf->f_mode, mode) == 0)
@@ -1036,7 +1036,7 @@ static int tftpd_parse_servercmd(struct testcase *req)
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-    fclose(stream);
+    curlx_fclose(stream);
     if(error) {
       logmsg("getpart() failed with error (%d)", error);
       return 1; /* done */
@@ -1155,7 +1155,7 @@ static int validate_access(struct testcase *test,
     else {
       size_t count;
       int error = getpart(&test->buffer, &count, "reply", partbuf, stream);
-      fclose(stream);
+      curlx_fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         return TFTP_EACCESS;

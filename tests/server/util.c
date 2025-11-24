@@ -120,7 +120,7 @@ void logmsg(const char *msg, ...)
   } while(!logfp && (errno == EINTR));
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
-    fclose(logfp);
+    curlx_fclose(logfp);
   }
   else {
     char errbuf[STRERROR_LEN];
@@ -232,7 +232,7 @@ int write_pidfile(const char *filename)
     return 0; /* fail */
   }
   fprintf(pidfile, "%ld\n", (long)pid);
-  fclose(pidfile);
+  curlx_fclose(pidfile);
   logmsg("Wrote pid %ld to %s", (long)pid, filename);
   return 1; /* success */
 }
@@ -248,7 +248,7 @@ int write_portfile(const char *filename, int port)
     return 0; /* fail */
   }
   fprintf(portfile, "%d\n", port);
-  fclose(portfile);
+  curlx_fclose(portfile);
   logmsg("Wrote port %d to %s", port, filename);
   return 1; /* success */
 }
@@ -270,7 +270,7 @@ void set_advisor_read_lock(const char *filename)
     return;
   }
 
-  res = fclose(lockfile);
+  res = curlx_fclose(lockfile);
   if(res)
     logmsg("Error closing lock file %s error (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));

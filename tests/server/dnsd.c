@@ -162,7 +162,7 @@ static int store_incoming(const unsigned char *data, size_t size,
     if(*qlen > qbuflen) {
       logmsg("dnsd: query too large: %lu > %lu",
              (unsigned long)*qlen, (unsigned long)qbuflen);
-      fclose(server);
+      curlx_fclose(server);
       return -1;
     }
     memcpy(qbuf, qptr, *qlen);
@@ -176,7 +176,7 @@ static int store_incoming(const unsigned char *data, size_t size,
   fprintf(server, "\n");
 #endif
 
-  fclose(server);
+  curlx_fclose(server);
 
   return 0;
 }
@@ -375,7 +375,7 @@ static void read_instructions(void)
         }
       }
     }
-    fclose(f);
+    curlx_fclose(f);
   }
   else
     logmsg("Error opening file '%s'", file);

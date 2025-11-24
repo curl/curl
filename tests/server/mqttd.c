@@ -119,7 +119,7 @@ static void mqttd_getconfig(void)
         }
       }
     }
-    fclose(fp);
+    curlx_fclose(fp);
   }
   else {
     logmsg("No config file '%s' to read", configfile);
@@ -636,9 +636,9 @@ end:
   if(buffer)
     free(buffer);
   if(dump)
-    fclose(dump);
+    curlx_fclose(dump);
   if(stream)
-    fclose(stream);
+    curlx_fclose(stream);
   return CURL_SOCKET_BAD;
 }
 

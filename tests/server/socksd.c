@@ -180,7 +180,7 @@ static void socksd_getconfig(void)
         }
       }
     }
-    fclose(fp);
+    curlx_fclose(fp);
   }
 }
 
@@ -493,7 +493,7 @@ static curl_socket_t sockit(curl_socket_t fd)
         fprintf(dump, "\n");
         break;
       }
-      fclose(dump);
+      curlx_fclose(dump);
     }
   }
 
