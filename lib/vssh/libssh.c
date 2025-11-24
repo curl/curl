@@ -2480,7 +2480,6 @@ static CURLcode myssh_block_statemach(struct Curl_easy *data,
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left_ms = 1000;
-    struct curltime now = curlx_now();
 
     result = myssh_statemach_act(data, sshc, sshp, &block);
     if(result)
