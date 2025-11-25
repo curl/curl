@@ -408,8 +408,9 @@ jobs:
           - name: 'gnutls'
             install_packages: libp11-kit-dev
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib -Wl,-rpath,/home/runner/nettle/build/lib64 -L/home/runner/nettle/build/lib64
+            CPPFLAGS: -I/home/runner/nettle/build/include
             configure: >-
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --enable-ssls-export
 
@@ -639,6 +640,7 @@ jobs:
 
       - name: 'configure'
         env:
+          CPPFLAGS: '${{ matrix.build.CPPFLAGS }}'
           LDFLAGS: '${{ matrix.build.LDFLAGS }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
