@@ -50,6 +50,7 @@ LIB_CURLX_HFILES = \
   curlx/inet_pton.h \
   curlx/multibyte.h \
   curlx/nonblock.h \
+  curlx/snprintf.h \
   curlx/strerr.h   \
   curlx/strparse.h \
   curlx/timediff.h \
