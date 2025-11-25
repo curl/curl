@@ -1195,6 +1195,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   DEBUGASSERT(blen);
   DEBUGASSERT(nread);
   DEBUGASSERT(eos);
+  *nread = 0;
 
   if(!data->req.reader_stack) {
     result = Curl_creader_set_fread(data, data->state.infilesize);
