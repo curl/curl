@@ -944,7 +944,7 @@ curl_socket_t win32_stdin_read_thread(void)
 
     return CURL_SOCKET_BAD;
   }
-
+  free(tdata);
   assert(socket_r != CURL_SOCKET_BAD);
   return socket_r;
 }
