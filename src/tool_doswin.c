@@ -801,10 +801,7 @@ ThreadCleanup:
   if(socket_w != CURL_SOCKET_BAD)
     sclose(socket_w);
 
-  if(tdata) {
-    free(tdata);
-  }
-
+  free(tdata);
   return 0;
 }
 
@@ -884,6 +881,7 @@ curl_socket_t win32_stdin_read_thread(void)
       errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
     }
+    tdata = NULL; /* win_stdin_thread_func owns it now */
 
     /* Connect to the thread and rearrange our own STDIN handles */
     socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
