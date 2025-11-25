@@ -196,6 +196,14 @@ void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable)
   }
 }
 
+void Curl_pgrsSendPause(struct Curl_easy *data, bool enable)
+{
+  if(!enable) {
+    data->progress.speeder_c = 0; /* reset speed records */
+    pgrs_speedinit(data); /* reset low speed measurements */
+  }
+}
+
 /*
  *
  * Curl_pgrsTimeWas(). Store the timestamp time at the given label.

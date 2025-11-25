@@ -59,8 +59,9 @@ void Curl_pgrsUpdate_nometer(struct Curl_easy *data);
 /* perform progress update with callbacks and speed checks */
 CURLcode Curl_pgrsCheck(struct Curl_easy *data);
 
-/* Inform progress/speedcheck about receive pausing */
+/* Inform progress/speedcheck about receive/send pausing */
 void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable);
+void Curl_pgrsSendPause(struct Curl_easy *data, bool enable);
 
 /* Reset sizes and couners for up- and download. */
 void Curl_pgrsReset(struct Curl_easy *data);
