@@ -37,7 +37,7 @@ CURL_HOME
 Verify XDG_CONFIG_HOME use to find curlrc
 </name>
 <command option="no-q">
-%HOSTIP:%HTTPPORT/%TESTNUMBER
+%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter
 </command>
 </client>
 
@@ -55,5 +55,8 @@ Content-Type: application/x-www-form-urlencoded
 
 curlrc read
 </protocol>
+<stderr mode="text">
+Note: Read config file from '%PWD/%LOGDIR/curlrc'
+</stderr>
 </verify>
 </testcase>
