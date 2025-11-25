@@ -130,7 +130,10 @@ static int get_category_content(const char *category, unsigned int cols)
   for(i = 0; i < CURL_ARRAYSIZE(categories); ++i)
     if(curl_strequal(categories[i].opt, category)) {
       curl_mprintf("%s: %s\n", categories[i].opt, categories[i].desc);
-      print_category(categories[i].category, cols);
+      if(table_flag)
+        tool_table(categories[i].category, cols);
+      else
+        print_category(categories[i].category, cols);
       return 0;
     }
   return 1;
@@ -484,7 +487,7 @@ void tool_table(unsigned int category, unsigned int cols)
               /* Use space before long or short option to align. */
               lng_spc = (int)(e_sp - helptext[opt_idx].opt);
               /* Output, left aligning option name. */
-              printf("%-*s ", (int)(max_len),
+              curl_mprintf("%-*s ", (int)(max_len),
                      helptext[opt_idx].opt + lng_spc);
               break;
             }
@@ -509,7 +512,7 @@ void tool_table(unsigned int category, unsigned int cols)
           if(helptext[opt_idx].categories & category) {
             if(found == current + c) {
               /* Output description. */
-              printf("%-*s ", (int)(max_len), helptext[opt_idx].desc);
+              curl_mprintf("%-*s ", (int)(max_len), helptext[opt_idx].desc);
               break;
             }
             found++;
