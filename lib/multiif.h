@@ -153,7 +153,7 @@ void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
  * Returns NULL if not found.
  */
 struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
-                                      unsigned int mid);
+                                      uint32_t mid);
 
 /* Get the # of transfers current in process/pending. */
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);

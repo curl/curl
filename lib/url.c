@@ -513,8 +513,8 @@ CURLcode Curl_open(struct Curl_easy **curl)
   data->state.recent_conn_id = -1;
   /* and not assigned an id yet */
   data->id = -1;
-  data->mid = UINT_MAX;
-  data->master_mid = UINT_MAX;
+  data->mid = UINT32_MAX;
+  data->master_mid = UINT32_MAX;
   data->progress.hide = TRUE;
   data->state.current_speed = -1; /* init to negative == impossible */
 
@@ -575,7 +575,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
   Curl_safefree(conn->destination);
-  Curl_uint_spbset_destroy(&conn->xfers_attached);
+  Curl_uint32_spbset_destroy(&conn->xfers_attached);
   Curl_hash_destroy(&conn->meta_hash);
 
   free(conn); /* free all the connection oriented data */
@@ -1407,7 +1407,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
 
   /* Initialize the attached xfers bitset */
-  Curl_uint_spbset_init(&conn->xfers_attached);
+  Curl_uint32_spbset_init(&conn->xfers_attached);
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
@@ -3685,7 +3685,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         connections_available = FALSE;
         break;
       case CPOOL_LIMIT_TOTAL:
-        if(data->master_mid != UINT_MAX)
+        if(data->master_mid != UINT32_MAX)
           CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
                      "max connection limit");
         else {

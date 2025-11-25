@@ -32,7 +32,7 @@ struct Curl_multi;
 struct curl_multi_ntfy {
   curl_notify_callback ntfy_cb;
   void *ntfy_cb_data;
-  struct uint_bset enabled;
+  struct uint32_bset enabled;
   CURLMcode failure;
   struct mntfy_chunk *head;
   struct mntfy_chunk *tail;

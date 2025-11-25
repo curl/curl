@@ -988,8 +988,8 @@ CURL *curl_easy_duphandle(CURL *d)
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
-  outcurl->mid = UINT_MAX;
-  outcurl->master_mid = UINT_MAX;
+  outcurl->mid = UINT32_MAX;
+  outcurl->master_mid = UINT32_MAX;
 
 #ifndef CURL_DISABLE_HTTP
   Curl_llist_init(&outcurl->state.httphdrs, NULL);
@@ -1126,7 +1126,7 @@ void curl_easy_reset(CURL *d)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
-  data->master_mid = UINT_MAX;
+  data->master_mid = UINT32_MAX;
 }
 
 /*

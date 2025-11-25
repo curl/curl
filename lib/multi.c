@@ -180,11 +180,11 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     if(oldstate < MSTATE_DONE)
       CURLM_NTFY(data, CURLMNOTIFY_EASY_DONE);
     /* changing to COMPLETED means it is in process and needs to go */
-    DEBUGASSERT(Curl_uint_bset_contains(&data->multi->process, data->mid));
-    Curl_uint_bset_remove(&data->multi->process, data->mid);
-    Curl_uint_bset_remove(&data->multi->pending, data->mid); /* to be sure */
+    DEBUGASSERT(Curl_uint32_bset_contains(&data->multi->process, data->mid));
+    Curl_uint32_bset_remove(&data->multi->process, data->mid);
+    Curl_uint32_bset_remove(&data->multi->pending, data->mid); /* to be sure */
 
-    if(Curl_uint_bset_empty(&data->multi->process)) {
+    if(Curl_uint32_bset_empty(&data->multi->process)) {
       /* free the transfer buffer when we have no more active transfers */
       multi_xfer_bufs_free(data->multi);
     }
@@ -229,7 +229,7 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
-struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
+struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t ev_hashsize,  /* event hash */
                                      size_t chashsize, /* connection hash */
                                      size_t dnssize,   /* dns hash */
@@ -245,11 +245,11 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   Curl_dnscache_init(&multi->dnscache, dnssize);
   Curl_mntfy_init(multi);
   Curl_multi_ev_init(multi, ev_hashsize);
-  Curl_uint_tbl_init(&multi->xfers, NULL);
-  Curl_uint_bset_init(&multi->process);
-  Curl_uint_bset_init(&multi->dirty);
-  Curl_uint_bset_init(&multi->pending);
-  Curl_uint_bset_init(&multi->msgsent);
+  Curl_uint32_tbl_init(&multi->xfers, NULL);
+  Curl_uint32_bset_init(&multi->process);
+  Curl_uint32_bset_init(&multi->dirty);
+  Curl_uint32_bset_init(&multi->pending);
+  Curl_uint32_bset_init(&multi->msgsent);
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, ph_freeentry);
   Curl_llist_init(&multi->msglist, NULL);
@@ -259,11 +259,11 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   multi->last_timeout_ms = -1;
 
   if(Curl_mntfy_resize(multi) ||
-     Curl_uint_bset_resize(&multi->process, xfer_table_size) ||
-     Curl_uint_bset_resize(&multi->pending, xfer_table_size) ||
-     Curl_uint_bset_resize(&multi->dirty, xfer_table_size) ||
-     Curl_uint_bset_resize(&multi->msgsent, xfer_table_size) ||
-     Curl_uint_tbl_resize(&multi->xfers, xfer_table_size))
+     Curl_uint32_bset_resize(&multi->process, xfer_table_size) ||
+     Curl_uint32_bset_resize(&multi->pending, xfer_table_size) ||
+     Curl_uint32_bset_resize(&multi->dirty, xfer_table_size) ||
+     Curl_uint32_bset_resize(&multi->msgsent, xfer_table_size) ||
+     Curl_uint32_tbl_resize(&multi->xfers, xfer_table_size))
     goto error;
 
   multi->admin = curl_easy_init();
@@ -278,8 +278,8 @@ struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
   if(getenv("CURL_DEBUG"))
     multi->admin->set.verbose = TRUE;
 #endif
-  Curl_uint_tbl_add(&multi->xfers, multi->admin, &multi->admin->mid);
-  Curl_uint_bset_add(&multi->process, multi->admin->mid);
+  Curl_uint32_tbl_add(&multi->xfers, multi->admin, &multi->admin->mid);
+  Curl_uint32_bset_add(&multi->process, multi->admin->mid);
 
   if(Curl_cshutdn_init(&multi->cshutdn, multi))
     goto error;
@@ -322,11 +322,11 @@ error:
   }
   Curl_mntfy_cleanup(multi);
 
-  Curl_uint_bset_destroy(&multi->process);
-  Curl_uint_bset_destroy(&multi->dirty);
-  Curl_uint_bset_destroy(&multi->pending);
-  Curl_uint_bset_destroy(&multi->msgsent);
-  Curl_uint_tbl_destroy(&multi->xfers);
+  Curl_uint32_bset_destroy(&multi->process);
+  Curl_uint32_bset_destroy(&multi->dirty);
+  Curl_uint32_bset_destroy(&multi->pending);
+  Curl_uint32_bset_destroy(&multi->msgsent);
+  Curl_uint32_tbl_destroy(&multi->xfers);
 
   free(multi);
   return NULL;
@@ -359,12 +359,12 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 static CURLMcode multi_xfers_add(struct Curl_multi *multi,
                                  struct Curl_easy *data)
 {
-  unsigned int capacity = Curl_uint_tbl_capacity(&multi->xfers);
-  unsigned int new_size = 0;
+  uint32_t capacity = Curl_uint32_tbl_capacity(&multi->xfers);
+  uint32_t new_size = 0;
   /* Prepare to make this into a CURLMOPT_MAX_TRANSFERS, because some
    * applications may want to prevent a run-away of their memory use. */
   /* UINT_MAX is our "invalid" id, do not let the table grow up to that. */
-  const unsigned int max_capacity = UINT_MAX - 1;
+  const uint32_t max_capacity = UINT_MAX - 1;
 
   if(capacity < max_capacity) {
     /* We want `multi->xfers` to have "sufficient" free rows, so that we do
@@ -372,9 +372,9 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
      * Since uint_tbl and uint_bset are quite memory efficient,
      * regard less than 25% free as insufficient.
      * (for low capacities, e.g. multi_easy, 4 or less). */
-    unsigned int used = Curl_uint_tbl_count(&multi->xfers);
-    unsigned int unused = capacity - used;
-    unsigned int min_unused = CURLMAX(capacity >> 2, 4);
+    uint32_t used = Curl_uint32_tbl_count(&multi->xfers);
+    uint32_t unused = capacity - used;
+    uint32_t min_unused = CURLMAX(capacity >> 2, 4);
     if(unused <= min_unused) {
       /* Make sure the uint arithmetic here works on the corner
        * cases where we are close to max_capacity or UINT_MAX */
@@ -397,19 +397,19 @@ static CURLMcode multi_xfers_add(struct Curl_multi *multi,
      * to work properly when larger than the table, but not
      * the other way around. */
     CURL_TRC_M(data, "increasing xfer table size to %u", new_size);
-    if(Curl_uint_bset_resize(&multi->process, new_size) ||
-       Curl_uint_bset_resize(&multi->dirty, new_size) ||
-       Curl_uint_bset_resize(&multi->pending, new_size) ||
-       Curl_uint_bset_resize(&multi->msgsent, new_size) ||
-       Curl_uint_tbl_resize(&multi->xfers, new_size))
+    if(Curl_uint32_bset_resize(&multi->process, new_size) ||
+       Curl_uint32_bset_resize(&multi->dirty, new_size) ||
+       Curl_uint32_bset_resize(&multi->pending, new_size) ||
+       Curl_uint32_bset_resize(&multi->msgsent, new_size) ||
+       Curl_uint32_tbl_resize(&multi->xfers, new_size))
       return CURLM_OUT_OF_MEMORY;
   }
 
   /* Insert the easy into the table now */
-  if(!Curl_uint_tbl_add(&multi->xfers, data, &data->mid)) {
+  if(!Curl_uint32_tbl_add(&multi->xfers, data, &data->mid)) {
     /* MUST only happen when table is full */
-    DEBUGASSERT(Curl_uint_tbl_capacity(&multi->xfers) <=
-                Curl_uint_tbl_count(&multi->xfers));
+    DEBUGASSERT(Curl_uint32_tbl_capacity(&multi->xfers) <=
+                Curl_uint32_tbl_count(&multi->xfers));
     return CURLM_OUT_OF_MEMORY;
   }
   return CURLM_OK;
@@ -441,14 +441,14 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
        handles are still alive - but if there are none alive anymore, it is
        fine to start over and unmark the "deadness" of this handle.
        This means only the admin handle MUST be present. */
-    if((Curl_uint_tbl_count(&multi->xfers) != 1) ||
-       !Curl_uint_tbl_contains(&multi->xfers, 0))
+    if((Curl_uint32_tbl_count(&multi->xfers) != 1) ||
+       !Curl_uint32_tbl_contains(&multi->xfers, 0))
       return CURLM_ABORTED_BY_CALLBACK;
     multi->dead = FALSE;
-    Curl_uint_bset_clear(&multi->process);
-    Curl_uint_bset_clear(&multi->dirty);
-    Curl_uint_bset_clear(&multi->pending);
-    Curl_uint_bset_clear(&multi->msgsent);
+    Curl_uint32_bset_clear(&multi->process);
+    Curl_uint32_bset_clear(&multi->dirty);
+    Curl_uint32_bset_clear(&multi->pending);
+    Curl_uint32_bset_clear(&multi->msgsent);
   }
 
   if(data->multi_easy) {
@@ -492,7 +492,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 #endif
 
   /* add the easy handle to the process set */
-  Curl_uint_bset_add(&multi->process, data->mid);
+  Curl_uint32_bset_add(&multi->process, data->mid);
   ++multi->xfers_alive;
   ++multi->xfers_total_ever;
 
@@ -507,8 +507,8 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
   rc = Curl_update_timer(multi);
   if(rc) {
     data->multi = NULL; /* not anymore */
-    Curl_uint_tbl_remove(&multi->xfers, data->mid);
-    data->mid = UINT_MAX;
+    Curl_uint32_tbl_remove(&multi->xfers, data->mid);
+    data->mid = UINT32_MAX;
     return rc;
   }
 
@@ -523,7 +523,7 @@ CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 
   CURL_TRC_M(data, "added to multi, mid=%u, running=%u, total=%u",
              data->mid, Curl_multi_xfers_running(multi),
-             Curl_uint_tbl_count(&multi->xfers));
+             Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
 
@@ -572,11 +572,11 @@ static void multi_done_locked(struct connectdata *conn,
   Curl_detach_connection(data);
 
   CURL_TRC_M(data, "multi_done_locked, in use=%u",
-             Curl_uint_spbset_count(&conn->xfers_attached));
+             Curl_uint32_spbset_count(&conn->xfers_attached));
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
     CURL_TRC_M(data, "Connection still in use %u, no more multi_done now!",
-               Curl_uint_spbset_count(&conn->xfers_attached));
+               Curl_uint32_spbset_count(&conn->xfers_attached));
     return;
   }
 
@@ -740,7 +740,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   struct Curl_llist_node *e;
   CURLMcode rc;
   bool removed_timer = FALSE;
-  unsigned int mid;
+  uint32_t mid;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -758,11 +758,11 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   if(data->multi != multi)
     return CURLM_BAD_EASY_HANDLE;
 
-  if(data->mid == UINT_MAX) {
+  if(data->mid == UINT32_MAX) {
     DEBUGASSERT(0);
     return CURLM_INTERNAL_ERROR;
   }
-  if(Curl_uint_tbl_get(&multi->xfers, data->mid) != data) {
+  if(Curl_uint32_tbl_get(&multi->xfers, data->mid) != data) {
     DEBUGASSERT(0);
     return CURLM_INTERNAL_ERROR;
   }
@@ -797,7 +797,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   removed_timer = Curl_expire_clear(data);
 
   /* If in `msgsent`, it was deducted from `multi->xfers_alive` already. */
-  if(!Curl_uint_bset_contains(&multi->msgsent, data->mid))
+  if(!Curl_uint32_bset_contains(&multi->msgsent, data->mid))
     --multi->xfers_alive;
 
   Curl_wildcard_dtor(&data->wildcard);
@@ -853,15 +853,15 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 
   /* clear the association to this multi handle */
   mid = data->mid;
-  DEBUGASSERT(Curl_uint_tbl_contains(&multi->xfers, mid));
-  Curl_uint_tbl_remove(&multi->xfers, mid);
-  Curl_uint_bset_remove(&multi->process, mid);
-  Curl_uint_bset_remove(&multi->dirty, mid);
-  Curl_uint_bset_remove(&multi->pending, mid);
-  Curl_uint_bset_remove(&multi->msgsent, mid);
+  DEBUGASSERT(Curl_uint32_tbl_contains(&multi->xfers, mid));
+  Curl_uint32_tbl_remove(&multi->xfers, mid);
+  Curl_uint32_bset_remove(&multi->process, mid);
+  Curl_uint32_bset_remove(&multi->dirty, mid);
+  Curl_uint32_bset_remove(&multi->pending, mid);
+  Curl_uint32_bset_remove(&multi->msgsent, mid);
   data->multi = NULL;
-  data->mid = UINT_MAX;
-  data->master_mid = UINT_MAX;
+  data->mid = UINT32_MAX;
+  data->master_mid = UINT32_MAX;
 
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
@@ -875,7 +875,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 
   CURL_TRC_M(data, "removed from multi, mid=%u, running=%u, total=%u",
              mid, Curl_multi_xfers_running(multi),
-             Curl_uint_tbl_count(&multi->xfers));
+             Curl_uint32_tbl_count(&multi->xfers));
   return CURLM_OK;
 }
 
@@ -895,8 +895,8 @@ void Curl_detach_connection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
-    Curl_uint_spbset_remove(&conn->xfers_attached, data->mid);
-    if(Curl_uint_spbset_empty(&conn->xfers_attached))
+    Curl_uint32_spbset_remove(&conn->xfers_attached, data->mid);
+    if(Curl_uint32_spbset_empty(&conn->xfers_attached))
       conn->attached_multi = NULL;
   }
   data->conn = NULL;
@@ -914,7 +914,7 @@ void Curl_attach_connection(struct Curl_easy *data,
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   data->conn = conn;
-  Curl_uint_spbset_add(&conn->xfers_attached, data->mid);
+  Curl_uint32_spbset_add(&conn->xfers_attached, data->mid);
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
     conn->attached_multi = data->multi;
@@ -1219,7 +1219,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
     return CURLM_RECURSIVE_API_CALL;
 
   Curl_pollset_init(&ps);
-  if(Curl_uint_bset_first(&multi->process, &mid)) {
+  if(Curl_uint32_bset_first(&multi->process, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
 
@@ -1248,7 +1248,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
           this_max_fd = (int)ps.sockets[i];
       }
     }
-    while(Curl_uint_bset_next(&multi->process, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
 
   Curl_cshutdn_setfds(&multi->cshutdn, multi->admin,
@@ -1282,19 +1282,19 @@ CURLMcode curl_multi_waitfds(CURLM *m,
 
   Curl_pollset_init(&ps);
   Curl_waitfds_init(&cwfds, ufds, size);
-  if(Curl_uint_bset_first(&multi->process, &mid)) {
+  if(Curl_uint32_bset_first(&multi->process, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(!data) {
         DEBUGASSERT(0);
-        Curl_uint_bset_remove(&multi->process, mid);
-        Curl_uint_bset_remove(&multi->dirty, mid);
+        Curl_uint32_bset_remove(&multi->process, mid);
+        Curl_uint32_bset_remove(&multi->dirty, mid);
         continue;
       }
       Curl_multi_pollset(data, &ps);
       need += Curl_waitfds_add_ps(&cwfds, &ps);
     }
-    while(Curl_uint_bset_next(&multi->process, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
 
   need += Curl_cshutdn_add_waitfds(&multi->cshutdn, multi->admin, &cwfds);
@@ -1345,7 +1345,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   unsigned int curl_nfds = 0; /* how many pfds are for curl transfers */
   struct Curl_easy *data = NULL;
   CURLMcode result = CURLM_OK;
-  unsigned int mid;
+  uint32_t mid;
 
 #ifdef USE_WINSOCK
   WSANETWORKEVENTS wsa_events;
@@ -1368,13 +1368,13 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   Curl_pollfds_init(&cpfds, a_few_on_stack, NUM_POLLS_ON_STACK);
 
   /* Add the curl handles to our pollfds first */
-  if(Curl_uint_bset_first(&multi->process, &mid)) {
+  if(Curl_uint32_bset_first(&multi->process, &mid)) {
     do {
       data = Curl_multi_get_easy(multi, mid);
       if(!data) {
         DEBUGASSERT(0);
-        Curl_uint_bset_remove(&multi->process, mid);
-        Curl_uint_bset_remove(&multi->dirty, mid);
+        Curl_uint32_bset_remove(&multi->process, mid);
+        Curl_uint32_bset_remove(&multi->dirty, mid);
         continue;
       }
       Curl_multi_pollset(data, &ps);
@@ -1383,7 +1383,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         goto out;
       }
     }
-    while(Curl_uint_bset_next(&multi->process, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
 
   if(Curl_cshutdn_add_pollfds(&multi->cshutdn, multi->admin, &cpfds)) {
@@ -2330,9 +2330,9 @@ static CURLMcode state_connect(struct Curl_multi *multi,
        wait for an available connection. */
     multistate(data, MSTATE_PENDING);
     /* move from process to pending set */
-    Curl_uint_bset_remove(&multi->process, data->mid);
-    Curl_uint_bset_remove(&multi->dirty, data->mid);
-    Curl_uint_bset_add(&multi->pending, data->mid);
+    Curl_uint32_bset_remove(&multi->process, data->mid);
+    Curl_uint32_bset_remove(&multi->dirty, data->mid);
+    Curl_uint32_bset_add(&multi->pending, data->mid);
     *resultp = CURLE_OK;
     return rc;
   }
@@ -2395,7 +2395,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
   /* transfer runs now, clear the dirty bit. This may be set
    * again during processing, triggering a re-run later. */
-  Curl_uint_bset_remove(&multi->dirty, data->mid);
+  Curl_uint32_bset_remove(&multi->dirty, data->mid);
 
   if(data == multi->admin) {
     Curl_cshutdn_perform(&multi->cshutdn, multi->admin, CURL_SOCKET_TIMEOUT);
@@ -2742,7 +2742,7 @@ statemachine_end:
     }
 
     if(MSTATE_COMPLETED == data->mstate) {
-      if(data->master_mid != UINT_MAX) {
+      if(data->master_mid != UINT32_MAX) {
         /* A sub transfer, not for msgsent to application */
         struct Curl_easy *mdata;
 
@@ -2773,10 +2773,10 @@ statemachine_end:
       multistate(data, MSTATE_MSGSENT);
 
       /* remove from the other sets, add to msgsent */
-      Curl_uint_bset_remove(&multi->process, data->mid);
-      Curl_uint_bset_remove(&multi->dirty, data->mid);
-      Curl_uint_bset_remove(&multi->pending, data->mid);
-      Curl_uint_bset_add(&multi->msgsent, data->mid);
+      Curl_uint32_bset_remove(&multi->process, data->mid);
+      Curl_uint32_bset_remove(&multi->dirty, data->mid);
+      Curl_uint32_bset_remove(&multi->pending, data->mid);
+      Curl_uint32_bset_add(&multi->msgsent, data->mid);
       --multi->xfers_alive;
       return CURLM_OK;
     }
@@ -2793,7 +2793,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
   struct Curl_tree *t = NULL;
   struct curltime now = curlx_now();
   struct Curl_multi *multi = m;
-  unsigned int mid;
+  uint32_t mid;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -2806,7 +2806,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
     return CURLM_RECURSIVE_API_CALL;
 
   sigpipe_init(&pipe_st);
-  if(Curl_uint_bset_first(&multi->process, &mid)) {
+  if(Curl_uint32_bset_first(&multi->process, &mid)) {
     CURL_TRC_M(multi->admin, "multi_perform(running=%u)",
                Curl_multi_xfers_running(multi));
     do {
@@ -2814,8 +2814,8 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
       CURLMcode result;
       if(!data) {
         DEBUGASSERT(0);
-        Curl_uint_bset_remove(&multi->process, mid);
-        Curl_uint_bset_remove(&multi->dirty, mid);
+        Curl_uint32_bset_remove(&multi->process, mid);
+        Curl_uint32_bset_remove(&multi->dirty, mid);
         continue;
       }
       sigpipe_apply(data, &pipe_st);
@@ -2823,7 +2823,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
       if(result)
         returncode = result;
     }
-    while(Curl_uint_bset_next(&multi->process, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->process, mid, &mid));
   }
   sigpipe_restore(&pipe_st);
 
@@ -2876,7 +2876,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
   struct Curl_multi *multi = m;
   if(GOOD_MULTI_HANDLE(multi)) {
     void *entry;
-    unsigned int mid;
+    uint32_t mid;
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
     if(multi->in_ntfy_callback)
@@ -2884,7 +2884,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
 
     /* First remove all remaining easy handles,
      * close internal ones. admin handle is special */
-    if(Curl_uint_tbl_first(&multi->xfers, &mid, &entry)) {
+    if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
       do {
         struct Curl_easy *data = entry;
         if(!GOOD_EASY_HANDLE(data))
@@ -2906,8 +2906,8 @@ CURLMcode curl_multi_cleanup(CURLM *m)
           (void)multi_done(data, CURLE_OK, TRUE);
 
         data->multi = NULL; /* clear the association */
-        Curl_uint_tbl_remove(&multi->xfers, mid);
-        data->mid = UINT_MAX;
+        Curl_uint32_tbl_remove(&multi->xfers, mid);
+        data->mid = UINT32_MAX;
 
 #ifdef USE_LIBPSL
         if(data->psl == &multi->psl)
@@ -2916,7 +2916,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
         if(data->state.internal)
           Curl_close(&data);
       }
-      while(Curl_uint_tbl_next(&multi->xfers, mid, &mid, &entry));
+      while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
     }
 
     Curl_cpool_destroy(&multi->cpool);
@@ -2924,7 +2924,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     if(multi->admin) {
       CURL_TRC_M(multi->admin, "multi_cleanup, closing admin handle, done");
       multi->admin->multi = NULL;
-      Curl_uint_tbl_remove(&multi->xfers, multi->admin->mid);
+      Curl_uint32_tbl_remove(&multi->xfers, multi->admin->mid);
       Curl_close(&multi->admin);
     }
 
@@ -2952,16 +2952,16 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     multi_xfer_bufs_free(multi);
     Curl_mntfy_cleanup(multi);
 #ifdef DEBUGBUILD
-    if(Curl_uint_tbl_count(&multi->xfers)) {
+    if(Curl_uint32_tbl_count(&multi->xfers)) {
       multi_xfer_tbl_dump(multi);
       DEBUGASSERT(0);
     }
 #endif
-    Curl_uint_bset_destroy(&multi->process);
-    Curl_uint_bset_destroy(&multi->dirty);
-    Curl_uint_bset_destroy(&multi->pending);
-    Curl_uint_bset_destroy(&multi->msgsent);
-    Curl_uint_tbl_destroy(&multi->xfers);
+    Curl_uint32_bset_destroy(&multi->process);
+    Curl_uint32_bset_destroy(&multi->dirty);
+    Curl_uint32_bset_destroy(&multi->pending);
+    Curl_uint32_bset_destroy(&multi->msgsent);
+    Curl_uint32_tbl_destroy(&multi->xfers);
     free(multi);
 
     return CURLM_OK;
@@ -3120,17 +3120,17 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
 {
   struct Curl_multi *multi = mrc->multi;
   CURLMcode result = CURLM_OK;
-  unsigned int mid;
+  uint32_t mid;
 
-  if(Curl_uint_bset_first(&multi->dirty, &mid)) {
+  if(Curl_uint32_bset_first(&multi->dirty, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
         CURL_TRC_M(data, "multi_run_dirty");
 
-        if(!Curl_uint_bset_contains(&multi->process, mid)) {
+        if(!Curl_uint32_bset_contains(&multi->process, mid)) {
           /* We are no longer processing this transfer */
-          Curl_uint_bset_remove(&multi->dirty, mid);
+          Curl_uint32_bset_remove(&multi->dirty, mid);
           continue;
         }
 
@@ -3148,10 +3148,10 @@ static CURLMcode multi_run_dirty(struct multi_run_ctx *mrc)
       }
       else {
         CURL_TRC_M(multi->admin, "multi_run_dirty, %u no longer found", mid);
-        Curl_uint_bset_remove(&multi->dirty, mid);
+        Curl_uint32_bset_remove(&multi->dirty, mid);
       }
     }
-    while(Curl_uint_bset_next(&multi->dirty, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->dirty, mid, &mid));
   }
 
 out:
@@ -3364,22 +3364,22 @@ CURLMcode curl_multi_socket_all(CURLM *m, int *running_handles)
 
 static bool multi_has_dirties(struct Curl_multi *multi)
 {
-  unsigned int mid;
-  if(Curl_uint_bset_first(&multi->dirty, &mid)) {
+  uint32_t mid;
+  if(Curl_uint32_bset_first(&multi->dirty, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
-        if(Curl_uint_bset_contains(&multi->process, mid))
+        if(Curl_uint32_bset_contains(&multi->process, mid))
           return TRUE;
         /* We are no longer processing this transfer */
-        Curl_uint_bset_remove(&multi->dirty, mid);
+        Curl_uint32_bset_remove(&multi->dirty, mid);
       }
       else {
         CURL_TRC_M(multi->admin, "dirty transfer %u no longer found", mid);
-        Curl_uint_bset_remove(&multi->dirty, mid);
+        Curl_uint32_bset_remove(&multi->dirty, mid);
       }
     }
-    while(Curl_uint_bset_next(&multi->dirty, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->dirty, mid, &mid));
   }
   return FALSE;
 }
@@ -3739,8 +3739,8 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   DEBUGASSERT(data->mstate == MSTATE_PENDING);
 
   /* Remove this node from the pending set, add into process set */
-  Curl_uint_bset_remove(&multi->pending, data->mid);
-  Curl_uint_bset_add(&multi->process, data->mid);
+  Curl_uint32_bset_remove(&multi->pending, data->mid);
+  Curl_uint32_bset_add(&multi->process, data->mid);
 
   multistate(data, MSTATE_CONNECT);
   Curl_multi_mark_dirty(data); /* make it run */
@@ -3762,8 +3762,8 @@ static void move_pending_to_connect(struct Curl_multi *multi,
 */
 static void process_pending_handles(struct Curl_multi *multi)
 {
-  unsigned int mid;
-  if(Curl_uint_bset_first(&multi->pending, &mid)) {
+  uint32_t mid;
+  if(Curl_uint32_bset_first(&multi->pending, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
       if(data) {
@@ -3771,10 +3771,10 @@ static void process_pending_handles(struct Curl_multi *multi)
         break;
       }
       /* transfer no longer known, should not happen */
-      Curl_uint_bset_remove(&multi->pending, mid);
+      Curl_uint32_bset_remove(&multi->pending, mid);
       DEBUGASSERT(0);
     }
-    while(Curl_uint_bset_next(&multi->pending, mid, &mid));
+    while(Curl_uint32_bset_next(&multi->pending, mid, &mid));
   }
 }
 
@@ -3799,19 +3799,19 @@ CURL **curl_multi_get_handles(CURLM *m)
 {
   struct Curl_multi *multi = m;
   void *entry;
-  unsigned int count = Curl_uint_tbl_count(&multi->xfers);
+  unsigned int count = Curl_uint32_tbl_count(&multi->xfers);
   CURL **a = malloc(sizeof(struct Curl_easy *) * (count + 1));
   if(a) {
     unsigned int i = 0, mid;
 
-    if(Curl_uint_tbl_first(&multi->xfers, &mid, &entry)) {
+    if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
       do {
         struct Curl_easy *data = entry;
         DEBUGASSERT(i < count);
         if(!data->state.internal)
           a[i++] = data;
       }
-      while(Curl_uint_tbl_next(&multi->xfers, mid, &mid, &entry));
+      while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry));
     }
     a[i] = NULL; /* last entry is a NULL */
   }
@@ -3823,7 +3823,7 @@ CURLMcode curl_multi_get_offt(CURLM *m,
                               curl_off_t *pvalue)
 {
   struct Curl_multi *multi = m;
-  unsigned int n;
+  uint32_t n;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -3832,22 +3832,22 @@ CURLMcode curl_multi_get_offt(CURLM *m,
 
   switch(info) {
   case CURLMINFO_XFERS_CURRENT:
-    n = Curl_uint_tbl_count(&multi->xfers);
+    n = Curl_uint32_tbl_count(&multi->xfers);
     if(n && multi->admin)
       --n;
     *pvalue = (curl_off_t)n;
     return CURLM_OK;
   case CURLMINFO_XFERS_RUNNING:
-    n = Curl_uint_bset_count(&multi->process);
-    if(n && Curl_uint_bset_contains(&multi->process, multi->admin->mid))
+    n = Curl_uint32_bset_count(&multi->process);
+    if(n && Curl_uint32_bset_contains(&multi->process, multi->admin->mid))
       --n;
     *pvalue = (curl_off_t)n;
     return CURLM_OK;
   case CURLMINFO_XFERS_PENDING:
-    *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->pending);
+    *pvalue = (curl_off_t)Curl_uint32_bset_count(&multi->pending);
     return CURLM_OK;
   case CURLMINFO_XFERS_DONE:
-    *pvalue = (curl_off_t)Curl_uint_bset_count(&multi->msgsent);
+    *pvalue = (curl_off_t)Curl_uint32_bset_count(&multi->msgsent);
     return CURLM_OK;
   case CURLMINFO_XFERS_ADDED:
     *pvalue = multi->xfers_total_ever;
@@ -4025,14 +4025,14 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
 }
 
 struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
-                                      unsigned int mid)
+                                      uint32_t mid)
 {
-  struct Curl_easy *data = Curl_uint_tbl_get(&multi->xfers, mid);
+  struct Curl_easy *data = Curl_uint32_tbl_get(&multi->xfers, mid);
   if(data && GOOD_EASY_HANDLE(data))
     return data;
   CURL_TRC_M(multi->admin, "invalid easy handle in xfer table for mid=%u",
              mid);
-  Curl_uint_tbl_remove(&multi->xfers, mid);
+  Curl_uint32_tbl_remove(&multi->xfers, mid);
   return NULL;
 }
 
@@ -4043,14 +4043,14 @@ unsigned int Curl_multi_xfers_running(struct Curl_multi *multi)
 
 void Curl_multi_mark_dirty(struct Curl_easy *data)
 {
-  if(data->multi && data->mid != UINT_MAX)
-    Curl_uint_bset_add(&data->multi->dirty, data->mid);
+  if(data->multi && data->mid != UINT32_MAX)
+    Curl_uint32_bset_add(&data->multi->dirty, data->mid);
 }
 
 void Curl_multi_clear_dirty(struct Curl_easy *data)
 {
-  if(data->multi && data->mid != UINT_MAX)
-    Curl_uint_bset_remove(&data->multi->dirty, data->mid);
+  if(data->multi && data->mid != UINT32_MAX)
+    Curl_uint32_bset_remove(&data->multi->dirty, data->mid);
 }
 
 CURLMcode curl_multi_notify_enable(CURLM *m, unsigned int notification)
@@ -4072,7 +4072,7 @@ CURLMcode curl_multi_notify_disable(CURLM *m, unsigned int notification)
 }
 
 #ifdef DEBUGBUILD
-static void multi_xfer_dump(struct Curl_multi *multi, unsigned int mid,
+static void multi_xfer_dump(struct Curl_multi *multi, uint32_t mid,
                             void *entry)
 {
   struct Curl_easy *data = entry;
@@ -4092,14 +4092,14 @@ static void multi_xfer_dump(struct Curl_multi *multi, unsigned int mid,
 
 static void multi_xfer_tbl_dump(struct Curl_multi *multi)
 {
-  unsigned int mid;
+  uint32_t mid;
   void *entry;
   curl_mfprintf(stderr, "=== multi xfer table (count=%u, capacity=%u\n",
-                Curl_uint_tbl_count(&multi->xfers),
-                Curl_uint_tbl_capacity(&multi->xfers));
-  if(Curl_uint_tbl_first(&multi->xfers, &mid, &entry)) {
+                Curl_uint32_tbl_count(&multi->xfers),
+                Curl_uint32_tbl_capacity(&multi->xfers));
+  if(Curl_uint32_tbl_first(&multi->xfers, &mid, &entry)) {
     multi_xfer_dump(multi, mid, entry);
-    while(Curl_uint_tbl_next(&multi->xfers, mid, &mid, &entry))
+    while(Curl_uint32_tbl_next(&multi->xfers, mid, &mid, &entry))
       multi_xfer_dump(multi, mid, entry);
   }
   curl_mfprintf(stderr, "===\n");
