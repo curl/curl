@@ -3834,6 +3834,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   if(!result) {
     DEBUGASSERT(conn);
+    Curl_pgrsTime(data, TIMER_POSTQUEUE);
     if(reused) {
       if(CONN_ATTACHED(conn) > 1)
         /* multiplexed */

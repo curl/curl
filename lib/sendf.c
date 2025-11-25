@@ -230,7 +230,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   size_t nwrite, excess_len = 0;
   bool is_connect = !!(type & CLIENTWRITE_CONNECT);
 
-  if(!is_connect && !ctx->started_response) {
+  if(!ctx->started_response &&
+     !(type & (CLIENTWRITE_INFO|CLIENTWRITE_CONNECT))) {
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
     Curl_rlimit_start(&data->progress.dl.rlimit, curlx_now());
     ctx->started_response = TRUE;
