@@ -343,7 +343,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
         Curl_dnscache_mk_entry(data, ares->temp_ai,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
-      ares->temp_ai = NULL; /* temp_ai now owned by entry */
+      if(data->state.async.dns)
+        ares->temp_ai = NULL; /* temp_ai now owned by entry */
 #ifdef HTTPSRR_WORKS
       if(data->state.async.dns) {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);
