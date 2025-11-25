@@ -1408,27 +1408,12 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
     AC_PATH_TOOL([PKGCONFIG], [pkg-config], [no],
       [$PATH:/usr/bin:/usr/local/bin])
   fi
-  AC_MSG_NOTICE([TRACE-A-A 'PKG_CONFIG_PATH:$PKG_CONFIG_PATH'])
-  AC_MSG_NOTICE([TRACE-A-A 'PKG_CONFIG_LIBDIR:$PKG_CONFIG_LIBDIR'])
-  AC_MSG_NOTICE([TRACE-A-A 'LIBRARY_PATH:$LIBRARY_PATH'])
-  AC_MSG_NOTICE([TRACE-A-0 '$PKGCONFIG'])
+
   if test "x$PKGCONFIG" != "xno"; then
-    AC_MSG_NOTICE([TRACE-A-1 '$1' '$2'])
     AC_MSG_CHECKING([for $1 options with pkg-config])
-
-    itexists=`env | sort`
-    AC_MSG_NOTICE([TRACE-A-2-ENVENV '$itexists'])
-
-    itexists=`$PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
-    AC_MSG_NOTICE([TRACE-A-2-TT '$itexists'])
-
-    itexists=`$PKGCONFIG --exists $1`
-    AC_MSG_NOTICE([TRACE-A-3-TT '$itexists'])
-
     dnl ask pkg-config about $1
     itexists=`CURL_EXPORT_PCDIR([$2]) dnl
       $PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
-    AC_MSG_NOTICE([TRACE-A-3 '$itexists'])
 
     if test -z "$itexists"; then
       dnl pkg-config does not have info about the given module! set the
