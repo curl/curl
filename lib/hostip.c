@@ -806,7 +806,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
   struct Curl_addrinfo *addr = NULL;
   bool respwait = FALSE;
   size_t hostname_len;
-  bool keep_negative = TRUE; /* cache a negative result */
   CURLcode result = CURLE_COULDNT_RESOLVE_HOST;
 
   *entry = NULL;
@@ -858,7 +857,6 @@ CURLcode Curl_resolv(struct Curl_easy *data,
                                   data->set.resolver_start_client);
     Curl_set_in_callback(data, FALSE);
     if(st) {
-      keep_negative = FALSE;
       result = CURLE_ABORTED_BY_CALLBACK;
       goto error;
     }
@@ -928,7 +926,6 @@ out:
       if(dns)
         /* avoid a dangling pointer to addr in the dying dns entry */
         dns->addr = NULL;
-      keep_negative = FALSE;
       result = CURLE_OUT_OF_MEMORY;
       goto error;
     }
@@ -947,7 +944,7 @@ error:
   if(dns)
     Curl_resolv_unlink(data, &dns);
   Curl_async_shutdown(data);
-  if(keep_negative)
+  if(result == CURLE_COULDNT_RESOLVE_HOST)
     store_negative_resolve(data, hostname, port);
   DEBUGASSERT(result);
   return result;
