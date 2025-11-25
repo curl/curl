@@ -393,6 +393,11 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
       return result;
     buf += nwritten;
     blen -= nwritten;
+    if(!blen) {
+      result = req_set_upload_done(data);
+      if(result)
+        return result;
+    }
   }
 
   if(blen) {
@@ -469,6 +474,9 @@ CURLcode Curl_req_stop_send_recv(struct Curl_easy *data)
   /* stop receiving and ALL sending as well, including PAUSE and HOLD.
    * We might still be paused on receive client writes though, so
    * keep those bits around. */
+  CURLcode result = CURLE_OK;
+  if(data->req.keepon & KEEP_SEND)
+    result = Curl_req_abort_sending(data);
   data->req.keepon &= ~(KEEP_RECV|KEEP_SEND);
-  return Curl_req_abort_sending(data);
+  return result;
 }

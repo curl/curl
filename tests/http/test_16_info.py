@@ -56,6 +56,7 @@ class TestInfo:
                       remote_ip='127.0.0.1')
         for idx, s in enumerate(r.stats):
             self.check_stat(idx, s, r, dl_size=30, ul_size=0)
+            r.check_stats_timeline(idx)
 
     # download plain file with a 302 redirect
     @pytest.mark.parametrize("proto", Env.http_protos())
@@ -71,6 +72,7 @@ class TestInfo:
                       remote_ip='127.0.0.1')
         for idx, s in enumerate(r.stats):
             self.check_stat(idx, s, r, dl_size=30, ul_size=0)
+            r.check_stats_timeline(idx)
 
     @pytest.mark.parametrize("proto", Env.http_protos())
     def test_16_03_info_upload(self, env: Env, httpd, nghttpx, proto):
@@ -89,6 +91,7 @@ class TestInfo:
                       remote_ip='127.0.0.1')
         for idx, s in enumerate(r.stats):
             self.check_stat(idx, s, r, dl_size=fsize, ul_size=fsize)
+            r.check_stats_timeline(idx)
 
     # download plain file via http: ('time_appconnect' is 0)
     @pytest.mark.parametrize("proto", ['http/1.1'])
@@ -101,9 +104,9 @@ class TestInfo:
                       remote_port=env.http_port, remote_ip='127.0.0.1')
         for idx, s in enumerate(r.stats):
             self.check_stat(idx, s, r, dl_size=30, ul_size=0)
+            r.check_stats_timeline(idx)
 
     def check_stat(self, idx, s, r, dl_size=None, ul_size=None):
-        self.check_stat_times(s, idx)
         # we always send something
         self.check_stat_positive(s, idx, 'size_request')
         # we always receive response headers
@@ -118,54 +121,3 @@ class TestInfo:
     def check_stat_positive(self, s, idx, key):
         assert key in s, f'stat #{idx} "{key}" missing: {s}'
         assert s[key] > 0, f'stat #{idx} "{key}" not positive: {s}'
-
-    def check_stat_positive_or_0(self, s, idx, key):
-        assert key in s, f'stat #{idx} "{key}" missing: {s}'
-        assert s[key] >= 0, f'stat #{idx} "{key}" not positive: {s}'
-
-    def check_stat_zero(self, s, key):
-        assert key in s, f'stat "{key}" missing: {s}'
-        assert s[key] == 0, f'stat "{key}" not zero: {s}'
-
-    def check_stat_times(self, s, idx):
-        # check timings reported on a transfer for consistency
-        url = s['url_effective']
-        # connect time is sometimes reported as 0 by openssl-quic (sigh)
-        self.check_stat_positive_or_0(s, idx, 'time_connect')
-        # all stat keys which reporting timings
-        all_keys = {
-            'time_appconnect', 'time_redirect',
-            'time_pretransfer', 'time_starttransfer', 'time_total'
-        }
-        # stat keys where we expect a positive value
-        pos_keys = {'time_pretransfer', 'time_starttransfer', 'time_total', 'time_queue'}
-        if s['num_connects'] > 0:
-            if url.startswith('https:'):
-                pos_keys.add('time_appconnect')
-        if s['num_redirects'] > 0:
-            pos_keys.add('time_redirect')
-        zero_keys = all_keys - pos_keys
-        # assert all zeros are zeros and the others are positive
-        for key in zero_keys:
-            self.check_stat_zero(s, key)
-        for key in pos_keys:
-            self.check_stat_positive(s, idx, key)
-        # assert that all timers before "time_pretransfer" are less or equal
-        for key in ['time_appconnect', 'time_connect', 'time_namelookup']:
-            assert s[key] < s['time_pretransfer'], f'time "{key}" larger than' \
-                f'"time_pretransfer": {s}'
-        # assert transfer total is after pretransfer.
-        # (in MOST situations, pretransfer is before starttransfer, BUT
-        # in protocols like HTTP we might get a server response already before
-        # we transition to multi state DID.)
-        assert s['time_pretransfer'] <= s['time_total'], f'"time_pretransfer" '\
-            f'greater than "time_total", {s}'
-        # assert that transfer start is before total
-        assert s['time_starttransfer'] <= s['time_total'], f'"time_starttransfer" '\
-            f'greater than "time_total", {s}'
-        if s['num_redirects'] > 0:
-            assert s['time_queue'] < s['time_starttransfer'], f'"time_queue" '\
-                f'greater/equal than "time_starttransfer", {s}'
-        else:
-            assert s['time_queue'] <= s['time_starttransfer'], f'"time_queue" '\
-                f'greater than "time_starttransfer", {s}'

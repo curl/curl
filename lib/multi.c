@@ -2337,7 +2337,7 @@ static CURLMcode state_connect(struct Curl_multi *multi,
     process_pending_handles(data->multi);
 
   if(!result) {
-    *nowp = Curl_pgrsTime(data, TIMER_POSTQUEUE);
+    *nowp = curlx_now();
     if(async)
       /* We are now waiting for an asynchronous name lookup */
       multistate(data, MSTATE_RESOLVING);
