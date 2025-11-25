@@ -88,10 +88,6 @@ my %banfunc = (
     "wcsncpy" => 1,
     "mbstowcs" => 1,
     "wcstombs" => 1,
-    "_open" => 1,
-    "_wfopen" => 1,
-    "_wfreopen" => 1,
-    "_wopen" => 1,
     "LoadLibrary" => 1,
     "LoadLibraryA" => 1,
     "LoadLibraryW" => 1,
@@ -117,6 +113,10 @@ my %banfunc = (
     "fopen" => 1,
     "freopen" => 1,
     "open" => 1,
+    "_open" => 1,
+    "_wfopen" => 1,
+    "_wfreopen" => 1,
+    "_wopen" => 1,
     "stat" => 1,
     );
 
