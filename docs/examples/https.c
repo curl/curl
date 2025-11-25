@@ -57,7 +57,7 @@ int main(void)
 
 #ifdef SKIP_HOSTNAME_VERIFICATION
     /*
-     * If the site you are connecting to uses a different hostname that what
+     * If the site you are connecting to uses a different hostname than what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl refuses to connect. You can skip this
      * check, but it makes the connection insecure.
