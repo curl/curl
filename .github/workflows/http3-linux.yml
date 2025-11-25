@@ -247,7 +247,6 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
             --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" | tar -xz
           cd "nettle-${NETTLE_VERSION}"
-          ./.bootstrap
           ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
             --disable-silent-rules --disable-static --disable-openssl --disable-documentation
           make install
@@ -259,6 +258,7 @@ jobs:
           git clone --quiet --depth 1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls
           cd gnutls
           # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
+          ./bootstrap
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
             PKG_CONFIG_PATH=/home/runner/nettle/build/lib/pkgconfig \
             --with-included-libtasn1 --with-included-unistring \
