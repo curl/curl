@@ -297,6 +297,11 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   return result;
 }
 
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR < 5)
+_CRTIMP errno_t __cdecl freopen_s(FILE** file, const char *filename,
+                                  const char *mode, FILE *stream);
+#endif
+
 FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
 {
   FILE *result = NULL;
@@ -323,12 +328,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
     target = fixed;
   else
     target = filename;
-#if !defined(__MINGW32__) || (__MINGW64_VERSION_MAJOR >= 5)
   errno = freopen_s(&result, target, mode, fp);
-#else
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = freopen(target, mode, fp);
-#endif
 #endif
 
   (free)(fixed);
