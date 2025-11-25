@@ -305,7 +305,7 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
-            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
+            BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include' || { cat config.log; false; }
           make install
 
       - name: 'build ngtcp2 boringssl'
