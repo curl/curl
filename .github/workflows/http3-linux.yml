@@ -409,14 +409,14 @@ jobs:
             install_packages: libp11-kit-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            LDFLAGS: -Wl,-rpath,/home/runner/nettle/build/lib -Wl,-rpath,/home/runner/gnutls/build/lib
+            LDFLAGS: -Wl,-rpath,/home/runner/nettle/build/lib64 -Wl,-rpath,/home/runner/gnutls/build/lib
             configure: >-
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'gnutls'
             install_packages: libp11-kit-dev
             PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            LDFLAGS: -Wl,-rpath,/home/runner/nettle/build/lib -Wl,-rpath,/home/runner/gnutls/build/lib
+            LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
             generate: >-
               -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
               -DCMAKE_UNITY_BUILD=ON
