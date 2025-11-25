@@ -36,6 +36,9 @@ struct curl_multi_ntfy {
   CURLMcode failure;
   struct mntfy_chunk *head;
   struct mntfy_chunk *tail;
+  timediff_t timer_interval_ms;
+  struct curltime timer_start;
+  BIT(timer_active);     /* if admin timer is running */
 };
 
 void Curl_mntfy_init(struct Curl_multi *multi);
@@ -53,5 +56,10 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type);
 
 CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi);
 
+CURLMcode Curl_mntfy_set_timer_ms(struct Curl_multi *multi,
+                                  unsigned int ms);
+
+void Curl_mntfy_update_timer(struct Curl_multi *multi,
+                             struct curltime now);
 
 #endif /* HEADER_CURL_MULTI_NTFY_H */

@@ -424,7 +424,7 @@ class TestDownload:
         curl = CurlClient(env=env)
         speed_limit = 256 * 1024
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
-            '--limit-rate', f'{speed_limit}'
+            '-Z', '--limit-rate', f'{speed_limit}'
         ])
         r.check_response(count=count, http_status=200)
         dl_speed = r.stats[0]['speed_download']
