@@ -230,6 +230,7 @@ struct OperationConfig {
   unsigned char fail;            /* NONE, with body, without body */
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
+  BIT(sync);                /* --sync download range if newer */
   BIT(cookiesession);       /* new session? */
   BIT(encoding);            /* Accept-Encoding please */
   BIT(tr_encoding);         /* Transfer-Encoding please */

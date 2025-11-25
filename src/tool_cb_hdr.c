@@ -133,6 +133,12 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
+    /* For --sync mode, only accept 2xx responses */
+    if(per->config->sync && response && (response/100 != 2)) {
+      /* non-2xx response in sync mode, treat as error */
+      return CURL_WRITEFUNC_ERROR;
+    }
+
     if((response/100 != 2) && (response/100 != 3))
       /* only care about etag and content-disposition headers in 2xx and 3xx
          responses */

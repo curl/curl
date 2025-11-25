@@ -332,6 +332,7 @@ static const struct LongShort aliases[]= {
   {"stderr",                     ARG_FILE, ' ', C_STDERR},
   {"styled-output",              ARG_BOOL, ' ', C_STYLED_OUTPUT},
   {"suppress-connect-headers",   ARG_BOOL, ' ', C_SUPPRESS_CONNECT_HEADERS},
+  {"sync",                        ARG_BOOL, ' ', C_SYNC},
   {"tcp-fastopen",               ARG_BOOL, ' ', C_TCP_FASTOPEN},
   {"tcp-nodelay",                ARG_BOOL, ' ', C_TCP_NODELAY},
   {"telnet-option",              ARG_STRG, 't', C_TELNET_OPTION},
@@ -2049,6 +2050,17 @@ static ParameterError opt_bool(struct OperationConfig *config,
     break;
   case C_STYLED_OUTPUT: /* --styled-output */
     global->styled_output = toggle;
+    break;
+  case C_SYNC: /* --sync */
+    if(toggle) {
+      config->sync = TRUE;
+      config->remote_name_all = TRUE;
+      config->remote_time = TRUE;
+      config->fail = FAIL_WO_BODY; /* fail silently on HTTP errors */
+    }
+    else {
+      config->sync = FALSE;
+    }
     break;
   case C_MAIL_RCPT_ALLOWFAILS: /* --mail-rcpt-allowfails */
     config->mail_rcpt_allowfails = toggle;

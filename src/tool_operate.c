@@ -1045,6 +1045,20 @@ static CURLcode setup_outfile(struct OperationConfig *config,
     }
   }
 
+  /* Handle --sync option: set time condition based on local file */
+  if(config->sync && !per->skip) {
+    struct_stat fileinfo;
+    if(!curlx_stat(per->outfile, &fileinfo)) {
+      /* file exists, use its modification time for conditional request */
+      config->timecond = CURL_TIMECOND_IFMODSINCE;
+      config->condtime = fileinfo.st_mtime;
+    }
+    else {
+      /* file doesn't exist, download unconditionally */
+      config->timecond = CURL_TIMECOND_NONE;
+    }
+  }
+
   if(config->resume_from_current) {
     /* We are told to continue from where we are now. Get the size
        of the file as it is now and open it for append instead */

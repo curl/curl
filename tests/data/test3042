@@ -1,0 +1,53 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--sync
+If-Modified-Since
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 304 Not Modified
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with --sync rejects 304 Not Modified
+</name>
+<command option="no-include">
+--sync --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+</stdout>
+# Should fail with write error for non-2xx response
+<errorcode>
+23
+</errorcode>
+</verify>
+</testcase>
