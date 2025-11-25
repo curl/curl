@@ -1275,8 +1275,7 @@ if(CURL_USE_LIBBACKTRACE)
     message(FATAL_ERROR "libbacktrace requires debug information")
   endif()
   find_package(Libbacktrace REQUIRED)
-  list(APPEND CURL_LIBS ${LIBBACKTRACE_LIBRARIES})
-  include_directories(SYSTEM ${LIBBACKTRACE_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS CURL::libbacktrace)
   set(USE_BACKTRACE ON)
 endif()
 
@@ -2326,6 +2325,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   HAVE_ZSTD
   #   USE_ARES
   #   USE_GNUTLS
+  #   USE_BACKTRACE
   #   USE_GSASL
   #   USE_LIBPSL
   #   USE_LIBRTMP
@@ -2362,6 +2362,7 @@ if(NOT CURL_DISABLE_INSTALL)
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGSS.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGnuTLS.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLDAP.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibbacktrace.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
