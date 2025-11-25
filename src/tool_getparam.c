@@ -112,6 +112,7 @@ static const struct LongShort aliases[]= {
   {"crlf",                       ARG_BOOL, ' ', C_CRLF},
   {"crlfile",                    ARG_FILE|ARG_TLS, ' ', C_CRLFILE},
   {"curves",                     ARG_STRG|ARG_TLS, ' ', C_CURVES},
+  {"custom-meter",               ARG_STRG, ' ', C_CUSTOM_METER},
   {"data",                       ARG_STRG, 'd', C_DATA},
   {"data-ascii",                 ARG_STRG, ' ', C_DATA_ASCII},
   {"data-binary",                ARG_STRG, ' ', C_DATA_BINARY},
@@ -2734,6 +2735,20 @@ static ParameterError opt_string(struct OperationConfig *config,
     break;
   case C_CURVES: /* --curves */
     err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);
+    break;
+  case C_CUSTOM_METER: /* --custom-meter */
+    {
+      long ms = 0;
+      err = secs2ms(&ms, nextarg);
+      if(!err) {
+        global->custom_meter_ms = (timediff_t)ms;
+        /* Enable progress meter mode when custom interval is set */
+        global->progressmode = CURL_PROGRESS_STATS;
+        global->noprogress = FALSE;
+        /* Enable parallel mode to use the custom progress meter */
+        global->parallel = TRUE;
+      }
+    }
     break;
   case C_SIGNATURE_ALGORITHMS: /* --sigalgs */
     err = getstr(&config->ssl_signature_algorithms, nextarg, DENY_BLANK);

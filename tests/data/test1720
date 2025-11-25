@@ -1,0 +1,50 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--custom-bar
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 10485760
+Connection: close
+Content-Type: application/octet-stream
+
+%repeat[10485760 x X]%
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with --custom-meter progress interval
+</name>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --custom-meter 1 -o %LOGDIR/out%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

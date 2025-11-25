@@ -348,6 +348,8 @@ struct GlobalConfig {
 #endif
   timediff_t ms_per_transfer;     /* start next transfer after (at least) this
                                      many milliseconds */
+  timediff_t custom_meter_ms;     /* custom progress meter update interval in
+                                     milliseconds (0 = use default) */
   trace tracetype;
   int progressmode;               /* CURL_PROGRESS_BAR / CURL_PROGRESS_STATS */
   unsigned short parallel_host; /* MAX_PARALLEL_HOST is the maximum */

@@ -58,6 +58,7 @@ typedef enum {
   C_CRLF,
   C_CRLFILE,
   C_CURVES,
+  C_CUSTOM_METER,
   C_DATA,
   C_DATA_ASCII,
   C_DATA_BINARY,

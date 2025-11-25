@@ -71,6 +71,7 @@ DPAGES = \
   crlf.md \
   crlfile.md \
   curves.md \
+  custom-meter.md \
   data-ascii.md \
   data-binary.md \
   data-raw.md \

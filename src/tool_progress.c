@@ -151,6 +151,7 @@ bool progress_meter(CURLM *multi,
   static bool header = FALSE;
   struct curltime now;
   timediff_t diff;
+  timediff_t interval;
 
   if(global->noprogress || global->silent)
     return FALSE;
@@ -158,13 +159,16 @@ bool progress_meter(CURLM *multi,
   now = curlx_now();
   diff = curlx_timediff_ms(now, stamp);
 
+  /* Use custom interval if set, otherwise default to 500ms */
+  interval = global->custom_meter_ms ? global->custom_meter_ms : 500;
+
   if(!header) {
     header = TRUE;
-    fputs("DL% UL%  Dled  Uled  Xfers  Live "
-          "Total     Current  Left    Speed\n",
+    fputs("  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n"
+          "                                 Dload  Upload   Total   Spent    Left  Speed\n",
           tool_stderr);
   }
-  if(final || (diff > 500)) {
+  if(final || (diff > interval)) {
     char time_left[10];
     char time_total[10];
     char time_spent[10];
@@ -267,30 +271,45 @@ bool progress_meter(CURLM *multi,
 
     (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_ADDED, &xfers_added);
     (void)curl_multi_get_offt(multi, CURLMINFO_XFERS_RUNNING, &xfers_running);
+
+    /* Calculate total percentage if known */
+    char totalpercen[4] = " --";
+    if(dlknown && all_dltotal) {
+      curl_off_t total_percent = all_dlnow < (CURL_OFF_T_MAX/100) ?
+                                  (all_dlnow * 100 / all_dltotal) :
+                                  (all_dlnow / (all_dltotal/100));
+      curl_msnprintf(totalpercen, sizeof(totalpercen), "%3" CURL_FORMAT_CURL_OFF_T,
+                     total_percent);
+    }
+
     curl_mfprintf(tool_stderr,
                   "\r"
-                  "%-3s " /* percent downloaded */
-                  "%-3s " /* percent uploaded */
-                  "%s " /* Dled */
-                  "%s " /* Uled */
-                  "%5" CURL_FORMAT_CURL_OFF_T " " /* Xfers */
-                  "%5" CURL_FORMAT_CURL_OFF_T " " /* Live */
-                  " %s "  /* Total time */
-                  "%s "  /* Current time */
-                  "%s "  /* Time left */
-                  "%s "  /* Speed */
-                  "%5s" /* final newline */,
+                  "%3s "              /* % Total */
+                  "%s "               /* Total size */
+                  "%3s "              /* % Received */
+                  "%s "               /* Received size */
+                  "%3s "              /* % Xferd */
+                  "%s "               /* Upload size */
+                  "%s "               /* Average Speed Dload */
+                  "%6s "              /* Average Speed Upload */
+                  "%s "               /* Time Total */
+                  "%s "               /* Time Spent */
+                  "%s "               /* Time Left */
+                  "%s"                /* Current Speed */
+                  "%5s",              /* final newline */
 
-                  dlpercen,  /* 3 letters */
-                  ulpercen,  /* 3 letters */
-                  max5data(all_dlnow, buffer[0]),
-                  max5data(all_ulnow, buffer[1]),
-                  xfers_added,
-                  xfers_running,
+                  totalpercen,
+                  max5data(all_dltotal, buffer[0]),
+                  dlpercen,
+                  max5data(all_dlnow, buffer[1]),
+                  ulpercen,
+                  max5data(all_ulnow, buffer[2]),
+                  max5data(speed, buffer[0]),
+                  "     0",           /* upload speed placeholder */
                   time_total,
                   time_spent,
                   time_left,
-                  max5data(speed, buffer[2]), /* speed */
+                  max5data(speed, buffer[1]),
                   final ? "\n" :"");
     return TRUE;
   }
