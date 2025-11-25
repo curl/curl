@@ -323,7 +323,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
     target = fixed;
   else
     target = filename;
-#if !defined(__MINGW32__) || (__MINGW64_VERSION_MAJOR >= 4)
+#if !defined(__MINGW32__) || (__MINGW64_VERSION_MAJOR >= 5)
   errno = freopen_s(&result, target, mode, fp);
 #else
   /* !checksrc! disable BANNEDFUNC 1 */
