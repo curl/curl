@@ -3449,9 +3449,12 @@ if test "x$USE_NGTCP2" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
+    AC_MSG_NOTICE([TRACE-1 '$want_tcp2_path'])
   CURL_CHECK_PKGCONFIG(libngtcp2_crypto_gnutls, $want_tcp2_path)
+    AC_MSG_NOTICE([TRACE-2 '$PKGCONFIG'])
 
   if test "$PKGCONFIG" != "no"; then
+    AC_MSG_NOTICE([TRACE-3 '$PKGCONFIG'])
     LIB_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_GNUTLS])
@@ -3490,6 +3493,7 @@ if test "x$USE_NGTCP2" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
     )
 
   else
+    AC_MSG_NOTICE([TRACE-4 '$want_tcp2'])
     dnl no ngtcp2_crypto_gnutls pkg-config found, deal with it
     if test X"$want_tcp2" != Xdefault; then
       dnl To avoid link errors, we do not allow --with-ngtcp2 without
