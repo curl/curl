@@ -125,7 +125,7 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 #endif
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
-  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint32_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->data_recvd = 0;
   ctx->initialized = TRUE;
 }
@@ -139,7 +139,7 @@ static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
     Curl_ssl_peer_cleanup(&ctx->peer);
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_uint_hash_destroy(&ctx->streams);
+    Curl_uint32_hash_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -210,7 +210,7 @@ struct cf_quiche_visit_ctx {
   void *user_data;
 };
 
-static bool cf_quiche_stream_do(unsigned int mid, void *val, void *user_data)
+static bool cf_quiche_stream_do(uint32_t mid, void *val, void *user_data)
 {
   struct cf_quiche_visit_ctx *vctx = user_data;
   struct h3_stream_ctx *stream = val;
@@ -231,7 +231,7 @@ static void cf_quiche_for_all_streams(struct Curl_cfilter *cf,
   vctx.multi = multi;
   vctx.cb = do_cb;
   vctx.user_data = user_data;
-  Curl_uint_hash_visit(&ctx->streams, cf_quiche_stream_do, &vctx);
+  Curl_uint32_hash_visit(&ctx->streams, cf_quiche_stream_do, &vctx);
 }
 
 static bool cf_quiche_do_resume(struct Curl_cfilter *cf,
@@ -278,7 +278,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -308,7 +308,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(result)
         CURL_TRC_CF(data, cf, "data_done, flush egress -> %d", result);
     }
-    Curl_uint_hash_remove(&ctx->streams, data->mid);
+    Curl_uint32_hash_remove(&ctx->streams, data->mid);
   }
 }
 
@@ -558,7 +558,7 @@ struct cf_quich_disp_ctx {
   CURLcode result;
 };
 
-static bool cf_quiche_disp_event(unsigned int mid, void *val, void *user_data)
+static bool cf_quiche_disp_event(uint32_t mid, void *val, void *user_data)
 {
   struct cf_quich_disp_ctx *dctx = user_data;
   struct h3_stream_ctx *stream = val;
@@ -607,7 +607,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
       else {
         /* another transfer, do not return errors, as they are not for
          * the calling transfer */
-        Curl_uint_hash_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
+        Curl_uint32_hash_visit(&ctx->streams, cf_quiche_disp_event, &dctx);
         quiche_h3_event_free(ev);
       }
     }

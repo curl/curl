@@ -96,7 +96,7 @@ struct doh_request {
 };
 
 struct doh_response {
-  unsigned int probe_mid;
+  uint32_t probe_mid;
   struct dynbuf body;
   DNStype dnstype;
   CURLcode result;

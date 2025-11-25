@@ -34,10 +34,10 @@
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
-#define CURL_UINTHASHINIT 0x7117e779
+#define CURL_UINT32_HASHINIT 0x7117e779
 #endif
 
-static unsigned int uint_hash_hash(unsigned int id, unsigned int slots)
+static uint32_t uint32_hash_hash(uint32_t id, uint32_t slots)
 {
   return (id % slots);
 }
@@ -46,12 +46,12 @@ static unsigned int uint_hash_hash(unsigned int id, unsigned int slots)
 struct uint_hash_entry {
   struct uint_hash_entry *next;
   void   *value;
-  unsigned int id;
+  uint32_t id;
 };
 
-void Curl_uint_hash_init(struct uint_hash *h,
-                         unsigned int slots,
-                         Curl_uint_hash_dtor *dtor)
+void Curl_uint32_hash_init(struct uint_hash *h,
+                           uint32_t slots,
+                           Curl_uint32_hash_dtor *dtor)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(slots);
@@ -61,11 +61,11 @@ void Curl_uint_hash_init(struct uint_hash *h,
   h->size = 0;
   h->slots = slots;
 #ifdef DEBUGBUILD
-  h->init = CURL_UINTHASHINIT;
+  h->init = CURL_UINT32_HASHINIT;
 #endif
 }
 
-static struct uint_hash_entry *uint_hash_mk_entry(unsigned int id, void *value)
+static struct uint_hash_entry *uint32_hash_mk_entry(uint32_t id, void *value)
 {
   struct uint_hash_entry *e;
 
@@ -79,8 +79,8 @@ static struct uint_hash_entry *uint_hash_mk_entry(unsigned int id, void *value)
   return e;
 }
 
-static void uint_hash_entry_clear(struct uint_hash *h,
-                                  struct uint_hash_entry *e)
+static void uint32_hash_entry_clear(struct uint_hash *h,
+                                    struct uint_hash_entry *e)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(e);
@@ -91,78 +91,78 @@ static void uint_hash_entry_clear(struct uint_hash *h,
   }
 }
 
-static void uint_hash_entry_destroy(struct uint_hash *h,
-                                    struct uint_hash_entry *e)
+static void uint32_hash_entry_destroy(struct uint_hash *h,
+                                      struct uint_hash_entry *e)
 {
-  uint_hash_entry_clear(h, e);
+  uint32_hash_entry_clear(h, e);
   free(e);
 }
 
-static void uint_hash_entry_unlink(struct uint_hash *h,
-                                   struct uint_hash_entry **he_anchor,
-                                   struct uint_hash_entry *he)
+static void uint32_hash_entry_unlink(struct uint_hash *h,
+                                     struct uint_hash_entry **he_anchor,
+                                     struct uint_hash_entry *he)
 {
   *he_anchor = he->next;
   --h->size;
 }
 
-static void uint_hash_elem_link(struct uint_hash *h,
-                                struct uint_hash_entry **he_anchor,
-                                struct uint_hash_entry *he)
+static void uint32_hash_elem_link(struct uint_hash *h,
+                                  struct uint_hash_entry **he_anchor,
+                                  struct uint_hash_entry *he)
 {
   he->next = *he_anchor;
   *he_anchor = he;
   ++h->size;
 }
 
-#define CURL_UINT_HASH_SLOT(h,id)  h->table[uint_hash_hash(id, h->slots)]
-#define CURL_UINT_HASH_SLOT_ADDR(h,id) &CURL_UINT_HASH_SLOT(h,id)
+#define CURL_UINT32_HASH_SLOT(h,id) h->table[uint32_hash_hash(id, h->slots)]
+#define CURL_UINT32_HASH_SLOT_ADDR(h,id) &CURL_UINT32_HASH_SLOT(h,id)
 
-bool Curl_uint_hash_set(struct uint_hash *h, unsigned int id, void *value)
+bool Curl_uint32_hash_set(struct uint_hash *h, uint32_t id, void *value)
 {
   struct uint_hash_entry *he, **slot;
 
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
-  DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+  DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   if(!h->table) {
     h->table = calloc(h->slots, sizeof(*he));
     if(!h->table)
       return FALSE; /* OOM */
   }
 
-  slot = CURL_UINT_HASH_SLOT_ADDR(h, id);
+  slot = CURL_UINT32_HASH_SLOT_ADDR(h, id);
   for(he = *slot; he; he = he->next) {
     if(he->id == id) {
       /* existing key entry, overwrite by clearing old pointer */
-      uint_hash_entry_clear(h, he);
+      uint32_hash_entry_clear(h, he);
       he->value = value;
       return TRUE;
     }
   }
 
-  he = uint_hash_mk_entry(id, value);
+  he = uint32_hash_mk_entry(id, value);
   if(!he)
     return FALSE; /* OOM */
 
-  uint_hash_elem_link(h, slot, he);
+  uint32_hash_elem_link(h, slot, he);
   return TRUE;
 }
 
-bool Curl_uint_hash_remove(struct uint_hash *h, unsigned int id)
+bool Curl_uint32_hash_remove(struct uint_hash *h, uint32_t id)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
-  DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+  DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   if(h->table) {
     struct uint_hash_entry *he, **he_anchor;
 
-    he_anchor = CURL_UINT_HASH_SLOT_ADDR(h, id);
+    he_anchor = CURL_UINT32_HASH_SLOT_ADDR(h, id);
     while(*he_anchor) {
       he = *he_anchor;
       if(id == he->id) {
-        uint_hash_entry_unlink(h, he_anchor, he);
-        uint_hash_entry_destroy(h, he);
+        uint32_hash_entry_unlink(h, he_anchor, he);
+        uint32_hash_entry_destroy(h, he);
         return TRUE;
       }
       he_anchor = &he->next;
@@ -171,14 +171,14 @@ bool Curl_uint_hash_remove(struct uint_hash *h, unsigned int id)
   return FALSE;
 }
 
-void *Curl_uint_hash_get(struct uint_hash *h, unsigned int id)
+void *Curl_uint32_hash_get(struct uint_hash *h, uint32_t id)
 {
   DEBUGASSERT(h);
-  DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+  DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   if(h->table) {
     struct uint_hash_entry *he;
     DEBUGASSERT(h->slots);
-    he = CURL_UINT_HASH_SLOT(h, id);
+    he = CURL_UINT32_HASH_SLOT(h, id);
     while(he) {
       if(id == he->id) {
         return he->value;
@@ -194,28 +194,28 @@ static void uint_hash_clear(struct uint_hash *h)
   if(h && h->table) {
     struct uint_hash_entry *he, **he_anchor;
     size_t i;
-    DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+    DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
     for(i = 0; i < h->slots; ++i) {
       he_anchor = &h->table[i];
       while(*he_anchor) {
         he = *he_anchor;
-        uint_hash_entry_unlink(h, he_anchor, he);
-        uint_hash_entry_destroy(h, he);
+        uint32_hash_entry_unlink(h, he_anchor, he);
+        uint32_hash_entry_destroy(h, he);
       }
     }
   }
 }
 
 #ifdef UNITTESTS
-UNITTEST void Curl_uint_hash_clear(struct uint_hash *h)
+UNITTEST void Curl_uint32_hash_clear(struct uint_hash *h)
 {
   uint_hash_clear(h);
 }
 #endif
 
-void Curl_uint_hash_destroy(struct uint_hash *h)
+void Curl_uint32_hash_destroy(struct uint_hash *h)
 {
-  DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+  DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   if(h->table) {
     uint_hash_clear(h);
     Curl_safefree(h->table);
@@ -224,20 +224,20 @@ void Curl_uint_hash_destroy(struct uint_hash *h)
   h->slots = 0;
 }
 
-unsigned int Curl_uint_hash_count(struct uint_hash *h)
+uint32_t Curl_uint32_hash_count(struct uint_hash *h)
 {
-  DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+  DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
   return h->size;
 }
 
-void Curl_uint_hash_visit(struct uint_hash *h,
-                          Curl_uint_hash_visit_cb *cb,
-                          void *user_data)
+void Curl_uint32_hash_visit(struct uint_hash *h,
+                            Curl_uint32_hash_visit_cb *cb,
+                            void *user_data)
 {
   if(h && h->table && cb) {
     struct uint_hash_entry *he;
     size_t i;
-    DEBUGASSERT(h->init == CURL_UINTHASHINIT);
+    DEBUGASSERT(h->init == CURL_UINT32_HASHINIT);
     for(i = 0; i < h->slots; ++i) {
       for(he = h->table[i]; he; he = he->next) {
         if(!cb(he->id, he->value, user_data))

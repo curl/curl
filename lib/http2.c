@@ -140,7 +140,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
   Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_uint_hash_init(&ctx->streams, 63, h2_stream_hash_free);
+  Curl_uint32_hash_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->remote_max_sid = 2147483647;
   ctx->via_h1_upgrade = via_h1_upgrade;
 #ifdef DEBUGBUILD
@@ -165,7 +165,7 @@ static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
     Curl_bufq_free(&ctx->outbufq);
     Curl_bufcp_free(&ctx->stream_bufcp);
     curlx_dyn_free(&ctx->scratch);
-    Curl_uint_hash_destroy(&ctx->streams);
+    Curl_uint32_hash_destroy(&ctx->streams);
     memset(ctx, 0, sizeof(*ctx));
   }
   free(ctx);
@@ -269,7 +269,7 @@ struct h2_stream_ctx {
 
 #define H2_STREAM_CTX(ctx,data)                                         \
   ((struct h2_stream_ctx *)(                                            \
-    data? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL))
+    data? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 {
@@ -426,7 +426,7 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
     h2_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -466,7 +466,7 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
-  Curl_uint_hash_remove(&ctx->streams, data->mid);
+  Curl_uint32_hash_remove(&ctx->streams, data->mid);
 }
 
 static int h2_client_new(struct Curl_cfilter *cf,

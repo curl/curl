@@ -610,8 +610,8 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) (!Curl_uint_spbset_empty(&(c)->xfers_attached))
-#define CONN_ATTACHED(c) Curl_uint_spbset_count(&(c)->xfers_attached)
+#define CONN_INUSE(c) (!Curl_uint32_spbset_empty(&(c)->xfers_attached))
+#define CONN_ATTACHED(c) Curl_uint32_spbset_count(&(c)->xfers_attached)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -671,7 +671,7 @@ struct connectdata {
      was used on this connection. */
   struct curltime keepalive;
 
-  struct uint_spbset xfers_attached; /* mids of attached transfers */
+  struct uint32_spbset xfers_attached; /* mids of attached transfers */
   /* A connection cache from a SHARE might be used in several multi handles.
    * We MUST not reuse connections that are running in another multi,
    * for concurrency reasons. That multi might run in another thread.
@@ -1631,8 +1631,8 @@ struct Curl_easy {
   /* once an easy handle is added to a multi, either explicitly by the
    * libcurl application or implicitly during `curl_easy_perform()`,
    * a unique identifier inside this one multi instance. */
-  unsigned int mid;
-  unsigned int master_mid; /* if set, this transfer belongs to a master */
+  uint32_t mid;
+  uint32_t master_mid; /* if set, this transfer belongs to a master */
   multi_sub_xfer_done_cb *sub_xfer_done;
 
   struct connectdata *conn;

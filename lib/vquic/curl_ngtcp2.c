@@ -168,7 +168,7 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   curlx_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint32_hash_init(&ctx->streams, 63, h3_stream_hash_free);
   ctx->initialized = TRUE;
 }
 
@@ -179,7 +179,7 @@ static void cf_ngtcp2_ctx_free(struct cf_ngtcp2_ctx *ctx)
     vquic_ctx_free(&ctx->q);
     Curl_bufcp_free(&ctx->stream_bufcp);
     curlx_dyn_free(&ctx->scratch);
-    Curl_uint_hash_destroy(&ctx->streams);
+    Curl_uint32_hash_destroy(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->peer);
   }
   free(ctx);
@@ -207,7 +207,7 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
     ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
     CURL_TRC_CF(data, cf, "no peer idle timeout, unset keep-alive");
   }
-  else if(!Curl_uint_hash_count(&ctx->streams)) {
+  else if(!Curl_uint32_hash_count(&ctx->streams)) {
     ngtcp2_conn_set_keep_alive_timeout(ctx->qconn, UINT64_MAX);
     CURL_TRC_CF(data, cf, "no active streams, unset keep-alive");
   }
@@ -288,12 +288,12 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->sendbuf_len_in_flight = 0;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint32_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
 
-  if(Curl_uint_hash_count(&ctx->streams) == 1)
+  if(Curl_uint32_hash_count(&ctx->streams) == 1)
     cf_ngtcp2_setup_keep_alive(cf, data);
 
   return CURLE_OK;
@@ -303,10 +303,10 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 struct cf_ngtcp2_sfind_ctx {
   int64_t stream_id;
   struct h3_stream_ctx *stream;
-  unsigned int mid;
+  uint32_t mid;
 };
 
-static bool cf_ngtcp2_sfind(unsigned int mid, void *value, void *user_data)
+static bool cf_ngtcp2_sfind(uint32_t mid, void *value, void *user_data)
 {
   struct cf_ngtcp2_sfind_ctx *fctx = user_data;
   struct h3_stream_ctx *stream = value;
@@ -325,7 +325,7 @@ cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx, int64_t stream_id)
   struct cf_ngtcp2_sfind_ctx fctx;
   fctx.stream_id = stream_id;
   fctx.stream = NULL;
-  Curl_uint_hash_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
+  Curl_uint32_hash_visit(&ctx->streams, cf_ngtcp2_sfind, &fctx);
   return fctx.stream;
 }
 #else
@@ -374,8 +374,8 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
     CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done",
                 stream->id);
     cf_ngtcp2_stream_close(cf, data, stream);
-    Curl_uint_hash_remove(&ctx->streams, data->mid);
-    if(!Curl_uint_hash_count(&ctx->streams))
+    Curl_uint32_hash_remove(&ctx->streams, data->mid);
+    if(!Curl_uint32_hash_count(&ctx->streams))
       cf_ngtcp2_setup_keep_alive(cf, data);
   }
 }

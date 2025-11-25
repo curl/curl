@@ -286,7 +286,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
                               DNStype dnstype,
                               const char *host,
                               const char *url, CURLM *multi,
-                              unsigned int *pmid)
+                              uint32_t *pmid)
 {
   struct Curl_easy *doh = NULL;
   CURLcode result = CURLE_OK;
@@ -294,7 +294,7 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
   struct doh_request *doh_req;
   DOHcode d;
 
-  *pmid = UINT_MAX;
+  *pmid = UINT32_MAX;
 
   doh_req = calloc(1, sizeof(*doh_req));
   if(!doh_req)
@@ -472,7 +472,7 @@ CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
     return CURLE_OUT_OF_MEMORY;
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
-    dohp->probe_resp[i].probe_mid = UINT_MAX;
+    dohp->probe_resp[i].probe_mid = UINT32_MAX;
     curlx_dyn_init(&dohp->probe_resp[i].body, DYN_DOH_RESPONSE);
   }
 
@@ -1222,8 +1222,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
-  if(dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT_MAX &&
-     dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT_MAX) {
+  if(dohp->probe_resp[DOH_SLOT_IPV4].probe_mid == UINT32_MAX &&
+     dohp->probe_resp[DOH_SLOT_IPV6].probe_mid == UINT32_MAX) {
     failf(data, "Could not DoH-resolve: %s", dohp->host);
     return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
       CURLE_COULDNT_RESOLVE_HOST;
@@ -1318,13 +1318,13 @@ void Curl_doh_close(struct Curl_easy *data)
   struct doh_probes *doh = data->state.async.doh;
   if(doh && data->multi) {
     struct Curl_easy *probe_data;
-    unsigned int mid;
+    uint32_t mid;
     size_t slot;
     for(slot = 0; slot < DOH_SLOT_COUNT; slot++) {
       mid = doh->probe_resp[slot].probe_mid;
-      if(mid == UINT_MAX)
+      if(mid == UINT32_MAX)
         continue;
-      doh->probe_resp[slot].probe_mid = UINT_MAX;
+      doh->probe_resp[slot].probe_mid = UINT32_MAX;
       /* should have been called before data is removed from multi handle */
       DEBUGASSERT(data->multi);
       probe_data = data->multi ? Curl_multi_get_easy(data->multi, mid) :

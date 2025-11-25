@@ -30,36 +30,38 @@
 static void check_set(const char *name, unsigned int capacity,
                       const unsigned int *s, size_t slen)
 {
-  struct uint_bset bset;
+  struct uint32_bset bset;
   size_t i, j;
   unsigned int n, c;
 
   curl_mfprintf(stderr, "test %s, capacity=%u, %zu numbers\n",
                 name, capacity, slen);
-  Curl_uint_bset_init(&bset);
-  fail_unless(!Curl_uint_bset_resize(&bset, capacity), "bset resize failed");
-  c = Curl_uint_bset_capacity(&bset);
+  Curl_uint32_bset_init(&bset);
+  fail_unless(!Curl_uint32_bset_resize(&bset, capacity), "bset resize failed");
+  c = Curl_uint32_bset_capacity(&bset);
   fail_unless(c == (((capacity + 63) / 64) * 64), "wrong capacity");
 
-  Curl_uint_bset_clear(&bset);
-  c = Curl_uint_bset_count(&bset);
+  Curl_uint32_bset_clear(&bset);
+  c = Curl_uint32_bset_count(&bset);
   fail_unless(c == 0, "set count is not 0");
 
   for(i = 0; i < slen; ++i) { /* add all */
-    fail_unless(Curl_uint_bset_add(&bset, s[i]), "failed to add");
+    fail_unless(Curl_uint32_bset_add(&bset, s[i]), "failed to add");
     for(j = i + 1; j < slen; ++j)
-      fail_unless(!Curl_uint_bset_contains(&bset, s[j]), "unexpectedly found");
+      fail_unless(!Curl_uint32_bset_contains(&bset, s[j]),
+                  "unexpectedly found");
   }
 
   for(i = 0; i < slen; ++i) { /* all present */
-    fail_unless(Curl_uint_bset_contains(&bset, s[i]), "failed presence check");
+    fail_unless(Curl_uint32_bset_contains(&bset, s[i]),
+                "failed presence check");
   }
 
   /* iterator over all numbers */
-  fail_unless(Curl_uint_bset_first(&bset, &n), "first failed");
+  fail_unless(Curl_uint32_bset_first(&bset, &n), "first failed");
   fail_unless(n == s[0], "first not correct number");
   for(i = 1; i < slen; ++i) {
-    fail_unless(Curl_uint_bset_next(&bset, n, &n), "next failed");
+    fail_unless(Curl_uint32_bset_next(&bset, n, &n), "next failed");
     if(n != s[i]) {
       curl_mfprintf(stderr, "expected next to be %u, not %u\n", s[i], n);
       fail_unless(n == s[i], "next not correct number");
@@ -67,57 +69,58 @@ static void check_set(const char *name, unsigned int capacity,
   }
 
   /* Adding capacity number does not work (0 - capacity-1) */
-  c = Curl_uint_bset_capacity(&bset);
-  fail_unless(!Curl_uint_bset_add(&bset, c), "add out of range worked");
+  c = Curl_uint32_bset_capacity(&bset);
+  fail_unless(!Curl_uint32_bset_add(&bset, c), "add out of range worked");
   /* The count it correct */
-  c = Curl_uint_bset_count(&bset);
+  c = Curl_uint32_bset_count(&bset);
   fail_unless(c == slen, "set count is wrong");
 
   for(i = 0; i < slen; i += 2) { /* remove every 2nd */
-    Curl_uint_bset_remove(&bset, s[i]);
-    fail_unless(!Curl_uint_bset_contains(&bset, s[i]), "unexpectedly found");
+    Curl_uint32_bset_remove(&bset, s[i]);
+    fail_unless(!Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly found");
   }
   for(i = 1; i < slen; i += 2) { /* others still there */
-    fail_unless(Curl_uint_bset_contains(&bset, s[i]), "unexpectedly gone");
+    fail_unless(Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly gone");
   }
   /* The count is half */
-  c = Curl_uint_bset_count(&bset);
+  c = Curl_uint32_bset_count(&bset);
   fail_unless(c == slen/2, "set count is wrong");
 
-  Curl_uint_bset_clear(&bset);
-  c = Curl_uint_bset_count(&bset);
+  Curl_uint32_bset_clear(&bset);
+  c = Curl_uint32_bset_count(&bset);
   fail_unless(c == 0, "set count is not 0");
   for(i = 0; i < slen; i++) { /* none present any longer */
-    fail_unless(!Curl_uint_bset_contains(&bset, s[i]), "unexpectedly there");
+    fail_unless(!Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly there");
   }
 
   for(i = 0; i < slen; ++i) { /* add all again */
-    fail_unless(Curl_uint_bset_add(&bset, s[i]), "failed to add");
+    fail_unless(Curl_uint32_bset_add(&bset, s[i]), "failed to add");
   }
 
-  fail_unless(!Curl_uint_bset_resize(&bset, capacity * 2),
+  fail_unless(!Curl_uint32_bset_resize(&bset, capacity * 2),
               "resize double failed");
   for(i = 0; i < slen; i++) { /* all still present after resize */
-    fail_unless(Curl_uint_bset_contains(&bset, s[i]), "unexpectedly lost");
+    fail_unless(Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly lost");
   }
 
-  fail_unless(!Curl_uint_bset_resize(&bset, capacity), "resize back failed");
+  fail_unless(!Curl_uint32_bset_resize(&bset, capacity), "resize back failed");
   for(i = 0; i < slen; i++)  /* all still present after resize back */
-    fail_unless(Curl_uint_bset_contains(&bset, s[i]), "unexpectedly lost");
+    fail_unless(Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly lost");
 
-  fail_unless(!Curl_uint_bset_resize(&bset, capacity/2), "resize half failed");
+  fail_unless(!Curl_uint32_bset_resize(&bset, capacity/2),
+              "resize half failed");
   /* halved the size, what numbers remain in set? */
-  c = Curl_uint_bset_capacity(&bset);
+  c = Curl_uint32_bset_capacity(&bset);
   n = 0;
   for(i = 0; i < slen; ++i) {
     if(s[i] < c)
       ++n;
   }
-  fail_unless(n == Curl_uint_bset_count(&bset), "set count(halved) wrong");
+  fail_unless(n == Curl_uint32_bset_count(&bset), "set count(halved) wrong");
   for(i = 0; i < n; i++)  /* still present after resize half */
-    fail_unless(Curl_uint_bset_contains(&bset, s[i]), "unexpectedly lost");
+    fail_unless(Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly lost");
 
-  Curl_uint_bset_destroy(&bset);
+  Curl_uint32_bset_destroy(&bset);
 }
 
 static CURLcode test_unit3211(const char *arg)
