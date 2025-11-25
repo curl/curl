@@ -46,8 +46,10 @@ env:
   AWSLC_VERSION: 1.63.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
   BORINGSSL_VERSION: 0.20251110.0
-  # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
-  GNUTLS_VERSION: 3.8.10
+  # renovate: datasource=github-tags depName=gnutls/nettle versioning=semver registryUrl=https://github.com
+  NETTLE_VERSION: 3.10.2
+  # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver extractVersion=^nettle_?(?<version>.+)_release_.+$ registryUrl=https://github.com
+  GNUTLS_VERSION: 3.8.11
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   WOLFSSL_VERSION: 5.8.4
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
@@ -101,6 +103,15 @@ jobs:
           path: ~/boringssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
 
+      - name: 'cache nettle'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-nettle
+        env:
+          cache-name: cache-nettle
+        with:
+          path: ~/nettle/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
+
       - name: 'cache gnutls'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-gnutls
@@ -108,7 +119,7 @@ jobs:
           cache-name: cache-gnutls
         with:
           path: ~/gnutls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
 
       - name: 'cache wolfssl'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -135,7 +146,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
 
       - name: 'cache ngtcp2 boringssl'
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -161,6 +172,7 @@ jobs:
               steps.cache-libressl.outputs.cache-hit != 'true' ||
               steps.cache-awslc.outputs.cache-hit != 'true' ||
               steps.cache-boringssl.outputs.cache-hit != 'true' ||
+              steps.cache-nettle.outputs.cache-hit != 'true' ||
               steps.cache-gnutls.outputs.cache-hit != 'true' ||
               steps.cache-wolfssl.outputs.cache-hit != 'true' ||
               steps.cache-nghttp3.outputs.cache-hit != 'true' ||
@@ -181,7 +193,7 @@ jobs:
             libbrotli-dev libzstd-dev zlib1g-dev \
             libev-dev \
             libc-ares-dev \
-            nettle-dev libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
+            libp11-kit-dev autopoint bison gperf gtk-doc-tools libtasn1-bin  # for GnuTLS
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
@@ -228,19 +240,30 @@ jobs:
           cmake --build .
           cmake --install .
 
+      - name: 'build nettle'
+        if: ${{ steps.cache-nettle.outputs.cache-hit != 'true' }}
+        run: |
+          cd ~
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            --location "https://ftpmirror.gnu.org/nettle/nettle-${NETTLE_VERSION}.tar.gz" | tar -xz
+          cd "nettle-${NETTLE_VERSION}"
+          ./configure --disable-dependency-tracking --prefix=/home/runner/nettle/build \
+            --disable-silent-rules --disable-static --disable-openssl --disable-documentation
+          make install
+
       - name: 'build gnutls'
         if: ${{ steps.cache-gnutls.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth 1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls
-          cd gnutls
-          # required: nettle-dev libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
-          ./bootstrap
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            LDFLAGS="-Wl,-rpath,$PWD/build/lib -L$PWD/build/lib" \
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
+            "https://www.gnupg.org/ftp/gcrypt/gnutls/v${GNUTLS_VERSION%.*}/gnutls-${GNUTLS_VERSION}.tar.xz" | tar -xJ
+          cd "gnutls-${GNUTLS_VERSION}"
+          # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
+          ./configure --disable-dependency-tracking --prefix=/home/runner/gnutls/build \
+            PKG_CONFIG_PATH=/home/runner/nettle/build/lib64/pkgconfig \
+            LDFLAGS=-Wl,-rpath,/home/runner/nettle/build/lib64 \
             --with-included-libtasn1 --with-included-unistring \
             --disable-guile --disable-doc --disable-tests --disable-tools
-          make
           make install
 
       - name: 'build wolfssl'
@@ -280,7 +303,7 @@ jobs:
           make install
           make clean
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
-            PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
+            PKG_CONFIG_PATH=/home/runner/openssl/build/lib/pkgconfig:/home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/wolfssl/build/lib/pkgconfig \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl --with-boringssl \
             BORINGSSL_LIBS='-L/home/runner/awslc/build/lib -lssl -lcrypto' \
             BORINGSSL_CFLAGS='-I/home/runner/awslc/build/include'
@@ -383,16 +406,18 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'gnutls'
-            install_packages: nettle-dev libp11-kit-dev
+            install_packages: libp11-kit-dev
             install_steps: skipall
-            PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib -Wl,-rpath,/home/runner/nettle/build/lib64 -L/home/runner/nettle/build/lib64 -Wl,-rpath,/home/runner/ngtcp2/build/lib
+            CPPFLAGS: -I/home/runner/nettle/build/include
             configure: >-
-              LDFLAGS=-Wl,-rpath,/home/runner/gnutls/build/lib
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'gnutls'
-            install_packages: nettle-dev libp11-kit-dev
-            PKG_CONFIG_PATH: /home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            install_packages: libp11-kit-dev
+            PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
+            LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
             generate: >-
               -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
               -DCMAKE_UNITY_BUILD=ON
@@ -502,6 +527,17 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.BORINGSSL_VERSION }}
           fail-on-cache-miss: true
 
+      - name: 'cache nettle'
+        if: ${{ matrix.build.name == 'gnutls' }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: cache-nettle
+        env:
+          cache-name: cache-nettle
+        with:
+          path: ~/nettle/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NETTLE_VERSION }}
+          fail-on-cache-miss: true
+
       - name: 'cache gnutls'
         if: ${{ matrix.build.name == 'gnutls' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -510,7 +546,7 @@ jobs:
           cache-name: cache-gnutls
         with:
           path: ~/gnutls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.GNUTLS_VERSION }}-${{ env.NETTLE_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache wolfssl'
@@ -541,7 +577,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: ~/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.NGTCP2_VERSION }}-${{ env.OPENSSL_VERSION }}-${{ env.LIBRESSL_VERSION }}-${{ env.AWSLC_VERSION }}-${{ env.NETTLE_VERSION }}-${{ env.GNUTLS_VERSION }}-${{ env.WOLFSSL_VERSION }}
           fail-on-cache-miss: true
 
       - name: 'cache ngtcp2 boringssl'
@@ -604,6 +640,8 @@ jobs:
 
       - name: 'configure'
         env:
+          CPPFLAGS: '${{ matrix.build.CPPFLAGS }}'
+          LDFLAGS: '${{ matrix.build.LDFLAGS }}'
           MATRIX_CONFIGURE: '${{ matrix.build.configure }}'
           MATRIX_GENERATE: '${{ matrix.build.generate }}'
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
