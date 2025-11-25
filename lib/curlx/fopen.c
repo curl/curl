@@ -298,7 +298,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
 }
 
 #if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR < 5)
-_CRTIMP errno_t __cdecl freopen_s(FILE** file, const char *filename,
+_CRTIMP errno_t __cdecl freopen_s(FILE **file, const char *filename,
                                   const char *mode, FILE *stream);
 #endif
 
