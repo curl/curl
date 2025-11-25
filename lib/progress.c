@@ -134,7 +134,7 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
       data->state.keeps_speed.tv_sec = 0;
   }
 
-  /* if low speed limit is enabled, set the expire timer to make this
+  /* since low speed limit is enabled, set the expire timer to make this
      connection's speed get checked again in a second */
   Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
 
