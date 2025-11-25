@@ -256,7 +256,7 @@ jobs:
         run: |
           cd ~
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://ftpmirror.gnu.org/gnutls/gnutls-${GNUTLS_VERSION}.tar.xz" | tar -xz
+            --location "https://ftpmirror.gnu.org/gnutls/gnutls-${GNUTLS_VERSION}.tar.xz" | tar -xJ
           cd "gnutls-${GNUTLS_VERSION}"
           # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
