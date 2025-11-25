@@ -259,11 +259,10 @@ jobs:
             "https://www.gnupg.org/ftp/gcrypt/gnutls/v${GNUTLS_VERSION%.*}/gnutls-${GNUTLS_VERSION}.tar.xz" | tar -xJ
           cd "gnutls-${GNUTLS_VERSION}"
           # required: libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
-          ./configure --disable-dependency-tracking --prefix="$PWD"/build \
+          ./configure --disable-dependency-tracking --prefix=/home/runner/gnutls/build \
             PKG_CONFIG_PATH=/home/runner/nettle/build/lib64/pkgconfig \
             --with-included-libtasn1 --with-included-unistring \
             --disable-guile --disable-doc --disable-tests --disable-tools
-          make
           make install
 
       - name: 'build wolfssl'
