@@ -166,7 +166,7 @@ static void on_uv_timeout(uv_timer_t *req)
   curl_multi_socket_action(uv->multi, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
 
-  /* We don't have a curl_context here, so we need to check messages
+  /* We do not have a curl_context here, so we need to check messages
      differently. Create a temporary context just for the check. */
   if(running_handles) {
     struct curl_context temp_context;
