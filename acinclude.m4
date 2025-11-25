@@ -1416,6 +1416,9 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
     AC_MSG_NOTICE([TRACE-A-1 '$1' '$2'])
     AC_MSG_CHECKING([for $1 options with pkg-config])
 
+    itexists=`env | sort`
+    AC_MSG_NOTICE([TRACE-A-2-ENVENV '$itexists'])
+
     itexists=`$PKGCONFIG --exists $1 >/dev/null 2>&1 && echo 1`
     AC_MSG_NOTICE([TRACE-A-2-TT '$itexists'])
 
