@@ -647,6 +647,15 @@ jobs:
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           [ -n "${MATRIX_PKG_CONFIG_PATH}" ] && export PKG_CONFIG_PATH="${MATRIX_PKG_CONFIG_PATH}"
+            echo '--------------- 1'
+            env | sort || true
+            echo '--------------- 2'
+            find /home/runner/ngtcp2/build/lib/pkgconfig | sort || true
+            echo '--------------- 3'
+            find /home/runner/ngtcp2/build | sort || true
+            echo '--------------- 4'
+            pkg-config --libs libngtcp2_crypto_gnutls || true
+            echo '--------------- 5'
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
