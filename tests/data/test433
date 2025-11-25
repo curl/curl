@@ -36,6 +36,10 @@ CURL_HOME
 <name>
 Verify XDG_CONFIG_HOME use to find curlrc
 </name>
+# set the terminal wide to avoid word wrap in the message
+<setenv>
+COLUMNS=300
+</setenv>
 <command option="no-q">
 %HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter
 </command>
