@@ -148,7 +148,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * add `kSecRevocationRequirePositiveResponse` to the Apple
          * Trust policies, it interprets this as it NEEDs a confirmation
          * of a cert being NOT REVOKED. Which not in general available for
-         * certificates on the internet.
+         * certificates on the Internet.
          * It seems that applications using this policy are expected to PIN
          * their certificate public keys or verification will fail.
          * This does not seem to be what we want here. */

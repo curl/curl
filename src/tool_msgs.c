@@ -42,18 +42,15 @@ static void voutf(const char *prefix,
                   const char *fmt,
                   va_list ap)
 {
-  size_t width = (get_terminal_columns() - strlen(prefix));
   size_t len;
   char *ptr;
-  char *print_buffer;
+  char buffer[1024];
+  size_t termw = get_terminal_columns();
+  size_t prefw = strlen(prefix);
+  size_t width = termw > prefw ? termw - prefw : SIZE_MAX;
   DEBUGASSERT(!strchr(fmt, '\n'));
-
-  print_buffer = curl_mvaprintf(fmt, ap);
-  if(!print_buffer)
-    return;
-  len = strlen(print_buffer);
-
-  ptr = print_buffer;
+  len = curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
+  ptr = buffer;
   while(len > 0) {
     fputs(prefix, tool_stderr);
 
@@ -79,7 +76,6 @@ static void voutf(const char *prefix,
       len = 0;
     }
   }
-  curl_free(print_buffer);
 }
 
 /*

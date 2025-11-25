@@ -3,6 +3,7 @@
 <keywords>
 SMTP
 MULTIPART
+notxml
 </keywords>
 </info>
 
@@ -40,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 -F "=@%LOGDIR/test%TESTNUMBER.txt;headers=<%LOGDIR/headers%TESTNUMBER"
 -H "From: different"
 -H "To: another"
--H "Reply-To: <followup@example.com>"
+-H "Reply-To: %LTfollowup@example.com%GT"
 </command>
 <file1 name="%LOGDIR/test%TESTNUMBER.txt">
 This is an attached file.
@@ -66,8 +67,8 @@ s/boundary=------------------------[A-Za-z0-9]*/boundary=-----------------------
 </strippart>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
@@ -76,7 +77,7 @@ Content-Type: multipart/mixed; boundary=----------------------------%CR
 Mime-Version: 1.0%CR
 From: different%CR
 To: another%CR
-Reply-To: <followup@example.com>%CR
+Reply-To: %LTfollowup@example.com%GT%CR
 %CR
 ------------------------------%CR
 Content-Type: multipart/alternative; boundary=----------------------------%CR

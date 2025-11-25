@@ -62,7 +62,7 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
     if(strlen(force_hostname) < (size_t)namelen)
       strcpy(name, force_hostname);
     else
-      return 1; /* can't do it */
+      return 1; /* cannot do it */
     err = 0;
   }
   else {

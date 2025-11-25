@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-/* wraps curl_easy_setopt() with typechecking */
+/* wraps curl_easy_setopt() with type checking */
 
 /* To add a new kind of warning, add an
  *   if(curlcheck_sometype_option(_curl_opt))
@@ -159,7 +159,7 @@
       curl_easy_setopt(handle, option, value);                          \
     })
 
-/* wraps curl_easy_getinfo() with typechecking */
+/* wraps curl_easy_getinfo() with type checking */
 #define curl_easy_getinfo(handle, info, arg)                            \
   __extension__({                                                       \
       if(__builtin_constant_p(info)) {                                  \

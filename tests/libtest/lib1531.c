@@ -50,7 +50,7 @@ static CURLcode test_lib1531(const char *URL)
   /* add the individual transfer */
   curl_multi_add_handle(multi, curl);
 
-  /* set the options (I left out a few, you'll get the point anyway) */
+  /* set the options (I left out a few, you get the point anyway) */
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
   curl_easy_setopt(curl, CURLOPT_POSTFIELDS, testData);

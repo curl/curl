@@ -28,6 +28,7 @@
 #include "sendf.h"
 #include "multiif.h"
 #include "progress.h"
+#include "transfer.h"
 #include "curlx/timeval.h"
 
 /* check rate limits within this many recent milliseconds, at minimum. */
@@ -92,6 +93,54 @@ static char *max6data(curl_off_t bytes, char *max6)
 }
 #endif
 
+static void pgrs_speedinit(struct Curl_easy *data)
+{
+  memset(&data->state.keeps_speed, 0, sizeof(struct curltime));
+}
+
+/*
+ * @unittest: 1606
+ */
+UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
+                                  struct curltime *pnow)
+{
+  if(!data->set.low_speed_time || !data->set.low_speed_limit ||
+     Curl_xfer_recv_is_paused(data) || Curl_xfer_send_is_paused(data))
+    /* A paused transfer is not qualified for speed checks */
+    return CURLE_OK;
+
+  if(data->progress.current_speed >= 0) {
+    if(data->progress.current_speed < data->set.low_speed_limit) {
+      if(!data->state.keeps_speed.tv_sec)
+        /* under the limit at this moment */
+        data->state.keeps_speed = *pnow;
+      else {
+        /* how long has it been under the limit */
+        timediff_t howlong = curlx_timediff_ms(*pnow, data->state.keeps_speed);
+
+        if(howlong >= data->set.low_speed_time * 1000) {
+          /* too long */
+          failf(data,
+                "Operation too slow. "
+                "Less than %ld bytes/sec transferred the last %ld seconds",
+                data->set.low_speed_limit,
+                data->set.low_speed_time);
+          return CURLE_OPERATION_TIMEDOUT;
+        }
+      }
+    }
+    else
+      /* faster right now */
+      data->state.keeps_speed.tv_sec = 0;
+  }
+
+  /* since low speed limit is enabled, set the expire timer to make this
+     connection's speed get checked again in a second */
+  Curl_expire(data, 1000, EXPIRE_SPEEDCHECK);
+
+  return CURLE_OK;
+}
+
 /*
 
    New proposed interface, 9th of February 2000:
@@ -119,8 +168,17 @@ int Curl_pgrsDone(struct Curl_easy *data)
      * hidden */
     curl_mfprintf(data->set.err, "\n");
 
-  data->progress.speeder_c = 0; /* reset the progress meter display */
   return 0;
+}
+
+void Curl_pgrsReset(struct Curl_easy *data)
+{
+  Curl_pgrsSetUploadCounter(data, 0);
+  Curl_pgrsSetDownloadCounter(data, 0);
+  Curl_pgrsSetUploadSize(data, -1);
+  Curl_pgrsSetDownloadSize(data, -1);
+  data->progress.speeder_c = 0; /* reset speed records */
+  pgrs_speedinit(data);
 }
 
 /* reset the known transfer sizes */
@@ -128,6 +186,22 @@ void Curl_pgrsResetTransferSizes(struct Curl_easy *data)
 {
   Curl_pgrsSetDownloadSize(data, -1);
   Curl_pgrsSetUploadSize(data, -1);
+}
+
+void Curl_pgrsRecvPause(struct Curl_easy *data, bool enable)
+{
+  if(!enable) {
+    data->progress.speeder_c = 0; /* reset speed records */
+    pgrs_speedinit(data); /* reset low speed measurements */
+  }
+}
+
+void Curl_pgrsSendPause(struct Curl_easy *data, bool enable)
+{
+  if(!enable) {
+    data->progress.speeder_c = 0; /* reset speed records */
+    pgrs_speedinit(data); /* reset low speed measurements */
+  }
 }
 
 /*
@@ -228,72 +302,11 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   p->speeder_c = 0; /* reset the progress meter display */
   p->start = curlx_now();
   p->is_t_startransfer_set = FALSE;
-  p->ul.limit.start = p->start;
-  p->dl.limit.start = p->start;
-  p->ul.limit.start_size = 0;
-  p->dl.limit.start_size = 0;
   p->dl.cur_size = 0;
   p->ul.cur_size = 0;
   /* the sizes are unknown at start */
   p->dl_size_known = FALSE;
   p->ul_size_known = FALSE;
-  Curl_ratelimit(data, p->start);
-}
-
-/*
- * This is used to handle speed limits, calculating how many milliseconds to
- * wait until we are back under the speed limit, if needed.
- *
- * The way it works is by having a "starting point" (time & amount of data
- * transferred by then) used in the speed computation, to be used instead of
- * the start of the transfer. This starting point is regularly moved as
- * transfer goes on, to keep getting accurate values (instead of average over
- * the entire transfer).
- *
- * This function takes the current amount of data transferred, the amount at
- * the starting point, the limit (in bytes/s), the time of the starting point
- * and the current time.
- *
- * Returns 0 if no waiting is needed or when no waiting is needed but the
- * starting point should be reset (to current); or the number of milliseconds
- * to wait to get back under the speed limit.
- */
-timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
-                                  curl_off_t bytes_per_sec,
-                                  struct curltime now)
-{
-  curl_off_t bytes = d->cur_size - d->limit.start_size;
-  timediff_t should_ms;
-  timediff_t took_ms;
-
-  /* no limit or we did not get to any bytes yet */
-  if(!bytes_per_sec || !bytes)
-    return 0;
-
-  /* The time it took us to have `bytes` */
-  took_ms = curlx_timediff_ceil_ms(now, d->limit.start);
-
-  /* The time it *should* have taken us to have `bytes`
-   * when obeying the bytes_per_sec speed_limit. */
-  if(bytes < CURL_OFF_T_MAX/1000) {
-    /* (1000 * bytes / (bytes / sec)) = 1000 * sec = ms */
-    should_ms = (timediff_t) (1000 * bytes / bytes_per_sec);
-  }
-  else {
-    /* very large `bytes`, first calc the seconds it should have taken.
-     * if that is small enough, convert to milliseconds. */
-    should_ms = (timediff_t) (bytes / bytes_per_sec);
-    if(should_ms < TIMEDIFF_T_MAX/1000)
-      should_ms *= 1000;
-    else
-      should_ms = TIMEDIFF_T_MAX;
-  }
-
-  if(took_ms < should_ms) {
-    /* when gotten to `bytes` too fast, wait the difference */
-    return should_ms - took_ms;
-  }
-  return 0;
 }
 
 /*
@@ -302,28 +315,6 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
 void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
   data->progress.dl.cur_size = size;
-}
-
-/*
- * Update the timestamp and sizestamp to use for rate limit calculations.
- */
-void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
-{
-  /* do not set a new stamp unless the time since last update is long enough */
-  if(data->set.max_recv_speed) {
-    if(curlx_timediff_ms(now, data->progress.dl.limit.start) >=
-       MIN_RATE_LIMIT_PERIOD) {
-      data->progress.dl.limit.start = now;
-      data->progress.dl.limit.start_size = data->progress.dl.cur_size;
-    }
-  }
-  if(data->set.max_send_speed) {
-    if(curlx_timediff_ms(now, data->progress.ul.limit.start) >=
-       MIN_RATE_LIMIT_PERIOD) {
-      data->progress.ul.limit.start = now;
-      data->progress.ul.limit.start_size = data->progress.ul.cur_size;
-    }
-  }
 }
 
 /*
@@ -378,75 +369,82 @@ static curl_off_t trspeed(curl_off_t size, /* number of bytes */
 }
 
 /* returns TRUE if it is time to show the progress meter */
-static bool progress_calc(struct Curl_easy *data, struct curltime now)
+static bool progress_calc(struct Curl_easy *data, struct curltime *pnow)
 {
-  bool timetoshow = FALSE;
   struct Progress * const p = &data->progress;
+  int i_next, i_oldest, i_latest;
+  timediff_t duration_ms;
+  curl_off_t amount;
 
   /* The time spent so far (from the start) in microseconds */
-  p->timespent = curlx_timediff_us(now, p->start);
+  p->timespent = curlx_timediff_us(*pnow, p->start);
   p->dl.speed = trspeed(p->dl.cur_size, p->timespent);
   p->ul.speed = trspeed(p->ul.cur_size, p->timespent);
 
-  /* Calculations done at most once a second, unless end is reached */
-  if(p->lastshow != now.tv_sec) {
-    int countindex; /* amount of seconds stored in the speeder array */
-    int nowindex = p->speeder_c% CURR_TIME;
-    p->lastshow = now.tv_sec;
-    timetoshow = TRUE;
-
-    /* Let's do the "current speed" thing, with the dl + ul speeds
-       combined. Store the speed at entry 'nowindex'. */
-    p->speeder[ nowindex ] = p->dl.cur_size + p->ul.cur_size;
-
-    /* remember the exact time for this moment */
-    p->speeder_time [ nowindex ] = now;
-
-    /* advance our speeder_c counter, which is increased every time we get
-       here and we expect it to never wrap as 2^32 is a lot of seconds! */
+  if(!p->speeder_c) { /* no previous record exists */
+    p->speed_amount[0] = p->dl.cur_size + p->ul.cur_size;
+    p->speed_time[0] = *pnow;
     p->speeder_c++;
+    /* use the overall average at the start */
+    p->current_speed = p->ul.speed + p->dl.speed;
+    p->lastshow = pnow->tv_sec;
+    return TRUE;
+  }
+  /* We have at least one record now. Where to put the next and
+   * where is the latest one? */
+  i_next = p->speeder_c % CURL_SPEED_RECORDS;
+  i_latest = (i_next > 0) ? (i_next - 1) : (CURL_SPEED_RECORDS - 1);
 
-    /* figure out how many index entries of data we have stored in our speeder
-       array. With N_ENTRIES filled in, we have about N_ENTRIES-1 seconds of
-       transfer. Imagine, after one second we have filled in two entries,
-       after two seconds we have filled in three entries etc. */
-    countindex = ((p->speeder_c >= CURR_TIME) ? CURR_TIME : p->speeder_c) - 1;
-
-    /* first of all, we do not do this if there is no counted seconds yet */
-    if(countindex) {
-      int checkindex;
-      timediff_t span_ms;
-      curl_off_t amount;
-
-      /* Get the index position to compare with the 'nowindex' position.
-         Get the oldest entry possible. While we have less than CURR_TIME
-         entries, the first entry will remain the oldest. */
-      checkindex = (p->speeder_c >= CURR_TIME) ? p->speeder_c%CURR_TIME : 0;
-
-      /* Figure out the exact time for the time span */
-      span_ms = curlx_timediff_ms(now, p->speeder_time[checkindex]);
-      if(span_ms == 0)
-        span_ms = 1; /* at least one millisecond MUST have passed */
-
-      /* Calculate the average speed the last 'span_ms' milliseconds */
-      amount = p->speeder[nowindex]- p->speeder[checkindex];
-
-      if(amount > (0xffffffff/1000))
-        /* the 'amount' value is bigger than would fit in 32 bits if
-           multiplied with 1000, so we use the double math for this */
-        p->current_speed = (curl_off_t)
-          ((double)amount/((double)span_ms/1000.0));
-      else
-        /* the 'amount' value is small enough to fit within 32 bits even
-           when multiplied with 1000 */
-        p->current_speed = amount * 1000/span_ms;
+  /* Make a new record only when some time has passed.
+   * Too frequent calls otherwise ruin the history. */
+  if(curlx_timediff_ms(*pnow, p->speed_time[i_latest]) >= 1000) {
+    p->speeder_c++;
+    i_latest = i_next;
+    p->speed_amount[i_latest] = p->dl.cur_size + p->ul.cur_size;
+    p->speed_time[i_latest] = *pnow;
+  }
+  else if(data->req.done) {
+    /* When a transfer is done, and we did not have a current speed
+     * already, update the last record. Otherwise, stay at the speed
+     * we have. The last chunk of data, when rate limiting, would increase
+     * reported speed since it no longer measures a full second. */
+    if(!p->current_speed) {
+      p->speed_amount[i_latest] = p->dl.cur_size + p->ul.cur_size;
+      p->speed_time[i_latest] = *pnow;
     }
-    else
-      /* the first second we use the average */
-      p->current_speed = p->ul.speed + p->dl.speed;
+  }
+  else {
+    /* transfer ongoing, wait for more time to pass. */
+    return FALSE;
+  }
 
-  } /* Calculations end */
-  return timetoshow;
+  i_oldest = (p->speeder_c < CURL_SPEED_RECORDS) ? 0 :
+             ((i_latest + 1) % CURL_SPEED_RECORDS);
+
+  /* How much we transferred between oldest and current records */
+  amount = p->speed_amount[i_latest]- p->speed_amount[i_oldest];
+  /* How long this took */
+  duration_ms = curlx_timediff_ms(p->speed_time[i_latest],
+                                  p->speed_time[i_oldest]);
+  if(duration_ms <= 0)
+    duration_ms = 1;
+
+  if(amount > (CURL_OFF_T_MAX/1000)) {
+    /* the 'amount' value is bigger than would fit in 64 bits if
+       multiplied with 1000, so we use the double math for this */
+    p->current_speed = (curl_off_t)
+      (((double)amount * 1000.0)/(double)duration_ms);
+  }
+  else {
+    /* the 'amount' value is small enough to fit within 32 bits even
+       when multiplied with 1000 */
+    p->current_speed = amount * 1000 / duration_ms;
+  }
+
+  if((p->lastshow == pnow->tv_sec) && !data->req.done)
+    return FALSE;
+  p->lastshow = pnow->tv_sec;
+  return TRUE;
 }
 
 #ifndef CURL_DISABLE_PROGRESS_METER
@@ -568,7 +566,7 @@ static void progress_meter(struct Curl_easy *data)
  * Curl_pgrsUpdate() returns 0 for success or the value returned by the
  * progress callback!
  */
-static int pgrsupdate(struct Curl_easy *data, bool showprogress)
+static CURLcode pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
   if(!data->progress.hide) {
     if(data->set.fxferinfo) {
@@ -582,9 +580,11 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
                                    data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result)
+        if(result) {
           failf(data, "Callback aborted");
-        return result;
+          return CURLE_ABORTED_BY_CALLBACK;
+        }
+        return CURLE_OK;
       }
     }
     else if(data->set.fprogress) {
@@ -598,9 +598,11 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
                                    (double)data->progress.ul.cur_size);
       Curl_set_in_callback(data, FALSE);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
-        if(result)
+        if(result) {
           failf(data, "Callback aborted");
-        return result;
+          return CURLE_ABORTED_BY_CALLBACK;
+        }
+        return CURLE_OK;
       }
     }
 
@@ -608,14 +610,30 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
       progress_meter(data);
   }
 
-  return 0;
+  return CURLE_OK;
 }
 
-int Curl_pgrsUpdate(struct Curl_easy *data)
+static CURLcode pgrs_update(struct Curl_easy *data, struct curltime *pnow)
+{
+  bool showprogress = progress_calc(data, pnow);
+  return pgrsupdate(data, showprogress);
+}
+
+CURLcode Curl_pgrsUpdate(struct Curl_easy *data)
 {
   struct curltime now = curlx_now(); /* what time is it */
-  bool showprogress = progress_calc(data, now);
-  return pgrsupdate(data, showprogress);
+  return pgrs_update(data, &now);
+}
+
+CURLcode Curl_pgrsCheck(struct Curl_easy *data)
+{
+  struct curltime now = curlx_now();
+  CURLcode result;
+
+  result = pgrs_update(data, &now);
+  if(!result && !data->req.done)
+    result = pgrs_speedcheck(data, &now);
+  return result;
 }
 
 /*
@@ -624,5 +642,5 @@ int Curl_pgrsUpdate(struct Curl_easy *data)
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
 {
   struct curltime now = curlx_now(); /* what time is it */
-  (void)progress_calc(data, now);
+  (void)progress_calc(data, &now);
 }

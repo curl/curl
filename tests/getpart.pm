@@ -47,13 +47,13 @@ BEGIN {
 use Memoize;
 
 my @xml;      # test data file contents
-my $xmlfile;  # test data file name
+my $xmlfile;  # test data filename
 
 my $warning=0;
 my $trace=0;
 
 # Normalize the part function arguments for proper caching. This includes the
-# file name in the arguments since that is an implied parameter that affects the
+# filename in the arguments since that is an implied parameter that affects the
 # return value.  Any error messages will only be displayed the first time, but
 # those are disabled by default anyway, so should never been seen outside
 # development.
@@ -115,7 +115,7 @@ sub getpartattr {
             }
             last;
         }
-        # detect end of section when part wasn't found
+        # detect end of section when part was not found
         elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
             last;
         }
@@ -242,7 +242,7 @@ sub loadtest {
     else {
         # failure
         if($warning) {
-            print STDERR "file $file wouldn't open!\n";
+            print STDERR "file $file would not open!\n";
         }
         return 1;
     }
@@ -310,7 +310,7 @@ sub savetest {
     else {
         # failure
         if($warning) {
-            print STDERR "file $file wouldn't open!\n";
+            print STDERR "file $file would not open!\n";
         }
         return 1;
     }
@@ -398,7 +398,7 @@ sub writearray {
     my ($filename, $arrayref)=@_;
 
     open(my $temp, ">", "$filename") || die "Failure writing file";
-    binmode($temp,":raw");  # Cygwin fix by Kevin Roth
+    binmode($temp,":raw");  # Cygwin fix
     for(@$arrayref) {
         print $temp $_;
     }

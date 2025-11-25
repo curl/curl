@@ -18,7 +18,7 @@ non-existing host
 http
 </server>
 <name>
-multi interface get with non-existing host name
+multi interface get with non-existing hostname
 </name>
 <tool>
 lib%TESTNUMBER

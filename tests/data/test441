@@ -39,7 +39,7 @@ this.hsts.example. "99991001 04:47:41"
 </file>
 
 <name>
-HSTS with no t-dot host name in URL but t-dot in file
+HSTS with no t-dot hostname in URL but t-dot in file
 </name>
 <command>
 -x http://%HOSTIP:%HTTPPORT http://this.hsts.example/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'

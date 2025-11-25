@@ -107,7 +107,7 @@ my $error;
 my @cfgarr;
 
 #***************************************************************************
-# Returns a path of the given file name in the log directory (PiddirPath)
+# Returns a path of the given filename in the log directory (PiddirPath)
 #
 sub pp {
     my $file = $_[0];
@@ -191,7 +191,7 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: sshserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: sshserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }
@@ -201,7 +201,7 @@ while(@ARGV) {
 #
 
 #***************************************************************************
-# Default ssh daemon pid file name & directory
+# Default ssh daemon pid filename & directory
 #
 if($pidfile) {
     # Use our pidfile directory to store server config files
@@ -214,7 +214,7 @@ else {
 }
 
 #***************************************************************************
-# ssh and sftp server log file names
+# ssh and sftp server log filenames
 #
 $sshdlog = server_logfilename($logdir, 'ssh', $ipvnum, $idnum);
 $sftplog = server_logfilename($logdir, 'sftp', $ipvnum, $idnum);
@@ -230,7 +230,7 @@ my $loglevel = $debugprotocol?'DEBUG3':'DEBUG2';
 # Validate username
 #
 if(!$username) {
-    $error = 'Will not run ssh server without a user name';
+    $error = 'Will not run ssh server without a username';
 }
 elsif($username eq 'root') {
     $error = 'Will not run ssh server as root to mitigate security risks';
@@ -242,7 +242,7 @@ if($error) {
 
 
 #***************************************************************************
-# Find out ssh daemon canonical file name
+# Find out ssh daemon canonical filename
 #
 my $sshd = find_sshd();
 if(!$sshd) {
@@ -293,7 +293,7 @@ if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
 
 
 #***************************************************************************
-# Find out sftp server plugin canonical file name
+# Find out sftp server plugin canonical filename
 #
 my $sftpsrv = find_sftpsrv();
 if(!$sftpsrv) {
@@ -304,7 +304,7 @@ logmsg "sftp server plugin found $sftpsrv\n" if($verbose);
 
 
 #***************************************************************************
-# Find out sftp client canonical file name
+# Find out sftp client canonical filename
 #
 my $sftp = find_sftp();
 if(!$sftp) {
@@ -315,7 +315,7 @@ logmsg "sftp client found $sftp\n" if($verbose);
 
 
 #***************************************************************************
-# Find out ssh keygen canonical file name
+# Find out ssh keygen canonical filename
 #
 my $sshkeygen = find_sshkeygen();
 if(!$sshkeygen) {
@@ -326,7 +326,7 @@ logmsg "ssh keygen found $sshkeygen\n" if($verbose);
 
 
 #***************************************************************************
-# Find out ssh client canonical file name
+# Find out ssh client canonical filename
 #
 my $ssh = find_ssh();
 if(!$ssh) {
@@ -406,7 +406,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
    (! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f)) ||
    (! -e pp($cliprvkeyf)) || (! -s pp($cliprvkeyf)) ||
    (! -e pp($clipubkeyf)) || (! -s pp($clipubkeyf))) {
-    # Make sure all files are gone so ssh-keygen doesn't complain
+    # Make sure all files are gone so ssh-keygen does not complain
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
 
@@ -435,7 +435,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
     display_file_top(pp($cliprvkeyf)) if($verbose);
-    # Make sure that permissions are restricted so openssh doesn't complain
+    # Make sure that permissions are restricted so openssh does not complain
     chmod 0600, pp($hstprvkeyf);
     chmod 0600, pp($cliprvkeyf);
     if(($^O eq 'cygwin' || $^O eq 'msys') && -e "/bin/setfacl") {
@@ -1207,7 +1207,7 @@ if($sshdid =~ /OpenSSH-Windows/) {
 
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
-    exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    exec("exec $cmd") || die "Cannot exec() $cmd: $!";
     # exec() will create a new process, but ties the existence of the
     # new process to the parent waiting perl.exe and sh.exe processes.
 

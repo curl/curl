@@ -54,7 +54,7 @@ versions do not work.
 
 Build OpenSSL (version 3.5.0 or newer):
 
-     % git clone --quiet --depth=1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
+     % git clone --depth 1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config --prefix=<somewhere1> --libdir=lib
      % make

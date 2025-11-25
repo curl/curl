@@ -1037,7 +1037,7 @@ static CURLcode ws_enc_send(struct Curl_easy *data,
      * that needs to be encoded into the buffer */
     if(buflen < ws->sendbuf_payload) {
       /* We have been called with LESS buffer data than before. This
-       * is not how it's supposed too work. */
+       * is not how it is supposed too work. */
       failf(data, "[WS] curl_ws_send() called with smaller 'buflen' than "
             "bytes already buffered in previous call, %zu vs %zu",
             buflen, ws->sendbuf_payload);
@@ -1927,9 +1927,9 @@ const struct Curl_handler Curl_handler_ws = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
-  Curl_http_do_pollset,                 /* doing_pollset */
+  Curl_http_doing_pollset,              /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -1954,9 +1954,9 @@ const struct Curl_handler Curl_handler_wss = {
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_pollset */
-  Curl_http_do_pollset,                 /* doing_pollset */
+  Curl_http_doing_pollset,              /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
   Curl_http_write_resp_hd,              /* write_resp_hd */
@@ -2016,4 +2016,4 @@ CURL_EXTERN CURLcode curl_ws_start_frame(CURL *curl,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !CURL_DISABLE_WEBSOCKETS */
+#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */

@@ -31,10 +31,10 @@ use strict;
 use warnings;
 use File::Basename;
 
-# get the file name first
+# get the filename first
 my $symbolsinversions=shift @ARGV;
 
-# we may get the dir roots pointed out
+# we may get the directory roots pointed out
 my @manpages=@ARGV;
 my $errors = 0;
 
@@ -119,7 +119,7 @@ sub checkref {
     }
 }
 
-# option-looking words that aren't options
+# option-looking words that are not options
 my %allownonref = (
     'CURLINFO_TEXT' => 1,
     'CURLINFO_HEADER_IN' => 1,
@@ -148,7 +148,7 @@ sub scanmanpage {
     open(my $m, "<", "$file") ||
         die "test1173.pl could not open $file";
     if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
-        # This is a man page for libcurl. It requires an example unless it's
+        # This is a man page for libcurl. It requires an example unless it is
         # considered deprecated.
         $reqex = 1 unless defined $deprecated{'CURL'.$2};
         if($1 eq "CURL") {
@@ -254,7 +254,7 @@ sub scanmanpage {
         if($_ =~ /(.*)\\f([^BIP])/) {
             my ($pre, $format) = ($1, $2);
             if($pre !~ /\\\z/) {
-                # only if there wasn't another backslash before the \f
+                # only if there was not another backslash before the \f
                 print STDERR "$file:$line suspicious \\f format!\n";
                 $errors++;
             }
@@ -372,7 +372,7 @@ sub scanmanpage {
 allsymbols();
 
 if(!$symbol{'CURLALTSVC_H1'}) {
-    print STDERR "didn't get the symbols-in-version!\n";
+    print STDERR "did not get the symbols-in-version!\n";
     exit;
 }
 

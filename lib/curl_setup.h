@@ -75,14 +75,14 @@
 #endif
 #endif
 
-#if defined(__MINGW32__) && !defined(__MINGW32CE__) && \
+#if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
 #error "Building curl requires mingw-w64 3.0 or later"
 #endif
 
-/* Visual Studio 2008 is the minimum Visual Studio version we support.
+/* Visual Studio 2010 is the minimum Visual Studio version we support.
    Workarounds for older versions of Visual Studio have been removed. */
-#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
 #error "Ancient versions of Visual Studio are no longer supported due to bugs."
 #endif
 
@@ -90,11 +90,13 @@
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
+#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
+#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), strdup(),
+                                      unlink(), etc. */
 #endif
-#ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for fopen(), getenv(), etc. */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), gmtime(), strcpy(),
+                                    in tests: localtime(), sscanf() */
 #endif
 #endif /* _MSC_VER */
 
@@ -120,14 +122,6 @@
 #      define CURL_WINDOWS_UWP
 #    endif
 #  endif
-#endif
-
-/* Avoid bogus format check warnings with mingw32ce gcc 4.4.0 in
-   C99 (-std=gnu99) mode */
-#if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
-  (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) && \
-  (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 4))
-#define CURL_NO_FMT_CHECKS
 #endif
 
 /* Compatibility */
@@ -497,12 +491,10 @@
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
-#    ifndef UNDER_CE
-#      undef  lseek
-#      define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#      define fstat(fdes, stp)             _fstat(fdes, stp)
-#      define struct_stat                  struct _stat
-#    endif
+#    undef  lseek
+#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes, stp)             _fstat(fdes, stp)
+#    define struct_stat                  struct _stat
 #    define LSEEK_ERROR                  (long)-1
 #  endif
 #elif defined(__DJGPP__)
@@ -632,6 +624,9 @@
 #endif
 #endif
 
+#if SIZEOF_LONG > SIZEOF_SIZE_T
+#error "unexpected: 'long' is larger than 'size_t'"
+#endif
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */
@@ -817,27 +812,6 @@
 #include "curl_setup_once.h"
 #endif
 
-#ifdef UNDER_CE
-#define getenv curl_getenv  /* Windows CE does not support getenv() */
-#define raise(s) ((void)(s))
-/* Terrible workarounds to make Windows CE compile */
-#define errno 0
-#define CURL_SETERRNO(x) ((void)(x))
-#define EINTR  4
-#define EAGAIN 11
-#define ENOMEM 12
-#define EACCES 13
-#define EEXIST 17
-#define EISDIR 21
-#define EINVAL 22
-#define ENOSPC 28
-#define strerror(x) "?"
-#undef STDIN_FILENO
-#define STDIN_FILENO 0
-#else
-#define CURL_SETERRNO(x) (errno = (x))
-#endif
-
 /*
  * Definition of our NOP statement Object-like macro
  */
@@ -926,7 +900,7 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  if defined(_WIN32) && !defined(UNDER_CE)
+#  ifdef _WIN32
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
 #  elif defined(HAVE_SA_FAMILY_T)
 #    define CURL_SA_FAMILY_T sa_family_t
@@ -1067,6 +1041,9 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fopen(const char *file, const char *mode,
                        int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
+                         int line, const char *source);
 CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);

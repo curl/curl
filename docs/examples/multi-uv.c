@@ -25,7 +25,6 @@
  * multi_socket API using libuv
  * </DESC>
  */
-
 /* Use the socket_action interface to download multiple files in parallel,
    powered by libuv.
 
@@ -38,7 +37,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <uv.h>
+
 #include <curl/curl.h>
 
 /* object to pass to the callbacks */

@@ -34,7 +34,7 @@
 # cmake-lint can be installed from PyPi with the command "python3 -m pip
 # install cmakelang".
 #
-# The xargs invocation is portable, but does not preserve spaces in file names.
+# The xargs invocation is portable, but does not preserve spaces in filenames.
 # If such a file is ever added, then this can be portably fixed by switching to
 # "xargs -I{}" and appending {} to the end of the xargs arguments (which will
 # call cmakelint once per file) or by using the GNU extension "xargs -d'\n'".

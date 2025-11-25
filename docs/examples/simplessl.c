@@ -25,6 +25,12 @@
  * Shows HTTPS usage with client certs and optional ssl engine use.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 
 #include <curl/curl.h>
@@ -103,7 +109,7 @@ int main(void)
 #endif
 
   /* cert is stored PEM coded in file... */
-  /* since PEM is default, we needn't set it for PEM */
+  /* since PEM is default, we need not set it for PEM */
   curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 
   /* set the cert for client authentication */

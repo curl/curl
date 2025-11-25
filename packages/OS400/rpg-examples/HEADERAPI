@@ -1,4 +1,4 @@
-      * Curl header API: extract headers post transfer
+      * curl header API: extract headers post transfer
       *
      h DFTACTGRP(*NO) ACTGRP(*NEW)
      h OPTION(*NOSHOWCPY)

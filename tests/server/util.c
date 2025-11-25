@@ -27,6 +27,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef _WIN32
+#include <share.h>
+#endif
+
 /* This function returns a pointer to STATIC memory. It converts the given
  * binary lump to a hex formatted string usable for output in logs or
  * whatever.
@@ -97,7 +101,7 @@ void logmsg(const char *msg, ...)
   }
   sec = epoch_offset + tv.tv_sec;
   /* !checksrc! disable BANNEDFUNC 1 */
-  now = localtime(&sec); /* not thread safe but we don't care */
+  now = localtime(&sec); /* not thread safe but we do not care */
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
@@ -115,12 +119,12 @@ void logmsg(const char *msg, ...)
   va_end(ap);
 
   do {
-    logfp = fopen(serverlogfile, "ab");
+    logfp = curlx_fopen(serverlogfile, "ab");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!logfp && (errno == EINTR));
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
-    fclose(logfp);
+    curlx_fclose(logfp);
   }
   else {
     char errbuf[STRERROR_LEN];
@@ -193,7 +197,7 @@ FILE *test2fopen(long testno, const char *logdir2)
   char filename[256];
   /* first try the alternative, preprocessed, file */
   snprintf(filename, sizeof(filename), "%s/test%ld", logdir2, testno);
-  stream = fopen(filename, "rb");
+  stream = curlx_fopen(filename, "rb");
 
   return stream;
 }
@@ -224,15 +228,15 @@ int write_pidfile(const char *filename)
   curl_off_t pid;
 
   pid = our_getpid();
-  pidfile = fopen(filename, "wb");
+  pidfile = curlx_fopen(filename, "wb");
   if(!pidfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write pid file: %s (%d) %s", filename,
+    logmsg("Could not write pid file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
   fprintf(pidfile, "%ld\n", (long)pid);
-  fclose(pidfile);
+  curlx_fclose(pidfile);
   logmsg("Wrote pid %ld to %s", (long)pid, filename);
   return 1; /* success */
 }
@@ -240,15 +244,15 @@ int write_pidfile(const char *filename)
 /* store the used port number in a file */
 int write_portfile(const char *filename, int port)
 {
-  FILE *portfile = fopen(filename, "wb");
+  FILE *portfile = curlx_fopen(filename, "wb");
   if(!portfile) {
     char errbuf[STRERROR_LEN];
-    logmsg("Couldn't write port file: %s (%d) %s", filename,
+    logmsg("Could not write port file: %s (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
     return 0; /* fail */
   }
   fprintf(portfile, "%d\n", port);
-  fclose(portfile);
+  curlx_fclose(portfile);
   logmsg("Wrote port %d to %s", port, filename);
   return 1; /* success */
 }
@@ -261,7 +265,7 @@ void set_advisor_read_lock(const char *filename)
   int res;
 
   do {
-    lockfile = fopen(filename, "wb");
+    lockfile = curlx_fopen(filename, "wb");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!lockfile && ((error = errno) == EINTR));
   if(!lockfile) {
@@ -270,7 +274,7 @@ void set_advisor_read_lock(const char *filename)
     return;
   }
 
-  res = fclose(lockfile);
+  res = curlx_fclose(lockfile);
   if(res)
     logmsg("Error closing lock file %s error (%d) %s", filename,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -333,7 +337,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 static DWORD thread_main_id = 0;
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
@@ -344,7 +348,6 @@ static HWND hidden_main_window = NULL;
  * The first time this is called it will set got_exit_signal to one and
  * store in exit_signal the signal that triggered its execution.
  */
-#ifndef UNDER_CE
 /*
  * Only call signal-safe functions from the signal handler, as required by
  * the POSIX specification:
@@ -360,13 +363,17 @@ static void exit_signal_handler(int signum)
     (void)!write(STDERR_FILENO, msg, sizeof(msg) - 1);
   }
   else {
+    int fd = -1;
 #ifdef _WIN32
-#define OPENMODE S_IREAD | S_IWRITE
+    if(!_sopen_s(&fd, serverlogfile, O_WRONLY | O_CREAT | O_APPEND,
+                 _SH_DENYNO, S_IREAD | S_IWRITE) &&
+       fd != -1) {
 #else
-#define OPENMODE S_IRUSR | S_IWUSR
-#endif
-    int fd = open(serverlogfile, O_WRONLY | O_CREAT | O_APPEND, OPENMODE);
+    /* !checksrc! disable BANNEDFUNC 1 */
+    fd = open(serverlogfile,
+              O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
     if(fd != -1) {
+#endif
       static const char msg[] = "exit_signal_handler: called\n";
       (void)!write(fd, msg, sizeof(msg) - 1);
       close(fd);
@@ -387,11 +394,10 @@ static void exit_signal_handler(int signum)
 #endif
   }
   (void)signal(signum, exit_signal_handler);
-  CURL_SETERRNO(old_errno);
+  errno = old_errno;
 }
-#endif
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -439,7 +445,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -519,7 +525,6 @@ static DWORD WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
-#ifndef UNDER_CE
 static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
                                bool restartable)
 {
@@ -549,7 +554,6 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   return oldhdlr;
 #endif
 }
-#endif
 
 void install_signal_handlers(bool keep_sigalrm)
 {
@@ -608,12 +612,10 @@ void install_signal_handlers(bool keep_sigalrm)
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
 #endif
 #ifdef _WIN32
-#ifndef UNDER_CE
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
-#endif
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   thread_main_window = CreateThread(NULL, 0, &main_window_loop,
                                     GetModuleHandle(NULL), 0, &thread_main_id);
   if(!thread_main_window || !thread_main_id)
@@ -653,10 +655,8 @@ void restore_signal_handlers(bool keep_sigalrm)
     (void)set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32
-#ifndef UNDER_CE
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#endif
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {

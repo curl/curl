@@ -26,6 +26,12 @@
  * one the server supports/wants.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -103,12 +109,7 @@ int main(int argc, char **argv)
   if(!fp)
     return 2;
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(file, &file_info) != 0) {
-#else
   if(fstat(fileno(fp), &file_info) != 0) {
-#endif
     fclose(fp);
     return 1; /* cannot continue */
   }
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
        data twice!!! */
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
-    /* set user name and password for the authentication */
+    /* set username and password for the authentication */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
 
     /* Now run off and do what you have been told! */

@@ -47,8 +47,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<Avs%hex[%c3%a4]hex%ndaren@xn--4cab6c.se> SMTPUTF8
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTAvs%hex[%c3%a4]hex%ndaren@xn--4cab6c.se%GT SMTPUTF8
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>

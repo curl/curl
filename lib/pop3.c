@@ -1503,10 +1503,7 @@ static CURLcode pop3_regular_transfer(struct Curl_easy *data,
   data->req.size = -1;
 
   /* Set the progress data */
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   /* Carry out the perform */
   result = pop3_perform(data, &connected, dophase_done);
@@ -1742,9 +1739,8 @@ static CURLcode pop3_write(struct Curl_easy *data, const char *str,
 
     /* Did we have a partial match which has subsequently failed? */
     if(prev && prev >= pop3c->eob) {
-      /* Strip can only be non-zero for the very first mismatch after CRLF
-         and then both prev and strip are equal and nothing will be output
-         below */
+      /* Strip can only be non-zero for the first mismatch after CRLF and
+         then both prev and strip are equal and nothing will be output below */
       while(prev && pop3c->strip) {
         prev--;
         pop3c->strip--;

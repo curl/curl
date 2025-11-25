@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Get a web page, extract the title with libxml.
+ * Get a webpage, extract the title with libxml.
  * </DESC>
 
  Written by Lars Nilsson
@@ -36,7 +36,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <string>
+
 #include <curl/curl.h>
+
 #include <libxml/HTMLparser.h>
 
 //

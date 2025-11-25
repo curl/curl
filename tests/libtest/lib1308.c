@@ -56,9 +56,9 @@ static CURLcode test_lib1308(const char *URL)
                     CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
   t1308_fail_unless(rc == 0, "curl_formadd returned error");
 
-  /* after the first curl_formadd when there's a single entry, both pointers
+  /* after the first curl_formadd when there is a single entry, both pointers
      should point to the same struct */
-  t1308_fail_unless(post == last, "post and last weren't the same");
+  t1308_fail_unless(post == last, "post and last were not the same");
 
   rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "htmlcode",
                     CURLFORM_COPYCONTENTS, "<HTML></HTML>",

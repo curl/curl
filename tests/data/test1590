@@ -42,7 +42,7 @@ IMAP cleanup before a connection was created
 lib1553
 </tool>
 
-# it is important this uses a host name that resolves successfully
+# it is important this uses a hostname that resolves successfully
 <command>
 imap://localhost:%IMAPPORT/%TESTNUMBER
 </command>

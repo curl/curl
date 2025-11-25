@@ -6,6 +6,7 @@ connection reuse
 persistent connection
 CURLOPT_MAXLIFETIME_CONN
 verbose logs
+notxml
 </keywords>
 </info>
 

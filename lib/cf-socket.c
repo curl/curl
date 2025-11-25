@@ -75,7 +75,7 @@
 #include "conncache.h"
 #include "multihandle.h"
 #include "rand.h"
-#include "share.h"
+#include "curl_share.h"
 #include "strdup.h"
 #include "system_win32.h"
 #include "curlx/version_win32.h"
@@ -149,13 +149,7 @@ static void nosigpipe(struct Curl_cfilter *cf,
 #define nosigpipe(x,y,z) Curl_nop_stmt
 #endif
 
-#if defined(USE_WINSOCK) && \
-    defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
-/*  Win 10, v 1709 (10.0.16299) and later can use SetSockOpt TCP_KEEP____
- *  so should use seconds */
-#define CURL_WINSOCK_KEEP_SSO
-#define KEEPALIVE_FACTOR(x)
-#elif defined(USE_WINSOCK) || \
+#if defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
    (defined(__DragonFly__) && __DragonFly_version < 500702) || \
    (defined(_WIN32) && !defined(TCP_KEEPIDLE))
@@ -164,17 +158,6 @@ static void nosigpipe(struct Curl_cfilter *cf,
 #define KEEPALIVE_FACTOR(x) (x *= 1000)
 #else
 #define KEEPALIVE_FACTOR(x)
-#endif
-
-/* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
-#if defined(USE_WINSOCK) && !defined(SIO_KEEPALIVE_VALS)
-#define SIO_KEEPALIVE_VALS    _WSAIOW(IOC_VENDOR,4)
-
-struct tcp_keepalive {
-  u_long onoff;
-  u_long keepalivetime;
-  u_long keepaliveinterval;
-};
 #endif
 
 static void
@@ -188,61 +171,71 @@ tcpkeepalive(struct Curl_cfilter *cf,
   if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
                 (void *)&optval, sizeof(optval)) < 0) {
     CURL_TRC_CF(data, cf, "Failed to set SO_KEEPALIVE on fd "
-                "%" FMT_SOCKET_T ": errno %d",
-                sockfd, SOCKERRNO);
+                "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
   }
   else {
-#ifdef SIO_KEEPALIVE_VALS /* Windows */
-/* Windows 10, version 1709 (10.0.16299) and later versions */
-#ifdef CURL_WINSOCK_KEEP_SSO
-    optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
-                (const char *)&optval, sizeof(optval)) < 0) {
-      CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+#ifdef USE_WINSOCK
+/* Offered by mingw-w64 v12+. MS SDK ~10+/~VS2017+. */
+#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+    /* Windows 10, version 1709 (10.0.16299) and later versions can use
+       setsockopt() TCP_KEEP*. Older versions return with failure. */
+    if(curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
+                                    VERSION_GREATER_THAN_EQUAL)) {
+      CURL_TRC_CF(data, cf, "Set TCP_KEEP* on fd=%" FMT_SOCKET_T, sockfd);
+      optval = curlx_sltosi(data->set.tcp_keepidle);
+      if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
+                    (const char *)&optval, sizeof(optval)) < 0) {
+        CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
+      }
+      optval = curlx_sltosi(data->set.tcp_keepintvl);
+      if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
+                    (const char *)&optval, sizeof(optval)) < 0) {
+        CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
+      }
+      optval = curlx_sltosi(data->set.tcp_keepcnt);
+      if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
+                    (const char *)&optval, sizeof(optval)) < 0) {
+        CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPCNT on fd "
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
+      }
     }
-    optval = curlx_sltosi(data->set.tcp_keepintvl);
-    KEEPALIVE_FACTOR(optval);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
-                (const char *)&optval, sizeof(optval)) < 0) {
-      CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
-    }
-    optval = curlx_sltosi(data->set.tcp_keepcnt);
-    if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPCNT,
-                (const char *)&optval, sizeof(optval)) < 0) {
-      CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPCNT on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
-    }
-#else /* Windows < 10.0.16299 */
-    struct tcp_keepalive vals;
-    DWORD dummy;
-    vals.onoff = 1;
-    optval = curlx_sltosi(data->set.tcp_keepidle);
-    KEEPALIVE_FACTOR(optval);
-    vals.keepalivetime = (u_long)optval;
-    optval = curlx_sltosi(data->set.tcp_keepintvl);
-    KEEPALIVE_FACTOR(optval);
-    vals.keepaliveinterval = (u_long)optval;
-    if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID) &vals, sizeof(vals),
-                NULL, 0, &dummy, NULL, NULL) != 0) {
-      CURL_TRC_CF(data, cf, "Failed to set SIO_KEEPALIVE_VALS on fd "
-                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
-    }
+    else
+#endif /* TCP_KEEPIDLE && TCP_KEEPINTVL && TCP_KEEPCNT */
+    {
+/* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
+#ifndef SIO_KEEPALIVE_VALS
+#define SIO_KEEPALIVE_VALS  _WSAIOW(IOC_VENDOR,4)
+      struct tcp_keepalive {
+        u_long onoff;
+        u_long keepalivetime;
+        u_long keepaliveinterval;
+      };
 #endif
-#else /* !Windows */
+      struct tcp_keepalive vals;
+      DWORD dummy;
+      vals.onoff = 1;
+      optval = curlx_sltosi(data->set.tcp_keepidle);
+      KEEPALIVE_FACTOR(optval);
+      vals.keepalivetime = (u_long)optval;
+      optval = curlx_sltosi(data->set.tcp_keepintvl);
+      KEEPALIVE_FACTOR(optval);
+      vals.keepaliveinterval = (u_long)optval;
+      if(WSAIoctl(sockfd, SIO_KEEPALIVE_VALS, (LPVOID)&vals, sizeof(vals),
+                  NULL, 0, &dummy, NULL, NULL) != 0) {
+        CURL_TRC_CF(data, cf, "Failed to set SIO_KEEPALIVE_VALS on fd "
+                    "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
+      }
+    }
+#else /* !USE_WINSOCK */
 #ifdef TCP_KEEPIDLE
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE)
     /* macOS style */
@@ -251,8 +244,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE_THRESHOLD)
     /* Solaris <11.4 style */
@@ -261,8 +253,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPALIVE_THRESHOLD,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPALIVE_THRESHOLD on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #endif
 #ifdef TCP_KEEPINTVL
@@ -271,8 +262,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPINTVL,
                   (void *)&optval, sizeof(optval)) < 0) {
       CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPINTVL on fd "
-                  "%" FMT_SOCKET_T ": errno %d",
-                  sockfd, SOCKERRNO);
+                  "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #elif defined(TCP_KEEPALIVE_ABORT_THRESHOLD)
     /* Solaris <11.4 style */
@@ -303,7 +293,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
                   "%" FMT_SOCKET_T ": errno %d", sockfd, SOCKERRNO);
     }
 #endif
-#endif
+#endif /* USE_WINSOCK */
   }
 }
 
@@ -664,7 +654,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
           /* Do not fall back to treating it as a hostname */
           char buffer[STRERROR_LEN];
           data->state.os_errno = error = SOCKERRNO;
-          failf(data, "Couldn't bind to interface '%s' with errno %d: %s",
+          failf(data, "Could not bind to interface '%s' with errno %d: %s",
                 iface, error, curlx_strerror(error, buffer, sizeof(buffer)));
           return CURLE_INTERFACE_FAILED;
         }
@@ -768,7 +758,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       char buffer[STRERROR_LEN];
       data->state.errorbuf = FALSE;
       data->state.os_errno = error = SOCKERRNO;
-      failf(data, "Couldn't bind to '%s' with errno %d: %s", host,
+      failf(data, "Could not bind to '%s' with errno %d: %s", host,
             error, curlx_strerror(error, buffer, sizeof(buffer)));
       return CURLE_INTERFACE_FAILED;
     }
@@ -853,24 +843,11 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    *
    *    Someone got to verify this on Win-NT 4.0, 2000."
    */
-
-#ifdef UNDER_CE
-  Sleep(0);
-#else
   SleepEx(0, FALSE);
-#endif
-
 #endif
 
   if(getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
-#ifdef UNDER_CE
-  /* Old Windows CE versions do not support SO_ERROR */
-  if(WSAENOPROTOOPT == err) {
-    SET_SOCKERRNO(0);
-    err = 0;
-  }
-#endif
 #if defined(EBADIOCTL) && defined(__minix)
   /* Minix 3.1.x does not support getsockopt on UDP sockets */
   if(EBADIOCTL == err) {
@@ -1455,7 +1432,7 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   curl_socket_t fdsave;
-  ssize_t nwritten;
+  ssize_t rv;
   size_t orig_len = len;
   CURLcode result = CURLE_OK;
 
@@ -1486,15 +1463,15 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
-    nwritten = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
-                      &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
+    rv = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
+                &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
     cf->conn->bits.tcp_fastopen = FALSE;
   }
   else
 #endif
-    nwritten = swrite(ctx->sock, buf, len);
+    rv = swrite(ctx->sock, buf, len);
 
-  if(nwritten < 0) {
+  if(!curlx_sztouz(rv, pnwritten)) {
     int sockerr = SOCKERRNO;
 
     if(
@@ -1521,8 +1498,6 @@ static CURLcode cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = CURLE_SEND_ERROR;
     }
   }
-  else
-    *pnwritten = (size_t)nwritten;
 
 #ifdef USE_WINSOCK
   if(!result)
@@ -1540,7 +1515,7 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t rv;
 
   *pnread = 0;
 #ifdef DEBUGBUILD
@@ -1561,9 +1536,9 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 #endif
 
-  nread = sread(ctx->sock, buf, len);
+  rv = sread(ctx->sock, buf, len);
 
-  if(nread < 0) {
+  if(!curlx_sztouz(rv, pnread)) {
     int sockerr = SOCKERRNO;
 
     if(
@@ -1589,8 +1564,6 @@ static CURLcode cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       result = CURLE_RECV_ERROR;
     }
   }
-  else
-    *pnread = (size_t)nread;
 
   CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, %zu", len, result, *pnread);
   if(!result && !ctx->got_first_byte) {

@@ -4,6 +4,7 @@
 HTTP
 verbose logs
 flaky
+notxml
 </keywords>
 </info>
 

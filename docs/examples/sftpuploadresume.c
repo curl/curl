@@ -25,9 +25,15 @@
  * Upload to SFTP, resuming a previously aborted transfer.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* read data to upload */
@@ -92,9 +98,7 @@ static int sftpResumeUpload(CURL *curl, const char *remotepath,
 
   f = fopen(localpath, "rb");
   if(!f) {
-#ifndef UNDER_CE
     perror(NULL);
-#endif
     return 0;
   }
 
@@ -103,7 +107,7 @@ static int sftpResumeUpload(CURL *curl, const char *remotepath,
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
   curl_easy_setopt(curl, CURLOPT_READDATA, f);
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   _fseeki64(f, remoteFileSizeByte, SEEK_SET);
 #else
   fseek(f, (long)remoteFileSizeByte, SEEK_SET);

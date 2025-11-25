@@ -78,6 +78,6 @@ typedef union {
 #endif /* UNICODE && _WIN32 */
 
 /* the purpose of this macro is to free() without being traced by memdebug */
-#define curlx_unicodefree(ptr) (free)(CURL_UNCONST(ptr))
+#define curlx_unicodefree(ptr) (free)(ptr)
 
 #endif /* HEADER_CURL_MULTIBYTE_H */

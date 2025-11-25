@@ -38,28 +38,16 @@ commands:
     steps:
       - run:
           command: |
+            export DEBIAN_FRONTEND=noninteractive
             sudo apt-get update && sudo apt-get install -y libssh-dev
 
   install-deps:
     steps:
       - run:
           command: |
-            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
-            sudo python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-
-  install-wolfssl:
-    steps:
-      - run:
-          command: |
-            # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-            WOLFSSL_VERSION=5.8.0
-            echo "Installing wolfSSL $WOLFSSL_VERSION"
-            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-              --location "https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VERSION-stable.tar.gz" | tar -xz
-            cd wolfssl-$WOLFSSL_VERSION-stable
-            ./autogen.sh
-            ./configure --disable-dependency-tracking --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
-            make install
+            sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip
+            python3 -m venv ~/venv
+            ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
   configure:
     steps:
@@ -109,16 +97,24 @@ commands:
   build:
     steps:
       - run: make -j3 V=1
+      - run: src/curl --disable --version
       - run: make -j3 V=1 examples
 
   test:
     steps:
-      - run: make -j3 V=1 test-ci TFLAGS='-j14'
+      - run:
+          command: |
+            source ~/venv/bin/activate
+            # Revert a CircleCI-specific local setting that makes test 1459
+            # return 67 (CURLE_LOGIN_DENIED) instead of the
+            # expected 60 (CURLE_PEER_FAILED_VERIFICATION).
+            echo 'StrictHostKeyChecking yes' >> ~/.ssh/config
+            make -j3 V=1 test-ci TFLAGS='-j14'
 
 executors:
   ubuntu:
     machine:
-      image: ubuntu-2004:2024.01.1
+      image: ubuntu-2204:2025.09.1
 
 jobs:
   basic:
@@ -161,7 +157,7 @@ jobs:
 
   arm:
     machine:
-      image: ubuntu-2004:2024.01.1
+      image: ubuntu-2204:2025.09.1
     resource_class: arm.medium
     steps:
       - checkout
@@ -172,7 +168,7 @@ jobs:
 
   arm-cares:
     machine:
-      image: ubuntu-2004:2024.01.1
+      image: ubuntu-2204:2025.09.1
     resource_class: arm.medium
     steps:
       - checkout

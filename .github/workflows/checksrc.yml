@@ -38,7 +38,7 @@ jobs:
     name: 'checksrc'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -49,7 +49,7 @@ jobs:
     name: 'spellcheck, linters, REUSE'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -111,7 +111,7 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             pmccabe
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -120,15 +120,27 @@ jobs:
 
   xmllint:
     name: 'xmllint'
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 1
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: 'install prereqs'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
+            libxml2-utils
+
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
       - name: 'check'
-        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint >/dev/null
+        run: |
+          {
+            git grep -z -i -l -E '^<\?xml' || true
+            git grep -z -L -F 'notxml' 'tests/data/test*' || true
+          } | xargs -0 -r xmllint >/dev/null
 
   miscchecks:
     name: 'misc checks'
@@ -138,7 +150,7 @@ jobs:
       - name: 'install prereqs'
         run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -174,6 +186,7 @@ jobs:
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
 
-      # we allow some extra in source code
       - name: 'badwords'
-        run: grep -Ev '(\\bwill)' .github/scripts/badwords.txt | .github/scripts/badwords.pl src lib include
+        run: |
+          # we allow some extra in source code
+          grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples

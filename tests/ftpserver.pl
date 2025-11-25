@@ -32,10 +32,10 @@
 # protocols simultaneously.
 #
 # It is meant to exercise curl, it is not meant to be a fully working
-# or even very standard compliant server.
+# or even overly standard compliant server.
 #
-# You may optionally specify port on the command line, otherwise it'll
-# default to port 8921.
+# You may optionally specify port on the command line, otherwise it
+# defaults to port 8921.
 #
 # All socket/network/TCP related stuff is done by the 'sockfilt' program.
 #
@@ -104,11 +104,11 @@ my $port = 8921;               # default primary listener port
 my $listenaddr = '127.0.0.1';  # default address for listener port
 
 #**********************************************************************
-# global vars used for file names
+# global vars used for filenames
 #
-my $PORTFILE="ftpserver.port"; # server port file name
+my $PORTFILE="ftpserver.port"; # server port filename
 my $portfile;           # server port file path
-my $pidfile;            # server pid file name
+my $pidfile;            # server pid filename
 my $mainsockf_pidfile;  # pid file for primary connection sockfilt process
 my $mainsockf_logfile;  # log file for primary connection sockfilt process
 my $datasockf_pidfile;  # pid file for secondary connection sockfilt process
@@ -147,15 +147,15 @@ my %displaytext;   # text returned to client before callback runs
 #
 my $ctrldelay;     # set if server should throttle ctrl stream
 my $datadelay;     # set if server should throttle data stream
-my $retrweirdo;    # set if ftp server should use RETRWEIRDO
-my $retrnosize;    # set if ftp server should use RETRNOSIZE
-my $retrsize;      # set if ftp server should use RETRSIZE
-my $pasvbadip;     # set if ftp server should use PASVBADIP
-my $nosave;        # set if ftp server should not save uploaded data
-my $nodataconn;    # set if ftp srvr doesn't establish or accepts data channel
-my $nodataconn425; # set if ftp srvr doesn't establish data ch and replies 425
-my $nodataconn421; # set if ftp srvr doesn't establish data ch and replies 421
-my $nodataconn150; # set if ftp srvr doesn't establish data ch and replies 150
+my $retrweirdo;    # set if FTP server should use RETRWEIRDO
+my $retrnosize;    # set if FTP server should use RETRNOSIZE
+my $retrsize;      # set if FTP server should use RETRSIZE
+my $pasvbadip;     # set if FTP server should use PASVBADIP
+my $nosave;        # set if FTP server should not save uploaded data
+my $nodataconn;    # set if FTP srvr does not establish or accepts data channel
+my $nodataconn425; # set if FTP srvr does not establish data ch and replies 425
+my $nodataconn421; # set if FTP srvr does not establish data ch and replies 421
+my $nodataconn150; # set if FTP srvr does not establish data ch and replies 150
 my $storeresp;
 my $postfetch;
 my @capabilities;  # set if server supports capability commands
@@ -166,7 +166,7 @@ my %customcount;   #
 my %delayreply;    #
 
 #**********************************************************************
-# global variables for to test ftp wildcardmatching or other test that
+# global variables for to test FTP wildcardmatching or other test that
 # need flexible LIST responses.. and corresponding files.
 # $ftptargetdir is keeping the fake "name" of LIST directory.
 #
@@ -174,7 +174,7 @@ my $ftplistparserstate;
 my $ftptargetdir="";
 
 #**********************************************************************
-# global variables used when running a ftp server to keep state info
+# global variables used when running an FTP server to keep state info
 # relative to the secondary or data sockfilt process. Values of these
 # variables should only be modified using datasockf_state() sub, given
 # that they are closely related and relationship is a bit awkward.
@@ -768,7 +768,7 @@ sub EHLO_smtp {
     my @data;
 
     # TODO: Get the IP address of the client connection to use in the
-    # EHLO response when the client doesn't specify one but for now use
+    # EHLO response when the client does not specify one but for now use
     # 127.0.0.1
     if(!$client) {
         $client = "[127.0.0.1]";
@@ -823,7 +823,7 @@ sub HELO_smtp {
     my ($client) = @_;
 
     # TODO: Get the IP address of the client connection to use in the HELO
-    # response when the client doesn't specify one but for now use 127.0.0.1
+    # response when the client does not specify one but for now use 127.0.0.1
     if(!$client) {
         $client = "[127.0.0.1]";
     }
@@ -864,7 +864,7 @@ sub MAIL_smtp {
             }
         }
 
-        # this server doesn't "validate" MAIL FROM addresses
+        # this server does not "validate" MAIL FROM addresses
         if(length($from)) {
             my @found;
             my $valid = 1;
@@ -989,7 +989,7 @@ sub DATA_smtp {
         }
 
         if($nosave) {
-            print $file "$ulsize bytes would've been stored here\n";
+            print $file "$ulsize bytes would have been stored here\n";
         }
 
         close($file);
@@ -1336,7 +1336,7 @@ sub APPEND_imap {
         }
 
         if($nosave) {
-            print $file "$size bytes would've been stored here\n";
+            print $file "$size bytes would have been stored here\n";
         }
 
         close($file);
@@ -2439,7 +2439,7 @@ sub STOR_ftp {
         }
     }
     if($nosave) {
-        print $file "$ulsize bytes would've been stored here\n";
+        print $file "$ulsize bytes would have been stored here\n";
     }
     close($file);
     close_dataconn($disc);
@@ -2765,7 +2765,7 @@ sub datasockf_state {
     }
     elsif($state eq 'PASSIVE_NODATACONN') {
         # Data sockfilter bound port without listening,
-        # client won't be able to establish data connection.
+        # client will not be able to establish data connection.
         $datasockf_state = $state;
         $datasockf_mode = 'passive';
         $datasockf_runs = 'yes';
@@ -2930,7 +2930,7 @@ sub customize {
             @auth_mechs = split(/ /, $1);
         }
         elsif($_ =~ /NOSAVE/) {
-            # don't actually store the file we upload - to be used when
+            # do not actually store the file we upload - to be used when
             # uploading insanely huge amounts
             $nosave = 1;
             logmsg "FTPD: NOSAVE prevents saving of uploaded data\n";
@@ -3044,7 +3044,7 @@ while(@ARGV) {
         }
     }
     else {
-        print STDERR "\nWarning: ftpserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: ftpserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }
@@ -3332,7 +3332,7 @@ while(1) {
                     $check = 0;
                 }
 
-                # only perform this if we're not faking a reply
+                # only perform this if we are not faking a reply
                 my $func = $commandfunc{uc($FTPCMD)};
                 if($func) {
                     &$func($FTPARG, $FTPCMD);
@@ -3342,7 +3342,7 @@ while(1) {
         }
 
         if($check) {
-            logmsg "$FTPCMD wasn't handled!\n";
+            logmsg "$FTPCMD was not handled!\n";
             if($proto eq 'pop3') {
                 sendcontrol "-ERR $FTPCMD is not dealt with!\r\n";
             }

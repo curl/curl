@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Get POP3 email using implicit SSL
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to retrieve mail using libcurl's POP3
@@ -67,7 +66,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
-    /* If the site you are connecting to uses a different host name that what
+    /* If the site you are connecting to uses a different hostname than what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl refuses to connect. You can skip this
      * check, but it makes the connection insecure. */

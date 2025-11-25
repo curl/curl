@@ -33,7 +33,7 @@
 #include "sendf.h"
 #include "multiif.h"
 #include "url.h"
-#include "share.h"
+#include "curl_share.h"
 #include "curlx/base64.h"
 #include "connect.h"
 #include "strdup.h"
@@ -441,15 +441,12 @@ error:
 }
 
 /*
- * Curl_doh() resolves a name using DoH. It resolves a name and returns a
- * 'Curl_addrinfo *' with the address information.
+ * Curl_doh() starts a name resolve using DoH. It resolves a name and returns
+ * a 'Curl_addrinfo *' with the address information.
  */
 
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
-                               const char *hostname,
-                               int port,
-                               int ip_version,
-                               int *waitp)
+CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
+                  int port, int ip_version)
 {
   CURLcode result = CURLE_OK;
   struct doh_probes *dohp = NULL;
@@ -467,12 +464,12 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   data->state.async.ip_version = ip_version;
   data->state.async.hostname = strdup(hostname);
   if(!data->state.async.hostname)
-    return NULL;
+    return CURLE_OUT_OF_MEMORY;
 
   /* start clean, consider allocating this struct on demand */
   data->state.async.doh = dohp = calloc(1, sizeof(struct doh_probes));
   if(!dohp)
-    return NULL;
+    return CURLE_OUT_OF_MEMORY;
 
   for(i = 0; i < DOH_SLOT_COUNT; ++i) {
     dohp->probe_resp[i].probe_mid = UINT_MAX;
@@ -527,12 +524,11 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     dohp->pending++;
   }
 #endif
-  *waitp = TRUE; /* this never returns synchronously */
-  return NULL;
+  return CURLE_OK;
 
 error:
   Curl_doh_cleanup(data);
-  return NULL;
+  return result;
 }
 
 static DOHcode doh_skipqname(const unsigned char *doh, size_t dohlen,
@@ -1300,6 +1296,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
         result = Curl_dnscache_add(data, dns);
         *dnsp = data->state.async.dns;
       }
+      else
+        Curl_freeaddrinfo(ai);
     } /* address processing done */
 
     /* All done */

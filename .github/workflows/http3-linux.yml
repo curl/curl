@@ -45,15 +45,15 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   AWSLC_VERSION: 1.63.0
   # renovate: datasource=github-tags depName=google/boringssl versioning=semver registryUrl=https://github.com
-  BORINGSSL_VERSION: 0.20251002.0
+  BORINGSSL_VERSION: 0.20251110.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   GNUTLS_VERSION: 3.8.10
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-  WOLFSSL_VERSION: 5.8.2
+  WOLFSSL_VERSION: 5.8.4
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
-  NGHTTP3_VERSION: 1.12.0
+  NGHTTP3_VERSION: 1.13.1
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  NGTCP2_VERSION: 1.17.0
+  NGTCP2_VERSION: 1.18.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.68.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
@@ -189,7 +189,7 @@ jobs:
         if: ${{ steps.cache-openssl-http3-no-deprecated.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
+          git clone --quiet --depth 1 -b "openssl-${OPENSSL_VERSION}" https://github.com/openssl/openssl
           cd openssl
           ./config --prefix="$PWD"/build --libdir=lib no-makedepend no-apps no-docs no-tests no-deprecated
           make
@@ -232,7 +232,7 @@ jobs:
         if: ${{ steps.cache-gnutls.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls.git
+          git clone --quiet --depth 1 -b "${GNUTLS_VERSION}" https://github.com/gnutls/gnutls
           cd gnutls
           # required: nettle-dev libp11-kit-dev libev-dev autopoint bison gperf gtk-doc-tools libtasn1-bin
           ./bootstrap
@@ -247,7 +247,7 @@ jobs:
         if: ${{ steps.cache-wolfssl.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl.git
+          git clone --quiet --depth 1 -b "v${WOLFSSL_VERSION}-stable" https://github.com/wolfSSL/wolfssl
           cd wolfssl
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
@@ -259,9 +259,9 @@ jobs:
         if: ${{ steps.cache-nghttp3.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "v${NGHTTP3_VERSION}" https://github.com/ngtcp2/nghttp3
+          git clone --quiet --depth 1 -b "v${NGHTTP3_VERSION}" https://github.com/ngtcp2/nghttp3
           cd nghttp3
-          git submodule update --init --depth=1
+          git submodule update --init --depth 1
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix="$PWD"/build --enable-lib-only
           make
@@ -272,7 +272,7 @@ jobs:
         # building twice to get crypto libs for ossl, libressl and awslc installed
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
+          git clone --quiet --depth 1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2
           cd ngtcp2
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
@@ -290,7 +290,7 @@ jobs:
         if: ${{ steps.cache-ngtcp2-boringssl.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-boringssl
+          git clone --quiet --depth 1 -b "v${NGTCP2_VERSION}" https://github.com/ngtcp2/ngtcp2 ngtcp2-boringssl
           cd ngtcp2-boringssl
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix="$PWD"/build \
@@ -303,9 +303,9 @@ jobs:
         if: ${{ steps.cache-nghttp2.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
+          git clone --quiet --depth 1 -b "v${NGHTTP2_VERSION}" https://github.com/nghttp2/nghttp2
           cd nghttp2
-          git submodule update --init --depth=1
+          git submodule update --init --depth 1
           autoreconf -fi
           # required (for nghttpx application): libc-ares-dev libev-dev zlib1g-dev
           # optional (for nghttpx application): libbrotli-dev
@@ -578,7 +578,7 @@ jobs:
         if: ${{ matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true' }}
         run: |
           cd ~
-          git clone --quiet --depth=1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche.git
+          git clone --quiet --depth 1 -b "${QUICHE_VERSION}" --recursive https://github.com/cloudflare/quiche
           cd quiche
           #### Work-around https://github.com/curl/curl/issues/7927 #######
           #### See https://github.com/alexcrichton/cmake-rs/issues/131 ####
@@ -594,7 +594,7 @@ jobs:
           # lib dir
           # /home/runner/quiche/quiche/deps/boringssl/src/lib
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 

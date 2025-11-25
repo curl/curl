@@ -202,7 +202,7 @@ class VsFTPD:
         ]
         if self._with_ssl:
             creds = self.env.get_credentials(self.domain)
-            assert creds  # convince pytype this isn't None
+            assert creds  # convince pytype this is not None
             conf.extend([
                 'ssl_enable=YES',
                 'debug_ssl=YES',

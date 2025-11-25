@@ -32,12 +32,12 @@
  * gcc -Wall -I/usr/local/include xmlstream.c -lcurl -lexpat -o xmlstream
  *
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <expat.h>
+
 #include <curl/curl.h>
 
 struct MemoryStruct {

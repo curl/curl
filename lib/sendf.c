@@ -108,6 +108,7 @@ static void cl_reset_writer(struct Curl_easy *data)
 static void cl_reset_reader(struct Curl_easy *data)
 {
   struct Curl_creader *reader = data->req.reader_stack;
+  data->req.reader_started = FALSE;
   while(reader) {
     data->req.reader_stack = reader->next;
     reader->crt->do_close(data, reader);
@@ -229,8 +230,10 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   size_t nwrite, excess_len = 0;
   bool is_connect = !!(type & CLIENTWRITE_CONNECT);
 
-  if(!is_connect && !ctx->started_response) {
+  if(!ctx->started_response &&
+     !(type & (CLIENTWRITE_INFO|CLIENTWRITE_CONNECT))) {
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+    Curl_rlimit_start(&data->progress.dl.rlimit, curlx_now());
     ctx->started_response = TRUE;
   }
 
@@ -301,7 +304,9 @@ static CURLcode cw_download_write(struct Curl_easy *data,
     if(result)
       return result;
   }
+
   /* Update stats, write and report progress */
+  Curl_rlimit_drain(&data->progress.dl.rlimit, nwrite, curlx_now());
   data->req.bytecount += nwrite;
   Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
 
@@ -1191,6 +1196,7 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
   DEBUGASSERT(blen);
   DEBUGASSERT(nread);
   DEBUGASSERT(eos);
+  *nread = 0;
 
   if(!data->req.reader_stack) {
     result = Curl_creader_set_fread(data, data->state.infilesize);
@@ -1198,9 +1204,28 @@ CURLcode Curl_client_read(struct Curl_easy *data, char *buf, size_t blen,
       return result;
     DEBUGASSERT(data->req.reader_stack);
   }
+  if(!data->req.reader_started) {
+    Curl_rlimit_start(&data->progress.ul.rlimit, curlx_now());
+    data->req.reader_started = TRUE;
+  }
 
+  if(Curl_rlimit_active(&data->progress.ul.rlimit)) {
+    curl_off_t ul_avail =
+      Curl_rlimit_avail(&data->progress.ul.rlimit, curlx_now());
+    if(ul_avail <= 0) {
+      result = CURLE_OK;
+      *eos = FALSE;
+      goto out;
+    }
+    if(ul_avail < (curl_off_t)blen)
+      blen = (size_t)ul_avail;
+  }
   result = Curl_creader_read(data, data->req.reader_stack, buf, blen,
                              nread, eos);
+  if(!result)
+    Curl_rlimit_drain(&data->progress.ul.rlimit, *nread, curlx_now());
+
+out:
   CURL_TRC_READ(data, "client_read(len=%zu) -> %d, nread=%zu, eos=%d",
                 blen, result, *nread, *eos);
   return result;

@@ -25,7 +25,7 @@
 
 #include "urldata.h"
 #include "connect.h"
-#include "share.h"
+#include "curl_share.h"
 
 #include "memdebug.h" /* LAST include file */
 
@@ -66,7 +66,7 @@ static CURLcode test_unit1607(const char *arg)
 
   /* CURLOPT_RESOLVE address parsing tests */
   static const struct testcase tests[] = {
-    /* spaces aren't allowed, for now */
+    /* spaces are not allowed, for now */
     { "test.com:80:127.0.0.1, 127.0.0.2",
       "test.com", 80, TRUE, { NULL, }
     },

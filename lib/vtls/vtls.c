@@ -63,7 +63,7 @@
 #include "../strcase.h"
 #include "../url.h"
 #include "../progress.h"
-#include "../share.h"
+#include "../curl_share.h"
 #include "../multiif.h"
 #include "../curlx/fopen.h"
 #include "../curlx/timeval.h"
@@ -1423,7 +1423,7 @@ static CURLcode ssl_cf_connect_deferred(struct Curl_cfilter *cf,
     result = ssl_cf_set_earlydata(cf, data, buf, blen);
     if(result)
       return result;
-    /* we buffered any early data we'd like to send. Actually
+    /* we buffered any early data we would like to send. Actually
      * do the connect now which sends it and performs the handshake. */
     connssl->earlydata_state = ssl_earlydata_sending;
     connssl->earlydata_skip = Curl_bufq_len(&connssl->earlydata);

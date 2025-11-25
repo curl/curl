@@ -20,24 +20,26 @@
  *
  * SPDX-License-Identifier: curl
  *
- * To compile:
- *   gcc crawler.c $(pkg-config --cflags --libs libxml-2.0 libcurl)
- *
- */
+ ***************************************************************************/
 /* <DESC>
  * Web crawler based on curl and libxml2 to stress-test curl with
  * hundreds of concurrent connections to various servers.
  * </DESC>
  */
-
+/*
+ * To compile:
+ *   gcc crawler.c $(pkg-config --cflags --libs libxml-2.0 libcurl)
+ */
 #include <libxml/HTMLparser.h>
 #include <libxml/xpath.h>
 #include <libxml/uri.h>
-#include <curl/curl.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <signal.h>
+
+#include <curl/curl.h>
 
 /* Parameters */
 static int max_con = 200;
@@ -170,7 +172,7 @@ static size_t follow_links(CURLM *multi, struct memory *mem,
   return count;
 }
 
-static int is_html(char *ctype)
+static int is_html(const char *ctype)
 {
   return ctype != NULL && strlen(ctype) > 10 && strstr(ctype, "text/html");
 }

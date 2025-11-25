@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send SMTP email with the multi interface
  * </DESC>
  */
-
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is an example showing how to send mail using libcurl's SMTP

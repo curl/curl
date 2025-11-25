@@ -58,21 +58,22 @@ This is purely a demo app, all retrieved data is simply discarded by the write
 callback.
 
 */
-
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/cdefs.h>
+#include <sys/poll.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/poll.h>
+
 #include <curl/curl.h>
+
 #include <event2/event.h>
 #include <event2/event_struct.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <sys/cdefs.h>
 
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
 

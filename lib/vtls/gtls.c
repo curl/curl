@@ -73,7 +73,7 @@ static void tls_log_func(int level, const char *str)
 }
 #endif
 
-#if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x03010a)
+#if !defined(GNUTLS_VERSION_NUMBER) || (GNUTLS_VERSION_NUMBER < 0x030605)
 #error "too old GnuTLS version"
 #endif
 
@@ -477,7 +477,31 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
 #endif
   }
 
-  if(config->CAfile) {
+  if(config->ca_info_blob) {
+    gnutls_datum_t ca_info_datum;
+    if(config->ca_info_blob->len > (size_t)UINT_MAX) {
+      failf(data, "certificate blob too long: %zu bytes",
+            config->ca_info_blob->len);
+      return CURLE_SSL_CACERT_BADFILE;
+    }
+    ca_info_datum.data = config->ca_info_blob->data;
+    ca_info_datum.size = (unsigned int)config->ca_info_blob->len;
+    rc = gnutls_certificate_set_x509_trust_mem(creds, &ca_info_datum,
+                                               GNUTLS_X509_FMT_PEM);
+    creds_are_empty = creds_are_empty && (rc <= 0);
+    if(rc < 0) {
+      infof(data, "error reading ca cert blob (%s)%s", gnutls_strerror(rc),
+            (creds_are_empty ? "" : ", continuing anyway"));
+      if(creds_are_empty) {
+        ssl_config->certverifyresult = rc;
+        return CURLE_SSL_CACERT_BADFILE;
+      }
+    }
+    else
+      infof(data, "  CA Blob: %d certificates", rc);
+  }
+  /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
+  else if(config->CAfile) {
     /* set the trusted CA cert bundle file */
     gnutls_certificate_set_verify_flags(creds,
                                         GNUTLS_VERIFY_ALLOW_X509_V1_CA_CRT);
@@ -691,7 +715,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   /* we always unconditionally get the session id here, as even if we
      already got it from the cache and asked to use it in the connection, it
-     might've been rejected and then a new one is in use now and we need to
+     might have been rejected and then a new one is in use now and we need to
      detect that. */
 
   /* get the session ID data size */
@@ -743,10 +767,8 @@ int Curl_glts_get_ietf_proto(gnutls_session_t session)
     return CURL_IETF_PROTO_TLS1_1;
   case GNUTLS_TLS1_2:
     return CURL_IETF_PROTO_TLS1_2;
-#if GNUTLS_VERSION_NUMBER >= 0x030603
   case GNUTLS_TLS1_3:
     return CURL_IETF_PROTO_TLS1_3;
-#endif
   default:
     return CURL_IETF_PROTO_UNKNOWN;
   }
@@ -1665,8 +1687,7 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
       infof(data, "  SSL certificate verified by GnuTLS");
 
 #ifdef USE_APPLE_SECTRUST
-    if(!verified && ssl_config->native_ca_store &&
-       (verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)) {
+    if(!verified && ssl_config->native_ca_store) {
       result = glts_apple_verify(cf, data, peer, &chain, &verified);
       if(result && (result != CURLE_PEER_FAILED_VERIFICATION))
         goto out; /* unexpected error */
@@ -1817,51 +1838,8 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   rc = (int)gnutls_x509_crt_check_hostname(x509_cert,
                                            peer->sni ? peer->sni :
                                            peer->hostname);
-#if GNUTLS_VERSION_NUMBER < 0x030306
-  /* Before 3.3.6, gnutls_x509_crt_check_hostname() did not check IP
-     addresses. */
-  if(!rc) {
-#ifdef USE_IPV6
-    #define use_addr in6_addr
-#else
-    #define use_addr in_addr
-#endif
-    unsigned char addrbuf[sizeof(struct use_addr)];
-    size_t addrlen = 0;
-
-    if(curlx_inet_pton(AF_INET, peer->hostname, addrbuf) > 0)
-      addrlen = 4;
-#ifdef USE_IPV6
-    else if(curlx_inet_pton(AF_INET6, peer->hostname, addrbuf) > 0)
-      addrlen = 16;
-#endif
-
-    if(addrlen) {
-      unsigned char certaddr[sizeof(struct use_addr)];
-      int i;
-
-      for(i = 0; ; i++) {
-        size_t certaddrlen = sizeof(certaddr);
-        int ret = gnutls_x509_crt_get_subject_alt_name(x509_cert, i, certaddr,
-                                                       &certaddrlen, NULL);
-        /* If this happens, it was not an IP address. */
-        if(ret == GNUTLS_E_SHORT_MEMORY_BUFFER)
-          continue;
-        if(ret < 0)
-          break;
-        if(ret != GNUTLS_SAN_IPADDRESS)
-          continue;
-        if(certaddrlen == addrlen && !memcmp(addrbuf, certaddr, addrlen)) {
-          rc = 1;
-          break;
-        }
-      }
-    }
-  }
-#endif
-
   result = (!rc && config->verifyhost) ?
-           CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
+    CURLE_PEER_FAILED_VERIFICATION : CURLE_OK;
   gtls_msg_verify_result(data, peer, x509_cert, rc, config->verifyhost);
   if(result)
     goto out;
@@ -2335,6 +2313,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CAINFO_BLOB |
   SSLSUPP_CIPHER_LIST |
   SSLSUPP_CA_CACHE,
 

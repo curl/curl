@@ -100,9 +100,9 @@ class Httpd:
             raise Exception(f'{env.apxs} failed to query libexecdir: {p}')
         self._mods_dir = p.stdout.strip()
         if self._mods_dir is None:
-            raise Exception('apache modules dir cannot be found')
+            raise Exception('apache modules directory cannot be found')
         if not os.path.exists(self._mods_dir):
-            raise Exception(f'apache modules dir does not exist: {self._mods_dir}')
+            raise Exception(f'apache modules directory does not exist: {self._mods_dir}')
         self._maybe_running = False
         self.ports = {}
         self._rmf(self._error_log)
@@ -260,17 +260,17 @@ class Httpd:
         domain1 = self.env.domain1
         domain1brotli = self.env.domain1brotli
         creds1 = self.env.get_credentials(self._domain1_cred_name)
-        assert creds1  # convince pytype this isn't None
+        assert creds1  # convince pytype this is not None
         self._loaded_domain1_cred_name = self._domain1_cred_name
         domain2 = self.env.domain2
         creds2 = self.env.get_credentials(domain2)
-        assert creds2  # convince pytype this isn't None
+        assert creds2  # convince pytype this is not None
         exp_domain = self.env.expired_domain
         exp_creds = self.env.get_credentials(exp_domain)
-        assert exp_creds  # convince pytype this isn't None
+        assert exp_creds  # convince pytype this is not None
         proxy_domain = self.env.proxy_domain
         proxy_creds = self.env.get_credentials(proxy_domain)
-        assert proxy_creds  # convince pytype this isn't None
+        assert proxy_creds  # convince pytype this is not None
         self._mkpath(self._conf_dir)
         self._mkpath(self._docs_dir)
         self._mkpath(self._logs_dir)

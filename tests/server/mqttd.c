@@ -73,7 +73,7 @@ static void mqttd_resetdefaults(void)
 
 static void mqttd_getconfig(void)
 {
-  FILE *fp = fopen(configfile, FOPEN_READTEXT);
+  FILE *fp = curlx_fopen(configfile, FOPEN_READTEXT);
   mqttd_resetdefaults();
   if(fp) {
     char buffer[512];
@@ -119,7 +119,7 @@ static void mqttd_getconfig(void)
         }
       }
     }
-    fclose(fp);
+    curlx_fclose(fp);
   }
   else {
     logmsg("No config file '%s' to read", configfile);
@@ -430,7 +430,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     0x04              /* protocol level */
   };
   snprintf(dumpfile, sizeof(dumpfile), "%s/%s", logdir, REQUEST_DUMP);
-  dump = fopen(dumpfile, "ab");
+  dump = curlx_fopen(dumpfile, "ab");
   if(!dump)
     goto end;
 
@@ -563,7 +563,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       memcpy(topic, &buffer[4], topic_len);
       topic[topic_len] = 0;
 
-      /* there's a QoS byte (two bits) after the topic */
+      /* there is a QoS byte (two bits) after the topic */
 
       logmsg("SUBSCRIBE to '%s' [%d]", topic, packet_id);
       stream = test2fopen(testno, logdir);
@@ -572,7 +572,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
         error = errno;
         logmsg("fopen() failed with error (%d) %s",
                error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-        logmsg("Couldn't open test file %ld", testno);
+        logmsg("Could not open test file %ld", testno);
         goto end;
       }
       error = getpart(&data, &datalen, "reply", "data", stream);
@@ -636,9 +636,9 @@ end:
   if(buffer)
     free(buffer);
   if(dump)
-    fclose(dump);
+    curlx_fclose(dump);
   if(stream)
-    fclose(stream);
+    curlx_fclose(stream);
   return CURL_SOCKET_BAD;
 }
 
@@ -679,7 +679,7 @@ static bool mqttd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_write);
     FD_ZERO(&fds_err);
 
-    /* there's always a socket to wait for */
+    /* there is always a socket to wait for */
 #ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"

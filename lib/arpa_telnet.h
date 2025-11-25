@@ -79,7 +79,7 @@ static const char * const telnetoptions[]=
 #define CURL_WILL 251 /* Our side WILL use this option */
 #define CURL_WONT 252 /* Our side will not use this option */
 #define CURL_DO   253 /* DO use this option! */
-#define CURL_DONT 254 /* DON'T use this option! */
+#define CURL_DONT 254 /* DO NOT use this option! */
 #define CURL_IAC  255 /* Interpret As Command */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS

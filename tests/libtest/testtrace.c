@@ -69,7 +69,7 @@ void debug_dump(const char *timebuf, const char *text,
       curl_mfprintf(stream, "%c",
                     ((ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80)) ?
                     ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
         i += (c + 3 - width);
@@ -105,7 +105,7 @@ int libtest_debug_cb(CURL *curl, curl_infotype type,
     }
     secs = epoch_offset + tv.tv_sec;
     /* !checksrc! disable BANNEDFUNC 1 */
-    now = localtime(&secs);  /* not thread safe but we don't care */
+    now = localtime(&secs);  /* not thread safe but we do not care */
     curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
                    now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
   }

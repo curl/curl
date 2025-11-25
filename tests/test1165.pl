@@ -37,7 +37,7 @@ my %file;
 # the DISABLE options that are documented
 my %docs;
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root=$ARGV[0] || ".";
 my $DOCS="CURL-DISABLE.md";
 
@@ -54,7 +54,7 @@ sub scanconf {
 }
 
 sub scan_configure {
-    opendir(my $m, "$root/m4") || die "Can't opendir $root/m4: $!";
+    opendir(my $m, "$root/m4") || die "Cannot opendir $root/m4: $!";
     my @m4 = grep { /\.m4$/ } readdir($m);
     closedir $m;
     scanconf("$root/configure.ac");
@@ -86,7 +86,7 @@ sub scan_cmake_config_h {
     scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
 }
 
-my %whitelisted = ("CURL_DISABLE_TYPECHECK" => 1);
+my %whitelisted = ('CURL_DISABLE_DEPRECATION' => 1);
 
 sub scan_file {
     my ($source)=@_;
@@ -105,7 +105,7 @@ sub scan_file {
 
 sub scan_dir {
     my ($dir)=@_;
-    opendir(my $dh, $dir) || die "Can't opendir $dir: $!";
+    opendir(my $dh, $dir) || die "Cannot opendir $dir: $!";
     my @cfiles = grep { /\.[ch]\z/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
     for my $f (sort @cfiles) {
@@ -114,6 +114,7 @@ sub scan_dir {
 }
 
 sub scan_sources {
+    scan_dir("$root/include/curl");
     scan_dir("$root/src");
     scan_dir("$root/lib");
     scan_dir("$root/lib/vtls");

@@ -112,15 +112,12 @@ struct doh_probes {
 };
 
 /*
- * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
- * and returns a 'Curl_addrinfo *' with the address information.
+ * Curl_doh() starts a name resolve using DoH (DNS-over-HTTPS). It resolves a
+ * name and returns a 'Curl_addrinfo *' with the address information.
  */
 
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
-                               const char *hostname,
-                               int port,
-                               int ip_version,
-                               int *waitp);
+CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
+                  int port, int ip_version);
 
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dns);

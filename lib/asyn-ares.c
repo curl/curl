@@ -52,7 +52,7 @@
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
-#include "share.h"
+#include "curl_share.h"
 #include "url.h"
 #include "multiif.h"
 #include "curlx/inet_pton.h"
@@ -343,7 +343,8 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
         Curl_dnscache_mk_entry(data, ares->temp_ai,
                                data->state.async.hostname, 0,
                                data->state.async.port, FALSE);
-      ares->temp_ai = NULL; /* temp_ai now owned by entry */
+      if(data->state.async.dns)
+        ares->temp_ai = NULL; /* temp_ai now owned by entry */
 #ifdef HTTPSRR_WORKS
       if(data->state.async.dns) {
         struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&ares->hinfo);
@@ -566,7 +567,7 @@ static void async_ares_hostbyname_cb(void *user_data,
        So, now that we have a usable answer (some IPv4 addresses, some IPv6
        addresses, or "no such domain"), we start a timeout for the remaining
        pending responses. Even though it is typical that this resolved
-       request came back quickly, that needn't be the case. It might be that
+       request came back quickly, that need not be the case. It might be that
        this completing request did not get a result from the first DNS
        server or even the first round of the whole DNS server pool. So it
        could already be quite some time after we issued the DNS queries in
@@ -718,25 +719,18 @@ static void async_ares_rr_done(void *user_data, ares_status_t status,
 /*
  * Curl_async_getaddrinfo() - when using ares
  *
- * Returns name information about the given hostname and port number. If
- * successful, the 'hostent' is returned and the fourth argument will point to
- * memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
+ * Starts a name resolve for the given hostname and port number.
  */
-struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
-                                             const char *hostname,
-                                             int port,
-                                             int ip_version,
-                                             int *waitp)
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
+                                int port, int ip_version)
 {
   struct async_ares_ctx *ares = &data->state.async.ares;
 #ifdef USE_HTTPSRR
   char *rrname = NULL;
 #endif
-  *waitp = 0; /* default to synchronous response */
 
   if(async_ares_init_lazy(data))
-    return NULL;
+    return CURLE_FAILED_INIT;
 
   data->state.async.done = FALSE;   /* not done */
   data->state.async.dns = NULL;     /* clear */
@@ -744,14 +738,12 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
   data->state.async.ip_version = ip_version;
   data->state.async.hostname = strdup(hostname);
   if(!data->state.async.hostname)
-    return NULL;
+    return CURLE_OUT_OF_MEMORY;
 #ifdef USE_HTTPSRR
   if(port != 443) {
     rrname = curl_maprintf("_%d_.https.%s", port, hostname);
-    if(!rrname) {
-      free(data->state.async.hostname);
-      return NULL;
-    }
+    if(!rrname)
+      return CURLE_OUT_OF_MEMORY;
   }
 #endif
 
@@ -838,9 +830,8 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
                       async_ares_rr_done, data, NULL);
   }
 #endif
-  *waitp = 1; /* expect asynchronous response */
 
-  return NULL; /* no struct yet */
+  return CURLE_OK;
 }
 
 /* Set what DNS server are is to use. This is called in 2 situations:

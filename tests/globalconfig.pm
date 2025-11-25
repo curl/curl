@@ -49,6 +49,7 @@ BEGIN {
         $buildinfo
         $LOCKDIR
         $LOGDIR
+        $maxtime
         $memanalyze
         $MEMDUMP
         $perlcmd
@@ -103,6 +104,7 @@ our $anyway;          # continue anyway, even if a test fail
 our $CURLVERSION="";  # curl's reported version number
 our $CURLVERNUM="";   # curl's reported version number (without -DEV)
 our $randseed = 0;    # random number seed
+our $maxtime;         # curl command timeout override
 
 # paths
 our $pwd = getcwd();  # current working directory

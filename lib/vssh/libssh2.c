@@ -53,7 +53,6 @@
 #include "../http.h" /* for HTTP proxy tunnel stuff */
 #include "ssh.h"
 #include "../url.h"
-#include "../speedcheck.h"
 #include "../vtls/vtls.h"
 #include "../cfilters.h"
 #include "../connect.h"
@@ -878,8 +877,8 @@ static CURLcode sftp_quote(struct Curl_easy *data,
     Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
     Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
 
-    /* this sends an FTP-like "header" to the header callback so that the
-       current directory can be read very similar to how it is read when
+    /* this sends an FTP-like "header" to the header callback so that
+       the current directory can be read similar to how it is read when
        using ordinary FTP. */
     result = Curl_client_write(data, CLIENTWRITE_HEADER, tmp, strlen(tmp));
     free(tmp);
@@ -2067,10 +2066,10 @@ static CURLcode ssh_state_sftp_quote_setstat(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "Attempt to set SFTP stats for \"%s\" failed: %s",
+          sshc->quote_path2, sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
     Curl_safefree(sshc->quote_path2);
-    failf(data, "Attempt to set SFTP stats failed: %s",
-          sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2093,10 +2092,11 @@ static CURLcode ssh_state_sftp_quote_symlink(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "symlink \"%s\" to \"%s\" failed: %s",
+          sshc->quote_path1, sshc->quote_path2,
+          sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
     Curl_safefree(sshc->quote_path2);
-    failf(data, "symlink command failed: %s",
-          sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2116,9 +2116,9 @@ static CURLcode ssh_state_sftp_quote_mkdir(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "mkdir \"%s\" failed: %s",
+          sshc->quote_path1, sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
-    failf(data, "mkdir command failed: %s",
-          sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2144,10 +2144,11 @@ static CURLcode ssh_state_sftp_quote_rename(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "rename \"%s\" to \"%s\" failed: %s",
+          sshc->quote_path1, sshc->quote_path2,
+          sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
     Curl_safefree(sshc->quote_path2);
-    failf(data, "rename command failed: %s",
-          sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2166,9 +2167,9 @@ static CURLcode ssh_state_sftp_quote_rmdir(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "rmdir \"%s\" failed: %s",
+          sshc->quote_path1, sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
-    failf(data, "rmdir command failed: %s",
-          sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2187,8 +2188,9 @@ static CURLcode ssh_state_sftp_quote_unlink(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "rm \"%s\" failed: %s",
+          sshc->quote_path1, sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
-    failf(data, "rm command failed: %s", sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -2210,9 +2212,9 @@ static CURLcode ssh_state_sftp_quote_statvfs(struct Curl_easy *data,
 
   if(rc && !sshc->acceptfail) {
     unsigned long sftperr = libssh2_sftp_last_error(sshc->sftp_session);
+    failf(data, "statvfs \"%s\" failed: %s",
+          sshc->quote_path1, sftp_libssh2_strerror(sftperr));
     Curl_safefree(sshc->quote_path1);
-    failf(data, "statvfs command failed: %s",
-          sftp_libssh2_strerror(sftperr));
     myssh_state(data, sshc, SSH_SFTP_CLOSE);
     sshc->nextstate = SSH_NO_STATE;
     return CURLE_QUOTE_ERROR;
@@ -3132,10 +3134,7 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
       break;
 
     if(!disconnect) {
-      if(Curl_pgrsUpdate(data))
-        return CURLE_ABORTED_BY_CALLBACK;
-
-      result = Curl_speedcheck(data, now);
+      result = Curl_pgrsCheck(data);
       if(result)
         break;
 
@@ -3531,10 +3530,7 @@ static CURLcode ssh_do(struct Curl_easy *data, bool *done)
   sshc->secondCreateDirs = 0;   /* reset the create directory attempt state
                                    variable */
 
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   if(conn->handler->protocol & CURLPROTO_SCP)
     result = scp_perform(data, &connected, done);

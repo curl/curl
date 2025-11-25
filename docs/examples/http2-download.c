@@ -25,20 +25,17 @@
  * Multiplexed HTTP/2 downloads over a single connection
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
 #include <errno.h>
-#endif
 
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
-#endif
-
-/* curl stuff */
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
@@ -46,6 +43,10 @@
    old enough to not have this symbol. It is _not_ defined to zero in a recent
    libcurl header. */
 #define CURLPIPE_MULTIPLEX 0L
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
 #endif
 
 struct transfer {
@@ -90,7 +91,7 @@ static void dump(const char *text, int num, unsigned char *ptr,
       }
       fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
         i += (c + 3 - width);

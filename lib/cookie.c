@@ -31,7 +31,7 @@
 #include "psl.h"
 #include "sendf.h"
 #include "slist.h"
-#include "share.h"
+#include "curl_share.h"
 #include "strcase.h"
 #include "curl_fopen.h"
 #include "curl_get_line.h"
@@ -458,16 +458,17 @@ parse_cookie_header(struct Curl_easy *data,
        */
 
       if(!co->name) {
-        /* The very first name/value pair is the actual cookie name */
+        /* The first name/value pair is the actual cookie name */
         if(!sep)
           /* Bad name/value pair. */
           return CURLE_OK;
 
         strstore(&co->name, curlx_str(&name), curlx_strlen(&name));
-        strstore(&co->value, curlx_str(&val), curlx_strlen(&val));
-        done = TRUE;
+        if(co->name)
+          strstore(&co->value, curlx_str(&val), curlx_strlen(&val));
         if(!co->name || !co->value)
-          return CURLE_OK;
+          return CURLE_OUT_OF_MEMORY;
+        done = TRUE;
 
         if(invalid_octets(co->value) || invalid_octets(co->name)) {
           infof(data, "invalid octets in name/value, cookie dropped");
@@ -1629,7 +1630,7 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   /* only save the cookie file if a transfer was started (data->state.url is
      set), as otherwise the cookies were not completely initialized and there
-     might be cookie files that weren't loaded so saving the file is the wrong
+     might be cookie files that were not loaded so saving the file is the wrong
      thing. */
   if(data->set.str[STRING_COOKIEJAR] && data->state.url) {
     /* if we have a destination file for all the cookies to get dumped to */

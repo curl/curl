@@ -121,7 +121,7 @@ if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
+if(ENABLE_UNICODE AND MINGW)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
     set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_OPTIONS "-municode")
   else()
@@ -141,8 +141,13 @@ endif()
 
 ################################################################################
 
-install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
-export(TARGETS ${EXE_NAME}
-  FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
-  NAMESPACE ${PROJECT_NAME}::
-)
+if(CURL_ENABLE_EXPORT_TARGET)
+  if(NOT CURL_DISABLE_INSTALL)
+    install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endif()
+
+  export(TARGETS ${EXE_NAME}
+    FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
+    NAMESPACE ${PROJECT_NAME}::
+  )
+endif()

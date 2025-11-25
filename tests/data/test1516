@@ -10,8 +10,8 @@ resolve
 </info>
 
 <reply>
-# Close the connection after the first request but don't tell the client to do
-# so! When starting the second request it'll detect a dead connection and must
+# Close the connection after the first request but do not tell the client to do
+# so! When starting the second request it detects a dead connection and must
 # not clean the DNS entries added manually.
 <data1>
 HTTP/1.1 200 OK

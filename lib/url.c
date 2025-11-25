@@ -81,14 +81,13 @@
 #include "cookie.h"
 #include "strcase.h"
 #include "escape.h"
-#include "share.h"
+#include "curl_share.h"
 #include "content_encoding.h"
 #include "http_digest.h"
 #include "http_negotiate.h"
 #include "select.h"
 #include "multiif.h"
 #include "easyif.h"
-#include "speedcheck.h"
 #include "curlx/warnless.h"
 #include "getinfo.h"
 #include "pop3.h"
@@ -1283,7 +1282,7 @@ static bool url_match_result(bool result, void *userdata)
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
-    /* We've seen a single-use, existing connection to the destination and
+    /* We have seen a single-use, existing connection to the destination and
      * no multiplexed one. It seems safe to assume that the server does
      * not support multiplexing. */
     match->wait_pipe = FALSE;
@@ -1974,7 +1973,9 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       conn->remote_port = (unsigned short)port;
   }
 
-  (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
+  uc = curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
+  if(uc && (uc != CURLUE_NO_QUERY))
+    return CURLE_OUT_OF_MEMORY;
 
 #ifdef USE_IPV6
   if(data->set.scope_id)
@@ -2285,7 +2286,11 @@ static CURLcode parse_proxy(struct Curl_easy *data,
     conn->bits.proxy_user_passwd = TRUE; /* enable it */
   }
 
-  (void)curl_url_get(uhp, CURLUPART_PORT, &portptr, 0);
+  uc = curl_url_get(uhp, CURLUPART_PORT, &portptr, 0);
+  if(uc == CURLUE_OUT_OF_MEMORY) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto error;
+  }
 
   if(portptr) {
     curl_off_t num;
@@ -2740,7 +2745,7 @@ static CURLcode override_login(struct Curl_easy *data,
                                       data->set.str[STRING_NETRC_FILE]);
       if(ret && ((ret == NETRC_NO_MATCH) ||
                  (data->set.use_netrc == CURL_NETRC_OPTIONAL))) {
-        infof(data, "Couldn't find host %s in the %s file; using defaults",
+        infof(data, "Could not find host %s in the %s file; using defaults",
               conn->host.name,
               (data->set.str[STRING_NETRC_FILE] ?
                data->set.str[STRING_NETRC_FILE] : ".netrc"));
@@ -2752,7 +2757,7 @@ static CURLcode override_login(struct Curl_easy *data,
       }
       else {
         if(!(conn->handler->flags&PROTOPT_USERPWDCTRL)) {
-          /* if the protocol can't handle control codes in credentials, make
+          /* if the protocol cannot handle control codes in credentials, make
              sure there are none */
           if(str_has_ctrl(*userp) || str_has_ctrl(*passwdp)) {
             failf(data, "control code detected in .netrc credentials");
@@ -3684,7 +3689,7 @@ static CURLcode create_conn(struct Curl_easy *data,
           CURL_TRC_M(data, "Allowing sub-requests (like DoH) to override "
                      "max connection limit");
         else {
-          infof(data, "No connections available, total of %ld reached.",
+          infof(data, "No connections available, total of %zu reached.",
                 data->multi->max_total_connections);
           connections_available = FALSE;
         }
@@ -3829,6 +3834,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   if(!result) {
     DEBUGASSERT(conn);
+    Curl_pgrsTime(data, TIMER_POSTQUEUE);
     if(reused) {
       if(CONN_ATTACHED(conn) > 1)
         /* multiplexed */
@@ -3878,7 +3884,6 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
-  /* if this is a pushed stream, we need this: */
   CURLcode result;
 
   if(conn) {
@@ -3898,9 +3903,7 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 
   result = Curl_req_start(&data->req, data);
   if(!result) {
-    Curl_speedinit(data);
-    Curl_pgrsSetUploadCounter(data, 0);
-    Curl_pgrsSetDownloadCounter(data, 0);
+    Curl_pgrsReset(data);
   }
   return result;
 }

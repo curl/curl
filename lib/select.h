@@ -163,8 +163,12 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
 
 #define Curl_pollset_add_in(data, ps, sock) \
           Curl_pollset_change((data), (ps), (sock), CURL_POLL_IN, 0)
+#define Curl_pollset_remove_in(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), 0, CURL_POLL_IN)
 #define Curl_pollset_add_out(data, ps, sock) \
           Curl_pollset_change((data), (ps), (sock), CURL_POLL_OUT, 0)
+#define Curl_pollset_remove_out(data, ps, sock) \
+          Curl_pollset_change((data), (ps), (sock), 0, CURL_POLL_OUT)
 #define Curl_pollset_add_inout(data, ps, sock) \
           Curl_pollset_change((data), (ps), (sock), \
                                CURL_POLL_IN|CURL_POLL_OUT, 0)
@@ -188,10 +192,12 @@ void Curl_pollset_check(struct Curl_easy *data,
                         struct easy_pollset *ps, curl_socket_t sock,
                         bool *pwant_read, bool *pwant_write);
 
-/**
- * Return TRUE if the pollset contains socket with CURL_POLL_IN.
- */
-bool Curl_pollset_want_read(struct Curl_easy *data,
+/* TRUE if the pollset contains socket with CURL_POLL_IN. */
+bool Curl_pollset_want_recv(struct Curl_easy *data,
+                            struct easy_pollset *ps,
+                            curl_socket_t sock);
+/* TRUE if the pollset contains socket with CURL_POLL_OUT. */
+bool Curl_pollset_want_send(struct Curl_easy *data,
                             struct easy_pollset *ps,
                             curl_socket_t sock);
 

@@ -30,7 +30,8 @@ char *curl_easy_unescape(CURL *curl, const char *input,
 This function converts the URL encoded string **input** to a "plain string"
 and returns that in an allocated memory area. All input characters that are URL
 encoded (%XX where XX is a two-digit hexadecimal number) are converted to their
-binary versions.
+binary versions. Although not constrained by its type, the returned data may
+not be altered.
 
 If the **length** argument is set to 0 (zero), curl_easy_unescape(3)
 uses strlen() on **input** to find out the size.

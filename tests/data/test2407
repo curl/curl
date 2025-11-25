@@ -4,6 +4,7 @@
 multi
 HTTP
 HTTP/2
+flaky
 </keywords>
 </info>
 

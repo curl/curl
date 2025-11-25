@@ -260,8 +260,9 @@ static void free_globalconfig(void)
     curlx_fclose(global->trace_stream);
   global->trace_stream = NULL;
 
+  tool_safefree(global->ssl_sessions);
   tool_safefree(global->libcurl);
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   free(global->term.buf);
 #endif
 }

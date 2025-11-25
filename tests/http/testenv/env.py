@@ -507,6 +507,36 @@ class Env:
             Env.curl_uses_lib('ngtcp2')
 
     @staticmethod
+    def http_protos() -> List[str]:
+        # http protocols we can test
+        if Env.have_h2_curl():
+            if Env.have_h3():
+                return ['http/1.1', 'h2', 'h3']
+            else:
+                return ['http/1.1', 'h2']
+        else:
+            return ['http/1.1']
+
+    @staticmethod
+    def http_h1_h2_protos() -> List[str]:
+        # http 1+2 protocols we can test
+        if Env.have_h2_curl():
+            return ['http/1.1', 'h2']
+        else:
+            return ['http/1.1']
+
+    @staticmethod
+    def http_mplx_protos() -> List[str]:
+        # http multiplexing protocols we can test
+        if Env.have_h2_curl():
+            if Env.have_h3():
+                return ['h2', 'h3']
+            else:
+                return ['h2']
+        else:
+            return []
+
+    @staticmethod
     def have_h3() -> bool:
         return Env.have_h3_curl() and Env.have_h3_server()
 
@@ -560,7 +590,8 @@ class Env:
 
     def issue_certs(self):
         if self._ca is None:
-            ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            # ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            ca_dir = os.path.join(self.gen_dir, 'ca')
             os.makedirs(ca_dir, exist_ok=True)
             lock_file = os.path.join(ca_dir, 'ca.lock')
             with FileLock(lock_file):

@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__AMIGA__)

@@ -5,6 +5,7 @@
 <keywords>
 SMTP
 --libcurl
+notxml
 </keywords>
 </info>
 
@@ -49,9 +50,9 @@ ftp
 <verify>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com> SIZE=38
-RCPT TO:<recipient.one@example.com>
-RCPT TO:<recipient.two@example.com>
+MAIL FROM:%LTsender@example.com%GT SIZE=38
+RCPT TO:%LTrecipient.one@example.com%GT
+RCPT TO:%LTrecipient.two@example.com%GT
 DATA
 QUIT
 </protocol>
@@ -130,6 +131,7 @@ $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 $_ = '' if /CURLOPT_SSLVERSION/
+$_ = '' if /CURLOPT_TIMEOUT_MS/
 </stripfile>
 </verify>
 </testcase>

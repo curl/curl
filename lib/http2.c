@@ -98,33 +98,6 @@
 #define H2_SETTINGS_IV_LEN  3
 #define H2_BINSETTINGS_LEN 80
 
-static size_t populate_settings(nghttp2_settings_entry *iv,
-                                struct Curl_easy *data)
-{
-  iv[0].settings_id = NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS;
-  iv[0].value = Curl_multi_max_concurrent_streams(data->multi);
-
-  iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
-  iv[1].value = H2_STREAM_WINDOW_SIZE_INITIAL;
-
-  iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
-  iv[2].value = data->multi->push_cb != NULL;
-
-  return 3;
-}
-
-static ssize_t populate_binsettings(uint8_t *binsettings,
-                                    struct Curl_easy *data)
-{
-  nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
-  size_t ivlen;
-
-  ivlen = populate_settings(iv, data);
-  /* this returns number of bytes it wrote or a negative number on error. */
-  return nghttp2_pack_settings_payload(binsettings, H2_BINSETTINGS_LEN,
-                                       iv, ivlen);
-}
-
 struct cf_h2_ctx {
   nghttp2_session *h2;
   /* The easy handle used in the current filter call, cleared at return */
@@ -137,6 +110,7 @@ struct cf_h2_ctx {
 
   struct uint_hash streams; /* hash of `data->mid` to `h2_stream_ctx` */
   size_t drain_total; /* sum of all stream's UrlState drain */
+  uint32_t initial_win_size; /* current initial window size (settings) */
   uint32_t max_concurrent_streams;
   uint32_t goaway_error;        /* goaway error code from server */
   int32_t remote_max_sid;       /* max id processed by server */
@@ -202,6 +176,60 @@ static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
   if(ctx->h2) {
     nghttp2_session_del(ctx->h2);
   }
+}
+
+static uint32_t cf_h2_initial_win_size(struct Curl_easy *data)
+{
+#if NGHTTP2_HAS_SET_LOCAL_WINDOW_SIZE
+  /* If the transfer has a rate-limit lower than the default initial
+   * stream window size, use that. It needs to be at least 8k or servers
+   * may be unhappy. */
+  if(data->progress.dl.rlimit.rate_per_step &&
+     (data->progress.dl.rlimit.rate_per_step < H2_STREAM_WINDOW_SIZE_INITIAL))
+    return CURLMAX((uint32_t)data->progress.dl.rlimit.rate_per_step, 8192);
+#endif
+  return H2_STREAM_WINDOW_SIZE_INITIAL;
+}
+
+static size_t populate_settings(nghttp2_settings_entry *iv,
+                                  struct Curl_easy *data,
+                                  struct cf_h2_ctx *ctx)
+{
+  iv[0].settings_id = NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS;
+  iv[0].value = Curl_multi_max_concurrent_streams(data->multi);
+
+  iv[1].settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
+  iv[1].value = cf_h2_initial_win_size(data);
+  if(ctx)
+    ctx->initial_win_size = iv[1].value;
+  iv[2].settings_id = NGHTTP2_SETTINGS_ENABLE_PUSH;
+  iv[2].value = data->multi->push_cb != NULL;
+
+  return 3;
+}
+
+static ssize_t populate_binsettings(uint8_t *binsettings,
+                                    struct Curl_easy *data)
+{
+  nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
+  size_t ivlen;
+
+  ivlen = populate_settings(iv, data, NULL);
+  /* this returns number of bytes it wrote or a negative number on error. */
+  return nghttp2_pack_settings_payload(binsettings, H2_BINSETTINGS_LEN,
+                                       iv, ivlen);
+}
+
+static CURLcode cf_h2_update_settings(struct cf_h2_ctx *ctx,
+                                      uint32_t initial_win_size)
+{
+  nghttp2_settings_entry entry;
+  entry.settings_id = NGHTTP2_SETTINGS_INITIAL_WINDOW_SIZE;
+  entry.value = initial_win_size;
+  if(nghttp2_submit_settings(ctx->h2, NGHTTP2_FLAG_NONE, &entry, 1))
+    return CURLE_SEND_ERROR;
+  ctx->initial_win_size = initial_win_size;
+  return CURLE_OK;
 }
 
 static CURLcode nw_out_flush(struct Curl_cfilter *cf,
@@ -296,16 +324,18 @@ static void h2_stream_hash_free(unsigned int id, void *stream)
 static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
                                            struct Curl_easy *data)
 {
+  curl_off_t avail = Curl_rlimit_avail(&data->progress.dl.rlimit,
+                                       curlx_now());
+
   (void)cf;
-  if(data->set.max_recv_speed && data->set.max_recv_speed < INT32_MAX) {
-    /* The transfer should only receive `max_recv_speed` bytes per second.
-     * We restrict the stream's local window size, so that the server cannot
-     * send us "too much" at a time.
-     * This gets less precise the higher the latency. */
-    return (int32_t)data->set.max_recv_speed;
+  if(avail < CURL_OFF_T_MAX) { /* limit in place */
+    if(avail <= 0)
+      return 0;
+    else if(avail < INT32_MAX)
+      return (int32_t)avail;
   }
 #ifdef DEBUGBUILD
-  else {
+  {
     struct cf_h2_ctx *ctx = cf->ctx;
     CURL_TRC_CF(data, cf, "stream_win_max=%d", ctx->stream_win_max);
     return ctx->stream_win_max;
@@ -506,7 +536,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
 
   rc = nghttp2_session_callbacks_new(&cbs);
   if(rc) {
-    failf(data, "Couldn't initialize nghttp2 callbacks");
+    failf(data, "Could not initialize nghttp2 callbacks");
     goto out;
   }
 
@@ -530,7 +560,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   /* The nghttp2 session is not yet setup, do it */
   rc = h2_client_new(cf, cbs);
   if(rc) {
-    failf(data, "Couldn't initialize nghttp2");
+    failf(data, "Could not initialize nghttp2");
     goto out;
   }
   ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
@@ -580,7 +610,7 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
     nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
     size_t ivlen;
 
-    ivlen = populate_settings(iv, data);
+    ivlen = populate_settings(iv, data, ctx);
     rc = nghttp2_submit_settings(ctx->h2, NGHTTP2_FLAG_NONE,
                                  iv, ivlen);
     if(rc) {
@@ -972,7 +1002,7 @@ static int push_promise(struct Curl_cfilter *cf,
 
     rv = set_transfer_url(newhandle, &heads);
     if(rv) {
-      CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, failed to set url -> %d",
+      CURL_TRC_CF(data, cf, "[%d] PUSH_PROMISE, failed to set URL -> %d",
                   frame->promised_stream_id, rv);
       discard_newhandle(cf, newhandle);
       rv = CURL_PUSH_DENY;
@@ -2007,6 +2037,9 @@ static CURLcode stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   (void)len;
   *pnread = 0;
 
+  if(!stream->xfer_result)
+    stream->xfer_result = cf_h2_update_local_win(cf, data, stream);
+
   if(stream->xfer_result) {
     CURL_TRC_CF(data, cf, "[%d] xfer write failed", stream->id);
     result = stream->xfer_result;
@@ -2237,9 +2270,9 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   nghttp2_data_provider data_prd;
   int32_t stream_id;
   nghttp2_priority_spec pri_spec;
-  ssize_t rc;
   size_t nwritten;
   CURLcode result = CURLE_OK;
+  uint32_t initial_win_size;
 
   *pnwritten = 0;
   Curl_dynhds_init(&h2_headers, 0, DYN_HTTP_REQUEST);
@@ -2248,8 +2281,11 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  rc = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL, 0, &result);
-  if(!curlx_sztouz(rc, &nwritten))
+  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+                                  !data->state.http_ignorecustom ?
+                                  data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                                  0, &nwritten);
+  if(result)
     goto out;
   *pnwritten = nwritten;
   if(!stream->h1.done) {
@@ -2273,6 +2309,15 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   h2_pri_spec(ctx, data, &pri_spec);
   if(!nghttp2_session_check_request_allowed(ctx->h2))
     CURL_TRC_CF(data, cf, "send request NOT allowed (via nghttp2)");
+
+  /* Check the initial windows size of the transfer (rate-limits?) and
+   * send an updated settings on changes from previous value. */
+  initial_win_size = cf_h2_initial_win_size(data);
+  if(initial_win_size != ctx->initial_win_size) {
+    result = cf_h2_update_settings(ctx, initial_win_size);
+    if(result)
+      goto out;
+  }
 
   switch(data->state.httpreq) {
   case HTTPREQ_POST:

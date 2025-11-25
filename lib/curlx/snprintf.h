@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_SPEEDCHECK_H
-#define HEADER_CURL_SPEEDCHECK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,12 +22,15 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+/* Raw snprintf() for curlx */
 
-#include "curlx/timeval.h"
-struct Curl_easy;
-void Curl_speedinit(struct Curl_easy *data);
-CURLcode Curl_speedcheck(struct Curl_easy *data,
-                         struct curltime now);
-
-#endif /* HEADER_CURL_SPEEDCHECK_H */
+#ifdef WITHOUT_LIBCURL /* when built for the test servers */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)  /* adjust for old MSVC */
+#define SNPRINTF _snprintf
+#else
+#define SNPRINTF snprintf
+#endif
+#else /* !WITHOUT_LIBCURL */
+#include <curl/mprintf.h>
+#define SNPRINTF curl_msnprintf
+#endif /* WITHOUT_LIBCURL */

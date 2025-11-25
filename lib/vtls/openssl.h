@@ -51,8 +51,7 @@
  * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
  * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
  */
-#if (OPENSSL_VERSION_NUMBER >= 0x10101000L && \
-  !defined(LIBRESSL_VERSION_NUMBER)) || defined(HAVE_BORINGSSL_LIKE)
+#if !defined(LIBRESSL_VERSION_NUMBER) || defined(HAVE_BORINGSSL_LIKE)
 #define HAVE_KEYLOG_CALLBACK
 #endif
 

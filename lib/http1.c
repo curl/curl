@@ -80,61 +80,64 @@ static CURLcode trim_line(struct h1_req_parser *parser, int options)
   return CURLE_OK;
 }
 
-static ssize_t detect_line(struct h1_req_parser *parser,
-                           const char *buf, const size_t buflen,
-                           CURLcode *err)
+static CURLcode detect_line(struct h1_req_parser *parser,
+                            const char *buf, const size_t buflen,
+                            size_t *pnread)
 {
   const char *line_end;
 
   DEBUGASSERT(!parser->line);
+  *pnread = 0;
   line_end = memchr(buf, '\n', buflen);
-  if(!line_end) {
-    *err = CURLE_AGAIN;
-    return -1;
-  }
+  if(!line_end)
+    return CURLE_AGAIN;
   parser->line = buf;
   parser->line_len = line_end - buf + 1;
-  *err = CURLE_OK;
-  return (ssize_t)parser->line_len;
+  *pnread = parser->line_len;
+  return CURLE_OK;
 }
 
-static ssize_t next_line(struct h1_req_parser *parser,
-                         const char *buf, const size_t buflen, int options,
-                         CURLcode *err)
+static CURLcode next_line(struct h1_req_parser *parser,
+                          const char *buf, const size_t buflen, int options,
+                          size_t *pnread)
 {
-  ssize_t nread = 0;
+  CURLcode result;
 
+  *pnread = 0;
   if(parser->line) {
     parser->line = NULL;
     parser->line_len = 0;
     curlx_dyn_reset(&parser->scratch);
   }
 
-  nread = detect_line(parser, buf, buflen, err);
-  if(nread >= 0) {
+  result = detect_line(parser, buf, buflen, pnread);
+  if(!result) {
     if(curlx_dyn_len(&parser->scratch)) {
       /* append detected line to scratch to have the complete line */
-      *err = curlx_dyn_addn(&parser->scratch, parser->line, parser->line_len);
-      if(*err)
-        return -1;
+      result = curlx_dyn_addn(&parser->scratch, parser->line,
+                              parser->line_len);
+      if(result)
+        return result;
       parser->line = curlx_dyn_ptr(&parser->scratch);
       parser->line_len = curlx_dyn_len(&parser->scratch);
     }
-    *err = trim_line(parser, options);
-    if(*err)
-      return -1;
+    result = trim_line(parser, options);
+    if(result)
+      return result;
   }
-  else if(*err == CURLE_AGAIN) {
+  else if(result == CURLE_AGAIN) {
     /* no line end in `buf`, add it to our scratch */
-    *err = curlx_dyn_addn(&parser->scratch, (const unsigned char *)buf,
-                          buflen);
-    nread = (*err) ? -1 : (ssize_t)buflen;
+    result = curlx_dyn_addn(&parser->scratch, (const unsigned char *)buf,
+                            buflen);
+    *pnread = buflen;
   }
-  return nread;
+  return result;
 }
 
 static CURLcode start_req(struct h1_req_parser *parser,
-                          const char *scheme_default, int options)
+                          const char *scheme_default,
+                          const char *custom_method,
+                          int options)
 {
   const char *p, *m, *target, *hv, *scheme, *authority, *path;
   size_t m_len, target_len, hv_len, scheme_len, authority_len, path_len;
@@ -144,9 +147,15 @@ static CURLcode start_req(struct h1_req_parser *parser,
 
   DEBUGASSERT(!parser->req);
   /* line must match: "METHOD TARGET HTTP_VERSION" */
-  p = memchr(parser->line, ' ', parser->line_len);
-  if(!p || p == parser->line)
-    goto out;
+  if(custom_method && custom_method[0] &&
+     !strncmp(custom_method, parser->line, strlen(custom_method))) {
+    p = parser->line + strlen(custom_method);
+  }
+  else {
+    p = memchr(parser->line, ' ', parser->line_len);
+    if(!p || p == parser->line)
+      goto out;
+  }
 
   m = parser->line;
   m_len = p - parser->line;
@@ -256,28 +265,28 @@ out:
   return result;
 }
 
-ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
-                               const char *buf, size_t buflen,
-                               const char *scheme_default, int options,
-                               CURLcode *err)
+CURLcode Curl_h1_req_parse_read(struct h1_req_parser *parser,
+                                const char *buf, size_t buflen,
+                                const char *scheme_default,
+                                const char *custom_method,
+                                int options, size_t *pnread)
 {
-  ssize_t nread = 0, n;
+  CURLcode result = CURLE_OK;
+  size_t nread;
 
-  *err = CURLE_OK;
+  *pnread = 0;
   while(!parser->done) {
-    n = next_line(parser, buf, buflen, options, err);
-    if(n < 0) {
-      if(*err != CURLE_AGAIN) {
-        nread = -1;
-      }
-      *err = CURLE_OK;
+    result = next_line(parser, buf, buflen, options, &nread);
+    if(result) {
+      if(result == CURLE_AGAIN)
+        result = CURLE_OK;
       goto out;
     }
 
     /* Consume this line */
-    nread += (size_t)n;
-    buf += (size_t)n;
-    buflen -= (size_t)n;
+    *pnread += nread;
+    buf += nread;
+    buflen -= nread;
 
     if(!parser->line) {
       /* consumed bytes, but line not complete */
@@ -285,17 +294,14 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
         goto out;
     }
     else if(!parser->req) {
-      *err = start_req(parser, scheme_default, options);
-      if(*err) {
-        nread = -1;
+      result = start_req(parser, scheme_default, custom_method, options);
+      if(result)
         goto out;
-      }
     }
     else if(parser->line_len == 0) {
       /* last, empty line, we are finished */
       if(!parser->req) {
-        *err = CURLE_URL_MALFORMAT;
-        nread = -1;
+        result = CURLE_URL_MALFORMAT;
         goto out;
       }
       parser->done = TRUE;
@@ -303,17 +309,15 @@ ssize_t Curl_h1_req_parse_read(struct h1_req_parser *parser,
       /* last chance adjustments */
     }
     else {
-      *err = Curl_dynhds_h1_add_line(&parser->req->headers,
-                                     parser->line, parser->line_len);
-      if(*err) {
-        nread = -1;
+      result = Curl_dynhds_h1_add_line(&parser->req->headers,
+                                       parser->line, parser->line_len);
+      if(result)
         goto out;
-      }
     }
   }
 
 out:
-  return nread;
+  return result;
 }
 
 CURLcode Curl_h1_req_write_head(struct httpreq *req, int http_minor,

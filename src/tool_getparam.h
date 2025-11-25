@@ -372,14 +372,14 @@ ParameterError getparameter(const char *flag, const char *nextarg,
                             int max_recursive);
 
 #ifdef UNITTESTS
-void parse_cert_parameter(const char *cert_parameter,
-                          char **certname,
-                          char **passphrase);
+ParameterError parse_cert_parameter(const char *cert_parameter,
+                                    char **certname,
+                                    char **passphrase);
 #endif
 
 ParameterError parse_args(int argc, argv_item_t argv[]);
 
-#if defined(UNICODE) && defined(_WIN32) && !defined(UNDER_CE)
+#if defined(UNICODE) && defined(_WIN32)
 
 #define convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))

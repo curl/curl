@@ -47,7 +47,7 @@ static void t1303_stop(struct Curl_easy *easy)
 }
 
 /* BASE is just a define to make us fool around with decently large number so
-   that we aren't zero-based */
+   that we are not zero-based */
 #define BASE 1000000
 
 /* macro to set the pretended current time */

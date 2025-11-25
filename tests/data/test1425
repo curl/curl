@@ -69,7 +69,7 @@ Content-Type: text/html
 Funny-head: yesyes
 
 </stdout>
-# 23 == CURLE_WRITE_ERROR, curl wouldn't accept the binary output
+# 23 == CURLE_WRITE_ERROR, curl would not accept the binary output
 <errorcode>
 23
 </errorcode>

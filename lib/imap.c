@@ -1938,10 +1938,7 @@ static CURLcode imap_regular_transfer(struct Curl_easy *data,
   data->req.size = -1;
 
   /* Set the progress data */
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   /* Carry out the perform */
   result = imap_perform(data, &connected, dophase_done);
@@ -2315,8 +2312,10 @@ static CURLcode imap_parse_url_path(struct Curl_easy *data,
      and no UID as per RFC-5092 */
   if(imap->mailbox && !imap->uid && !imap->mindex) {
     /* Get the query parameter, URL decoded */
-    (void)curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
-                       CURLU_URLDECODE);
+    CURLUcode uc = curl_url_get(data->state.uh, CURLUPART_QUERY, &imap->query,
+                                CURLU_URLDECODE);
+    if(uc == CURLUE_OUT_OF_MEMORY)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   /* Any extra stuff at the end of the URL is an error */

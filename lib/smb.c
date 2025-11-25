@@ -668,12 +668,12 @@ static CURLcode smb_send_message(struct Curl_easy *data,
                                  unsigned char cmd,
                                  const void *msg, size_t msg_len)
 {
-  smb_format_message(smbc, req, (struct smb_header *)smbc->send_buf,
-                     cmd, msg_len);
-  if((sizeof(struct smb_header) + msg_len) > MAX_MESSAGE_SIZE) {
+  if((MAX_MESSAGE_SIZE - sizeof(struct smb_header)) < msg_len) {
     DEBUGASSERT(0);
     return CURLE_SEND_ERROR;
   }
+  smb_format_message(smbc, req, (struct smb_header *)smbc->send_buf,
+                     cmd, msg_len);
   memcpy(smbc->send_buf + sizeof(struct smb_header), msg, msg_len);
 
   return smb_send(data, smbc, sizeof(struct smb_header) + msg_len, 0);

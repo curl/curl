@@ -51,10 +51,6 @@
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
 #  endif
-   /* Offered by mingw-w64 v3+. MS SDK v7.0A+. */
-#  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
-#  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
-#  endif
 #  ifndef STATUS_SUCCESS
 #  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #  endif

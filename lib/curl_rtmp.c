@@ -335,15 +335,15 @@ static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
   struct connectdata *conn = data->conn;
   RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t rv;
 
   (void)sockindex;
   *pnread = 0;
   if(!r)
     return CURLE_FAILED_INIT;
 
-  nread = RTMP_Read(r, buf, curlx_uztosi(len));
-  if(nread < 0) {
+  rv = RTMP_Read(r, buf, curlx_uztosi(len));
+  if(!curlx_sztouz(rv, pnread)) {
     if(r->m_read.status == RTMP_READ_COMPLETE ||
        r->m_read.status == RTMP_READ_EOF) {
       data->req.size = data->req.bytecount;
@@ -351,8 +351,6 @@ static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
     else
       result = CURLE_RECV_ERROR;
   }
-  else
-    *pnread = (size_t)nread;
 
   return result;
 }
@@ -363,7 +361,7 @@ static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
 {
   struct connectdata *conn = data->conn;
   RTMP *r = Curl_conn_meta_get(conn, CURL_META_RTMP_CONN);
-  ssize_t nwritten;
+  ssize_t rv;
 
   (void)sockindex;
   (void)eos;
@@ -371,11 +369,10 @@ static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
   if(!r)
     return CURLE_FAILED_INIT;
 
-  nwritten = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
-  if(nwritten < 0)
+  rv = RTMP_Write(r, (const char *)buf, curlx_uztosi(len));
+  if(!curlx_sztouz(rv, pnwritten))
     return CURLE_SEND_ERROR;
 
-  *pnwritten = (size_t)nwritten;
   return CURLE_OK;
 }
 

@@ -78,11 +78,16 @@ my %banfunc = (
     "_mbsncat" => 1,
     "_tcscat" => 1,
     "_tcsdup" => 1,
+    "_tcsncpy" => 1,
     "_tcsncat" => 1,
     "_wcscat" => 1,
     "_wcsncat" => 1,
     "_wcsdup" => 1,
     "wcsdup" => 1,
+    "wcscpy" => 1,
+    "wcsncpy" => 1,
+    "mbstowcs" => 1,
+    "wcstombs" => 1,
     "LoadLibrary" => 1,
     "LoadLibraryA" => 1,
     "LoadLibraryW" => 1,
@@ -106,7 +111,12 @@ my %banfunc = (
     "fclose" => 1,
     "fdopen" => 1,
     "fopen" => 1,
+    "freopen" => 1,
     "open" => 1,
+    "_open" => 1,
+    "_wfopen" => 1,
+    "_wfreopen" => 1,
+    "_wopen" => 1,
     "stat" => 1,
     );
 
@@ -181,7 +191,7 @@ sub readskiplist {
 
 # Reads the .checksrc in $dir for any extended warnings to enable locally.
 # Currently there is no support for disabling warnings from the standard set,
-# and since that's already handled via !checksrc! commands there is probably
+# and since that is already handled via !checksrc! commands there is probably
 # little use to add it.
 sub readlocalfile {
     my ($file) = @_;
@@ -246,7 +256,7 @@ sub checkwarn {
     my $nowarn=0;
 
     #if(!$warnings{$name}) {
-    #    print STDERR "Dev! there's no description for $name!\n";
+    #    print STDERR "Dev! there is no description for $name!\n";
     #}
 
     # checksrc.skip
@@ -351,7 +361,7 @@ if(!$file) {
     print "  -A[rule]  Accept this violation, can be used multiple times\n";
     print "  -a[func]  Allow use of this function\n";
     print "  -b[func]  Ban use of this function\n";
-    print "  -D[DIR]   Directory to prepend file names\n";
+    print "  -D[DIR]   Directory to prepend filenames\n";
     print "  -h        Show help output\n";
     print "  -W[file]  Skip the given file - ignore all its flaws\n";
     print "  -i<n>     Indent spaces. Default: 2\n";
@@ -961,7 +971,7 @@ sub scanfile {
         }
 
         # scan for use of non-binary fopen without the macro
-        if($l =~ /^(.*\W)(curlx_fopen|CURLX_FOPEN_LOW)\s*\([^,]*, *\"([^"]*)/) {
+        if($l =~ /^(.*\W)(curlx_fopen|CURLX_FOPEN_LOW|curlx_freopen|CURLX_FREOPEN_LOW)\s*\([^,]*, *\"([^"]*)/) {
             my $mode = $3;
             if($mode !~ /b/) {
                 checkwarn("FOPENMODE",
@@ -971,7 +981,7 @@ sub scanfile {
         }
 
         # check for open brace first on line but not first column only alert
-        # if previous line ended with a close paren and it wasn't a cpp line
+        # if previous line ended with a close paren and it was not a cpp line
         if(($prevl =~ /\)\z/) && ($l =~ /^( +)\{/) && !$prevp) {
             checkwarn("BRACEPOS",
                       $line, length($1), $file, $ol, "badly placed open brace");
@@ -995,7 +1005,7 @@ sub scanfile {
         }
 
         # if the previous line starts with if/while/for AND ends with a closed
-        # parenthesis and there's an equal number of open and closed
+        # parenthesis and there is an equal number of open and closed
         # parentheses, check that this line is indented $indent more steps, if
         # not a cpp line
         elsif(!$prevp && ($prevl =~ /^( *)(if|while|for)(\(.*\))\z/)) {

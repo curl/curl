@@ -26,7 +26,6 @@
  * chunk of memory instead of storing it in a file.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

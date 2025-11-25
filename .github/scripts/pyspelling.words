@@ -434,6 +434,7 @@ LDAPS
 ldaps
 LF
 LGTM
+libbacktrace
 libbrotlidec
 libc
 libcurl
@@ -463,6 +464,7 @@ libWebSocket
 libz
 libzstd
 LineageOS
+linter
 linux
 lldb
 ln
@@ -957,7 +959,6 @@ watchOS
 WAV
 WB
 wcurl
-web page
 WebDAV
 WebOS
 webpage
@@ -982,6 +983,7 @@ Xbox
 XDG
 xdigit
 Xilinx
+xmllint
 XP
 Xtensa
 XYZ

@@ -25,9 +25,15 @@
  * Upload to FTP, resuming failed transfers. Active mode.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), sscanf() */
+#endif
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* parse headers for Content-Length */
@@ -39,7 +45,7 @@ static size_t getcontentlengthfunc(void *ptr, size_t size, size_t nmemb,
 
   r = sscanf(ptr, "Content-Length: %ld\n", &len);
   if(r == 1)
-    *((long *) stream) = len;
+    *((long *)stream) = len;
 
   return size * nmemb;
 }
@@ -77,9 +83,7 @@ static int upload(CURL *curl, const char *remotepath,
 
   f = fopen(localpath, "rb");
   if(!f) {
-#ifndef UNDER_CE
     perror(NULL);
-#endif
     return 0;
   }
 

@@ -26,7 +26,6 @@
  * transfers in parallel without curl_multi_wait/poll.
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
 
@@ -36,7 +35,6 @@
 #include <unistd.h>
 #endif
 
-/* curl stuff */
 #include <curl/curl.h>
 
 /*

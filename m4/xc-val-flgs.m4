@@ -226,7 +226,7 @@ dnl script might have set. When checks fails, user
 dnl is noticed about errors detected in all of them
 dnl but script continues execution.
 dnl
-dnl Intended to be used very late in configure script.
+dnl Intended to be used late in configure script.
 
 AC_DEFUN([XC_CHECK_BUILD_FLAGS], [
   AC_PREREQ([2.50])dnl

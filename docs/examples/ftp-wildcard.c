@@ -25,8 +25,15 @@
  * FTP wildcard pattern matching
  * </DESC>
  */
-#include <curl/curl.h>
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
+
+#include <curl/curl.h>
 
 struct callback_data {
   FILE *output;

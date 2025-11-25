@@ -54,7 +54,7 @@ static int unslashquote(const char *line, struct dynbuf *param)
       /* default is to output the letter after the backslash */
       switch(out = *line) {
       case '\0':
-        continue; /* this'll break out of the loop */
+        continue; /* this breaks out of the loop */
       case 't':
         out = '\t';
         break;
@@ -81,7 +81,8 @@ static int unslashquote(const char *line, struct dynbuf *param)
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
-ParameterError parseconfig(const char *filename, int max_recursive)
+ParameterError parseconfig(const char *filename, int max_recursive,
+                           char **resolved)
 {
   FILE *file = NULL;
   bool usedarg = FALSE;
@@ -100,10 +101,10 @@ ParameterError parseconfig(const char *filename, int max_recursive)
       }
       filename = pathalloc = curlrc;
     }
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
     else {
       char *fullp;
-      /* check for .curlrc then _curlrc in the dir of the executable */
+      /* check for .curlrc then _curlrc in the directory of the executable */
       file = tool_execpath(".curlrc", &fullp);
       if(!file)
         file = tool_execpath("_curlrc", &fullp);
@@ -264,6 +265,11 @@ ParameterError parseconfig(const char *filename, int max_recursive)
   if((err == PARAM_READ_ERROR) && filename)
     errorf("cannot read config from '%s'", filename);
 
+  if(!err && resolved) {
+    *resolved = strdup(filename);
+    if(!*resolved)
+      err = PARAM_NO_MEM;
+  }
   free(pathalloc);
   return err;
 }

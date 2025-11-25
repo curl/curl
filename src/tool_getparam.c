@@ -385,20 +385,21 @@ static const struct LongShort aliases[]= {
 #ifndef UNITTESTS
 static
 #endif
-void parse_cert_parameter(const char *cert_parameter,
-                          char **certname,
-                          char **passphrase)
+ParameterError parse_cert_parameter(const char *cert_parameter,
+                                    char **certname,
+                                    char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
   size_t span;
   const char *param_place = NULL;
   char *certname_place = NULL;
+  ParameterError err = PARAM_OK;
   *certname = NULL;
   *passphrase = NULL;
 
   /* most trivial assumption: cert_parameter is empty */
   if(param_length == 0)
-    return;
+    return PARAM_BLANK_STRING;
 
   /* next less trivial: cert_parameter starts 'pkcs11:' and thus
    * looks like a RFC7512 PKCS#11 URI which can be used as-is.
@@ -407,12 +408,16 @@ void parse_cert_parameter(const char *cert_parameter,
   if(curl_strnequal(cert_parameter, "pkcs11:", 7) ||
      !strpbrk(cert_parameter, ":\\")) {
     *certname = strdup(cert_parameter);
-    return;
+    if(!*certname)
+      return PARAM_NO_MEM;
+    return PARAM_OK;
   }
   /* deal with escaped chars; find unescaped colon if it exists */
   certname_place = malloc(param_length + 1);
-  if(!certname_place)
-    return;
+  if(!certname_place) {
+    err = PARAM_NO_MEM;
+    goto done;
+  }
 
   *certname = certname_place;
   param_place = cert_parameter;
@@ -471,12 +476,19 @@ void parse_cert_parameter(const char *cert_parameter,
       param_place++;
       if(*param_place) {
         *passphrase = strdup(param_place);
+        if(!*passphrase)
+          err = PARAM_NO_MEM;
       }
       goto done;
     }
   }
 done:
-  *certname_place = '\0';
+  if(err) {
+    tool_safefree(*certname);
+  }
+  else
+    *certname_place = '\0';
+  return err;
 }
 
 /* Replace (in-place) '%20' by '+' according to RFC1866 */
@@ -507,18 +519,22 @@ static size_t replace_url_encoded_space_by_plus(char *url)
   return new_index; /* new size */
 }
 
-static void
+static ParameterError
 GetFileAndPassword(const char *nextarg, char **file, char **password)
 {
   char *certname, *passphrase;
+  ParameterError err;
   /* nextarg is never NULL here */
-  parse_cert_parameter(nextarg, &certname, &passphrase);
-  free(*file);
-  *file = certname;
-  if(passphrase) {
-    free(*password);
-    *password = passphrase;
+  err = parse_cert_parameter(nextarg, &certname, &passphrase);
+  if(!err) {
+    free(*file);
+    *file = certname;
+    if(passphrase) {
+      free(*password);
+      *password = passphrase;
+    }
   }
+  return err;
 }
 
 /* Get a size parameter for '--limit-rate' or '--max-filesize'.
@@ -1213,7 +1229,7 @@ static ParameterError parse_ech(struct OperationConfig *config,
         file = curlx_fopen(nextarg, FOPEN_READTEXT);
       }
       if(!file) {
-        warnf("Couldn't read file \"%s\" "
+        warnf("Could not read file \"%s\" "
               "specified for \"--ech ecl:\" option",
               nextarg);
         return PARAM_BAD_USE; /*  */
@@ -2084,7 +2100,7 @@ static ParameterError opt_bool(struct OperationConfig *config,
     config->doh_insecure_ok = toggle;
     break;
   case C_LIST_ONLY: /* --list-only */
-    config->dirlistonly = toggle; /* only list the names of the FTP dir */
+    config->dirlistonly = toggle; /* only list names of the FTP directory */
     break;
   case C_MANUAL: /* --manual */
     if(toggle)   /* --no-manual shows no manual... */
@@ -2164,6 +2180,19 @@ static ParameterError opt_bool(struct OperationConfig *config,
   return PARAM_OK;
 }
 
+static ParameterError existingfile(char **store,
+                                   const struct LongShort *a,
+                                   const char *filename)
+{
+  struct_stat info;
+  if(curlx_stat(filename, &info)) {
+    errorf("The file '%s' provided to --%s does not exist",
+           filename, a->lname);
+    return PARAM_BAD_USE;
+  }
+  return getstr(store, filename, DENY_BLANK);
+}
+
 /* opt_file handles file options */
 static ParameterError opt_file(struct OperationConfig *config,
                                const struct LongShort *a,
@@ -2181,13 +2210,13 @@ static ParameterError opt_file(struct OperationConfig *config,
     err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
     break;
   case C_CACERT: /* --cacert */
-    err = getstr(&config->cacert, nextarg, DENY_BLANK);
+    err = existingfile(&config->cacert, a, nextarg);
     break;
   case C_CAPATH: /* --capath */
     err = getstr(&config->capath, nextarg, DENY_BLANK);
     break;
   case C_CERT: /* --cert */
-    GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
+    err = GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
     break;
   case C_CONFIG: /* --config */
     if(--max_recursive < 0) {
@@ -2196,11 +2225,11 @@ static ParameterError opt_file(struct OperationConfig *config,
       err = PARAM_BAD_USE;
     }
     else {
-      err = parseconfig(nextarg, max_recursive);
+      err = parseconfig(nextarg, max_recursive, NULL);
     }
     break;
   case C_CRLFILE: /* --crlfile */
-    err = getstr(&config->crlfile, nextarg, DENY_BLANK);
+    err = existingfile(&config->crlfile, a, nextarg);
     break;
   case C_DUMP_HEADER: /* --dump-header */
     err = getstr(&config->headerfile, nextarg, DENY_BLANK);
@@ -2225,26 +2254,26 @@ static ParameterError opt_file(struct OperationConfig *config,
     err = getstr(&config->key, nextarg, DENY_BLANK);
     break;
   case C_KNOWNHOSTS: /* --knownhosts */
-    err = getstr(&config->knownhosts, nextarg, DENY_BLANK);
+    err = existingfile(&config->knownhosts, a, nextarg);
     break;
   case C_NETRC_FILE: /* --netrc-file */
-    err = getstr(&config->netrc_file, nextarg, DENY_BLANK);
+    err = existingfile(&config->netrc_file, a, nextarg);
     break;
   case C_OUTPUT: /* --output */
     err = parse_output(config, nextarg);
     break;
   case C_PROXY_CACERT: /* --proxy-cacert */
-    err = getstr(&config->proxy_cacert, nextarg, DENY_BLANK);
+    err = existingfile(&config->proxy_cacert, a, nextarg);
     break;
   case C_PROXY_CAPATH: /* --proxy-capath */
     err = getstr(&config->proxy_capath, nextarg, DENY_BLANK);
     break;
   case C_PROXY_CERT: /* --proxy-cert */
-    GetFileAndPassword(nextarg, &config->proxy_cert,
-                       &config->proxy_key_passwd);
+    err = GetFileAndPassword(nextarg, &config->proxy_cert,
+                             &config->proxy_key_passwd);
     break;
   case C_PROXY_CRLFILE: /* --proxy-crlfile */
-    err = getstr(&config->proxy_crlfile, nextarg, DENY_BLANK);
+    err = existingfile(&config->proxy_crlfile, a, nextarg);
     break;
   case C_PROXY_KEY: /* --proxy-key */
     err = getstr(&config->proxy_key, nextarg, ALLOW_BLANK);
@@ -2876,7 +2905,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     /* is there an '=' ? */
     if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
        !curlx_str_single(&p, '=') ) {
-      /* there's an equal sign */
+      /* there is an equal sign */
       char tempword[MAX_OPTION_LEN + 1];
       memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
       tempword[curlx_strlen(&out)] = 0;
@@ -3021,7 +3050,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
         if(i < (argc - 1)) {
           nextarg = convert_tchar_to_UTF8(argv[i + 1]);
           if(!nextarg) {
-            unicodefree(orig_opt);
+            unicodefree(CURL_UNCONST(orig_opt));
             return PARAM_NO_MEM;
           }
         }
@@ -3029,7 +3058,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
         result = getparameter(orig_opt, nextarg, &passarg, config,
                               CONFIG_MAX_LEVELS);
 
-        unicodefree(nextarg);
+        unicodefree(CURL_UNCONST(nextarg));
         config = global->last;
         if(result == PARAM_NEXT_OPERATION) {
           /* Reset result as PARAM_NEXT_OPERATION is only used here and not
@@ -3067,7 +3096,7 @@ ParameterError parse_args(int argc, argv_item_t argv[])
     }
 
     if(!result) {
-      unicodefree(orig_opt);
+      unicodefree(CURL_UNCONST(orig_opt));
       orig_opt = NULL;
     }
   }
@@ -3090,6 +3119,6 @@ ParameterError parse_args(int argc, argv_item_t argv[])
       helpf("%s", reason);
   }
 
-  unicodefree(orig_opt);
+  unicodefree(CURL_UNCONST(orig_opt));
   return result;
 }

@@ -133,7 +133,7 @@ static void mcode_or_die(const char *where, CURLMcode code)
 
 static void timer_cb(struct GlobalInfo *g, int revents);
 
-/* Update the timer after curl_multi library does its thing. Curl informs the
+/* Update the timer after curl_multi library does its thing. curl informs the
  * application through this callback what it wants the new timeout to be,
  * after it does some work. */
 static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
@@ -219,7 +219,7 @@ static void timer_cb(struct GlobalInfo *g, int revents)
   err = read(g->tfd, &count, sizeof(uint64_t));
   if(err == -1) {
     /* Note that we may call the timer callback even if the timerfd is not
-     * readable. It's possible that there are multiple events stored in the
+     * readable. It is possible that there are multiple events stored in the
      * epoll buffer (i.e. the timer may have fired multiple times). The event
      * count is cleared after the first call so future events in the epoll
      * buffer fails to read from the timer. */

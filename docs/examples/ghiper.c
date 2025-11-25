@@ -55,14 +55,15 @@
  callback.
 
 */
-
 #include <glib.h>
-#include <sys/stat.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
+#include <sys/stat.h>
+
 #include <curl/curl.h>
 
 #define MSG_OUT g_print   /* Change to "g_error" to write to stderr */
@@ -430,9 +431,9 @@ int init_fifo(void)
 int main(void)
 {
   struct GlobalInfo *g = g_malloc0(sizeof(struct GlobalInfo));
-  GMainLoop*gmain;
+  GMainLoop *gmain;
   int fd;
-  GIOChannel* ch;
+  GIOChannel *ch;
 
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)

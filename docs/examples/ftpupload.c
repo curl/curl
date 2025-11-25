@@ -21,18 +21,26 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+/* <DESC>
+ * Performs an FTP upload and renames the file just after a successful
+ * transfer.
+ * </DESC>
+ */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <curl/curl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
-#include <errno.h>
-#endif
+
 #ifdef _WIN32
 #include <io.h>
 #undef stat
@@ -43,12 +51,6 @@
 #else
 #include <unistd.h>
 #endif
-
-/* <DESC>
- * Performs an FTP upload and renames the file just after a successful
- * transfer.
- * </DESC>
- */
 
 #define LOCAL_FILE      "/tmp/uploadthis.txt"
 #define UPLOAD_FILE_AS  "while-uploading.txt"
@@ -90,17 +92,12 @@ int main(void)
   /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
   if(!hd_src) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    printf("Could not open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 2;
   }
 
   /* to get the file size */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(LOCAL_FILE, &file_info) != 0) {
-#else
   if(fstat(fileno(hd_src), &file_info) != 0) {
-#endif
     fclose(hd_src);
     return 1; /* cannot continue */
   }

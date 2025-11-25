@@ -317,10 +317,11 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_SHUFFLE_DNS`:               Disable shuffle DNS feature. Default: `OFF`
 - `CURL_DISABLE_SMB`:                       Disable SMB. Default: `OFF`
 - `CURL_DISABLE_SMTP`:                      Disable SMTP. Default: `OFF`
-- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll. Default: `OFF`
+- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll(). Default: `OFF`
 - `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
 - `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
+- `CURL_DISABLE_TYPECHECK`:                 Disable curl_easy_setopt()/curl_easy_getinfo() type checking. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
 - `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
@@ -354,6 +355,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
@@ -410,6 +412,8 @@ Details via CMake
 - `LDAP_INCLUDE_DIR`:                       Absolute path to LDAP include directory.
 - `LDAP_LIBRARY`:                           Absolute path to `ldap` library.
 - `LDAP_LBER_LIBRARY`:                      Absolute path to `lber` library.
+- `LIBBACKTRACE_INCLUDE_DIR`:               Absolute path to libbacktrace include directory (https://github.com/ianlancetaylor/libbacktrace).
+- `LIBBACKTRACE_LIBRARY`:                   Absolute path to `libbacktrace` library.
 - `LIBGSASL_INCLUDE_DIR`:                   Absolute path to libgsasl include directory.
 - `LIBGSASL_LIBRARY`:                       Absolute path to `libgsasl` library.
 - `LIBIDN2_INCLUDE_DIR`:                    Absolute path to libidn2 include directory.

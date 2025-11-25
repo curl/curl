@@ -119,12 +119,6 @@
 #define CALG_SHA_256 0x0000800c
 #endif
 
-/* Work around typo in CeGCC (as of 0.59.1) w32api headers */
-#if defined(__MINGW32CE__) && \
-  !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
-#define ALG_CLASS_DHASH ALG_CLASS_HASH
-#endif
-
 /* Offered by mingw-w64 v4+. MS SDK 6.0A+. */
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
@@ -385,7 +379,6 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
   return CURLE_OK;
 }
 
-#ifndef UNDER_CE
 /* Function allocates memory for store_path only if CURLE_OK is returned */
 static CURLcode
 get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
@@ -441,7 +434,6 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 
   return CURLE_OK;
 }
-#endif
 
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
@@ -536,7 +528,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifndef UNDER_CE
   /* client certificate */
   if(data->set.ssl.primary.clientcert || data->set.ssl.primary.cert_blob) {
     DWORD cert_store_name = 0;
@@ -575,8 +566,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       }
     }
 
-    if((fInCert || blob) && (data->set.ssl.cert_type) &&
-       (!curl_strequal(data->set.ssl.cert_type, "P12"))) {
+    if((fInCert || blob) && data->set.ssl.cert_type &&
+       !curl_strequal(data->set.ssl.cert_type, "P12")) {
       failf(data, "schannel: certificate format compatibility error "
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
@@ -744,7 +735,6 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
     }
     client_cert_store = cert_store;
   }
-#endif
 
   /* allocate memory for the reusable credential handle */
   backend->cred = (struct Curl_schannel_cred *)
@@ -875,9 +865,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
-#ifndef UNDER_CE
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-#endif
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
@@ -908,11 +896,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   backend->use_alpn = FALSE;
 #endif
 
-#ifdef UNDER_CE
-  /* certificate validation on Windows CE does not seem to work right; we will
-   * do it following a more manual process. */
-  backend->use_manual_cred_validation = TRUE;
-#else
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
@@ -926,7 +909,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
   else
     backend->use_manual_cred_validation = FALSE;
-#endif
 
   backend->cred = NULL;
 
@@ -1286,7 +1268,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* The socket must be writeable (or a poll error occurred) before we call
        InitializeSecurityContext to continue processing the received TLS
-       records. This is because that function is not idempotent and we don't
+       records. This is because that function is not idempotent and we do not
        support partial save/resume sending replies of handshake tokens. */
     if(!SOCKET_WRITABLE(Curl_conn_cf_get_socket(cf, data), 0)) {
       SCH_DEV(infof(data, "schannel: handshake waiting for writeable socket"));
@@ -1809,7 +1791,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
      * data needs to be sent then we block for a writeable socket that should
      * be writeable immediately except for OS resource constraints. For caller
      * send if handshake data needs to be received then we block for a readable
-     * socket, which could take some time, but it's more likely the user has
+     * socket, which could take some time, but it is more likely the user has
      * called recv since they had called it prior (only recv can start
      * renegotiation and probably the user is going to call it again to get
      * more of their data before calling send).
@@ -1829,10 +1811,9 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       int what;
       timediff_t timeout_ms, remaining;
 
-      if(Curl_pgrsUpdate(data)) {
-        result = CURLE_ABORTED_BY_CALLBACK;
+      result = Curl_pgrsUpdate(data);
+      if(result)
         break;
-      }
 
       elapsed = curlx_timediff_ms(curlx_now(), rs->start_time);
       if(elapsed >= MAX_RENEG_BLOCK_TIME) {
@@ -2573,7 +2554,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-#if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
+#ifdef HAS_ALPN_SCHANNEL
   typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic push
@@ -2581,8 +2562,7 @@ static int schannel_init(void)
 #endif
   WINE_GET_VERSION_FN p_wine_get_version =
     CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
-                        GetProcAddress(GetModuleHandleA("ntdll"),
-                                       "wine_get_version"));
+      GetProcAddress(GetModuleHandle(TEXT("ntdll")), "wine_get_version"));
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif
@@ -2599,7 +2579,7 @@ static int schannel_init(void)
     s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                                   VERSION_GREATER_THAN_EQUAL);
   }
-#endif /* HAS_ALPN_SCHANNEL && !UNDER_CE */
+#endif /* HAS_ALPN_SCHANNEL */
 
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
@@ -2716,12 +2696,7 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
-#ifdef __MINGW32CE__
-    /* workaround for CeGCC, should be (const BYTE*) */
-    if(!CryptHashData(hHash, (BYTE*)CURL_UNCONST(input), (DWORD)inputlen, 0))
-#else
     if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
-#endif
       break; /* failed */
 
     /* get hash size */

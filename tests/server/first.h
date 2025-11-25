@@ -48,9 +48,7 @@ struct entry_s {
 
 extern const struct entry_s s_entries[];
 
-#ifndef UNDER_CE
 #include <signal.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -152,7 +150,7 @@ extern curl_socket_t sockdaemon(curl_socket_t sock,
                                 bool bind_only);
 
 /* global variables */
-static const char *srcpath = "."; /* pointing to the test dir */
+static const char *srcpath = "."; /* pointing to the test directory */
 static const char *pidname = NULL;
 static const char *portname = NULL; /* none by default */
 static const char *serverlogfile = NULL;

@@ -31,7 +31,7 @@ Funny-head: yesyes
 http
 </server>
 
-# make sure there's no Expect: 100-continue when there's no file to send!
+# make sure there is no Expect: 100-continue when there is no file to send!
 <name>
 HTTP with zero size file PUT
 </name>

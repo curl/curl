@@ -258,7 +258,7 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
-  data->req.keepon &= ~(KEEP_SEND|KEEP_SEND_TIMED); /* we are done sending */
+  data->req.keepon &= ~KEEP_SEND; /* we are done sending */
 
   Curl_pgrsTime(data, TIMER_POSTRANSFER);
   Curl_creader_done(data, data->req.upload_aborted);
@@ -393,6 +393,11 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
       return result;
     buf += nwritten;
     blen -= nwritten;
+    if(!blen) {
+      result = req_set_upload_done(data);
+      if(result)
+        return result;
+    }
   }
 
   if(blen) {
@@ -420,9 +425,9 @@ bool Curl_req_want_send(struct Curl_easy *data)
    * - or request has buffered data to send
    * - or transfer connection has pending data to send */
   return !data->req.done &&
-         (((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) ||
-           !Curl_req_sendbuf_empty(data) ||
-           Curl_xfer_needs_flush(data));
+         ((data->req.keepon & KEEP_SEND) ||
+          !Curl_req_sendbuf_empty(data) ||
+          Curl_xfer_needs_flush(data));
 }
 
 bool Curl_req_done_sending(struct Curl_easy *data)
@@ -458,8 +463,7 @@ CURLcode Curl_req_abort_sending(struct Curl_easy *data)
   if(!data->req.upload_done) {
     Curl_bufq_reset(&data->req.sendbuf);
     data->req.upload_aborted = TRUE;
-    /* no longer KEEP_SEND and KEEP_SEND_PAUSE */
-    data->req.keepon &= ~KEEP_SENDBITS;
+    data->req.keepon &= ~KEEP_SEND;
     return req_set_upload_done(data);
   }
   return CURLE_OK;
@@ -470,6 +474,9 @@ CURLcode Curl_req_stop_send_recv(struct Curl_easy *data)
   /* stop receiving and ALL sending as well, including PAUSE and HOLD.
    * We might still be paused on receive client writes though, so
    * keep those bits around. */
-  data->req.keepon &= ~(KEEP_RECV|KEEP_SENDBITS);
-  return Curl_req_abort_sending(data);
+  CURLcode result = CURLE_OK;
+  if(data->req.keepon & KEEP_SEND)
+    result = Curl_req_abort_sending(data);
+  data->req.keepon &= ~(KEEP_RECV|KEEP_SEND);
+  return result;
 }

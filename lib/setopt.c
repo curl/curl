@@ -41,7 +41,7 @@
 #include "progress.h"
 #include "content_encoding.h"
 #include "strcase.h"
-#include "share.h"
+#include "curl_share.h"
 #include "vtls/vtls.h"
 #include "curlx/warnless.h"
 #include "sendf.h"
@@ -2842,6 +2842,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_send_speed = offt;
+    Curl_rlimit_init(&data->progress.ul.rlimit, offt, offt, curlx_now());
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
@@ -2851,6 +2852,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_recv_speed = offt;
+    Curl_rlimit_init(&data->progress.dl.rlimit, offt, offt, curlx_now());
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*

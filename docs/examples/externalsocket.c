@@ -26,6 +26,9 @@
  * </DESC>
  */
 #ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for strerror() */
+#endif
 #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */
 #endif
@@ -34,6 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include <curl/curl.h>
 
 #ifdef _WIN32
@@ -46,11 +50,7 @@
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
 #include <errno.h>
-#endif
 
 /* The IP address and port number to connect to */
 #define IPADDR "127.0.0.1"

@@ -623,7 +623,7 @@ CURLcode tool_setopt_offt(CURL *curl, const char *name, CURLoption tag,
   if(global->libcurl && !ret && lval) {
     /* we only use this for real if --libcurl was used */
     ret = easysrc_addf(&easysrc_code, "curl_easy_setopt(hnd, %s, (curl_off_t)%"
-          CURL_FORMAT_CURL_OFF_T ");", name, lval);
+                       CURL_FORMAT_CURL_OFF_T ");", name, lval);
   }
 
   return ret;

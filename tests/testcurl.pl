@@ -33,8 +33,8 @@
 # at a regular interval. The output is suitable to be mailed to
 # curl-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
-# otherwise).  The most current build status (with a reasonable backlog) will
-# be published on the curl site, at https://curl.se/auto/
+# otherwise).  The most current build status (with a reasonable backlog) is
+# published on the curl site, at https://curl.se/auto/
 
 # USAGE:
 # testcurl.pl [options] [curl-daily-name] > output
@@ -49,12 +49,12 @@
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
 # --notes=[notes]          More human-readable information about this configuration
-# --nocvsup                Don't pull from git even though it is a git tree
-# --nogitpull              Don't pull from git even though it is a git tree
-# --nobuildconf            Don't run autoreconf -fi
-# --noconfigure            Don't run configure
+# --nocvsup                Do not pull from git even though it is a git tree
+# --nogitpull              Do not pull from git even though it is a git tree
+# --nobuildconf            Do not run autoreconf -fi
+# --noconfigure            Do not run configure
 # --runtestopts=[options]  Options to pass to runtests.pl
-# --setup=[file name]      File name to read setup from (deprecated)
+# --setup=[filename]       Filename to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
 #
 # if [curl-daily-name] is omitted, a 'curl' git directory is assumed.
@@ -66,7 +66,7 @@ use warnings;
 use Cwd;
 use File::Spec;
 
-# Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
+# Turn on warnings (equivalent to -w, which cannot be used with /usr/bin/env)
 #BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $git $pwd $build $buildlog
@@ -84,7 +84,7 @@ $runtestopts='';
 $version='2024-11-28';
 $fixed=0;
 
-# Determine if we're running from git or a canned copy of curl,
+# Determine if we are running from git or a canned copy of curl,
 # or if we got a specific target option or setup file option.
 $CURLDIR="curl";
 if(-f ".git/config") {
@@ -362,7 +362,7 @@ logit "date = $timestamp";  # When the test build starts
 
 $str1066os = undef;
 
-# Make $pwd to become the path without newline. We'll use that in order to cut
+# Make $pwd to become the path without newline. We use that in order to cut
 # off that path from all possible logs and error messages etc.
 $pwd = getcwd();
 
@@ -374,14 +374,14 @@ if(-d $CURLDIR) {
         # remove the generated sources to force them to be re-generated each
         # time we run this test
         unlink "$CURLDIR/src/tool_hugehelp.c";
-        # find out if curl source dir has an in-tree c-ares repo
+        # find out if curl source directory has an in-tree c-ares repo
         $have_embedded_ares = 1 if(-f "$CURLDIR/ares/GIT-INFO");
     } elsif(!$git && -f "$CURLDIR/tests/testcurl.pl") {
         logit "$CURLDIR is verified to be a fine daily source dir";
-        # find out if curl source dir has an in-tree c-ares extracted tarball
+        # find out if curl source directory has an in-tree c-ares extracted tarball
         $have_embedded_ares = 1 if(-f "$CURLDIR/ares/ares_build.h");
     } else {
-        mydie "$CURLDIR is not a daily source dir or checked out from git!"
+        mydie "$CURLDIR is not a daily source directory or checked out from git!"
     }
 }
 
@@ -399,13 +399,13 @@ rmtree "buildlog-*";
 # this is to remove old build logs that ended up in the wrong dir
 foreach(glob("$CURLDIR/buildlog-*")) { unlink $_; }
 
-# create a dir to build in
+# create a directory to build in
 mkdir $build, 0777;
 
 if(-d $build) {
-    logit "build dir $build was created fine";
+    logit "build directory $build was created fine";
 } else {
-    mydie "failed to create dir $build";
+    mydie "failed to create directory $build";
 }
 
 # get in the curl source tree root
@@ -500,7 +500,7 @@ if($git) {
     }
 }
 
-# Set timestamp to the one in curlver.h if this isn't a git test build.
+# Set timestamp to the one in curlver.h if this is not a git test build.
 if((-f "include/curl/curlver.h") &&
     (open(my $f, "<", "include/curl/curlver.h"))) {
     while(<$f>) {
@@ -548,7 +548,7 @@ sub findinpath {
 
 my $make = findinpath("gmake", "make", "nmake");
 if(!$make) {
-    mydie "Couldn't find make in the PATH";
+    mydie "Could not find make in the PATH";
 }
 # force to 'nmake' for VC builds
 $make = "nmake" if($targetos =~ /vc/);
@@ -564,10 +564,10 @@ if($configurebuild) {
     if(-f "lib/Makefile") {
         logit "configure seems to have finished fine";
     } else {
-        mydie "configure didn't work";
+        mydie "configure did not work";
     }
 } else {
-    logit "copying files to build dir ...";
+    logit "copying files to build directory ...";
     if($^O eq 'MSWin32') {
         system("xcopy /s /q \"$CURLDIR\" .");
     }
@@ -777,7 +777,7 @@ else {
             close($log);
             chdir "$pwd/$build";
         }
-        logit_spaced "cross-compiling, can't run tests";
+        logit_spaced "cross-compiling, cannot run tests";
     }
     # dummy message to feign success
     print "TESTDONE: 1 tests out of 0 (dummy message)\n";

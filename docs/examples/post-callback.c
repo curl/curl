@@ -27,6 +27,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* silly test data to POST */

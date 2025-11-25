@@ -180,6 +180,10 @@ regression test suite.
 
 Lists all test case names.
 
+## `-m=[seconds]`
+
+Set timeout for curl commands in tests
+
 ## `-n`
 
 Disable the check for and use of valgrind.

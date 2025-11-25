@@ -42,7 +42,7 @@
  *                              state
  * "nmethods_max [number: 3]" - the minimum numberf NMETHODS the client must
  *                              state
- * "user [string]" - the user name that must match (if method is 2)
+ * "user [string]" - the username that must match (if method is 2)
  * "password [string]" - the password that must match (if method is 2)
  * "backend [IPv4]" - numerical IPv4 address of backend to connect to
  * "backendport [number:0]" - TCP port of backend to connect to. 0 means use
@@ -108,7 +108,7 @@ static void socksd_resetdefaults(void)
 
 static void socksd_getconfig(void)
 {
-  FILE *fp = fopen(configfile, FOPEN_READTEXT);
+  FILE *fp = curlx_fopen(configfile, FOPEN_READTEXT);
   socksd_resetdefaults();
   if(fp) {
     char buffer[512];
@@ -180,7 +180,7 @@ static void socksd_getconfig(void)
         }
       }
     }
-    fclose(fp);
+    curlx_fclose(fp);
   }
 }
 
@@ -470,7 +470,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   {
     FILE *dump;
-    dump = fopen(reqlogfile, "ab");
+    dump = curlx_fopen(reqlogfile, "ab");
     if(dump) {
       int i;
       fprintf(dump, "atyp %u =>", type);
@@ -493,7 +493,7 @@ static curl_socket_t sockit(curl_socket_t fd)
         fprintf(dump, "\n");
         break;
       }
-      fclose(dump);
+      curlx_fclose(dump);
     }
   }
 
@@ -644,7 +644,7 @@ static bool socksd_incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_write);
     FD_ZERO(&fds_err);
 
-    /* there's always a socket to wait for */
+    /* there is always a socket to wait for */
 #ifdef __DJGPP__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warith-conversion"

@@ -25,10 +25,17 @@
  * Upload to a file:// URL
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
-#include <curl/curl.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+
+#include <curl/curl.h>
 
 #ifdef _WIN32
 #undef stat
@@ -57,12 +64,7 @@ int main(void)
   }
 
   /* to get the file size */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat("debugit", &file_info) != 0) {
-#else
   if(fstat(fileno(fd), &file_info) != 0) {
-#endif
     fclose(fd);
     curl_global_cleanup();
     return 1; /* cannot continue */

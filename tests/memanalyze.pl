@@ -130,7 +130,10 @@ while(<$fileh>) {
     chomp $_;
     my $line = $_;
     $lnum++;
-    if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
+    if($line =~ /^BT/) {
+        # back-trace, ignore
+    }
+    elsif($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
         # new memory limit test prefix
         my $i = $3;
         my ($source, $linenum) = ($1, $2);
@@ -420,7 +423,7 @@ if($totalmem) {
         $addr = $_;
         $size = $sizeataddr{$addr};
         if($size > 0) {
-            print "At $addr, there's $size bytes.\n";
+            print "At $addr, there is $size bytes.\n";
             print " allocated by ".$getmem{$addr}."\n";
         }
     }

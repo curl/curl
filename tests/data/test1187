@@ -21,7 +21,7 @@ Mime
 smtp
 </server>
 <name>
-SMTP multipart with file name escaping
+SMTP multipart with filename escaping
 </name>
 <stdin crlf="yes">
 From: different
@@ -30,7 +30,7 @@ To: another
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F  "=This is the mail text" -F '=File content;filename="strange\file\"name"'
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -F "=This is the mail text" -F '=File content;filename="strange\file\"name"'
 </command>
 </client>
 
@@ -43,8 +43,8 @@ s/boundary=------------------------[A-Za-z0-9]*/boundary=-----------------------
 </strippart>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>

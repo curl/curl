@@ -1,6 +1,6 @@
 $! BUILD_VMS.COM
 $!
-$! I've taken the original build_vms.com, supplied by Nico Baggus, if
+$! I have taken the original build_vms.com, supplied by Nico Baggus, if
 $! memory serves me correctly, and made some modifications.
 $!
 $! SSL support is controlled by logical names.  If SSL$INCLUDE is
@@ -45,14 +45,14 @@ $!    LIST      Create C compiler listings and linker maps.
 $!                 /list/show=(expan,includ)/machine
 $!    FULLLIST  Full detailed listing.
 $!                 /list/show=(all, nomessages)/machine
-$!    NOHPSSL   Don't use HP SSL, even if available.
+$!    NOHPSSL   Do not use HP SSL, even if available.
 $!              Note, you must match the pointer size that the OpenSSL
 $!              shared image expects.  This procedure will select the
 $!              correct HP OpenSSL image.
-$!    NOSSL     Don't use any SSL, even if available.
+$!    NOSSL     Do not use any SSL, even if available.
 $!    OSSLOLB   Use OpenSSL object libraries (.OLB), even if shared
 $!              images (.EXE) are available.
-$!    NOZLIB    Don't use GNV$ZLIB shared image even if available.
+$!    NOZLIB    Do not use GNV$ZLIB shared image even if available.
 $!    REALCLEAN Delete product files for all host architectures.  (No
 $!              build done.)  Alias for CLEAN_ALL
 $!
@@ -516,7 +516,7 @@ $ endif
 $!
 $!
 $! CC /LIST, LINK /MAP, and MESSAGE /LIST are defaults in batch mode,
-$! so be explicit when they're not desired.
+$! so be explicit when they are not desired.
 $!
 $
 $ if list .eq. 0
@@ -744,7 +744,7 @@ $   endif
 $   if ((f$search(ossl_lib1) .eqs. "") .or. -
         (f$search(ossl_lib2) .eqs. ""))
 $   then
-$       write sys$output "Can't find OpenSSL ''msg':"
+$       write sys$output "Cannot find OpenSSL ''msg':"
 $       write sys$output "   ''ossl_lib1'"
 $       write sys$output "   ''ossl_lib2'"
 $       goto Common_Exit
@@ -943,7 +943,7 @@ $   reset = f$search( "reset", 1)
 $Loop:
 $   file = f$search( search, 1)
 $   if file .eqs. "" then goto EndLoop
-$!  Skip a name if it's in the P4 exclusion list.
+$!  Skip a name if it is in the P4 exclusion list.
 $   if (p4 .nes. "")
 $   then
 $       name__ = "," + -
@@ -1016,7 +1016,7 @@ $   endif
 $ ENDSUBROUTINE   ! Compile
 $!
 $! Do a diff of the file specified in P1 with that in P2.  If different
-$! copy P1 to P2.  This also covers if P2 doesn't exist, but not if P2
+$! copy P1 to P2.  This also covers if P2 does not exist, but not if P2
 $! is an invalid filespec.
 $!
 $MoveIfDiff:  subroutine

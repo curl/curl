@@ -118,11 +118,8 @@ CURLcode Curl_async_await(struct Curl_easy *data,
  * Each resolver backend must of course make sure to return data in the
  * correct format to comply with this.
  */
-struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
-                                             const char *hostname,
-                                             int port,
-                                             int ip_version,
-                                             int *waitp);
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
+                                int port, int ip_version);
 
 #ifdef USE_ARES
 /* common functions for c-ares and threaded resolver with HTTPSRR */

@@ -55,7 +55,7 @@ run 3: overwrite cookie 1 and 4, set cookie 6 with and without tailmatch
 <server>
 http
 </server>
-# don't run this with the threaded-resolver or c-ares since the events might
+# do not run this with the threaded-resolver or c-ares since the events might
 # trigger in a different order!
 <features>
 !threaded-resolver

@@ -59,8 +59,8 @@ struct sws_httprequest {
   long testno;       /* test number found in the request */
   long partno;       /* part number found in the request */
   bool open;      /* keep connection open info, as found in the request */
-  bool auth_req;  /* authentication required, don't wait for body unless
-                     there's an Authorization header */
+  bool auth_req;  /* authentication required, do not wait for body unless
+                     there is an Authorization header */
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
@@ -76,7 +76,7 @@ struct sws_httprequest {
   int prot_version;  /* HTTP version * 10 */
   int callcount;  /* times sws_ProcessRequest() gets called */
   bool skipall;   /* skip all incoming data */
-  bool noexpect;  /* refuse Expect: (don't read the body) */
+  bool noexpect;  /* refuse Expect: (do not read the body) */
   bool connmon;   /* monitor the state of the connection, log disconnects */
   bool upgrade;   /* test case allows upgrade */
   bool upgrade_request; /* upgrade request found and allowed */
@@ -178,7 +178,7 @@ static bool socket_domain_is_ip(void)
 /* parse the file on disk that might have a test number for us */
 static int parse_cmdfile(struct sws_httprequest *req)
 {
-  FILE *f = fopen(cmdfile, FOPEN_READTEXT);
+  FILE *f = curlx_fopen(cmdfile, FOPEN_READTEXT);
   if(f) {
     int testnum = DOCNUMBER_NOTHING;
     char buf[256];
@@ -188,7 +188,7 @@ static int parse_cmdfile(struct sws_httprequest *req)
         req->testno = testnum;
       }
     }
-    fclose(f);
+    curlx_fclose(f);
   }
   return 0;
 }
@@ -208,7 +208,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
     error = errno;
     logmsg("fopen() failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("  Couldn't open test file %ld", req->testno);
+    logmsg("  Could not open test file %ld", req->testno);
     req->open = FALSE; /* closes connection */
     return 1; /* done */
   }
@@ -220,7 +220,7 @@ static int sws_parse_servercmd(struct sws_httprequest *req)
 
     /* get the custom server control "commands" */
     error = getpart(&orgcmd, &cmdsize, "reply", "servercmd", stream);
-    fclose(stream);
+    curlx_fclose(stream);
     if(error) {
       logmsg("getpart() failed with error (%d)", error);
       req->open = FALSE; /* closes connection */
@@ -340,7 +340,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       if(http && sscanf(http, "HTTP/%d.%d",
                         &prot_major,
                         &prot_minor) == 2) {
-        /* between the request keyword and HTTP/ there's a path */
+        /* between the request keyword and HTTP/ there is a path */
         httppath = line + strlen(request);
         npath = http - httppath;
 
@@ -414,7 +414,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       }
 
       if(req->testno == DOCNUMBER_NOTHING) {
-        /* didn't find any in the first scan, try alternative test case
+        /* did not find any in the first scan, try alternative test case
            number placements */
         static char doc[MAXDOCNAMELEN];
         if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
@@ -485,7 +485,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   }
 
   if(!end) {
-    /* we don't have a complete request yet! */
+    /* we do not have a complete request yet! */
     logmsg("request not complete yet");
     return 0; /* not complete yet */
   }
@@ -545,7 +545,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
   /* **** Persistence ****
    *
    * If the request is an HTTP/1.0 one, we close the connection unconditionally
-   * when we're done.
+   * when we are done.
    *
    * If the request is an HTTP/1.1 one, we MUST check for a "Connection:"
    * header that might say "close". If it does, we close a connection when
@@ -558,8 +558,8 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
       return 1; /* done */
 
     if((req->cl == 0) && !CURL_STRNICMP("Content-Length:", line, 15)) {
-      /* If we don't ignore content-length, we read it and we read the whole
-         request including the body before we return. If we've been told to
+      /* If we do not ignore content-length, we read it and we read the whole
+         request including the body before we return. If we have been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
       curl_off_t clen;
@@ -734,7 +734,7 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
     return;
 
   do {
-    dump = fopen(dumpfile, "ab");
+    dump = curlx_fopen(dumpfile, "ab");
     /* !checksrc! disable ERRNOVAR 1 */
   } while(!dump && ((error = errno) == EINTR));
   if(!dump) {
@@ -766,7 +766,7 @@ static void sws_storerequest(const char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  res = fclose(dump);
+  res = curlx_fclose(dump);
   if(res)
     logmsg("Error closing file %s error (%d) %s", dumpfile,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -883,7 +883,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
   else {
     if(req->skip)
       /* we are instructed to not read the entire thing, so we make sure to
-         only read what we're supposed to and NOT read the entire thing the
+         only read what we are supposed to and NOT read the entire thing the
          client wants to send! */
       got = sread(sock, reqbuf + req->offset, req->cl);
     else
@@ -1050,7 +1050,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
     }
     else {
       error = getpart(&ptr, &count, "reply", partbuf, stream);
-      fclose(stream);
+      curlx_fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         return 0;
@@ -1075,7 +1075,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
     else {
       /* get the custom server control "commands" */
       error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
-      fclose(stream);
+      curlx_fclose(stream);
       if(error) {
         logmsg("getpart() failed with error (%d)", error);
         free(ptr);
@@ -1104,7 +1104,7 @@ static int sws_send_doc(curl_socket_t sock, struct sws_httprequest *req)
   else
     sws_prevbounce = FALSE;
 
-  dump = fopen(responsedump, "ab");
+  dump = curlx_fopen(responsedump, "ab");
   if(!dump) {
     error = errno;
     logmsg("fopen() failed with error (%d) %s",
@@ -1158,7 +1158,7 @@ retry:
     }
   } while((count > 0) && !got_exit_signal);
 
-  res = fclose(dump);
+  res = curlx_fclose(dump);
   if(res)
     logmsg("Error closing file %s error (%d) %s", responsedump,
            errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
@@ -1955,7 +1955,7 @@ static int service_connection(curl_socket_t *msgsock,
   if(req->connect_request) {
     /* a CONNECT request, setup and talk the tunnel */
     if(!is_proxy) {
-      logmsg("received CONNECT but isn't running as proxy!");
+      logmsg("received CONNECT but not running as proxy!");
       return 1;
     }
     else {
@@ -2419,7 +2419,7 @@ static int test_sws(int argc, char *argv[])
 
             if(!req->open)
               /* When instructed to close connection after server-reply we
-                 wait a very small amount of time before doing so. If this
+                 wait a small amount of time before doing so. If this
                  is not done client might get an ECONNRESET before reading
                  a single byte of server-reply. */
               curlx_wait_ms(50);
@@ -2437,7 +2437,7 @@ static int test_sws(int argc, char *argv[])
               goto sws_cleanup;
           }
 
-          /* Reset the request, unless we're still in the middle of reading */
+          /* Reset the request, unless we are still in the middle of reading */
           if(rc && !req->upgrade_request)
             /* Note: resetting the HTTP request here can cause problems if:
              * 1) req->skipall is TRUE,
@@ -2448,9 +2448,9 @@ static int test_sws(int argc, char *argv[])
              * data (in service_connection()) as the first data received on
              * this new HTTP request and report "** Unusual request" (skipall
              * would have otherwise caused that data to be ignored). Normally,
-             * that socket will be closed by the client and there won't be any
-             * stale data to cause this, but stranger things have happened (see
-             * issue #11678).
+             * that socket will be closed by the client and there will not be
+             * any stale data to cause this, but stranger things have happened
+             * (see issue #11678).
              */
             init_httprequest(req);
         } while(rc > 0);

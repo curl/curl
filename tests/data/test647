@@ -33,9 +33,9 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER
 -F "=)"
 -F "=@%LOGDIR/test%TESTNUMBER.txt"
 -H "Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)"
--H "From: Fred Foobar <foobar@example.com>"
+-H "From: Fred Foobar %LTfoobar@example.com%GT"
 -H "To: joe@example.com"
--H "Message-Id: <B27397-0100000@example.com>"
+-H "Message-Id: %LTB27397-0100000@example.com%GT"
 -H "Subject: afternoon meeting"
 -u user:secret
 </command>
@@ -63,9 +63,9 @@ A004 LOGOUT
 Content-Type: multipart/mixed; boundary=----------------------------%CR
 Mime-Version: 1.0%CR
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)%CR
-From: Fred Foobar <foobar@example.com>%CR
+From: Fred Foobar %LTfoobar@example.com%GT%CR
 To: joe@example.com%CR
-Message-Id: <B27397-0100000@example.com>%CR
+Message-Id: %LTB27397-0100000@example.com%GT%CR
 Subject: afternoon meeting%CR
 %CR
 ------------------------------%CR

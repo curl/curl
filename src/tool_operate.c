@@ -555,25 +555,19 @@ static CURLcode retrycheck(struct OperationConfig *config,
     }
 
     if(truncate && outs->bytes && outs->filename && outs->stream) {
-#ifndef __MINGW32CE__
       struct_stat fileinfo;
 
       /* The output can be a named pipe or a character device etc that
          cannot be truncated. Only truncate regular files. */
       if(!fstat(fileno(outs->stream), &fileinfo) &&
-         S_ISREG(fileinfo.st_mode))
-#else
-        /* Windows CE's fileno() is bad so just skip the check */
-#endif
-      {
+         S_ISREG(fileinfo.st_mode)) {
         int rc;
         /* We have written data to an output file, we truncate file */
         fflush(outs->stream);
         notef("Throwing away %"  CURL_FORMAT_CURL_OFF_T " bytes",
               outs->bytes);
         /* truncate file at the position where we started appending */
-#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__) && \
-  !defined(__MINGW32CE__)
+#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
@@ -625,7 +619,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
 
   if(per->uploadfile) {
     if(!strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
       sclose(per->infd);
 #else
       warnf("Closing per->infd != 0: FD == "
@@ -1122,7 +1116,7 @@ static void check_stdin_upload(struct OperationConfig *config,
 
   CURLX_SET_BINMODE(stdin);
   if(!strcmp(per->uploadfile, ".")) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     /* non-blocking stdin behavior on Windows is challenging
        Spawn a new thread that will read from stdin and write
        out to a socket */
@@ -1205,7 +1199,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     if(u->infile) {
       if(!config->globoff && !glob_inuse(&state->inglob))
         result = glob_url(&state->inglob, u->infile, &state->upnum, err);
-      if(!state->uploadfile) {
+      if(!result && !state->uploadfile) {
         if(glob_inuse(&state->inglob))
           result = glob_next_url(&state->uploadfile, &state->inglob);
         else if(!state->upidx) {
@@ -2100,8 +2094,7 @@ static CURLcode cacertpaths(struct OperationConfig *config)
         goto fail;
       }
     }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
-  !defined(CURL_DISABLE_CA_SEARCH)
+#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
     result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       goto fail;
@@ -2234,11 +2227,10 @@ CURLcode operate(int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
   const char *first_arg;
-#ifdef UNDER_CE
-  first_arg = argc > 1 ? strdup(argv[1]) : NULL;
-#else
+  char *curlrc_path = NULL;
+  bool found_curlrc = FALSE;
+
   first_arg = argc > 1 ? convert_tchar_to_UTF8(argv[1]) : NULL;
-#endif
 
 #ifdef HAVE_SETLOCALE
   /* Override locale for number parsing (only) */
@@ -2250,20 +2242,26 @@ CURLcode operate(int argc, argv_item_t argv[])
   if((argc == 1) ||
      (first_arg && strncmp(first_arg, "-q", 2) &&
       strcmp(first_arg, "--disable"))) {
-    parseconfig(NULL, CONFIG_MAX_LEVELS); /* ignore possible failure */
+    if(!parseconfig(NULL, CONFIG_MAX_LEVELS, &curlrc_path))
+      found_curlrc = TRUE;
 
-    /* If we had no arguments then make sure a url was specified in .curlrc */
+    /* If we had no arguments then make sure a URL was specified in .curlrc */
     if((argc < 2) && (!global->first->url_list)) {
       helpf(NULL);
       result = CURLE_FAILED_INIT;
     }
   }
 
-  unicodefree(first_arg);
+  unicodefree(CURL_UNCONST(first_arg));
 
   if(!result) {
     /* Parse the command line arguments */
     ParameterError res = parse_args(argc, argv);
+    if(found_curlrc) {
+      /* After parse_args so notef knows the verbosity */
+      notef("Read config file from '%s'", curlrc_path);
+      free(curlrc_path);
+    }
     if(res) {
       result = CURLE_OK;
 
@@ -2331,17 +2329,19 @@ CURLcode operate(int argc, argv_item_t argv[])
             operation = operation->next;
           } while(!result && operation);
 
-          /* Set the current operation pointer */
-          global->current = global->first;
+          if(!result) {
+            /* Set the current operation pointer */
+            global->current = global->first;
 
-          /* now run! */
-          result = run_all_transfers(share, result);
+            /* now run! */
+            result = run_all_transfers(share, result);
 
-          if(global->ssl_sessions && feature_ssls_export) {
-            CURLcode r2 = tool_ssls_save(global->first, share,
-                                         global->ssl_sessions);
-            if(r2 && !result)
-              result = r2;
+            if(global->ssl_sessions && feature_ssls_export) {
+              CURLcode r2 = tool_ssls_save(global->first, share,
+                                           global->ssl_sessions);
+              if(r2 && !result)
+                result = r2;
+            }
           }
         }
 

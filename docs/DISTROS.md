@@ -222,6 +222,12 @@ can also be used on other distributions
 - curl issues: https://support.oracle.com/ (requires support contract)
 - curl patches: https://github.com/oracle/solaris-userland/tree/master/components/curl/patches
 
+## OpenBSD
+
+- curl: https://github.com/openbsd/ports/tree/master/net/curl
+- curl issues: https://www.openbsd.org/mail.html (ports mailing list)
+- curl patches: https://github.com/openbsd/ports/tree/master/net/curl/patches
+
 ## OpenEmbedded / Yocto Project
 
 *Rolling Release*

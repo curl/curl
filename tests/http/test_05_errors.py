@@ -38,12 +38,8 @@ log = logging.getLogger(__name__)
 class TestErrors:
 
     # download 1 file, check that we get CURLE_PARTIAL_FILE
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         count = 1
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -60,12 +56,8 @@ class TestErrors:
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
     # download files, check that we get CURLE_PARTIAL_FILE for all
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_mplx_protos())
     def test_05_02_partial_20(self, env: Env, httpd, nghttpx, proto):
-        if proto == 'h2' and not env.have_h2_curl():
-            pytest.skip("h2 not supported")
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip("openssl-quic is flaky in yielding proper error codes")
         count = 20
@@ -85,9 +77,8 @@ class TestErrors:
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
     # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_05_03_required(self, env: Env, httpd, nghttpx):
-        if not env.have_h2_curl():
-            pytest.skip("h2 not supported")
         curl = CurlClient(env=env)
         proto = 'http/1.1'
         urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/1_1'

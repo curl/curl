@@ -21,7 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# by Tetetest and Sukender (Benoit Neil)
 
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
@@ -71,37 +70,6 @@ if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-elseif(WIN32 AND WINCE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # mingw32ce build
-  if(NOT MINGW32CE_LIBRARY_DIR)
-    message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
-  endif()
-
-  set(MINGW 1)
-  set(MINGW32CE 1)
-
-  # Build implib with libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
-  set(CMAKE_C_CREATE_SHARED_LIBRARY "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS>")
-  string(APPEND CMAKE_C_CREATE_SHARED_LIBRARY " <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB>")
-  string(APPEND CMAKE_C_CREATE_SHARED_LIBRARY " ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
-
-  # Build resources. Copied from CMake's 'Modules/Platform/Windows-windres.cmake'.
-  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-  enable_language(RC)
-
-  # To compile long long integer literals
-  set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-std=gnu99")
-  string(APPEND CMAKE_REQUIRED_FLAGS " -std=gnu99")
-
-  set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
-
-  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
-  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
-  set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
-  set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
-  set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
-  set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
 elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
@@ -129,9 +97,6 @@ if(ANDROID)
 endif()
 if(WIN32)
   string(APPEND _target_flags " WIN32")
-endif()
-if(WINCE)
-  string(APPEND _target_flags " WINCE")
 endif()
 if(WINDOWS_STORE)
   string(APPEND _target_flags " UWP")
@@ -213,12 +178,12 @@ option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
 
 if(WIN32)
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
-  if(WINDOWS_STORE OR WINCE)
+  if(WINDOWS_STORE)
     set(ENABLE_UNICODE ON)
   endif()
   if(ENABLE_UNICODE)
     set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "UNICODE" "_UNICODE")
-    if(MINGW AND NOT MINGW32CE)
+    if(MINGW)
       set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-municode")
     endif()
   endif()
@@ -497,7 +462,7 @@ option(CURL_DISABLE_SMB "Disable SMB" OFF)
 mark_as_advanced(CURL_DISABLE_SMB)
 option(CURL_DISABLE_SMTP "Disable SMTP" OFF)
 mark_as_advanced(CURL_DISABLE_SMTP)
-option(CURL_DISABLE_SOCKETPAIR "Disable use of socketpair for curl_multi_poll" OFF)
+option(CURL_DISABLE_SOCKETPAIR "Disable use of socketpair for curl_multi_poll()" OFF)
 mark_as_advanced(CURL_DISABLE_SOCKETPAIR)
 option(CURL_DISABLE_WEBSOCKETS "Disable WebSocket" OFF)
 mark_as_advanced(CURL_DISABLE_WEBSOCKETS)
@@ -505,6 +470,8 @@ option(CURL_DISABLE_TELNET "Disable Telnet" OFF)
 mark_as_advanced(CURL_DISABLE_TELNET)
 option(CURL_DISABLE_TFTP "Disable TFTP" OFF)
 mark_as_advanced(CURL_DISABLE_TFTP)
+option(CURL_DISABLE_TYPECHECK "Disable curl_easy_setopt()/curl_easy_getinfo() type checking" OFF)
+mark_as_advanced(CURL_DISABLE_TYPECHECK)
 option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 
@@ -538,7 +505,7 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_TFTP ON)
 endif()
 
-if(WINDOWS_STORE OR WINCE)
+if(WINDOWS_STORE)
   set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
 
@@ -624,21 +591,7 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(WIN32)
-  if(WINCE)
-    set(_win32_winsock "ws2")
-  else()
-    set(_win32_winsock "ws2_32")
-  endif()
-  set(_win32_crypt32 "crypt32")
-  set(_win32_secur32 "secur32")
-
-  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
-    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
-    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
-    set(_win32_secur32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_secur32}.a")
-  endif()
-elseif(DOS)
+if(DOS)
   if(WATT_ROOT)
     set(USE_WATT32 ON)
     # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
@@ -659,7 +612,7 @@ elseif(AMIGA)
     set(CURL_USE_OPENSSL ON)
     set(CURL_CA_FALLBACK ON CACHE BOOL "")
   endif()
-elseif(NOT APPLE)
+elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
     set(CURL_NETWORK_AND_TIME_LIBS "socket" ${CURL_NETWORK_AND_TIME_LIBS})
@@ -694,7 +647,7 @@ if(ENABLE_IPV6)
     endif()
   endif()
 endif()
-if(ENABLE_IPV6 AND NOT WINCE)
+if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
@@ -1035,7 +988,7 @@ macro(curl_openssl_check_exists)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
     endif()
-    if(WIN32 AND NOT WINCE)
+    if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
   endif()
@@ -1049,7 +1002,7 @@ macro(curl_openssl_check_exists)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
   if(WIN32)
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}" "${_win32_crypt32}")  # for OpenSSL/wolfSSL
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")  # for OpenSSL/wolfSSL
   endif()
   if(${ARGC} EQUAL 2)
     check_function_exists(${ARGN})
@@ -1262,7 +1215,7 @@ if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
-  if(WIN32 AND NOT WINDOWS_STORE AND NOT WINCE)
+  if(WIN32 AND NOT WINDOWS_STORE)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
     if(USE_WIN32_LDAP)
       list(APPEND CURL_LIBS "wldap32")
@@ -1468,6 +1421,21 @@ if(CURL_USE_GSSAPI)
   endif()
 endif()
 
+# libbacktrace
+option(CURL_USE_LIBBACKTRACE "Use libbacktrace. Requires build with TrackMemory and DWARF debug information." OFF)
+if(CURL_USE_LIBBACKTRACE)
+  if(NOT ENABLE_CURLDEBUG)
+    message(FATAL_ERROR "libbacktrace requires TrackMemory enabled")
+  endif()
+  if(NOT CMAKE_BUILD_TYPE MATCHES "(Debug|RelWithDebInfo)")
+    message(FATAL_ERROR "libbacktrace requires debug information")
+  endif()
+  find_package(Libbacktrace REQUIRED)
+  list(APPEND CURL_LIBS ${LIBBACKTRACE_LIBRARIES})
+  include_directories(SYSTEM ${LIBBACKTRACE_INCLUDE_DIRS})
+  set(USE_BACKTRACE ON)
+endif()
+
 # libuv
 option(CURL_USE_LIBUV "Use libuv for event-based tests" OFF)
 if(CURL_USE_LIBUV)
@@ -1501,7 +1469,7 @@ if(USE_LIBRTMP)
 endif()
 
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
-if(ENABLE_UNIX_SOCKETS AND NOT WINCE)
+if(ENABLE_UNIX_SOCKETS)
   if(WIN32 OR DOS)
     set(USE_UNIX_SOCKETS 1)
   else()
@@ -1618,7 +1586,7 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "winsock2.h")
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
-  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
+  if(HAVE_WIN32_WINNT AND HAVE_WIN32_WINNT LESS 0x0501)
     # Windows XP is required for freeaddrinfo, getaddrinfo
     message(FATAL_ERROR "Building for Windows XP or newer is required.")
   endif()
@@ -1626,7 +1594,7 @@ if(WIN32)
   # Pre-fill detection results based on target OS version
   if(_CURL_PREFILL)
     if(NOT HAVE_WIN32_WINNT OR HAVE_WIN32_WINNT LESS 0x0600 OR  # older than Windows Vista
-       WINCE OR WINDOWS_STORE)
+       WINDOWS_STORE)
       set(HAVE_IF_NAMETOINDEX 0)
       unset(HAVE_IF_NAMETOINDEX CACHE)
     elseif(MSVC OR MINGW)
@@ -1734,8 +1702,8 @@ endif()
 
 # Apply to all feature checks
 if(WIN32)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
-  if(NOT WINCE AND NOT WINDOWS_STORE)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+  if(NOT WINDOWS_STORE)
     list(APPEND CMAKE_REQUIRED_LIBRARIES "iphlpapi")
   endif()
 elseif(HAVE_LIBSOCKET)
@@ -1789,9 +1757,9 @@ check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("ftruncate"       "unistd.h" HAVE_FTRUNCATE)
 check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
-check_function_exists("getrlimit"       HAVE_GETRLIMIT)
-check_function_exists("setlocale"       HAVE_SETLOCALE)
-check_function_exists("setrlimit"       HAVE_SETRLIMIT)
+check_function_exists("getrlimit"     HAVE_GETRLIMIT)
+check_function_exists("setlocale"     HAVE_SETLOCALE)
+check_function_exists("setrlimit"     HAVE_SETRLIMIT)
 
 if(WIN32)
   # include wincrypt.h as a workaround for mingw-w64 __MINGW64_VERSION_MAJOR <= 5 header bug */
@@ -1800,16 +1768,14 @@ else()
   check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # net/if.h
   check_function_exists("realpath"        HAVE_REALPATH)
   check_function_exists("sched_yield"     HAVE_SCHED_YIELD)
-  check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)
-  check_symbol_exists("stricmp"         "string.h" HAVE_STRICMP)
-  check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
+  check_symbol_exists("strcasecmp"        "string.h" HAVE_STRCASECMP)
+  check_symbol_exists("stricmp"           "string.h" HAVE_STRICMP)
+  check_symbol_exists("strcmpi"           "string.h" HAVE_STRCMPI)
 endif()
 
-if(NOT MINGW32CE)  # Avoid false detections
-  check_function_exists("setmode" HAVE_SETMODE)
-  if(WIN32 OR CYGWIN)
-    check_function_exists("_setmode" HAVE__SETMODE)
-  endif()
+check_function_exists("setmode" HAVE_SETMODE)
+if(WIN32 OR CYGWIN)
+  check_function_exists("_setmode" HAVE__SETMODE)
 endif()
 
 if(AMIGA)
@@ -1907,7 +1873,7 @@ check_type_size("off_t" SIZEOF_OFF_T)
 
 if(NOT WIN32)
   # fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
-  # _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
+  # _FILE_OFFSET_BITS unset or 32 (as in Android ARMv7 with NDK 26b and API level < 24)
   # so we need to test fseeko after testing for _FILE_OFFSET_BITS
   check_symbol_exists("fseeko" "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
 
@@ -1971,17 +1937,13 @@ include(CMake/OtherTests.cmake)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
-  list(APPEND CURL_NETWORK_AND_TIME_LIBS "${_win32_winsock}")
-  if(NOT WINCE AND NOT WINDOWS_STORE)
+  list(APPEND CURL_NETWORK_AND_TIME_LIBS "ws2_32")
+  if(NOT WINDOWS_STORE)
     list(APPEND CURL_NETWORK_AND_TIME_LIBS "iphlpapi")
   endif()
-  if(NOT WINCE)
-    list(APPEND CURL_LIBS "bcrypt")
-  endif()
+  list(APPEND CURL_LIBS "bcrypt")
 
-  if(NOT WINCE)
-    set(USE_WIN32_LARGE_FILES ON)
-  endif()
+  set(USE_WIN32_LARGE_FILES ON)
 
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
@@ -1990,13 +1952,10 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    if(NOT WINCE)
-      list(APPEND CURL_LIBS "advapi32")
-    endif()
-    list(APPEND CURL_LIBS "${_win32_crypt32}")
+    list(APPEND CURL_LIBS "advapi32" "crypt32")
   endif()
   if(USE_WINDOWS_SSPI)
-    list(APPEND CURL_LIBS "${_win32_secur32}")
+    list(APPEND CURL_LIBS "secur32")
   endif()
 endif()
 
@@ -2209,8 +2168,7 @@ message(STATUS "Features: ${SUPPORT_FEATURES}")
 # Clear list and collect SSL backends
 set(_items "")
 curl_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
-curl_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
-curl_add_if("${_openssl} v3+"  _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_GREATER_EQUAL 3.0.0)
+curl_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL)
 curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
 curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
 curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)

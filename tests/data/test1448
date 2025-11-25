@@ -46,7 +46,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-Redirect following to UTF-8 IDN host name
+Redirect following to UTF-8 IDN hostname
 </name>
 
 <command>
