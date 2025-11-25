@@ -36,6 +36,7 @@ versions of libs and build tools.
  - nghttp2      1.15.0 (2016-09-25)
  - OpenLDAP     2.0 (2000-08-01)
  - OpenSSL      3.0.0 (2021-09-07)
+ - Windows      XP (2001-08-24 - 2009-04-14)
  - wolfSSL      3.4.6 (2017-09-22)
  - zlib         1.2.5.2 (2011-12-11)
  - zstd         1.0 (2016-08-31)
@@ -46,12 +47,14 @@ versions of libs and build tools.
  we use a few "build tools" and we make sure that we remain functional with
  these versions:
 
- - GNU libtool  1.4.2 (2001-09-11)
- - GNU autoconf 2.59 (2003-11-06)
- - GNU automake 1.7 (2002-09-25)
- - GNU m4       1.4 (2007-09-21)
- - perl         5.8 (2002-07-19), on Windows: 5.22 (2015-06-01)
- - cmake        3.7 (2016-11-11)
+ - cmake               3.7 (2016-11-11)
+ - GNU autoconf        2.59 (2003-11-06)
+ - GNU automake        1.7 (2002-09-25)
+ - GNU libtool         1.4.2 (2001-09-11)
+ - GNU m4              1.4 (2007-09-21)
+ - mingw-w64           3.0 (2013-09-20)
+ - perl                5.8 (2002-07-19), on Windows: 5.22 (2015-06-01)
+ - Visual Studio 2010  10.0 (2010-04-12 - 2020-07-14)
 
 Library Symbols
 ===============
