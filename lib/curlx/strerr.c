@@ -34,21 +34,8 @@
 
 #include <curl/curl.h>
 
-#ifndef WITHOUT_LIBCURL
-#include <curl/mprintf.h>
-#define SNPRINTF curl_msnprintf
-#else
-/* when built for the test servers */
-
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define SNPRINTF _snprintf
-#else
-#define SNPRINTF snprintf
-#endif
-#endif /* !WITHOUT_LIBCURL */
-
 #include "winapi.h"
+#include "snprintf.h"
 #include "strerr.h"
 /* The last 2 #include files should be in this order */
 #include "../curl_memory.h"

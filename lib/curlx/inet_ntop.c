@@ -32,6 +32,7 @@
 #endif
 
 #include "inet_ntop.h"
+#include "snprintf.h"
 
 #define IN6ADDRSZ       16
 /* #define INADDRSZ         4 */
@@ -61,13 +62,12 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 
   DEBUGASSERT(size >= 16);
 
-  /* this sprintf() does not overflow the buffer. Avoids snprintf to work more
-     widely. Avoids the msnprintf family to work as a curlx function. */
-  (void)(sprintf)(tmp, "%d.%d.%d.%d",
-                  ((int)((unsigned char)src[0])) & 0xff,
-                  ((int)((unsigned char)src[1])) & 0xff,
-                  ((int)((unsigned char)src[2])) & 0xff,
-                  ((int)((unsigned char)src[3])) & 0xff);
+  /* this snprintf() does not overflow the buffer. */
+  SNPRINTF(tmp, sizeof(tmp), "%d.%d.%d.%d",
+           ((int)((unsigned char)src[0])) & 0xff,
+           ((int)((unsigned char)src[1])) & 0xff,
+           ((int)((unsigned char)src[2])) & 0xff,
+           ((int)((unsigned char)src[3])) & 0xff);
 
   len = strlen(tmp);
   if(len == 0 || len >= size) {
