@@ -59,6 +59,11 @@ Content-Type: application/x-www-form-urlencoded
 
 curlrc read
 </protocol>
+
+# On Windows curl may use a backslash, convert that for the comparison
+<stripfile>
+s:\\:/:g
+</stripfile>
 <stderr mode="text">
 Note: Read config file from '%PWD/%LOGDIR/curlrc'
 </stderr>
