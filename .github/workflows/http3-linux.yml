@@ -658,6 +658,9 @@ jobs:
             echo '--------------- 5'
             cat /home/runner/ngtcp2/build/lib/pkgconfig/libngtcp2_crypto_gnutls.pc
             echo '--------------- 6'
+            echo "|$PKG_CONFIG_PATH|"
+            pkg-config --exists libngtcp2_crypto_gnutls && echo 'YESYES' || echo 'NONO'
+            echo '--------------- 7'
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m)-pc-linux-gnu" -DBUILD_STATIC_LIBS=ON \
