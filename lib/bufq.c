@@ -51,9 +51,9 @@ static void chunk_reset(struct buf_chunk *chunk)
 }
 
 static size_t chunk_append(struct buf_chunk *chunk,
-                           const unsigned char *buf, size_t len)
+                           const uint8_t *buf, size_t len)
 {
-  unsigned char *p = &chunk->x.data[chunk->w_offset];
+  uint8_t *p = &chunk->x.data[chunk->w_offset];
   size_t n = chunk->dlen - chunk->w_offset;
   DEBUGASSERT(chunk->dlen >= chunk->w_offset);
   if(n) {
@@ -65,9 +65,9 @@ static size_t chunk_append(struct buf_chunk *chunk,
 }
 
 static size_t chunk_read(struct buf_chunk *chunk,
-                         unsigned char *buf, size_t len)
+                         uint8_t *buf, size_t len)
 {
-  unsigned char *p = &chunk->x.data[chunk->r_offset];
+  uint8_t *p = &chunk->x.data[chunk->r_offset];
   size_t n = chunk->w_offset - chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
   if(!n) {
@@ -89,7 +89,7 @@ static CURLcode chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
                              Curl_bufq_reader *reader,
                              void *reader_ctx, size_t *pnread)
 {
-  unsigned char *p = &chunk->x.data[chunk->w_offset];
+  uint8_t *p = &chunk->x.data[chunk->w_offset];
   size_t n = chunk->dlen - chunk->w_offset; /* free amount */
   CURLcode result;
 
@@ -108,7 +108,7 @@ static CURLcode chunk_slurpn(struct buf_chunk *chunk, size_t max_len,
 }
 
 static void chunk_peek(const struct buf_chunk *chunk,
-                       const unsigned char **pbuf, size_t *plen)
+                       const uint8_t **pbuf, size_t *plen)
 {
   DEBUGASSERT(chunk->w_offset >= chunk->r_offset);
   *pbuf = &chunk->x.data[chunk->r_offset];
@@ -116,7 +116,7 @@ static void chunk_peek(const struct buf_chunk *chunk,
 }
 
 static void chunk_peek_at(const struct buf_chunk *chunk, size_t offset,
-                          const unsigned char **pbuf, size_t *plen)
+                          const uint8_t **pbuf, size_t *plen)
 {
   offset += chunk->r_offset;
   DEBUGASSERT(chunk->w_offset >= offset);
@@ -370,7 +370,7 @@ static struct buf_chunk *get_non_full_tail(struct bufq *q)
 }
 
 CURLcode Curl_bufq_write(struct bufq *q,
-                         const unsigned char *buf, size_t len,
+                         const uint8_t *buf, size_t len,
                          size_t *pnwritten)
 {
   struct buf_chunk *tail;
@@ -400,10 +400,10 @@ CURLcode Curl_bufq_cwrite(struct bufq *q,
                           const char *buf, size_t len,
                           size_t *pnwritten)
 {
-  return Curl_bufq_write(q, (const unsigned char *)buf, len, pnwritten);
+  return Curl_bufq_write(q, (const uint8_t *)buf, len, pnwritten);
 }
 
-CURLcode Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
+CURLcode Curl_bufq_read(struct bufq *q, uint8_t *buf, size_t len,
                         size_t *pnread)
 {
   *pnread = 0;
@@ -422,11 +422,11 @@ CURLcode Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
 CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
                          size_t *pnread)
 {
-  return Curl_bufq_read(q, (unsigned char *)buf, len, pnread);
+  return Curl_bufq_read(q, (uint8_t *)buf, len, pnread);
 }
 
 bool Curl_bufq_peek(struct bufq *q,
-                    const unsigned char **pbuf, size_t *plen)
+                    const uint8_t **pbuf, size_t *plen)
 {
   if(q->head && chunk_is_empty(q->head)) {
     prune_head(q);
@@ -441,7 +441,7 @@ bool Curl_bufq_peek(struct bufq *q,
 }
 
 bool Curl_bufq_peek_at(struct bufq *q, size_t offset,
-                       const unsigned char **pbuf, size_t *plen)
+                       const uint8_t **pbuf, size_t *plen)
 {
   struct buf_chunk *c = q->head;
   size_t clen;
@@ -477,7 +477,7 @@ void Curl_bufq_skip(struct bufq *q, size_t amount)
 CURLcode Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
                         void *writer_ctx, size_t *pwritten)
 {
-  const unsigned char *buf;
+  const uint8_t *buf;
   size_t blen;
   CURLcode result = CURLE_OK;
 
@@ -507,7 +507,7 @@ CURLcode Curl_bufq_pass(struct bufq *q, Curl_bufq_writer *writer,
 }
 
 CURLcode Curl_bufq_write_pass(struct bufq *q,
-                              const unsigned char *buf, size_t len,
+                              const uint8_t *buf, size_t len,
                               Curl_bufq_writer *writer, void *writer_ctx,
                               size_t *pwritten)
 {
