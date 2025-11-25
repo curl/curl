@@ -1054,7 +1054,7 @@ static CURLcode setup_outfile(struct OperationConfig *config,
       config->condtime = fileinfo.st_mtime;
     }
     else {
-      /* file doesn't exist, download unconditionally */
+      /* file does not exist, download unconditionally */
       config->timecond = CURL_TIMECOND_NONE;
     }
   }

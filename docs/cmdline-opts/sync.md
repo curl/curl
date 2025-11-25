@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: sync
 Help: Sync download with remote name/time/conditional
 Category: output
-Added: 8.12.0
+Added: 8.18.0
 Multi: boolean
 See-also:
   - remote-name
