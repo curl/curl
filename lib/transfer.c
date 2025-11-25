@@ -925,6 +925,7 @@ CURLcode Curl_xfer_pause_send(struct Curl_easy *data, bool enable)
   Curl_rlimit_block(&data->progress.ul.rlimit, enable, curlx_now());
   if(!enable && Curl_creader_is_paused(data))
     result = Curl_creader_unpause(data);
+  Curl_pgrsSendPause(data, enable);
   return result;
 }
 
