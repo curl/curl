@@ -263,6 +263,7 @@ jobs:
             PKG_CONFIG_PATH=/home/runner/nettle/build/lib64/pkgconfig \
             --with-included-libtasn1 --with-included-unistring \
             --disable-guile --disable-doc --disable-tests --disable-tools
+          make
           make install
 
       - name: 'build wolfssl'
