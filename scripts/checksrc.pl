@@ -113,6 +113,10 @@ my %banfunc = (
     "fopen" => 1,
     "freopen" => 1,
     "open" => 1,
+    "_open" => 1,
+    "_wfopen" => 1,
+    "_wfreopen" => 1,
+    "_wopen" => 1,
     "stat" => 1,
     );
 

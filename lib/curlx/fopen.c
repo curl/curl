@@ -51,6 +51,8 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 
 #include "multibyte.h"
 
+#include <share.h>  /* for _SH_DENYNO */
+
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
   (_WIN32_WINNT < _WIN32_WINNT_WIN10)
@@ -244,7 +246,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
       target = fixed;
     else
       target = filename_w;
-    result = _wopen(target, oflag, pmode);
+    errno = _wsopen_s(&result, target, oflag, _SH_DENYNO, pmode);
     curlx_unicodefree(filename_w);
   }
   else
@@ -255,7 +257,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     target = fixed;
   else
     target = filename;
-  result = _open(target, oflag, pmode);
+  errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
 #endif
 
   (free)(fixed);
@@ -276,7 +278,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
       target = fixed;
     else
       target = filename_w;
-    result = _wfopen(target, mode_w);
+    errno = _wfopen_s(&result, target, mode_w);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -288,13 +290,17 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = fopen(target, mode);
+  errno = fopen_s(&result, target, mode);
 #endif
 
   (free)(fixed);
   return result;
 }
+
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR < 5)
+_CRTIMP errno_t __cdecl freopen_s(FILE **file, const char *filename,
+                                  const char *mode, FILE *stream);
+#endif
 
 FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
 {
@@ -310,7 +316,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
       target = fixed;
     else
       target = filename_w;
-    result = _wfreopen(target, mode_w, fp);
+    errno = _wfreopen_s(&result, target, mode_w, fp);
   }
   else
     /* !checksrc! disable ERRNOVAR 1 */
@@ -322,8 +328,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
     target = fixed;
   else
     target = filename;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  result = freopen(target, mode, fp);
+  errno = freopen_s(&result, target, mode, fp);
 #endif
 
   (free)(fixed);
