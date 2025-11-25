@@ -90,8 +90,6 @@ static void ratelimit_update(struct Curl_rlimit *r,
 
   elapsed_us = curlx_timediff_us(ts, r->ts);
   if(elapsed_us < 0) { /* not going back in time */
-    curl_mfprintf(stderr, "rlimit: neg elapsed time %" FMT_TIMEDIFF_T "us\n",
-                  elapsed_us);
     DEBUGASSERT(0);
     return;
   }
