@@ -111,6 +111,8 @@ if test "x$OPT_GNUTLS" != xno; then
         [
           LIBS="$CLEANLIBS"
           CPPFLAGS="$CLEANCPPFLAGS"
+          LDFLAGS="$CLEANLDFLAGS"
+          LDFLAGSPC="$CLEANLDFLAGSPC"
         ])
 
       if test "x$USE_GNUTLS" = "xyes"; then
