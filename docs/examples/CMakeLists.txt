@@ -41,21 +41,13 @@ foreach(_target IN LISTS COMPLICATED_MAY_BUILD check_PROGRAMS _all)  # keep 'COM
   set(_more_libs "")
   set(_target_name "curl-example-${_target}")
   if(_target STREQUAL "all")
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
-      add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_all_src})
-      if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
-        # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
-        # warning LNK4006: main already defined in ....obj; second definition ignored
-        # warning LNK4221: This object file does not define any previously undefined public symbols,
-        #                  so it will not be used by any link operation that consumes this library
-        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-          set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006;-ignore:4221")
-        else()
-          set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_FLAGS "-ignore:4006 -ignore:4221")
-        endif()
-      endif()
-    else()
-      add_library(${_target_name} STATIC EXCLUDE_FROM_ALL ${_all_src})
+    add_library(${_target_name} OBJECT EXCLUDE_FROM_ALL ${_all_src})
+    if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
+      # CMake generates a static library for the OBJECT target. Silence these 'lib.exe' warnings:
+      # warning LNK4006: main already defined in ....obj; second definition ignored
+      # warning LNK4221: This object file does not define any previously undefined public symbols,
+      #                  so it will not be used by any link operation that consumes this library
+      set_target_properties(${_target_name} PROPERTIES STATIC_LIBRARY_OPTIONS "-ignore:4006;-ignore:4221")
     endif()
     if(_with_deps)
       set(_more_libs ${CURL_LIBS})  # If any examples required dependencies, link them
