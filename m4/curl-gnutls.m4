@@ -172,15 +172,15 @@ if test "$GNUTLS_ENABLED" = "1"; then
         fi
 
         AC_CHECK_LIB(nettle, nettle_MD5Init,
-          [
-            USE_GNUTLS_NETTLE=1
-          ],
-          [
-            LIBS="$CLEANLIBS"
-            CPPFLAGS="$CLEANCPPFLAGS"
-            LDFLAGS="$CLEANLDFLAGS"
-            LDFLAGSPC="$CLEANLDFLAGSPC"
-          ])
+        [
+          USE_GNUTLS_NETTLE=1
+        ],
+        [
+          LIBS="$CLEANLIBS"
+          CPPFLAGS="$CLEANCPPFLAGS"
+          LDFLAGS="$CLEANLDFLAGS"
+          LDFLAGSPC="$CLEANLDFLAGSPC"
+        ])
 
         if test "$USE_GNUTLS_NETTLE" = "1"; then
           if test -z "$version"; then
