@@ -187,7 +187,6 @@ if test "$GNUTLS_ENABLED" = "1"; then
             version="unknown"
           fi
           AC_MSG_NOTICE([detected nettle version $version])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE nettle"
         fi
       fi
     fi
@@ -196,6 +195,10 @@ if test "$GNUTLS_ENABLED" = "1"; then
     fi
   else
     LIBS="-lnettle $LIBS"
+  fi
+
+  if test "$USE_GNUTLS_NETTLE" = "1"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE nettle"
   fi
 
   dnl ---
