@@ -43,20 +43,6 @@ that is apart from the source tree.
 For the full list of CMake build configuration variables see
 [the corresponding section](#cmake-build-options).
 
-### Fallback for CMake before version 3.13
-
-CMake before version 3.13 does not support the `-B` option. In that case,
-you must create the build directory yourself, `cd` to it and run `cmake`
-from there:
-
-    $ mkdir ../curl-build
-    $ cd ../curl-build
-    $ cmake ../curl
-
-If you want to build in the source tree, it is enough to do this:
-
-    $ cmake .
-
 ### Build system generator selection
 
 You can override CMake's default by using `-G <generator-name>`. For example
