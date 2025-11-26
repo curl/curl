@@ -55,7 +55,7 @@ struct cf_hc_baller {
   CURLcode result;
   struct curltime started;
   int reply_ms;
-  unsigned char transport;
+  uint8_t transport;
   enum alpnid alpn_id;
   BIT(shutdown);
 };
@@ -124,7 +124,7 @@ struct cf_hc_ctx {
 
 static void cf_hc_baller_assign(struct cf_hc_baller *b,
                                 enum alpnid alpn_id,
-                                unsigned char def_transport)
+                                uint8_t def_transport)
 {
   b->alpn_id = alpn_id;
   b->transport = def_transport;
@@ -148,7 +148,7 @@ static void cf_hc_baller_assign(struct cf_hc_baller *b,
 static void cf_hc_baller_init(struct cf_hc_baller *b,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              int transport)
+                              uint8_t transport)
 {
   struct Curl_cfilter *save = cf->next;
 
@@ -581,7 +581,7 @@ struct Curl_cftype Curl_cft_http_connect = {
 static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              enum alpnid *alpnids, size_t alpn_count,
-                             unsigned char def_transport)
+                             uint8_t def_transport)
 {
   struct Curl_cfilter *cf = NULL;
   struct cf_hc_ctx *ctx;
@@ -626,7 +626,7 @@ static CURLcode cf_http_connect_add(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex,
                                     enum alpnid *alpn_ids, size_t alpn_count,
-                                    unsigned char def_transport)
+                                    uint8_t def_transport)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;

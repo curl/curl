@@ -35,6 +35,9 @@ connection done with this **curl** handle.
 If the connection was done using QUIC, the port number is a UDP port number,
 otherwise it is a TCP port number.
 
+If no connection was established or if the protocol does not use ports, -1
+is returned.
+
 # %PROTOCOLS%
 
 # EXAMPLE

@@ -2171,7 +2171,6 @@ static CURLcode parse_proxy(struct Curl_easy *data,
                             long proxytype)
 {
   char *portptr = NULL;
-  int port = -1;
   char *proxyuser = NULL;
   char *proxypasswd = NULL;
   char *host = NULL;
@@ -2293,24 +2292,23 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   if(portptr) {
     curl_off_t num;
     const char *p = portptr;
-    if(!curlx_str_number(&p, &num, 0xffff))
-      port = (int)num;
+    if(!curlx_str_number(&p, &num, UINT16_MAX))
+      proxyinfo->port = (uint16_t)num;
+    /* Should we not error out when the port number is invalid? */
     free(portptr);
   }
   else {
     if(data->set.proxyport)
       /* None given in the proxy string, then get the default one if it is
          given */
-      port = (int)data->set.proxyport;
+      proxyinfo->port = data->set.proxyport;
     else {
       if(IS_HTTPS_PROXY(proxytype))
-        port = CURL_DEFAULT_HTTPS_PROXY_PORT;
+        proxyinfo->port = CURL_DEFAULT_HTTPS_PROXY_PORT;
       else
-        port = CURL_DEFAULT_PROXY_PORT;
+        proxyinfo->port = CURL_DEFAULT_PROXY_PORT;
     }
   }
-  if(port >= 0)
-    proxyinfo->port = port;
 
   /* now, clone the proxy hostname */
   uc = curl_url_get(uhp, CURLUPART_HOST, &host, CURLU_URLDECODE);

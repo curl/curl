@@ -81,8 +81,6 @@ void Curl_initinfo(struct Curl_easy *data)
   info->wouldredirect = NULL;
 
   memset(&info->primary, 0, sizeof(info->primary));
-  info->primary.remote_port = -1;
-  info->primary.local_port = -1;
   info->retry_after = 0;
 
   info->conn_scheme = 0;
@@ -304,11 +302,17 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_PRIMARY_PORT:
     /* Return the (remote) port of the most recent (primary) connection */
-    *param_longp = data->info.primary.remote_port;
+    if(CUR_IP_QUAD_HAS_PORTS(&data->info.primary))
+      *param_longp = data->info.primary.remote_port;
+    else
+      *param_longp = -1;
     break;
   case CURLINFO_LOCAL_PORT:
     /* Return the local port of the most recent (primary) connection */
-    *param_longp = data->info.primary.local_port;
+    if(CUR_IP_QUAD_HAS_PORTS(&data->info.primary))
+      *param_longp = data->info.primary.local_port;
+    else
+      *param_longp = -1;
     break;
   case CURLINFO_PROXY_ERROR:
     *param_longp = (long)data->info.pxcode;

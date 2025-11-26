@@ -303,7 +303,7 @@ tcpkeepalive(struct Curl_cfilter *cf,
  */
 static CURLcode sock_assign_addr(struct Curl_sockaddr_ex *dest,
                                  const struct Curl_addrinfo *ai,
-                                 int transport)
+                                 uint8_t transport)
 {
   /*
    * The Curl_sockaddr_ex structure is basically libcurl's external API
@@ -404,7 +404,7 @@ static CURLcode socket_open(struct Curl_easy *data,
 CURLcode Curl_socket_open(struct Curl_easy *data,
                           const struct Curl_addrinfo *ai,
                           struct Curl_sockaddr_ex *addr,
-                          int transport,
+                          uint8_t transport,
                           curl_socket_t *sockfd)
 {
   struct Curl_sockaddr_ex dummy;
@@ -909,7 +909,7 @@ static CURLcode socket_connect_result(struct Curl_easy *data,
 }
 
 struct cf_socket_ctx {
-  int transport;
+  uint8_t transport;
   struct Curl_sockaddr_ex addr;      /* address to connect to */
   curl_socket_t sock;                /* current attempt socket */
   struct ip_quadruple ip;            /* The IP quadruple 2x(addr+port) */
@@ -936,7 +936,7 @@ struct cf_socket_ctx {
 
 static CURLcode cf_socket_ctx_init(struct cf_socket_ctx *ctx,
                                    const struct Curl_addrinfo *ai,
-                                   int transport)
+                                   uint8_t transport)
 {
   CURLcode result;
 
@@ -1035,7 +1035,7 @@ static void set_local_ip(struct Curl_cfilter *cf,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   ctx->ip.local_ip[0] = 0;
-  ctx->ip.local_port = -1;
+  ctx->ip.local_port = 0;
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&
@@ -1069,6 +1069,7 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
   /* store remote address and port used in this connection attempt */
+  ctx->ip.transport = ctx->transport;
   if(!Curl_addr2string(&ctx->addr.curl_sa_addr,
                        (curl_socklen_t)ctx->addr.addrlen,
                        ctx->ip.remote_ip, &ctx->ip.remote_port)) {
@@ -1743,7 +1744,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
                             const struct Curl_addrinfo *ai,
-                            int transport)
+                            uint8_t transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1910,7 +1911,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
                             struct Curl_easy *data,
                             struct connectdata *conn,
                             const struct Curl_addrinfo *ai,
-                            int transport)
+                            uint8_t transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;
@@ -1964,7 +1965,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              const struct Curl_addrinfo *ai,
-                             int transport)
+                             uint8_t transport)
 {
   struct cf_socket_ctx *ctx = NULL;
   struct Curl_cfilter *cf = NULL;

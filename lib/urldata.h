@@ -528,7 +528,7 @@ struct Curl_handler {
   CURLcode (*follow)(struct Curl_easy *data, const char *newurl,
                      followtype type);
 
-  int defport;            /* Default port. */
+  uint16_t defport;       /* Default port. */
   curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
                              specific protocol bit */
   curl_prot_t family;     /* single bit for protocol family; basically the
@@ -576,25 +576,31 @@ struct Curl_handler {
 #define CONNRESULT_NONE 0                /* No extra information. */
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
 
-struct ip_quadruple {
-  char remote_ip[MAX_IPADR_LEN];
-  char local_ip[MAX_IPADR_LEN];
-  int remote_port;
-  int local_port;
-};
-
-struct proxy_info {
-  struct hostname host;
-  int port;
-  unsigned char proxytype; /* what kind of proxy that is in use */
-  char *user;    /* proxy username string, allocated */
-  char *passwd;  /* proxy password string, allocated */
-};
-
+#define TRNSPRT_NONE 0
 #define TRNSPRT_TCP 3
 #define TRNSPRT_UDP 4
 #define TRNSPRT_QUIC 5
 #define TRNSPRT_UNIX 6
+
+struct ip_quadruple {
+  char remote_ip[MAX_IPADR_LEN];
+  char local_ip[MAX_IPADR_LEN];
+  uint16_t remote_port;
+  uint16_t local_port;
+  uint8_t transport;
+};
+
+#define CUR_IP_QUAD_HAS_PORTS(x)  (((x)->transport == TRNSPRT_TCP) || \
+                                   ((x)->transport == TRNSPRT_UDP) || \
+                                   ((x)->transport == TRNSPRT_QUIC))
+
+struct proxy_info {
+  struct hostname host;
+  uint16_t port;
+  unsigned char proxytype; /* what kind of proxy that is in use */
+  char *user;    /* proxy username string, allocated */
+  char *passwd;  /* proxy password string, allocated */
+};
 
 /*
  * The connectdata struct contains all fields and variables that should be
@@ -1364,7 +1370,7 @@ struct UserDefined {
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
-  unsigned short proxyport; /* If non-zero, use this port number by
+  uint16_t proxyport;       /* If non-zero, use this port number by
                                default. If the proxy string features a
                                ":[port]" that one will override this. */
   unsigned char proxytype; /* what kind of proxy */
