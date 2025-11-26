@@ -1695,13 +1695,19 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
     }
     return CURLUE_MALFORMED_INPUT;
   }
+  else {
+    /* if the new URL is absolute replace the existing with the new. */
+    if(Curl_is_absolute_url(url, NULL, 0,
+                            flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME)))
+      return parseurl_and_replace(url, u, flags);
 
-  /* if the new thing is absolute or the old one is not (we could not get an
-   * absolute URL in 'oldurl'), then replace the existing with the new. */
-  if(Curl_is_absolute_url(url, NULL, 0,
-                          flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME))
-     || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
-    return parseurl_and_replace(url, u, flags);
+    /* if the old URL is incomplete (we cannot get an absolute URL in
+       'oldurl'), replace the existing with the new */
+    uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
+    if(uc == CURLUE_OUT_OF_MEMORY)
+      return uc;
+    else if(uc)
+      return parseurl_and_replace(url, u, flags);
   }
   DEBUGASSERT(oldurl); /* it is set here */
   /* apply the relative part to create a new URL */
