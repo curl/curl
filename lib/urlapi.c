@@ -1687,22 +1687,31 @@ static CURLUcode set_url(CURLU *u, const char *url, size_t part_size,
   if(!part_size) {
     /* a blank URL is not a valid URL unless we already have a complete one
        and this is a redirect */
-    if(!curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+    uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
+    if(!uc) {
       /* success, meaning the "" is a fine relative URL, but nothing
          changes */
       free(oldurl);
       return CURLUE_OK;
     }
+    if(uc == CURLUE_OUT_OF_MEMORY)
+      return uc;
     return CURLUE_MALFORMED_INPUT;
   }
 
-  /* if the new thing is absolute or the old one is not (we could not get an
-   * absolute URL in 'oldurl'), then replace the existing with the new. */
+  /* if the new URL is absolute replace the existing with the new. */
   if(Curl_is_absolute_url(url, NULL, 0,
-                          flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME))
-     || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
+                          flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME)))
     return parseurl_and_replace(url, u, flags);
-  }
+
+  /* if the old URL is incomplete (we cannot get an absolute URL in
+     'oldurl'), replace the existing with the new */
+  uc = curl_url_get(u, CURLUPART_URL, &oldurl, flags);
+  if(uc == CURLUE_OUT_OF_MEMORY)
+    return uc;
+  else if(uc)
+    return parseurl_and_replace(url, u, flags);
+
   DEBUGASSERT(oldurl); /* it is set here */
   /* apply the relative part to create a new URL */
   uc = redirect_url(oldurl, url, u, flags);
