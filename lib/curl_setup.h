@@ -571,20 +571,6 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - 1)
 
-#if (SIZEOF_CURL_OFF_T != 8)
-#  error "curl_off_t must be exactly 64 bits"
-#else
-  typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
-  typedef CURL_TYPEOF_CURL_OFF_T  curl_int64_t;
-#  ifndef CURL_SUFFIX_CURL_OFF_TU
-#    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
-#  endif
-#  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
-#  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-#  define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-#  define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
-#endif
-
 #define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
