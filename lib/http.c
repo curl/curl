@@ -1282,7 +1282,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
                      CURLU_ALLOW_SPACE |
                      (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
   if(uc) {
-    if(type != FOLLOW_FAKE) {
+    if((uc == CURLUE_OUT_OF_MEMORY) || (type != FOLLOW_FAKE)) {
       failf(data, "The redirect target URL could not be parsed: %s",
             curl_url_strerror(uc));
       return Curl_uc_to_curlcode(uc);
