@@ -28,12 +28,6 @@ RTMP in curl is powered by the 3rd party library librtmp.
 
 Support for RTMP in libcurl gets removed in April 2026.
 
-## CMake 3.17 and earlier
-
-We remove support for CMake <3.18 in April 2026.
-
-CMake 3.18 was released on 2020-07-15.
-
 ## TLS-SRP Authentication
 
 Transport Layer Security Secure Remote Password is a TLS feature that does not
@@ -78,3 +72,4 @@ After curl 8.19.0 NTLM support becomes opt-in.
 - OpenSSL 1.1.1 and older (removed in 8.18.0)
 - Support for Windows XP (removed in 8.19.0)
 - OpenSSL-QUIC (removed in 8.19.0)
+- CMake 3.17 and older (removed in 8.21.0)
