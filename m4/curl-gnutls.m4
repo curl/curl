@@ -100,20 +100,20 @@ if test "x$OPT_GNUTLS" != xno; then
 
       dnl this function is selected since it was introduced in 3.1.10
       AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
-        [
+      [
         AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
         GNUTLS_ENABLED=1
         USE_GNUTLS="yes"
         ssl_msg="GnuTLS"
         QUIC_ENABLED=yes
         test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ],
-        [
-          LIBS="$CLEANLIBS"
-          CPPFLAGS="$CLEANCPPFLAGS"
-          LDFLAGS="$CLEANLDFLAGS"
-          LDFLAGSPC="$CLEANLDFLAGSPC"
-        ])
+      ],
+      [
+        LIBS="$CLEANLIBS"
+        CPPFLAGS="$CLEANCPPFLAGS"
+        LDFLAGS="$CLEANLDFLAGS"
+        LDFLAGSPC="$CLEANLDFLAGSPC"
+      ])
 
       if test "x$USE_GNUTLS" = "xyes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
