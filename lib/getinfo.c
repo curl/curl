@@ -81,8 +81,6 @@ void Curl_initinfo(struct Curl_easy *data)
   info->wouldredirect = NULL;
 
   memset(&info->primary, 0, sizeof(info->primary));
-  info->primary.remote_port = -1;
-  info->primary.local_port = -1;
   info->retry_after = 0;
 
   info->conn_scheme = 0;

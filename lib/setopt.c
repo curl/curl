@@ -1001,9 +1001,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXYPORT:
-    if((arg < 0) || (arg > 65535))
+    if((arg < 0) || (arg > UINT16_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->proxyport = (unsigned short)arg;
+    s->proxyport = (uint16_t)arg;
     break;
 
   case CURLOPT_PROXYAUTH:

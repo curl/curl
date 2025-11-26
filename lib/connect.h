@@ -74,7 +74,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, int *port);
+                      char *addr, uint16_t *port);
 
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'

@@ -1035,7 +1035,7 @@ static void set_local_ip(struct Curl_cfilter *cf,
 {
   struct cf_socket_ctx *ctx = cf->ctx;
   ctx->ip.local_ip[0] = 0;
-  ctx->ip.local_port = -1;
+  ctx->ip.local_port = 0;
 
 #ifdef HAVE_GETSOCKNAME
   if((ctx->sock != CURL_SOCKET_BAD) &&

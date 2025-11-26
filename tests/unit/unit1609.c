@@ -143,7 +143,7 @@ static CURLcode test_unit1609(const char *arg)
     addr = dns ? dns->addr : NULL;
 
     for(j = 0; j < addressnum; ++j) {
-      int port = 0;
+      uint16_t port = 0;
       char ipaddress[MAX_IPADR_LEN] = {0};
 
       if(!addr && !tests[i].address[j])
