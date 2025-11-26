@@ -104,7 +104,7 @@ static void add_download(const char *url, int num, CURLM *multi)
   fprintf(stderr, "Added download %s -> %s\n", url, filename);
 }
 
-static void check_multi_info(struct curl_context *context)
+static void check_multi_info(struct datauv *uv)
 {
   char *done_url;
   CURLMsg *message;
@@ -112,7 +112,7 @@ static void check_multi_info(struct curl_context *context)
   CURL *curl;
   FILE *file;
 
-  while((message = curl_multi_info_read(context->uv->multi, &pending))) {
+  while((message = curl_multi_info_read(uv->multi, &pending))) {
     switch(message->msg) {
     case CURLMSG_DONE:
       /* Do not use message data after calling curl_multi_remove_handle() and
@@ -126,7 +126,7 @@ static void check_multi_info(struct curl_context *context)
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &file);
       printf("%s DONE\n", done_url);
 
-      curl_multi_remove_handle(context->uv->multi, curl);
+      curl_multi_remove_handle(uv->multi, curl);
       curl_easy_cleanup(curl);
       if(file) {
         fclose(file);
@@ -154,7 +154,7 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 
   curl_multi_socket_action(context->uv->multi, context->sockfd, flags,
                            &running_handles);
-  check_multi_info(context);
+  check_multi_info(context->uv);
 }
 
 /* callback from libuv when timeout expires */
@@ -167,13 +167,8 @@ static void on_uv_timeout(uv_timer_t *req)
   curl_multi_socket_action(uv->multi, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
 
-  /* We do not have a curl_context here, so we need to check messages
-     differently. Create a temporary context just for the check. */
-  if(running_handles) {
-    struct curl_context temp_context;
-    temp_context.uv = uv;
-    check_multi_info(&temp_context);
-  }
+  if(running_handles)
+    check_multi_info(uv);
 }
 
 /* callback from libcurl to update the timeout expiry */
