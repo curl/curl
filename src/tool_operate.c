@@ -2258,7 +2258,7 @@ CURLcode operate(int argc, argv_item_t argv[])
     if(found_curlrc) {
       /* After parse_args so notef knows the verbosity */
       notef("Read config file from '%s'", curlrc_path);
-      free(curlrc_path);
+      curlx_free(curlrc_path);
     }
     if(res) {
       result = CURLE_OK;
