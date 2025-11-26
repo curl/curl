@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16.2 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 option(TEST_CPP "Test C++" OFF)
@@ -70,9 +70,6 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "add_subdirectory")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
   add_subdirectory(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
-  if(CMAKE_VERSION VERSION_LESS 3.14)
-    message(FATAL_ERROR "This test requires CMake 3.14 or upper")
-  endif()
   include(FetchContent)
   option(FROM_GIT_REPO "Git URL" "https://github.com/curl/curl.git")
   option(FROM_GIT_TAG "Git tag" "master")
@@ -82,7 +79,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
     GIT_SHALLOW)
   set(BUILD_SHARED_LIBS ON CACHE BOOL "")
   set(BUILD_STATIC_LIBS ON CACHE BOOL "")
-  FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
+  FetchContent_MakeAvailable(curl)
 elseif(TEST_INTEGRATION_MODE STREQUAL "ExternalProject")
   include(ExternalProject)
   set(_curl_install_dir "${CMAKE_BINARY_DIR}/curl-external-install")
