@@ -1272,8 +1272,8 @@ static CURLcode h3_quic_recv(void *reader_ctx,
       }
       else {
         CURL_TRC_CF(x->data, x->cf, "[%" PRId64 "] h3_quic_recv -> RESET, "
-                    "rv=%d, app_err=%" FMT_PRIu64,
-                    x->s->id, rv, (curl_uint64_t)app_error_code);
+                    "rv=%d, app_err=%" PRIu64,
+                    x->s->id, rv, app_error_code);
         if(app_error_code != NGHTTP3_H3_NO_ERROR)
           x->s->reset = TRUE;
       }
@@ -2246,8 +2246,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
                   "assume connection is dead.");
       goto out;
     }
-    CURL_TRC_CF(data, cf, "negotiated idle timeout: %" FMT_PRIu64 "ms",
-                (curl_uint64_t)idle_ms);
+    CURL_TRC_CF(data, cf, "negotiated idle timeout: %" PRIu64 "ms", idle_ms);
     idletime = curlx_timediff_ms(curlx_now(), ctx->q.last_io);
     if(idle_ms && idletime > 0 && (uint64_t)idletime > idle_ms)
       goto out;
