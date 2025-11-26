@@ -50,7 +50,7 @@ we use a few "build tools" and we make sure that we remain functional with
 these versions:
 
 - clang-tidy     17.0.0 (2023-09-19), recommended: 19.1.0 or later (2024-09-17)
-- cmake          3.7 (2016-11-11)
+- cmake          3.16.2 (2019-12-19)
 - GNU autoconf   2.59 (2003-11-06)
 - GNU automake   1.7 (2002-09-25)
 - GNU libtool    1.4.2 (2001-09-11)
