@@ -258,7 +258,7 @@ jobs:
       MAKEFLAGS: ${{ contains(matrix.image, 'macos') && '-j 4' || '-j 5' }}
       MATRIX_IMAGE: '${{ matrix.image }}'
       TESTOPTS: ${{ contains(matrix.image, 'macos') && '-D_CURL_PREFILL=ON' || '' }} ${{ contains(matrix.image, 'windows') && '-DCMAKE_UNITY_BUILD_BATCH_SIZE=30' || '' }}
-      OLD_CMAKE_VERSION: 3.11.4
+      OLD_CMAKE_VERSION: 3.16.2
     strategy:
       fail-fast: false
       matrix:
