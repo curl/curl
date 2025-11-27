@@ -4132,7 +4132,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
   int rv = 1;
 # ifndef HAVE_BORINGSSL_LIKE
   char *inner = NULL;
-  unsigned char *rcs = NULL;
+  uint8_t *rcs = NULL;
   char *outer = NULL;
 # else
   const char *inner = NULL;
@@ -4156,7 +4156,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
     char *b64str = NULL;
     size_t blen = 0;
 
-    result = curlx_base64_encode((const char *)rcs, rcl, &b64str, &blen);
+    result = curlx_base64_encode(rcs, rcl, &b64str, &blen);
     if(!result && b64str) {
       infof(data, "ECH: retry_configs %s", b64str);
       free(b64str);
