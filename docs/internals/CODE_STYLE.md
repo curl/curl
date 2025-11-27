@@ -334,14 +334,31 @@ This is the full list of functions generally banned.
     _access
     _mbscat
     _mbsncat
+    _open
     _tcscat
     _tcsdup
     _tcsncat
+    _tcsncpy
     _waccess
     _wcscat
     _wcsdup
     _wcsncat
+    _wfopen
+    _wfreopen
+    _wopen
+    accept
+    accept4
     access
+    aprintf
+    atoi
+    atol
+    fclose
+    fdopen
+    fopen
+    fprintf
+    freeaddrinfo
+    freopen
+    getaddrinfo
     gets
     gmtime
     LoadLibrary
@@ -351,9 +368,19 @@ This is the full list of functions generally banned.
     LoadLibraryExW
     LoadLibraryW
     localtime
+    mbstowcs
+    msnprintf
+    mvsnprintf
+    open
+    printf
+    recv
+    send
     snprintf
+    socket
+    socketpair
     sprintf
     sscanf
+    stat
     strcat
     strerror
     strncat
@@ -362,6 +389,15 @@ This is the full list of functions generally banned.
     strtok_r
     strtol
     strtoul
+    vaprintf
+    vfprintf
+    vprintf
     vsnprintf
     vsprintf
+    wcscpy
     wcsdup
+    wcsncpy
+    wcstombs
+    WSASocket
+    WSASocketA
+    WSASocketW
