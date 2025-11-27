@@ -597,7 +597,8 @@ static int ossl_bio_cf_out_write(BIO *bio, const char *buf, int blen)
   if(blen < 0)
     return 0;
 
-  result = Curl_conn_cf_send(cf->next, data, buf, (size_t)blen, FALSE,
+  result = Curl_conn_cf_send(cf->next, data,
+                             (const uint8_t *)buf, (size_t)blen, FALSE,
                              &nwritten);
   CURL_TRC_CF(data, cf, "ossl_bio_cf_out_write(len=%d) -> %d, %zu",
               blen, result, nwritten);

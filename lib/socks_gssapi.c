@@ -211,7 +211,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       us_length = htons((unsigned short)gss_send_token.length);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
-      code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4,
+      code = Curl_conn_cf_send(cf->next, data, socksreq, 4,
                                FALSE, &nwritten);
       if(code || (nwritten != 4)) {
         failf(data, "Failed to send GSS-API authentication request.");
@@ -222,7 +222,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       }
 
       code = Curl_conn_cf_send(cf->next, data,
-                               (char *)gss_send_token.value,
+                               gss_send_token.value,
                                gss_send_token.length, FALSE, &nwritten);
       if(code || (gss_send_token.length != nwritten)) {
         failf(data, "Failed to send GSS-API authentication token.");
@@ -409,8 +409,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
-  code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
-                           &nwritten);
+  code = Curl_conn_cf_send(cf->next, data, socksreq, 4, FALSE, &nwritten);
   if(code || (nwritten != 4)) {
     failf(data, "Failed to send GSS-API encryption request.");
     gss_release_buffer(&gss_status, &gss_w_token);
@@ -420,8 +419,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   if(data->set.socks5_gssapi_nec) {
     memcpy(socksreq, &gss_enc, 1);
-    code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
-                             &nwritten);
+    code = Curl_conn_cf_send(cf->next, data, socksreq, 1, FALSE, &nwritten);
     if(code || (nwritten != 1)) {
       failf(data, "Failed to send GSS-API encryption type.");
       Curl_gss_delete_sec_context(&gss_status, &gss_context, NULL);
@@ -429,7 +427,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
   }
   else {
-    code = Curl_conn_cf_send(cf->next, data, (char *)gss_w_token.value,
+    code = Curl_conn_cf_send(cf->next, data, gss_w_token.value,
                              gss_w_token.length, FALSE, &nwritten);
     if(code || (gss_w_token.length != nwritten)) {
       failf(data, "Failed to send GSS-API encryption type.");

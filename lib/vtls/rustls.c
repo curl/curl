@@ -133,7 +133,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   size_t nwritten;
 
   result = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
-                             (const char *)buf, len, FALSE, &nwritten);
+                             buf, len, FALSE, &nwritten);
   if(result) {
     nwritten = 0;
     if(CURLE_AGAIN == result)

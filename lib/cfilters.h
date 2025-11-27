@@ -89,7 +89,7 @@ typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
 
 typedef CURLcode Curl_cft_send(struct Curl_cfilter *cf,
                                struct Curl_easy *data, /* transfer */
-                               const void *buf,        /* data to write */
+                               const uint8_t *buf,     /* data to write */
                                size_t len,             /* amount to write */
                                bool eos,               /* last chunk */
                                size_t *pnwritten);     /* how much sent */
@@ -250,7 +250,7 @@ CURLcode Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
                                   const struct Curl_easy *data);
 CURLcode Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
+                          const uint8_t *buf, size_t len, bool eos,
                           size_t *pnwritten);
 CURLcode Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, size_t *pnread);
@@ -323,7 +323,7 @@ CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               bool *done);
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 CURLcode Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                           const void *buf, size_t len, bool eos,
+                           const uint8_t *buf, size_t len, bool eos,
                            size_t *pnwritten);
 CURLcode Curl_conn_cf_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                            char *buf, size_t len, size_t *pnread);

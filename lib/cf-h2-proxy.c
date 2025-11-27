@@ -225,7 +225,7 @@ static void drain_tunnel(struct Curl_cfilter *cf,
 }
 
 static CURLcode proxy_h2_nw_out_writer(void *writer_ctx,
-                                       const unsigned char *buf, size_t buflen,
+                                       const uint8_t *buf, size_t buflen,
                                        size_t *pnwritten)
 {
   struct Curl_cfilter *cf = writer_ctx;
@@ -233,7 +233,7 @@ static CURLcode proxy_h2_nw_out_writer(void *writer_ctx,
   if(cf) {
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     CURLcode result;
-    result = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen,
+    result = Curl_conn_cf_send(cf->next, data, buf, buflen,
                                FALSE, pnwritten);
     CURL_TRC_CF(data, cf, "[0] nw_out_writer(len=%zu) -> %d, %zu",
                 buflen, result, *pnwritten);
@@ -1356,7 +1356,7 @@ out:
 
 static CURLcode cf_h2_proxy_send(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 const void *buf, size_t len, bool eos,
+                                 const uint8_t *buf, size_t len, bool eos,
                                  size_t *pnwritten)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
