@@ -94,6 +94,7 @@ jobs:
     steps:
       - name: 'brew install'
         if: ${{ matrix.build.configure }}
+        timeout-minutes: 2
         run: |
           # shellcheck disable=SC2181,SC2034
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
@@ -350,6 +351,7 @@ jobs:
 
     steps:
       - name: 'brew install'
+        timeout-minutes: 2
         # Run this command with retries because of spurious failures seen
         # while running the tests, for example
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
