@@ -30,6 +30,7 @@
 
 #include "urldata.h"
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
+#include "easy_lock.h"
 
 #ifdef USE_BACKTRACE
 #include "backtrace.h"
@@ -65,6 +66,11 @@ static long memsize = 0;  /* set number of mallocs allowed */
 #ifdef USE_BACKTRACE
 static struct backtrace_state *btstate;
 #endif
+
+/* lock access to the debug log */
+static Curl_simple_lock debug_lock = CURL_SIMPLE_LOCK_INIT;
+#define memdebug_lock() Curl_simple_lock_lock(&debug_lock)
+#define memdebug_unlock() Curl_simple_lock_unlock(&debug_lock)
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
@@ -525,8 +531,11 @@ void curl_dbg_log(const char *format, ...)
   if(nchars > (int)sizeof(buf) - 1)
     nchars = (int)sizeof(buf) - 1;
 
-  if(nchars > 0)
+  if(nchars > 0) {
+    memdebug_lock();
     (fwrite)(buf, 1, (size_t)nchars, curl_dbg_logfile);
+    memdebug_unlock();
+  }
 }
 
 #endif /* CURLDEBUG */

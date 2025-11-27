@@ -90,9 +90,9 @@ static long          easy_init_flags;
 
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
-static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
-#define global_init_lock() curl_simple_lock_lock(&s_lock)
-#define global_init_unlock() curl_simple_lock_unlock(&s_lock)
+static Curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
+#define global_init_lock() Curl_simple_lock_lock(&s_lock)
+#define global_init_unlock() Curl_simple_lock_unlock(&s_lock)
 
 #else
 

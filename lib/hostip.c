@@ -304,7 +304,7 @@ void Curl_dnscache_clear(struct Curl_easy *data)
    return address that we can jump back to from inside a signal handler. This
    is not thread-safe stuff. */
 static sigjmp_buf curl_jmpenv;
-static curl_simple_lock curl_jmpenv_lock;
+static Curl_simple_lock curl_jmpenv_lock;
 #endif
 
 /* lookup address, returns entry if found and not stale */
@@ -1072,7 +1072,7 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
      This should be the last thing we do before calling Curl_resolv(),
      as otherwise we would have to worry about variables that get modified
      before we invoke Curl_resolv() (and thus use "volatile"). */
-  curl_simple_lock_lock(&curl_jmpenv_lock);
+  Curl_simple_lock_lock(&curl_jmpenv_lock);
 
   if(sigsetjmp(curl_jmpenv, 1)) {
     /* this is coming from a siglongjmp() after an alarm signal */
@@ -1142,7 +1142,7 @@ clean_up:
 #endif
 #endif /* HAVE_SIGACTION */
 
-  curl_simple_lock_unlock(&curl_jmpenv_lock);
+  Curl_simple_lock_unlock(&curl_jmpenv_lock);
 
   /* switch back the alarm() to either zero or to what it was before minus
      the time we spent until now! */
