@@ -304,6 +304,10 @@ while(<$fileh>) {
         $function = $3;
 
         if($function =~ /socket\(\) = (\d*)/) {
+            my $fd = $1;
+            if($filedes{$fd}) {
+                print "Suspicious: socket() returns same descriptor *again* ($fd). Last created at ".$getfile{$fd}."\n";
+            }
             $filedes{$1}=1;
             $getfile{$1}="$source:$linenum";
             $openfile++;
@@ -323,10 +327,15 @@ while(<$fileh>) {
             $openfile++;
         }
         elsif($function =~ /sclose\((\d*)\)/) {
-            if($filedes{$1} != 1) {
+            my $fd = $1;
+            if($filedes{$fd} != 1) {
                 print "Close without open: $line\n";
             }
             else {
+                if($trace) {
+                    printf("CLOSE($fd) at $source:$linenum, created at ".
+                           $getfile{$1}."\n");
+                }
                 $filedes{$1}=0; # closed now
                 $openfile--;
             }
