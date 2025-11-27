@@ -1816,7 +1816,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf,
         char *b64str = NULL;
         size_t blen = 0;
 
-        result = curlx_base64_encode((const char *)echConfigs, echConfigsLen,
+        result = curlx_base64_encode(echConfigs, echConfigsLen,
                                      &b64str, &blen);
         if(!result && b64str)
           infof(data, "ECH: (not yet) retry_configs %s", b64str);

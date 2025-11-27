@@ -790,7 +790,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                                  sha256sumdigest, CURL_SHA256_DIGEST_LENGTH);
 
     if(!encode)
-      encode = curlx_base64_encode((char *)sha256sumdigest,
+      encode = curlx_base64_encode(sha256sumdigest,
                                    CURL_SHA256_DIGEST_LENGTH,
                                    &cert_hash, &cert_hash_len);
     Curl_safefree(sha256sumdigest);

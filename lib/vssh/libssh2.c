@@ -602,7 +602,7 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data,
 
     /* The length of fingerprint is 32 bytes for SHA256.
      * See libssh2_hostkey_hash documentation. */
-    if(curlx_base64_encode(fingerprint, 32, &fingerprint_b64,
+    if(curlx_base64_encode((const uint8_t *)fingerprint, 32, &fingerprint_b64,
                            &fingerprint_b64_len) != CURLE_OK) {
       myssh_state(data, sshc, SSH_SESSION_FREE);
       return CURLE_PEER_FAILED_VERIFICATION;

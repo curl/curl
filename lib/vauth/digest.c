@@ -710,7 +710,7 @@ static CURLcode auth_create_digest_http_message(
     if(result)
       return result;
 
-    result = curlx_base64_encode(cnoncebuf, sizeof(cnoncebuf),
+    result = curlx_base64_encode((uint8_t *)cnoncebuf, sizeof(cnoncebuf),
                                  &cnonce, &cnonce_sz);
     if(result)
       return result;
