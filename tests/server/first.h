@@ -36,7 +36,6 @@
 
 #define WITHOUT_LIBCURL
 #define CURL_NO_OLDIES
-#define CURL_STANDARD_ALLOC
 
 #include "curl_setup.h"
 
