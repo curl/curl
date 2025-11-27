@@ -30,8 +30,7 @@
 #undef curlx_tcsdup
 
 #ifdef CURLDEBUG
-/*#warning "XMEMNEW defined DEBUG"*/
-#define XMEMNEW 9
+
 #define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
 #define curlx_calloc(nbelem,size) \
@@ -39,6 +38,7 @@
 #define curlx_realloc(ptr,size)   \
                               curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
 #define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+
 #ifdef _WIN32
 #ifdef UNICODE
 #define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
@@ -50,12 +50,6 @@
 #else /* !CURLDEBUG */
 
 #if !defined(CURL_STANDARD_ALLOC) || defined(CURL_STANDARD_LOCAL_OVERRIDE)
-#ifdef CURL_STANDARD_LOCAL_OVERRIDE
-/*#warning "XMEMNEW defined CURLALLOC LOCAL OVERRIDE"*/
-#else
-/*#warning "XMEMNEW defined CURLALLOC"*/
-#endif
-#define XMEMNEW 2
 #undef curlx_strdup
 #define curlx_strdup(ptr)         Curl_cstrdup(ptr)
 #define curlx_malloc(size)        Curl_cmalloc(size)
@@ -63,8 +57,6 @@
 #define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
 #define curlx_free(ptr)           Curl_cfree(ptr)
 #else /* CURL_STANDARD_ALLOC */
-/*#warning "XMEMNEW defined DEFAULT"*/
-#define XMEMNEW 1
 #ifdef _WIN32
 #define curlx_strdup(ptr)         _strdup(ptr)
 #else
