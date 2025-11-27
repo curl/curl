@@ -726,7 +726,7 @@ jobs:
           [ -d ~/venv ] || python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
-      - name: 'run pytest event based'
+      - name: 'run pytest (event based)'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         env:
           CURL_TEST_EVENT: 1
