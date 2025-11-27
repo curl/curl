@@ -65,5 +65,8 @@ via: 1.1 nghttpx
 "via":["1.1 nghttpx"]
 }
 </stdout>
+<limits>
+Maximum allocated: 1800000
+</limits>
 </verify>
 </testcase>
