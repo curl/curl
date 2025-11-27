@@ -101,5 +101,8 @@ Via: 3 nghttpx
 <stripfile>
 $_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
 </stripfile>
+<limits>
+Maximum allocated: 1800000
+</limits>
 </verify>
 </testcase>
