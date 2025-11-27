@@ -26,9 +26,9 @@
 #include "dynbuf.h"
 #include "../curl_printf.h"
 #ifdef BUILDING_LIBCURL
-#define CURL_STANDARD_LOCAL_OVERRIDE
+#define CURL_ALLOC_OVERRIDE_LIBCURL
 #include "../curl_memory.h"
-#undef CURL_STANDARD_LOCAL_OVERRIDE
+#undef CURL_ALLOC_OVERRIDE_LIBCURL
 #endif
 
 #define MIN_FIRST_ALLOC 32

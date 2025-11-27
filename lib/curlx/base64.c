@@ -31,9 +31,9 @@
 #include "base64.h"
 
 #ifdef BUILDING_LIBCURL
-#define CURL_STANDARD_LOCAL_OVERRIDE
+#define CURL_ALLOC_OVERRIDE_LIBCURL
 #include "../curl_memory.h"
-#undef CURL_STANDARD_LOCAL_OVERRIDE
+#undef CURL_ALLOC_OVERRIDE_LIBCURL
 #endif
 
 /* ---- Base64 Encoding/Decoding Table --- */

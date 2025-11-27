@@ -51,7 +51,7 @@
 
 #else /* !CURLDEBUG */
 
-#if !defined(CURL_STANDARD_ALLOC) || defined(CURL_STANDARD_LOCAL_OVERRIDE)
+#if !defined(CURL_STANDARD_ALLOC) || defined(CURL_ALLOC_OVERRIDE_LIBCURL)
 #define curlx_strdup(ptr)         Curl_cstrdup(ptr)
 #define curlx_malloc(size)        Curl_cmalloc(size)
 #define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
