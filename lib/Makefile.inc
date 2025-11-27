@@ -300,6 +300,7 @@ LIB_HFILES =         \
   curl_ldap.h        \
   curl_md4.h         \
   curl_md5.h         \
+  curl_memory.h      \
   curl_memrchr.h     \
   curl_ntlm_core.h   \
   curl_printf.h      \
@@ -307,7 +308,6 @@ LIB_HFILES =         \
   curl_rtmp.h        \
   curl_sasl.h        \
   curl_setup.h       \
-  curl_setup_mem.h   \
   curl_setup_once.h  \
   curl_sha256.h      \
   curl_sha512_256.h  \

@@ -1077,7 +1077,7 @@ CURL_EXTERN ALLOC_FUNC
 
 #endif /* CURLDEBUG */
 
-#include "curl_setup_mem.h"
+#include "curl_memory.h"
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \

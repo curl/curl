@@ -32,7 +32,7 @@
 
 #ifdef BUILDING_LIBCURL
 #define CURL_STANDARD_LOCAL_OVERRIDE
-#include "../curl_setup_mem.h"
+#include "../curl_memory.h"
 #undef CURL_STANDARD_LOCAL_OVERRIDE
 #endif
 
@@ -275,5 +275,5 @@ CURLcode curlx_base64url_encode(const uint8_t *inputbuff, size_t insize,
 
 #ifdef BUILDING_LIBCURL
 /* !checksrc! disable INCLUDEDUP 1 */
-#include "../curl_setup_mem.h"
+#include "../curl_memory.h"
 #endif

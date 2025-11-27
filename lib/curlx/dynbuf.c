@@ -27,7 +27,7 @@
 #include "../curl_printf.h"
 #ifdef BUILDING_LIBCURL
 #define CURL_STANDARD_LOCAL_OVERRIDE
-#include "../curl_setup_mem.h"
+#include "../curl_memory.h"
 #undef CURL_STANDARD_LOCAL_OVERRIDE
 #endif
 
@@ -301,5 +301,5 @@ CURLcode curlx_dyn_setlen(struct dynbuf *s, size_t set)
 
 #ifdef BUILDING_LIBCURL
 /* !checksrc! disable INCLUDEDUP 1 */
-#include "../curl_setup_mem.h"
+#include "../curl_memory.h"
 #endif
