@@ -931,19 +931,6 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
   return cf ? cf_get_remote_addr(cf, data) : NULL;
 }
 
-void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
-{
-  struct connectdata *conn = data->conn;
-  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
-    struct Curl_cfilter *cf = conn->cfilter[sockindex];
-    if(cf)
-      (void)Curl_conn_cf_cntrl(cf, data, TRUE,
-                               CF_CTRL_FORGET_SOCKET, 0, NULL);
-    fake_sclose(conn->sock[sockindex]);
-    conn->sock[sockindex] = CURL_SOCKET_BAD;
-  }
-}
-
 static CURLcode cf_cntrl_all(struct connectdata *conn,
                              struct Curl_easy *data,
                              bool ignore_result,
