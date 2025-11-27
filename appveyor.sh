@@ -46,12 +46,12 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
      [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2015' ] || \
      [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2017' ]; then
     (
-      cd /c
       curl --version || true
       curl --disable --fail --verbose --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
         --location 'https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-win64-x64.zip' --output bin.zip
       unzip -q bin.zip
       rm -f bin.zip
+      pwd
     )
     PATH="/c/cmake-3.18.4-win64-x64/bin:$PATH"
   fi
