@@ -320,7 +320,6 @@ if(!$ENV{"NGHTTPX"}) {
 if($ENV{"NGHTTPX"}) {
     my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
     my $nghttpx_version=join(' ', `$cmd`);
-    $nghttpx_version eq '' && die "nghttpx detected at '" . $ENV{"NGHTTPX"} . "', but -v fails";
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
