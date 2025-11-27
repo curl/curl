@@ -300,7 +300,6 @@ LIB_HFILES =         \
   curl_ldap.h        \
   curl_md4.h         \
   curl_md5.h         \
-  curl_memory.h      \
   curl_memrchr.h     \
   curl_ntlm_core.h   \
   curl_printf.h      \

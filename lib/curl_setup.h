@@ -1077,7 +1077,55 @@ CURL_EXTERN ALLOC_FUNC
 
 #endif /* CURLDEBUG */
 
-#include "curl_memory.h"
+/* Allocator macros */
+
+#ifdef CURLDEBUG
+
+#define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
+#define curlx_calloc(nbelem,size) \
+                              curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define curlx_realloc(ptr,size)   \
+                              curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
+
+#else /* !CURLDEBUG */
+
+#ifdef BUILDING_LIBCURL
+#define curlx_strdup(ptr)         Curl_cstrdup(ptr)
+#define curlx_malloc(size)        Curl_cmalloc(size)
+#define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
+#define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
+#define curlx_free(ptr)           Curl_cfree(ptr)
+#else /* !BUILDING_LIBCURL */
+#ifdef _WIN32
+#define curlx_strdup(ptr)         _strdup(ptr)
+#else
+#define curlx_strdup(ptr)         strdup(ptr)
+#endif
+#define curlx_malloc(size)        malloc(size)
+#define curlx_calloc(nbelem,size) calloc(nbelem, size)
+#define curlx_realloc(ptr,size)   realloc(ptr, size)
+#define curlx_free(ptr)           free(ptr)
+#endif /* BUILDING_LIBCURL */
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         Curl_wcsdup(ptr)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
+
+#endif /* CURLDEBUG */
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
