@@ -43,12 +43,20 @@ fi
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   # Install custom cmake version
-  if [ -n "${CMAKE_VERSION}" ]; then
+  if [ -n "${CMAKE_VERSION:-}" ]; then
+    cmake_ver=$(printf '%02d%02d' \
+      "$(echo "$CMAKE_VERSION" | cut -f1 -d.)" \
+      "$(echo "$CMAKE_VERSION" | cut -f2 -d.)")
+    if [ "${cmake_ver}" -ge '0320' ]; then
+      fn="cmake-${CMAKE_VERSION}-windows-x86_64.zip"
+    else
+      fn="cmake-${CMAKE_VERSION}-win64-x64"
+    fi
     curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-      --location "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-win64-x64.zip" --output bin.zip
+      --location "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.zip" --output bin.zip
     7z x bin.zip
     rm -f bin.zip
-    PATH="$PWD/cmake-${CMAKE_VERSION}-win64-x64/bin:$PATH"
+    PATH="$PWD/${fn}/bin:$PATH"
   fi
 
   # Set env CHKPREFILL to the value '_chkprefill' to compare feature detection
