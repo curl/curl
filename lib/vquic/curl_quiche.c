@@ -914,7 +914,7 @@ out:
 static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct h3_stream_ctx *stream,
-                                    const void *buf, size_t len, bool eos,
+                                    const uint8_t *buf, size_t len, bool eos,
                                     size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -959,7 +959,7 @@ static CURLcode cf_quiche_send_body(struct Curl_cfilter *cf,
 
 static CURLcode h3_open_stream(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               const char *buf, size_t blen, bool eos,
+                               const uint8_t *buf, size_t blen, bool eos,
                                size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
@@ -983,7 +983,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   DEBUGASSERT(stream);
 
-  result = Curl_h1_req_parse_read(&stream->h1, buf, blen, NULL,
+  result = Curl_h1_req_parse_read(&stream->h1, (const char *)buf, blen, NULL,
                                     !data->state.http_ignorecustom ?
                                     data->set.str[STRING_CUSTOMREQUEST] : NULL,
                                     0, pnwritten);
@@ -1079,7 +1079,7 @@ out:
 }
 
 static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                               const void *buf, size_t len, bool eos,
+                               const uint8_t *buf, size_t len, bool eos,
                                size_t *pnwritten)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;

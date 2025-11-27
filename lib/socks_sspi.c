@@ -88,7 +88,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   unsigned char socksreq[4]; /* room for GSS-API exchange header only */
   const char *service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
                         data->set.str[STRING_PROXY_SERVICE_NAME] : "rcmd";
-  char *etbuf;
+  uint8_t *etbuf;
   size_t etbuf_size;
 
   /*   GSS-API request looks like
@@ -201,8 +201,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       us_length = htons((unsigned short)sspi_send_token.cbBuffer);
       memcpy(socksreq + 2, &us_length, sizeof(short));
 
-      code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
-                               &written);
+      code = Curl_conn_cf_send(cf->next, data, socksreq, 4, FALSE, &written);
       if(code || (written != 4)) {
         failf(data, "Failed to send SSPI authentication request.");
         result = CURLE_COULDNT_CONNECT;
@@ -210,7 +209,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       }
 
       code = Curl_conn_cf_send(cf->next, data,
-                               (char *)sspi_send_token.pvBuffer,
+                               sspi_send_token.pvBuffer,
                                sspi_send_token.cbBuffer, FALSE, &written);
       if(code || (sspi_send_token.cbBuffer != written)) {
         failf(data, "Failed to send SSPI authentication token.");
@@ -433,8 +432,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     memcpy(socksreq + 2, &us_length, sizeof(short));
   }
 
-  code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 4, FALSE,
-                           &written);
+  code = Curl_conn_cf_send(cf->next, data, socksreq, 4, FALSE, &written);
   if(code || (written != 4)) {
     failf(data, "Failed to send SSPI encryption request.");
     result = CURLE_COULDNT_CONNECT;
@@ -443,8 +441,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   if(data->set.socks5_gssapi_nec) {
     memcpy(socksreq, &gss_enc, 1);
-    code = Curl_conn_cf_send(cf->next, data, (char *)socksreq, 1, FALSE,
-                             &written);
+    code = Curl_conn_cf_send(cf->next, data, socksreq, 1, FALSE, &written);
     if(code || (written != 1)) {
       failf(data, "Failed to send SSPI encryption type.");
       result = CURLE_COULDNT_CONNECT;

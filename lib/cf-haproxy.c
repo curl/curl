@@ -133,7 +133,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
     if(len > 0) {
       size_t nwritten;
       result = Curl_conn_cf_send(cf->next, data,
-                                 curlx_dyn_ptr(&ctx->data_out), len, FALSE,
+                                 curlx_dyn_uptr(&ctx->data_out), len, FALSE,
                                  &nwritten);
       if(result) {
         if(result != CURLE_AGAIN)

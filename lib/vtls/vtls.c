@@ -1477,7 +1477,7 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
 
 static CURLcode ssl_cf_send(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            const void *buf, size_t blen,
+                            const uint8_t *buf, size_t blen,
                             bool eos, size_t *pnwritten)
 {
   struct ssl_connect_data *connssl = cf->ctx;
@@ -1509,7 +1509,7 @@ static CURLcode ssl_cf_send(struct Curl_cfilter *cf,
     }
     else {
       *pnwritten = connssl->earlydata_skip;
-      buf = ((const char *)buf) + connssl->earlydata_skip;
+      buf = buf + connssl->earlydata_skip;
       blen -= connssl->earlydata_skip;
       connssl->earlydata_skip = 0;
     }

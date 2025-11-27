@@ -2258,7 +2258,7 @@ static CURLcode cf_h2_body_send(struct Curl_cfilter *cf,
 
 static CURLcode h2_submit(struct h2_stream_ctx **pstream,
                           struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len,
+                          const uint8_t *buf, size_t len,
                           bool eos, size_t *pnwritten)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
@@ -2281,7 +2281,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
   if(result)
     goto out;
 
-  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+  result = Curl_h1_req_parse_read(&stream->h1, (const char *)buf, len, NULL,
                                   !data->state.http_ignorecustom ?
                                   data->set.str[STRING_CUSTOMREQUEST] : NULL,
                                   0, &nwritten);
@@ -2391,7 +2391,7 @@ out:
 }
 
 static CURLcode cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                           const void *buf, size_t len, bool eos,
+                           const uint8_t *buf, size_t len, bool eos,
                            size_t *pnwritten)
 {
   struct cf_h2_ctx *ctx = cf->ctx;

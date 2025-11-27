@@ -1074,7 +1074,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* send initial handshake data which is now stored in output buffer */
   result = Curl_conn_cf_send(cf->next, data,
-                             outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
+                             (const uint8_t *)outbuf.pvBuffer,
+                             outbuf.cbBuffer, FALSE,
                              &written);
   Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if(result || (outbuf.cbBuffer != written)) {
@@ -1307,7 +1308,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
           /* send handshake token to server */
           result = Curl_conn_cf_send(cf->next, data,
-                                     outbuf[i].pvBuffer, outbuf[i].cbBuffer,
+                                     (const uint8_t *)outbuf[i].pvBuffer,
+                                     outbuf[i].cbBuffer,
                                      FALSE, &written);
           if(result || (outbuf[i].cbBuffer != written)) {
             failf(data, "schannel: failed to send next handshake data: "
@@ -2004,7 +2006,8 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* socket is writable */
 
        result = Curl_conn_cf_send(cf->next, data,
-                                  ptr + *pnwritten, len - *pnwritten,
+                                  (const uint8_t *)ptr + *pnwritten,
+                                  len - *pnwritten,
                                   FALSE, &this_write);
       if(result == CURLE_AGAIN)
         continue;
@@ -2450,7 +2453,8 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       size_t written;
 
       result = Curl_conn_cf_send(cf->next, data,
-                                 outbuf.pvBuffer, outbuf.cbBuffer,
+                                 (const uint8_t *)outbuf.pvBuffer,
+                                 outbuf.cbBuffer,
                                  FALSE, &written);
       Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {

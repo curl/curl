@@ -1524,7 +1524,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
 
 static CURLcode h3_stream_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               const void *buf, size_t len,
+                               const uint8_t *buf, size_t len,
                                size_t *pnwritten)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
@@ -1552,7 +1552,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
+  result = Curl_h1_req_parse_read(&stream->h1, (const char *)buf, len, NULL,
                                   !data->state.http_ignorecustom ?
                                   data->set.str[STRING_CUSTOMREQUEST] : NULL,
                                   0, pnwritten);
@@ -1656,7 +1656,7 @@ out:
 }
 
 static CURLcode cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                               const void *buf, size_t len, bool eos,
+                               const uint8_t *buf, size_t len, bool eos,
                                size_t *pnwritten)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;

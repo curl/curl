@@ -247,7 +247,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
                              struct h1_tunnel_state *ts,
                              bool *done)
 {
-  char *buf = curlx_dyn_ptr(&ts->request_data);
+  uint8_t *buf = curlx_dyn_uptr(&ts->request_data);
   size_t request_len = curlx_dyn_len(&ts->request_data);
   size_t blen = request_len;
   CURLcode result = CURLE_OK;
@@ -268,7 +268,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
 
   DEBUGASSERT(blen >= nwritten);
   ts->nsent += nwritten;
-  Curl_debug(data, CURLINFO_HEADER_OUT, buf, nwritten);
+  Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf, nwritten);
 
 out:
   if(result)
