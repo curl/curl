@@ -613,7 +613,6 @@ static int cf_ip_ballers_min_reply_ms(struct cf_ip_ballers *bs,
   return reply_ms;
 }
 
-
 typedef enum {
   SCFST_INIT,
   SCFST_WAITING,

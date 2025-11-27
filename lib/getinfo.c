@@ -128,7 +128,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     *param_charp = data->info.contenttype;
     break;
   case CURLINFO_PRIVATE:
-    *param_charp = (char *) data->set.private_data;
+    *param_charp = (char *)data->set.private_data;
     break;
   case CURLINFO_FTP_ENTRY_PATH:
     /* Return the entrypath string from the most recent connection.
@@ -375,7 +375,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   return CURLE_OK;
 }
 
-#define DOUBLE_SECS(x) (double)(x)/1000000
+#define DOUBLE_SECS(x) (double)(x) / 1000000
 
 static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
                              curl_off_t *param_offt)
@@ -577,20 +577,19 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
     *param_slistp = ptr.to_slist;
     break;
   case CURLINFO_TLS_SESSION:
-  case CURLINFO_TLS_SSL_PTR:
-    {
-      struct curl_tlssessioninfo **tsip = (struct curl_tlssessioninfo **)
-                                          param_slistp;
-      struct curl_tlssessioninfo *tsi = &data->tsi;
+  case CURLINFO_TLS_SSL_PTR: {
+    struct curl_tlssessioninfo **tsip = (struct curl_tlssessioninfo **)
+                                        param_slistp;
+    struct curl_tlssessioninfo *tsi = &data->tsi;
 
-      /* we are exposing a pointer to internal memory with unknown
-       * lifetime here. */
-      *tsip = tsi;
-      if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, tsi)) {
-        tsi->backend = Curl_ssl_backend();
-        tsi->internals = NULL;
-      }
+    /* we are exposing a pointer to internal memory with unknown
+     * lifetime here. */
+    *tsip = tsi;
+    if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, tsi)) {
+      tsi->backend = Curl_ssl_backend();
+      tsi->internals = NULL;
     }
+  }
     break;
   default:
     return CURLE_UNKNOWN_OPTION;

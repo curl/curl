@@ -55,9 +55,8 @@ entry_new(const char *name, size_t namelen,
   return e;
 }
 
-static struct dynhds_entry *
-entry_append(struct dynhds_entry *e,
-             const char *value, size_t valuelen)
+static struct dynhds_entry *entry_append(struct dynhds_entry *e,
+                                         const char *value, size_t valuelen)
 {
   struct dynhds_entry *e2;
   size_t valuelen2 = e->valuelen + 1 + valuelen;
@@ -171,7 +170,7 @@ CURLcode Curl_dynhds_add(struct dynhds *dynhds,
   if(dynhds->strs_len + namelen + valuelen > dynhds->max_strs_size)
     return CURLE_OUT_OF_MEMORY;
 
-entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
+  entry = entry_new(name, namelen, value, valuelen, dynhds->opts);
   if(!entry)
     goto out;
 
@@ -234,11 +233,11 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
     }
     if(!line_len)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    e = dynhds->hds[dynhds->hds_len-1];
+    e = dynhds->hds[dynhds->hds_len - 1];
     e2 = entry_append(e, line, line_len);
     if(!e2)
       return CURLE_OUT_OF_MEMORY;
-    dynhds->hds[dynhds->hds_len-1] = e2;
+    dynhds->hds[dynhds->hds_len - 1] = e2;
     entry_free(e);
     return CURLE_OK;
   }

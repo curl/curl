@@ -77,7 +77,6 @@ struct cpool_bundle {
   char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
 
-
 static void cpool_discard_conn(struct cpool *cpool,
                                struct Curl_easy *data,
                                struct connectdata *conn,

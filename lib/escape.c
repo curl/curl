@@ -52,8 +52,7 @@ char *curl_unescape(const char *string, int length)
 /* Escapes for URL the given unescaped string of given length.
  * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_escape(CURL *data, const char *string,
-                       int inlength)
+char *curl_easy_escape(CURL *data, const char *string, int inlength)
 {
   size_t length;
   struct dynbuf d;
@@ -79,7 +78,7 @@ char *curl_easy_escape(CURL *data, const char *string,
     }
     else {
       /* encode it */
-      unsigned char out[3]={'%'};
+      unsigned char out[3] = { '%' };
       Curl_hexbyte(&out[1], in);
       if(curlx_dyn_addn(&d, out, 3))
         return NULL;
@@ -163,8 +162,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
  * If olen == NULL, no output length is stored.
  * 'data' is ignored since 7.82.0.
  */
-char *curl_easy_unescape(CURL *data, const char *string,
-                         int length, int *olen)
+char *curl_easy_unescape(CURL *data, const char *string, int length, int *olen)
 {
   char *str = NULL;
   (void)data;
@@ -177,7 +175,7 @@ char *curl_easy_unescape(CURL *data, const char *string,
       return NULL;
 
     if(olen) {
-      if(outputlen <= (size_t) INT_MAX)
+      if(outputlen <= (size_t)INT_MAX)
         *olen = curlx_uztosi(outputlen);
       else
         /* too large to return in an int, fail! */

@@ -186,9 +186,9 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #else /* CURL_HAVE_C99 */
 
-#define infof Curl_infof
-#define CURL_TRC_M  Curl_trc_multi
-#define CURL_TRC_CF Curl_trc_cf_infof
+#define infof          Curl_infof
+#define CURL_TRC_M     Curl_trc_multi
+#define CURL_TRC_CF    Curl_trc_cf_infof
 #define CURL_TRC_WRITE Curl_trc_write
 #define CURL_TRC_READ  Curl_trc_read
 #define CURL_TRC_DNS   Curl_trc_dns
@@ -204,7 +204,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_SSLS  Curl_trc_ssls
 #endif
 #ifdef USE_SSH
-#define CURL_TRC_SSH  Curl_trc_ssh
+#define CURL_TRC_SSH   Curl_trc_ssh
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS    Curl_trc_ws
@@ -240,8 +240,8 @@ extern struct curl_trc_feat Curl_trc_feat_timer;
 /* All informational messages are not compiled in for size savings */
 
 #define Curl_trc_is_verbose(d)        (FALSE)
-#define Curl_trc_cf_is_verbose(x,y)   (FALSE)
-#define Curl_trc_ft_is_verbose(x,y)   (FALSE)
+#define Curl_trc_cf_is_verbose(x, y)  (FALSE)
+#define Curl_trc_ft_is_verbose(x, y)  (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 #define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
 
