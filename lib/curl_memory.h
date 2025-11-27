@@ -27,7 +27,9 @@
 #undef curlx_calloc
 #undef curlx_realloc
 #undef curlx_free
+#ifdef _WIN32
 #undef curlx_tcsdup
+#endif
 
 #ifdef CURLDEBUG
 
