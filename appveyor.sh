@@ -48,7 +48,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       "$(echo "$CMAKE_VERSION" | cut -f1 -d.)" \
       "$(echo "$CMAKE_VERSION" | cut -f2 -d.)")
     if [ "${cmake_ver}" -ge '0320' ]; then
-      fn="cmake-${CMAKE_VERSION}-windows-x86_64.zip"
+      fn="cmake-${CMAKE_VERSION}-windows-x86_64"
     else
       fn="cmake-${CMAKE_VERSION}-win64-x64"
     fi
