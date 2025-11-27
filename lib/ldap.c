@@ -626,7 +626,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
              curl_strequal(";binary", attr + (attr_len - 7)) ) {
             /* Binary attribute, encode to base64. */
             if(vals[i]->bv_len) {
-              result = curlx_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+              result = curlx_base64_encode((uint8_t *)vals[i]->bv_val,
+                                           vals[i]->bv_len,
                                            &val_b64, &val_b64_sz);
               if(result) {
                 ldap_value_free_len(vals);

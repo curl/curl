@@ -150,7 +150,7 @@ static ParameterError varfunc(char *c, /* content */
       if(clen) {
         char *enc;
         size_t elen;
-        CURLcode result = curlx_base64_encode(c, clen, &enc, &elen);
+        CURLcode result = curlx_base64_encode((uint8_t *)c, clen, &enc, &elen);
         if(result) {
           err = PARAM_NO_MEM;
           break;

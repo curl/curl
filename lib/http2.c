@@ -1847,8 +1847,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
     return CURLE_FAILED_INIT;
   }
 
-  result = curlx_base64url_encode((const char *)binsettings, binlen,
-                                  &base64, &blen);
+  result = curlx_base64url_encode(binsettings, binlen, &base64, &blen);
   if(result) {
     curlx_dyn_free(req);
     return result;

@@ -1276,7 +1276,7 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   result = Curl_rand(data, (unsigned char *)rand, sizeof(rand));
   if(result)
     return result;
-  result = curlx_base64_encode((char *)rand, sizeof(rand), &randstr, &randlen);
+  result = curlx_base64_encode(rand, sizeof(rand), &randstr, &randlen);
   if(result)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));

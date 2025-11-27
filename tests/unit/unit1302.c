@@ -133,7 +133,7 @@ static CURLcode test_unit1302(const char *arg)
     size_t dlen;
 
     /* first encode */
-    rc = curlx_base64_encode(e->input, e->ilen, &out, &olen);
+    rc = curlx_base64_encode((const uint8_t *)e->input, e->ilen, &out, &olen);
     abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     abort_unless(olen == e->olen, "wrong output size");
     if(memcmp(out, e->output, e->olen)) {
@@ -166,7 +166,8 @@ static CURLcode test_unit1302(const char *arg)
     struct etest *e = &url[i];
     char *out;
     size_t olen;
-    rc = curlx_base64url_encode(e->input, e->ilen, &out, &olen);
+    rc = curlx_base64url_encode((const uint8_t *)e->input, e->ilen,
+                                &out, &olen);
     abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     if(olen != e->olen) {
       curl_mfprintf(stderr, "Test %u URL encoded output length %zu "

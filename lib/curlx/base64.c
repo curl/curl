@@ -66,7 +66,7 @@ static const unsigned char decodetable[] =
  * @unittest: 1302
  */
 CURLcode curlx_base64_decode(const char *src,
-                             unsigned char **outptr, size_t *outlen)
+                             uint8_t **outptr, size_t *outlen)
 {
   size_t srclen = 0;
   size_t padding = 0;
@@ -170,8 +170,8 @@ bad:
 }
 
 static CURLcode base64_encode(const char *table64,
-                              unsigned char padbyte,
-                              const char *inputbuff, size_t insize,
+                              uint8_t padbyte,
+                              const uint8_t *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
   char *output;
@@ -245,7 +245,7 @@ static CURLcode base64_encode(const char *table64,
  *
  * @unittest: 1302
  */
-CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
+CURLcode curlx_base64_encode(const uint8_t *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
   return base64_encode(Curl_base64encdec, '=',
@@ -267,7 +267,7 @@ CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
  *
  * @unittest: 1302
  */
-CURLcode curlx_base64url_encode(const char *inputbuff, size_t insize,
+CURLcode curlx_base64url_encode(const uint8_t *inputbuff, size_t insize,
                                 char **outptr, size_t *outlen)
 {
   return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
