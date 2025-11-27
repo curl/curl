@@ -63,7 +63,6 @@ environment:
       CURLDEBUG: 'ON'
     - job_name: 'CM VS2010, Debug, x64, Schannel, Shared, Build-tests & examples, XP'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
-      CMAKE_VERSION: '3.18.4'
       PRJ_GEN: 'Visual Studio 10 2010'
       TARGET: '-A x64'
       WINTARGET: 0x0501  # Windows XP
@@ -73,7 +72,6 @@ environment:
       EXAMPLES: 'ON'
     - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
-      CMAKE_VERSION: '3.18.4'
       PRJ_GEN: 'Visual Studio 11 2012'
       TARGET: '-A Win32'
       PRJ_CFG: Release
