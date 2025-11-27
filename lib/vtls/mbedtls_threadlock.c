@@ -69,9 +69,6 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
 {
   int i;
 
-  if(!mutex_buf)
-    return 0; /* error, no threads locks defined */
-
   for(i = 0; i < NUMT; i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_destroy(&mutex_buf[i]))
@@ -81,7 +78,6 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
       return 0; /* CloseHandle failed */
 #endif /* USE_THREADS_POSIX && HAVE_PTHREAD_H */
   }
-  mutex_buf = NULL;
 
   return 1; /* OK */
 }
