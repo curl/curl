@@ -1228,7 +1228,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   curlx_dyn_reset(&out);
 
   /* Generate PEM certificate. */
-  result = curlx_base64_encode(cert.certificate.beg,
+  result = curlx_base64_encode((const uint8_t *)cert.certificate.beg,
                                cert.certificate.end - cert.certificate.beg,
                                &certptr, &clen);
   if(result)
