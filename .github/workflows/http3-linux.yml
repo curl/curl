@@ -486,7 +486,6 @@ jobs:
           echo 'CXX=g++-12' >> "$GITHUB_ENV"
 
       - name: 'cache openssl'
-        if: ${{ matrix.build.name == 'openssl' || matrix.build.name == 'openssl-quic' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-openssl-http3-no-deprecated
         env:
