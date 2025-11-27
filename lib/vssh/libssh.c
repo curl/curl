@@ -1873,6 +1873,19 @@ static int myssh_in_SFTP_QUOTE_STAT(struct Curl_easy *data,
   return SSH_NO_ERROR;
 }
 
+static void conn_forget_socket(struct Curl_easy *data, int sockindex)
+{
+  struct connectdata *conn = data->conn;
+  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
+    struct Curl_cfilter *cf = conn->cfilter[sockindex];
+    if(cf)
+      (void)Curl_conn_cf_cntrl(cf, data, TRUE,
+                               CF_CTRL_FORGET_SOCKET, 0, NULL);
+    fake_sclose(conn->sock[sockindex]);
+    conn->sock[sockindex] = CURL_SOCKET_BAD;
+  }
+}
+
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
  * blocking and without reaching the end. The data the pointer 'block' points
@@ -2375,7 +2388,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
         /* conn->sock[FIRSTSOCKET] is closed by ssh_disconnect behind our back,
            tell the connection to forget about it. This libssh
            bug is fixed in 0.10.0. */
-        Curl_conn_forget_socket(data, FIRSTSOCKET);
+        conn_forget_socket(data, FIRSTSOCKET);
       }
 
       SSH_STRING_FREE_CHAR(sshc->homedir);
