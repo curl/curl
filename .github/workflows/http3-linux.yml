@@ -353,7 +353,6 @@ jobs:
       matrix:
         build:
           - name: 'openssl'
-            install_steps: pytest
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
@@ -376,7 +375,6 @@ jobs:
               --enable-unity
 
           - name: 'libressl'
-            install_steps: pytest
             PKG_CONFIG_PATH: /home/runner/libressl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/libressl/build -DUSE_NGTCP2=ON
@@ -389,7 +387,6 @@ jobs:
               --with-openssl=/home/runner/awslc/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'awslc'
-            install_steps: pytest
             PKG_CONFIG_PATH: /home/runner/awslc/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/awslc/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
@@ -403,7 +400,6 @@ jobs:
               --with-openssl=/home/runner/boringssl/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'boringssl'
-            install_steps: pytest
             PKG_CONFIG_PATH: /home/runner/boringssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2-boringssl/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/boringssl/build -DUSE_NGTCP2=ON -DBUILD_SHARED_LIBS=OFF
@@ -418,7 +414,6 @@ jobs:
               --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'gnutls'
-            install_steps: pytest
             install_packages: libp11-kit-dev
             PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
@@ -435,7 +430,6 @@ jobs:
               --enable-unity
 
           - name: 'wolfssl'
-            install_steps: pytest
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
@@ -449,15 +443,6 @@ jobs:
               --with-openssl=/home/runner/openssl/build --with-openssl-quic
 
           - name: 'openssl-quic'
-            install_steps: pytest
-            PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
-            generate: >-
-              -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
-              -DCURL_DISABLE_LDAP=ON
-              -DCMAKE_UNITY_BUILD=ON
-
-          - name: 'openssl-quic valgrind'
-            install_packages: valgrind
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
@@ -475,7 +460,6 @@ jobs:
               --enable-unity
 
           - name: 'quiche'
-            install_steps: pytest
             PKG_CONFIG_PATH: /home/runner/nghttp2/build/lib/pkgconfig:/home/runner/quiche/target/release
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/quiche/quiche/deps/boringssl/src
@@ -495,7 +479,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             libtool autoconf automake pkgconf \
-            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev \
+            libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libidn2-0-dev libldap-dev libuv1-dev valgrind \
             ${INSTALL_PACKAGES} \
             ${MATRIX_INSTALL_PACKAGES}
           echo 'CC=gcc-12' >> "$GITHUB_ENV"
@@ -717,10 +701,18 @@ jobs:
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
-          if [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
-            TFLAGS+=' -j6'
-            TFLAGS+=' HTTP/3'
+          TFLAGS+=' -n'
+          source ~/venv/bin/activate
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target test-ci
+          else
+            make -C bld V=1 test-ci
           fi
+
+      - name: 'run tests (valgrind)'
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
+        run: |
+          TFLAGS+=' -j6 HTTP/3'
           source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target test-ci
@@ -729,13 +721,13 @@ jobs:
           fi
 
       - name: 'install pytest prereqs'
-        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
           [ -d ~/venv ] || python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
       - name: 'run pytest event based'
-        if: ${{ contains(matrix.build.install_steps, 'pytest') }}
+        if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         env:
           CURL_TEST_EVENT: 1
           PYTEST_ADDOPTS: '--color=yes'
