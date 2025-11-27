@@ -322,10 +322,13 @@ else {
     logmsg "TRACE-1: " . $ENV{"NGHTTPX"} . "\n";
 }
 if($ENV{"NGHTTPX"}) {
+    my $cmdd = "\"$ENV{'NGHTTPX'}\" -v 2>&1";
     my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
     logmsg "TRACE-3: '$cmd'\n";
     my $nghttpx_version=join(' ', `$cmd`);
     logmsg "TRACE-4: '$nghttpx_version'\n";
+    my $nghttpx_versiond=join(' ', `$cmd`);
+    logmsg "TRACE-5: '$nghttpx_versiond'\n";
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
