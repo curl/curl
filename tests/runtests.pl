@@ -891,7 +891,7 @@ sub checksystemfeatures {
                       $valgrind?"Valgrind ":"",
                       $run_duphandle?"test-duphandle ":"",
                       $run_event_based?"event-based ":"",
-                      $nghttpx_h3,
+                      $nghttpx_h3?"nghttpx-h3 " :"",
                       $libtool?"Libtool ":"");
     if($env) {
         logmsg "* Env: $env\n";
