@@ -42,21 +42,17 @@ elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
 fi
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  # Install supported cmake version
   if [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2013' ] || \
      [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2015' ] || \
      [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2017' ]; then
-    (
-      curl --disable --fail --verbose --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-        --location 'https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-win64-x64.zip' --output bin.zip
-      ls -l
-      7z x bin.zip
-      rm -f bin.zip
-    )
+    curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+      --location 'https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-win64-x64.zip' --output bin.zip
+    7z x bin.zip
+    rm -f bin.zip
     PATH="$PWD/cmake-3.18.4-win64-x64/bin:$PATH"
   fi
-fi
 
-if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   # Set env CHKPREFILL to the value '_chkprefill' to compare feature detection
   # results with and without the pre-fill feature. They have to match.
   for _chkprefill in '' ${CHKPREFILL:-}; do
