@@ -2880,20 +2880,4 @@ out:
   return result;
 }
 
-bool Curl_conn_is_ngtcp2(const struct Curl_easy *data,
-                         const struct connectdata *conn,
-                         int sockindex)
-{
-  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
-
-  (void)data;
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_http3)
-      return TRUE;
-    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
-      return FALSE;
-  }
-  return FALSE;
-}
-
 #endif
