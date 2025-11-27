@@ -73,6 +73,7 @@ jobs:
           .github/scripts/codespell.sh
 
       - name: 'typos'
+        timeout-minutes: 2
         run: |
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -148,6 +149,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 'install prereqs'
+        timeout-minutes: 2
         run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
