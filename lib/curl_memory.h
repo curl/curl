@@ -51,13 +51,13 @@
 
 #else /* !CURLDEBUG */
 
-#if defined(BUILDING_LIBCURL) || defined(CURL_ALLOC_OVERRIDE_LIBCURL)
+#ifdef BUILDING_LIBCURL
 #define curlx_strdup(ptr)         Curl_cstrdup(ptr)
 #define curlx_malloc(size)        Curl_cmalloc(size)
 #define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
 #define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
 #define curlx_free(ptr)           Curl_cfree(ptr)
-#else /* !BUILDING_LIBCURL && !CURL_ALLOC_OVERRIDE_LIBCURL */
+#else /* !BUILDING_LIBCURL */
 #ifdef _WIN32
 #define curlx_strdup(ptr)         _strdup(ptr)
 #else
@@ -67,7 +67,7 @@
 #define curlx_calloc(nbelem,size) calloc(nbelem, size)
 #define curlx_realloc(ptr,size)   realloc(ptr, size)
 #define curlx_free(ptr)           free(ptr)
-#endif /* BUILDING_LIBCURL || CURL_ALLOC_OVERRIDE_LIBCURL */
+#endif /* BUILDING_LIBCURL */
 
 #ifdef _WIN32
 #ifdef UNICODE

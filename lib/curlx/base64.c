@@ -30,12 +30,6 @@
 #include "warnless.h"
 #include "base64.h"
 
-#ifdef BUILDING_LIBCURL
-#define CURL_ALLOC_OVERRIDE_LIBCURL
-#include "../curl_memory.h"
-#undef CURL_ALLOC_OVERRIDE_LIBCURL
-#endif
-
 /* ---- Base64 Encoding/Decoding Table --- */
 const char Curl_base64encdec[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -272,8 +266,3 @@ CURLcode curlx_base64url_encode(const uint8_t *inputbuff, size_t insize,
 {
   return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
 }
-
-#ifdef BUILDING_LIBCURL
-/* !checksrc! disable INCLUDEDUP 1 */
-#include "../curl_memory.h"
-#endif

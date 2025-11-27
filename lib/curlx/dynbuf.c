@@ -25,11 +25,6 @@
 #include "../curl_setup.h"
 #include "dynbuf.h"
 #include "../curl_printf.h"
-#ifdef BUILDING_LIBCURL
-#define CURL_ALLOC_OVERRIDE_LIBCURL
-#include "../curl_memory.h"
-#undef CURL_ALLOC_OVERRIDE_LIBCURL
-#endif
 
 #define MIN_FIRST_ALLOC 32
 
@@ -298,8 +293,3 @@ CURLcode curlx_dyn_setlen(struct dynbuf *s, size_t set)
   s->bufr[s->leng] = 0;
   return CURLE_OK;
 }
-
-#ifdef BUILDING_LIBCURL
-/* !checksrc! disable INCLUDEDUP 1 */
-#include "../curl_memory.h"
-#endif
