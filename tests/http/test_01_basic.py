@@ -96,6 +96,9 @@ class TestBasic:
         # there are cases where time_connect is reported as 0
         assert r.stats[0]['time_connect'] >= 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
+        # ports are reported correctly
+        assert r.stats[0]['remote_port'] == env.port_for(proto), f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] > 0, f'{r.dump_logs()}'
 
     # simple https: HEAD
     @pytest.mark.parametrize("proto", Env.http_protos())

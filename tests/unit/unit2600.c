@@ -110,7 +110,7 @@ static int test_idx;
 struct cf_test_ctx {
   int idx;
   int ai_family;
-  int transport;
+  uint8_t transport;
   char id[16];
   struct curltime started;
   timediff_t fail_delay_ms;
@@ -166,7 +166,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
                                const struct Curl_addrinfo *ai,
-                               int transport)
+                               uint8_t transport)
 {
   static const struct Curl_cftype cft_test = {
     "TEST",

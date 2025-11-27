@@ -575,12 +575,23 @@ struct Curl_handler {
 #define CONNRESULT_NONE 0                /* No extra information. */
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
 
+#define TRNSPRT_NONE 0
+#define TRNSPRT_TCP 3
+#define TRNSPRT_UDP 4
+#define TRNSPRT_QUIC 5
+#define TRNSPRT_UNIX 6
+
 struct ip_quadruple {
   char remote_ip[MAX_IPADR_LEN];
   char local_ip[MAX_IPADR_LEN];
   uint16_t remote_port;
   uint16_t local_port;
+  uint8_t transport;
 };
+
+#define CUR_IP_QUAD_HAS_PORTS(x)  (((x)->transport == TRNSPRT_TCP) || \
+                                   ((x)->transport == TRNSPRT_UDP) || \
+                                   ((x)->transport == TRNSPRT_QUIC))
 
 struct proxy_info {
   struct hostname host;
@@ -589,11 +600,6 @@ struct proxy_info {
   char *user;    /* proxy username string, allocated */
   char *passwd;  /* proxy password string, allocated */
 };
-
-#define TRNSPRT_TCP 3
-#define TRNSPRT_UDP 4
-#define TRNSPRT_QUIC 5
-#define TRNSPRT_UNIX 6
 
 /*
  * The connectdata struct contains all fields and variables that should be
