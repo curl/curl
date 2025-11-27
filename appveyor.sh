@@ -42,7 +42,6 @@ elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
 fi
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  CMAKE_VERSION='3.18.4'
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION}" ]; then
     curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
