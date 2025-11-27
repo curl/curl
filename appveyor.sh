@@ -48,7 +48,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     (
       cd /c
       curl --version || true
-      curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+      curl --disable --fail --verbose --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
         --location 'https://github.com/Kitware/CMake/releases/download/v3.18.4/cmake-3.18.4-win64-x64.zip' --output bin.zip
       unzip -q bin.zip
       rm -f bin.zip
