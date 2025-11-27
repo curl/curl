@@ -316,10 +316,16 @@ if(open(my $fd, "<", "config")) {
 my $nghttpx_h3 = 0;
 if(!$ENV{"NGHTTPX"}) {
     $ENV{"NGHTTPX"} = checktestcmd("nghttpx");
+    logmsg "TRACE-2: " . $ENV{"NGHTTPX"} . "\n";
+}
+else {
+    logmsg "TRACE-1: " . $ENV{"NGHTTPX"} . "\n";
 }
 if($ENV{"NGHTTPX"}) {
     my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
+    logmsg "TRACE-3: '$cmd'\n";
     my $nghttpx_version=join(' ', `$cmd`);
+    logmsg "TRACE-4: '$nghttpx_version'\n";
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }

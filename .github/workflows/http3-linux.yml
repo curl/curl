@@ -644,6 +644,7 @@ jobs:
           MATRIX_PKG_CONFIG_PATH: '${{ matrix.build.PKG_CONFIG_PATH }}'
         run: |
           echo '----------------'
+          echo "|$PATH|"
           which nghttpx || true
           echo '----------------'
           command -v nghttpx || true
@@ -708,6 +709,14 @@ jobs:
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         run: |
+          echo '----------------'
+          echo "|$PATH|"
+          which nghttpx || true
+          echo '----------------'
+          command -v nghttpx || true
+          echo '----------------'
+          nghttpx -v || true
+          echo '----------------'
           export TFLAGS='-n'
           source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
