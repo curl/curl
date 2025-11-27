@@ -2277,7 +2277,6 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 #endif
     Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
                           SSL_version(ssl), "h3", quic_tp, quic_tp_len);
-    return 1;
   }
   return 0;
 }
