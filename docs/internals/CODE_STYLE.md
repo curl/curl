@@ -385,8 +385,8 @@ This is the full list of functions generally banned.
     strerror
     strncat
     strncpy
-    strtok_r
     strtok
+    strtok_r
     strtol
     strtoul
     vaprintf
