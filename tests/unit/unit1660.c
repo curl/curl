@@ -130,7 +130,7 @@ static CURLcode test_unit1660(const char *arg)
 
   Curl_hsts_loadfile(easy, h, arg);
 
-  for(i = 0; headers[i].host ; i++) {
+  for(i = 0; headers[i].host; i++) {
     if(headers[i].hdr) {
       res = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
 

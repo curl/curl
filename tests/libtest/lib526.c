@@ -155,7 +155,6 @@ test_cleanup:
 
     curl_multi_cleanup(multi);
     curl_global_cleanup();
-
   }
   else if(testnum == 532) {
     /* undocumented cleanup sequence - type UB */

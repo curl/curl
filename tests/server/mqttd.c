@@ -156,7 +156,7 @@ static void logprotocol(mqttdir dir,
 /* return 0 on success */
 static int connack(FILE *dump, curl_socket_t fd)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_CONNACK, 0x02,
     0x00, 0x00
   };
@@ -283,7 +283,6 @@ static size_t encode_length(size_t packetlen,
   return bytes;
 }
 
-
 static size_t decode_length(unsigned char *buffer,
                             size_t buflen, size_t *lenbytes)
 {
@@ -303,7 +302,6 @@ static size_t decode_length(unsigned char *buffer,
 
   return len;
 }
-
 
 /* return 0 on success */
 static int publish(FILE *dump,
@@ -408,7 +406,7 @@ static int fixedheader(curl_socket_t fd,
 
 static curl_socket_t mqttit(curl_socket_t fd)
 {
-  size_t buff_size = 10*1024;
+  size_t buff_size = 10 * 1024;
   unsigned char *buffer = NULL;
   ssize_t rc;
   unsigned char byte;
@@ -482,8 +480,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     }
 
     if(byte == MQTT_MSG_CONNECT) {
-      logprotocol(FROM_CLIENT, "CONNECT", remaining_length,
-                  dump, buffer, rc);
+      logprotocol(FROM_CLIENT, "CONNECT", remaining_length, dump, buffer, rc);
 
       if(memcmp(protocol, buffer, sizeof(protocol))) {
         logmsg("Protocol preamble mismatch");
@@ -607,8 +604,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       size_t topiclen;
 
       logmsg("Incoming PUBLISH");
-      logprotocol(FROM_CLIENT, "PUBLISH", remaining_length,
-                  dump, buffer, rc);
+      logprotocol(FROM_CLIENT, "PUBLISH", remaining_length, dump, buffer, rc);
 
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
       logmsg("Got %zu bytes topic", topiclen);
@@ -754,7 +750,7 @@ static int test_mqttd(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {
@@ -802,8 +798,7 @@ static int test_mqttd(int argc, char *argv[])
       if(argc > arg) {
         opt = argv[arg];
         if(curlx_str_number(&opt, &num, 0xffff)) {
-          fprintf(stderr, "mqttd: invalid --port argument (%s)\n",
-                  argv[arg]);
+          fprintf(stderr, "mqttd: invalid --port argument (%s)\n", argv[arg]);
           return 0;
         }
         server_port = (unsigned short)num;

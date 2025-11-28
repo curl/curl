@@ -32,7 +32,7 @@ static CURLcode ntlmcb_res = CURLE_OK;
 
 static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
-  ssize_t idx = ((CURL **) data) - ntlm_curls;
+  ssize_t idx = ((CURL **)data) - ntlm_curls;
   curl_socket_t sock;
   long longdata;
   CURLcode code;
@@ -195,8 +195,8 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
       interval.tv_sec = 0;

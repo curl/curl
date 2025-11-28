@@ -80,7 +80,7 @@ static CURLcode test_lib1597(const char *URL)
 
   n = 0;
   for(proto = curlinfo->protocols; *proto; proto++) {
-    if((size_t) n >= sizeof(protolist)) {
+    if((size_t)n >= sizeof(protolist)) {
       puts("protolist buffer too small\n");
       res = TEST_ERR_FAILURE;
       goto test_cleanup;

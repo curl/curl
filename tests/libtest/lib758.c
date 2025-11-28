@@ -69,7 +69,6 @@ static void t758_msg(const char *msg)
   curl_mfprintf(stderr, "%s %s\n", t758_tag(), msg);
 }
 
-
 struct t758_Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
@@ -203,7 +202,7 @@ static int t758_curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 
 static int t758_cert_verify_callback(X509_STORE_CTX *ctx, void *arg)
 {
-  SSL * ssl;
+  SSL *ssl;
   (void)arg;
   ssl = (SSL *)X509_STORE_CTX_get_ex_data(ctx,
         SSL_get_ex_data_X509_STORE_CTX_idx());
@@ -226,7 +225,7 @@ static int t758_cert_verify_callback(X509_STORE_CTX *ctx, void *arg)
 static CURLcode
 t758_set_ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *clientp)
 {
-  SSL_CTX *ctx = (SSL_CTX *) ssl_ctx;
+  SSL_CTX *ctx = (SSL_CTX *)ssl_ctx;
   (void)curl;
   SSL_CTX_set_cert_verify_callback(ctx, t758_cert_verify_callback, clientp);
   return CURLE_OK;
@@ -277,7 +276,7 @@ static ssize_t t758_getMicroSecondTimeout(struct curltime *timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void t758_updateFdSet(struct t758_Sockets *sockets, fd_set* fdset,
+static void t758_updateFdSet(struct t758_Sockets *sockets, fd_set *fdset,
                              curl_socket_t *maxFd)
 {
   int i;
@@ -358,7 +357,6 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
     return res;
 
   curl_global_trace("all");
-
 
   easy_init(curl);
   debug_config.nohex = TRUE;

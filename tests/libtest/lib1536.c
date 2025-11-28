@@ -36,7 +36,7 @@ static CURLcode test_lib1536(const char *URL)
   easy_init(curl);
 
   /* Test that scheme is properly initialized on curl_easy_init.
-  */
+   */
 
   res = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
   if(res) {
@@ -64,7 +64,7 @@ static CURLcode test_lib1536(const char *URL)
   }
 
   /* Test that a scheme is properly set after receiving an HTTP resource.
-  */
+   */
 
   res = curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
   if(res) {
@@ -83,7 +83,7 @@ static CURLcode test_lib1536(const char *URL)
   }
 
   /* Test that a scheme is properly initialized on curl_easy_duphandle.
-  */
+   */
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
@@ -108,7 +108,7 @@ static CURLcode test_lib1536(const char *URL)
   }
 
   /* Test that a scheme is properly initialized on curl_easy_reset.
-  */
+   */
 
   curl_easy_reset(curl);
 

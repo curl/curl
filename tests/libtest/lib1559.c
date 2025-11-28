@@ -25,7 +25,7 @@
 
 static CURLcode test_lib1559(const char *URL)
 {
-  static const int EXCESSIVE = 10*1000*1000;
+  static const int EXCESSIVE = 10 * 1000 * 1000;
 
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
@@ -43,7 +43,7 @@ static CURLcode test_lib1559(const char *URL)
   }
 
   memset(longurl, 'a', EXCESSIVE);
-  longurl[EXCESSIVE-1] = 0;
+  longurl[EXCESSIVE - 1] = 0;
 
   res = curl_easy_setopt(curl, CURLOPT_URL, longurl);
   curl_mprintf("CURLOPT_URL %d bytes URL == %d\n",

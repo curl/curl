@@ -34,12 +34,12 @@ static CURLcode test_unit1614(const char *arg)
   int err = 0;
 
   struct check {
-  const char *a;
+    const char *a;
     const char *n;
     unsigned int bits;
     bool match;
   };
-  struct check list4[]= {
+  struct check list4[] = {
     { "192.160.0.1", "192.160.0.1", 33, FALSE},
     { "192.160.0.1", "192.160.0.1", 32, TRUE},
     { "192.160.0.1", "192.160.0.1", 0, TRUE},
@@ -55,7 +55,7 @@ static CURLcode test_unit1614(const char *arg)
     { NULL, NULL, 0, FALSE} /* end marker */
   };
 #ifdef USE_IPV6
-  struct check list6[]= {
+  struct check list6[] = {
     { "::1", "::1", 0, TRUE},
     { "::1", "::1", 128, TRUE},
     { "::1", "0:0::1", 128, TRUE},
@@ -69,7 +69,7 @@ static CURLcode test_unit1614(const char *arg)
     const char *n;
     bool match;
   };
-  struct noproxy list[]= {
+  struct noproxy list[] = {
     { "www.example.com", "localhost .example.com .example.de", FALSE},
     { "www.example.com", "localhost,.example.com,.example.de", TRUE},
     { "www.example.com.", "localhost,.example.com,.example.de", TRUE},
@@ -161,7 +161,7 @@ static CURLcode test_unit1614(const char *arg)
     if(match != list4[i].match) {
       curl_mfprintf(stderr, "%s in %s/%u should %smatch\n",
                     list4[i].a, list4[i].n, list4[i].bits,
-                    list4[i].match ? "": "not ");
+                    list4[i].match ? "" : "not ");
       err++;
     }
   }
@@ -171,7 +171,7 @@ static CURLcode test_unit1614(const char *arg)
     if(match != list6[i].match) {
       curl_mfprintf(stderr, "%s in %s/%u should %smatch\n",
                     list6[i].a, list6[i].n, list6[i].bits,
-                    list6[i].match ? "": "not ");
+                    list6[i].match ? "" : "not ");
       err++;
     }
   }
@@ -181,7 +181,7 @@ static CURLcode test_unit1614(const char *arg)
     if(match != list[i].match) {
       curl_mfprintf(stderr, "%s in %s should %smatch\n",
                     list[i].a, list[i].n,
-                    list[i].match ? "": "not ");
+                    list[i].match ? "" : "not ");
       err++;
     }
   }
