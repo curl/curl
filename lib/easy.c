@@ -130,7 +130,7 @@ curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 #ifdef DEBUGBUILD
 static char *leakpointer;
 /* External assertion handler for custom integrations */
-static curl_assert_callback curl_global_assert_handler = NULL;
+CURL_EXTERN curl_assert_callback curl_global_assert_handler = NULL;
 #endif
 
 /**
