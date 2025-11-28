@@ -33,7 +33,7 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 /* the purpose of this macro is to free() without being traced by memdebug */
 #define curlx_unicodefree(ptr) free(ptr)
 #else
-#define curlx_unicodefree(ptr) curlx_free(ptr)
+#define curlx_unicodefree(ptr) do {} while(0)
 #endif
 
 /*
@@ -70,10 +70,6 @@ typedef union {
 #ifdef _WIN32
 #define curlx_convert_UTF8_to_tchar(ptr) _strdup(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) _strdup(ptr)
-#else
-#define curlx_convert_UTF8_to_tchar(ptr) curlx_strdup(ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) curlx_strdup(ptr)
-#endif
 
 typedef union {
   char                *tchar_ptr;
@@ -81,6 +77,10 @@ typedef union {
   unsigned char       *tbyte_ptr;
   const unsigned char *const_tbyte_ptr;
 } xcharp_u;
+#else
+#define curlx_convert_UTF8_to_tchar(ptr) ((const char *)(ptr))
+#define curlx_convert_tchar_to_UTF8(ptr) ((const char *)(ptr))
+#endif
 
 #endif /* UNICODE && _WIN32 */
 
