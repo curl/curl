@@ -30,7 +30,7 @@
 
 #include <curl/curl.h>
 
-static const char olivertwist[]=
+static const char olivertwist[] =
   "Among other public buildings in a certain town, which for many reasons "
   "it will be prudent to refrain from mentioning, and to which I will assign "
   "no fictitious name, there is one anciently common to most towns, great or "

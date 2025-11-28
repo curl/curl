@@ -76,7 +76,6 @@ int main(void)
           printf(" %s: %s (%u)\n", h->name, h->value, (unsigned int)h->amount);
         prev = h;
       } while(h);
-
     }
     /* always cleanup */
     curl_easy_cleanup(curl);

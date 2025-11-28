@@ -85,8 +85,7 @@ static long file_is_downloaded(void *input)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-static size_t write_cb(char *buff, size_t size, size_t nmemb,
-                       void *cb_data)
+static size_t write_cb(char *buff, size_t size, size_t nmemb, void *cb_data)
 {
   struct callback_data *data = cb_data;
   size_t written = 0;
@@ -104,7 +103,7 @@ int main(int argc, char **argv)
   CURL *curl;
 
   /* help data */
-  struct callback_data data = { 0 };
+  struct callback_data data = {0};
 
   /* global initialization */
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);

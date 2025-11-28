@@ -115,7 +115,6 @@ static int server_push_callback(CURL *parent,
   return CURL_PUSH_OK;
 }
 
-
 /*
  * Download a file over HTTP/2, take care of server push.
  */

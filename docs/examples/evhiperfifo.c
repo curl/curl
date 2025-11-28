@@ -79,7 +79,6 @@ callback.
 
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
 
-
 /* Global information, common to all connections */
 struct GlobalInfo {
   struct ev_loop *loop;
@@ -119,7 +118,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
   ev_timer_stop(g->loop, &g->timer_event);
   if(timeout_ms >= 0) {
     /* -1 means delete, other values are timeout times in milliseconds */
-    double  t = timeout_ms / 1000;
+    double t = timeout_ms / 1000;
     ev_timer_init(&g->timer_event, timer_cb, t, 0.);
     ev_timer_start(g->loop, &g->timer_event);
   }
@@ -196,7 +195,7 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   int action;
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
-  g = (struct GlobalInfo*) w->data;
+  g = (struct GlobalInfo *)w->data;
 
   action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
            ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
@@ -270,15 +269,14 @@ static void addsock(curl_socket_t s, CURL *curl, int action,
 /* CURLMOPT_SOCKETFUNCTION */
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  struct GlobalInfo *g = (struct GlobalInfo*) cbp;
-  struct SockInfo *fdp = (struct SockInfo*) sockp;
-  const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE"};
+  struct GlobalInfo *g = (struct GlobalInfo *)cbp;
+  struct SockInfo *fdp = (struct SockInfo *)sockp;
+  const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
 
   printf("%s e %p s %i what %i cbp %p sockp %p\n",
          __PRETTY_FUNCTION__, e, s, what, cbp, sockp);
 
-  fprintf(MSG_OUT,
-          "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
+  fprintf(MSG_OUT, "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {
     fprintf(MSG_OUT, "\n");
     remsock(fdp, g);
@@ -289,8 +287,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
       addsock(s, e, what, g);
     }
     else {
-      fprintf(MSG_OUT,
-              "Changing action from %s to %s\n",
+      fprintf(MSG_OUT, "Changing action from %s to %s\n",
               whatstr[fdp->action], whatstr[what]);
       setsock(fdp, s, e, what, g);
     }
@@ -302,7 +299,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
-  struct ConnInfo *conn = (struct ConnInfo*) data;
+  struct ConnInfo *conn = (struct ConnInfo *)data;
   (void)ptr;
   (void)conn;
   return realsize;
@@ -316,8 +313,9 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
-          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T "/"
+          "%" CURL_FORMAT_CURL_OFF_T ")\n",
+          conn->url, dlnow, dltotal);
   return 0;
 }
 
@@ -328,7 +326,7 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   CURLMcode rc;
 
   conn = calloc(1, sizeof(*conn));
-  conn->error[0]='\0';
+  conn->error[0] = '\0';
 
   conn->curl = curl_easy_init();
   if(!conn->curl) {
@@ -349,8 +347,8 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_TIME, 3L);
   curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_LIMIT, 10L);
 
-  fprintf(MSG_OUT,
-          "Adding easy %p to multi %p (%s)\n", conn->curl, g->multi, url);
+  fprintf(MSG_OUT, "Adding easy %p to multi %p (%s)\n",
+          conn->curl, g->multi, url);
   rc = curl_multi_add_handle(g->multi, conn->curl);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
 
@@ -369,9 +367,9 @@ static void fifo_cb(EV_P_ struct ev_io *w, int revents)
   (void)revents;
 
   do {
-    s[0]='\0';
+    s[0] = '\0';
     rv = fscanf(g->input, "%1023s%n", s, &n);
-    s[n]='\0';
+    s[n] = '\0';
     if(n && s[0]) {
       new_conn(s, g);  /* if we read a URL, go get it! */
     }
