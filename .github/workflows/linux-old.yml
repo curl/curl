@@ -92,7 +92,9 @@ jobs:
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
           tar -xf "${fn}".tar*.gz
           rm -f "${fn}".tar*.gz
-          mv cmake-${CMAKE_VERSION}-Linux-x86_64 cmake
+          ls -l
+          mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
+          ls -l
           echo "|$PWD|"
           pwd
 
