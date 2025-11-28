@@ -45,8 +45,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   # Install custom cmake version
   if [ -n "${CMAKE_VERSION:-}" ]; then
     cmake_ver=$(printf '%02d%02d' \
-      "$(echo "$CMAKE_VERSION" | cut -f1 -d.)" \
-      "$(echo "$CMAKE_VERSION" | cut -f2 -d.)")
+      "$(echo "${CMAKE_VERSION}" | cut -f1 -d.)" \
+      "$(echo "${CMAKE_VERSION}" | cut -f2 -d.)")
     if [ "${cmake_ver}" -ge '0320' ]; then
       fn="cmake-${CMAKE_VERSION}-windows-x86_64"
     else
