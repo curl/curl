@@ -91,10 +91,9 @@ jobs:
           else
             fn="cmake-${CMAKE_VERSION}-win64-x64"
           fi
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
-            --location "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.zip" --output bin.zip
-          7z x -y bin.zip >/dev/null
-          rm -f bin.zip
+          httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.zip"
+          7z x -y "${fn}.zip" >/dev/null
+          rm -f "${fn}.zip".zip
           "$PWD/${fn}/bin/cmake" --version
 
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
