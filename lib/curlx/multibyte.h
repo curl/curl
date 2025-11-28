@@ -76,13 +76,6 @@ typedef union {
 } xcharp_u;
 
 #endif /* UNICODE */
-
-#else /* !_WIN32 */
-
-#define curlx_convert_UTF8_to_tchar(ptr) ((const char *)(ptr))
-#define curlx_convert_tchar_to_UTF8(ptr) ((const char *)(ptr))
-#define curlx_unicodefree(ptr)           do {} while(0)
-
 #endif /* _WIN32 */
 
 #endif /* HEADER_CURL_MULTIBYTE_H */
