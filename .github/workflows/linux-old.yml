@@ -93,8 +93,10 @@ jobs:
           tar -xf "${fn}".tar*.gz
           rm -f "${fn}".tar*.gz
           ls -l
-          mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
+          mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmaketool
+          find cmaketool/bin
           ls -l
+          ls -l cmaketool/bin
           echo "|$PWD|"
           pwd
 
@@ -102,9 +104,11 @@ jobs:
         run: |
           echo "|$PWD|"
           pwd
+          ls -l
+          ls -l cmaketool/bin
           mkdir bld-1
           cd bld-1
-          cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmaketool/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
 
       - name: 'CM build-only build'
@@ -128,7 +132,7 @@ jobs:
         run: |
           mkdir bld-cares
           cd bld-cares
-          cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmaketool/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
