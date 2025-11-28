@@ -63,8 +63,8 @@ static struct backtrace_state *btstate;
 #endif
 
 #define KEEPSIZE 10000
-static char fbuf[KEEPSIZE];
-static size_t widx = 0; /* write index */
+static char membuf[KEEPSIZE];
+static size_t memwidx = 0; /* write index */
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
@@ -72,8 +72,8 @@ static size_t widx = 0; /* write index */
    _exit() comes after the atexit handlers are called. curl/curl#6620 */
 static void curl_dbg_cleanup(void)
 {
-  if(widx)
-    fwrite(fbuf, 1, widx, curl_dbg_logfile);
+  if(memwidx)
+    fwrite(membuf, 1, memwidx, curl_dbg_logfile);
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
@@ -526,18 +526,18 @@ void curl_dbg_log(const char *format, ...)
     nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0) {
-    if(KEEPSIZE - nchars < widx) {
+    if(KEEPSIZE - nchars < memwidx) {
       /* flush */
-      fwrite(fbuf, 1, widx, curl_dbg_logfile);
+      fwrite(membuf, 1, memwidx, curl_dbg_logfile);
       fflush(curl_dbg_logfile);
-      widx = 0;
+      memwidx = 0;
     }
-    if(widx) {
+    if(memwidx) {
       /* the previous line ends with a newline */
-      DEBUGASSERT(fbuf[widx - 1] == '\n');
+      DEBUGASSERT(membuf[memwidx - 1] == '\n');
     }
-    memcpy(&fbuf[widx], buf, nchars);
-    widx += nchars;
+    memcpy(&membuf[memwidx], buf, nchars);
+    memwidx += nchars;
   }
 }
 
