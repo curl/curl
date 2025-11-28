@@ -88,7 +88,10 @@ jobs:
           ls -l
           tar -xf "${fn}".tar*.gz
           rm -f "${fn}".tar*.gz
-          "$PWD/${fn}/bin/cmake" --version
+          ls -l
+          find .
+          echo "|$PWD|"
+          "$PWD/cmake-${CMAKE_VERSION}-Linux-x86_64/bin/cmake" --version
 
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
