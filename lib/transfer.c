@@ -820,6 +820,7 @@ CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos)
 {
   if(data->conn->handler->write_resp_hd) {
+    DEBUGASSERT(!hd0[hdlen]); /* null terminated */
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
     return data->conn->handler->write_resp_hd(data, hd0, hdlen, is_eos);
