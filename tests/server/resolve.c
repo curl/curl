@@ -47,7 +47,7 @@ static int test_resolve(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
@@ -79,7 +79,7 @@ static int test_resolve(int argc, char *argv[])
 #ifdef CURLRES_IPV6
          "\n --ipv6"
 #endif
-         );
+    );
     return 1;
   }
 

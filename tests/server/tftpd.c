@@ -380,7 +380,7 @@ static void read_ahead(struct testcase *test,
   }
 
   p = dp->th_data;
-  for(i = 0 ; i < SEGSIZE; i++) {
+  for(i = 0; i < SEGSIZE; i++) {
     if(newline) {
       if(prevchar == '\n')
         c = '\n';       /* lf to cr,lf */
@@ -536,8 +536,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
       else
         fromaddrlen = sizeof(fromaddr.sa6);
 #endif
-      (void)recvfrom(f, rbuf, sizeof(rbuf), 0,
-                     &fromaddr.sa, &fromaddrlen);
+      (void)recvfrom(f, rbuf, sizeof(rbuf), 0, &fromaddr.sa, &fromaddrlen);
     }
     else
       break;
@@ -578,7 +577,7 @@ static int test_tftpd(int argc, char **argv)
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {
@@ -674,8 +673,7 @@ static int test_tftpd(int argc, char **argv)
   }
 
   flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -825,7 +823,7 @@ static int test_tftpd(int argc, char **argv)
     }
 #endif
 
-    maxtimeout = 5*TIMEOUT;
+    maxtimeout = 5 * TIMEOUT;
 
     tp = &trsbuf.hdr;
     tp->th_opcode = ntohs(tp->th_opcode);
@@ -1076,7 +1074,6 @@ static int tftpd_parse_servercmd(struct testcase *req)
   return 0; /* OK! */
 }
 
-
 /*
  * Validate file access.
  */
@@ -1104,7 +1101,7 @@ static int validate_access(struct testcase *test,
   ptr = strrchr(filename, '/');
 
   if(ptr) {
-    char partbuf[80]="data";
+    char partbuf[80] = "data";
     long partno;
     long testno;
     const char *pval;
@@ -1209,7 +1206,7 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
     if(test->writedelay) {
       logmsg("Pausing %d seconds before %d bytes", test->writedelay,
              size);
-      curlx_wait_ms(1000*test->writedelay);
+      curlx_wait_ms(1000 * test->writedelay);
     }
 
 send_data:
@@ -1249,11 +1246,10 @@ send_data:
         }
         /* Re-synchronize with the other side */
         (void)synchnet(peer);
-        if(sap->th_block == (sendblock-1)) {
+        if(sap->th_block == (sendblock - 1)) {
           goto send_data;
         }
       }
-
     }
     sendblock++;
   } while(size == SEGSIZE);
