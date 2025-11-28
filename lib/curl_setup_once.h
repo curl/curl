@@ -287,7 +287,7 @@ typedef unsigned int bit;
 #undef DEBUGASSERT
 #ifdef DEBUGBUILD
 /* External assertion handler for custom integrations */
-typedef void (*curl_assert_callback)(const char *expr,\
+typedef void (*curl_assert_callback)(const char *expr, \
   const char *file, int line);
 extern curl_assert_callback curl_global_assert_handler;
 
