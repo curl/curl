@@ -61,7 +61,7 @@ jobs:
     container: 'debian:stretch'
 
     env:
-      CMAKE_VERSION: '3.7.2'
+      CMAKE_VERSION: '3.7.0'  # Earliest version supported by curl
     steps:
       - name: 'install prereqs'
         # Remember, this shell is dash, not bash
