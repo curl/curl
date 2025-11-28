@@ -93,9 +93,13 @@ jobs:
           tar -xf "${fn}".tar*.gz
           rm -f "${fn}".tar*.gz
           mv cmake-${CMAKE_VERSION}-Linux-x86_64 cmake
+          echo "|$PWD|"
+          pwd
 
       - name: 'CM build-only configure (out-of-tree)'
         run: |
+          echo "|$PWD|"
+          pwd
           mkdir bld-1
           cd bld-1
           cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
