@@ -352,7 +352,7 @@ static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
 }
 
 static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
-                          const void *buf, size_t len, bool eos,
+                          const uint8_t *buf, size_t len, bool eos,
                           size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;

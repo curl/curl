@@ -3715,7 +3715,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
 }
 
 static CURLcode scp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, bool eos,
+                         const uint8_t *mem, size_t len, bool eos,
                          size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;
@@ -3731,7 +3731,8 @@ static CURLcode scp_send(struct Curl_easy *data, int sockindex,
     return CURLE_FAILED_INIT;
 
   /* libssh2_channel_write() returns int! */
-  nwritten = (ssize_t) libssh2_channel_write(sshc->ssh_channel, mem, len);
+  nwritten = (ssize_t) libssh2_channel_write(sshc->ssh_channel,
+                                             (const char *)mem, len);
 
   ssh_block2waitfor(data, sshc, (nwritten == LIBSSH2_ERROR_EAGAIN));
 
@@ -3874,7 +3875,7 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 
 /* return number of sent bytes */
 static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
-                          const void *mem, size_t len, bool eos,
+                          const uint8_t *mem, size_t len, bool eos,
                           size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;
@@ -3888,7 +3889,7 @@ static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
   if(!sshc)
     return CURLE_FAILED_INIT;
 
-  nwrite = libssh2_sftp_write(sshc->sftp_handle, mem, len);
+  nwrite = libssh2_sftp_write(sshc->sftp_handle, (const char *)mem, len);
 
   ssh_block2waitfor(data, sshc, (nwrite == LIBSSH2_ERROR_EAGAIN));
 
