@@ -1903,7 +1903,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
     goto out;
   }
 
-  result = Curl_h1_req_parse_read(&stream->h1, (const char *)buf, len, NULL,
+  result = Curl_h1_req_parse_read(&stream->h1, buf, len, NULL,
                                   !data->state.http_ignorecustom ?
                                   data->set.str[STRING_CUSTOMREQUEST] : NULL,
                                   0, pnwritten);
