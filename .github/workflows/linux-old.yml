@@ -85,7 +85,8 @@ jobs:
           CMAKE_VERSION='3.18.4'
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
-          tar -xzf "${fn}.tar.gz"
+          ls -l
+          tar -xf "${fn}.tar.gz"
           rm -f "${fn}.tar.gz"
           "$PWD/${fn}/bin/cmake" --version
 
