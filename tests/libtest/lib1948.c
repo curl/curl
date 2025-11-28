@@ -23,8 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-typedef struct
-{
+typedef struct {
   const char *buf;
   size_t len;
 } put_buffer;

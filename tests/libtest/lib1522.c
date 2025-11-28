@@ -78,7 +78,7 @@ static CURLcode test_lib1522(const char *URL)
 
     curl_mprintf("uploadSize = %" CURL_FORMAT_CURL_OFF_T "\n", uploadSize);
 
-    if((size_t) uploadSize == sizeof(g_Data)) {
+    if((size_t)uploadSize == sizeof(g_Data)) {
       curl_mprintf("!!!!!!!!!! PASS\n");
     }
     else {

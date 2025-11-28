@@ -27,10 +27,9 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode
-test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
-                           size_t r_offset, size_t nread,
-                           size_t exp_len)
+static CURLcode test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
+                                           size_t r_offset, size_t nread,
+                                           size_t exp_len)
 {
   if(!frame)
     return CURLE_OK;
@@ -362,7 +361,6 @@ static CURLcode test_ws_data_m1_echo(const char *url,
         r = CURLE_RECV_ERROR;
         goto out;
       }
-
     }
 
     curl_multi_remove_handle(multi, m1_ctx.curl);
@@ -393,16 +391,13 @@ out:
   return r;
 }
 
-
 static void test_ws_data_usage(const char *msg)
 {
   if(msg)
     curl_mfprintf(stderr, "%s\n", msg);
-  curl_mfprintf(stderr,
-    "usage: [options] url\n"
-    "  -m number  minimum frame size\n"
-    "  -M number  maximum frame size\n"
-  );
+  curl_mfprintf(stderr, "usage: [options] url\n"
+                        "  -m number  minimum frame size\n"
+                        "  -M number  maximum frame size\n");
 }
 
 #endif

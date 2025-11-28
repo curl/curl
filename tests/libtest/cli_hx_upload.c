@@ -72,7 +72,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
+    curl_msnprintf(t->filename, sizeof(t->filename) - 1, "download_%zu.data",
                    t->idx);
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
@@ -461,7 +461,6 @@ static CURLcode test_cli_hx_upload(const char *URL)
             curl_mfprintf(stderr, "unknown FINISHED???\n");
           }
         }
-
 
         /* nothing happening, maintenance */
         if(abort_paused) {

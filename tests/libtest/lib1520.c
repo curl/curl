@@ -46,7 +46,7 @@ static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 

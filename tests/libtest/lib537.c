@@ -118,7 +118,7 @@ static int t537_test_rlimit(int keep_open)
   /* If the OS allows a HUGE number of open files, we do not run.
    * Modern debian sid reports a limit of 134217724 and this tests
    * takes minutes. */
-#define LIMIT_CAP     (256*1024)
+#define LIMIT_CAP     (256 * 1024)
   if(rl.rlim_cur > LIMIT_CAP) {
     curl_mfprintf(stderr, "soft limit above %ld, not running\n",
                   (long)LIMIT_CAP);

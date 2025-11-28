@@ -31,7 +31,7 @@ struct t654_WriteThis {
 
 static void free_callback(void *userp)
 {
-  struct t654_WriteThis *pooh = (struct t654_WriteThis *) userp;
+  struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
 
   pooh->freecount++;
 }
@@ -41,7 +41,7 @@ static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
   int eof;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   eof = pooh->sizeleft <= 0;
@@ -92,7 +92,7 @@ static CURLcode test_lib654(const char *URL)
 
   /* Prepare the callback structure. */
   pooh.readptr = testdata;
-  pooh.sizeleft = (curl_off_t) strlen(testdata);
+  pooh.sizeleft = (curl_off_t)strlen(testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */

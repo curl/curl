@@ -38,8 +38,7 @@ static void usage_h2_pausing(const char *msg)
   );
 }
 
-struct handle
-{
+struct handle {
   size_t idx;
   int paused;
   int resumed;
@@ -51,7 +50,7 @@ struct handle
 static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
   size_t realsize = size * nmemb;
-  struct handle *handle = (struct handle *) clientp;
+  struct handle *handle = (struct handle *)clientp;
   curl_off_t totalsize;
 
   (void)data;
@@ -163,8 +162,8 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     goto cleanup;
   }
   memset(&resolve, 0, sizeof(resolve));
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
-                 host, port);
+  curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1", host,
+                 port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {

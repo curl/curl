@@ -83,7 +83,6 @@ static CURL *tse_add_transfer(CURLM *multi, CURLSH *share,
   if(resolve)
     curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve);
 
-
   mc = curl_multi_add_handle(multi, curl);
   if(mc != CURLM_OK) {
     curl_mfprintf(stderr, "curl_multi_add_handle: %s\n",
@@ -144,8 +143,8 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
     goto cleanup;
   }
 
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
-                 host, port);
+  curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1", host,
+                 port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   multi = curl_multi_init();
@@ -160,7 +159,6 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-
 
   if(!tse_add_transfer(multi, share, resolve, URL, http_version))
     goto cleanup;
@@ -205,7 +203,7 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
         curl_easy_getinfo(msg->easy_handle, CURLINFO_XFER_ID, &xfer_id);
         curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
         if(msg->data.result == CURLE_SEND_ERROR ||
-            msg->data.result == CURLE_RECV_ERROR) {
+           msg->data.result == CURLE_RECV_ERROR) {
           /* We get these if the server had a GOAWAY in transit on
            * reusing a connection */
         }

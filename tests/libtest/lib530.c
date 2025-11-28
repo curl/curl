@@ -229,7 +229,7 @@ static ssize_t t530_getMicroSecondTimeout(struct curltime *timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set* fdset,
+static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set *fdset,
                              curl_socket_t *maxFd)
 {
   int i;
