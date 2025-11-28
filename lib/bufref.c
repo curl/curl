@@ -29,7 +29,6 @@
 
 #ifdef DEBUGBUILD
 #define SIGNATURE 0x5c48e9b2    /* Random pattern. */
-curl_assert_callback curl_global_assert_handler = NULL; /* External assertion handler for custom integrations */
 #endif
 
 /*
