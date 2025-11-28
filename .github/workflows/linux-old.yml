@@ -92,7 +92,7 @@ jobs:
             fn="cmake-${CMAKE_VERSION}-win64-x64"
           fi
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.zip"
-          7z x -y "${fn}.zip" >/dev/null
+          unzip -q "${fn}.zip"
           rm -f "${fn}.zip".zip
           "$PWD/${fn}/bin/cmake" --version
 
