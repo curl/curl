@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
-       data twice!!! */
+       data twice */
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
     /* set username and password for the authentication */
