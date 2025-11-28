@@ -116,8 +116,7 @@ static CURLcode test_unit1620(const char *arg)
 
   Curl_freeset(empty);
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
-    fail_unless(empty->set.str[i] == NULL,
-                "Curl_free() did not set to NULL");
+    fail_unless(empty->set.str[i] == NULL, "Curl_free() did not set to NULL");
   }
 
   rc = Curl_close(&empty);

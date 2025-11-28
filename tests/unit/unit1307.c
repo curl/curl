@@ -290,7 +290,7 @@ static CURLcode test_unit1307(const char *arg)
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     int result = tests[i].result;
     int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
-    if(result & (LINUX_DIFFER|MAC_DIFFER)) {
+    if(result & (LINUX_DIFFER | MAC_DIFFER)) {
       if((result & LINUX_DIFFER) && (machine == SYSTEM_LINUX))
         result >>= LINUX_SHIFT;
       else if((result & MAC_DIFFER) && (machine == SYSTEM_MACOS))

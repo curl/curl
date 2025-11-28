@@ -205,7 +205,7 @@ static CURLcode test_unit1650(const char *arg)
         int j;
         for(j = 0; j < 16; j += 2) {
           size_t l;
-          curl_msnprintf(ptr, len, "%s%02x%02x", j?":":"", a->ip.v6[j],
+          curl_msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "", a->ip.v6[j],
                          a->ip.v6[j + 1]);
           l = strlen(ptr);
           len -= l;
@@ -232,12 +232,12 @@ static CURLcode test_unit1650(const char *arg)
   }
 
   /* pass all sizes into the decoder until full */
-  for(i = 0; i < sizeof(full49)-1; i++) {
+  for(i = 0; i < sizeof(full49) - 1; i++) {
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
-    rc = doh_resp_decode((const unsigned char *)full49, i, CURL_DNS_TYPE_A,
-                         &d);
+    rc = doh_resp_decode((const unsigned char *)full49,
+                         i, CURL_DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
       curl_mfprintf(stderr, "%zu: %d\n", i, rc);
@@ -250,8 +250,8 @@ static CURLcode test_unit1650(const char *arg)
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
-    rc = doh_resp_decode((const unsigned char *)&full49[i], sizeof(full49)-i-1,
-                         CURL_DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)&full49[i],
+                         sizeof(full49) - i - 1, CURL_DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
       curl_mfprintf(stderr, "2 %zu: %d\n", i, rc);
@@ -264,8 +264,8 @@ static CURLcode test_unit1650(const char *arg)
     struct dohentry d;
     struct dohaddr *a;
     memset(&d, 0, sizeof(d));
-    rc = doh_resp_decode((const unsigned char *)full49, sizeof(full49)-1,
-                         CURL_DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)full49,
+                         sizeof(full49) - 1, CURL_DNS_TYPE_A, &d);
     fail_if(d.numaddr != 1, "missing address");
     a = &d.addr[0];
     p = &a->ip.v4[0];

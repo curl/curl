@@ -45,7 +45,7 @@ static CURLcode test_unit3216(const char *arg)
   fail_unless(Curl_rlimit_avail(&r, ts) == 0, "blocked inf");
   Curl_rlimit_block(&r, FALSE, ts);
   fail_unless(Curl_rlimit_avail(&r, ts) == CURL_OFF_T_MAX,
-    "unblocked unlimited");
+              "unblocked unlimited");
 
   /* A ratelimit that give 10 tokens per second */
   ts = curlx_now();

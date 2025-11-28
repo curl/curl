@@ -39,12 +39,11 @@ static CURLcode t1663_setup(void)
   return res;
 }
 
-static void t1663_parse(
-  const char *input_data,
-  const char *exp_dev,
-  const char *exp_iface,
-  const char *exp_host,
-  CURLcode exp_rc)
+static void t1663_parse(const char *input_data,
+                        const char *exp_dev,
+                        const char *exp_iface,
+                        const char *exp_host,
+                        CURLcode exp_rc)
 {
   char *dev = NULL;
   char *iface = NULL;

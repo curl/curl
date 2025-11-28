@@ -238,8 +238,7 @@ out:
   return res;
 }
 
-static void check_result(const struct test_case *tc,
-                         struct test_result *tr)
+static void check_result(const struct test_case *tc, struct test_result *tr)
 {
   char msg[256];
   timediff_t duration_ms;
@@ -247,8 +246,7 @@ static void check_result(const struct test_case *tc,
   duration_ms = curlx_timediff_ms(tr->ended, tr->started);
   curl_mfprintf(stderr, "%d: test case took %dms\n", tc->id, (int)duration_ms);
 
-  if(tr->res != tc->exp_res
-    && CURLE_OPERATION_TIMEDOUT != tr->res) {
+  if(tr->res != tc->exp_res && CURLE_OPERATION_TIMEDOUT != tr->res) {
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",

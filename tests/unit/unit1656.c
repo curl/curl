@@ -95,7 +95,7 @@ static CURLcode test_unit1656(const char *arg)
   struct dynbuf dbuf;
   bool all_ok = TRUE;
 
-  curlx_dyn_init(&dbuf, 32*1024);
+  curlx_dyn_init(&dbuf, 32 * 1024);
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

@@ -37,7 +37,7 @@ static CURLcode test_unit1601(const char *arg)
   unsigned char output[MD5_DIGEST_LEN];
   unsigned char *testp = output;
 
-  Curl_md5it(output, (const unsigned char *) string1, strlen(string1));
+  Curl_md5it(output, (const unsigned char *)string1, strlen(string1));
 
   verify_memory(testp, "\xc4\xca\x42\x38\xa0\xb9\x23\x82\x0d\xcc\x50\x9a\x6f"
                 "\x75\x84\x9b", MD5_DIGEST_LEN);
