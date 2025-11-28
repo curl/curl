@@ -86,8 +86,8 @@ jobs:
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
           httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
           ls -l
-          tar -xf "${fn}.tar*.gz"
-          rm -f "${fn}.tar*.gz"
+          tar -xf "${fn}".tar*.gz
+          rm -f "${fn}".tar*.gz
           "$PWD/${fn}/bin/cmake" --version
 
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
