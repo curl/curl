@@ -473,7 +473,7 @@ void Curl_trc_ssh(struct Curl_easy *data, const char *fmt, ...)
     va_end(ap);
   }
 }
-#endif /* USE_SSL */
+#endif /* USE_SSH */
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 struct curl_trc_feat Curl_trc_feat_ws = {
@@ -719,6 +719,13 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
+}
+#endif
+#ifdef USE_SSH
+void Curl_trc_ssh(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data;
+  (void)fmt;
 }
 #endif
 #ifdef USE_SSL
