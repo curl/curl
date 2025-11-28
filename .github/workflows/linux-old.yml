@@ -82,6 +82,10 @@ jobs:
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
           dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
 
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
       - name: 'install prereqs (cmake)'
         run: |
           fn="cmake-${CMAKE_VERSION}-linux-x86_64"
@@ -90,15 +94,11 @@ jobs:
           rm -f "${fn}".tar*.gz
           mv cmake-${CMAKE_VERSION}-Linux-x86_64 cmake
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
-        with:
-          persist-credentials: false
-
       - name: 'CM build-only configure (out-of-tree)'
         run: |
           mkdir bld-1
           cd bld-1
-          "$PWD/cmake/bin/cmake" .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
 
       - name: 'CM build-only build'
@@ -122,7 +122,7 @@ jobs:
         run: |
           mkdir bld-cares
           cd bld-cares
-          "$PWD/cmake/bin/cmake" .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
