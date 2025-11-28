@@ -108,7 +108,8 @@ static CURLcode test_lib1960(const char *URL)
     goto test_cleanup;
   }
 
-  status = connect(client_fd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+  status = connect(client_fd, (struct sockaddr *)&serv_addr,
+                   sizeof(serv_addr));
   if(status < 0) {
     curl_mfprintf(stderr, "connection failed\n");
     goto test_cleanup;
