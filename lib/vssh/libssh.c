@@ -2877,7 +2877,7 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
 }
 
 static CURLcode scp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, bool eos,
+                         const uint8_t *mem, size_t len, bool eos,
                          size_t *pnwritten)
 {
   int rc;
@@ -3038,7 +3038,7 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 
 /* return number of sent bytes */
 static CURLcode sftp_send(struct Curl_easy *data, int sockindex,
-                          const void *mem, size_t len, bool eos,
+                          const uint8_t *mem, size_t len, bool eos,
                           size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;

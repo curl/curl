@@ -508,7 +508,7 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
  * in `*pnwritten` or on error.
  */
 CURLcode Curl_cf_send(struct Curl_easy *data, int sockindex,
-                      const void *buf, size_t len, bool eos,
+                      const uint8_t *buf, size_t len, bool eos,
                       size_t *pnwritten);
 
 /**

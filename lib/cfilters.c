@@ -246,7 +246,7 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
 }
 
 CURLcode Curl_cf_send(struct Curl_easy *data, int num,
-                      const void *mem, size_t len, bool eos,
+                      const uint8_t *mem, size_t len, bool eos,
                       size_t *pnwritten)
 {
   struct Curl_cfilter *cf;
