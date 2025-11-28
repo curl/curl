@@ -26,10 +26,6 @@
 #include "../curl_setup.h"
 
 #ifdef _WIN32
-/* MultiByte conversions using Windows kernel32 library. */
-wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
-char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
-#endif
 
 /*
  * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
@@ -48,7 +44,14 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * memory tracker memdebug functions.
  */
 
-#if defined(UNICODE) && defined(_WIN32)
+/* MultiByte conversions using Windows kernel32 library. */
+wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
+char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
+
+/* the purpose of this macro is to free() without being traced by memdebug */
+#define curlx_unicodefree(ptr) free(ptr)
+
+#ifdef UNICODE
 
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
@@ -60,15 +63,10 @@ typedef union {
   const unsigned short *const_tbyte_ptr;
 } xcharp_u;
 
-#else
+#else /* !UNICODE */
 
-#ifdef _WIN32
 #define curlx_convert_UTF8_to_tchar(ptr) _strdup(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) _strdup(ptr)
-#else
-#define curlx_convert_UTF8_to_tchar(ptr) strdup(ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) strdup(ptr)
-#endif
 
 typedef union {
   char                *tchar_ptr;
@@ -77,9 +75,7 @@ typedef union {
   const unsigned char *const_tbyte_ptr;
 } xcharp_u;
 
-#endif /* UNICODE && _WIN32 */
-
-/* the purpose of this macro is to free() without being traced by memdebug */
-#define curlx_unicodefree(ptr) free(ptr)
+#endif /* UNICODE */
+#endif /* _WIN32 */
 
 #endif /* HEADER_CURL_MULTIBYTE_H */
