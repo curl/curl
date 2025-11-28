@@ -72,11 +72,11 @@ static size_t memwidx = 0; /* write index */
    _exit() comes after the atexit handlers are called. curl/curl#6620 */
 static void curl_dbg_cleanup(void)
 {
-  if(memwidx)
-    fwrite(membuf, 1, memwidx, curl_dbg_logfile);
   if(curl_dbg_logfile &&
      curl_dbg_logfile != stderr &&
      curl_dbg_logfile != stdout) {
+    if(memwidx)
+      fwrite(membuf, 1, memwidx, curl_dbg_logfile);
     /* !checksrc! disable BANNEDFUNC 1 */
     fclose(curl_dbg_logfile);
   }
