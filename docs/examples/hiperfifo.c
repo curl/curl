@@ -106,35 +106,38 @@ struct SockInfo {
   struct GlobalInfo *global;
 };
 
-#define mycase(code)                                                          \
-  case code:                                                                  \
-    s = __STRING(code)
-
 /* Die if we get a bad CURLMcode somewhere */
 static void mcode_or_die(const char *where, CURLMcode code)
 {
   if(CURLM_OK != code) {
     const char *s;
     switch(code) {
-      mycase(CURLM_BAD_HANDLE);
-        break;
-      mycase(CURLM_BAD_EASY_HANDLE);
-        break;
-      mycase(CURLM_OUT_OF_MEMORY);
-        break;
-      mycase(CURLM_INTERNAL_ERROR);
-        break;
-      mycase(CURLM_UNKNOWN_OPTION);
-        break;
-      mycase(CURLM_LAST);
-        break;
-      default:
-        s = "CURLM_unknown";
-        break;
-      mycase(CURLM_BAD_SOCKET);
-        fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
-        /* ignore this error */
-        return;
+    case CURLM_BAD_HANDLE:
+      s = "CURLM_BAD_HANDLE";
+      break;
+    case CURLM_BAD_EASY_HANDLE:
+      s = "CURLM_BAD_EASY_HANDLE";
+      break;
+    case CURLM_OUT_OF_MEMORY:
+      s = "CURLM_OUT_OF_MEMORY";
+      break;
+    case CURLM_INTERNAL_ERROR:
+      s = "CURLM_INTERNAL_ERROR";
+      break;
+    case CURLM_UNKNOWN_OPTION:
+      s = "CURLM_UNKNOWN_OPTION";
+      break;
+    case CURLM_LAST:
+      s = "CURLM_LAST";
+      break;
+    default:
+      s = "CURLM_unknown";
+      break;
+    case CURLM_BAD_SOCKET:
+      s = "CURLM_BAD_SOCKET";
+      fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
+      /* ignore this error */
+      return;
     }
     fprintf(MSG_OUT, "ERROR: %s returns %s\n", where, s);
     exit(code);

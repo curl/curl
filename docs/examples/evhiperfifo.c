@@ -61,7 +61,6 @@ This is purely a demo app, all retrieved data is simply discarded by the write
 callback.
 
 */
-
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
