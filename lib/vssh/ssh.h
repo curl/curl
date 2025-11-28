@@ -156,7 +156,8 @@ struct ssh_conn {
   int secondCreateDirs;         /* counter use by the code to see if the
                                    second attempt has been made to change
                                    to/create a directory */
-  int orig_waitfor;             /* default READ/WRITE bits wait for */
+  int waitfor;                  /* KEEP_RECV/KEEP_SEND bits overriding
+                                   pollset given flags */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
 #ifdef USE_LIBSSH
