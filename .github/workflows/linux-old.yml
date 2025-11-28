@@ -61,7 +61,7 @@ jobs:
     container: 'debian:stretch'
 
     env:
-      CMAKE_VERSION: '3.18.4'
+      CMAKE_VERSION: '3.7.2'
     steps:
       - name: 'install prereqs'
         # Remember, this shell is dash, not bash
