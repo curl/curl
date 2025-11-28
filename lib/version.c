@@ -735,3 +735,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 
   return &version_info;
 }
+
+#ifdef DEBUGBUILD
+/* External assertion handler for custom integrations */
+CURL_EXTERN curl_assert_callback curl_global_assert_handler = NULL;
+#endif
