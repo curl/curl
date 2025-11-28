@@ -395,9 +395,11 @@ static void test_ws_data_usage(const char *msg)
 {
   if(msg)
     curl_mfprintf(stderr, "%s\n", msg);
-  curl_mfprintf(stderr, "usage: [options] url\n"
-                        "  -m number  minimum frame size\n"
-                        "  -M number  maximum frame size\n");
+  curl_mfprintf(stderr,
+    "usage: [options] url\n"
+    "  -m number  minimum frame size\n"
+    "  -M number  maximum frame size\n"
+  );
 }
 
 #endif

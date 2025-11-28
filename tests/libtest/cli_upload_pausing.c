@@ -76,9 +76,10 @@ static void usage_upload_pausing(const char *msg)
   if(msg)
     curl_mfprintf(stderr, "%s\n", msg);
   curl_mfprintf(stderr,
-                "usage: [options] url\n"
-                "  upload and pause, options:\n"
-                "  -V http_version (http/1.1, h2, h3) http version to use\n");
+    "usage: [options] url\n"
+    "  upload and pause, options:\n"
+    "  -V http_version (http/1.1, h2, h3) http version to use\n"
+  );
 }
 
 static CURLcode test_cli_upload_pausing(const char *URL)
