@@ -57,7 +57,8 @@ static struct t758_ctx {
 
 static const char *t758_tag(void)
 {
-  curl_msnprintf(t758_ctx.buf, sizeof(t758_ctx.buf), "[T758-%d-%d] [%d/%d]",
+  curl_msnprintf(t758_ctx.buf, sizeof(t758_ctx.buf),
+                 "[T758-%d-%d] [%d/%d]",
                  t758_ctx.max_socket_calls, t758_ctx.max_timer_calls,
                  t758_ctx.socket_calls, t758_ctx.timer_calls);
   return t758_ctx.buf;
