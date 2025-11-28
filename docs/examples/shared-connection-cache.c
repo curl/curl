@@ -29,8 +29,8 @@
 
 #include <curl/curl.h>
 
-static void my_lock(CURL *curl, curl_lock_data data,
-                    curl_lock_access laccess, void *useptr)
+static void my_lock(CURL *curl, curl_lock_data data, curl_lock_access laccess,
+                    void *useptr)
 {
   (void)curl;
   (void)data;

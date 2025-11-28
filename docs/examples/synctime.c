@@ -66,7 +66,11 @@
 #include <stdio.h>
 
 #ifndef _WIN32
-int main(void) { printf("Platform not supported.\n"); return 1; }
+int main(void)
+{
+  printf("Platform not supported.\n");
+  return 1;
+}
 #else
 
 #if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
@@ -79,7 +83,11 @@ int main(void) { printf("Platform not supported.\n"); return 1; }
 #endif
 
 #ifdef CURL_WINDOWS_UWP
-int main(void) { printf("Platform not supported.\n"); return 1; }
+int main(void)
+{
+  printf("Platform not supported.\n");
+  return 1;
+}
 #else
 
 #include <time.h>
@@ -123,8 +131,7 @@ static SYSTEMTIME LOCALTime;
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
-static size_t write_cb(void *ptr, size_t size, size_t nmemb,
-                                        void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return nmemb * size;
@@ -280,7 +287,7 @@ int main(int argc, char *argv[])
         snprintf(conf->http_proxy, MAX_STRING, "%s", &argv[OptionIndex][8]);
 
       if((strcmp(argv[OptionIndex], "--help") == 0) ||
-          (strcmp(argv[OptionIndex], "/?") == 0)) {
+         (strcmp(argv[OptionIndex], "/?") == 0)) {
         showUsage();
         return 0;
       }
@@ -317,9 +324,9 @@ int main(int argc, char *argv[])
     gmt      = gmtime(&tt);
     tt_gmt   = mktime(gmt);
     tzonediffFloat = difftime(tt_local, tt_gmt);
-    tzonediffWord  = (int)(tzonediffFloat/3600.0);
+    tzonediffWord = (int)(tzonediffFloat / 3600.0);
 
-    if(tzonediffWord == (int)(tzonediffFloat/3600.0))
+    if(tzonediffWord == (int)(tzonediffFloat / 3600.0))
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
@@ -329,9 +336,8 @@ int main(int argc, char *argv[])
     GetLocalTime(&LOCALTime);
     snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-             LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-             LOCALTime.wMilliseconds);
+             MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear, LOCALTime.wHour,
+             LOCALTime.wMinute, LOCALTime.wSecond, LOCALTime.wMilliseconds);
 
     fprintf(stderr, "Fetch: %s\n\n", conf->timeserver);
     fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
@@ -343,9 +349,8 @@ int main(int argc, char *argv[])
     GetLocalTime(&LOCALTime);
     snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-             LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-             LOCALTime.wMilliseconds);
+             MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear, LOCALTime.wHour,
+             LOCALTime.wMinute, LOCALTime.wSecond, LOCALTime.wMilliseconds);
     fprintf(stderr, "\nAfter  HTTP. Date: %s%s\n", timeBuf, tzoneBuf);
 
     if(AutoSyncTime == 3) {
@@ -359,7 +364,7 @@ int main(int argc, char *argv[])
         GetLocalTime(&LOCALTime);
         snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
                  DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-                 MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+                 MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear,
                  LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
                  LOCALTime.wMilliseconds);
         fprintf(stderr, "\nNew System's Date: %s%s\n", timeBuf, tzoneBuf);

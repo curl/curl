@@ -60,7 +60,7 @@ static struct curl_context *create_curl_context(curl_socket_t sockfd,
 {
   struct curl_context *context;
 
-  context = (struct curl_context *) malloc(sizeof(*context));
+  context = (struct curl_context *)malloc(sizeof(*context));
 
   context->sockfd = sockfd;
   context->uv = uv;
@@ -73,13 +73,13 @@ static struct curl_context *create_curl_context(curl_socket_t sockfd,
 
 static void curl_close_cb(uv_handle_t *handle)
 {
-  struct curl_context *context = (struct curl_context *) handle->data;
+  struct curl_context *context = (struct curl_context *)handle->data;
   free(context);
 }
 
 static void destroy_curl_context(struct curl_context *context)
 {
-  uv_close((uv_handle_t *) &context->poll_handle, curl_close_cb);
+  uv_close((uv_handle_t *)&context->poll_handle, curl_close_cb);
 }
 
 static void add_download(const char *url, int num, CURLM *multi)
@@ -145,7 +145,7 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 {
   int running_handles;
   int flags = 0;
-  struct curl_context *context = (struct curl_context *) req->data;
+  struct curl_context *context = (struct curl_context *)req->data;
   (void)status;
   if(events & UV_READABLE)
     flags |= CURL_CSELECT_IN;
@@ -202,9 +202,9 @@ static int cb_socket(CURL *curl, curl_socket_t s, int action,
   case CURL_POLL_OUT:
   case CURL_POLL_INOUT:
     curl_context = socketp ?
-      (struct curl_context *) socketp : create_curl_context(s, uv);
+      (struct curl_context *)socketp : create_curl_context(s, uv);
 
-    curl_multi_assign(uv->multi, s, (void *) curl_context);
+    curl_multi_assign(uv->multi, s, (void *)curl_context);
 
     if(action != CURL_POLL_IN)
       events |= UV_WRITABLE;
@@ -215,8 +215,8 @@ static int cb_socket(CURL *curl, curl_socket_t s, int action,
     break;
   case CURL_POLL_REMOVE:
     if(socketp) {
-      uv_poll_stop(&((struct curl_context*)socketp)->poll_handle);
-      destroy_curl_context((struct curl_context*) socketp);
+      uv_poll_stop(&((struct curl_context *)socketp)->poll_handle);
+      destroy_curl_context((struct curl_context *)socketp);
       curl_multi_assign(uv->multi, s, NULL);
     }
     break;
@@ -230,7 +230,7 @@ static int cb_socket(CURL *curl, curl_socket_t s, int action,
 int main(int argc, char **argv)
 {
   CURLcode res;
-  struct datauv uv = { 0 };
+  struct datauv uv = {0};
   int running_handles;
 
   if(argc <= 1)

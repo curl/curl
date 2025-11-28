@@ -83,7 +83,6 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
   return remoteFileSizeByte;
 }
 
-
 static int sftpResumeUpload(CURL *curl, const char *remotepath,
                             const char *localpath)
 {

@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  FILE * hd_src;
+  FILE *hd_src;
   struct stat file_info;
 
   char *file;

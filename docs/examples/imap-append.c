@@ -64,7 +64,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   const char *data;
   size_t room = size * nmemb;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
@@ -95,7 +95,7 @@ int main(void)
   if(curl) {
     size_t filesize;
     long infilesize = LONG_MAX;
-    struct upload_status upload_ctx = { 0 };
+    struct upload_status upload_ctx = {0};
 
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");

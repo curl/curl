@@ -31,7 +31,11 @@
 
 #ifdef __AMIGA__
 #include <stdio.h>
-int main(void) { printf("Platform not supported.\n"); return 1; }
+int main(void)
+{
+  printf("Platform not supported.\n");
+  return 1;
+}
 #else
 
 #ifdef _MSC_VER

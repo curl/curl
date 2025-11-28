@@ -52,7 +52,6 @@ static size_t write_cb(void *buffer, size_t size, size_t nmemb, void *stream)
   return fwrite(buffer, size, nmemb, out->stream);
 }
 
-
 int main(void)
 {
   CURL *curl;

@@ -90,7 +90,7 @@ int main(void)
     curl_easy_cleanup(curl);
   }
 
-  fclose(ftpfile); /* close the local file */
+  fclose(ftpfile);  /* close the local file */
   fclose(respfile); /* close the response file */
 
   curl_global_cleanup();

@@ -55,7 +55,7 @@ struct ParserStruct {
 static void startElement(void *userData, const XML_Char *name,
                          const XML_Char **atts)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   state->tags++;
   state->depth++;
 
@@ -70,7 +70,7 @@ static void startElement(void *userData, const XML_Char *name,
 
 static void characterDataHandler(void *userData, const XML_Char *s, int len)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   struct MemoryStruct *mem = &state->characters;
 
   char *ptr = realloc(mem->memory, mem->size + (unsigned long)len + 1);
@@ -89,7 +89,7 @@ static void characterDataHandler(void *userData, const XML_Char *s, int len)
 
 static void endElement(void *userData, const XML_Char *name)
 {
-  struct ParserStruct *state = (struct ParserStruct *) userData;
+  struct ParserStruct *state = (struct ParserStruct *)userData;
   state->depth--;
 
   printf("%5lu   %10lu   %s\n", state->depth, state->characters.size, name);
@@ -98,9 +98,9 @@ static void endElement(void *userData, const XML_Char *name)
 static size_t write_cb(void *contents, size_t length, size_t nmemb,
                        void *userp)
 {
-  XML_Parser parser = (XML_Parser) userp;
+  XML_Parser parser = (XML_Parser)userp;
   size_t real_size = length * nmemb;
-  struct ParserStruct *state = (struct ParserStruct *) XML_GetUserData(parser);
+  struct ParserStruct *state = (struct ParserStruct *)XML_GetUserData(parser);
 
   /* Only parse if we are not already in a failure state. */
   if(state->ok && XML_Parse(parser, contents, (int)real_size, 0) == 0) {

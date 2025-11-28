@@ -47,7 +47,7 @@ struct WriteThis {
 static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
-  size_t buffer_size = size*nmemb;
+  size_t buffer_size = size * nmemb;
 
   if(wt->sizeleft) {
     /* copy as much as possible from the source to the destination */
