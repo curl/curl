@@ -143,8 +143,8 @@ static CURLcode test_cli_tls_session_reuse(const char *URL)
     goto cleanup;
   }
 
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1", host,
-                 port);
+  curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1",
+                 host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   multi = curl_multi_init();
