@@ -1794,12 +1794,11 @@ if(CURL_CODE_COVERAGE)
 endif()
 
 # Hack to add some libraries to the end of the library list to make binutils ld
-# for GCC happy when linking statically. Necessary for libs detected via
-# CMake's built-in find modules and which CMake adds to the beginning of
-# the lib list on linker command-line for some reason. This makes them appear
-# before the dependencies detected via curl's custom Find modules, and
-# breaking linkers sensitive to lib order. There must be a better solution
-# to this.
+# for GCC find symbols when linking statically. Necessary for libs detected via
+# CMake's built-in find modules, which CMake adds to the beginning of the lib
+# list on the linker command-line for some reason. This makes them appear
+# before dependencies detected via curl's custom Find modules, and breaks
+# linkers sensitive to lib order. There must be a better solution to this.
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   foreach(_lib IN ITEMS OpenSSL::Crypto ZLIB::ZLIB)
     if(TARGET "${_lib}")
