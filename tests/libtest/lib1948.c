@@ -23,10 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-struct {
+struct put_buffer {
   const char *buf;
   size_t len;
-} put_buffer;
+};
 
 static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
