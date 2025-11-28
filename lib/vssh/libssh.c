@@ -2410,7 +2410,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       break;
 
     }
-  } while(!rc && (sshc->state != SSH_STOP));
+    /* break the loop only on STOP or SSH_AGAIN. If `rc` is some
+     * other error code, we will have progressed the state accordingly. */
+  } while((rc != SSH_AGAIN) && (sshc->state != SSH_STOP));
 
   if(rc == SSH_AGAIN) {
     /* we would block, we need to wait for the socket to be ready (in the
