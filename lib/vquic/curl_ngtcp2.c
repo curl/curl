@@ -2277,16 +2277,26 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 static const char *gtls_hs_msg_name(int mtype)
 {
   switch(mtype) {
-  case 1: return "ClientHello";
-  case 2: return "ServerHello";
-  case 4: return "SessionTicket";
-  case 8: return "EncryptedExtensions";
-  case 11: return "Certificate";
-  case 13: return "CertificateRequest";
-  case 15: return "CertificateVerify";
-  case 20: return "Finished";
-  case 24: return "KeyUpdate";
-  case 254: return "MessageHash";
+  case 1:
+    return "ClientHello";
+  case 2:
+    return "ServerHello";
+  case 4:
+    return "SessionTicket";
+  case 8:
+    return "EncryptedExtensions";
+  case 11:
+    return "Certificate";
+  case 13:
+    return "CertificateRequest";
+  case 15:
+    return "CertificateVerify";
+  case 20:
+    return "Finished";
+  case 24:
+    return "KeyUpdate";
+  case 254:
+    return "MessageHash";
   }
   return "Unknown";
 }
