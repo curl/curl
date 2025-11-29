@@ -37,17 +37,14 @@
 
 #include "mbedtls_threadlock.h"
 
-/* number of thread locks */
-#define NUMT                    2
-
-/* This array stores the mutexes available to Mbedtls */
-static MBEDTLS_MUTEX_T mutex_buf[NUMT];
+/* This array stores the mutexes available to mbedTLS */
+static MBEDTLS_MUTEX_T mutex_buf[2];
 
 int Curl_mbedtlsthreadlock_thread_setup(void)
 {
   int i;
 
-  for(i = 0;  i < NUMT;  i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(mutex_buf); i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_init(&mutex_buf[i], NULL))
       return 0; /* pthread_mutex_init failed */
@@ -65,7 +62,7 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
 {
   int i;
 
-  for(i = 0; i < NUMT; i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(mutex_buf); i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_destroy(&mutex_buf[i]))
       return 0; /* pthread_mutex_destroy failed */
@@ -80,7 +77,7 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
 
 int Curl_mbedtlsthreadlock_lock_function(int n)
 {
-  if(n < NUMT) {
+  if(n < CURL_ARRAYSIZE(mutex_buf)) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_lock(&mutex_buf[n])) {
       DEBUGF(curl_mfprintf(stderr, "Error: "
@@ -100,7 +97,7 @@ int Curl_mbedtlsthreadlock_lock_function(int n)
 
 int Curl_mbedtlsthreadlock_unlock_function(int n)
 {
-  if(n < NUMT) {
+  if(n < CURL_ARRAYSIZE(mutex_buf)) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
     if(pthread_mutex_unlock(&mutex_buf[n])) {
       DEBUGF(curl_mfprintf(stderr, "Error: "
