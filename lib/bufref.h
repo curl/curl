@@ -36,7 +36,6 @@ struct bufref {
 #endif
 };
 
-
 void Curl_bufref_init(struct bufref *br);
 void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
                      void (*dtor)(void *));

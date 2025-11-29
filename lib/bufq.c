@@ -143,7 +143,6 @@ static void chunk_list_free(struct buf_chunk **anchor)
   }
 }
 
-
 void Curl_bufcp_init(struct bufc_pool *pool,
                      size_t chunk_size, size_t spare_max)
 {
@@ -330,7 +329,7 @@ static void prune_head(struct bufq *q)
       --q->chunk_count;
     }
     else if((q->chunk_count > q->max_chunks) ||
-       (q->opts & BUFQ_OPT_NO_SPARES)) {
+            (q->opts & BUFQ_OPT_NO_SPARES)) {
       /* SOFT_LIMIT allowed us more than max. free spares until
        * we are at max again. Or free them if we are configured
        * to not use spares. */

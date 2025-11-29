@@ -511,8 +511,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
-                  result);
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d", result);
       conn_report_connect_stats(cf, data);
       goto out;
     }
@@ -653,7 +652,7 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_MULTIPLEX)
       return TRUE;
-    if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
       return FALSE;
   }
   return FALSE;
@@ -691,7 +690,7 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data,
         v = (unsigned char)value;
       break;
     }
-    if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
       break;
   }
   return (unsigned char)(result ? 0 : v);
@@ -803,9 +802,9 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
   cf = CONN_SOCK_IDX_VALID(sockindex) ? data->conn->cfilter[sockindex] : NULL;
   /* Find the "lowest" tunneling proxy filter that has not connected yet. */
   while(cf && !cf->connected) {
-    if((cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY)) ==
-       (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY))
-       cf_proxy = cf;
+    if((cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_PROXY)) ==
+       (CF_TYPE_IP_CONNECT | CF_TYPE_PROXY))
+      cf_proxy = cf;
     cf = cf->next;
   }
   /* cf_proxy (!= NULL) is not connected yet. It is talking
@@ -945,8 +944,7 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
 
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
 {
-  return cf_cntrl_all(data->conn, data, FALSE,
-                      CF_CTRL_DATA_SETUP, 0, NULL);
+  return cf_cntrl_all(data->conn, data, FALSE, CF_CTRL_DATA_SETUP, 0, NULL);
 }
 
 CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
@@ -1100,8 +1098,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #ifdef DEBUGBUILD
   if(write_len) {
-    /* Allow debug builds to override this logic to force short sends
-    */
+    /* Allow debug builds to override this logic to force short sends */
     const char *p = getenv("CURL_SMALLSENDS");
     if(p) {
       curl_off_t altsize;
