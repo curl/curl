@@ -26,6 +26,8 @@
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependencies. Default: @CURL_USE_PKGCONFIG@" "@CURL_USE_PKGCONFIG@")
 
 include(CMakeFindDependencyMacro)
+
+set(_curl_cmake_module_path_save ${CMAKE_MODULE_PATH})
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
 
 set(_libs "")
@@ -125,6 +127,8 @@ if("@HAVE_ZSTD@")
   find_dependency(Zstd)
   list(APPEND _libs CURL::zstd)
 endif()
+
+set(CMAKE_MODULE_PATH ${_curl_cmake_module_path_save})
 
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND WIN32 AND NOT TARGET CURL::win32_winsock)
   add_library(CURL::win32_winsock INTERFACE IMPORTED)
