@@ -41,7 +41,7 @@ struct Cookie {
   unsigned int creationtime;      /* time when the cookie was written */
   BIT(tailmatch);                 /* tail-match the domain name */
   BIT(secure);                    /* the 'secure' keyword was used */
-  BIT(livecookie);                /* updated from a server, not a stored file */
+  BIT(livecookie);                /* updated from server, not a stored file */
   BIT(httponly);                  /* the httponly directive is present */
   BIT(prefix_secure);             /* secure prefix is set */
   BIT(prefix_host);               /* host prefix is set */
