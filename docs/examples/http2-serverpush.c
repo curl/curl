@@ -136,7 +136,7 @@ static int setup(CURL *curl, const char *url)
 {
   out_download = fopen(OUTPUTFILE, "wb");
   if(!out_download)
-    return 1;  /* failed */
+    return 1; /* failed */
 
   /* set the same URL */
   curl_easy_setopt(curl, CURLOPT_URL, url);

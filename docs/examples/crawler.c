@@ -123,8 +123,8 @@ static CURL *make_handle(const char *url)
 /* HREF finder implemented in libxml2 but could be any HTML parser */
 static size_t follow_links(CURLM *multi, struct memory *mem, const char *url)
 {
-  int opts = HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | \
-             HTML_PARSE_NOWARNING | HTML_PARSE_NONET;
+  int opts = HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING |
+             HTML_PARSE_NONET;
   htmlDocPtr doc = htmlReadMemory(mem->buf, (int)mem->size, url, NULL, opts);
   size_t count;
   int i;

@@ -93,7 +93,7 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    struct state st = {0};
+    struct state st = { 0 };
 
     /* enable HSTS for this handle */
     curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);

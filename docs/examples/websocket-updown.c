@@ -35,8 +35,8 @@ static size_t write_cb(char *b, size_t size, size_t nitems, void *p)
   size_t i;
   unsigned int blen = (unsigned int)(nitems * size);
   const struct curl_ws_frame *frame = curl_ws_meta(curl);
-  fprintf(stderr, "Type: %s\n", frame->flags & CURLWS_BINARY ?
-          "binary" : "text");
+  fprintf(stderr, "Type: %s\n",
+          frame->flags & CURLWS_BINARY ? "binary" : "text");
   if(frame->flags & CURLWS_BINARY) {
     fprintf(stderr, "Bytes: %u", blen);
     for(i = 0; i < nitems; i++)
@@ -110,7 +110,6 @@ int main(int argc, const char *argv[])
     memcpy(rctx.buf, payload, rctx.blen);
     curl_easy_setopt(curl, CURLOPT_READDATA, &rctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-
 
     /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);

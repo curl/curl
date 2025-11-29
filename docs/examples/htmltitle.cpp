@@ -54,7 +54,6 @@
 //
 //  libxml callback context structure
 //
-
 struct Context {
   Context() : addTitle(false) {}
 
@@ -71,7 +70,6 @@ static std::string buffer;
 //
 //  libcurl write callback function
 //
-
 static size_t writer(char *data, size_t size, size_t nmemb,
                      std::string *writerData)
 {
@@ -86,7 +84,6 @@ static size_t writer(char *data, size_t size, size_t nmemb,
 //
 //  libcurl connection initialization
 //
-
 static bool init(CURL *&curl, const char *url)
 {
   CURLcode res;
@@ -134,7 +131,6 @@ static bool init(CURL *&curl, const char *url)
 //
 //  libxml start element callback function
 //
-
 static void StartElement(void *voidContext,
                          const xmlChar *name,
                          const xmlChar **attributes)
@@ -151,7 +147,6 @@ static void StartElement(void *voidContext,
 //
 //  libxml end element callback function
 //
-
 static void EndElement(void *voidContext,
                        const xmlChar *name)
 {
@@ -164,7 +159,6 @@ static void EndElement(void *voidContext,
 //
 //  Text handling helper function
 //
-
 static void handleCharacters(Context *context,
                              const xmlChar *chars,
                              int length)
@@ -177,7 +171,6 @@ static void handleCharacters(Context *context,
 //
 //  libxml PCDATA callback function
 //
-
 static void Characters(void *voidContext,
                        const xmlChar *chars,
                        int length)
@@ -190,7 +183,6 @@ static void Characters(void *voidContext,
 //
 //  libxml CDATA callback function
 //
-
 static void cdata(void *voidContext,
                   const xmlChar *chars,
                   int length)
@@ -203,9 +195,7 @@ static void cdata(void *voidContext,
 //
 //  libxml SAX callback structure
 //
-
-static htmlSAXHandler saxHandler =
-{
+static htmlSAXHandler saxHandler = {
   NULL,
   NULL,
   NULL,
@@ -243,7 +233,6 @@ static htmlSAXHandler saxHandler =
 //
 //  Parse given (assumed to be) HTML text and return the title
 //
-
 static void parseHtml(const std::string &html,
                       std::string &title)
 {

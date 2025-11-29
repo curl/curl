@@ -81,7 +81,7 @@ static const char *urls[] = {
 };
 
 #define MAX_PARALLEL 10  /* number of simultaneous transfers */
-#define NUM_URLS (sizeof(urls) / sizeof(char *))
+#define NUM_URLS     (sizeof(urls) / sizeof(char *))
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
 {

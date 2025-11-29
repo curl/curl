@@ -268,7 +268,7 @@ static curl_socket_t opensocket(void *clientp,
 
       if(ip && filter->type == CONNECTION_FILTER_BLACKLIST) {
         if(filter->verbose) {
-          char buf[128] = {0};
+          char buf[128] = { 0 };
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr, "* Rejecting IP %s due to blacklist entry %s.\n",
                   buf, ip->str);
@@ -277,7 +277,7 @@ static curl_socket_t opensocket(void *clientp,
       }
       else if(!ip && filter->type == CONNECTION_FILTER_WHITELIST) {
         if(filter->verbose) {
-          char buf[128] = {0};
+          char buf[128] = { 0 };
           inet_ntop(address->family, cinaddr, buf, sizeof(buf));
           fprintf(stderr,
                   "* Rejecting IP %s due to missing whitelist entry.\n", buf);

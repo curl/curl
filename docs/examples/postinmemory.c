@@ -68,7 +68,7 @@ int main(void)
     return (int)res;
 
   chunk.memory = malloc(1);  /* grown as needed by realloc above */
-  chunk.size = 0;    /* no data at this point */
+  chunk.size = 0;            /* no data at this point */
 
   curl = curl_easy_init();
   if(curl) {
