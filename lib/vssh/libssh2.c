@@ -2377,8 +2377,7 @@ static CURLcode ssh_state_scp_download_init(struct Curl_easy *data,
        LIBSSH2_ERROR_EAGAIN)
       return CURLE_AGAIN;
 
-    ssh_err = (int)(libssh2_session_last_error(sshc->ssh_session,
-                                               &err_msg, NULL, 0));
+    ssh_err = libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
     failf(data, "%s", err_msg);
     myssh_state(data, sshc, SSH_SCP_CHANNEL_FREE);
     return libssh2_session_error_to_CURLE(ssh_err);
@@ -2518,8 +2517,7 @@ static CURLcode ssh_state_scp_upload_init(struct Curl_easy *data,
        LIBSSH2_ERROR_EAGAIN)
       return CURLE_AGAIN;
 
-    ssh_err = (int)(libssh2_session_last_error(sshc->ssh_session,
-                                               &err_msg, NULL, 0));
+    ssh_err = libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
     failf(data, "%s", err_msg);
     myssh_state(data, sshc, SSH_SCP_CHANNEL_FREE);
     result = libssh2_session_error_to_CURLE(ssh_err);
