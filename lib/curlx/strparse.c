@@ -66,8 +66,7 @@ int curlx_str_until(const char **linep, struct Curl_str *out,
 
 /* Get a word until the first space or end of string. At least one byte long.
    return non-zero on error */
-int curlx_str_word(const char **linep, struct Curl_str *out,
-                   const size_t max)
+int curlx_str_word(const char **linep, struct Curl_str *out, const size_t max)
 {
   return curlx_str_until(linep, out, max, ' ');
 }

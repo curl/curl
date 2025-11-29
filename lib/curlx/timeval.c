@@ -79,7 +79,7 @@ struct curltime curlx_now(void)
   return now;
 }
 
-#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
+#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
   defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
 struct curltime curlx_now(void)
@@ -103,7 +103,7 @@ struct curltime curlx_now(void)
   ** called on unsupported OS version.
   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+  (HAVE_BUILTIN_AVAILABLE == 1)
   bool have_clock_gettime = FALSE;
   if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
     have_clock_gettime = TRUE;
@@ -111,8 +111,8 @@ struct curltime curlx_now(void)
 
 #ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
   if(
-#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) &&    \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
+  (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
     (clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow) == 0)) {
@@ -124,7 +124,7 @@ struct curltime curlx_now(void)
 
   if(
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+  (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
     (clock_gettime(CLOCK_MONOTONIC, &tsnow) == 0)) {
