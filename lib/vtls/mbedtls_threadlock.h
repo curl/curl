@@ -33,8 +33,8 @@
 
 int Curl_mbedtlsthreadlock_thread_setup(void);
 int Curl_mbedtlsthreadlock_thread_cleanup(void);
-int Curl_mbedtlsthreadlock_lock_function(int n);
-int Curl_mbedtlsthreadlock_unlock_function(int n);
+int Curl_mbedtlsthreadlock_lock_function(size_t n);
+int Curl_mbedtlsthreadlock_unlock_function(size_t n);
 
 #else
 

@@ -42,7 +42,7 @@ static MBEDTLS_MUTEX_T mutex_buf[2];
 
 int Curl_mbedtlsthreadlock_thread_setup(void)
 {
-  int i;
+  size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(mutex_buf); i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
@@ -60,7 +60,7 @@ int Curl_mbedtlsthreadlock_thread_setup(void)
 
 int Curl_mbedtlsthreadlock_thread_cleanup(void)
 {
-  int i;
+  size_t i;
 
   for(i = 0; i < CURL_ARRAYSIZE(mutex_buf); i++) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
@@ -75,7 +75,7 @@ int Curl_mbedtlsthreadlock_thread_cleanup(void)
   return 1; /* OK */
 }
 
-int Curl_mbedtlsthreadlock_lock_function(int n)
+int Curl_mbedtlsthreadlock_lock_function(size_t n)
 {
   if(n < CURL_ARRAYSIZE(mutex_buf)) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
@@ -95,7 +95,7 @@ int Curl_mbedtlsthreadlock_lock_function(int n)
   return 1; /* OK */
 }
 
-int Curl_mbedtlsthreadlock_unlock_function(int n)
+int Curl_mbedtlsthreadlock_unlock_function(size_t n)
 {
   if(n < CURL_ARRAYSIZE(mutex_buf)) {
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
