@@ -266,7 +266,7 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
     unsigned char c;
     *psent = 0;
     Curl_rand(data, &c, 1);
-    if(c >= ((100-qctx->wblock_percent)*256/100)) {
+    if(c >= ((100 - qctx->wblock_percent) * 256 / 100)) {
       CURL_TRC_CF(data, cf, "vquic_flush() simulate EWOULDBLOCK");
       return CURLE_AGAIN;
     }
@@ -334,8 +334,7 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
   CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
-              qctx->split_len, qctx->split_gsolen,
-              tail_len, qctx->gsolen);
+              qctx->split_len, qctx->split_gsolen, tail_len, qctx->gsolen);
   return vquic_flush(cf, data, qctx);
 }
 
@@ -476,7 +475,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 {
   struct iovec msg_iov;
   struct msghdr msg;
-  uint8_t buf[64*1024];
+  uint8_t buf[64 * 1024];
   struct sockaddr_storage remote_addr;
   size_t total_nread, pkts, calls;
   ssize_t rc;
@@ -551,7 +550,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
                                  size_t max_pkts,
                                  vquic_recv_pkts_cb *recv_cb, void *userp)
 {
-  uint8_t buf[64*1024];
+  uint8_t buf[64 * 1024];
   int bufsize = (int)sizeof(buf);
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen = sizeof(remote_addr);

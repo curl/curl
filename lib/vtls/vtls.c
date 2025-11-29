@@ -93,14 +93,13 @@
       dest->var = NULL;                      \
   } while(0)
 
-#define CLONE_BLOB(var)                        \
-  do {                                         \
-    if(blobdup(&dest->var, source->var))       \
-      return FALSE;                            \
+#define CLONE_BLOB(var)                  \
+  do {                                   \
+    if(blobdup(&dest->var, source->var)) \
+      return FALSE;                      \
   } while(0)
 
-static CURLcode blobdup(struct curl_blob **dest,
-                        struct curl_blob *src)
+static CURLcode blobdup(struct curl_blob **dest, struct curl_blob *src)
 {
   DEBUGASSERT(dest);
   DEBUGASSERT(!*dest);
@@ -149,8 +148,8 @@ static const struct alpn_spec ALPN_SPEC_H2_H11 = {
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
-static const struct alpn_spec *
-alpn_get_spec(http_majors allowed, bool use_alpn)
+static const struct alpn_spec *alpn_get_spec(http_majors allowed,
+                                             bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
@@ -170,7 +169,6 @@ alpn_get_spec(http_majors allowed, bool use_alpn)
 #endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 #endif /* USE_SSL */
 
-
 void Curl_ssl_easy_config_init(struct Curl_easy *data)
 {
   /*
@@ -185,10 +183,9 @@ void Curl_ssl_easy_config_init(struct Curl_easy *data)
 #endif
 }
 
-static bool
-match_ssl_primary_config(struct Curl_easy *data,
-                         struct ssl_primary_config *c1,
-                         struct ssl_primary_config *c2)
+static bool match_ssl_primary_config(struct Curl_easy *data,
+                                     struct ssl_primary_config *c1,
+                                     struct ssl_primary_config *c2)
 {
   (void)data;
   if((c1->version == c2->version) &&
@@ -324,8 +321,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST];
   sslc->primary.signature_algorithms =
     data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
-  sslc->primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   sslc->primary.cert_blob = data->set.blobs[BLOB_CERT];
   sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
   sslc->primary.curves = data->set.str[STRING_SSL_EC_CURVES];
@@ -538,9 +534,9 @@ void Curl_ssl_close_all(struct Curl_easy *data)
     Curl_ssl->close_all(data);
 }
 
-CURLcode  Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct easy_pollset *ps)
+CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
 {
   struct ssl_connect_data *connssl = cf->ctx;
 
@@ -628,7 +624,7 @@ CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num)
   Curl_ssl_free_certinfo(data);
 
   /* Allocate the required certificate information structures */
-  table = curlx_calloc((size_t) num, sizeof(struct curl_slist *));
+  table = curlx_calloc((size_t)num, sizeof(struct curl_slist *));
   if(!table)
     return CURLE_OUT_OF_MEMORY;
 
@@ -661,8 +657,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
      curlx_dyn_addn(&build, value, valuelen))
     return CURLE_OUT_OF_MEMORY;
 
-  nl = Curl_slist_append_nodup(ci->certinfo[certnum],
-                               curlx_dyn_ptr(&build));
+  nl = Curl_slist_append_nodup(ci->certinfo[certnum], curlx_dyn_ptr(&build));
   if(!nl) {
     curlx_dyn_free(&build);
     curl_slist_free_all(ci->certinfo[certnum]);
@@ -798,8 +793,8 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
     pinned_hash = pinnedpubkey;
     while(pinned_hash &&
-          !strncmp(pinned_hash, "sha256//", (sizeof("sha256//")-1))) {
-      pinned_hash = pinned_hash + (sizeof("sha256//")-1);
+          !strncmp(pinned_hash, "sha256//", (sizeof("sha256//") - 1))) {
+      pinned_hash = pinned_hash + (sizeof("sha256//") - 1);
       end_pos = strchr(pinned_hash, ';');
       pinned_hash_len = end_pos ?
                         (size_t)(end_pos - pinned_hash) : strlen(pinned_hash);
@@ -845,7 +840,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      * if the size of our certificate is bigger than the file
      * size then it cannot match
      */
-    size = curlx_sotouz((curl_off_t) filesize);
+    size = curlx_sotouz((curl_off_t)filesize);
     if(pubkeylen > size)
       goto end;
 
@@ -1277,7 +1272,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
     /* not an IP address, normalize according to RCC 6066 ch. 3,
      * max len of SNI is 2^16-1, no trailing dot */
     size_t len = strlen(peer->hostname);
-    if(len && (peer->hostname[len-1] == '.'))
+    if(len && (peer->hostname[len - 1] == '.'))
       len--;
     if(len < USHRT_MAX) {
       peer->sni = curlx_calloc(1, len + 1);
@@ -1563,7 +1558,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
   *done = TRUE;
   /* If we have done the SSL handshake, shut down the connection cleanly */
   if(cf->connected && (connssl->state == ssl_connection_complete) &&
-    !cf->shutdown && Curl_ssl->shut_down) {
+     !cf->shutdown && Curl_ssl->shut_down) {
     struct cf_call_data save;
 
     CF_DATA_SAVE(save, cf, data);
@@ -1781,7 +1776,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    allowed = (CURL_HTTP_V1x|CURL_HTTP_V2x);
+    allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x);
   }
 #endif
 
@@ -1847,7 +1842,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
     }
 
     result = connssl->ssl_impl->shut_down(cf, data, send_shutdown, done);
-    if(result ||*done)
+    if(result || *done)
       goto out;
 
     if(connssl->io_need) {
@@ -2042,7 +2037,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   if(proto && proto_len) {
     if(memchr(proto, '\0', proto_len)) {
       failf(data, "ALPN: server selected protocol contains NUL. "
-            "Refusing to continue.");
+                  "Refusing to continue.");
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }

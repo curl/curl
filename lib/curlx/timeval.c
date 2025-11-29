@@ -79,7 +79,7 @@ struct curltime curlx_now(void)
   return now;
 }
 
-#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) ||  \
+#elif defined(HAVE_CLOCK_GETTIME_MONOTONIC) || \
   defined(HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 
 struct curltime curlx_now(void)
@@ -103,7 +103,7 @@ struct curltime curlx_now(void)
   ** called on unsupported OS version.
   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+  (HAVE_BUILTIN_AVAILABLE == 1)
   bool have_clock_gettime = FALSE;
   if(__builtin_available(macOS 10.12, iOS 10, tvOS 10, watchOS 3, *))
     have_clock_gettime = TRUE;
@@ -111,8 +111,8 @@ struct curltime curlx_now(void)
 
 #ifdef HAVE_CLOCK_GETTIME_MONOTONIC_RAW
   if(
-#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) &&    \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+#if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
+  (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
     (clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow) == 0)) {
@@ -124,7 +124,7 @@ struct curltime curlx_now(void)
 
   if(
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
-        (HAVE_BUILTIN_AVAILABLE == 1)
+  (HAVE_BUILTIN_AVAILABLE == 1)
     have_clock_gettime &&
 #endif
     (clock_gettime(CLOCK_MONOTONIC, &tsnow) == 0)) {
@@ -222,12 +222,12 @@ struct curltime curlx_now(void)
  */
 timediff_t curlx_timediff_ms(struct curltime newer, struct curltime older)
 {
-  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
-  if(diff >= (TIMEDIFF_T_MAX/1000))
+  timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
+  if(diff >= (TIMEDIFF_T_MAX / 1000))
     return TIMEDIFF_T_MAX;
-  else if(diff <= (TIMEDIFF_T_MIN/1000))
+  else if(diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000 + (newer.tv_usec-older.tv_usec)/1000;
+  return diff * 1000 + (newer.tv_usec - older.tv_usec) / 1000;
 }
 
 /*
@@ -237,12 +237,12 @@ timediff_t curlx_timediff_ms(struct curltime newer, struct curltime older)
 timediff_t curlx_timediff_ceil_ms(struct curltime newer,
                                   struct curltime older)
 {
-  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
-  if(diff >= (TIMEDIFF_T_MAX/1000))
+  timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
+  if(diff >= (TIMEDIFF_T_MAX / 1000))
     return TIMEDIFF_T_MAX;
-  else if(diff <= (TIMEDIFF_T_MIN/1000))
+  else if(diff <= (TIMEDIFF_T_MIN / 1000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000 + (newer.tv_usec - older.tv_usec + 999)/1000;
+  return diff * 1000 + (newer.tv_usec - older.tv_usec + 999) / 1000;
 }
 
 /*
@@ -251,10 +251,10 @@ timediff_t curlx_timediff_ceil_ms(struct curltime newer,
  */
 timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
 {
-  timediff_t diff = (timediff_t)newer.tv_sec-older.tv_sec;
-  if(diff >= (TIMEDIFF_T_MAX/1000000))
+  timediff_t diff = (timediff_t)newer.tv_sec - older.tv_sec;
+  if(diff >= (TIMEDIFF_T_MAX / 1000000))
     return TIMEDIFF_T_MAX;
-  else if(diff <= (TIMEDIFF_T_MIN/1000000))
+  else if(diff <= (TIMEDIFF_T_MIN / 1000000))
     return TIMEDIFF_T_MIN;
-  return diff * 1000000 + newer.tv_usec-older.tv_usec;
+  return diff * 1000000 + newer.tv_usec - older.tv_usec;
 }

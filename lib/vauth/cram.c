@@ -63,7 +63,7 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *) passwdp,
+                        (const unsigned char *)passwdp,
                         curlx_uztoui(strlen(passwdp)));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;

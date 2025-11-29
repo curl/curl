@@ -453,29 +453,29 @@ static CURLcode cf_osslq_h3conn_add_stream(struct cf_osslq_h3conn *h3,
    * BUT OpenSSL does not offer this information to us. So, we silently
    * ignore all such streams we do not expect. */
   switch(stype) {
-    case SSL_STREAM_TYPE_READ: {
-      struct cf_osslq_stream *nstream;
-      if(h3->remote_ctrl_n >= CURL_ARRAYSIZE(h3->remote_ctrl)) {
-        /* rejected, we are full */
-        CURL_TRC_CF(data, cf, "[%" PRId64 "] reject remote uni stream",
-                    stream_id);
-        SSL_free(stream_ssl);
-        return CURLE_OK;
-      }
-      nstream = &h3->remote_ctrl[h3->remote_ctrl_n++];
-      nstream->id = stream_id;
-      nstream->ssl = stream_ssl;
-      Curl_bufq_initp(&nstream->recvbuf, &ctx->stream_bufcp, 1, BUFQ_OPT_NONE);
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] accepted remote uni stream",
+  case SSL_STREAM_TYPE_READ: {
+    struct cf_osslq_stream *nstream;
+    if(h3->remote_ctrl_n >= CURL_ARRAYSIZE(h3->remote_ctrl)) {
+      /* rejected, we are full */
+      CURL_TRC_CF(data, cf, "[%" PRId64 "] reject remote uni stream",
                   stream_id);
-      return CURLE_OK;
-    }
-    default:
-      CURL_TRC_CF(data, cf, "[%" PRId64 "] reject remote %s"
-                  " stream, type=%x", stream_id,
-                  (stype == SSL_STREAM_TYPE_BIDI) ? "bidi" : "write", stype);
       SSL_free(stream_ssl);
       return CURLE_OK;
+    }
+    nstream = &h3->remote_ctrl[h3->remote_ctrl_n++];
+    nstream->id = stream_id;
+    nstream->ssl = stream_ssl;
+    Curl_bufq_initp(&nstream->recvbuf, &ctx->stream_bufcp, 1, BUFQ_OPT_NONE);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] accepted remote uni stream",
+                stream_id);
+    return CURLE_OK;
+  }
+  default:
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] reject remote %s"
+                " stream, type=%x", stream_id,
+                (stype == SSL_STREAM_TYPE_BIDI) ? "bidi" : "write", stype);
+    SSL_free(stream_ssl);
+    return CURLE_OK;
   }
 }
 
@@ -505,8 +505,7 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
     lerr = SSL_get_verify_result(ctx->tls.ossl.ssl);
     if(lerr != X509_V_OK) {
       ssl_config->certverifyresult = lerr;
-      curl_msnprintf(ebuf, sizeof(ebuf),
-                     "SSL certificate problem: %s",
+      curl_msnprintf(ebuf, sizeof(ebuf), "SSL certificate problem: %s",
                      X509_verify_cert_error_string(lerr));
     }
     else
@@ -540,7 +539,7 @@ static CURLcode cf_osslq_ssl_err(struct Curl_cfilter *cf,
    * the SO_ERROR is also lost.
    */
   if(CURLE_SSL_CONNECT_ERROR == result && errdetail == 0) {
-    char extramsg[80]="";
+    char extramsg[80] = "";
     int sockerr = SOCKERRNO;
     struct ip_quadruple ip;
 
@@ -570,20 +569,21 @@ static CURLcode cf_osslq_verify_peer(struct Curl_cfilter *cf,
  */
 struct h3_stream_ctx {
   struct cf_osslq_stream s;
-  struct bufq sendbuf;   /* h3 request body */
-  struct bufq recvbuf;   /* h3 response body */
-  struct h1_req_parser h1; /* h1 request parsing */
+  struct bufq sendbuf;          /* h3 request body */
+  struct bufq recvbuf;          /* h3 response body */
+  struct h1_req_parser h1;      /* h1 request parsing */
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
-  size_t recv_buf_nonflow; /* buffered bytes, not counting for flow control */
-  uint64_t error3; /* HTTP/3 stream error code */
-  curl_off_t upload_left; /* number of request bytes left to upload */
-  curl_off_t download_recvd; /* number of response DATA bytes received */
-  int status_code; /* HTTP status code */
-  BIT(resp_hds_complete); /* we have a complete, final response */
-  BIT(closed); /* TRUE on stream close */
-  BIT(reset);  /* TRUE on stream reset */
-  BIT(send_closed); /* stream is local closed */
-  BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
+  size_t recv_buf_nonflow;      /* buffered bytes,
+                                   not counting for flow control */
+  uint64_t error3;              /* HTTP/3 stream error code */
+  curl_off_t upload_left;       /* number of request bytes left to upload */
+  curl_off_t download_recvd;    /* number of response DATA bytes received */
+  int status_code;              /* HTTP status code */
+  BIT(resp_hds_complete);       /* we have a complete, final response */
+  BIT(closed);                  /* TRUE on stream close */
+  BIT(reset);                   /* TRUE on stream reset */
+  BIT(send_closed);             /* stream is local closed */
+  BIT(quic_flow_blocked);       /* stream is blocked by QUIC flow control */
 };
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
@@ -645,8 +645,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   (void)cf;
   if(stream) {
-    CURL_TRC_CF(data, cf, "[%" PRIu64 "] easy handle is done",
-                stream->s.id);
+    CURL_TRC_CF(data, cf, "[%" PRIu64 "] easy handle is done", stream->s.id);
     if(ctx->h3.conn && (stream->s.id >= 0) && !stream->closed) {
       nghttp3_conn_shutdown_stream_read(ctx->h3.conn, stream->s.id);
       nghttp3_conn_close_stream(ctx->h3.conn, stream->s.id,
@@ -965,11 +964,10 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static nghttp3_ssize
-cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
-                    nghttp3_vec *vec, size_t veccnt,
-                    uint32_t *pflags, void *user_data,
-                    void *stream_user_data)
+static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
+                                         nghttp3_vec *vec, size_t veccnt,
+                                         uint32_t *pflags, void *user_data,
+                                         void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_osslq_ctx *ctx = cf->ctx;
@@ -1106,21 +1104,21 @@ static CURLcode cf_osslq_h3conn_init(struct cf_osslq_ctx *ctx, SSL *conn,
   }
 
   result = cf_osslq_stream_open(&h3->s_ctrl, conn,
-                                SSL_STREAM_FLAG_ADVANCE|SSL_STREAM_FLAG_UNI,
+                                SSL_STREAM_FLAG_ADVANCE | SSL_STREAM_FLAG_UNI,
                                 &ctx->stream_bufcp, NULL);
   if(result) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto out;
   }
   result = cf_osslq_stream_open(&h3->s_qpack_enc, conn,
-                                SSL_STREAM_FLAG_ADVANCE|SSL_STREAM_FLAG_UNI,
+                                SSL_STREAM_FLAG_ADVANCE | SSL_STREAM_FLAG_UNI,
                                 &ctx->stream_bufcp, NULL);
   if(result) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto out;
   }
   result = cf_osslq_stream_open(&h3->s_qpack_dec, conn,
-                                SSL_STREAM_FLAG_ADVANCE|SSL_STREAM_FLAG_UNI,
+                                SSL_STREAM_FLAG_ADVANCE | SSL_STREAM_FLAG_UNI,
                                 &ctx->stream_bufcp, NULL);
   if(result) {
     result = CURLE_QUIC_CONNECT_ERROR;
@@ -1221,7 +1219,8 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
                                  SSL_INCOMING_STREAM_POLICY_ACCEPT, 0);
   /* from our side, there is no idle timeout */
   SSL_set_value_uint(ctx->tls.ossl.ssl,
-    SSL_VALUE_CLASS_FEATURE_REQUEST, SSL_VALUE_QUIC_IDLE_TIMEOUT, 0);
+                     SSL_VALUE_CLASS_FEATURE_REQUEST,
+                     SSL_VALUE_QUIC_IDLE_TIMEOUT, 0);
   /* setup the H3 things on top of the QUIC connection */
   result = cf_osslq_h3conn_init(ctx, ctx->tls.ossl.ssl, cf);
 
@@ -1532,7 +1531,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
     fill_ctx.multi = data->multi;
     fill_ctx.n = 0;
     Curl_uint32_hash_visit(&ctx->streams, cf_osslq_collect_block_send,
-                         &fill_ctx);
+                           &fill_ctx);
     poll_count = fill_ctx.n;
     if(poll_count) {
       CURL_TRC_CF(data, cf, "polling %zu blocked streams", poll_count);
@@ -1541,7 +1540,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
       res = CURLE_UNRECOVERABLE_POLL;
       if(!SSL_poll(ctx->poll_items, poll_count, sizeof(SSL_POLL_ITEM),
                    &timeout, 0, &result_count))
-          goto out;
+        goto out;
 
       res = CURLE_OK;
 
@@ -1617,7 +1616,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
       uint64_t flags = (eos && ((i + 1) == n)) ? SSL_WRITE_FLAG_CONCLUDE : 0;
       written = vec[i].len;
       ok = !s->ssl || SSL_write_ex2(s->ssl, vec[i].base, vec[i].len, flags,
-                                   &written);
+                                    &written);
       if(ok && flags & SSL_WRITE_FLAG_CONCLUDE)
         eos_written = TRUE;
       if(ok) {

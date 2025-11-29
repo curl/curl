@@ -75,7 +75,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
       /* Copy a separating '/' if homedir does not end with one */
       len = curlx_dyn_len(&npath);
       p = curlx_dyn_ptr(&npath);
-      if(len && (p[len-1] != '/'))
+      if(len && (p[len - 1] != '/'))
         copyfrom = 2;
 
       if(curlx_dyn_addn(&npath, &working_path[copyfrom],
@@ -147,7 +147,6 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 
     if(!curlx_dyn_len(&out))
       goto fail;
-
   }
   else {
     struct Curl_str word;
