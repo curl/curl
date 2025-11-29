@@ -276,13 +276,13 @@ struct ssl_config_data {
   char *key_type; /* format for private key (default: PEM) */
   char *key_passwd; /* plain text private key password */
   BIT(certinfo);     /* gather lots of certificate info */
-  BIT(earlydata);    /* use tls1.3 early data */
+  BIT(earlydata);    /* use TLS 1.3 early data */
   BIT(enable_beast); /* allow this flaw for interoperability's sake */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
   BIT(no_partialchain); /* do not accept partial certificate chains */
   BIT(revoke_best_effort); /* ignore SSL revocation offline/missing revocation
                               list errors */
-  BIT(native_ca_store); /* use the native ca store of operating system */
+  BIT(native_ca_store); /* use the native CA store of operating system */
   BIT(auto_client_cert);   /* automatically locate and use a client
                               certificate for authentication (Schannel) */
   BIT(custom_cafile); /* application has set custom CA file */
@@ -1159,7 +1159,7 @@ enum dupstring {
   STRING_SSL_PINNEDPUBLICKEY, /* public key file to verify peer against */
   STRING_SSL_CIPHER_LIST, /* list of ciphers to use */
   STRING_SSL_CIPHER13_LIST, /* list of TLS 1.3 ciphers to use */
-  STRING_SSL_CRLFILE,     /* crl file to check certificate */
+  STRING_SSL_CRLFILE,     /* CRL file to check certificate */
   STRING_SSL_ISSUERCERT, /* issuer cert file to check certificate */
   STRING_SERVICE_NAME,    /* Service name */
 #ifndef CURL_DISABLE_PROXY
@@ -1173,7 +1173,7 @@ enum dupstring {
   STRING_SSL_PINNEDPUBLICKEY_PROXY, /* public key file to verify proxy */
   STRING_SSL_CIPHER_LIST_PROXY, /* list of ciphers to use */
   STRING_SSL_CIPHER13_LIST_PROXY, /* list of TLS 1.3 ciphers to use */
-  STRING_SSL_CRLFILE_PROXY, /* crl file to check certificate */
+  STRING_SSL_CRLFILE_PROXY, /* CRL file to check certificate */
   STRING_SSL_ISSUERCERT_PROXY, /* issuer cert file to check certificate */
   STRING_PROXY_SERVICE_NAME, /* Proxy service name */
 #endif
