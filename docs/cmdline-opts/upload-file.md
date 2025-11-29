@@ -5,7 +5,7 @@ Long: upload-file
 Short: T
 Arg: <file>
 Help: Transfer local FILE to destination
-Category: important upload
+Category: important upload common
 Added: 4.0
 Multi: per-URL
 See-also:

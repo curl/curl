@@ -5,7 +5,7 @@ Long: proxy
 Short: x
 Arg: <[protocol://]host[:port]>
 Help: Use this proxy
-Category: proxy
+Category: proxy common
 Added: 4.0
 Multi: single
 See-also:

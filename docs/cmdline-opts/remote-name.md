@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: remote-name
 Short: O
 Help: Write output to file named as remote file
-Category: important output
+Category: important output common
 Added: 4.0
 Multi: per-URL
 See-also:
