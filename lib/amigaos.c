@@ -120,8 +120,7 @@ void Curl_amiga_cleanup(void)
  * allocates memory also.
  */
 
-struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
-                                          int port)
+struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname, int port)
 {
   struct Curl_addrinfo *ai = NULL;
   struct hostent *h;
@@ -144,7 +143,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     }
   }
   else {
-    #ifdef CURLRES_THREADED
+#ifdef CURLRES_THREADED
     /* gethostbyname() is not thread safe, so we need to reopen bsdsocket
      * on the thread's context
      */
@@ -160,13 +159,13 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
       }
       CloseLibrary(base);
     }
-    #else
+#else
     /* not using threaded resolver - safe to use this as-is */
     h = gethostbyname(hostname);
     if(h) {
       ai = Curl_he2ai(h, port);
     }
-    #endif
+#endif
   }
 
   return ai;
@@ -219,8 +218,7 @@ CURLcode Curl_amiga_init(void)
   }
 
   if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG)&errno,
-                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG)"curl",
-                    TAG_DONE)) {
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG)"curl", TAG_DONE)) {
     CURL_AMIGA_REQUEST("SocketBaseTags ERROR");
     return CURLE_FAILED_INIT;
   }

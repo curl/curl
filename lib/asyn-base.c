@@ -59,7 +59,6 @@
  **********************************************************************/
 #ifdef CURLRES_ASYNCH
 
-
 #ifdef USE_ARES
 
 #if ARES_VERSION < 0x010600
@@ -122,8 +121,7 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
  *
  * return number of sockets it worked on, or -1 on error
  */
-int Curl_ares_perform(ares_channel channel,
-                      timediff_t timeout_ms)
+int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms)
 {
   int nfds;
   int bitmask;
@@ -142,11 +140,11 @@ int Curl_ares_perform(ares_channel channel,
     pfd[i].revents = 0;
     if(ARES_GETSOCK_READABLE(bitmask, i)) {
       pfd[i].fd = socks[i];
-      pfd[i].events |= POLLRDNORM|POLLIN;
+      pfd[i].events |= POLLRDNORM | POLLIN;
     }
     if(ARES_GETSOCK_WRITABLE(bitmask, i)) {
       pfd[i].fd = socks[i];
-      pfd[i].events |= POLLWRNORM|POLLOUT;
+      pfd[i].events |= POLLWRNORM | POLLOUT;
     }
     if(pfd[i].events)
       num++;

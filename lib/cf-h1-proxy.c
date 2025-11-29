@@ -48,12 +48,12 @@
 
 
 typedef enum {
-    H1_TUNNEL_INIT,     /* init/default/no tunnel state */
-    H1_TUNNEL_CONNECT,  /* CONNECT request is being send */
-    H1_TUNNEL_RECEIVE,  /* CONNECT answer is being received */
-    H1_TUNNEL_RESPONSE, /* CONNECT response received completely */
-    H1_TUNNEL_ESTABLISHED,
-    H1_TUNNEL_FAILED
+  H1_TUNNEL_INIT,     /* init/default/no tunnel state */
+  H1_TUNNEL_CONNECT,  /* CONNECT request is being send */
+  H1_TUNNEL_RECEIVE,  /* CONNECT answer is being received */
+  H1_TUNNEL_RESPONSE, /* CONNECT response received completely */
+  H1_TUNNEL_ESTABLISHED,
+  H1_TUNNEL_FAILED
 } h1_tunnel_state;
 
 /* struct for HTTP CONNECT tunneling */
@@ -73,7 +73,6 @@ struct h1_tunnel_state {
   BIT(chunked_encoding);
   BIT(close_connection);
 };
-
 
 static bool tunnel_is_established(struct h1_tunnel_state *ts)
 {
@@ -209,9 +208,9 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   int http_minor;
   CURLcode result;
 
-    /* This only happens if we have looped here due to authentication
-       reasons, and we do not really use the newly cloned URL here
-       then. Just free it. */
+  /* This only happens if we have looped here due to authentication
+     reasons, and we do not really use the newly cloned URL here
+     then. Just free it. */
   Curl_safefree(data->req.newurl);
 
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 1);
@@ -281,10 +280,8 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
   struct SingleRequest *k = &data->req;
   (void)cf;
 
-  if((checkprefix("WWW-Authenticate:", header) &&
-      (401 == k->httpcode)) ||
-     (checkprefix("Proxy-authenticate:", header) &&
-      (407 == k->httpcode))) {
+  if((checkprefix("WWW-Authenticate:", header) && (401 == k->httpcode)) ||
+     (checkprefix("Proxy-authenticate:", header) && (407 == k->httpcode))) {
 
     bool proxy = (k->httpcode == 407);
     char *auth = Curl_copy_header_value(header);
@@ -300,7 +297,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
       return result;
   }
   else if(checkprefix("Content-Length:", header)) {
-    if(k->httpcode/100 == 2) {
+    if(k->httpcode / 100 == 2) {
       /* A client MUST ignore any Content-Length or Transfer-Encoding
          header fields received in a successful response to CONNECT.
          "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
@@ -319,7 +316,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
                              STRCONST("Connection:"), STRCONST("close")))
     ts->close_connection = TRUE;
   else if(checkprefix("Transfer-Encoding:", header)) {
-    if(k->httpcode/100 == 2) {
+    if(k->httpcode / 100 == 2) {
       /* A client MUST ignore any Content-Length or Transfer-Encoding
          header fields received in a successful response to CONNECT.
          "Successful" described as: 2xx (Successful). RFC 7231 4.3.6 */
@@ -493,8 +490,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         ts->keepon = KEEPON_DONE;
       }
 
-      DEBUGASSERT(ts->keepon == KEEPON_IGNORE
-                  || ts->keepon == KEEPON_DONE);
+      DEBUGASSERT(ts->keepon == KEEPON_IGNORE ||
+                  ts->keepon == KEEPON_DONE);
       continue;
     }
 
@@ -508,7 +505,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   if(error)
     result = CURLE_RECV_ERROR;
   *done = (ts->keepon == KEEPON_DONE);
-  if(!result && *done && data->info.httpproxycode/100 != 2) {
+  if(!result && *done && data->info.httpproxycode / 100 != 2) {
     /* Deal with the possibly already received authenticate
        headers. 'newurl' is set to a new URL if we must loop. */
     result = Curl_http_auth_act(data);
@@ -603,7 +600,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
   } while(data->req.newurl);
 
   DEBUGASSERT(ts->tunnel_state == H1_TUNNEL_RESPONSE);
-  if(data->info.httpproxycode/100 != 2) {
+  if(data->info.httpproxycode / 100 != 2) {
     /* a non-2xx response and we have no next URL to try. */
     Curl_safefree(data->req.newurl);
     h1_tunnel_go_state(cf, ts, H1_TUNNEL_FAILED, data);
@@ -716,10 +713,9 @@ static void cf_h1_proxy_close(struct Curl_cfilter *cf,
   }
 }
 
-
 struct Curl_cftype Curl_cft_h1_proxy = {
   "H1-PROXY",
-  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
   0,
   cf_h1_proxy_destroy,
   cf_h1_proxy_connect,

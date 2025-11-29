@@ -140,7 +140,6 @@ void Curl_async_global_cleanup(void)
 #endif
 }
 
-
 static void sock_state_cb(void *data, ares_socket_t socket_fd,
                           int readable, int writable)
 {
@@ -309,12 +308,12 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
   /* Now that we have checked for any last minute results above, see if there
      are any responses still pending when the EXPIRE_HAPPY_EYEBALLS_DNS timer
      expires. */
-  if(ares->num_pending
+  if(ares->num_pending &&
      /* This is only set to non-zero if the timer was started. */
-     && (ares->happy_eyeballs_dns_time.tv_sec
-         || ares->happy_eyeballs_dns_time.tv_usec)
-     && (curlx_timediff_ms(curlx_now(), ares->happy_eyeballs_dns_time)
-         >= HAPPY_EYEBALLS_DNS_TIMEOUT)) {
+     (ares->happy_eyeballs_dns_time.tv_sec ||
+      ares->happy_eyeballs_dns_time.tv_usec) &&
+     (curlx_timediff_ms(curlx_now(), ares->happy_eyeballs_dns_time) >=
+      HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
     memset(&ares->happy_eyeballs_dns_time, 0,
@@ -418,8 +417,8 @@ CURLcode Curl_async_await(struct Curl_easy *data,
     itimeout_ms = (int)timeout_ms;
 #endif
 
-    max_timeout.tv_sec = itimeout_ms/1000;
-    max_timeout.tv_usec = (itimeout_ms%1000)*1000;
+    max_timeout.tv_sec = itimeout_ms / 1000;
+    max_timeout.tv_usec = (itimeout_ms % 1000) * 1000;
 
     real_timeout = ares_timeout(ares->channel, &max_timeout, &time_buf);
 
@@ -427,7 +426,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
        second is left, otherwise just use 1000ms to make sure the progress
        callback gets called frequent enough */
     if(!real_timeout->tv_sec)
-      call_timeout_ms = (timediff_t)(real_timeout->tv_usec/1000);
+      call_timeout_ms = (timediff_t)(real_timeout->tv_usec / 1000);
     else
       call_timeout_ms = 1000;
 
@@ -518,7 +517,7 @@ static void async_ares_hostbyname_cb(void *user_data,
   if(ARES_SUCCESS == status) {
     ares->ares_status = status; /* one success overrules any error */
     async_addr_concat(&ares->temp_ai,
-      Curl_he2ai(hostent, data->state.async.port));
+                      Curl_he2ai(hostent, data->state.async.port));
   }
   else if(ares->ares_status != ARES_SUCCESS) {
     /* no success so far, remember last error */
@@ -586,8 +585,7 @@ static void async_ares_hostbyname_cb(void *user_data,
        c-ares retry cycle each request is.
     */
     ares->happy_eyeballs_dns_time = curlx_now();
-    Curl_expire(data, HAPPY_EYEBALLS_DNS_TIMEOUT,
-                EXPIRE_HAPPY_EYEBALLS_DNS);
+    Curl_expire(data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
   }
 }
 

@@ -59,7 +59,7 @@
     }                                                                   \
   } while(0)
 
-#define CPOOL_UNLOCK(c,d)                                                 \
+#define CPOOL_UNLOCK(c,d)                                               \
   do {                                                                  \
     if((c)) {                                                           \
       DEBUGASSERT((c)->locked);                                         \
@@ -161,7 +161,6 @@ static struct connectdata *cpool_get_first(struct cpool *cpool)
   return NULL;
 }
 
-
 static struct cpool_bundle *cpool_find_bundle(struct cpool *cpool,
                                               struct connectdata *conn)
 {
@@ -177,7 +176,6 @@ static void cpool_remove_bundle(struct cpool *cpool,
     return;
   Curl_hash_delete(&cpool->dest2bundle, bundle->dest, bundle->dest_len);
 }
-
 
 static void cpool_remove_conn(struct cpool *cpool,
                               struct connectdata *conn)
@@ -260,8 +258,8 @@ void Curl_cpool_xfer_init(struct Curl_easy *data)
   }
 }
 
-static struct cpool_bundle *
-cpool_add_bundle(struct cpool *cpool, struct connectdata *conn)
+static struct cpool_bundle *cpool_add_bundle(struct cpool *cpool,
+                                             struct connectdata *conn)
 {
   struct cpool_bundle *bundle;
 
@@ -341,7 +339,6 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
   return oldest_idle;
 }
 
-
 int Curl_cpool_check_limits(struct Curl_easy *data,
                             struct connectdata *conn)
 {
@@ -386,10 +383,10 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
-        CURL_TRC_M(data, "Discarding connection #%"
-                     FMT_OFF_T " from %zu to reach destination "
-                     "limit of %zu", oldest_idle->connection_id,
-                     Curl_llist_count(&bundle->conns), dest_limit);
+        CURL_TRC_M(data, "Discarding connection #%" FMT_OFF_T
+                   " from %zu to reach destination limit of %zu",
+                   oldest_idle->connection_id,
+                   Curl_llist_count(&bundle->conns), dest_limit);
         Curl_conn_terminate(cpool->idata, oldest_idle, FALSE);
 
         /* in case the bundle was destroyed in disconnect, look it up again */
@@ -703,7 +700,6 @@ void Curl_conn_terminate(struct Curl_easy *data,
   if(do_lock)
     CPOOL_UNLOCK(cpool, data);
 }
-
 
 struct cpool_reaper_ctx {
   struct curltime now;
