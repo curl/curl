@@ -1036,7 +1036,7 @@ Curl_cookie_add(struct Curl_easy *data,
     /* Only show this when NOT reading the cookies from a file */
     infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
           "expire %" FMT_OFF_T,
-          replaces ? "Replaced":"Added", co->name, co->value,
+          replaces ? "Replaced" : "Added", co->name, co->value,
           co->domain, co->path, co->expires);
 
   if(!replaces)

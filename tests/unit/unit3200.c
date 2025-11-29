@@ -28,7 +28,7 @@ static CURLcode test_unit3200(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
+#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) || \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)

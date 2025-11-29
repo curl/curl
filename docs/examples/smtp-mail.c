@@ -37,9 +37,9 @@
 /* The libcurl options want plain addresses, the viewable headers in the mail
  * can get a full name as well.
  */
-#define FROM_ADDR    "<sender@example.org>"
-#define TO_ADDR      "<addressee@example.net>"
-#define CC_ADDR      "<info@example.org>"
+#define FROM_ADDR "<sender@example.org>"
+#define TO_ADDR   "<addressee@example.net>"
+#define CC_ADDR   "<info@example.org>"
 
 #define FROM_MAIL "Sender Person " FROM_ADDR
 #define TO_MAIL   "A Receiver " TO_ADDR
@@ -96,7 +96,7 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     struct curl_slist *recipients = NULL;
-    struct upload_status upload_ctx = {0};
+    struct upload_status upload_ctx = { 0 };
 
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");

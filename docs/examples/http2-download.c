@@ -200,10 +200,10 @@ int main(int argc, char **argv)
     /* if given a number, do that many transfers */
     num_transfers = atoi(argv[1]);
     if((num_transfers < 1) || (num_transfers > 1000))
-      num_transfers = 3;  /* a suitable low default */
+      num_transfers = 3; /* a suitable low default */
   }
   else
-    num_transfers = 3;  /* a suitable low default */
+    num_transfers = 3; /* a suitable low default */
 
   res = curl_global_init(CURL_GLOBAL_ALL);
   if(res)

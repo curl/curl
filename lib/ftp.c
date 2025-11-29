@@ -81,8 +81,8 @@
 
 /* macro to check for a three-digit ftp status code at the start of the
    given string */
-#define STATUSCODE(line) (ISDIGIT(line[0]) && ISDIGIT(line[1]) &&       \
-                          ISDIGIT(line[2]))
+#define STATUSCODE(line) \
+  (ISDIGIT(line[0]) && ISDIGIT(line[1]) && ISDIGIT(line[2]))
 
 /* macro to check for the last line in an FTP server response */
 #define LASTLINE(line) (STATUSCODE(line) && (' ' == line[3]))
@@ -1749,8 +1749,7 @@ static CURLcode ftp_epsv_disable(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode ftp_control_addr_dup(struct Curl_easy *data,
-                                     char **newhostp)
+static CURLcode ftp_control_addr_dup(struct Curl_easy *data, char **newhostp)
 {
   struct connectdata *conn = data->conn;
   struct ip_quadruple ipquad;

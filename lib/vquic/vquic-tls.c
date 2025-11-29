@@ -178,12 +178,12 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
     if(!cert)
       result = CURLE_OUT_OF_MEMORY;
     else if(peer->sni &&
-      (wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0, NULL)
-       == WOLFSSL_FAILURE))
+            (wolfSSL_X509_check_host(cert, peer->sni, strlen(peer->sni), 0,
+                                     NULL) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     else if(!peer->sni &&
-      (wolfSSL_X509_check_ip_asc(cert, peer->hostname, 0)
-       == WOLFSSL_FAILURE))
+            (wolfSSL_X509_check_ip_asc(cert, peer->hostname,
+                                       0) == WOLFSSL_FAILURE))
       result = CURLE_PEER_FAILED_VERIFICATION;
     wolfSSL_X509_free(cert);
   }

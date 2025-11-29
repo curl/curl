@@ -72,7 +72,6 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
   return n;
 }
 
-
 static int upload(CURL *curl, const char *remotepath,
                   const char *localpath, long timeout, long tries)
 {

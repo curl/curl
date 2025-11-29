@@ -36,7 +36,7 @@
  */
 
 #define HTTP_HANDLE 0   /* Index for the HTTP transfer */
-#define FTP_HANDLE 1    /* Index for the FTP transfer */
+#define FTP_HANDLE  1   /* Index for the FTP transfer */
 #define HANDLECOUNT 2   /* Number of simultaneous transfers */
 
 int main(void)

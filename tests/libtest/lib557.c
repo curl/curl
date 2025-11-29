@@ -46,7 +46,7 @@
 #endif
 #endif
 
-#define BUFSZ    256
+#define BUFSZ 256
 
 struct unsshort_st {
   unsigned short num;   /* unsigned short  */
@@ -1166,9 +1166,9 @@ static int test_width_precision(void)
 {
   /* 325 is max precision (and width) for a double */
   char larger[1024];
-#define SPACE60 "                                                            "
+#define SPACE60  "                                                            "
 #define SPACE300 SPACE60 SPACE60 SPACE60 SPACE60 SPACE60
-#define OK325 SPACE300 "                        0"
+#define OK325    SPACE300 "                        0"
 
   int rc;
   int errors = 0;

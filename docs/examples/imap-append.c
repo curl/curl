@@ -36,9 +36,9 @@
  * Note that this example requires libcurl 7.30.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM "<sender@example.org>"
+#define TO   "<addressee@example.net>"
+#define CC   "<info@example.org>"
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -95,7 +95,7 @@ int main(void)
   if(curl) {
     size_t filesize;
     long infilesize = LONG_MAX;
-    struct upload_status upload_ctx = {0};
+    struct upload_status upload_ctx = { 0 };
 
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");

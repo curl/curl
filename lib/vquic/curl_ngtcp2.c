@@ -73,7 +73,7 @@
 #include "../curlx/warnless.h"
 
 
-#define QUIC_MAX_STREAMS (256 * 1024)
+#define QUIC_MAX_STREAMS       (256 * 1024)
 #define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
@@ -91,12 +91,11 @@
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE) / 2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
 #define H3_STREAM_SEND_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
-
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store ngtcp2 version info in this buffer.
@@ -959,7 +958,7 @@ static CURLcode cf_ngtcp2_adjust_pollset(struct Curl_cfilter *cf,
 
     CF_DATA_SAVE(save, cf, data);
     c_exhaust = want_send && (!ngtcp2_conn_get_cwnd_left(ctx->qconn) ||
-                !ngtcp2_conn_get_max_data_left(ctx->qconn));
+                              !ngtcp2_conn_get_max_data_left(ctx->qconn));
     s_exhaust = want_send && stream && stream->id >= 0 &&
                 stream->quic_flow_blocked;
     want_recv = (want_recv || c_exhaust || s_exhaust);
@@ -2513,7 +2512,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
-  static const struct alpn_spec ALPN_SPEC_H3 = {{ "h3", "h3-29" }, 2};
+  static const struct alpn_spec ALPN_SPEC_H3 = { { "h3", "h3-29" }, 2 };
 
   DEBUGASSERT(ctx->initialized);
   ctx->dcid.datalen = NGTCP2_MAX_CIDLEN;

@@ -31,8 +31,8 @@
 
 #define T518_SAFETY_MARGIN (16)
 
-#define NUM_OPEN      (FD_SETSIZE + 10)
-#define NUM_NEEDED    (NUM_OPEN + T518_SAFETY_MARGIN)
+#define NUM_OPEN   (FD_SETSIZE + 10)
+#define NUM_NEEDED (NUM_OPEN + T518_SAFETY_MARGIN)
 
 #if defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"

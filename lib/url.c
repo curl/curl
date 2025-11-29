@@ -1769,7 +1769,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   if(!use_set_uh) {
     char *newurl;
     uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url),
-                      (unsigned int) (CURLU_GUESS_SCHEME |
+                      (unsigned int)(CURLU_GUESS_SCHEME |
                        CURLU_NON_SUPPORT_SCHEME |
                        (data->set.disallow_username_in_url ?
                         CURLU_DISALLOW_USER : 0) |
@@ -3199,7 +3199,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
     if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
-       !strncmp(UNIX_SOCKET_PREFIX"/",
+       !strncmp(UNIX_SOCKET_PREFIX "/",
                 conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
       unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
 #endif

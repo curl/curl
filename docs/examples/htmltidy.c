@@ -79,8 +79,8 @@ int main(int argc, char **argv)
   CURL *curl;
   char curl_errbuf[CURL_ERROR_SIZE];
   TidyDoc tdoc;
-  TidyBuffer docbuf = {0};
-  TidyBuffer tidy_errbuf = {0};
+  TidyBuffer docbuf = { 0 };
+  TidyBuffer tidy_errbuf = { 0 };
   CURLcode res;
 
   if(argc != 2) {

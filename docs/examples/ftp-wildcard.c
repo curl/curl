@@ -103,7 +103,7 @@ int main(int argc, char **argv)
   CURL *curl;
 
   /* help data */
-  struct callback_data data = {0};
+  struct callback_data data = { 0 };
 
   /* global initialization */
   CURLcode res = curl_global_init(CURL_GLOBAL_ALL);

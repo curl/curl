@@ -40,13 +40,13 @@
 /* The libcurl options want plain addresses, the viewable headers in the mail
  * can get a full name as well.
  */
-#define FROM_ADDR    "<ursel@example.org>"
-#define SENDER_ADDR  "<kurt@example.org>"
-#define TO_ADDR      "<addressee@example.net>"
+#define FROM_ADDR   "<ursel@example.org>"
+#define SENDER_ADDR "<kurt@example.org>"
+#define TO_ADDR     "<addressee@example.net>"
 
-#define FROM_MAIL    "Ursel " FROM_ADDR
-#define SENDER_MAIL  "Kurt " SENDER_ADDR
-#define TO_MAIL      "A Receiver " TO_ADDR
+#define FROM_MAIL   "Ursel " FROM_ADDR
+#define SENDER_MAIL "Kurt " SENDER_ADDR
+#define TO_MAIL     "A Receiver " TO_ADDR
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -99,7 +99,7 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     struct curl_slist *recipients = NULL;
-    struct upload_status upload_ctx = {0};
+    struct upload_status upload_ctx = { 0 };
 
     /* This is the URL for your mailserver. In this example we connect to the
        smtp-submission port as we require an authenticated connection. */

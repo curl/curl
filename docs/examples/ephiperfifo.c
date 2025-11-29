@@ -244,7 +244,7 @@ static void timer_cb(struct GlobalInfo *g, int revents)
   }
 
   rc = curl_multi_socket_action(g->multi,
-                                  CURL_SOCKET_TIMEOUT, 0, &g->still_running);
+                                CURL_SOCKET_TIMEOUT, 0, &g->still_running);
   mcode_or_die("timer_cb: curl_multi_socket_action", rc);
   check_multi_info(g);
 }
@@ -303,7 +303,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)cbp;
   struct SockInfo *fdp = (struct SockInfo *)sockp;
-  const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
+  const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   fprintf(MSG_OUT, "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {

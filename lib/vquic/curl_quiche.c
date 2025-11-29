@@ -65,11 +65,11 @@
  * stream buffer to not keep spares. Memory consumption goes down when streams
  * run empty, have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE) / 2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
 #define H3_STREAM_RECV_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store quiche version info in this buffer.
@@ -1228,7 +1228,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   int rv;
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr;
-  static const struct alpn_spec ALPN_SPEC_H3 = {{ "h3" }, 1};
+  static const struct alpn_spec ALPN_SPEC_H3 = { { "h3" }, 1 };
 
   DEBUGASSERT(ctx->q.sockfd != CURL_SOCKET_BAD);
   DEBUGASSERT(ctx->initialized);

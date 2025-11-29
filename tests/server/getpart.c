@@ -243,7 +243,7 @@ static int decodedata(char  **buf, /* dest buffer */
 int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
-# define MAX_TAG_LEN 200
+#define MAX_TAG_LEN 200
   char curouter[MAX_TAG_LEN + 1]; /* current outermost section */
   char curmain[MAX_TAG_LEN + 1];  /* current main section */
   char cursub[MAX_TAG_LEN + 1];   /* current sub section */

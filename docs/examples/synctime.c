@@ -58,8 +58,8 @@
  */
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), gmtime(),
-                                    localtime(), sscanf() */
+#define _CRT_SECURE_NO_WARNINGS /* for _snprintf(), fopen(), gmtime(),
+                                   localtime(), sscanf() */
 #endif
 #endif
 
@@ -74,9 +74,9 @@ int main(void)
 #else
 
 #if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-   defined(WINAPI_FAMILY)
+  defined(WINAPI_FAMILY)
 #  include <winapifamily.h>
-#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && \
      !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #    define CURL_WINDOWS_UWP
 #  endif
@@ -100,8 +100,8 @@ int main(void)
 #define snprintf _snprintf
 #endif
 
-#define MAX_STRING              256
-#define MAX_STRING1             MAX_STRING + 1
+#define MAX_STRING  256
+#define MAX_STRING1 MAX_STRING + 1
 
 #define SYNCTIME_UA "synctime/1.0"
 
@@ -111,8 +111,7 @@ struct conf {
   char timeserver[MAX_STRING1];
 };
 
-static const char DefaultTimeServer[3][MAX_STRING1] =
-{
+static const char DefaultTimeServer[3][MAX_STRING1] = {
   "https://nist.time.gov/",
   "https://www.google.com/"
 };
@@ -128,8 +127,8 @@ static int AutoSyncTime;
 static SYSTEMTIME SYSTime;
 static SYSTEMTIME LOCALTime;
 
-#define HTTP_COMMAND_HEAD       0
-#define HTTP_COMMAND_GET        1
+#define HTTP_COMMAND_HEAD 0
+#define HTTP_COMMAND_GET  1
 
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -167,17 +166,17 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
 
       if(RetVal == 7) {
         int i;
-        SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
+        SYSTime.wMilliseconds = 500;  /* adjust to midpoint, 0.5 sec */
         for(i = 0; i < 12; i++) {
           if(strcmp(MthStr[i], TmpStr2) == 0) {
             SYSTime.wMonth = (WORD)(i + 1);
             break;
           }
         }
-        AutoSyncTime = 3;       /* Computer clock is adjusted */
+        AutoSyncTime = 3;  /* Computer clock is adjusted */
       }
       else {
-        AutoSyncTime = 0;       /* Error in sscanf() fields conversion */
+        AutoSyncTime = 0;  /* Error in sscanf() fields conversion */
       }
     }
   }
@@ -222,7 +221,7 @@ static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
   res = curl_easy_perform(curl);
   if(outfile)
     fclose(outfile);
-  return res;  /* (CURLE_OK) */
+  return res; /* (CURLE_OK) */
 }
 
 static void showUsage(void)
@@ -251,7 +250,7 @@ static int conf_init(struct conf *conf)
 
   *conf->http_proxy = 0;
   for(i = 0; i < MAX_STRING1; i++)
-    conf->proxy_user[i] = 0;    /* Clean up password from memory */
+    conf->proxy_user[i] = 0;  /* Clean up password from memory */
   *conf->timeserver = 0;
   return 1;
 }
@@ -263,9 +262,9 @@ int main(int argc, char *argv[])
   struct conf conf[1];
   int RetValue;
 
-  ShowAllHeader   = 0;    /* Do not show HTTP Header */
-  AutoSyncTime    = 0;    /* Do not synchronise computer clock */
-  RetValue        = 0;    /* Successful Exit */
+  ShowAllHeader = 0;  /* Do not show HTTP Header */
+  AutoSyncTime = 0;   /* Do not synchronise computer clock */
+  RetValue = 0;       /* Successful Exit */
   conf_init(conf);
 
   if(argc > 1) {
@@ -295,7 +294,7 @@ int main(int argc, char *argv[])
     }
   }
 
-  if(*conf->timeserver == 0)     /* Use default server for time information */
+  if(*conf->timeserver == 0)  /* Use default server for time information */
     snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
   /* Init CURL before usage */

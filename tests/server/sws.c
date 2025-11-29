@@ -104,10 +104,10 @@ static size_t num_sockets = 0;
 static const char *cmdfile = "log/server.cmd";
 
 /* very-big-path support */
-#define MAXDOCNAMELEN 140000
+#define MAXDOCNAMELEN     140000
 #define MAXDOCNAMELEN_TXT "139999"
 
-#define REQUEST_KEYWORD_SIZE 256
+#define REQUEST_KEYWORD_SIZE     256
 #define REQUEST_KEYWORD_SIZE_TXT "255"
 
 #define CMD_AUTH_REQUIRED "auth_required"
@@ -141,7 +141,8 @@ static const char *end_of_headers = END_OF_HEADERS;
 static const char *docquit_sws = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* send back this on 404 file not found */
-static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
+static const char *doc404 =
+  "HTTP/1.1 404 Not Found\r\n"
   "Server: " SWSVERSION "\r\n"
   "Connection: close\r\n"
   "Content-Type: text/html"
@@ -152,7 +153,8 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
   "</HEAD><BODY>\n"
   "<H1>Not Found</H1>\n"
   "The requested URL was not found on this server.\n"
-  "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
+  "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n"
+  "</BODY></HTML>\n";
 
 /* work around for handling trailing headers */
 static int already_recv_zeroed_chunk = FALSE;
@@ -332,8 +334,7 @@ static int sws_ProcessRequest(struct sws_httprequest *req)
     char *httppath = NULL;
     size_t npath = 0; /* httppath length */
 
-    if(sscanf(line,
-              "%" REQUEST_KEYWORD_SIZE_TXT "s ", request) == 1) {
+    if(sscanf(line, "%" REQUEST_KEYWORD_SIZE_TXT "s ", request) == 1) {
       http = strstr(line + strlen(request), "HTTP/");
 
       if(http && sscanf(http, "HTTP/%d.%d", &prot_major, &prot_minor) == 2) {
@@ -833,7 +834,7 @@ static int sws_get_request(curl_socket_t sock, struct sws_httprequest *req)
           int rc;
           fd_set input;
           fd_set output;
-          struct timeval timeout = {0};
+          struct timeval timeout = { 0 };
           timeout.tv_sec = 1; /* 1000 ms */
 
           logmsg("Got EAGAIN from sread");
@@ -1318,7 +1319,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     error = SOCKERRNO;
     if((error == SOCKEINPROGRESS) || (error == SOCKEWOULDBLOCK)) {
       fd_set output;
-      struct timeval timeout = {0};
+      struct timeval timeout = { 0 };
       timeout.tv_sec = 1; /* 1000 ms */
 
       FD_ZERO(&output);
@@ -1386,8 +1387,8 @@ success:
 
 #define data_or_ctrl(x) ((x) ? "DATA" : "CTRL")
 
-#define SWS_CTRL  0
-#define SWS_DATA  1
+#define SWS_CTRL 0
+#define SWS_DATA 1
 
 static void http_connect(curl_socket_t *infdp,
                          curl_socket_t rootfd,
@@ -1395,10 +1396,10 @@ static void http_connect(curl_socket_t *infdp,
                          unsigned short ipport,
                          int keepalive_secs)
 {
-  curl_socket_t serverfd[2] = {CURL_SOCKET_BAD, CURL_SOCKET_BAD};
-  curl_socket_t clientfd[2] = {CURL_SOCKET_BAD, CURL_SOCKET_BAD};
-  ssize_t toc[2] = {0, 0}; /* number of bytes to client */
-  ssize_t tos[2] = {0, 0}; /* number of bytes to server */
+  curl_socket_t serverfd[2] = { CURL_SOCKET_BAD, CURL_SOCKET_BAD };
+  curl_socket_t clientfd[2] = { CURL_SOCKET_BAD, CURL_SOCKET_BAD };
+  ssize_t toc[2] = { 0, 0 }; /* number of bytes to client */
+  ssize_t tos[2] = { 0, 0 }; /* number of bytes to server */
   char readclient[2][256];
   char readserver[2][256];
   bool poll_client_rd[2] = { TRUE, TRUE };
@@ -1441,7 +1442,7 @@ static void http_connect(curl_socket_t *infdp,
     fd_set output;
     ssize_t rc;
     curl_socket_t maxfd = (curl_socket_t)-1;
-    struct timeval timeout = {0};
+    struct timeval timeout = { 0 };
     timeout.tv_sec = 1; /* 1000 ms */
 
     FD_ZERO(&input);
@@ -2176,8 +2177,7 @@ static int test_sws(int argc, char *argv[])
   }
 
   flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -2314,7 +2314,7 @@ static int test_sws(int argc, char *argv[])
     fd_set output;
     curl_socket_t maxfd = (curl_socket_t)-1;
     int active;
-    struct timeval timeout = {0};
+    struct timeval timeout = { 0 };
     timeout.tv_usec = 250000L; /* 250 ms */
 
     /* Clear out closed sockets */
@@ -2458,7 +2458,7 @@ sws_cleanup:
 
   for(socket_idx = 1; socket_idx < num_sockets; ++socket_idx)
     if((all_sockets[socket_idx] != sock) &&
-     (all_sockets[socket_idx] != CURL_SOCKET_BAD))
+       (all_sockets[socket_idx] != CURL_SOCKET_BAD))
       sclose(all_sockets[socket_idx]);
 
   if(sock != CURL_SOCKET_BAD)

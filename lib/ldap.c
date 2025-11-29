@@ -143,11 +143,11 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp);
 #endif /* !HAVE_LDAP_URL_PARSE */
 
 #ifdef DEBUG_LDAP
-#define LDAP_TRACE(x)               \
-do {                                \
-  ldap_trace_low("%u: ", __LINE__); \
-  ldap_trace_low x;                 \
-} while(0)
+#define LDAP_TRACE(x)                 \
+  do {                                \
+    ldap_trace_low("%u: ", __LINE__); \
+    ldap_trace_low x;                 \
+  } while(0)
 
 static void ldap_trace_low(const char *fmt, ...) CURL_PRINTF(1, 2);
 #else

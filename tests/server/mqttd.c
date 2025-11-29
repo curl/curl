@@ -55,7 +55,7 @@ struct mqttd_configurable {
   int testnum;
 };
 
-#define REQUEST_DUMP  "server.input"
+#define REQUEST_DUMP   "server.input"
 #define CONFIG_VERSION 5
 
 static struct mqttd_configurable m_config;
@@ -152,7 +152,6 @@ static void logprotocol(mqttdir dir,
           prefix, (int)remlen, data);
 }
 
-
 /* return 0 on success */
 static int connack(FILE *dump, curl_socket_t fd)
 {
@@ -179,7 +178,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 /* return 0 on success */
 static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_SUBACK, 0x03,
     0, 0, /* filled in below */
     0x00
@@ -202,7 +201,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 /* return 0 on success */
 static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_PUBACK, 0x00,
     0, 0 /* filled in below */
   };
@@ -225,7 +224,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 /* return 0 on success */
 static int disconnect(FILE *dump, curl_socket_t fd)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_DISCONNECT, 0x00,
   };
   ssize_t rc = swrite(fd, (char *)packet, sizeof(packet));
@@ -364,7 +363,7 @@ static int publish(FILE *dump,
   return 1;
 }
 
-#define MAX_TOPIC_LENGTH 65535
+#define MAX_TOPIC_LENGTH     65535
 #define MAX_CLIENT_ID_LENGTH 32
 
 static char topic[MAX_TOPIC_LENGTH + 1];
