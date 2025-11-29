@@ -44,7 +44,6 @@
 #include "../rand.h"
 #include "../vtls/vtls.h"
 #include "../strdup.h"
-
 #include "../curl_endian.h"
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
