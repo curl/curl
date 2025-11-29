@@ -229,20 +229,20 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
  * All about the H3 internals of a stream
  */
 struct h3_stream_ctx {
-  int64_t id; /* HTTP/3 protocol identifier */
-  struct bufq sendbuf;   /* h3 request body */
-  struct h1_req_parser h1; /* h1 request parsing */
+  int64_t id;                   /* HTTP/3 protocol identifier */
+  struct bufq sendbuf;          /* h3 request body */
+  struct h1_req_parser h1;      /* h1 request parsing */
   size_t sendbuf_len_in_flight; /* sendbuf amount "in flight" */
-  uint64_t error3; /* HTTP/3 stream error code */
-  curl_off_t upload_left; /* number of request bytes left to upload */
-  uint64_t download_unacked; /* bytes not acknowledged yet */
-  int status_code; /* HTTP status code */
-  CURLcode xfer_result; /* result from xfer_resp_write(_hd) */
-  BIT(resp_hds_complete); /* we have a complete, final response */
-  BIT(closed); /* TRUE on stream close */
-  BIT(reset);  /* TRUE on stream reset */
-  BIT(send_closed); /* stream is local closed */
-  BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
+  uint64_t error3;              /* HTTP/3 stream error code */
+  curl_off_t upload_left;       /* number of request bytes left to upload */
+  uint64_t download_unacked;    /* bytes not acknowledged yet */
+  int status_code;              /* HTTP status code */
+  CURLcode xfer_result;         /* result from xfer_resp_write(_hd) */
+  BIT(resp_hds_complete);       /* we have a complete, final response */
+  BIT(closed);                  /* TRUE on stream close */
+  BIT(reset);                   /* TRUE on stream reset */
+  BIT(send_closed);             /* stream is local closed */
+  BIT(quic_flow_blocked);       /* stream is blocked by QUIC flow control */
 };
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
@@ -313,8 +313,8 @@ static bool cf_ngtcp2_sfind(uint32_t mid, void *value, void *user_data)
   return TRUE; /* continue */
 }
 
-static struct h3_stream_ctx *
-cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx, int64_t stream_id)
+static struct h3_stream_ctx *cf_ngtcp2_get_stream(struct cf_ngtcp2_ctx *ctx,
+                                                  int64_t stream_id)
 {
   struct cf_ngtcp2_sfind_ctx fctx;
   fctx.stream_id = stream_id;
@@ -365,8 +365,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   (void)cf;
   if(stream) {
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done",
-                stream->id);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] easy handle is done", stream->id);
     cf_ngtcp2_stream_close(cf, data, stream);
     Curl_uint32_hash_remove(&ctx->streams, data->mid);
     if(!Curl_uint32_hash_count(&ctx->streams))
@@ -638,10 +637,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   return 0;
 }
 
-static int
-cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
-                            uint64_t offset, uint64_t datalen, void *user_data,
-                            void *stream_user_data)
+static int cb_acked_stream_data_offset(ngtcp2_conn *tconn, int64_t stream_id,
+                                       uint64_t offset, uint64_t datalen,
+                                       void *user_data, void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
@@ -828,8 +826,8 @@ static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_encryption_level level,
 }
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(push)
-#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
+#pragma warning(push)
+#pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
 static ngtcp2_callbacks ng_callbacks = {
@@ -879,7 +877,7 @@ static ngtcp2_callbacks ng_callbacks = {
 };
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 /**
@@ -1335,9 +1333,9 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
 }
 
 static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct h3_stream_ctx *stream,
-                                  size_t *pnread)
+                                   struct Curl_easy *data,
+                                   struct h3_stream_ctx *stream,
+                                   size_t *pnread)
 {
   (void)cf;
   *pnread = 0;
@@ -1450,11 +1448,10 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   return 0;
 }
 
-static nghttp3_ssize
-cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
-                    nghttp3_vec *vec, size_t veccnt,
-                    uint32_t *pflags, void *user_data,
-                    void *stream_user_data)
+static nghttp3_ssize cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
+                                         nghttp3_vec *vec, size_t veccnt,
+                                         uint32_t *pflags, void *user_data,
+                                         void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
@@ -1502,8 +1499,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
   else if(!nwritten) {
     /* Not EOF, and nothing to give, we signal WOULDBLOCK. */
-    CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> AGAIN",
-                stream->id);
+    CURL_TRC_CF(data, cf, "[%" PRId64 "] read req body -> AGAIN", stream->id);
     return NGHTTP3_ERR_WOULDBLOCK;
   }
 
@@ -1959,7 +1955,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
    */
   max_payload_size = ngtcp2_conn_get_max_tx_udp_payload_size(ctx->qconn);
   path_max_payload_size =
-      ngtcp2_conn_get_path_max_tx_udp_payload_size(ctx->qconn);
+    ngtcp2_conn_get_path_max_tx_udp_payload_size(ctx->qconn);
   send_quantum = ngtcp2_conn_get_send_quantum(ctx->qconn);
   CURL_TRC_CF(data, cf, "egress, collect and send packets, quantum=%zu",
               send_quantum);
@@ -2281,16 +2277,16 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 static const char *gtls_hs_msg_name(int mtype)
 {
   switch(mtype) {
-    case 1: return "ClientHello";
-    case 2: return "ServerHello";
-    case 4: return "SessionTicket";
-    case 8: return "EncryptedExtensions";
-    case 11: return "Certificate";
-    case 13: return "CertificateRequest";
-    case 15: return "CertificateVerify";
-    case 20: return "Finished";
-    case 24: return "KeyUpdate";
-    case 254: return "MessageHash";
+  case 1: return "ClientHello";
+  case 2: return "ServerHello";
+  case 4: return "SessionTicket";
+  case 8: return "EncryptedExtensions";
+  case 11: return "Certificate";
+  case 13: return "CertificateRequest";
+  case 15: return "CertificateVerify";
+  case 20: return "Finished";
+  case 24: return "KeyUpdate";
+  case 254: return "MessageHash";
   }
   return "Unknown";
 }
@@ -2456,7 +2452,7 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
 #endif /* WOLFSSL_EARLY_DATA */
 #endif
 #if defined(USE_GNUTLS) || defined(USE_WOLFSSL) || \
-    (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
+  (defined(USE_OPENSSL) && defined(HAVE_OPENSSL_EARLYDATA))
   if((!ctx->earlydata_max)) {
     CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }

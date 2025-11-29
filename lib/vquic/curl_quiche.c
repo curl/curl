@@ -167,17 +167,17 @@ static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
  * All about the H3 internals of a stream
  */
 struct h3_stream_ctx {
-  uint64_t id; /* HTTP/3 protocol stream identifier */
-  struct bufq recvbuf; /* h3 response */
+  uint64_t id;             /* HTTP/3 protocol stream identifier */
+  struct bufq recvbuf;     /* h3 response */
   struct h1_req_parser h1; /* h1 request parsing */
-  uint64_t error3; /* HTTP/3 stream error code */
-  BIT(opened); /* TRUE after stream has been opened */
-  BIT(closed); /* TRUE on stream close */
-  BIT(reset);  /* TRUE on stream reset */
-  BIT(send_closed); /* stream is locally closed */
+  uint64_t error3;         /* HTTP/3 stream error code */
+  BIT(opened);             /* TRUE after stream has been opened */
+  BIT(closed);             /* TRUE on stream close */
+  BIT(reset);              /* TRUE on stream reset */
+  BIT(send_closed);        /* stream is locally closed */
   BIT(resp_hds_complete);  /* final response has been received */
-  BIT(resp_got_header); /* TRUE when h3 stream has recvd some HEADER */
-  BIT(quic_flow_blocked); /* stream is blocked by QUIC flow control */
+  BIT(resp_got_header);    /* TRUE when h3 stream has recvd some HEADER */
+  BIT(quic_flow_blocked);  /* stream is blocked by QUIC flow control */
 };
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
