@@ -100,13 +100,13 @@ void Curl_conncontrol(struct connectdata *conn,
   );
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
-#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
-#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
+#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
+#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
+#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
 #else /* if !DEBUGBUILD || CURL_DISABLE_VERBOSE_STRINGS */
-#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM)
-#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
-#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
+#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
+#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
+#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,

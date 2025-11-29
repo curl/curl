@@ -64,7 +64,6 @@ const char *Curl_alpnid2str(enum alpnid id)
   }
 }
 
-
 static void altsvc_free(struct altsvc *as)
 {
   curlx_free(as->src.host);

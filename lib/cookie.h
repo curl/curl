@@ -30,29 +30,29 @@
 #include "llist.h"
 
 struct Cookie {
-  struct Curl_llist_node node; /* for the main cookie list */
+  struct Curl_llist_node node;    /* for the main cookie list */
   struct Curl_llist_node getnode; /* for getlist */
-  char *name;         /* <this> = value */
-  char *value;        /* name = <this> */
-  char *path;         /* path = <this> which is in Set-Cookie: */
-  char *spath;        /* sanitized cookie path */
-  char *domain;       /* domain = <this> */
-  curl_off_t expires; /* expires = <this> */
-  unsigned int creationtime; /* time when the cookie was written */
-  BIT(tailmatch);     /* tail-match the domain name */
-  BIT(secure);        /* the 'secure' keyword was used */
-  BIT(livecookie);    /* updated from a server, not a stored file */
-  BIT(httponly);      /* the httponly directive is present */
-  BIT(prefix_secure); /* secure prefix is set */
-  BIT(prefix_host);   /* host prefix is set */
+  char *name;                     /* <this> = value */
+  char *value;                    /* name = <this> */
+  char *path;                     /* path = <this> which is in Set-Cookie: */
+  char *spath;                    /* sanitized cookie path */
+  char *domain;                   /* domain = <this> */
+  curl_off_t expires;             /* expires = <this> */
+  unsigned int creationtime;      /* time when the cookie was written */
+  BIT(tailmatch);                 /* tail-match the domain name */
+  BIT(secure);                    /* the 'secure' keyword was used */
+  BIT(livecookie);                /* updated from a server, not a stored file */
+  BIT(httponly);                  /* the httponly directive is present */
+  BIT(prefix_secure);             /* secure prefix is set */
+  BIT(prefix_host);               /* host prefix is set */
 };
 
 /*
  * Available cookie prefixes, as defined in
  * draft-ietf-httpbis-rfc6265bis-02
  */
-#define COOKIE_PREFIX__SECURE (1<<0)
-#define COOKIE_PREFIX__HOST (1<<1)
+#define COOKIE_PREFIX__SECURE (1 << 0)
+#define COOKIE_PREFIX__HOST (1 << 1)
 
 #define COOKIE_HASH_SIZE 63
 
@@ -60,9 +60,9 @@ struct CookieInfo {
   /* linked lists of cookies we know of */
   struct Curl_llist cookielist[COOKIE_HASH_SIZE];
   curl_off_t next_expiration; /* the next time at which expiration happens */
-  unsigned int numcookies;  /* number of cookies in the "jar" */
-  unsigned int lastct;      /* last creation-time used in the jar */
-  BIT(running);    /* state info, for cookie adding information */
+  unsigned int numcookies;    /* number of cookies in the "jar" */
+  unsigned int lastct;        /* last creation-time used in the jar */
+  BIT(running);               /* state info, for cookie adding information */
   BIT(newsession); /* new session, discard session cookies on load */
 };
 
@@ -130,7 +130,7 @@ void Curl_cookie_clearsess(struct CookieInfo *cookies);
 #define Curl_cookie_init() NULL
 #define Curl_cookie_run(x) Curl_nop_stmt
 #define Curl_cookie_cleanup(x) Curl_nop_stmt
-#define Curl_flush_cookies(x,y) Curl_nop_stmt
+#define Curl_flush_cookies(x, y) Curl_nop_stmt
 #else
 void Curl_flush_cookies(struct Curl_easy *data, bool cleanup);
 void Curl_cookie_cleanup(struct CookieInfo *c);

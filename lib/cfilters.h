@@ -116,16 +116,16 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  * "ignored" meaning return values are ignored and the event is distributed
  *           to all filters in the chain. Overall result is always CURLE_OK.
  */
-/*      data event                          arg1       arg2     return */
-#define CF_CTRL_DATA_SETUP            4  /* 0          NULL     first fail */
-/* unused now                         5  */
-#define CF_CTRL_DATA_PAUSE            6  /* on/off     NULL     first fail */
-#define CF_CTRL_DATA_DONE             7  /* premature  NULL     ignored */
-#define CF_CTRL_DATA_DONE_SEND        8  /* 0          NULL     ignored */
+/*      data event                            arg1       arg2     return */
+#define CF_CTRL_DATA_SETUP              4  /* 0          NULL     first fail */
+/* unused now                           5  */
+#define CF_CTRL_DATA_PAUSE              6  /* on/off     NULL     first fail */
+#define CF_CTRL_DATA_DONE               7  /* premature  NULL     ignored */
+#define CF_CTRL_DATA_DONE_SEND          8  /* 0          NULL     ignored */
 /* update conn info at connection and data */
-#define CF_CTRL_CONN_INFO_UPDATE (256+0) /* 0          NULL     ignored */
-#define CF_CTRL_FORGET_SOCKET    (256+1) /* 0          NULL     ignored */
-#define CF_CTRL_FLUSH            (256+2) /* 0          NULL     first fail */
+#define CF_CTRL_CONN_INFO_UPDATE (256 + 0) /* 0          NULL     ignored */
+#define CF_CTRL_FORGET_SOCKET    (256 + 1) /* 0          NULL     ignored */
+#define CF_CTRL_FLUSH            (256 + 2) /* 0          NULL     first fail */
 
 /**
  * Handle event/control for the filter.
@@ -134,7 +134,6 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
 typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int event, int arg1, void *arg2);
-
 
 /**
  * Queries to ask via a `Curl_cft_query *query` method on a cfilter chain.
@@ -210,21 +209,21 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
-  const char *name;                       /* name of the filter type */
-  int flags;                              /* flags of filter type */
-  int log_level;                          /* log level for such filters */
-  Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
-  Curl_cft_connect *do_connect;           /* establish connection */
-  Curl_cft_close *do_close;               /* close conn */
-  Curl_cft_shutdown *do_shutdown;         /* shutdown conn */
+  const char *name;                        /* name of the filter type */
+  int flags;                               /* flags of filter type */
+  int log_level;                           /* log level for such filters */
+  Curl_cft_destroy_this *destroy;          /* destroy resources of this cf */
+  Curl_cft_connect *do_connect;            /* establish connection */
+  Curl_cft_close *do_close;                /* close conn */
+  Curl_cft_shutdown *do_shutdown;          /* shutdown conn */
   Curl_cft_adjust_pollset *adjust_pollset; /* adjust transfer poll set */
-  Curl_cft_data_pending *has_data_pending;/* conn has data pending */
-  Curl_cft_send *do_send;                 /* send data */
-  Curl_cft_recv *do_recv;                 /* receive data */
-  Curl_cft_cntrl *cntrl;                  /* events/control */
-  Curl_cft_conn_is_alive *is_alive;       /* FALSE if conn is dead, Jim! */
-  Curl_cft_conn_keep_alive *keep_alive;   /* try to keep it alive */
-  Curl_cft_query *query;                  /* query filter chain */
+  Curl_cft_data_pending *has_data_pending; /* conn has data pending */
+  Curl_cft_send *do_send;                  /* send data */
+  Curl_cft_recv *do_recv;                  /* receive data */
+  Curl_cft_cntrl *cntrl;                   /* events/control */
+  Curl_cft_conn_is_alive *is_alive;        /* FALSE if conn is dead, Jim! */
+  Curl_cft_conn_keep_alive *keep_alive;    /* try to keep it alive */
+  Curl_cft_query *query;                   /* query filter chain */
 };
 
 /* A connection filter instance, e.g. registered at a connection */
@@ -426,7 +425,7 @@ const char *Curl_conn_get_alpn_negotiated(struct Curl_easy *data,
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.
-  * Filters remain in place and may be connected again afterwards.
+ * Filters remain in place and may be connected again afterwards.
  */
 void Curl_conn_close(struct Curl_easy *data, int sockindex);
 
@@ -622,7 +621,6 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
                         const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
-
 /**
  * Types and macros used to keep the current easy handle in filter calls,
  * allowing for nested invocations. See #10336.
@@ -654,7 +652,7 @@ struct cf_call_data {
  * a member in the cfilter's `ctx`.
  *
  * #define CF_CTX_CALL_DATA(cf)   -> struct cf_call_data instance
-*/
+ */
 
 #ifdef DEBUGBUILD
 
@@ -688,7 +686,6 @@ struct cf_call_data {
 
 #endif /* !DEBUGBUILD */
 
-#define CF_DATA_CURRENT(cf) \
-  ((cf)? (CF_CTX_CALL_DATA(cf).data) : NULL)
+#define CF_DATA_CURRENT(cf) ((cf) ? (CF_CTX_CALL_DATA(cf).data) : NULL)
 
 #endif /* HEADER_CURL_CFILTERS_H */

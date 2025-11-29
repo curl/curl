@@ -45,13 +45,13 @@
 #endif
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-#  include <pthread.h>
+#include <pthread.h>
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#  define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
+#define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
 #else
-#  define RESOLVER_ENOMEM  SOCKENOMEM
+#define RESOLVER_ENOMEM  SOCKENOMEM
 #endif
 
 #include "urldata.h"
@@ -245,7 +245,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
       }
     }
 #endif
-
   }
 
   addr_ctx_unlink(&addr_ctx, NULL);
@@ -486,8 +485,8 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
 
   Curl_mutex_acquire(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
-    if(!addr_ctx->do_abort)
-      Curl_multi_will_close(data, addr_ctx->sock_pair[0]);
+  if(!addr_ctx->do_abort)
+    Curl_multi_will_close(data, addr_ctx->sock_pair[0]);
 #endif
   addr_ctx->do_abort = TRUE;
   done = addr_ctx->thrd_done;
@@ -703,7 +702,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 
   if(!thrd_done) {
 #ifndef CURL_DISABLE_SOCKETPAIR
-  /* return read fd to client for polling the DNS resolution status */
+    /* return read fd to client for polling the DNS resolution status */
     result = Curl_pollset_add_in(data, ps, thrdd->addr->sock_pair[0]);
 #else
     timediff_t milli;
@@ -711,7 +710,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
-      milli = ms/3;
+      milli = ms / 3;
     else if(ms <= 250)
       milli = 50;
     else
