@@ -547,8 +547,7 @@ static const struct cs_entry cs_list [] = {
 };
 #define CS_LIST_LEN CURL_ARRAYSIZE(cs_list)
 
-static int cs_str_to_zip(const char *cs_str, size_t cs_len,
-                         uint8_t zip[6])
+static int cs_str_to_zip(const char *cs_str, size_t cs_len, uint8_t zip[6])
 {
   uint8_t indexes[8] = {0};
   const char *entry, *cur;
@@ -596,8 +595,7 @@ static int cs_str_to_zip(const char *cs_str, size_t cs_len,
   return 0;
 }
 
-static int cs_zip_to_str(const uint8_t zip[6],
-                         char *buf, size_t buf_size)
+static int cs_zip_to_str(const uint8_t zip[6], char *buf, size_t buf_size)
 {
   uint8_t indexes[8] = {0};
   const char *entry;

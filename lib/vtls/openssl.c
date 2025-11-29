@@ -179,7 +179,7 @@ static void ossl_provider_cleanup(struct Curl_easy *data);
 #define OSSL_PACKAGE "BoringSSL"
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
-#elif defined(USE_NGTCP2) && defined(USE_NGHTTP3) &&   \
+#elif defined(USE_NGTCP2) && defined(USE_NGHTTP3) && \
   !defined(OPENSSL_QUIC_API2)
 #define OSSL_PACKAGE "quictls"
 #else
@@ -234,7 +234,7 @@ static CURLcode pubkey_show(struct Curl_easy *data,
   return push_certinfo(data, mem, namebuf, num);
 }
 
-#define print_pubkey_BN(_type, _name, _num)             \
+#define print_pubkey_BN(_type, _name, _num)           \
   pubkey_show(data, mem, _num, #_type, #_name, _name)
 
 static int asn1_object_dump(const ASN1_OBJECT *a, char *buf, size_t len)
@@ -1215,16 +1215,15 @@ static int engineload(struct Curl_easy *data,
     /* Load the certificate from the engine */
     if(!ENGINE_ctrl_cmd(data->state.engine, cmd_name,
                         0, &params, NULL, 1)) {
-      failf(data, "ssl engine cannot load client cert with id"
-            " '%s' [%s]", cert_file,
+      failf(data, "ssl engine cannot load client cert with id '%s' [%s]",
+            cert_file,
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)));
       return 0;
     }
 
     if(!params.cert) {
-      failf(data, "ssl engine did not initialized the certificate "
-            "properly.");
+      failf(data, "ssl engine did not initialized the certificate properly.");
       return 0;
     }
 
@@ -1346,8 +1345,7 @@ static int pkcs12load(struct Curl_easy *data,
   if(cert_blob) {
     cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
     if(!cert_bio) {
-      failf(data,
-            "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
+      failf(data, "BIO_new_mem_buf NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)) );
       return 0;
@@ -1356,8 +1354,7 @@ static int pkcs12load(struct Curl_easy *data,
   else {
     cert_bio = BIO_new(BIO_s_file());
     if(!cert_bio) {
-      failf(data,
-            "BIO_new return NULL, " OSSL_PACKAGE " error %s",
+      failf(data, "BIO_new return NULL, " OSSL_PACKAGE " error %s",
             ossl_strerror(ERR_get_error(), error_buffer,
                           sizeof(error_buffer)) );
       return 0;
@@ -1380,8 +1377,7 @@ static int pkcs12load(struct Curl_easy *data,
   }
 
   if(!PKCS12_parse(p12, key_passwd, &pri, &x509, &ca)) {
-    failf(data,
-          "could not parse PKCS12 file, check password, " OSSL_PACKAGE
+    failf(data, "could not parse PKCS12 file, check password, " OSSL_PACKAGE
           " error %s",
           ossl_strerror(ERR_get_error(), error_buffer, sizeof(error_buffer)));
     PKCS12_free(p12);
@@ -1391,8 +1387,7 @@ static int pkcs12load(struct Curl_easy *data,
   PKCS12_free(p12);
 
   if(SSL_CTX_use_certificate(ctx, x509) != 1) {
-    failf(data,
-          "could not load PKCS12 client certificate, " OSSL_PACKAGE
+    failf(data, "could not load PKCS12 client certificate, " OSSL_PACKAGE
           " error %s",
           ossl_strerror(ERR_get_error(), error_buffer, sizeof(error_buffer)));
     goto fail;
@@ -2153,8 +2148,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
              our server IP address is */
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen)) {
             matched = TRUE;
-            infof(data,
-                  "  subjectAltName: \"%s\" matches cert's IP address!",
+            infof(data, "  subjectAltName: \"%s\" matches cert's IP address!",
                   peer->dispname);
           }
           break;
@@ -2229,8 +2223,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
       /* error already detected, pass through */
       ;
     else if(!cn) {
-      failf(data,
-            "SSL: unable to obtain common name from peer certificate");
+      failf(data, "SSL: unable to obtain common name from peer certificate");
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
@@ -3197,7 +3190,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
 }
 
 /* key to use at `multi->proto_hash` */
-#define MPROTO_OSSL_X509_KEY   "tls:ossl:x509:share"
+#define MPROTO_OSSL_X509_KEY  "tls:ossl:x509:share"
 
 struct ossl_x509_share {
   char *CAfile;         /* CAfile path used to generate X509 store */
@@ -4017,8 +4010,7 @@ static CURLcode ossl_on_session_reuse(struct Curl_cfilter *cf,
   return result;
 }
 
-void Curl_ossl_report_handshake(struct Curl_easy *data,
-                                struct ossl_ctx *octx)
+void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(Curl_trc_is_verbose(data)) {
@@ -4514,8 +4506,7 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
     type_name = NULL;
 #endif
 
-    infof(data,
-          "  Certificate level %d: "
+    infof(data, "  Certificate level %d: "
           "Public key type %s%s (%d/%d Bits/secBits), signed using %s",
           cert_level, type_name ? type_name : "?",
           get_group_name == 0 ? "" : group_name_final,

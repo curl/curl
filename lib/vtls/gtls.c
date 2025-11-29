@@ -131,8 +131,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   }
 
   result = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
-  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %d, %zd",
-              blen, result, nread);
+  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %d, %zd", blen, result, nread);
   backend->gtls.io_result = result;
   if(result) {
     /* !checksrc! disable ERRNOVAR 1 */
@@ -173,9 +172,7 @@ static void gtls_cleanup(void)
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-static void showtime(struct Curl_easy *data,
-                     const char *text,
-                     time_t stamp)
+static void showtime(struct Curl_easy *data, const char *text, time_t stamp)
 {
   struct tm buffer;
   const struct tm *tm = &buffer;
@@ -230,7 +227,6 @@ static void unload_file(gnutls_datum_t data)
 {
   curlx_free(data.data);
 }
-
 
 /* this function does an SSL/TLS (re-)handshake */
 static CURLcode cf_gtls_handshake(struct Curl_cfilter *cf,
@@ -584,8 +580,8 @@ static bool gtls_shared_creds_different(struct Curl_cfilter *cf,
   return strcmp(sc->CAfile, conn_config->CAfile);
 }
 
-static struct gtls_shared_creds*
-gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
+static struct gtls_shared_creds *gtls_get_cached_creds(struct Curl_cfilter *cf,
+                                                       struct Curl_easy *data)
 {
   struct gtls_shared_creds *shared_creds;
 
@@ -635,9 +631,9 @@ static void gtls_set_cached_creds(struct Curl_cfilter *cf,
     return;
 
   if(!Curl_hash_add2(&data->multi->proto_hash,
-                    CURL_UNCONST(MPROTO_GTLS_X509_KEY),
-                    sizeof(MPROTO_GTLS_X509_KEY)-1,
-                    sc, gtls_shared_creds_hash_free)) {
+                     CURL_UNCONST(MPROTO_GTLS_X509_KEY),
+                     sizeof(MPROTO_GTLS_X509_KEY) - 1,
+                     sc, gtls_shared_creds_hash_free)) {
     Curl_gtls_shared_creds_free(&sc); /* down reference again */
     return;
   }
@@ -839,7 +835,7 @@ static CURLcode gtls_set_priority(struct Curl_cfilter *cf,
     if((conn_config->cipher_list[0] == '+') ||
        (conn_config->cipher_list[0] == '-') ||
        (conn_config->cipher_list[0] == '!')) {
-       /* add it to out own */
+      /* add it to out own */
       if(!curlx_dyn_len(&buf)) {  /* not added yet */
         result = curlx_dyn_add(&buf, priority);
         if(result)
@@ -1333,8 +1329,7 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
   return result;
 }
 
-void Curl_gtls_report_handshake(struct Curl_easy *data,
-                                struct gtls_ctx *gctx)
+void Curl_gtls_report_handshake(struct Curl_easy *data, struct gtls_ctx *gctx)
 {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   if(Curl_trc_is_verbose(data)) {
@@ -1601,7 +1596,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
   time_t certclock;
   int rc;
   CURLcode result = CURLE_OK;
-  long *const certverifyresult = &ssl_config->certverifyresult;
+  long * const certverifyresult = &ssl_config->certverifyresult;
 
   (void)cf;
   /* This function will return the peer's raw certificate (chain) as sent by
@@ -1895,7 +1890,7 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
-      (struct gtls_ssl_backend_data *)connssl->backend;
+    (struct gtls_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
   const unsigned char *buf;
   size_t blen;
@@ -1905,8 +1900,7 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
   backend->gtls.io_result = CURLE_OK;
   while(Curl_bufq_peek(&connssl->earlydata, &buf, &blen)) {
     n = gnutls_record_send_early_data(backend->gtls.session, buf, blen);
-    CURL_TRC_CF(data, cf, "gtls_send_earlydata(len=%zu) -> %zd",
-                blen, n);
+    CURL_TRC_CF(data, cf, "gtls_send_earlydata(len=%zu) -> %zd", blen, n);
     if(n < 0) {
       if(n == GNUTLS_E_AGAIN)
         result = CURLE_AGAIN;
@@ -1945,7 +1939,7 @@ static CURLcode gtls_connect_common(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
-      (struct gtls_ssl_backend_data *)connssl->backend;
+    (struct gtls_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
 
   DEBUGASSERT(backend);

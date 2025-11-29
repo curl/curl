@@ -93,14 +93,13 @@
       dest->var = NULL;                      \
   } while(0)
 
-#define CLONE_BLOB(var)                        \
-  do {                                         \
-    if(blobdup(&dest->var, source->var))       \
-      return FALSE;                            \
+#define CLONE_BLOB(var)                  \
+  do {                                   \
+    if(blobdup(&dest->var, source->var)) \
+      return FALSE;                      \
   } while(0)
 
-static CURLcode blobdup(struct curl_blob **dest,
-                        struct curl_blob *src)
+static CURLcode blobdup(struct curl_blob **dest, struct curl_blob *src)
 {
   DEBUGASSERT(dest);
   DEBUGASSERT(!*dest);
@@ -322,8 +321,7 @@ CURLcode Curl_ssl_easy_config_complete(struct Curl_easy *data)
   sslc->primary.cipher_list13 = data->set.str[STRING_SSL_CIPHER13_LIST];
   sslc->primary.signature_algorithms =
     data->set.str[STRING_SSL_SIGNATURE_ALGORITHMS];
-  sslc->primary.pinned_key =
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+  sslc->primary.pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
   sslc->primary.cert_blob = data->set.blobs[BLOB_CERT];
   sslc->primary.ca_info_blob = data->set.blobs[BLOB_CAINFO];
   sslc->primary.curves = data->set.str[STRING_SSL_EC_CURVES];
@@ -659,8 +657,7 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
      curlx_dyn_addn(&build, value, valuelen))
     return CURLE_OUT_OF_MEMORY;
 
-  nl = Curl_slist_append_nodup(ci->certinfo[certnum],
-                               curlx_dyn_ptr(&build));
+  nl = Curl_slist_append_nodup(ci->certinfo[certnum], curlx_dyn_ptr(&build));
   if(!nl) {
     curlx_dyn_free(&build);
     curl_slist_free_all(ci->certinfo[certnum]);

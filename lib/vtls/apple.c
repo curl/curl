@@ -207,8 +207,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   if(ocsp_len > 0) {
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-      CFDataRef ocspdata =
-        CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
+      CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
 
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
@@ -243,7 +242,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
         err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
-             kCFStringEncodingUTF8)) {
+                                 kCFStringEncodingUTF8)) {
             curlx_free(err_desc);
             err_desc = NULL;
           }

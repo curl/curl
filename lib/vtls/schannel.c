@@ -34,7 +34,7 @@
 #ifdef USE_SCHANNEL
 
 #ifndef USE_WINDOWS_SSPI
-#  error "cannot compile SCHANNEL support without SSPI."
+#error "cannot compile SCHANNEL support without SSPI."
 #endif
 
 #include "schannel.h"
@@ -67,7 +67,7 @@
  */
 #ifdef CURL_SCHANNEL_DEV_DEBUG
 #define SCH_DEV(x) x
-#define SCH_DEV_SHOWBOOL(x) \
+#define SCH_DEV_SHOWBOOL(x)                                   \
   infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE");
 #else
 #define SCH_DEV(x) do { } while(0)
@@ -864,8 +864,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
   CURLcode result;
 
   DEBUGASSERT(backend);
-  DEBUGF(infof(data,
-               "schannel: SSL/TLS connection with %s port %d (step 1/3)",
+  DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 1/3)",
                connssl->peer.hostname, connssl->peer.port));
 
   if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
@@ -942,7 +941,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
     int cur = 0;
     int list_start_index = 0;
     unsigned int *extension_len = NULL;
-    unsigned short* list_len = NULL;
+    unsigned short *list_len = NULL;
     struct alpn_proto_buf proto;
 
     /* The first four bytes will be an unsigned int indicating number
@@ -958,7 +957,7 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
     /* The next two bytes will be an unsigned short indicating the number
        of bytes used to list the preferred protocols. */
-    list_len = (unsigned short*)(void *)(&alpn_buffer[cur]);
+    list_len = (unsigned short *)(void *)(&alpn_buffer[cur]);
     cur += (int)sizeof(unsigned short);
 
     list_start_index = cur;
@@ -996,8 +995,8 @@ static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
 
   /* security request flags */
   backend->req_flags = ISC_REQ_SEQUENCE_DETECT | ISC_REQ_REPLAY_DETECT |
-    ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
-    ISC_REQ_STREAM;
+                       ISC_REQ_CONFIDENTIALITY | ISC_REQ_ALLOCATE_MEMORY |
+                       ISC_REQ_STREAM;
 
   if(!ssl_config->auto_client_cert) {
     backend->req_flags |= ISC_REQ_USE_SUPPLIED_CREDS;
@@ -1121,8 +1120,8 @@ static CURLcode schannel_error(struct Curl_easy *data,
   }
 }
 
-static CURLcode
-schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode schannel_connect_step2(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
@@ -1145,8 +1144,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   doread = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ? FALSE : TRUE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
-  DEBUGF(infof(data,
-               "schannel: SSL/TLS connection with %s port %d (step 2/3)",
+  DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 2/3)",
                connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred || !backend->ctxt)
@@ -1351,7 +1349,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(backend->encdata_offset > inbuf[1].cbBuffer) {
         memmove(backend->encdata_buffer,
                 (backend->encdata_buffer + backend->encdata_offset) -
-                inbuf[1].cbBuffer, inbuf[1].cbBuffer);
+                  inbuf[1].cbBuffer,
+                inbuf[1].cbBuffer);
         backend->encdata_offset = inbuf[1].cbBuffer;
         if(sspi_status == SEC_I_CONTINUE_NEEDED) {
           doread = FALSE;
@@ -1413,8 +1412,8 @@ static bool valid_cert_encoding(const CERT_CONTEXT *cert_context)
     (cert_context->cbCertEncoded > 0);
 }
 
-typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context,
-                             bool reverse_order, void *arg);
+typedef bool (*Read_crt_func)(const CERT_CONTEXT *ccert_context,
+                              bool reverse_order, void *arg);
 
 static void traverse_cert_store(const CERT_CONTEXT *context,
                                 Read_crt_func func, void *arg)
@@ -1512,8 +1511,7 @@ static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
   DEBUGASSERT(backend);
 
-  DEBUGF(infof(data,
-               "schannel: SSL/TLS connection with %s port %d (step 3/3)",
+  DEBUGF(infof(data, "schannel: SSL/TLS connection with %s port %d (step 3/3)",
                connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred)
@@ -2214,7 +2212,8 @@ static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
              buffer */
           memmove(backend->encdata_buffer,
                   (backend->encdata_buffer + backend->encdata_offset) -
-                  inbuf[3].cbBuffer, inbuf[3].cbBuffer);
+                    inbuf[3].cbBuffer,
+                  inbuf[3].cbBuffer);
           backend->encdata_offset = inbuf[3].cbBuffer;
         }
 

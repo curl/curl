@@ -71,8 +71,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   const unsigned char *proto,
                                   size_t proto_len);
 
-bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
-                              const char *proto);
+bool Curl_alpn_contains_proto(const struct alpn_spec *spec, const char *proto);
 
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
@@ -99,8 +98,8 @@ typedef enum {
 } ssl_earlydata_state;
 
 #define CURL_SSL_IO_NEED_NONE   (0)
-#define CURL_SSL_IO_NEED_RECV   (1<<0)
-#define CURL_SSL_IO_NEED_SEND   (1<<1)
+#define CURL_SSL_IO_NEED_RECV   (1 << 0)
+#define CURL_SSL_IO_NEED_SEND   (1 << 1)
 
 /* Max earlydata payload we want to send */
 #define CURL_SSL_EARLY_MAX       (64 * 1024)
@@ -154,8 +153,7 @@ struct Curl_ssl {
   /* data_pending() shall return TRUE when it wants to get called again to
      drain internal buffers and deliver data instead of waiting for the socket
      to get readable */
-  bool (*data_pending)(struct Curl_cfilter *cf,
-                       const struct Curl_easy *data);
+  bool (*data_pending)(struct Curl_cfilter *cf, const struct Curl_easy *data);
 
   /* return 0 if a find random is filled in */
   CURLcode (*random)(struct Curl_easy *data, unsigned char *entropy,

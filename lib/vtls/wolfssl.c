@@ -309,8 +309,7 @@ static long wssl_bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
   return ret;
 }
 
-static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio,
-                                 const char *buf, int blen)
+static int wssl_bio_cf_out_write(WOLFSSL_BIO *bio, const char *buf, int blen)
 {
   struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
   struct ssl_connect_data *connssl = cf->ctx;
@@ -535,8 +534,8 @@ static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
     connssl->earlydata_state = ssl_earlydata_await;
     connssl->state = ssl_connection_deferred;
     result = Curl_alpn_set_negotiated(cf, data, connssl,
-                    (const unsigned char *)scs->alpn,
-                    scs->alpn ? strlen(scs->alpn) : 0);
+                                      (const unsigned char *)scs->alpn,
+                                      scs->alpn ? strlen(scs->alpn) : 0);
     *do_early_data = !result;
   }
   return result;
@@ -707,9 +706,9 @@ static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
 #define MPROTO_WSSL_X509_KEY   "tls:wssl:x509:share"
 
 struct wssl_x509_share {
-  char *CAfile;         /* CAfile path used to generate X509 store */
+  char *CAfile;              /* CAfile path used to generate X509 store */
   WOLFSSL_X509_STORE *store; /* cached X509 store or NULL if none */
-  struct curltime time; /* when the cached store was created */
+  struct curltime time;      /* when the cached store was created */
 };
 
 static void wssl_x509_share_free(void *key, size_t key_len, void *p)
@@ -1352,8 +1351,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     /* Ensure the Client Random is preserved. */
     wolfSSL_KeepArrays(wctx->ssl);
 #if defined(HAVE_SECRET_CALLBACK) && defined(WOLFSSL_TLS13)
-    wolfSSL_set_tls13_secret_cb(wctx->ssl,
-                                wssl_tls13_secret_callback, NULL);
+    wolfSSL_set_tls13_secret_cb(wctx->ssl, wssl_tls13_secret_callback, NULL);
 #endif
   }
 #endif /* OPENSSL_EXTRA */
@@ -1537,8 +1535,7 @@ static CURLcode wssl_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static char *wssl_strerror(unsigned long error, char *buf,
-                           unsigned long size)
+static char *wssl_strerror(unsigned long error, char *buf, unsigned long size)
 {
   DEBUGASSERT(size > 40);
   *buf = '\0';
@@ -1659,8 +1656,7 @@ static CURLcode wssl_send_earlydata(struct Curl_cfilter *cf,
 }
 #endif /* WOLFSSL_EARLY_DATA */
 
-static CURLcode wssl_handshake(struct Curl_cfilter *cf,
-                               struct Curl_easy *data)
+static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct wssl_ctx *wssl = (struct wssl_ctx *)connssl->backend;
@@ -2118,8 +2114,7 @@ static bool wssl_data_pending(struct Curl_cfilter *cf,
     return FALSE;
 }
 
-void Curl_wssl_report_handshake(struct Curl_easy *data,
-                                struct wssl_ctx *wssl)
+void Curl_wssl_report_handshake(struct Curl_easy *data, struct wssl_ctx *wssl)
 {
 #if (LIBWOLFSSL_VERSION_HEX >= 0x03009010)
   infof(data, "SSL connection using %s / %s",

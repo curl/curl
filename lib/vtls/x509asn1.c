@@ -303,8 +303,7 @@ static CURLcode octet2str(struct dynbuf *store,
   return result;
 }
 
-static CURLcode bit2str(struct dynbuf *store,
-                        const char *beg, const char *end)
+static CURLcode bit2str(struct dynbuf *store, const char *beg, const char *end)
 {
   /* Convert an ASN.1 bit string to a printable string. */
 
@@ -318,8 +317,7 @@ static CURLcode bit2str(struct dynbuf *store,
  *
  * Returns error.
  */
-static CURLcode int2str(struct dynbuf *store,
-                        const char *beg, const char *end)
+static CURLcode int2str(struct dynbuf *store, const char *beg, const char *end)
 {
   unsigned int val = 0;
   size_t n = end - beg;
@@ -1078,8 +1076,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
  * Convert an ASN.1 distinguished name into a printable string.
  * Return error.
  */
-static CURLcode DNtostr(struct dynbuf *store,
-                        struct Curl_asn1Element *dn)
+static CURLcode DNtostr(struct dynbuf *store, struct Curl_asn1Element *dn)
 {
   return encodeDN(store, dn);
 }
@@ -1163,8 +1160,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   if(result)
     goto done;
   if(data->set.ssl.certinfo) {
-    result = ssl_push_certinfo_dyn(data, certnum, "Signature Algorithm",
-                                   &out);
+    result = ssl_push_certinfo_dyn(data, certnum, "Signature Algorithm", &out);
     if(result)
       goto done;
   }

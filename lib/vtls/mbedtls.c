@@ -38,7 +38,7 @@
 
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
+#error "mbedTLS 3.2.0 or later required"
 #endif
 #include <psa/crypto_config.h>
 #include <mbedtls/net_sockets.h>
@@ -77,7 +77,7 @@
 
 /* ALPN for http2 */
 #if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)
-#  define HAS_ALPN_MBEDTLS
+#define HAS_ALPN_MBEDTLS
 #endif
 
 struct mbed_ssl_backend_data {
@@ -217,8 +217,7 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
 /*
  *  profile
  */
-static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
-{
+static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr = {
   /* Hashes from SHA-1 and above */
   MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_SHA1) |
   MBEDTLS_X509_ID_FLAG(MBEDTLS_MD_RIPEMD160) |
@@ -961,8 +960,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static CURLcode
-mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode mbed_connect_step2(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
 {
   CURLcode result;
   int ret;
@@ -1006,8 +1005,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   {
     char cipher_str[64];
     uint16_t cipher_id;
-    cipher_id = (uint16_t)
-                mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
+    cipher_id =
+      (uint16_t)mbedtls_ssl_get_ciphersuite_id_from_ssl(&backend->ssl);
     mbed_cipher_suite_get_str(cipher_id, cipher_str, sizeof(cipher_str), TRUE);
     infof(data, "mbedTLS: %s Handshake complete, cipher is %s",
           mbedtls_ssl_get_version(&backend->ssl), cipher_str);

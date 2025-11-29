@@ -96,7 +96,7 @@ static int read_cb(void *userdata, uint8_t *buf, uintptr_t len,
                    uintptr_t *out_n)
 {
   const struct io_ctx *io_ctx = userdata;
-  struct ssl_connect_data *const connssl = io_ctx->cf->ctx;
+  struct ssl_connect_data * const connssl = io_ctx->cf->ctx;
   CURLcode result;
   int ret = 0;
   size_t nread;
@@ -145,8 +145,8 @@ static int write_cb(void *userdata, const uint8_t *buf, uintptr_t len,
 static ssize_t tls_recv_more(struct Curl_cfilter *cf,
                              struct Curl_easy *data, CURLcode *err)
 {
-  const struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct ssl_connect_data * const connssl = cf->ctx;
+  struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct io_ctx io_ctx;
   size_t tls_bytes_read = 0;
@@ -188,8 +188,8 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
 static CURLcode cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                         char *plainbuf, size_t plainlen, size_t *pnread)
 {
-  const struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct ssl_connect_data * const connssl = cf->ctx;
+  struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
   CURLcode result = CURLE_OK;
@@ -302,8 +302,8 @@ static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *plainbuf, size_t plainlen,
                         size_t *pnwritten)
 {
-  const struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct ssl_connect_data * const connssl = cf->ctx;
+  struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
   size_t plainwritten = 0;
@@ -525,8 +525,8 @@ init_config_builder(struct Curl_easy *data,
   const struct rustls_crypto_provider *custom_provider = NULL;
 
   uint16_t tls_versions[2] = {
-      RUSTLS_TLS_VERSION_TLSV1_2,
-      RUSTLS_TLS_VERSION_TLSV1_3,
+    RUSTLS_TLS_VERSION_TLSV1_2,
+    RUSTLS_TLS_VERSION_TLSV1_3,
   };
   size_t tls_versions_len = 2;
   size_t cipher_suites_len = rustls_default_crypto_provider_ciphersuites_len();
@@ -665,8 +665,7 @@ init_config_builder_alpn(struct Curl_easy *data,
   infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
 }
 
-static CURLcode
-init_config_builder_verifier_crl(
+static CURLcode init_config_builder_verifier_crl(
   struct Curl_easy *data,
   const struct ssl_primary_config *conn_config,
   struct rustls_web_pki_server_cert_verifier_builder *builder)
@@ -719,7 +718,6 @@ init_config_builder_verifier(struct Curl_easy *data,
                                                 1);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "failed to parse trusted certificates from blob");
-
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
@@ -730,7 +728,6 @@ init_config_builder_verifier(struct Curl_easy *data,
                                                              1);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "failed to load trusted certificates");
-
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
@@ -785,8 +782,7 @@ cleanup:
   return result;
 }
 
-static CURLcode
-init_config_builder_platform_verifier(
+static CURLcode init_config_builder_platform_verifier(
   struct Curl_easy *data,
   struct rustls_client_config_builder *builder)
 {
@@ -886,10 +882,8 @@ init_config_builder_client_auth(struct Curl_easy *data,
 
   rr = rustls_certified_key_keys_match(certified_key);
   if(rr != RUSTLS_RESULT_OK) {
-    rustls_failf(data,
-                 rr,
+    rustls_failf(data, rr,
                  "rustls: client certificate and keypair files do not match:");
-
     result = CURLE_SSL_CERTPROBLEM;
     goto cleanup;
   }
@@ -1009,7 +1003,7 @@ cleanup:
 
 static CURLcode cr_init_backend(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                struct rustls_ssl_backend_data *const backend)
+                                struct rustls_ssl_backend_data * const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   const struct ssl_primary_config *conn_config =
@@ -1114,7 +1108,7 @@ static void cr_set_negotiated_alpn(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    const struct rustls_connection *rconn)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
+  struct ssl_connect_data * const connssl = cf->ctx;
   const uint8_t *protocol = NULL;
   size_t len = 0;
 
@@ -1130,8 +1124,8 @@ static void cr_set_negotiated_alpn(struct Curl_cfilter *cf,
 static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
                            bool *done)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
-  const struct rustls_ssl_backend_data *const backend =
+  struct ssl_connect_data * const connssl = cf->ctx;
+  const struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   const struct rustls_connection *rconn = NULL;
   CURLcode tmperr = CURLE_OK;
@@ -1179,8 +1173,7 @@ static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       /* REALLY Done with the handshake. */
       {
-        const uint16_t proto =
-          rustls_connection_get_protocol_version(rconn);
+        const uint16_t proto = rustls_connection_get_protocol_version(rconn);
         const rustls_str ciphersuite_name =
           rustls_connection_get_negotiated_ciphersuite_name(rconn);
         const rustls_str kex_group_name =
