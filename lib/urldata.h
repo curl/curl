@@ -198,6 +198,9 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #   include <gssapi/gssapi.h>
 #  endif
 # endif
+# ifdef GSS_C_CHANNEL_BOUND_FLAG /* MIT Kerberos 1.19+, missing from GNU GSS */
+# define CURL_GSSAPI_HAS_CHANNEL_BINDING
+# endif
 #endif
 
 #ifdef USE_LIBSSH2

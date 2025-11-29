@@ -28,6 +28,7 @@
 
 #include "../bufref.h"
 #include "../curlx/dynbuf.h"
+#include "../urldata.h"
 
 struct Curl_easy;
 struct connectdata;
