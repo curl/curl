@@ -664,7 +664,6 @@ static bool cs_is_separator(char c)
   case ',':
   case ';':
     return TRUE;
-  default:;
   }
   return FALSE;
 }
