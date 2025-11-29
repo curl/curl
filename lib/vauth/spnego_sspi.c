@@ -139,7 +139,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     nego->output_token = curlx_malloc(nego->token_max);
     if(!nego->output_token)
       return CURLE_OUT_OF_MEMORY;
- }
+  }
 
   if(!nego->credentials) {
     /* Do we have credentials to use or are we using single sign-on? */
@@ -200,12 +200,12 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
     /* ssl context comes from Schannel.
-    * When extended protection is used in IIS server,
-    * we have to pass a second SecBuffer to the SecBufferDesc
-    * otherwise IIS will not pass the authentication (401 response).
-    * Minimum supported version is Windows 7.
-    * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
-    */
+     * When extended protection is used in IIS server,
+     * we have to pass a second SecBuffer to the SecBufferDesc
+     * otherwise IIS will not pass the authentication (401 response).
+     * Minimum supported version is Windows 7.
+     * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
+     */
     if(nego->sslContext) {
       SEC_CHANNEL_BINDINGS channelBindings;
       SecPkgContext_Bindings pkgBindings;

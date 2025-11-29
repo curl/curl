@@ -100,7 +100,7 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
   size_t outlen;
 
   res = gsasl_step(gsasl->client,
-                   (const char *) Curl_bufref_ptr(chlg), Curl_bufref_len(chlg),
+                   (const char *)Curl_bufref_ptr(chlg), Curl_bufref_len(chlg),
                    &response, &outlen);
   if(res != GSASL_OK && res != GSASL_NEEDS_MORE) {
     failf(data, "GSASL step: %s", gsasl_strerror(res));

@@ -192,7 +192,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
 
   /* Process header byte. */
   elem->header = beg;
-  b = (unsigned char) *beg++;
+  b = (unsigned char)*beg++;
   elem->constructed = (b & 0x20) != 0;
   elem->eclass = (b >> 6) & 3;
   b &= 0x1F;
@@ -203,7 +203,7 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   /* Process length. */
   if(beg >= end)
     return NULL;
-  b = (unsigned char) *beg++;
+  b = (unsigned char)*beg++;
   if(!(b & 0x80))
     len = b;
   else if(!(b &= 0x7F)) {
@@ -284,7 +284,7 @@ static CURLcode bool2str(struct dynbuf *store,
 {
   if(end - beg != 1)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  return curlx_dyn_add(store, *beg ? "TRUE": "FALSE");
+  return curlx_dyn_add(store, *beg ? "TRUE" : "FALSE");
 }
 
 /*
@@ -298,13 +298,12 @@ static CURLcode octet2str(struct dynbuf *store,
   CURLcode result = CURLE_OK;
 
   while(!result && beg < end)
-    result = curlx_dyn_addf(store, "%02x:", (unsigned char) *beg++);
+    result = curlx_dyn_addf(store, "%02x:", (unsigned char)*beg++);
 
   return result;
 }
 
-static CURLcode bit2str(struct dynbuf *store,
-                        const char *beg, const char *end)
+static CURLcode bit2str(struct dynbuf *store, const char *beg, const char *end)
 {
   /* Convert an ASN.1 bit string to a printable string. */
 
@@ -318,8 +317,7 @@ static CURLcode bit2str(struct dynbuf *store,
  *
  * Returns error.
  */
-static CURLcode int2str(struct dynbuf *store,
-                        const char *beg, const char *end)
+static CURLcode int2str(struct dynbuf *store, const char *beg, const char *end)
 {
   unsigned int val = 0;
   size_t n = end - beg;
@@ -335,7 +333,7 @@ static CURLcode int2str(struct dynbuf *store,
     val = ~val;
 
   do
-    val = (val << 8) | *(const unsigned char *) beg++;
+    val = (val << 8) | *(const unsigned char *)beg++;
   while(beg < end);
   return curlx_dyn_addf(store, "%s%x", val >= 10 ? "0x" : "", val);
 }
@@ -348,8 +346,8 @@ static CURLcode int2str(struct dynbuf *store,
  *
  * Returns error.
  */
-static CURLcode
-utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
+static CURLcode utf8asn1str(struct dynbuf *to, int type, const char *from,
+                            const char *end)
 {
   size_t inlength = end - from;
   int size = 1;
@@ -390,14 +388,14 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
 
       switch(size) {
       case 4:
-        wc = (wc << 8) | *(const unsigned char *) from++;
-        wc = (wc << 8) | *(const unsigned char *) from++;
+        wc = (wc << 8) | *(const unsigned char *)from++;
+        wc = (wc << 8) | *(const unsigned char *)from++;
         FALLTHROUGH();
       case 2:
-        wc = (wc << 8) | *(const unsigned char *) from++;
+        wc = (wc << 8) | *(const unsigned char *)from++;
         FALLTHROUGH();
       default: /* case 1: */
-        wc = (wc << 8) | *(const unsigned char *) from++;
+        wc = (wc << 8) | *(const unsigned char *)from++;
       }
       if(wc >= 0x00000080) {
         if(wc >= 0x00000800) {
@@ -406,19 +404,19 @@ utf8asn1str(struct dynbuf *to, int type, const char *from, const char *end)
               /* Invalid char. size for target encoding. */
               return CURLE_WEIRD_SERVER_REPLY;
             }
-            buf[3] = (char) (0x80 | (wc & 0x3F));
+            buf[3] = (char)(0x80 | (wc & 0x3F));
             wc = (wc >> 6) | 0x00010000;
             charsize++;
           }
-          buf[2] = (char) (0x80 | (wc & 0x3F));
+          buf[2] = (char)(0x80 | (wc & 0x3F));
           wc = (wc >> 6) | 0x00000800;
           charsize++;
         }
-        buf[1] = (char) (0x80 | (wc & 0x3F));
+        buf[1] = (char)(0x80 | (wc & 0x3F));
         wc = (wc >> 6) | 0x000000C0;
         charsize++;
       }
-      buf[0] = (char) wc;
+      buf[0] = (char)wc;
       result = curlx_dyn_addn(to, buf, charsize);
     }
   }
@@ -438,7 +436,7 @@ static CURLcode encodeOID(struct dynbuf *store,
   CURLcode result = CURLE_OK;
 
   /* Process the first two numbers. */
-  y = *(const unsigned char *) beg++;
+  y = *(const unsigned char *)beg++;
   x = y / 40;
   y -= x * 40;
 
@@ -452,7 +450,7 @@ static CURLcode encodeOID(struct dynbuf *store,
     do {
       if(x & 0xFF000000)
         return CURLE_OK;
-      y = *(const unsigned char *) beg++;
+      y = *(const unsigned char *)beg++;
       x = (x << 7) | (y & 0x7F);
     } while(y & 0x80);
     result = curlx_dyn_addf(store, ".%u", x);
@@ -973,8 +971,8 @@ static CURLcode do_pubkey_field(struct Curl_easy *data, int certnum,
 }
 
 /* return 0 on success, 1 on error */
-static int do_pubkey(struct Curl_easy *data, int certnum,
-                     const char *algo, struct Curl_asn1Element *param,
+static int do_pubkey(struct Curl_easy *data, int certnum, const char *algo,
+                     struct Curl_asn1Element *param,
                      struct Curl_asn1Element *pubkey)
 {
   struct Curl_asn1Element elem;
@@ -1019,7 +1017,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
     len = ((elem.end - q) * 8);
     if(len) {
       unsigned int i;
-      for(i = *(const unsigned char *) q; !(i & 0x80); i <<= 1)
+      for(i = *(const unsigned char *)q; !(i & 0x80); i <<= 1)
         len--;
     }
     if(len > 32)
@@ -1078,8 +1076,7 @@ static int do_pubkey(struct Curl_easy *data, int certnum,
  * Convert an ASN.1 distinguished name into a printable string.
  * Return error.
  */
-static CURLcode DNtostr(struct dynbuf *store,
-                        struct Curl_asn1Element *dn)
+static CURLcode DNtostr(struct dynbuf *store, struct Curl_asn1Element *dn)
 {
   return encodeDN(store, dn);
 }
@@ -1135,7 +1132,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   /* Version (always fits in less than 32 bits). */
   version = 0;
   for(ptr = cert.version.beg; ptr < cert.version.end; ptr++)
-    version = (version << 8) | *(const unsigned char *) ptr;
+    version = (version << 8) | *(const unsigned char *)ptr;
   if(data->set.ssl.certinfo) {
     result = curlx_dyn_addf(&out, "%x", version);
     if(result)
@@ -1163,8 +1160,7 @@ CURLcode Curl_extract_certinfo(struct Curl_easy *data,
   if(result)
     goto done;
   if(data->set.ssl.certinfo) {
-    result = ssl_push_certinfo_dyn(data, certnum, "Signature Algorithm",
-                                   &out);
+    result = ssl_push_certinfo_dyn(data, certnum, "Signature Algorithm", &out);
     if(result)
       goto done;
   }

@@ -150,8 +150,7 @@ CURLcode Curl_ossl_check_peer_cert(struct Curl_cfilter *cf,
                                    struct ssl_peer *peer);
 
 /* Report properties of a successful handshake */
-void Curl_ossl_report_handshake(struct Curl_easy *data,
-                                struct ossl_ctx *octx);
+void Curl_ossl_report_handshake(struct Curl_easy *data, struct ossl_ctx *octx);
 
 #endif /* USE_OPENSSL */
 #endif /* HEADER_CURL_SSLUSE_H */

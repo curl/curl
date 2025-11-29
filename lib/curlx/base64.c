@@ -31,12 +31,12 @@
 #include "base64.h"
 
 /* ---- Base64 Encoding/Decoding Table --- */
-const char Curl_base64encdec[]=
+const char Curl_base64encdec[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
-static const char base64url[]=
+static const char base64url[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 static const unsigned char decodetable[] =
@@ -188,18 +188,18 @@ static CURLcode base64_encode(const char *table64,
     return CURLE_OUT_OF_MEMORY;
 
   while(insize >= 3) {
-    *output++ = table64[ in[0] >> 2 ];
-    *output++ = table64[ ((in[0] & 0x03) << 4) | (in[1] >> 4) ];
-    *output++ = table64[ ((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6) ];
-    *output++ = table64[ in[2] & 0x3F ];
+    *output++ = table64[in[0] >> 2];
+    *output++ = table64[((in[0] & 0x03) << 4) | (in[1] >> 4)];
+    *output++ = table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)];
+    *output++ = table64[in[2] & 0x3F];
     insize -= 3;
     in += 3;
   }
   if(insize) {
     /* this is only one or two bytes now */
-    *output++ = table64[ in[0] >> 2 ];
+    *output++ = table64[in[0] >> 2];
     if(insize == 1) {
-      *output++ = table64[ ((in[0] & 0x03) << 4) ];
+      *output++ = table64[((in[0] & 0x03) << 4)];
       if(padbyte) {
         *output++ = padbyte;
         *output++ = padbyte;
@@ -207,8 +207,8 @@ static CURLcode base64_encode(const char *table64,
     }
     else {
       /* insize == 2 */
-      *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
-      *output++ = table64[ ((in[1] & 0x0F) << 2) ];
+      *output++ = table64[((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4)];
+      *output++ = table64[((in[1] & 0x0F) << 2)];
       if(padbyte)
         *output++ = padbyte;
     }

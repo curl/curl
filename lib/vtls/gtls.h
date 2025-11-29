@@ -119,8 +119,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  size_t quic_tp_len);
 
 /* Report properties of a successful handshake */
-void Curl_gtls_report_handshake(struct Curl_easy *data,
-                                struct gtls_ctx *gctx);
+void Curl_gtls_report_handshake(struct Curl_easy *data, struct gtls_ctx *gctx);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 

@@ -37,8 +37,8 @@ struct ssl_peer;
 
 /* RFC 8446 (TLSv1.3) restrict lifetime to one week max, for
  * other, less secure versions, we restrict it to a day */
-#define CURL_SCACHE_MAX_13_LIFETIME_SEC    (60*60*24*7)
-#define CURL_SCACHE_MAX_12_LIFETIME_SEC    (60*60*24)
+#define CURL_SCACHE_MAX_13_LIFETIME_SEC    (60 * 60 * 24 * 7)
+#define CURL_SCACHE_MAX_12_LIFETIME_SEC    (60 * 60 * 24)
 
 /* Create a session cache for up to max_peers endpoints with a total
  * of up to max_sessions SSL sessions per peer */
@@ -142,22 +142,18 @@ struct Curl_ssl_session {
  *                  in case this is not known.
  * @param psession on return the scached session instance created
  */
-CURLcode
-Curl_ssl_session_create(void *sdata, size_t sdata_len,
-                        int ietf_tls_id, const char *alpn,
-                        curl_off_t valid_until,
-                        size_t earlydata_max,
-                        struct Curl_ssl_session **psession);
+CURLcode Curl_ssl_session_create(void *sdata, size_t sdata_len,
+                                 int ietf_tls_id, const char *alpn,
+                                 curl_off_t valid_until, size_t earlydata_max,
+                                 struct Curl_ssl_session **psession);
 
 /* Variation of session creation with quic transport parameter bytes,
  * Takes ownership of `quic_tp` regardless of return code. */
-CURLcode
-Curl_ssl_session_create2(void *sdata, size_t sdata_len,
-                         int ietf_tls_id, const char *alpn,
-                         curl_off_t valid_until,
-                         size_t earlydata_max,
-                         unsigned char *quic_tp, size_t quic_tp_len,
-                         struct Curl_ssl_session **psession);
+CURLcode Curl_ssl_session_create2(void *sdata, size_t sdata_len,
+                                  int ietf_tls_id, const char *alpn,
+                                  curl_off_t valid_until, size_t earlydata_max,
+                                  unsigned char *quic_tp, size_t quic_tp_len,
+                                  struct Curl_ssl_session **psession);
 
 /* Destroy a `session` instance. Can be called with NULL.
  * Does NOT need locking. */
