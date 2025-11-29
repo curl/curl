@@ -277,6 +277,8 @@ test3016 test3017 test3018 test3019 test3020 test3021 test3022 test3023 \
 test3024 test3025 test3026 test3027 test3028 test3029 test3030 test3031 \
 test3032 test3033 test3034 test3035 \
 \
+test3040 test3041 test3042 test3043 \
+\
 test3100 test3101 test3102 test3103 test3104 test3105 \
 \
 test3200 test3201 test3202 test3203 test3204 test3205 test3206 test3207 test3208 \

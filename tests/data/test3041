@@ -1,0 +1,55 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+--sync
+redirect
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 302 Found
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: /elsewhere
+Content-Length: 0
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+HTTP GET with --sync rejects 302 redirect
+</name>
+<command option="no-include">
+--sync --output-dir %LOGDIR http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<stdout>
+</stdout>
+# Should fail with write error
+<errorcode>
+23
+</errorcode>
+</verify>
+</testcase>
