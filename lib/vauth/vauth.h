@@ -300,6 +300,7 @@ struct negotiatedata {
   gss_name_t spn;
   gss_buffer_desc output_token;
 #ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+#warning DETECTED-VAUTH_H
   struct dynbuf channel_binding_data;
 #endif
 #else
