@@ -33,7 +33,6 @@
 
 #include "vauth.h"
 #include "digest.h"
-#include "../urldata.h"
 #include "../curlx/base64.h"
 #include "../curl_hmac.h"
 #include "../curl_md5.h"
