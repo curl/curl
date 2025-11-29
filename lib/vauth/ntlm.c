@@ -35,6 +35,7 @@
 
 #define DEBUG_ME 0
 
+#include "vauth.h"
 #include "../sendf.h"
 #include "../curl_ntlm_core.h"
 #include "../curl_gethostname.h"
@@ -44,7 +45,6 @@
 #include "../vtls/vtls.h"
 #include "../strdup.h"
 
-#include "vauth.h"
 #include "../curl_endian.h"
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
