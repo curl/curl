@@ -28,11 +28,6 @@
 #include "urldata.h"
 
 #ifdef HAVE_GSSAPI
-
-#ifdef GSS_C_CHANNEL_BOUND_FLAG  /* MIT Kerberos 1.19+, missing from GNU GSS */
-#define CURL_GSSAPI_HAS_CHANNEL_BINDING
-#endif
-
 extern gss_OID_desc Curl_spnego_mech_oid;
 extern gss_OID_desc Curl_krb5_mech_oid;
 
