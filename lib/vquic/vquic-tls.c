@@ -143,7 +143,9 @@ CURLcode Curl_vquic_tls_before_recv(struct curl_tls_ctx *ctx,
       return result;
   }
 #else
-  (void)ctx; (void)cf; (void)data;
+  (void)ctx;
+  (void)cf;
+  (void)data;
 #endif
   return CURLE_OK;
 }
@@ -172,7 +174,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 #elif defined(USE_WOLFSSL)
   (void)data;
   if(conn_config->verifyhost) {
-    WOLFSSL_X509* cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
+    WOLFSSL_X509 *cert = wolfSSL_get_peer_certificate(ctx->wssl.ssl);
     if(!cert)
       result = CURLE_OUT_OF_MEMORY;
     else if(peer->sni &&
@@ -193,7 +195,6 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
     Curl_ssl_scache_remove_all(cf, data, peer->scache_key);
   return result;
 }
-
 
 bool Curl_vquic_tls_get_ssl_info(struct curl_tls_ctx *ctx,
                                  bool give_ssl_ctx,

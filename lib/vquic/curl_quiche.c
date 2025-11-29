@@ -318,7 +318,7 @@ static void cf_quiche_expire_conn_closed(struct Curl_cfilter *cf,
 
 /*
  * write_resp_raw() copies response data in raw format to the `data`'s
-  * receive buffer. If not enough space is available, it appends to the
+ * receive buffer. If not enough space is available, it appends to the
  * `data`'s overflow buffer.
  */
 static CURLcode write_resp_raw(struct Curl_cfilter *cf,
@@ -813,7 +813,7 @@ out:
   timeout_ns = quiche_conn_timeout_as_nanos(ctx->qconn);
   if(timeout_ns % 1000000)
     timeout_ns += 1000000;
-    /* expire resolution is milliseconds */
+  /* expire resolution is milliseconds */
   Curl_expire(data, (timeout_ns / 1000000), EXPIRE_QUIC);
   return result;
 }
@@ -977,9 +977,9 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
   DEBUGASSERT(stream);
 
   result = Curl_h1_req_parse_read(&stream->h1, buf, blen, NULL,
-                                    !data->state.http_ignorecustom ?
-                                    data->set.str[STRING_CUSTOMREQUEST] : NULL,
-                                    0, pnwritten);
+                                  !data->state.http_ignorecustom ?
+                                  data->set.str[STRING_CUSTOMREQUEST] : NULL,
+                                  0, pnwritten);
   if(result)
     goto out;
   if(!stream->h1.done) {
@@ -1313,8 +1313,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     int qfd;
     (void)Curl_qlogdir(data, ctx->scid, sizeof(ctx->scid), &qfd);
     if(qfd != -1)
-      quiche_conn_set_qlog_fd(ctx->qconn, qfd,
-                              "qlog title", "curl qlog");
+      quiche_conn_set_qlog_fd(ctx->qconn, qfd, "qlog title", "curl qlog");
   }
 #endif
 

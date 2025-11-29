@@ -51,7 +51,7 @@ struct cf_quic_ctx {
   BIT(no_gso); /* do not use gso on sending */
 };
 
-#define H3_STREAM_CTX(ctx,data)                                         \
+#define H3_STREAM_CTX(ctx, data)                                        \
   (data ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
@@ -76,7 +76,6 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
                      struct cf_quic_ctx *qctx);
-
 
 typedef CURLcode vquic_recv_pkts_cb(const unsigned char *buf, size_t buflen,
                                     size_t gso_size,

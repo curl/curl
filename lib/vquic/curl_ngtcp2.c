@@ -72,14 +72,14 @@
 #include "../curlx/warnless.h"
 
 
-#define QUIC_MAX_STREAMS (256*1024)
-#define QUIC_HANDSHAKE_TIMEOUT (10*NGTCP2_SECONDS)
+#define QUIC_MAX_STREAMS (256 * 1024)
+#define QUIC_HANDSHAKE_TIMEOUT (10 * NGTCP2_SECONDS)
 
 /* A stream window is the maximum amount we need to buffer for
  * each active transfer.
  * Chunk size is large enough to take a full DATA frame */
 #define H3_STREAM_WINDOW_SIZE (64 * 1024)
-#define H3_STREAM_CHUNK_SIZE   (16 * 1024)
+#define H3_STREAM_CHUNK_SIZE  (16 * 1024)
 #if H3_STREAM_CHUNK_SIZE < NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #error H3_STREAM_CHUNK_SIZE smaller than NGTCP2_MAX_UDP_PAYLOAD_SIZE
 #endif
@@ -150,8 +150,7 @@ struct cf_ngtcp2_ctx {
 
 /* How to access `call_data` from a cf_ngtcp2 filter */
 #undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf)  \
-  ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
+#define CF_CTX_CALL_DATA(cf) ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
 
 static void h3_stream_hash_free(unsigned int id, void *stream);
 
@@ -187,14 +186,14 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   const ngtcp2_transport_params *rp;
   /* Peer should have sent us its transport parameters. If it
-  * announces a positive `max_idle_timeout` it will close the
-  * connection when it does not hear from us for that time.
-  *
-  * Some servers use this as a keep-alive timer at a rather low
-  * value. We are doing HTTP/3 here and waiting for the response
-  * to a request may take a considerable amount of time. We need
-  * to prevent the peer's QUIC stack from closing in this case.
-  */
+   * announces a positive `max_idle_timeout` it will close the
+   * connection when it does not hear from us for that time.
+   *
+   * Some servers use this as a keep-alive timer at a rather low
+   * value. We are doing HTTP/3 here and waiting for the response
+   * to a request may take a considerable amount of time. We need
+   * to prevent the peer's QUIC stack from closing in this case.
+   */
   if(!ctx->qconn)
     return;
 
@@ -217,7 +216,6 @@ static void cf_ngtcp2_setup_keep_alive(struct Curl_cfilter *cf,
                 (keep_ns / NGTCP2_MILLISECONDS));
   }
 }
-
 
 struct pkt_io_ctx;
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
@@ -1977,7 +1975,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
       size_t buflen = Curl_bufq_len(&ctx->q.sendbuf);
       if((buflen >= send_quantum) ||
          ((buflen + gsolen) >= ctx->q.sendbuf.chunk_size))
-         break;
+        break;
       DEBUGASSERT(nread > 0);
       ++pktcnt;
       if(pktcnt == 1) {
@@ -2668,7 +2666,7 @@ out:
           CURL_TRC_CF(data, cf, "connection refused by server");
           /* When a QUIC server instance is shutting down, it may send us a
            * CONNECTION_CLOSE with this code right away. We want
-            * to keep on trying in this case. */
+           * to keep on trying in this case. */
           result = CURLE_WEIRD_SERVER_REPLY;
         }
       }
