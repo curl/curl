@@ -142,7 +142,7 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
 {
   int i;
   for(i = 0; i < 16; i++)
-    curl_msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
+    curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
 }
 
 /* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
@@ -151,7 +151,7 @@ static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
 {
   int i;
   for(i = 0; i < 32; i++)
-    curl_msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
+    curl_msnprintf((char *)&dest[i * 2], 3, "%02x", source[i]);
 }
 
 /* Perform quoted-string escaping as described in RFC2616 and its errata */
@@ -272,7 +272,7 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
                                                char *alg, size_t alen,
                                                char *qop, size_t qlen)
 {
-  const char *chlg = (const char *) Curl_bufref_ptr(chlgref);
+  const char *chlg = (const char *)Curl_bufref_ptr(chlgref);
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlgref))
@@ -387,13 +387,13 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *) userp,
+  Curl_MD5_update(ctxt, (const unsigned char *)userp,
                   curlx_uztoui(strlen(userp)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) realm,
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)realm,
                   curlx_uztoui(strlen(realm)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) passwdp,
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)passwdp,
                   curlx_uztoui(strlen(passwdp)));
   Curl_MD5_final(ctxt, digest);
 
@@ -401,12 +401,12 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *) digest, MD5_DIGEST_LEN);
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) nonce,
+  Curl_MD5_update(ctxt, (const unsigned char *)digest, MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)nonce,
                   curlx_uztoui(strlen(nonce)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)cnonce,
                   curlx_uztoui(strlen(cnonce)));
   Curl_MD5_final(ctxt, digest);
 
@@ -427,7 +427,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  Curl_MD5_update(ctxt, (const unsigned char *) method,
+  Curl_MD5_update(ctxt, (const unsigned char *)method,
                   curlx_uztoui(strlen(method)));
   Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
   Curl_MD5_update(ctxt, (const unsigned char *) spn,
@@ -445,23 +445,23 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  Curl_MD5_update(ctxt, (const unsigned char *) HA1_hex, 2 * MD5_DIGEST_LEN);
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) nonce,
+  Curl_MD5_update(ctxt, (const unsigned char *)HA1_hex, 2 * MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)nonce,
                   curlx_uztoui(strlen(nonce)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
 
-  Curl_MD5_update(ctxt, (const unsigned char *) nonceCount,
+  Curl_MD5_update(ctxt, (const unsigned char *)nonceCount,
                   curlx_uztoui(strlen(nonceCount)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) cnonce,
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)cnonce,
                   curlx_uztoui(strlen(cnonce)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
-  Curl_MD5_update(ctxt, (const unsigned char *) qop,
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)qop,
                   curlx_uztoui(strlen(qop)));
-  Curl_MD5_update(ctxt, (const unsigned char *) ":", 1);
+  Curl_MD5_update(ctxt, (const unsigned char *)":", 1);
 
-  Curl_MD5_update(ctxt, (const unsigned char *) HA2_hex, 2 * MD5_DIGEST_LEN);
+  Curl_MD5_update(ctxt, (const unsigned char *)HA2_hex, 2 * MD5_DIGEST_LEN);
   Curl_MD5_final(ctxt, digest);
 
   for(i = 0; i < MD5_DIGEST_LEN; i++)
@@ -743,7 +743,7 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
     return result;
@@ -755,7 +755,7 @@ static CURLcode auth_create_digest_http_message(
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
 
-    result = hash(hashbuf, (unsigned char *) tmp, strlen(tmp));
+    result = hash(hashbuf, (unsigned char *)tmp, strlen(tmp));
     curlx_free(tmp);
     if(result)
       return result;
@@ -799,7 +799,7 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
     return result;
@@ -816,7 +816,7 @@ static CURLcode auth_create_digest_http_message(
   if(!hashthis)
     return CURLE_OUT_OF_MEMORY;
 
-  result = hash(hashbuf, (unsigned char *) hashthis, strlen(hashthis));
+  result = hash(hashbuf, (unsigned char *)hashthis, strlen(hashthis));
   curlx_free(hashthis);
   if(result)
     return result;

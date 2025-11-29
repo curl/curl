@@ -48,7 +48,6 @@
 #include "vauth.h"
 #include "../curl_endian.h"
 
-
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
 

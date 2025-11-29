@@ -221,7 +221,6 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
 }
 
 /*
-* Curl_auth_create_ntlm_type3_message()
  * Curl_auth_create_ntlm_type3_message()
  *
  * This is used to generate an already encoded NTLM type-3 message ready for
