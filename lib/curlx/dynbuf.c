@@ -156,7 +156,6 @@ CURLcode curlx_dyn_tail(struct dynbuf *s, size_t trail)
     s->bufr[s->leng] = 0;
   }
   return CURLE_OK;
-
 }
 
 /*

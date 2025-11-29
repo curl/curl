@@ -95,7 +95,6 @@ int curlx_str_untilnl(const char **linep, struct Curl_str *out,
   return STRE_OK;
 }
 
-
 /* Get a "quoted" word. No escaping possible.
    return non-zero on error */
 int curlx_str_quotedword(const char **linep, struct Curl_str *out,
@@ -141,8 +140,8 @@ int curlx_str_singlespace(const char **linep)
 }
 
 /* given an ASCII character and max ascii, return TRUE if valid */
-#define valid_digit(x,m) \
-  (((x) >= '0') && ((x) <= m) && Curl_hexasciitable[(x)-'0'])
+#define valid_digit(x, m) \
+  (((x) >= '0') && ((x) <= m) && Curl_hexasciitable[(x) - '0'])
 
 /* We use 16 for the zero index (and the necessary bitwise AND in the loop)
    to be able to have a non-zero value there to make valid_digit() able to

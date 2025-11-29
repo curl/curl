@@ -57,8 +57,8 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
     /* Truncate multiple lines */
     p = strchr(buf, '\n');
     if(p) {
-      if(p > buf && *(p-1) == '\r')
-        *(p-1) = '\0';
+      if(p > buf && *(p - 1) == '\r')
+        *(p - 1) = '\0';
       else
         *p = '\0';
     }
@@ -89,7 +89,6 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
 #endif
-
   }
 #else
   {
