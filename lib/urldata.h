@@ -193,7 +193,7 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #  include <gss.h>
 # elif defined(HAVE_GSSAPI_H)
 #  include <gssapi.h>
-# else
+# else /* MIT Kerberos */
 #  include <gssapi/gssapi.h>
 #  include <gssapi/gssapi_krb5.h> /* for GSS_C_CHANNEL_BOUND_FLAG */
 # endif
