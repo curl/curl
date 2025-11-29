@@ -286,7 +286,15 @@ typedef unsigned int bit;
 
 #undef DEBUGASSERT
 #ifdef DEBUGBUILD
-#define DEBUGASSERT(x) assert(x)
+/* External assertion handler for custom integrations */
+typedef void (*curl_assert_callback)(const char *expr, \
+  const char *file, int line);
+extern curl_assert_callback curl_global_assert_handler;
+
+#define DEBUGASSERT(x) \
+  ((void)(!(x) && (curl_global_assert_handler ? \
+    (curl_global_assert_handler(#x, __FILE__, __LINE__), 1) : \
+    (assert(x), 0))))
 #else
 #define DEBUGASSERT(x) do { } while(0)
 #endif
