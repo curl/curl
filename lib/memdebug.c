@@ -63,8 +63,7 @@ static long memsize = 0;  /* set number of mallocs allowed */
 static struct backtrace_state *btstate;
 #endif
 
-#define KEEPSIZE 10000
-static char membuf[KEEPSIZE];
+static char membuf[10000];
 static size_t memwidx = 0; /* write index */
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
@@ -549,7 +548,7 @@ void curl_dbg_log(const char *format, ...)
     if(lock_mutex)
       Curl_mutex_acquire(&dbg_mutex);
 #endif
-    if(KEEPSIZE - nchars < memwidx) {
+    if(sizeof(membuf) - nchars < memwidx) {
       /* flush */
       fwrite(membuf, 1, memwidx, curl_dbg_logfile);
       fflush(curl_dbg_logfile);
