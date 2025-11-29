@@ -35,7 +35,6 @@
 
 #define DEBUG_ME 0
 
-#include "../urldata.h"
 #include "../sendf.h"
 #include "../curl_ntlm_core.h"
 #include "../curl_gethostname.h"

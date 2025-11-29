@@ -31,7 +31,6 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "../urldata.h"
 #include "../sendf.h"
 
 #include <gsasl.h>
