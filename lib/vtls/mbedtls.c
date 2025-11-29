@@ -597,7 +597,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
     curlx_free(newblob);
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error importing CA cert blob - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error importing CA cert blob: (-0x%04X) %s",
             -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -609,7 +609,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading CA cert file %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading CA cert file %s: (-0x%04X) %s",
             ssl_cafile, -ret, errorbuf);
       return CURLE_SSL_CACERT_BADFILE;
     }
@@ -625,7 +625,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading CA cert path %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading CA cert path %s: (-0x%04X) %s",
             ssl_capath, -ret, errorbuf);
 
       if(verifypeer)
@@ -646,7 +646,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading client cert file %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading client cert file %s: (-0x%04X) %s",
             ssl_cert, -ret, errorbuf);
 
       return CURLE_SSL_CERTPROBLEM;
@@ -671,7 +671,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading client cert data %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading client cert data %s: (-0x%04X) %s",
             ssl_config->key, -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -705,7 +705,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-        failf(data, "Error reading private key %s - mbedTLS: (-0x%04X) %s",
+        failf(data, "mbedTLS: error reading private key %s: (-0x%04X) %s",
               ssl_config->key, -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -743,7 +743,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
       if(ret) {
         mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-        failf(data, "Error parsing private key - mbedTLS: (-0x%04X) %s",
+        failf(data, "mbedTLS: error parsing private key: (-0x%04X) %s",
               -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -760,7 +760,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "Error reading CRL file %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading CRL file %s: (-0x%04X) %s",
             ssl_crlfile, -ret, errorbuf);
 
       return CURLE_SSL_CRL_BADFILE;
@@ -822,7 +822,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   ret = mbedtls_ssl_setup(&backend->ssl, &backend->config);
   if(ret) {
     mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "ssl_setup failed - mbedTLS: (-0x%04X) %s",
+    failf(data, "mbedTLS: ssl_setup failed: (-0x%04X) %s",
           -ret, errorbuf);
     return CURLE_SSL_CONNECT_ERROR;
   }
