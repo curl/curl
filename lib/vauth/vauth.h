@@ -234,18 +234,6 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
 
 #ifdef USE_KERBEROS5
 
-#ifdef HAVE_GSSAPI
-# ifdef HAVE_GSSGNU
-#  include <gss.h>
-# else
-#  ifdef HAVE_GSSAPI_H
-#   include <gssapi.h>
-#  else
-#   include <gssapi/gssapi.h>
-#  endif
-# endif
-#endif
-
 /* meta key for storing KRB5 meta at connection */
 #define CURL_META_KRB5_CONN   "meta:auth:krb5:conn"
 
