@@ -266,12 +266,12 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   /* ssl context comes from schannel.
-  * When extended protection is used in IIS server,
-  * we have to pass a second SecBuffer to the SecBufferDesc
-  * otherwise IIS will not pass the authentication (401 response).
-  * Minimum supported version is Windows 7.
-  * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
-  */
+   * When extended protection is used in IIS server,
+   * we have to pass a second SecBuffer to the SecBufferDesc
+   * otherwise IIS will not pass the authentication (401 response).
+   * Minimum supported version is Windows 7.
+   * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
+   */
   if(ntlm->sslContext) {
     SEC_CHANNEL_BINDINGS channelBindings;
     SecPkgContext_Bindings pkgBindings;

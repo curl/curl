@@ -157,7 +157,7 @@
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
 #if DEBUG_ME
-# define DEBUG_OUT(x) x
+#define DEBUG_OUT(x) x
 static void ntlm_print_flags(FILE *handle, unsigned long flags)
 {
   if(flags & NTLMFLAG_NEGOTIATE_UNICODE)
@@ -235,7 +235,7 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
     curl_mfprintf(stderr, "%02.2x", (unsigned int)*p++);
 }
 #else
-# define DEBUG_OUT(x) Curl_nop_stmt
+#define DEBUG_OUT(x) Curl_nop_stmt
 #endif
 
 /*

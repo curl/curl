@@ -175,8 +175,7 @@ struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy)
   struct ntlmdata *ntlm = Curl_conn_meta_get(conn, key);
   if(!ntlm) {
     ntlm = curlx_calloc(1, sizeof(*ntlm));
-    if(!ntlm ||
-       Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor))
+    if(!ntlm || Curl_conn_meta_set(conn, key, ntlm, ntlm_conn_dtor))
       return NULL;
   }
   return ntlm;
@@ -260,8 +259,7 @@ struct negotiatedata *Curl_auth_nego_get(struct connectdata *conn, bool proxy)
   struct negotiatedata *nego = Curl_conn_meta_get(conn, key);
   if(!nego) {
     nego = curlx_calloc(1, sizeof(*nego));
-    if(!nego ||
-       Curl_conn_meta_set(conn, key, nego, nego_conn_dtor))
+    if(!nego || Curl_conn_meta_set(conn, key, nego, nego_conn_dtor))
       return NULL;
   }
   return nego;
