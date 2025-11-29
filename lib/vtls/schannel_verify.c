@@ -455,12 +455,11 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 }
 
 /*
-* Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
-* and populates the buffer with IPv4/IPv6 info.
-*/
+ * Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
+ * and populates the buffer with IPv4/IPv6 info.
+ */
 
-static bool get_num_host_info(struct num_ip_data *ip_blob,
-                              LPCSTR hostname)
+static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
   struct in_addr ia;
   struct in6_addr ia6;
@@ -545,7 +544,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   DWORD actual_len = 0;
   PCERT_ALT_NAME_INFO alt_name_info = NULL;
   DWORD alt_name_info_size = 0;
-  struct num_ip_data ip_blob = { 0 };
+  struct num_ip_data ip_blob = {0};
   bool Win8_compat;
   struct num_ip_data *p = &ip_blob;
   DWORD i;
@@ -840,7 +839,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
          * list URL, or when the list could not be downloaded because the
          * server is currently unreachable. */
         dwTrustErrorMask &= ~(DWORD)(CERT_TRUST_REVOCATION_STATUS_UNKNOWN |
-          CERT_TRUST_IS_OFFLINE_REVOCATION);
+                                     CERT_TRUST_IS_OFFLINE_REVOCATION);
       }
 
       if(dwTrustErrorMask) {

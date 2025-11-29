@@ -66,7 +66,7 @@
 #ifdef GTLSDEBUG
 static void tls_log_func(int level, const char *str)
 {
-    curl_mfprintf(stderr, "|<%d>| %s", level, str);
+  curl_mfprintf(stderr, "|<%d>| %s", level, str);
 }
 #endif
 
@@ -209,10 +209,10 @@ static gnutls_datum_t load_file(const char *file)
   f = curlx_fopen(file, "rb");
   if(!f)
     return loaded_file;
-  if(fseek(f, 0, SEEK_END) != 0
-     || (filelen = ftell(f)) < 0
-     || fseek(f, 0, SEEK_SET) != 0
-     || !(ptr = curlx_malloc((size_t)filelen)))
+  if(fseek(f, 0, SEEK_END) != 0 ||
+     (filelen = ftell(f)) < 0 ||
+     fseek(f, 0, SEEK_SET) != 0 ||
+     !(ptr = curlx_malloc((size_t)filelen)))
     goto out;
   if(fread(ptr, 1, (size_t)filelen, f) < (size_t)filelen) {
     curlx_free(ptr);
@@ -592,12 +592,12 @@ gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(data->multi) {
     shared_creds = Curl_hash_pick(&data->multi->proto_hash,
                                   CURL_UNCONST(MPROTO_GTLS_X509_KEY),
-                                  sizeof(MPROTO_GTLS_X509_KEY)-1);
-     if(shared_creds && shared_creds->creds &&
-        !gtls_shared_creds_expired(data, shared_creds) &&
-        !gtls_shared_creds_different(cf, shared_creds)) {
-       return shared_creds;
-     }
+                                  sizeof(MPROTO_GTLS_X509_KEY) - 1);
+    if(shared_creds && shared_creds->creds &&
+       !gtls_shared_creds_expired(data, shared_creds) &&
+       !gtls_shared_creds_different(cf, shared_creds)) {
+      return shared_creds;
+    }
   }
   return NULL;
 }
@@ -605,7 +605,7 @@ gtls_get_cached_creds(struct Curl_cfilter *cf, struct Curl_easy *data)
 static void gtls_shared_creds_hash_free(void *key, size_t key_len, void *p)
 {
   struct gtls_shared_creds *sc = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_GTLS_X509_KEY)-1));
+  DEBUGASSERT(key_len == (sizeof(MPROTO_GTLS_X509_KEY) - 1));
   DEBUGASSERT(!memcmp(MPROTO_GTLS_X509_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -1106,8 +1106,8 @@ static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
     connssl->earlydata_state = ssl_earlydata_await;
     connssl->state = ssl_connection_deferred;
     result = Curl_alpn_set_negotiated(cf, data, connssl,
-                    (const unsigned char *)scs->alpn,
-                    scs->alpn ? strlen(scs->alpn) : 0);
+                                      (const unsigned char *)scs->alpn,
+                                      scs->alpn ? strlen(scs->alpn) : 0);
     *do_early_data = !result;
   }
   return result;
@@ -1225,8 +1225,8 @@ out:
   return result;
 }
 
-static CURLcode
-gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode gtls_connect_step1(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
@@ -1580,8 +1580,7 @@ static CURLcode glts_apple_verify(struct Curl_cfilter *cf,
   CURLcode result;
 
   result = Curl_vtls_apple_verify(cf, data, peer, chain->num_certs,
-                                  gtls_chain_get_der, chain,
-                                  NULL, 0);
+                                  gtls_chain_get_der, chain, NULL, 0);
   *pverified = !result;
   if(*pverified)
     infof(data, "  SSL certificate verified by Apple SecTrust.");
@@ -1589,21 +1588,20 @@ static CURLcode glts_apple_verify(struct Curl_cfilter *cf,
 }
 #endif /* USE_APPLE_SECTRUST */
 
-CURLcode
-Curl_gtls_verifyserver(struct Curl_cfilter *cf,
-                       struct Curl_easy *data,
-                       gnutls_session_t session,
-                       struct ssl_primary_config *config,
-                       struct ssl_config_data *ssl_config,
-                       struct ssl_peer *peer,
-                       const char *pinned_key)
+CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                gnutls_session_t session,
+                                struct ssl_primary_config *config,
+                                struct ssl_config_data *ssl_config,
+                                struct ssl_peer *peer,
+                                const char *pinned_key)
 {
   struct gtls_cert_chain chain;
   gnutls_x509_crt_t x509_cert = NULL, x509_issuer = NULL;
   time_t certclock;
   int rc;
   CURLcode result = CURLE_OK;
-  long * const certverifyresult = &ssl_config->certverifyresult;
+  long *const certverifyresult = &ssl_config->certverifyresult;
 
   (void)cf;
   /* This function will return the peer's raw certificate (chain) as sent by
@@ -1651,7 +1649,7 @@ Curl_gtls_verifyserver(struct Curl_cfilter *cf,
         goto out;
 
       for(i = 0; i < chain.num_certs; i++) {
-        const char *beg = (const char *) chain.certs[i].data;
+        const char *beg = (const char *)chain.certs[i].data;
         const char *end = beg + chain.certs[i].size;
 
         result = Curl_extract_certinfo(data, (int)i, beg, end);
@@ -2131,7 +2129,7 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
   size_t i;
 
   DEBUGASSERT(backend);
-   /* If we have no handshaked connection or already shut down */
+  /* If we have no handshaked connection or already shut down */
   if(!backend->gtls.session || cf->shutdown ||
      connssl->state != ssl_connection_complete) {
     *done = TRUE;

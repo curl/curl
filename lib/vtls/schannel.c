@@ -159,10 +159,9 @@ static void InitSecBufferDesc(SecBufferDesc *desc, SecBuffer *BufArr,
   desc->cBuffers = NumArrElem;
 }
 
-static CURLcode
-schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
-                                 struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static CURLcode schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
+                                                 struct Curl_cfilter *cf,
+                                                 struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   long ssl_version = conn_config->version;
@@ -222,7 +221,7 @@ struct algo {
   int id;
 };
 
-static const struct algo algs[]= {
+static const struct algo algs[] = {
   CIPHEROPTION(CALG_MD2),
   CIPHEROPTION(CALG_MD4),
   CIPHEROPTION(CALG_MD5),
@@ -330,8 +329,7 @@ static const struct algo algs[]= {
   {NULL, 0},
 };
 
-static int
-get_alg_id_by_name(const char *name)
+static int get_alg_id_by_name(const char *name)
 {
   const char *nameEnd = strchr(name, ':');
   size_t n = nameEnd ? (size_t)(nameEnd - name) : strlen(name);
@@ -346,9 +344,8 @@ get_alg_id_by_name(const char *name)
 
 #define NUM_CIPHERS 47 /* There are 47 options listed above */
 
-static CURLcode
-set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
-                ALG_ID *algIds)
+static CURLcode set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
+                                ALG_ID *algIds)
 {
   const char *startCur = ciphers;
   int algCount = 0;
@@ -376,9 +373,8 @@ set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
 }
 
 /* Function allocates memory for store_path only if CURLE_OK is returned */
-static CURLcode
-get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
-                  TCHAR **thumbprint)
+static CURLcode get_cert_location(TCHAR *path, DWORD *store_name,
+                                  TCHAR **store_path, TCHAR **thumbprint)
 {
   TCHAR *sep;
   TCHAR *store_path_start;
@@ -400,14 +396,11 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
     *store_name = CERT_SYSTEM_STORE_SERVICES;
   else if(_tcsncmp(path, TEXT("Users"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_USERS;
-  else if(_tcsncmp(path, TEXT("CurrentUserGroupPolicy"),
-                   store_name_len) == 0)
+  else if(_tcsncmp(path, TEXT("CurrentUserGroupPolicy"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_CURRENT_USER_GROUP_POLICY;
-  else if(_tcsncmp(path, TEXT("LocalMachineGroupPolicy"),
-                   store_name_len) == 0)
+  else if(_tcsncmp(path, TEXT("LocalMachineGroupPolicy"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_GROUP_POLICY;
-  else if(_tcsncmp(path, TEXT("LocalMachineEnterprise"),
-                   store_name_len) == 0)
+  else if(_tcsncmp(path, TEXT("LocalMachineEnterprise"), store_name_len) == 0)
     *store_name = CERT_SYSTEM_STORE_LOCAL_MACHINE_ENTERPRISE;
   else
     return CURLE_SSL_CERTPROBLEM;
@@ -431,9 +424,8 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
   return CURLE_OK;
 }
 
-static CURLcode
-schannel_acquire_credential_handle(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
+                                                   struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -461,37 +453,36 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     if(ssl_config->no_revoke) {
       flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
-        SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+               SCH_CRED_IGNORE_REVOCATION_OFFLINE;
 
       DEBUGF(infof(data, "schannel: disabled server certificate revocation "
-                   "checks"));
+                         "checks"));
     }
     else if(ssl_config->revoke_best_effort) {
       flags |= SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
-        SCH_CRED_IGNORE_REVOCATION_OFFLINE | SCH_CRED_REVOCATION_CHECK_CHAIN;
+               SCH_CRED_IGNORE_REVOCATION_OFFLINE |
+               SCH_CRED_REVOCATION_CHECK_CHAIN;
 
       DEBUGF(infof(data, "schannel: ignore revocation offline errors"));
     }
     else {
       flags |= SCH_CRED_REVOCATION_CHECK_CHAIN;
 
-      DEBUGF(infof(data,
-                   "schannel: checking server certificate revocation"));
+      DEBUGF(infof(data, "schannel: checking server certificate revocation"));
     }
   }
   else {
     flags = SCH_CRED_MANUAL_CRED_VALIDATION |
-      SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
-      SCH_CRED_IGNORE_REVOCATION_OFFLINE;
-    DEBUGF(infof(data,
-                 "schannel: disabled server cert revocation checks"));
+            SCH_CRED_IGNORE_NO_REVOCATION_CHECK |
+            SCH_CRED_IGNORE_REVOCATION_OFFLINE;
+    DEBUGF(infof(data, "schannel: disabled server cert revocation checks"));
   }
 
   if(!conn_config->verifyhost) {
     flags |= SCH_CRED_NO_SERVERNAME_CHECK;
     DEBUGF(infof(data, "schannel: verifyhost setting prevents Schannel from "
-                 "comparing the supplied target name with the subject "
-                 "names in server certificates."));
+                       "comparing the supplied target name with the subject "
+                       "names in server certificates."));
   }
 
   if(!ssl_config->auto_client_cert) {
@@ -508,8 +499,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
   case CURL_SSLVERSION_TLSv1_2:
-  case CURL_SSLVERSION_TLSv1_3:
-  {
+  case CURL_SSLVERSION_TLSv1_3: {
     result = schannel_set_ssl_version_min_max(&enabled_protocols, cf, data);
     if(result)
       return result;
@@ -550,7 +540,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       result = get_cert_location(cert_path, &cert_store_name,
                                  &cert_store_path, &cert_thumbprint_str);
 
-      if(result && (data->set.ssl.primary.clientcert[0]!='\0'))
+      if(result && (data->set.ssl.primary.clientcert[0] != '\0'))
         fInCert = curlx_fopen(data->set.ssl.primary.clientcert, "rb");
 
       if(result && !fInCert) {
@@ -579,7 +569,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
          https://learn.microsoft.com/archive/msdn-technet-forums/3e7bc95f-b21a-4bcd-bd2c-7f996718cae5
       */
       CRYPT_DATA_BLOB datablob;
-      WCHAR* pszPassword;
+      WCHAR *pszPassword;
       size_t pwd_len = 0;
       int str_w_len = 0;
       int cert_find_flags;
@@ -613,12 +603,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       }
 
       /* Convert key-pair data to the in-memory certificate store */
-      datablob.pbData = (BYTE*)certdata;
+      datablob.pbData = (BYTE *)certdata;
       datablob.cbData = (DWORD)certsize;
 
       if(data->set.ssl.key_passwd)
         pwd_len = strlen(data->set.ssl.key_passwd);
-      pszPassword = (WCHAR*)curlx_malloc(sizeof(WCHAR)*(pwd_len + 1));
+      pszPassword = (WCHAR *)curlx_malloc(sizeof(WCHAR) * (pwd_len + 1));
       if(pszPassword) {
         if(pwd_len > 0)
           str_w_len = MultiByteToWideChar(CP_UTF8,
@@ -854,8 +844,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static CURLcode
-schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode schannel_connect_step1(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
 {
   size_t written = 0;
   struct ssl_connect_data *connssl = cf->ctx;
@@ -899,7 +889,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     else {
       failf(data, "schannel: this version of Windows is too old to support "
-            "certificate verification via CA bundle file.");
+                  "certificate verification via CA bundle file.");
       return CURLE_SSL_CACERT_BADFILE;
     }
   }
@@ -1415,8 +1405,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static bool
-valid_cert_encoding(const CERT_CONTEXT *cert_context)
+static bool valid_cert_encoding(const CERT_CONTEXT *cert_context)
 {
   return (cert_context != NULL) &&
     ((cert_context->dwCertEncodingType & X509_ASN_ENCODING) != 0) &&
@@ -1427,9 +1416,8 @@ valid_cert_encoding(const CERT_CONTEXT *cert_context)
 typedef bool(*Read_crt_func)(const CERT_CONTEXT *ccert_context,
                              bool reverse_order, void *arg);
 
-static void
-traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func,
-                    void *arg)
+static void traverse_cert_store(const CERT_CONTEXT *context,
+                                Read_crt_func func, void *arg)
 {
   const CERT_CONTEXT *current_context = NULL;
   bool should_continue = TRUE;
@@ -1454,9 +1442,8 @@ traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func,
     CertFreeCertificateContext(current_context);
 }
 
-static bool
-cert_counter_callback(const CERT_CONTEXT *ccert_context, bool reverse_order,
-                      void *certs_count)
+static bool cert_counter_callback(const CERT_CONTEXT *ccert_context,
+                                  bool reverse_order, void *certs_count)
 {
   (void)reverse_order;
   if(valid_cert_encoding(ccert_context))
@@ -1466,22 +1453,20 @@ cert_counter_callback(const CERT_CONTEXT *ccert_context, bool reverse_order,
   return TRUE;
 }
 
-struct Adder_args
-{
+struct Adder_args {
   struct Curl_easy *data;
   CURLcode result;
   int idx;
   int certs_count;
 };
 
-static bool
-add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, bool reverse_order,
-                     void *raw_arg)
+static bool add_cert_to_certinfo(const CERT_CONTEXT *ccert_context,
+                                 bool reverse_order, void *raw_arg)
 {
-  struct Adder_args *args = (struct Adder_args*)raw_arg;
+  struct Adder_args *args = (struct Adder_args *)raw_arg;
   args->result = CURLE_OK;
   if(valid_cert_encoding(ccert_context)) {
-    const char *beg = (const char *) ccert_context->pbCertEncoded;
+    const char *beg = (const char *)ccert_context->pbCertEncoded;
     const char *end = beg + ccert_context->cbCertEncoded;
     int insert_index = reverse_order ? (args->certs_count - 1) - args->idx :
                        args->idx;
@@ -1511,8 +1496,8 @@ static void schannel_session_free(void *sessionid)
   }
 }
 
-static CURLcode
-schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode schannel_connect_step3(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
@@ -1886,9 +1871,8 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
   return result;
 }
 
-static CURLcode
-schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-              const void *buf, size_t len, size_t *pnwritten)
+static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              const void *buf, size_t len, size_t *pnwritten)
 {
   size_t data_len = 0;
   unsigned char *ptr = NULL;
@@ -2018,7 +2002,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else if(sspi_status == SEC_E_INSUFFICIENT_MEMORY) {
     result = CURLE_OUT_OF_MEMORY;
   }
-  else{
+  else {
     result = CURLE_SEND_ERROR;
   }
 
@@ -2032,9 +2016,8 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   return result;
 }
 
-static CURLcode
-schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-              char *buf, size_t len, size_t *pnread)
+static CURLcode schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                              char *buf, size_t len, size_t *pnread)
 {
   size_t size = 0;
   size_t nread = 0;
@@ -2170,7 +2153,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* https://learn.microsoft.com/windows/win32/api/sspi/nf-sspi-decryptmessage
      */
     sspi_status = Curl_pSecFn->DecryptMessage(&backend->ctxt->ctxt_handle,
-                                           &inbuf_desc, 0, NULL);
+                                              &inbuf_desc, 0, NULL);
 
     /* check if everything went fine (server may want to renegotiate
        or shutdown the connection context) */
@@ -2761,7 +2744,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
+                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
   if(!share || !share->cert_store) {
     return NULL;
   }
@@ -2809,7 +2792,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
 static void schannel_cert_share_free(void *key, size_t key_len, void *p)
 {
   struct schannel_cert_share *share = p;
-  DEBUGASSERT(key_len == (sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1));
+  DEBUGASSERT(key_len == (sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1));
   DEBUGASSERT(!memcmp(MPROTO_SCHANNEL_CERT_SHARE_KEY, key, key_len));
   (void)key;
   (void)key_len;
@@ -2839,7 +2822,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
 
   share = Curl_hash_pick(&multi->proto_hash,
                          CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
+                         sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1);
   if(!share) {
     share = curlx_calloc(1, sizeof(*share));
     if(!share) {
@@ -2847,7 +2830,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     }
     if(!Curl_hash_add2(&multi->proto_hash,
                        CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
-                       sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
+                       sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY) - 1,
                        share, schannel_cert_share_free)) {
       curlx_free(share);
       return FALSE;

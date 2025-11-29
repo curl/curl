@@ -109,7 +109,7 @@ struct mbed_ssl_backend_data {
 #endif
 
 #ifndef MBEDTLS_ERROR_C
-#define mbedtls_strerror(a,b,c) b[0] = 0
+#define mbedtls_strerror(a, b, c) b[0] = 0
 #endif
 
 #if defined(CURL_MBEDTLS_DRBG) && defined(HAS_THREADING_SUPPORT)
@@ -307,9 +307,8 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
    cipher suite present in other SSL implementations. Provide
    provisional support for specifying the cipher suite here. */
 #ifdef MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
-static int
-mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
-                          bool prefer_rfc)
+static int mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
+                                     bool prefer_rfc)
 {
   if(id == MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8)
     curl_msnprintf(buf, buf_size, "%s", "TLS_ECJPAKE_WITH_AES_128_CCM_8");
@@ -318,8 +317,7 @@ mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
   return 0;
 }
 
-static uint16_t
-mbed_cipher_suite_walk_str(const char **str, const char **end)
+static uint16_t mbed_cipher_suite_walk_str(const char **str, const char **end)
 {
   uint16_t id = Curl_cipher_suite_walk_str(str, end);
   size_t len = *end - *str;
@@ -348,7 +346,8 @@ mbed_set_selected_ciphers(struct Curl_easy *data,
   const char *ptr, *end;
 
   supported = mbedtls_ssl_list_ciphersuites();
-  for(i = 0; supported[i] != 0; i++);
+  for(i = 0; supported[i] != 0; i++)
+    ;
   supported_len = i;
 
   selected = curlx_malloc(sizeof(int) * (supported_len + 1));
@@ -361,7 +360,7 @@ mbed_set_selected_ciphers(struct Curl_easy *data,
   if(!ciphers13) {
     /* Add default TLSv1.3 ciphers to selection */
     for(j = 0; j < supported_len; j++) {
-      uint16_t id = (uint16_t) supported[j];
+      uint16_t id = (uint16_t)supported[j];
       if(strncmp(mbedtls_ssl_get_ciphersuite_name(id), "TLS1-3", 6) != 0)
         continue;
 
@@ -380,23 +379,25 @@ add_ciphers:
 
     /* Check if cipher is supported */
     if(id) {
-      for(i = 0; i < supported_len && supported[i] != id; i++);
+      for(i = 0; i < supported_len && supported[i] != id; i++)
+        ;
       if(i == supported_len)
         id = 0;
     }
     if(!id) {
       if(ptr[0] != '\0')
         infof(data, "mbedTLS: unknown cipher in list: \"%.*s\"",
-              (int) (end - ptr), ptr);
+              (int)(end - ptr), ptr);
       continue;
     }
 
     /* No duplicates allowed (so selected cannot overflow) */
-    for(i = 0; i < count && selected[i] != id; i++);
+    for(i = 0; i < count && selected[i] != id; i++)
+      ;
     if(i < count) {
       if(i >= default13_count)
         infof(data, "mbedTLS: duplicate cipher in list: \"%.*s\"",
-              (int) (end - ptr), ptr);
+              (int)(end - ptr), ptr);
       continue;
     }
 
@@ -412,12 +413,13 @@ add_ciphers:
   if(!ciphers12) {
     /* Add default TLSv1.2 ciphers to selection */
     for(j = 0; j < supported_len; j++) {
-      uint16_t id = (uint16_t) supported[j];
+      uint16_t id = (uint16_t)supported[j];
       if(strncmp(mbedtls_ssl_get_ciphersuite_name(id), "TLS1-3", 6) == 0)
         continue;
 
       /* No duplicates allowed (so selected cannot overflow) */
-      for(i = 0; i < count && selected[i] != id; i++);
+      for(i = 0; i < count && selected[i] != id; i++)
+        ;
       if(i < count)
         continue;
 
@@ -441,8 +443,8 @@ add_ciphers:
   return CURLE_OK;
 }
 
-static void
-mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
+static void mbed_dump_cert_info(struct Curl_easy *data,
+                                const mbedtls_x509_crt *crt)
 {
 #if defined(CURL_DISABLE_VERBOSE_STRINGS) || defined(MBEDTLS_X509_REMOVE_INFO)
   (void)data, (void)crt;
@@ -454,7 +456,7 @@ mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
     infof(data, "Server certificate:");
     for(p = buffer; *p; p += *p != '\0') {
       size_t s = strcspn(p, "\n");
-      infof(data, "%.*s", (int) s, p);
+      infof(data, "%.*s", (int)s, p);
       p += s;
     }
   }
@@ -465,8 +467,8 @@ mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
 #endif
 }
 
-static void
-mbed_extract_certinfo(struct Curl_easy *data, const mbedtls_x509_crt *crt)
+static void mbed_extract_certinfo(struct Curl_easy *data,
+                                  const mbedtls_x509_crt *crt)
 {
   CURLcode result;
   const mbedtls_x509_crt *cur;
@@ -485,7 +487,7 @@ mbed_extract_certinfo(struct Curl_easy *data, const mbedtls_x509_crt *crt)
   result = Curl_ssl_init_certinfo(data, cert_count);
 
   for(i = 0, cur = crt; result == CURLE_OK && cur; ++i, cur = cur->next) {
-    const char *beg = (const char *) cur->raw.p;
+    const char *beg = (const char *)cur->raw.p;
     const char *end = beg + cur->raw.len;
     result = Curl_extract_certinfo(data, i, beg, end);
   }
@@ -494,7 +496,7 @@ mbed_extract_certinfo(struct Curl_easy *data, const mbedtls_x509_crt *crt)
 static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
                           int depth, uint32_t *flags)
 {
-  struct Curl_cfilter *cf = (struct Curl_cfilter *) ptr;
+  struct Curl_cfilter *cf = (struct Curl_cfilter *)ptr;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
 
@@ -523,8 +525,8 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
   return 0;
 }
 
-static CURLcode
-mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
@@ -1084,8 +1086,8 @@ pinnedpubkey_error:
   return CURLE_OK;
 }
 
-static CURLcode
-mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
+static CURLcode mbed_new_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
@@ -1148,8 +1150,7 @@ out:
 }
 
 static CURLcode mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *mem, size_t len,
-                          size_t *pnwritten)
+                          const void *mem, size_t len, size_t *pnwritten)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
@@ -1327,8 +1328,7 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 static CURLcode mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          char *buf, size_t buffersize,
-                          size_t *pnread)
+                          char *buf, size_t buffersize, size_t *pnread)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =

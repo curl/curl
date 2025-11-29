@@ -106,23 +106,21 @@ static void cf_ssl_scache_session_ldestroy(void *udata, void *obj)
   curlx_free(s);
 }
 
-CURLcode
-Curl_ssl_session_create(void *sdata, size_t sdata_len,
-                        int ietf_tls_id, const char *alpn,
-                        curl_off_t valid_until, size_t earlydata_max,
-                        struct Curl_ssl_session **psession)
+CURLcode Curl_ssl_session_create(void *sdata, size_t sdata_len,
+                                 int ietf_tls_id, const char *alpn,
+                                 curl_off_t valid_until, size_t earlydata_max,
+                                 struct Curl_ssl_session **psession)
 {
   return Curl_ssl_session_create2(sdata, sdata_len, ietf_tls_id, alpn,
                                   valid_until, earlydata_max,
                                   NULL, 0, psession);
 }
 
-CURLcode
-Curl_ssl_session_create2(void *sdata, size_t sdata_len,
-                         int ietf_tls_id, const char *alpn,
-                         curl_off_t valid_until, size_t earlydata_max,
-                         unsigned char *quic_tp, size_t quic_tp_len,
-                         struct Curl_ssl_session **psession)
+CURLcode Curl_ssl_session_create2(void *sdata, size_t sdata_len,
+                                  int ietf_tls_id, const char *alpn,
+                                  curl_off_t valid_until, size_t earlydata_max,
+                                  unsigned char *quic_tp, size_t quic_tp_len,
+                                  struct Curl_ssl_session **psession)
 {
   struct Curl_ssl_session *s;
 
@@ -322,7 +320,7 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
   }
 
   scache->magic = CURL_SCACHE_MAGIC;
-  scache->default_lifetime_secs = (24*60*60); /* 1 day */
+  scache->default_lifetime_secs = (24 * 60 * 60); /* 1 day */
   scache->peer_count = max_peers;
   scache->peers = peers;
   scache->age = 1;
@@ -507,7 +505,7 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
 
   if(ssl->version || ssl->version_max) {
     r = curlx_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
-                      (ssl->version_max >> 16));
+                       (ssl->version_max >> 16));
     if(r)
       goto out;
   }
@@ -616,19 +614,18 @@ static bool cf_ssl_scache_match_auth(struct Curl_ssl_scache_peer *peer,
   else if(!Curl_safecmp(peer->clientcert, conn_config->clientcert))
     return FALSE;
 #ifdef USE_TLS_SRP
-   if(Curl_timestrcmp(peer->srp_username, conn_config->username) ||
-      Curl_timestrcmp(peer->srp_password, conn_config->password))
-     return FALSE;
+  if(Curl_timestrcmp(peer->srp_username, conn_config->username) ||
+     Curl_timestrcmp(peer->srp_password, conn_config->password))
+    return FALSE;
 #endif
   return TRUE;
 }
 
-static CURLcode
-cf_ssl_find_peer_by_key(struct Curl_easy *data,
-                        struct Curl_ssl_scache *scache,
-                        const char *ssl_peer_key,
-                        struct ssl_primary_config *conn_config,
-                        struct Curl_ssl_scache_peer **ppeer)
+static CURLcode cf_ssl_find_peer_by_key(struct Curl_easy *data,
+                                        struct Curl_ssl_scache *scache,
+                                        const char *ssl_peer_key,
+                                        struct ssl_primary_config *conn_config,
+                                        struct Curl_ssl_scache_peer **ppeer)
 {
   size_t i, peer_key_len = 0;
   CURLcode result = CURLE_OK;
@@ -718,12 +715,11 @@ cf_ssl_get_free_peer(struct Curl_ssl_scache *scache)
   return peer;
 }
 
-static CURLcode
-cf_ssl_add_peer(struct Curl_easy *data,
-                struct Curl_ssl_scache *scache,
-                const char *ssl_peer_key,
-                struct ssl_primary_config *conn_config,
-                struct Curl_ssl_scache_peer **ppeer)
+static CURLcode cf_ssl_add_peer(struct Curl_easy *data,
+                                struct Curl_ssl_scache *scache,
+                                const char *ssl_peer_key,
+                                struct ssl_primary_config *conn_config,
+                                struct Curl_ssl_scache_peer **ppeer)
 {
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result = CURLE_OK;
@@ -1000,7 +996,7 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
 
 #ifdef USE_SSLS_EXPORT
 
-#define CURL_SSL_TICKET_MAX   (16*1024)
+#define CURL_SSL_TICKET_MAX   (16 * 1024)
 
 static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
 {
