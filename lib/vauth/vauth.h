@@ -26,6 +26,7 @@
 
 #include <curl/curl.h>
 
+#include "../urldata.h"
 #include "../bufref.h"
 #include "../curlx/dynbuf.h"
 
