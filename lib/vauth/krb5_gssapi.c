@@ -33,7 +33,6 @@
 
 #include "vauth.h"
 #include "../curl_sasl.h"
-#include "../urldata.h"
 #include "../curl_gssapi.h"
 #include "../sendf.h"
 

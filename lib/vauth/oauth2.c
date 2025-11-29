@@ -31,7 +31,6 @@
   (!defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP))
 
 #include <curl/curl.h>
-#include "../urldata.h"
 
 #include "vauth.h"
 #include "../curlx/warnless.h"

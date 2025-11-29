@@ -31,7 +31,6 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "../urldata.h"
 #include "../curlx/base64.h"
 #include "../curlx/warnless.h"
 #include "../curlx/multibyte.h"

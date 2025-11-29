@@ -29,7 +29,6 @@
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include <curl/curl.h>
-#include "../urldata.h"
 
 #include "vauth.h"
 #include "../curl_hmac.h"
