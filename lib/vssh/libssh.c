@@ -74,12 +74,12 @@
 
 /* A recent macro provided by libssh. Or make our own. */
 #ifndef SSH_STRING_FREE_CHAR
-#define SSH_STRING_FREE_CHAR(x)                 \
-  do {                                          \
-    if(x) {                                     \
-      ssh_string_free_char(x);                  \
-      x = NULL;                                 \
-    }                                           \
+#define SSH_STRING_FREE_CHAR(x) \
+  do {                          \
+    if(x) {                     \
+      ssh_string_free_char(x);  \
+      x = NULL;                 \
+    }                           \
   } while(0)
 #endif
 
@@ -111,10 +111,9 @@ static CURLcode sftp_doing(struct Curl_easy *data,
 static CURLcode sftp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool dead);
-static
-CURLcode sftp_perform(struct Curl_easy *data,
-                      bool *connected,
-                      bool *dophase_done);
+static CURLcode sftp_perform(struct Curl_easy *data,
+                             bool *connected,
+                             bool *dophase_done);
 
 static CURLcode myssh_pollset(struct Curl_easy *data,
                               struct easy_pollset *ps);
@@ -189,22 +188,22 @@ const struct Curl_handler Curl_handler_sftp = {
 static CURLcode sftp_error_to_CURLE(int err)
 {
   switch(err) {
-    case SSH_FX_OK:
-      return CURLE_OK;
+  case SSH_FX_OK:
+    return CURLE_OK;
 
-    case SSH_FX_NO_SUCH_FILE:
-    case SSH_FX_NO_SUCH_PATH:
-      return CURLE_REMOTE_FILE_NOT_FOUND;
+  case SSH_FX_NO_SUCH_FILE:
+  case SSH_FX_NO_SUCH_PATH:
+    return CURLE_REMOTE_FILE_NOT_FOUND;
 
-    case SSH_FX_PERMISSION_DENIED:
-    case SSH_FX_WRITE_PROTECT:
-      return CURLE_REMOTE_ACCESS_DENIED;
+  case SSH_FX_PERMISSION_DENIED:
+  case SSH_FX_WRITE_PROTECT:
+    return CURLE_REMOTE_ACCESS_DENIED;
 
-    case SSH_FX_FILE_ALREADY_EXISTS:
-      return CURLE_REMOTE_FILE_EXISTS;
+  case SSH_FX_FILE_ALREADY_EXISTS:
+    return CURLE_REMOTE_FILE_EXISTS;
 
-    default:
-      break;
+  default:
+    break;
   }
 
   return CURLE_SSH;
@@ -213,7 +212,7 @@ static CURLcode sftp_error_to_CURLE(int err)
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static const char *myssh_statename(sshstate state)
 {
-  static const char *const names[] = {
+  static const char * const names[] = {
     "SSH_STOP",
     "SSH_INIT",
     "SSH_S_STARTUP",
@@ -284,7 +283,7 @@ static const char *myssh_statename(sshstate state)
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 
-#define myssh_to(x,y,z) myssh_set_state(x,y,z)
+#define myssh_to(x, y, z) myssh_set_state(x, y, z)
 
 /*
  * SSH State machine related code
@@ -342,8 +341,7 @@ static int myssh_is_known(struct Curl_easy *data, struct ssh_conn *sshc)
     char md5buffer[33];
     const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
 
-    rc = ssh_get_publickey_hash(pubkey, SSH_PUBLICKEY_HASH_MD5,
-                                &hash, &hlen);
+    rc = ssh_get_publickey_hash(pubkey, SSH_PUBLICKEY_HASH_MD5, &hash, &hlen);
     if(rc != SSH_OK || hlen != 16) {
       failf(data,
             "Denied establishing ssh session: md5 fingerprint not available");
@@ -681,8 +679,7 @@ static int myssh_in_SFTP_READDIR_LINK(struct Curl_easy *data,
 
   Curl_safefree(sshc->readdir_linkPath);
 
-  if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s",
-                    sshc->readdir_filename)) {
+  if(curlx_dyn_addf(&sshc->readdir_buf, " -> %s", sshc->readdir_filename)) {
     /* Not using:
      * return myssh_to_SFTP_CLOSE(data, sshc);
      *
@@ -964,8 +961,7 @@ static int myssh_in_AUTH_PKEY_INIT(struct Curl_easy *data,
    * (2) use the "default" keys. */
   if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
     if(sshc->pubkey && !data->set.ssl.key_passwd) {
-      rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL,
-                                      sshc->pubkey);
+      rc = ssh_userauth_try_publickey(sshc->ssh_session, NULL, sshc->pubkey);
       if(rc == SSH_AUTH_AGAIN)
         return SSH_AGAIN;
 
@@ -1360,8 +1356,7 @@ static int myssh_in_SFTP_DOWNLOAD_STAT(struct Curl_easy *data,
     /* Now store the number of bytes we are expected to download */
     data->req.size = size - data->state.resume_from;
     data->req.maxdownload = size - data->state.resume_from;
-    Curl_pgrsSetDownloadSize(data,
-                             size - data->state.resume_from);
+    Curl_pgrsSetDownloadSize(data, size - data->state.resume_from);
 
     rc = sftp_seek64(sshc->sftp_file, data->state.resume_from);
     if(rc)
@@ -1874,8 +1869,7 @@ static void conn_forget_socket(struct Curl_easy *data, int sockindex)
   if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
     struct Curl_cfilter *cf = conn->cfilter[sockindex];
     if(cf)
-      (void)Curl_conn_cf_cntrl(cf, data, TRUE,
-                               CF_CTRL_FORGET_SOCKET, 0, NULL);
+      (void)Curl_conn_cf_cntrl(cf, data, TRUE, CF_CTRL_FORGET_SOCKET, 0, NULL);
     fake_sclose(conn->sock[sockindex]);
     conn->sock[sockindex] = CURL_SOCKET_BAD;
   }
@@ -2064,8 +2058,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
         break;
       if(rc && !sshc->acceptfail) {
         Curl_safefree(sshc->quote_path1);
-        failf(data, "rm command failed: %s",
-              ssh_get_error(sshc->ssh_session));
+        failf(data, "rm command failed: %s", ssh_get_error(sshc->ssh_session));
         myssh_to(data, sshc, SSH_SFTP_CLOSE);
         sshc->nextstate = SSH_NO_STATE;
         sshc->actualcode = CURLE_QUOTE_ERROR;
@@ -2310,7 +2303,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
 
       /* download data */
       bytecount = ssh_scp_request_get_size(sshc->scp_session);
-      data->req.maxdownload = (curl_off_t) bytecount;
+      data->req.maxdownload = (curl_off_t)bytecount;
       Curl_xfer_setup_recv(data, FIRSTSOCKET, bytecount);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
@@ -2403,7 +2396,6 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data,
       sshc->nextstate = SSH_NO_STATE;
       myssh_to(data, sshc, SSH_STOP);
       break;
-
     }
     /* break the loop only on STOP or SSH_AGAIN. If `rc` is some
      * other error code, we will have progressed the state accordingly. */

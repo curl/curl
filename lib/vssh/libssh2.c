@@ -154,12 +154,12 @@ const struct Curl_handler Curl_handler_sftp = {
   PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
 };
 
-static void
-kbd_callback(const char *name, int name_len, const char *instruction,
-             int instruction_len, int num_prompts,
-             const LIBSSH2_USERAUTH_KBDINT_PROMPT *prompts,
-             LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses,
-             void **abstract)
+static void kbd_callback(const char *name, int name_len,
+                         const char *instruction, int instruction_len,
+                         int num_prompts,
+                         const LIBSSH2_USERAUTH_KBDINT_PROMPT *prompts,
+                         LIBSSH2_USERAUTH_KBDINT_RESPONSE *responses,
+                         void **abstract)
 {
   struct Curl_easy *data = (struct Curl_easy *)*abstract;
 
@@ -283,7 +283,7 @@ static LIBSSH2_FREE_FUNC(my_libssh2_free)
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static const char *myssh_statename(sshstate state)
 {
-  static const char *const names[] = {
+  static const char * const names[] = {
     "SSH_STOP",
     "SSH_INIT",
     "SSH_S_STARTUP",
@@ -354,7 +354,7 @@ static const char *myssh_statename(sshstate state)
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 
-#define myssh_state(x,y,z) myssh_set_state(x,y,z)
+#define myssh_state(x, y, z) myssh_set_state(x, y, z)
 
 /*
  * SSH State machine related code
@@ -1465,8 +1465,7 @@ static CURLcode sftp_download_stat(struct Curl_easy *data,
     /* Now store the number of bytes we are expected to download */
     data->req.size = attrs.filesize - data->state.resume_from;
     data->req.maxdownload = attrs.filesize - data->state.resume_from;
-    Curl_pgrsSetDownloadSize(data,
-                             attrs.filesize - data->state.resume_from);
+    Curl_pgrsSetDownloadSize(data, attrs.filesize - data->state.resume_from);
     libssh2_sftp_seek64(sshc->sftp_handle,
                         (libssh2_uint64_t)data->state.resume_from);
   }
@@ -1504,7 +1503,7 @@ static CURLcode sftp_readdir(struct Curl_easy *data,
     return result;
   }
   if(rc > 0) {
-    size_t readdir_len = (size_t) rc;
+    size_t readdir_len = (size_t)rc;
     sshp->readdir_filename[readdir_len] = '\0';
 
     if(data->set.list_only) {
@@ -1636,8 +1635,7 @@ static CURLcode ssh_state_authlist(struct Curl_easy *data,
     myssh_state(data, sshc, SSH_SESSION_FREE);
     return libssh2_session_error_to_CURLE(rc);
   }
-  infof(data, "SSH authentication methods available: %s",
-        sshc->authlist);
+  infof(data, "SSH authentication methods available: %s", sshc->authlist);
 
   myssh_state(data, sshc, SSH_AUTH_PKEY_INIT);
   return CURLE_OK;
@@ -1676,8 +1674,7 @@ static CURLcode ssh_state_auth_pkey(struct Curl_easy *data,
       err_msg = unknown;
     }
     else {
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
     }
     infof(data, "SSH public key authentication failed: %s", err_msg);
     myssh_state(data, sshc, SSH_AUTH_PASS_INIT);
@@ -1910,8 +1907,7 @@ static CURLcode ssh_state_sftp_init(struct Curl_easy *data,
        LIBSSH2_ERROR_EAGAIN)
       return CURLE_AGAIN;
 
-    (void)libssh2_session_last_error(sshc->ssh_session,
-                                     &err_msg, NULL, 0);
+    (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
     failf(data, "Failure initializing sftp session: %s", err_msg);
     myssh_state(data, sshc, SSH_SESSION_FREE);
     return CURLE_FAILED_INIT;
@@ -2412,8 +2408,7 @@ static CURLcode ssh_state_sftp_close(struct Curl_easy *data,
 
     if(rc < 0) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
       infof(data, "Failed to close libssh2 file: %d %s", rc, err_msg);
     }
     sshc->sftp_handle = NULL;
@@ -2451,8 +2446,7 @@ static CURLcode ssh_state_sftp_shutdown(struct Curl_easy *data,
 
     if(rc < 0) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg,
-                                       NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
       infof(data, "Failed to close libssh2 file: %d %s", rc, err_msg);
     }
     sshc->sftp_handle = NULL;
@@ -2564,10 +2558,8 @@ static CURLcode ssh_state_session_disconnect(struct Curl_easy *data,
 
     if(rc < 0) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
-      infof(data, "Failed to free libssh2 scp subsystem: %d %s",
-            rc, err_msg);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+      infof(data, "Failed to free libssh2 scp subsystem: %d %s", rc, err_msg);
     }
     sshc->ssh_channel = NULL;
   }
@@ -2579,10 +2571,8 @@ static CURLcode ssh_state_session_disconnect(struct Curl_easy *data,
 
     if(rc < 0) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
-      infof(data, "Failed to disconnect libssh2 session: %d %s",
-            rc, err_msg);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+      infof(data, "Failed to disconnect libssh2 session: %d %s", rc, err_msg);
     }
   }
 
@@ -3557,8 +3547,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
     rc = libssh2_agent_disconnect(sshc->ssh_agent);
     if((rc < 0) && data) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
       infof(data, "Failed to disconnect from libssh2 agent: %d %s",
             rc, err_msg);
     }
@@ -3578,8 +3567,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
     rc = libssh2_sftp_close(sshc->sftp_handle);
     if((rc < 0) && data) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg,
-                                       NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
       infof(data, "Failed to close libssh2 file: %d %s", rc, err_msg);
     }
     if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
@@ -3592,10 +3580,8 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
     rc = libssh2_channel_free(sshc->ssh_channel);
     if((rc < 0) && data) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
-      infof(data, "Failed to free libssh2 scp subsystem: %d %s",
-            rc, err_msg);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
+      infof(data, "Failed to free libssh2 scp subsystem: %d %s", rc, err_msg);
     }
     if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
       return CURLE_AGAIN;
@@ -3607,8 +3593,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
     rc = libssh2_sftp_shutdown(sshc->sftp_session);
     if((rc < 0) && data) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
       infof(data, "Failed to stop libssh2 sftp subsystem: %d %s", rc, err_msg);
     }
     if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
@@ -3621,8 +3606,7 @@ static CURLcode sshc_cleanup(struct ssh_conn *sshc, struct Curl_easy *data,
     rc = libssh2_session_free(sshc->ssh_session);
     if((rc < 0) && data) {
       char *err_msg = NULL;
-      (void)libssh2_session_last_error(sshc->ssh_session,
-                                       &err_msg, NULL, 0);
+      (void)libssh2_session_last_error(sshc->ssh_session, &err_msg, NULL, 0);
       infof(data, "Failed to free libssh2 session: %d %s", rc, err_msg);
     }
     if(!block && (rc == LIBSSH2_ERROR_EAGAIN))
@@ -3842,7 +3826,6 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
     sshc_cleanup(sshc, data, TRUE);
   }
   return result;
-
 }
 
 static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
