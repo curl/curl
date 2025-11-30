@@ -109,7 +109,7 @@ typedef EVP_MD_CTX *Curl_sha512_256_ctx;
  */
 static CURLcode Curl_sha512_256_init(void *context)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
   *ctx = EVP_MD_CTX_create();
   if(!*ctx)
@@ -142,7 +142,7 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        const unsigned char *data,
                                        size_t length)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
   if(!EVP_DigestUpdate(*ctx, data, length))
     return CURLE_SSL_CIPHER;
@@ -163,7 +163,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
   CURLcode ret;
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
 #ifdef NEED_NETBSD_SHA512_256_WORKAROUND
   /* Use a larger buffer to work around a bug in NetBSD:
@@ -202,7 +202,7 @@ typedef struct sha512_256_ctx Curl_sha512_256_ctx;
  */
 static CURLcode Curl_sha512_256_init(void *context)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH == CURL_SHA512_256_DIGEST_SIZE);
@@ -225,7 +225,7 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        const unsigned char *data,
                                        size_t length)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
   DEBUGASSERT((data != NULL) || (length == 0));
 
@@ -246,7 +246,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 static CURLcode Curl_sha512_256_finish(unsigned char *digest,
                                        void *context)
 {
-  Curl_sha512_256_ctx *const ctx = (Curl_sha512_256_ctx *)context;
+  Curl_sha512_256_ctx * const ctx = (Curl_sha512_256_ctx *)context;
 
   sha512_256_digest(ctx,
                     (size_t)CURL_SHA512_256_DIGEST_SIZE, (uint8_t *)digest);
@@ -408,7 +408,7 @@ typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
  */
 static CURLcode Curl_sha512_256_init(void *context)
 {
-  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
+  struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
 
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH == CURL_SHA512_256_DIGEST_SIZE);
@@ -612,9 +612,9 @@ static CURLcode Curl_sha512_256_update(void *context,
                                        size_t length)
 {
   unsigned int bytes_have; /**< Number of bytes in the context buffer */
-  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
+  struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
   /* the void pointer here is required to mute Intel compiler warning */
-  void *const ctx_buf = ctx->buffer;
+  void * const ctx_buf = ctx->buffer;
 
   DEBUGASSERT((data != NULL) || (length == 0));
 
@@ -684,11 +684,11 @@ static CURLcode Curl_sha512_256_update(void *context,
  */
 static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 {
-  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
+  struct Curl_sha512_256ctx * const ctx = (struct Curl_sha512_256ctx *)context;
   uint64_t num_bits;   /**< Number of processed bits */
   unsigned int bytes_have; /**< Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
-  void *const ctx_buf = ctx->buffer;
+  void * const ctx_buf = ctx->buffer;
 
   /* Memorise the number of processed bits.
      The padding and other data added here during the postprocessing must
