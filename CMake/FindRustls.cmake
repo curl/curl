@@ -104,10 +104,6 @@ if(RUSTLS_FOUND)
     mark_as_advanced(MATH_LIBRARY)
   endif()
 
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_rustls_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::rustls)
     add_library(CURL::rustls INTERFACE IMPORTED)
     set_target_properties(CURL::rustls PROPERTIES
