@@ -37,9 +37,8 @@
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 
-#if defined(_WIN32) && !defined(USE_LWIPSOCK)
-#define SET_RCVTIMEO(tv,s)   int tv = s*1000
-#elif defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
+#if (defined(_WIN32) && !defined(USE_LWIPSOCK)) || \
+  defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
 #define SET_RCVTIMEO(tv,s)   int tv = s*1000
 #else
 #define SET_RCVTIMEO(tv,s)   struct timeval tv = {s,0}
