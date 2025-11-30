@@ -299,7 +299,7 @@ struct negotiatedata {
   gss_ctx_id_t context;
   gss_name_t spn;
   gss_buffer_desc output_token;
-#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+#ifdef GSS_C_CHANNEL_BOUND_FLAG
   struct dynbuf channel_binding_data;
 #endif
 #else
