@@ -29,8 +29,7 @@
 
 #include "curl_get_line.h"
 
-#define appendnl(b)                             \
-  curlx_dyn_addn(buf, "\n", 1)
+#define appendnl(b)  curlx_dyn_addn(buf, "\n", 1)
 
 /*
  * Curl_get_line() returns only complete whole lines that end with newline.
@@ -57,7 +56,7 @@ CURLcode Curl_get_line(struct dynbuf *buf, FILE *input, bool *eof)
     /* now check the full line */
     rlen = curlx_dyn_len(buf);
     b = curlx_dyn_ptr(buf);
-    if(rlen && (b[rlen-1] == '\n'))
+    if(rlen && (b[rlen - 1] == '\n'))
       /* LF at end of the line */
       return CURLE_OK; /* all good */
     if(*eof)
