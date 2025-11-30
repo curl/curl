@@ -1098,7 +1098,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
 #ifdef USE_IPV6
   if(ctx->addr.family == AF_INET6) {
-#ifdef _WIN32
+#ifdef USE_WINSOCK
     /* Turn on support for IPv4-mapped IPv6 addresses.
      * Linux kernel, NetBSD, FreeBSD and Darwin: default is off;
      * Windows Vista and later: default is on (= 1);
