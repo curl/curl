@@ -75,10 +75,6 @@
 #include <wolfssl/error-ssl.h>
 #include "wolfssl.h"
 
-#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
-#define USE_ECH_WOLFSSL
-#endif
-
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
    OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
    in wolfSSL's settings.h, and the latter two are build time symbols in
@@ -1364,7 +1360,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
-#ifdef USE_ECH_WOLFSSL
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
   if(ECH_ENABLED(data)) {
     int trying_ech_now = 0;
 
@@ -1449,7 +1445,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     }
 
   }
-#endif  /* USE_ECH_WOLFSSL */
+#endif /* HAVE_WOLFSSL_CTX_GENERATEECHCONFIG */
 
   result = CURLE_OK;
 
@@ -1786,7 +1782,7 @@ static CURLcode wssl_handshake(struct Curl_cfilter *cf, struct Curl_easy *data)
         return wssl->io_result;
       }
     }
-#ifdef USE_ECH_WOLFSSL
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
     else if(detail == -1) {
       /* try access a retry_config ECHConfigList for tracing */
       byte echConfigs[1000];
@@ -2282,7 +2278,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #endif
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
-#ifdef USE_ECH_WOLFSSL
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
   SSLSUPP_ECH |
 #endif
   SSLSUPP_SSL_CTX |
