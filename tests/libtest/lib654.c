@@ -107,7 +107,7 @@ static CURLcode test_lib654(const char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
-  curl_mime_data_cb(part, (curl_off_t) -1, t654_read_cb, NULL,
+  curl_mime_data_cb(part, (curl_off_t)-1, t654_read_cb, NULL,
                     free_callback, &pooh);
 
   /* Bind mime data to its easy handle. */

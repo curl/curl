@@ -52,7 +52,6 @@ static void t530_msg(const char *msg)
   curl_mfprintf(stderr, "%s %s\n", t530_tag(), msg);
 }
 
-
 struct t530_Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
@@ -285,9 +284,9 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  struct t530_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
+  struct t530_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;
-  struct curltime timeout = {0};
+  struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
   /* set the limits */
@@ -328,7 +327,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   while(!t530_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
-    struct timeval tv = {0};
+    struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
     FD_ZERO(&readSet);

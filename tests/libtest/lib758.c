@@ -57,8 +57,7 @@ static struct t758_ctx {
 
 static const char *t758_tag(void)
 {
-  curl_msnprintf(t758_ctx.buf, sizeof(t758_ctx.buf),
-                 "[T758-%d-%d] [%d/%d]",
+  curl_msnprintf(t758_ctx.buf, sizeof(t758_ctx.buf), "[T758-%d-%d] [%d/%d]",
                  t758_ctx.max_socket_calls, t758_ctx.max_timer_calls,
                  t758_ctx.socket_calls, t758_ctx.timer_calls);
   return t758_ctx.buf;
@@ -204,8 +203,8 @@ static int t758_cert_verify_callback(X509_STORE_CTX *ctx, void *arg)
 {
   SSL *ssl;
   (void)arg;
-  ssl = (SSL *)X509_STORE_CTX_get_ex_data(ctx,
-        SSL_get_ex_data_X509_STORE_CTX_idx());
+  ssl = (SSL *)X509_STORE_CTX_get_ex_data(
+    ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
   t758_ctx.number_of_cert_verify_callbacks++;
   if(!t758_ctx.fake_async_cert_verification_pending) {
     t758_ctx.fake_async_cert_verification_pending = 1;
@@ -222,8 +221,8 @@ static int t758_cert_verify_callback(X509_STORE_CTX *ctx, void *arg)
   }
 }
 
-static CURLcode
-t758_set_ssl_ctx_callback(CURL *curl, void *ssl_ctx, void *clientp)
+static CURLcode t758_set_ssl_ctx_callback(CURL *curl, void *ssl_ctx,
+                                          void *clientp)
 {
   SSL_CTX *ctx = (SSL_CTX *)ssl_ctx;
   (void)curl;
@@ -333,9 +332,9 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  struct t758_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
+  struct t758_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;
-  struct curltime timeout = {0};
+  struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
   /* set the limits */
@@ -390,7 +389,7 @@ static CURLcode t758_one(const char *URL, int timer_fail_at,
   while(!t758_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
-    struct timeval tv = {0};
+    struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
     if(t758_ctx.fake_async_cert_verification_pending &&

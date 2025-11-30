@@ -174,22 +174,22 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     handles[i].fail_write = 1;
     handles[i].curl = curl_easy_init();
     if(!handles[i].curl ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_WRITEFUNCTION, cb)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_WRITEDATA, &handles[i])
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_FOLLOWLOCATION, 1L)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_SSL_VERIFYPEER, 0L)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_RESOLVE, resolve)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_PIPEWAIT, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_URL, url) != CURLE_OK) {
-      curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
+       curl_easy_setopt(handles[i].curl, CURLOPT_WRITEFUNCTION, cb)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_WRITEDATA, &handles[i])
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_FOLLOWLOCATION, 1L)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_SSL_VERIFYPEER, 0L)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_RESOLVE, resolve)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_PIPEWAIT, 1L) != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_URL, url) != CURLE_OK) {
+       curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
       res = (CURLcode)2;
       goto cleanup;
     }

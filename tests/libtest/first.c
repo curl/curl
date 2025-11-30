@@ -62,7 +62,7 @@ int unitfail; /* for unittests */
 int coptind;
 const char *coptarg;
 
-int cgetopt(int argc, const char *const argv[], const char *optstring)
+int cgetopt(int argc, const char * const argv[], const char *optstring)
 {
   static int optpos = 1;
   int coptopt;
@@ -141,7 +141,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#  define memory_tracking_init() Curl_nop_stmt
+#define memory_tracking_init() Curl_nop_stmt
 #endif
 
 /* returns a hexdump in a static memory area */

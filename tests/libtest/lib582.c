@@ -229,9 +229,9 @@ static CURLcode test_lib582(const char *URL)
   int hd;
   struct_stat file_info;
   CURLM *multi = NULL;
-  struct t582_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
+  struct t582_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;
-  struct curltime timeout = {0};
+  struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
   assert(test_argc >= 5);
@@ -304,7 +304,7 @@ static CURLcode test_lib582(const char *URL)
   while(!t582_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
-    struct timeval tv = {0};
+    struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
     FD_ZERO(&readSet);
