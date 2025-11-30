@@ -25,7 +25,7 @@ Compare curl --version with curl-config --version
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
+%PERL %SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
 </postcheck>
 <errorcode>
 0
