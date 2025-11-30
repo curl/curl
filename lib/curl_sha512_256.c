@@ -286,19 +286,19 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest,
 /* Bits manipulation macros and functions.
    Can be moved to other headers to reuse. */
 
-#define CURL_GET_64BIT_BE(ptr)                                  \
-  ( ((uint64_t)(((const uint8_t*)(ptr))[0]) << 56) | \
-    ((uint64_t)(((const uint8_t*)(ptr))[1]) << 48) | \
-    ((uint64_t)(((const uint8_t*)(ptr))[2]) << 40) | \
-    ((uint64_t)(((const uint8_t*)(ptr))[3]) << 32) | \
-    ((uint64_t)(((const uint8_t*)(ptr))[4]) << 24) | \
-    ((uint64_t)(((const uint8_t*)(ptr))[5]) << 16) | \
-    ((uint64_t)(((const uint8_t*)(ptr))[6]) << 8)  | \
-    (uint64_t)(((const uint8_t*)(ptr))[7]) )
+#define CURL_GET_64BIT_BE(ptr)                      \
+  (((uint64_t)(((const uint8_t*)(ptr))[0]) << 56) | \
+   ((uint64_t)(((const uint8_t*)(ptr))[1]) << 48) | \
+   ((uint64_t)(((const uint8_t*)(ptr))[2]) << 40) | \
+   ((uint64_t)(((const uint8_t*)(ptr))[3]) << 32) | \
+   ((uint64_t)(((const uint8_t*)(ptr))[4]) << 24) | \
+   ((uint64_t)(((const uint8_t*)(ptr))[5]) << 16) | \
+   ((uint64_t)(((const uint8_t*)(ptr))[6]) << 8)  | \
+    (uint64_t)(((const uint8_t*)(ptr))[7]))
 
-#define CURL_PUT_64BIT_BE(ptr,val) do {                                 \
-    ((uint8_t*)(ptr))[7]=(uint8_t)((uint64_t)(val));   \
-    ((uint8_t*)(ptr))[6]=(uint8_t)(((uint64_t)(val)) >> 8); \
+#define CURL_PUT_64BIT_BE(ptr,val) do {                      \
+    ((uint8_t*)(ptr))[7]=(uint8_t)((uint64_t)(val));         \
+    ((uint8_t*)(ptr))[6]=(uint8_t)(((uint64_t)(val)) >> 8);  \
     ((uint8_t*)(ptr))[5]=(uint8_t)(((uint64_t)(val)) >> 16); \
     ((uint8_t*)(ptr))[4]=(uint8_t)(((uint64_t)(val)) >> 24); \
     ((uint8_t*)(ptr))[3]=(uint8_t)(((uint64_t)(val)) >> 32); \
@@ -558,7 +558,7 @@ void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        see FIPS PUB 180-4 section 3.1.2. */
 #define SHA512_GET_W_FROM_DATA(buf,t)                                   \
     CURL_GET_64BIT_BE(                                                  \
-      ((const uint8_t*) (buf)) + (t) * SHA512_256_BYTES_IN_WORD)
+      ((const uint8_t*)(buf)) + (t) * SHA512_256_BYTES_IN_WORD)
 
     /* During first 16 steps, before making any calculation on each step, the
        W element is read from the input data buffer as a big-endian value and
@@ -574,8 +574,8 @@ void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        use 16 elements array of W as a cyclic buffer.
        Note: ((t-16) & 15) have same value as (t & 15) */
 #define Wgen(w,t)                                                  \
-    (uint64_t)( (w)[(t - 16) & 15] + sig1((w)[((t) - 2) & 15])     \
-                + (w)[((t) - 7) & 15] + sig0((w)[((t) - 15) & 15]) )
+    (uint64_t)((w)[((t) - 16) & 15] + sig1((w)[((t) -  2) & 15]) + \
+               (w)[((t) -  7) & 15] + sig0((w)[((t) - 15) & 15]))
 
     /* During the last 64 steps, before making any calculation on each step,
        current W element is generated from other W elements of the cyclic
@@ -623,7 +623,7 @@ static CURLcode Curl_sha512_256_update(void *context,
 
   /* Note: (count & (CURL_SHA512_256_BLOCK_SIZE-1))
      equals (count % CURL_SHA512_256_BLOCK_SIZE) for this block size. */
-  bytes_have = (unsigned int) (ctx->count & (CURL_SHA512_256_BLOCK_SIZE - 1));
+  bytes_have = (unsigned int)(ctx->count & (CURL_SHA512_256_BLOCK_SIZE - 1));
   ctx->count += length;
   if(length > ctx->count)
     ctx->count_bits_hi += 1U << 3; /* Value wrap */
@@ -635,7 +635,7 @@ static CURLcode Curl_sha512_256_update(void *context,
     if(length >= bytes_left) {
       /* Combine new data with data in the buffer and process the full
          block. */
-      memcpy(((unsigned char *) ctx_buf) + bytes_have,
+      memcpy(((unsigned char *)ctx_buf) + bytes_have,
              data,
              bytes_left);
       data += bytes_left;
@@ -656,7 +656,7 @@ static CURLcode Curl_sha512_256_update(void *context,
   if(length) {
     /* Copy incomplete block of new data (if any)
        to the buffer. */
-    memcpy(((unsigned char *) ctx_buf) + bytes_have, data, length);
+    memcpy(((unsigned char *)ctx_buf) + bytes_have, data, length);
   }
 
   return CURLE_OK;
@@ -697,7 +697,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
 
   /* Note: (count & (CURL_SHA512_256_BLOCK_SIZE-1))
            equals (count % CURL_SHA512_256_BLOCK_SIZE) for this block size. */
-  bytes_have = (unsigned int) (ctx->count & (CURL_SHA512_256_BLOCK_SIZE - 1));
+  bytes_have = (unsigned int)(ctx->count & (CURL_SHA512_256_BLOCK_SIZE - 1));
 
   /* Input data must be padded with a single bit "1", then with zeros and
      the finally the length of data in bits must be added as the final bytes
@@ -715,7 +715,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
     /* No space in the current block to put the total length of message.
        Pad the current block with zeros and process it. */
     if(bytes_have < CURL_SHA512_256_BLOCK_SIZE)
-      memset(((unsigned char *) ctx_buf) + bytes_have, 0,
+      memset(((unsigned char *)ctx_buf) + bytes_have, 0,
              CURL_SHA512_256_BLOCK_SIZE - bytes_have);
     /* Process the full block. */
     Curl_sha512_256_transform(ctx->H, ctx->buffer);
@@ -724,17 +724,17 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
   }
 
   /* Pad the rest of the buffer with zeros. */
-  memset(((unsigned char *) ctx_buf) + bytes_have, 0,
+  memset(((unsigned char *)ctx_buf) + bytes_have, 0,
          CURL_SHA512_256_BLOCK_SIZE - SHA512_256_SIZE_OF_LEN_ADD - bytes_have);
   /* Put high part of number of bits in processed message and then lower
      part of number of bits as big-endian values.
      See FIPS PUB 180-4 section 5.1.2. */
   /* Note: the target location is predefined and buffer is always aligned */
-  CURL_PUT_64BIT_BE(((unsigned char *) ctx_buf)       \
+  CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)        \
                       + CURL_SHA512_256_BLOCK_SIZE    \
                       - SHA512_256_SIZE_OF_LEN_ADD,   \
                       ctx->count_bits_hi);
-  CURL_PUT_64BIT_BE(((unsigned char *) ctx_buf)       \
+  CURL_PUT_64BIT_BE(((unsigned char *)ctx_buf)        \
                       + CURL_SHA512_256_BLOCK_SIZE    \
                       - SHA512_256_SIZE_OF_LEN_ADD    \
                       + SHA512_256_BYTES_IN_WORD,     \
@@ -775,7 +775,7 @@ CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
   if(res != CURLE_OK)
     return res;
 
-  res = Curl_sha512_256_update(&ctx, (const void *) input, input_size);
+  res = Curl_sha512_256_update(&ctx, (const void *)input, input_size);
 
   if(res != CURLE_OK) {
     (void)Curl_sha512_256_finish(output, &ctx);
