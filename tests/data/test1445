@@ -3,7 +3,6 @@
 <keywords>
 FILE
 --remote-time
-notxml
 </keywords>
 </info>
 
@@ -29,8 +28,7 @@ file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt --remote-tim
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
-%PERL -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 946728000)'
+%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %LOGDIR/curl%TESTNUMBER.out 946728000
 </postcheck>
 </verify>
 </testcase>
