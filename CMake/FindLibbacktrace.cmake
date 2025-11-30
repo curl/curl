@@ -47,10 +47,6 @@ if(LIBBACKTRACE_FOUND)
   set(_libbacktrace_INCLUDE_DIRS ${LIBBACKTRACE_INCLUDE_DIR})
   set(_libbacktrace_LIBRARIES    ${LIBBACKTRACE_LIBRARY})
 
-  if(CMAKE_VERSION VERSION_LESS 3.13)
-    link_directories(${_libbacktrace_LIBRARY_DIRS})
-  endif()
-
   if(NOT TARGET CURL::libbacktrace)
     add_library(CURL::libbacktrace INTERFACE IMPORTED)
     set_target_properties(CURL::libbacktrace PROPERTIES
