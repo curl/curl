@@ -127,11 +127,12 @@ static CURLcode test_unit3211(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static const unsigned int s1[] = {  /* spread numbers, some at slot edges */
-    0, 1, 4, 17, 63, 64, 65, 66,
-    90, 99,
+  static const unsigned int s1[] = {
+    /* spread numbers, some at slot edges */
+    0, 1, 4, 17, 63, 64, 65, 66, 90, 99,
   };
-  static const unsigned int s2[] = { /* set with all bits in slot1 set */
+  static const unsigned int s2[] = {
+    /* set with all bits in slot1 set */
     64, 65, 66, 67, 68, 69, 70, 71,
     72, 73, 74, 75, 76, 77, 78, 79,
     80, 81, 82, 83, 84, 85, 86, 87,

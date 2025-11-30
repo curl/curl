@@ -67,8 +67,8 @@ static CURLcode test_unit1309(const char *arg)
   size_t storage[NUM_NODES * 3];
   int rc;
   int i, j;
-  struct curltime tv_now = {0, 0};
-  root = NULL;              /* the empty tree */
+  struct curltime tv_now = { 0, 0 };
+  root = NULL; /* the empty tree */
 
   /* add nodes */
   for(i = 0; i < NUM_NODES; i++) {
