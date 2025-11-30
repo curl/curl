@@ -102,59 +102,58 @@ elsif($ARGV[0] eq "postprocess") {
         my $mtime = (stat($checkfile))[9];
         exit ($mtime != $expected_mtime);
     }
-    elsif($#ARGV >= 2) {
-        my $logfile = $ARGV[2];
-        if($logfile && -s $logfile) {
-            # Process the directory file to remove all information that
-            # could be inconsistent from one test run to the next (e.g.
-            # file date) or may be unsupported on some platforms (e.g.
-            # Windows). Also, since 7.17.0, the sftp directory listing
-            # format can be dependent on the server (with a recent
-            # enough version of libssh2) so this script must also
-            # canonicalize the format.  Here are examples of the general
-            # format supported:
-            # -r--r--r--   12 ausername grp            47 Dec 31  2000 rofile.txt
-            # -r--r--r--   1  1234  4321         47 Dec 31  2000 rofile.txt
-            # The "canonical" format is similar to the first (which is
-            # the one generated on a typical Linux installation):
-            # -r-?r-?r-?   12 U         U              47 Dec 31  2000 rofile.txt
 
-            my @canondir;
-            open(IN, "<$logfile") || die "$!";
-            while(<IN>) {
-                /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
-                if($1 eq "d") {
-                    # Skip current and parent directory listing, because some SSH
-                    # servers (eg. OpenSSH for Windows) are not listing those
-                    if($8 eq "." || $8 eq "..") {
-                        next;
-                    }
-                    # Erase all directory metadata except for the name, as it is not
-                    # consistent for across all test systems and file systems
-                    push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
-                } elsif($1 eq "-") {
-                    # Ignore group and other permissions, because these may vary on
-                    # some systems (e.g. on Windows)
-                    # Erase user and group names, as they are not consistent across
-                    # all test systems
-                    my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
-                    push @canondir, $line;
-                } else {
-                    # Unexpected format; just pass it through and let the test fail
-                    push @canondir, $_;
+    my $logfile = $ARGV[2];
+    if($logfile && -s $logfile) {
+        # Process the directory file to remove all information that
+        # could be inconsistent from one test run to the next (e.g.
+        # file date) or may be unsupported on some platforms (e.g.
+        # Windows). Also, since 7.17.0, the sftp directory listing
+        # format can be dependent on the server (with a recent
+        # enough version of libssh2) so this script must also
+        # canonicalize the format.  Here are examples of the general
+        # format supported:
+        # -r--r--r--   12 ausername grp            47 Dec 31  2000 rofile.txt
+        # -r--r--r--   1  1234  4321         47 Dec 31  2000 rofile.txt
+        # The "canonical" format is similar to the first (which is
+        # the one generated on a typical Linux installation):
+        # -r-?r-?r-?   12 U         U              47 Dec 31  2000 rofile.txt
+
+        my @canondir;
+        open(IN, "<$logfile") || die "$!";
+        while(<IN>) {
+            /^(.)(..).(..).(..).\s*(\S+)\s+\S+\s+\S+\s+(\S+)\s+(\S+\s+\S+\s+\S+)\s+(.*)$/;
+            if($1 eq "d") {
+                # Skip current and parent directory listing, because some SSH
+                # servers (eg. OpenSSH for Windows) are not listing those
+                if($8 eq "." || $8 eq "..") {
+                    next;
                 }
+                # Erase all directory metadata except for the name, as it is not
+                # consistent for across all test systems and file systems
+                push @canondir, "d?????????    N U         U               N ???  N NN:NN $8\n";
+            } elsif($1 eq "-") {
+                # Ignore group and other permissions, because these may vary on
+                # some systems (e.g. on Windows)
+                # Erase user and group names, as they are not consistent across
+                # all test systems
+                my $line = sprintf("%s%s???????%5d U         U %15d %s %s\n", $1,$2,$5,$6,$7,$8);
+                push @canondir, $line;
+            } else {
+                # Unexpected format; just pass it through and let the test fail
+                push @canondir, $_;
             }
-            close(IN);
-
-            @canondir = sort {substr($a,57) cmp substr($b,57)} @canondir;
-            my $newfile = $logfile . ".new";
-            open(OUT, ">$newfile") || die "$!";
-            print OUT join('', @canondir);
-            close(OUT);
-
-            unlink $logfile;
-            rename $newfile, $logfile;
         }
+        close(IN);
+
+        @canondir = sort {substr($a,57) cmp substr($b,57)} @canondir;
+        my $newfile = $logfile . ".new";
+        open(OUT, ">$newfile") || die "$!";
+        print OUT join('', @canondir);
+        close(OUT);
+
+        unlink $logfile;
+        rename $newfile, $logfile;
     }
 
     exit 0;
