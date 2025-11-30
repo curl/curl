@@ -173,7 +173,7 @@ if(TARGET @PROJECT_NAME@::@LIB_STATIC@)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
     cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
   endif()
-  if(NOT _has_CMP0099 AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND _curl_libs)
+  if(NOT _has_CMP0099 AND _curl_libs)
     set(_curl_libdirs "")
     foreach(_curl_lib IN LISTS _curl_libs)
       if(TARGET "${_curl_lib}")
