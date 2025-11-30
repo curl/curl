@@ -193,7 +193,7 @@ if(BUILD_STATIC_LIBS)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
     cmake_policy(GET CMP0099 _has_CMP0099)  # https://cmake.org/cmake/help/latest/policy/CMP0099.html
   endif()
-  if(NOT _has_CMP0099 AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND CURL_LIBS)
+  if(NOT _has_CMP0099 AND CURL_LIBS)
     set(_curl_libdirs "")
     foreach(_curl_lib IN LISTS CURL_LIBS)
       if(TARGET "${_curl_lib}")
