@@ -61,7 +61,6 @@ if CURLDEBUG
 AM_CPPFLAGS += -DCURLDEBUG
 endif
 
-AM_LDFLAGS =
 if USE_UNICODE
 UNICODEFLAG = -municode
 endif
@@ -94,7 +93,7 @@ curl_SOURCES += $(CURL_RCFILES)
 $(CURL_RCFILES): tool_version.h
 endif
 
-curl_LDFLAGS = $(AM_LDFLAGS) $(CURL_LDFLAGS_BIN) $(UNICODEFLAG)
+curl_LDFLAGS = $(CURL_LDFLAGS_BIN) $(UNICODEFLAG)
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
