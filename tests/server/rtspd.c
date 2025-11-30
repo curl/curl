@@ -88,10 +88,10 @@ struct rtspd_httprequest {
 #define RESPONSE_DUMP "server.response"
 
 /* very-big-path support */
-#define MAXDOCNAMELEN 140000
+#define MAXDOCNAMELEN     140000
 #define MAXDOCNAMELEN_TXT "139999"
 
-#define REQUEST_KEYWORD_SIZE 256
+#define REQUEST_KEYWORD_SIZE     256
 #define REQUEST_KEYWORD_SIZE_TXT "255"
 
 #define CMD_AUTH_REQUIRED "auth_required"
@@ -110,14 +110,15 @@ static const char *docquit_rtsp = "HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* sent as reply to a CONNECT */
 static const char *docconnect =
-"HTTP/1.1 200 Mighty fine indeed" END_OF_HEADERS;
+  "HTTP/1.1 200 Mighty fine indeed" END_OF_HEADERS;
 
 /* sent as reply to a "bad" CONNECT */
 static const char *docbadconnect =
-"HTTP/1.1 501 Forbidden you fool" END_OF_HEADERS;
+  "HTTP/1.1 501 Forbidden you fool" END_OF_HEADERS;
 
 /* send back this on HTTP 404 file not found */
-static const char *doc404_HTTP = "HTTP/1.1 404 Not Found\r\n"
+static const char *doc404_HTTP =
+  "HTTP/1.1 404 Not Found\r\n"
   "Server: " RTSPDVERSION "\r\n"
   "Connection: close\r\n"
   "Content-Type: text/html"
@@ -128,7 +129,8 @@ static const char *doc404_HTTP = "HTTP/1.1 404 Not Found\r\n"
   "</HEAD><BODY>\n"
   "<H1>Not Found</H1>\n"
   "The requested URL was not found on this server.\n"
-  "<P><HR><ADDRESS>" RTSPDVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
+  "<P><HR><ADDRESS>" RTSPDVERSION "</ADDRESS>\n"
+  "</BODY></HTML>\n";
 
 /* send back this on RTSP 404 file not found */
 static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
@@ -1021,8 +1023,7 @@ static int test_rtspd(int argc, char *argv[])
     curl_off_t num;
     if(!strcmp("--version", argv[arg])) {
       printf("rtspd IPv4%s"
-             "\n"
-             ,
+             "\n",
 #ifdef USE_IPV6
              "/IPv6"
 #else
