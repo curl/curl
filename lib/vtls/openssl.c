@@ -86,11 +86,7 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
-#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
-#define USE_ECH_OPENSSL
-#endif
-
-#if defined(USE_ECH_OPENSSL) && !defined(HAVE_BORINGSSL_LIKE)
+#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) && !defined(HAVE_BORINGSSL_LIKE)
 #include <openssl/ech.h>
 #endif
 
@@ -3447,7 +3443,7 @@ ossl_init_session_and_alpns(struct ossl_ctx *octx,
   return CURLE_OK;
 }
 
-#ifdef USE_ECH_OPENSSL
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
 static CURLcode ossl_init_ech(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -3576,7 +3572,7 @@ static CURLcode ossl_init_ech(struct ossl_ctx *octx,
 
   return CURLE_OK;
 }
-#endif /* USE_ECH_OPENSSL */
+#endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
 
 static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                               struct Curl_cfilter *cf,
@@ -3611,13 +3607,13 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
     }
   }
 
-#ifdef USE_ECH_OPENSSL
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
   {
     CURLcode result = ossl_init_ech(octx, cf, data, peer);
     if(result)
       return result;
   }
-#endif /* USE_ECH_OPENSSL */
+#endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST */
 
   return ossl_init_session_and_alpns(octx, cf, data, peer,
                                      alpns_requested, sess_reuse_cb);
@@ -4091,7 +4087,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#ifdef USE_ECH_OPENSSL
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
 /* If we have retry configs, then trace those out */
 static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL *ssl,
                                          int reason)
@@ -4262,7 +4258,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
-#ifdef USE_ECH_OPENSSL
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
       else if((lib == ERR_LIB_SSL) &&
 # ifndef HAVE_BORINGSSL_LIKE
               (reason == SSL_R_ECH_REQUIRED)) {
@@ -4309,7 +4305,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_3;
     Curl_ossl_report_handshake(data, octx);
 
-#if defined(USE_ECH_OPENSSL) && !defined(HAVE_BORINGSSL_LIKE)
+#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) && !defined(HAVE_BORINGSSL_LIKE)
     if(ECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
       const char *status = NULL;
@@ -4367,7 +4363,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     else {
       infof(data, "ECH: result: status is not attempted");
     }
-#endif /* USE_ECH_OPENSSL && !HAVE_BORINGSSL_LIKE */
+#endif /* HAVE_SSL_SET1_ECH_CONFIG_LIST && !HAVE_BORINGSSL_LIKE */
 
 #ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -5435,7 +5431,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #ifdef HAVE_SSL_CTX_SET1_SIGALGS
   SSLSUPP_SIGNATURE_ALGORITHMS |
 #endif
-#ifdef USE_ECH_OPENSSL
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
   SSLSUPP_ECH |
 #endif
   SSLSUPP_CA_CACHE |
