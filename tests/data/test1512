@@ -3,7 +3,6 @@
 <keywords>
 HTTP
 GLOBAL DNS CACHE
-notxml
 </keywords>
 </info>
 
@@ -75,7 +74,7 @@ Accept: */*
 ^Host:.*
 </strip>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
 </verify>
 </testcase>
