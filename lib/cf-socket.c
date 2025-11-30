@@ -83,7 +83,7 @@
 #include "curlx/strparse.h"
 
 
-#if defined(USE_IPV6) && defined(IPV6_V6ONLY) && defined(_WIN32)
+#if defined(USE_IPV6) && defined(_WIN32)
 /* It makes support for IPv4-mapped IPv6 addresses.
  * Linux kernel, NetBSD, FreeBSD and Darwin: default is off;
  * Windows Vista and later: default is on;
