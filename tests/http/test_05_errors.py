@@ -73,8 +73,8 @@ class TestErrors:
         invalid_stats = []
         for idx, s in enumerate(r.stats):
             if 'exitcode' not in s or s['exitcode'] not in [18, 55, 56, 92, 95]:
-                invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{s}')
-        assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
+                invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{r.dump_logs()}')
+        assert len(invalid_stats) == 0, f'failed: {invalid_stats}\n{r.dump_logs()}'
 
     # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
     @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")

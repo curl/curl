@@ -308,13 +308,14 @@ class TestBasic:
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True,
                                extra_args=['-X', method])
-        assert len(r.stats) == 1
         if proto == 'h2' or proto == 'h3':
-            r.check_response(http_status=0)
+            # h2+3 may close the connection for such invalid requests
             re_m = re.compile(r'.*\[:method: ([^\]]+)\].*')
             lines = [line for line in r.trace_lines if re_m.match(line)]
             assert len(lines) == 1, f'{r.dump_logs()}'
             m = re_m.match(lines[0])
             assert m.group(1) == method, f'{r.dump_logs()}'
         else:
+            # h1 should give us a real response
+            assert len(r.stats) == 1
             r.check_response(http_status=400)
