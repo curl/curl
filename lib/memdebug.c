@@ -27,8 +27,10 @@
 #ifdef CURLDEBUG
 
 #include <curl/curl.h>
+
 #include "urldata.h"
 #include "curl_threads.h"
+#include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
 
 #ifdef USE_BACKTRACE
 #include "backtrace.h"
@@ -126,8 +128,7 @@ void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
     if(logname && *logname)
-      /* !checksrc! disable BANNEDFUNC 1 - accept fopen() */
-      curl_dbg_logfile = fopen(logname, "wt");
+      curl_dbg_logfile = CURLX_FOPEN_LOW(logname, FOPEN_WRITETEXT);
 #ifdef MEMDEBUG_LOG_SYNC
     /* Flush the log file after every line so the log is not lost in a crash */
     if(curl_dbg_logfile)
@@ -477,8 +478,7 @@ ALLOC_FUNC
 FILE *curl_dbg_fopen(const char *file, const char *mode,
                      int line, const char *source)
 {
-  /* !checksrc! disable BANNEDFUNC 1 use fopen here */
-  FILE *res = fopen(file, mode);
+  FILE *res = CURLX_FOPEN_LOW(file, mode);
   if(source)
     curl_dbg_log("FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
                  source, line, file, mode, (void *)res);
@@ -490,8 +490,7 @@ ALLOC_FUNC
 FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
                        int line, const char *source)
 {
-  /* !checksrc! disable BANNEDFUNC 1 - accept freopen() */
-  FILE *res = freopen(file, mode, fh);
+  FILE *res = CURLX_FREOPEN_LOW(file, mode, fh);
   if(source)
     curl_dbg_log("FILE %s:%d freopen(\"%s\",\"%s\",%p) = %p\n",
                  source, line, file, mode, (void *)fh, (void *)res);
