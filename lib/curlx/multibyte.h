@@ -52,14 +52,14 @@
 #define CURLX_FREE(x)   curlx_free(x)
 #endif
 
-/* MultiByte conversions using Windows kernel32 library. */
-wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
-char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
-
 /* the purpose of this macro is to free() without being traced by memdebug */
 #define curlx_unicodefree(ptr) CURLX_FREE(ptr)
 
 #ifdef UNICODE
+
+/* MultiByte conversions using Windows kernel32 library. */
+wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
+char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
