@@ -60,6 +60,7 @@ X-Men: cyclops, iceman
 
 </protocol>
 <stripfile>
+s/(URL, \"http:\/\/)%HOSTIP:%HTTPPORT/${1}HOSTIP:HTTPPORT/
 # CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with
 # configurations - just ignore them
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
