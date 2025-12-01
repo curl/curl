@@ -39,8 +39,6 @@
 #ifdef __DJGPP__
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
-#elif defined(_MSC_VER)
-#pragma warning(disable:4127)  /* conditional expression is constant */
 #endif
 
 /* Auxiliary function that waits on the socket. */
