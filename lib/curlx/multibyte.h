@@ -25,6 +25,14 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
+#ifdef CURLDEBUG
+#define CURLX_MALLOC(x) malloc(x)
+#define CURLX_FREE(x)   free(x)
+#else
+#define CURLX_MALLOC(x) curlx_malloc(x)
+#define CURLX_FREE(x)   curlx_free(x)
+#endif
+
 #ifdef _WIN32
 
 /*
@@ -49,7 +57,7 @@ wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
 char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 
 /* the purpose of this macro is to free() without being traced by memdebug */
-#define curlx_unicodefree(ptr) free(ptr)
+#define curlx_unicodefree(ptr) CURLX_FREE(ptr)
 
 #ifdef UNICODE
 
@@ -65,8 +73,13 @@ typedef union {
 
 #else /* !UNICODE */
 
+#ifdef CURLDEBUG
 #define curlx_convert_UTF8_to_tchar(ptr) _strdup(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) _strdup(ptr)
+#else
+#define curlx_convert_UTF8_to_tchar(ptr) curlx_strdup(ptr)
+#define curlx_convert_tchar_to_UTF8(ptr) curlx_strdup(ptr)
+#endif
 
 typedef union {
   char                *tchar_ptr;
