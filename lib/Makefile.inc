@@ -172,7 +172,6 @@ LIB_CFILES =         \
   curl_range.c       \
   curl_rtmp.c        \
   curl_sasl.c        \
-  curl_setup_once.c  \
   curl_sha512_256.c  \
   curl_share.c       \
   curl_sspi.c        \

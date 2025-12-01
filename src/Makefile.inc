@@ -107,8 +107,7 @@ CURL_CFILES = \
   tool_writeout.c \
   tool_writeout_json.c \
   tool_xattr.c \
-  var.c \
-  ../lib/curl_setup_once.c
+  var.c
 
 CURL_HFILES = \
   config2setopts.h \
