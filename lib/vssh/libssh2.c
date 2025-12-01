@@ -1205,8 +1205,11 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
 
     sshc->rsa_pub = sshc->rsa = NULL;
 
-    if(data->set.str[STRING_SSH_PRIVATE_KEY])
+    if(data->set.str[STRING_SSH_PRIVATE_KEY]) {
       sshc->rsa = curlx_strdup(data->set.str[STRING_SSH_PRIVATE_KEY]);
+      if(!sshc->rsa)
+        out_of_memory = TRUE;
+    }
     else {
       /* To ponder about: should really the lib be messing about with the
          HOME environment variable etc? */
@@ -1251,7 +1254,7 @@ static CURLcode ssh_state_pkey_init(struct Curl_easy *data,
      * libssh2 extract the public key from the private key file.
      * This is done by simply passing sshc->rsa_pub = NULL.
      */
-    if(data->set.str[STRING_SSH_PUBLIC_KEY]
+    if(!out_of_memory && data->set.str[STRING_SSH_PUBLIC_KEY]
        /* treat empty string the same way as NULL */
        && data->set.str[STRING_SSH_PUBLIC_KEY][0]) {
       sshc->rsa_pub = curlx_strdup(data->set.str[STRING_SSH_PUBLIC_KEY]);
