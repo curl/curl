@@ -337,6 +337,9 @@ void curl_dbg_free(void *ptr, int line, const char *source)
   if(ptr) {
     struct memdebug *mem;
 
+  if(source)
+    curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
+
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:1684)
@@ -352,9 +355,6 @@ void curl_dbg_free(void *ptr, int line, const char *source)
     /* free for real */
     (Curl_cfree)(mem);
   }
-
-  if(source && ptr)
-    curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 }
 
 curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
