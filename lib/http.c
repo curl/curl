@@ -944,7 +944,7 @@ static CURLcode auth_ntlm(struct Curl_easy *data,
       /* NTLM authentication is picked and activated */
       CURLcode result = Curl_input_ntlm(data, proxy, auth);
       if(!result)
-        data->state.authproblem = !!result;
+        data->state.authproblem = FALSE;
       else {
         if(result == CURLE_OUT_OF_MEMORY)
           return result;
