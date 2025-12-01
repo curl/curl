@@ -100,7 +100,6 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
     goto cleanup;
   if(!needed || needed >= max_path_len)
     goto cleanup;
-  /* !checksrc! disable BANNEDFUNC 1 */
   ibuf = CURLX_MALLOC(needed * sizeof(wchar_t));
   if(!ibuf)
     goto cleanup;
@@ -122,7 +121,6 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   /* skip paths that are not excessive and do not need modification */
   if(needed <= MAX_PATH)
     goto cleanup;
-  /* !checksrc! disable BANNEDFUNC 1 */
   fbuf = CURLX_MALLOC(needed * sizeof(wchar_t));
   if(!fbuf)
     goto cleanup;
@@ -156,18 +154,15 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
-      /* !checksrc! disable BANNEDFUNC 1 */
       temp = CURLX_MALLOC(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
 
       if(wcsncpy_s(temp, needed, L"\\\\?\\UNC\\", 8)) {
-        /* !checksrc! disable BANNEDFUNC 1 */
         CURLX_FREE(temp);
         goto cleanup;
       }
       if(wcscpy_s(temp + 8, needed, fbuf + 2)) {
-        /* !checksrc! disable BANNEDFUNC 1 */
         CURLX_FREE(temp);
         goto cleanup;
       }
@@ -178,24 +173,20 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
-      /* !checksrc! disable BANNEDFUNC 1 */
       temp = CURLX_MALLOC(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
 
       if(wcsncpy_s(temp, needed, L"\\\\?\\", 4)) {
-        /* !checksrc! disable BANNEDFUNC 1 */
         CURLX_FREE(temp);
         goto cleanup;
       }
       if(wcscpy_s(temp + 4, needed, fbuf)) {
-        /* !checksrc! disable BANNEDFUNC 1 */
         CURLX_FREE(temp);
         goto cleanup;
       }
     }
 
-    /* !checksrc! disable BANNEDFUNC 1 */
     CURLX_FREE(fbuf);
     fbuf = temp;
   }
@@ -206,7 +197,6 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
     goto cleanup;
   if(!needed || needed >= max_path_len)
     goto cleanup;
-  /* !checksrc! disable BANNEDFUNC 1 */
   obuf = CURLX_MALLOC(needed);
   if(!obuf)
     goto cleanup;
@@ -222,10 +212,8 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
 #endif
 
 cleanup:
-  /* !checksrc! disable BANNEDFUNC 1 */
   CURLX_FREE(fbuf);
 #ifndef _UNICODE
-  /* !checksrc! disable BANNEDFUNC 2 */
   CURLX_FREE(ibuf);
   CURLX_FREE(obuf);
 #endif
@@ -269,7 +257,6 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
 #endif
 
-  /* !checksrc! disable BANNEDFUNC 1 */
   CURLX_FREE(fixed);
   return result;
 }
@@ -303,7 +290,6 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   errno = fopen_s(&result, target, mode);
 #endif
 
-  /* !checksrc! disable BANNEDFUNC 1 */
   CURLX_FREE(fixed);
   return result;
 }
@@ -342,7 +328,6 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
   errno = freopen_s(&result, target, mode, fp);
 #endif
 
-  /* !checksrc! disable BANNEDFUNC 1 */
   CURLX_FREE(fixed);
   return result;
 }
@@ -382,7 +367,6 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 #endif
 #endif
 
-  /* !checksrc! disable BANNEDFUNC 1 */
   CURLX_FREE(fixed);
   return result;
 }
