@@ -29,7 +29,7 @@
 
 #include "../curl_setup.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(UNICODE)
 
 #include "multibyte.h"
 
@@ -81,4 +81,4 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
   return str_utf8;
 }
 
-#endif /* _WIN32 */
+#endif /* _WIN32 && UNICODE */
