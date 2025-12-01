@@ -846,15 +846,9 @@ sub checksystemfeatures {
     }
     # 'socks' was once here but is now removed
 
-    if($torture) {
-        if(!$feature{"TrackMemory"}) {
-            die "cannot run torture tests since curl was built without ".
-                "TrackMemory feature (--enable-curldebug)";
-        }
-        if($feature{"threaded-resolver"} && !$valgrind) {
-            die "cannot run torture tests since curl was built with the ".
-                "threaded resolver, and we are not running with valgrind";
-        }
+    if($torture && !$feature{"TrackMemory"}) {
+        die "cannot run torture tests since curl was built without ".
+            "TrackMemory feature (--enable-curldebug)";
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
@@ -878,13 +872,6 @@ sub checksystemfeatures {
     if($jobs) {
         # Only show if not the default for now
         logmsg "* Jobs: $jobs\n";
-    }
-    # Disable memory tracking when using threaded resolver
-    if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
-        logmsg("*\n",
-               "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
-               "*\n");
-        $feature{"TrackMemory"} = 0;
     }
 
     my $env = sprintf("%s%s%s%s%s",
