@@ -2251,12 +2251,12 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   /* Is there a username and password given in this proxy url? */
   uc = curl_url_get(uhp, CURLUPART_USER, &proxyuser, CURLU_URLDECODE);
   if(uc && (uc != CURLUE_NO_USER)) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = Curl_uc_to_curlcode(uc);
     goto error;
   }
   uc = curl_url_get(uhp, CURLUPART_PASSWORD, &proxypasswd, CURLU_URLDECODE);
   if(uc && (uc != CURLUE_NO_PASSWORD)) {
-    result = CURLE_OUT_OF_MEMORY;
+    result = Curl_uc_to_curlcode(uc);
     goto error;
   }
 
