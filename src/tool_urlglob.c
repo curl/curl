@@ -356,12 +356,14 @@ static CURLcode peek_ipv6(const char *str, size_t *skip, bool *ipv6p)
   size_t hlen;
   CURLUcode rc;
   CURLcode result = CURLE_OK;
+  *ipv6p = FALSE; /* default to nope */
+  *skip = 0;
   if(!endbr)
-    return FALSE;
+    return CURLE_OK;
 
   hlen = endbr - str + 1;
   if(hlen >= MAX_IP6LEN)
-    return FALSE;
+    return CURLE_OK;
 
   u = curl_url();
   if(!u)
@@ -375,9 +377,10 @@ static CURLcode peek_ipv6(const char *str, size_t *skip, bool *ipv6p)
   curl_url_cleanup(u);
   if(rc == CURLUE_OUT_OF_MEMORY)
     return CURLE_OUT_OF_MEMORY;
-  if(!rc)
+  if(!rc) {
     *skip = hlen;
-  *ipv6p = rc ? FALSE : TRUE;
+    *ipv6p = TRUE;
+  }
   return result;
 }
 
