@@ -705,7 +705,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_NTLM_TYPE2MSG: {
     /* Decode the type-2 message */
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
-    result = !ntlm ? CURLE_FAILED_INIT :
+    result = !ntlm ? CURLE_OUT_OF_MEMORY :
       get_server_message(sasl, data, &serverdata);
     if(!result)
       result = Curl_auth_decode_ntlm_type2_message(data, &serverdata, ntlm);
