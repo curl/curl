@@ -283,4 +283,9 @@ test3200 test3201 test3202 test3203 test3204 test3205 test3206 test3207 test3208
 test3209 test3210 test3211 test3212 test3213 test3214 test3215 test3216 \
 test4000 test4001
 
-EXTRA_DIST = $(TESTCASES) DISABLED data-xml1
+EXTRA_DIST = $(TESTCASES) DISABLED \
+\
+data-xml1 \
+\
+data1400.c data1401.c data1402.c data1403.c data1404.c data1405.c data1406.c \
+data1407.c data1420.c data1465.c data1481.c
