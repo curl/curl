@@ -64,7 +64,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, proxy);
     if(!ntlm)
-      return CURLE_FAILED_INIT;
+      return CURLE_OUT_OF_MEMORY;
 
     header += strlen("NTLM");
     curlx_str_passblanks(&header);
