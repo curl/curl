@@ -25,14 +25,6 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
-#ifdef CURLDEBUG
-#define CURLX_MALLOC(x) malloc(x)
-#define CURLX_FREE(x)   free(x)
-#else
-#define CURLX_MALLOC(x) curlx_malloc(x)
-#define CURLX_FREE(x)   curlx_free(x)
-#endif
-
 #ifdef _WIN32
 
 /*
@@ -51,6 +43,14 @@
  * Use system allocators to avoid infinite recursion when called by curl's
  * memory tracker memdebug functions.
  */
+
+#ifdef CURLDEBUG
+#define CURLX_MALLOC(x) malloc(x)
+#define CURLX_FREE(x)   free(x)
+#else
+#define CURLX_MALLOC(x) curlx_malloc(x)
+#define CURLX_FREE(x)   curlx_free(x)
+#endif
 
 /* MultiByte conversions using Windows kernel32 library. */
 wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
