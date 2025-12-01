@@ -201,6 +201,7 @@ static CURLcode win32_ascii_to_idn(const char *in, char **output)
     WCHAR idn[IDN_MAX_LENGTH]; /* stores a UTF-16 string */
     int chars = IdnToUnicode(0, in_w, (int)(wcslen(in_w) + 1), idn,
                              IDN_MAX_LENGTH);
+    curlx_unicodefree(in_w);
     if(chars) {
       /* 'chars' is "the number of characters retrieved" */
       char *mstr = curlx_convert_wchar_to_UTF8(idn);
