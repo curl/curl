@@ -1750,7 +1750,7 @@ sub singletest_check {
         if(! -f "$logdir/$MEMDUMP") {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
-            if($cmdhash{'option'} !~ /no-memdebug/) {
+            if($cmdhash{'option'} && $cmdhash{'option'} !~ /no-memdebug/) {
                 logmsg "\n** ALERT! memory tracking with no output file?\n"
                     if($cmdtype ne "perl");
             }
