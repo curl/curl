@@ -946,6 +946,8 @@ static CURLcode auth_ntlm(struct Curl_easy *data,
       if(!result)
         data->state.authproblem = FALSE;
       else {
+        if(result == CURLE_OUT_OF_MEMORY)
+          return result;
         infof(data, "NTLM authentication problem, ignoring.");
         data->state.authproblem = TRUE;
       }
