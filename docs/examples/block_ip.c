@@ -38,12 +38,6 @@ int main(void)
 }
 #else
 
-#ifdef _MSC_VER
-#ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup() */
-#endif
-#endif
-
 #ifdef _WIN32
 #if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
 #undef _WIN32_WINNT
@@ -52,6 +46,7 @@ int main(void)
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#define strdup _strdup
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
