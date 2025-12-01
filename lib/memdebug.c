@@ -29,6 +29,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "curl_threads.h"
 #include "curlx/fopen.h"  /* for CURLX_FOPEN_LOW(), CURLX_FREOPEN_LOW() */
 
 #ifdef USE_BACKTRACE
@@ -66,6 +67,11 @@ static struct backtrace_state *btstate;
 static char membuf[KEEPSIZE];
 static size_t memwidx = 0; /* write index */
 
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+static bool dbg_mutex_init = 0;
+static curl_mutex_t dbg_mutex;
+#endif
+
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
    Though _exit() does not call atexit handlers such as this, LSAN's call to
@@ -81,6 +87,12 @@ static void curl_dbg_cleanup(void)
     fclose(curl_dbg_logfile);
   }
   curl_dbg_logfile = NULL;
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+  if(dbg_mutex_init) {
+    Curl_mutex_destroy(&dbg_mutex);
+    dbg_mutex_init = FALSE;
+  }
+#endif
 }
 #ifdef USE_BACKTRACE
 static void error_bt_callback(void *data, const char *message,
@@ -123,6 +135,12 @@ void curl_dbg_memdebug(const char *logname)
       setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
   }
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+  if(!dbg_mutex_init) {
+    dbg_mutex_init = TRUE;
+    Curl_mutex_init(&dbg_mutex);
+  }
+#endif
 #ifdef USE_BACKTRACE
   btstate = backtrace_create_state(NULL, 0, error_bt_callback, NULL);
 #endif
@@ -526,6 +544,11 @@ void curl_dbg_log(const char *format, ...)
     nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0) {
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+    bool lock_mutex = dbg_mutex_init;
+    if(lock_mutex)
+      Curl_mutex_acquire(&dbg_mutex);
+#endif
     if(KEEPSIZE - nchars < memwidx) {
       /* flush */
       fwrite(membuf, 1, memwidx, curl_dbg_logfile);
@@ -538,6 +561,10 @@ void curl_dbg_log(const char *format, ...)
     }
     memcpy(&membuf[memwidx], buf, nchars);
     memwidx += nchars;
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+    if(lock_mutex)
+      Curl_mutex_release(&dbg_mutex);
+#endif
   }
 }
 
