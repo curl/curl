@@ -28,10 +28,6 @@ option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependenci
 
 include(CMakeFindDependencyMacro)
 
-set(_curl_cmake_module_path_save ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
-
-set(_libs "")
 if("@USE_OPENSSL@")
   if("@OPENSSL_VERSION_MAJOR@")
     find_dependency(OpenSSL "@OPENSSL_VERSION_MAJOR@")
@@ -42,6 +38,12 @@ endif()
 if("@HAVE_LIBZ@")
   find_dependency(ZLIB "@ZLIB_VERSION_MAJOR@")
 endif()
+
+set(_curl_cmake_module_path_save ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
+
+set(_libs "")
+
 if("@HAVE_BROTLI@")
   find_dependency(Brotli)
   list(APPEND _libs CURL::brotli)
