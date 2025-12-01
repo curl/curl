@@ -63,6 +63,7 @@ body
 .
 </upload>
 <stripfile>
+s/(URL, \"smtp:\/\/)%HOSTIP:%SMTPPORT/${1}HOSTIP:SMTPPORT/
 # These options vary with configurations - just ignore them
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_USERAGENT/

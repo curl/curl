@@ -62,6 +62,7 @@ NOOP 3
 QUIT
 </protocol>
 <stripfile>
+s/(URL, \"ftp:\/\/)%HOSTIP:%FTPPORT/${1}HOSTIP:FTPPORT/
 # CURLOPT_USERAGENT and CURLOPT_MAXREDIRS requires HTTP protocol
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 # support, IOW depends on configuration - just ignore these.

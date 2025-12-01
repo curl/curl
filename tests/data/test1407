@@ -50,6 +50,7 @@ LIST %TESTNUMBER
 QUIT
 </protocol>
 <stripfile>
+s/(URL, \"pop3:\/\/)%HOSTIP:%POP3PORT/${1}HOSTIP:POP3PORT/
 # These options vary with configurations - just ignore them
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_USERAGENT/

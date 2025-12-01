@@ -56,6 +56,7 @@ A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
 <stripfile>
+s/(URL, \"imap:\/\/)%HOSTIP:%IMAPPORT/${1}HOSTIP:IMAPPORT/
 # These options vary with configurations - just ignore them
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
 $_ = '' if /CURLOPT_USERAGENT/
