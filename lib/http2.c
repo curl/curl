@@ -111,9 +111,6 @@ struct cf_h2_ctx {
   uint32_t goaway_error;        /* goaway error code from server */
   int32_t remote_max_sid;       /* max id processed by server */
   int32_t local_max_sid;        /* max id processed by us */
-#ifdef DEBUGBUILD
-  int32_t stream_win_max;       /* max h2 stream window size */
-#endif
   BIT(initialized);
   BIT(via_h1_upgrade);
   BIT(conn_closed);
@@ -139,18 +136,6 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
   Curl_uint32_hash_init(&ctx->streams, 63, h2_stream_hash_free);
   ctx->remote_max_sid = 2147483647;
   ctx->via_h1_upgrade = via_h1_upgrade;
-#ifdef DEBUGBUILD
-  {
-    const char *p = getenv("CURL_H2_STREAM_WIN_MAX");
-
-    ctx->stream_win_max = H2_STREAM_WINDOW_SIZE_MAX;
-    if(p) {
-      curl_off_t l;
-      if(!curlx_str_number(&p, &l, INT_MAX))
-        ctx->stream_win_max = (int32_t)l;
-    }
-  }
-#endif
   ctx->initialized = TRUE;
 }
 
@@ -330,15 +315,7 @@ static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
     else if(avail < INT32_MAX)
       return (int32_t)avail;
   }
-#ifdef DEBUGBUILD
-  {
-    struct cf_h2_ctx *ctx = cf->ctx;
-    CURL_TRC_CF(data, cf, "stream_win_max=%d", ctx->stream_win_max);
-    return ctx->stream_win_max;
-  }
-#else
   return H2_STREAM_WINDOW_SIZE_MAX;
-#endif
 }
 
 static CURLcode cf_h2_update_local_win(struct Curl_cfilter *cf,
