@@ -38,7 +38,7 @@ struct mntfy_entry {
   uint32_t type;
 };
 
-#define CURL_MNTFY_CHUNK_SIZE   128
+#define CURL_MNTFY_CHUNK_SIZE 128
 
 struct mntfy_chunk {
   struct mntfy_chunk *next;

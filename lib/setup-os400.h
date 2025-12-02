@@ -42,7 +42,7 @@ typedef unsigned long   u_int32_t;
 
 #include <stdio.h>      /* Be sure it is loaded. */
 #undef puts
-#define puts(s) (fputs((s), stdout) == EOF? EOF: putchar('\n'))
+#define puts(s) (fputs((s), stdout) == EOF ? EOF : putchar('\n'))
 
 /* System API wrapper prototypes & definitions to support ASCII parameters. */
 
@@ -102,8 +102,8 @@ extern OM_uint32 Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
 #define gss_init_sec_context    Curl_gss_init_sec_context_a
 
 
-extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
-                                               gss_ctx_id_t * context_handle,
+extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
+                                               gss_ctx_id_t *context_handle,
                                                gss_buffer_t output_token);
 #define gss_delete_sec_context  Curl_gss_delete_sec_context_a
 

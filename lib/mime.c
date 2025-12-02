@@ -120,15 +120,13 @@ static const unsigned char qp_class[] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                 /* F0 - FF */
 };
 
-
 /* Binary --> hexadecimal ASCII table. */
 static const char aschex[] =
   "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x41\x42\x43\x44\x45\x46";
 
-
 #ifndef __VMS
 #define filesize(name, stat_data) (stat_data.st_size)
-#define fopen_read curlx_fopen
+#define fopen_read                curlx_fopen
 
 #else
 
@@ -143,13 +141,12 @@ static const char aschex[] =
  * and CD/DVD images should be either a STREAM_LF format or a fixed format.
  *
  */
-curl_off_t VmsRealFileSize(const char *name,
-                           const struct_stat *stat_buf)
+curl_off_t VmsRealFileSize(const char *name, const struct_stat *stat_buf)
 {
   char buffer[8192];
   curl_off_t count;
   int ret_stat;
-  FILE * file;
+  FILE *file;
 
   file = curlx_fopen(name, FOPEN_READTEXT); /* VMS */
   if(!file)
@@ -173,8 +170,7 @@ curl_off_t VmsRealFileSize(const char *name,
  *  if not to call a routine to get the correct size.
  *
  */
-static curl_off_t VmsSpecialSize(const char *name,
-                                 const struct_stat *stat_buf)
+static curl_off_t VmsSpecialSize(const char *name, const struct_stat *stat_buf)
 {
   switch(stat_buf->st_fab_rfm) {
   case FAB$C_VAR:
@@ -196,7 +192,7 @@ static curl_off_t VmsSpecialSize(const char *name,
  * record format of the file.
  *
  */
-static FILE * vmsfopenread(const char *file, const char *mode)
+static FILE *vmsfopenread(const char *file, const char *mode)
 {
   struct_stat statbuf;
   int result;
@@ -263,7 +259,7 @@ static char *Curl_basename(char *path)
   return path;
 }
 
-#define basename(x)  Curl_basename((x))
+#define basename(x)  Curl_basename(x)
 #endif
 
 
@@ -1131,7 +1127,7 @@ static void cleanup_part_content(curl_mimepart *part)
 
 static void mime_subparts_free(void *ptr)
 {
-  curl_mime *mime = (curl_mime *) ptr;
+  curl_mime *mime = (curl_mime *)ptr;
 
   if(mime && mime->parent) {
     mime->parent->freefunc = NULL;  /* Be sure we will not be called again. */
@@ -1143,7 +1139,7 @@ static void mime_subparts_free(void *ptr)
 /* Do not free subparts: unbind them. This is used for the top level only. */
 static void mime_subparts_unbind(void *ptr)
 {
-  curl_mime *mime = (curl_mime *) ptr;
+  curl_mime *mime = (curl_mime *)ptr;
 
   if(mime && mime->parent) {
     mime->parent->freefunc = NULL;  /* Be sure we will not be called again. */
@@ -1151,7 +1147,6 @@ static void mime_subparts_unbind(void *ptr)
     mime->parent = NULL;
   }
 }
-
 
 void Curl_mime_cleanpart(curl_mimepart *part)
 {
@@ -1199,7 +1194,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
   case MIMEKIND_NONE:
     break;
   case MIMEKIND_DATA:
-    res = curl_mime_data(dst, src->data, (size_t) src->datasize);
+    res = curl_mime_data(dst, src->data, (size_t)src->datasize);
     break;
   case MIMEKIND_FILE:
     res = curl_mime_filedata(dst, src->data);
@@ -1218,7 +1213,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
     res = mime ? curl_mime_subparts(dst, mime) : CURLE_OUT_OF_MEMORY;
 
     /* Duplicate subparts. */
-    for(s = ((curl_mime *) src->arg)->firstpart; !res && s; s = s->nextpart) {
+    for(s = ((curl_mime *)src->arg)->firstpart; !res && s; s = s->nextpart) {
       d = curl_mime_addpart(mime);
       res = d ? Curl_mime_duppart(data, d, s) : CURLE_OUT_OF_MEMORY;
     }
@@ -1279,7 +1274,7 @@ curl_mime *curl_mime_init(void *easy)
 
     memset(mime->boundary, '-', MIME_BOUNDARY_DASHES);
     if(Curl_rand_alnum(easy,
-                       (unsigned char *) &mime->boundary[MIME_BOUNDARY_DASHES],
+                       (unsigned char *)&mime->boundary[MIME_BOUNDARY_DASHES],
                        MIME_RAND_BOUNDARY_CHARS + 1)) {
       /* failed to get random separator, bail out */
       curlx_free(mime);
@@ -1294,7 +1289,7 @@ curl_mime *curl_mime_init(void *easy)
 /* Initialize a mime part. */
 void Curl_mime_initpart(curl_mimepart *part)
 {
-  memset((char *) part, 0, sizeof(*part));
+  memset((char *)part, 0, sizeof(*part));
   part->lastreadstatus = 1; /* Successful read status. */
   mimesetstate(&part->state, MIMESTATE_BEGIN, NULL);
 }
@@ -1359,8 +1354,7 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
 }
 
 /* Set mime part content from memory data. */
-CURLcode curl_mime_data(curl_mimepart *part,
-                        const char *ptr, size_t datasize)
+CURLcode curl_mime_data(curl_mimepart *part, const char *ptr, size_t datasize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1550,7 +1544,7 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
        they might not be positioned at start. Rewind them now, as
        a future check while rewinding the parent may cause this
        content to be skipped. */
-    if(mime_subparts_seek(subparts, (curl_off_t) 0, SEEK_SET) !=
+    if(mime_subparts_seek(subparts, (curl_off_t)0, SEEK_SET) !=
        CURL_SEEKFUNC_OK)
       return CURLE_SEND_FAIL_REWIND;
 
@@ -2103,7 +2097,7 @@ static CURLcode cr_mime_resume_from(struct Curl_easy *data,
     curl_off_t passed = 0;
 
     do {
-      char scratch[4*1024];
+      char scratch[4 * 1024];
       size_t readthisamountnow =
         (offset - passed > (curl_off_t)sizeof(scratch)) ?
         sizeof(scratch) :
@@ -2252,8 +2246,7 @@ CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
   return CURLE_NOT_BUILT_IN;
 }
 
-CURLcode curl_mime_data(curl_mimepart *part,
-                        const char *data, size_t datasize)
+CURLcode curl_mime_data(curl_mimepart *part, const char *data, size_t datasize)
 {
   (void)part;
   (void)data;
@@ -2268,8 +2261,7 @@ CURLcode curl_mime_filedata(curl_mimepart *part, const char *filename)
   return CURLE_NOT_BUILT_IN;
 }
 
-CURLcode curl_mime_data_cb(curl_mimepart *part,
-                           curl_off_t datasize,
+CURLcode curl_mime_data_cb(curl_mimepart *part, curl_off_t datasize,
                            curl_read_callback readfunc,
                            curl_seek_callback seekfunc,
                            curl_free_callback freefunc,

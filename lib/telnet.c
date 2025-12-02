@@ -1095,9 +1095,9 @@ static CURLcode telrcv(struct Curl_easy *data,
   }                                                              \
   startwrite = -1
 
-#define writebyte() \
-    if(startwrite < 0) \
-      startwrite = in
+#define writebyte()  \
+  if(startwrite < 0) \
+    startwrite = in
 
 #define bufferflush() startskipping()
 
@@ -1605,7 +1605,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       else {
         /* read from user-supplied method */
         snread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
-                                            data->state.in);
+                                             data->state.in);
         if(snread == CURL_READFUNC_ABORT) {
           keepon = FALSE;
           break;

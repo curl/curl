@@ -782,7 +782,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
       bufptr += cb;
     } while(state->sbytes < state->blksize && cb);
 
-    sbytes = sendto(state->sockfd, (void *) state->spacket.data,
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                     4 + (SEND_TYPE_ARG3)state->sbytes, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);

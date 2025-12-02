@@ -579,9 +579,9 @@ CURLcode Curl_pollset_change(struct Curl_easy *data,
   if(!VALID_SOCK(sock))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
+  DEBUGASSERT(add_flags <= (CURL_POLL_IN | CURL_POLL_OUT));
+  DEBUGASSERT(remove_flags <= (CURL_POLL_IN | CURL_POLL_OUT));
+  DEBUGASSERT((add_flags & remove_flags) == 0); /* no overlap */
   for(i = 0; i < ps->n; ++i) {
     if(ps->sockets[i] == sock) {
       ps->actions[i] &= (unsigned char)(~remove_flags);

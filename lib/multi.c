@@ -55,7 +55,7 @@
 #include "urlapi-int.h"
 
 /* initial multi->xfers table size for a full multi */
-#define CURL_XFER_TABLE_SIZE    512
+#define CURL_XFER_TABLE_SIZE 512
 
 /*
   CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
@@ -840,7 +840,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
     Curl_cpool_do_by_id(data, data->state.lastconnect_id,
-                            close_connect_only, NULL);
+                        close_connect_only, NULL);
   }
 
 #ifdef USE_LIBPSL
@@ -1074,14 +1074,12 @@ static CURLcode mstate_perform_pollset(struct Curl_easy *data,
   else {
     /* Default is to obey the data->req.keepon flags for send/recv */
     if(CURL_WANT_RECV(data) && CONN_SOCK_IDX_VALID(conn->recv_idx)) {
-      result = Curl_pollset_add_in(
-        data, ps, conn->sock[conn->recv_idx]);
+      result = Curl_pollset_add_in(data, ps, conn->sock[conn->recv_idx]);
     }
 
     if(!result && Curl_req_want_send(data) &&
        CONN_SOCK_IDX_VALID(conn->send_idx)) {
-      result = Curl_pollset_add_out(
-        data, ps, conn->sock[conn->send_idx]);
+      result = Curl_pollset_add_out(data, ps, conn->sock[conn->send_idx]);
     }
   }
   if(!result)
@@ -1857,8 +1855,7 @@ static CURLcode protocol_doing(struct Curl_easy *data, bool *done)
  * proceed with some action.
  *
  */
-static CURLcode protocol_connect(struct Curl_easy *data,
-                                 bool *protocol_done)
+static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
 {
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
@@ -1867,8 +1864,7 @@ static CURLcode protocol_connect(struct Curl_easy *data,
 
   *protocol_done = FALSE;
 
-  if(Curl_conn_is_connected(conn, FIRSTSOCKET) &&
-     conn->bits.protoconnstart) {
+  if(Curl_conn_is_connected(conn, FIRSTSOCKET) && conn->bits.protoconnstart) {
     /* We already are connected, get back. This may happen when the connect
        worked fine in the first call, like when we connect to a local server
        or proxy. Note that we do not know if the protocol is actually done.
@@ -1935,8 +1931,7 @@ static CURLcode multi_follow(struct Curl_easy *data,
   return CURLE_TOO_MANY_REDIRECTS;
 }
 
-static CURLcode mspeed_check(struct Curl_easy *data,
-                             struct curltime now)
+static CURLcode mspeed_check(struct Curl_easy *data, struct curltime now)
 {
   timediff_t recv_wait_ms = 0;
   timediff_t send_wait_ms = 0;
@@ -3572,7 +3567,6 @@ static CURLMcode multi_addtimeout(struct Curl_easy *data,
         break;
       prev = e;
     }
-
   }
   /* else
      this is the first timeout on the list */
@@ -3599,8 +3593,8 @@ void Curl_expire_ex(struct Curl_easy *data,
   DEBUGASSERT(id < EXPIRE_LAST);
 
   set = *nowp;
-  set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bits conversion */
-  set.tv_usec += (int)(milli%1000)*1000;
+  set.tv_sec += (time_t)(milli / 1000); /* may be a 64 to 32-bit conversion */
+  set.tv_usec += (int)(milli % 1000) * 1000;
 
   if(set.tv_usec >= 1000000) {
     set.tv_sec++;

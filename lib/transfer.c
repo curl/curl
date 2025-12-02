@@ -82,7 +82,7 @@
 #include "curlx/warnless.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
-    !defined(CURL_DISABLE_IMAP)
+  !defined(CURL_DISABLE_IMAP)
 /*
  * checkheaders() checks the linked list of custom headers for a
  * particular header (prefix). Provide the prefix without colon!

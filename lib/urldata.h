@@ -28,30 +28,30 @@
 
 #include "curl_setup.h"
 
-#define PORT_FTP 21
-#define PORT_FTPS 990
+#define PORT_FTP    21
+#define PORT_FTPS   990
 #define PORT_TELNET 23
-#define PORT_HTTP 80
-#define PORT_HTTPS 443
-#define PORT_DICT 2628
-#define PORT_LDAP 389
-#define PORT_LDAPS 636
-#define PORT_TFTP 69
-#define PORT_SSH 22
-#define PORT_IMAP 143
-#define PORT_IMAPS 993
-#define PORT_POP3 110
-#define PORT_POP3S 995
-#define PORT_SMB 445
-#define PORT_SMBS 445
-#define PORT_SMTP 25
-#define PORT_SMTPS 465 /* sometimes called SSMTP */
-#define PORT_RTSP 554
-#define PORT_RTMP 1935
-#define PORT_RTMPT PORT_HTTP
-#define PORT_RTMPS PORT_HTTPS
+#define PORT_HTTP   80
+#define PORT_HTTPS  443
+#define PORT_DICT   2628
+#define PORT_LDAP   389
+#define PORT_LDAPS  636
+#define PORT_TFTP   69
+#define PORT_SSH    22
+#define PORT_IMAP   143
+#define PORT_IMAPS  993
+#define PORT_POP3   110
+#define PORT_POP3S  995
+#define PORT_SMB    445
+#define PORT_SMBS   445
+#define PORT_SMTP   25
+#define PORT_SMTPS  465 /* sometimes called SSMTP */
+#define PORT_RTSP   554
+#define PORT_RTMP   1935
+#define PORT_RTMPT  PORT_HTTP
+#define PORT_RTMPS  PORT_HTTPS
 #define PORT_GOPHER 70
-#define PORT_MQTT 1883
+#define PORT_MQTT   1883
 
 struct curl_trc_featt;
 
@@ -115,7 +115,7 @@ typedef unsigned int curl_prot_t;
 #define PROTO_FAMILY_SMTP (CURLPROTO_SMTP | CURLPROTO_SMTPS)
 #define PROTO_FAMILY_SSH  (CURLPROTO_SCP | CURLPROTO_SFTP)
 
-#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH) ||   \
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH) || \
   !defined(CURL_DISABLE_POP3)
 /* these protocols support CURLOPT_DIRLISTONLY */
 #define CURL_LIST_ONLY_PROTOCOL 1

@@ -37,10 +37,9 @@ void Curl_uint32_bset_init(struct uint32_bset *bset)
 #endif
 }
 
-
 CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax)
 {
-  uint32_t nslots = (nmax < (UINT32_MAX-63)) ?
+  uint32_t nslots = (nmax < (UINT32_MAX - 63)) ?
                     ((nmax + 63) / 64) : (UINT32_MAX / 64);
 
   DEBUGASSERT(bset->init == CURL_UINT32_BSET_MAGIC);

@@ -236,42 +236,43 @@ static void my_sha256_final(unsigned char *digest, void *in)
 /* This is based on the SHA256 implementation in LibTomCrypt that was released
  * into public domain. */
 
-#define WPA_GET_BE32(a) ((((unsigned long)(a)[0]) << 24) | \
-                         (((unsigned long)(a)[1]) << 16) | \
-                         (((unsigned long)(a)[2]) <<  8) | \
-                          ((unsigned long)(a)[3]))
-#define WPA_PUT_BE32(a, val)                                       \
-do {                                                               \
-  (a)[0] = (unsigned char)((((unsigned long)(val)) >> 24) & 0xff); \
-  (a)[1] = (unsigned char)((((unsigned long)(val)) >> 16) & 0xff); \
-  (a)[2] = (unsigned char)((((unsigned long)(val)) >>  8) & 0xff); \
-  (a)[3] = (unsigned char) (((unsigned long)(val)) & 0xff);        \
-} while(0)
+#define WPA_GET_BE32(a)              \
+  ((((unsigned long)(a)[0]) << 24) | \
+   (((unsigned long)(a)[1]) << 16) | \
+   (((unsigned long)(a)[2]) <<  8) | \
+    ((unsigned long)(a)[3]))
+#define WPA_PUT_BE32(a, val)                                         \
+  do {                                                               \
+    (a)[0] = (unsigned char)((((unsigned long)(val)) >> 24) & 0xff); \
+    (a)[1] = (unsigned char)((((unsigned long)(val)) >> 16) & 0xff); \
+    (a)[2] = (unsigned char)((((unsigned long)(val)) >>  8) & 0xff); \
+    (a)[3] = (unsigned char) (((unsigned long)(val)) & 0xff);        \
+  } while(0)
 
 #ifdef HAVE_LONGLONG
-#define WPA_PUT_BE64(a, val)                                    \
-do {                                                            \
-  (a)[0] = (unsigned char)(((unsigned long long)(val)) >> 56);  \
-  (a)[1] = (unsigned char)(((unsigned long long)(val)) >> 48);  \
-  (a)[2] = (unsigned char)(((unsigned long long)(val)) >> 40);  \
-  (a)[3] = (unsigned char)(((unsigned long long)(val)) >> 32);  \
-  (a)[4] = (unsigned char)(((unsigned long long)(val)) >> 24);  \
-  (a)[5] = (unsigned char)(((unsigned long long)(val)) >> 16);  \
-  (a)[6] = (unsigned char)(((unsigned long long)(val)) >>  8);  \
-  (a)[7] = (unsigned char)(((unsigned long long)(val)) & 0xff); \
-} while(0)
+#define WPA_PUT_BE64(a, val)                                      \
+  do {                                                            \
+    (a)[0] = (unsigned char)(((unsigned long long)(val)) >> 56);  \
+    (a)[1] = (unsigned char)(((unsigned long long)(val)) >> 48);  \
+    (a)[2] = (unsigned char)(((unsigned long long)(val)) >> 40);  \
+    (a)[3] = (unsigned char)(((unsigned long long)(val)) >> 32);  \
+    (a)[4] = (unsigned char)(((unsigned long long)(val)) >> 24);  \
+    (a)[5] = (unsigned char)(((unsigned long long)(val)) >> 16);  \
+    (a)[6] = (unsigned char)(((unsigned long long)(val)) >>  8);  \
+    (a)[7] = (unsigned char)(((unsigned long long)(val)) & 0xff); \
+  } while(0)
 #else
-#define WPA_PUT_BE64(a, val)                                  \
-do {                                                          \
-  (a)[0] = (unsigned char)(((unsigned __int64)(val)) >> 56);  \
-  (a)[1] = (unsigned char)(((unsigned __int64)(val)) >> 48);  \
-  (a)[2] = (unsigned char)(((unsigned __int64)(val)) >> 40);  \
-  (a)[3] = (unsigned char)(((unsigned __int64)(val)) >> 32);  \
-  (a)[4] = (unsigned char)(((unsigned __int64)(val)) >> 24);  \
-  (a)[5] = (unsigned char)(((unsigned __int64)(val)) >> 16);  \
-  (a)[6] = (unsigned char)(((unsigned __int64)(val)) >>  8);  \
-  (a)[7] = (unsigned char)(((unsigned __int64)(val)) & 0xff); \
-} while(0)
+#define WPA_PUT_BE64(a, val)                                    \
+  do {                                                          \
+    (a)[0] = (unsigned char)(((unsigned __int64)(val)) >> 56);  \
+    (a)[1] = (unsigned char)(((unsigned __int64)(val)) >> 48);  \
+    (a)[2] = (unsigned char)(((unsigned __int64)(val)) >> 40);  \
+    (a)[3] = (unsigned char)(((unsigned __int64)(val)) >> 32);  \
+    (a)[4] = (unsigned char)(((unsigned __int64)(val)) >> 24);  \
+    (a)[5] = (unsigned char)(((unsigned __int64)(val)) >> 16);  \
+    (a)[6] = (unsigned char)(((unsigned __int64)(val)) >>  8);  \
+    (a)[7] = (unsigned char)(((unsigned __int64)(val)) & 0xff); \
+  } while(0)
 #endif
 
 struct sha256_state {
@@ -318,8 +319,7 @@ static const unsigned long K[64] = {
 #define Gamma1(x)         (Sha256_S(x, 17) ^ Sha256_S(x, 19) ^ Sha256_R(x, 10))
 
 /* Compress 512-bits */
-static int sha256_compress(struct sha256_state *md,
-                           const unsigned char *buf)
+static int sha256_compress(struct sha256_state *md, const unsigned char *buf)
 {
   unsigned long S[8], W[64];
   int i;

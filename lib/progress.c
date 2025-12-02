@@ -87,7 +87,7 @@ static char *max6data(curl_off_t bytes, char *max6)
     /* xxx.yU */
     curl_msnprintf(max6, 7, "%3" CURL_FORMAT_CURL_OFF_T
                    ".%" CURL_FORMAT_CURL_OFF_T "%c", nbytes,
-                   (bytes%1024) / (1024/10), unit[k]);
+                   (bytes % 1024) / (1024 / 10), unit[k]);
   }
   return max6;
 }

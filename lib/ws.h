@@ -38,7 +38,6 @@ extern const struct Curl_handler Curl_handler_ws;
 extern const struct Curl_handler Curl_handler_wss;
 #endif
 
-
 #else
 #define Curl_ws_request(x, y) CURLE_OK
 #define Curl_ws_free(x)       Curl_nop_stmt

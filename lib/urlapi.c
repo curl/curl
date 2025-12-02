@@ -38,19 +38,19 @@
 #include "curl_memrchr.h"
 
 #ifdef _WIN32
-  /* MS-DOS/Windows style drive prefix, eg c: in c:foo */
-#define STARTS_WITH_DRIVE_PREFIX(str) \
-  ((('a' <= str[0] && str[0] <= 'z') || \
+/* MS-DOS/Windows style drive prefix, eg c: in c:foo */
+#define STARTS_WITH_DRIVE_PREFIX(str)    \
+  ((('a' <= str[0] && str[0] <= 'z') ||  \
     ('A' <= str[0] && str[0] <= 'Z')) && \
    (str[1] == ':'))
 #endif
 
-  /* MS-DOS/Windows style drive prefix, optionally with
-   * a '|' instead of ':', followed by a slash or NUL */
-#define STARTS_WITH_URL_DRIVE_PREFIX(str) \
-  ((('a' <= (str)[0] && (str)[0] <= 'z') || \
-    ('A' <= (str)[0] && (str)[0] <= 'Z')) && \
-   ((str)[1] == ':' || (str)[1] == '|') && \
+/* MS-DOS/Windows style drive prefix, optionally with
+ * a '|' instead of ':', followed by a slash or NUL */
+#define STARTS_WITH_URL_DRIVE_PREFIX(str)                  \
+  ((('a' <= (str)[0] && (str)[0] <= 'z') ||                \
+    ('A' <= (str)[0] && (str)[0] <= 'Z')) &&               \
+   ((str)[1] == ':' || (str)[1] == '|') &&                 \
    ((str)[2] == '/' || (str)[2] == '\\' || (str)[2] == 0))
 
 /* scheme is not URL encoded, the longest libcurl supported ones are... */

@@ -73,7 +73,6 @@
 #define WS_CHUNK_SIZE  65535
 #define WS_CHUNK_COUNT 2
 
-
 /* a client-side WS frame decoder, parsing frame headers and
  * payload, keeping track of current position and stats */
 enum ws_dec_state {
@@ -125,7 +124,6 @@ struct websocket {
   struct ws_cntrl_frame pending; /* a control frame pending to be sent */
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
-
 
 static const char *ws_frame_name_of_op(uint8_t firstbyte)
 {

@@ -256,7 +256,7 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
 
     /* switch off bits we cannot support */
 #ifndef USE_NTLM
-    auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
+    auth &= ~CURLAUTH_NTLM; /* no NTLM support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without GSS-API
@@ -809,7 +809,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
     s->tcp_keepalive = enabled;
     break;
   case CURLOPT_TCP_FASTOPEN:
-#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) ||        \
+#if defined(CONNECT_DATA_IDEMPOTENT) || defined(MSG_FASTOPEN) || \
   defined(TCP_FASTOPEN_CONNECT)
     s->tcp_fastopen = enabled;
     break;
@@ -1098,7 +1098,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #ifdef HAVE_GSSAPI
   case CURLOPT_GSSAPI_DELEGATION:
     s->gssapi_delegation = (unsigned char)uarg &
-      (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
+      (CURLGSSAPI_DELEGATION_POLICY_FLAG | CURLGSSAPI_DELEGATION_FLAG);
     break;
 #endif
 
@@ -1412,8 +1412,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     break;
 #endif /* ! CURL_DISABLE_FORM_API */
 #endif /* ! CURL_DISABLE_HTTP */
-#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) ||       \
-    !defined(CURL_DISABLE_IMAP)
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
+  !defined(CURL_DISABLE_IMAP)
 # ifndef CURL_DISABLE_MIME
   case CURLOPT_MIMEPOST:
     /*
@@ -1528,8 +1528,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 }
 
 #ifndef CURL_DISABLE_COOKIES
-static CURLcode cookielist(struct Curl_easy *data,
-                           const char *ptr)
+static CURLcode cookielist(struct Curl_easy *data, const char *ptr)
 {
   CURLcode result = CURLE_OK;
   if(!ptr)
@@ -1582,8 +1581,7 @@ static CURLcode cookielist(struct Curl_easy *data,
   return result;
 }
 
-static CURLcode cookiefile(struct Curl_easy *data,
-                           const char *ptr)
+static CURLcode cookiefile(struct Curl_easy *data, const char *ptr)
 {
   /*
    * Set cookie file to read and parse. Can be used multiple times.
@@ -1637,8 +1635,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
   case CURLOPT_PROXY_SSL_CIPHER_LIST:
     if(Curl_ssl_supports(data, SSLSUPP_CIPHER_LIST)) {
       /* set a list of cipher we want to use in the SSL connection for proxy */
-      return Curl_setstropt(&s->str[STRING_SSL_CIPHER_LIST_PROXY],
-                            ptr);
+      return Curl_setstropt(&s->str[STRING_SSL_CIPHER_LIST_PROXY], ptr);
     }
     else
       return CURLE_NOT_BUILT_IN;
@@ -1654,8 +1651,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
   case CURLOPT_PROXY_TLS13_CIPHERS:
     if(Curl_ssl_supports(data, SSLSUPP_TLS13_CIPHERSUITES))
       /* set preferred list of TLS 1.3 cipher suites for proxy */
-      return Curl_setstropt(&s->str[STRING_SSL_CIPHER13_LIST_PROXY],
-                            ptr);
+      return Curl_setstropt(&s->str[STRING_SSL_CIPHER13_LIST_PROXY], ptr);
     else
       return CURLE_NOT_BUILT_IN;
 #endif
@@ -2199,8 +2195,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_PINNEDPUBKEY))
-      return Curl_setstropt(&s->str[STRING_SSL_PINNEDPUBLICKEY_PROXY],
-                            ptr);
+      return Curl_setstropt(&s->str[STRING_SSL_PINNEDPUBLICKEY_PROXY], ptr);
 #endif
     return CURLE_NOT_BUILT_IN;
 #endif
@@ -2302,8 +2297,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Specify colon-delimited list of signature scheme names.
      */
     if(Curl_ssl_supports(data, SSLSUPP_SIGNATURE_ALGORITHMS))
-      return Curl_setstropt(&s->str[STRING_SSL_SIGNATURE_ALGORITHMS],
-                            ptr);
+      return Curl_setstropt(&s->str[STRING_SSL_SIGNATURE_ALGORITHMS], ptr);
     return CURLE_NOT_BUILT_IN;
 #endif
 #ifdef USE_SSH
@@ -2345,8 +2339,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Option to allow for the SHA256 of the host public key to be checked
      * for validation purposes.
      */
-    return Curl_setstropt(&s->str[STRING_SSH_HOST_PUBLIC_KEY_SHA256],
-                          ptr);
+    return Curl_setstropt(&s->str[STRING_SSH_HOST_PUBLIC_KEY_SHA256], ptr);
 
   case CURLOPT_SSH_HOSTKEYDATA:
     /*
@@ -2569,17 +2562,13 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     /* set tls_ech flag value, preserving CLA_CFG bit */
     if(!strcmp(ptr, "false"))
-      s->tls_ech = CURLECH_DISABLE |
-        (s->tls_ech & CURLECH_CLA_CFG);
+      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_DISABLE;
     else if(!strcmp(ptr, "grease"))
-      s->tls_ech = CURLECH_GREASE |
-        (s->tls_ech & CURLECH_CLA_CFG);
+      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_GREASE;
     else if(!strcmp(ptr, "true"))
-      s->tls_ech = CURLECH_ENABLE |
-        (s->tls_ech & CURLECH_CLA_CFG);
+      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_ENABLE;
     else if(!strcmp(ptr, "hard"))
-      s->tls_ech = CURLECH_HARD |
-        (s->tls_ech & CURLECH_CLA_CFG);
+      s->tls_ech = (s->tls_ech & CURLECH_CLA_CFG) | CURLECH_HARD;
     else if(plen > 5 && !strncmp(ptr, "ecl:", 4)) {
       result = Curl_setstropt(&s->str[STRING_ECH_CONFIG], ptr + 4);
       if(result)
@@ -2906,8 +2895,7 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
     /*
      * Blob that holds Issuer certificate to check certificates issuer
      */
-    return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT_PROXY],
-                           blob);
+    return Curl_setblobopt(&s->blobs[BLOB_SSL_ISSUERCERT_PROXY], blob);
 #endif
   case CURLOPT_SSLKEY_BLOB:
     /*

@@ -142,7 +142,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
 
     gss_major_status = gss_import_name(&gss_minor_status, &service,
-                                       (gss_OID) GSS_C_NULL_OID, &server);
+                                       (gss_OID)GSS_C_NULL_OID, &server);
   }
   else {
     service.value = curlx_malloc(serviceptr_length +

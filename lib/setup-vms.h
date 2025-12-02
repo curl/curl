@@ -38,9 +38,9 @@
 /* Hide the stuff we are overriding */
 #define getenv decc_getenv
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE != 64
-#       define getpwuid decc_getpwuid
-#   endif
+#  if __INITIAL_POINTER_SIZE != 64
+#    define getpwuid decc_getpwuid
+#  endif
 #endif
 #include <stdlib.h>
 char *decc$getenv(const char *__name);
@@ -60,25 +60,25 @@ char *decc$getenv(const char *__name);
 #define sys$qiow   SYS$QIOW
 
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE
-#       pragma __pointer_size __save
-#   endif
+#  if __INITIAL_POINTER_SIZE
+#    pragma __pointer_size __save
+#  endif
 #endif
 
 #if __USE_LONG_GID_T
-#   define decc_getpwuid DECC$__LONG_GID_GETPWUID
+#  define decc_getpwuid DECC$__LONG_GID_GETPWUID
 #else
-#   if __INITIAL_POINTER_SIZE
-#       define decc_getpwuid decc$__32_getpwuid
-#   else
-#       define decc_getpwuid decc$getpwuid
-#   endif
+#  if __INITIAL_POINTER_SIZE
+#    define decc_getpwuid decc$__32_getpwuid
+#  else
+#    define decc_getpwuid decc$getpwuid
+#  endif
 #endif
 
 struct passwd *decc_getpwuid(uid_t uid);
 
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE == 32
+#  if __INITIAL_POINTER_SIZE == 32
 /* Translate the path, but only if the path is a VMS file specification */
 /* The translation is usually only needed for older versions of VMS */
 static char *vms_translate_path(const char *path)
@@ -100,18 +100,18 @@ static char *vms_translate_path(const char *path)
     return (char *)path;
   }
 }
-#   else
-    /* VMS translate path is actually not needed on the current 64-bit */
-    /* VMS platforms, so instead of figuring out the pointer settings */
-    /* Change it to a noop */
-#   define vms_translate_path(__path) __path
-#   endif
+#  else
+   /* VMS translate path is actually not needed on the current 64-bit */
+   /* VMS platforms, so instead of figuring out the pointer settings */
+   /* Change it to a noop */
+#  define vms_translate_path(__path) __path
+#  endif
 #endif
 
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE
-#       pragma __pointer_size __restore
-#   endif
+#  if __INITIAL_POINTER_SIZE
+#    pragma __pointer_size __restore
+#  endif
 #endif
 
 static char *vms_getenv(const char *envvar)
@@ -145,11 +145,11 @@ static struct passwd *vms_getpwuid(uid_t uid)
 
 /* Hack needed to support 64-bit builds, decc_getpwnam is 32-bit only */
 #ifdef __DECC
-#   if __INITIAL_POINTER_SIZE
+#  if __INITIAL_POINTER_SIZE
   __char_ptr32 unix_path;
-#   else
+#  else
   char *unix_path;
-#   endif
+#  endif
 #else
   char *unix_path;
 #endif
@@ -211,11 +211,11 @@ static struct passwd *vms_getpwuid(uid_t uid)
   /* Ancient OpenSSL on VAX/VMS missing this constant */
 #    define CONF_MFLAGS_IGNORE_MISSING_FILE 0x10
 #    undef CONF_modules_load_file
-     static int CONF_modules_load_file(const char *filename,
-                                       const char *appname,
-                                       unsigned long flags) {
-             return 1;
-     }
+static int CONF_modules_load_file(const char *filename,
+                                  const char *appname,
+                                  unsigned long flags) {
+  return 1;
+}
 #  endif
 #endif
 #define DES_ecb_encrypt             DES_ECB_ENCRYPT
@@ -390,11 +390,11 @@ static struct passwd *vms_getpwuid(uid_t uid)
 /* that way a newer port will also work if some one has one */
 #ifdef __VAX
 
-#   include <openssl/evp.h>
-#   ifndef OpenSSL_add_all_algorithms
-#       define OpenSSL_add_all_algorithms OPENSSL_ADD_ALL_ALGORITHMS
-        void OPENSSL_ADD_ALL_ALGORITHMS(void);
-#   endif
+#  include <openssl/evp.h>
+#  ifndef OpenSSL_add_all_algorithms
+#    define OpenSSL_add_all_algorithms OPENSSL_ADD_ALL_ALGORITHMS
+     void OPENSSL_ADD_ALL_ALGORITHMS(void);
+#  endif
 #endif
 
 #endif /* HEADER_CURL_SETUP_VMS_H */

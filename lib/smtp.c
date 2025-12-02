@@ -1941,7 +1941,7 @@ static void cr_eob_close(struct Curl_easy *data, struct Curl_creader *reader)
 }
 
 /* this is the 5-bytes End-Of-Body marker for SMTP */
-#define SMTP_EOB "\r\n.\r\n"
+#define SMTP_EOB          "\r\n.\r\n"
 #define SMTP_EOB_FIND_LEN 3
 
 /* client reader doing SMTP End-Of-Body escaping. */

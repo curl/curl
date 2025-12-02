@@ -601,8 +601,8 @@ static void smb_format_message(struct smb_conn *smbc,
   const unsigned int pid = 0xbad71d; /* made up */
 
   memset(h, 0, sizeof(*h));
-  h->nbt_length = htons((unsigned short) (sizeof(*h) - sizeof(unsigned int) +
-                                          len));
+  h->nbt_length = htons((unsigned short)(sizeof(*h) - sizeof(unsigned int) +
+                                         len));
   memcpy((char *)h->magic, "\xffSMB", 4);
   h->command = cmd;
   h->flags = SMB_FLAGS_CANONICAL_PATHNAMES | SMB_FLAGS_CASELESS_PATHNAMES;

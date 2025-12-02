@@ -85,8 +85,7 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
  * bothersome, then simply create a separate _init function and call it
  * appropriately from within the program.
  */
-struct curl_slist *curl_slist_append(struct curl_slist *list,
-                                     const char *data)
+struct curl_slist *curl_slist_append(struct curl_slist *list, const char *data)
 {
   char *dupdata = curlx_strdup(data);
 

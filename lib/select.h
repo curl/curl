@@ -115,7 +115,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms);
  * `actions` are bitmaps of CURL_POLL_IN and CURL_POLL_OUT.
  * Starts with small capacity, grows on demand.
  */
-#define EZ_POLLSET_DEF_COUNT    2
+#define EZ_POLLSET_DEF_COUNT 2
 
 struct easy_pollset {
   curl_socket_t *sockets;
@@ -170,7 +170,7 @@ CURLcode Curl_pollset_set(struct Curl_easy *data,
   Curl_pollset_change((data), (ps), (sock), 0, CURL_POLL_OUT)
 #define Curl_pollset_add_inout(data, ps, sock) \
   Curl_pollset_change((data), (ps), (sock), \
-                       CURL_POLL_IN|CURL_POLL_OUT, 0)
+                       CURL_POLL_IN | CURL_POLL_OUT, 0)
 #define Curl_pollset_set_in_only(data, ps, sock) \
   Curl_pollset_change((data), (ps), (sock), \
                        CURL_POLL_IN, CURL_POLL_OUT)

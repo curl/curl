@@ -320,9 +320,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
          rtspreq == RTSPREQ_GET_PARAMETER) {
         if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-          result = curlx_dyn_addn(reqp,
-                                  STRCONST("Content-Type: "
-                                           "text/parameters\r\n"));
+          result = curlx_dyn_addn(reqp, STRCONST("Content-Type: "
+                                                 "text/parameters\r\n"));
           if(result)
             return result;
         }
@@ -330,9 +329,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
 
       if(rtspreq == RTSPREQ_ANNOUNCE) {
         if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-          result = curlx_dyn_addn(reqp,
-                                  STRCONST("Content-Type: "
-                                           "application/sdp\r\n"));
+          result = curlx_dyn_addn(reqp, STRCONST("Content-Type: "
+                                                 "application/sdp\r\n"));
           if(result)
             return result;
         }
@@ -927,7 +925,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                blen, rtspc->in_header, data->req.done, rtspc->state,
                data->req.size));
   if(!result && (is_eos || blen)) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY|
+    result = Curl_client_write(data, CLIENTWRITE_BODY |
                                (is_eos ? CLIENTWRITE_EOS : 0), buf, blen);
   }
 

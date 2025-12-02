@@ -692,7 +692,6 @@ static void mqstate(struct Curl_easy *data,
     mqtt->nextstate = nextstate;
 }
 
-
 static CURLcode mqtt_read_publish(struct Curl_easy *data, bool *done)
 {
   CURLcode result = CURLE_OK;

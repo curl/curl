@@ -412,8 +412,8 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
       }
       else {
         struct passwd pw, *pw_res;
-        if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
-           && pw_res) {
+        if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res) &&
+           pw_res) {
           home = pw.pw_dir;
         }
 #elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
