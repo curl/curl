@@ -36,7 +36,7 @@ stack.
  - curl users building with vanilla OpenSSL can still use QUIC through the
    means of ngtcp2
 
-We remove the OpenSSL-QUIC backend in March 2026.
+We remove the OpenSSL-QUIC backend in January 2026.
 
 ## RTMP
 
