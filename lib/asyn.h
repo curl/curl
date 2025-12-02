@@ -266,7 +266,7 @@ void Curl_async_shutdown(struct Curl_easy *data);
 void Curl_async_destroy(struct Curl_easy *data);
 #else /* !USE_CURL_ASYNC */
 #define Curl_async_shutdown(x) Curl_nop_stmt
-#define Curl_async_destroy(x) Curl_nop_stmt
+#define Curl_async_destroy(x)  Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */
 
 /********** end of generic resolver interface functions *****************/

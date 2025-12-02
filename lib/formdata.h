@@ -55,5 +55,4 @@ CURLcode Curl_getformdata(CURL *data,
                           curl_read_callback fread_func);
 #endif /* CURL_DISABLE_FORM_API */
 
-
 #endif /* HEADER_CURL_FORMDATA_H */

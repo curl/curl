@@ -181,8 +181,7 @@ int r_getaddrinfo(const char *node,
     }
   }
 
-  ares_getaddrinfo(channel, node, service, &ahints,
-                   async_addrinfo_cb, &ctx);
+  ares_getaddrinfo(channel, node, service, &ahints, async_addrinfo_cb, &ctx);
 
   /* Wait until no more requests are left to be processed */
   ares_queue_wait_empty(channel, -1);

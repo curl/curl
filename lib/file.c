@@ -127,7 +127,6 @@ const struct Curl_handler Curl_handler_file = {
   PROTOPT_NONETWORK | PROTOPT_NOURLQUERY /* flags */
 };
 
-
 static void file_cleanup(struct FILEPROTO *file)
 {
   Curl_safefree(file->freepath);
@@ -332,7 +331,7 @@ static CURLcode file_upload(struct Curl_easy *data,
   if(!dir[1])
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
-  mode = O_WRONLY|O_CREAT|CURL_O_BINARY;
+  mode = O_WRONLY | O_CREAT | CURL_O_BINARY;
   if(data->state.resume_from)
     mode |= O_APPEND;
   else
@@ -478,7 +477,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     const struct tm *tm = &buffer;
     char header[80];
     int headerlen;
-    static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
+    static const char accept_ranges[] = { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
       headerlen =
         curl_msnprintf(header, sizeof(header),
@@ -502,7 +501,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     headerlen =
       curl_msnprintf(header, sizeof(header),
                      "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                     Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                     Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
                      tm->tm_mday,
                      Curl_month[tm->tm_mon],
                      tm->tm_year + 1900,
@@ -568,10 +567,10 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     if(!S_ISDIR(statbuf.st_mode)) {
 #ifdef __AMIGA__
       if(data->state.resume_from !=
-          lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
+         lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
 #else
       if(data->state.resume_from !=
-          lseek(fd, data->state.resume_from, SEEK_SET))
+         lseek(fd, data->state.resume_from, SEEK_SET))
 #endif
         return CURLE_BAD_DOWNLOAD_RESUME;
     }
@@ -591,11 +590,11 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       size_t bytestoread;
 
       if(size_known) {
-        bytestoread = (expected_size < (curl_off_t)(xfer_blen-1)) ?
-          curlx_sotouz(expected_size) : (xfer_blen-1);
+        bytestoread = (expected_size < (curl_off_t)(xfer_blen - 1)) ?
+          curlx_sotouz(expected_size) : (xfer_blen - 1);
       }
       else
-        bytestoread = xfer_blen-1;
+        bytestoread = xfer_blen - 1;
 
       nread = read(fd, xfer_buf, bytestoread);
 

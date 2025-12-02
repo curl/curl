@@ -356,7 +356,7 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
   struct bufref nullmsg;
 
   if(sctx->user &&
-     (sctx->enabledmechs & (SASL_MECH_SCRAM_SHA_256|SASL_MECH_SCRAM_SHA_1))) {
+     (sctx->enabledmechs & (SASL_MECH_SCRAM_SHA_256 | SASL_MECH_SCRAM_SHA_1))) {
     gsasl = Curl_auth_gsasl_get(sctx->conn);
     if(!gsasl) {
       sctx->result = CURLE_OUT_OF_MEMORY;
