@@ -88,6 +88,12 @@ lines:
     %SP  - space
     %TAB - horizontal tab
 
+## Special characters
+
+Macros to help keep data files XML-compliant:
+
+    %AMP - Ampersand: `&`
+
 ## Insert capped epoch days
 
 Mostly to test capped cookie expire dates: `%days[NUM]` inserts the number of
