@@ -2176,12 +2176,15 @@ static int test_sws(int argc, char *argv[])
     goto sws_cleanup;
   }
 
-  flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
-    error = SOCKERRNO;
-    logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    goto sws_cleanup;
+  if(socket_domain != AF_UNIX) {
+    flag = 1;
+    if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                  (void *)&flag, sizeof(flag))) {
+      error = SOCKERRNO;
+      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+      goto sws_cleanup;
+    }
   }
   if(curlx_nonblock(sock, TRUE)) {
     error = SOCKERRNO;
