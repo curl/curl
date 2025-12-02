@@ -118,7 +118,7 @@ static void dnscache_entry_free(struct Curl_dns_entry *dns);
 static void show_resolve_info(struct Curl_easy *data,
                               struct Curl_dns_entry *dns);
 #else
-#define show_resolve_info(x,y) Curl_nop_stmt
+#define show_resolve_info(x, y) Curl_nop_stmt
 #endif
 
 /*
@@ -158,10 +158,9 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
  * Create a hostcache id string for the provided host + port, to be used by
  * the DNS caching. Without alloc. Return length of the id string.
  */
-static size_t
-create_dnscache_id(const char *name,
-                   size_t nlen, /* 0 or actual name length */
-                   int port, char *ptr, size_t buflen)
+static size_t create_dnscache_id(const char *name,
+                                 size_t nlen, /* 0 or actual name length */
+                                 int port, char *ptr, size_t buflen)
 {
   size_t len = nlen ? nlen : strlen(name);
   DEBUGASSERT(buflen >= MAX_HOSTCACHE_LEN);
@@ -185,12 +184,10 @@ struct dnscache_prune_data {
  * Returning non-zero means remove the entry, return 0 to keep it in the
  * cache.
  */
-static int
-dnscache_entry_is_stale(void *datap, void *hc)
+static int dnscache_entry_is_stale(void *datap, void *hc)
 {
-  struct dnscache_prune_data *prune =
-    (struct dnscache_prune_data *) datap;
-  struct Curl_dns_entry *dns = (struct Curl_dns_entry *) hc;
+  struct dnscache_prune_data *prune = (struct dnscache_prune_data *)datap;
+  struct Curl_dns_entry *dns = (struct Curl_dns_entry *)hc;
 
   if(dns->timestamp.tv_sec || dns->timestamp.tv_usec) {
     /* get age in milliseconds */
@@ -209,9 +206,9 @@ dnscache_entry_is_stale(void *datap, void *hc)
  * Prune the DNS cache. This assumes that a lock has already been taken.
  * Returns the 'age' of the oldest still kept entry - in milliseconds.
  */
-static timediff_t
-dnscache_prune(struct Curl_hash *hostcache, timediff_t cache_timeout_ms,
-               struct curltime now)
+static timediff_t dnscache_prune(struct Curl_hash *hostcache,
+                                 timediff_t cache_timeout_ms,
+                                 struct curltime now)
 {
   struct dnscache_prune_data user;
 
@@ -389,11 +386,10 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
  * The returned data *MUST* be "released" with Curl_resolv_unlink() after
  * use, or we will leak memory!
  */
-struct Curl_dns_entry *
-Curl_dnscache_get(struct Curl_easy *data,
-                  const char *hostname,
-                  int port,
-                  int ip_version)
+struct Curl_dns_entry *Curl_dnscache_get(struct Curl_easy *data,
+                                         const char *hostname,
+                                         int port,
+                                         int ip_version)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
   struct Curl_dns_entry *dns = NULL;
@@ -632,7 +628,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   return ca;
 }
 #else
-#define get_localhost6(x,y) NULL
+#define get_localhost6(x, y) NULL
 #endif
 
 /* return a static IPv4 127.0.0.1 for the given name */
@@ -726,7 +722,6 @@ bool Curl_host_is_ipnum(const char *hostname)
     return TRUE;
   return FALSE;
 }
-
 
 /* return TRUE if 'part' is a case insensitive tail of 'full' */
 static bool tailmatch(const char *full, size_t flen,
@@ -980,8 +975,7 @@ CURLcode Curl_resolv_blocking(struct Curl_easy *data,
  * execution. This effectively causes the remainder of the application to run
  * within a signal handler which is nonportable and could lead to problems.
  */
-CURL_NORETURN static
-void alarmfunc(int sig)
+CURL_NORETURN static void alarmfunc(int sig)
 {
   (void)sig;
   siglongjmp(curl_jmpenv, 1);
@@ -1058,8 +1052,8 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
     /* The alarm() function only provides integer second resolution, so if
        we want to wait less than one second we must bail out already now. */
     failf(data,
-        "remaining timeout of %ld too small to resolve via SIGALRM method",
-        timeout);
+          "remaining timeout of %ld too small to resolve via SIGALRM method",
+          timeout);
     return CURLE_OPERATION_TIMEDOUT;
   }
   /* This allows us to time-out from the name resolver, as the timeout
@@ -1101,7 +1095,7 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
 
     /* alarm() makes a signal get sent when the timeout fires off, and that
        will abort system calls */
-    prev_alarm = alarm(curlx_sltoui(timeout/1000L));
+    prev_alarm = alarm(curlx_sltoui(timeout / 1000L));
   }
 
 #else /* !USE_ALARM_TIMEOUT */
@@ -1151,7 +1145,7 @@ clean_up:
     unsigned long alarm_set = (unsigned long)(prev_alarm - elapsed_secs);
 
     if(!alarm_set ||
-       ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
+       ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000))) {
       /* if the alarm time-left reached zero or turned "negative" (counted
          with unsigned values), we should fire off a SIGALRM here, but we
          will not, and zero would be to switch it off so we never set it to
@@ -1203,7 +1197,7 @@ void Curl_resolv_unlink(struct Curl_easy *data, struct Curl_dns_entry **pdns)
 
 static void dnscache_entry_dtor(void *entry)
 {
-  struct Curl_dns_entry *dns = (struct Curl_dns_entry *) entry;
+  struct Curl_dns_entry *dns = (struct Curl_dns_entry *)entry;
   DEBUGASSERT(dns && (dns->refcount > 0));
   dns->refcount--;
   if(dns->refcount == 0)
@@ -1361,8 +1355,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       error = FALSE;
 err:
       if(error) {
-        failf(data, "Could not parse CURLOPT_RESOLVE entry '%s'",
-              hostp->data);
+        failf(data, "Could not parse CURLOPT_RESOLVE entry '%s'", hostp->data);
         Curl_freeaddrinfo(head);
         return CURLE_SETOPT_OPTION_SYNTAX;
       }

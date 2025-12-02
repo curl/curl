@@ -88,12 +88,12 @@ static void sigpipe_apply(struct Curl_easy *data,
 
 #else
 /* for systems without sigaction */
-#define sigpipe_ignore(x,y) Curl_nop_stmt
-#define sigpipe_apply(x,y) Curl_nop_stmt
-#define sigpipe_init(x)  Curl_nop_stmt
-#define sigpipe_restore(x)  Curl_nop_stmt
+#define sigpipe_ignore(x, y) Curl_nop_stmt
+#define sigpipe_apply(x, y)  Curl_nop_stmt
+#define sigpipe_init(x)      Curl_nop_stmt
+#define sigpipe_restore(x)   Curl_nop_stmt
 #define SIGPIPE_VARIABLE(x)
-#define SIGPIPE_MEMBER(x)   bool x
+#define SIGPIPE_MEMBER(x)    bool x
 #endif
 
 #endif /* HEADER_CURL_SIGPIPE_H */

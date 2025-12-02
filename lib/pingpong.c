@@ -214,7 +214,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-
 /***********************************************************************
  *
  * Curl_pp_sendf()

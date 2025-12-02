@@ -202,12 +202,11 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
       result = curlx_base64_encode(Curl_bufref_ptr(&ntlmmsg),
-                                  Curl_bufref_len(&ntlmmsg), &base64, &len);
+                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
-                                      proxy ? "Proxy-" : "",
-                                      base64);
+                                      proxy ? "Proxy-" : "", base64);
         curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
@@ -225,8 +224,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
       if(!result) {
         curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
-                                      proxy ? "Proxy-" : "",
-                                      base64);
+                                      proxy ? "Proxy-" : "", base64);
         curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;

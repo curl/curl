@@ -131,25 +131,31 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
       if(data->state.aptr.host &&
          /* a Host: header was sent already, do not pass on any custom Host:
             header as that will produce *two* in the same request! */
-         curlx_str_casecompare(&name, "Host"));
+         curlx_str_casecompare(&name, "Host"))
+        ;
       else if(data->state.httpreq == HTTPREQ_POST_FORM &&
               /* this header (extended by formdata.c) is sent later */
-              curlx_str_casecompare(&name, "Content-Type"));
+              curlx_str_casecompare(&name, "Content-Type"))
+        ;
       else if(data->state.httpreq == HTTPREQ_POST_MIME &&
               /* this header is sent later */
-              curlx_str_casecompare(&name, "Content-Type"));
+              curlx_str_casecompare(&name, "Content-Type"))
+        ;
       else if(data->req.authneg &&
               /* while doing auth neg, do not allow the custom length since
                  we will force length zero then */
-              curlx_str_casecompare(&name, "Content-Length"));
+              curlx_str_casecompare(&name, "Content-Length"))
+        ;
       else if((httpversion >= 20) &&
-              curlx_str_casecompare(&name, "Transfer-Encoding"));
+              curlx_str_casecompare(&name, "Transfer-Encoding"))
+        ;
       /* HTTP/2 and HTTP/3 do not support chunked requests */
       else if((curlx_str_casecompare(&name, "Authorization") ||
                curlx_str_casecompare(&name, "Cookie")) &&
               /* be careful of sending this potentially sensitive header to
                  other hosts */
-              !Curl_auth_allowed_to_host(data));
+              !Curl_auth_allowed_to_host(data))
+        ;
       else {
         CURLcode result =
           Curl_dynhds_add(hds, curlx_str(&name), curlx_strlen(&name),
@@ -211,7 +217,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
 
   authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
-                            ipv6_ip ?"]" : "", port);
+                            ipv6_ip ? "]" : "", port);
   if(!authority) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -253,7 +259,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   }
 
   if(http_version_major == 1 &&
-    !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
+     !Curl_checkProxyheaders(data, cf->conn, STRCONST("Proxy-Connection"))) {
     result = Curl_dynhds_cadd(&req->headers, "Proxy-Connection", "Keep-Alive");
     if(result)
       goto out;
@@ -394,10 +400,9 @@ static void http_proxy_cf_close(struct Curl_cfilter *cf,
     cf->next->cft->do_close(cf->next, data);
 }
 
-
 struct Curl_cftype Curl_cft_http_proxy = {
   "HTTP-PROXY",
-  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
   0,
   http_proxy_cf_destroy,
   http_proxy_cf_connect,

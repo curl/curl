@@ -70,7 +70,7 @@ CURLcode Curl_win32_init(long flags)
     /* highest supported version. */
 
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
+       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
       /* Tell the user that we could not find a usable */
 
       /* winsock.dll. */

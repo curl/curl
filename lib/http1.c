@@ -33,7 +33,7 @@
 #include "urlapi-int.h"
 
 
-#define H1_MAX_URL_LEN   (8*1024)
+#define H1_MAX_URL_LEN (8 * 1024)
 
 void Curl_h1_req_parse_init(struct h1_req_parser *parser, size_t max_line_len)
 {
@@ -227,8 +227,8 @@ static CURLcode start_req(struct h1_req_parser *parser,
         result = CURLE_OUT_OF_MEMORY;
         goto out;
       }
-      url_options = (CURLU_NON_SUPPORT_SCHEME|
-                     CURLU_PATH_AS_IS|
+      url_options = (CURLU_NON_SUPPORT_SCHEME |
+                     CURLU_PATH_AS_IS |
                      CURLU_NO_DEFAULT_PORT);
       if(!(options & H1_PARSE_OPT_STRICT))
         url_options |= CURLU_ALLOW_SPACE;

@@ -141,8 +141,7 @@ static bool match_host(const char *token, size_t tokenlen,
   else if(tokenlen < namelen) {
     /* case B, tailmatch domain */
     match = (name[namelen - tokenlen - 1] == '.') &&
-      curl_strnequal(token, name + (namelen - tokenlen),
-                     tokenlen);
+            curl_strnequal(token, name + (namelen - tokenlen), tokenlen);
   }
   /* case C passes through, not a match */
   return match;
@@ -180,11 +179,10 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
     return Curl_cidr4_match(name, check, bits);
 }
 
-
 /****************************************************************
-* Checks if the host is in the noproxy list. returns TRUE if it matches and
-* therefore the proxy should NOT be used.
-****************************************************************/
+ * Checks if the host is in the noproxy list. returns TRUE if it matches and
+ * therefore the proxy should NOT be used.
+ ****************************************************************/
 bool Curl_check_noproxy(const char *name, const char *no_proxy)
 {
   char hostip[128];

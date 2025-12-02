@@ -460,7 +460,7 @@ static int ech_present(curl_version_info_data *info)
  * Use FEATURE() macro to define an entry: this allows documentation check.
  */
 
-#define FEATURE(name, present, bitmask) {(name), (present), (bitmask)}
+#define FEATURE(name, present, bitmask) { (name), (present), (bitmask) }
 
 struct feat {
   const char *name;

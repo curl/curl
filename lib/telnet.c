@@ -62,27 +62,27 @@
 
 #define SUBBUFSIZE 512
 
-#define CURL_SB_CLEAR(x)  x->subpointer = x->subbuffer
-#define CURL_SB_TERM(x)                                 \
-  do {                                                  \
-    x->subend = x->subpointer;                          \
-    CURL_SB_CLEAR(x);                                   \
+#define CURL_SB_CLEAR(x) x->subpointer = x->subbuffer
+#define CURL_SB_TERM(x)        \
+  do {                         \
+    x->subend = x->subpointer; \
+    CURL_SB_CLEAR(x);          \
   } while(0)
-#define CURL_SB_ACCUM(x,c)                                      \
-  do {                                                          \
-    if(x->subpointer < (x->subbuffer + sizeof(x->subbuffer)))   \
-      *x->subpointer++ = (c);                                   \
+#define CURL_SB_ACCUM(x, c)                                   \
+  do {                                                        \
+    if(x->subpointer < (x->subbuffer + sizeof(x->subbuffer))) \
+      *x->subpointer++ = (c);                                 \
   } while(0)
 
-#define  CURL_SB_GET(x) ((*x->subpointer++)&0xff)
-#define  CURL_SB_LEN(x) (x->subend - x->subpointer)
+#define CURL_SB_GET(x) ((*x->subpointer++) & 0xff)
+#define CURL_SB_LEN(x) (x->subend - x->subpointer)
 
 /* For posterity:
 #define  CURL_SB_PEEK(x) ((*x->subpointer)&0xff)
 #define  CURL_SB_EOF(x) (x->subpointer >= x->subend) */
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
-#define printoption(a,b,c,d)  Curl_nop_stmt
+#define printoption(a, b, c, d) Curl_nop_stmt
 #endif
 
 /* For negotiation compliant to RFC 1143 */
@@ -101,8 +101,7 @@
 /*
  * Telnet receiver states for fsm
  */
-typedef enum
-{
+typedef enum {
   CURL_TS_DATA = 0,
   CURL_TS_IAC,
   CURL_TS_WILL,
@@ -137,12 +136,11 @@ struct TELNET {
   unsigned char *subpointer, *subend;      /* buffer for sub-options */
 };
 
-
-static
-CURLcode telrcv(struct Curl_easy *data,
-                struct TELNET *tn,
-                const unsigned char *inbuf, /* Data received from socket */
-                ssize_t count);             /* Number of bytes received */
+static CURLcode telrcv(struct Curl_easy *data,
+                       struct TELNET *tn,
+                       const unsigned char *inbuf, /* Data received from
+                                                      socket */
+                       ssize_t count);             /* Number of bytes received */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void printoption(struct Curl_easy *data,
@@ -199,7 +197,6 @@ const struct Curl_handler Curl_handler_telnet = {
   PROTOPT_NONE | PROTOPT_NOURLQUERY     /* flags */
 };
 
-
 static void telnet_easy_dtor(void *key, size_t klen, void *entry)
 {
   struct TELNET *tn = entry;
@@ -210,8 +207,7 @@ static void telnet_easy_dtor(void *key, size_t klen, void *entry)
   curlx_free(tn);
 }
 
-static
-CURLcode init_telnet(struct Curl_easy *data)
+static CURLcode init_telnet(struct Curl_easy *data)
 {
   struct TELNET *tn;
 
@@ -328,15 +324,14 @@ static void send_negotiation(struct Curl_easy *data, int cmd, int option)
   bytes_written = swrite(conn->sock[FIRSTSOCKET], buf, 3);
   if(bytes_written < 0) {
     int err = SOCKERRNO;
-    failf(data,"Sending data failed (%d)",err);
+    failf(data, "Sending data failed (%d)", err);
   }
 
   printoption(data, "SENT", cmd, option);
 }
 
-static
-void set_remote_option(struct Curl_easy *data, struct TELNET *tn,
-                       int option, int newstate)
+static void set_remote_option(struct Curl_easy *data, struct TELNET *tn,
+                              int option, int newstate)
 {
   if(newstate == CURL_YES) {
     switch(tn->him[option]) {
@@ -408,8 +403,7 @@ void set_remote_option(struct Curl_easy *data, struct TELNET *tn,
   }
 }
 
-static
-void rec_will(struct Curl_easy *data, struct TELNET *tn, int option)
+static void rec_will(struct Curl_easy *data, struct TELNET *tn, int option)
 {
   switch(tn->him[option]) {
   case CURL_NO:
@@ -455,8 +449,7 @@ void rec_will(struct Curl_easy *data, struct TELNET *tn, int option)
   }
 }
 
-static
-void rec_wont(struct Curl_easy *data, struct TELNET *tn, int option)
+static void rec_wont(struct Curl_easy *data, struct TELNET *tn, int option)
 {
   switch(tn->him[option]) {
   case CURL_NO:
@@ -496,9 +489,8 @@ void rec_wont(struct Curl_easy *data, struct TELNET *tn, int option)
   }
 }
 
-static void
-set_local_option(struct Curl_easy *data, struct TELNET *tn,
-                 int option, int newstate)
+static void set_local_option(struct Curl_easy *data, struct TELNET *tn,
+                             int option, int newstate)
 {
   if(newstate == CURL_YES) {
     switch(tn->us[option]) {
@@ -570,8 +562,7 @@ set_local_option(struct Curl_easy *data, struct TELNET *tn,
   }
 }
 
-static
-void rec_do(struct Curl_easy *data, struct TELNET *tn, int option)
+static void rec_do(struct Curl_easy *data, struct TELNET *tn, int option)
 {
   switch(tn->us[option]) {
   case CURL_NO:
@@ -629,8 +620,7 @@ void rec_do(struct Curl_easy *data, struct TELNET *tn, int option)
   }
 }
 
-static
-void rec_dont(struct Curl_easy *data, struct TELNET *tn, int option)
+static void rec_dont(struct Curl_easy *data, struct TELNET *tn, int option)
 {
   switch(tn->us[option]) {
   case CURL_NO:
@@ -670,7 +660,6 @@ void rec_dont(struct Curl_easy *data, struct TELNET *tn, int option)
   }
 }
 
-
 static void printsub(struct Curl_easy *data,
                      int direction,             /* '<' or '>' */
                      unsigned char *pointer,    /* where suboption data is */
@@ -683,8 +672,8 @@ static void printsub(struct Curl_easy *data,
       if(length >= 3) {
         int j;
 
-        i = pointer[length-2];
-        j = pointer[length-1];
+        i = pointer[length - 2];
+        j = pointer[length - 1];
 
         if(i != CURL_IAC || j != CURL_SE) {
           infof(data, "(terminated by ");
@@ -950,77 +939,77 @@ static CURLcode suboption(struct Curl_easy *data, struct TELNET *tn)
 
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn) + 2);
   switch(CURL_SB_GET(tn)) {
-    case CURL_TELOPT_TTYPE:
-      if(bad_option(tn->subopt_ttype))
-        return CURLE_BAD_FUNCTION_ARGUMENT;
-      if(strlen(tn->subopt_ttype) > 1000) {
-        failf(data, "Tool long telnet TTYPE");
-        return CURLE_SEND_ERROR;
-      }
-      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
-                           CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
-                           CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC,
-                           CURL_SE);
-      bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+  case CURL_TELOPT_TTYPE:
+    if(bad_option(tn->subopt_ttype))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(strlen(tn->subopt_ttype) > 1000) {
+      failf(data, "Tool long telnet TTYPE");
+      return CURLE_SEND_ERROR;
+    }
+    len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                         CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
+                         CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC,
+                         CURL_SE);
+    bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
 
-      if(bytes_written < 0) {
-        err = SOCKERRNO;
-        failf(data, "Sending data failed (%d)", err);
-        return CURLE_SEND_ERROR;
-      }
-      printsub(data, '>', &temp[2], len-2);
-      break;
-    case CURL_TELOPT_XDISPLOC:
-      if(bad_option(tn->subopt_xdisploc))
+    if(bytes_written < 0) {
+      err = SOCKERRNO;
+      failf(data, "Sending data failed (%d)", err);
+      return CURLE_SEND_ERROR;
+    }
+    printsub(data, '>', &temp[2], len-2);
+    break;
+  case CURL_TELOPT_XDISPLOC:
+    if(bad_option(tn->subopt_xdisploc))
+      return CURLE_BAD_FUNCTION_ARGUMENT;
+    if(strlen(tn->subopt_xdisploc) > 1000) {
+      failf(data, "Tool long telnet XDISPLOC");
+      return CURLE_SEND_ERROR;
+    }
+    len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
+                         CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
+                         CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC,
+                         CURL_SE);
+    bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+    if(bytes_written < 0) {
+      err = SOCKERRNO;
+      failf(data, "Sending data failed (%d)", err);
+      return CURLE_SEND_ERROR;
+    }
+    printsub(data, '>', &temp[2], len - 2);
+    break;
+  case CURL_TELOPT_NEW_ENVIRON:
+    len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
+                         CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
+                         CURL_TELQUAL_IS);
+    for(v = tn->telnet_vars; v; v = v->next) {
+      size_t tmplen = (strlen(v->data) + 1);
+      if(bad_option(v->data))
         return CURLE_BAD_FUNCTION_ARGUMENT;
-      if(strlen(tn->subopt_xdisploc) > 1000) {
-        failf(data, "Tool long telnet XDISPLOC");
-        return CURLE_SEND_ERROR;
-      }
-      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c%s%c%c",
-                           CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
-                           CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC,
-                           CURL_SE);
-      bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
-      if(bytes_written < 0) {
-        err = SOCKERRNO;
-        failf(data,"Sending data failed (%d)",err);
-        return CURLE_SEND_ERROR;
-      }
-      printsub(data, '>', &temp[2], len-2);
-      break;
-    case CURL_TELOPT_NEW_ENVIRON:
-      len = curl_msnprintf((char *)temp, sizeof(temp), "%c%c%c%c",
-                           CURL_IAC, CURL_SB, CURL_TELOPT_NEW_ENVIRON,
-                           CURL_TELQUAL_IS);
-      for(v = tn->telnet_vars; v; v = v->next) {
-        size_t tmplen = (strlen(v->data) + 1);
-        if(bad_option(v->data))
-          return CURLE_BAD_FUNCTION_ARGUMENT;
-        /* Add the variable if it fits */
-        if(len + tmplen < (int)sizeof(temp)-6) {
-          char *s = strchr(v->data, ',');
-          if(!s)
-            len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
-                                  "%c%s", CURL_NEW_ENV_VAR, v->data);
-          else {
-            size_t vlen = s - v->data;
-            len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
-                                  "%c%.*s%c%s", CURL_NEW_ENV_VAR,
-                                  (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
-          }
+      /* Add the variable if it fits */
+      if(len + tmplen < (int)sizeof(temp) - 6) {
+        char *s = strchr(v->data, ',');
+        if(!s)
+          len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                "%c%s", CURL_NEW_ENV_VAR, v->data);
+        else {
+          size_t vlen = s - v->data;
+          len += curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                                "%c%.*s%c%s", CURL_NEW_ENV_VAR,
+                                (int)vlen, v->data, CURL_NEW_ENV_VALUE, ++s);
         }
       }
-      curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
-                     "%c%c", CURL_IAC, CURL_SE);
-      len += 2;
-      bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
-      if(bytes_written < 0) {
-        err = SOCKERRNO;
-        failf(data,"Sending data failed (%d)",err);
-      }
-      printsub(data, '>', &temp[2], len-2);
-      break;
+    }
+    curl_msnprintf((char *)&temp[len], sizeof(temp) - len,
+                   "%c%c", CURL_IAC, CURL_SE);
+    len += 2;
+    bytes_written = swrite(conn->sock[FIRSTSOCKET], temp, len);
+    if(bytes_written < 0) {
+      err = SOCKERRNO;
+      failf(data, "Sending data failed (%d)", err);
+    }
+    printsub(data, '>', &temp[2], len - 2);
+    break;
   }
   return CURLE_OK;
 }
@@ -1063,7 +1052,7 @@ static void sendsuboption(struct Curl_easy *data,
     /* data suboption is now ready */
 
     printsub(data, '>', (unsigned char *)tn->subbuffer + 2,
-             CURL_SB_LEN(tn)-2);
+             CURL_SB_LEN(tn) - 2);
 
     /* we send the header of the suboption... */
     bytes_written = swrite(conn->sock[FIRSTSOCKET], tn->subbuffer, 3);
@@ -1084,11 +1073,11 @@ static void sendsuboption(struct Curl_easy *data,
   }
 }
 
-static
-CURLcode telrcv(struct Curl_easy *data,
-                struct TELNET *tn,
-                const unsigned char *inbuf, /* Data received from socket */
-                ssize_t count)              /* Number of bytes received */
+static CURLcode telrcv(struct Curl_easy *data,
+                       struct TELNET *tn,
+                       const unsigned char *inbuf, /* Data received from
+                                                      socket */
+                       ssize_t count)              /* Number of bytes received */
 {
   unsigned char c;
   CURLcode result;
@@ -1170,79 +1159,79 @@ process_iac:
       }
       break;
 
-      case CURL_TS_WILL:
-        printoption(data, "RCVD", CURL_WILL, c);
-        tn->please_negotiate = 1;
-        rec_will(data, tn, c);
-        tn->telrcv_state = CURL_TS_DATA;
-        break;
+    case CURL_TS_WILL:
+      printoption(data, "RCVD", CURL_WILL, c);
+      tn->please_negotiate = 1;
+      rec_will(data, tn, c);
+      tn->telrcv_state = CURL_TS_DATA;
+      break;
 
-      case CURL_TS_WONT:
-        printoption(data, "RCVD", CURL_WONT, c);
-        tn->please_negotiate = 1;
-        rec_wont(data, tn, c);
-        tn->telrcv_state = CURL_TS_DATA;
-        break;
+    case CURL_TS_WONT:
+      printoption(data, "RCVD", CURL_WONT, c);
+      tn->please_negotiate = 1;
+      rec_wont(data, tn, c);
+      tn->telrcv_state = CURL_TS_DATA;
+      break;
 
-      case CURL_TS_DO:
-        printoption(data, "RCVD", CURL_DO, c);
-        tn->please_negotiate = 1;
-        rec_do(data, tn, c);
-        tn->telrcv_state = CURL_TS_DATA;
-        break;
+    case CURL_TS_DO:
+      printoption(data, "RCVD", CURL_DO, c);
+      tn->please_negotiate = 1;
+      rec_do(data, tn, c);
+      tn->telrcv_state = CURL_TS_DATA;
+      break;
 
-      case CURL_TS_DONT:
-        printoption(data, "RCVD", CURL_DONT, c);
-        tn->please_negotiate = 1;
-        rec_dont(data, tn, c);
-        tn->telrcv_state = CURL_TS_DATA;
-        break;
+    case CURL_TS_DONT:
+      printoption(data, "RCVD", CURL_DONT, c);
+      tn->please_negotiate = 1;
+      rec_dont(data, tn, c);
+      tn->telrcv_state = CURL_TS_DATA;
+      break;
 
-      case CURL_TS_SB:
-        if(c == CURL_IAC)
-          tn->telrcv_state = CURL_TS_SE;
-        else
-          CURL_SB_ACCUM(tn, c);
-        break;
+    case CURL_TS_SB:
+      if(c == CURL_IAC)
+        tn->telrcv_state = CURL_TS_SE;
+      else
+        CURL_SB_ACCUM(tn, c);
+      break;
 
-      case CURL_TS_SE:
-        if(c != CURL_SE) {
-          if(c != CURL_IAC) {
-            /*
-             * This is an error. We only expect to get "IAC IAC" or "IAC SE".
-             * Several things may have happened. An IAC was not doubled, the
-             * IAC SE was left off, or another option got inserted into the
-             * suboption are all possibilities. If we assume that the IAC was
-             * not doubled, and really the IAC SE was left off, we could get
-             * into an infinite loop here. So, instead, we terminate the
-             * suboption, and process the partial suboption if we can.
-             */
-            CURL_SB_ACCUM(tn, CURL_IAC);
-            CURL_SB_ACCUM(tn, c);
-            tn->subpointer -= 2;
-            CURL_SB_TERM(tn);
-
-            printoption(data, "In SUBOPTION processing, RCVD", CURL_IAC, c);
-            result = suboption(data, tn);   /* handle sub-option */
-            if(result)
-              return result;
-            tn->telrcv_state = CURL_TS_IAC;
-            goto process_iac;
-          }
-          CURL_SB_ACCUM(tn, c);
-          tn->telrcv_state = CURL_TS_SB;
-        }
-        else {
+    case CURL_TS_SE:
+      if(c != CURL_SE) {
+        if(c != CURL_IAC) {
+          /*
+           * This is an error. We only expect to get "IAC IAC" or "IAC SE".
+           * Several things may have happened. An IAC was not doubled, the
+           * IAC SE was left off, or another option got inserted into the
+           * suboption are all possibilities. If we assume that the IAC was
+           * not doubled, and really the IAC SE was left off, we could get
+           * into an infinite loop here. So, instead, we terminate the
+           * suboption, and process the partial suboption if we can.
+           */
           CURL_SB_ACCUM(tn, CURL_IAC);
-          CURL_SB_ACCUM(tn, CURL_SE);
+          CURL_SB_ACCUM(tn, c);
           tn->subpointer -= 2;
           CURL_SB_TERM(tn);
+
+          printoption(data, "In SUBOPTION processing, RCVD", CURL_IAC, c);
           result = suboption(data, tn);   /* handle sub-option */
           if(result)
             return result;
-          tn->telrcv_state = CURL_TS_DATA;
+          tn->telrcv_state = CURL_TS_IAC;
+          goto process_iac;
         }
-        break;
+        CURL_SB_ACCUM(tn, c);
+        tn->telrcv_state = CURL_TS_SB;
+      }
+      else {
+        CURL_SB_ACCUM(tn, CURL_IAC);
+        CURL_SB_ACCUM(tn, CURL_SE);
+        tn->subpointer -= 2;
+        CURL_SB_TERM(tn);
+        result = suboption(data, tn);   /* handle sub-option */
+        if(result)
+          return result;
+        tn->telrcv_state = CURL_TS_DATA;
+      }
+      break;
     }
     ++in;
   }
@@ -1291,16 +1280,16 @@ static CURLcode send_telnet_data(struct Curl_easy *data,
     pfd[0].fd = conn->sock[FIRSTSOCKET];
     pfd[0].events = POLLOUT;
     switch(Curl_poll(pfd, 1, -1)) {
-      case -1:                    /* error, abort writing */
-      case 0:                     /* timeout (will never happen) */
-        result = CURLE_SEND_ERROR;
-        break;
-      default:                    /* write! */
-        bytes_written = 0;
-        result = Curl_xfer_send(data, outbuf + total_written,
-                                outlen - total_written, FALSE, &bytes_written);
-        total_written += bytes_written;
-        break;
+    case -1:                    /* error, abort writing */
+    case 0:                     /* timeout (will never happen) */
+      result = CURLE_SEND_ERROR;
+      break;
+    default:                    /* write! */
+      bytes_written = 0;
+      result = Curl_xfer_send(data, outbuf + total_written,
+                              outlen - total_written, FALSE, &bytes_written);
+      total_written += bytes_written;
+      break;
     }
   }
 
@@ -1326,8 +1315,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   WSANETWORKEVENTS events;
   HANDLE stdin_handle;
   HANDLE objs[2];
-  DWORD  obj_count;
-  DWORD  wait_timeout;
+  DWORD obj_count;
+  DWORD wait_timeout;
   DWORD readfile_read;
   int err;
 #else
@@ -1340,7 +1329,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 #endif
   struct curltime now;
   bool keepon = TRUE;
-  char buffer[4*1024];
+  char buffer[4 * 1024];
   struct TELNET *tn;
 
   *done = TRUE; /* unconditionally */
@@ -1371,7 +1360,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   /* Tell Winsock what events we want to listen to */
-  if(WSAEventSelect(sockfd, event_handle, FD_READ|FD_CLOSE) == SOCKET_ERROR) {
+  if(WSAEventSelect(sockfd, event_handle, FD_READ | FD_CLOSE) ==
+     SOCKET_ERROR) {
     WSACloseEvent(event_handle);
     return CURLE_RECV_ERROR;
   }
@@ -1385,8 +1375,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
   /* If stdin_handle is a pipe, use PeekNamedPipe() method to check it,
      else use the old WaitForMultipleObjects() way */
-  if(GetFileType(stdin_handle) == FILE_TYPE_PIPE ||
-     data->set.is_fread_set) {
+  if(GetFileType(stdin_handle) == FILE_TYPE_PIPE || data->set.is_fread_set) {
     /* Do not wait for stdin_handle, just wait for event_handle */
     obj_count = 1;
     /* Check stdin_handle per 100 milliseconds */
@@ -1404,8 +1393,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
                                            FALSE, wait_timeout);
     switch(waitret) {
 
-    case WAIT_TIMEOUT:
-    {
+    case WAIT_TIMEOUT: {
       for(;;) {
         if(data->set.is_fread_set) {
           size_t n;
@@ -1438,8 +1426,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           if(!readfile_read)
             break;
 
-          if(!ReadFile(stdin_handle, buffer, buf_size,
-                       &readfile_read, NULL)) {
+          if(!ReadFile(stdin_handle, buffer, buf_size, &readfile_read, NULL)) {
             keepon = FALSE;
             result = CURLE_READ_ERROR;
             break;
@@ -1455,10 +1442,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     }
     break;
 
-    case WAIT_OBJECT_0 + 1:
-    {
-      if(!ReadFile(stdin_handle, buffer, buf_size,
-                   &readfile_read, NULL)) {
+    case WAIT_OBJECT_0 + 1: {
+      if(!ReadFile(stdin_handle, buffer, buf_size, &readfile_read, NULL)) {
         keepon = FALSE;
         result = CURLE_READ_ERROR;
         break;
@@ -1472,8 +1457,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     }
     break;
 
-    case WAIT_OBJECT_0:
-    {
+    case WAIT_OBJECT_0: {
       events.lNetworkEvents = 0;
       if(WSAEnumNetworkEvents(sockfd, event_handle, &events) == SOCKET_ERROR) {
         err = SOCKERRNO;
@@ -1503,7 +1487,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           break;
         }
 
-        result = telrcv(data, tn, (unsigned char *) buffer, nread);
+        result = telrcv(data, tn, (unsigned char *)buffer, nread);
         if(result) {
           keepon = FALSE;
           break;
@@ -1522,7 +1506,6 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
     }
     break;
-
     }
 
     if(data->set.timeout) {

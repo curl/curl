@@ -57,11 +57,11 @@ struct curl_trc_featt;
 
 #ifdef USE_ECH
 /* CURLECH_ bits for the tls_ech option */
-# define CURLECH_DISABLE    (1<<0)
-# define CURLECH_GREASE     (1<<1)
-# define CURLECH_ENABLE     (1<<2)
-# define CURLECH_HARD       (1<<3)
-# define CURLECH_CLA_CFG    (1<<4)
+# define CURLECH_DISABLE    (1 << 0)
+# define CURLECH_GREASE     (1 << 1)
+# define CURLECH_ENABLE     (1 << 2)
+# define CURLECH_HARD       (1 << 3)
+# define CURLECH_CLA_CFG    (1 << 4)
 #endif
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -70,8 +70,8 @@ struct curl_trc_featt;
  * platforms that have a >= 64-bit type and then we use such a type for the
  * protocol fields in the protocol handler.
  */
-#define CURLPROTO_WS     (1L<<30)
-#define CURLPROTO_WSS    ((curl_prot_t)1<<31)
+#define CURLPROTO_WS     (1L << 30)
+#define CURLPROTO_WSS    ((curl_prot_t)1 << 31)
 #else
 #define CURLPROTO_WS     0L
 #define CURLPROTO_WSS    0L
@@ -107,13 +107,13 @@ typedef unsigned int curl_prot_t;
 /* Convenience defines for checking protocols or their SSL based version. Each
    protocol handler should only ever have a single CURLPROTO_ in its protocol
    field. */
-#define PROTO_FAMILY_HTTP (CURLPROTO_HTTP|CURLPROTO_HTTPS|CURLPROTO_WS| \
+#define PROTO_FAMILY_HTTP (CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_WS | \
                            CURLPROTO_WSS)
-#define PROTO_FAMILY_FTP  (CURLPROTO_FTP|CURLPROTO_FTPS)
-#define PROTO_FAMILY_POP3 (CURLPROTO_POP3|CURLPROTO_POP3S)
-#define PROTO_FAMILY_SMB  (CURLPROTO_SMB|CURLPROTO_SMBS)
-#define PROTO_FAMILY_SMTP (CURLPROTO_SMTP|CURLPROTO_SMTPS)
-#define PROTO_FAMILY_SSH  (CURLPROTO_SCP|CURLPROTO_SFTP)
+#define PROTO_FAMILY_FTP  (CURLPROTO_FTP | CURLPROTO_FTPS)
+#define PROTO_FAMILY_POP3 (CURLPROTO_POP3 | CURLPROTO_POP3S)
+#define PROTO_FAMILY_SMB  (CURLPROTO_SMB | CURLPROTO_SMBS)
+#define PROTO_FAMILY_SMTP (CURLPROTO_SMTP | CURLPROTO_SMTPS)
+#define PROTO_FAMILY_SSH  (CURLPROTO_SCP | CURLPROTO_SFTP)
 
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH) ||   \
   !defined(CURL_DISABLE_POP3)
@@ -127,7 +127,7 @@ typedef unsigned int curl_prot_t;
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
 /* Default FTP/IMAP etc response timeout in milliseconds */
-#define RESP_TIMEOUT (60*1000)
+#define RESP_TIMEOUT (60 * 1000)
 
 /* Max string input length is a precaution against abuse and to detect junk
    input easier and better. */
@@ -217,8 +217,8 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
    larger buffers can help further, but this is deemed a fair memory/speed
    compromise. */
 #define UPLOADBUFFER_DEFAULT 65536
-#define UPLOADBUFFER_MAX (2*1024*1024)
-#define UPLOADBUFFER_MIN CURL_MAX_WRITE_SIZE
+#define UPLOADBUFFER_MAX     (2 * 1024 * 1024)
+#define UPLOADBUFFER_MIN     CURL_MAX_WRITE_SIZE
 
 #define CURLEASY_MAGIC_NUMBER 0xc0dedbadU
 #ifdef DEBUGBUILD
@@ -576,8 +576,8 @@ struct Curl_handler {
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
 
 #define TRNSPRT_NONE 0
-#define TRNSPRT_TCP 3
-#define TRNSPRT_UDP 4
+#define TRNSPRT_TCP  3
+#define TRNSPRT_UDP  4
 #define TRNSPRT_QUIC 5
 #define TRNSPRT_UNIX 6
 
@@ -827,8 +827,8 @@ struct Progress {
 
 #define CURL_SPEED_RECORDS (5 + 1) /* 6 entries for 5 seconds */
 
-  curl_off_t speed_amount[ CURL_SPEED_RECORDS ];
-  struct curltime speed_time[ CURL_SPEED_RECORDS ];
+  curl_off_t speed_amount[CURL_SPEED_RECORDS];
+  struct curltime speed_time[CURL_SPEED_RECORDS];
   unsigned char speeder_c;
   BIT(hide);
   BIT(ul_size_known);
@@ -839,19 +839,19 @@ struct Progress {
 };
 
 typedef enum {
-    RTSPREQ_NONE, /* first in list */
-    RTSPREQ_OPTIONS,
-    RTSPREQ_DESCRIBE,
-    RTSPREQ_ANNOUNCE,
-    RTSPREQ_SETUP,
-    RTSPREQ_PLAY,
-    RTSPREQ_PAUSE,
-    RTSPREQ_TEARDOWN,
-    RTSPREQ_GET_PARAMETER,
-    RTSPREQ_SET_PARAMETER,
-    RTSPREQ_RECORD,
-    RTSPREQ_RECEIVE,
-    RTSPREQ_LAST /* last in list */
+  RTSPREQ_NONE, /* first in list */
+  RTSPREQ_OPTIONS,
+  RTSPREQ_DESCRIBE,
+  RTSPREQ_ANNOUNCE,
+  RTSPREQ_SETUP,
+  RTSPREQ_PLAY,
+  RTSPREQ_PAUSE,
+  RTSPREQ_TEARDOWN,
+  RTSPREQ_GET_PARAMETER,
+  RTSPREQ_SET_PARAMETER,
+  RTSPREQ_RECORD,
+  RTSPREQ_RECEIVE,
+  RTSPREQ_LAST /* last in list */
 } Curl_RtspReq;
 
 struct auth {

@@ -347,46 +347,46 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   /* Do we have an untagged command response? */
   if(len >= 2 && !memcmp("* ", line, 2)) {
     switch(imapc->state) {
-      /* States which are interested in untagged responses */
-      case IMAP_CAPABILITY:
-        if(!imap_matchresp(line, len, "CAPABILITY"))
-          return FALSE;
-        break;
-
-      case IMAP_LIST:
-        if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
-           (imap->custom && !imap_matchresp(line, len, imap->custom) &&
-            (!curl_strequal(imap->custom, "STORE") ||
-             !imap_matchresp(line, len, "FETCH")) &&
-            !curl_strequal(imap->custom, "SELECT") &&
-            !curl_strequal(imap->custom, "EXAMINE") &&
-            !curl_strequal(imap->custom, "SEARCH") &&
-            !curl_strequal(imap->custom, "EXPUNGE") &&
-            !curl_strequal(imap->custom, "LSUB") &&
-            !curl_strequal(imap->custom, "UID") &&
-            !curl_strequal(imap->custom, "GETQUOTAROOT") &&
-            !curl_strequal(imap->custom, "NOOP")))
-          return FALSE;
-        break;
-
-      case IMAP_SELECT:
-        /* SELECT is special in that its untagged responses do not have a
-           common prefix so accept anything! */
-        break;
-
-      case IMAP_FETCH:
-        if(!imap_matchresp(line, len, "FETCH"))
-          return FALSE;
-        break;
-
-      case IMAP_SEARCH:
-        if(!imap_matchresp(line, len, "SEARCH"))
-          return FALSE;
-        break;
-
-      /* Ignore other untagged responses */
-      default:
+    /* States which are interested in untagged responses */
+    case IMAP_CAPABILITY:
+      if(!imap_matchresp(line, len, "CAPABILITY"))
         return FALSE;
+      break;
+
+    case IMAP_LIST:
+      if((!imap->custom && !imap_matchresp(line, len, "LIST")) ||
+         (imap->custom && !imap_matchresp(line, len, imap->custom) &&
+          (!curl_strequal(imap->custom, "STORE") ||
+           !imap_matchresp(line, len, "FETCH")) &&
+          !curl_strequal(imap->custom, "SELECT") &&
+          !curl_strequal(imap->custom, "EXAMINE") &&
+          !curl_strequal(imap->custom, "SEARCH") &&
+          !curl_strequal(imap->custom, "EXPUNGE") &&
+          !curl_strequal(imap->custom, "LSUB") &&
+          !curl_strequal(imap->custom, "UID") &&
+          !curl_strequal(imap->custom, "GETQUOTAROOT") &&
+          !curl_strequal(imap->custom, "NOOP")))
+        return FALSE;
+      break;
+
+    case IMAP_SELECT:
+      /* SELECT is special in that its untagged responses do not have a
+         common prefix so accept anything! */
+      break;
+
+    case IMAP_FETCH:
+      if(!imap_matchresp(line, len, "FETCH"))
+        return FALSE;
+      break;
+
+    case IMAP_SEARCH:
+      if(!imap_matchresp(line, len, "SEARCH"))
+        return FALSE;
+      break;
+
+    /* Ignore other untagged responses */
+    default:
+      return FALSE;
     }
 
     *resp = '*';
@@ -400,16 +400,16 @@ static bool imap_endofresp(struct Curl_easy *data, struct connectdata *conn,
   if(!imap->custom && ((len == 3 && line[0] == '+') ||
                        (len >= 2 && !memcmp("+ ", line, 2)))) {
     switch(imapc->state) {
-      /* States which are interested in continuation responses */
-      case IMAP_AUTHENTICATE:
-      case IMAP_APPEND:
-        *resp = '+';
-        break;
+    /* States which are interested in continuation responses */
+    case IMAP_AUTHENTICATE:
+    case IMAP_APPEND:
+      *resp = '+';
+      break;
 
-      default:
-        failf(data, "Unexpected continuation response");
-        *resp = -1;
-        break;
+    default:
+      failf(data, "Unexpected continuation response");
+      *resp = -1;
+      break;
     }
 
     return TRUE;
@@ -471,7 +471,7 @@ static void imap_state(struct Curl_easy *data,
 {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
-  static const char * const names[]={
+  static const char * const names[] = {
     "STOP",
     "SERVERGREET",
     "CAPABILITY",
@@ -570,8 +570,8 @@ static CURLcode imap_perform_upgrade_tls(struct Curl_easy *data,
          result, ssldone));
   if(!result && ssldone) {
     imapc->ssldone = ssldone;
-     /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
-     result = imap_perform_capability(data, imapc);
+    /* perform CAPA now, changes imapc->state out of IMAP_UPGRADETLS */
+    result = imap_perform_capability(data, imapc);
   }
 out:
   return result;
@@ -636,7 +636,7 @@ static CURLcode imap_perform_authenticate(struct Curl_easy *data,
   struct imap_conn *imapc =
     Curl_conn_meta_get(data->conn, CURL_META_IMAP_CONN);
   CURLcode result = CURLE_OK;
-  const char *ir = (const char *) Curl_bufref_ptr(initresp);
+  const char *ir = (const char *)Curl_bufref_ptr(initresp);
 
   if(!imapc)
     return CURLE_FAILED_INIT;
@@ -669,7 +669,7 @@ static CURLcode imap_continue_authenticate(struct Curl_easy *data,
   if(!imapc)
     return CURLE_FAILED_INIT;
   return Curl_pp_sendf(data, &imapc->pp,
-                       "%s", (const char *) Curl_bufref_ptr(resp));
+                       "%s", (const char *)Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************
@@ -1048,8 +1048,8 @@ static CURLcode imap_state_capability_resp(struct Curl_easy *data,
 
       /* Extract the word */
       for(wordlen = 0; line[wordlen] && line[wordlen] != ' ' &&
-            line[wordlen] != '\t' && line[wordlen] != '\r' &&
-            line[wordlen] != '\n';)
+                       line[wordlen] != '\t' && line[wordlen] != '\r' &&
+                       line[wordlen] != '\n';)
         wordlen++;
 
       /* Does the server support the STARTTLS capability? */
@@ -1322,7 +1322,6 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
         imapc->mb_uidvalidity = (unsigned int)value;
         imapc->mb_uidvalidity_set = TRUE;
       }
-
     }
   }
   else if(imapcode == IMAP_RESP_OK) {
@@ -1797,7 +1796,7 @@ static CURLcode imap_perform(struct Curl_easy *data, bool *connected,
     /* SEARCH the current mailbox */
     result = imap_perform_search(data, imapc, imap);
   else if(imap->mailbox && !selected &&
-         (imap->custom || imap->uid || imap->mindex || imap->query))
+          (imap->custom || imap->uid || imap->mindex || imap->query))
     /* SELECT the mailbox */
     result = imap_perform_select(data, imapc, imap);
   else
@@ -2112,21 +2111,33 @@ static bool imap_is_bchar(char ch)
     return TRUE;
 
   switch(ch) {
-    /* bchar */
-    case ':': case '@': case '/':
-    /* bchar -> achar */
-    case '&': case '=':
-    /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
-    case '-': case '.': case '_': case '~':
-    /* bchar -> achar -> uchar -> sub-delims-sh */
-    case '!': case '$': case '\'': case '(': case ')': case '*':
-    case '+': case ',':
-    /* bchar -> achar -> uchar -> pct-encoded */
-    case '%': /* HEXDIG chars are already included above */
-      return TRUE;
+  /* bchar */
+  case ':':
+  case '@':
+  case '/':
+  /* bchar -> achar */
+  case '&':
+  case '=':
+  /* bchar -> achar -> uchar -> unreserved (without alphanumeric) */
+  case '-':
+  case '.':
+  case '_':
+  case '~':
+  /* bchar -> achar -> uchar -> sub-delims-sh */
+  case '!':
+  case '$':
+  case '\'':
+  case '(':
+  case ')':
+  case '*':
+  case '+':
+  case ',':
+  /* bchar -> achar -> uchar -> pct-encoded */
+  case '%': /* HEXDIG chars are already included above */
+    return TRUE;
 
-    default:
-      return FALSE;
+  default:
+    return FALSE;
   }
 }
 

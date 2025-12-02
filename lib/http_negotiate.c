@@ -47,7 +47,6 @@ static void http_auth_nego_reset(struct connectdata *conn,
     Curl_auth_cleanup_spnego(neg_ctx);
 }
 
-
 CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
                               bool proxy, const char *header)
 {

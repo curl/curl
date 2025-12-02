@@ -59,8 +59,8 @@ static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
   if(secs < 0)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-#if LONG_MAX > (TIMEDIFF_T_MAX/1000)
-  if(secs > (TIMEDIFF_T_MAX/1000)) {
+#if LONG_MAX > (TIMEDIFF_T_MAX / 1000)
+  if(secs > (TIMEDIFF_T_MAX / 1000)) {
     *ptimeout_ms = TIMEDIFF_T_MAX;
     return CURLE_OK;
   }
@@ -193,7 +193,7 @@ static CURLcode setstropt_interface(char *option, char **devp,
   return CURLE_OK;
 }
 
-#define C_SSLVERSION_VALUE(x) (x & 0xffff)
+#define C_SSLVERSION_VALUE(x)     (x & 0xffff)
 #define C_SSLVERSION_MAX_VALUE(x) ((unsigned long)x & 0xffff0000)
 
 static CURLcode protocol2num(const char *str, curl_prot_t *val)
@@ -208,7 +208,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(curl_strequal(str, "all")) {
-    *val = ~(curl_prot_t) 0;
+    *val = ~(curl_prot_t)0;
     return CURLE_OK;
   }
 
@@ -217,7 +217,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     size_t tlen;
 
     str = strchr(str, ',');
-    tlen = str ? (size_t) (str - token) : strlen(token);
+    tlen = str ? (size_t)(str - token) : strlen(token);
     if(tlen) {
       const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
 
@@ -787,8 +787,7 @@ static CURLcode setopt_bool(struct Curl_easy *data, CURLoption option,
   case CURLOPT_SSL_SESSIONID_CACHE:
     s->ssl.primary.cache_session = enabled;
 #ifndef CURL_DISABLE_PROXY
-    s->proxy_ssl.primary.cache_session =
-      s->ssl.primary.cache_session;
+    s->proxy_ssl.primary.cache_session = s->ssl.primary.cache_session;
 #endif
     break;
 #ifdef USE_SSH
@@ -1145,7 +1144,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
   case CURLOPT_IPRESOLVE:
     if((arg < CURL_IPRESOLVE_WHATEVER) || (arg > CURL_IPRESOLVE_V6))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->ipver = (unsigned char) arg;
+    s->ipver = (unsigned char)arg;
     break;
 
   case CURLOPT_CONNECT_ONLY:
@@ -1444,8 +1443,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     if(!s->err)
       s->err = stderr;
     break;
-  case CURLOPT_SHARE:
-  {
+  case CURLOPT_SHARE: {
     struct Curl_share *set = va_arg(param, struct Curl_share *);
 
     /* disconnect from old share, if any */
@@ -1492,7 +1490,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
         /* enable cookies since we now use a share that uses cookies! */
         data->cookies = data->share->cookies;
       }
-#endif   /* CURL_DISABLE_HTTP */
+#endif /* CURL_DISABLE_HTTP */
 #ifndef CURL_DISABLE_HSTS
       if(data->share->hsts) {
         /* first free the private one if any */
@@ -1509,8 +1507,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     }
     /* check for host cache not needed,
      * it will be done by curl_easy_perform */
+    break;
   }
-  break;
 
 #ifdef USE_HTTP2
   case CURLOPT_STREAM_DEPENDS:
@@ -1841,7 +1839,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * to use the socks proxy.
      */
     return Curl_setstropt(&s->str[STRING_PRE_PROXY], ptr);
-#endif   /* CURL_DISABLE_PROXY */
+#endif /* CURL_DISABLE_PROXY */
 
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_SOCKS5_GSSAPI_SERVICE:
@@ -2038,8 +2036,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     curlx_free(u);
     curlx_free(p);
-  }
     break;
+  }
   case CURLOPT_PROXYUSERNAME:
     /*
      * authentication username to use in the operation
@@ -2367,7 +2365,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     else
       /* make a NULL argument reset to default */
-      s->allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
+      s->allowed_protocols = (curl_prot_t)CURLPROTO_ALL;
     break;
 
   case CURLOPT_REDIR_PROTOCOLS_STR:
@@ -2379,7 +2377,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     }
     else
       /* make a NULL argument reset to default */
-      s->redir_protocols = (curl_prot_t) CURLPROTO_REDIR;
+      s->redir_protocols = (curl_prot_t)CURLPROTO_REDIR;
     break;
 
   case CURLOPT_DEFAULT_PROTOCOL:

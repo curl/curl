@@ -165,8 +165,7 @@ static bool countcheck(const char *func, int line, const char *source)
   if(memlimit && source) {
     if(!memsize) {
       /* log to file */
-      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
-                   source, line, func);
+      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n", source, line, func);
       /* log to stderr also */
       curl_mfprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
                     source, line, func);
@@ -336,8 +335,8 @@ void curl_dbg_free(void *ptr, int line, const char *source)
   if(ptr) {
     struct memdebug *mem;
 
-  if(source)
-    curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
+    if(source)
+      curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -515,8 +514,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
   DEBUGASSERT(file != NULL);
 
   if(source)
-    curl_dbg_log("FILE %s:%d fclose(%p)\n",
-                 source, line, (void *)file);
+    curl_dbg_log("FILE %s:%d fclose(%p)\n", source, line, (void *)file);
 
   /* !checksrc! disable BANNEDFUNC 1 */
   res = fclose(file);

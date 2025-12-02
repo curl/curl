@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-
 /* OS/400 netdb.h does not define NI_MAXHOST. */
 #define NI_MAXHOST      1025
 
@@ -37,7 +36,6 @@ typedef unsigned long   u_int32_t;
 /* OS/400 has no idea of a tty! */
 #define isatty(fd)      0
 
-
 /* Workaround bug in IBM QADRT runtime library:
  * function puts() does not output the implicit trailing newline.
  */
@@ -45,7 +43,6 @@ typedef unsigned long   u_int32_t;
 #include <stdio.h>      /* Be sure it is loaded. */
 #undef puts
 #define puts(s) (fputs((s), stdout) == EOF? EOF: putchar('\n'))
-
 
 /* System API wrapper prototypes & definitions to support ASCII parameters. */
 

@@ -151,7 +151,6 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
   Curl_safefree(rrinfo->rrname);
 }
 
-
 #ifdef USE_ARES
 
 static CURLcode httpsrr_opt(struct Curl_easy *data,

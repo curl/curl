@@ -66,7 +66,7 @@
 
 /* RFC2348 allows the block size to be negotiated */
 #define TFTP_BLKSIZE_DEFAULT 512
-#define TFTP_OPTION_BLKSIZE "blksize"
+#define TFTP_OPTION_BLKSIZE  "blksize"
 
 /* from RFC2349: */
 #define TFTP_OPTION_TSIZE    "tsize"
@@ -159,7 +159,6 @@ static CURLcode tftp_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 static CURLcode tftp_translate_code(tftp_error_t error);
 
-
 /*
  * TFTP protocol handler.
  */
@@ -221,7 +220,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     timeout = 15;
 
   /* Average reposting an ACK after 5 seconds */
-  state->retry_max = (int)timeout/5;
+  state->retry_max = (int)timeout / 5;
 
   /* But bound the total number */
   if(state->retry_max < 3)
@@ -231,7 +230,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     state->retry_max = 50;
 
   /* Compute the re-ACK interval to suit the timeout */
-  state->retry_time = (int)(timeout/state->retry_max);
+  state->retry_time = (int)(timeout / state->retry_max);
   if(state->retry_time < 1)
     state->retry_time = 1;
 
@@ -259,7 +258,6 @@ static void setpacketevent(struct tftp_packet *packet, unsigned short num)
   packet->data[1] = (unsigned char)(num & 0xff);
 }
 
-
 static void setpacketblock(struct tftp_packet *packet, unsigned short num)
 {
   packet->data[2] = (unsigned char)(num >> 8);
@@ -279,7 +277,7 @@ static unsigned short getrpacketblock(const struct tftp_packet *packet)
 static size_t tftp_strnlen(const char *string, size_t maxlen)
 {
   const char *end = memchr(string, '\0', maxlen);
-  return end ? (size_t) (end - string) : maxlen;
+  return end ? (size_t)(end - string) : maxlen;
 }
 
 static const char *tftp_option_get(const char *buf, size_t len,
@@ -294,7 +292,7 @@ static const char *tftp_option_get(const char *buf, size_t len,
     return NULL;
   *option = buf;
 
-  loc += tftp_strnlen(buf + loc, len-loc);
+  loc += tftp_strnlen(buf + loc, len - loc);
   loc++; /* NULL term */
 
   if(loc > len)
@@ -570,7 +568,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
 /* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
    boundary */
-#define NEXT_BLOCKNUM(x) (((x) + 1)&0xffff)
+#define NEXT_BLOCKNUM(x) (((x) + 1) & 0xffff)
 
 /**********************************************************
  *
@@ -1136,15 +1134,14 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
         result = Curl_client_write(data, CLIENTWRITE_BODY,
                                    (char *)state->rpacket.data + 4,
-                                   state->rbytes-4);
+                                   state->rbytes - 4);
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
           return result;
         }
       }
       break;
-    case TFTP_EVENT_ERROR:
-    {
+    case TFTP_EVENT_ERROR: {
       unsigned short error = getrpacketblock(&state->rpacket);
       char *str = (char *)state->rpacket.data + 4;
       size_t strn = state->rbytes - 4;
@@ -1327,7 +1324,6 @@ static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)
 
   return result;
 }
-
 
 /**********************************************************
  *

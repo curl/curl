@@ -96,7 +96,7 @@
 
 #ifdef USE_WIN32_LDAP
 #define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
-#define curl_ldap_num_t ULONG
+#define curl_ldap_num_t    ULONG
 #else
 #define FREE_ON_WINLDAP(x)
 #define curl_ldap_num_t int
@@ -619,7 +619,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           }
 
           if((attr_len > 7) &&
-             curl_strequal(";binary", attr + (attr_len - 7)) ) {
+             curl_strequal(";binary", attr + (attr_len - 7))) {
             /* Binary attribute, encode to base64. */
             if(vals[i]->bv_len) {
               result = curlx_base64_encode((uint8_t *)vals[i]->bv_val,
@@ -886,8 +886,7 @@ static curl_ldap_num_t ldap_url_parse2_low(struct Curl_easy *data,
       LDAP_TRACE(("attr[%zu] '%.*s'\n", i, (int)out.len, out.str));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(out.str, out.len, &unescaped, NULL,
-                              REJECT_ZERO);
+      result = Curl_urldecode(out.str, out.len, &unescaped, NULL, REJECT_ZERO);
       if(result) {
         rc = LDAP_NO_MEMORY;
         goto quit;
