@@ -1509,7 +1509,7 @@ static void delete_imported_key(PCCERT_CONTEXT imported_cert)
     goto done;
   }
 
-  storage = malloc(byte_count);
+  storage = curlx_malloc(byte_count);
   if(!storage) {
     /* On failure to allocate, skip attempting to delete imported key. */
     goto done;
@@ -1605,7 +1605,7 @@ done:
     }
 #endif
     CertFreeCertificateContext(imported_cert);
-    free(storage);
+    curlx_free(storage);
 }
 
 static void schannel_session_free(void *sessionid)
