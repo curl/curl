@@ -30,12 +30,12 @@
 #include "curlx/warnless.h"
 
 /* The recommended order of the TLS backends:
- * * OpenSSL
- * * GnuTLS
- * * wolfSSL
- * * Schannel SSPI
- * * mbedTLS
- * * Rustls
+ * 1. OpenSSL
+ * 2. GnuTLS
+ * 3. wolfSSL
+ * 4. Schannel SSPI
+ * 5. mbedTLS
+ * 6. Rustls
  * Skip the backend if it does not support the required algorithm */
 
 #ifdef USE_OPENSSL
@@ -71,7 +71,6 @@
 #    endif
 #  endif
 #endif /* USE_OPENSSL */
-
 
 #if !defined(HAS_SHA512_256_IMPLEMENTATION) && defined(USE_GNUTLS)
 #  include <nettle/sha.h>
@@ -129,7 +128,6 @@ static CURLcode Curl_sha512_256_init(void *context)
   return CURLE_FAILED_INIT;
 }
 
-
 /**
  * Process portion of bytes.
  *
@@ -149,7 +147,6 @@ static CURLcode Curl_sha512_256_update(void *context,
 
   return CURLE_OK;
 }
-
 
 /**
  * Finalise SHA-512/256 calculation, return digest.
@@ -212,7 +209,6 @@ static CURLcode Curl_sha512_256_init(void *context)
   return CURLE_OK;
 }
 
-
 /**
  * Process portion of bytes.
  *
@@ -233,7 +229,6 @@ static CURLcode Curl_sha512_256_update(void *context,
 
   return CURLE_OK;
 }
-
 
 /**
  * Finalise SHA-512/256 calculation, return digest.
@@ -286,32 +281,31 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest,
 /* Bits manipulation macros and functions.
    Can be moved to other headers to reuse. */
 
-#define CURL_GET_64BIT_BE(ptr)                      \
-  (((uint64_t)(((const uint8_t*)(ptr))[0]) << 56) | \
-   ((uint64_t)(((const uint8_t*)(ptr))[1]) << 48) | \
-   ((uint64_t)(((const uint8_t*)(ptr))[2]) << 40) | \
-   ((uint64_t)(((const uint8_t*)(ptr))[3]) << 32) | \
-   ((uint64_t)(((const uint8_t*)(ptr))[4]) << 24) | \
-   ((uint64_t)(((const uint8_t*)(ptr))[5]) << 16) | \
-   ((uint64_t)(((const uint8_t*)(ptr))[6]) << 8)  | \
-    (uint64_t)(((const uint8_t*)(ptr))[7]))
+#define CURL_GET_64BIT_BE(ptr)                       \
+  (((uint64_t)(((const uint8_t *)(ptr))[0]) << 56) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[1]) << 48) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[2]) << 40) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[3]) << 32) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[4]) << 24) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[5]) << 16) | \
+   ((uint64_t)(((const uint8_t *)(ptr))[6]) << 8)  | \
+    (uint64_t)(((const uint8_t *)(ptr))[7]))
 
-#define CURL_PUT_64BIT_BE(ptr,val) do {                      \
-    ((uint8_t*)(ptr))[7]=(uint8_t)((uint64_t)(val));         \
-    ((uint8_t*)(ptr))[6]=(uint8_t)(((uint64_t)(val)) >> 8);  \
-    ((uint8_t*)(ptr))[5]=(uint8_t)(((uint64_t)(val)) >> 16); \
-    ((uint8_t*)(ptr))[4]=(uint8_t)(((uint64_t)(val)) >> 24); \
-    ((uint8_t*)(ptr))[3]=(uint8_t)(((uint64_t)(val)) >> 32); \
-    ((uint8_t*)(ptr))[2]=(uint8_t)(((uint64_t)(val)) >> 40); \
-    ((uint8_t*)(ptr))[1]=(uint8_t)(((uint64_t)(val)) >> 48); \
-    ((uint8_t*)(ptr))[0]=(uint8_t)(((uint64_t)(val)) >> 56); \
+#define CURL_PUT_64BIT_BE(ptr,val) do {                        \
+    ((uint8_t*)(ptr))[7] = (uint8_t) ((uint64_t)(val));        \
+    ((uint8_t*)(ptr))[6] = (uint8_t)(((uint64_t)(val)) >> 8);  \
+    ((uint8_t*)(ptr))[5] = (uint8_t)(((uint64_t)(val)) >> 16); \
+    ((uint8_t*)(ptr))[4] = (uint8_t)(((uint64_t)(val)) >> 24); \
+    ((uint8_t*)(ptr))[3] = (uint8_t)(((uint64_t)(val)) >> 32); \
+    ((uint8_t*)(ptr))[2] = (uint8_t)(((uint64_t)(val)) >> 40); \
+    ((uint8_t*)(ptr))[1] = (uint8_t)(((uint64_t)(val)) >> 48); \
+    ((uint8_t*)(ptr))[0] = (uint8_t)(((uint64_t)(val)) >> 56); \
   } while(0)
 
 /* Defined as a function. The macro version may duplicate the binary code
  * size as each argument is used twice, so if any calculation is used
  * as an argument, the calculation could be done twice. */
-static CURL_FORCEINLINE uint64_t Curl_rotr64(uint64_t value,
-                                                  unsigned int bits)
+static CURL_FORCEINLINE uint64_t Curl_rotr64(uint64_t value, unsigned int bits)
 {
   bits %= 64;
   if(bits == 0)
@@ -399,7 +393,6 @@ struct Curl_sha512_256ctx {
  */
 typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
 
-
 /**
  * Initialise structure for SHA-512/256 calculation.
  *
@@ -434,16 +427,14 @@ static CURLcode Curl_sha512_256_init(void *context)
   return CURLE_OK;
 }
 
-
 /**
  * Base of the SHA-512/256 transformation.
  * Gets a full 128 bytes block of data and updates hash values;
  * @param H     hash values
  * @param data  the data buffer with #CURL_SHA512_256_BLOCK_SIZE bytes block
  */
-static
-void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
-                               const void *data)
+static void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
+                                      const void *data)
 {
   /* Working variables,
      see FIPS PUB 180-4 section 6.7, 6.4. */
@@ -462,8 +453,8 @@ void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
 
   /* 'Ch' and 'Maj' macro functions are defined with widely-used optimization.
      See FIPS PUB 180-4 formulae 4.8, 4.9. */
-#define Sha512_Ch(x,y,z)     ( (z) ^ ((x) & ((y) ^ (z))) )
-#define Sha512_Maj(x,y,z)    ( ((x) & (y)) ^ ((z) & ((x) ^ (y))) )
+#define Sha512_Ch(x, y, z)    ( (z) ^ ((x) & ((y) ^ (z))) )
+#define Sha512_Maj(x, y, z)   ( ((x) & (y)) ^ ((z) & ((x) ^ (y))) )
 
   /* Four 'Sigma' macro functions.
      See FIPS PUB 180-4 formulae 4.10, 4.11, 4.12, 4.13. */
@@ -533,38 +524,41 @@ void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        * Note: 'wt' must be used exactly one time in this macro as macro for
        'wt' calculation may change other data as well every time when
        used. */
-#define SHA2STEP64(vA,vB,vC,vD,vE,vF,vG,vH,kt,wt) do {                       \
-     (vD) += ((vH) += SIG1((vE)) + Sha512_Ch((vE),(vF),(vG)) + (kt) + (wt)); \
-     (vH) += SIG0((vA)) + Sha512_Maj((vA),(vB),(vC)); } while (0)
+#define SHA2STEP64(vA, vB, vC, vD, vE, vF, vG, vH, kt, wt)                    \
+  do {                                                                        \
+    (vD) += ((vH) += SIG1((vE)) + Sha512_Ch((vE), (vF), (vG)) + (kt) + (wt)); \
+    (vH) += SIG0((vA)) + Sha512_Maj((vA), (vB), (vC));                        \
+  } while(0)
 
     /* One step of SHA-512/256 computation with working variables rotation,
        see FIPS PUB 180-4 section 6.4.2 step 3. This macro version reassigns
        all working variables on each step. */
-#define SHA2STEP64RV(vA,vB,vC,vD,vE,vF,vG,vH,kt,wt) do {                \
-      uint64_t tmp_h_ = (vH);                                           \
-      SHA2STEP64((vA),(vB),(vC),(vD),(vE),(vF),(vG),tmp_h_,(kt),(wt));  \
-      (vH) = (vG);                                                      \
-      (vG) = (vF);                                                      \
-      (vF) = (vE);                                                      \
-      (vE) = (vD);                                                      \
-      (vD) = (vC);                                                      \
-      (vC) = (vB);                                                      \
-      (vB) = (vA);                                                      \
-      (vA) = tmp_h_;  } while(0)
+#define SHA2STEP64RV(vA, vB, vC, vD, vE, vF, vG, vH, kt, wt)                  \
+  do {                                                                        \
+    uint64_t tmp_h_ = (vH);                                                   \
+    SHA2STEP64((vA), (vB), (vC), (vD), (vE), (vF), (vG), tmp_h_, (kt), (wt)); \
+    (vH) = (vG);                                                              \
+    (vG) = (vF);                                                              \
+    (vF) = (vE);                                                              \
+    (vE) = (vD);                                                              \
+    (vD) = (vC);                                                              \
+    (vC) = (vB);                                                              \
+    (vB) = (vA);                                                              \
+    (vA) = tmp_h_;                                                            \
+  } while(0)
 
     /* Get value of W(t) from input data buffer for 0 <= t <= 15,
        See FIPS PUB 180-4 section 6.2.
        Input data must be read in big-endian bytes order,
        see FIPS PUB 180-4 section 3.1.2. */
-#define SHA512_GET_W_FROM_DATA(buf,t)                                   \
-    CURL_GET_64BIT_BE(                                                  \
-      ((const uint8_t*)(buf)) + (t) * SHA512_256_BYTES_IN_WORD)
+#define SHA512_GET_W_FROM_DATA(buf, t) \
+  CURL_GET_64BIT_BE(((const uint8_t *)(buf)) + (t) * SHA512_256_BYTES_IN_WORD)
 
     /* During first 16 steps, before making any calculation on each step, the
        W element is read from the input data buffer as a big-endian value and
        stored in the array of W elements. */
     for(t = 0; t < 16; ++t) {
-      SHA2STEP64RV(a, b, c, d, e, f, g, h, K[t], \
+      SHA2STEP64RV(a, b, c, d, e, f, g, h, K[t],
                    W[t] = SHA512_GET_W_FROM_DATA(data, t));
     }
 
@@ -573,15 +567,15 @@ void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        As only the last 16 'W' are used in calculations, it is possible to
        use 16 elements array of W as a cyclic buffer.
        Note: ((t-16) & 15) have same value as (t & 15) */
-#define Wgen(w,t)                                                  \
-    (uint64_t)((w)[((t) - 16) & 15] + sig1((w)[((t) -  2) & 15]) + \
-               (w)[((t) -  7) & 15] + sig0((w)[((t) - 15) & 15]))
+#define Wgen(w, t)                                               \
+  (uint64_t)((w)[((t) - 16) & 15] + sig1((w)[((t) -  2) & 15]) + \
+             (w)[((t) -  7) & 15] + sig0((w)[((t) - 15) & 15]))
 
     /* During the last 64 steps, before making any calculation on each step,
        current W element is generated from other W elements of the cyclic
        buffer and the generated value is stored back in the cyclic buffer. */
     for(t = 16; t < 80; ++t) {
-      SHA2STEP64RV(a, b, c, d, e, f, g, h, K[t], \
+      SHA2STEP64RV(a, b, c, d, e, f, g, h, K[t],
                    W[t & 15] = Wgen(W, t));
     }
   }
@@ -597,7 +591,6 @@ void Curl_sha512_256_transform(uint64_t H[SHA512_256_HASH_SIZE_WORDS],
   H[6] += g;
   H[7] += h;
 }
-
 
 /**
  * Process portion of bytes.
@@ -662,7 +655,6 @@ static CURLcode Curl_sha512_256_update(void *context,
   return CURLE_OK;
 }
 
-
 /**
  * Size of "length" insertion in bits.
  * See FIPS PUB 180-4 section 5.1.2.
@@ -709,7 +701,7 @@ static CURLcode Curl_sha512_256_finish(unsigned char *digest, void *context)
      predefined (0x80). */
   /* Buffer always have space at least for one byte (as full buffers are
      processed when formed). */
-  ((unsigned char *) ctx_buf)[bytes_have++] = 0x80U;
+  ((unsigned char *)ctx_buf)[bytes_have++] = 0x80U;
 
   if(CURL_SHA512_256_BLOCK_SIZE - bytes_have < SHA512_256_SIZE_OF_LEN_ADD) {
     /* No space in the current block to put the total length of message.

@@ -28,7 +28,7 @@
 #define ISUPHEXALHA(x)  (((x) >= 'A') && ((x) <= 'F'))
 
 #define ISLOWCNTRL(x) ((unsigned char)(x) <= 0x1f)
-#define IS7F(x) ((x) == 0x7f)
+#define IS7F(x)       ((x) == 0x7f)
 
 #define ISLOWPRINT(x) (((x) >= 9) && ((x) <= 0x0d))
 

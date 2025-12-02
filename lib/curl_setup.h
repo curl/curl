@@ -325,8 +325,8 @@
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
  */
-#define CURL_CONC_MACROS_(A,B) A ## B
-#define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
+#define CURL_CONC_MACROS_(A, B) A ## B
+#define CURL_CONC_MACROS(A, B) CURL_CONC_MACROS_(A, B)
 
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that it matches the GNU format attribute we
@@ -431,9 +431,9 @@
 #    ifdef __amigaos4__
        int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                              fd_set *errorfds, struct timeval *timeout);
-#      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
+#      define select(a, b, c, d, e) Curl_amiga_select(a, b, c, d, e)
 #    else
-#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#      define select(a, b, c, d, e) WaitSelect(a, b, c, d, e, 0)
 #    endif
      /* must not use libc's fcntl() on bsdsocket.library sockfds! */
 #    undef HAVE_FCNTL
@@ -485,7 +485,7 @@
 #    undef  lseek
 #    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
 #    undef  fstat
-#    define fstat(fdes,stp)              _fstati64(fdes, stp)
+#    define fstat(fdes, stp)             _fstati64(fdes, stp)
 #    define struct_stat                  struct _stati64
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
@@ -500,8 +500,8 @@
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
 #  undef  lseek
-#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
-#  define LSEEK_ERROR                (offset_t)-1
+#  define lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                  (offset_t)-1
 #endif
 
 #ifndef struct_stat
@@ -570,7 +570,7 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - 1)
 
-#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
+#define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
@@ -639,8 +639,8 @@
 #  ifdef MSDOS  /* Watt-32 */
 
 #    include <sys/ioctl.h>
-#    define select(n,r,w,x,t) select_s(n,r,w,x,t)
-#    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
+#    define select(n, r, w, x, t)  select_s(n, r, w, x, t)
+#    define ioctl(x, y, z)         ioctlsocket(x, y, (char *)(z))
 #    include <tcp.h>
 #    undef word
 #    undef byte
@@ -899,15 +899,15 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
-#define CURLMAX(x,y) ((x)>(y)?(x):(y))
-#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+#define CURLMAX(x, y) ((x) > (y) ? (x) : (y))
+#define CURLMIN(x, y) ((x) < (y) ? (x) : (y))
 
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x,sizeof(x)-1
+#define STRCONST(x) x, sizeof(x) - 1
 
-#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#define CURL_ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 /* Buffer size for error messages retrieved via
    curlx_strerror() and Curl_sspi_strerror() */
@@ -1033,28 +1033,28 @@ CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 
-#define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
-#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
+#define sclose(sockfd) curl_dbg_sclose(sockfd, __LINE__, __FILE__)
+#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd, __LINE__, __FILE__)
 
-#define CURL_GETADDRINFO(host,serv,hint,res) \
+#define CURL_GETADDRINFO(host, serv, hint, res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-#define CURL_SOCKET(domain,type,protocol) \
+#define CURL_SOCKET(domain, type, protocol) \
   curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
-#define CURL_SOCKETPAIR(domain,type,protocol,socket_vector) \
+#define CURL_SOCKETPAIR(domain, type, protocol, socket_vector) \
   curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
                       __LINE__, __FILE__)
 #endif
-#define CURL_ACCEPT(sock,addr,len) \
+#define CURL_ACCEPT(sock, addr, len) \
   curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_ACCEPT4
-#define CURL_ACCEPT4(sock,addr,len,flags) \
+#define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
-#define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
+#define CURL_SEND(a, b, c, d) curl_dbg_send(a, b, c, d, __LINE__, __FILE__)
+#define CURL_RECV(a, b, c, d) curl_dbg_recv(a, b, c, d, __LINE__, __FILE__)
 
 #else /* !CURLDEBUG */
 

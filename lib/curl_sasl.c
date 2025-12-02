@@ -235,7 +235,7 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
   if(!result && (sasl->params->flags & SASL_FLAG_BASE64)) {
     unsigned char *msg;
     size_t msglen;
-    const char *serverdata = (const char *) Curl_bufref_ptr(out);
+    const char *serverdata = (const char *)Curl_bufref_ptr(out);
 
     if(!*serverdata || *serverdata == '=')
       Curl_bufref_set(out, NULL, 0, NULL);
@@ -399,7 +399,7 @@ static bool sasl_choose_digest(struct Curl_easy *data, struct sasl_ctx *sctx)
   if(!sctx->user)
     return FALSE;
   else if((sctx->enabledmechs & SASL_MECH_DIGEST_MD5) &&
-     Curl_auth_is_digest_supported()) {
+          Curl_auth_is_digest_supported()) {
     sctx->mech = SASL_MECH_STRING_DIGEST_MD5;
     sctx->state1 = SASL_DIGESTMD5;
     sctx->sasl->authused = SASL_MECH_DIGEST_MD5;

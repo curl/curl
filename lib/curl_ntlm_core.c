@@ -451,7 +451,7 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
 #ifndef USE_WINDOWS_SSPI
 
 #define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
-#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
+#define NTLMv2_BLOB_LEN       (44 - 16 + ntlm->target_info_len + 4)
 
 /* Timestamp in tenths of a microsecond since January 1, 1601 00:00:00 UTC. */
 struct ms_filetime {
