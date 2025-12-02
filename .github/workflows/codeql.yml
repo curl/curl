@@ -45,7 +45,7 @@ jobs:
     permissions:
       security-events: write  # To create/update security events
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
@@ -82,7 +82,7 @@ jobs:
             libnghttp2-dev libldap-dev libkrb5-dev librtmp-dev libgnutls28-dev libwolfssl-dev
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install c-ares gsasl libnghttp3 libngtcp2 mbedtls rustls-ffi
 
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
 
