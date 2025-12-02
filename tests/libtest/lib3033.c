@@ -33,8 +33,7 @@ static CURLcode t3033_req_test(CURLM *multi, CURL *curl,
   int still_running = 0;
 
   if(index == 1) {
-    curl_multi_setopt(multi, CURLMOPT_NETWORK_CHANGED,
-                      CURLMNWC_CLEAR_CONNS);
+    curl_multi_setopt(multi, CURLMOPT_NETWORK_CHANGED, CURLMNWC_CLEAR_CONNS);
     curl_mprintf("[1] signal network change\n");
   }
   else {

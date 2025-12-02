@@ -23,8 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-static int new_fnmatch(void *ptr,
-                       const char *pattern, const char *string)
+static int new_fnmatch(void *ptr, const char *pattern, const char *string)
 {
   (void)ptr;
   curl_mfprintf(stderr, "lib574: match string '%s' against pattern '%s'\n",

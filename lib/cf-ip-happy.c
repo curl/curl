@@ -108,7 +108,6 @@ void Curl_debug_set_transport_provider(uint8_t transport,
 }
 #endif /* UNITTESTS */
 
-
 struct cf_ai_iter {
   const struct Curl_addrinfo *head;
   const struct Curl_addrinfo *last;
@@ -423,9 +422,9 @@ evaluate:
     int ai_family = 0;
 #ifdef USE_IPV6
     if((bs->last_attempt_ai_family == AF_INET) ||
-        !cf_ai_iter_has_more(&bs->addr_iter)) {
-       addr = cf_ai_iter_next(&bs->ipv6_iter);
-       ai_family = bs->ipv6_iter.ai_family;
+       !cf_ai_iter_has_more(&bs->addr_iter)) {
+      addr = cf_ai_iter_next(&bs->ipv6_iter);
+      ai_family = bs->ipv6_iter.ai_family;
     }
 #endif
     if(!addr) {
@@ -629,7 +628,6 @@ struct cf_ip_happy_ctx {
   struct curltime started;
 };
 
-
 static CURLcode is_connected(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              bool *connected)
@@ -774,50 +772,50 @@ static CURLcode cf_ip_happy_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   switch(ctx->state) {
-    case SCFST_INIT:
-      DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
-      DEBUGASSERT(!cf->connected);
-      result = start_connect(cf, data);
-      if(result)
-        return result;
-      ctx->state = SCFST_WAITING;
-      FALLTHROUGH();
-    case SCFST_WAITING:
-      result = is_connected(cf, data, done);
-      if(!result && *done) {
-        DEBUGASSERT(ctx->ballers.winner);
-        DEBUGASSERT(ctx->ballers.winner->cf);
-        DEBUGASSERT(ctx->ballers.winner->cf->connected);
-        /* we have a winner. Install and activate it.
-         * close/free all others. */
-        ctx->state = SCFST_DONE;
-        cf->connected = TRUE;
-        cf->next = ctx->ballers.winner->cf;
-        ctx->ballers.winner->cf = NULL;
-        cf_ip_happy_ctx_clear(cf, data);
-        Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
+  case SCFST_INIT:
+    DEBUGASSERT(CURL_SOCKET_BAD == Curl_conn_cf_get_socket(cf, data));
+    DEBUGASSERT(!cf->connected);
+    result = start_connect(cf, data);
+    if(result)
+      return result;
+    ctx->state = SCFST_WAITING;
+    FALLTHROUGH();
+  case SCFST_WAITING:
+    result = is_connected(cf, data, done);
+    if(!result && *done) {
+      DEBUGASSERT(ctx->ballers.winner);
+      DEBUGASSERT(ctx->ballers.winner->cf);
+      DEBUGASSERT(ctx->ballers.winner->cf->connected);
+      /* we have a winner. Install and activate it.
+       * close/free all others. */
+      ctx->state = SCFST_DONE;
+      cf->connected = TRUE;
+      cf->next = ctx->ballers.winner->cf;
+      ctx->ballers.winner->cf = NULL;
+      cf_ip_happy_ctx_clear(cf, data);
+      Curl_expire_done(data, EXPIRE_HAPPY_EYEBALLS);
 
-        if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
-          Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
+      if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
+        Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-        if(Curl_trc_cf_is_verbose(cf, data)) {
-          struct ip_quadruple ipquad;
-          bool is_ipv6;
-          if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
-            const char *host;
-            int port;
-            Curl_conn_get_current_host(data, cf->sockindex, &host, &port);
-            CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
-                        host, ipquad.remote_ip, ipquad.remote_port);
-          }
+      if(Curl_trc_cf_is_verbose(cf, data)) {
+        struct ip_quadruple ipquad;
+        bool is_ipv6;
+        if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
+          const char *host;
+          int port;
+          Curl_conn_get_current_host(data, cf->sockindex, &host, &port);
+          CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
+                      host, ipquad.remote_ip, ipquad.remote_port);
         }
-#endif
-        data->info.numconnects++; /* to track the # of connections made */
       }
-      break;
-    case SCFST_DONE:
-      *done = TRUE;
-      break;
+#endif
+      data->info.numconnects++; /* to track the # of connections made */
+    }
+    break;
+  case SCFST_DONE:
+    *done = TRUE;
+    break;
   }
   return result;
 }

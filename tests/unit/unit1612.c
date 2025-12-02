@@ -40,8 +40,8 @@ static CURLcode test_unit1612(const char *arg)
   unsigned char *testp = output;
 
   Curl_hmacit(&Curl_HMAC_MD5,
-              (const unsigned char *) password, strlen(password),
-              (const unsigned char *) string1, strlen(string1),
+              (const unsigned char *)password, strlen(password),
+              (const unsigned char *)string1, strlen(string1),
               output);
 
   verify_memory(testp,
@@ -49,8 +49,8 @@ static CURLcode test_unit1612(const char *arg)
                 "\x37", HMAC_MD5_LENGTH);
 
   Curl_hmacit(&Curl_HMAC_MD5,
-              (const unsigned char *) password, strlen(password),
-              (const unsigned char *) string2, strlen(string2),
+              (const unsigned char *)password, strlen(password),
+              (const unsigned char *)string2, strlen(string2),
               output);
 
   verify_memory(testp,

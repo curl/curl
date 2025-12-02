@@ -72,7 +72,7 @@ int main(void)
 
     int still_running = 0; /* keep number of running handles */
 
-    CURLMsg *msg; /* for picking up messages with the transfer status */
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
     int msgs_left; /* how many messages are left */
 
     /* add the individual transfers */
@@ -85,7 +85,7 @@ int main(void)
     while(still_running) {
 
       struct timeval timeout;
-      int rc; /* select() return code */
+      int rc;       /* select() return code */
       CURLMcode mc; /* curl_multi_fdset() return code */
 
       fd_set fdread;
@@ -155,7 +155,7 @@ int main(void)
       case -1:
         /* select error */
         break;
-      case 0: /* timeout */
+      case 0:  /* timeout */
       default: /* action */
         curl_multi_perform(multi, &still_running);
         break;

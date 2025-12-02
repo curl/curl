@@ -38,7 +38,7 @@ struct buf_chunk {
   size_t r_offset;         /* first unread bytes */
   size_t w_offset;         /* one after last written byte */
   union {
-    uint8_t data[1]; /* the buffer for `dlen` bytes */
+    uint8_t data[1];       /* the buffer for `dlen` bytes */
     void *dummy;           /* alignment */
   } x;
 };

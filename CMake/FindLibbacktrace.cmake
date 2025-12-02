@@ -25,14 +25,13 @@
 #
 # Input variables:
 #
-# - `LIBBACKTRACE_INCLUDE_DIR`:   Absolute path to libbacktrace include directory.
-# - `LIBBACKTRACE_LIBRARY`:       Absolute path to `libbacktrace` library.
+# - `LIBBACKTRACE_INCLUDE_DIR`:  Absolute path to libbacktrace include directory.
+# - `LIBBACKTRACE_LIBRARY`:      Absolute path to `libbacktrace` library.
 #
-# Result variables:
+# Defines:
 #
-# - `LIBBACKTRACE_FOUND`:         System has libbacktrace.
-# - `LIBBACKTRACE_INCLUDE_DIRS`:  The libbacktrace include directories.
-# - `LIBBACKTRACE_LIBRARIES`:     The libbacktrace library names.
+# - `LIBBACKTRACE_FOUND`:        System has libbacktrace.
+# - `CURL::libbacktrace`:        libbacktrace library target.
 
 find_path(LIBBACKTRACE_INCLUDE_DIR NAMES "backtrace.h")
 find_library(LIBBACKTRACE_LIBRARY NAMES "backtrace" "libbacktrace")
@@ -45,8 +44,22 @@ find_package_handle_standard_args(Libbacktrace
 )
 
 if(LIBBACKTRACE_FOUND)
-  set(LIBBACKTRACE_INCLUDE_DIRS ${LIBBACKTRACE_INCLUDE_DIR})
-  set(LIBBACKTRACE_LIBRARIES    ${LIBBACKTRACE_LIBRARY})
+  set(_libbacktrace_INCLUDE_DIRS ${LIBBACKTRACE_INCLUDE_DIR})
+  set(_libbacktrace_LIBRARIES    ${LIBBACKTRACE_LIBRARY})
+
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_libbacktrace_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::libbacktrace)
+    add_library(CURL::libbacktrace INTERFACE IMPORTED)
+    set_target_properties(CURL::libbacktrace PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_libbacktrace_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_libbacktrace_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_libbacktrace_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_libbacktrace_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_libbacktrace_LIBRARIES}")
+  endif()
 endif()
 
 mark_as_advanced(LIBBACKTRACE_INCLUDE_DIR LIBBACKTRACE_LIBRARY)

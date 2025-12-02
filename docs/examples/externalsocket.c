@@ -124,7 +124,7 @@ int main(void)
 
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port   = htons(PORTNUM);
+    servaddr.sin_port = htons(PORTNUM);
 
     servaddr.sin_addr.s_addr = inet_addr(IPADDR);
     if(INADDR_NONE == servaddr.sin_addr.s_addr) {
@@ -132,8 +132,7 @@ int main(void)
       return 2;
     }
 
-    if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
-       -1) {
+    if(connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
       close(sockfd);
       printf("client error: connect: %s\n", strerror(errno));
       return 1;

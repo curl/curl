@@ -120,7 +120,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   neg_ctx->sslContext = conn->sslContext;
 #endif
   /* Check if the connection is using SSL and get the channel binding data */
-#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+#ifdef GSS_C_CHANNEL_BOUND_FLAG
 #ifdef USE_SSL
   curlx_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
@@ -134,13 +134,13 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #else
   curlx_dyn_init(&neg_ctx->channel_binding_data, 1);
 #endif /* USE_SSL */
-#endif /* CURL_GSSAPI_HAS_CHANNEL_BINDING */
+#endif /* GSS_C_CHANNEL_BOUND_FLAG */
 
   /* Initialize the security context and decode our challenge */
   result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);
 
-#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+#ifdef GSS_C_CHANNEL_BOUND_FLAG
   curlx_dyn_free(&neg_ctx->channel_binding_data);
 #endif
 

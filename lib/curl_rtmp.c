@@ -37,10 +37,7 @@
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 
-#if defined(_WIN32) && !defined(USE_LWIPSOCK)
-#define setsockopt(a,b,c,d,e) (setsockopt)(a,b,c,(const char *)d,(int)e)
-#define SET_RCVTIMEO(tv,s)   int tv = s*1000
-#elif defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
+#if defined(USE_WINSOCK) || defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
 #define SET_RCVTIMEO(tv,s)   int tv = s*1000
 #else
 #define SET_RCVTIMEO(tv,s)   struct timeval tv = {s,0}
@@ -352,7 +349,7 @@ static CURLcode rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
 }
 
 static CURLcode rtmp_send(struct Curl_easy *data, int sockindex,
-                          const void *buf, size_t len, bool eos,
+                          const uint8_t *buf, size_t len, bool eos,
                           size_t *pnwritten)
 {
   struct connectdata *conn = data->conn;

@@ -65,7 +65,7 @@ static CURLcode test_unit1300(const char *arg)
    * 2: list head will be NULL
    * 3: list tail will be NULL
    * 4: list dtor will be NULL
-  */
+   */
 
   fail_unless(Curl_llist_count(&llist) == 0,
               "list initial size should be zero");

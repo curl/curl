@@ -75,7 +75,7 @@ static void check_spbset(const char *name, const unsigned int *s, size_t slen)
   }
   /* The count is half */
   c = Curl_uint32_spbset_count(&bset);
-  fail_unless(c == slen/2, "set count is wrong");
+  fail_unless(c == slen / 2, "set count is wrong");
 
   Curl_uint32_spbset_clear(&bset);
   c = Curl_uint32_spbset_count(&bset);

@@ -51,11 +51,12 @@ int curlx_win32_open(const char *filename, int oflag, ...);
 #endif
 
 #ifdef CURLDEBUG
-#define curlx_fopen(file,mode)  curl_dbg_fopen(file,mode,__LINE__,__FILE__)
-#define curlx_freopen(file,mode,fh) \
-  curl_dbg_freopen(file,mode,fh,__LINE__,__FILE__)
-#define curlx_fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
-#define curlx_fclose(file)      curl_dbg_fclose(file,__LINE__,__FILE__)
+#define curlx_fopen(file, mode) curl_dbg_fopen(file, mode, __LINE__, __FILE__)
+#define curlx_freopen(file, mode, fh) \
+  curl_dbg_freopen(file, mode, fh, __LINE__, __FILE__)
+#define curlx_fdopen(file, mode) \
+  curl_dbg_fdopen(file, mode, __LINE__, __FILE__)
+#define curlx_fclose(file)      curl_dbg_fclose(file, __LINE__, __FILE__)
 #else
 #define curlx_fopen             CURLX_FOPEN_LOW
 #define curlx_freopen           CURLX_FREOPEN_LOW

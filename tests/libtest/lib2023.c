@@ -90,7 +90,7 @@ static CURLcode test_lib2023(const char *URL)  /* libauthretry */
   long fallback_auth_scheme = parse_auth_name(libtest_arg3);
 
   if(main_auth_scheme == CURLAUTH_NONE ||
-      fallback_auth_scheme == CURLAUTH_NONE) {
+     fallback_auth_scheme == CURLAUTH_NONE) {
     curl_mfprintf(stderr, "auth schemes not found on commandline\n");
     return TEST_ERR_MAJOR_BAD;
   }

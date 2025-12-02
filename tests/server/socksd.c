@@ -289,8 +289,8 @@ static curl_socket_t socks4(curl_socket_t fd,
 
 static curl_socket_t sockit(curl_socket_t fd)
 {
-  unsigned char buffer[2*256 + 16];
-  unsigned char response[2*256 + 16];
+  unsigned char buffer[2 * 256 + 16];
+  unsigned char response[2 * 256 + 16];
   ssize_t rc;
   unsigned char len;
   unsigned char type;
@@ -483,7 +483,7 @@ static curl_socket_t sockit(curl_socket_t fd)
       case 3:
         /* The first octet of the address field contains the number of octets
            of name that follow */
-        fprintf(dump, " %.*s\n", len-1, &address[1]);
+        fprintf(dump, " %.*s\n", len - 1, &address[1]);
         break;
       case 4:
         /* 16 bytes IPv6 address */
@@ -579,8 +579,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     /* read from client, send to remote */
     nread = recv(cp->clientfd, buffer, sizeof(buffer), 0);
     if(nread > 0) {
-      nwrite = send(cp->remotefd, (char *)buffer,
-                    (SEND_TYPE_ARG3)nread, 0);
+      nwrite = send(cp->remotefd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
       if(nwrite != nread)
         return 1;
       cp->fromclient += nwrite;
@@ -592,8 +591,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     /* read from remote, send to client */
     nread = recv(cp->remotefd, buffer, sizeof(buffer), 0);
     if(nread > 0) {
-      nwrite = send(cp->clientfd, (char *)buffer,
-                    (SEND_TYPE_ARG3)nread, 0);
+      nwrite = send(cp->clientfd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
       if(nwrite != nread)
         return 1;
       cp->fromremote += nwrite;
@@ -725,7 +723,6 @@ static bool socksd_incoming(curl_socket_t listenfd)
           cp->used = TRUE;
           clients++;
         }
-
       }
     }
     for(i = 0; i < 2; i++) {
@@ -777,7 +774,7 @@ static int test_socksd(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {

@@ -33,7 +33,6 @@
 
 #include "vauth.h"
 #include "digest.h"
-#include "../urldata.h"
 #include "../curlx/warnless.h"
 #include "../curlx/multibyte.h"
 #include "../sendf.h"
@@ -42,14 +41,14 @@
 #include "../strerror.h"
 
 /*
-* Curl_auth_is_digest_supported()
-*
-* This is used to evaluate if DIGEST is supported.
-*
-* Parameters: None
-*
-* Returns TRUE if DIGEST is supported by Windows SSPI.
-*/
+ * Curl_auth_is_digest_supported()
+ *
+ * This is used to evaluate if DIGEST is supported.
+ *
+ * Parameters: None
+ *
+ * Returns TRUE if DIGEST is supported by Windows SSPI.
+ */
 bool Curl_auth_is_digest_supported(void)
 {
   PSecPkgInfo SecurityPackage;

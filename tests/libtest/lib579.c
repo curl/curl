@@ -84,7 +84,7 @@ static size_t t579_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t579_WriteThis *pooh = (struct t579_WriteThis *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   data = testpost[pooh->counter];

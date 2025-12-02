@@ -124,7 +124,7 @@ static CURLcode test_unit1302(const char *arg)
     {"", 0, "aWlpaWlpaQ=", 15} /* unaligned size, missing a padding char */
   };
 
-  for(i = 0 ; i < CURL_ARRAYSIZE(encode); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(encode); i++) {
     struct etest *e = &encode[i];
     char *out;
     unsigned char *decoded;
@@ -180,7 +180,7 @@ static CURLcode test_unit1302(const char *arg)
     Curl_safefree(out);
   }
 
-  for(i = 0 ; i < CURL_ARRAYSIZE(badecode); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(badecode); i++) {
     struct etest *e = &badecode[i];
     unsigned char *decoded;
     size_t dlen;

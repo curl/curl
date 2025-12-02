@@ -78,7 +78,7 @@ static CURLcode test_unit1661(const char *arg)
   /**
    * testing Curl_bufref_ptr
    */
-  fail_unless((const char *) Curl_bufref_ptr(&bufref) == buffer,
+  fail_unless((const char *)Curl_bufref_ptr(&bufref) == buffer,
               "Wrong pointer value returned");
 
   /**

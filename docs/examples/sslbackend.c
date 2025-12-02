@@ -38,7 +38,7 @@
  * SSL backend has to be configured).
  *
  *  **** This example only works with libcurl 7.56.0 and later! ****
-*/
+ */
 
 int main(int argc, char **argv)
 {

@@ -25,32 +25,28 @@
 #
 # Input variables:
 #
-# - `LIBGSASL_INCLUDE_DIR`:   Absolute path to libgsasl include directory.
-# - `LIBGSASL_LIBRARY`:       Absolute path to `libgsasl` library.
+# - `LIBGSASL_INCLUDE_DIR`:  Absolute path to libgsasl include directory.
+# - `LIBGSASL_LIBRARY`:      Absolute path to `libgsasl` library.
 #
-# Result variables:
+# Defines:
 #
-# - `LIBGSASL_FOUND`:         System has libgsasl.
-# - `LIBGSASL_INCLUDE_DIRS`:  The libgsasl include directories.
-# - `LIBGSASL_LIBRARIES`:     The libgsasl library names.
-# - `LIBGSASL_LIBRARY_DIRS`:  The libgsasl library directories.
-# - `LIBGSASL_PC_REQUIRES`:   The libgsasl pkg-config packages.
-# - `LIBGSASL_CFLAGS`:        Required compiler flags.
-# - `LIBGSASL_VERSION`:       Version of libgsasl.
+# - `LIBGSASL_FOUND`:        System has libgsasl.
+# - `LIBGSASL_VERSION`:      Version of libgsasl.
+# - `CURL::libgsasl`:        libgsasl library target.
 
-set(LIBGSASL_PC_REQUIRES "libgsasl")
+set(_libgsasl_pc_requires "libgsasl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBGSASL_INCLUDE_DIR AND
    NOT DEFINED LIBGSASL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBGSASL ${LIBGSASL_PC_REQUIRES})
+  pkg_check_modules(_libgsasl ${_libgsasl_pc_requires})
 endif()
 
-if(LIBGSASL_FOUND)
+if(_libgsasl_FOUND)
   set(Libgsasl_FOUND TRUE)
-  string(REPLACE ";" " " LIBGSASL_CFLAGS "${LIBGSASL_CFLAGS}")
-  message(STATUS "Found Libgsasl (via pkg-config): ${LIBGSASL_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
+  set(LIBGSASL_FOUND TRUE)
+  message(STATUS "Found Libgsasl (via pkg-config): ${_libgsasl_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
 else()
   find_path(LIBGSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
@@ -75,9 +71,25 @@ else()
   )
 
   if(LIBGSASL_FOUND)
-    set(LIBGSASL_INCLUDE_DIRS ${LIBGSASL_INCLUDE_DIR})
-    set(LIBGSASL_LIBRARIES    ${LIBGSASL_LIBRARY})
+    set(_libgsasl_INCLUDE_DIRS ${LIBGSASL_INCLUDE_DIR})
+    set(_libgsasl_LIBRARIES    ${LIBGSASL_LIBRARY})
   endif()
 
   mark_as_advanced(LIBGSASL_INCLUDE_DIR LIBGSASL_LIBRARY)
+endif()
+
+if(LIBGSASL_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_libgsasl_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::libgsasl)
+    add_library(CURL::libgsasl INTERFACE IMPORTED)
+    set_target_properties(CURL::libgsasl PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_libgsasl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_libgsasl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_libgsasl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_libgsasl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_libgsasl_LIBRARIES}")
+  endif()
 endif()

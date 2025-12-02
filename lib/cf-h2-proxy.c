@@ -45,12 +45,12 @@
 #include "curlx/warnless.h"
 #include "cf-h2-proxy.h"
 
-#define PROXY_H2_CHUNK_SIZE  (16*1024)
+#define PROXY_H2_CHUNK_SIZE  (16 * 1024)
 
 #define PROXY_HTTP2_HUGE_WINDOW_SIZE (100 * 1024 * 1024)
 #define H2_TUNNEL_WINDOW_SIZE        (10 * 1024 * 1024)
 
-#define PROXY_H2_NW_RECV_CHUNKS  (H2_TUNNEL_WINDOW_SIZE / PROXY_H2_CHUNK_SIZE)
+#define PROXY_H2_NW_RECV_CHUNKS   (H2_TUNNEL_WINDOW_SIZE / PROXY_H2_CHUNK_SIZE)
 #define PROXY_H2_NW_SEND_CHUNKS   1
 
 #define H2_TUNNEL_RECV_CHUNKS   (H2_TUNNEL_WINDOW_SIZE / PROXY_H2_CHUNK_SIZE)
@@ -58,11 +58,11 @@
 
 
 typedef enum {
-    H2_TUNNEL_INIT,     /* init/default/no tunnel state */
-    H2_TUNNEL_CONNECT,  /* CONNECT request is being send */
-    H2_TUNNEL_RESPONSE, /* CONNECT response received completely */
-    H2_TUNNEL_ESTABLISHED,
-    H2_TUNNEL_FAILED
+  H2_TUNNEL_INIT,     /* init/default/no tunnel state */
+  H2_TUNNEL_CONNECT,  /* CONNECT request is being send */
+  H2_TUNNEL_RESPONSE, /* CONNECT response received completely */
+  H2_TUNNEL_ESTABLISHED,
+  H2_TUNNEL_FAILED
 } h2_tunnel_state;
 
 struct tunnel_stream {
@@ -94,7 +94,7 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
   Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
 
   /* host:port with IPv6 support */
-  ts->authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+  ts->authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
                                 ipv6_ip ? "]" : "", port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
@@ -184,8 +184,7 @@ struct cf_h2_proxy_ctx {
 
 /* How to access `call_data` from a cf_h2 filter */
 #undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf)  \
-  ((struct cf_h2_proxy_ctx *)(cf)->ctx)->call_data
+#define CF_CTX_CALL_DATA(cf) ((struct cf_h2_proxy_ctx *)(cf)->ctx)->call_data
 
 static void cf_h2_proxy_ctx_clear(struct cf_h2_proxy_ctx *ctx)
 {
@@ -542,70 +541,70 @@ static int proxy_h2_fr_print(const nghttp2_frame *frame,
                              char *buffer, size_t blen)
 {
   switch(frame->hd.type) {
-    case NGHTTP2_DATA: {
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[DATA, len=%d, eos=%d, padlen=%d]",
-                            (int)frame->hd.length,
-                            !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM),
-                            (int)frame->data.padlen);
+  case NGHTTP2_DATA: {
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[DATA, len=%d, eos=%d, padlen=%d]",
+                          (int)frame->hd.length,
+                          !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM),
+                          (int)frame->data.padlen);
+  }
+  case NGHTTP2_HEADERS: {
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[HEADERS, len=%d, hend=%d, eos=%d]",
+                          (int)frame->hd.length,
+                          !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS),
+                          !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM));
+  }
+  case NGHTTP2_PRIORITY: {
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[PRIORITY, len=%d, flags=%d]",
+                          (int)frame->hd.length, frame->hd.flags);
+  }
+  case NGHTTP2_RST_STREAM: {
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
+                          (int)frame->hd.length, frame->hd.flags,
+                          frame->rst_stream.error_code);
+  }
+  case NGHTTP2_SETTINGS: {
+    if(frame->hd.flags & NGHTTP2_FLAG_ACK) {
+      return curl_msnprintf(buffer, blen, "FRAME[SETTINGS, ack=1]");
     }
-    case NGHTTP2_HEADERS: {
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[HEADERS, len=%d, hend=%d, eos=%d]",
-                            (int)frame->hd.length,
-                            !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS),
-                            !!(frame->hd.flags & NGHTTP2_FLAG_END_STREAM));
-    }
-    case NGHTTP2_PRIORITY: {
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[PRIORITY, len=%d, flags=%d]",
-                            (int)frame->hd.length, frame->hd.flags);
-    }
-    case NGHTTP2_RST_STREAM: {
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[RST_STREAM, len=%d, flags=%d, error=%u]",
-                            (int)frame->hd.length, frame->hd.flags,
-                            frame->rst_stream.error_code);
-    }
-    case NGHTTP2_SETTINGS: {
-      if(frame->hd.flags & NGHTTP2_FLAG_ACK) {
-        return curl_msnprintf(buffer, blen, "FRAME[SETTINGS, ack=1]");
-      }
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
-    }
-    case NGHTTP2_PUSH_PROMISE:
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
-                            (int)frame->hd.length,
-                            !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
-    case NGHTTP2_PING:
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[PING, len=%d, ack=%d]",
-                            (int)frame->hd.length,
-                            frame->hd.flags & NGHTTP2_FLAG_ACK);
-    case NGHTTP2_GOAWAY: {
-      char scratch[128];
-      size_t s_len = CURL_ARRAYSIZE(scratch);
-      size_t len = (frame->goaway.opaque_data_len < s_len) ?
-        frame->goaway.opaque_data_len : s_len-1;
-      if(len)
-        memcpy(scratch, frame->goaway.opaque_data, len);
-      scratch[len] = '\0';
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[GOAWAY, error=%d, reason='%s', "
-                            "last_stream=%d]", frame->goaway.error_code,
-                            scratch, frame->goaway.last_stream_id);
-    }
-    case NGHTTP2_WINDOW_UPDATE: {
-      return curl_msnprintf(buffer, blen,
-                            "FRAME[WINDOW_UPDATE, incr=%d]",
-                            frame->window_update.window_size_increment);
-    }
-    default:
-      return curl_msnprintf(buffer, blen, "FRAME[%d, len=%d, flags=%d]",
-                            frame->hd.type, (int)frame->hd.length,
-                            frame->hd.flags);
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
+  }
+  case NGHTTP2_PUSH_PROMISE:
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
+                          (int)frame->hd.length,
+                          !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
+  case NGHTTP2_PING:
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[PING, len=%d, ack=%d]",
+                          (int)frame->hd.length,
+                          frame->hd.flags & NGHTTP2_FLAG_ACK);
+  case NGHTTP2_GOAWAY: {
+    char scratch[128];
+    size_t s_len = CURL_ARRAYSIZE(scratch);
+    size_t len = (frame->goaway.opaque_data_len < s_len) ?
+      frame->goaway.opaque_data_len : s_len-1;
+    if(len)
+      memcpy(scratch, frame->goaway.opaque_data, len);
+    scratch[len] = '\0';
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[GOAWAY, error=%d, reason='%s', "
+                          "last_stream=%d]", frame->goaway.error_code,
+                          scratch, frame->goaway.last_stream_id);
+  }
+  case NGHTTP2_WINDOW_UPDATE: {
+    return curl_msnprintf(buffer, blen,
+                          "FRAME[WINDOW_UPDATE, incr=%d]",
+                          frame->window_update.window_size_increment);
+  }
+  default:
+    return curl_msnprintf(buffer, blen, "FRAME[%d, len=%d, flags=%d]",
+                          frame->hd.type, (int)frame->hd.length,
+                          frame->hd.flags);
   }
 }
 
@@ -621,7 +620,7 @@ static int proxy_h2_on_frame_send(nghttp2_session *session,
   if(data && Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer)-1);
+    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
     CURL_TRC_CF(data, cf, "[%d] -> %s", frame->hd.stream_id, buffer);
   }
@@ -644,9 +643,9 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
   if(Curl_trc_cf_is_verbose(cf, data)) {
     char buffer[256];
     int len;
-    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer)-1);
+    len = proxy_h2_fr_print(frame, buffer, sizeof(buffer) - 1);
     buffer[len] = 0;
-    CURL_TRC_CF(data, cf, "[%d] <- %s",frame->hd.stream_id, buffer);
+    CURL_TRC_CF(data, cf, "[%d] <- %s", frame->hd.stream_id, buffer);
   }
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
@@ -962,7 +961,7 @@ static CURLcode inspect_response(struct Curl_cfilter *cf,
   (void)cf;
 
   DEBUGASSERT(ts->resp);
-  if(ts->resp->status/100 == 2) {
+  if(ts->resp->status / 100 == 2) {
     infof(data, "CONNECT tunnel established, response %d", ts->resp->status);
     h2_tunnel_go_state(cf, ts, H2_TUNNEL_ESTABLISHED, data);
     return CURLE_OK;
@@ -1220,7 +1219,7 @@ static CURLcode cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
     c_exhaust = !nghttp2_session_get_remote_window_size(ctx->h2);
     s_exhaust = ctx->tunnel.stream_id >= 0 &&
                 !nghttp2_session_get_stream_remote_window_size(
-                   ctx->h2, ctx->tunnel.stream_id);
+                  ctx->h2, ctx->tunnel.stream_id);
     want_recv = (want_recv || c_exhaust || s_exhaust);
     want_send = (!s_exhaust && want_send) ||
                 (!c_exhaust && nghttp2_session_want_write(ctx->h2)) ||
@@ -1414,7 +1413,7 @@ out:
               "h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)",
               ctx->tunnel.stream_id, len, result, *pnwritten,
               nghttp2_session_get_stream_remote_window_size(
-                  ctx->h2, ctx->tunnel.stream_id),
+                ctx->h2, ctx->tunnel.stream_id),
               nghttp2_session_get_remote_window_size(ctx->h2),
               Curl_bufq_len(&ctx->tunnel.sendbuf),
               Curl_bufq_len(&ctx->outbufq));
@@ -1566,7 +1565,7 @@ static CURLcode cf_h2_proxy_cntrl(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h2_proxy = {
   "H2-PROXY",
-  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
   CURL_LOG_LVL_NONE,
   cf_h2_proxy_destroy,
   cf_h2_proxy_connect,

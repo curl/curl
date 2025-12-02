@@ -236,7 +236,7 @@ int main(void)
   curl_global_trace("all");
 #endif
 
-  for(i = 0; i < sizeof(transfer)/sizeof(transfer[0]); ++i) {
+  for(i = 0; i < sizeof(transfer) / sizeof(transfer[0]); ++i) {
     int failed = 0;
     struct transfer *t = &transfer[i];
 

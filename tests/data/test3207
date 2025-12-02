@@ -37,7 +37,7 @@ concurrent HTTPS GET using shared ssl session cache
 lib%TESTNUMBER
 </tool>
 # provide URL and ca-cert
-<command>
+<command option="no-memdebug">
 https://localhost:%HTTPSPORT/%TESTNUMBER %CERTDIR/certs/test-ca.crt
 </command>
 </client>

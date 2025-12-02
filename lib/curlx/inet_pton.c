@@ -54,8 +54,8 @@
  * sizeof(int) < 4. sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static int      inet_pton4(const char *src, unsigned char *dst);
-static int      inet_pton6(const char *src, unsigned char *dst);
+static int inet_pton4(const char *src, unsigned char *dst);
+static int inet_pton6(const char *src, unsigned char *dst);
 
 /* int
  * inet_pton(af, src, dst)
@@ -73,8 +73,7 @@ static int      inet_pton6(const char *src, unsigned char *dst);
  * author:
  *      Paul Vixie, 1996.
  */
-int
-curlx_inet_pton(int af, const char *src, void *dst)
+int curlx_inet_pton(int af, const char *src, void *dst)
 {
   switch(af) {
   case AF_INET:
@@ -98,8 +97,7 @@ curlx_inet_pton(int af, const char *src, void *dst)
  * author:
  *      Paul Vixie, 1996.
  */
-static int
-inet_pton4(const char *src, unsigned char *dst)
+static int inet_pton4(const char *src, unsigned char *dst)
 {
   int saw_digit, octets, ch;
   unsigned char tmp[INADDRSZ], *tp;
@@ -151,8 +149,7 @@ inet_pton4(const char *src, unsigned char *dst)
  * author:
  *      Paul Vixie, 1996.
  */
-static int
-inet_pton6(const char *src, unsigned char *dst)
+static int inet_pton6(const char *src, unsigned char *dst)
 {
   unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
   const char *curtok;
@@ -187,14 +184,14 @@ inet_pton6(const char *src, unsigned char *dst)
       }
       if(tp + INT16SZ > endp)
         return 0;
-      *tp++ = (unsigned char) ((val >> 8) & 0xff);
-      *tp++ = (unsigned char) (val & 0xff);
+      *tp++ = (unsigned char)((val >> 8) & 0xff);
+      *tp++ = (unsigned char)(val & 0xff);
       saw_xdigit = 0;
       val = 0;
       continue;
     }
     if(ch == '.' && ((tp + INADDRSZ) <= endp) &&
-        inet_pton4(curtok, tp) > 0) {
+       inet_pton4(curtok, tp) > 0) {
       tp += INADDRSZ;
       saw_xdigit = 0;
       break;    /* '\0' was seen by inet_pton4(). */
@@ -204,8 +201,8 @@ inet_pton6(const char *src, unsigned char *dst)
   if(saw_xdigit) {
     if(tp + INT16SZ > endp)
       return 0;
-    *tp++ = (unsigned char) ((val >> 8) & 0xff);
-    *tp++ = (unsigned char) (val & 0xff);
+    *tp++ = (unsigned char)((val >> 8) & 0xff);
+    *tp++ = (unsigned char)(val & 0xff);
   }
   if(colonp) {
     /*

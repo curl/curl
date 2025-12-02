@@ -23,15 +23,14 @@
  ***************************************************************************/
 #include "first.h"
 
-typedef struct
-{
+struct put_buffer {
   const char *buf;
   size_t len;
-} put_buffer;
+};
 
 static size_t put_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  put_buffer *putdata = (put_buffer *)stream;
+  struct put_buffer *putdata = (struct put_buffer *)stream;
   size_t totalsize = size * nmemb;
   size_t tocopy = (putdata->len < totalsize) ? putdata->len : totalsize;
   memcpy(ptr, putdata->buf, tocopy);
@@ -45,7 +44,7 @@ static CURLcode test_lib1948(const char *URL)
   CURL *curl;
   CURLcode res = CURLE_OK;
   static const char *testput = "This is test PUT data\n";
-  put_buffer pbuf;
+  struct put_buffer pbuf;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 

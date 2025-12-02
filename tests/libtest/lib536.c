@@ -27,8 +27,7 @@ static void proxystat(CURL *curl)
 {
   long wasproxy;
   if(!curl_easy_getinfo(curl, CURLINFO_USED_PROXY, &wasproxy)) {
-    curl_mprintf("This %sthe proxy\n", wasproxy ? "used ":
-                 "DID NOT use ");
+    curl_mprintf("This %sthe proxy\n", wasproxy ? "used " : "DID NOT use ");
   }
 }
 

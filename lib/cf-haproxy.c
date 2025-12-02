@@ -36,9 +36,9 @@
 
 
 typedef enum {
-    HAPROXY_INIT,     /* init/default/no tunnel state */
-    HAPROXY_SEND,     /* data_out being sent */
-    HAPROXY_DONE      /* all work done */
+  HAPROXY_INIT,     /* init/default/no tunnel state */
+  HAPROXY_SEND,     /* data_out being sent */
+  HAPROXY_DONE      /* all work done */
 } haproxy_state;
 
 struct cf_haproxy_ctx {
@@ -61,7 +61,7 @@ static void cf_haproxy_ctx_free(struct cf_haproxy_ctx *ctx)
   }
 }
 
-static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
+static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;

@@ -44,14 +44,14 @@ static CURLcode test_unit1610(const char *arg)
   unsigned char output[CURL_SHA256_DIGEST_LENGTH];
   unsigned char *testp = output;
 
-  Curl_sha256it(output, (const unsigned char *) string1, strlen(string1));
+  Curl_sha256it(output, (const unsigned char *)string1, strlen(string1));
 
   verify_memory(testp,
                 "\x6b\x86\xb2\x73\xff\x34\xfc\xe1\x9d\x6b\x80\x4e\xff\x5a\x3f"
                 "\x57\x47\xad\xa4\xea\xa2\x2f\x1d\x49\xc0\x1e\x52\xdd\xb7\x87"
                 "\x5b\x4b", CURL_SHA256_DIGEST_LENGTH);
 
-  Curl_sha256it(output, (const unsigned char *) string2, strlen(string2));
+  Curl_sha256it(output, (const unsigned char *)string2, strlen(string2));
 
   verify_memory(testp,
                 "\xcb\xb1\x6a\x8a\xb9\xcb\xb9\x35\xa8\xcb\xa0\x2e\x28\xc0\x26"

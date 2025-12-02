@@ -51,7 +51,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
     /* This fetches message 1 from the user's inbox. Note the use of
-    * imaps:// rather than imap:// to request an SSL based connection. */
+     * imaps:// rather than imap:// to request an SSL based connection. */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "imaps://imap.example.com/INBOX/;UID=1");
 

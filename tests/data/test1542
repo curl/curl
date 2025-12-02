@@ -6,7 +6,6 @@ connection reuse
 persistent connection
 CURLOPT_MAXLIFETIME_CONN
 verbose logs
-notxml
 </keywords>
 </info>
 
@@ -66,7 +65,7 @@ Accept: */*
 == Info: Connection #1 to host %HOSTIP:%HTTPPORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /(closing|shutting down) connection #\d+/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /(closing|shutting down) connection #\d+/))
 </stripfile>
 </verify>
 </testcase>

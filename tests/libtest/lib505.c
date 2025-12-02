@@ -127,8 +127,7 @@ static CURLcode test_lib505(const char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* and give the size of the upload (optional) */
-  test_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                   (curl_off_t)file_info.st_size);
+  test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
   /* Now run off and do what you have been told! */
   res = curl_easy_perform(curl);

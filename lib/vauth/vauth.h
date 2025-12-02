@@ -28,6 +28,7 @@
 
 #include "../bufref.h"
 #include "../curlx/dynbuf.h"
+#include "../urldata.h"
 
 struct Curl_easy;
 struct connectdata;
@@ -233,18 +234,6 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
 
 #ifdef USE_KERBEROS5
 
-#ifdef HAVE_GSSAPI
-# ifdef HAVE_GSSGNU
-#  include <gss.h>
-# else
-#  ifdef HAVE_GSSAPI_H
-#   include <gssapi.h>
-#  else
-#   include <gssapi/gssapi.h>
-#  endif
-# endif
-#endif
-
 /* meta key for storing KRB5 meta at connection */
 #define CURL_META_KRB5_CONN   "meta:auth:krb5:conn"
 
@@ -310,7 +299,7 @@ struct negotiatedata {
   gss_ctx_id_t context;
   gss_name_t spn;
   gss_buffer_desc output_token;
-#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+#ifdef GSS_C_CHANNEL_BOUND_FLAG
   struct dynbuf channel_binding_data;
 #endif
 #else

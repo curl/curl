@@ -31,9 +31,7 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "../urldata.h"
 #include "../curlx/warnless.h"
-#include "../curlx/multibyte.h"
 #include "../sendf.h"
 
 /*
@@ -278,8 +276,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
   /* Get our response size information */
   status = Curl_pSecFn->QueryContextAttributes(krb5->context,
-                                               SECPKG_ATTR_SIZES,
-                                               &sizes);
+                                               SECPKG_ATTR_SIZES, &sizes);
 
   if(status == SEC_E_INSUFFICIENT_MEMORY)
     return CURLE_OUT_OF_MEMORY;

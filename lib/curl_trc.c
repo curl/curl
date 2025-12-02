@@ -453,6 +453,24 @@ void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* USE_SSL */
 
+#ifdef USE_SSH
+struct curl_trc_feat Curl_trc_feat_ssh = {
+  "SSH",
+  CURL_LOG_LVL_NONE,
+};
+
+void Curl_trc_ssh(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssh)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_ssh, NULL, 0, fmt, ap);
+    va_end(ap);
+  }
+}
+#endif /* USE_SSH */
+
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 struct curl_trc_feat Curl_trc_feat_ws = {
   "WS",
@@ -499,6 +517,9 @@ static struct trc_feat_def trc_feats[] = {
 #endif
 #ifdef USE_SSL
   { &Curl_trc_feat_ssls,      TRC_CT_NETWORK },
+#endif
+#ifdef USE_SSH
+  { &Curl_trc_feat_ssh,      TRC_CT_PROTOCOL },
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
   { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },
@@ -694,6 +715,13 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
+}
+#endif
+#ifdef USE_SSH
+void Curl_trc_ssh(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data;
+  (void)fmt;
 }
 #endif
 #ifdef USE_SSL

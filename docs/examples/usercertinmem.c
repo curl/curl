@@ -114,7 +114,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   }
 
   /* tell SSL to use the X509 certificate */
-  ret = SSL_CTX_use_certificate((SSL_CTX*)sslctx, cert);
+  ret = SSL_CTX_use_certificate((SSL_CTX *)sslctx, cert);
   if(ret != 1) {
     printf("Use certificate failed\n");
   }
@@ -132,7 +132,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   }
 
   /* tell SSL to use the RSA key from memory */
-  ret = SSL_CTX_use_RSAPrivateKey((SSL_CTX*)sslctx, rsa);
+  ret = SSL_CTX_use_RSAPrivateKey((SSL_CTX *)sslctx, rsa);
   if(ret != 1) {
     printf("Use Key failed\n");
   }

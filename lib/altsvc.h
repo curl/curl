@@ -68,7 +68,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         const int versions); /* CURLALTSVC_H* bits */
 #else
 /* disabled */
-#define Curl_altsvc_save(a,b,c)
+#define Curl_altsvc_save(a, b, c)
 #define Curl_altsvc_cleanup(x)
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */
 #endif /* HEADER_CURL_ALTSVC_H */

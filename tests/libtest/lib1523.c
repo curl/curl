@@ -41,7 +41,7 @@ static size_t t1523_write_cb(char *d, size_t n, size_t l, void *p)
   /* take care of the data here, ignored in this example */
   (void)d;
   (void)p;
-  return n*l;
+  return n * l;
 }
 
 static CURLcode run(CURL *curl, long limit, long time)

@@ -56,7 +56,6 @@ struct targ {
   const char *url;
 };
 
-
 static void *pull_one_url(void *p)
 {
   CURL *curl;
@@ -71,7 +70,6 @@ static void *pull_one_url(void *p)
 
   return NULL;
 }
-
 
 /*
    int pthread_create(pthread_t *new_thread_ID,

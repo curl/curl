@@ -247,36 +247,35 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #endif
 
   switch(sa->sa_family) {
-    case AF_INET:
-      si = (struct sockaddr_in *)(void *) sa;
-      if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
-        *port = ntohs(si->sin_port);
-        return TRUE;
-      }
-      break;
+  case AF_INET:
+    si = (struct sockaddr_in *)(void *)sa;
+    if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
+      *port = ntohs(si->sin_port);
+      return TRUE;
+    }
+    break;
 #ifdef USE_IPV6
-    case AF_INET6:
-      si6 = (struct sockaddr_in6 *)(void *) sa;
-      if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr,
-                         MAX_IPADR_LEN)) {
-        *port = ntohs(si6->sin6_port);
-        return TRUE;
-      }
-      break;
+  case AF_INET6:
+    si6 = (struct sockaddr_in6 *)(void *)sa;
+    if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
+      *port = ntohs(si6->sin6_port);
+      return TRUE;
+    }
+    break;
 #endif
 #if (defined(HAVE_SYS_UN_H) || defined(WIN32_SOCKADDR_UN)) && defined(AF_UNIX)
-    case AF_UNIX:
-      if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
-        su = (struct sockaddr_un*)sa;
-        curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
-      }
-      else
-        addr[0] = 0; /* socket with no name */
-      *port = 0;
-      return TRUE;
+  case AF_UNIX:
+    if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
+      su = (struct sockaddr_un *)sa;
+      curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+    }
+    else
+      addr[0] = 0; /* socket with no name */
+    *port = 0;
+    return TRUE;
 #endif
-    default:
-      break;
+  default:
+    break;
   }
 
   addr[0] = '\0';
@@ -338,7 +337,7 @@ void Curl_conncontrol(struct connectdata *conn,
 #endif
   is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
   closeit = (ctrl == CONNCTRL_CONNECTION) ||
-    ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
+            ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
   if((ctrl == CONNCTRL_STREAM) && is_multiplex)
     ;  /* stream signal on multiplex conn never affects close state */
   else if((bit)closeit != conn->bits.close) {
@@ -409,8 +408,8 @@ connect_sub_chain:
 
   if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
 #ifdef USE_SSL
-    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype)
-       && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
+    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
       result = Curl_cf_ssl_proxy_insert_after(cf, data);
       if(result)
         return result;
@@ -450,9 +449,9 @@ connect_sub_chain:
 
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #ifdef USE_SSL
-    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE
-        || (ctx->ssl_mode != CURL_CF_SSL_DISABLE
-           && cf->conn->handler->flags & PROTOPT_SSL)) /* we want SSL */
+    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
+        (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
+         cf->conn->handler->flags & PROTOPT_SSL))       /* we want SSL */
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       result = Curl_cf_ssl_insert_after(cf, data);
       if(result)
@@ -493,7 +492,6 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   CURL_TRC_CF(data, cf, "destroy");
   Curl_safefree(ctx);
 }
-
 
 struct Curl_cftype Curl_cft_setup = {
   "SETUP",

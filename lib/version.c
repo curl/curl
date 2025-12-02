@@ -77,18 +77,6 @@
 #include <gsasl.h>
 #endif
 
-#ifdef HAVE_GSSAPI
-# ifdef HAVE_GSSGNU
-#  include <gss.h>
-# else
-#  ifdef HAVE_GSSAPI_H
-#   include <gssapi.h>
-#  else
-#   include <gssapi/gssapi.h>
-#  endif
-# endif
-#endif
-
 #ifdef USE_OPENLDAP
 #include <ldap.h>
 #endif

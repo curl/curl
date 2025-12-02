@@ -1214,8 +1214,6 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
 
         /* This is a literal response, setup to receive the body data */
         infof(data, "Found %" FMT_OFF_T " bytes to download", size);
-        /* Progress size includes both header line and literal body */
-        Curl_pgrsSetDownloadSize(data, size + len);
 
         /* First write the header line */
         result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
@@ -1267,6 +1265,9 @@ static CURLcode imap_state_listsearch_resp(struct Curl_easy *data,
           size = CURL_OFF_T_MAX;
         else
           size += len;
+
+        /* Progress size includes both header line and literal body */
+        Curl_pgrsSetDownloadSize(data, size);
 
         if(data->req.bytecount == size)
           /* All data already transferred (header + literal body) */

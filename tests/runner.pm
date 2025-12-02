@@ -840,6 +840,7 @@ sub singletest_run {
         $tool = $tool_name . exe_ext('TOOL');
     }
 
+    my $oldmemdebug;
     my $disablevalgrind;
     my $CMDLINE="";
     my $cmdargs;
@@ -1025,6 +1026,11 @@ sub singletest_run {
     # timestamp starting of test command
     $$testtimings{"timetoolini"} = Time::HiRes::time();
 
+    if($cmdhash{'option'} && ($cmdhash{'option'} =~ /no-memdebug/)) {
+        $oldmemdebug = $ENV{'CURL_MEMDEBUG'};
+        delete $ENV{'CURL_MEMDEBUG'};
+    }
+
     # run the command line we built
     if($torture) {
         $cmdres = torture($CMDLINE,
@@ -1046,6 +1052,11 @@ sub singletest_run {
     else {
         # Convert the raw result code into a more useful one
         ($cmdres, $dumped_core) = normalize_cmdres(runclient("$CMDLINE"));
+    }
+
+    # restore contents
+    if($oldmemdebug) {
+        $ENV{'CURL_MEMDEBUG'} = $oldmemdebug;
     }
 
     # timestamp finishing of test command

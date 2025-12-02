@@ -28,13 +28,12 @@
 
 #ifdef USE_MBEDTLS
 
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
-    defined(_WIN32)
+#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || defined(_WIN32)
 
 int Curl_mbedtlsthreadlock_thread_setup(void);
 int Curl_mbedtlsthreadlock_thread_cleanup(void);
-int Curl_mbedtlsthreadlock_lock_function(int n);
-int Curl_mbedtlsthreadlock_unlock_function(int n);
+int Curl_mbedtlsthreadlock_lock_function(size_t n);
+int Curl_mbedtlsthreadlock_unlock_function(size_t n);
 
 #else
 

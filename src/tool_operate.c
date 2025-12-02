@@ -848,6 +848,8 @@ static CURLcode append2query(struct OperationConfig *config,
     }
     curl_url_cleanup(uh);
   }
+  else
+    result = CURLE_OUT_OF_MEMORY;
   return result;
 }
 

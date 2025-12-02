@@ -62,7 +62,7 @@ int unitfail; /* for unittests */
 int coptind;
 const char *coptarg;
 
-int cgetopt(int argc, const char * const argv[], const char *optstring)
+int cgetopt(int argc, const char *const argv[], const char *optstring)
 {
   static int optpos = 1;
   int coptopt;
@@ -203,7 +203,6 @@ void ws_close(CURL *curl)
   curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n", res, sent);
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
-
 
 int main(int argc, const char **argv)
 {

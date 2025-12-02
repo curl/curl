@@ -68,11 +68,11 @@ int main(void)
   const char *pKeyType;
 
 #ifdef USE_ENGINE
-  pKeyName  = "rsa_test";
-  pKeyType  = "ENG";
+  pKeyName = "rsa_test";
+  pKeyType = "ENG";
 #else
-  pKeyName  = "testkey.pem";
-  pKeyType  = "PEM";
+  pKeyName = "testkey.pem";
+  pKeyType = "PEM";
 #endif
 
   res = curl_global_init(CURL_GLOBAL_ALL);

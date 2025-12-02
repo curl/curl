@@ -47,21 +47,21 @@ static void t586_test_lock(CURL *curl, curl_lock_data data,
   (void)laccess;
 
   switch(data) {
-    case CURL_LOCK_DATA_SHARE:
-      what = "share";
-      break;
-    case CURL_LOCK_DATA_DNS:
-      what = "dns";
-      break;
-    case CURL_LOCK_DATA_COOKIE:
-      what = "cookie";
-      break;
-    case CURL_LOCK_DATA_SSL_SESSION:
-      what = "ssl_session";
-      break;
-    default:
-      curl_mfprintf(stderr, "lock: no such data: %d\n", data);
-      return;
+  case CURL_LOCK_DATA_SHARE:
+    what = "share";
+    break;
+  case CURL_LOCK_DATA_DNS:
+    what = "dns";
+    break;
+  case CURL_LOCK_DATA_COOKIE:
+    what = "cookie";
+    break;
+  case CURL_LOCK_DATA_SSL_SESSION:
+    what = "ssl_session";
+    break;
+  default:
+    curl_mfprintf(stderr, "lock: no such data: %d\n", data);
+    return;
   }
   curl_mprintf("lock:   %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
@@ -74,21 +74,21 @@ static void t586_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
   struct t586_userdata *user = (struct t586_userdata *)useptr;
   (void)curl;
   switch(data) {
-    case CURL_LOCK_DATA_SHARE:
-      what = "share";
-      break;
-    case CURL_LOCK_DATA_DNS:
-      what = "dns";
-      break;
-    case CURL_LOCK_DATA_COOKIE:
-      what = "cookie";
-      break;
-    case CURL_LOCK_DATA_SSL_SESSION:
-      what = "ssl_session";
-      break;
-    default:
-      curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
-      return;
+  case CURL_LOCK_DATA_SHARE:
+    what = "share";
+    break;
+  case CURL_LOCK_DATA_DNS:
+    what = "dns";
+    break;
+  case CURL_LOCK_DATA_COOKIE:
+    what = "cookie";
+    break;
+  case CURL_LOCK_DATA_SSL_SESSION:
+    what = "ssl_session";
+    break;
+  default:
+    curl_mfprintf(stderr, "unlock: no such data: %d\n", data);
+    return;
   }
   curl_mprintf("unlock: %-6s [%s]: %d\n", what, user->text, user->counter);
   user->counter++;
@@ -98,7 +98,7 @@ static void t586_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 static void *t586_test_fire(void *ptr)
 {
   CURLcode code;
-  struct t586_Tdata *tdata = (struct t586_Tdata*)ptr;
+  struct t586_Tdata *tdata = (struct t586_Tdata *)ptr;
   CURL *curl;
 
   curl = curl_easy_init();
@@ -108,8 +108,8 @@ static void *t586_test_fire(void *ptr)
   }
 
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE,    1L);
-  curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
+  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(curl, CURLOPT_URL, tdata->url);
   curl_mprintf("CURLOPT_SHARE\n");
   curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
 
@@ -181,19 +181,17 @@ static CURLcode test_lib586(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-
   /* start treads */
   for(i = 1; i <= THREADS; i++) {
 
     /* set thread data */
-    tdata.url   = URL;
+    tdata.url = URL;
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
-    curl_mprintf("*** run %d\n",i);
+    curl_mprintf("*** run %d\n", i);
     t586_test_fire(&tdata);
   }
-
 
   /* fetch another one */
   curl_mprintf("*** run %d\n", i);
@@ -233,8 +231,7 @@ test_cleanup:
   curl_mprintf("SHARE_CLEANUP\n");
   scode = curl_share_cleanup(share);
   if(scode != CURLSHE_OK)
-    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
-                  scode);
+    curl_mfprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
 
   curl_mprintf("GLOBAL_CLEANUP\n");
   curl_global_cleanup();

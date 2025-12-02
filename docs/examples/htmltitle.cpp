@@ -55,9 +55,8 @@
 //  libxml callback context structure
 //
 
-struct Context
-{
-  Context(): addTitle(false) { }
+struct Context {
+  Context() : addTitle(false) {}
 
   bool addTitle;
   std::string title;
@@ -79,7 +78,7 @@ static size_t writer(char *data, size_t size, size_t nmemb,
   if(writerData == NULL)
     return 0;
 
-  writerData->append(data, size*nmemb);
+  writerData->append(data, size * nmemb);
 
   return size * nmemb;
 }

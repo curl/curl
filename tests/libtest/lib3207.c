@@ -116,7 +116,7 @@ test_cleanup:
 static void t3207_test_lock(CURL *curl, curl_lock_data data,
                             curl_lock_access laccess, void *useptr)
 {
-  curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
+  curl_mutex_t *mutexes = (curl_mutex_t *)useptr;
   (void)curl;
   (void)laccess;
   Curl_mutex_acquire(&mutexes[data]);
@@ -124,7 +124,7 @@ static void t3207_test_lock(CURL *curl, curl_lock_data data,
 
 static void t3207_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
+  curl_mutex_t *mutexes = (curl_mutex_t *)useptr;
   (void)curl;
   Curl_mutex_release(&mutexes[data]);
 }
@@ -175,7 +175,7 @@ static CURLcode test_lib3207(const char *URL)
 {
   CURLcode res = CURLE_OK;
   size_t i;
-  CURLSH* share;
+  CURLSH *share;
   struct Ctx ctx[THREAD_SIZE];
 
   curl_global_init(CURL_GLOBAL_ALL);

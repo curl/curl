@@ -69,14 +69,14 @@ typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
 /**
  * Initialize the QUIC TLS instances based of the SSL configurations
  * for the connection filter, transfer and peer.
- * @param ctx         the TLS context to initialize
- * @param cf          the connection filter involved
- * @param data        the transfer involved
- * @param peer        the peer that will be connected to
- * @param alpns       the ALPN specifications to negotiate, may be NULL
- * @param cb_setup    optional callback for early TLS config
- * @param cb_user_data user_data param for callback
- * @param ssl_user_data  optional pointer to set in TLS application context
+ * @param ctx              the TLS context to initialize
+ * @param cf               the connection filter involved
+ * @param data             the transfer involved
+ * @param peer             the peer that will be connected to
+ * @param alpns            the ALPN specifications to negotiate, may be NULL
+ * @param cb_setup         optional callback for early TLS config
+ * @param cb_user_data     user_data param for callback
+ * @param ssl_user_data    optional pointer to set in TLS application context
  * @param session_reuse_cb callback to handle session reuse, signal early data
  */
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
