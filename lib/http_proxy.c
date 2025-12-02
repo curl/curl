@@ -223,7 +223,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
     goto out;
   }
 
-  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT")-1,
+  result = Curl_http_req_make(&req, "CONNECT", sizeof("CONNECT") - 1,
                               NULL, 0, authority, strlen(authority),
                               NULL, 0);
   if(result)

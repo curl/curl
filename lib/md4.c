@@ -71,7 +71,6 @@
 #include <nettle/md4.h>
 #endif
 
-
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
 #ifdef OPENSSL_COEXIST
@@ -224,8 +223,8 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * The MD4 transformation for all three rounds.
  */
 #define MD4_STEP(f, a, b, c, d, x, s) \
-        (a) += f((b), (c), (d)) + (x); \
-        (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));
+  (a) += f((b), (c), (d)) + (x); \
+  (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s))));
 
 /*
  * SET reads 4 input bytes in little-endian byte order and stores them
@@ -236,19 +235,15 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  * does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
-#define MD4_SET(n) \
-        (*(const MD4_u32plus *)(const void *)&ptr[(n) * 4])
-#define MD4_GET(n) \
-        MD4_SET(n)
+#define MD4_SET(n) (*(const MD4_u32plus *)(const void *)&ptr[(n) * 4])
+#define MD4_GET(n) MD4_SET(n)
 #else
-#define MD4_SET(n) \
-        (ctx->block[(n)] = \
-          (MD4_u32plus)ptr[(n) * 4] | \
-          ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
-          ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
-          ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
-#define MD4_GET(n) \
-        (ctx->block[(n)])
+#define MD4_SET(n) (ctx->block[(n)] = \
+   (MD4_u32plus)ptr[(n) * 4] | \
+  ((MD4_u32plus)ptr[(n) * 4 + 1] <<  8) | \
+  ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
+  ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
+#define MD4_GET(n) (ctx->block[(n)])
 #endif
 
 /*

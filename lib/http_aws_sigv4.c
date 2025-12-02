@@ -400,8 +400,7 @@ fail:
 
 #define CONTENT_SHA256_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Content-Sha256"))
 /* add 2 for ": " between header name and value */
-#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + \
-                                SHA256_HEX_LENGTH)
+#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + SHA256_HEX_LENGTH)
 
 /* try to parse a payload hash from the content-sha256 header */
 static const char *parse_content_sha_hdr(struct Curl_easy *data,
@@ -571,8 +570,7 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   if(!query)
     return result;
 
-  result = split_to_dyn_array(query, &query_array[0],
-                              &num_query_components);
+  result = split_to_dyn_array(query, &query_array[0], &num_query_components);
   if(result) {
     goto fail;
   }
@@ -781,7 +779,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
     bool sign_as_s3 = curlx_str_casecompare(&provider0, "aws") &&
-      curlx_str_casecompare(&service, "s3");
+                      curlx_str_casecompare(&service, "s3");
 
     if(sign_as_s3)
       result = calc_s3_payload_hash(data, httpreq, curlx_str(&provider1),

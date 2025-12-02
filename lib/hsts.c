@@ -336,7 +336,6 @@ static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
   return CURLE_OK;
 }
 
-
 /*
  * Curl_https_save() writes the HSTS cache to file and callback.
  */

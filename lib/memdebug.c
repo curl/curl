@@ -385,7 +385,7 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   rc = send(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
-                source, line, (unsigned long)len, (long)rc);
+                 source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
@@ -400,7 +400,7 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   rc = recv(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
-                source, line, (unsigned long)len, (long)rc);
+                 source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 

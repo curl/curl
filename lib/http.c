@@ -111,7 +111,6 @@ static CURLcode http_statusline(struct Curl_easy *data,
 static CURLcode http_target(struct Curl_easy *data, struct dynbuf *req);
 static CURLcode http_useragent(struct Curl_easy *data);
 
-
 /*
  * HTTP handler interface.
  */
@@ -616,7 +615,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
   }
   else if((data->req.httpcode < 300) &&
-          (!data->state.authhost.done) &&
+          !data->state.authhost.done &&
           data->req.authneg) {
     /* no (known) authentication available,
        authentication is not "done" yet and
@@ -1395,7 +1394,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
     /* 300 - Multiple Choices */
     /* 306 - Not used */
     /* 307 - Temporary Redirect */
-  default:  /* for all above (and the unknown ones) */
+  default: /* for all above (and the unknown ones) */
     /* Some codes are explicitly mentioned since I have checked RFC2616 and
      * they seem to be OK to POST to.
      */
@@ -1837,7 +1836,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
   curl_msnprintf(datestr, sizeof(datestr),
                  "%s: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
                  condp,
-                 Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                 Curl_wkday[tm->tm_wday ? tm->tm_wday - 1 : 6],
                  tm->tm_mday,
                  Curl_month[tm->tm_mon],
                  tm->tm_year + 1900,

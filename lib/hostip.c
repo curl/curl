@@ -443,7 +443,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
     struct Curl_addrinfo **nodes;
     infof(data, "Shuffling %i addresses", num_addrs);
 
-    nodes = curlx_malloc(num_addrs*sizeof(*nodes));
+    nodes = curlx_malloc(num_addrs * sizeof(*nodes));
     if(nodes) {
       int i;
       unsigned int *rnd;
@@ -452,7 +452,7 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
       /* build a plain array of Curl_addrinfo pointers */
       nodes[0] = *addr;
       for(i = 1; i < num_addrs; i++) {
-        nodes[i] = nodes[i-1]->ai_next;
+        nodes[i] = nodes[i - 1]->ai_next;
       }
 
       rnd = curlx_malloc(rnd_size);
@@ -468,10 +468,10 @@ UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
 
           /* relink list in the new order */
           for(i = 1; i < num_addrs; i++) {
-            nodes[i-1]->ai_next = nodes[i];
+            nodes[i - 1]->ai_next = nodes[i];
           }
 
-          nodes[num_addrs-1]->ai_next = NULL;
+          nodes[num_addrs - 1]->ai_next = NULL;
           *addr = nodes[0];
         }
         curlx_free(rnd);
@@ -1012,7 +1012,7 @@ CURLcode Curl_resolv_timeout(struct Curl_easy *data,
 {
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
-  struct sigaction keep_sigact;   /* store the old struct here */
+  struct sigaction keep_sigact; /* store the old struct here */
   volatile bool keep_copysig = FALSE; /* whether old sigact has been saved */
   struct sigaction sigact;
 #else

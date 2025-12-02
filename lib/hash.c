@@ -37,8 +37,7 @@
 
 
 #if 0 /* useful function for debugging hashes and their contents */
-void Curl_hash_print(struct Curl_hash *h,
-                     void (*func)(void *))
+void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 {
   struct Curl_hash_iterator iter;
   struct Curl_hash_element *he;

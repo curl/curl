@@ -49,10 +49,10 @@ typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
 
 struct Curl_hash_element {
   struct Curl_hash_element *next;
-  void   *ptr;
+  void *ptr;
   Curl_hash_elem_dtor dtor;
   size_t key_len;
-  char   key[1]; /* allocated memory following the struct */
+  char key[1]; /* allocated memory following the struct */
 };
 
 struct Curl_hash {
@@ -63,7 +63,7 @@ struct Curl_hash {
   /* Comparator function to compare keys */
   comp_function comp_func;
   /* General element construct, unless element itself carries one */
-  Curl_hash_dtor   dtor;
+  Curl_hash_dtor dtor;
   size_t slots;
   size_t size;
 #ifdef DEBUGBUILD
@@ -105,7 +105,6 @@ void Curl_hash_start_iterate(struct Curl_hash *hash,
 struct Curl_hash_element *
 Curl_hash_next_element(struct Curl_hash_iterator *iter);
 
-void Curl_hash_print(struct Curl_hash *h,
-                     void (*func)(void *));
+void Curl_hash_print(struct Curl_hash *h, void (*func)(void *));
 
 #endif /* HEADER_CURL_HASH_H */

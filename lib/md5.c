@@ -314,9 +314,9 @@ static void my_md5_final(unsigned char *result, void *ctx);
  * The MD5 transformation for all four rounds.
  */
 #define MD5_STEP(f, a, b, c, d, x, t, s) \
-        (a) += f((b), (c), (d)) + (x) + (t); \
-        (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
-        (a) += (b);
+  (a) += f((b), (c), (d)) + (x) + (t); \
+  (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
+  (a) += (b);
 
 /*
  * SET reads 4 input bytes in little-endian byte order and stores them
@@ -327,19 +327,15 @@ static void my_md5_final(unsigned char *result, void *ctx);
  * does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
-#define MD5_SET(n) \
-        (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
-#define MD5_GET(n) \
-        MD5_SET(n)
+#define MD5_SET(n) (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
+#define MD5_GET(n) MD5_SET(n)
 #else
-#define MD5_SET(n) \
-        (ctx->block[(n)] = \
-        (MD5_u32plus)ptr[(n) * 4] | \
-        ((MD5_u32plus)ptr[(n) * 4 + 1] << 8) | \
-        ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
-        ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
-#define MD5_GET(n) \
-        (ctx->block[(n)])
+#define MD5_SET(n) (ctx->block[(n)] = \
+   (MD5_u32plus)ptr[(n) * 4] | \
+  ((MD5_u32plus)ptr[(n) * 4 + 1] <<  8) | \
+  ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
+  ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
+#define MD5_GET(n) (ctx->block[(n)])
 #endif
 
 /*

@@ -38,7 +38,6 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
-
 /* When redirecting transfers. */
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to

@@ -91,7 +91,7 @@
  * is blocked from sending us any data. See #10988 for an issue with this. */
 #define HTTP2_HUGE_WINDOW_SIZE (100 * H2_STREAM_WINDOW_SIZE_MAX)
 
-#define H2_SETTINGS_IV_LEN  3
+#define H2_SETTINGS_IV_LEN 3
 #define H2_BINSETTINGS_LEN 80
 
 struct cf_h2_ctx {
@@ -262,7 +262,7 @@ struct h2_stream_ctx {
   BIT(write_paused);  /* stream write is paused */
 };
 
-#define H2_STREAM_CTX(ctx,data)                                         \
+#define H2_STREAM_CTX(ctx, data)                                        \
   ((struct h2_stream_ctx *)(                                            \
     data? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL))
 
@@ -1359,9 +1359,9 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
       if(!(frame->hd.flags & NGHTTP2_FLAG_ACK)) {
         uint32_t max_conn = ctx->max_concurrent_streams;
         ctx->max_concurrent_streams = nghttp2_session_get_remote_settings(
-            session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
+          session, NGHTTP2_SETTINGS_MAX_CONCURRENT_STREAMS);
         ctx->enable_push = nghttp2_session_get_remote_settings(
-            session, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
+          session, NGHTTP2_SETTINGS_ENABLE_PUSH) != 0;
         CURL_TRC_CF(data, cf, "[0] MAX_CONCURRENT_STREAMS: %d",
                     ctx->max_concurrent_streams);
         CURL_TRC_CF(data, cf, "[0] ENABLE_PUSH: %s",
