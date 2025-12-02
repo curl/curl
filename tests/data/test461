@@ -10,7 +10,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -H host:
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 User-Agent: curl/%VERSION
 Accept: */*

@@ -28,8 +28,6 @@
 /*               Hand crafted config file for Windows               */
 /* ================================================================ */
 
-#ifndef UNDER_CE
-
 /* Define some minimum and default build targets for Visual Studio */
 #ifdef _MSC_VER
    /* VS2012 default target settings and minimum build target check. */
@@ -58,27 +56,24 @@
 #        error VS2012 does not support build targets prior to Windows Vista
 #      endif
 #    endif
-   /* Default target settings and minimum build target check for
-      VS2008 and VS2010 */
+   /* VS2010 default target settings and minimum build target check. */
 #  else
-#    define VS2008_MIN_TARGET 0x0501  /* XP */
-     /* VS2008 default build target is Windows Vista (0x0600).
+     /* VS2010 default build target is Windows 7 (0x0601).
         We override default target to be Windows XP. */
-#    define VS2008_DEF_TARGET 0x0501  /* XP */
+#    define VS2010_MIN_TARGET 0x0501  /* XP */
+#    define VS2010_DEF_TARGET 0x0501  /* XP */
 
 #    ifndef _WIN32_WINNT
-#    define _WIN32_WINNT VS2008_DEF_TARGET
+#    define _WIN32_WINNT VS2010_DEF_TARGET
 #    endif
 #    ifndef WINVER
-#    define WINVER VS2008_DEF_TARGET
+#    define WINVER VS2010_DEF_TARGET
 #    endif
-#    if (_WIN32_WINNT < VS2008_MIN_TARGET) || (WINVER < VS2008_MIN_TARGET)
-#      error VS2008 does not support build targets prior to Windows XP
+#    if (_WIN32_WINNT < VS2010_MIN_TARGET) || (WINVER < VS2010_MIN_TARGET)
+#      error VS2010 does not support build targets prior to Windows XP
 #    endif
 #  endif
 #endif /* _MSC_VER */
-
-#endif /* UNDER_CE */
 
 /* ---------------------------------------------------------------- */
 /*                          HEADER FILES                            */
@@ -87,18 +82,14 @@
 /* Define if you have the <arpa/inet.h> header file. */
 /* #define HAVE_ARPA_INET_H 1 */
 
-#ifndef UNDER_CE
-
 /* Define if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1  /* exists on __MINGW32CE__ */
+#define HAVE_FCNTL_H 1
 
 /* Define if you have the <io.h> header file. */
-#define HAVE_IO_H 1  /* exists on __MINGW32CE__ */
+#define HAVE_IO_H 1
 
 /* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
-
-#endif
 
 /* Define if you have the <netdb.h> header file. */
 /* #define HAVE_NETDB_H 1 */
@@ -107,14 +98,12 @@
 /* #define HAVE_NETINET_IN_H 1 */
 
 /* Define to 1 if you have the <stdbool.h> header file. */
-#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_STDBOOL_H 1  /* exists on __MINGW32CE__ */
-#endif
+#define HAVE_STDBOOL_H 1
 #endif
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define HAVE_STDINT_H 1
 #endif
 
@@ -159,10 +148,8 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if bool is an available type. */
-#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_BOOL_T 1  /* exists on __MINGW32CE__ */
-#endif
+#define HAVE_BOOL_T 1
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -200,7 +187,6 @@
 /* Define if you have the select function. */
 #define HAVE_SELECT 1
 
-#ifndef UNDER_CE
 /* Define if you have the setlocale function. */
 #define HAVE_SETLOCALE 1
 
@@ -209,7 +195,6 @@
 
 /* Define if you have the _setmode function. */
 #define HAVE__SETMODE 1
-#endif
 
 /* Define if you have the socket function. */
 #define HAVE_SOCKET 1
@@ -276,9 +261,7 @@
 #endif
 
 /* Define to 1 if you have the signal function. */
-#ifndef UNDER_CE
 #define HAVE_SIGNAL 1
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
@@ -347,11 +330,9 @@
 #endif
 
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
-#ifndef UNDER_CE
 #define HAVE_FREEADDRINFO           1
 #define HAVE_GETADDRINFO            1
 #define HAVE_GETADDRINFO_THREADSAFE 1
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
@@ -370,8 +351,6 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#ifndef UNDER_CE
-
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
@@ -389,8 +368,6 @@
 #else
 #  define SIZEOF_OFF_T 4
 #endif
-
-#endif /* UNDER_CE */
 
 /* ---------------------------------------------------------------- */
 /*                       DNS RESOLVER SPECIALTY                     */
@@ -420,7 +397,7 @@
 #ifdef CURL_HAS_OPENLDAP_LDAPSDK
 #undef USE_WIN32_LDAP
 #define HAVE_LDAP_URL_PARSE 1
-#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#elif !defined(CURL_WINDOWS_UWP)
 #undef HAVE_LDAP_URL_PARSE
 #define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
@@ -432,9 +409,7 @@
 #endif
 
 /* Define to use Unix sockets. */
-#ifndef UNDER_CE
 #define USE_UNIX_SOCKETS
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
@@ -442,52 +417,19 @@
 
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
-#  ifdef UNDER_CE
-#    ifdef _M_ARM
-#    define CURL_OS "arm-pc-win32ce"
-#    else
-#    define CURL_OS "i386-pc-win32ce"
-#    endif
-#  else /* !UNDER_CE */
-#    if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
-#    define CURL_OS "i386-pc-win32"
-#    elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
-#    define CURL_OS "x86_64-pc-win32"
-#    elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
-#    define CURL_OS "ia64-pc-win32"
-#    elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 */
-#    define CURL_OS "thumbv7a-pc-win32"
-#    elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
-#    define CURL_OS "aarch64-pc-win32"
-#    else
-#    define CURL_OS "unknown-pc-win32"
-#    endif
-#  endif /* UNDER_CE */
+#  if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
+#  define CURL_OS "i386-pc-win32"
+#  elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
+#  define CURL_OS "x86_64-pc-win32"
+#  elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
+#  define CURL_OS "ia64-pc-win32"
+#  elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 */
+#  define CURL_OS "thumbv7a-pc-win32"
+#  elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
+#  define CURL_OS "aarch64-pc-win32"
+#  else
+#  define CURL_OS "unknown-pc-win32"
+#  endif
 #endif /* !CURL_OS */
-
-/* ---------------------------------------------------------------- */
-/*                            Windows CE                            */
-/* ---------------------------------------------------------------- */
-
-#ifdef UNDER_CE
-
-#ifndef UNICODE
-#define UNICODE
-#endif
-
-#ifndef _UNICODE
-#define _UNICODE
-#endif
-
-#define CURL_DISABLE_FILE 1
-#define CURL_DISABLE_TELNET 1
-#define CURL_DISABLE_LDAP 1
-
-#ifndef _MSC_VER
-/* !checksrc! disable BANNEDFUNC 1 */
-extern int stat(const char *path, struct stat *buffer);
-#endif
-
-#endif /* UNDER_CE */
 
 #endif /* HEADER_CURL_CONFIG_WIN32_H */

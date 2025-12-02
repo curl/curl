@@ -25,11 +25,10 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
 
-dnl We don't know the version number "statically" so we use a dash here
+dnl We do not know the version number "statically" so we use a dash here
 AC_INIT([curl], [-], [a suitable curl mailing list: https://curl.se/mail/])
 
 XC_OVR_ZZ50
-XC_OVR_ZZ60
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
@@ -141,36 +140,37 @@ AC_SUBST(VERSIONNUM)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls} )"
-    curl_ssh_msg="no      (--with-{libssh,libssh2})"
-   curl_zlib_msg="no      (--with-zlib)"
- curl_brotli_msg="no      (--with-brotli)"
-   curl_zstd_msg="no      (--with-zstd)"
-    curl_gss_msg="no      (--with-gssapi)"
-  curl_gsasl_msg="no      (--with-gsasl)"
-curl_tls_srp_msg="no      (--enable-tls-srp)"
-    curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
-   curl_ipv6_msg="no      (--enable-ipv6)"
-curl_unix_sockets_msg="no      (--enable-unix-sockets)"
-    curl_idn_msg="no      (--with-{libidn2,winidn})"
-   curl_docs_msg="enabled (--disable-docs)"
- curl_manual_msg="no      (--enable-manual)"
-curl_libcurl_msg="enabled (--disable-libcurl-option)"
-curl_verbose_msg="enabled (--disable-verbose)"
-   curl_sspi_msg="no      (--enable-sspi)"
-   curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
-  curl_ldaps_msg="no      (--enable-ldaps)"
-   curl_ipfs_msg="no      (--enable-ipfs)"
-   curl_rtsp_msg="no      (--enable-rtsp)"
-   curl_rtmp_msg="no      (--with-librtmp)"
-    curl_psl_msg="no      (--with-libpsl)"
- curl_altsvc_msg="enabled (--disable-alt-svc)"
-curl_headers_msg="enabled (--disable-headers-api)"
-   curl_hsts_msg="enabled (--disable-hsts)"
-    ssl_backends=
-     curl_h1_msg="enabled (internal)"
-     curl_h2_msg="no      (--with-nghttp2)"
-     curl_h3_msg="no      (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic)"
+         curl_ssl_msg="no       (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,amissl,rustls} )"
+         curl_ssh_msg="no       (--with-{libssh,libssh2})"
+        curl_zlib_msg="no       (--with-zlib)"
+      curl_brotli_msg="no       (--with-brotli)"
+        curl_zstd_msg="no       (--with-zstd)"
+         curl_gss_msg="no       (--with-gssapi)"
+       curl_gsasl_msg="no       (--with-gsasl)"
+     curl_tls_srp_msg="no       (--enable-tls-srp)"
+         curl_res_msg="blocking (--enable-ares / --enable-threaded-resolver)"
+        curl_ipv6_msg="no       (--enable-ipv6)"
+curl_unix_sockets_msg="no       (--enable-unix-sockets)"
+         curl_idn_msg="no       (--with-{libidn2,winidn})"
+        curl_docs_msg="enabled  (--disable-docs)"
+      curl_manual_msg="no       (--enable-manual)"
+     curl_libcurl_msg="enabled  (--disable-libcurl-option)"
+   curl_typecheck_msg="enabled  (--disable-typecheck)"
+     curl_verbose_msg="enabled  (--disable-verbose)"
+        curl_sspi_msg="no       (--enable-sspi)"
+        curl_ldap_msg="no       (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
+       curl_ldaps_msg="no       (--enable-ldaps)"
+        curl_ipfs_msg="no       (--enable-ipfs)"
+        curl_rtsp_msg="no       (--enable-rtsp)"
+        curl_rtmp_msg="no       (--with-librtmp)"
+         curl_psl_msg="no       (--with-libpsl)"
+      curl_altsvc_msg="enabled  (--disable-alt-svc)"
+     curl_headers_msg="enabled  (--disable-headers-api)"
+        curl_hsts_msg="enabled  (--disable-hsts)"
+         ssl_backends=
+          curl_h1_msg="enabled  (internal)"
+          curl_h2_msg="no       (--with-nghttp2)"
+          curl_h3_msg="no       (--with-ngtcp2 --with-nghttp3, --with-quiche, --with-openssl-quic)"
 
 enable_altsvc="yes"
 hsts="yes"
@@ -329,7 +329,7 @@ AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
 )
 AC_SUBST(VSFTPD)
 
-dnl we'd like a httpd as test server
+dnl we would like an httpd as test server
 dnl
 HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
@@ -379,7 +379,7 @@ fi
 AC_SUBST(HTTPD)
 AC_SUBST(APXS)
 
-dnl we'd like a dante as test socks server
+dnl we would like a dante as test socks server
 dnl
 DANTED_ENABLED="maybe"
 AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
@@ -530,12 +530,8 @@ dnl for --enable-code-coverage
 CURL_COVERAGE
 CURL_CHECK_NATIVE_WINDOWS
 
-curl_cv_wince='no'
 curl_cv_winuwp='no'
 if test "$curl_cv_native_windows" = "yes"; then
-  case $host_os in
-    mingw32ce*) curl_cv_wince='yes';;
-  esac
   case "$CPPFLAGS" in
     *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
   esac
@@ -897,7 +893,7 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
     AC_MSG_RESULT(yes)
 )
 
-if test "$curl_cv_winuwp" = 'yes' -o "$curl_cv_wince" = 'yes'; then
+if test "$curl_cv_winuwp" = 'yes'; then
   AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
   CURL_DISABLE_TELNET=1
 fi
@@ -1112,6 +1108,22 @@ AS_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
     AC_MSG_RESULT(no)
 )
 
+AC_MSG_CHECKING([whether to use libbacktrace])
+AC_ARG_WITH(backtrace,
+AS_HELP_STRING([--enable-backtrace],[use libbacktrace when linking]),
+[ case "$enableval" in
+  yes)
+    LIBS="-lbacktrace $LIBS"
+    AC_DEFINE(USE_BACKTRACE, 1, [if libbacktrace is in use])
+    AC_MSG_RESULT(yes)
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
+  esac ],
+    AC_MSG_RESULT(no)
+)
+
 CURL_CHECK_LIB_XNET
 
 dnl gethostbyname without lib or in the nsl lib?
@@ -1176,37 +1188,6 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
     AC_MSG_RESULT([no])
     LIBS=$my_ac_save_LIBS
   ])
-fi
-
-if test "$HAVE_GETHOSTBYNAME" != "1"; then
-  if test "$curl_cv_wince" = 'yes'; then
-    dnl This is for Windows CE systems
-    winsock_LIB="-lws2"
-    if test ! -z "$winsock_LIB"; then
-      my_ac_save_LIBS=$LIBS
-      LIBS="$winsock_LIB $LIBS"
-      AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
-      AC_LINK_IFELSE([
-        AC_LANG_PROGRAM([[
-          #ifdef _WIN32
-          #ifndef WIN32_LEAN_AND_MEAN
-          #define WIN32_LEAN_AND_MEAN
-          #endif
-          #include <winsock2.h>
-          #endif
-        ]],[[
-          gethostbyname("localhost");
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-        HAVE_GETHOSTBYNAME="1"
-      ],[
-        AC_MSG_RESULT([no])
-        winsock_LIB=""
-        LIBS=$my_ac_save_LIBS
-      ])
-    fi
-  fi
 fi
 
 # In UWP mode gethostbyname gets detected via the core libs, but some
@@ -1404,7 +1385,7 @@ else
     [
       dnl zlib.h was found
       HAVE_ZLIB_H="1"
-      dnl if the lib wasn't found already, try again with the new paths
+      dnl if the lib was not found already, try again with the new paths
       if test "$HAVE_LIBZ" != "1"; then
         AC_CHECK_LIB(z, gzread,
           [
@@ -1536,8 +1517,8 @@ if test X"$OPT_BROTLI" != Xno; then
 
   if test "$HAVE_BROTLI" = "1"; then
     if test -n "$DIR_BROTLI"; then
-      dnl when the brotli shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the brotli shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
@@ -1625,8 +1606,8 @@ if test X"$OPT_ZSTD" != Xno; then
 
   if test "$HAVE_ZSTD" = "1"; then
     if test -n "$DIR_ZSTD"; then
-      dnl when the zstd shared lib were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to
+      dnl when the zstd shared lib were found in a path that the runtime
+      dnl linker does not search through, we need to add it to
       dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
       dnl this
 
@@ -1693,10 +1674,6 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
     ipv6=no
   )
 )
-
-if test "$curl_cv_wince" = 'yes'; then
-  ipv6=no
-fi
 
 if test "$ipv6" = yes; then
   curl_ipv6_msg="enabled"
@@ -1840,51 +1817,14 @@ if test x"$want_gss" = xyes; then
       gnu_gss=yes
     ],
     [
-      dnl not found, check Heimdal or MIT
-      AC_CHECK_HEADERS([gssapi/gssapi.h], [], [not_mit=1])
+      dnl not found, check for MIT
       AC_CHECK_HEADERS(
-        [gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
+        [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
         [],
-        [not_mit=1],
-        [
-          AC_INCLUDES_DEFAULT
-          #ifdef HAVE_GSSAPI_GSSAPI_H
-          #include <gssapi/gssapi.h>
-          #endif
-        ])
+        [not_mit=1])
       if test "x$not_mit" = "x1"; then
-        dnl MIT not found, check for Heimdal
-        AC_CHECK_HEADER(gssapi.h,
-          [],
-          [
-            dnl no header found, disabling GSS
-            want_gss=no
-            AC_MSG_WARN(disabling GSS-API support since no header files were found)
-          ]
-        )
-      else
-        dnl MIT found
-        dnl check if we have a really old MIT Kerberos version (<= 1.2)
-        AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
-        AC_COMPILE_IFELSE([
-          AC_LANG_PROGRAM([[
-            #include <gssapi/gssapi.h>
-            #include <gssapi/gssapi_generic.h>
-            #include <gssapi/gssapi_krb5.h>
-          ]],[[
-            gss_import_name(
-                            (OM_uint32 *)0,
-                            (gss_buffer_t)0,
-                            GSS_C_NT_HOSTBASED_SERVICE,
-                            (gss_name_t *)0);
-          ]])
-        ],[
-          AC_MSG_RESULT([yes])
-        ],[
-          AC_MSG_RESULT([no])
-          AC_DEFINE(HAVE_OLD_GSSMIT, 1,
-            [if you have an old MIT Kerberos version, lacking GSS_C_NT_HOSTBASED_SERVICE])
-        ])
+        dnl MIT not found
+        AC_MSG_ERROR([MIT or GNU GSS library required, but not found])
       fi
     ]
   )
@@ -1894,7 +1834,7 @@ fi
 if test x"$want_gss" = xyes; then
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have GSS-API libraries])
   HAVE_GSSAPI=1
-  curl_gss_msg="enabled (MIT Kerberos/Heimdal)"
+  curl_gss_msg="enabled (MIT Kerberos)"
   link_pkgconfig=''
 
   if test -n "$gnu_gss"; then
@@ -1913,7 +1853,7 @@ if test x"$want_gss" = xyes; then
         CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
       fi
       if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl krb5-config does not have --libs-only-L or similar, put everything
         dnl into LIBS
         gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
         LIBS="$gss_libs $LIBS"
@@ -1922,7 +1862,7 @@ if test x"$want_gss" = xyes; then
         LIBS="$gss_libs $LIBS"
         link_pkgconfig=1
       elif test -f "$KRB5CONFIG"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
+        dnl krb5-config does not have --libs-only-L or similar, put everything
         dnl into LIBS
         gss_libs=`$KRB5CONFIG --libs gssapi`
         LIBS="$gss_libs $LIBS"
@@ -1946,6 +1886,18 @@ if test x"$want_gss" = xyes; then
         fi
       fi
     fi
+    gss_version=""
+    if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+      gss_version=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --version | $SED 's/Kerberos 5 release //'`
+    elif test "$PKGCONFIG" != "no"; then
+      gss_version=`$PKGCONFIG --modversion mit-krb5-gssapi`
+    elif test -f "$KRB5CONFIG"; then
+      gss_version=`$KRB5CONFIG --version | $SED 's/Kerberos 5 release //'`
+    fi
+    if test -n "$gss_version"; then
+      AC_MSG_NOTICE([GSS-API MIT Kerberos version detected: $gss_version])
+      AC_DEFINE_UNQUOTED([CURL_KRB5_VERSION], ["$gss_version"], [MIT Kerberos version])
+    fi
   else
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
@@ -1961,8 +1913,6 @@ if test x"$want_gss" = xyes; then
   if test -n "$link_pkgconfig"; then
     if test -n "$gnu_gss"; then
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
-    elif test "x$not_mit" = "x1"; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE heimdal-gssapi"
     else
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
     fi
@@ -2026,14 +1976,11 @@ CURL_WITH_APPLE_SECTRUST
 
 dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
 if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
-  LIBS="-lcrypt32 $LIBS"
-  if test "$curl_cv_wince" = 'no'; then
-    LIBS="-ladvapi32 $LIBS"
-  fi
+  LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
 
 dnl link bcrypt for BCryptGenRandom() (used when building for Vista or newer)
-if test "x$curl_cv_native_windows" = "xyes" -a "$curl_cv_wince" = 'no'; then
+if test "x$curl_cv_native_windows" = "xyes"; then
   LIBS="-lbcrypt $LIBS"
   LIBS="-lncrypt $LIBS"
   AC_DEFINE(HAVE_NCRYPT, 1, [to enable CNG API])
@@ -2358,8 +2305,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
   if test "$USE_LIBSSH2" = "1"; then
     if test -n "$DIR_SSH2"; then
-      dnl when the libssh2 shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the libssh2 shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
@@ -2438,8 +2385,8 @@ elif test X"$OPT_LIBSSH" != Xno; then
       LIBS="-liphlpapi $LIBS"
     fi
     if test -n "$DIR_SSH"; then
-      dnl when the libssh shared libs were found in a path that the run-time
-      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl when the libssh shared libs were found in a path that the runtime
+      dnl linker does not search through, we need to add it to CURL_LIBRARY_PATH
       dnl to prevent further configure tests to fail due to this
 
       if test "x$cross_compiling" != "xyes"; then
@@ -2492,7 +2439,7 @@ case "$OPT_LDAP" in
     want_ldap="yes"
     ;;
   off)
-    dnl no --with-ldap option given, don't change anything
+    dnl no --with-ldap option given, do not change anything
     want_ldap="default"
     ;;
   *)
@@ -2549,7 +2496,7 @@ if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
 
     if test "$ldap_lib_ok" = "no"; then
       if test -n "$ldap_askedfor"; then
-        AC_MSG_ERROR([couldn't detect the LDAP libraries])
+        AC_MSG_ERROR([could not detect the LDAP libraries])
       fi
       AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
       AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
@@ -2567,7 +2514,7 @@ if test x$CURL_DISABLE_LDAP != x1 && test "$want_ldap" != "no"; then
     case X-"$curl_cv_ldap_LIBS" in
       X-unknown)
         if test -n "$ldap_askedfor"; then
-          AC_MSG_ERROR([couldn't detect the LDAP libraries])
+          AC_MSG_ERROR([could not detect the LDAP libraries])
         fi
         AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
@@ -2586,8 +2533,8 @@ fi
 if test x$CURL_DISABLE_LDAP != x1; then
   dnl Add to library path if needed
   if test -n "$DIR_LDAP"; then
-    dnl when the ldap shared lib were found in a path that the run-time
-    dnl linker doesn't search through, we need to add it to
+    dnl when the ldap shared lib were found in a path that the runtime
+    dnl linker does not search through, we need to add it to
     dnl CURL_LIBRARY_PATH to prevent further configure tests to fail due to
     dnl this
 
@@ -2599,8 +2546,8 @@ if test x$CURL_DISABLE_LDAP != x1; then
   fi
 
   if test "$LBERLIBNAME"; then
-    dnl If name is "no" then don't define this library at all
-    dnl (it's only needed if libldap.so's dependencies are broken).
+    dnl If name is "no" then do not define this library at all
+    dnl (it is only needed if libldap.so's dependencies are broken).
     dnl Skip this check if we already determined we need both libraries above
     if test "$LBERLIBNAME" != "no" -a "$ldap_lib_ok" != "yes"; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
@@ -2780,11 +2727,7 @@ dnl ----------------------------
 dnl check Windows Unicode option
 dnl ----------------------------
 
-if test "$curl_cv_wince" = 'yes'; then
-  want_winuni="yes"
-else
-  want_winuni="no"
-fi
+want_winuni="no"
 if test "$curl_cv_native_windows" = "yes"; then
   if test "$curl_cv_winuwp" = 'yes'; then
     want_winuni="yes"
@@ -3865,7 +3808,7 @@ if test X"$want_quiche" != Xno; then
         )
       ],
         dnl not found, revert back to clean variables
-        AC_MSG_ERROR([couldn't use quiche])
+        AC_MSG_ERROR([could not use quiche])
     )
   else
     dnl no quiche pkg-config found, deal with it
@@ -4031,7 +3974,7 @@ if test -z "$PERL" -a x"$FISH_FUNCTIONS_DIR" != x; then
 fi
 AM_CONDITIONAL(USE_FISH_COMPLETION, test x"$FISH_FUNCTIONS_DIR" != x)
 
-dnl Now check for the very most basic headers. Then we can use these
+dnl Now check for the most basic headers. Then we can use these
 dnl ones as default-headers when checking for the rest!
 AC_CHECK_HEADERS(
   sys/types.h \
@@ -4129,7 +4072,7 @@ AC_CHECK_TYPE(long long,
 )
 
 if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
-  AC_MSG_ERROR([64 bit curl_off_t is required])
+  AC_MSG_ERROR([64-bit curl_off_t is required])
 fi
 
 # check for ssize_t
@@ -4296,11 +4239,9 @@ else
   CURL_CHECK_FUNC_STRICMP
 fi
 
-if test "$curl_cv_wince" = 'no'; then
-  AC_CHECK_FUNCS([setmode])
-  if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
-    AC_CHECK_FUNCS([_setmode])
-  fi
+AC_CHECK_FUNCS([setmode])
+if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
+  AC_CHECK_FUNCS([_setmode])
 fi
 
 if test -z "$ssl_backends"; then
@@ -4375,7 +4316,7 @@ if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; t
           ;;
       esac
 
-      dnl if it wasn't found without lib, search for it in pthread lib
+      dnl if it was not found without lib, search for it in pthread lib
       if test "$USE_THREADS_POSIX" != "1"; then
         # assign PTHREAD for pkg-config use
         PTHREAD=" -pthread"
@@ -4422,6 +4363,26 @@ AC_CHECK_HEADER(dirent.h,
 )
 
 CURL_CONVERT_INCLUDE_TO_ISYSTEM
+
+dnl ************************************************************
+dnl disable curl_easy_setopt()/curl_easy_getinfo() type checking
+dnl
+AC_MSG_CHECKING([whether to enable curl_easy_setopt()/curl_easy_getinfo() type checking])
+AC_ARG_ENABLE(typecheck,
+AS_HELP_STRING([--enable-typecheck],[Enable type checking (default)])
+AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
+    curl_typecheck_msg="no"
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
 
 dnl ************************************************************
 dnl disable verbose text strings
@@ -4669,7 +4630,7 @@ AS_HELP_STRING([--disable-unix-sockets],[Disable Unix domain sockets]),
     want_unix_sockets=auto
     ]
 )
-if test "x$want_unix_sockets" != "xno" -a "$curl_cv_wince" = 'no'; then
+if test "x$want_unix_sockets" != "xno"; then
   if test "x$curl_cv_native_windows" = "xyes"; then
     USE_UNIX_SOCKETS=1
     AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
@@ -4986,7 +4947,7 @@ AS_HELP_STRING([--disable-headers-api],[Disable headers-api support]),
     AC_MSG_RESULT(yes)
 )
 
-dnl only check for HSTS if there's SSL present
+dnl only check for HSTS if there is SSL present
 if test -n "$SSL_ENABLED"; then
   dnl ************************************************************
   dnl switch on/off hsts
@@ -5107,9 +5068,9 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
       if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
         AC_MSG_RESULT(yes)
       else
-        dnl WebSockets requires >32 bit curl_off_t
+        dnl WebSockets requires >32-bit curl_off_t
         AC_MSG_RESULT(no)
-        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
+        AC_MSG_WARN([WebSockets disabled due to lack of >32-bit curl_off_t])
         AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
         CURL_DISABLE_WEBSOCKETS=1
       fi
@@ -5281,10 +5242,11 @@ fi
 use_curl_ntlm_core=no
 
 if test "x$CURL_DISABLE_NTLM" != "x1"; then
-  if test "x$OPENSSL_ENABLED" = "x1" -o "x$MBEDTLS_ENABLED" = "x1" \
+  if test "x$HAVE_DES_ECB_ENCRYPT" = "x1" \
       -o "x$GNUTLS_ENABLED" = "x1" \
       -o "x$USE_WIN32_CRYPTO" = "x1" \
-      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1"; then
+      -o "x$HAVE_WOLFSSL_DES_ECB_ENCRYPT" = "x1" \
+      -o "x$HAVE_MBEDTLS_DES_CRYPT_ECB" = "x1"; then
     use_curl_ntlm_core=yes
   fi
 
@@ -5343,6 +5305,10 @@ if test "x$OPENSSL_ENABLED" = "x1" -o -n "$SSL_ENABLED"; then
   if test "x$ECH_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
   fi
+fi
+
+if test "x$APPLE_SECTRUST_ENABLED" = "x1"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
 fi
 
 if test "x$want_httpsrr" != "xno"; then
@@ -5594,6 +5560,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
   Built-in manual:  ${curl_manual_msg}
   --libcurl option: ${curl_libcurl_msg}
+  Type checking:    ${curl_typecheck_msg}
   Verbose errors:   ${curl_verbose_msg}
   Code coverage:    ${curl_coverage_msg}
   SSPI:             ${curl_sspi_msg}

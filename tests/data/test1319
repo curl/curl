@@ -12,7 +12,7 @@ HTTP proxy
 # Server-side
 <reply>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 pop3: sure hit me
 
@@ -27,7 +27,7 @@ To: fake@nowhere
 body
 
 --
-  yours sincerely
+  yours sincerely%CR
 </data>
 
 <datacheck>
@@ -37,7 +37,7 @@ To: fake@nowhere
 body
 
 --
-  yours sincerely
+  yours sincerely%CR
 </datacheck>
 </reply>
 
@@ -63,14 +63,14 @@ pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:se
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret
 RETR %TESTNUMBER
 QUIT
 </protocol>
-<proxy>
+<proxy crlf="headers">
 CONNECT pop.%TESTNUMBER:%POP3PORT HTTP/1.1
 Host: pop.%TESTNUMBER:%POP3PORT
 User-Agent: curl/%VERSION

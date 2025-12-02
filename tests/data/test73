@@ -9,7 +9,7 @@ cookiejar
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
@@ -38,7 +38,7 @@ cookies
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: host.NOT_DISCLOSED.se
 User-Agent: curl/%VERSION

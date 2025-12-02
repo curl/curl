@@ -10,7 +10,7 @@ RETR
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -20,7 +20,7 @@ To: fake@nowhere
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -49,7 +49,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret

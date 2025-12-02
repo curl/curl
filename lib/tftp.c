@@ -59,15 +59,10 @@
 #include "multiif.h"
 #include "url.h"
 #include "strcase.h"
-#include "speedcheck.h"
 #include "select.h"
 #include "escape.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* RFC2348 allows the block size to be negotiated */
 #define TFTP_BLKSIZE_DEFAULT 512
@@ -211,7 +206,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
   bool start = (state->state == TFTP_STATE_START);
 
   /* Compute drop-dead time */
-  timeout_ms = Curl_timeleft(state->data, NULL, start);
+  timeout_ms = Curl_timeleft_ms(state->data, NULL, start);
 
   if(timeout_ms < 0) {
     /* time-out, bail out, go home */
@@ -241,7 +236,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     state->retry_time = 1;
 
   infof(state->data,
-        "set timeouts for state %d; Total % " FMT_OFF_T ", retry %d maxtry %d",
+        "set timeouts for state %d; Total %" FMT_OFF_T ", retry %d maxtry %d",
         (int)state->state, timeout_ms, state->retry_time, state->retry_max);
 
   /* init RX time */
@@ -381,7 +376,7 @@ static CURLcode tftp_parse_option_ack(struct tftp_conn *state,
 static CURLcode tftp_option_add(struct tftp_conn *state, size_t *csize,
                                 char *buf, const char *option)
 {
-  if(( strlen(option) + *csize + 1) > (size_t)state->blksize)
+  if((strlen(option) + *csize + 1) > (size_t)state->blksize)
     return CURLE_TFTP_ILLEGAL;
   strcpy(buf, option);
   *csize += strlen(option) + 1;
@@ -460,6 +455,10 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
     /* As RFC3617 describes the separator slash is not actually part of the
        filename so we skip the always-present first letter of the path
        string. */
+    if(!state->data->state.up.path[1]) {
+      failf(data, "Missing filename");
+      return CURLE_TFTP_ILLEGAL;
+    }
     result = Curl_urldecode(&state->data->state.up.path[1], 0,
                             &filename, NULL, REJECT_ZERO);
     if(result)
@@ -467,14 +466,15 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
     if(strlen(filename) > (state->blksize - strlen(mode) - 4)) {
       failf(data, "TFTP filename too long");
-      free(filename);
+      curlx_free(filename);
       return CURLE_TFTP_ILLEGAL; /* too long filename field */
     }
 
     curl_msnprintf((char *)state->spacket.data + 2,
                    state->blksize,
-                   "%s%c%s%c", filename, '\0',  mode, '\0');
+                   "%s%c%s%c", filename, '\0', mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
+    curlx_free(filename);
 
     /* optional addition of TFTP options */
     if(!data->set.tftp_no_options) {
@@ -513,7 +513,6 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
       if(result != CURLE_OK) {
         failf(data, "TFTP buffer too small for options");
-        free(filename);
         return CURLE_TFTP_ILLEGAL;
       }
     }
@@ -533,7 +532,6 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                       (SEND_TYPE_ARG3)sbytes, 0,
                       CURL_SENDTO_ARG5(&remote_addr->curl_sa_addr),
                       (curl_socklen_t)remote_addr->addrlen);
-    free(filename);
     if(senddata != (ssize_t)sbytes) {
       char buffer[STRERROR_LEN];
       failf(data, "%s", curlx_strerror(SOCKERRNO, buffer, sizeof(buffer)));
@@ -944,7 +942,7 @@ static void tftp_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_safefree(state->rpacket.data);
   Curl_safefree(state->spacket.data);
-  free(state);
+  curlx_free(state);
 }
 
 /**********************************************************
@@ -965,7 +963,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
 
   blksize = TFTP_BLKSIZE_DEFAULT;
 
-  state = calloc(1, sizeof(*state));
+  state = curlx_calloc(1, sizeof(*state));
   if(!state ||
      Curl_conn_meta_set(conn, CURL_META_TFTP_CONN, state, tftp_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -981,14 +979,14 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     need_blksize = TFTP_BLKSIZE_DEFAULT;
 
   if(!state->rpacket.data) {
-    state->rpacket.data = calloc(1, need_blksize + 2 + 2);
+    state->rpacket.data = curlx_calloc(1, need_blksize + 2 + 2);
 
     if(!state->rpacket.data)
       return CURLE_OUT_OF_MEMORY;
   }
 
   if(!state->spacket.data) {
-    state->spacket.data = calloc(1, need_blksize + 2 + 2);
+    state->spacket.data = curlx_calloc(1, need_blksize + 2 + 2);
 
     if(!state->spacket.data)
       return CURLE_OUT_OF_MEMORY;
@@ -1172,9 +1170,10 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
     }
 
     /* Update the progress meter */
-    if(Curl_pgrsUpdate(data)) {
+    result = Curl_pgrsUpdate(data);
+    if(result) {
       tftp_state_machine(state, TFTP_EVENT_ERROR);
-      return CURLE_ABORTED_BY_CALLBACK;
+      return result;
     }
   }
   return result;
@@ -1196,8 +1195,8 @@ static timediff_t tftp_state_timeout(struct tftp_conn *state,
   if(event)
     *event = TFTP_EVENT_NONE;
 
-  timeout_ms = Curl_timeleft(state->data, NULL,
-                             (state->state == TFTP_STATE_START));
+  timeout_ms = Curl_timeleft_ms(state->data, NULL,
+                                (state->state == TFTP_STATE_START));
   if(timeout_ms < 0) {
     state->error = TFTP_ERR_TIMEOUT;
     state->state = TFTP_STATE_FIN;
@@ -1294,10 +1293,7 @@ static CURLcode tftp_doing(struct Curl_easy *data, bool *dophase_done)
     /* The multi code does not have this logic for the DOING state so we
        provide it for TFTP since it may do the entire transfer in this
        state. */
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
-    else
-      result = Curl_speedcheck(data, curlx_now());
+    result = Curl_pgrsCheck(data);
   }
   return result;
 }
@@ -1375,35 +1371,19 @@ static CURLcode tftp_do(struct Curl_easy *data, bool *done)
 static CURLcode tftp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
-  char *type;
+  char *path = data->state.up.path;
+  size_t len = strlen(path);
 
   conn->transport_wanted = TRNSPRT_UDP;
 
-  /* TFTP URLs support an extension like ";mode=<typecode>" that
-   * we will try to get now! */
-  type = strstr(data->state.up.path, ";mode=");
-
-  if(!type)
-    type = strstr(conn->host.rawalloc, ";mode=");
-
-  if(type) {
-    char command;
-    *type = 0;                   /* it was in the middle of the hostname */
-    command = Curl_raw_toupper(type[6]);
-
-    switch(command) {
-    case 'A': /* ASCII mode */
-    case 'N': /* NETASCII mode */
-      data->state.prefer_ascii = TRUE;
-      break;
-
-    case 'O': /* octet mode */
-    case 'I': /* binary mode */
-    default:
-      /* switch off ASCII */
-      data->state.prefer_ascii = FALSE;
-      break;
-    }
+  /* TFTP URLs support a trailing ";mode=netascii" or ";mode=octet" */
+  if((len >= 14) && !memcmp(&path[len - 14], ";mode=netascii", 14)) {
+    data->state.prefer_ascii = TRUE;
+    path[len - 14] = 0; /* cut it there */
+  }
+  else if((len >= 11) && !memcmp(&path[len - 11], ";mode=octet", 11)) {
+    data->state.prefer_ascii = FALSE;
+    path[len - 11] = 0; /* cut it there */
   }
 
   return CURLE_OK;

@@ -55,18 +55,17 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 GET /aws_sigv4/testapi/test HTTP/1.1
 Host: exam.ple.com:9000
 Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, SignedHeaders=content-type;host;tesmixcase;test2;test3;test_space;x-xxx-date, Signature=dd39202e9fb7b836ebf2abb83b114cae11ff3b6a169f0c64b290a774a873db9d
 X-Xxx-Date: 19700101T000000Z
 test3: 1234
 test2:
-test_space: t	s  m	   end    
+test_space: t%TABs  m%TAB   end%repeat[4 x  ]%
 tesMixCase: MixCase
 
 </protocol>

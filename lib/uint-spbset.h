@@ -27,8 +27,8 @@
 
 #include <curl/curl.h>
 
-/* A "sparse" bitset for unsigned int values.
- * It can hold any unsigned int value.
+/* A "sparse" bitset for uint32_t values.
+ * It can hold any uint32_t value.
  *
  * Optimized for the case where only a small set of numbers need
  * to be kept, especially when "close" together. Then storage space
@@ -36,48 +36,48 @@
  */
 
 /* 4 slots = 256 bits, keep this a 2^n value. */
-#define CURL_UINT_SPBSET_CH_SLOTS  4
-#define CURL_UINT_SPBSET_CH_MASK   ((CURL_UINT_SPBSET_CH_SLOTS * 64) - 1)
+#define CURL_UINT32_SPBSET_CH_SLOTS  4
+#define CURL_UINT32_SPBSET_CH_MASK   ((CURL_UINT32_SPBSET_CH_SLOTS * 64) - 1)
 
 /* store the uint value from offset to
- * (offset + (CURL_UINT_SPBSET_CHUNK_SLOTS * 64) - 1 */
-struct uint_spbset_chunk {
-  struct uint_spbset_chunk *next;
-  curl_uint64_t slots[CURL_UINT_SPBSET_CH_SLOTS];
-  unsigned int offset;
+ * (offset + (CURL_UINT32_SPBSET_CHUNK_SLOTS * 64) - 1 */
+struct uint32_spbset_chunk {
+  struct uint32_spbset_chunk *next;
+  uint64_t slots[CURL_UINT32_SPBSET_CH_SLOTS];
+  uint32_t offset;
 };
 
-struct uint_spbset {
-  struct uint_spbset_chunk head;
+struct uint32_spbset {
+  struct uint32_spbset_chunk head;
 #ifdef DEBUGBUILD
   int init;
 #endif
 };
 
-void Curl_uint_spbset_init(struct uint_spbset *bset);
+void Curl_uint32_spbset_init(struct uint32_spbset *bset);
 
-void Curl_uint_spbset_destroy(struct uint_spbset *bset);
+void Curl_uint32_spbset_destroy(struct uint32_spbset *bset);
 
 /* Get the cardinality of the bitset, e.g. numbers present in the set. */
-unsigned int Curl_uint_spbset_count(struct uint_spbset *bset);
+uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset);
 
 /* TRUE of bitset is empty */
-bool Curl_uint_spbset_empty(struct uint_spbset *bset);
+bool Curl_uint32_spbset_empty(struct uint32_spbset *bset);
 
 /* Add the number `i` to the bitset.
  * Numbers can be added more than once, without making a difference.
  * Returns FALSE if allocations failed. */
-bool Curl_uint_spbset_add(struct uint_spbset *bset, unsigned int i);
+bool Curl_uint32_spbset_add(struct uint32_spbset *bset, uint32_t i);
 
 /* Remove the number `i` from the bitset. */
-void Curl_uint_spbset_remove(struct uint_spbset *bset, unsigned int i);
+void Curl_uint32_spbset_remove(struct uint32_spbset *bset, uint32_t i);
 
 /* Return TRUE if the bitset contains number `i`. */
-bool Curl_uint_spbset_contains(struct uint_spbset *bset, unsigned int i);
+bool Curl_uint32_spbset_contains(struct uint32_spbset *bset, uint32_t i);
 
 /* Get the first number in the bitset, e.g. the smallest.
  * Returns FALSE when the bitset is empty. */
-bool Curl_uint_spbset_first(struct uint_spbset *bset, unsigned int *pfirst);
+bool Curl_uint32_spbset_first(struct uint32_spbset *bset, uint32_t *pfirst);
 
 /* Get the next number in the bitset, following `last` in natural order.
  * Put another way, this is the smallest number greater than `last` in
@@ -90,7 +90,7 @@ bool Curl_uint_spbset_first(struct uint_spbset *bset, unsigned int *pfirst);
  * - added numbers lower than 'last' will not show up.
  * - removed numbers lower or equal to 'last' will not show up.
  * - removed numbers higher than 'last' will not be visited. */
-bool Curl_uint_spbset_next(struct uint_spbset *bset, unsigned int last,
-                           unsigned int *pnext);
+bool Curl_uint32_spbset_next(struct uint32_spbset *bset, uint32_t last,
+                             uint32_t *pnext);
 
 #endif /* HEADER_CURL_UINT_SPBSET_H */

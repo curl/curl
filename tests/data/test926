@@ -35,7 +35,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 <errorcode>
 8
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY recipient
 QUIT

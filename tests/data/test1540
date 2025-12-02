@@ -13,27 +13,27 @@ DELAY
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK swsclose
-Transfer-Encoding: chunked
-Trailer: MyCoolTrailerHeader
-
-4
-data
-5
+HTTP/1.1 200 OK swsclose%CR
+Transfer-Encoding: chunked%CR
+Trailer: MyCoolTrailerHeader%CR
+%CR
+4%CR
+data%CR
+5%CR
 d474
-
-0
-MyCoolTrailerHeader: amazingtrailer
-
+%CR
+0%CR
+MyCoolTrailerHeader: amazingtrailer%CR
+%CR
 </data>
 <datacheck>
-HTTP/1.1 200 OK swsclose
-Transfer-Encoding: chunked
-Trailer: MyCoolTrailerHeader
-
+HTTP/1.1 200 OK swsclose%CR
+Transfer-Encoding: chunked%CR
+Trailer: MyCoolTrailerHeader%CR
+%CR
 Got bytes but pausing!
 datad474
-MyCoolTrailerHeader: amazingtrailer
+MyCoolTrailerHeader: amazingtrailer%CR
 </datacheck>
 <servercmd>
 writedelay: 10
@@ -57,7 +57,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

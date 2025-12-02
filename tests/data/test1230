@@ -12,7 +12,7 @@ IPv6
 # Server-side
 <reply>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 9
@@ -20,13 +20,13 @@ Content-Length: 9
 mooooooo
 </data>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 welcome dear
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 
 </connect>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 welcome dear
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 
@@ -62,7 +62,7 @@ http://[1234:1234:1234::4ce]:%HTTPPORT/wanted/page/%TESTNUMBER -p -x %HOSTIP:%HT
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 CONNECT [1234:1234:1234::4ce]:%HTTPPORT HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
 User-Agent: curl/%VERSION

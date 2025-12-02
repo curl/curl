@@ -27,7 +27,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-HTTP over proxy with too long IDN host name
+HTTP over proxy with too long IDN hostname
 </name>
 <command>
 http://too-long-IDN-name-c%hex[%c3%bc]hex%rl-r%hex[%c3%bc]hex%le%hex[%c3%9f]hex%-la-la-la-dee-da-flooby-nooby.local/page/%TESTNUMBER -x %HOSTIP:%NOLISTENPORT

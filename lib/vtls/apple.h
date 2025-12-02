@@ -26,7 +26,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
+#ifdef USE_APPLE_SECTRUST
 struct Curl_cfilter;
 struct Curl_easy;
 struct ssl_peer;
@@ -50,6 +50,6 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
                                 void *cb_user_data,
                                 const unsigned char *ocsp_buf,
                                 size_t ocsp_len);
-#endif /* USE_SSL && USE_APPLE_SECTRUST */
+#endif /* USE_APPLE_SECTRUST */
 
 #endif /* HEADER_CURL_VTLS_APPLE_H */

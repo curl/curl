@@ -11,9 +11,9 @@ APOP
 <reply>
 <servercmd>
 CAPA APOP
-REPLY welcome +OK curl POP3 server ready to serve <1972.987654321\@curl>
+REPLY welcome +OK curl POP3 server ready to serve %LT1972.987654321\@curl%GT
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -45,7 +45,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 APOP user 7501b4cdc224d469940e65e7b5e4d6eb
 RETR %TESTNUMBER

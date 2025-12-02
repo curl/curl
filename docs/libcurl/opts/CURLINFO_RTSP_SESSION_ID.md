@@ -15,7 +15,7 @@ Added-in: 7.20.0
 
 # NAME
 
-CURLINFO_RTSP_SESSION_ID - get RTSP session ID
+CURLINFO_RTSP_SESSION_ID - RTSP session ID
 
 # SYNOPSIS
 

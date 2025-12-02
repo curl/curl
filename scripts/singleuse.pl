@@ -36,7 +36,7 @@
 use strict;
 use warnings;
 
-my $unittests;
+my $unittests="";
 if(@ARGV && $ARGV[0] eq "--unit") {
     $unittests = "tests/unit ";
     shift @ARGV;
@@ -116,6 +116,8 @@ my %api = (
     'curl_multi_get_offt' => 'API',
     'curl_multi_info_read' => 'API',
     'curl_multi_init' => 'API',
+    'curl_multi_notify_disable' => 'API',
+    'curl_multi_notify_enable' => 'API',
     'curl_multi_perform' => 'API',
     'curl_multi_remove_handle' => 'API',
     'curl_multi_setopt' => 'API',

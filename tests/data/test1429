@@ -8,7 +8,7 @@ HTTP/0.9
 </info>
 
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 999 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -42,7 +42,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --write-out '%{response_code}'
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout nonewline="yes">
+<stdout crlf="headers" nonewline="yes">
 HTTP/1.1 999 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -57,7 +57,7 @@ Funny-head: yesyes
 -foo-
 999
 </stdout>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -22,16 +22,20 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Very simple HTTP/3 GET
+ * Simple HTTP/3 GET
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -50,5 +54,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }

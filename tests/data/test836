@@ -15,7 +15,7 @@ connection reuse
 REPLY "LOGIN user.one secret" A002 OK LOGIN completed
 REPLY "LOGIN user.two secret" B002 OK LOGIN completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -43,7 +43,7 @@ IMAP multiple connection authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user.one secret
 A003 SELECT %TESTNUMBER

@@ -11,13 +11,13 @@ HTTP Digest auth
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 WWW-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
 </data>
 
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: no
 Content-Length: 15
@@ -25,7 +25,7 @@ Content-Length: 15
 Nice auth sir!
 </data1000>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 WWW-Authenticate: Digest realm="weirdorealm", nonce="12345"
 
@@ -58,7 +58,7 @@ http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER --proxy http://%
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://data.from.server.requiring.digest.hohoho.com/%TESTNUMBER HTTP/1.1
 Host: data.from.server.requiring.digest.hohoho.com
 Proxy-Authorization: Basic %b64[foo:bar]b64%

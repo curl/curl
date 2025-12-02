@@ -68,6 +68,8 @@ extern FILE *tool_stderr;
 
 #ifndef HAVE_STRDUP
 #include "tool_strdup.h"
+#undef Curl_strdup
+#define Curl_strdup tool_strdup
 #endif
 
 #ifndef tool_nop_stmt
@@ -92,15 +94,6 @@ extern FILE *tool_stderr;
 #ifdef _WIN32
 /* set in init_terminal() */
 extern bool tool_term_has_bold;
-
-#ifdef UNDER_CE
-#  undef isatty
-#  define isatty(fd) 0  /* fd is void*, expects int */
-#  undef _get_osfhandle
-#  define _get_osfhandle(fd) (fd)
-#  undef _getch
-#  define _getch() 0
-#endif
 
 #ifndef HAVE_FTRUNCATE
 

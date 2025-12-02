@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
@@ -33,16 +34,19 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   /* take care of the data here, ignored in this example */
   (void)data;
   (void)userp;
-  return n*l;
+  return n * l;
 }
 
 int main(void)
 {
   CURL *curl;
 
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
     struct curl_header *header;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* example.com is redirected, so we tell libcurl to follow redirection */
@@ -72,10 +76,10 @@ int main(void)
           printf(" %s: %s (%u)\n", h->name, h->value, (unsigned int)h->amount);
         prev = h;
       } while(h);
-
     }
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+  curl_global_cleanup();
   return 0;
 }

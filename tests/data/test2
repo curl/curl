@@ -9,7 +9,7 @@ HTTP Basic auth
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -36,7 +36,7 @@ HTTP GET with user and password
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[fake:user]b64%

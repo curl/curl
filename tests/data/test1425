@@ -49,7 +49,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -69,7 +69,7 @@ Content-Type: text/html
 Funny-head: yesyes
 
 </stdout>
-# 23 == CURLE_WRITE_ERROR, curl wouldn't accept the binary output
+# 23 == CURLE_WRITE_ERROR, curl would not accept the binary output
 <errorcode>
 23
 </errorcode>

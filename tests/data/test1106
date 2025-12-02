@@ -9,7 +9,7 @@ HTTP proxy
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -44,7 +44,7 @@ ftp://%HOSTIP:23456/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://%HOSTIP:23456/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:23456
 User-Agent: curl/%VERSION

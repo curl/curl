@@ -109,19 +109,20 @@ target_link_libraries(${EXE_NAME} ${LIB_SELECTED_FOR_EXE} ${CURL_LIBS})
 add_executable(${PROJECT_NAME}::${EXE_NAME} ALIAS ${EXE_NAME})
 
 add_executable(curlinfo EXCLUDE_FROM_ALL "curlinfo.c")
+target_link_libraries(curlinfo PRIVATE ${CURL_LIBS})
 set_target_properties(curlinfo PROPERTIES UNITY_BUILD OFF)
 
 # special libcurltool library just for unittests
 add_library(curltool STATIC EXCLUDE_FROM_ALL ${CURL_CFILES} ${CURL_HFILES} ${_curlx_cfiles_lib} ${_curlx_hfiles_lib})
 target_compile_definitions(curltool PUBLIC "CURL_STATICLIB" "UNITTESTS")
-target_link_libraries(curltool PRIVATE ${CURL_LIBS})
+target_link_libraries(curltool PUBLIC ${CURL_LIBS})
 set_target_properties(curltool PROPERTIES C_CLANG_TIDY "")
 
 if(CURL_HAS_LTO)
   set_target_properties(${EXE_NAME} PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(ENABLE_UNICODE AND MINGW AND NOT MINGW32CE)
+if(ENABLE_UNICODE AND MINGW)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
     set_property(TARGET ${EXE_NAME} APPEND PROPERTY LINK_OPTIONS "-municode")
   else()
@@ -141,8 +142,13 @@ endif()
 
 ################################################################################
 
-install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
-export(TARGETS ${EXE_NAME}
-  FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
-  NAMESPACE ${PROJECT_NAME}::
-)
+if(CURL_ENABLE_EXPORT_TARGET)
+  if(NOT CURL_DISABLE_INSTALL)
+    install(TARGETS ${EXE_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+  endif()
+
+  export(TARGETS ${EXE_NAME}
+    FILE "${PROJECT_BINARY_DIR}/curl-target.cmake"
+    NAMESPACE ${PROJECT_NAME}::
+  )
+endif()

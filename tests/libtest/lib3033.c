@@ -25,9 +25,7 @@
 
 #include "testtrace.h"
 
-#include "memdebug.h"
-
-static CURLcode t3033_req_test(CURLM *multi, CURL *easy,
+static CURLcode t3033_req_test(CURLM *multi, CURL *curl,
                                const char *URL, int index)
 {
   CURLMsg *msg = NULL;
@@ -35,21 +33,20 @@ static CURLcode t3033_req_test(CURLM *multi, CURL *easy,
   int still_running = 0;
 
   if(index == 1) {
-    curl_multi_setopt(multi, CURLMOPT_NETWORK_CHANGED,
-                      CURLMNWC_CLEAR_CONNS);
+    curl_multi_setopt(multi, CURLMOPT_NETWORK_CHANGED, CURLMNWC_CLEAR_CONNS);
     curl_mprintf("[1] signal network change\n");
   }
   else {
     curl_mprintf("[%d] no network change\n", index);
   }
 
-  curl_easy_reset(easy);
-  curl_easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_DEBUGDATA, &debug_config);
-  easy_setopt(easy, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  curl_easy_reset(curl);
+  curl_easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  curl_multi_add_handle(multi, easy);
+  curl_multi_add_handle(multi, curl);
 
   do {
     CURLMcode mres;
@@ -76,7 +73,7 @@ static CURLcode t3033_req_test(CURLM *multi, CURL *easy,
         goto test_cleanup;
       }
 
-      curl_easy_getinfo(easy, CURLINFO_NUM_CONNECTS, &num_connects);
+      curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &num_connects);
       if(index == 1 && num_connects == 0) {
         curl_mprintf("[1] should not reuse connection in pool\n");
         res = TEST_ERR_MAJOR_BAD;
@@ -92,7 +89,7 @@ static CURLcode t3033_req_test(CURLM *multi, CURL *easy,
 
 test_cleanup:
 
-  curl_multi_remove_handle(multi, easy);
+  curl_multi_remove_handle(multi, curl);
 
   return res;
 }

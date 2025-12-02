@@ -8,7 +8,7 @@ gif data
 </info>
 
 <reply>
-<data nonewline="yes">
+<data crlf="headers" nonewline="yes">
 HTTP/1.1 200 OK
 Date: Thu, 22 Jul 2010 11:22:33 GMT
 Connection: close
@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/gif/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /gif/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

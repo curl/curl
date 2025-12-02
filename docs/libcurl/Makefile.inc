@@ -78,6 +78,8 @@ man_MANS = \
  curl_multi_get_offt.3 \
  curl_multi_info_read.3 \
  curl_multi_init.3 \
+ curl_multi_notify_disable.3 \
+ curl_multi_notify_enable.3 \
  curl_multi_perform.3 \
  curl_multi_poll.3 \
  curl_multi_remove_handle.3 \

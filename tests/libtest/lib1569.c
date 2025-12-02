@@ -23,28 +23,26 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1569(const char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *hnd;
+  CURL *curl;
   global_init(CURL_GLOBAL_ALL);
 
-  easy_init(hnd);
-  easy_setopt(hnd, CURLOPT_URL, URL);
-  easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  easy_setopt(hnd, CURLOPT_HEADER, 1L);
+  easy_init(curl);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
 
-  res = curl_easy_perform(hnd);
+  res = curl_easy_perform(curl);
   if(res)
     goto test_cleanup;
 
-  curl_easy_setopt(hnd, CURLOPT_URL, libtest_arg2);
-  res = curl_easy_perform(hnd);
+  curl_easy_setopt(curl, CURLOPT_URL, libtest_arg2);
+  res = curl_easy_perform(curl);
 
 test_cleanup:
-  curl_easy_cleanup(hnd);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
   return res;
 }

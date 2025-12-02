@@ -12,7 +12,7 @@ globbing
 too many {} globs
 </name>
 <command>
-http://testingthis/{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b
+http://testingthis/%repeat[201 x {a}b]%
 </command>
 </client>
 
@@ -24,7 +24,7 @@ http://testingthis/{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{
 </errorcode>
 <stderr mode="text">
 curl: (3) too many {} sets in URL position 403:
-http://testingthis/{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a}b{a
+http://testingthis/%repeat[113 x {a}b]%{a
 </stderr>
 </verify>
 </testcase>

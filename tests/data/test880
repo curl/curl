@@ -22,7 +22,7 @@ REPLY * -ERR AUTH exchange cancelled by client
 REPLY "AUTH PLAIN" +
 REPLY AHVzZXIAc2VjcmV0 +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -55,7 +55,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH NTLM
 TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

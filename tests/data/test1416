@@ -15,15 +15,15 @@ Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked
 Connection: mooo
 
-12345678123456789
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-30
-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-21;heresatest=moooo
+12345678123456789%CR
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%CR
+30%CR
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb%CR
+21;heresatest=moooo%CR
 cccccccccccccccccccccccccccccccc
-
-0
-
+%CR
+0%CR
+%CR
 </data>
 </reply>
 
@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

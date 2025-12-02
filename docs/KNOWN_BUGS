@@ -37,18 +37,17 @@ problems may have been fixed or changed somewhat since this was written.
  5.2 curl-config --libs contains private details
  5.3 LDFLAGS passed too late making libs linked incorrectly
  5.6 Cygwin: make install installs curl-config.1 twice
- 5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
  5.15 Unicode on Windows
 
  6. Authentication
+ 6.1 Digest auth-int for PUT/POST
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
- 6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -67,6 +66,7 @@ problems may have been fixed or changed somewhat since this was written.
  10. Connection
  10.1 --interface with link-scoped IPv6 address
  10.2 Does not acknowledge getaddrinfo sorting policy
+ 10.3 SOCKS-SSPI discards the security context
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
@@ -229,12 +229,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/8839
 
-5.11 configure --with-gssapi with Heimdal is ignored on macOS
-
- ... unless you also pass --with-gssapi-libs
-
- https://github.com/curl/curl/issues/3841
-
 5.12 flaky CI builds
 
  We run many CI builds for each commit and PR on github, and especially a
@@ -300,6 +294,10 @@ problems may have been fixed or changed somewhat since this was written.
 
 6. Authentication
 
+6.1 Digest auth-int for PUT/POST
+
+ We do not support auth-int for Digest using PUT or POST
+
 6.2 MIT Kerberos for Windows build
 
  libcurl fails to build with MIT Kerberos for Windows (KfW) due to KfW's
@@ -332,13 +330,6 @@ problems may have been fixed or changed somewhat since this was written.
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
-
-6.8 Heimdal memory leaks
-
- Running test 2077 and 2078 with curl built to do GSS with Heimdal causes
- valgrind errors (memory leak).
-
- https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 
@@ -444,6 +435,15 @@ problems may have been fixed or changed somewhat since this was written.
  tries IPv6 addresses first.
 
  https://github.com/curl/curl/issues/16718
+
+
+10.3 SOCKS-SSPI discards the security context
+
+ After a successful SSPI/GSS-API exchange, the function queries and logs the
+ authenticated username and reports the supported data-protection level, but
+ then immediately deletes the negotiated SSPI security context and frees the
+ credentials before returning. The negotiated context is not stored on the
+ connection and is therefore never used to protect later SOCKS5 traffic.
 
 11. Internals
 

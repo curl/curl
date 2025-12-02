@@ -30,7 +30,7 @@ FIRST_C = first.c
 FIRST_H = first.h
 
 # Common files used by test programs
-UTILS_C = memptr.c getpart.c util.c
+UTILS_C = getpart.c util.c
 UTILS_H =
 
 CURLX_C = \

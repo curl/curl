@@ -9,7 +9,7 @@ RETR
 # Server-side
 <reply>
 # file%TESTNUMBER contents...
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -37,7 +37,7 @@ ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -i --output-dir %LOGDIR
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -49,7 +49,7 @@ RETR file%TESTNUMBER
 QUIT
 </protocol>
 
-<file1 name="%LOGDIR/file%TESTNUMBER">
+<file1 name="%LOGDIR/file%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

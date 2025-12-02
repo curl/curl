@@ -32,7 +32,7 @@ CURL_WS_FORCE_ZERO_MASK=1
 upgrade
 </servercmd>
 
-# Full list of frames: see <verify.stdout> below
+# Full list of frames: see 'verify.stdout' below
 #   1st a message with an empty fragment at the beginning
 #   2nd a message with an empty fragment in the middle
 #   3rd a message with an empty fragment at the end
@@ -76,7 +76,7 @@ close [0]
 0
 </errorcode>
 
-# Strip HTTP header from <protocol>
+# Strip HTTP header from 'protocol'
 <strip>
 ^GET /.*
 ^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*

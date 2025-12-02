@@ -3,6 +3,7 @@
 <keywords>
 FILE
 config
+--config
 </keywords>
 </info>
 
@@ -30,7 +31,7 @@ config file with overly long option
 <verify>
 # the used option in the config file is too long
 <errorcode>
-26
+2
 </errorcode>
 </verify>
 </testcase>

@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/10290002.txt?coolsite=yes
 Content-Length: 62
@@ -36,7 +36,7 @@ http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w '%{redirect_url}\n' --locati
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -47,7 +47,7 @@ Accept: */*
 <errorcode>
 47
 </errorcode>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/10290002.txt?coolsite=yes
 Content-Length: 62

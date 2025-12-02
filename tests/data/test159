@@ -15,7 +15,7 @@ HTTP NTLM auth
 This is supposed to be returned when the server gets a first
 Authorization: NTLM line passed-in from the client -->
 
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -26,7 +26,7 @@ Connection: close
 This is not the real page either!
 </data1001>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -60,7 +60,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -0
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

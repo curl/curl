@@ -11,7 +11,7 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * 22 EXPUNGE
 * 23 EXISTS
 * 3 RECENT
@@ -36,7 +36,7 @@ imap://%HOSTIP:%IMAPPORT -X NOOP -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 NOOP

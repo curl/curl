@@ -11,7 +11,7 @@ HTTPS
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 201 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
@@ -46,8 +46,8 @@ HTTP/2 POST over HTTPS
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
-HTTP/2 201 
+<stdout crlf="headers">
+HTTP/2 201%SP
 date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 0
 funny-head: yesyes
@@ -55,7 +55,7 @@ server: nghttpx
 via: 1.1 nghttpx
 
 </stdout>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2TLSPORT
 User-Agent: curl/%VERSION

@@ -19,14 +19,17 @@ ftps
 FTPS with invalid cacert
 </name>
 <command>
---ftp-ssl-control --cacert moooo ftps://%HOSTIP:%FTPSPORT/
+--ftp-ssl-control --cacert "%LOGDIR/cacert" ftps://%HOSTIP:%FTPSPORT/
 </command>
+<file name="%LOGDIR/cacert">
+made up content
+</file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-77
+77,60
 </errorcode>
 </verify>
 </testcase>

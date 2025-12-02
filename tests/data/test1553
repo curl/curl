@@ -10,7 +10,7 @@ FETCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -42,7 +42,7 @@ IMAP cleanup before a connection was created
 lib%TESTNUMBER
 </tool>
 
-# this MUST use a host name that doesn't resolve
+# this MUST use a hostname that does not resolve
 <command>
 imap://non-existing-host.haxx.se:%IMAPPORT/%TESTNUMBER
 </command>
@@ -51,7 +51,5 @@ imap://non-existing-host.haxx.se:%IMAPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 </verify>
 </testcase>

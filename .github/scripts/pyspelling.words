@@ -97,6 +97,7 @@ changeset
 CharConv
 charset
 charsets
+checkdocs
 checksrc
 checksums
 chgrp
@@ -148,7 +149,6 @@ CSeq
 csh
 cshrc
 CTRL
-cURL
 CURLcode
 curldown
 CURLE
@@ -244,6 +244,7 @@ et
 etag
 ETag
 ETags
+exa
 exe
 executables
 EXPN
@@ -293,6 +294,7 @@ getinfo
 GETing
 getpwuid
 ggcov
+GHA
 Ghedini
 giga
 Gisle
@@ -416,6 +418,7 @@ kerberos
 Keychain
 keychain
 KiB
+kibibyte
 kickstart
 Kirei
 Knauf
@@ -431,6 +434,7 @@ LDAPS
 ldaps
 LF
 LGTM
+libbacktrace
 libbrotlidec
 libc
 libcurl
@@ -460,6 +464,7 @@ libWebSocket
 libz
 libzstd
 LineageOS
+linter
 linux
 lldb
 ln
@@ -490,6 +495,7 @@ Mavrogiannopoulos
 Mbed
 mbedTLS
 md
+mebibyte
 Meglio
 memdebug
 MesaLink
@@ -887,6 +893,7 @@ UI
 UID
 UIDL
 Ultrix
+umask
 Unary
 unassign
 UNC
@@ -931,6 +938,7 @@ VC
 vcpkg
 vexxhost
 Viktor
+virtualized
 Virtuozzo
 VLAN
 VM
@@ -951,7 +959,6 @@ watchOS
 WAV
 WB
 wcurl
-web page
 WebDAV
 WebOS
 webpage
@@ -976,6 +983,7 @@ Xbox
 XDG
 xdigit
 Xilinx
+xmllint
 XP
 Xtensa
 XYZ

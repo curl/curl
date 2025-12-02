@@ -12,7 +12,7 @@ chunked Transfer-Encoding
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 OK
 Date: Sun, 13 Sep 2020 15:00 GMT
 Content-Length: 8
@@ -23,19 +23,19 @@ Location: ./%TESTNUMBER0001
 monster
 </data>
 <data1 nocheck="yes">
-HTTP/1.1 200 OK
-Date: Sun, 13 Sep 2020 15:00 GMT
-Transfer-Encoding: chunked
-Connection: close
-Content-Type: text/plain; charset=us-ascii
-
-0007
-bigger 
-0008
+HTTP/1.1 200 OK%CR
+Date: Sun, 13 Sep 2020 15:00 GMT%CR
+Transfer-Encoding: chunked%CR
+Connection: close%CR
+Content-Type: text/plain; charset=us-ascii%CR
+%CR
+0007%CR
+bigger %CR
+0008%CR
 monster
-
-0
-
+%CR
+0%CR
+%CR
 </data1>
 
 </reply>
@@ -57,7 +57,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_headers}\n" -L -o%DEV_NULL
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

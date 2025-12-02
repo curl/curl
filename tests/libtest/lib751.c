@@ -23,45 +23,43 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Get a single URL without select().
  */
 
 static CURLcode test_lib751(const char *URL)
 {
-  CURL *easies[1000];
-  CURLM *m;
+  CURL *curls[1000];
+  CURLM *multi;
   CURLcode res = CURLE_FAILED_INIT;
   CURLMcode mres;
   int i;
 
   (void)URL;
-  memset(easies, 0, sizeof(easies));
+  memset(curls, 0, sizeof(curls));
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  m = curl_multi_init();
-  if(!m) {
+  multi = curl_multi_init();
+  if(!multi) {
     res = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
 
   for(i = 0; i < 1000; i++) {
-    CURL *e = curl_easy_init();
-    if(!e) {
+    CURL *curl = curl_easy_init();
+    if(!curl) {
       res = CURLE_OUT_OF_MEMORY;
       goto test_cleanup;
     }
-    easies[i] = e;
+    curls[i] = curl;
 
-    res = curl_easy_setopt(e, CURLOPT_URL, "https://www.example.com/");
+    res = curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     if(!res)
-      res = curl_easy_setopt(e, CURLOPT_VERBOSE, 1L);
+      res = curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     if(res)
       goto test_cleanup;
 
-    mres = curl_multi_add_handle(m, e);
+    mres = curl_multi_add_handle(multi, curl);
     if(mres != CURLM_OK) {
       curl_mfprintf(stderr, "MULTI ERROR: %s\n", curl_multi_strerror(mres));
       res = CURLE_FAILED_INIT;
@@ -75,13 +73,13 @@ test_cleanup:
     curl_mfprintf(stderr, "ERROR: %s\n", curl_easy_strerror(res));
 
   for(i = 0; i < 1000; i++) {
-    if(easies[i]) {
-      curl_multi_add_handle(m, easies[i]);
-      curl_easy_cleanup(easies[i]);
-      easies[i] = NULL;
+    if(curls[i]) {
+      curl_multi_add_handle(multi, curls[i]);
+      curl_easy_cleanup(curls[i]);
+      curls[i] = NULL;
     }
   }
-  curl_multi_cleanup(m);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   return res;

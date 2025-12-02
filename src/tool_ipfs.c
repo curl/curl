@@ -28,102 +28,71 @@
 #include "tool_cfgable.h"
 #include "tool_msgs.h"
 #include "tool_ipfs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
-/* ensure input ends in slash */
-static CURLcode ensure_trailing_slash(char **input)
+/* input string ends in slash? */
+static bool has_trailing_slash(const char *input)
 {
-  if(*input && **input) {
-    size_t len = strlen(*input);
-    if(((*input)[len - 1] != '/')) {
-      struct dynbuf dyn;
-      curlx_dyn_init(&dyn, len + 2);
-
-      if(curlx_dyn_addn(&dyn, *input, len)) {
-        tool_safefree(*input);
-        return CURLE_OUT_OF_MEMORY;
-      }
-
-      tool_safefree(*input);
-
-      if(curlx_dyn_addn(&dyn, "/", 1))
-        return CURLE_OUT_OF_MEMORY;
-
-      *input = curlx_dyn_ptr(&dyn);
-    }
-  }
-
-  return CURLE_OK;
+  size_t len = strlen(input);
+  return (len && input[len - 1] == '/');
 }
 
 static char *ipfs_gateway(void)
 {
-  char *ipfs_path = NULL;
-  char *gateway_composed_file_path = NULL;
-  FILE *gateway_file = NULL;
-  char *gateway = curl_getenv("IPFS_GATEWAY");
+  char *ipfs_path_c = NULL;
+  char *gateway_composed_c = NULL;
+  FILE *gfile = NULL;
+  char *gateway_env = getenv("IPFS_GATEWAY");
 
-  /* Gateway is found from environment variable. */
-  if(gateway) {
-    if(ensure_trailing_slash(&gateway))
-      goto fail;
-    return gateway;
-  }
+  if(gateway_env)
+    return curlx_strdup(gateway_env);
 
   /* Try to find the gateway in the IPFS data folder. */
-  ipfs_path = curl_getenv("IPFS_PATH");
+  ipfs_path_c = curl_getenv("IPFS_PATH");
 
-  if(!ipfs_path) {
+  if(!ipfs_path_c) {
     char *home = getenv("HOME");
-    if(home && *home)
-      ipfs_path = curl_maprintf("%s/.ipfs/", home);
     /* fallback to "~/.ipfs", as that is the default location. */
+    if(home && *home)
+      ipfs_path_c = curl_maprintf("%s/.ipfs/", home);
+    if(!ipfs_path_c)
+      goto fail;
   }
 
-  if(!ipfs_path || ensure_trailing_slash(&ipfs_path))
+  gateway_composed_c =
+    curl_maprintf("%s%sgateway", ipfs_path_c,
+                  has_trailing_slash(ipfs_path_c) ? "" : "/");
+
+  if(!gateway_composed_c)
     goto fail;
 
-  gateway_composed_file_path = curl_maprintf("%sgateway", ipfs_path);
+  gfile = curlx_fopen(gateway_composed_c, FOPEN_READTEXT);
+  curl_free(gateway_composed_c);
 
-  if(!gateway_composed_file_path)
-    goto fail;
-
-  gateway_file = curlx_fopen(gateway_composed_file_path, FOPEN_READTEXT);
-  tool_safefree(gateway_composed_file_path);
-
-  if(gateway_file) {
+  if(gfile) {
     int c;
     struct dynbuf dyn;
+    char *gateway = NULL;
     curlx_dyn_init(&dyn, MAX_GATEWAY_URL_LEN);
 
     /* get the first line of the gateway file, ignore the rest */
-    while((c = getc(gateway_file)) != EOF && c != '\n' && c != '\r') {
+    while((c = getc(gfile)) != EOF && c != '\n' && c != '\r') {
       char c_char = (char)c;
       if(curlx_dyn_addn(&dyn, &c_char, 1))
         goto fail;
     }
 
-    curlx_fclose(gateway_file);
-    gateway_file = NULL;
-
     if(curlx_dyn_len(&dyn))
       gateway = curlx_dyn_ptr(&dyn);
 
-    if(gateway)
-      ensure_trailing_slash(&gateway);
-
-    if(!gateway)
-      goto fail;
-
-    tool_safefree(ipfs_path);
+    curl_free(ipfs_path_c);
+    curlx_fclose(gfile);
 
     return gateway;
   }
 fail:
-  if(gateway_file)
-    curlx_fclose(gateway_file);
-  tool_safefree(gateway);
-  tool_safefree(ipfs_path);
+  if(gfile)
+    curlx_fclose(gfile);
+  curl_free(ipfs_path_c);
   return NULL;
 }
 
@@ -161,20 +130,13 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
    * if we do have something but if it is an invalid url.
    */
   if(config->ipfs_gateway) {
-    /* ensure the gateway ends in a trailing / */
-    if(ensure_trailing_slash(&config->ipfs_gateway) != CURLE_OK) {
-      result = CURLE_OUT_OF_MEMORY;
-      goto clean;
-    }
-
     if(!curl_url_set(gatewayurl, CURLUPART_URL, config->ipfs_gateway,
-                    CURLU_GUESS_SCHEME)) {
-      gateway = strdup(config->ipfs_gateway);
+                     CURLU_GUESS_SCHEME)) {
+      gateway = curlx_strdup(config->ipfs_gateway);
       if(!gateway) {
         result = CURLE_URL_MALFORMAT;
         goto clean;
       }
-
     }
     else {
       result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -182,7 +144,6 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
     }
   }
   else {
-    /* this is ensured to end in a trailing / within ipfs_gateway() */
     gateway = ipfs_gateway();
     if(!gateway) {
       result = CURLE_FILE_COULDNT_READ_FILE;
@@ -203,24 +164,18 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   /* get gateway parts */
-  if(curl_url_get(gatewayurl, CURLUPART_HOST,
-                  &gwhost, CURLU_URLDECODE)) {
+  if(curl_url_get(gatewayurl, CURLUPART_HOST, &gwhost, CURLU_URLDECODE) ||
+     curl_url_get(gatewayurl, CURLUPART_SCHEME, &gwscheme, CURLU_URLDECODE) ||
+     curl_url_get(gatewayurl, CURLUPART_PORT, &gwport, CURLU_URLDECODE) ||
+     curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE))
     goto clean;
-  }
-
-  if(curl_url_get(gatewayurl, CURLUPART_SCHEME,
-                  &gwscheme, CURLU_URLDECODE)) {
-    goto clean;
-  }
-
-  curl_url_get(gatewayurl, CURLUPART_PORT, &gwport, CURLU_URLDECODE);
-  curl_url_get(gatewayurl, CURLUPART_PATH, &gwpath, CURLU_URLDECODE);
 
   /* get the path from user input */
-  curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE);
+  if(curl_url_get(uh, CURLUPART_PATH, &inputpath, CURLU_URLDECODE))
+    goto clean;
   /* inputpath might be NULL or a valid pointer now */
 
-  /* set gateway parts in input url */
+  /* set gateway parts in input URL */
   if(curl_url_set(uh, CURLUPART_SCHEME, gwscheme, CURLU_URLENCODE) ||
      curl_url_set(uh, CURLUPART_HOST, gwhost, CURLU_URLENCODE) ||
      curl_url_set(uh, CURLUPART_PORT, gwport, CURLU_URLENCODE))
@@ -230,18 +185,13 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   if(inputpath && (inputpath[0] == '/') && !inputpath[1])
     *inputpath = '\0';
 
-  /* ensure the gateway path ends with a trailing slash */
-  ensure_trailing_slash(&gwpath);
-
-  pathbuffer = curl_maprintf("%s%s/%s%s", gwpath, protocol, cid,
+  pathbuffer = curl_maprintf("%s%s%s/%s%s", gwpath,
+                             has_trailing_slash(gwpath) ? "" : "/",
+                             protocol, cid,
                              inputpath ? inputpath : "");
-  if(!pathbuffer) {
+  if(!pathbuffer ||
+     curl_url_set(uh, CURLUPART_PATH, pathbuffer, CURLU_URLENCODE))
     goto clean;
-  }
-
-  if(curl_url_set(uh, CURLUPART_PATH, pathbuffer, CURLU_URLENCODE)) {
-    goto clean;
-  }
 
   /* Free whatever it has now, rewriting is next */
   tool_safefree(*url);
@@ -249,8 +199,8 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   if(curl_url_get(uh, CURLUPART_URL, &cloneurl, CURLU_URLENCODE)) {
     goto clean;
   }
-  /* we need to strdup the URL so that we can call free() on it later */
-  *url = strdup(cloneurl);
+  /* we need to strdup the URL so that we can call curlx_free() on it later */
+  *url = curlx_strdup(cloneurl);
   curl_free(cloneurl);
   if(!*url)
     goto clean;
@@ -258,7 +208,7 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   result = CURLE_OK;
 
 clean:
-  free(gateway);
+  curlx_free(gateway);
   curl_free(gwhost);
   curl_free(gwpath);
   curl_free(gwquery);

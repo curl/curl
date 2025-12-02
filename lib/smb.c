@@ -42,10 +42,6 @@
 #include "escape.h"
 #include "curl_endian.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_SMB_EASY   "meta:proto:smb:easy"
@@ -329,7 +325,7 @@ const struct Curl_handler Curl_handler_smb = {
   PORT_SMB,                             /* defport */
   CURLPROTO_SMB,                        /* protocol */
   CURLPROTO_SMB,                        /* family */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_CONN_REUSE                    /* flags */
 };
 
 #ifdef USE_SSL
@@ -358,7 +354,7 @@ const struct Curl_handler Curl_handler_smbs = {
   PORT_SMBS,                            /* defport */
   CURLPROTO_SMBS,                       /* protocol */
   CURLPROTO_SMB,                        /* family */
-  PROTOPT_SSL                           /* flags */
+  PROTOPT_SSL | PROTOPT_CONN_REUSE      /* flags */
 };
 #endif
 
@@ -451,7 +447,7 @@ static void smb_easy_dtor(void *key, size_t klen, void *entry)
   /* `req->path` points to somewhere in `struct smb_conn` which is
    * kept at the connection meta. If the connection is destroyed first,
    * req->path points to free'd memory. */
-  free(req);
+  curlx_free(req);
 }
 
 static void smb_conn_dtor(void *key, size_t klen, void *entry)
@@ -463,7 +459,7 @@ static void smb_conn_dtor(void *key, size_t klen, void *entry)
   Curl_safefree(smbc->domain);
   Curl_safefree(smbc->recv_buf);
   Curl_safefree(smbc->send_buf);
-  free(smbc);
+  curlx_free(smbc);
 }
 
 /* this should setup things in the connection, not in the easy
@@ -475,13 +471,13 @@ static CURLcode smb_setup_connection(struct Curl_easy *data,
   struct smb_request *req;
 
   /* Initialize the connection state */
-  smbc = calloc(1, sizeof(*smbc));
+  smbc = curlx_calloc(1, sizeof(*smbc));
   if(!smbc ||
      Curl_conn_meta_set(conn, CURL_META_SMB_CONN, smbc, smb_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   /* Initialize the request state */
-  req = calloc(1, sizeof(*req));
+  req = curlx_calloc(1, sizeof(*req));
   if(!req ||
      Curl_meta_set(data, CURL_META_SMB_EASY, req, smb_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -506,15 +502,12 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
 
   /* Initialize the connection state */
   smbc->state = SMB_CONNECTING;
-  smbc->recv_buf = malloc(MAX_MESSAGE_SIZE);
+  smbc->recv_buf = curlx_malloc(MAX_MESSAGE_SIZE);
   if(!smbc->recv_buf)
     return CURLE_OUT_OF_MEMORY;
-  smbc->send_buf = malloc(MAX_MESSAGE_SIZE);
+  smbc->send_buf = curlx_malloc(MAX_MESSAGE_SIZE);
   if(!smbc->send_buf)
     return CURLE_OUT_OF_MEMORY;
-
-  /* Multiple requests are allowed with this connection */
-  connkeep(conn, "SMB default");
 
   /* Parse the username, domain, and password */
   slash = strchr(conn->user, '/');
@@ -523,14 +516,14 @@ static CURLcode smb_connect(struct Curl_easy *data, bool *done)
 
   if(slash) {
     smbc->user = slash + 1;
-    smbc->domain = strdup(conn->user);
+    smbc->domain = curlx_strdup(conn->user);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
     smbc->domain[slash - conn->user] = 0;
   }
   else {
     smbc->user = conn->user;
-    smbc->domain = strdup(conn->host.name);
+    smbc->domain = curlx_strdup(conn->host.name);
     if(!smbc->domain)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -545,7 +538,7 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
   char *buf = smbc->recv_buf;
   size_t bytes_read;
   size_t nbt_size;
-  size_t msg_size;
+  size_t msg_size = sizeof(struct smb_header);
   size_t len = MAX_MESSAGE_SIZE - smbc->got;
   CURLcode result;
 
@@ -565,10 +558,19 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
   nbt_size = Curl_read16_be((const unsigned char *)
                             (buf + sizeof(unsigned short))) +
     sizeof(unsigned int);
+  if(nbt_size > MAX_MESSAGE_SIZE) {
+    failf(data, "too large NetBIOS frame size %zu", nbt_size);
+    return CURLE_RECV_ERROR;
+  }
+  else if(nbt_size < msg_size) {
+    /* Each SMB message must be at least this large, e.g. 32 bytes */
+    failf(data, "too small NetBIOS frame size %zu", nbt_size);
+    return CURLE_RECV_ERROR;
+  }
+
   if(smbc->got < nbt_size)
     return CURLE_OK;
 
-  msg_size = sizeof(struct smb_header);
   if(nbt_size >= msg_size + 1) {
     /* Add the word count */
     msg_size += 1 + ((unsigned char) buf[msg_size]) * sizeof(unsigned short);
@@ -577,7 +579,7 @@ static CURLcode smb_recv_message(struct Curl_easy *data,
       msg_size += sizeof(unsigned short) +
         Curl_read16_le((const unsigned char *)&buf[msg_size]);
       if(nbt_size < msg_size)
-        return CURLE_READ_ERROR;
+        return CURLE_RECV_ERROR;
     }
   }
 
@@ -659,9 +661,12 @@ static CURLcode smb_send_message(struct Curl_easy *data,
                                  unsigned char cmd,
                                  const void *msg, size_t msg_len)
 {
+  if((MAX_MESSAGE_SIZE - sizeof(struct smb_header)) < msg_len) {
+    DEBUGASSERT(0);
+    return CURLE_SEND_ERROR;
+  }
   smb_format_message(smbc, req, (struct smb_header *)smbc->send_buf,
                      cmd, msg_len);
-  DEBUGASSERT((sizeof(struct smb_header) + msg_len) <= MAX_MESSAGE_SIZE);
   memcpy(smbc->send_buf + sizeof(struct smb_header), msg, msg_len);
 
   return smb_send(data, smbc, sizeof(struct smb_header) + msg_len, 0);
@@ -1237,8 +1242,9 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
     return result;
 
   /* Parse the path for the share */
-  smbc->share = strdup((*path == '/' || *path == '\\') ? path + 1 : path);
-  free(path);
+  smbc->share = curlx_strdup((*path == '/' || *path == '\\')
+                             ? path + 1 : path);
+  curlx_free(path);
   if(!smbc->share)
     return CURLE_OUT_OF_MEMORY;
 

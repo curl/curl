@@ -10,7 +10,7 @@ HTTP/3
 #
 # Server-side
 <reply>
-<data nocheck="yes" crlf="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -50,15 +50,15 @@ HTTP/3 GET:
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET https://localhost:%HTTP3PORT/%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTP3PORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout crlf="yes">
-HTTP/3 200 
+<stdout crlf="headers">
+HTTP/3 200%SP
 date: Tue, 09 Nov 2010 14:49:00 GMT
 last-modified: Tue, 13 Jun 2000 12:10:00 GMT
 etag: "21025-dc7-39462498"
@@ -73,5 +73,9 @@ via: 1.1 nghttpx
 <stripfile>
 s/^server: nghttpx.*\r?\n//
 </stripfile>
+<limits>
+Allocations: 150
+Maximum allocated: 1800000
+</limits>
 </verify>
 </testcase>

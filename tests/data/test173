@@ -52,21 +52,21 @@ line8
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 378
-Content-Type: multipart/form-data; boundary=----------------------------5dbea401cd8c
-
-------------------------------5dbea401cd8c
-Content-Disposition: form-data; name="field1"
-
-contents1
-------------------------------5dbea401cd8c
-Content-Disposition: form-data; name="fileupload"; filename="%DEV_NULL"
-Content-Type: text/x-null;format=x-curl
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 378%CR
+Content-Type: multipart/form-data; boundary=----------------------------5dbea401cd8c%CR
+%CR
+------------------------------5dbea401cd8c%CR
+Content-Disposition: form-data; name="field1"%CR
+%CR
+contents1%CR
+------------------------------5dbea401cd8c%CR
+Content-Disposition: form-data; name="fileupload"; filename="%DEV_NULL"%CR
+Content-Type: text/x-null;format=x-curl%CR
+%CR
 line1
 line2
 line3
@@ -75,8 +75,8 @@ line5
 line6
 line7
 line8
-
-------------------------------5dbea401cd8c--
+%CR
+------------------------------5dbea401cd8c--%CR
 </protocol>
 </verify>
 </testcase>

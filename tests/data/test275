@@ -14,7 +14,7 @@ proxytunnel
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 Connected-fine: sure
 
@@ -30,9 +30,9 @@ Content-Length: 9
 contents
 </data>
 <datacheck>
-HTTP/1.1 200 OK
-Connected-fine: sure
-
+HTTP/1.1 200 OK%CR
+Connected-fine: sure%CR
+%CR
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -64,7 +64,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT remotesite.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: remotesite.com.%TESTNUMBER:%HTTPPORT
 Proxy-Authorization: Basic %b64[youare:yourself]b64%
@@ -72,7 +72,7 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: remotesite.com.%TESTNUMBER:%HTTPPORT
 Authorization: Basic %b64[iam:myself]b64%

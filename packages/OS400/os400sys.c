@@ -158,6 +158,11 @@ get_buffer(struct buffer_t *buf, long size)
 }
 
 
+/*
+ * Get buffer address for the given local key.
+ * This is always called though `Curl_thread_buffer' and when threads are
+ * NOT made available by the os, so no mutex lock/unlock occurs.
+ */
 static char *
 buffer_unthreaded(localkey_t key, long size)
 {
@@ -165,6 +170,12 @@ buffer_unthreaded(localkey_t key, long size)
 }
 
 
+/*
+ * Get buffer address for the given local key, taking care of
+ * concurrent threads.
+ * This is always called though `Curl_thread_buffer' and when threads are
+ * made available by the os.
+ */
 static char *
 buffer_threaded(localkey_t key, long size)
 {
@@ -208,16 +219,21 @@ buffer_undef(localkey_t key, long size)
   /* Determine if we can use pthread-specific data. */
 
   if(Curl_thread_buffer == buffer_undef) {      /* If unchanged during lock. */
-    if(!pthread_key_create(&thdkey, thdbufdestroy))
+    /* OS400 interactive jobs do not support threads: check here. */
+    if(!pthread_key_create(&thdkey, thdbufdestroy)) {
+      /* Threads are supported: use the thread-aware buffer procedure. */
       Curl_thread_buffer = buffer_threaded;
+    }
     else {
+      /* No multi-threading available: allocate storage for single-thread
+       * buffer headers. */
       locbufs = calloc((size_t) LK_LAST, sizeof(*locbufs));
       if(!locbufs) {
-        pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);   /* For symetry: will probably fail. */
         return (char *) NULL;
       }
       else
-        Curl_thread_buffer = buffer_unthreaded;
+        Curl_thread_buffer = buffer_unthreaded; /* Use unthreaded version. */
     }
 
     atexit(terminate);
@@ -686,7 +702,7 @@ Curl_ldap_get_values_len_a(void *ld, LDAPMessage *entry, const char *attr)
   result = ldap_get_values_len(ld, entry, cp);
   free(cp);
 
-  /* Result data are binary in nature, so they haven't been
+  /* Result data are binary in nature, so they have not been
      converted to EBCDIC. Therefore do not convert. */
 
   return result;

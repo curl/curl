@@ -55,10 +55,6 @@
 #include "curlx/inet_ntop.h"
 #include "if2ip.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* ------------------------------------------------------------------ */
 
 #ifdef USE_IPV6

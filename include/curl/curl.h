@@ -401,12 +401,12 @@ typedef int (*curl_seek_callback)(void *instream,
 #define CURL_TRAILERFUNC_ABORT 1
 
 typedef size_t (*curl_read_callback)(char *buffer,
-                                      size_t size,
-                                      size_t nitems,
-                                      void *instream);
+                                     size_t size,
+                                     size_t nitems,
+                                     void *instream);
 
 typedef int (*curl_trailer_callback)(struct curl_slist **list,
-                                      void *userdata);
+                                     void *userdata);
 
 typedef enum {
   CURLSOCKTYPE_IPCXN,  /* socket created for a specific IP connection */
@@ -1953,8 +1953,7 @@ typedef enum {
   /* Pass in a bitmask of "header options" */
   CURLOPT(CURLOPT_HEADEROPT, CURLOPTTYPE_VALUES, 229),
 
-  /* The public key in DER form used to validate the peer public key
-     this option is used only if SSL_VERIFYPEER is true */
+  /* The public key used to validate the peer public key */
   CURLOPT(CURLOPT_PINNEDPUBLICKEY, CURLOPTTYPE_STRINGPOINT, 230),
 
   /* Path to Unix domain socket */

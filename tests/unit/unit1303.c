@@ -25,7 +25,6 @@
 
 #include "urldata.h"
 #include "connect.h"
-#include "memdebug.h" /* LAST include file */
 
 static CURLcode t1303_setup(struct Curl_easy **easy)
 {
@@ -47,7 +46,7 @@ static void t1303_stop(struct Curl_easy *easy)
 }
 
 /* BASE is just a define to make us fool around with decently large number so
-   that we aren't zero-based */
+   that we are not zero-based */
 #define BASE 1000000
 
 /* macro to set the pretended current time */
@@ -148,7 +147,7 @@ static CURLcode test_unit1303(const char *arg)
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout =  Curl_timeleft(easy, &now, run[i].connecting);
+    timeout = Curl_timeleft_ms(easy, &now, run[i].connecting);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }

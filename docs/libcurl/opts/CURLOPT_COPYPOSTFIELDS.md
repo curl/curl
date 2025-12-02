@@ -11,6 +11,8 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - HTTP
+  - MQTT
+  - RTSP
 Added-in: 7.17.1
 ---
 

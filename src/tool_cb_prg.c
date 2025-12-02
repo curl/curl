@@ -29,8 +29,6 @@
 #include "tool_operate.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #define MAX_BARLENGTH 400
 #define MIN_BARLENGTH 20
 
@@ -171,13 +169,13 @@ int tool_progress_cb(void *clientp,
       if(bar->prev == point)
         /* progress did not change since last invoke */
         return 0;
-      else if((curlx_timediff(now, bar->prevtime) < 100L) && point < total)
+      else if((curlx_timediff_ms(now, bar->prevtime) < 100L) && point < total)
         /* limit progress-bar updating to 10 Hz except when we are at 100% */
         return 0;
     }
     else {
       /* total is unknown */
-      if(curlx_timediff(now, bar->prevtime) < 100L)
+      if(curlx_timediff_ms(now, bar->prevtime) < 100L)
         /* limit progress-bar updating to 10 Hz */
         return 0;
       update_width(bar);

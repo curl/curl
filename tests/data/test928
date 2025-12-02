@@ -9,7 +9,7 @@ HELP
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 214-This server supports the following commands:
 214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP
 </data>
@@ -32,7 +32,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 HELP
 QUIT

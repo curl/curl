@@ -10,7 +10,7 @@ Transfer-Encoding
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Mon, 29 Nov 2004 21:56:53 GMT
 Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
@@ -26,7 +26,7 @@ Transfer-Encoding: gzip, chunked
 
 </data>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Mon, 29 Nov 2004 21:56:53 GMT
 Server: Apache/1.3.31 (Debian GNU/Linux) mod_gzip/1.3.26.1a PHP/4.3.9-1 mod_ssl/2.8.20 OpenSSL/0.9.7d mod_perl/1.29
@@ -61,7 +61,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --tr-encoding -H "Connection:"
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

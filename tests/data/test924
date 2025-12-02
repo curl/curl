@@ -9,11 +9,11 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 553-Ambiguous; Possibilities are:
-553-Joe Smith <joe.smith@example.com>
-553-Harry Smith <harry.smith@example.com>
-553 Melvin Smith <melvin.smith@example.com>
+553-Joe Smith %LTjoe.smith@example.com%GT
+553-Harry Smith %LTharry.smith@example.com%GT
+553 Melvin Smith %LTmelvin.smith@example.com%GT
 </data>
 </reply>
 
@@ -34,7 +34,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt smith
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY smith
 QUIT

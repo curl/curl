@@ -16,7 +16,7 @@ data
 returned
  to client
 </data>
-<datacheck>
+<datacheck crlf="yes">
 a chunk of
 data
 returned

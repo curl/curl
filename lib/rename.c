@@ -32,14 +32,10 @@
 #include "curlx/multibyte.h"
 #include "curlx/timeval.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* return 0 on success, 1 on error */
 int Curl_rename(const char *oldpath, const char *newpath)
 {
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   /* rename() on Windows does not overwrite, so we cannot use it here.
      MoveFileEx() will overwrite and is usually atomic, however it fails
      when there are open handles to the file. */
@@ -54,7 +50,7 @@ int Curl_rename(const char *oldpath, const char *newpath)
       curlx_unicodefree(tchar_newpath);
       break;
     }
-    diff = curlx_timediff(curlx_now(), start);
+    diff = curlx_timediff_ms(curlx_now(), start);
     if(diff < 0 || diff > max_wait_ms) {
       curlx_unicodefree(tchar_oldpath);
       curlx_unicodefree(tchar_newpath);

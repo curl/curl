@@ -27,10 +27,6 @@
 #include <curl/curl.h>
 
 #include "llist.h"
-#include "curl_memory.h"
-
-/* this must be the last include file */
-#include "memdebug.h"
 
 #ifdef DEBUGBUILD
 #define LLISTINIT 0x100cc001 /* random pattern */

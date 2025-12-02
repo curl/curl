@@ -12,6 +12,7 @@ directory
 <reply>
 <datacheck>
 d?????????    N U         U               N ???  N NN:NN asubdir
+-rw???????    1 U         U               0 Jan  1  2000 emptyfile.txt
 -r-???????    1 U         U              37 Jan  1  2000 plainfile.txt
 -r-???????    1 U         U              47 Dec 31  2000 rofile.txt
 </datacheck>

@@ -59,15 +59,9 @@ If you have configured curl with `--with-test-danted=<danted-path>` for a
 with arguments `--socks4` or `--socks5` to test performance with a SOCKS proxy
 involved. (Note: this does not work for HTTP/3)
 
-## dtrace
-
-With the `--dtrace` option, scorecard produces a dtrace sample of the user stacks in `tests/http/gen/curl/curl.user_stacks`. On many platforms, `dtrace` requires **special permissions**. It is therefore invoked via `sudo` and you should make sure that sudo works for the run without prompting for a password.
-
-Note: the file is the trace of the last curl invocation by scorecard. Use the parameters to narrow down the runs to the particular case you are interested in.
-
 ## flame graphs
 
-With the excellent [Flame Graph](https://github.com/brendangregg/FlameGraph) by Brendan Gregg, scorecard can turn the `dtrace` samples into an interactive SVG. Set the environment variable `FLAMEGRAPH` to the location of your clone of that project and invoked scorecard with the `--flame` option. Like
+With the excellent [Flame Graph](https://github.com/brendangregg/FlameGraph) by Brendan Gregg, scorecard can turn `perf`/`dtrace` samples into an interactive SVG. Either clone the `Flamegraph` repository next to your `curl` project or set the environment variable `FLAMEGRAPH` to the location of your clone. Then run scorecard with the `--flame` option, like
 
 ```
 curl> FLAMEGRAPH=/Users/sei/projects/FlameGraph python3 tests/http/scorecard.py \
@@ -75,4 +69,13 @@ curl> FLAMEGRAPH=/Users/sei/projects/FlameGraph python3 tests/http/scorecard.py 
 ```
 and the SVG of the run is in `tests/http/gen/curl/curl.flamegraph.svg`. You can open that in Firefox and zoom in/out of stacks of interest.
 
-Note: as with `dtrace`, the flame graph is for the last invocation of curl done by scorecard.
+The flame graph is about the last run of `curl`. That is why you should add scorecard arguments
+that restrict measurements to a single run.
+
+### Measures/Privileges
+
+The `--flame` option uses `perf` on linux and `dtrace` on macOS. Since both tools require special
+privileges, they are run via the `sudo` command by scorecard. This means you need to issue a
+`sudo` recently enough before running scorecard, so no new password check is needed.
+
+There is no support right now for measurements on other platforms.

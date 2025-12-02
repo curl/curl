@@ -10,7 +10,7 @@ followlocation
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 301 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
@@ -18,14 +18,14 @@ Location: http://yet.another.host/%TESTNUMBER
 
 moo
 </data>
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
 
 moo
 </data1>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 301 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 4
@@ -57,7 +57,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1
 Host: another.visitor.stay.a.while.stay.foreeeeeever
 User-Agent: curl/%VERSION

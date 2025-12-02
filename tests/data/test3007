@@ -19,14 +19,18 @@ smtp
 <name>
 SMTP with invalid --mail-rcpt and --mail-rcpt-allowfails
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
+--mail-rcpt-allowfails
+--mail-rcpt invalid.one
+--mail-from sender@example.com
+-T -
 </command>
 </client>
 
@@ -37,10 +41,10 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<invalid.one>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTinvalid.one%GT
 QUIT
 </protocol>
 </verify>

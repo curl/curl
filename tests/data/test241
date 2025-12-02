@@ -43,7 +43,7 @@ HTTP-IPv6 GET (using ip6-localhost)
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: ip6-localhost:%HTTP6PORT
 User-Agent: curl/%VERSION

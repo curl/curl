@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t t1901_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   static const char *chunks[] = {

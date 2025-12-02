@@ -25,9 +25,16 @@
  * HTTP PUT with easy interface and read callback
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
 #include <curl/curl.h>
 
 #ifdef _WIN32
@@ -48,7 +55,7 @@
  * http://www.apacheweek.com/features/put
  */
 
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t retcode;
   unsigned long nread;
@@ -70,7 +77,7 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  FILE * hd_src;
+  FILE *hd_src;
   struct stat file_info;
 
   char *file;
@@ -90,24 +97,23 @@ int main(int argc, char **argv)
     return 2;
 
   /* get the file size of the local file */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(file, &file_info) != 0) {
-#else
   if(fstat(fileno(hd_src), &file_info) != 0) {
-#endif
     fclose(hd_src);
     return 1; /* cannot continue */
   }
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(hd_src);
+    return (int)res;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* enable uploading (implies PUT over HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -137,5 +143,5 @@ int main(int argc, char **argv)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

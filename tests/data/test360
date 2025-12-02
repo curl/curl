@@ -6,7 +6,23 @@
 </keywords>
 </info>
 
-# Client-side
+<reply>
+<data crlf="headers">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
 <client>
 <server>
 http
@@ -15,14 +31,14 @@ http
 Error on both --fail-with-body and --fail
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body --fail
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail-with-body --fail --no-progress-meter
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<errorcode>
-2
-</errorcode>
+<stderr mode="text">
+Warning: --fail deselects --fail-with-body here
+</stderr>
 </verify>
 </testcase>

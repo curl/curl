@@ -13,7 +13,7 @@ NTLM
 <reply>
 
 # this is returned first since we get no proxy-auth
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 34
@@ -23,7 +23,7 @@ Hey you, authenticate or go away!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 200 Things are fine in proxy land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -32,7 +32,7 @@ Content-Length: 42
 Contents of that page you requested, sir.
 </data1002>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 34
@@ -67,7 +67,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-us
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

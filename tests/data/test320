@@ -4,15 +4,16 @@
 HTTPS
 HTTP GET
 TLS-SRP
+notxml
 </keywords>
 </info>
 
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.0 200 OK
-Content-type: text/html
-
+HTTP/1.0 200 OK%CR
+Content-type: text/html%CR
+%CR
 
 <HTML><BODY>
 <CENTER><H1>This is <a href="http://www.gnu.org/software/gnutls">GnuTLS</a></H1></CENTER>
@@ -28,10 +29,10 @@ Content-type: text/html
 <TR><TD>Cipher</TD><TD>AES-NNN-CBC</TD></TR>
 <TR><TD>MAC</TD><TD>SHA1</TD></TR>
 <TR><TD>Ciphersuite</TD><TD>SRP_SHA_AES_NNN_CBC_SHA1</TD></TR></p></TABLE>
-<hr><P>Your HTTP header was:<PRE>Host: localhost:9011
-User-Agent: curl-test-suite
-Accept: */*
-
+<hr><P>Your HTTP header was:<PRE>Host: localhost:9011%CR
+User-Agent: curl-test-suite%CR
+Accept: */*%CR
+%CR
 </PRE></P>
 </BODY></HTML>
 
@@ -56,9 +57,7 @@ simple TLS-SRP HTTPS GET, check user in response
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
-<file name="%LOGDIR/curl%TESTNUMBER.out">
+<file name="%LOGDIR/curl%TESTNUMBER.out" crlf="headers">
 HTTP/1.0 200 OK
 Content-type: text/html
 

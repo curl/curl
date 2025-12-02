@@ -32,7 +32,7 @@ CURL_WS_FORCE_ZERO_MASK=1
 upgrade
 </servercmd>
 
-# Full list of frames: see <verify.stdout> below
+# Full list of frames: see 'verify.stdout' below
 # Frames with sizes around special cases of the frame encoding
 #   see https://datatracker.ietf.org/doc/html/rfc6455#section-5.2
 #    - 0: empty frame
@@ -74,7 +74,7 @@ close [0]
 0
 </errorcode>
 
-# Strip HTTP header from <protocol>
+# Strip HTTP header from 'protocol'
 <strip>
 ^GET /.*
 ^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*

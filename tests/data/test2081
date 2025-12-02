@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 62
@@ -19,7 +19,7 @@ Connection: close
 
 This server reply is for testing a simple Location: following
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 This is another weirdo text message swsclose
 Connection: close
 
@@ -42,7 +42,7 @@ http://user:pass@%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER#anchor --location --r
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user:pass]b64%
@@ -57,7 +57,7 @@ Accept: */*
 Referer: http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/%TESTNUMBER0002.txt?coolsite=yes
 Content-Length: 62

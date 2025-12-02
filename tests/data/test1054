@@ -10,21 +10,21 @@ followlocation
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 301 OK swsclose
 Location: moo/testcase/%TESTNUMBER0002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
 Connection: close
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Thu, 31 Jul 2008 14:49:00 GMT
 Connection: close
 
 body
 </data2>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 301 OK swsclose
 Location: moo/testcase/%TESTNUMBER0002
 Date: Thu, 31 Jul 2008 14:49:00 GMT
@@ -58,7 +58,7 @@ http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d @%LOGDIR/test%TESTNUMBER.txt --p
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -18,7 +18,7 @@ AUTH OAUTHBEARER
 CAPA SASL-IR
 REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -46,7 +46,7 @@ IMAP OAuth 2.0 (OAUTHBEARER) authentication with initial response
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE OAUTHBEARER %b64[n,a=user,%01host=127.0.0.1%01port=%IMAPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
 A003 SELECT %TESTNUMBER

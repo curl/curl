@@ -26,23 +26,27 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
 {
+  struct curl_slist *host;
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /*
     Each single string should be written using the format
     HOST:PORT:CONNECT-TO-HOST:CONNECT-TO-PORT where HOST is the host of the
-    request, PORT is the port of the request, CONNECT-TO-HOST is the host name
+    request, PORT is the port of the request, CONNECT-TO-HOST is the hostname
     to connect to, and CONNECT-TO-PORT is the port to connect to.
    */
   /* instead of curl.se:443, it resolves and uses example.com:443 but in other
      aspects work as if it still is curl.se */
-  struct curl_slist *host = curl_slist_append(NULL,
-                                              "curl.se:443:example.com:443");
+  host = curl_slist_append(NULL, "curl.se:443:example.com:443");
 
   curl = curl_easy_init();
   if(curl) {
@@ -50,12 +54,12 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
-    /* since this connects to the wrong host, checking the host name in the
+    /* since this connects to the wrong host, checking the hostname in the
        server certificate fails, so unless we disable the check libcurl
        returns CURLE_PEER_FAILED_VERIFICATION */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-    /* Letting the wrong host name in the certificate be okay, the transfer
+    /* Letting the wrong hostname in the certificate be okay, the transfer
        goes through but (most likely) causes a 404 or similar because it sends
        an unknown name in the Host: header field */
     res = curl_easy_perform(curl);
@@ -65,6 +69,8 @@ int main(void)
   }
 
   curl_slist_free_all(host);
+
+  curl_global_cleanup();
 
   return (int)res;
 }

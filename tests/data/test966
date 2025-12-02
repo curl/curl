@@ -31,7 +31,7 @@ LC_ALL=C.UTF-8
 <name>
 SMTP with SMTPUTF8 support - UTF-8 based recipient
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -45,14 +45,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt St%hex[%c3%b6]hex%dmottagaren@%
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com> SMTPUTF8
-RCPT TO:<St%hex[%c3%b6]hex%dmottagaren@xn--4cab6c.se>
+MAIL FROM:%LTsender@example.com%GT SMTPUTF8
+RCPT TO:%LTSt%hex[%c3%b6]hex%dmottagaren@xn--4cab6c.se%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

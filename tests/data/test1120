@@ -32,7 +32,7 @@ ftp://%HOSTIP:%FTPPORT/a/path/%TESTNUMBER
 # Verify data after the test has been "shot"
 <verify>
 # Strip all valid kinds of PORT and EPRT that curl can send
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

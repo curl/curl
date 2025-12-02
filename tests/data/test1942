@@ -15,7 +15,7 @@ Server: maybe different
 
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server:       test with trailing space     
+Server:       test with trailing space%repeat[5 x  ]%
 Content-Type: text/html
 Content-Length: 0
 Set-Cookie: onecookie=data;

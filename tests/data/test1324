@@ -48,7 +48,7 @@ HTTP with --resolve and [ipv6address]
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: example.com:%HTTP6PORT
 User-Agent: curl/%VERSION

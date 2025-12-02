@@ -11,7 +11,7 @@ MIME
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -19,7 +19,7 @@ Content-Length: 3
 
 OK
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -58,17 +58,17 @@ s/^--------------------------[A-Za-z0-9]*/------------------------------/
 s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
 </strippart>
 <protocol>
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 17237
-Content-Type: multipart/form-data; boundary=----------------------------
-
-------------------------------
-Content-Disposition: form-data; name="upfile"; filename="myfile.txt"
-Content-Type: text/plain
-Content-Transfer-Encoding: binary
-
+POST /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Content-Length: 17237%CR
+Content-Type: multipart/form-data; boundary=----------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="upfile"; filename="myfile.txt"%CR
+Content-Type: text/plain%CR
+Content-Transfer-Encoding: binary%CR
+%CR
 ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWX
 ZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVW
 YZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUV
@@ -289,8 +289,8 @@ STUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOP
 RSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNO
 QRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMN
 PQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLM
-OPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUV
---------------------------------
+OPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUV%CR
+--------------------------------%CR
 </protocol>
 </verify>
 </testcase>

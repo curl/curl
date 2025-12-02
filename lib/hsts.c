@@ -37,13 +37,9 @@
 #include "sendf.h"
 #include "parsedate.h"
 #include "rename.h"
-#include "share.h"
+#include "curl_share.h"
 #include "strdup.h"
 #include "curlx/strparse.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #define MAX_HSTS_LINE 4095
 #define MAX_HSTS_HOSTLEN 2048
@@ -72,7 +68,7 @@ static time_t hsts_debugtime(void *unused)
 
 struct hsts *Curl_hsts_init(void)
 {
-  struct hsts *h = calloc(1, sizeof(struct hsts));
+  struct hsts *h = curlx_calloc(1, sizeof(struct hsts));
   if(h) {
     Curl_llist_init(&h->list, NULL);
   }
@@ -81,8 +77,8 @@ struct hsts *Curl_hsts_init(void)
 
 static void hsts_free(struct stsentry *e)
 {
-  free(CURL_UNCONST(e->host));
-  free(e);
+  curlx_free(CURL_UNCONST(e->host));
+  curlx_free(e);
 }
 
 void Curl_hsts_cleanup(struct hsts **hp)
@@ -96,8 +92,8 @@ void Curl_hsts_cleanup(struct hsts **hp)
       n = Curl_node_next(e);
       hsts_free(sts);
     }
-    free(h->filename);
-    free(h);
+    curlx_free(h->filename);
+    curlx_free(h);
     *hp = NULL;
   }
 }
@@ -116,13 +112,13 @@ static CURLcode hsts_create(struct hsts *h,
     --hlen;
   if(hlen) {
     char *duphost;
-    struct stsentry *sts = calloc(1, sizeof(struct stsentry));
+    struct stsentry *sts = curlx_calloc(1, sizeof(struct stsentry));
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
 
     duphost = Curl_memdup0(hostname, hlen);
     if(!duphost) {
-      free(sts);
+      curlx_free(sts);
       return CURLE_OUT_OF_MEMORY;
     }
 
@@ -277,7 +273,7 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
           blen = ntail;
         }
       }
-      /* avoid curl_strequal because the host name is not null-terminated */
+      /* avoid curl_strequal because the hostname is not null-terminated */
       if((hlen == ntail) && curl_strnequal(hostname, sts->host, hlen))
         return sts;
     }
@@ -385,7 +381,7 @@ CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
     if(result && tempstore)
       unlink(tempstore);
   }
-  free(tempstore);
+  curlx_free(tempstore);
 skipsave:
   if(data->set.hsts_write) {
     /* if there is a write callback */
@@ -518,28 +514,32 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
   /* we need a private copy of the filename so that the hsts cache file
      name survives an easy handle reset */
-  free(h->filename);
-  h->filename = strdup(file);
+  curlx_free(h->filename);
+  h->filename = curlx_strdup(file);
   if(!h->filename)
     return CURLE_OUT_OF_MEMORY;
 
   fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
     struct dynbuf buf;
+    bool eof = FALSE;
     curlx_dyn_init(&buf, MAX_HSTS_LINE);
-    while(Curl_get_line(&buf, fp)) {
-      const char *lineptr = curlx_dyn_ptr(&buf);
-      curlx_str_passblanks(&lineptr);
+    do {
+      result = Curl_get_line(&buf, fp, &eof);
+      if(!result) {
+        const char *lineptr = curlx_dyn_ptr(&buf);
+        curlx_str_passblanks(&lineptr);
 
-      /*
-       * Skip empty or commented lines, since we know the line will have a
-       * trailing newline from Curl_get_line we can treat length 1 as empty.
-       */
-      if((*lineptr == '#') || strlen(lineptr) <= 1)
-        continue;
+        /*
+         * Skip empty or commented lines, since we know the line will have a
+         * trailing newline from Curl_get_line we can treat length 1 as empty.
+         */
+        if((*lineptr == '#') || strlen(lineptr) <= 1)
+          continue;
 
-      hsts_add(h, lineptr);
-    }
+        hsts_add(h, lineptr);
+      }
+    } while(!result && !eof);
     curlx_dyn_free(&buf); /* free the line buffer */
     curlx_fclose(fp);
   }
@@ -567,18 +567,22 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
   return CURLE_OK;
 }
 
-void Curl_hsts_loadfiles(struct Curl_easy *data)
+CURLcode Curl_hsts_loadfiles(struct Curl_easy *data)
 {
+  CURLcode result = CURLE_OK;
   struct curl_slist *l = data->state.hstslist;
   if(l) {
     Curl_share_lock(data, CURL_LOCK_DATA_HSTS, CURL_LOCK_ACCESS_SINGLE);
 
     while(l) {
-      (void)Curl_hsts_loadfile(data, data->hsts, l->data);
+      result = Curl_hsts_loadfile(data, data->hsts, l->data);
+      if(result)
+        break;
       l = l->next;
     }
     Curl_share_unlock(data, CURL_LOCK_DATA_HSTS);
   }
+  return result;
 }
 
 #if defined(DEBUGBUILD) || defined(UNITTESTS)

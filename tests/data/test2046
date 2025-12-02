@@ -46,7 +46,7 @@ codeset-utf8
 LC_ALL=C.UTF-8
 </setenv>
 <name>
-Connection reuse with IDN host name
+Connection reuse with IDN hostname
 </name>
 
 <command>
@@ -57,7 +57,7 @@ http://%hex[%c3%a5%c3%a4%c3%b6]hex%.se:%HTTPPORT/%TESTNUMBER --resolve xn--4cab6
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
 User-Agent: curl/%VERSION

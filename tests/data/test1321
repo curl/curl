@@ -12,12 +12,12 @@ HTTP proxy
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 imap: sure hit me
 
 </connect>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -26,7 +26,7 @@ body
 --
   yours sincerely
 </data>
-<datacheck>
+<datacheck crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -59,14 +59,14 @@ IMAP FETCH tunneled through HTTP proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER
 A004 FETCH 1 BODY[]
 A005 LOGOUT
 </protocol>
-<proxy>
+<proxy crlf="headers">
 CONNECT imap.%TESTNUMBER:%IMAPPORT HTTP/1.1
 Host: imap.%TESTNUMBER:%IMAPPORT
 User-Agent: curl/%VERSION

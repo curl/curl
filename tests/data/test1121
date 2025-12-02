@@ -7,7 +7,7 @@ HTTP
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
@@ -34,7 +34,7 @@ HTTP multiple provided Host: headers
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: host1
 User-Agent: curl/%VERSION

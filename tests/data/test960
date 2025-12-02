@@ -27,7 +27,7 @@ LC_ALL=C.UTF-8
 <name>
 SMTP without SMTPUTF8 support - UTF-8 based recipient (host part only)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -45,10 +45,10 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@%hex[%c3%a5%c3%a4%c3%
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@%hex[%c3%a5%c3%a4%c3%b6]hex%.se%GT
 QUIT
 </protocol>
 </verify>

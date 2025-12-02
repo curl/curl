@@ -9,7 +9,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 No Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Content-Type: text/html; charset=iso-8859-1
@@ -34,7 +34,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

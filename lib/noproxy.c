@@ -117,6 +117,70 @@ enum nametype {
   TYPE_IPV6
 };
 
+static bool match_host(const char *token, size_t tokenlen,
+                       const char *name, size_t namelen)
+{
+  bool match = FALSE;
+
+  /* ignore trailing dots in the token to check */
+  if(token[tokenlen - 1] == '.')
+    tokenlen--;
+
+  if(tokenlen && (*token == '.')) {
+    /* ignore leading token dot as well */
+    token++;
+    tokenlen--;
+  }
+  /* A: example.com matches 'example.com'
+     B: www.example.com matches 'example.com'
+     C: nonexample.com DOES NOT match 'example.com'
+  */
+  if(tokenlen == namelen)
+    /* case A, exact match */
+    match = curl_strnequal(token, name, namelen);
+  else if(tokenlen < namelen) {
+    /* case B, tailmatch domain */
+    match = (name[namelen - tokenlen - 1] == '.') &&
+      curl_strnequal(token, name + (namelen - tokenlen),
+                     tokenlen);
+  }
+  /* case C passes through, not a match */
+  return match;
+}
+
+static bool match_ip(int type, const char *token, size_t tokenlen,
+                     const char *name)
+{
+  const char *check = token;
+  char *slash;
+  unsigned int bits = 0;
+  char checkip[128];
+  if(tokenlen >= sizeof(checkip))
+    /* this cannot match */
+    return FALSE;
+  /* copy the check name to a temp buffer */
+  memcpy(checkip, check, tokenlen);
+  checkip[tokenlen] = 0;
+  check = checkip;
+
+  slash = strchr(check, '/');
+  /* if the slash is part of this token, use it */
+  if(slash) {
+    curl_off_t value;
+    const char *p = &slash[1];
+    if(curlx_str_number(&p, &value, 128) || *p)
+      return FALSE;
+    /* a too large value is rejected in the cidr function below */
+    bits = (unsigned int)value;
+    *slash = 0; /* null-terminate there */
+  }
+  if(type == TYPE_IPV6)
+    return Curl_cidr6_match(name, check, bits);
+  else
+    return Curl_cidr4_match(name, check, bits);
+}
+
+
 /****************************************************************
 * Checks if the host is in the noproxy list. returns TRUE if it matches and
 * therefore the proxy should NOT be used.
@@ -176,7 +240,6 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     while(*p) {
       const char *token;
       size_t tokenlen = 0;
-      bool match = FALSE;
 
       /* pass blanks */
       curlx_str_passblanks(&p);
@@ -189,64 +252,16 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       }
 
       if(tokenlen) {
-        switch(type) {
-        case TYPE_HOST:
-          /* ignore trailing dots in the token to check */
-          if(token[tokenlen - 1] == '.')
-            tokenlen--;
+        bool match = FALSE;
+        if(type == TYPE_HOST)
+          match = match_host(token, tokenlen, name, namelen);
+        else
+          match = match_ip(type, token, tokenlen, name);
 
-          if(tokenlen && (*token == '.')) {
-            /* ignore leading token dot as well */
-            token++;
-            tokenlen--;
-          }
-          /* A: example.com matches 'example.com'
-             B: www.example.com matches 'example.com'
-             C: nonexample.com DOES NOT match 'example.com'
-          */
-          if(tokenlen == namelen)
-            /* case A, exact match */
-            match = curl_strnequal(token, name, namelen);
-          else if(tokenlen < namelen) {
-            /* case B, tailmatch domain */
-            match = (name[namelen - tokenlen - 1] == '.') &&
-              curl_strnequal(token, name + (namelen - tokenlen),
-                             tokenlen);
-          }
-          /* case C passes through, not a match */
-          break;
-        case TYPE_IPV4:
-        case TYPE_IPV6: {
-          const char *check = token;
-          char *slash;
-          unsigned int bits = 0;
-          char checkip[128];
-          if(tokenlen >= sizeof(checkip))
-            /* this cannot match */
-            break;
-          /* copy the check name to a temp buffer */
-          memcpy(checkip, check, tokenlen);
-          checkip[tokenlen] = 0;
-          check = checkip;
-
-          slash = strchr(check, '/');
-          /* if the slash is part of this token, use it */
-          if(slash) {
-            /* if the bits variable gets a crazy value here, that is fine as
-               the value will then be rejected in the cidr function */
-            bits = (unsigned int)atoi(slash + 1);
-            *slash = 0; /* null-terminate there */
-          }
-          if(type == TYPE_IPV6)
-            match = Curl_cidr6_match(name, check, bits);
-          else
-            match = Curl_cidr4_match(name, check, bits);
-          break;
-        }
-        }
         if(match)
           return TRUE;
-      } /* if(tokenlen) */
+      }
+
       /* pass blanks after pattern */
       curlx_str_passblanks(&p);
       /* if not a comma, this ends the loop */

@@ -35,8 +35,10 @@ cd "${TOPDIR}" || exit 1
 
 #       Make sure all files are UTF8-encoded.
 
+# Qshell does not support -print0. ls -S has a non-POSIX meaning.
+#   https://www.ibm.com/docs/en/i/7.1.0?topic=qshell-command-language
 # shellcheck disable=SC2038
-find "${TOPDIR}" -type f -print | xargs ls -S | while read -r CCSID FILE
+find "${TOPDIR}" -type f | xargs ls -S -- | while read -r CCSID FILE
 do      if [ "${CCSID}" != 1208 ]
         then    CMD="CPY OBJ('${FILE}') TOOBJ('${FILE}') FROMCCSID(*OBJ)"
                 CMD="${CMD} TOCCSID(1208) DTAFMT(*TEXT) REPLACE(*YES)"

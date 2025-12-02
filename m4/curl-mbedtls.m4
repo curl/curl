@@ -92,8 +92,8 @@ if test "x$OPT_MBEDTLS" != xno; then
       LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
 
       if test -n "$mbedtlslib"; then
-        dnl when shared libs were found in a path that the run-time
-        dnl linker doesn't search through, we need to add it to
+        dnl when shared libs were found in a path that the runtime
+        dnl linker does not search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
         if test "x$cross_compiling" != "xyes"; then
@@ -105,6 +105,12 @@ if test "x$OPT_MBEDTLS" != xno; then
       dnl FIXME: Enable when mbedTLS was detected via pkg-config
       if false; then
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls mbedx509 mbedcrypto"
+      fi
+
+      dnl Check DES support in mbedTLS <4.
+      AC_CHECK_FUNCS(mbedtls_des_crypt_ecb)
+      if test "$ac_cv_func_mbedtls_des_crypt_ecb" = 'yes'; then
+        HAVE_MBEDTLS_DES_CRYPT_ECB=1
       fi
     fi
 

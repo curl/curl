@@ -26,14 +26,16 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -55,7 +57,7 @@ int main(void)
 
 #ifdef SKIP_HOSTNAME_VERIFICATION
     /*
-     * If the site you are connecting to uses a different host name that what
+     * If the site you are connecting to uses a different hostname than what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl refuses to connect. You can skip this
      * check, but it makes the connection insecure.
@@ -79,5 +81,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

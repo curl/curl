@@ -6,6 +6,7 @@ FTP
 post-quote
 pre-quote
 --libcurl
+notxml
 </keywords>
 </info>
 # Server-side
@@ -45,7 +46,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FA
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD
@@ -143,6 +144,7 @@ $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 $_ = '' if /CURLOPT_SSLVERSION/
+$_ = '' if /CURLOPT_TIMEOUT_MS/
 </stripfile>
 </verify>
 </testcase>

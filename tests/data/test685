@@ -40,13 +40,13 @@ machine %HOSTIP password 5up3r53cr37
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
+<protocol crlf="headers">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user:5up3r53cr37]b64%
 User-Agent: curl/%VERSION
 Accept: */*
 
+</protocol>
 </verify>
 </testcase>

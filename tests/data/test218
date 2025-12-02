@@ -9,7 +9,7 @@ chunked Transfer-Encoding
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
@@ -40,17 +40,17 @@ just some tiny teeny contents
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Transfer-Encoding: chunked
-
-1e
+PUT /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Transfer-Encoding: chunked%CR
+%CR
+1e%CR
 just some tiny teeny contents
-
-0
-
+%CR
+0%CR
+%CR
 </protocol>
 </verify>
 </testcase>

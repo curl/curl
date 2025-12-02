@@ -74,7 +74,7 @@ HTTP with custom auth and cookies redirected to HTTP on a diff port
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://firsthost.com/ HTTP/1.1
 Host: firsthost.com
 User-Agent: curl/%VERSION

@@ -29,6 +29,6 @@ string_mask             = utf8only
 countryName             = "Country Name is Northern Nowhere"
 countryName_value       = NN
 organizationName        = "Organization Name"
-organizationName_value  = Edel Curl Arctic Illudium Research Cloud
+organizationName_value  = Edel curl Arctic Illudium Research Cloud
 commonName              = "Common Name"
 commonName_value        = localhost.nn

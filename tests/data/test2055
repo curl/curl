@@ -62,14 +62,14 @@ http://www.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.co
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT connect.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: connect.example.com.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com.%TESTNUMBER
 User-Agent: curl/%VERSION

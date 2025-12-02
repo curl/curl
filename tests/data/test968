@@ -40,7 +40,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Anv%hex[%c3%a4]hex%ndaren
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY Anv%hex[%c3%a4]hex%ndaren SMTPUTF8
 QUIT

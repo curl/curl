@@ -3,13 +3,14 @@
 <keywords>
 HTTP
 aws-sigv4
+notxml
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -46,8 +47,8 @@ aws-sigv4 with query
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
-GET /439/?name=me&noval&aim=b%aad&&&weirdo=*.//- HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER/?name=me&noval&aim=b%aad&&&weirdo=*.//- HTTP/1.1
 Host: fake.fake.fake:8000
 Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=9dd8592929306832a6673d10063491391e486e5f50de4647ea7c2c797277e0a6
 X-Amz-Date: 19700101T000000Z

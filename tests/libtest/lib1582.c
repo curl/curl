@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_MEMDEBUG_H
-#define HEADER_CURL_MEMDEBUG_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,34 +21,38 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "first.h"
 
-/*
- * CAUTION: this header is designed to work when included by the app-side
- * as well as the library. Do not mix with library internals!
- */
+static CURLcode test_lib1582(const char *URL)
+{
+  CURLcode res;
+  CURL *curl;
 
-#ifdef CURLDEBUG
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-/* Set this symbol on the command-line, recompile all lib-sources */
-#undef strdup
-#define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#undef malloc
-#define malloc(size) curl_dbg_malloc(size, __LINE__, __FILE__)
-#undef calloc
-#define calloc(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
-#undef realloc
-#define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
-#undef free
-#define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
+  curl = curl_easy_init();
+  if(!curl) {
+    curl_mfprintf(stderr, "curl_easy_init() failed\n");
+    curl_global_cleanup();
+    return TEST_ERR_MAJOR_BAD;
+  }
 
-#ifdef _WIN32
-#undef Curl_tcsdup
-#ifdef UNICODE
-#define Curl_tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
-#else
-#define Curl_tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#endif
-#endif /* _WIN32 */
+  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_NEGOTIATE);
+  test_setopt(curl, CURLOPT_USERPWD, ":");
+  test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-#endif /* CURLDEBUG */
-#endif /* HEADER_CURL_MEMDEBUG_H */
+  res = curl_easy_perform(curl);
+
+test_cleanup:
+  curl_easy_cleanup(curl);
+  curl_global_cleanup();
+
+  return res;
+}

@@ -11,7 +11,7 @@ CONNECT
 <data nocheck="yes">
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server:       test with trailing space     
+Server:       test with trailing space%repeat[5 x  ]%
 Content-Type: text/html
 Content-Length: 0
 Set-Cookie: onecookie=data;
@@ -20,7 +20,7 @@ Set-Cookie: cookie3=data3;
 Location: /%TESTNUMBER0002
 
 </data>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Sure go ahead
 Server: from the connect
 Silly-thing: yes yes
@@ -54,7 +54,7 @@ http://hello:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT hello:%HTTPPORT HTTP/1.1
 Host: hello:%HTTPPORT
 Proxy-Connection: Keep-Alive

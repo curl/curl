@@ -208,6 +208,9 @@ char *curl_version(void)
 #ifdef USE_GSASL
   char gsasl_buf[30];
 #endif
+#ifdef HAVE_GSSAPI
+  char gss_buf[40];
+#endif
 #ifdef USE_OPENLDAP
   char ldap_buf[30];
 #endif
@@ -274,6 +277,18 @@ char *curl_version(void)
                  gsasl_check_version(NULL));
   src[i++] = gsasl_buf;
 #endif
+#ifdef HAVE_GSSAPI
+#ifdef HAVE_GSSGNU
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "libgss/%s",
+                 GSS_VERSION);
+#elif defined(CURL_KRB5_VERSION)
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5/%s",
+                 CURL_KRB5_VERSION);
+#else
+  curl_msnprintf(gss_buf, sizeof(gss_buf), "mit-krb5");
+#endif
+  src[i++] = gss_buf;
+#endif /* HAVE_GSSAPI */
 #ifdef USE_OPENLDAP
   oldap_version(ldap_buf, sizeof(ldap_buf));
   src[i++] = ldap_buf;
@@ -522,6 +537,9 @@ static const struct feat features_table[] = {
 #endif
 #ifdef USE_LIBPSL
   FEATURE("PSL",         NULL,                CURL_VERSION_PSL),
+#endif
+#ifdef USE_APPLE_SECTRUST
+  FEATURE("AppleSecTrust", NULL,              0),
 #endif
 #ifdef USE_SPNEGO
   FEATURE("SPNEGO",      NULL,                CURL_VERSION_SPNEGO),

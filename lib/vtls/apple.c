@@ -46,16 +46,12 @@
 #include "vtls.h"
 #include "apple.h"
 
-#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
+#ifdef USE_APPLE_SECTRUST
 #include <Security/Security.h>
-#endif /* USE_SSL && USE_APPLE_SECTRUST */
-
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
+#endif
 
 
-#if defined(USE_SSL) && defined(USE_APPLE_SECTRUST)
+#ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
 
 #if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
@@ -148,7 +144,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
          * add `kSecRevocationRequirePositiveResponse` to the Apple
          * Trust policies, it interprets this as it NEEDs a confirmation
          * of a cert being NOT REVOKED. Which not in general available for
-         * certificates on the internet.
+         * certificates on the Internet.
          * It seems that applications using this policy are expected to PIN
          * their certificate public keys or verification will fail.
          * This does not seem to be what we want here. */
@@ -211,8 +207,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   if(ocsp_len > 0) {
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-      CFDataRef ocspdata =
-        CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
+      CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
 
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
@@ -244,11 +239,11 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       if(error_ref) {
         CFIndex size = CFStringGetMaximumSizeForEncoding(
           CFStringGetLength(error_ref), kCFStringEncodingUTF8);
-        err_desc = malloc(size + 1);
+        err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
-             kCFStringEncodingUTF8)) {
-            free(err_desc);
+                                 kCFStringEncodingUTF8)) {
+            curlx_free(err_desc);
             err_desc = NULL;
           }
         }
@@ -267,8 +262,8 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
     if(status != noErr) {
       failf(data, "Apple SecTrust verification failed: error %i", (int)status);
     }
-    else if((status == kSecTrustResultUnspecified) ||
-            (status == kSecTrustResultProceed)) {
+    else if((sec_result == kSecTrustResultUnspecified) ||
+            (sec_result == kSecTrustResultProceed)) {
       /* "unspecified" means system-trusted with no explicit user setting */
       result = CURLE_OK;
     }
@@ -276,7 +271,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   }
 
 out:
-  free(err_desc);
+  curlx_free(err_desc);
   if(error_ref)
     CFRelease(error_ref);
   if(error)
@@ -294,4 +289,4 @@ out:
   return result;
 }
 
-#endif /* USE_SSL && USE_APPLE_SECTRUST */
+#endif /* USE_APPLE_SECTRUST */

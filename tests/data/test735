@@ -2,6 +2,7 @@
 <info>
 <keywords>
 IPFS
+notxml
 </keywords>
 </info>
 
@@ -44,7 +45,7 @@ IPNS with path, query args and gateway with path
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /some/path/ipns/fancy.tld/a/b?foo=bar&aaa=bbb HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

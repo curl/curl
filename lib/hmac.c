@@ -33,11 +33,7 @@
 #include <curl/curl.h>
 
 #include "curl_hmac.h"
-#include "curl_memory.h"
 #include "curlx/warnless.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /*
  * Generic HMAC algorithm.
@@ -62,7 +58,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
 
   /* Create HMAC context. */
   i = sizeof(*ctxt) + 2 * hashparams->ctxtsize + hashparams->resultlen;
-  ctxt = malloc(i);
+  ctxt = curlx_malloc(i);
 
   if(!ctxt)
     return ctxt;
@@ -74,7 +70,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
   /* If the key is too long, replace it by its hash digest. */
   if(keylen > hashparams->maxkeylen) {
     if(hashparams->hinit(ctxt->hashctxt1))
-      return NULL;
+      goto fail;
     hashparams->hupdate(ctxt->hashctxt1, key, keylen);
     hkey = (unsigned char *) ctxt->hashctxt2 + hashparams->ctxtsize;
     hashparams->hfinal(hkey, ctxt->hashctxt1);
@@ -85,7 +81,7 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
   /* Prime the two hash contexts with the modified key. */
   if(hashparams->hinit(ctxt->hashctxt1) ||
      hashparams->hinit(ctxt->hashctxt2))
-    return NULL;
+    goto fail;
 
   for(i = 0; i < keylen; i++) {
     b = (unsigned char)(*key ^ hmac_ipad);
@@ -101,6 +97,10 @@ Curl_HMAC_init(const struct HMAC_params *hashparams,
 
   /* Done, return pointer to HMAC context. */
   return ctxt;
+
+fail:
+  curlx_free(ctxt);
+  return NULL;
 }
 
 int Curl_HMAC_update(struct HMAC_context *ctxt,
@@ -126,7 +126,7 @@ int Curl_HMAC_final(struct HMAC_context *ctxt, unsigned char *output)
   hashparams->hfinal(output, ctxt->hashctxt1);
   hashparams->hupdate(ctxt->hashctxt2, output, hashparams->resultlen);
   hashparams->hfinal(output, ctxt->hashctxt2);
-  free(ctxt);
+  curlx_free(ctxt);
   return 0;
 }
 

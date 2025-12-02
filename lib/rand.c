@@ -38,10 +38,6 @@
 #include "rand.h"
 #include "escape.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef _WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_VISTA && \
@@ -50,10 +46,6 @@
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
-#  endif
-   /* Offered by mingw-w64 v3+. MS SDK v7.0A+. */
-#  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
-#  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
 #  endif
 #  ifndef STATUS_SUCCESS
 #  define STATUS_SUCCESS ((NTSTATUS)0x00000000L)

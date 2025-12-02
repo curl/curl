@@ -10,7 +10,7 @@ FETCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -46,7 +46,5 @@ lib%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 </verify>
 </testcase>

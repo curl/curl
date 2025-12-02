@@ -159,6 +159,13 @@ entry.
 
 HTTP Alt-Svc parsing and the associated options (Added in 7.64.1)
 
+## `AppleSecTrust`
+
+*features* mask bit: non-existent
+
+libcurl was built with support for Apple's SecTrust service to verify
+server certificates (Added in 8.17.0).
+
 ## `AsynchDNS`
 
 *features* mask bit: CURL_VERSION_ASYNCHDNS

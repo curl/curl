@@ -26,6 +26,12 @@
  * one the server supports/wants.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -59,9 +65,9 @@
 /* seek callback function */
 static int my_seek(void *userp, curl_off_t offset, int origin)
 {
-  FILE *fp = (FILE *) userp;
+  FILE *fp = (FILE *)userp;
 
-  if(fseek(fp, (long) offset, origin) == -1)
+  if(fseek(fp, (long)offset, origin) == -1)
     /* could not seek */
     return CURL_SEEKFUNC_CANTSEEK;
 
@@ -69,7 +75,7 @@ static int my_seek(void *userp, curl_off_t offset, int origin)
 }
 
 /* read callback function, fread() look alike */
-static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t nread;
 
@@ -103,30 +109,32 @@ int main(int argc, char **argv)
   if(!fp)
     return 2;
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  stat(file, &file_info);
-#else
-  fstat(fileno(fp), &file_info);
-#endif
+  if(fstat(fileno(fp), &file_info) != 0) {
+    fclose(fp);
+    return 1; /* cannot continue */
+  }
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
+    fclose(fp);
+    return (int)res;
+  }
 
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void *) fp);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)fp);
 
     /* set the seek function */
     curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
 
     /* pass the file descriptor to the seek callback as well */
-    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *) fp);
+    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *)fp);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -145,7 +153,7 @@ int main(int argc, char **argv)
        data twice!!! */
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
-    /* set user name and password for the authentication */
+    /* set username and password for the authentication */
     curl_easy_setopt(curl, CURLOPT_USERPWD, "user:password");
 
     /* Now run off and do what you have been told! */
@@ -161,5 +169,5 @@ int main(int argc, char **argv)
   fclose(fp); /* close the local file */
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

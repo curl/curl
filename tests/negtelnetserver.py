@@ -135,7 +135,7 @@ class Negotiator(object):
         """
         buffer = bytearray()
 
-        # If we keep receiving negotiation sequences, we won't fill the buffer.
+        # If we keep receiving negotiation sequences, we will not fill the buffer.
         # Keep looping while we can, and until we have something to give back
         # to the caller.
         while len(buffer) == 0:
@@ -190,8 +190,8 @@ class Negotiator(object):
             log.debug("Client can do")
             self.state = self.DO
         elif byte_int == NegTokens.DONT:
-            # Client is indicating they can't do an option
-            log.debug("Client can't do")
+            # Client is indicating they cannot do an option
+            log.debug("Client cannot do")
             self.state = self.DONT
         else:
             # Received an unexpected byte. Stop negotiations
@@ -296,9 +296,9 @@ def get_options():
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",
-                        help="file name for the PID")
+                        help="filename for the PID")
     parser.add_argument("--logfile", action="store",
-                        help="file name for the log")
+                        help="filename for the log")
     parser.add_argument("--srcdir", action="store", help="test directory")
     parser.add_argument("--id", action="store", help="server ID")
     parser.add_argument("--ipv4", action="store_true", default=0,
@@ -323,7 +323,7 @@ def setup_logging(options):
         handler.setLevel(logging.DEBUG)
         root_logger.addHandler(handler)
     else:
-        # The logfile wasn't specified. Add a stdout logger.
+        # The logfile was not specified. Add a stdout logger.
         add_stdout = True
 
     if options.verbose:

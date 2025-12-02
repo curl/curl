@@ -188,6 +188,7 @@ class EnvConfig:
         self.cert_specs = [
             CertificateSpec(domains=[self.domain1, self.domain1brotli, 'localhost', '127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(name='domain1-no-ip', domains=[self.domain1, self.domain1brotli], key_type='rsa2048'),
+            CertificateSpec(name='domain1-very-bad', domains=[self.domain1, 'dns:127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
             CertificateSpec(domains=[self.ftp_domain], key_type='rsa2048'),
             CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),
@@ -197,6 +198,16 @@ class EnvConfig:
                CertificateSpec(name="user1", client=True),
             ]),
         ]
+
+        self.openssl = 'openssl'
+        p = subprocess.run(args=[self.openssl, 'version'],
+                           capture_output=True, text=True)
+        if p.returncode != 0:
+            # no openssl in path
+            self.openssl = None
+            self.openssl_version = None
+        else:
+            self.openssl_version = p.stdout.strip()
 
         self.nghttpx = self.config['nghttpx']['nghttpx']
         if len(self.nghttpx.strip()) == 0:
@@ -372,6 +383,10 @@ class Env:
         return Env.CONFIG.get_incomplete_reason()
 
     @staticmethod
+    def have_openssl() -> bool:
+        return Env.CONFIG.openssl is not None
+
+    @staticmethod
     def have_nghttpx() -> bool:
         return Env.CONFIG.nghttpx is not None
 
@@ -390,6 +405,12 @@ class Env:
     @staticmethod
     def have_h3_curl() -> bool:
         return 'http3' in Env.CONFIG.curl_props['features']
+
+    @staticmethod
+    def have_compressed_curl() -> bool:
+        return 'brotli' in Env.CONFIG.curl_props['libs'] or \
+               'zlib' in Env.CONFIG.curl_props['libs'] or \
+               'zstd' in Env.CONFIG.curl_props['libs']
 
     @staticmethod
     def curl_uses_lib(libname: str) -> bool:
@@ -486,6 +507,36 @@ class Env:
             Env.curl_uses_lib('ngtcp2')
 
     @staticmethod
+    def http_protos() -> List[str]:
+        # http protocols we can test
+        if Env.have_h2_curl():
+            if Env.have_h3():
+                return ['http/1.1', 'h2', 'h3']
+            else:
+                return ['http/1.1', 'h2']
+        else:
+            return ['http/1.1']
+
+    @staticmethod
+    def http_h1_h2_protos() -> List[str]:
+        # http 1+2 protocols we can test
+        if Env.have_h2_curl():
+            return ['http/1.1', 'h2']
+        else:
+            return ['http/1.1']
+
+    @staticmethod
+    def http_mplx_protos() -> List[str]:
+        # http multiplexing protocols we can test
+        if Env.have_h2_curl():
+            if Env.have_h3():
+                return ['h2', 'h3']
+            else:
+                return ['h2']
+        else:
+            return []
+
+    @staticmethod
     def have_h3() -> bool:
         return Env.have_h3_curl() and Env.have_h3_server()
 
@@ -539,7 +590,8 @@ class Env:
 
     def issue_certs(self):
         if self._ca is None:
-            ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            # ca_dir = os.path.join(self.CONFIG.gen_root, 'ca')
+            ca_dir = os.path.join(self.gen_dir, 'ca')
             os.makedirs(ca_dir, exist_ok=True)
             lock_file = os.path.join(ca_dir, 'ca.lock')
             with FileLock(lock_file):
@@ -547,6 +599,8 @@ class Env:
                                               store_dir=ca_dir,
                                               key_type="rsa2048")
                 self._ca.issue_certs(self.CONFIG.cert_specs)
+                if self.have_openssl():
+                    self._ca.create_hashdir(self.openssl)
 
     def setup(self):
         os.makedirs(self.gen_dir, exist_ok=True)
@@ -701,6 +755,10 @@ class Env:
     @property
     def curl(self) -> str:
         return self.CONFIG.curl
+
+    @property
+    def openssl(self) -> Optional[str]:
+        return self.CONFIG.openssl
 
     @property
     def httpd(self) -> str:

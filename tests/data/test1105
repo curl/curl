@@ -5,12 +5,13 @@ HTTP
 HTTP POST
 cookies
 cookiejar
+notxml
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -19,9 +20,9 @@ Funny-head: yesyes swsclose
 Set-Cookie: foobar=name;
 Set-Cookie: mismatch=this; domain=127.0.0.1; path="/silly/";
 Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
-Set-Cookie: foo	bar=barfoo
-Set-Cookie: bar	foo=
-Set-Cookie: bar=foo	bar
+Set-Cookie: foo%TABbar=barfoo
+Set-Cookie: bar%TABfoo=
+Set-Cookie: bar=foo%TABbar
 
 </data>
 </reply>
@@ -45,7 +46,7 @@ local-http
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /we/want/%TESTNUMBER?parm1=this*that/other/thing&parm2=foobar/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

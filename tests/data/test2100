@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 DOH
+httpsrr
 </keywords>
 </info>
 
@@ -69,7 +70,7 @@ http://foo.example.com:%HTTPPORT/%TESTNUMBER --doh-url http://%HOSTIP:%HTTPPORT/
 <strippart>
 s/com\x00\x00(\x1c|\x01)/com-00-00!/g;
 </strippart>
-<protocol>
+<protocol crlf="yes">
 %if HTTPSRR
 POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

@@ -5,12 +5,13 @@
 <keywords>
 RTSP
 ANNOUNCE
+notxml
 </keywords>
 </info>
 
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Cseq: 1
@@ -18,24 +19,24 @@ Cseq: 1
 </data1>
 
 <data2>
-RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
-Cseq: 2
-Content-Length: 70
-Content-Type: application/sdp
-
+RTSP/1.0 200 OK%CR
+Server: RTSPD/libcurl-test%CR
+Cseq: 2%CR
+Content-Length: 70%CR
+Content-Type: application/sdp%CR
+%CR
 v=0
 s=rtspd SDP
 i=A fake SDP reply
 u=http://www.curl.example.com/fakesdp.ps
 </data2>
-<data3>
+<data3 crlf="headers">
 RTSP/1.0 200 Okie Dokie
 Server: RTSPD/libcurl-test
 Cseq: 3
 
 </data3>
-<data4>
+<data4 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 4
@@ -80,7 +81,7 @@ m=video 2232 RTP/AVP 31
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
+<protocol crlf="headers">
 ANNOUNCE rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 Content-Length: 306

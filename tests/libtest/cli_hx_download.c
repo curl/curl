@@ -25,8 +25,6 @@
 
 #include "testtrace.h"
 
-#include "curl_mem_undef.h"
-
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 #include <openssl/ssl.h>
 #endif
@@ -45,13 +43,11 @@
 #include <rustls.h>
 #endif
 
-#include "memdebug.h"
-
 static int verbose_d = 1;
 
 struct transfer_d {
   size_t idx;
-  CURL *easy;
+  CURL *curl;
   char filename[128];
   FILE *out;
   curl_off_t recv_size;
@@ -63,18 +59,18 @@ struct transfer_d {
   int resumed;
   int done;
   int checked_ssl;
-  CURLcode result;
+  CURLcode res;
 };
 
 static size_t transfer_count_d = 1;
 static struct transfer_d *transfer_d;
 static int forbid_reuse_d = 0;
 
-static struct transfer_d *get_transfer_for_easy_d(CURL *easy)
+static struct transfer_d *get_transfer_for_easy_d(CURL *curl)
 {
   size_t i;
   for(i = 0; i < transfer_count_d; ++i) {
-    if(easy == transfer_d[i].easy)
+    if(curl == transfer_d[i].curl)
       return &transfer_d[i];
   }
   return NULL;
@@ -92,7 +88,7 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
+    curl_msnprintf(t->filename, sizeof(t->filename) - 1, "download_%zu.data",
                    t->idx);
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
@@ -143,7 +139,7 @@ static int my_progress_d_cb(void *userdata,
     CURLcode res;
 
     t->checked_ssl = TRUE;
-    res = curl_easy_getinfo(t->easy, CURLINFO_TLS_SSL_PTR, &tls);
+    res = curl_easy_getinfo(t->curl, CURLINFO_TLS_SSL_PTR, &tls);
     if(res) {
       curl_mfprintf(stderr, "[t-%zu] info CURLINFO_TLS_SSL_PTR failed: %d\n",
                     t->idx, res);
@@ -153,7 +149,7 @@ static int my_progress_d_cb(void *userdata,
       switch(tls->backend) {
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
       case CURLSSLBACKEND_OPENSSL: {
-        const char *version = SSL_get_version((SSL*)tls->internals);
+        const char *version = SSL_get_version((SSL *)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info OpenSSL using %s\n",
@@ -163,7 +159,7 @@ static int my_progress_d_cb(void *userdata,
 #endif
 #ifdef USE_WOLFSSL
       case CURLSSLBACKEND_WOLFSSL: {
-        const char *version = wolfSSL_get_version((WOLFSSL*)tls->internals);
+        const char *version = wolfSSL_get_version((WOLFSSL *)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info wolfSSL using %s\n",
@@ -212,40 +208,40 @@ static int my_progress_d_cb(void *userdata,
   return 0;
 }
 
-static int setup_hx_download(CURL *hnd, const char *url, struct transfer_d *t,
+static int setup_hx_download(CURL *curl, const char *url, struct transfer_d *t,
                              long http_version, struct curl_slist *host,
                              CURLSH *share, int use_earlydata,
                              int fresh_connect)
 {
-  curl_easy_setopt(hnd, CURLOPT_SHARE, share);
-  curl_easy_setopt(hnd, CURLOPT_URL, url);
-  curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_setopt(hnd, CURLOPT_ACCEPT_ENCODING, "");
-  curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_d_cb);
-  curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
-  curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_d_cb);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
+  curl_easy_setopt(curl, CURLOPT_SHARE, share);
+  curl_easy_setopt(curl, CURLOPT_URL, url);
+  curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+  curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_write_d_cb);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, t);
+  curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+  curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, my_progress_d_cb);
+  curl_easy_setopt(curl, CURLOPT_XFERINFODATA, t);
   if(use_earlydata)
-    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
+    curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_EARLYDATA);
   if(forbid_reuse_d)
-    curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_FORBID_REUSE, 1L);
   if(host)
-    curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
+    curl_easy_setopt(curl, CURLOPT_RESOLVE, host);
   if(fresh_connect)
-    curl_easy_setopt(hnd, CURLOPT_FRESH_CONNECT, 1L);
+    curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1L);
 
   /* please be verbose */
   if(verbose_d) {
-    curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
   }
 
   /* wait for pipe connection to confirm */
-  curl_easy_setopt(hnd, CURLOPT_PIPEWAIT, 1L);
+  curl_easy_setopt(curl, CURLOPT_PIPEWAIT, 1L);
 
   return 0; /* all is good */
 }
@@ -256,7 +252,7 @@ static void usage_hx_download(const char *msg)
     curl_mfprintf(stderr, "%s\n", msg);
   curl_mfprintf(stderr,
     "usage: [options] url\n"
-    "  download a url with following options:\n"
+    "  download a URL with following options:\n"
     "  -a         abort paused transfer\n"
     "  -m number  max parallel downloads\n"
     "  -e         use TLS early data when possible\n"
@@ -278,9 +274,9 @@ static void usage_hx_download(const char *msg)
  */
 static CURLcode test_cli_hx_download(const char *URL)
 {
-  CURLM *multi_handle;
+  CURLM *multi = NULL;
   struct CURLMsg *m;
-  CURLSH *share;
+  CURLSH *share = NULL;
   const char *url;
   size_t i, n, max_parallel = 1;
   size_t active_transfers;
@@ -288,7 +284,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   size_t abort_offset = 0;
   size_t fail_offset = 0;
   int abort_paused = 0, use_earlydata = 0;
-  struct transfer_d *t;
+  struct transfer_d *t = NULL;
   long http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
@@ -296,17 +292,19 @@ static CURLcode test_cli_hx_download(const char *URL)
   size_t max_host_conns = 0;
   size_t max_total_conns = 0;
   int fresh_connect = 0;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   (void)URL;
 
   while((ch = cgetopt(test_argc, test_argv, "aefhm:n:xA:F:M:P:r:T:V:"))
         != -1) {
+    const char *opt = coptarg;
+    curl_off_t num;
     switch(ch) {
     case 'h':
       usage_hx_download(NULL);
-      result = (CURLcode)2;
-      goto cleanup;
+      res = (CURLcode)2;
+      goto optcleanup;
     case 'a':
       abort_paused = 1;
       break;
@@ -317,32 +315,39 @@ static CURLcode test_cli_hx_download(const char *URL)
       forbid_reuse_d = 1;
       break;
     case 'm':
-      max_parallel = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        max_parallel = (size_t)num;
       break;
     case 'n':
-      transfer_count_d = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        transfer_count_d = (size_t)num;
       break;
     case 'x':
       fresh_connect = 1;
       break;
     case 'A':
-      abort_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        abort_offset = (size_t)num;
       break;
     case 'F':
-      fail_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        fail_offset = (size_t)num;
       break;
     case 'M':
-      max_host_conns = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        max_host_conns = (size_t)num;
       break;
     case 'P':
-      pause_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        pause_offset = (size_t)num;
       break;
     case 'r':
-      free(resolve);
-      resolve = strdup(coptarg);
+      curlx_free(resolve);
+      resolve = curlx_strdup(coptarg);
       break;
     case 'T':
-      max_total_conns = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        max_total_conns = (size_t)num;
       break;
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
@@ -353,29 +358,34 @@ static CURLcode test_cli_hx_download(const char *URL)
         http_version = CURL_HTTP_VERSION_3ONLY;
       else {
         usage_hx_download("invalid http version");
-        result = (CURLcode)1;
-        goto cleanup;
+        res = (CURLcode)1;
+        goto optcleanup;
       }
       break;
     }
     default:
       usage_hx_download("invalid option");
-      result = (CURLcode)1;
-      goto cleanup;
+      res = (CURLcode)1;
+      goto optcleanup;
     }
   }
   test_argc -= coptind;
   test_argv += coptind;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
   curl_global_trace("ids,time,http/2,http/3");
 
   if(test_argc != 1) {
     usage_hx_download("not enough arguments");
-    result = (CURLcode)2;
-    goto cleanup;
+    res = (CURLcode)2;
+    goto optcleanup;
   }
   url = test_argv[0];
+
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    res = (CURLcode)3;
+    goto optcleanup;
+  }
 
   if(resolve)
     host = curl_slist_append(NULL, resolve);
@@ -383,7 +393,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -393,18 +403,18 @@ static CURLcode test_cli_hx_download(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
+  transfer_d = curlx_calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
 
-  multi_handle = curl_multi_init();
-  curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-  curl_multi_setopt(multi_handle, CURLMOPT_MAX_TOTAL_CONNECTIONS,
+  multi = curl_multi_init();
+  curl_multi_setopt(multi, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi, CURLMOPT_MAX_TOTAL_CONNECTIONS,
                     (long)max_total_conns);
-  curl_multi_setopt(multi_handle, CURLMOPT_MAX_HOST_CONNECTIONS,
+  curl_multi_setopt(multi, CURLMOPT_MAX_HOST_CONNECTIONS,
                     (long)max_host_conns);
 
   active_transfers = 0;
@@ -419,15 +429,15 @@ static CURLcode test_cli_hx_download(const char *URL)
   n = (max_parallel < transfer_count_d) ? max_parallel : transfer_count_d;
   for(i = 0; i < n; ++i) {
     t = &transfer_d[i];
-    t->easy = curl_easy_init();
-    if(!t->easy ||
-       setup_hx_download(t->easy, url, t, http_version, host, share,
+    t->curl = curl_easy_init();
+    if(!t->curl ||
+       setup_hx_download(t->curl, url, t, http_version, host, share,
                          use_earlydata, fresh_connect)) {
       curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-      result = (CURLcode)1;
+      res = (CURLcode)1;
       goto cleanup;
     }
-    curl_multi_add_handle(multi_handle, t->easy);
+    curl_multi_add_handle(multi, t->curl);
     t->started = 1;
     ++active_transfers;
     curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
@@ -435,11 +445,11 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   do {
     int still_running; /* keep number of running handles */
-    CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+    CURLMcode mc = curl_multi_perform(multi, &still_running);
 
     if(still_running) {
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
     }
 
     if(mc)
@@ -447,26 +457,26 @@ static CURLcode test_cli_hx_download(const char *URL)
 
     do {
       int msgq = 0;
-      m = curl_multi_info_read(multi_handle, &msgq);
+      m = curl_multi_info_read(multi, &msgq);
       if(m && (m->msg == CURLMSG_DONE)) {
-        CURL *e = m->easy_handle;
+        CURL *easy = m->easy_handle;
         --active_transfers;
-        curl_multi_remove_handle(multi_handle, e);
-        t = get_transfer_for_easy_d(e);
+        curl_multi_remove_handle(multi, easy);
+        t = get_transfer_for_easy_d(easy);
         if(t) {
           t->done = 1;
-          t->result = m->data.result;
+          t->res = m->data.result;
           curl_mfprintf(stderr, "[t-%zu] FINISHED with result %d\n",
-                        t->idx, t->result);
+                        t->idx, t->res);
           if(use_earlydata) {
             curl_off_t sent;
-            curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
+            curl_easy_getinfo(easy, CURLINFO_EARLYDATA_SENT_T, &sent);
             curl_mfprintf(stderr, "[t-%zu] EarlyData: "
                           "%" CURL_FORMAT_CURL_OFF_T "\n", t->idx, sent);
           }
         }
         else {
-          curl_easy_cleanup(e);
+          curl_easy_cleanup(easy);
           curl_mfprintf(stderr, "unknown FINISHED???\n");
         }
       }
@@ -476,8 +486,8 @@ static CURLcode test_cli_hx_download(const char *URL)
         /* abort paused transfers */
         for(i = 0; i < transfer_count_d; ++i) {
           t = &transfer_d[i];
-          if(!t->done && t->paused && t->easy) {
-            curl_multi_remove_handle(multi_handle, t->easy);
+          if(!t->done && t->paused && t->curl) {
+            curl_multi_remove_handle(multi, t->curl);
             t->done = 1;
             active_transfers--;
             curl_mfprintf(stderr, "[t-%zu] ABORTED\n", t->idx);
@@ -491,7 +501,7 @@ static CURLcode test_cli_hx_download(const char *URL)
           if(!t->done && t->paused) {
             t->resumed = 1;
             t->paused = 0;
-            curl_easy_pause(t->easy, CURLPAUSE_CONT);
+            curl_easy_pause(t->curl, CURLPAUSE_CONT);
             curl_mfprintf(stderr, "[t-%zu] RESUMED\n", t->idx);
             break;
           }
@@ -502,15 +512,15 @@ static CURLcode test_cli_hx_download(const char *URL)
         for(i = 0; i < transfer_count_d; ++i) {
           t = &transfer_d[i];
           if(!t->started) {
-            t->easy = curl_easy_init();
-            if(!t->easy ||
-              setup_hx_download(t->easy, url, t, http_version, host, share,
+            t->curl = curl_easy_init();
+            if(!t->curl ||
+              setup_hx_download(t->curl, url, t, http_version, host, share,
                                 use_earlydata, fresh_connect)) {
               curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-              result = (CURLcode)1;
+              res = (CURLcode)1;
               goto cleanup;
             }
-            curl_multi_add_handle(multi_handle, t->easy);
+            curl_multi_add_handle(multi, t->curl);
             t->started = 1;
             ++active_transfers;
             curl_mfprintf(stderr, "[t-%zu] STARTED\n", t->idx);
@@ -525,29 +535,37 @@ static CURLcode test_cli_hx_download(const char *URL)
 
   } while(active_transfers); /* as long as we have transfers going */
 
-  curl_multi_cleanup(multi_handle);
+cleanup:
 
-  for(i = 0; i < transfer_count_d; ++i) {
-    t = &transfer_d[i];
-    if(t->out) {
-      curlx_fclose(t->out);
-      t->out = NULL;
+  curl_multi_cleanup(multi);
+
+  if(transfer_d) {
+    for(i = 0; i < transfer_count_d; ++i) {
+      t = &transfer_d[i];
+      if(t->out) {
+        curlx_fclose(t->out);
+        t->out = NULL;
+      }
+      if(t->curl) {
+        curl_easy_cleanup(t->curl);
+        t->curl = NULL;
+      }
+      if(t->res)
+        res = t->res;
+      else /* on success we expect ssl to have been checked */
+        assert(t->checked_ssl);
     }
-    if(t->easy) {
-      curl_easy_cleanup(t->easy);
-      t->easy = NULL;
-    }
-    if(t->result)
-      result = t->result;
-    else /* on success we expect ssl to have been checked */
-      assert(t->checked_ssl);
+    curlx_free(transfer_d);
   }
-  free(transfer_d);
 
   curl_share_cleanup(share);
   curl_slist_free_all(host);
-cleanup:
-  free(resolve);
 
-  return result;
+  curl_global_cleanup();
+
+optcleanup:
+
+  curlx_free(resolve);
+
+  return res;
 }

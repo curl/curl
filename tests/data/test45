@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 followlocation
+notxml
 </keywords>
 </info>
 # Server-side
@@ -59,7 +60,7 @@ simple HTTP Location: without protocol in initial URL
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

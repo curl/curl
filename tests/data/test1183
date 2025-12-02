@@ -8,7 +8,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Server: Blafasel/5.0
 Date: Sat, 16 Jan 2021 14:48:30 GMT
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify that the %TESTNUMBER has been resolved to %TESTNUMBER
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

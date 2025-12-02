@@ -4,23 +4,23 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# Unsigned Int Sets
+# `uint32_t` Sets
 
-The multi handle tracks added easy handles via an unsigned int
-it calls an `mid`. There are four data structures for unsigned int
+The multi handle tracks added easy handles via an `uint32_t`
+it calls an `mid`. There are four data structures for `uint32_t`
 optimized for the multi use case.
 
-## `uint_tbl`
+## `uint32_tbl`
 
-`uint_table`, implemented in `uint-table.[ch]` manages an array
-of `void *`. The unsigned int are the index into this array. It is
+`uint32_table`, implemented in `uint-table.[ch]` manages an array
+of `void *`. The `uint32_t` is the index into this array. It is
 created with a *capacity* which can be *resized*. The table assigns
 the index when a `void *` is *added*. It keeps track of the last
 assigned index and uses the next available larger index for a
 subsequent add. Reaching *capacity* it wraps around.
 
 The table *can not* store `NULL` values. The largest possible index
-is `UINT_MAX - 1`.
+is `UINT32_MAX - 1`.
 
 The table is iterated over by asking for the *first* existing index,
 meaning the smallest number that has an entry, if the table is not
@@ -29,10 +29,10 @@ iteration step. It does not matter if the previous index is still
 in the table. Sample code for a table iteration would look like this:
 
 ```c
-unsigned int mid;
+uint32_t int mid;
 void *entry;
 
-if(Curl_uint_tbl_first(tbl, &mid, &entry)) {
+if(Curl_uint32_tbl_first(tbl, &mid, &entry)) {
   do {
      /* operate on entry with index mid */
   }
@@ -51,7 +51,7 @@ This iteration has the following properties:
 ### Memory
 
 For storing 1000 entries, the table would allocate one block of 8KB on a 64-bit system,
-plus the 2 pointers and 3 unsigned int in its base `struct uint_tbl`. A resize
+plus the 2 pointers and 3 `uint32_t` in its base `struct uint32_tbl`. A resize
 allocates a completely new pointer array, copy the existing entries and free the previous one.
 
 ### Performance
@@ -77,17 +77,17 @@ For these reasons, the simple implementation was preferred. Should this become
 a concern, there are options like "free index lists" or, alternatively, an internal
 bitset that scans better.
 
-## `uint_bset`
+## `uint32_bset`
 
-A bitset for unsigned integers, allowing fast add/remove operations. It is initialized
+A bitset for `uint32_t` values, allowing fast add/remove operations. It is initialized
 with a *capacity*, meaning it can store only the numbers in the range `[0, capacity-1]`.
-It can be *resized* and safely *iterated*. `uint_bset` is designed to operate in combination with `uint_tbl`.
+It can be *resized* and safely *iterated*. `uint32_bset` is designed to operate in combination with `uint_tbl`.
 
-The bitset keeps an array of `curl_uint64_t`. The first array entry keeps the numbers 0 to 63, the
+The bitset keeps an array of `uint64_t`. The first array entry keeps the numbers 0 to 63, the
 second 64 to 127 and so on. A bitset with capacity 1024 would therefore allocate an array
 of 16 64-bit values (128 bytes). Operations for an unsigned int divide it by 64 for the array index and then check/set/clear the bit of the remainder.
 
-Iterator works the same as with `uint_tbl`: ask the bitset for the *first* number present and
+Iterator works the same as with `uint32_tbl`: ask the bitset for the *first* number present and
 then use that to get the *next* higher number present. Like the table, this safe for
 adds/removes and growing the set while iterating.
 
@@ -102,14 +102,14 @@ Operations for add/remove/check are O(1). Iteration needs to scan for the next b
 number of scans is small (see memory footprint) and, for checking bits, many compilers
 offer primitives for special CPU instructions.
 
-## `uint_spbset`
+## `uint32_spbset`
 
-While the memory footprint of `uint_bset` is good, it still needs 5KB to store the single number 40000. This
+While the memory footprint of `uint32_bset` is good, it still needs 5KB to store the single number 40000. This
 is not optimal when many are needed. For example, in event based processing, each socket needs to
 keep track of the transfers involved. There are many sockets potentially, but each one mostly tracks
 a single transfer or few (on HTTP/2 connection borderline up to 100).
 
-For such uses cases, the `uint_spbset` is intended: track a small number of unsigned int, potentially
+For such uses cases, the `uint32_spbset` is intended: track a small number of unsigned int, potentially
 rather "close" together. It keeps "chunks" with an offset and has no capacity limit.
 
 Example: adding the number 40000 to an empty sparse bitset would have one chunk with offset 39936, keeping
@@ -121,8 +121,8 @@ would need to be allocated and linked, resulting in overall 4 KB of memory used.
 
 Iterating a sparse bitset works the same as for bitset and table.
 
-## `uint_hash`
+## `uint32_hash`
 
 At last, there are places in libcurl such as the HTTP/2 and HTTP/3 protocol implementations that need
-to store their own data related to a transfer. `uint_hash` allows then to associate an unsigned int,
+to store their own data related to a transfer. `uint32_hash` allows then to associate an unsigned int,
 e.g. the transfer's `mid`, to their own data.

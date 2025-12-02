@@ -52,11 +52,15 @@ libcurl does not inspect, parse or "understand" the commands passed to the
 server using this option. If you change connection state, working directory or
 similar using quote commands, libcurl does not know about it.
 
-The path arguments for FTP or SFTP can use single or double quotes to
-distinguish a space from being the parameter separator or being a part of the
-path. e.g. rename with sftp using a quote command like this:
+The path arguments for FTP or SFTP should use double quotes to distinguish a
+space from being the parameter separator or being a part of the path. For
+example, rename with sftp using a quote command like this:
 
-    "rename 'test/_upload.txt' 'test/Hello World.txt'"
+    rename "test/_upload.txt" "test/Hello World.txt"
+
+For SFTP, filenames must be provided within double quotes to embed spaces,
+backslashes, quotes or double quotes. Within double quotes the following
+escape sequences are available for that purpose: \\, \", and \'.
 
 # SFTP commands
 

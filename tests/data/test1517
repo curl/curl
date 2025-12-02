@@ -62,7 +62,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <strippart>
 s/^(this is what we post to the silly web server)(\r)?\n//
 </strippart>
-<protocol>
+<protocol crlf="headers">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

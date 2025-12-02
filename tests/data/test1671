@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{header_json}\n' -o %LOGDIR/%TESTNUMBE
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

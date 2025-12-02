@@ -32,16 +32,23 @@
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
+#ifdef USE_MBEDTLS
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER < 0x03020000
+    #error "mbedTLS 3.2.0 or later required"
+  #endif
+  #include <psa/crypto_config.h>
+  #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
+    #define USE_MBEDTLS_SHA256
+  #endif
+#endif
+
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/sha.h>
-#elif defined(USE_MBEDTLS)
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#include <mbedtls/sha256.h>
+#elif defined(USE_MBEDTLS_SHA256)
+#include <psa/crypto.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
@@ -51,10 +58,6 @@
 #elif defined(USE_WIN32_CRYPTO)
 #include <wincrypt.h>
 #endif
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* Please keep the SSL backend-specific #if branches in this order:
  *
@@ -126,13 +129,15 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_SHA256)
 
-typedef mbedtls_sha256_context my_sha256_ctx;
+typedef psa_hash_operation_t my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-  (void)mbedtls_sha256_starts(ctx, 0);
+  memset(ctx, 0, sizeof(my_sha256_ctx));
+  if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
+    return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
@@ -140,12 +145,14 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-  (void)mbedtls_sha256_update(ctx, data, length);
+  (void)psa_hash_update(ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-  (void)mbedtls_sha256_finish(ctx, digest);
+  size_t actual_length;
+  (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
+                        &actual_length);
 }
 
 #elif defined(AN_APPLE_OS)
@@ -203,11 +210,7 @@ static void my_sha256_update(void *in,
                              unsigned int length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-#ifdef __MINGW32CE__
-  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(data), length, 0);
-#else
   CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
-#endif
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)

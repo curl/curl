@@ -13,7 +13,7 @@ HTTP Digest auth
 
  Explanation for the duplicate 400 requests:
 
- libcurl doesn't detect that a given Digest password is wrong already on the
+ libcurl does not detect that a given Digest password is wrong already on the
  first 401 response (as the data400 gives). libcurl will instead consider the
  new response just as a duplicate and it sends another and detects the auth
  problem on the second 401 response!
@@ -21,7 +21,7 @@ HTTP Digest auth
 -->
 
 <!-- First request has Digest auth, wrong password -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Need Digest auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -31,7 +31,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="1"
 This is not the real page!
 </data100>
 
-<data1100>
+<data1100 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -42,7 +42,7 @@ This is a bad password page!
 </data1100>
 
 <!-- Second request has Digest auth, right password -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 401 Need Digest auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -52,7 +52,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="3"
 This is not the real page!
 </data200>
 
-<data1200>
+<data1200 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -62,7 +62,7 @@ Finally, this is the real page!
 </data1200>
 
 <!-- Third request has Digest auth, wrong password -->
-<data300>
+<data300 crlf="headers">
 HTTP/1.1 401 Need Digest auth (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -72,7 +72,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="4"
 This is not the real page!
 </data300>
 
-<data1300>
+<data1300 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -83,7 +83,7 @@ This is a bad password page!
 </data1300>
 
 <!-- Fourth request has Digest auth, wrong password -->
-<data400>
+<data400 crlf="headers">
 HTTP/1.1 401 Need Digest auth (4)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -93,7 +93,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="6"
 This is not the real page!
 </data400>
 
-<data1400>
+<data1400 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -104,7 +104,7 @@ This is a bad password page!
 </data1400>
 
 <!-- Fifth request has Digest auth, right password -->
-<data1500>
+<data1500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -113,7 +113,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1500>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Need Digest auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -193,7 +193,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER digest digest
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

@@ -9,7 +9,7 @@ HTTP HEAD
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Transfer-Encoding: chunked
@@ -17,7 +17,7 @@ Transfer-Encoding: chunked
 HEAD response with content
 </data>
 # make sure no data is written
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Transfer-Encoding: chunked
@@ -42,7 +42,7 @@ HTTP HEAD with response body to ignore
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 HEAD /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

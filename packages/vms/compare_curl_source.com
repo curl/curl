@@ -255,7 +255,7 @@ $   then
 $       ref_fname = f$edit(ref_fname, "LOWERCASE")
 $   endif
 $!
-$!  These files are in the wrong format for VMS diff, and we don't change them.
+$!  These files are in the wrong format for VMS diff, and we do not change them.
 $   ref_skip = 0
 $   if ref_type .eqs. ".PDF" then ref_skip = 1
 $   if ref_type .eqs. ".HTML" then ref_skip = 1

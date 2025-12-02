@@ -44,7 +44,7 @@ machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a"
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user1:with%20spaces%20and%20"%0a%0d%09a]b64%

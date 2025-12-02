@@ -10,7 +10,7 @@ chunked Transfer-Encoding
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Sun, 19 Jan 2014 18:50:58 GMT
 Server: test-server/fake swsclose
@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <verify>
 # Content-Length header is not present
 # Transfer-Encoding header is added automatically
-<protocol>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

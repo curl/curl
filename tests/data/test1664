@@ -68,7 +68,7 @@ curlx_str_singlespace
 3: ("b") 5, line 0
 4: ("\") 5, line 0
 5: (" ") 0, line 1
-6: ("	") 5, line 0
+6: ("%TAB") 5, line 0
 7: ("
 ") 5, line 0
 8: ("") 5, line 0

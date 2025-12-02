@@ -42,7 +42,7 @@ ftp://%HOSTIP:%FTPPORT/path/ -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3" -Q "*FAIL" -Q
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

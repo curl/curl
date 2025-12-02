@@ -47,7 +47,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=a;filename=a.pdf' --next http://%H
 <strip>
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
-<protocol>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

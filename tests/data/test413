@@ -34,7 +34,7 @@ Debug
 http
 </server>
 <name>
-alt-svc using host name with trailing dot on host from file
+alt-svc using hostname with trailing dot on host from file
 </name>
 <setenv>
 # make Debug-curl accept Alt-Svc over plain HTTP
@@ -52,7 +52,7 @@ h1 whohoo. 12345 h1 %HOSTIP %HTTPPORT "20290222 22:19:28" 0 0
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: whohoo:12345
 User-Agent: curl/%VERSION

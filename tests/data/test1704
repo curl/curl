@@ -10,7 +10,7 @@ HTTP/2
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/2 101 OK
 
 HTTP/1.1 200 OK
@@ -47,7 +47,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 ^X-Forwarded-Proto:.*
 ^Via:.*
 </strip>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

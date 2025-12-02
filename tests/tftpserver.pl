@@ -104,7 +104,7 @@ while(@ARGV) {
         $verbose = 1;
     }
     else {
-        print STDERR "\nWarning: tftpserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: tftpserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }

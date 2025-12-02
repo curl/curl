@@ -9,7 +9,7 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 252 Send some mail and I'll try my best
 </data>
 </reply>
@@ -31,7 +31,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt user@example.net
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 VRFY user@example.net
 QUIT

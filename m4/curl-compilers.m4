@@ -119,7 +119,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     compiler_ver="$clangver"
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
     if test "$appleclang" = '1' && test "$oldapple" = '0'; then
-      dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
+      dnl Starting with Xcode 7 / clang 3.7, Apple clang does not tell its upstream version
       if   test "$compiler_num" -ge '1700'; then compiler_num='1901'
       elif test "$compiler_num" -ge '1600'; then compiler_num='1700'
       elif test "$compiler_num" -ge '1500'; then compiler_num='1600'
@@ -555,7 +555,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       HP_UX_C)
         #
-        dnl Disallow run-time dereferencing of null pointers
+        dnl Disallow runtime dereferencing of null pointers
         tmp_CFLAGS="$tmp_CFLAGS -z"
         dnl Disable some remarks
         dnl #4227: padding struct with n bytes to align member
@@ -937,11 +937,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
           fi
           dnl clang 20 or later
-          if test "$compiler_num" -ge "2000"; then
+          if test "$compiler_num" -ge "2001"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [array-compare])
           fi
           dnl clang 21 or later
-          if test "$compiler_num" -ge "2100"; then
+          if test "$compiler_num" -ge "2101"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [c++-hidden-decl])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-implicit-void-ptr-cast"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [tentative-definition-compat])

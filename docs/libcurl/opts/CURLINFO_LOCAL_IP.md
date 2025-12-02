@@ -17,7 +17,7 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_LOCAL_IP - get local IP address of last connection
+CURLINFO_LOCAL_IP - local IP address of last connection
 
 # SYNOPSIS
 

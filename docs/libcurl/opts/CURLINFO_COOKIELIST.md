@@ -15,7 +15,7 @@ Added-in: 7.14.1
 
 # NAME
 
-CURLINFO_COOKIELIST - get all known cookies
+CURLINFO_COOKIELIST - all known cookies
 
 # SYNOPSIS
 

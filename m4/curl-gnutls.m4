@@ -60,7 +60,7 @@ if test "x$OPT_GNUTLS" != xno; then
         fi
       fi
     else
-      dnl this is with a given path, first check if there's a libgnutls-config
+      dnl this is with a given path, first check if there is a libgnutls-config
       dnl there and if not, make an educated guess
       cfg=$OPT_GNUTLS/bin/libgnutls-config
       check=`$cfg --version 2>/dev/null`
@@ -74,7 +74,7 @@ if test "x$OPT_GNUTLS" != xno; then
         addlib=-lgnutls
         addld=-L$OPT_GNUTLS/lib$libsuff
         addcflags=-I$OPT_GNUTLS/include
-        version="" # we just don't know
+        version="" # we just do not know
         gtlslib=$OPT_GNUTLS/lib$libsuff
       fi
     fi
@@ -100,25 +100,27 @@ if test "x$OPT_GNUTLS" != xno; then
 
       dnl this function is selected since it was introduced in 3.1.10
       AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
-        [
+      [
         AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
         GNUTLS_ENABLED=1
         USE_GNUTLS="yes"
         ssl_msg="GnuTLS"
         QUIC_ENABLED=yes
         test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ],
-        [
-          LIBS="$CLEANLIBS"
-          CPPFLAGS="$CLEANCPPFLAGS"
-        ])
+      ],
+      [
+        LIBS="$CLEANLIBS"
+        CPPFLAGS="$CLEANCPPFLAGS"
+        LDFLAGS="$CLEANLDFLAGS"
+        LDFLAGSPC="$CLEANLDFLAGSPC"
+      ])
 
       if test "x$USE_GNUTLS" = "xyes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
         check_for_ca_bundle=1
         if test -n "$gtlslib"; then
-          dnl when shared libs were found in a path that the run-time
-          dnl linker doesn't search through, we need to add it to
+          dnl when shared libs were found in a path that the runtime
+          dnl linker does not search through, we need to add it to
           dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
           dnl due to this
           if test "x$cross_compiling" != "xyes"; then
@@ -127,9 +129,8 @@ if test "x$OPT_GNUTLS" != xno; then
             AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
           fi
         fi
-        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gnutls nettle"
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gnutls"
       fi
-
     fi
 
   fi dnl GNUTLS not disabled
@@ -137,34 +138,81 @@ if test "x$OPT_GNUTLS" != xno; then
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
-dnl ---
-dnl Check which crypto backend GnuTLS uses
-dnl ---
-
 if test "$GNUTLS_ENABLED" = "1"; then
+  dnl ---
+  dnl Check which crypto backend GnuTLS uses
+  dnl ---
   USE_GNUTLS_NETTLE=
   # First check if we can detect either crypto library via transitive linking
   AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
 
   # If not, try linking directly to both of them to see if they are available
   if test "$USE_GNUTLS_NETTLE" = ""; then
-    AC_CHECK_LIB(nettle, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
-  fi
-  if test "$USE_GNUTLS_NETTLE" = ""; then
-    AC_MSG_ERROR([GnuTLS found, but nettle was not found])
-  fi
-  LIBS="-lnettle $LIBS"
-fi
 
-dnl ---
-dnl We require GnuTLS with SRP support.
-dnl ---
-if test "$GNUTLS_ENABLED" = "1"; then
+    dnl this is with no particular path given
+    CURL_CHECK_PKGCONFIG(nettle)
+
+    if test "$PKGCONFIG" != "no" ; then
+      addlib=`$PKGCONFIG --libs-only-l nettle`
+      addld=`$PKGCONFIG --libs-only-L nettle`
+      addcflags=`$PKGCONFIG --cflags-only-I nettle`
+      version=`$PKGCONFIG --modversion nettle`
+      gtlslib=`echo $addld | $SED -e 's/^-L//'`
+
+      if test -n "$addlib"; then
+
+        CLEANLIBS="$LIBS"
+        CLEANCPPFLAGS="$CPPFLAGS"
+        CLEANLDFLAGS="$LDFLAGS"
+        CLEANLDFLAGSPC="$LDFLAGSPC"
+
+        LIBS="$addlib $LIBS"
+        LDFLAGS="$LDFLAGS $addld"
+        LDFLAGSPC="$LDFLAGSPC $addld"
+        if test "$addcflags" != "-I/usr/include"; then
+          CPPFLAGS="$CPPFLAGS $addcflags"
+        fi
+
+        AC_CHECK_LIB(nettle, nettle_MD5Init,
+        [
+          USE_GNUTLS_NETTLE=1
+        ],
+        [
+          LIBS="$CLEANLIBS"
+          CPPFLAGS="$CLEANCPPFLAGS"
+          LDFLAGS="$CLEANLDFLAGS"
+          LDFLAGSPC="$CLEANLDFLAGSPC"
+        ])
+
+        if test "$USE_GNUTLS_NETTLE" = "1"; then
+          if test -z "$version"; then
+            version="unknown"
+          fi
+          AC_MSG_NOTICE([detected nettle version $version])
+        fi
+      fi
+    fi
+    if test "$USE_GNUTLS_NETTLE" = ""; then
+      AC_MSG_ERROR([GnuTLS found, but nettle was not found])
+    fi
+  else
+    LIBS="-lnettle $LIBS"
+  fi
+
+  if test "$USE_GNUTLS_NETTLE" = "1"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE nettle"
+  fi
+
+  dnl ---
+  dnl We require GnuTLS with SRP support.
+  dnl
+  dnl In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
+  dnl Detecting actual TLS-SRP support needs poking the API at runtime.
+  dnl ---
   AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
     [
       AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
       HAVE_GNUTLS_SRP=1
     ])
 fi
-
 ])

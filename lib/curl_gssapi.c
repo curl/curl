@@ -29,9 +29,25 @@
 #include "curl_gssapi.h"
 #include "sendf.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
+#ifdef DEBUGBUILD
+#if defined(HAVE_GSSGNU) || !defined(_WIN32)
+#define Curl_gss_alloc malloc  /* freed via the GSS API gss_release_buffer() */
+#define Curl_gss_free  free    /* pair of the above */
+#define CURL_GSS_STUB
+/* For correctness this would be required for all platforms, not only Windows,
+   but, as of v1.22.1, MIT Kerberos uses a special allocator only for Windows,
+   and the availability of 'gssapi/gssapi_alloc.h' is difficult to detect,
+   because GSS headers are not versioned, and there is also no other macro to
+   indicate 1.18+ vs. previous versions. On Windows we can use 'GSS_S_BAD_MIC'.
+ */
+#elif defined(_WIN32) && defined(GSS_S_BAD_MIC) /* MIT Kerberos 1.15+ */
+/* MIT Kerberos 1.10+ (Windows), 1.18+ (all platforms), missing from GNU GSS */
+#include <gssapi/gssapi_alloc.h>
+#define Curl_gss_alloc gssalloc_malloc
+#define Curl_gss_free  gssalloc_free
+#define CURL_GSS_STUB
+#endif
+#endif /* DEBUGBUILD */
 
 #ifdef __GNUC__
 #define CURL_ALIGN8  __attribute__((aligned(8)))
@@ -51,7 +67,7 @@ gss_OID_desc Curl_krb5_mech_oid CURL_ALIGN8 = {
   9, CURL_UNCONST("\x2a\x86\x48\x86\xf7\x12\x01\x02\x02")
 };
 
-#ifdef DEBUGBUILD
+#ifdef CURL_GSS_STUB
 enum min_err_code {
   STUB_GSS_OK = 0,
   STUB_GSS_NO_MEMORY,
@@ -186,7 +202,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       return GSS_S_FAILURE;
     }
 
-    ctx = calloc(1, sizeof(*ctx));
+    ctx = curlx_calloc(1, sizeof(*ctx));
     if(!ctx) {
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
@@ -203,7 +219,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     else if(ctx->have_ntlm)
       ctx->sent = STUB_GSS_NTLM1;
     else {
-      free(ctx);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MECH;
       return GSS_S_FAILURE;
     }
@@ -212,11 +228,9 @@ stub_gss_init_sec_context(OM_uint32 *min,
     ctx->flags = req_flags;
   }
 
-  /* To avoid memdebug macro replacement, wrap the name in parentheses to call
-     the original version. It is freed via the GSS API gss_release_buffer(). */
-  token = (malloc)(length);
+  token = Curl_gss_alloc(length);
   if(!token) {
-    free(ctx);
+    curlx_free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -229,15 +243,15 @@ stub_gss_init_sec_context(OM_uint32 *min,
     major_status = gss_display_name(&minor_status, target_name,
                                     &target_desc, &name_type);
     if(GSS_ERROR(major_status)) {
-      (free)(token);
-      free(ctx);
+      Curl_gss_free(token);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
 
     if(strlen(creds) + target_desc.length + 5 >= sizeof(ctx->creds)) {
-      (free)(token);
-      free(ctx);
+      Curl_gss_free(token);
+      curlx_free(ctx);
       *min = STUB_GSS_NO_MEMORY;
       return GSS_S_FAILURE;
     }
@@ -252,8 +266,8 @@ stub_gss_init_sec_context(OM_uint32 *min,
   }
 
   if(used >= length) {
-    (free)(token);
-    free(ctx);
+    Curl_gss_free(token);
+    curlx_free(ctx);
     *min = STUB_GSS_NO_MEMORY;
     return GSS_S_FAILURE;
   }
@@ -288,13 +302,13 @@ stub_gss_delete_sec_context(OM_uint32 *min,
     return GSS_S_FAILURE;
   }
 
-  free(*context);
+  curlx_free(*context);
   *context = NULL;
   *min = 0;
 
   return GSS_S_COMPLETE;
 }
-#endif /* DEBUGBUILD */
+#endif /* CURL_GSS_STUB */
 
 OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                     OM_uint32 *minor_status,
@@ -313,7 +327,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
     req_flags |= GSS_C_MUTUAL_FLAG;
 
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_POLICY_FLAG) {
-#ifdef GSS_C_DELEG_POLICY_FLAG
+#ifdef GSS_C_DELEG_POLICY_FLAG  /* MIT Kerberos 1.8+, missing from GNU GSS */
     req_flags |= GSS_C_DELEG_POLICY_FLAG;
 #else
     infof(data, "WARNING: support for CURLGSSAPI_DELEGATION_POLICY_FLAG not "
@@ -324,7 +338,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
   if(data->set.gssapi_delegation & CURLGSSAPI_DELEGATION_FLAG)
     req_flags |= GSS_C_DELEG_FLAG;
 
-#ifdef DEBUGBUILD
+#ifdef CURL_GSS_STUB
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_init_sec_context(minor_status,
                                      GSS_C_NO_CREDENTIAL, /* cred_handle */
@@ -339,7 +353,7 @@ OM_uint32 Curl_gss_init_sec_context(struct Curl_easy *data,
                                      output_token,
                                      ret_flags,
                                      NULL /* time_rec */);
-#endif /* DEBUGBUILD */
+#endif /* CURL_GSS_STUB */
 
   return gss_init_sec_context(minor_status,
                               GSS_C_NO_CREDENTIAL, /* cred_handle */
@@ -360,19 +374,20 @@ OM_uint32 Curl_gss_delete_sec_context(OM_uint32 *min,
                                       gss_ctx_id_t *context,
                                       gss_buffer_t output_token)
 {
-#ifdef DEBUGBUILD
+#ifdef CURL_GSS_STUB
   if(getenv("CURL_STUB_GSS_CREDS"))
     return stub_gss_delete_sec_context(min,
                                      (struct stub_gss_ctx_id_t_desc **)context,
                                      output_token);
-#endif /* DEBUGBUILD */
+#endif /* CURL_GSS_STUB */
 
   return gss_delete_sec_context(min, context, output_token);
 }
 
 #define GSS_LOG_BUFFER_LEN 1024
 static size_t display_gss_error(OM_uint32 status, int type,
-                                char *buf, size_t len) {
+                                char *buf, size_t len)
+{
   OM_uint32 maj_stat;
   OM_uint32 min_stat;
   OM_uint32 msg_ctx = 0;

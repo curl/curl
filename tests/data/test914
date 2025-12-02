@@ -22,7 +22,7 @@ smtp
 <name>
 SMTP invalid --mail-from
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 
@@ -40,9 +40,9 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<invalid>
+MAIL FROM:%LTinvalid%GT
 QUIT
 </protocol>
 </verify>

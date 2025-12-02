@@ -45,7 +45,7 @@ HTTP-IPv6 GET
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
 User-Agent: curl/%VERSION

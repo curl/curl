@@ -63,6 +63,7 @@ INTERNALDOCS =                                  \
  internals/MULTI-EV.md                          \
  internals/NEW-PROTOCOL.md                      \
  internals/PORTING.md                           \
+ internals/RATELIMITS.md                        \
  internals/README.md                            \
  internals/SCORECARD.md                         \
  internals/SPLAY.md                             \
@@ -108,6 +109,7 @@ EXTRA_DIST =                                    \
  INTERNALS.md                                   \
  IPFS.md                                        \
  KNOWN_BUGS                                     \
+ KNOWN_RISKS.md                                 \
  MAIL-ETIQUETTE.md                              \
  MANUAL.md                                      \
  options-in-versions                            \

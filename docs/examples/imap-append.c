@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send email with IMAP
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's IMAP
@@ -59,13 +58,13 @@ struct upload_status {
   size_t bytes_read;
 };
 
-static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
   size_t room = size * nmemb;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
@@ -87,13 +86,16 @@ static size_t payload_source(char *ptr, size_t size, size_t nmemb, void *userp)
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
     size_t filesize;
     long infilesize = LONG_MAX;
-    struct upload_status upload_ctx = { 0 };
+    struct upload_status upload_ctx = {0};
 
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");
@@ -105,7 +107,7 @@ int main(void)
     /* In this case, we are using a callback function to specify the data. You
      * could just use the CURLOPT_READDATA option to specify a FILE pointer to
      * read from. */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, payload_source);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
     curl_easy_setopt(curl, CURLOPT_READDATA, &upload_ctx);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
@@ -125,6 +127,8 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

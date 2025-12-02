@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * IMAP with implicit SSL
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to fetch mail using libcurl's IMAP
@@ -40,7 +39,10 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -49,7 +51,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PASSWORD, "secret");
 
     /* This fetches message 1 from the user's inbox. Note the use of
-    * imaps:// rather than imap:// to request an SSL based connection. */
+     * imaps:// rather than imap:// to request an SSL based connection. */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "imaps://imap.example.com/INBOX/;UID=1");
 
@@ -65,7 +67,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 #endif
 
-    /* If the site you are connecting to uses a different host name that what
+    /* If the site you are connecting to uses a different hostname than what
      * they have mentioned in their server certificate's commonName (or
      * subjectAltName) fields, libcurl refuses to connect. You can skip this
      * check, but it makes the connection insecure. */
@@ -89,6 +91,8 @@ int main(void)
     /* Always cleanup */
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
 
   return (int)res;
 }

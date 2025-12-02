@@ -16,7 +16,7 @@ AUTH CRAM-MD5
 REPLY AUTHENTICATE + PDE5NzIuOTg3NjU0MzIxQGN1cmw+
 REPLY dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg== A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -48,7 +48,7 @@ IMAP CRAM-MD5 authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE CRAM-MD5
 dXNlciA3MDMxNzI1NTk5ZmRiYjVkNDEyNjg5YWEzMjNlM2UwYg==

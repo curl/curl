@@ -36,7 +36,7 @@ FTP PORT download, no data conn and no positive preliminary reply
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 
 # The protocol part does not include QUIT simply because the error is
@@ -44,7 +44,7 @@ s/^EPRT \|1\|(.*)/EPRT \|1\|/
 # specifically saying for which connection it concerns, and for timeouts libcurl
 # marks the control channel as "invalid". As this test case times out for the
 # data connection it could still use the control channel.
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

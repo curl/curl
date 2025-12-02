@@ -7,7 +7,7 @@
 FAQ
 
  1. Philosophy
-  1.1 What is cURL?
+  1.1 What is curl?
   1.2 What is libcurl?
   1.3 What is curl not?
   1.4 When will you make curl do XXXX ?
@@ -123,15 +123,15 @@ FAQ
 
 1. Philosophy
 
-  1.1 What is cURL?
+  1.1 What is curl?
 
-  cURL is the name of the project. The name is a play on 'Client for URLs',
+  curl is the name of the project. The name is a play on 'Client for URLs',
   originally with URL spelled in uppercase to make it obvious it deals with
   URLs. The fact it can also be read as 'see URL' also helped, it works as
   an abbreviation for "Client URL Request Library" or why not the recursive
   version: "curl URL Request Library".
 
-  The cURL project produces two products:
+  The curl project produces two products:
 
   libcurl
 
@@ -247,7 +247,7 @@ FAQ
 
   1.6 What do you get for making curl?
 
-  Project cURL is entirely free and open. We do this voluntarily, mostly in
+  Project curl is entirely free and open. We do this voluntarily, mostly in
   our spare time. Companies may pay individual developers to work on curl.
   This is not controlled by nor supervised in any way by the curl project.
 
@@ -326,7 +326,7 @@ FAQ
 
   1.11 Why do you not update ca-bundle.crt
 
-  In the cURL project we have decided not to attempt to keep this file updated
+  In the curl project we have decided not to attempt to keep this file updated
   (or even present) since deciding what to add to a ca cert bundle is an
   undertaking we have not been ready to accept, and the one we can get from
   Mozilla is perfectly fine so there is no need to duplicate that work.
@@ -548,7 +548,7 @@ FAQ
   https://curl.se/libcurl/
 
   All the various bindings to libcurl are made by other projects and people,
-  outside of the cURL project. The cURL project itself only produces libcurl
+  outside of the curl project. The curl project itself only produces libcurl
   with its plain C API. If you do not find anywhere else to ask you can ask
   about bindings on the curl-library list too, but be prepared that people on
   that list may not know anything about bindings.
@@ -1496,7 +1496,7 @@ FAQ
   The module for PHP that makes it possible for PHP programs to access curl-
   functions from within PHP.
 
-  In the cURL project we call this module PHP/CURL to differentiate it from
+  In the curl project we call this module PHP/CURL to differentiate it from
   curl the command line tool and libcurl the library. The PHP team however
   does not refer to it like this (for unknown reasons). They call it plain
   CURL (often using all caps) or sometimes ext/curl, but both cause much

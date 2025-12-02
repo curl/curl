@@ -109,8 +109,8 @@ test727 test728 test729 test730 test731 test732 test733 test734 test735 \
 test736 test737 test738 test739 test740 test741 test742 test743 test744 \
 test745 test746 test747 test748 test749 test750 test751 test752 test753 \
 test754 test755 test756 test757 test758 test759 test760 test761 test762 \
-test763 test764 test765 test766 \
-\
+test763 test764 test765 test766 test767 test768 test769 test770 test771 \
+test772 test773 test774 test775 test776 test777 \
 test780 test781 test782 test783 test784 test785 test786 test787 test788 \
 test789 test790 test791 test792 test793 test794         test796 test797 \
 \
@@ -152,7 +152,7 @@ test1093 test1094 test1095 test1096 test1097 test1098 test1099 test1100 \
 test1101 test1102 test1103 test1104 test1105 test1106 test1107 test1108 \
 test1109 test1110 test1111 test1112 test1113 test1114 test1115 test1116 \
 test1117 test1118 test1119 test1120 test1121 test1122 test1123 test1124 \
-test1125 test1126 test1127 test1128 test1129 test1130 test1131 test1132 \
+test1125 test1126 test1127 test1128 test1129 test1130 test1131 \
 test1133 test1134 test1135 test1136 test1137 test1138 test1139 test1140 \
 test1141 test1142 test1143 test1144 test1145 test1146 test1147 test1148 \
 test1149 test1150 test1151 test1152 test1153 test1154 test1155 test1156 \
@@ -209,7 +209,7 @@ test1548 test1549 test1550 test1551 test1552 test1553 test1554 test1555 \
 test1556 test1557 test1558 test1559 test1560 test1561 test1562 test1563 \
 test1564 test1565 test1566 test1567 test1568 test1569 test1570 test1571 \
 test1572 test1573 test1574 test1575 test1576 test1577 test1578 test1579 \
-test1580 test1581 \
+test1580 test1581 test1582 test1583 test1584 test1585 \
 \
 test1590 test1591 test1592 test1593 test1594 test1595 test1596 test1597 \
 test1598 test1599 test1600 test1601 test1602 test1603 test1604 test1605 \
@@ -230,7 +230,7 @@ test1680 test1681 test1682 test1683 \
 test1700 test1701 test1702 test1703 test1704 test1705 test1706 test1707 \
 test1708 test1709 test1710 test1711 \
 \
-test1800 test1801 \
+test1800 test1801 test1802 \
 \
 test1900 test1901 test1902 test1903 test1904 test1905 test1906 test1907 \
 test1908 test1909 test1910 test1911 test1912 test1913 test1914 test1915 \
@@ -261,11 +261,11 @@ test2200 test2201 test2202 test2203 test2204 test2205 \
 test2300 test2301 test2302 test2303 test2304 test2306 test2307 test2308 \
 test2309 \
 \
-test2400 test2401 test2402 test2403 test2404 test2405 test2406 \
+test2400 test2401 test2402 test2403 test2404 test2405 test2406 test2407 \
 \
 test2500 test2501 test2502 test2503 \
 \
-test2600 test2601 test2602 test2603 test2604 \
+test2600 test2601 test2602 test2603 test2604 test2605 \
 \
 test2700 test2701 test2702 test2703 test2704 test2705 test2706 test2707 \
 test2708 test2709 test2710 test2711 test2712 test2713 test2714 test2715 \
@@ -275,12 +275,12 @@ test3000 test3001 test3002 test3003 test3004 test3005 test3006 test3007 \
 test3008 test3009 test3010 test3011 test3012 test3013 test3014 test3015 \
 test3016 test3017 test3018 test3019 test3020 test3021 test3022 test3023 \
 test3024 test3025 test3026 test3027 test3028 test3029 test3030 test3031 \
-test3032 test3033 test3034 \
+test3032 test3033 test3034 test3035 \
 \
 test3100 test3101 test3102 test3103 test3104 test3105 \
 \
-test3200 test3201 test3202 test3203 test3204 test3205 test3207 test3208 \
-test3209 test3210 test3211 test3212 test3213 test3214 test3215 \
+test3200 test3201 test3202 test3203 test3204 test3205 test3206 test3207 test3208 \
+test3209 test3210 test3211 test3212 test3213 test3214 test3215 test3216 \
 test4000 test4001 test4002
 
-EXTRA_DIST = $(TESTCASES) DISABLED
+EXTRA_DIST = $(TESTCASES) DISABLED data-xml1

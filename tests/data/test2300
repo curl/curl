@@ -8,7 +8,7 @@ WebSockets
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 101 Switching to WebSockets swsclose
 Server: test-server/fake
 Upgrade: websocket
@@ -47,7 +47,7 @@ WebSockets upgrade only
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nocheck="yes">
+<protocol crlf="headers" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

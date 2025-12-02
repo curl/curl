@@ -32,11 +32,9 @@
 #include "tool_util.h"
 #include "tool_version.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct getout *new_getout(struct OperationConfig *config)
 {
-  struct getout *node = calloc(1, sizeof(struct getout));
+  struct getout *node = curlx_calloc(1, sizeof(struct getout));
   struct getout *last = config->url_last;
   if(node) {
     static int outnum = 0;
@@ -119,19 +117,6 @@ ParameterError file2string(char **bufp, FILE *file)
   return PARAM_OK;
 }
 
-static int myfseek(void *stream, curl_off_t offset, int whence)
-{
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
-  return _fseeki64(stream, (__int64)offset, whence);
-#elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
-  return fseeko(stream, (off_t)offset, whence);
-#else
-  if(offset > LONG_MAX)
-    return -1;
-  return fseek(stream, (long)offset, whence);
-#endif
-}
-
 ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
                                  curl_off_t starto, curl_off_t endo)
 {
@@ -143,12 +128,12 @@ ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
 
     if(starto) {
       if(file != stdin) {
-        if(myfseek(file, starto, SEEK_SET))
+        if(curlx_fseek(file, starto, SEEK_SET))
           return PARAM_READ_ERROR;
         offset = starto;
       }
       else
-        /* we can't seek stdin, read 'starto' bytes and throw them away */
+        /* we cannot seek stdin, read 'starto' bytes and throw them away */
         throwaway = starto;
     }
 
@@ -410,11 +395,11 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   const char **protoset;
   struct dynbuf obuf;
   size_t proto;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   curlx_dyn_init(&obuf, MAX_PROTOSTRING);
 
-  protoset = malloc((proto_count + 1) * sizeof(*protoset));
+  protoset = curlx_malloc((proto_count + 1) * sizeof(*protoset));
   if(!protoset)
     return PARAM_NO_MEM;
 
@@ -509,15 +494,19 @@ ParameterError proto2num(const char * const *val, char **ostr, const char *str)
   qsort((char *) protoset, protoset_index(protoset, NULL), sizeof(*protoset),
         struplocompare4sort);
 
-  result = curlx_dyn_addn(&obuf, "", 0);
   for(proto = 0; protoset[proto] && !result; proto++)
-    result = curlx_dyn_addf(&obuf, "%s,", protoset[proto]);
-  free((char *) protoset);
-  curlx_dyn_setlen(&obuf, curlx_dyn_len(&obuf) - 1);
-  free(*ostr);
+    result = curlx_dyn_addf(&obuf, "%s%s", curlx_dyn_len(&obuf) ? "," : "",
+                            protoset[proto]);
+  curlx_free((char *)protoset);
+  if(result)
+    return PARAM_NO_MEM;
+  if(!curlx_dyn_len(&obuf)) {
+    curlx_dyn_free(&obuf);
+    return PARAM_BAD_USE;
+  }
+  curlx_free(*ostr);
   *ostr = curlx_dyn_ptr(&obuf);
-
-  return *ostr ? PARAM_OK : PARAM_NO_MEM;
+  return PARAM_OK;
 }
 
 /**
@@ -601,7 +590,7 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
       return CURLE_OUT_OF_MEMORY;
 
     /* return the new string */
-    free(*userpwd);
+    curlx_free(*userpwd);
     *userpwd = curlx_dyn_ptr(&dyn);
   }
 
@@ -659,14 +648,6 @@ long delegation(const char *str)
   return CURLGSSAPI_DELEGATION_NONE;
 }
 
-/*
- * my_useragent: returns allocated string with default user agent
- */
-static char *my_useragent(void)
-{
-  return strdup(CURL_NAME "/" CURL_VERSION);
-}
-
 #define isheadersep(x) ((((x)==':') || ((x)==';')))
 
 /*
@@ -714,21 +695,12 @@ CURLcode get_args(struct OperationConfig *config, const size_t i)
   if(!result && config->proxyuserpwd)
     result = checkpasswd("proxy", i, last, &config->proxyuserpwd);
 
-  /* Check if we have a user agent */
-  if(!result && !config->useragent) {
-    config->useragent = my_useragent();
-    if(!config->useragent) {
-      errorf("out of memory");
-      result = CURLE_OUT_OF_MEMORY;
-    }
-  }
-
   return result;
 }
 
 /*
  * Parse the string and modify ssl_version in the val argument. Return PARAM_OK
- * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ * on success, otherwise a parameter error enum.
  *
  * Since this function gets called with the 'nextarg' pointer from within the
  * getparameter a lot, we must check it for NULL before accessing the str

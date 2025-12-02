@@ -8,7 +8,7 @@ HTTP
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 100 Continue
 Foo: Bar
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

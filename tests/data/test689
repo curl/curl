@@ -11,9 +11,9 @@ OPTIONS
 # Server-side
 <reply>
 <data>
-RTSP/1.0 786          
+RTSP/1.0 786%repeat[10 x  ]%
 
-RTSP/          
+RTSP/%repeat[10 x  ]%
 </data>
 <datacheck>
 </datacheck>
@@ -37,7 +37,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
 CSeq: 1
 User-Agent: test567

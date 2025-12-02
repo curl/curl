@@ -34,13 +34,6 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#endif /* USE_MBEDTLS */
-
 #ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>
   #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
@@ -55,14 +48,25 @@
   #endif
 #endif
 
+#ifdef USE_MBEDTLS
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER < 0x03020000
+    #error "mbedTLS 3.2.0 or later required"
+  #endif
+  #include <psa/crypto_config.h>
+  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+    #define USE_MBEDTLS_MD5
+  #endif
+#endif
+
 #ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
 #elif defined(USE_WOLFSSL_MD5)
 #include <wolfssl/openssl/md5.h>
-#elif defined(USE_MBEDTLS)
-#include <mbedtls/md5.h>
+#elif defined(USE_MBEDTLS_MD5)
+#include <psa/crypto.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
        defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
@@ -76,10 +80,6 @@
 #elif defined(USE_WIN32_CRYPTO)
 #include <wincrypt.h>
 #endif
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #ifdef USE_GNUTLS
 
@@ -152,13 +152,14 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_MD5)
 
-typedef mbedtls_md5_context my_md5_ctx;
+typedef psa_hash_operation_t my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  if(mbedtls_md5_starts(ctx))
+  memset(ctx, 0, sizeof(my_md5_ctx));
+  if(psa_hash_setup(ctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
@@ -167,12 +168,13 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-  (void)mbedtls_md5_update(ctx, data, length);
+  (void)psa_hash_update(ctx, data, length);
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  (void)mbedtls_md5_finish(ctx, digest);
+  size_t actual_length;
+  (void)psa_hash_finish(ctx, digest, 16, &actual_length);
 }
 
 #elif defined(AN_APPLE_OS)
@@ -234,11 +236,7 @@ static void my_md5_update(void *in,
                           unsigned int inputLen)
 {
   my_md5_ctx *ctx = in;
-#ifdef __MINGW32CE__
-  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(input), inputLen, 0);
-#else
   CryptHashData(ctx->hHash, (const BYTE *)input, inputLen, 0);
-#endif
 }
 
 static void my_md5_final(unsigned char *digest, void *in)
@@ -602,23 +600,23 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   struct MD5_context *ctxt;
 
   /* Create MD5 context */
-  ctxt = malloc(sizeof(*ctxt));
+  ctxt = curlx_malloc(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;
 
-  ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
+  ctxt->md5_hashctx = curlx_malloc(md5params->md5_ctxtsize);
 
   if(!ctxt->md5_hashctx) {
-    free(ctxt);
+    curlx_free(ctxt);
     return NULL;
   }
 
   ctxt->md5_hash = md5params;
 
   if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
-    free(ctxt->md5_hashctx);
-    free(ctxt);
+    curlx_free(ctxt->md5_hashctx);
+    curlx_free(ctxt);
     return NULL;
   }
 
@@ -638,8 +636,8 @@ CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
-  free(context->md5_hashctx);
-  free(context);
+  curlx_free(context->md5_hashctx);
+  curlx_free(context);
 
   return CURLE_OK;
 }

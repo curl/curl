@@ -12,7 +12,7 @@ FAILURE
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 501 Method not implemented swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
@@ -42,11 +42,11 @@ ftp://test-number:%TESTNUMBER/wanted/page -p -x %HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-# The server doesn't implement CONNECT for ftp, so this must be a failure test
+# The server does not implement CONNECT for ftp, so this must be a failure test
 <errorcode>
 56
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 CONNECT test-number:%TESTNUMBER HTTP/1.1
 Host: test-number:%TESTNUMBER
 User-Agent: curl/%VERSION

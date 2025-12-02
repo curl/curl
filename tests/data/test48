@@ -4,6 +4,7 @@
 HTTP
 HTTP HEAD
 -G
+notxml
 </keywords>
 </info>
 #
@@ -36,7 +37,7 @@ HTTP with -d and -G and -I
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

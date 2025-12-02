@@ -12,13 +12,13 @@ proxytunnel
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 
 </connect>
 
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -52,14 +52,14 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -73,22 +73,22 @@ Accept: */*
 # Must not suppress in --verbose and --trace
 # Must not suppress in statistics (eg received header byte total)
 <stdout>
-HTTP/1.1 200 OK
-HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Server: test-server/fake
-Content-Type: text/html
-Content-Type: text/html
-Funny-head: yesyes
-Funny-head: yesyes
-Content-Length: 9
-Content-Length: 9
-Connection: keep-alive
-Connection: keep-alive
-
-
+HTTP/1.1 200 OK%CR
+HTTP/1.1 200 OK%CR
+Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
+Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
+Server: test-server/fake%CR
+Server: test-server/fake%CR
+Content-Type: text/html%CR
+Content-Type: text/html%CR
+Funny-head: yesyes%CR
+Funny-head: yesyes%CR
+Content-Length: 9%CR
+Content-Length: 9%CR
+Connection: keep-alive%CR
+Connection: keep-alive%CR
+%CR
+%CR
 contents
 
 CONNECT CODE: 200

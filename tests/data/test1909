@@ -35,7 +35,7 @@ http
 <name>
 HTTP GET --retry-all-errors to overcome partial transfer
 </name>
- <command option="no-output,no-include">
+<command option="no-output,no-include">
 --retry 1 --retry-all-errors -o %LOGDIR/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
@@ -43,7 +43,7 @@ HTTP GET --retry-all-errors to overcome partial transfer
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

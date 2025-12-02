@@ -13,7 +13,6 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 
 [[annotations]]
 path = [
-  ".mailmap",
   "docs/FAQ",
   "docs/INSTALL",
   "docs/KNOWN_BUGS",
@@ -22,7 +21,6 @@ path = [
   "docs/options-in-versions",
   "docs/THANKS",
   "docs/TODO",
-  "GIT-INFO.md",
   "lib/libcurl.vers.in",
   "lib/libcurl.def",
   "packages/OS400/README.OS400",
@@ -37,13 +35,9 @@ path = [
   "RELEASE-NOTES",
   "renovate.json",
   "tests/certs/**",
+  "tests/data/data**",
   "tests/data/test**",
   "tests/valgrind.supp",
-  # checksrc control files
-  "docs/examples/.checksrc",
-  "scripts/.checksrc",
-  "src/.checksrc",
-  "tests/server/.checksrc",
 ]
 SPDX-FileCopyrightText = "Daniel Stenberg, <daniel@haxx.se>, et al."
 SPDX-License-Identifier = "curl"

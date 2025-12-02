@@ -16,7 +16,7 @@ AUTH EXTERNAL
 REPLY AUTHENTICATE +
 REPLY dXNlcg== A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -44,7 +44,7 @@ IMAP external authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE EXTERNAL
 dXNlcg==

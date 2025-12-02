@@ -28,14 +28,13 @@
 #include "tool_getparam.h"
 #include "tool_paramhlp.h"
 #include "tool_formparse.h"
-
-#include "memdebug.h" /* keep this as LAST include */
+#include "tool_parsecfg.h"
 
 /* tool_mime functions. */
 static struct tool_mime *tool_mime_new(struct tool_mime *parent,
                                        toolmimekind kind)
 {
-  struct tool_mime *m = (struct tool_mime *) calloc(1, sizeof(*m));
+  struct tool_mime *m = (struct tool_mime *)curlx_calloc(1, sizeof(*m));
 
   if(m) {
     m->kind = kind;
@@ -59,11 +58,11 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   char *mime_data_copy;
   struct tool_mime *m = NULL;
 
-  mime_data_copy = strdup(mime_data);
+  mime_data_copy = curlx_strdup(mime_data);
   if(mime_data_copy) {
     m = tool_mime_new(parent, TOOLMIME_DATA);
     if(!m)
-      free(mime_data_copy);
+      curlx_free(mime_data_copy);
     else
       m->data = mime_data_copy;
   }
@@ -106,25 +105,21 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   *errcode = CURLE_OUT_OF_MEMORY;
   if(strcmp(filename, "-")) {
     /* This is a normal file. */
-    char *filedup = strdup(filename);
+    char *filedup = curlx_strdup(filename);
     if(filedup) {
       m = tool_mime_new(parent, TOOLMIME_FILE);
       if(!m)
-        free(filedup);
+        curlx_free(filedup);
       else {
         m->data = filedup;
         if(!isremotefile)
           m->kind = TOOLMIME_FILEDATA;
-       *errcode = CURLE_OK;
+        *errcode = CURLE_OK;
       }
     }
   }
   else {        /* Standard input. */
-#ifdef UNDER_CE
-    int fd = STDIN_FILENO;
-#else
     int fd = fileno(stdin);
-#endif
     char *data = NULL;
     curl_off_t size;
     curl_off_t origin;
@@ -155,7 +150,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
       default:
         if(!stdinsize) {
           /* Zero-length data has been freed. Re-create it. */
-          data = strdup("");
+          data = curlx_strdup("");
           if(!data)
             return m;
         }
@@ -193,7 +188,7 @@ void tool_mime_free(struct tool_mime *mime)
     tool_safefree(mime->encoder);
     tool_safefree(mime->data);
     curl_slist_free_all(mime->headers);
-    free(mime);
+    curlx_free(mime);
   }
 }
 
@@ -248,7 +243,7 @@ int tool_mime_stdin_seek(void *instream, curl_off_t offset, int whence)
   if(offset < 0)
     return CURL_SEEKFUNC_CANTSEEK;
   if(!sip->data) {
-    if(fseek(stdin, (long) (offset + sip->origin), SEEK_SET))
+    if(curlx_fseek(stdin, offset + sip->origin, SEEK_SET))
       return CURL_SEEKFUNC_CANTSEEK;
   }
   sip->curpos = offset;
@@ -417,65 +412,63 @@ static int slist_append(struct curl_slist **plist, const char *data)
 }
 
 /* Read headers from a file and append to list. */
-static int read_field_headers(const char *filename, FILE *fp,
-                              struct curl_slist **pheaders)
+static int read_field_headers(FILE *fp, struct curl_slist **pheaders)
 {
-  size_t hdrlen = 0;
-  size_t pos = 0;
-  bool incomment = FALSE;
-  int lineno = 1;
-  char hdrbuf[999] = ""; /* Max. header length + 1. */
+  struct dynbuf line;
+  bool error = FALSE;
+  int err = 0;
 
-  for(;;) {
-    int c = getc(fp);
-    if(c == EOF || (!pos && !ISSPACE(c))) {
-      /* Strip and flush the current header. */
-      while(hdrlen && ISSPACE(hdrbuf[hdrlen - 1]))
-        hdrlen--;
-      if(hdrlen) {
-        hdrbuf[hdrlen] = '\0';
-        if(slist_append(pheaders, hdrbuf)) {
-          errorf("Out of memory for field headers");
-          return -1;
-        }
-        hdrlen = 0;
+  curlx_dyn_init(&line, 8092);
+  while(my_get_line(fp, &line, &error)) {
+    const char *ptr = curlx_dyn_ptr(&line);
+    size_t len = curlx_dyn_len(&line);
+    bool folded = FALSE;
+    if(ptr[0] == '#') /* comment */
+      continue;
+    else if(ptr[0] == ' ') /* a continuation from the line before */
+      folded = TRUE;
+    /* trim off trailing CRLFs and whitespaces */
+    while(len && (ISNEWLINE(ptr[len -1]) || ISBLANK(ptr[len - 1])))
+      len--;
+
+    if(!len)
+      continue;
+    curlx_dyn_setlen(&line, len); /* set the new length */
+
+    if(folded && *pheaders) {
+      /* append this new line onto the previous line */
+      struct dynbuf amend;
+      struct curl_slist *l = *pheaders;
+      curlx_dyn_init(&amend, 8092);
+      /* find the last node */
+      while(l && l->next)
+        l = l->next;
+      /* add both parts */
+      if(curlx_dyn_add(&amend, l->data) || curlx_dyn_addn(&amend, ptr, len)) {
+        err = -1;
+        break;
+      }
+      curl_free(l->data);
+      /* we use maprintf here to make it a libcurl alloc, to match the previous
+         curl_slist_append */
+      l->data = curl_maprintf("%s", curlx_dyn_ptr(&amend));
+      curlx_dyn_free(&amend);
+      if(!l->data) {
+        errorf("Out of memory for field headers");
+        err = 1;
       }
     }
-
-    switch(c) {
-    case EOF:
-      if(ferror(fp)) {
-        char errbuf[STRERROR_LEN];
-        errorf("Header file %s read error: %s", filename,
-               curlx_strerror(errno, errbuf, sizeof(errbuf)));
-        return -1;
-      }
-      return 0;    /* Done. */
-    case '\r':
-      continue;    /* Ignore. */
-    case '\n':
-      pos = 0;
-      incomment = FALSE;
-      lineno++;
-      continue;
-    case '#':
-      if(!pos)
-        incomment = TRUE;
+    else {
+      err = slist_append(pheaders, ptr);
+    }
+    if(err) {
+      errorf("Out of memory for field headers");
+      err = -1;
       break;
     }
-
-    pos++;
-    if(!incomment) {
-      if(hdrlen == sizeof(hdrbuf) - 1) {
-        warnf("File %s line %d: header too long (truncated)",
-              filename, lineno);
-        c = ' ';
-      }
-      if(hdrlen <= sizeof(hdrbuf) - 1)
-        hdrbuf[hdrlen++] = (char) c;
-    }
   }
-  /* NOTREACHED */
+  curlx_dyn_free(&line);
+  return err;
 }
 
 static int get_param_part(char endchar,
@@ -572,7 +565,7 @@ static int get_param_part(char endchar,
                 curlx_strerror(errno, errbuf, sizeof(errbuf)));
         }
         else {
-          int i = read_field_headers(hdrfile, fp, &headers);
+          int i = read_field_headers(fp, &headers);
 
           curlx_fclose(fp);
           if(i) {
@@ -716,7 +709,7 @@ static int get_param_part(char endchar,
 #define SET_TOOL_MIME_PTR(m, field)                                     \
   do {                                                                  \
     if(field) {                                                         \
-      (m)->field = strdup(field);                                       \
+      (m)->field = curlx_strdup(field);                                 \
       if(!(m)->field)                                                   \
         goto fail;                                                      \
     }                                                                   \
@@ -750,7 +743,7 @@ int formparse(const char *input,
   }
 
   /* Make a copy we can overwrite. */
-  contents = strdup(input);
+  contents = curlx_strdup(input);
   if(!contents)
     goto fail;
 

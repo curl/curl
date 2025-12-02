@@ -10,7 +10,7 @@ DELAY
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
@@ -20,7 +20,7 @@ This is a long error message that is large enough that the test server is
 guaranteed to split it into two packets.
 </data>
 
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 206 Partial Content
 Date: Tue, 09 Sep 2010 14:49:01 GMT
 Accept-Ranges: bytes
@@ -51,7 +51,7 @@ HTTP with invalid range then another URL
 
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Tue, 09 Sep 2010 14:49:00 GMT
 Accept-Ranges: bytes
@@ -69,7 +69,7 @@ Content-Type: text/plain
 partial body
 </stdout>
 
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=10-22

@@ -49,7 +49,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/hej/but/%TESTNUMBER?stupid=me/../%TESTNUMBER HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
 User-Agent: curl/%VERSION

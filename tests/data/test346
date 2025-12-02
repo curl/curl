@@ -44,7 +44,7 @@ HTTP GET over proxy with credentials using blank passwords
 
 #
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://remote.example/%TESTNUMBER HTTP/1.1
 Host: remote.example
 Proxy-Authorization: Basic %b64[puser:]b64%

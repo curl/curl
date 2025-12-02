@@ -51,11 +51,6 @@
 #include "sendf.h"
 #include "http.h"
 #include "content_encoding.h"
-#include "strdup.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #define CONTENT_ENCODING_DEFAULT  "identity"
 
@@ -96,15 +91,15 @@ static voidpf
 zalloc_cb(voidpf opaque, unsigned int items, unsigned int size)
 {
   (void)opaque;
-  /* not a typo, keep it calloc() */
-  return (voidpf) calloc(items, size);
+  /* not a typo, keep it curlx_calloc() */
+  return (voidpf)curlx_calloc(items, size);
 }
 
 static void
 zfree_cb(voidpf opaque, voidpf ptr)
 {
   (void)opaque;
-  free(ptr);
+  curlx_free(ptr);
 }
 
 static CURLcode
@@ -385,12 +380,10 @@ static CURLcode brotli_map_error(BrotliDecoderErrorCode be)
   case BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS:
   case BROTLI_DECODER_ERROR_FORMAT_PADDING_1:
   case BROTLI_DECODER_ERROR_FORMAT_PADDING_2:
-#ifdef BROTLI_DECODER_ERROR_COMPOUND_DICTIONARY
+#ifdef BROTLI_DECODER_ERROR_COMPOUND_DICTIONARY  /* brotli v1.1.0+ */
   case BROTLI_DECODER_ERROR_COMPOUND_DICTIONARY:
 #endif
-#ifdef BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET
   case BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET:
-#endif
   case BROTLI_DECODER_ERROR_INVALID_ARGUMENTS:
     return CURLE_BAD_CONTENT_ENCODING;
   case BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES:

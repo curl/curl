@@ -12,7 +12,7 @@ HTTP proxy
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -23,7 +23,7 @@ Proxy-Connection: Keep-Alive
 
 contents
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.0 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -57,7 +57,7 @@ FTP over HTTP proxy with downgrade to HTTP 1.0
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -26,6 +26,11 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
+#ifdef HAVE_POLL_H
+#include <poll.h>
+#elif defined(HAVE_SYS_POLL_H)
+#include <sys/poll.h>
+#endif
 
 #include "tool_cfgable.h"
 #include "tool_cb_rea.h"
@@ -33,7 +38,48 @@
 #include "tool_util.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
+#ifndef _WIN32
+/* Wait up to a number of milliseconds for socket activity. This function
+   waits on read activity on a file descriptor that is not a socket which
+   makes it not work with select() or poll() on Windows. */
+static bool waitfd(int waitms, int fd)
+{
+#ifdef HAVE_POLL
+  struct pollfd set;
+
+  set.fd = fd;
+  set.events = POLLIN;
+  set.revents = 0;
+  if(poll(&set, 1, (int)waitms))
+    return TRUE; /* timeout */
+  return FALSE;
+#else
+  fd_set bits;
+  struct timeval timeout;
+
+  if(fd >= FD_SETSIZE)
+    /* cannot wait! */
+    return FALSE;
+
+  /* wait this long at the most */
+  timeout.tv_sec = waitms / 1000;
+  timeout.tv_usec = (int)((waitms % 1000) * 1000);
+
+  FD_ZERO(&bits);
+#ifdef __DJGPP__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+  FD_SET(fd, &bits);
+#ifdef __DJGPP__
+#pragma GCC diagnostic pop
+#endif
+  if(!select(fd + 1, &bits, NULL, NULL, &timeout))
+    return TRUE; /* timeout */
+  return FALSE;
+#endif
+}
+#endif
 
 /*
 ** callback for CURLOPT_READFUNCTION
@@ -53,34 +99,17 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(config->timeout_ms) {
     struct curltime now = curlx_now();
-    long msdelta = (long)curlx_timediff(now, per->start);
+    long msdelta = (long)curlx_timediff_ms(now, per->start);
 
     if(msdelta > config->timeout_ms)
       /* timeout */
       return 0;
 #ifndef _WIN32
-    /* this logic waits on read activity on a file descriptor that is not a
-       socket which makes it not work with select() on Windows */
     else {
-      fd_set bits;
-      struct timeval timeout;
-      long wait = config->timeout_ms - msdelta;
-
-      /* wait this long at the most */
-      timeout.tv_sec = wait/1000;
-      timeout.tv_usec = (int)((wait%1000)*1000);
-
-      FD_ZERO(&bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
-      FD_SET(per->infd, &bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
-      if(!select(per->infd + 1, &bits, NULL, NULL, &timeout))
-        return 0; /* timeout */
+      long w = config->timeout_ms - msdelta;
+      if(w > INT_MAX)
+        w = INT_MAX;
+      waitfd((int)w, per->infd);
     }
 #endif
   }
@@ -91,11 +120,11 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
    On Linux per->infd should be stdin (0) and the block below should not
    execute */
   if(per->uploadfile && !strcmp(per->uploadfile, ".") && per->infd > 0) {
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     rc = CURL_RECV(per->infd, buffer, curlx_uztosi(sz * nmemb), 0);
     if(rc < 0) {
       if(SOCKERRNO == SOCKEWOULDBLOCK) {
-        CURL_SETERRNO(0);
+        errno = 0;
         config->readbusy = TRUE;
         return CURL_READFUNC_PAUSE;
       }
@@ -111,7 +140,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     rc = read(per->infd, buffer, sz*nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
-        CURL_SETERRNO(0);
+        errno = 0;
         config->readbusy = TRUE;
         return CURL_READFUNC_PAUSE;
       }
@@ -154,22 +183,7 @@ int tool_readbusy_cb(void *clientp,
   if(config->readbusy) {
     if(ulprev == ulnow) {
 #ifndef _WIN32
-      fd_set bits;
-      struct timeval timeout;
-      /* wait this long at the most */
-      timeout.tv_sec = 0;
-      timeout.tv_usec = 1000;
-
-      FD_ZERO(&bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
-      FD_SET(per->infd, &bits);
-#ifdef __DJGPP__
-#pragma GCC diagnostic pop
-#endif
-      select(per->infd + 1, &bits, NULL, NULL, &timeout);
+      waitfd(1, per->infd);
 #else
       /* sleep */
       curlx_wait_ms(1);

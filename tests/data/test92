@@ -10,7 +10,7 @@ Resume
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Fri, 24 Oct 2003 21:33:12 GMT
 Server: Apache/1.3.19 (Unix) (Red-Hat/Linux) mod_ssl/2.8.1 OpenSSL/0.9.6 PHP/4.3.1
@@ -25,7 +25,7 @@ bad
 </data>
 
 # The body should be ignored.
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Date: Fri, 24 Oct 2003 21:33:12 GMT
 Server: Apache/1.3.19 (Unix) (Red-Hat/Linux) mod_ssl/2.8.1 OpenSSL/0.9.6 PHP/4.3.1
@@ -54,7 +54,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C 87
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=87-

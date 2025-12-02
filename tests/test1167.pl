@@ -55,7 +55,7 @@ if($ARGV[0] eq "-v") {
     shift;
 }
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root=$ARGV[0] || ".";
 
 # need an include directory when building out-of-tree
@@ -77,7 +77,7 @@ sub scanenums {
     while(<H_IN>) {
         my ($line, $linenum) = ($_, $.);
         if(/^#(line|) (\d+) \"(.*)\"/) {
-            # if the included file isn't in our incdir, then we skip this section
+            # if the included file is not in our incdir, then we skip this section
             # until next #line
             #
             if($3 !~ /^$incdir/) {
@@ -135,7 +135,7 @@ sub scanheader {
 }
 
 
-opendir(my $dh, $incdir) || die "Can't opendir $incdir: $!";
+opendir(my $dh, $incdir) || die "Cannot opendir $incdir: $!";
 my @hfiles = grep { /\.h$/ } readdir($dh);
 closedir $dh;
 

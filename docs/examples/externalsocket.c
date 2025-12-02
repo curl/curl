@@ -26,6 +26,9 @@
  * </DESC>
  */
 #ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for strerror() */
+#endif
 #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _WINSOCK_DEPRECATED_NO_WARNINGS  /* for inet_addr() */
 #endif
@@ -34,6 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
 #include <curl/curl.h>
 
 #ifdef _WIN32
@@ -46,11 +50,7 @@
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
 #include <errno.h>
-#endif
 
 /* The IP address and port number to connect to */
 #define IPADDR "127.0.0.1"
@@ -60,7 +60,7 @@
 #define INADDR_NONE 0xffffffff
 #endif
 
-static size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t written = fwrite(ptr, size, nmemb, (FILE *)stream);
   return written;
@@ -103,14 +103,9 @@ int main(void)
   struct sockaddr_in servaddr;  /*  socket address structure  */
   curl_socket_t sockfd;
 
-#ifdef _WIN32
-  WSADATA wsaData;
-  int initwsa = WSAStartup(MAKEWORD(2, 2), &wsaData);
-  if(initwsa) {
-    printf("WSAStartup failed: %d\n", initwsa);
-    return 1;
-  }
-#endif
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -129,7 +124,7 @@ int main(void)
 
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port   = htons(PORTNUM);
+    servaddr.sin_port = htons(PORTNUM);
 
     servaddr.sin_addr.s_addr = inet_addr(IPADDR);
     if(INADDR_NONE == servaddr.sin_addr.s_addr) {
@@ -137,8 +132,7 @@ int main(void)
       return 2;
     }
 
-    if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
-       -1) {
+    if(connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
       close(sockfd);
       printf("client error: connect: %s\n", strerror(errno));
       return 1;
@@ -148,7 +142,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
     /* send all data to this function  */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     /* call this function to get a socket */
     curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, opensocket);
@@ -175,8 +169,7 @@ int main(void)
     }
   }
 
-#ifdef _WIN32
-  WSACleanup();
-#endif
+  curl_global_cleanup();
+
   return 0;
 }

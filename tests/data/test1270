@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 Captive Portal
 Server: ohlala/2000
 Date: Tue, 17 Dec 2019 13:08:30 GMT
@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w '%{redirect_url}\n' -s
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -49,7 +49,7 @@ Accept: */*
 
 </protocol>
 
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 302 Captive Portal
 Server: ohlala/2000
 Date: Tue, 17 Dec 2019 13:08:30 GMT

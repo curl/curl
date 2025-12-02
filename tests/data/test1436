@@ -47,7 +47,7 @@ HTTP requests with multiple connections over Unix socket
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: one.example.com
 User-Agent: curl/%VERSION

@@ -8,7 +8,7 @@ HTTP GET
 
 #
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -i -o %LOGDIR/outfile%TESTNUMBER -D %LOGDIR
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -45,7 +45,7 @@ Accept: */*
 
 </protocol>
 
-<file1 name="%LOGDIR/outfile%TESTNUMBER">
+<file1 name="%LOGDIR/outfile%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -56,7 +56,7 @@ Content-Type: text/html
 12345
 </file1>
 
-<file2 name="%LOGDIR/heads%TESTNUMBER">
+<file2 name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

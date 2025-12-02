@@ -46,7 +46,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "QUIT"
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH PLAIN
 dXJzZWwAa3VydAB4aXBqM3BsbXE=

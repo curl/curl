@@ -10,7 +10,7 @@ verbose logs
 
 # Server-side
 <reply>
-<data1 crlf="yes">
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -18,7 +18,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data1>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -26,7 +26,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data2>
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -34,7 +34,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data3>
-<data4>
+<data4 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: server.example.com
@@ -66,7 +66,7 @@ HTTP GET multiple over HTTP/3
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET https://localhost:%HTTP3PORT/path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
@@ -98,7 +98,10 @@ Via: 3 nghttpx
 == Info: Connection #0 to host localhost:%HTTP3PORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
+<limits>
+Maximum allocated: 1800000
+</limits>
 </verify>
 </testcase>

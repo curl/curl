@@ -69,7 +69,7 @@ HTTP with auth in URL redirected to another host
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://somewhere.example/998 HTTP/1.1
 Host: somewhere.example
 Authorization: Basic %b64[alberto:einstein]b64%

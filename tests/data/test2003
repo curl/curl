@@ -15,7 +15,7 @@ multiprotocol
 #
 # Server-side
 <reply>
-<data1 nocheck="yes">
+<data1 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -58,7 +58,14 @@ tftp
 HTTP GET, FTP RETR, FILE, TFTP RRQ then again in rev order
 </name>
 <command option="no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003 file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER0003
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
+ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 foo
@@ -76,18 +83,18 @@ moo
 ^timeout = [5-6]$
 </strip>
 <protocol>
-GET /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-
-USER anonymous
-PASS ftp@example.com
-PWD
-EPSV
-TYPE I
-SIZE %TESTNUMBER0002
-RETR %TESTNUMBER0002
+GET /%TESTNUMBER0001 HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+%CR
+USER anonymous%CR
+PASS ftp@example.com%CR
+PWD%CR
+EPSV%CR
+TYPE I%CR
+SIZE %TESTNUMBER0002%CR
+RETR %TESTNUMBER0002%CR
 opcode = 1
 mode = octet
 tsize = 0
@@ -98,15 +105,15 @@ mode = octet
 tsize = 0
 blksize = 512
 filename = /%TESTNUMBER0003
-EPSV
-SIZE %TESTNUMBER0002
-RETR %TESTNUMBER0002
-GET /%TESTNUMBER0001 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-
-QUIT
+EPSV%CR
+SIZE %TESTNUMBER0002%CR
+RETR %TESTNUMBER0002%CR
+GET /%TESTNUMBER0001 HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+%CR
+QUIT%CR
 </protocol>
 <stdout>
 -foo-

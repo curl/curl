@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static int t1553_xferinfo(void *p,
                           curl_off_t dltotal, curl_off_t dlnow,
@@ -41,7 +40,7 @@ static int t1553_xferinfo(void *p,
 
 static CURLcode test_lib1553(const char *URL)
 {
-  CURL *curls = NULL;
+  CURL *curl = NULL;
   CURLM *multi = NULL;
   int still_running;
   CURLcode i = CURLE_OK;
@@ -56,28 +55,28 @@ static CURLcode test_lib1553(const char *URL)
 
   multi_init(multi);
 
-  easy_init(curls);
+  easy_init(curl);
 
-  mime = curl_mime_init(curls);
+  mime = curl_mime_init(curl);
   field = curl_mime_addpart(mime);
   curl_mime_name(field, "name");
   curl_mime_data(field, "value", CURL_ZERO_TERMINATED);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_HEADER, 1L);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curls, CURLOPT_MIMEPOST, mime);
-  easy_setopt(curls, CURLOPT_USERPWD, "u:s");
-  easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, t1553_xferinfo);
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_MIMEPOST, mime);
+  easy_setopt(curl, CURLOPT_USERPWD, "u:s");
+  easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, t1553_xferinfo);
+  easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
   debug_config.nohex = TRUE;
   debug_config.tracetime = TRUE;
-  test_setopt(curls, CURLOPT_DEBUGDATA, &debug_config);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_DEBUGDATA, &debug_config);
+  easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  multi_add_handle(multi, curls);
+  multi_add_handle(multi, curl);
 
   multi_perform(multi, &still_running);
 
@@ -103,9 +102,9 @@ static CURLcode test_lib1553(const char *URL)
 test_cleanup:
 
   curl_mime_free(mime);
-  curl_multi_remove_handle(multi, curls);
+  curl_multi_remove_handle(multi, curl);
   curl_multi_cleanup(multi);
-  curl_easy_cleanup(curls);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   if(res)

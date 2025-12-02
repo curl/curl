@@ -29,12 +29,12 @@
 #include <string.h>
 #include <curl/curl.h>
 
-static size_t writecb(char *b, size_t size, size_t nitems, void *p)
+static size_t write_cb(char *b, size_t size, size_t nitems, void *p)
 {
-  CURL *easy = p;
+  CURL *curl = p;
   size_t i;
   unsigned int blen = (unsigned int)(nitems * size);
-  const struct curl_ws_frame *frame = curl_ws_meta(easy);
+  const struct curl_ws_frame *frame = curl_ws_meta(curl);
   fprintf(stderr, "Type: %s\n", frame->flags & CURLWS_BINARY ?
           "binary" : "text");
   if(frame->flags & CURLWS_BINARY) {
@@ -49,26 +49,25 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
 }
 
 struct read_ctx {
-  CURL *easy;
+  CURL *curl;
   char buf[1024];
   size_t blen;
   size_t nsent;
 };
 
-static size_t readcb(char *buf, size_t nitems, size_t buflen, void *p)
+static size_t read_cb(char *buf, size_t nitems, size_t buflen, void *p)
 {
   struct read_ctx *ctx = p;
   size_t len = nitems * buflen;
   size_t left = ctx->blen - ctx->nsent;
-  CURLcode result;
+  CURLcode res;
 
   if(!ctx->nsent) {
     /* On first call, set the FRAME information to be used (it defaults
      * to CURLWS_BINARY otherwise). */
-    result = curl_ws_start_frame(ctx->easy, CURLWS_TEXT,
-                                 (curl_off_t)ctx->blen);
-    if(result) {
-      fprintf(stderr, "error starting frame: %d\n", result);
+    res = curl_ws_start_frame(ctx->curl, CURLWS_TEXT, (curl_off_t)ctx->blen);
+    if(res) {
+      fprintf(stderr, "error starting frame: %d\n", res);
       return CURL_READFUNC_ABORT;
     }
   }
@@ -85,41 +84,44 @@ static size_t readcb(char *buf, size_t nitems, size_t buflen, void *p)
 
 int main(int argc, const char *argv[])
 {
-  CURL *easy;
+  CURL *curl;
   struct read_ctx rctx;
-  CURLcode res;
   const char *payload = "Hello, friend!";
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   memset(&rctx, 0, sizeof(rctx));
 
-  easy = curl_easy_init();
-  if(!easy)
-    return 1;
+  curl = curl_easy_init();
+  if(curl) {
+    if(argc == 2)
+      curl_easy_setopt(curl, CURLOPT_URL, argv[1]);
+    else
+      curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com");
 
-  if(argc == 2)
-    curl_easy_setopt(easy, CURLOPT_URL, argv[1]);
-  else
-    curl_easy_setopt(easy, CURLOPT_URL, "wss://example.com");
-
-  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, writecb);
-  curl_easy_setopt(easy, CURLOPT_WRITEDATA, easy);
-  curl_easy_setopt(easy, CURLOPT_READFUNCTION, readcb);
-  /* tell curl that we want to send the payload */
-  rctx.easy = easy;
-  rctx.blen = strlen(payload);
-  memcpy(rctx.buf, payload, rctx.blen);
-  curl_easy_setopt(easy, CURLOPT_READDATA, &rctx);
-  curl_easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
+    /* tell curl that we want to send the payload */
+    rctx.curl = curl;
+    rctx.blen = strlen(payload);
+    memcpy(rctx.buf, payload, rctx.blen);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &rctx);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
 
-  /* Perform the request, res gets the return code */
-  res = curl_easy_perform(easy);
-  /* Check for errors */
-  if(res != CURLE_OK)
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+    /* Perform the request, res gets the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
 
-  /* always cleanup */
-  curl_easy_cleanup(easy);
-  return 0;
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+  return (int)res;
 }

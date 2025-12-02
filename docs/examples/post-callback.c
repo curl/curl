@@ -27,6 +27,7 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* silly test data to POST */
@@ -43,10 +44,10 @@ struct WriteThis {
   size_t sizeleft;
 };
 
-static size_t read_callback(char *dest, size_t size, size_t nmemb, void *userp)
+static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
-  size_t buffer_size = size*nmemb;
+  size_t buffer_size = size * nmemb;
 
   if(wt->sizeleft) {
     /* copy as much as possible from the source to the destination */
@@ -79,7 +80,7 @@ int main(void)
   if(res != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed: %s\n",
             curl_easy_strerror(res));
-    return 1;
+    return (int)res;
   }
 
   /* get a curl handle */
@@ -92,7 +93,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
     /* we want to use our own read function */
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* pointer to pass to our read function */
     curl_easy_setopt(curl, CURLOPT_READDATA, &wt);

@@ -10,8 +10,8 @@ VRFY
 #
 # Server-side
 <reply>
-<data>
-250 <recipient@example.com>
+<data crlf="yes">
+250 %LTrecipient@example.com%GT
 </data>
 </reply>
 
@@ -34,7 +34,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient --request "vrfy"
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 vrfy recipient
 QUIT

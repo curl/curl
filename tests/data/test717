@@ -43,7 +43,7 @@ http
 SOCKS5 proxy auth
 </name>
 
-# target a port that won't work without the SOCKS magic
+# target a port that does not work without the SOCKS magic
 <command>
 http://%HOSTIP:1/%TESTNUMBER -x socks5://uz3r:p4ssworm@%HOSTIP:%SOCKSPORT
 </command>
@@ -55,7 +55,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:1
 User-Agent: curl/%VERSION

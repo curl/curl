@@ -7,7 +7,7 @@ HTTP GET
 </info>
 
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -54,11 +54,11 @@ Connection: close
 
 -foo-
 </stdout>
-<protocol>
-GET /556 HTTP/1.1
+<protocol crlf="headers">
+GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 
-GET /556 HTTP/1.1
+GET /%TESTNUMBER HTTP/1.1
 Host: ninja
 
 </protocol>

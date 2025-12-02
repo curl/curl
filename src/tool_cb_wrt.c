@@ -28,8 +28,6 @@
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef _WIN32
 #define OPENMODE S_IREAD | S_IWRITE
 #else
@@ -109,7 +107,7 @@ bool tool_create_output_file(struct OutStruct *outs,
   return TRUE;
 }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
                           char *buffer, size_t bytes,
                           size_t *retp)
@@ -211,8 +209,8 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
 
     /* grow the buffer if needed */
     if(len > global->term.len) {
-      wchar_t *buf = (wchar_t *) realloc(global->term.buf,
-                                         len * sizeof(wchar_t));
+      wchar_t *buf = (wchar_t *)curlx_realloc(global->term.buf,
+                                              len * sizeof(wchar_t));
       if(!buf)
         return CURL_WRITEFUNC_ERROR;
       global->term.len = len;
@@ -247,7 +245,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
   bool is_tty = global->isatty;
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
 #endif
@@ -321,7 +319,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
   /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&

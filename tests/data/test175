@@ -9,7 +9,7 @@ HTTP Digest auth
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 foobar swsclose swsbounce
 Server: Microsoft-IIS/6.0
 Authentication-Info: Passport1.4 tname=MSPAuth,tname=MSPProf,tname=MSPConsent,tname=MSPSecAuth
@@ -18,7 +18,7 @@ Content-Type: text/html; charset=iso-8859-1
 This is not the real page
 </data>
 
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 moo swsclose
 Server: Microsoft-IIS/6.0
 Content-Type: text/html; charset=iso-8859-1
@@ -27,7 +27,7 @@ Content-Length: 16
 content for you
 </data1>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 foobar swsclose swsbounce
 Server: Microsoft-IIS/6.0
 Authentication-Info: Passport1.4 tname=MSPAuth,tname=MSPProf,tname=MSPConsent,tname=MSPSecAuth
@@ -63,7 +63,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

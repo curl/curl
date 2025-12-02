@@ -10,7 +10,7 @@ HSTS
 <reply>
 
 # we use this as response to a CONNECT
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Server: fake
 
@@ -65,9 +65,9 @@ test-duphandle
 <verify>
 
 <stdout>
-HTTP/1.1 200 OK
-Server: fake
-
+HTTP/1.1 200 OK%CR
+Server: fake%CR
+%CR
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose

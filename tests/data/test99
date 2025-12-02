@@ -55,7 +55,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 <errorcode>
 33
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=9999999999-

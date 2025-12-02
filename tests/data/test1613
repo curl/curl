@@ -10,7 +10,7 @@ HTTP proxy
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Sat, 29 Feb 2020 16:10:44 GMT
 Server: Blafasel/1.1
@@ -40,7 +40,7 @@ proxy
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="yes">
 OPTIONS * HTTP/1.1
 Host: www.example.org
 User-Agent: curl/%VERSION

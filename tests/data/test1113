@@ -40,7 +40,7 @@ FTP wildcard download - changed fnmatch, 2x perform (DOS LIST response)
 0
 </errorcode>
 # THERE SHOULD NOT BE "SIZE"! and one "USER/PASS"
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

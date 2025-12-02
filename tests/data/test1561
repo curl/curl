@@ -69,14 +69,14 @@ https
 https
 </killserver>
 <name>
-Cookies set over HTTP can't override secure ones
+Cookies set over HTTP cannot override secure ones
 </name>
 <command>
 --insecure https://%HOSTIP:%HTTPSPORT/%TESTNUMBER0001 -L -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.example.com"  http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002 -L -c %LOGDIR/jar%TESTNUMBER.txt -H "Host: www.example.com"
 </command>
 </client>
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
 User-Agent: curl/%VERSION

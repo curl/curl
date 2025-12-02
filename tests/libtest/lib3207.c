@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #ifdef USE_THREADS_POSIX
 #include <pthread.h>
 #endif
@@ -37,7 +35,7 @@
 struct Ctx {
   const char *URL;
   CURLSH *share;
-  CURLcode result;
+  CURLcode res;
   size_t thread_id;
   struct curl_slist *contents;
 };
@@ -48,7 +46,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   /* append the data to contents */
   size_t realsize = size * nmemb;
   struct Ctx *mem = (struct Ctx *)userp;
-  char *data = (char *)malloc(realsize + 1);
+  char *data = (char *)curlx_malloc(realsize + 1);
   struct curl_slist *item_append = NULL;
   if(!data) {
     curl_mprintf("not enough memory (malloc returned NULL)\n");
@@ -57,7 +55,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   memcpy(data, contents, realsize);
   data[realsize] = '\0';
   item_append = curl_slist_append(mem->contents, data);
-  free(data);
+  curlx_free(data);
   if(item_append) {
     mem->contents = item_append;
   }
@@ -109,25 +107,25 @@ static unsigned int test_thread(void *ptr)
   }
 
 test_cleanup:
-  ctx->result = res;
+  ctx->res = res;
   return 0;
 }
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-static void t3207_test_lock(CURL *handle, curl_lock_data data,
+static void t3207_test_lock(CURL *curl, curl_lock_data data,
                             curl_lock_access laccess, void *useptr)
 {
-  curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
-  (void)handle;
+  curl_mutex_t *mutexes = (curl_mutex_t *)useptr;
+  (void)curl;
   (void)laccess;
   Curl_mutex_acquire(&mutexes[data]);
 }
 
-static void t3207_test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void t3207_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
-  (void)handle;
+  curl_mutex_t *mutexes = (curl_mutex_t *)useptr;
+  (void)curl;
   Curl_mutex_release(&mutexes[data]);
 }
 
@@ -177,7 +175,7 @@ static CURLcode test_lib3207(const char *URL)
 {
   CURLcode res = CURLE_OK;
   size_t i;
-  CURLSH* share;
+  CURLSH *share;
   struct Ctx ctx[THREAD_SIZE];
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -192,15 +190,15 @@ static CURLcode test_lib3207(const char *URL)
     ctx[i].share = share;
     ctx[i].URL = URL;
     ctx[i].thread_id = i;
-    ctx[i].result = CURLE_OK;
+    ctx[i].res = CURLE_OK;
     ctx[i].contents = NULL;
   }
 
   execute(share, ctx);
 
   for(i = 0; i < CURL_ARRAYSIZE(ctx); i++) {
-    if(ctx[i].result) {
-      res = ctx[i].result;
+    if(ctx[i].res) {
+      res = ctx[i].res;
     }
     else {
       struct curl_slist *item = ctx[i].contents;

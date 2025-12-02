@@ -103,7 +103,7 @@ static CURLcode test_unit1397(const char *arg)
                     "did %sMATCH\n",
                     tests[i].host,
                     tests[i].pattern,
-                    tests[i].match ? "NOT ": "");
+                    tests[i].match ? "NOT " : "");
       unitfail++;
     }
   }

@@ -41,7 +41,7 @@ machine %HOSTIP login user2 password passwd2
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user2:passwd2]b64%

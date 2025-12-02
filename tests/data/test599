@@ -9,7 +9,7 @@ chunked Transfer-Encoding
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 302 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -21,21 +21,21 @@ Content-Type: text/html
 -foo-
 </data>
 <data1>
-HTTP/1.1 200 OK
-Date: Tue, 09 Nov 2010 14:49:00 GMT
-Server: test-server/fake
-Transfer-Encoding: chunked
-Connection: close
-Content-Type: text/html
-
-32
+HTTP/1.1 200 OK%CR
+Date: Tue, 09 Nov 2010 14:49:00 GMT%CR
+Server: test-server/fake%CR
+Transfer-Encoding: chunked%CR
+Connection: close%CR
+Content-Type: text/html%CR
+%CR
+32%CR
 this data is slightly larger than the first piece
-
-0
-
+%CR
+0%CR
+%CR
 </data1>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 302 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

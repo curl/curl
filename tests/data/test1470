@@ -41,7 +41,7 @@ https
 socks5unix
 </server>
 <name>
-HTTPS GET with host name using SOCKS5h via Unix sockets
+HTTPS GET with hostname using SOCKS5h via Unix sockets
 </name>
 <command>
 https://this.is.a.host.name:%HTTPSPORT/%TESTNUMBER --insecure --proxy socks5h://localhost%SOCKSUNIXPATH
@@ -51,7 +51,7 @@ https://this.is.a.host.name:%HTTPSPORT/%TESTNUMBER --insecure --proxy socks5h://
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: this.is.a.host.name:%HTTPSPORT
 User-Agent: curl/%VERSION

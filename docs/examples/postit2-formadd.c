@@ -25,7 +25,6 @@
  * HTTP Multipart formpost with file upload and two additional parts.
  * </DESC>
  */
-
 /*
  * Example code that uploads a filename 'foo' to a remote script that accepts
  * "HTML form based" (as described in RFC 1738) uploads using HTTP POST.
@@ -41,7 +40,6 @@
  * <input type="submit" value="send" name="submit">
  * </form>
  */
-
 #include <stdio.h>
 #include <string.h>
 
@@ -57,7 +55,9 @@ int main(int argc, char *argv[])
   struct curl_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in the file upload field */
@@ -115,5 +115,8 @@ int main(int argc, char *argv[])
     /* free slist */
     curl_slist_free_all(headerlist);
   }
+
+  curl_global_cleanup();
+
   return 0;
 }

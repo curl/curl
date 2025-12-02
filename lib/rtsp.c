@@ -42,10 +42,6 @@
 #include "strdup.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
@@ -142,7 +138,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* proto_pollset */
   rtsp_do_pollset,                      /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
   rtsp_rtp_write_resp_hd,               /* write_resp_hd */
@@ -152,7 +148,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
   CURLPROTO_RTSP,                       /* family */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_CONN_REUSE                    /* flags */
 };
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
@@ -162,7 +158,7 @@ static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
   struct RTSP *rtsp = entry;
   (void)key;
   (void)klen;
-  free(rtsp);
+  curlx_free(rtsp);
 }
 
 static void rtsp_conn_dtor(void *key, size_t klen, void *entry)
@@ -171,7 +167,7 @@ static void rtsp_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   curlx_dyn_free(&rtspc->buf);
-  free(rtspc);
+  curlx_free(rtspc);
 }
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
@@ -180,14 +176,14 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
   struct rtsp_conn *rtspc;
   struct RTSP *rtsp;
 
-  rtspc = calloc(1, sizeof(*rtspc));
+  rtspc = curlx_calloc(1, sizeof(*rtspc));
   if(!rtspc)
     return CURLE_OUT_OF_MEMORY;
   curlx_dyn_init(&rtspc->buf, MAX_RTP_BUFFERSIZE);
   if(Curl_conn_meta_set(conn, CURL_META_RTSP_CONN, rtspc, rtsp_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  rtsp = calloc(1, sizeof(struct RTSP));
+  rtsp = curlx_calloc(1, sizeof(struct RTSP));
   if(!rtsp ||
      Curl_meta_set(data, CURL_META_RTSP_EASY, rtsp, rtsp_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -298,7 +294,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
     else {
       if(data->set.postfields) {
-        size_t plen = strlen(data->set.postfields);
+        size_t plen = (data->set.postfieldsize >= 0) ?
+          (size_t)data->set.postfieldsize : strlen(data->set.postfields);
         req_clen = (curl_off_t)plen;
         result = Curl_creader_set_buf(data, data->set.postfields, plen);
       }
@@ -391,7 +388,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
      to this origin */
 
   if(!data->state.first_host) {
-    data->state.first_host = strdup(conn->host.name);
+    data->state.first_host = curlx_strdup(conn->host.name);
     if(!data->state.first_host)
       return CURLE_OUT_OF_MEMORY;
 
@@ -480,7 +477,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      free(data->state.aptr.rtsp_transport);
+      curlx_free(data->state.aptr.rtsp_transport);
       data->state.aptr.rtsp_transport =
         curl_maprintf("Transport: %s\r\n",
                       data->set.str[STRING_RTSP_TRANSPORT]);
@@ -506,7 +503,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
        data->set.str[STRING_ENCODING]) {
-      free(data->state.aptr.accept_encoding);
+      curlx_free(data->state.aptr.accept_encoding);
       data->state.aptr.accept_encoding =
         curl_maprintf("Accept-Encoding: %s\r\n",
                       data->set.str[STRING_ENCODING]);
@@ -562,7 +559,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
-      free(data->state.aptr.rangeline);
+      curlx_free(data->state.aptr.rangeline);
       data->state.aptr.rangeline = curl_maprintf("Range: %s\r\n",
                                                  data->state.range);
       p_range = data->state.aptr.rangeline;
@@ -667,8 +664,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* if a request-body has been sent off, we make sure this progress is
        noted properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
+    result = Curl_pgrsUpdate(data);
   }
 out:
   curlx_dyn_free(&req_buffer);

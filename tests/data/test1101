@@ -11,7 +11,7 @@ NO_PROXY
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -28,7 +28,7 @@ boo
 http
 </server>
 <name>
-NO_PROXY test, with user name in URL
+NO_PROXY test, with username in URL
 </name>
 
 <setenv>
@@ -42,7 +42,7 @@ http://user:secret@%HOSTIP:%HTTPPORT/gimme/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /gimme/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user:secret]b64%

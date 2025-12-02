@@ -56,7 +56,7 @@ HTTP receive cookies over IPV6
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
 User-Agent: curl/%VERSION

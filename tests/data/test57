@@ -12,7 +12,7 @@ HTTP GET
 <data nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Funny-head: yesyes
-Content-Type: text/html; charset=ISO-8859-4   
+Content-Type: text/html; charset=ISO-8859-4%repeat[3 x  ]%
 
 </data>
 </reply>
@@ -35,7 +35,7 @@ HTTP content-type with spaces in
 <stdout mode="text">
 text/html; charset=ISO-8859-4
 </stdout>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

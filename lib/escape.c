@@ -23,7 +23,7 @@
  ***************************************************************************/
 
 /* Escape and unescape URL encoding in strings. The functions return a new
- * allocated string or NULL if an error occurred.  */
+ * allocated string or NULL if an error occurred. */
 
 #include "curl_setup.h"
 
@@ -34,13 +34,8 @@ struct Curl_easy;
 #include "urldata.h"
 #include "curlx/warnless.h"
 #include "escape.h"
-#include "strdup.h"
 #include "curlx/strparse.h"
 #include "curl_printf.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* for ABI-compatibility with previous versions */
 char *curl_escape(const char *string, int inlength)
@@ -69,7 +64,7 @@ char *curl_easy_escape(CURL *data, const char *string,
 
   length = (inlength ? (size_t)inlength : strlen(string));
   if(!length)
-    return strdup("");
+    return curlx_strdup("");
 
   curlx_dyn_init(&d, length * 3 + 1);
 
@@ -121,7 +116,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
   DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
 
   alloc = (length ? length : strlen(string));
-  ns = malloc(alloc + 1);
+  ns = curlx_malloc(alloc + 1);
 
   if(!ns)
     return CURLE_OUT_OF_MEMORY;
@@ -197,7 +192,7 @@ char *curl_easy_unescape(CURL *data, const char *string,
    the library's memory system */
 void curl_free(void *p)
 {
-  free(p);
+  curlx_free(p);
 }
 
 /*

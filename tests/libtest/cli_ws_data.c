@@ -24,14 +24,12 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode
-test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
-                           size_t r_offset, size_t nread,
-                           size_t exp_len)
+static CURLcode test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
+                                           size_t r_offset, size_t nread,
+                                           size_t exp_len)
 {
   if(!frame)
     return CURLE_OK;
@@ -83,8 +81,8 @@ static CURLcode test_ws_data_m2_echo(const char *url,
   size_t i, scount = count, rcount = count;
   int rblock, sblock;
 
-  send_buf = calloc(1, plen_max + 1);
-  recv_buf = calloc(1, plen_max + 1);
+  send_buf = curlx_calloc(1, plen_max + 1);
+  recv_buf = curlx_calloc(1, plen_max + 1);
   if(!send_buf || !recv_buf) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -184,13 +182,13 @@ out:
       ws_close(curl);
     curl_easy_cleanup(curl);
   }
-  free(send_buf);
-  free(recv_buf);
+  curlx_free(send_buf);
+  curlx_free(recv_buf);
   return r;
 }
 
 struct test_ws_m1_ctx {
-  CURL *easy;
+  CURL *curl;
   char *send_buf;
   char *recv_buf;
   size_t send_len, nsent;
@@ -216,7 +214,7 @@ static size_t test_ws_data_m1_read(char *buf, size_t nitems, size_t buflen,
     goto out;
 
   if(!ctx->frame_reading) {
-    curl_ws_start_frame(ctx->easy, CURLWS_BINARY, ctx->send_len);
+    curl_ws_start_frame(ctx->curl, CURLWS_BINARY, ctx->send_len);
     ctx->frame_reading = TRUE;
   }
 
@@ -294,8 +292,8 @@ static CURLcode test_ws_data_m1_echo(const char *url,
   curl_mfprintf(stderr, "test_ws_data_m1_echo(min=%zu, max=%zu)\n",
                 plen_min, plen_max);
   memset(&m1_ctx, 0, sizeof(m1_ctx));
-  m1_ctx.send_buf = calloc(1, plen_max + 1);
-  m1_ctx.recv_buf = calloc(1, plen_max + 1);
+  m1_ctx.send_buf = curlx_calloc(1, plen_max + 1);
+  m1_ctx.recv_buf = curlx_calloc(1, plen_max + 1);
   if(!m1_ctx.send_buf || !m1_ctx.recv_buf) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -310,8 +308,8 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     goto out;
   }
 
-  m1_ctx.easy = curl_easy_init();
-  if(!m1_ctx.easy) {
+  m1_ctx.curl = curl_easy_init();
+  if(!m1_ctx.curl) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
   }
@@ -330,22 +328,22 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     m1_ctx.frames_read = 0;
     m1_ctx.frames_written = 0;
     memset(m1_ctx.recv_buf, 0, plen_max);
-    curl_easy_pause(m1_ctx.easy, CURLPAUSE_CONT);
+    curl_easy_pause(m1_ctx.curl, CURLPAUSE_CONT);
 
-    curl_easy_reset(m1_ctx.easy);
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_URL, url);
+    curl_easy_reset(m1_ctx.curl);
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_URL, url);
     /* use the callback style */
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_USERAGENT, "ws-data");
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_VERBOSE, 1L);
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_USERAGENT, "ws-data");
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_VERBOSE, 1L);
     /* we want to send */
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_UPLOAD, 1L);
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_READFUNCTION, test_ws_data_m1_read);
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_READDATA, &m1_ctx);
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEFUNCTION,
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_UPLOAD, 1L);
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_READFUNCTION, test_ws_data_m1_read);
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_READDATA, &m1_ctx);
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_WRITEFUNCTION,
                      test_ws_data_m1_write);
-    curl_easy_setopt(m1_ctx.easy, CURLOPT_WRITEDATA, &m1_ctx);
+    curl_easy_setopt(m1_ctx.curl, CURLOPT_WRITEDATA, &m1_ctx);
 
-    curl_multi_add_handle(multi, m1_ctx.easy);
+    curl_multi_add_handle(multi, m1_ctx.curl);
 
     while(1) {
       int still_running; /* keep number of running handles */
@@ -363,10 +361,9 @@ static CURLcode test_ws_data_m1_echo(const char *url,
         r = CURLE_RECV_ERROR;
         goto out;
       }
-
     }
 
-    curl_multi_remove_handle(multi, m1_ctx.easy);
+    curl_multi_remove_handle(multi, m1_ctx.curl);
 
     /* check results */
     if(m1_ctx.frames_read < m1_ctx.nframes) {
@@ -386,14 +383,13 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 out:
   if(multi)
     curl_multi_cleanup(multi);
-  if(m1_ctx.easy) {
-    curl_easy_cleanup(m1_ctx.easy);
+  if(m1_ctx.curl) {
+    curl_easy_cleanup(m1_ctx.curl);
   }
-  free(m1_ctx.send_buf);
-  free(m1_ctx.recv_buf);
+  curlx_free(m1_ctx.send_buf);
+  curlx_free(m1_ctx.recv_buf);
   return r;
 }
-
 
 static void test_ws_data_usage(const char *msg)
 {
@@ -419,6 +415,8 @@ static CURLcode test_cli_ws_data(const char *URL)
   (void)URL;
 
   while((ch = cgetopt(test_argc, test_argv, "12c:hm:M:")) != -1) {
+    const char *opt = coptarg;
+    curl_off_t num;
     switch(ch) {
     case '1':
       model = 1;
@@ -428,21 +426,22 @@ static CURLcode test_cli_ws_data(const char *URL)
       break;
     case 'h':
       test_ws_data_usage(NULL);
-      res = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto cleanup;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     case 'c':
-      count = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        count = (size_t)num;
       break;
     case 'm':
-      plen_min = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        plen_min = (size_t)num;
       break;
     case 'M':
-      plen_max = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        plen_max = (size_t)num;
       break;
     default:
       test_ws_data_usage("invalid option");
-      res = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto cleanup;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
   test_argc -= coptind;
@@ -454,26 +453,27 @@ static CURLcode test_cli_ws_data(const char *URL)
   if(plen_max < plen_min) {
     curl_mfprintf(stderr, "maxlen must be >= minlen, got %zu-%zu\n",
                   plen_min, plen_max);
-    res = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto cleanup;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
   if(test_argc != 1) {
     test_ws_data_usage(NULL);
-    res = CURLE_BAD_FUNCTION_ARGUMENT;
-    goto cleanup;
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
   url = test_argv[0];
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
 
   if(model == 1)
     res = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
     res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
-cleanup:
   curl_global_cleanup();
+
   return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */

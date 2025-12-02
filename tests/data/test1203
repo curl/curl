@@ -10,7 +10,7 @@ INDEX
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 iMenu results		error.host	1
 0Selector 	/bar	bar.foo.invalid	70
 .
@@ -36,7 +36,7 @@ Gopher IPv6 index
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 /moo/%TESTNUMBER
 </protocol>
 </verify>

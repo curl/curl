@@ -48,7 +48,7 @@ http://12.34.56.78:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: 12.34.56.78:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -11,7 +11,7 @@ globbing
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -36,14 +36,14 @@ http://%HOSTIP:%HTTPPORT/[a-a][1-1][b-b:1][2-2:1]/%TESTNUMBER -o "%LOGDIR/outfil
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /a1b2/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/outfile%TESTNUMBER_a1b2.dump">
+<file name="%LOGDIR/outfile%TESTNUMBER_a1b2.dump" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6

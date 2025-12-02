@@ -45,10 +45,6 @@
 #include "curlx/inet_pton.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define DEBUG_AND_VERBOSE
 #endif
@@ -137,7 +133,7 @@ CURLcode Curl_blockread_all(struct Curl_cfilter *cf,
 
   *pnread = 0;
   for(;;) {
-    timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
+    timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
     if(timeout_ms < 0) {
       /* we already got the timeout */
       return CURLE_OPERATION_TIMEDOUT;
@@ -254,8 +250,14 @@ static CURLproxycode socks_recv(struct socks_state *sx,
             curl_easy_strerror(result));
       return CURLPX_RECV_CONNECT;
     }
-    else if(!nread) /* EOF */
+    else if(!nread) { /* EOF */
+      if(Curl_bufq_len(&sx->iobuf) < min_bytes) {
+        failf(data, "Failed to receive SOCKS response, "
+              "proxy closed connection");
+        return CURLPX_RECV_CONNECT;
+      }
       break;
+    }
   }
   *done = TRUE;
   return CURLPX_OK;
@@ -302,7 +304,7 @@ static CURLproxycode socks4_req_add_user(struct socks_state *sx,
       return CURLPX_SEND_REQUEST;
   }
   else {
-    /* empty user name */
+    /* empty username */
     unsigned char b = 0;
     result = Curl_bufq_write(&sx->iobuf, &b, 1, &nwritten);
     if(result || (nwritten != 1))
@@ -325,6 +327,7 @@ static CURLproxycode socks4_resolving(struct socks_state *sx,
   if(sx->start_resolving) {
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
+    DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version, TRUE, &dns);
@@ -426,7 +429,7 @@ static CURLproxycode socks4_check_resp(struct socks_state *sx,
   switch(resp[1]) {
   case 90:
     CURL_TRC_CF(data, cf, "SOCKS4%s request granted.", sx->socks4a ? "a" : "");
-    Curl_bufq_reset(&sx->iobuf);
+    Curl_bufq_skip(&sx->iobuf, 8);
     return CURLPX_OK;
   case 91:
     failf(data,
@@ -521,7 +524,7 @@ process_state:
       /* socks4a, not resolving locally, sends the hostname.
        * add an invalid address + user + hostname */
       unsigned char buf[4] = { 0, 0, 0, 1 };
-      size_t hlen =  strlen(sx->hostname) + 1; /* including NUL */
+      size_t hlen = strlen(sx->hostname) + 1; /* including NUL */
 
       if(hlen > 255) {
         failf(data, "SOCKS4: too long hostname");
@@ -658,7 +661,7 @@ static CURLproxycode socks5_check_resp0(struct socks_state *sx,
   }
 
   auth_mode = resp[1];
-  Curl_bufq_reset(&sx->iobuf);
+  Curl_bufq_skip(&sx->iobuf, 2);
 
   switch(auth_mode) {
   case 0:
@@ -675,8 +678,12 @@ static CURLproxycode socks5_check_resp0(struct socks_state *sx,
     return CURLPX_GSSAPI_PERMSG;
   case 2:
     /* regular name + password authentication */
-    sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
-    return CURLPX_OK;
+    if(data->set.socks5auth & CURLAUTH_BASIC) {
+      sxstate(sx, cf, data, SOCKS5_ST_AUTH_INIT);
+      return CURLPX_OK;
+    }
+    failf(data, "BASIC authentication proposed but not enabled.");
+    return CURLPX_NO_AUTH;
   case 255:
     failf(data, "No authentication method was acceptable.");
     return CURLPX_NO_AUTH;
@@ -755,13 +762,12 @@ static CURLproxycode socks5_check_auth_resp(struct socks_state *sx,
 
   /* ignore the first (VER) byte */
   auth_status = resp[1];
-  Curl_bufq_reset(&sx->iobuf);
-
   if(auth_status) {
     failf(data, "User was rejected by the SOCKS5 server (%d %d).",
           resp[0], resp[1]);
     return CURLPX_USER_REJECTED;
   }
+  Curl_bufq_skip(&sx->iobuf, 2);
   return CURLPX_OK;
 }
 
@@ -849,6 +855,7 @@ static CURLproxycode socks5_resolving(struct socks_state *sx,
   if(sx->start_resolving) {
     /* need to resolve hostname to add destination address */
     sx->start_resolving = FALSE;
+    DEBUGASSERT(sx->hostname && *sx->hostname);
 
     result = Curl_resolv(data, sx->hostname, sx->remote_port,
                          cf->conn->ip_version, TRUE, &dns);
@@ -1204,7 +1211,7 @@ static void socks_proxy_cf_free(struct Curl_cfilter *cf)
   struct socks_state *sxstate = cf->ctx;
   if(sxstate) {
     Curl_bufq_free(&sxstate->iobuf);
-    free(sxstate);
+    curlx_free(sxstate);
     cf->ctx = NULL;
   }
 }
@@ -1236,9 +1243,11 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
     return result;
 
   if(!sx) {
-    cf->ctx = sx = calloc(1, sizeof(*sx));
-    if(!sx)
-      return CURLE_OUT_OF_MEMORY;
+    cf->ctx = sx = curlx_calloc(1, sizeof(*sx));
+    if(!sx) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
 
     /* for the secondary socket (FTP), use the "connect to host"
      * but ignore the "connect to port" (use the secondary port)

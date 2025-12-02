@@ -36,7 +36,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 <verify>
 # Note here the lack of If-Modified-Since
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

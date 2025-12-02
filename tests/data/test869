@@ -19,7 +19,7 @@ REPLY AUTH + cmVhbG09ImN1cmwiLG5vbmNlPSI1MzAwZDE3YTFkNjk1YmQ0MTFlNGNkZjk2Zjk1NDh
 REPLY dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvMTI3LjAuMC4xIixyZXNwb25zZT0xODMxNTU0OGM3ZjNhMzdlNzE2ZmE4ZTkwZGZhYjliNixxb3A9YXV0aA== + cnNwYXV0aD1mZWNiMzZiNzA4NmUwYjk1ZDkwNjQ1OWVmYThjYzI5ZQ==
 REPLY  +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -56,7 +56,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH DIGEST-MD5
 dXNlcm5hbWU9InVzZXIiLHJlYWxtPSJjdXJsIixub25jZT0iNTMwMGQxN2ExZDY5NWJkNDExZTRjZGY5NmY5NTQ4YzIzY2VkNjE3NSIsY25vbmNlPSIzNDMzMzIzMTM1MzMzMjMxMzYzMzMyMzEzNzMzMzIzMSIsbmM9IjAwMDAwMDAxIixkaWdlc3QtdXJpPSJwb3AvMTI3LjAuMC4xIixyZXNwb25zZT0xODMxNTU0OGM3ZjNhMzdlNzE2ZmE4ZTkwZGZhYjliNixxb3A9YXV0aA==

@@ -19,55 +19,55 @@ Content-Length: 29
 run 1: foobar and so on fun!
 </data>
 <datacheck>
--> Mutex lock SHARE
-<- Mutex unlock SHARE
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
 run 1: foobar and so on fun!
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock SHARE
-<- Mutex unlock SHARE
--> Mutex lock SHARE
-<- Mutex unlock SHARE
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
 run 1: foobar and so on fun!
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock SHARE
-<- Mutex unlock SHARE
--> Mutex lock SHARE
-<- Mutex unlock SHARE
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
 run 1: foobar and so on fun!
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
--> Mutex lock SHARE
-<- Mutex unlock SHARE
--> Mutex lock SHARE
-<- Mutex unlock SHARE
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock CONNECT
+[- Mutex unlock CONNECT
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
+-] Mutex lock SHARE
+[- Mutex unlock SHARE
 </datacheck>
 </reply>
 

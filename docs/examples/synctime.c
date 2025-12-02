@@ -56,11 +56,21 @@
  * This software synchronises your computer clock only when you issue
  * it with --synctime. By default, it only display the webserver's clock.
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), gmtime(),
+                                    localtime(), sscanf() */
+#endif
+#endif
 
 #include <stdio.h>
 
 #ifndef _WIN32
-int main(void) { printf("Platform not supported.\n"); return 1; }
+int main(void)
+{
+  printf("Platform not supported.\n");
+  return 1;
+}
 #else
 
 #if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
@@ -73,7 +83,11 @@ int main(void) { printf("Platform not supported.\n"); return 1; }
 #endif
 
 #ifdef CURL_WINDOWS_UWP
-int main(void) { printf("Platform not supported.\n"); return 1; }
+int main(void)
+{
+  printf("Platform not supported.\n");
+  return 1;
+}
 #else
 
 #include <time.h>
@@ -117,14 +131,13 @@ static SYSTEMTIME LOCALTime;
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
-
-static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
-                                        void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return nmemb * size;
 }
 
+/* Remember: do not assume headers are passed on null terminated! */
 static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
@@ -135,18 +148,22 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   if(ShowAllHeader == 1)
     fprintf(stderr, "%.*s", (int)nmemb, (char *)ptr);
 
-  if(strncmp((char *)ptr, "Date:", 5) == 0) {
+  if((nmemb >= 5) && !strncmp((char *)ptr, "Date:", 5)) {
     if(ShowAllHeader == 0)
       fprintf(stderr, "HTTP Server. %.*s", (int)nmemb, (char *)ptr);
 
     if(AutoSyncTime == 1) {
-      int RetVal;
+      int RetVal = 0;
+      char *field = ptr;
       *TmpStr1 = 0;
       *TmpStr2 = 0;
-      RetVal = sscanf((char *)ptr, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
-                      TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
-                      &SYSTime.wHour, &SYSTime.wMinute,
-                      &SYSTime.wSecond);
+      if(nmemb && (field[nmemb] == '\n')) {
+        field[nmemb] = 0; /* null terminated */
+        RetVal = sscanf(field, "Date: %25s %hu %25s %hu %hu:%hu:%hu",
+                        TmpStr1, &SYSTime.wDay, TmpStr2, &SYSTime.wYear,
+                        &SYSTime.wHour, &SYSTime.wMinute,
+                        &SYSTime.wSecond);
+      }
 
       if(RetVal == 7) {
         int i;
@@ -165,7 +182,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
     }
   }
 
-  if(strncmp((char *)ptr, "X-Cache: HIT", 12) == 0) {
+  if((nmemb >= 12) && !strncmp((char *)ptr, "X-Cache: HIT", 12)) {
     fprintf(stderr, "ERROR: HTTP Server data is cached."
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
@@ -183,7 +200,7 @@ static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, proxy_user_password);
 
   curl_easy_setopt(curl, CURLOPT_USERAGENT, SYNCTIME_UA);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, SyncTime_CURL_WriteOutput);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 
@@ -241,6 +258,7 @@ static int conf_init(struct conf *conf)
 
 int main(int argc, char *argv[])
 {
+  CURLcode res;
   CURL *curl;
   struct conf conf[1];
   int RetValue;
@@ -251,7 +269,7 @@ int main(int argc, char *argv[])
   conf_init(conf);
 
   if(argc > 1) {
-    int OptionIndex = 0;
+    int OptionIndex = 1;
     while(OptionIndex < argc) {
       if(strncmp(argv[OptionIndex], "--server=", 9) == 0)
         snprintf(conf->timeserver, MAX_STRING, "%s", &argv[OptionIndex][9]);
@@ -269,7 +287,7 @@ int main(int argc, char *argv[])
         snprintf(conf->http_proxy, MAX_STRING, "%s", &argv[OptionIndex][8]);
 
       if((strcmp(argv[OptionIndex], "--help") == 0) ||
-          (strcmp(argv[OptionIndex], "/?") == 0)) {
+         (strcmp(argv[OptionIndex], "/?") == 0)) {
         showUsage();
         return 0;
       }
@@ -281,7 +299,10 @@ int main(int argc, char *argv[])
     snprintf(conf->timeserver, MAX_STRING, "%s", DefaultTimeServer[0]);
 
   /* Init CURL before usage */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
     struct tm *lt;
@@ -303,9 +324,9 @@ int main(int argc, char *argv[])
     gmt      = gmtime(&tt);
     tt_gmt   = mktime(gmt);
     tzonediffFloat = difftime(tt_local, tt_gmt);
-    tzonediffWord  = (int)(tzonediffFloat/3600.0);
+    tzonediffWord = (int)(tzonediffFloat / 3600.0);
 
-    if(tzonediffWord == (int)(tzonediffFloat/3600.0))
+    if(tzonediffWord == (int)(tzonediffFloat / 3600.0))
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
       snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
@@ -315,9 +336,8 @@ int main(int argc, char *argv[])
     GetLocalTime(&LOCALTime);
     snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-             LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-             LOCALTime.wMilliseconds);
+             MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear, LOCALTime.wHour,
+             LOCALTime.wMinute, LOCALTime.wSecond, LOCALTime.wMilliseconds);
 
     fprintf(stderr, "Fetch: %s\n\n", conf->timeserver);
     fprintf(stderr, "Before HTTP. Date: %s%s\n\n", timeBuf, tzoneBuf);
@@ -329,9 +349,8 @@ int main(int argc, char *argv[])
     GetLocalTime(&LOCALTime);
     snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
              DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-             MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
-             LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
-             LOCALTime.wMilliseconds);
+             MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear, LOCALTime.wHour,
+             LOCALTime.wMinute, LOCALTime.wSecond, LOCALTime.wMilliseconds);
     fprintf(stderr, "\nAfter  HTTP. Date: %s%s\n", timeBuf, tzoneBuf);
 
     if(AutoSyncTime == 3) {
@@ -345,7 +364,7 @@ int main(int argc, char *argv[])
         GetLocalTime(&LOCALTime);
         snprintf(timeBuf, 60, "%s, %02d %s %04d %02d:%02d:%02d.%03d, ",
                  DayStr[LOCALTime.wDayOfWeek], LOCALTime.wDay,
-                 MthStr[LOCALTime.wMonth-1], LOCALTime.wYear,
+                 MthStr[LOCALTime.wMonth - 1], LOCALTime.wYear,
                  LOCALTime.wHour, LOCALTime.wMinute, LOCALTime.wSecond,
                  LOCALTime.wMilliseconds);
         fprintf(stderr, "\nNew System's Date: %s%s\n", timeBuf, tzoneBuf);
@@ -356,6 +375,9 @@ int main(int argc, char *argv[])
     conf_init(conf);
     curl_easy_cleanup(curl);
   }
+
+  curl_global_cleanup();
+
   return RetValue;
 }
 #endif /* CURL_WINDOWS_UWP */

@@ -29,7 +29,7 @@ smtp
 <name>
 SMTP OAuth 2.0 (OAUTHBEARER) authentication
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>
@@ -40,16 +40,16 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 AUTH OAUTHBEARER
 %b64[n,a=user,%01host=127.0.0.1%01port=%SMTPPORT%01auth=Bearer mF_9.B5f-4.1JqM%01%01]b64%
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

@@ -35,7 +35,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Bearer c4e448d652a961fda0ab64f882c8c161d5985f805d45d80c9ddca1

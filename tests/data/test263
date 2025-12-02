@@ -41,7 +41,7 @@ HTTP-IPv6 GET with proxy specified using IPv6-numerical address
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://veryveryremotesite.com/%TESTNUMBER HTTP/1.1
 Host: veryveryremotesite.com
 User-Agent: curl/%VERSION

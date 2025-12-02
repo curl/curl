@@ -45,7 +45,7 @@ https://test.anything.really.com:%TESTNUMBER --proxy1.0 %HOSTIP:%HTTPPORT
 <errorcode>
 56
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 CONNECT test.anything.really.com:%TESTNUMBER HTTP/1.0
 Host: test.anything.really.com:%TESTNUMBER
 User-Agent: curl/%VERSION

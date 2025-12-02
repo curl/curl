@@ -10,12 +10,12 @@ chunked Transfer-Encoding
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 funky chunky!
-Server: fakeit/0.9 fakeitbad/1.0
-Transfer-Encoding: chunked
-Trailer: chunky-trailer
-Connection: mooo
-
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+%CR
 40
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 30
@@ -28,14 +28,14 @@ chunky-trailer: header data
 
 </data>
 <datacheck>
-HTTP/1.1 200 funky chunky!
-Server: fakeit/0.9 fakeitbad/1.0
-Transfer-Encoding: chunked
-Trailer: chunky-trailer
-Connection: mooo
-
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+%CR
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
-chunky-trailer: header data
+chunky-trailer: header data%CR
 </datacheck>
 </reply>
 
@@ -56,14 +56,14 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/heads%TESTNUMBER">
+<file name="%LOGDIR/heads%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 funky chunky!
 Server: fakeit/0.9 fakeitbad/1.0
 Transfer-Encoding: chunked

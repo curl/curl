@@ -41,7 +41,7 @@
 #include "progress.h"
 #include "content_encoding.h"
 #include "strcase.h"
-#include "share.h"
+#include "curl_share.h"
 #include "vtls/vtls.h"
 #include "curlx/warnless.h"
 #include "sendf.h"
@@ -54,10 +54,6 @@
 #include "tftp.h"
 #include "strdup.h"
 #include "escape.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
 {
@@ -98,7 +94,7 @@ CURLcode Curl_setstropt(char **charp, const char *s)
     if(strlen(s) > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    *charp = strdup(s);
+    *charp = curlx_strdup(s);
     if(!*charp)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -119,8 +115,8 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
     if(blob->len > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     nblob = (struct curl_blob *)
-      malloc(sizeof(struct curl_blob) +
-             ((blob->flags & CURL_BLOB_COPY) ? blob->len : 0));
+      curlx_malloc(sizeof(struct curl_blob) +
+                   ((blob->flags & CURL_BLOB_COPY) ? blob->len : 0));
     if(!nblob)
       return CURLE_OUT_OF_MEMORY;
     *nblob = *blob;
@@ -158,10 +154,10 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
       return result;
   }
 
-  free(*userp);
+  curlx_free(*userp);
   *userp = user;
 
-  free(*passwdp);
+  curlx_free(*passwdp);
   *passwdp = passwd;
 
   return CURLE_OK;
@@ -185,13 +181,13 @@ static CURLcode setstropt_interface(char *option, char **devp,
     if(result)
       return result;
   }
-  free(*devp);
+  curlx_free(*devp);
   *devp = dev;
 
-  free(*ifacep);
+  curlx_free(*ifacep);
   *ifacep = iface;
 
-  free(*hostp);
+  curlx_free(*hostp);
   *hostp = host;
 
   return CURLE_OK;
@@ -870,7 +866,12 @@ static CURLcode value_range(long *value, long below_error, long min, long max)
 static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
                             long arg)
 {
+#if !defined(CURL_DISABLE_PROXY) || \
+  !defined(CURL_DISABLE_HTTP) || \
+  defined(HAVE_GSSAPI) || \
+  defined(USE_IPV6)
   unsigned long uarg = (unsigned long)arg;
+#endif
   bool set = FALSE;
   CURLcode result = setopt_bool(data, option, arg, &set);
   struct UserDefined *s = &data->set;
@@ -879,7 +880,10 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
   switch(option) {
   case CURLOPT_DNS_CACHE_TIMEOUT:
-    return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
+    if(arg != -1)
+      return setopt_set_timeout_sec(&s->dns_cache_timeout_ms, arg);
+    s->dns_cache_timeout_ms = -1;
+    break;
 
   case CURLOPT_CA_CACHE_TIMEOUT:
     if(Curl_ssl_supports(data, SSLSUPP_CA_CACHE)) {
@@ -993,9 +997,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 #endif
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXYPORT:
-    if((arg < 0) || (arg > 65535))
+    if((arg < 0) || (arg > UINT16_MAX))
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    s->proxyport = (unsigned short)arg;
+    s->proxyport = (uint16_t)arg;
     break;
 
   case CURLOPT_PROXYAUTH:
@@ -1094,7 +1098,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
 
 #ifdef HAVE_GSSAPI
   case CURLOPT_GSSAPI_DELEGATION:
-    s->gssapi_delegation = (unsigned char)uarg&
+    s->gssapi_delegation = (unsigned char)uarg &
       (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
     break;
 #endif
@@ -1150,7 +1154,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     s->connect_only = !!arg;
     s->connect_only_ws = (arg == 2);
     break;
-
 
 #ifdef USE_SSH
   case CURLOPT_SSH_AUTH_TYPES:
@@ -1530,6 +1533,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 static CURLcode cookielist(struct Curl_easy *data,
                            const char *ptr)
 {
+  CURLcode result = CURLE_OK;
   if(!ptr)
     return CURLE_OK;
 
@@ -1551,14 +1555,15 @@ static CURLcode cookielist(struct Curl_easy *data,
   }
   else if(curl_strequal(ptr, "RELOAD")) {
     /* reload cookies from file */
-    Curl_cookie_loadfiles(data);
+    return Curl_cookie_loadfiles(data);
   }
   else {
     if(!data->cookies) {
       /* if cookie engine was not running, activate it */
-      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+      data->cookies = Curl_cookie_init();
       if(!data->cookies)
         return CURLE_OUT_OF_MEMORY;
+      data->state.cookie_engine = TRUE;
     }
 
     /* general protection against mistakes and abuse */
@@ -1568,15 +1573,15 @@ static CURLcode cookielist(struct Curl_easy *data,
     Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     if(checkprefix("Set-Cookie:", ptr))
       /* HTTP Header format line */
-      Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11, NULL,
-                      NULL, TRUE);
+      result = Curl_cookie_add(data, data->cookies, TRUE, FALSE, ptr + 11,
+                               NULL, NULL, TRUE);
     else
       /* Netscape format line */
-      Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
-                      NULL, TRUE);
+      result = Curl_cookie_add(data, data->cookies, FALSE, FALSE, ptr, NULL,
+                               NULL, TRUE);
     Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
-  return CURLE_OK;
+  return result;
 }
 
 static CURLcode cookiefile(struct Curl_easy *data,
@@ -1675,31 +1680,29 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * A string with POST data. Makes curl HTTP POST. Even if it is NULL.
      * If needed, CURLOPT_POSTFIELDSIZE must have been set prior to
-     *  CURLOPT_COPYPOSTFIELDS and not altered later.
+     * CURLOPT_COPYPOSTFIELDS and not altered later.
      */
     if(!ptr || s->postfieldsize == -1)
       result = Curl_setstropt(&s->str[STRING_COPYPOSTFIELDS], ptr);
     else {
+      size_t pflen;
+
       if(s->postfieldsize < 0)
         return CURLE_BAD_FUNCTION_ARGUMENT;
-#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
-      /*
-       *  Check that requested length does not overflow the size_t type.
-       */
-      else if(s->postfieldsize > SIZE_MAX)
+      pflen = curlx_sotouz_range(s->postfieldsize, 0, SIZE_MAX);
+      if(pflen == SIZE_MAX)
         return CURLE_OUT_OF_MEMORY;
-#endif
       else {
         /* Allocate even when size == 0. This satisfies the need of possible
            later address compare to detect the COPYPOSTFIELDS mode, and to
            mark that postfields is used rather than read function or form
            data.
         */
-        char *p = Curl_memdup0(ptr, (size_t)s->postfieldsize);
+        char *p = Curl_memdup0(ptr, pflen);
         if(!p)
           return CURLE_OUT_OF_MEMORY;
         else {
-          free(s->str[STRING_COPYPOSTFIELDS]);
+          curlx_free(s->str[STRING_COPYPOSTFIELDS]);
           s->str[STRING_COPYPOSTFIELDS] = p;
         }
       }
@@ -1790,11 +1793,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
        * Activate the cookie parser. This may or may not already
        * have been made.
        */
-      struct CookieInfo *newcookies =
-        Curl_cookie_init(data, NULL, data->cookies, s->cookiesession);
-      if(!newcookies)
+      if(!data->cookies)
+        data->cookies = Curl_cookie_init();
+      if(!data->cookies)
         result = CURLE_OUT_OF_MEMORY;
-      data->cookies = newcookies;
+      else
+        data->state.cookie_engine = TRUE;
     }
     break;
 
@@ -2032,8 +2036,8 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
       result = Curl_urldecode(p, 0, &s->str[STRING_PROXYPASSWORD], NULL,
                               REJECT_ZERO);
     }
-    free(u);
-    free(p);
+    curlx_free(u);
+    curlx_free(p);
   }
     break;
   case CURLOPT_PROXYUSERNAME:
@@ -2162,8 +2166,9 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * Set the client IP to send through HAProxy PROXY protocol
      */
     result = Curl_setstropt(&s->str[STRING_HAPROXY_CLIENT_IP], ptr);
-    /* enable the HAProxy protocol */
-    s->haproxyprotocol = TRUE;
+
+    /* enable the HAProxy protocol if an IP is provided */
+    s->haproxyprotocol = !!s->str[STRING_HAPROXY_CLIENT_IP];
     break;
 
 #endif
@@ -2354,17 +2359,27 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
 #endif /* USE_LIBSSH2 */
 #endif /* USE_SSH */
   case CURLOPT_PROTOCOLS_STR:
-    if(ptr)
-      return protocol2num(ptr, &s->allowed_protocols);
-    /* make a NULL argument reset to default */
-    s->allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
+    if(ptr) {
+      curl_prot_t protos;
+      result = protocol2num(ptr, &protos);
+      if(!result)
+        s->allowed_protocols = protos;
+    }
+    else
+      /* make a NULL argument reset to default */
+      s->allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
     break;
 
   case CURLOPT_REDIR_PROTOCOLS_STR:
-    if(ptr)
-      return protocol2num(ptr, &s->redir_protocols);
-    /* make a NULL argument reset to default */
-    s->redir_protocols = (curl_prot_t) CURLPROTO_REDIR;
+    if(ptr) {
+      curl_prot_t protos;
+      result = protocol2num(ptr, &protos);
+      if(!result)
+        s->redir_protocols = protos;
+    }
+    else
+      /* make a NULL argument reset to default */
+      s->redir_protocols = (curl_prot_t) CURLPROTO_REDIR;
     break;
 
   case CURLOPT_DEFAULT_PROTOCOL:
@@ -2823,6 +2838,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_send_speed = offt;
+    Curl_rlimit_init(&data->progress.ul.rlimit, offt, offt, curlx_now());
     break;
   case CURLOPT_MAX_RECV_SPEED_LARGE:
     /*
@@ -2832,6 +2848,7 @@ static CURLcode setopt_offt(struct Curl_easy *data, CURLoption option,
     if(offt < 0)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     s->max_recv_speed = offt;
+    Curl_rlimit_init(&data->progress.dl.rlimit, offt, offt, curlx_now());
     break;
   case CURLOPT_RESUME_FROM_LARGE:
     /*

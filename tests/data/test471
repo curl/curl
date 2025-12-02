@@ -46,7 +46,7 @@ http
 <name>
 Reject HTTP/1.1 to HTTP/2 switch on the same connection
 </name>
- <command option="no-output">
+<command option="no-output">
 "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER0001}" -o "%LOGDIR/dumpit#1.dump"
 </command>
 </client>
@@ -54,7 +54,7 @@ Reject HTTP/1.1 to HTTP/2 switch on the same connection
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -36,7 +36,8 @@
  * https://github.com/curl/curl/blob/curl-7_88_1/docs/examples/threaded-ssl.c
  */
 
-#define USE_OPENSSL /* or USE_GNUTLS accordingly */
+/* Requires: HAVE_PTHREAD_H */
+/* Also requires TLS support to run */
 
 #include <stdio.h>
 #include <pthread.h>
@@ -45,46 +46,52 @@
 #define NUMT 4
 
 /* List of URLs to fetch.*/
-static const char * const urls[]= {
+static const char * const urls[] = {
   "https://www.example.com/",
   "https://www2.example.com/",
   "https://www3.example.com/",
   "https://www4.example.com/",
 };
 
-static void *pull_one_url(void *url)
+static void *pull_one_url(void *pindex)
 {
   CURL *curl;
 
   curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, url);
-  /* this example does not verify the server's certificate, which means we
-     might be downloading stuff from an impostor */
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-  curl_easy_perform(curl); /* ignores error */
-  curl_easy_cleanup(curl);
+  if(curl) {
+    int i = *(int *)pindex;
+    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+    /* this example does not verify the server's certificate, which means we
+       might be downloading stuff from an impostor */
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    (void)curl_easy_perform(curl); /* ignores error */
+    curl_easy_cleanup(curl);
+  }
 
   return NULL;
 }
 
 int main(int argc, char **argv)
 {
+  CURLcode res;
   pthread_t tid[NUMT];
   int i;
   (void)argc;
   (void)argv;
 
   /* Must initialize libcurl before any threads are started */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   for(i = 0; i < NUMT; i++) {
     int error = pthread_create(&tid[i],
                                NULL, /* default attributes please */
                                pull_one_url,
-                               (void *)urls[i]);
+                               (void *)&i);
     if(error)
-      fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
+      fprintf(stderr, "Could not run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }
@@ -94,6 +101,8 @@ int main(int argc, char **argv)
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
+
+  curl_global_cleanup();
 
   return 0;
 }

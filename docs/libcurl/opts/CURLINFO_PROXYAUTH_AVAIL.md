@@ -15,7 +15,7 @@ Added-in: 7.10.8
 
 # NAME
 
-CURLINFO_PROXYAUTH_AVAIL - get available HTTP proxy authentication methods
+CURLINFO_PROXYAUTH_AVAIL - HTTP proxy authentication methods
 
 # SYNOPSIS
 

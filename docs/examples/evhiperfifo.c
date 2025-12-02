@@ -61,22 +61,22 @@ This is purely a demo app, all retrieved data is simply discarded by the write
 callback.
 
 */
-
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/poll.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
-#include <sys/poll.h>
-#include <curl/curl.h>
+
 #include <ev.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <errno.h>
+
+#include <curl/curl.h>
 
 #define MSG_OUT stdout /* Send info to stdout, change to stderr if you want */
-
 
 /* Global information, common to all connections */
 struct GlobalInfo {
@@ -90,7 +90,7 @@ struct GlobalInfo {
 
 /* Information associated with a specific easy handle */
 struct ConnInfo {
-  CURL *easy;
+  CURL *curl;
   char *url;
   struct GlobalInfo *global;
   char error[CURL_ERROR_SIZE];
@@ -99,7 +99,7 @@ struct ConnInfo {
 /* Information associated with a specific socket */
 struct SockInfo {
   curl_socket_t sockfd;
-  CURL *easy;
+  CURL *curl;
   int action;
   long timeout;
   struct ev_io ev;
@@ -117,7 +117,7 @@ static int multi_timer_cb(CURLM *multi, long timeout_ms, struct GlobalInfo *g)
   ev_timer_stop(g->loop, &g->timer_event);
   if(timeout_ms >= 0) {
     /* -1 means delete, other values are timeout times in milliseconds */
-    double  t = timeout_ms / 1000;
+    double t = timeout_ms / 1000;
     ev_timer_init(&g->timer_event, timer_cb, t, 0.);
     ev_timer_start(g->loop, &g->timer_event);
   }
@@ -169,20 +169,18 @@ static void check_multi_info(struct GlobalInfo *g)
   CURLMsg *msg;
   int msgs_left;
   struct ConnInfo *conn;
-  CURL *easy;
-  CURLcode res;
 
   fprintf(MSG_OUT, "REMAINING: %d\n", g->still_running);
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
-      easy = msg->easy_handle;
-      res = msg->data.result;
-      curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
-      curl_easy_getinfo(easy, CURLINFO_EFFECTIVE_URL, &eff_url);
+      CURL *curl = msg->easy_handle;
+      CURLcode res = msg->data.result;
+      curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
       fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, res, conn->error);
-      curl_multi_remove_handle(g->multi, easy);
+      curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
-      curl_easy_cleanup(easy);
+      curl_easy_cleanup(curl);
       free(conn);
     }
   }
@@ -196,7 +194,7 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   int action;
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
-  g = (struct GlobalInfo*) w->data;
+  g = (struct GlobalInfo *)w->data;
 
   action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
            ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
@@ -247,7 +245,7 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 
   f->sockfd = s;
   f->action = act;
-  f->easy = e;
+  f->curl = e;
   if(f->evset)
     ev_io_stop(g->loop, &f->ev);
   ev_io_init(&f->ev, event_cb, f->sockfd, kind);
@@ -257,28 +255,27 @@ static void setsock(struct SockInfo *f, curl_socket_t s, CURL *e, int act,
 }
 
 /* Initialize a new SockInfo structure */
-static void addsock(curl_socket_t s, CURL *easy, int action,
+static void addsock(curl_socket_t s, CURL *curl, int action,
                     struct GlobalInfo *g)
 {
   struct SockInfo *fdp = calloc(1, sizeof(struct SockInfo));
 
   fdp->global = g;
-  setsock(fdp, s, easy, action, g);
+  setsock(fdp, s, curl, action, g);
   curl_multi_assign(g->multi, s, fdp);
 }
 
 /* CURLMOPT_SOCKETFUNCTION */
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  struct GlobalInfo *g = (struct GlobalInfo*) cbp;
-  struct SockInfo *fdp = (struct SockInfo*) sockp;
-  const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE"};
+  struct GlobalInfo *g = (struct GlobalInfo *)cbp;
+  struct SockInfo *fdp = (struct SockInfo *)sockp;
+  const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
 
   printf("%s e %p s %i what %i cbp %p sockp %p\n",
          __PRETTY_FUNCTION__, e, s, what, cbp, sockp);
 
-  fprintf(MSG_OUT,
-          "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
+  fprintf(MSG_OUT, "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {
     fprintf(MSG_OUT, "\n");
     remsock(fdp, g);
@@ -289,8 +286,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
       addsock(s, e, what, g);
     }
     else {
-      fprintf(MSG_OUT,
-              "Changing action from %s to %s\n",
+      fprintf(MSG_OUT, "Changing action from %s to %s\n",
               whatstr[fdp->action], whatstr[what]);
       setsock(fdp, s, e, what, g);
     }
@@ -302,7 +298,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
-  struct ConnInfo *conn = (struct ConnInfo*) data;
+  struct ConnInfo *conn = (struct ConnInfo *)data;
   (void)ptr;
   (void)conn;
   return realsize;
@@ -316,8 +312,9 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
-          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T "/"
+          "%" CURL_FORMAT_CURL_OFF_T ")\n",
+          conn->url, dlnow, dltotal);
   return 0;
 }
 
@@ -328,30 +325,30 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   CURLMcode rc;
 
   conn = calloc(1, sizeof(*conn));
-  conn->error[0]='\0';
+  conn->error[0] = '\0';
 
-  conn->easy = curl_easy_init();
-  if(!conn->easy) {
+  conn->curl = curl_easy_init();
+  if(!conn->curl) {
     fprintf(MSG_OUT, "curl_easy_init() failed, exiting!\n");
     exit(2);
   }
   conn->global = g;
   conn->url = strdup(url);
-  curl_easy_setopt(conn->easy, CURLOPT_URL, conn->url);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
-  curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(conn->easy, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
-  curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
-  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_TIME, 3L);
-  curl_easy_setopt(conn->easy, CURLOPT_LOW_SPEED_LIMIT, 10L);
+  curl_easy_setopt(conn->curl, CURLOPT_URL, conn->url);
+  curl_easy_setopt(conn->curl, CURLOPT_WRITEFUNCTION, write_cb);
+  curl_easy_setopt(conn->curl, CURLOPT_WRITEDATA, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_VERBOSE, 1L);
+  curl_easy_setopt(conn->curl, CURLOPT_ERRORBUFFER, conn->error);
+  curl_easy_setopt(conn->curl, CURLOPT_PRIVATE, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_NOPROGRESS, 0L);
+  curl_easy_setopt(conn->curl, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
+  curl_easy_setopt(conn->curl, CURLOPT_PROGRESSDATA, conn);
+  curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_TIME, 3L);
+  curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_LIMIT, 10L);
 
-  fprintf(MSG_OUT,
-          "Adding easy %p to multi %p (%s)\n", conn->easy, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->easy);
+  fprintf(MSG_OUT, "Adding easy %p to multi %p (%s)\n",
+          conn->curl, g->multi, url);
+  rc = curl_multi_add_handle(g->multi, conn->curl);
   mcode_or_die("new_conn: curl_multi_add_handle", rc);
 
   /* note that add_handle() sets a timeout to trigger soon so that the
@@ -369,9 +366,9 @@ static void fifo_cb(EV_P_ struct ev_io *w, int revents)
   (void)revents;
 
   do {
-    s[0]='\0';
+    s[0] = '\0';
     rv = fscanf(g->input, "%1023s%n", s, &n);
-    s[n]='\0';
+    s[n] = '\0';
     if(n && s[0]) {
       new_conn(s, g);  /* if we read a URL, go get it! */
     }
@@ -415,9 +412,14 @@ static int init_fifo(struct GlobalInfo *g)
 
 int main(int argc, char **argv)
 {
+  CURLcode res;
   struct GlobalInfo g;
   (void)argc;
   (void)argv;
+
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   memset(&g, 0, sizeof(g));
   g.loop = ev_default_loop(0);
@@ -439,5 +441,6 @@ int main(int argc, char **argv)
 
   ev_loop(g.loop, 0);
   curl_multi_cleanup(g.multi);
+  curl_global_cleanup();
   return 0;
 }

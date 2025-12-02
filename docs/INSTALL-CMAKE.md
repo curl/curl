@@ -221,9 +221,9 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_EXAMPLES`:                         Build libcurl examples. Default: `ON`
 - `BUILD_LIBCURL_DOCS`:                     Build libcurl man pages. Default: `ON`
 - `BUILD_MISC_DOCS`:                        Build misc man pages (e.g. `curl-config` and `mk-ca-bundle`). Default: `ON`
-- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON`
-- `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF`
-- `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
+- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON` (if target platform supports shared libs, otherwise `OFF`)
+- `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF` (turns to `ON`, when building static libcurl only)
+- `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF` (turns to `ON` if `BUILD_SHARED_LIBS` is `OFF`)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
@@ -255,10 +255,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 
 ## CA bundle options
 
-- `CURL_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
-- `CURL_CA_EMBED`:                          Path to the CA bundle to embed in the curl tool. Default: (disabled)
+- `CURL_CA_BUNDLE`:                         Absolute path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `CURL_CA_EMBED`:                          Absolute path to the CA bundle to embed in the curl tool. Default: (disabled)
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of OpenSSL. Default: `OFF`
-- `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
 
 ## Enabling features
@@ -317,10 +317,11 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_SHUFFLE_DNS`:               Disable shuffle DNS feature. Default: `OFF`
 - `CURL_DISABLE_SMB`:                       Disable SMB. Default: `OFF`
 - `CURL_DISABLE_SMTP`:                      Disable SMTP. Default: `OFF`
-- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll. Default: `OFF`
+- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll(). Default: `OFF`
 - `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
 - `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
+- `CURL_DISABLE_TYPECHECK`:                 Disable curl_easy_setopt()/curl_easy_getinfo() type checking. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
 - `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
@@ -354,6 +355,7 @@ Details via CMake
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
 - `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `CURL_USE_LIBBACKTRACE`:                  Use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace). Requires build with TrackMemory and DWARF debug information. Default: `OFF`
 - `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
 - `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
 - `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
@@ -379,13 +381,13 @@ Details via CMake
 
 ## Dependency options (via CMake)
 
-- `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
-- `OPENSSL_INCLUDE_DIR`:                    The OpenSSL include directory.
-- `OPENSSL_SSL_LIBRARY`:                    Path to `ssl` library. With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
-- `OPENSSL_CRYPTO_LIBRARY`:                 Path to `crypto` library. With MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
+- `OPENSSL_ROOT_DIR`:                       Absolute path to the root installation of OpenSSL (and forks).
+- `OPENSSL_INCLUDE_DIR`:                    Absolute path to OpenSSL include directory.
+- `OPENSSL_SSL_LIBRARY`:                    Absolute path to `ssl` library. With MSVC, CMake uses variables `SSL_EAY_DEBUG`/`SSL_EAY_RELEASE` instead.
+- `OPENSSL_CRYPTO_LIBRARY`:                 Absolute path to `crypto` library. With MSVC, CMake uses variables `LIB_EAY_DEBUG`/`LIB_EAY_RELEASE` instead.
 - `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
-- `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
-- `ZLIB_LIBRARY`:                           Path to `zlib` library.
+- `ZLIB_INCLUDE_DIR`:                       Absolute path to zlib include directory.
+- `ZLIB_LIBRARY`:                           Absolute path to `zlib` library.
 - `ZLIB_USE_STATIC_LIBS`:                   Look for static ZLIB library (requires CMake v3.24).
 
 ## Dependency options (tools)
@@ -395,62 +397,82 @@ Details via CMake
 
 ## Dependency options (libraries)
 
-- `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
-- `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
-- `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
-- `BROTLI_INCLUDE_DIR`:                     The brotli include directory.
-- `BROTLICOMMON_LIBRARY`:                   Path to `brotlicommon` library.
-- `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library.
-- `CARES_INCLUDE_DIR`:                      The c-ares include directory.
-- `CARES_LIBRARY`:                          Path to `cares` library.
-- `DL_LIBRARY`:                             Path to `dl` library. (for Rustls)
-- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS. (also supported as environment)
-- `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
-- `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
-- `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory.
-- `LIBGSASL_INCLUDE_DIR`:                   The libgsasl include directory.
-- `LIBGSASL_LIBRARY`:                       Path to `libgsasl` library.
-- `LIBIDN2_INCLUDE_DIR`:                    The libidn2 include directory.
-- `LIBIDN2_LIBRARY`:                        Path to `libidn2` library.
-- `LIBPSL_INCLUDE_DIR`:                     The libpsl include directory.
-- `LIBPSL_LIBRARY`:                         Path to `libpsl` library.
-- `LIBRTMP_INCLUDE_DIR`:                    The librtmp include directory.
-- `LIBRTMP_LIBRARY`:                        Path to `librtmp` library.
-- `LIBSSH_INCLUDE_DIR`:                     The libssh include directory.
-- `LIBSSH_LIBRARY`:                         Path to `libssh` library.
-- `LIBSSH2_INCLUDE_DIR`:                    The libssh2 include directory.
-- `LIBSSH2_LIBRARY`:                        Path to `libssh2` library.
-- `LIBUV_INCLUDE_DIR`:                      The libuv include directory.
-- `LIBUV_LIBRARY`:                          Path to `libuv` library.
-- `MATH_LIBRARY`:                           Path to `m` library. (for Rustls, wolfSSL)
-- `MBEDTLS_INCLUDE_DIR`:                    The mbedTLS include directory.
-- `MBEDTLS_LIBRARY`:                        Path to `mbedtls` library.
-- `MBEDX509_LIBRARY`:                       Path to `mbedx509` library.
-- `MBEDCRYPTO_LIBRARY`:                     Path to `mbedcrypto` library.
-- `NGHTTP2_INCLUDE_DIR`:                    The nghttp2 include directory.
-- `NGHTTP2_LIBRARY`:                        Path to `nghttp2` library.
-- `NGHTTP3_INCLUDE_DIR`:                    The nghttp3 include directory.
-- `NGHTTP3_LIBRARY`:                        Path to `nghttp3` library.
-- `NGTCP2_INCLUDE_DIR`:                     The ngtcp2 include directory.
-- `NGTCP2_LIBRARY`:                         Path to `ngtcp2` library.
-- `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Path to `ngtcp2_crypto_boringssl` library. (also for AWS-LC)
-- `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:           Path to `ngtcp2_crypto_gnutls` library.
-- `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:         Path to `ngtcp2_crypto_libressl` library. (requires ngtcp2 1.15.0+)
-- `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Path to `ngtcp2_crypto_ossl` library.
-- `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
-- `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Path to `ngtcp2_crypto_wolfssl` library.
-- `NETTLE_INCLUDE_DIR`:                     The nettle include directory.
-- `NETTLE_LIBRARY`:                         Path to `nettle` library.
-- `PTHREAD_LIBRARY`:                        Path to `pthread` library. (for Rustls)
-- `QUICHE_INCLUDE_DIR`:                     The quiche include directory.
-- `QUICHE_LIBRARY`:                         Path to `quiche` library.
-- `RUSTLS_INCLUDE_DIR`:                     The Rustls include directory.
-- `RUSTLS_LIBRARY`:                         Path to `rustls` library.
-- `WATT_ROOT`:                              Set this variable to the root installation of Watt-32.
-- `WOLFSSL_INCLUDE_DIR`:                    The wolfSSL include directory.
-- `WOLFSSL_LIBRARY`:                        Path to `wolfssl` library.
-- `ZSTD_INCLUDE_DIR`:                       The zstd include directory.
-- `ZSTD_LIBRARY`:                           Path to `zstd` library.
+- `AMISSL_INCLUDE_DIR`:                     Absolute path to AmiSSL include directory.
+- `AMISSL_STUBS_LIBRARY`:                   Absolute path to `amisslstubs` library.
+- `AMISSL_AUTO_LIBRARY`:                    Absolute path to `amisslauto` library.
+- `BROTLI_INCLUDE_DIR`:                     Absolute path to brotli include directory.
+- `BROTLICOMMON_LIBRARY`:                   Absolute path to `brotlicommon` library.
+- `BROTLIDEC_LIBRARY`:                      Absolute path to `brotlidec` library.
+- `CARES_INCLUDE_DIR`:                      Absolute path to c-ares include directory.
+- `CARES_LIBRARY`:                          Absolute path to `cares` library.
+- `DL_LIBRARY`:                             Absolute path to `dl` library. (for Rustls)
+- `GNUTLS_INCLUDE_DIR`:                     Absolute path to GnuTLS include directory.
+- `GNUTLS_LIBRARY`:                         Absolute path to `gnutls` library.
+- `GSS_ROOT_DIR`:                           Absolute path to the root installation of GSS. (also supported as environment)
+- `LDAP_INCLUDE_DIR`:                       Absolute path to LDAP include directory.
+- `LDAP_LIBRARY`:                           Absolute path to `ldap` library.
+- `LDAP_LBER_LIBRARY`:                      Absolute path to `lber` library.
+- `LIBBACKTRACE_INCLUDE_DIR`:               Absolute path to libbacktrace include directory (https://github.com/ianlancetaylor/libbacktrace).
+- `LIBBACKTRACE_LIBRARY`:                   Absolute path to `libbacktrace` library.
+- `LIBGSASL_INCLUDE_DIR`:                   Absolute path to libgsasl include directory.
+- `LIBGSASL_LIBRARY`:                       Absolute path to `libgsasl` library.
+- `LIBIDN2_INCLUDE_DIR`:                    Absolute path to libidn2 include directory.
+- `LIBIDN2_LIBRARY`:                        Absolute path to `libidn2` library.
+- `LIBPSL_INCLUDE_DIR`:                     Absolute path to libpsl include directory.
+- `LIBPSL_LIBRARY`:                         Absolute path to `libpsl` library.
+- `LIBRTMP_INCLUDE_DIR`:                    Absolute path to librtmp include directory.
+- `LIBRTMP_LIBRARY`:                        Absolute path to `librtmp` library.
+- `LIBSSH_INCLUDE_DIR`:                     Absolute path to libssh include directory.
+- `LIBSSH_LIBRARY`:                         Absolute path to `libssh` library.
+- `LIBSSH2_INCLUDE_DIR`:                    Absolute path to libssh2 include directory.
+- `LIBSSH2_LIBRARY`:                        Absolute path to `libssh2` library.
+- `LIBUV_INCLUDE_DIR`:                      Absolute path to libuv include directory.
+- `LIBUV_LIBRARY`:                          Absolute path to `libuv` library.
+- `MATH_LIBRARY`:                           Absolute path to `m` library. (for Rustls, wolfSSL)
+- `MBEDTLS_INCLUDE_DIR`:                    Absolute path to mbedTLS include directory.
+- `MBEDTLS_LIBRARY`:                        Absolute path to `mbedtls` library.
+- `MBEDX509_LIBRARY`:                       Absolute path to `mbedx509` library.
+- `MBEDCRYPTO_LIBRARY`:                     Absolute path to `mbedcrypto` library.
+- `NGHTTP2_INCLUDE_DIR`:                    Absolute path to nghttp2 include directory.
+- `NGHTTP2_LIBRARY`:                        Absolute path to `nghttp2` library.
+- `NGHTTP3_INCLUDE_DIR`:                    Absolute path to nghttp3 include directory.
+- `NGHTTP3_LIBRARY`:                        Absolute path to `nghttp3` library.
+- `NGTCP2_INCLUDE_DIR`:                     Absolute path to ngtcp2 include directory.
+- `NGTCP2_LIBRARY`:                         Absolute path to `ngtcp2` library.
+- `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Absolute path to `ngtcp2_crypto_boringssl` library. (also for AWS-LC)
+- `NGTCP2_CRYPTO_GNUTLS_LIBRARY`:           Absolute path to `ngtcp2_crypto_gnutls` library.
+- `NGTCP2_CRYPTO_LIBRESSL_LIBRARY`:         Absolute path to `ngtcp2_crypto_libressl` library. (requires ngtcp2 1.15.0+)
+- `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Absolute path to `ngtcp2_crypto_ossl` library.
+- `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Absolute path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
+- `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Absolute path to `ngtcp2_crypto_wolfssl` library.
+- `NETTLE_INCLUDE_DIR`:                     Absolute path to nettle include directory.
+- `NETTLE_LIBRARY`:                         Absolute path to `nettle` library.
+- `PTHREAD_LIBRARY`:                        Absolute path to `pthread` library. (for Rustls)
+- `QUICHE_INCLUDE_DIR`:                     Absolute path to quiche include directory.
+- `QUICHE_LIBRARY`:                         Absolute path to `quiche` library.
+- `RUSTLS_INCLUDE_DIR`:                     Absolute path to Rustls include directory.
+- `RUSTLS_LIBRARY`:                         Absolute path to `rustls` library.
+- `WATT_ROOT`:                              Absolute path to the root installation of Watt-32.
+- `WOLFSSL_INCLUDE_DIR`:                    Absolute path to wolfSSL include directory.
+- `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
+- `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
+- `ZSTD_LIBRARY`:                           Absolute path to `zstd` library.
+
+Examples:
+
+- `-DLIBPSL_INCLUDE_DIR=/path/to/libpl/include`,
+  which directory contains `libpsl.h`.
+  No ending slash or backslash is necessary.
+
+- `-DNGHTTP3_INCLUDE_DIR=/path/to/libnghttp3/include`,
+  which directory contains an `nghttp3` subdirectory with `.h` files in it.
+
+- `-DLIBPSL_LIBRARY=/path/to/libpsl/lib/libpsl.a`
+  Always a single library, with its complete filename, as-is on the file system.
+
+- `-DOPENSSL_ROOT_DIR=/path/to/openssl`,
+  which directory (typically) contains `include` and `lib` subdirectories.
+  No ending slash or backslash is necessary.
 
 ## Test tools
 
@@ -473,10 +495,11 @@ the parent project, ideally in the "extra" find package redirect file:
 
 Available variables:
 
+- `HAVE_DES_ECB_ENCRYPT`:                   `DES_ecb_encrypt` present in OpenSSL (or fork).
 - `HAVE_GNUTLS_SRP`:                        `gnutls_srp_verifier` present in GnuTLS.
-- `HAVE_GSS_C_NT_HOSTBASED_SERVICE`:        `GSS_C_NT_HOSTBASED_SERVICE` present in GSS/Heimdal/Kerberos.
 - `HAVE_LDAP_INIT_FD`:                      `ldap_init_fd` present in LDAP library.
 - `HAVE_LDAP_URL_PARSE`:                    `ldap_url_parse` present in LDAP library.
+- `HAVE_MBEDTLS_DES_CRYPT_ECB`:             `mbedtls_des_crypt_ecb` present in mbedTLS <4.
 - `HAVE_OPENSSL_SRP`:                       `SSL_CTX_set_srp_username` present in OpenSSL (or fork).
 - `HAVE_QUICHE_CONN_SET_QLOG_FD`:           `quiche_conn_set_qlog_fd` present in quiche.
 - `HAVE_RUSTLS_SUPPORTED_HPKE`:             `rustls_supported_hpke` present in Rustls (unused if Rustls is detected via `pkg-config`).
@@ -498,6 +521,26 @@ or `OFF`), the symbol detection is skipped. If the variable is *not defined*,
 the feature detection is performed.
 
 Note: These variables are internal and subject to change.
+
+## Useful build targets
+
+- `testdeps`:               Build test dependencies (servers, tools, test certificates).
+                            Individual targets: `curlinfo`, `libtests`, `servers`, `tunits`, `units`
+                            Test certificates: `build-certs`, `clean-certs`
+- `tests`:                  Run tests (`runtests.pl`). Customize via the `TFLAGS` environment variable, e.g. `TFLAGS=1621`.
+                            Other flavors: `test-am`, `test-ci`, `test-event`, `test-full`, `test-nonflaky`, `test-quiet`, `test-torture`
+- `curl-pytest`:            Run tests (pytest).
+                            Other flavor: `curl-test-ci`
+- `curl-examples`:          Build examples
+                            Individual targets: `curl-example-<name>`,
+                            where <name> is the .c filename without extension.
+- `curl-examples-build`:    Build examples quickly but without the ability to run them (for build tests)
+- `curl-man`:               Build man pages (built by default unless disabled)
+- `curl_uninstall`:         Uninstall curl
+- `curl-completion-fish`:   Build shell completions for fish (built by default if enabled)
+- `curl-completion-zsh`:    Build shell completions for zsh (built by default if enabled)
+- `curl-ca-bundle`:         Build the CA bundle via `scripts/mk-ca-bundle.pl`
+- `curl-ca-firefox`:        Build the CA bundle via `scripts/firefox-db2pem.sh`
 
 # Migrating from Visual Studio IDE Project Files
 

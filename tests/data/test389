@@ -40,13 +40,13 @@ local-http
 <command>
 -4 http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost
+# Ensure that we are running on localhost
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: curlmachine.localhost:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -11,7 +11,7 @@
 # the files fit into the category, and the any-glob-to-any-file ones are added
 # as long as any file matches. The first ones are for "major" categories (the
 # PR is all about that one topic, like HTTP/3), while the second ones are
-# "addendums" that give useful information about a PR that's really mostly
+# "addendums" that give useful information about a PR that is really mostly
 # something else (e.g. CI if the PR also touches CI jobs).
 #
 # N.B. any-glob-to-all-files is misnamed; it acts like one-glob-to-all-files.
@@ -162,9 +162,9 @@ cryptography:
               docs/libcurl/opts/CURLOPT_EGDSOCKET*,\
               lib/*sha256*,\
               lib/*sha512*,\
-              lib/curl_des.*,\
               lib/curl_hmac.*,\
               lib/curl_md?.*,\
+              lib/curl_ntlm_core.*,\
               lib/md?.*,\
               lib/rand.*\
               }"
@@ -451,6 +451,7 @@ TLS:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
+              CMake/FindGnuTLS.cmake,\
               CMake/FindMbedTLS.cmake,\
               CMake/FindWolfSSL.cmake,\
               CMake/FindRustls.cmake,\

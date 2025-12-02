@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 #if !CURL_AT_LEAST_VERSION(7,87,0)
@@ -37,7 +38,9 @@ int main(void)
   curl_version_info_data *ver;
   const char *const *ptr;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   ver = curl_version_info(CURLVERSION_NOW);
   printf("Protocols:\n");

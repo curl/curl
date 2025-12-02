@@ -11,7 +11,7 @@ FAILURE
 # Server-side
 <reply>
 # Some servers (e.g. Apache 1.2) respond this way to an invalid byte range
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Connection: close
 Content-Length: 100
@@ -42,11 +42,11 @@ Content-Type: text/plain
 012345678
 012345678
 012345678
-HTTP/1.1 200 OK
-Connection: close
-Content-Length: 100
-Content-Type: text/plain
-
+HTTP/1.1 200 OK%CR
+Connection: close%CR
+Content-Length: 100%CR
+Content-Type: text/plain%CR
+%CR
 </datacheck>
 </reply>
 
@@ -80,7 +80,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 200
 <errorcode>
 33
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=200-

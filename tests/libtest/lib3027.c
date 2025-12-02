@@ -23,31 +23,29 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib3027(const char *URL)
 {
   CURLcode ret = CURLE_OK;
-  CURL *hnd;
+  CURL *curl;
   start_test_timing();
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
-  if(hnd) {
-    curl_easy_setopt(hnd, CURLOPT_URL, URL);
-    curl_easy_setopt(hnd, CURLOPT_FILETIME, 1L);
-    ret = curl_easy_perform(hnd);
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, URL);
+    curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
+    ret = curl_easy_perform(curl);
     if(CURLE_OK == ret) {
       long filetime;
-      ret = curl_easy_getinfo(hnd, CURLINFO_FILETIME, &filetime);
+      ret = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
       /* MTDM fails with 550, so filetime should be -1 */
       if((CURLE_OK == ret) && (filetime != -1)) {
         /* we just need to return something which is not CURLE_OK */
         ret = CURLE_UNSUPPORTED_PROTOCOL;
       }
     }
-    curl_easy_cleanup(hnd);
+    curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
   return ret;

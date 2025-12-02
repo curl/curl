@@ -34,16 +34,8 @@ my @tabs = (
     "^tests/data/test",
 );
 
-my @mixed_eol = (
-    "^tests/data/test",
-);
-
 my @need_crlf = (
     "\\.(bat|sln)\$",
-);
-
-my @space_at_eol = (
-    "^tests/data/test",
 );
 
 my @non_ascii_allowed = (
@@ -53,7 +45,7 @@ my @non_ascii_allowed = (
 my $non_ascii_allowed = join(', ', @non_ascii_allowed);
 
 my @non_ascii = (
-    ".github/scripts/spellcheck.words",
+    ".github/scripts/pyspelling.words",
     ".mailmap",
     "RELEASE-NOTES",
     "docs/BINDINGS.md",
@@ -96,11 +88,11 @@ sub eol_detect {
 
 my $issues = 0;
 
-open my $git_ls_files, '-|', 'git ls-files' or die "Failed running git ls-files: $!";
+open(my $git_ls_files, '-|', 'git ls-files') or die "Failed running git ls-files: $!";
 while(my $filename = <$git_ls_files>) {
     chomp $filename;
 
-    open my $fh, '<', $filename or die "Cannot open '$filename': $!";
+    open(my $fh, '<', $filename) or die "Cannot open '$filename': $!";
     my $content = do { local $/; <$fh> };
     close $fh;
 
@@ -113,8 +105,7 @@ while(my $filename = <$git_ls_files>) {
 
     my $eol = eol_detect($content);
 
-    if($eol eq "" &&
-        !fn_match($filename, @mixed_eol)) {
+    if($eol eq "") {
         push @err, "content: has mixed EOL types";
     }
 
@@ -124,13 +115,11 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($eol ne "lf" && $content ne "" &&
-        !fn_match($filename, @need_crlf) &&
-        !fn_match($filename, @mixed_eol)) {
+        !fn_match($filename, @need_crlf)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
-    if(!fn_match($filename, @space_at_eol) &&
-       $content =~ /[ \t]\n/) {
+    if($content =~ /[ \t]\n/) {
         my $line;
         for my $l (split(/\n/, $content)) {
             $line++;

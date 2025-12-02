@@ -29,11 +29,7 @@
 #ifdef USE_LIBPSL
 
 #include "psl.h"
-#include "share.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "curl_share.h"
 
 void Curl_psl_destroy(struct PslCache *pslcache)
 {

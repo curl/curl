@@ -16,7 +16,7 @@ Added-in: 7.9.7
 
 # NAME
 
-CURLINFO_REDIRECT_COUNT - get the number of redirects
+CURLINFO_REDIRECT_COUNT - number of redirects
 
 # SYNOPSIS
 

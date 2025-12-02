@@ -33,7 +33,7 @@
  * will turn on some CRTL features that are not enabled by default.
  *
  * The CRTL features can also be turned on via logical names, but that
- * impacts all programs and some aren't ready, willing, or able to handle
+ * impacts all programs and some are not ready, willing, or able to handle
  * those settings.
  *
  * On VMS versions that are too old to use the feature setting API, this
@@ -173,7 +173,7 @@ static int sys_crelnm(const char *logname,
 }
 
 
- /* Start of DECC RTL Feature handling */
+/* Start of DECC RTL Feature handling */
 
 /*
 ** Sets default value for a feature
@@ -213,7 +213,6 @@ static void set_features(void)
   /* We always want the new parse style */
   set_feature_default("DECC$ARGV_PARSE_STYLE", ENABLE);
 
-
   /* Unless we are in POSIX compliant mode, we want the old POSIX root
    * enabled.
    */
@@ -237,14 +236,14 @@ static void set_features(void)
   set_feature_default("DECC$EXEC_FILEATTR_INHERITANCE", 2);
 #endif
 
-  /* Don't display trailing dot after files without type */
+  /* Do not display trailing dot after files without type */
   set_feature_default("DECC$READDIR_DROPDOTNOTYPE", ENABLE);
 
   /* For standard output channels buffer output until terminator */
   /* Gets rid of output logs with single character lines in them. */
   set_feature_default("DECC$STDIO_CTX_EOL", ENABLE);
 
-  /* Fix mv aa.bb aa  */
+  /* Fix mv aa.bb aa */
   set_feature_default("DECC$RENAME_NO_INHERIT", ENABLE);
 
   if(use_unix_settings) {
@@ -283,7 +282,7 @@ static void set_features(void)
   /* Set strtol to proper behavior */
   set_feature_default("DECC$STRTOL_ERANGE", ENABLE);
 
-  /* Commented here to prevent future bugs:  A program or user should */
+  /* Commented here to prevent future bugs: A program or user should */
   /* never ever enable DECC$POSIX_STYLE_UID. */
   /* It will probably break all code that accesses UIDs */
   /*  do_not_set_default ("DECC$POSIX_STYLE_UID", TRUE); */

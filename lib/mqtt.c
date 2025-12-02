@@ -34,16 +34,11 @@
 #include "progress.h"
 #include "mqtt.h"
 #include "select.h"
-#include "strdup.h"
 #include "url.h"
 #include "escape.h"
 #include "curlx/warnless.h"
 #include "multiif.h"
 #include "rand.h"
-
-/* The last 2 #includes file should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* first byte is command.
    second byte is for flags. */
@@ -147,14 +142,14 @@ static void mqtt_easy_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   curlx_dyn_free(&mq->sendbuf);
   curlx_dyn_free(&mq->recvbuf);
-  free(mq);
+  curlx_free(mq);
 }
 
 static void mqtt_conn_dtor(void *key, size_t klen, void *entry)
 {
   (void)key;
   (void)klen;
-  free(entry);
+  curlx_free(entry);
 }
 
 static CURLcode mqtt_setup_conn(struct Curl_easy *data,
@@ -164,12 +159,12 @@ static CURLcode mqtt_setup_conn(struct Curl_easy *data,
   struct mqtt_conn *mqtt;
   struct MQTT *mq;
 
-  mqtt = calloc(1, sizeof(*mqtt));
+  mqtt = curlx_calloc(1, sizeof(*mqtt));
   if(!mqtt ||
      Curl_conn_meta_set(conn, CURL_META_MQTT_CONN, mqtt, mqtt_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  mq = calloc(1, sizeof(struct MQTT));
+  mq = curlx_calloc(1, sizeof(struct MQTT));
   if(!mq)
     return CURLE_OUT_OF_MEMORY;
   curlx_dyn_init(&mq->recvbuf, DYN_MQTT_RECV);
@@ -193,7 +188,7 @@ static CURLcode mqtt_send(struct Curl_easy *data,
   if(result)
     return result;
   mq->lastTime = curlx_now();
-  Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)n);
+  Curl_debug(data, CURLINFO_HEADER_OUT, buf, n);
   if(len != n) {
     size_t nsend = len - n;
     if(curlx_dyn_len(&mq->sendbuf)) {
@@ -351,7 +346,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   /* allocating packet */
   if(packetlen > 0xFFFFFFF)
     return CURLE_WEIRD_SERVER_REPLY;
-  packet = calloc(1, packetlen);
+  packet = curlx_calloc(1, packetlen);
   if(!packet)
     return CURLE_OUT_OF_MEMORY;
 
@@ -401,7 +396,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
 
 end:
   if(packet)
-    free(packet);
+    curlx_free(packet);
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
   return result;
@@ -525,7 +520,7 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   n = mqtt_encode_len((char *)encodedsize, packetlen);
   packetlen += n + 1; /* add one for the control packet type byte */
 
-  packet = malloc(packetlen);
+  packet = curlx_malloc(packetlen);
   if(!packet) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -543,8 +538,8 @@ static CURLcode mqtt_subscribe(struct Curl_easy *data)
   result = mqtt_send(data, (const char *)packet, packetlen);
 
 fail:
-  free(topic);
-  free(packet);
+  curlx_free(topic);
+  curlx_free(packet);
   return result;
 }
 
@@ -583,6 +578,8 @@ fail:
   return result;
 }
 
+#define MAX_MQTT_MESSAGE_SIZE 0xFFFFFFF
+
 static CURLcode mqtt_publish(struct Curl_easy *data)
 {
   CURLcode result;
@@ -601,10 +598,11 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
     DEBUGF(infof(data, "mqtt_publish without payload, return bad arg"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  if(postfieldsize < 0)
+  if(!curlx_sotouz_fits(postfieldsize, &payloadlen)) {
+    if(postfieldsize > 0) /* off_t does not fit into size_t */
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     payloadlen = strlen(payload);
-  else
-    payloadlen = (size_t)postfieldsize;
+  }
 
   result = mqtt_get_topic(data, &topic, &topiclen);
   if(result)
@@ -612,9 +610,13 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
 
   remaininglength = payloadlen + 2 + topiclen;
   encodelen = mqtt_encode_len(encodedbytes, remaininglength);
+  if(MAX_MQTT_MESSAGE_SIZE - remaininglength - 1 < encodelen) {
+    result = CURLE_TOO_LARGE;
+    goto fail;
+  }
 
   /* add the control byte and the encoded remaining length */
-  pkt = malloc(remaininglength + 1 + encodelen);
+  pkt = curlx_malloc(remaininglength + 1 + encodelen);
   if(!pkt) {
     result = CURLE_OUT_OF_MEMORY;
     goto fail;
@@ -633,8 +635,8 @@ static CURLcode mqtt_publish(struct Curl_easy *data)
   result = mqtt_send(data, (const char *)pkt, i);
 
 fail:
-  free(pkt);
-  free(topic);
+  curlx_free(pkt);
+  curlx_free(topic);
   return result;
 }
 
@@ -842,7 +844,7 @@ static CURLcode mqtt_ping(struct Curl_easy *data)
      !mq->pingsent &&
      data->set.upkeep_interval_ms > 0) {
     struct curltime t = curlx_now();
-    timediff_t diff = curlx_timediff(t, mq->lastTime);
+    timediff_t diff = curlx_timediff_ms(t, mq->lastTime);
 
     if(diff > data->set.upkeep_interval_ms) {
       /* 0xC0 is PINGREQ, and 0x00 is remaining length */

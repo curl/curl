@@ -9,23 +9,23 @@ HTTP GET
 # Server-side
 <reply>
 <data nocheck="yes">
-HTTP/1.1 200 funky chunky!
-Server: fakeit/0.9 fakeitbad/1.0
-Transfer-Encoding: chunked
-Trailer: chunky-trailer
-Connection: mooo
-ETag: W/"asdf"
-
-40
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-30
-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-21;heresatest=moooo
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+ETag: W/"asdf"%CR
+%CR
+40%CR
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%CR
+30%CR
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb%CR
+21;heresatest=moooo%CR
 cccccccccccccccccccccccccccccccc
-
-0
-chunky-trailer: header data
-
+%CR
+0%CR
+chunky-trailer: header data%CR
+%CR
 </data>
 </reply>
 
@@ -46,7 +46,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --etag-save %LOGDIR/etag%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

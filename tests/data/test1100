@@ -9,14 +9,14 @@ HTTP NTLM auth
 # Server-side
 <reply>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 200 Thanks for this! swsclose
 Content-Length: 25
 
 This is the final page !
 </data>
 
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -28,7 +28,7 @@ This is not the real page either!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 302 Thanks for this, but we want to redir you!
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -38,7 +38,7 @@ Content-Length: 34
 This is not the real page either!
 </data1002>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -80,6 +80,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -L -d "stuff to
 
 # Verify data after the test has been "shot"
 <verify>
+<protocol crlf="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
@@ -90,7 +91,7 @@ Content-Type: application/x-www-form-urlencoded
 
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAAIAAgAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyY3VybGhvc3Q=
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 18
@@ -101,5 +102,6 @@ Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
+</protocol>
 </verify>
 </testcase>

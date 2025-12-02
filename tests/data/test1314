@@ -63,7 +63,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://firstplace.example.com/want/%TESTNUMBER HTTP/1.1
 Host: firstplace.example.com
 User-Agent: curl/%VERSION

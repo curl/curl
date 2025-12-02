@@ -14,6 +14,7 @@ name: 'Docs'
       - '*/ci'
     paths:
       - '.github/workflows/checkdocs.yml'
+      - '.github/scripts/**'
       - '.github/scripts/mdlinkcheck'
       - '/scripts/**'
       - '**.md'
@@ -25,6 +26,7 @@ name: 'Docs'
       - '.github/workflows/checkdocs.yml'
       - '.github/scripts/**'
       - '.github/scripts/mdlinkcheck'
+      - '/scripts/**'
       - '**.md'
       - 'docs/*'
 
@@ -66,10 +68,10 @@ jobs:
   #          JSON
   #
   #      - name: 'trim headers off all *.md files'
-  #        run: git ls-files -z '*.md' | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+  #        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
   #
   #      - name: 'check prose'
-  #        run: git ls-files -z '*.md' | grep -Evz 'CHECKSRC.md|DISTROS.md|curl_mprintf.md|CURLOPT_INTERFACE.md|interface.md' | xargs -0 proselint README
+  #        run: git ls-files '*.md' -z | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint -- README
   #
   #      # This is for CHECKSRC and files with aggressive exclamation mark needs
   #      - name: 'create second proselint config'
@@ -93,7 +95,7 @@ jobs:
     name: 'linkcheck'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -104,14 +106,12 @@ jobs:
     name: 'pyspelling'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
       - name: 'trim all *.md files in docs/'
-        run: |
-          # shellcheck disable=SC2046
-          .github/scripts/cleancmd.pl $(find docs -name '*.md')
+        run: .github/scripts/cleancmd.pl 'docs/*.md'
 
       - name: 'install'
         run: |
@@ -126,23 +126,21 @@ jobs:
         run: |
           source ~/venv/bin/activate
           # setup the custom wordlist
-          grep -v '^#' .github/scripts/spellcheck.words > wordlist.txt
+          grep -v '^#' .github/scripts/pyspelling.words > wordlist.txt
           aspell --version
           pyspelling --version
-          pyspelling --verbose --jobs 5 --config .github/scripts/spellcheck.yaml
+          pyspelling --verbose --jobs 5 --config .github/scripts/pyspelling.yaml
 
   badwords-synopsis:
     name: 'badwords, synopsis'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
       - name: 'badwords'
-        run: |
-          # shellcheck disable=SC2046
-          .github/scripts/badwords.pl < .github/scripts/badwords.txt $(git ls-files '**.md') docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
+        run: .github/scripts/badwords.pl '**.md' docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400 < .github/scripts/badwords.txt
 
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
@@ -151,7 +149,7 @@ jobs:
     name: 'man-examples'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -163,7 +161,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 

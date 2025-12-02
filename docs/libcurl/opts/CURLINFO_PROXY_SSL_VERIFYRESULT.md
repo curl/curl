@@ -18,7 +18,7 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLINFO_PROXY_SSL_VERIFYRESULT - get the result of the proxy certificate verification
+CURLINFO_PROXY_SSL_VERIFYRESULT - result of proxy certificate verification
 
 # SYNOPSIS
 

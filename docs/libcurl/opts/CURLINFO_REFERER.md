@@ -16,7 +16,7 @@ Added-in: 7.76.0
 
 # NAME
 
-CURLINFO_REFERER - get the used referrer request header
+CURLINFO_REFERER - used HTTP referrer request header
 
 # SYNOPSIS
 

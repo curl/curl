@@ -2,9 +2,9 @@ $! File: Build_GNV_curl_pcsi_text.com
 $!
 $! Build the *.pcsi$text file from the four components:
 $!    1. Generated =product header section
-$!    2. [--]readme. file from the Curl distribution, modified to fit
+$!    2. [--]readme. file from the curl distribution, modified to fit
 $!       a pcsi$text file format.
-$!    3. [--]copying file from the Curl distribution, modified to fit
+$!    3. [--]copying file from the curl distribution, modified to fit
 $!       a pcsi$text file format.
 $!    4. Generated Producer section.
 $!

@@ -22,13 +22,13 @@ Content-Length: 9
 
 contents
 </data>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 204 Sure go ahead
 
 </connect>
 <datacheck>
-HTTP/1.1 204 Sure go ahead
-
+HTTP/1.1 204 Sure go ahead%CR
+%CR
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -61,14 +61,14 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

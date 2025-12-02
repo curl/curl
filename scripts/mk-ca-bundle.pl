@@ -60,7 +60,7 @@ $opt_d = 'release';
 # If the OpenSSL commandline is not in search path you can configure it here!
 my $openssl = 'openssl';
 
-my $version = '1.29';
+my $version = '1.30';
 
 $opt_w = 76; # default base64 encoded lines length
 
@@ -91,8 +91,8 @@ my @valid_mozilla_trust_purposes = (
 
 my @valid_mozilla_trust_levels = (
     "TRUSTED_DELEGATOR",    # CAs
-    "NOT_TRUSTED",          # Don't trust these certs.
-    "MUST_VERIFY_TRUST",    # This explicitly tells us that it ISN'T a CA but is
+    "NOT_TRUSTED",          # Do not trust these certs.
+    "MUST_VERIFY_TRUST",    # This explicitly tells us that it IS NOT a CA but is
                             # otherwise ok. In other words, this should tell the
                             # app to ignore any other sources that claim this is
                             # a CA.
@@ -100,7 +100,7 @@ my @valid_mozilla_trust_levels = (
                             # for delegates (i.e. it is not a CA).
 );
 
-my $default_signature_algorithms = $opt_s = "MD5";
+my $default_signature_algorithms = $opt_s = "SHA256";
 
 my @valid_signature_algorithms = (
     "MD5",
@@ -154,7 +154,7 @@ sub warning_message() {
         print "  2) Default to 'release', but more recent updates may be found in other trees\n";
         print "  3) certdata.txt file format may change, lag time to update this script\n";
         print "  4) Generally unwise to blindly trust CAs without manual review & verification\n";
-        print "  5) Mozilla apps use additional security checks aren't represented in certdata\n";
+        print "  5) Mozilla apps use additional security checks are not represented in certdata\n";
         print "  6) Use of this script will make a security engineer grind his teeth and\n";
         print "     swear at you.  ;)\n";
         exit;
@@ -241,13 +241,15 @@ sub parse_csv_param($$@) {
 sub sha256 {
     my $result;
     if($Digest::SHA::VERSION || $Digest::SHA::PurePerl::VERSION) {
-        open(FILE, $_[0]) or die "Can't open '$_[0]': $!";
+        open(FILE, $_[0]) or die "Could not open '$_[0]': $!";
         binmode(FILE);
         $result = $MOD_SHA->new(256)->addfile(*FILE)->hexdigest;
         close(FILE);
     } else {
         # Use OpenSSL command if Perl Digest::SHA modules not available
-        $result = `"$openssl" dgst -r -sha256 "$_[0]"`;
+        open(my $fh, '-|', $openssl, 'dgst', '-r', '-sha256', $_[0]) or die "Failed running openssl on '$_[0]': $!";
+        $result = <$fh>;  # read first line
+        close $fh;
         $result =~ s/^([0-9a-f]{64}) .+/$1/is;
     }
     return $result;
@@ -311,10 +313,16 @@ if(!$opt_n) {
         if($curl) {
             if($curl =~ /^Protocols:.* https( |$)/m) {
                 report "Get certdata with curl!";
-                my $proto = !$opt_k ? "--proto =https" : "";
-                my $quiet = $opt_q ? "-s" : "";
-                my @out = `curl -Lw %{response_code} $proto $quiet -o "$txt" "$url"`;
-                if(!$? && @out && $out[0] == 200) {
+                my @opts = ();
+                push @opts, '--proto', '=https' if !$opt_k;
+                push @opts, '-s' if $opt_q;
+                my $out = '';
+                if(open(my $fh, '-|', 'curl', '-Lw', '%{response_code}', (@opts), '-o', $txt, $url)) {
+                    $out = <$fh>;  # read first line
+                    chomp $out;
+                    close $fh;
+                }
+                if($out && $out == 200) {
                     $fetched = 1;
                     report "Downloaded $txt";
                 }
@@ -349,7 +357,7 @@ if(!$opt_n) {
             report "LWP is not available (LWP::UserAgent not found)";
             exit 1;
         }
-        my $ua  = new LWP::UserAgent(agent => "$0/$version");
+        my $ua = new LWP::UserAgent(agent => "$0/$version");
         $ua->env_proxy();
         $resp = $ua->mirror($url, $txt);
         if($resp && $resp->code eq '304') {
@@ -393,9 +401,9 @@ my $currentdate = scalar gmtime($filedate);
 
 my $format = $opt_t ? "plain text and " : "";
 if($stdout) {
-    open(CRT, '> -') or die "Couldn't open STDOUT: $!\n";
+    open(CRT, '> -') or die "Could not open STDOUT: $!\n";
 } else {
-    open(CRT,">$crt.~") or die "Couldn't open $crt.~: $!\n";
+    open(CRT,">$crt.~") or die "Could not open $crt.~: $!\n";
 }
 print CRT <<EOT;
 ##
@@ -434,7 +442,7 @@ my @precert;
 my $cka_value;
 my $valid = 0;
 
-open(TXT,"$txt") or die "Couldn't open $txt: $!\n";
+open(TXT,"$txt") or die "Could not open $txt: $!\n";
 while(<TXT>) {
     if(/\*\*\*\*\* BEGIN LICENSE BLOCK \*\*\*\*\*/) {
         print CRT;
@@ -621,25 +629,25 @@ while(<TXT>) {
                     $pipe = "|$openssl x509 -" . $hash . " -fingerprint -noout -inform PEM";
                     if(!$stdout) {
                         $pipe .= " >> $crt.~";
-                        close(CRT) or die "Couldn't close $crt.~: $!";
+                        close(CRT) or die "Could not close $crt.~: $!";
                     }
-                    open(TMP, $pipe) or die "Couldn't open openssl pipe: $!";
+                    open(TMP, $pipe) or die "Could not open openssl pipe: $!";
                     print TMP $pem;
-                    close(TMP) or die "Couldn't close openssl pipe: $!";
+                    close(TMP) or die "Could not close openssl pipe: $!";
                     if(!$stdout) {
-                        open(CRT, ">>$crt.~") or die "Couldn't open $crt.~: $!";
+                        open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
                     }
                 }
                 $pipe = "|$openssl x509 -text -inform PEM";
                 if(!$stdout) {
                     $pipe .= " >> $crt.~";
-                    close(CRT) or die "Couldn't close $crt.~: $!";
+                    close(CRT) or die "Could not close $crt.~: $!";
                 }
-                open(TMP, $pipe) or die "Couldn't open openssl pipe: $!";
+                open(TMP, $pipe) or die "Could not open openssl pipe: $!";
                 print TMP $pem;
-                close(TMP) or die "Couldn't close openssl pipe: $!";
+                close(TMP) or die "Could not close openssl pipe: $!";
                 if(!$stdout) {
-                    open(CRT, ">>$crt.~") or die "Couldn't open $crt.~: $!";
+                    open(CRT, ">>$crt.~") or die "Could not open $crt.~: $!";
                 }
             }
             report "Processed: $caname" if($opt_v);
@@ -647,8 +655,8 @@ while(<TXT>) {
         }
     }
 }
-close(TXT) or die "Couldn't close $txt: $!\n";
-close(CRT) or die "Couldn't close $crt.~: $!\n";
+close(TXT) or die "Could not close $txt: $!\n";
+close(CRT) or die "Could not close $crt.~: $!\n";
 unless($stdout) {
     if($opt_b && -e $crt) {
         my $bk = 1;

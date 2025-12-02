@@ -34,10 +34,6 @@
 #include "curlx/winapi.h"
 #include "strerror.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 const char *
 curl_easy_strerror(CURLcode error)
 {
@@ -679,7 +675,7 @@ const char *Curl_sspi_strerror(SECURITY_STATUS err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
 #ifdef _WIN32
   if(old_win_err != GetLastError())

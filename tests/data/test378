@@ -29,7 +29,7 @@ Reject using -T and -d at once
 2
 </errorcode>
 <stderr mode="text">
-Warning: You can only select one HTTP request method! You asked for both PUT 
+Warning: You can only select one HTTP request method! You asked for both PUT%SP
 Warning: (-T, --upload-file) and POST (-d, --data).
 </stderr>
 </verify>

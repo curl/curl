@@ -23,22 +23,20 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Get a single URL without select().
  */
 
 static CURLcode test_lib674(const char *URL)
 {
-  CURL *handle = NULL;
-  CURL *handle2;
+  CURL *curl = NULL;
+  CURL *curl2;
   CURLcode res = CURLE_OK;
   CURLU *urlp = NULL;
   CURLUcode uc = CURLUE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  easy_init(handle);
+  easy_init(curl);
 
   urlp = curl_url();
 
@@ -56,10 +54,10 @@ static CURLcode test_lib674(const char *URL)
 
   /* demonstrate override behavior */
 
-  easy_setopt(handle, CURLOPT_CURLU, urlp);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_CURLU, urlp);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(handle);
+  res = curl_easy_perform(curl);
 
   if(res) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
@@ -68,14 +66,14 @@ static CURLcode test_lib674(const char *URL)
     goto test_cleanup;
   }
 
-  handle2 = curl_easy_duphandle(handle);
-  res = curl_easy_perform(handle2);
-  curl_easy_cleanup(handle2);
+  curl2 = curl_easy_duphandle(curl);
+  res = curl_easy_perform(curl2);
+  curl_easy_cleanup(curl2);
 
 test_cleanup:
 
   curl_url_cleanup(urlp);
-  curl_easy_cleanup(handle);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;

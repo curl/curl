@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib544(const char *URL)
 {
   CURL *curl;
@@ -67,11 +65,11 @@ static CURLcode test_lib544(const char *URL)
   strcpy(teststring, "FAIL");
 
   {
-    CURL *handle2;
-    handle2 = curl_easy_duphandle(curl);
+    CURL *curl2;
+    curl2 = curl_easy_duphandle(curl);
     curl_easy_cleanup(curl);
 
-    curl = handle2;
+    curl = curl2;
   }
 
   /* Now, this is a POST request with binary 0 embedded in POST data. */

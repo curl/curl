@@ -11,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/%TESTNUMBER0099.txt?coolsite=yes
 Content-Length: 62
@@ -19,7 +19,7 @@ Connection: close
 
 This server reply is for testing a simple Location: following
 </data>
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 Followed here fine swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER http://%HOSTIP:%HTTPPORT/we/wan
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -56,7 +56,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: data/%TESTNUMBER0099.txt?coolsite=yes
 Content-Length: 62

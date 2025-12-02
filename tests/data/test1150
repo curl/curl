@@ -39,7 +39,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://test.remote.example.com.%TESTNUMBER:150/path HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:150
 User-Agent: curl/%VERSION

@@ -21,15 +21,20 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <string.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Checks a single file's size and mtime from an FTP server.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+#include <string.h>
+
+#include <curl/curl.h>
 
 static size_t throw_away(void *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -49,7 +54,9 @@ int main(void)
   curl_off_t filesize = 0;
   const char *filename = strrchr(ftpurl, '/') + 1;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -89,5 +96,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

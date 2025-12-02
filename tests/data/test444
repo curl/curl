@@ -126,7 +126,7 @@ cookies
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /a/b/%TESTNUMBER HTTP/1.1
 Host: attack.invalid:%HTTPPORT
 User-Agent: curl/%VERSION

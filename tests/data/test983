@@ -45,7 +45,7 @@ works
 <errorcode>
 8
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 AUTH SSL
 </protocol>
 </verify>

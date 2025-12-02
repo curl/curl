@@ -44,7 +44,7 @@ http://foo%40bar:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --netrc-optional
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[foo@bar:secret]b64%

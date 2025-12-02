@@ -8,7 +8,7 @@ CURLOPT_FOLLOWLOCATION
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 301 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -23,7 +23,7 @@ Funny-head: yesyes
 
 -foo-
 </data>
-<data1 crlf="yes">
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Connection: close
@@ -31,7 +31,7 @@ Content-Type: text/html
 
 -bar-
 </data1>
-<datacheck crlf="yes">
+<datacheck crlf="headers">
 HTTP/1.1 301 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -65,20 +65,17 @@ http
 lib1571
 </tool>
 
- <name>
+<name>
 CURLFOLLOW_OBEYCODE with custom POST301 method, 301 => custom
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^User-Agent:.*
-</strip>
-<protocol nonewline="yes" crlf="yes">
+<protocol crlf="yes" nonewline="yes">
 IGLOO /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

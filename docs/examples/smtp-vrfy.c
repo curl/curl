@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Verify an SMTP email address
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to verify an email address from an
@@ -45,11 +44,15 @@
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
-  struct curl_slist *recipients = NULL;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *recipients = NULL;
+
     /* This is the URL for your mailserver */
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://mail.example.com");
 
@@ -77,5 +80,7 @@ int main(void)
     curl_easy_cleanup(curl);
   }
 
-  return 0;
+  curl_global_cleanup();
+
+  return (int)res;
 }

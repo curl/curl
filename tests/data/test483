@@ -10,7 +10,7 @@ cookies
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Set-Cookie: name=value; expires=Fri Feb 13 11:56:27 GMT 2132
 Set-Cookie: name2=value; expires=Fri Feb 13 11:56:27 ; 2132
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -c %LOGDIR/c%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

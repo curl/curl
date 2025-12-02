@@ -15,7 +15,7 @@ Added-in: 7.20.0
 
 # NAME
 
-CURLINFO_RTSP_CSEQ_RECV - get the recently received CSeq
+CURLINFO_RTSP_CSEQ_RECV - last received RTSP CSeq
 
 # SYNOPSIS
 

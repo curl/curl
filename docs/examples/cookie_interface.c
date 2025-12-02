@@ -25,6 +25,11 @@
  * Import and export cookies with COOKIELIST.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf() */
+#endif
+#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -47,7 +52,7 @@ static int print_cookies(CURL *curl)
   printf("Cookies, curl knows:\n");
   res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
   if(res != CURLE_OK) {
-    fprintf(stderr, "Curl curl_easy_getinfo failed: %s\n",
+    fprintf(stderr, "curl curl_easy_getinfo failed: %s\n",
             curl_easy_strerror(res));
     return 1;
   }
@@ -66,13 +71,15 @@ static int print_cookies(CURL *curl)
   return 0;
 }
 
-int
-main(void)
+int main(void)
 {
   CURL *curl;
   CURLcode res;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   curl = curl_easy_init();
   if(curl) {
     char nline[512];
@@ -82,7 +89,7 @@ main(void)
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, ""); /* start cookie engine */
     res = curl_easy_perform(curl);
     if(res != CURLE_OK) {
-      fprintf(stderr, "Curl perform failed: %s\n", curl_easy_strerror(res));
+      fprintf(stderr, "curl perform failed: %s\n", curl_easy_strerror(res));
       return 1;
     }
 
@@ -102,7 +109,7 @@ main(void)
              "PREF", "hello example, I like you!");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
-      fprintf(stderr, "Curl curl_easy_setopt failed: %s\n",
+      fprintf(stderr, "curl curl_easy_setopt failed: %s\n",
               curl_easy_strerror(res));
       return 1;
     }
@@ -117,7 +124,7 @@ main(void)
       "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.example.com");
     res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
     if(res != CURLE_OK) {
-      fprintf(stderr, "Curl curl_easy_setopt failed: %s\n",
+      fprintf(stderr, "curl curl_easy_setopt failed: %s\n",
               curl_easy_strerror(res));
       return 1;
     }
@@ -126,14 +133,14 @@ main(void)
 
     res = curl_easy_perform(curl);
     if(res != CURLE_OK) {
-      fprintf(stderr, "Curl perform failed: %s\n", curl_easy_strerror(res));
+      fprintf(stderr, "curl perform failed: %s\n", curl_easy_strerror(res));
       return 1;
     }
 
     curl_easy_cleanup(curl);
   }
   else {
-    fprintf(stderr, "Curl init failed!\n");
+    fprintf(stderr, "curl init failed!\n");
     return 1;
   }
 

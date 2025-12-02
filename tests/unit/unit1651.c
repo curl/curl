@@ -32,7 +32,8 @@ static CURLcode test_unit1651(const char *arg)
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL)
 
   /* cert captured from gdb when connecting to curl.se on October 26
-     2018 */
+     2018.
+     !checksrc! disable CLOSEBRACE 1 */
   static unsigned char cert[] = {
   0x30, 0x82, 0x0F, 0x5B, 0x30, 0x82, 0x0E, 0x43, 0xA0, 0x03, 0x02, 0x01, 0x02,
   0x02, 0x0C, 0x08, 0x77, 0x99, 0x2C, 0x6B, 0x67, 0xE1, 0x18, 0xD6, 0x66, 0x66,
@@ -339,7 +340,7 @@ static CURLcode test_unit1651(const char *arg)
   0x61, 0x54, 0x4A, 0x2B, 0xB7, 0x6A, 0x12, 0x08, 0xFB,
   };
 
-  CURLcode result;
+  CURLcode res;
   const char *beg = (const char *)&cert[0];
   const char *end = (const char *)&cert[sizeof(cert)];
   struct Curl_easy *data;
@@ -353,16 +354,16 @@ static CURLcode test_unit1651(const char *arg)
 
   data = curl_easy_init();
   if(data) {
-    result = Curl_extract_certinfo(data, 0, beg, end);
+    res = Curl_extract_certinfo(data, 0, beg, end);
 
-    fail_unless(result == CURLE_OK, "Curl_extract_certinfo returned error");
+    fail_unless(res == CURLE_OK, "Curl_extract_certinfo returned error");
 
     /* a poor man's fuzzing of some initial data to make sure nothing bad
        happens */
-    for(byte = 1 ; byte < 255; byte += 17) {
+    for(byte = 1; byte < 255; byte += 17) {
       for(i = 0; i < 45; i++) {
         unsigned char backup = cert[i];
-        cert[i] = (unsigned char) (byte & 0xff);
+        cert[i] = (unsigned char)(byte & 0xff);
         (void)Curl_extract_certinfo(data, 0, beg, end);
         cert[i] = backup;
       }

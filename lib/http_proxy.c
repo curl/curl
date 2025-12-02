@@ -44,22 +44,11 @@
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-static bool hd_name_eq(const char *n1, size_t n1len,
-                       const char *n2, size_t n2len)
-{
-  return (n1len == n2len) ? curl_strnequal(n1, n2, n1len) : FALSE;
-}
-
 static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   bool is_connect, int httpversion,
                                   struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
-  const char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
   int numlists = 1; /* by default */
@@ -95,86 +84,76 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
   /* loop through one or two lists */
   for(i = 0; i < numlists; i++) {
     for(headers = h[i]; headers; headers = headers->next) {
-      const char *name, *value;
-      size_t namelen, valuelen;
+      struct Curl_str name;
+      const char *value = NULL;
+      size_t valuelen = 0;
+      const char *ptr = headers->data;
 
       /* There are 2 quirks in place for custom headers:
        * 1. setting only 'name:' to suppress a header from being sent
        * 2. setting only 'name;' to send an empty (illegal) header
        */
-      ptr = strchr(headers->data, ':');
-      if(ptr) {
-        name = headers->data;
-        namelen = ptr - headers->data;
-        ptr++; /* pass the colon */
-        curlx_str_passblanks(&ptr);
-        if(*ptr) {
-          value = ptr;
-          valuelen = strlen(value);
+      if(!curlx_str_cspn(&ptr, &name, ";:")) {
+        if(!curlx_str_single(&ptr, ':')) {
+          curlx_str_passblanks(&ptr);
+          if(*ptr) {
+            value = ptr;
+            valuelen = strlen(value);
+          }
+          else {
+            /* quirk #1, suppress this header */
+            continue;
+          }
         }
-        else {
-          /* quirk #1, suppress this header */
+        else if(!curlx_str_single(&ptr, ';')) {
+          curlx_str_passblanks(&ptr);
+          if(!*ptr) {
+            /* quirk #2, send an empty header */
+            value = "";
+            valuelen = 0;
+          }
+          else {
+            /* this may be used for something else in the future,
+             * ignore this for now */
+            continue;
+          }
+        }
+        else
+          /* neither : nor ; in provided header value. We ignore this
+           * silently */
           continue;
-        }
       }
-      else {
-        ptr = strchr(headers->data, ';');
+      else
+        /* no name, move on */
+        continue;
 
-        if(!ptr) {
-          /* neither : nor ; in provided header value. We seem
-           * to ignore this silently */
-          continue;
-        }
-
-        name = headers->data;
-        namelen = ptr - headers->data;
-        ptr++; /* pass the semicolon */
-        curlx_str_passblanks(&ptr);
-        if(!*ptr) {
-          /* quirk #2, send an empty header */
-          value = "";
-          valuelen = 0;
-        }
-        else {
-          /* this may be used for something else in the future,
-           * ignore this for now */
-          continue;
-        }
-      }
-
-      DEBUGASSERT(name && value);
+      DEBUGASSERT(curlx_strlen(&name) && value);
       if(data->state.aptr.host &&
          /* a Host: header was sent already, do not pass on any custom Host:
             header as that will produce *two* in the same request! */
-         hd_name_eq(name, namelen, STRCONST("Host:")))
-        ;
+         curlx_str_casecompare(&name, "Host"));
       else if(data->state.httpreq == HTTPREQ_POST_FORM &&
               /* this header (extended by formdata.c) is sent later */
-              hd_name_eq(name, namelen, STRCONST("Content-Type:")))
-        ;
+              curlx_str_casecompare(&name, "Content-Type"));
       else if(data->state.httpreq == HTTPREQ_POST_MIME &&
               /* this header is sent later */
-              hd_name_eq(name, namelen, STRCONST("Content-Type:")))
-        ;
+              curlx_str_casecompare(&name, "Content-Type"));
       else if(data->req.authneg &&
               /* while doing auth neg, do not allow the custom length since
                  we will force length zero then */
-              hd_name_eq(name, namelen, STRCONST("Content-Length:")))
-        ;
+              curlx_str_casecompare(&name, "Content-Length"));
       else if((httpversion >= 20) &&
-              hd_name_eq(name, namelen, STRCONST("Transfer-Encoding:")))
-        /* HTTP/2 and HTTP/3 do not support chunked requests */
-        ;
-      else if((hd_name_eq(name, namelen, STRCONST("Authorization:")) ||
-               hd_name_eq(name, namelen, STRCONST("Cookie:"))) &&
+              curlx_str_casecompare(&name, "Transfer-Encoding"));
+      /* HTTP/2 and HTTP/3 do not support chunked requests */
+      else if((curlx_str_casecompare(&name, "Authorization") ||
+               curlx_str_casecompare(&name, "Cookie")) &&
               /* be careful of sending this potentially sensitive header to
                  other hosts */
-              !Curl_auth_allowed_to_host(data))
-        ;
+              !Curl_auth_allowed_to_host(data));
       else {
-        CURLcode result;
-
-        result = Curl_dynhds_add(hds, name, namelen, value, valuelen);
+        CURLcode result =
+          Curl_dynhds_add(hds, curlx_str(&name), curlx_strlen(&name),
+                          value, valuelen);
         if(result)
           return result;
       }
@@ -184,9 +163,9 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                         const char **phostname,
-                                         int *pport, bool *pipv6_ip)
+void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+                                     const char **phostname,
+                                     int *pport, bool *pipv6_ip)
 {
   DEBUGASSERT(cf);
   DEBUGASSERT(cf->conn);
@@ -209,8 +188,6 @@ CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
     *pipv6_ip = (strchr(*phostname, ':') != NULL);
   else
     *pipv6_ip = cf->conn->bits.ipv6_ip;
-
-  return CURLE_OK;
 }
 
 struct cf_proxy_ctx {
@@ -231,9 +208,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   CURLcode result;
   struct httpreq *req = NULL;
 
-  result = Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
-  if(result)
-    goto out;
+  Curl_http_proxy_get_destination(cf, &hostname, &port, &ipv6_ip);
 
   authority = curl_maprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
                             ipv6_ip ?"]" : "", port);
@@ -291,7 +266,7 @@ out:
     Curl_http_req_free(req);
     req = NULL;
   }
-  free(authority);
+  curlx_free(authority);
   *preq = req;
   return result;
 }
@@ -407,7 +382,7 @@ static void http_proxy_cf_destroy(struct Curl_cfilter *cf,
 
   (void)data;
   CURL_TRC_CF(data, cf, "destroy");
-  free(ctx);
+  curlx_free(ctx);
 }
 
 static void http_proxy_cf_close(struct Curl_cfilter *cf,
@@ -446,7 +421,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   CURLcode result;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -458,7 +433,7 @@ CURLcode Curl_cf_http_proxy_insert_after(struct Curl_cfilter *cf_at,
   Curl_conn_cf_insert_after(cf_at, cf);
 
 out:
-  free(ctx);
+  curlx_free(ctx);
   return result;
 }
 

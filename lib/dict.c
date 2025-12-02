@@ -60,11 +60,6 @@
 #include "progress.h"
 #include "dict.h"
 
-/* The last 2 #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-
 #define DICT_MATCH "/MATCH:"
 #define DICT_MATCH2 "/M:"
 #define DICT_MATCH3 "/FIND:"
@@ -160,9 +155,9 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
     if(result)
       break;
 
-    Curl_debug(data, CURLINFO_DATA_OUT, sptr, (size_t)bytes_written);
+    Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written);
 
-    if((size_t)bytes_written != write_len) {
+    if(bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
          the size left and try again! */
       write_len -= bytes_written;
@@ -172,7 +167,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
       break;
   }
 
-  free(s); /* free the output string */
+  curlx_free(s); /* free the output string */
 
   return result;
 }
@@ -310,8 +305,8 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   }
 
 error:
-  free(eword);
-  free(path);
+  curlx_free(eword);
+  curlx_free(path);
   return result;
 }
 #endif /* CURL_DISABLE_DICT */

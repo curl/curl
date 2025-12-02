@@ -10,7 +10,7 @@ SELECT
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 --
@@ -25,7 +25,7 @@ body
 imap
 </server>
 <name>
-IMAP doesn't perform SELECT if reusing the same mailbox
+IMAP does not perform SELECT if reusing the same mailbox
 </name>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=456/;SECTION=2.3' -u user:secret
@@ -35,7 +35,7 @@ IMAP doesn't perform SELECT if reusing the same mailbox
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER

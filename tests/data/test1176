@@ -8,7 +8,7 @@ globbing
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -33,7 +33,7 @@ http
 <name>
 --output using #0
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o '%LOGDIR/base-#0'
 </command>
 </client>
@@ -41,14 +41,14 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o '%LOGDIR/base-#0'
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/base-#0">
+<file name="%LOGDIR/base-#0" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

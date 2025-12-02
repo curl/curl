@@ -28,12 +28,10 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib583(const char *URL)
 {
   int stillRunning;
-  CURLM *multiHandle = NULL;
+  CURLM *multi = NULL;
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   CURLMcode mres;
@@ -42,7 +40,7 @@ static CURLcode test_lib583(const char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  multi_init(multiHandle);
+  multi_init(multi);
 
   easy_init(curl);
 
@@ -56,19 +54,19 @@ static CURLcode test_lib583(const char *URL)
   easy_setopt(curl, CURLOPT_URL, URL);
   easy_setopt(curl, CURLOPT_INFILESIZE, 5L);
 
-  multi_add_handle(multiHandle, curl);
+  multi_add_handle(multi, curl);
 
   /* this tests if removing an easy handle immediately after multi
      perform has been called succeeds or not. */
 
   curl_mfprintf(stderr, "curl_multi_perform()...\n");
 
-  multi_perform(multiHandle, &stillRunning);
+  multi_perform(multi, &stillRunning);
 
   curl_mfprintf(stderr, "curl_multi_perform() succeeded\n");
 
   curl_mfprintf(stderr, "curl_multi_remove_handle()...\n");
-  mres = curl_multi_remove_handle(multiHandle, curl);
+  mres = curl_multi_remove_handle(multi, curl);
   if(mres) {
     curl_mfprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n",
                   mres);
@@ -82,7 +80,7 @@ test_cleanup:
   /* undocumented cleanup sequence - type UB */
 
   curl_easy_cleanup(curl);
-  curl_multi_cleanup(multiHandle);
+  curl_multi_cleanup(multi);
   curl_global_cleanup();
 
   return res;

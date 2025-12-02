@@ -15,7 +15,7 @@ Added-in: 7.15.4
 
 # NAME
 
-CURLINFO_FTP_ENTRY_PATH - get entry path in FTP server
+CURLINFO_FTP_ENTRY_PATH - entry path in FTP server
 
 # SYNOPSIS
 

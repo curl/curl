@@ -52,6 +52,10 @@
 #define CLIENTWRITE_EOS     (1<<7) /* End Of transfer download Stream */
 #define CLIENTWRITE_0LEN    (1<<8) /* write even 0-length buffers */
 
+/* Forward declarations */
+struct Curl_creader;
+struct Curl_cwriter;
+
 /**
  * Write `len` bytes at `prt` to the client. `type` indicates what
  * kind of data is being written.

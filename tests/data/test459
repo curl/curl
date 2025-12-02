@@ -9,7 +9,7 @@ HTTP
 #
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -56,7 +56,7 @@ Content-Type: application/x-www-form-urlencoded
 arg
 </protocol>
 <stderr mode="text">
-Warning: %LOGDIR/config:1: warning: 'data' uses unquoted whitespace. This may 
+Warning: %LOGDIR/config:1: warning: 'data' uses unquoted whitespace. This may%SP
 Warning: cause side-effects. Consider double quotes.
 </stderr>
 </verify>

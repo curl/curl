@@ -21,21 +21,26 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Get a single file from an FTP server.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+
+#include <curl/curl.h>
 
 struct FtpFile {
   const char *filename;
   FILE *stream;
 };
 
-static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
+static size_t write_cb(void *buffer, size_t size, size_t nmemb, void *stream)
 {
   struct FtpFile *out = (struct FtpFile *)stream;
   if(!out->stream) {
@@ -47,7 +52,6 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
   return fwrite(buffer, size, nmemb, out->stream);
 }
 
-
 int main(void)
 {
   CURL *curl;
@@ -57,7 +61,9 @@ int main(void)
     NULL
   };
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -67,7 +73,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://ftp.example.com/curl/curl-7.9.2.tar.gz");
     /* Define our callback to get called when there is data to be written */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
     /* Set a pointer to our struct to pass to the callback */
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ftpfile);
 
@@ -90,5 +96,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return 0;
+  return (int)res;
 }

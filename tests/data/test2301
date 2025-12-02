@@ -8,7 +8,7 @@ WebSockets
 #
 # Server-side
 <reply>
-<data nocheck="yes" nonewline="yes">
+<data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
 Server: test-server/fake
 Upgrade: websocket
@@ -52,7 +52,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nocheck="yes" nonewline="yes">
+<protocol crlf="yes" nonewline="yes" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: webbie-sox/3

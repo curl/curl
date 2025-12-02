@@ -9,7 +9,7 @@ variables
 #
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -36,7 +36,7 @@ FUNVALUE=contents%TESTNUMBER
 VALUE2=curl
 </setenv>
 <name>
-variable expand the file name with --expand-output
+variable expand the filename with --expand-output
 </name>
 <file name="%LOGDIR/cmd">
 --variable %FUNVALUE
@@ -50,14 +50,14 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/contents%TESTNUMBER" crlf="yes">
+<file name="%LOGDIR/contents%TESTNUMBER" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

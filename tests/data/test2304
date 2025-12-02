@@ -49,10 +49,10 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </client>
 
 #
-# PONG with no data and the 32 bit mask
+# PONG with no data and the 32-bit mask
 #
 <verify>
-<protocol nocheck="yes" crlf="yes">
+<protocol crlf="headers" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: websocket/%TESTNUMBER

@@ -55,11 +55,10 @@ http://xxx:yyy@127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%H
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER/testapi/test HTTP/1.1
 Host: 127.0.0.1:9000
 Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/0/127/xxx4_request, SignedHeaders=content-type;host;x-xxx-date, Signature=3d8e00a02e437211a596143dcd590fcc805b731365c68f7f48951ea6eda39c4f

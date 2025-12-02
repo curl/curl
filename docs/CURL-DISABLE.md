@@ -68,8 +68,8 @@ Disable the FTP (and FTPS) protocol
 
 ## `CURL_DISABLE_GETOPTIONS`
 
-Disable the `curl_easy_options` API calls that lets users get information
-about existing options to `curl_easy_setopt`.
+Disable the `curl_easy_options()` API calls that lets users get information
+about existing options to `curl_easy_setopt()`.
 
 ## `CURL_DISABLE_GOPHER`
 
@@ -181,6 +181,12 @@ Disable the TELNET protocol
 ## `CURL_DISABLE_TFTP`
 
 Disable the TFTP protocol
+
+## `CURL_DISABLE_TYPECHECK`
+
+Disable `curl_easy_setopt()`/`curl_easy_getinfo()` type checking.
+
+Useful to improve build performance for the `tests/libtest` test tool.
 
 ## `CURL_DISABLE_VERBOSE_STRINGS`
 

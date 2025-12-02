@@ -34,10 +34,10 @@ https test-localhost.pem
 <name>
 Ignore certificate revocation "best effort" strategy
 </name>
-  <setenv>
+<setenv>
 # This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
- </setenv>
+</setenv>
 <command>
 -4 --cacert %CERTDIR/certs/test-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
@@ -46,7 +46,7 @@ CURL_SSL_BACKEND=schannel
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
 User-Agent: curl/%VERSION

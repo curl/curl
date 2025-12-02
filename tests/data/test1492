@@ -40,7 +40,7 @@ http://%HOSTIP:%HTTPPORT/junk%TESTNUMBER -J -O --show-headers --output-dir %LOGD
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /junk%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

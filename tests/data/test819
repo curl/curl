@@ -16,7 +16,7 @@ AUTH PLAIN
 REPLY AUTHENTICATE +
 REPLY AHVzZXIAc2VjcmV0 A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -44,7 +44,7 @@ IMAP plain authentication
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE PLAIN
 AHVzZXIAc2VjcmV0

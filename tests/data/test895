@@ -11,7 +11,7 @@ FETCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -39,7 +39,7 @@ IMAP with --login-options 'AUTH=*'
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN "\"user" "sec\"ret{"
 A003 SELECT %TESTNUMBER

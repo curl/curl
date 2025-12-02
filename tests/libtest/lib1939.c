@@ -23,34 +23,32 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1939(const char *URL)
 {
   CURLM *multi;
-  CURL *easy;
+  CURL *curl;
   int running_handles;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
   multi = curl_multi_init();
   if(multi) {
-    easy = curl_easy_init();
-    if(easy) {
+    curl = curl_easy_init();
+    if(curl) {
       CURLcode c;
       CURLMcode m;
 
       /* Crash only happens when using HTTPS */
-      c = curl_easy_setopt(easy, CURLOPT_URL, URL);
+      c = curl_easy_setopt(curl, CURLOPT_URL, URL);
       if(!c)
         /* Any old HTTP tunneling proxy will do here */
-        c = curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
+        c = curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
 
       if(!c) {
 
-        /* We're going to drive the transfer using multi interface here,
+        /* We are going to drive the transfer using multi interface here,
            because we want to stop during the middle. */
-        m = curl_multi_add_handle(multi, easy);
+        m = curl_multi_add_handle(multi, curl);
 
         if(!m)
           /* Run the multi handle once, just enough to start establishing an
@@ -62,7 +60,7 @@ static CURLcode test_lib1939(const char *URL)
       }
       /* Close the easy handle *before* the multi handle. Doing it the other
          way around avoids the issue. */
-      curl_easy_cleanup(easy);
+      curl_easy_cleanup(curl);
     }
     curl_multi_cleanup(multi); /* double-free happens here */
   }

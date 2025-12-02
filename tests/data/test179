@@ -46,7 +46,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://supertrooper.fake/c/%TESTNUMBER HTTP/1.1
 Host: supertrooper.fake
 User-Agent: curl/%VERSION

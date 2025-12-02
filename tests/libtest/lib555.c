@@ -32,10 +32,8 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char t555_uploadthis[] = "this is the blurb we want to upload\n";
-#define T555_DATALEN (sizeof(t555_uploadthis)-1)
+#define T555_DATALEN (sizeof(t555_uploadthis) - 1)
 
 static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {
@@ -57,10 +55,10 @@ static size_t t555_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
   return 0;
 }
 
-static curlioerr t555_ioctl_callback(CURL *handle, int cmd, void *clientp)
+static curlioerr t555_ioctl_callback(CURL *curl, int cmd, void *clientp)
 {
   int *counter = (int *)clientp;
-  (void)handle;
+  (void)curl;
   if(cmd == CURLIOCMD_RESTARTREAD) {
     curl_mfprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
@@ -73,7 +71,7 @@ static CURLcode test_lib555(const char *URL)
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   int counter = 0;
-  CURLM *m = NULL;
+  CURLM *multi = NULL;
   int running = 1;
 
   start_test_timing();
@@ -102,9 +100,9 @@ static CURLcode test_lib555(const char *URL)
   easy_setopt(curl, CURLOPT_PROXYAUTH,
               CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
 
-  multi_init(m);
+  multi_init(multi);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(multi, curl);
 
   while(running) {
     struct timeval timeout;
@@ -114,7 +112,7 @@ static CURLcode test_lib555(const char *URL)
     timeout.tv_sec = 0;
     timeout.tv_usec = 100000L; /* 100 ms */
 
-    multi_perform(m, &running);
+    multi_perform(multi, &running);
 
     abort_on_test_timeout();
 
@@ -125,7 +123,7 @@ static CURLcode test_lib555(const char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
-    multi_fdset(m, &fdread, &fdwrite, &fdexcep, &maxfd);
+    multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
@@ -138,8 +136,8 @@ test_cleanup:
 
   /* proper cleanup sequence - type PA */
 
-  curl_multi_remove_handle(m, curl);
-  curl_multi_cleanup(m);
+  curl_multi_remove_handle(multi, curl);
+  curl_multi_cleanup(multi);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 

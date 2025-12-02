@@ -117,6 +117,11 @@ extern struct curl_trc_feat Curl_trc_feat_ssls;
 void Curl_trc_ssls(struct Curl_easy *data,
                    const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
+#ifdef USE_SSH
+extern struct curl_trc_feat Curl_trc_feat_ssh;
+void Curl_trc_ssh(struct Curl_easy *data,
+                   const char *fmt, ...) CURL_PRINTF(2, 3);
+#endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 extern struct curl_trc_feat Curl_trc_feat_ws;
 void Curl_trc_ws(struct Curl_easy *data,
@@ -168,6 +173,11 @@ void Curl_trc_ws(struct Curl_easy *data,
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) \
          Curl_trc_ssls(data, __VA_ARGS__); } while(0)
 #endif /* USE_SSL */
+#ifdef USE_SSH
+#define CURL_TRC_SSH(data, ...) \
+  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssh)) \
+         Curl_trc_ssh(data, __VA_ARGS__); } while(0)
+#endif /* USE_SSH */
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS(data, ...)                             \
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
@@ -192,6 +202,9 @@ void Curl_trc_ws(struct Curl_easy *data,
 #endif
 #ifdef USE_SSL
 #define CURL_TRC_SSLS  Curl_trc_ssls
+#endif
+#ifdef USE_SSH
+#define CURL_TRC_SSH  Curl_trc_ssh
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS    Curl_trc_ws

@@ -52,7 +52,7 @@ HTTPS GET, receive no headers only data!
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION

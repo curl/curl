@@ -28,10 +28,6 @@
 
 #include "hash.h"
 #include "llist.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -115,7 +111,7 @@ hash_elem_create(const void *key, size_t key_len, const void *p,
   struct Curl_hash_element *he;
 
   /* allocate the struct plus memory after it to store the key */
-  he = malloc(sizeof(struct Curl_hash_element) + key_len);
+  he = curlx_malloc(sizeof(struct Curl_hash_element) + key_len);
   if(he) {
     he->next = NULL;
     /* copy the key */
@@ -145,7 +141,7 @@ static void hash_elem_destroy(struct Curl_hash *h,
                               struct Curl_hash_element *he)
 {
   hash_elem_clear_ptr(h, he);
-  free(he);
+  curlx_free(he);
 }
 
 static void hash_elem_unlink(struct Curl_hash *h,
@@ -177,7 +173,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == HASHINIT);
   if(!h->table) {
-    h->table = calloc(h->slots, sizeof(struct Curl_hash_element *));
+    h->table = curlx_calloc(h->slots, sizeof(struct Curl_hash_element *));
     if(!h->table)
       return NULL; /* OOM */
   }

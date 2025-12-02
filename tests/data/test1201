@@ -9,7 +9,7 @@ SELECTOR
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 iMenu results		error.host	1
 0Selector /selector/SELECTOR	/bar	bar.foo.invalid	70
 .
@@ -32,7 +32,7 @@ gopher://%HOSTIP:%GOPHERPORT/1/selector/SELECTOR/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 /selector/SELECTOR/%TESTNUMBER
 </protocol>
 </verify>

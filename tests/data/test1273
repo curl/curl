@@ -11,7 +11,7 @@ Resume
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 416 Invalid range
 Connection: close
 Content-Length: 0
@@ -31,10 +31,10 @@ Content-Length: 0
 012345678
 012345678
 012345678
-HTTP/1.1 416 Invalid range
-Connection: close
-Content-Length: 0
-
+HTTP/1.1 416 Invalid range%CR
+Connection: close%CR
+Content-Length: 0%CR
+%CR
 </datacheck>
 
 </reply>
@@ -69,7 +69,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C - -f
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-

@@ -47,7 +47,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER/ --ftp-account "data for acct"
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 ACCT data for acct

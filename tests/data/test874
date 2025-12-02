@@ -18,7 +18,7 @@ RFC6749
 AUTH XOAUTH2
 REPLY AUTH +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -46,7 +46,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user --oauth2-bearer mF_9.B5f-4.1JqM --s
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
 RETR %TESTNUMBER

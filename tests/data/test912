@@ -23,7 +23,7 @@ smtp
 <name>
 SMTP with SIZE support
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.eml">
+<file name="%LOGDIR/test%TESTNUMBER.eml" crlf="yes">
 From: different
 To: another
 
@@ -37,14 +37,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com> SIZE=38
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT SIZE=38
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

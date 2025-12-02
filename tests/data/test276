@@ -59,7 +59,7 @@ HTTP Location: following with multiple question marks in URLs
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want?uri=http://anything/%TESTNUMBER?secondq/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

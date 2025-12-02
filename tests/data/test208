@@ -51,14 +51,14 @@ the
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1
-Host: host.com:21
-Authorization: Basic %b64[daniel:mysecret]b64%
-User-Agent: curl/%VERSION
-Accept: */*
-Proxy-Connection: Keep-Alive
-Content-Length: 78
-
+PUT ftp://daniel:mysecret@host.com/we/want/%TESTNUMBER HTTP/1.1%CR
+Host: host.com:21%CR
+Authorization: Basic %b64[daniel:mysecret]b64%%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Proxy-Connection: Keep-Alive%CR
+Content-Length: 78%CR
+%CR
 Weird
      file
          to

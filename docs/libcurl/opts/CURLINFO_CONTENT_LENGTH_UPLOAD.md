@@ -15,7 +15,7 @@ Added-in: 7.6.1
 
 # NAME
 
-CURLINFO_CONTENT_LENGTH_UPLOAD - get the specified size of the upload
+CURLINFO_CONTENT_LENGTH_UPLOAD - specified size of the upload
 
 # SYNOPSIS
 

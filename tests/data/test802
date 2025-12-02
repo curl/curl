@@ -11,7 +11,7 @@ UIDVALIDITY
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 --
@@ -36,7 +36,7 @@ IMAP SELECT UIDVALIDITY Success
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER

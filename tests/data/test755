@@ -47,7 +47,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET http://foo.host/%TESTNUMBER HTTP/1.1
 Host: foo.host
 Authorization: Basic %b64[foo:alone-in-the-dark]b64%

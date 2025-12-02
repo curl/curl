@@ -286,7 +286,7 @@ enum assume {
 static time_t time2epoch(int sec, int min, int hour,
                          int mday, int mon, int year)
 {
-  static const int month_days_cumulative [12] =
+  static const int month_days_cumulative[12] =
     { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
   int leap_days = year - (mon <= 1);
   leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)
@@ -362,7 +362,7 @@ static int parsedate(const char *date, time_t *output)
   time_t t = 0;
   int wdaynum = -1;  /* day of the week number, 0-6 (mon-sun) */
   int monnum = -1;   /* month of the year number, 0-11 */
-  int mdaynum = -1; /* day of month, 1 - 31 */
+  int mdaynum = -1;  /* day of month, 1 - 31 */
   int hournum = -1;
   int minnum = -1;
   int secnum = -1;

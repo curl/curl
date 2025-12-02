@@ -34,14 +34,14 @@ ftp://%HOSTIP:%FTPPORT/path/%TESTNUMBER
 <verify>
 # Strip off parts of the EPRT command that might differ
 <strippart>
-s/^EPRT \|1\|(.*)/EPRT \|1\|/
+s/^EPRT \|1\|(\S*)/EPRT \|1\|/
 </strippart>
 # The TYPE command might get sent so we ignore that
 <strip>
 ^TYPE
 </strip>
 
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

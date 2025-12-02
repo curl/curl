@@ -19,33 +19,37 @@ smtp
 <name>
 SMTP
 </name>
-<stdin>
-From: different
-To: another
+<file name="%LOGDIR/mail%TESTNUMBER">
+From: different%CR
+To: another%CR
+%CR
+body%CR
+%repeat[6553 x 0123456789]%
+</file>
 
-body
-</stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -T %LOGDIR/mail%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
 <upload>
-From: different
-To: another
-
-body
-.
+From: different%CR
+To: another%CR
+%CR
+body%CR
+%repeat[6553 x 0123456789]%
+%CR
+.%CR
 </upload>
 </verify>
 </testcase>

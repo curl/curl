@@ -12,7 +12,7 @@ type=
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -50,7 +50,7 @@ FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://www.example.com/moo/%TESTNUMBER;type=i HTTP/1.1
 Host: www.example.com:21
 Accept: */*

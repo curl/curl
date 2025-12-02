@@ -26,12 +26,16 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+
+  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -68,5 +72,6 @@ int main(void)
     /* free the custom headers */
     curl_slist_free_all(chunk);
   }
-  return 0;
+  curl_global_cleanup();
+  return (int)res;
 }

@@ -42,7 +42,7 @@ ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://%HOSTIP:%HTTPPORT/we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

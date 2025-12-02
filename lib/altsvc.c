@@ -42,10 +42,6 @@
 #include "curlx/strparse.h"
 #include "connect.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define MAX_ALTSVC_LINE 4095
 #define MAX_ALTSVC_DATELEN 256
 #define MAX_ALTSVC_HOSTLEN 2048
@@ -68,12 +64,11 @@ const char *Curl_alpnid2str(enum alpnid id)
   }
 }
 
-
 static void altsvc_free(struct altsvc *as)
 {
-  free(as->src.host);
-  free(as->dst.host);
-  free(as);
+  curlx_free(as->src.host);
+  curlx_free(as->dst.host);
+  curlx_free(as);
 }
 
 static struct altsvc *altsvc_createid(const char *srchost,
@@ -85,7 +80,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
                                       size_t srcport,
                                       size_t dstport)
 {
-  struct altsvc *as = calloc(1, sizeof(struct altsvc));
+  struct altsvc *as = curlx_calloc(1, sizeof(struct altsvc));
   if(!as)
     return NULL;
   DEBUGASSERT(hlen);
@@ -136,10 +131,8 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                                     size_t srcport,
                                     size_t dstport)
 {
-  enum alpnid dstalpnid =
-    Curl_alpn2alpnid(curlx_str(dstalpn), curlx_strlen(dstalpn));
-  enum alpnid srcalpnid =
-    Curl_alpn2alpnid(curlx_str(srcalpn), curlx_strlen(srcalpn));
+  enum alpnid dstalpnid = Curl_str2alpnid(dstalpn);
+  enum alpnid srcalpnid = Curl_str2alpnid(srcalpn);
   if(!srcalpnid || !dstalpnid)
     return NULL;
   return altsvc_createid(curlx_str(srchost), curlx_strlen(srchost),
@@ -221,21 +214,25 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
 
   /* we need a private copy of the filename so that the altsvc cache file
      name survives an easy handle reset */
-  free(asi->filename);
-  asi->filename = strdup(file);
+  curlx_free(asi->filename);
+  asi->filename = curlx_strdup(file);
   if(!asi->filename)
     return CURLE_OUT_OF_MEMORY;
 
   fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
+    bool eof = FALSE;
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_ALTSVC_LINE);
-    while(Curl_get_line(&buf, fp)) {
-      const char *lineptr = curlx_dyn_ptr(&buf);
-      curlx_str_passblanks(&lineptr);
-      if(curlx_str_single(&lineptr, '#'))
-        altsvc_add(asi, lineptr);
-    }
+    do {
+      result = Curl_get_line(&buf, fp, &eof);
+      if(!result) {
+        const char *lineptr = curlx_dyn_ptr(&buf);
+        curlx_str_passblanks(&lineptr);
+        if(curlx_str_single(&lineptr, '#'))
+          altsvc_add(asi, lineptr);
+      }
+    } while(!result && !eof);
     curlx_dyn_free(&buf); /* free the line buffer */
     curlx_fclose(fp);
   }
@@ -297,7 +294,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
  */
 struct altsvcinfo *Curl_altsvc_init(void)
 {
-  struct altsvcinfo *asi = calloc(1, sizeof(struct altsvcinfo));
+  struct altsvcinfo *asi = curlx_calloc(1, sizeof(struct altsvcinfo));
   if(!asi)
     return NULL;
   Curl_llist_init(&asi->list, NULL);
@@ -348,8 +345,8 @@ void Curl_altsvc_cleanup(struct altsvcinfo **altsvcp)
       n = Curl_node_next(e);
       altsvc_free(as);
     }
-    free(altsvc->filename);
-    free(altsvc);
+    curlx_free(altsvc->filename);
+    curlx_free(altsvc);
     *altsvcp = NULL; /* clear the pointer */
   }
 }
@@ -397,7 +394,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
     if(result && tempstore)
       unlink(tempstore);
   }
-  free(tempstore);
+  curlx_free(tempstore);
   return result;
 }
 
@@ -541,8 +538,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   do {
     if(!curlx_str_single(&p, '=')) {
       /* [protocol]="[host][:port], [protocol]="[host][:port]" */
-      enum alpnid dstalpnid =
-        Curl_alpn2alpnid(curlx_str(&alpn), curlx_strlen(&alpn));
+      enum alpnid dstalpnid = Curl_str2alpnid(&alpn);
       if(!curlx_str_single(&p, '\"')) {
         struct Curl_str dsthost;
         curl_off_t port = 0;
@@ -555,7 +551,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
             }
           }
           else {
-            /* IPv6 host name */
+            /* IPv6 hostname */
             if(curlx_str_until(&p, &dsthost, MAX_IPADR_LEN, ']') ||
                curlx_str_single(&p, ']')) {
               infof(data, "Bad alt-svc IPv6 hostname, ignoring.");

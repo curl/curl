@@ -9,7 +9,7 @@ HTTP GET
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -17,7 +17,7 @@ Content-Length: 8
 
 content
 </data>
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -25,7 +25,7 @@ Content-Length: 9
 
 content2
 </data1>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK swsbounce
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -62,7 +62,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[monster:underbed]b64%

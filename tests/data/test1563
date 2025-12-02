@@ -36,7 +36,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -L -H "Host: www.example.com"
 <errorcode>
 1
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
 User-Agent: curl/%VERSION

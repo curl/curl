@@ -12,13 +12,13 @@ NTLM
 <reply>
 
 <!-- Alternate the order that Digest and NTLM headers appear in responses to
-ensure that the order doesn't matter. -->
+ensure that the order does not matter. -->
 
 <!--
 
  Explanation for the duplicate 400 requests:
 
- libcurl doesn't detect that a given Digest password is wrong already on the
+ libcurl does not detect that a given Digest password is wrong already on the
  first 401 response (as the data400 gives). libcurl will instead consider the
  new response just as a duplicate and it sends another and detects the auth
  problem on the second 401 response!
@@ -27,7 +27,7 @@ ensure that the order doesn't matter. -->
 
 
 <!-- First request has NTLM auth, wrong password -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -38,7 +38,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="1"
 This is not the real page!
 </data100>
 
-<data1101>
+<data1101 crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -48,7 +48,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1101>
 
-<data1102>
+<data1102 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -60,7 +60,7 @@ This is a bad password page!
 </data1102>
 
 <!-- Second request has Digest auth, right password -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -71,7 +71,7 @@ WWW-Authenticate: Digest realm="testrealm", nonce="3"
 This is not the real page!
 </data200>
 
-<data1200>
+<data1200 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -81,7 +81,7 @@ Finally, this is the real page!
 </data1200>
 
 <!-- Third request has NTLM auth, wrong password -->
-<data300>
+<data300 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -92,7 +92,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data300>
 
-<data1301>
+<data1301 crlf="headers">
 HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -102,7 +102,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1301>
 
-<data1302>
+<data1302 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -114,7 +114,7 @@ This is a bad password page!
 </data1302>
 
 <!-- Fourth request has Digest auth, wrong password -->
-<data400>
+<data400 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (4)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -125,7 +125,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data400>
 
-<data1400>
+<data1400 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -137,7 +137,7 @@ This is a bad password page!
 </data1400>
 
 <!-- Fifth request has Digest auth, right password -->
-<data500>
+<data500 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth (5)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -148,7 +148,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data500>
 
-<data1500>
+<data1500 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -157,7 +157,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1500>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -242,7 +242,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER ntlm digest
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

@@ -5,9 +5,11 @@
 
 set -eu
 
-# shellcheck disable=SC2046
+cd "$(dirname "${0}")"/../..
+
+git ls-files '*.yaml' '*.yml' -z | xargs -0 -r \
 yamllint \
   --format standard \
   --strict \
-  --config-data "$(dirname "$0")/yamlcheck.yaml" \
-  $(git ls-files '*.yaml' '*.yml')
+  --config-data .github/scripts/yamlcheck.yaml \
+  --

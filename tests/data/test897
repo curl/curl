@@ -10,7 +10,7 @@ FETCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 --
@@ -38,18 +38,18 @@ IMAP and envelope meta data after body transfer
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER
 A004 FETCH 123 BODY[1]
 A005 LOGOUT
 </protocol>
-<file name="%LOGDIR/head-%TESTNUMBER">
-        _   _ ____  _     
-    ___| | | |  _ \| |    
-   / __| | | | |_) | |    
-  | (__| |_| |  _ {| |___ 
+<file name="%LOGDIR/head-%TESTNUMBER" crlf="yes">
+        _   _ ____  _
+    ___| | | |  _ \| |
+   / __| | | | |_) | |
+  | (__| |_| |  _ {| |___
    \___|\___/|_| \_\_____|
 * OK curl IMAP server ready to serve
 A001 BAD Command

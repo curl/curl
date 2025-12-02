@@ -13,13 +13,13 @@ proxytunnel
 #
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 
 </connect>
 
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.0 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -53,14 +53,14 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT %HOSTIP:%HTTPPORT HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -72,7 +72,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 

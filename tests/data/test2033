@@ -35,10 +35,10 @@ https test-localhost.pem
 <name>
 simple HTTPS GET with DER public key pinning (Schannel variant)
 </name>
- <setenv>
+<setenv>
 # This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
- </setenv>
+</setenv>
 <command>
 -4 --cacert %CERTDIR/certs/test-ca.crt --pinnedpubkey %CERTDIR/certs/test-localhost.pub.der --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
@@ -47,7 +47,7 @@ CURL_SSL_BACKEND=schannel
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
 User-Agent: curl/%VERSION

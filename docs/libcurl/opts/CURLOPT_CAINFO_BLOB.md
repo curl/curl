@@ -13,8 +13,9 @@ See-also:
   - CURLOPT_SSL_VERIFYPEER (3)
 TLS-backend:
   - OpenSSL
+  - GnuTLS
   - mbedTLS
-  - rustls
+  - Rustls
   - wolfSSL
   - Schannel
 Added-in: 7.77.0
@@ -80,7 +81,7 @@ int main(void)
 # HISTORY
 
 This option is supported by the mbedTLS (since 7.81.0), Rustls (since 7.82.0),
-wolfSSL (since 8.2.0), OpenSSL and Schannel backends.
+wolfSSL (since 8.2.0), GnuTLS (since 8.18.0), OpenSSL and Schannel backends.
 
 # %AVAILABILITY%
 

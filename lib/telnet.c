@@ -60,10 +60,6 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #define SUBBUFSIZE 512
 
 #define CURL_SB_CLEAR(x)  x->subpointer = x->subbuffer
@@ -211,7 +207,7 @@ static void telnet_easy_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   curl_slist_free_all(tn->telnet_vars);
   curlx_dyn_free(&tn->out);
-  free(tn);
+  curlx_free(tn);
 }
 
 static
@@ -219,7 +215,7 @@ CURLcode init_telnet(struct Curl_easy *data)
 {
   struct TELNET *tn;
 
-  tn = calloc(1, sizeof(struct TELNET));
+  tn = curlx_calloc(1, sizeof(struct TELNET));
   if(!tn)
     return CURLE_OUT_OF_MEMORY;
 
@@ -895,8 +891,10 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       case 6:
         /* To take care or not of the 8th bit in data exchange */
         if(curl_strnequal(option, "BINARY", 6)) {
-          int binary_option = atoi(arg);
-          if(binary_option != 1) {
+          const char *p = arg;
+          curl_off_t binary_option;
+          if(!curlx_str_number(&p, &binary_option, 1) &&
+             (binary_option != 1)) {
             tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
             tn->him_preferred[CURL_TELOPT_BINARY] = CURL_NO;
           }
@@ -1529,7 +1527,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
     if(data->set.timeout) {
       now = curlx_now();
-      if(curlx_timediff(now, conn->created) >= data->set.timeout) {
+      if(curlx_timediff_ms(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;
@@ -1599,9 +1597,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
 
         total_dl += nread;
-        result = Curl_pgrsSetDownloadCounter(data, total_dl);
-        if(!result)
-          result = telrcv(data, tn, (unsigned char *)buffer, nread);
+        Curl_pgrsSetDownloadCounter(data, total_dl);
+        result = telrcv(data, tn, (unsigned char *)buffer, nread);
         if(result) {
           keepon = FALSE;
           break;
@@ -1651,16 +1648,17 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
 
     if(data->set.timeout) {
       now = curlx_now();
-      if(curlx_timediff(now, conn->created) >= data->set.timeout) {
+      if(curlx_timediff_ms(now, conn->created) >= data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;
       }
     }
 
-    if(Curl_pgrsUpdate(data)) {
-      result = CURLE_ABORTED_BY_CALLBACK;
-      break;
+    if(!result) {
+      result = Curl_pgrsUpdate(data);
+      if(result)
+        keepon = FALSE;
     }
   }
 #endif

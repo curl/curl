@@ -59,7 +59,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --silent --location --referer "firston
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

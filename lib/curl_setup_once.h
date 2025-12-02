@@ -33,9 +33,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
-#ifndef UNDER_CE
 #include <errno.h>
-#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -67,8 +65,6 @@
    Use it for APIs that do not or cannot support the const qualifier. */
 #ifdef HAVE_STDINT_H
 #  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
-#elif defined(_WIN32)  /* for VS2008 */
-#  define CURL_UNCONST(p) ((void *)(ULONG_PTR)(const void *)(p))
 #else
 #  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
 #endif
@@ -356,7 +352,7 @@ typedef unsigned int bit;
 
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
-#elif defined(_UNICODE) && !defined(UNDER_CE)
+#elif defined(_UNICODE)
 #define argv_item_t  wchar_t *
 #else
 #define argv_item_t  char *

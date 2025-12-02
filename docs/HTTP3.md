@@ -54,7 +54,7 @@ versions do not work.
 
 Build OpenSSL (version 3.5.0 or newer):
 
-     % git clone --quiet --depth=1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
+     % git clone --depth 1 -b openssl-$OPENSSL_VERSION https://github.com/openssl/openssl
      % cd openssl
      % ./config --prefix=<somewhere1> --libdir=lib
      % make
@@ -93,8 +93,9 @@ Build curl:
 
 ## Build with quictls
 
-OpenSSL does not offer the required APIs for building a QUIC client. You need
-to use a TLS library that has such APIs and that works with *ngtcp2*.
+OpenSSL before version 3.5 does not offer the required APIs for building a
+QUIC client. You need to use a TLS library that has such APIs and that works
+with *ngtcp2*.
 
 Build quictls (any `+quic` tagged version works):
 

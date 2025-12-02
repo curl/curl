@@ -13,7 +13,7 @@ NTLM
 # Server-side
 <reply>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
 Proxy-Authenticate: NTLM
 Content-Length: 16
@@ -23,7 +23,7 @@ data to discard
 </connect>
 
 # this is returned first since we get no proxy-auth
-<connect1001>
+<connect1001 crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 Content-Length: 28
@@ -33,7 +33,7 @@ Content-Length: 28
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<connect1002>
+<connect1002 crlf="headers">
 HTTP/1.1 200 Things are fine in proxy land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -54,26 +54,26 @@ daniel
 
 # then this is returned when we get proxy-auth
 <data1000>
-HTTP/1.1 200 OK swsbounce
+HTTP/1.1 200 OK swsbounce%CR
 Server: no
-
+%CR
 Nice proxy auth sir!
 </data1000>
 
 <datacheck>
-HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
-Proxy-Authenticate: NTLM
-Content-Length: 16
-Connection: close
-
-HTTP/1.1 407 Authorization Required to proxy me my dear
-Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
-Content-Length: 28
-
-HTTP/1.1 200 Things are fine in proxy land
-Server: Microsoft-IIS/5.0
-Content-Type: text/html; charset=iso-8859-1
-
+HTTP/1.1 407 Authorization Required to proxy me my dear swsclose%CR
+Proxy-Authenticate: NTLM%CR
+Content-Length: 16%CR
+Connection: close%CR
+%CR
+HTTP/1.1 407 Authorization Required to proxy me my dear%CR
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==%CR
+Content-Length: 28%CR
+%CR
+HTTP/1.1 200 Things are fine in proxy land%CR
+Server: Microsoft-IIS/5.0%CR
+Content-Type: text/html; charset=iso-8859-1%CR
+%CR
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 7
@@ -106,7 +106,7 @@ http://test.remote.example.com.%TESTNUMBER:%HTTPPORT/path/%TESTNUMBER0002 --prox
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 CONNECT test.remote.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION

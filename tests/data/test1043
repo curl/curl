@@ -9,7 +9,7 @@ Resume
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 206 Partial Content
 Date: Mon, 13 Nov 2007 13:41:09 GMT
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -32,13 +32,13 @@ Content-Range: bytes 40-99/100
 012345678
 012345678
 012345678
-HTTP/1.1 206 Partial Content
-Date: Mon, 13 Nov 2007 13:41:09 GMT
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-Accept-Ranges: bytes
-Content-Length: 60
-Content-Range: bytes 40-99/100
-
+HTTP/1.1 206 Partial Content%CR
+Date: Mon, 13 Nov 2007 13:41:09 GMT%CR
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT%CR
+Accept-Ranges: bytes%CR
+Content-Length: 60%CR
+Content-Range: bytes 40-99/100%CR
+%CR
 012345678
 012345678
 012345678
@@ -70,7 +70,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=40-

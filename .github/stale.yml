@@ -6,7 +6,7 @@
 daysUntilStale: 180
 # Number of days of inactivity before a stale issue is closed
 daysUntilClose: 14
-# Issues with these labels will never be considered stale
+# Issues with these labels are never considered stale
 exemptLabels:
   - pinned
   - security

@@ -12,7 +12,7 @@ CUSTOMREQUEST
 #
 # Server-side
 <reply>
-<data1>
+<data1 crlf="yes">
 * 123 FETCH (FLAGS (\Seen \Deleted))
 </data1>
 </reply>
@@ -34,7 +34,7 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -X 'STORE 123 +Flags \Deleted' -u user:secr
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER

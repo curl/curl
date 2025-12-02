@@ -11,7 +11,7 @@ HTTPS
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 201 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
@@ -46,15 +46,15 @@ HTTP/3 POST
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout>
-HTTP/3 201 
+<stdout crlf="headers">
+HTTP/3 201%SP
 date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 0
 funny-head: yesyes
 via: 1.1 nghttpx
 
 </stdout>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST https://%HOSTIP:%HTTP3PORT/2501 HTTP/1.1
 Host: %HOSTIP:%HTTP3PORT
 User-Agent: curl/%VERSION
@@ -65,5 +65,8 @@ Via: 3 nghttpx
 
 moo
 </protocol>
+<limits>
+Maximum allocated: 1900000
+</limits>
 </verify>
 </testcase>

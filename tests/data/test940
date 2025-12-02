@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP with username and password but no AUTH capability
 </name>
-<stdin>
+<stdin crlf="yes">
 mail body
 </stdin>
 <command>
@@ -30,14 +30,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

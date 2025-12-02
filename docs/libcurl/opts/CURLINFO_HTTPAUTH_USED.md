@@ -15,7 +15,7 @@ Added-in: 8.12.0
 
 # NAME
 
-CURLINFO_HTTPAUTH_USED - get used HTTP authentication method
+CURLINFO_HTTPAUTH_USED - used HTTP authentication method
 
 # SYNOPSIS
 

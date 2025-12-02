@@ -28,7 +28,6 @@
 #include "tool_paramhlp.h"
 #include "tool_main.h"
 #include "tool_msgs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 static struct GlobalConfig globalconf;
 struct GlobalConfig *global;
@@ -36,7 +35,7 @@ struct GlobalConfig *global;
 struct OperationConfig *config_alloc(void)
 {
   struct OperationConfig *config =
-    calloc(1, sizeof(struct OperationConfig));
+    curlx_calloc(1, sizeof(struct OperationConfig));
   if(!config)
     return NULL;
 
@@ -184,8 +183,6 @@ static void free_config_fields(struct OperationConfig *config)
   tool_safefree(config->ftp_account);
   tool_safefree(config->ftp_alternative_to_user);
   tool_safefree(config->aws_sigv4);
-  tool_safefree(config->proto_str);
-  tool_safefree(config->proto_redir_str);
   tool_safefree(config->ech);
   tool_safefree(config->ech_config);
   tool_safefree(config->ech_public);
@@ -201,7 +198,7 @@ void config_free(struct OperationConfig *config)
     struct OperationConfig *prev = last->prev;
 
     free_config_fields(last);
-    free(last);
+    curlx_free(last);
 
     last = prev;
   }
@@ -238,12 +235,12 @@ CURLcode globalconf_init(void)
 
       if(result) {
         errorf("error retrieving curl library information");
-        free(global->first);
+        curlx_free(global->first);
       }
     }
     else {
       errorf("error initializing curl library");
-      free(global->first);
+      curlx_free(global->first);
     }
   }
   else {
@@ -262,9 +259,10 @@ static void free_globalconfig(void)
     curlx_fclose(global->trace_stream);
   global->trace_stream = NULL;
 
+  tool_safefree(global->ssl_sessions);
   tool_safefree(global->libcurl);
-#if defined(_WIN32) && !defined(UNDER_CE)
-  free(global->term.buf);
+#ifdef _WIN32
+  curlx_free(global->term.buf);
 #endif
 }
 

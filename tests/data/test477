@@ -51,7 +51,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 5 -L
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

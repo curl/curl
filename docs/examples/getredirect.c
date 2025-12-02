@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
@@ -34,6 +35,10 @@ int main(void)
   CURLcode res;
   char *location;
   long response_code;
+
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   curl = curl_easy_init();
   if(curl) {
@@ -49,8 +54,7 @@ int main(void)
               curl_easy_strerror(res));
     else {
       res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-      if((res == CURLE_OK) &&
-         ((response_code / 100) != 3)) {
+      if((res == CURLE_OK) && ((response_code / 100) != 3)) {
         /* a redirect implies a 3xx response code */
         fprintf(stderr, "Not a redirect.\n");
       }
@@ -68,5 +72,6 @@ int main(void)
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
-  return 0;
+  curl_global_cleanup();
+  return (int)res;
 }

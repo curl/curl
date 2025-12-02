@@ -81,10 +81,6 @@
 #include "idn.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_SMTP_EASY   "meta:proto:smtp:easy"
 /* meta key for storing protocol meta at connection */
@@ -205,7 +201,8 @@ const struct Curl_handler Curl_handler_smtp = {
   CURLPROTO_SMTP,                   /* protocol */
   CURLPROTO_SMTP,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS
+  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
+  PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -235,8 +232,9 @@ const struct Curl_handler Curl_handler_smtps = {
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTPS,                  /* protocol */
   CURLPROTO_SMTP,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL
-  | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS |
+  PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -644,7 +642,7 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
                              utf8 ? " SMTPUTF8" : "");
 
       Curl_free_idnconverted_hostname(&host);
-      free(address);
+      curlx_free(address);
     }
     else {
       /* Establish whether we should report that we support SMTPUTF8 for EXPN
@@ -720,11 +718,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
          worry about that and reply with a 501 error */
       from = curl_maprintf("<%s>%s", address, suffix);
 
-    free(address);
+    curlx_free(address);
   }
   else
     /* Null reverse-path, RFC-5321, sect. 3.6.3 */
-    from = strdup("<>");
+    from = curlx_strdup("<>");
 
   if(!from) {
     result = CURLE_OUT_OF_MEMORY;
@@ -761,11 +759,11 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
         /* An invalid mailbox was provided but we will simply let the server
            worry about it */
         auth = curl_maprintf("<%s>%s", address, suffix);
-      free(address);
+      curlx_free(address);
     }
     else
       /* Empty AUTH, RFC-2554, sect. 5 */
-      auth = strdup("<>");
+      auth = curlx_strdup("<>");
 
     if(!auth) {
       result = CURLE_OUT_OF_MEMORY;
@@ -846,9 +844,9 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
                                : "");          /* included in our envelope  */
 
 out:
-  free(from);
-  free(auth);
-  free(size);
+  curlx_free(from);
+  curlx_free(auth);
+  curlx_free(size);
 
   if(!result)
     smtp_state(data, smtpc, SMTP_MAIL);
@@ -890,7 +888,7 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
                            address, suffix);
 
   Curl_free_idnconverted_hostname(&host);
-  free(address);
+  curlx_free(address);
 
   if(!result)
     smtp_state(data, smtpc, SMTP_RCPT);
@@ -1136,7 +1134,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
     if(!data->req.no_body)
       result = Curl_client_write(data, CLIENTWRITE_BODY, line, len);
 
-    if(smtpcode != 1) {
+    if(!result && (smtpcode != 1)) {
       if(smtp->rcpt) {
         smtp->rcpt = smtp->rcpt->next;
 
@@ -1440,9 +1438,6 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done)
   if(!smtpc)
     return CURLE_FAILED_INIT;
 
-  /* We always support persistent connections in SMTP */
-  connkeep(data->conn, "SMTP default");
-
   PINGPONG_SETUP(&smtpc->pp, smtp_pp_statemachine, smtp_endofresp);
 
   /* Initialize the SASL storage */
@@ -1697,10 +1692,7 @@ static CURLcode smtp_regular_transfer(struct Curl_easy *data,
   data->req.size = -1;
 
   /* Set the progress data */
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, -1);
-  Curl_pgrsSetDownloadSize(data, -1);
+  Curl_pgrsReset(data);
 
   /* Carry out the perform */
   result = smtp_perform(data, smtpc, smtp, &connected, dophase_done);
@@ -1720,7 +1712,7 @@ static void smtp_easy_dtor(void *key, size_t klen, void *entry)
   struct SMTP *smtp = entry;
   (void)key;
   (void)klen;
-  free(smtp);
+  curlx_free(smtp);
 }
 
 static void smtp_conn_dtor(void *key, size_t klen, void *entry)
@@ -1730,7 +1722,7 @@ static void smtp_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_pp_disconnect(&smtpc->pp);
   Curl_safefree(smtpc->domain);
-  free(smtpc);
+  curlx_free(smtpc);
 }
 
 static CURLcode smtp_setup_connection(struct Curl_easy *data,
@@ -1740,14 +1732,14 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
   struct SMTP *smtp;
   CURLcode result = CURLE_OK;
 
-  smtpc = calloc(1, sizeof(*smtpc));
+  smtpc = curlx_calloc(1, sizeof(*smtpc));
   if(!smtpc ||
      Curl_conn_meta_set(conn, CURL_META_SMTP_CONN, smtpc, smtp_conn_dtor)) {
      result = CURLE_OUT_OF_MEMORY;
      goto out;
   }
 
-  smtp = calloc(1, sizeof(*smtp));
+  smtp = curlx_calloc(1, sizeof(*smtp));
   if(!smtp ||
      Curl_meta_set(data, CURL_META_SMTP_EASY, smtp, smtp_easy_dtor))
     result = CURLE_OUT_OF_MEMORY;
@@ -1881,7 +1873,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
-  char *dup = strdup(fqma[0] == '<' ? fqma + 1  : fqma);
+  char *dup = curlx_strdup(fqma[0] == '<' ? fqma + 1 : fqma);
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1927,6 +1919,7 @@ struct cr_eob_ctx {
   size_t eob;       /* Number of bytes of the EOB (End Of Body) that
                        have been received so far */
   BIT(read_eos);  /* we read an EOS from the next reader */
+  BIT(processed_eos);  /* we read and processed an EOS */
   BIT(eos);       /* we have returned an EOS */
 };
 
@@ -1967,6 +1960,8 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
   if(!ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
     /* Get more and convert it when needed */
     result = Curl_creader_read(data, reader->next, buf, blen, &nread, &eos);
+    CURL_TRC_SMTP(data, "cr_eob_read, next_read(len=%zu) -> %d, %zu eos=%d",
+                  blen, result, nread, eos);
     if(result)
       return result;
 
@@ -2010,31 +2005,34 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
           return result;
       }
     }
-
-    if(ctx->read_eos) {
-      /* if we last matched a CRLF or if the data was empty, add ".\r\n"
-       * to end the body. If we sent something and it did not end with "\r\n",
-       * add "\r\n.\r\n" to end the body */
-      const char *eob = SMTP_EOB;
-      switch(ctx->n_eob) {
-        case 2:
-          /* seen a CRLF at the end, just add the remainder */
-          eob = &SMTP_EOB[2];
-          break;
-        case 3:
-          /* ended with '\r\n.', we should escape the last '.' */
-          eob = "." SMTP_EOB;
-          break;
-        default:
-          break;
-      }
-      result = Curl_bufq_cwrite(&ctx->buf, eob, strlen(eob), &n);
-      if(result)
-        return result;
-    }
   }
 
   *peos = FALSE;
+
+  if(ctx->read_eos && !ctx->processed_eos) {
+    /* if we last matched a CRLF or if the data was empty, add ".\r\n"
+     * to end the body. If we sent something and it did not end with "\r\n",
+     * add "\r\n.\r\n" to end the body */
+    const char *eob = SMTP_EOB;
+    CURL_TRC_SMTP(data, "auto-ending mail body with '\\r\\n.\\r\\n'");
+    switch(ctx->n_eob) {
+      case 2:
+        /* seen a CRLF at the end, just add the remainder */
+        eob = &SMTP_EOB[2];
+        break;
+      case 3:
+        /* ended with '\r\n.', we should escape the last '.' */
+        eob = "." SMTP_EOB;
+        break;
+      default:
+        break;
+    }
+    result = Curl_bufq_cwrite(&ctx->buf, eob, strlen(eob), &n);
+    if(result)
+      return result;
+    ctx->processed_eos = TRUE;
+  }
+
   if(!Curl_bufq_is_empty(&ctx->buf)) {
     result = Curl_bufq_cread(&ctx->buf, buf, blen, pnread);
   }
@@ -2043,6 +2041,7 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
 
   if(ctx->read_eos && Curl_bufq_is_empty(&ctx->buf)) {
     /* no more data, read all, done. */
+    CURL_TRC_SMTP(data, "mail body complete, returning EOS");
     ctx->eos = TRUE;
   }
   *peos = ctx->eos;

@@ -33,7 +33,6 @@
 #include "tool_writeout_json.h"
 #include "tool_strdup.h"
 #include "var.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 #define MAX_EXPAND_CONTENT 10000000
 #define MAX_VAR_LEN 128 /* max length of a name */
@@ -45,8 +44,8 @@ void varcleanup(void)
   while(list) {
     struct tool_var *t = list;
     list = list->next;
-    free(CURL_UNCONST(t->content));
-    free(t);
+    curlx_free(CURL_UNCONST(t->content));
+    curlx_free(t);
   }
 }
 
@@ -150,7 +149,7 @@ static ParameterError varfunc(char *c, /* content */
       if(clen) {
         char *enc;
         size_t elen;
-        CURLcode result = curlx_base64_encode(c, clen, &enc, &elen);
+        CURLcode result = curlx_base64_encode((uint8_t *)c, clen, &enc, &elen);
         if(result) {
           err = PARAM_NO_MEM;
           break;
@@ -192,7 +191,7 @@ static ParameterError varfunc(char *c, /* content */
       break;
     }
     if(alloc)
-      free(c);
+      curlx_free(c);
 
     clen = curlx_dyn_len(out);
     c = memdup0(curlx_dyn_ptr(out), clen);
@@ -203,7 +202,7 @@ static ParameterError varfunc(char *c, /* content */
     alloc = TRUE;
   }
   if(alloc)
-    free(c);
+    curlx_free(c);
   if(err)
     curlx_dyn_free(out);
   return err;
@@ -359,9 +358,10 @@ static ParameterError addvariable(const char *name,
   if(check)
     notef("Overwriting variable '%s'", check->name);
 
-  p = calloc(1, sizeof(struct tool_var) + nlen);
+  p = curlx_calloc(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
+    /* the null termination byte is already present from above */
 
     p->content = contalloc ? content : memdup0(content, clen);
     if(p->content) {
@@ -371,7 +371,7 @@ static ParameterError addvariable(const char *name,
       global->variables = p;
       return PARAM_OK;
     }
-    free(p);
+    curlx_free(p);
   }
   return PARAM_NO_MEM;
 }
@@ -446,10 +446,7 @@ ParameterError setvariable(const char *input)
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
-    struct dynbuf fname;
     line++;
-
-    curlx_dyn_init(&fname, MAX_FILENAME);
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
@@ -469,7 +466,6 @@ ParameterError setvariable(const char *input)
       if(clen)
         contalloc = TRUE;
     }
-    curlx_dyn_free(&fname);
     if(!use_stdin && file)
       curlx_fclose(file);
     if(err)
@@ -499,7 +495,7 @@ ParameterError setvariable(const char *input)
   err = addvariable(name, nlen, content, clen, contalloc);
   if(err) {
     if(contalloc)
-      free(content);
+      curlx_free(content);
   }
   return err;
 }

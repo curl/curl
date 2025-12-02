@@ -19,7 +19,7 @@ smtp
 <name>
 SMTP with invalid --mail-rcpt
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -37,10 +37,10 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt invalid --mail-from sender@exam
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<invalid>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTinvalid%GT
 QUIT
 </protocol>
 </verify>

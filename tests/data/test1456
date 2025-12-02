@@ -23,7 +23,7 @@ Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
-These data aren't actually sent to the client
+These data are not actually sent to the client
 </data>
 </reply>
 
@@ -55,7 +55,7 @@ proxy
 <strippart>
 s/PROXY TCP6 ::1 ::1 (\d+) (\d+)/PROXY TCP6 ::1 ::1 $2/
 </strippart>
-<protocol>
+<protocol crlf="yes">
 PROXY TCP6 ::1 ::1 %HTTP6PORT
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT

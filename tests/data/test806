@@ -10,7 +10,7 @@ LIST
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 * LIST () "/" /%TESTNUMBER/blurdybloop
 * LIST (\Noselect) "/" /%TESTNUMBER/foo
 * LIST () "/" /%TESTNUMBER/foo/bar
@@ -34,7 +34,7 @@ imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -u user:secret
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 LIST "%TESTNUMBER" *

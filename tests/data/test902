@@ -24,7 +24,7 @@ smtp
 <name>
 RFC821-only SMTP server (EHLO not supported)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -38,15 +38,15 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
 HELO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

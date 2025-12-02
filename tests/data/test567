@@ -10,7 +10,7 @@ OPTIONS
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 1
@@ -37,7 +37,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER RTSP/1.0
 CSeq: 1
 User-Agent: test%TESTNUMBER

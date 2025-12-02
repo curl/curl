@@ -10,7 +10,7 @@ Mismatch checking
 
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 CSeq: 2
@@ -18,14 +18,14 @@ Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
 Informational: CSeq Mismatch
 
 </data1>
-<data2>
+<data2 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: asdf
 CSeq: 999
 
 </data2>
-<data3>
+<data3 crlf="headers">
 RTSP/1.0 200 OK
 Server: RTSPD/libcurl-test
 Session: asdfWRONG
@@ -58,7 +58,7 @@ rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 <strip>
 ^If-Modified-Since:.*
 </strip>
-<protocol>
+<protocol crlf="yes">
 OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0001 RTSP/1.0
 CSeq: 1
 

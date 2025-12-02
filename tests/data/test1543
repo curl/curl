@@ -52,7 +52,7 @@ CURLOPT_CURLU, URL with space and CURLINFO_EFFECTIVE_URL
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%20/with/%20space/%20/file HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

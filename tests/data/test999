@@ -59,7 +59,7 @@ HTTP with auth in first URL but not second
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://somewhere.example/%TESTNUMBER HTTP/1.1
 Host: somewhere.example
 Authorization: Basic %b64[alberto:einstein]b64%

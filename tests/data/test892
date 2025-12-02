@@ -18,7 +18,7 @@ AUTH PLAIN
 REPLY AUTH +
 REPLY c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ= +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -46,7 +46,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-authzid shared-mailbo
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH PLAIN
 c2hhcmVkLW1haWxib3gAdXNlcgBzZWNyZXQ=

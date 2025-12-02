@@ -30,7 +30,7 @@ connection-monitor
 http
 </server>
 <name>
-Reusing HTTP proxy connection for two different host names
+Reusing HTTP proxy connection for two different hostnames
 </name>
 <command>
 --proxy http://%HOSTIP:%HTTPPORT http://test.remote.haxx.se.%TESTNUMBER:8990/ http://different.remote.haxx.se.%TESTNUMBER:8990
@@ -55,7 +55,7 @@ Content-Length: 6
 
 -foo-
 </stdout>
-<protocol>
+<protocol crlf="headers">
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/ HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
 User-Agent: curl/%VERSION

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1907(const char *URL)
 {
   char *url_after;
@@ -43,7 +41,7 @@ static CURLcode test_lib1907(const char *URL)
                   "curl_easy_perform returned %d: <%s>, <%s>\n",
                   res, curl_easy_strerror(res), error_buffer);
 
-  /* print the used url */
+  /* print the used URL */
   if(!curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url_after))
     curl_mprintf("Effective URL: %s\n", url_after);
 

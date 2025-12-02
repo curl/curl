@@ -8,7 +8,7 @@ WebSockets
 #
 # Sends a PING + a 5 byte hello TEXT
 <reply>
-<data nocheck="yes" nonewline="yes">
+<data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
 Server: test-server/fake
 Upgrade: websocket
@@ -50,10 +50,10 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </client>
 
 #
-# PONG with no data and the 32 bit mask
+# PONG with no data and the 32-bit mask
 #
 <verify>
-<protocol nocheck="yes" nonewline="yes">
+<protocol crlf="yes" nonewline="yes" nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: webbie-sox/3
@@ -66,7 +66,7 @@ Connection: Upgrade
 %hex[%8a%808321]hex%
 </protocol>
 <stdout mode="text">
-68 65 6c 6c 6f 
+68 65 6c 6c 6f%SP
 RECFLAGS: 1
 </stdout>
 <limits>

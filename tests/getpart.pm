@@ -33,6 +33,7 @@ BEGIN {
     our @EXPORT = qw(
         compareparts
         fulltest
+        checktest
         getpart
         getpartattr
         loadarray
@@ -46,13 +47,13 @@ BEGIN {
 use Memoize;
 
 my @xml;      # test data file contents
-my $xmlfile;  # test data file name
+my $xmlfile;  # test data filename
 
 my $warning=0;
 my $trace=0;
 
 # Normalize the part function arguments for proper caching. This includes the
-# file name in the arguments since that is an implied parameter that affects the
+# filename in the arguments since that is an implied parameter that affects the
 # return value.  Any error messages will only be displayed the first time, but
 # those are disabled by default anyway, so should never been seen outside
 # development.
@@ -114,7 +115,7 @@ sub getpartattr {
             }
             last;
         }
-        # detect end of section when part wasn't found
+        # detect end of section when part was not found
         elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
             last;
         }
@@ -216,7 +217,7 @@ sub partexists {
 # memoize('partexists', NORMALIZER => 'normalize_part');  # cache each result
 
 sub loadtest {
-    my ($file)=@_;
+    my ($file, $original)=@_;
 
     if(defined $xmlfile && $file eq $xmlfile) {
         # This test is already loaded
@@ -227,7 +228,12 @@ sub loadtest {
     $xmlfile = "";
 
     if(open(my $xmlh, "<", "$file")) {
-        binmode $xmlh; # for crapage systems, use binary
+        if($original) {
+            binmode $xmlh, ':crlf';
+        }
+        else {
+            binmode $xmlh; # for crapage systems, use binary
+        }
         while(<$xmlh>) {
             push @xml, $_;
         }
@@ -236,7 +242,7 @@ sub loadtest {
     else {
         # failure
         if($warning) {
-            print STDERR "file $file wouldn't open!\n";
+            print STDERR "file $file would not open!\n";
         }
         return 1;
     }
@@ -248,6 +254,46 @@ sub loadtest {
 # Return entire document as list of lines
 sub fulltest {
     return @xml;
+}
+
+sub eol_detect {
+    my ($content) = @_;
+
+    my $cr = () = $content =~ /\r/g;
+    my $lf = () = $content =~ /\n/g;
+
+    if($cr > 0 && $lf == 0) {
+        return "cr";
+    }
+    elsif($cr == 0 && $lf > 0) {
+        return "lf";
+    }
+    elsif($cr == 0 && $lf == 0) {
+        return "bin";
+    }
+    elsif($cr == $lf) {
+        return "crlf";
+    }
+
+    return "";
+}
+
+sub checktest {
+    my ($file) = @_;
+
+    if(open(my $xmlh, '<', $file)) {
+        binmode $xmlh; # we want the raw data to check original newlines
+        my $content = do { local $/; <$xmlh> };
+        close($xmlh);
+
+        my $eol = eol_detect($content);
+        if($eol eq '') {
+            print STDERR "*** getpart.pm: $xmlfile has mixed newlines. Replace significant carriage return with %CR macro, or convert to consistent newlines.\n";
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 # write the test to the given file
@@ -264,7 +310,7 @@ sub savetest {
     else {
         # failure
         if($warning) {
-            print STDERR "file $file wouldn't open!\n";
+            print STDERR "file $file would not open!\n";
         }
         return 1;
     }
@@ -352,7 +398,7 @@ sub writearray {
     my ($filename, $arrayref)=@_;
 
     open(my $temp, ">", "$filename") || die "Failure writing file";
-    binmode($temp,":raw");  # Cygwin fix by Kevin Roth
+    binmode($temp,":raw");  # Cygwin fix
     for(@$arrayref) {
         print $temp $_;
     }

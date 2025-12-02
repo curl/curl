@@ -9,7 +9,7 @@ HTTP Basic auth
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required swsbounce
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: X-MobileMe-AuthToken realm="Newcastle", Basic realm="fun fun  fun"
@@ -20,7 +20,7 @@ This is not the real page
 </data>
 
 # This is supposed to be returned when the server gets the second request
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Content-Type: text/html; charset=iso-8859-1
@@ -29,7 +29,7 @@ Content-Length: 23
 This IS the real page!
 </data1>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required swsbounce
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: X-MobileMe-AuthToken realm="Newcastle", Basic realm="fun fun  fun"
@@ -61,7 +61,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

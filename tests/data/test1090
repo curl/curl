@@ -12,7 +12,7 @@ chunked Transfer-Encoding
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 OK swsbounce swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8
@@ -22,7 +22,7 @@ Location: ./%TESTNUMBER0001
 
 monster
 </data>
-<data1 nocheck="yes">
+<data1 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Transfer-Encoding: chunked
@@ -30,7 +30,7 @@ Connection: close
 Content-Type: text/plain; charset=us-ascii
 
 0007
-bigger 
+bigger%SP
 0008
 monster
 
@@ -57,7 +57,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n%{num_redirects}\n%{si
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -70,7 +70,7 @@ Accept: */*
 
 </protocol>
 
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 302 OK swsbounce swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 8

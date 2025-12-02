@@ -65,7 +65,7 @@ static CURLcode test_unit1300(const char *arg)
    * 2: list head will be NULL
    * 3: list tail will be NULL
    * 4: list dtor will be NULL
-  */
+   */
 
   fail_unless(Curl_llist_count(&llist) == 0,
               "list initial size should be zero");
@@ -127,7 +127,7 @@ static CURLcode test_unit1300(const char *arg)
   fail_unless(Curl_node_elem(Curl_node_next(Curl_llist_head(&llist))) ==
               &unusedData_case2,
               "the node next to head is not getting set correctly");
-  /* better safe than sorry, check that the tail isn't corrupted */
+  /* better safe than sorry, check that the tail is not corrupted */
   fail_unless(Curl_node_elem(Curl_llist_tail(&llist)) != &unusedData_case2,
               "the list tail is not getting set correctly");
 

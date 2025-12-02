@@ -19,10 +19,10 @@ Transfer-Encoding: chunked
 Content-Type: text/html
 Funny-head: yesyes
 
-10
-chunked data fun
-0
-
+10%CR
+chunked data fun%CR
+0%CR
+%CR
 </data>
 <datacheck nonewline="yes">
 HTTP/1.1 200 OK
@@ -54,7 +54,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

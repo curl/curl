@@ -43,7 +43,7 @@ Weird
 <errorcode>
 22
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

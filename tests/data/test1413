@@ -9,14 +9,14 @@ followlocation
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 302 OK swsclose
 Location: moo.html/%TESTNUMBER0002#fragmentpart
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Location: this should be ignored
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -24,7 +24,7 @@ Connection: close
 
 body
 </data2>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 302 OK swsclose
 Location: moo.html/%TESTNUMBER0002#fragmentpart
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/this/%TESTNUMBER -L
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /this/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

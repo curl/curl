@@ -18,7 +18,7 @@ AUTH LOGIN
 REPLY AUTH + UGFzc3dvcmQ6
 REPLY c2VjcmV0 +OK Login successful
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -46,7 +46,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --sasl-ir
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 AUTH LOGIN dXNlcg==
 c2VjcmV0

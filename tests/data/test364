@@ -37,7 +37,7 @@ HTTPS PUT of small file
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 User-Agent: curl/%VERSION

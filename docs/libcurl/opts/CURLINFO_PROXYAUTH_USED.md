@@ -15,7 +15,7 @@ Added-in: 8.12.0
 
 # NAME
 
-CURLINFO_PROXYAUTH_USED - get used HTTP proxy authentication method
+CURLINFO_PROXYAUTH_USED - HTTP proxy authentication method
 
 # SYNOPSIS
 

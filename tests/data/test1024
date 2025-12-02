@@ -10,7 +10,7 @@ cookies
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 301 This is a weirdo text message
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -21,7 +21,7 @@ Content-Length: 69
 This server reply is for testing a Location: following with cookies
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 301 This is a weirdo text message
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -32,7 +32,7 @@ Content-Length: 69
 This server reply is for testing a Location: following with cookies
 
 </data2>
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 Followed here fine
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -41,7 +41,7 @@ Content-Length: 52
 If this is received, the location following worked
 
 </data3>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 301 This is a weirdo text message
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -84,7 +84,7 @@ cookies
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

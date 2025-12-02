@@ -12,16 +12,16 @@ DELAY
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK swsclose
-Transfer-Encoding: chunked
-
-4
-data
-5
+HTTP/1.1 200 OK swsclose%CR
+Transfer-Encoding: chunked%CR
+%CR
+4%CR
+data%CR
+5%CR
 d474
-
-0
-
+%CR
+0%CR
+%CR
 </data>
 <datacheck>
 CURLINFO_CONNECT_TIME_T on 1st header is OK
@@ -30,9 +30,9 @@ CURLINFO_STARTTRANSFER_TIME_T on 1st header is OK
 CURLINFO_TOTAL_TIME_T on 1st header is OK
 CURLINFO_APPCONNECT_TIME_T on 1st header is OK
 CURLINFO_SPEED_DOWNLOAD_T on 1st header is OK
-HTTP/1.1 200 OK swsclose
-Transfer-Encoding: chunked
-
+HTTP/1.1 200 OK swsclose%CR
+Transfer-Encoding: chunked%CR
+%CR
 datad474
 CURLINFO_CONNECT_TIME_T on done is OK
 CURLINFO_PRETRANSFER_TIME_T on done is OK
@@ -64,7 +64,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*

@@ -12,7 +12,7 @@ curl_easy_reset
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -23,7 +23,7 @@ Content-Type: text/html
 </data>
 
 # since the request runs twice
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -69,7 +69,7 @@ cookies
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: the-moo agent next generation

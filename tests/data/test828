@@ -17,7 +17,7 @@ AUTH XOAUTH2
 CAPA SASL-IR
 REPLY AUTHENTICATE A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -45,7 +45,7 @@ IMAP OAuth 2.0 (XOAUTH2) authentication with initial response
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE XOAUTH2 dXNlcj11c2VyAWF1dGg9QmVhcmVyIG1GXzkuQjVmLTQuMUpxTQEB
 A003 SELECT %TESTNUMBER

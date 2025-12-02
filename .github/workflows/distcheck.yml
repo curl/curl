@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -49,7 +49,7 @@ jobs:
       - name: 'maketgz'
         run: SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -75,7 +75,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -99,7 +99,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -125,7 +125,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -149,7 +149,7 @@ jobs:
     timeout-minutes: 10
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -170,7 +170,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -192,7 +192,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -214,11 +214,11 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      - uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           name: 'release-tgz'
 
@@ -230,7 +230,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -279,6 +279,7 @@ jobs:
             mingw-w64-x86_64-zlib mingw-w64-x86_64-zstd mingw-w64-x86_64-libpsl mingw-w64-x86_64-libssh2 mingw-w64-x86_64-nghttp2 mingw-w64-x86_64-openssl
 
       - name: 'install prereqs'
+        timeout-minutes: 3
         run: |
           if [[ "${MATRIX_IMAGE}" = *'windows'* ]]; then
             cd ~
@@ -302,7 +303,7 @@ jobs:
             printf '%s' ~/cmake-"${OLD_CMAKE_VERSION}"-Darwin-x86_64/CMake.app/Contents/bin/cmake > ~/old-cmake-path.txt
           fi
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 

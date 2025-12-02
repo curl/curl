@@ -7,7 +7,7 @@
 #
 # Server-side
 <reply>
-<data nocheck="yes" crlf="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -43,14 +43,14 @@ http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER --dump-header %PWD/%LOGDIR/tmp/
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /this/is/the/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/tmp/out.txt" crlf="yes">
+<file name="%LOGDIR/tmp/out.txt" crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

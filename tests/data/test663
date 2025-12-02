@@ -14,14 +14,14 @@ followlocation
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 302 OK
 Location: http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 0
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Location: this should be ignored
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -29,7 +29,7 @@ Content-Length: 5
 
 body
 </data2>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 302 OK
 Location: http://example.net/there/it/is/../../tes t case=/%TESTNUMBER0002? yes no
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -64,7 +64,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://example.com/gimme/%TESTNUMBER?foobar HTTP/1.1
 Host: example.com
 User-Agent: curl/%VERSION

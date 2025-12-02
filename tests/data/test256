@@ -28,7 +28,7 @@ http
 <name>
 HTTP resume request over proxy with auth without server supporting it
 </name>
- <command option="no-output">
+<command option="no-output">
 -x http://%HOSTIP:%HTTPPORT http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -C - --no-include -o %LOGDIR/fewl%TESTNUMBER.txt -U daniel:stenberg
 </command>
 <file name="%LOGDIR/fewl%TESTNUMBER.txt">
@@ -45,7 +45,7 @@ proxy
 <errorcode>
 33
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: Basic %b64[daniel:stenberg]b64%

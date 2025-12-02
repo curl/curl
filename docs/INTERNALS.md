@@ -24,20 +24,22 @@ versions of libs and build tools.
 
  We aim to support these or later versions.
 
- - OpenSSL      1.0.2a
- - LibreSSL     2.9.1
- - GnuTLS       3.1.10
- - mbedTLS      3.2.0
- - zlib         1.2.5.2
- - libssh2      1.9.0
- - c-ares       1.6.0
- - libssh       0.9.0
- - libidn2      2.0.0
- - wolfSSL      3.4.6
- - OpenLDAP     2.0
- - MIT Kerberos 1.2.4
- - Heimdal      7.1.0
- - nghttp2      1.15.0
+ - brotli       1.0.0 (2017-09-21)
+ - c-ares       1.6.0 (2008-12-09)
+ - GnuTLS       3.6.5 (2018-12-01)
+ - libidn2      2.0.0 (2017-03-29)
+ - LibreSSL     2.9.1 (2019-04-22)
+ - libssh       0.9.0 (2019-06-28)
+ - libssh2      1.9.0 (2019-06-20)
+ - mbedTLS      3.2.0 (2022-07-11)
+ - MIT Kerberos 1.3 (2003-07-31)
+ - nghttp2      1.15.0 (2016-09-25)
+ - OpenLDAP     2.0 (2000-08-01)
+ - OpenSSL      3.0.0 (2021-09-07)
+ - Windows      XP 5.1 (2001-08-24 - 2009-04-14)
+ - wolfSSL      3.4.6 (2017-09-22)
+ - zlib         1.2.5.2 (2011-12-11)
+ - zstd         1.0 (2016-08-31)
 
 ## Build tools
 
@@ -45,13 +47,14 @@ versions of libs and build tools.
  we use a few "build tools" and we make sure that we remain functional with
  these versions:
 
- - GNU Libtool  1.4.2
- - GNU Autoconf 2.59
- - GNU Automake 1.7
- - GNU M4       1.4
- - perl         5.8
- - roffit       0.5
- - cmake        3.7
+ - cmake          3.7 (2016-11-11)
+ - GNU autoconf   2.59 (2003-11-06)
+ - GNU automake   1.7 (2002-09-25)
+ - GNU libtool    1.4.2 (2001-09-11)
+ - GNU m4         1.4 (2007-09-21)
+ - mingw-w64      3.0 (2013-09-20)
+ - perl           5.8 (2002-07-19), on Windows: 5.22 (2015-06-01)
+ - Visual Studio  2010 10.0 (2010-04-12 - 2020-07-14)
 
 Library Symbols
 ===============

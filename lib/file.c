@@ -60,8 +60,6 @@
 #include "sendf.h"
 #include "escape.h"
 #include "file.h"
-#include "speedcheck.h"
-#include "getinfo.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
@@ -69,10 +67,6 @@
 #include "curlx/fopen.h"
 #include "curlx/warnless.h"
 #include "curl_range.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 #if defined(_WIN32) || defined(MSDOS)
 #define DOS_FILESYSTEM 1
@@ -150,7 +144,7 @@ static void file_easy_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   file_cleanup(file);
-  free(file);
+  curlx_free(file);
 }
 
 static CURLcode file_setup_connection(struct Curl_easy *data,
@@ -159,7 +153,7 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
   struct FILEPROTO *filep;
   (void)conn;
   /* allocate the FILE specific struct */
-  filep = calloc(1, sizeof(*filep));
+  filep = curlx_calloc(1, sizeof(*filep));
   if(!filep ||
      Curl_meta_set(data, CURL_META_FILE_EASY, filep, file_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -271,12 +265,12 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
   file->path = real_path;
   #endif
 #endif
-  free(file->freepath);
+  curlx_free(file->freepath);
   file->freepath = real_path; /* free this when done */
 
   file->fd = fd;
   if(!data->state.upload && (fd == -1)) {
-    failf(data, "Couldn't open file %s", data->state.up.path);
+    failf(data, "Could not open file %s", data->state.up.path);
     file_done(data, CURLE_FILE_COULDNT_READ_FILE, FALSE);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
@@ -344,7 +338,10 @@ static CURLcode file_upload(struct Curl_easy *data,
   else
     mode |= O_TRUNC;
 
-#if (defined(ANDROID) || defined(__ANDROID__)) && \
+#ifdef _WIN32
+  fd = curlx_open(file->path, mode,
+                  data->set.new_file_perms & (_S_IREAD | _S_IWRITE));
+#elif (defined(ANDROID) || defined(__ANDROID__)) && \
   (defined(__i386__) || defined(__arm__))
   fd = curlx_open(file->path, mode, (mode_t)data->set.new_file_perms);
 #else
@@ -374,8 +371,8 @@ static CURLcode file_upload(struct Curl_easy *data,
     goto out;
 
   while(!result && !eos) {
-    size_t nread;
-    ssize_t nwrite;
+    size_t nread, nwritten;
+    ssize_t rv;
     size_t readcount;
 
     result = Curl_client_read(data, xfer_ulbuf, xfer_ulblen, &readcount, &eos);
@@ -404,23 +401,19 @@ static CURLcode file_upload(struct Curl_easy *data,
       sendbuf = xfer_ulbuf;
 
     /* write the data to the target */
-    nwrite = write(fd, sendbuf, nread);
-    if((size_t)nwrite != nread) {
+    rv = write(fd, sendbuf, nread);
+    if(!curlx_sztouz(rv, &nwritten) || (nwritten != nread)) {
       result = CURLE_SEND_ERROR;
       break;
     }
-
-    bytecount += nread;
+    bytecount += nwritten;
 
     Curl_pgrsSetUploadCounter(data, bytecount);
 
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
-    else
-      result = Curl_speedcheck(data, curlx_now());
+    result = Curl_pgrsCheck(data);
   }
-  if(!result && Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
+  if(!result)
+    result = Curl_pgrsUpdate(data);
 
 out:
   close(fd);
@@ -573,7 +566,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from) {
     if(!S_ISDIR(statbuf.st_mode)) {
-#if defined(__AMIGA__) || defined(__MINGW32CE__)
+#ifdef __AMIGA__
       if(data->state.resume_from !=
           lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
 #else
@@ -619,10 +612,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       if(result)
         goto out;
 
-      if(Curl_pgrsUpdate(data))
-        result = CURLE_ABORTED_BY_CALLBACK;
-      else
-        result = Curl_speedcheck(data, curlx_now());
+      result = Curl_pgrsCheck(data);
       if(result)
         goto out;
     }
@@ -656,8 +646,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 #endif
   }
 
-  if(Curl_pgrsUpdate(data))
-    result = CURLE_ABORTED_BY_CALLBACK;
+  if(!result)
+    result = Curl_pgrsUpdate(data);
 
 out:
   Curl_multi_xfer_buf_release(data, xfer_buf);

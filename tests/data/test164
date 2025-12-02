@@ -12,30 +12,30 @@ HTTP GET
 # to avoid XML escaping problems).
 <reply>
 <data>
-HTTP/1.1 206 Partial Content swsclose
-Date: Sat, 24 Apr 2004 09:24:49 GMT
-Server: Apache/1.3.29 (Unix) mod_throttle/3.1.2 PHP/4.3.4 mod_fastcgi/2.4.0
-Last-Modified: Tue, 23 Mar 2004 08:23:14 GMT
-ETag: "53814a-ec5-405ff3f2"
-Accept-Ranges: bytes
-Content-Length: 187
-Content-Type: multipart/byteranges; boundary=408a326132c
-
---408a326132c
-Content-type: text/html
-Content-range: bytes 0-10/3781
-
+HTTP/1.1 206 Partial Content swsclose%CR
+Date: Sat, 24 Apr 2004 09:24:49 GMT%CR
+Server: Apache/1.3.29 (Unix) mod_throttle/3.1.2 PHP/4.3.4 mod_fastcgi/2.4.0%CR
+Last-Modified: Tue, 23 Mar 2004 08:23:14 GMT%CR
+ETag: "53814a-ec5-405ff3f2"%CR
+Accept-Ranges: bytes%CR
+Content-Length: 187%CR
+Content-Type: multipart/byteranges; boundary=408a326132c%CR
+%CR
+--408a326132c%CR
+Content-type: text/html%CR
+Content-range: bytes 0-10/3781%CR
+%CR
 {html}
 {hea
-
---408a326132c
-Content-type: text/html
-Content-range: bytes 12-15/3781
-
+%CR
+--408a326132c%CR
+Content-type: text/html%CR
+Content-range: bytes 12-15/3781%CR
+%CR
 }
 {t
-
---408a326132c--
+%CR
+--408a326132c--%CR
 </data>
 </reply>
 
@@ -54,7 +54,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r 0-10,12-15
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=0-10,12-15

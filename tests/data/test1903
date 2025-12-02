@@ -9,7 +9,7 @@ CURLOPT_COOKIEFILE
 
 # Server-side
 <reply>
-<data nocheck="yes" crlf="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

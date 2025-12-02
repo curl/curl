@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static int testcounter;
 
@@ -128,7 +127,10 @@ static CURLcode test_lib500(const char *URL)
                         (time_pretransfer / 1000000),
                         (long)(time_pretransfer % 1000000));
         }
-        if(time_pretransfer > time_posttransfer) {
+        if(time_posttransfer > time_pretransfer) {
+          /* counter-intuitive: on a GET request, all bytes are sent *before*
+           * PRETRANSFER happens. Thus POSTTRANSFER has to be smaller.
+           * The reverse would be true for a POST/PUT. */
           curl_mfprintf(moo, "pretransfer vs posttransfer: %"
                         CURL_FORMAT_CURL_OFF_T
                         ".%06ld %" CURL_FORMAT_CURL_OFF_T ".%06ld\n",

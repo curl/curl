@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-SRC ?= ftpget.c
+SRC ?= https.c
 
 # What to call the final executable
 TARGET ?= example
@@ -36,12 +36,12 @@ CFLAGS ?= -g
 # This should point to a directory that holds libcurl, if it is not in the
 # system's standard lib dir
 # We also set a -L to include the directory where we have the OpenSSL libraries
-LDFLAGS ?= -L/home/dast/lib -L/usr/local/ssl/lib
+LDFLAGS ?= -L/usr/lib -L/usr/local/lib
 
 # We need -lsocket and -lnsl when on Solaris
 # We need -lssl and -lcrypto when using libcurl with TLS support
 # We need -lpthread for the pthread example
-LIBS ?= -lsocket -lnsl -lssl -lcrypto
+LIBS ?= -lssl -lcrypto
 # We need -lcurl for the curl stuff
 LIBS := -lcurl $(LIBS)
 

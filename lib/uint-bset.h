@@ -39,51 +39,51 @@
  * the price of slightly slower operations.
  */
 
-struct uint_bset {
-  curl_uint64_t *slots;
-  unsigned int nslots;
-  unsigned int first_slot_used;
+struct uint32_bset {
+  uint64_t *slots;
+  uint32_t nslots;
+  uint32_t first_slot_used;
 #ifdef DEBUGBUILD
   int init;
 #endif
 };
 
 /* Initialize the bitset with capacity 0. */
-void Curl_uint_bset_init(struct uint_bset *bset);
+void Curl_uint32_bset_init(struct uint32_bset *bset);
 
 /* Resize the bitset capacity to hold numbers from 0 to `nmax`,
  * which rounds up `nmax` to the next multiple of 64. */
-CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax);
+CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax);
 
 /* Destroy the bitset, freeing all resources. */
-void Curl_uint_bset_destroy(struct uint_bset *bset);
+void Curl_uint32_bset_destroy(struct uint32_bset *bset);
 
 /* Get the bitset capacity, e.g. can hold numbers from 0 to capacity - 1. */
-unsigned int Curl_uint_bset_capacity(struct uint_bset *bset);
+uint32_t Curl_uint32_bset_capacity(struct uint32_bset *bset);
 
 /* Get the cardinality of the bitset, e.g. numbers present in the set. */
-unsigned int Curl_uint_bset_count(struct uint_bset *bset);
+uint32_t Curl_uint32_bset_count(struct uint32_bset *bset);
 
 /* TRUE of bitset is empty */
-bool Curl_uint_bset_empty(struct uint_bset *bset);
+bool Curl_uint32_bset_empty(struct uint32_bset *bset);
 
 /* Clear the bitset, making it empty. */
-void Curl_uint_bset_clear(struct uint_bset *bset);
+void Curl_uint32_bset_clear(struct uint32_bset *bset);
 
 /* Add the number `i` to the bitset. Return FALSE if the number is
  * outside the set's capacity.
  * Numbers can be added more than once, without making a difference. */
-bool Curl_uint_bset_add(struct uint_bset *bset, unsigned int i);
+bool Curl_uint32_bset_add(struct uint32_bset *bset, uint32_t i);
 
 /* Remove the number `i` from the bitset. */
-void Curl_uint_bset_remove(struct uint_bset *bset, unsigned int i);
+void Curl_uint32_bset_remove(struct uint32_bset *bset, uint32_t i);
 
 /* Return TRUE if the bitset contains number `i`. */
-bool Curl_uint_bset_contains(struct uint_bset *bset, unsigned int i);
+bool Curl_uint32_bset_contains(struct uint32_bset *bset, uint32_t i);
 
 /* Get the first number in the bitset, e.g. the smallest.
  * Returns FALSE when the bitset is empty. */
-bool Curl_uint_bset_first(struct uint_bset *bset, unsigned int *pfirst);
+bool Curl_uint32_bset_first(struct uint32_bset *bset, uint32_t *pfirst);
 
 /* Get the next number in the bitset, following `last` in natural order.
  * Put another way, this is the smallest number greater than `last` in
@@ -96,20 +96,20 @@ bool Curl_uint_bset_first(struct uint_bset *bset, unsigned int *pfirst);
  * - added numbers lower than 'last' will not show up.
  * - removed numbers lower or equal to 'last' will not show up.
  * - removed numbers higher than 'last' will not be visited. */
-bool Curl_uint_bset_next(struct uint_bset *bset, unsigned int last,
-                         unsigned int *pnext);
+bool Curl_uint32_bset_next(struct uint32_bset *bset, uint32_t last,
+                           uint32_t *pnext);
 
 
 #ifndef CURL_POPCOUNT64
 #define CURL_POPCOUNT64(x)   Curl_popcount64(x)
 #define CURL_POPCOUNT64_IMPLEMENT
-unsigned int Curl_popcount64(curl_uint64_t x);
+uint32_t Curl_popcount64(uint64_t x);
 #endif /* !CURL_POPCOUNT64 */
 
 #ifndef CURL_CTZ64
 #define CURL_CTZ64(x)  Curl_ctz64(x)
 #define CURL_CTZ64_IMPLEMENT
-unsigned int Curl_ctz64(curl_uint64_t x);
+uint32_t Curl_ctz64(uint64_t x);
 #endif /* !CURL_CTZ64 */
 
 #endif /* HEADER_CURL_UINT_BSET_H */

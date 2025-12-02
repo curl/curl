@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
@@ -65,7 +64,10 @@ static CURLcode test_cli_ws_pingpong(const char *URL)
   }
   payload = libtest_arg2;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
+    curl_mfprintf(stderr, "curl_global_init() failed\n");
+    return (CURLcode)3;
+  }
 
   curl = curl_easy_init();
   if(curl) {

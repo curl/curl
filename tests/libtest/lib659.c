@@ -23,20 +23,18 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Get a single URL without select().
  */
 
 static CURLcode test_lib659(const char *URL)
 {
-  CURL *handle = NULL;
+  CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   CURLU *urlp = NULL;
 
   global_init(CURL_GLOBAL_ALL);
-  easy_init(handle);
+  easy_init(curl);
 
   urlp = curl_url();
 
@@ -45,7 +43,7 @@ static CURLcode test_lib659(const char *URL)
     goto test_cleanup;
   }
 
-  /* this doesn't set the PATH part */
+  /* this does not set the PATH part */
   if(curl_url_set(urlp, CURLUPART_HOST, "www.example.com", 0) ||
      curl_url_set(urlp, CURLUPART_SCHEME, "http", 0) ||
      curl_url_set(urlp, CURLUPART_PORT, "80", 0)) {
@@ -53,11 +51,11 @@ static CURLcode test_lib659(const char *URL)
     goto test_cleanup;
   }
 
-  easy_setopt(handle, CURLOPT_CURLU, urlp);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
-  easy_setopt(handle, CURLOPT_PROXY, URL);
+  easy_setopt(curl, CURLOPT_CURLU, urlp);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_PROXY, URL);
 
-  res = curl_easy_perform(handle);
+  res = curl_easy_perform(curl);
 
   if(res) {
     curl_mfprintf(stderr, "%s:%d curl_easy_perform() failed "
@@ -69,7 +67,7 @@ static CURLcode test_lib659(const char *URL)
 test_cleanup:
 
   curl_url_cleanup(urlp);
-  curl_easy_cleanup(handle);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;

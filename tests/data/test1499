@@ -10,32 +10,32 @@ chunked Transfer-Encoding
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 funky chunky!
-Server: fakeit/0.9 fakeitbad/1.0
-Transfer-Encoding: chunked
-Trailer: chunky-trailer
-Connection: mooo
-
-40
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-30
-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-21;heresatest=moooo
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+%CR
+40%CR
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%CR
+30%CR
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb%CR
+21;heresatest=moooo%CR
 cccccccccccccccccccccccccccccccc
-
-0
-chunky-trailer: header data
-
+%CR
+0%CR
+chunky-trailer: header data%CR
+%CR
 </data>
 <datacheck>
-HTTP/1.1 200 funky chunky!
-Server: fakeit/0.9 fakeitbad/1.0
-Transfer-Encoding: chunked
-Trailer: chunky-trailer
-Connection: mooo
-
+HTTP/1.1 200 funky chunky!%CR
+Server: fakeit/0.9 fakeitbad/1.0%CR
+Transfer-Encoding: chunked%CR
+Trailer: chunky-trailer%CR
+Connection: mooo%CR
+%CR
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbcccccccccccccccccccccccccccccccc
-chunky-trailer: header data
+chunky-trailer: header data%CR
 </datacheck>
 <servercmd>
 writedelay: 10
@@ -48,10 +48,10 @@ writedelay: 10
 <server>
 http
 </server>
- <name>
+<name>
 HTTP chunked encoding and chunked trailer, twice
- </name>
- <command>
+</name>
+<command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
 </client>
@@ -59,7 +59,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D %LO
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -12,7 +12,7 @@ CURLOPT_PROXYHEADER
 
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 
 </connect>
@@ -25,8 +25,8 @@ ETag: "21025-dc7-39462498"
 
 </data>
 <datacheck>
-HTTP/1.1 200 OK
-
+HTTP/1.1 200 OK%CR
+%CR
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -58,14 +58,14 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
 User-Agent: Http Agent
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*

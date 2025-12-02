@@ -32,7 +32,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --retry 1 -w '%{num_retries}\n'
 <errorcode>
 67
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 USER anonymous

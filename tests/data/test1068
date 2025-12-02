@@ -10,7 +10,7 @@ chunked Transfer-Encoding
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -39,18 +39,18 @@ more than one byte
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-PUT /bzz/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Transfer-Encoding: chunked
-Expect: 100-continue
-
-13
+PUT /bzz/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Transfer-Encoding: chunked%CR
+Expect: 100-continue%CR
+%CR
+13%CR
 more than one byte
-
-0
-
+%CR
+0%CR
+%CR
 </protocol>
 </verify>
 </testcase>

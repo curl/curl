@@ -37,65 +37,9 @@ permissions: {}
 
 env:
   CURL_CI: github
+  CURL_TEST_NO_TASKKILL: '1'
 
 jobs:
-  build-cache:
-    name: 'Build caches'
-    runs-on: ${{ matrix.image }}
-    timeout-minutes: 15
-    defaults:
-      run:
-        shell: msys2 {0}
-    strategy:
-      fail-fast: false
-      matrix:
-        image: [windows-2022, windows-11-arm]
-    steps:
-      - name: 'install build prereqs'
-        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
-        uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
-        with:
-          msystem: msys
-          install: gcc make
-
-      - name: 'perl version'
-        run: perl --version | tee "$GITHUB_WORKSPACE"/perlversion
-
-      - name: 'cache perl packages'
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
-
-      - name: 'build perl packages'
-        if: ${{ steps.cache-perl-win32-pkgs.outputs.cache-hit != 'true' }}
-        run: |
-          cd /c
-          mkdir perl-win32-pkgs
-          cd perl-win32-pkgs
-          sed -i.bak 's/#define I_CRYPT//g' /usr/lib/perl5/core_perl/CORE/config.h
-
-          # https://metacpan.org/pod/Win32::Process
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://cpan.metacpan.org/authors/id/J/JD/JDB/Win32-Process-0.17.tar.gz" | tar -xz
-          cd Win32-Process-0.17
-          perl Makefile.PL
-          sed -i.bak 's/-lcrypt//g' Makefile
-          make
-          cd ..
-
-          # https://metacpan.org/pod/Win32::Process::List
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 6 --retry-connrefused \
-            --location "https://cpan.metacpan.org/authors/id/R/RP/RPAGITSCH/Win32-Process-List-0.09.tar.gz" | tar -xz
-          cd Win32-Process-List-0.09
-          perl Makefile.PL
-          sed -i.bak 's/-lcrypt//g' Makefile
-          make
-          cd ..
-
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
     runs-on: windows-2022
@@ -114,8 +58,6 @@ jobs:
           - { build: 'cmake'    , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', install: 'libssl-devel libssh2-devel', name: 'openssl' }
       fail-fast: false
     steps:
-      - run: git config --global core.autocrlf input
-        shell: pwsh
       - uses: cygwin/cygwin-install-action@f2009323764960f80959895c7bc3bb30210afe4d # v6
         with:
           platform: ${{ matrix.platform }}
@@ -133,7 +75,7 @@ jobs:
             libnghttp2-devel
             ${{ matrix.install }}
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -187,11 +129,11 @@ jobs:
             make -C bld V=1 install
           fi
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
           PATH=/usr/bin
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
@@ -242,8 +184,6 @@ jobs:
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
-    needs:
-      - build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: 15
     defaults:
@@ -279,9 +219,6 @@ jobs:
           - { build: 'cmake'    , sys: 'mingw32'   , env: 'i686'         , tflags: 'skiprun', config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-i686-libssh2', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
-      - run: git config --global core.autocrlf input
-        shell: pwsh
-
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         if: ${{ matrix.sys == 'msys' }}
         with:
@@ -302,7 +239,6 @@ jobs:
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
-          update: ${{ matrix.sys == 'clangarm64' }}  # delete this line on next msys2/setup-msys2 bump
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
@@ -311,7 +247,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-c-ares
             ${{ matrix.install }}
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -391,7 +327,7 @@ jobs:
             make -C bld V=1 install
           fi
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
@@ -401,7 +337,7 @@ jobs:
             # avoid libtool's curl.exe wrapper for shared builds
             mv bld/src/.libs/curl.exe bld/src/curl.exe || true
           fi
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
           if [ "${MATRIX_TEST}" != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
@@ -429,38 +365,6 @@ jobs:
         run: |
           /usr/bin/pacman --noconfirm --noprogressbar --sync --needed openssh
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
-
-      - name: 'cache perl packages'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' && matrix.sys != 'msys' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
-
-      - name: 'install test prereqs perl'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: &perl-win32-pkgs-install |
-          perl --version
-          if [ -d /c/perl-win32-pkgs ]; then
-            pushd /c/perl-win32-pkgs
-            pushd Win32-Process-0.17
-            install -D blib/arch/auto/Win32/Process/Process.dll      /usr/lib/perl5/site_perl/auto/Win32/Process/Process.dll
-            install -D blib/lib/Win32/Process.pm                     /usr/lib/perl5/site_perl/Win32/Process.pm
-            popd
-            pushd Win32-Process-List-0.09
-            install -D blib/arch/auto/Win32/Process/List/List.dll    /usr/lib/perl5/site_perl/auto/Win32/Process/List/List.dll
-            install -D blib/lib/auto/Win32/Process/List/autosplit.ix /usr/lib/perl5/site_perl/auto/Win32/Process/List/autosplit.ix
-            install -D blib/lib/Win32/Process/List.pm                /usr/lib/perl5/site_perl/Win32/Process/List.pm
-            install -D blib/lib/Win32/Process/processes.pl           /usr/lib/perl5/site_perl/Win32/Process/processes.pl
-            popd
-            popd
-          fi
-          perl -MWin32::Process -MWin32::Process::List -e 1 && echo '! Modules loading OK.' || echo '! Failed to load modules.'
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -503,8 +407,6 @@ jobs:
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.ver }}-${{ matrix.env }} ${{ matrix.name }}'
-    needs:
-      - build-cache
     runs-on: windows-2022
     timeout-minutes: 15
     defaults:
@@ -517,14 +419,16 @@ jobs:
       matrix:
         include:
           - name: 'schannel'  # mingw-w64 12.0
-            dir: 'mingw64'
+            sys: 'mingw64'
+            dir: 'w64devkit'
             env: 'x86_64'
-            ver: '15.0.1'
-            url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/15.0.1-snapshot20250406posix-12.0.0-ucrt-r1/winlibs-x86_64-posix-seh-gcc-15.0.1-snapshot20250406-mingw-w64ucrt-12.0.0-r1.7z'
+            ver: '15.1.0'
+            url: 'https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x64-2.2.0.7z.exe'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel'  # mingw-w64 10.0
+            sys: 'mingw64'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '9.5.0'
@@ -532,6 +436,7 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
+            sys: 'mingw64'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '7.3.0'
@@ -541,6 +446,7 @@ jobs:
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel !unity'  # mingw-w64 5.0
+            sys: 'mingw32'
             dir: 'mingw32'
             env: 'i686'
             ver: '6.4.0'
@@ -549,6 +455,7 @@ jobs:
             type: 'Debug'
             tflags: 'skiprun'
           - name: 'schannel !examples'  # mingw-w64 3.0
+            sys: 'mingw64'
             dir: 'mingw64'
             env: 'x86_64'
             ver: '4.8.1'
@@ -556,11 +463,12 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON'
             type: 'Debug'
             tflags: 'skipall'
+            chkprefill: ''  # Set it once to silence actionlint
       fail-fast: false
     steps:
       - uses: msys2/setup-msys2@fb197b72ce45fb24f17bf3f807a388985654d1f2 # v2.29.0
         with:
-          msystem: ${{ matrix.dir }}
+          msystem: ${{ matrix.sys }}
           release: false
           update: false
           cache: false
@@ -592,9 +500,7 @@ jobs:
           rm -r -f pack.bin
           ls -l
 
-      - run: git config --global core.autocrlf input
-
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -639,10 +545,10 @@ jobs:
           PATH="/d/my-cache/${MATRIX_DIR}/bin:$PATH"
           cmake --build bld
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -659,22 +565,6 @@ jobs:
         run: |
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
-          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
-
-      - name: 'cache perl packages'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
-
-      - name: 'install test prereqs perl'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: *perl-win32-pkgs-install
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -723,7 +613,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -777,7 +667,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+        run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file -- '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' && matrix.compiler != 'clang-tidy' }}  # Save time by skipping this for autotools and clang-tidy
@@ -802,8 +692,6 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    needs:
-      - build-cache
     runs-on: ${{ matrix.image || 'windows-2022' }}
     timeout-minutes: 15
     defaults:
@@ -914,7 +802,7 @@ jobs:
         timeout-minutes: 45
         run: vcpkg x-set-installed ${MATRIX_INSTALL_VCPKG} --triplet="${MATRIX_ARCH}-${MATRIX_PLAT}"
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -1016,10 +904,10 @@ jobs:
         timeout-minutes: 5
         run: cmake --build bld --config "${MATRIX_TYPE}" --parallel 5
 
-      - name: 'curl version'
+      - name: 'curl -V'
         timeout-minutes: 1
         run: |
-          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file '{}' \;
+          /usr/bin/find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' -o -name '*.pdb' \) -exec file -- '{}' \;
           if [ "${MATRIX_PLAT}" != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib/${MATRIX_TYPE}:$PATH"
             "bld/src/${MATRIX_TYPE}/curl.exe" --disable --version
@@ -1053,22 +941,6 @@ jobs:
           if [ "${MATRIX_IMAGE}" != 'windows-11-arm' ]; then  # save 30-60 seconds, to counteract the slower test run step
             python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
           fi
-          perl --version | tee "$GITHUB_WORKSPACE"/perlversion
-
-      - name: 'cache perl packages'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        id: cache-perl-win32-pkgs
-        env:
-          cache-name: cache-perl-win32-pkgs
-        with:
-          path: C:\perl-win32-pkgs
-          key: ${{ runner.os }}-${{ runner.arch }}-build-${{ env.cache-name }}-${{ hashFiles('perlversion') }}
-
-      - name: 'install test prereqs perl'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: *perl-win32-pkgs-install
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}

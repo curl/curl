@@ -7,7 +7,7 @@ HTTP custom request
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 Read you
 Content-Length: 29
 Deleted: suppose we got a header like this! ;-)
@@ -31,7 +31,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -X DELETE
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 DELETE /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

@@ -7,7 +7,7 @@ HTTP FORMPOST
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -29,7 +29,12 @@ http
 HTTP RFC1867-type formposting with filename/data contains ',', ';', '"'
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "file=@\"%LOGDIR/test%TESTNUMBER,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\"" -F 'file2=@"%LOGDIR/test%TESTNUMBER,and;.txt"' -F 'file3=@"%LOGDIR/test%TESTNUMBER,and;.txt";type=m/f,"%LOGDIR/test%TESTNUMBER,and;.txt"' -F a="{\"field1\":\"value1\",\"field2\":\"value2\"}" -F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+-F "file=@\"%LOGDIR/test%TESTNUMBER,and;.txt\";type=mo/foo;filename=\"faker,and;.txt\""
+-F 'file2=@"%LOGDIR/test%TESTNUMBER,and;.txt"'
+-F 'file3=@"%LOGDIR/test%TESTNUMBER,and;.txt";type=m/f,"%LOGDIR/test%TESTNUMBER,and;.txt"'
+-F a="{\"field1\":\"value1\",\"field2\":\"value2\"}"
+-F 'b=" \\value1;type=\"whatever\" "; type=text/foo; charset=utf-8 ; filename=param_b'
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER,and;.txt">
@@ -46,60 +51,60 @@ foo
 ^(Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 1324
-Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file"; filename="faker,and;.txt"
-Content-Type: mo/foo
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 1324%CR
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32%CR
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file"; filename="faker,and;.txt"%CR
+Content-Type: mo/foo%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER,and;.txt"
-Content-Type: text/plain
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER,and;.txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file3"
-Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
-
-Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"
-Content-Type: m/f
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file3"%CR
+Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b%CR
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"%CR
+Content-Type: m/f%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"
-Content-Type: text/plain
-
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER,and;.txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-
-Content-Disposition: form-data; name="a"
-
-{"field1":"value1","field2":"value2"}
-Content-Disposition: form-data; name="b"; filename="param_b"
-Content-Type: text/foo; charset=utf-8
-
- \value1;type="whatever" 
-------------------------------24e78000bd32--
+%CR
+%CR
+Content-Disposition: form-data; name="a"%CR
+%CR
+{"field1":"value1","field2":"value2"}%CR
+Content-Disposition: form-data; name="b"; filename="param_b"%CR
+Content-Type: text/foo; charset=utf-8%CR
+%CR
+ \value1;type="whatever" %CR
+------------------------------24e78000bd32--%CR
 </protocol>
 </verify>
 </testcase>

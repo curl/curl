@@ -25,7 +25,6 @@
 
 #include "urldata.h"
 #include "url.h" /* for Curl_safefree */
-#include "memdebug.h" /* LAST include file */
 
 struct etest {
   const char *input;
@@ -125,7 +124,7 @@ static CURLcode test_unit1302(const char *arg)
     {"", 0, "aWlpaWlpaQ=", 15} /* unaligned size, missing a padding char */
   };
 
-  for(i = 0 ; i < CURL_ARRAYSIZE(encode); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(encode); i++) {
     struct etest *e = &encode[i];
     char *out;
     unsigned char *decoded;
@@ -133,7 +132,7 @@ static CURLcode test_unit1302(const char *arg)
     size_t dlen;
 
     /* first encode */
-    rc = curlx_base64_encode(e->input, e->ilen, &out, &olen);
+    rc = curlx_base64_encode((const uint8_t *)e->input, e->ilen, &out, &olen);
     abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     abort_unless(olen == e->olen, "wrong output size");
     if(memcmp(out, e->output, e->olen)) {
@@ -166,7 +165,8 @@ static CURLcode test_unit1302(const char *arg)
     struct etest *e = &url[i];
     char *out;
     size_t olen;
-    rc = curlx_base64url_encode(e->input, e->ilen, &out, &olen);
+    rc = curlx_base64url_encode((const uint8_t *)e->input, e->ilen,
+                                &out, &olen);
     abort_unless(rc == CURLE_OK, "return code should be CURLE_OK");
     if(olen != e->olen) {
       curl_mfprintf(stderr, "Test %u URL encoded output length %zu "
@@ -180,7 +180,7 @@ static CURLcode test_unit1302(const char *arg)
     Curl_safefree(out);
   }
 
-  for(i = 0 ; i < CURL_ARRAYSIZE(badecode); i++) {
+  for(i = 0; i < CURL_ARRAYSIZE(badecode); i++) {
     struct etest *e = &badecode[i];
     unsigned char *decoded;
     size_t dlen;

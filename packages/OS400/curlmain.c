@@ -85,7 +85,7 @@ int main(int argc, char **argv)
 
     /* Reset the shift state. */
     iconv(cd, NULL, &inbytesleft, &outbuf, &outbytesleft);
-   }
+  }
 
   /* Allocate memory for the ASCII arguments and vector. */
   argv = (char **) malloc((argc + 1) * sizeof(*argv) + bytecount);

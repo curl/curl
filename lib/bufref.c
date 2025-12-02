@@ -27,9 +27,6 @@
 #include "bufref.h"
 #include "strdup.h"
 
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define SIGNATURE 0x5c48e9b2    /* Random pattern. */
 #endif
@@ -79,7 +76,7 @@ void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
   DEBUGASSERT(len <= CURL_MAX_INPUT_LENGTH);
 
   Curl_bufref_free(br);
-  br->ptr = (const unsigned char *) ptr;
+  br->ptr = (const unsigned char *)ptr;
   br->len = len;
   br->dtor = dtor;
 }

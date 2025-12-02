@@ -8,7 +8,7 @@ HTTP GET
 </info>
 
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1
@@ -16,7 +16,7 @@ Content-Length: 3
 
 ok
 </data>
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1
@@ -45,7 +45,7 @@ test
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -59,7 +59,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 A OK
 Server: curl test
 Content-Type: text/html; charset=iso-8859-1

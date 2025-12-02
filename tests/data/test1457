@@ -49,7 +49,7 @@ line1line3
 <stderr nonewline="yes">
 line2
 </stderr>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

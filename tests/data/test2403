@@ -13,7 +13,7 @@ HTTPS
 #
 # Server-side
 <reply>
-<data nocheck="yes" crlf="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -50,8 +50,8 @@ HTTP/2 GET using %{header_json}
 #
 # Verify data after the test has been "shot"
 <verify>
-<stdout crlf="yes">
-HTTP/2 200 
+<stdout crlf="headers">
+HTTP/2 200%SP
 date: Tue, 09 Nov 2010 14:49:00 GMT
 content-length: 6
 content-type: text/html

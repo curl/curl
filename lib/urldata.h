@@ -127,7 +127,7 @@ typedef unsigned int curl_prot_t;
 #define MAX_IPADR_LEN sizeof("ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255")
 
 /* Default FTP/IMAP etc response timeout in milliseconds */
-#define RESP_TIMEOUT (120*1000)
+#define RESP_TIMEOUT (60*1000)
 
 /* Max string input length is a precaution against abuse and to detect junk
    input easier and better. */
@@ -156,12 +156,13 @@ typedef unsigned int curl_prot_t;
 #include "curlx/dynbuf.h"
 #include "dynhds.h"
 #include "request.h"
+#include "ratelimit.h"
 #include "netrc.h"
 
 /* On error return, the value of `pnwritten` has no meaning */
 typedef CURLcode (Curl_send)(struct Curl_easy *data,   /* transfer */
                              int sockindex,            /* socketindex */
-                             const void *buf,          /* data to write */
+                             const uint8_t *buf,       /* data to write */
                              size_t len,               /* amount to send */
                              bool eos,                 /* last chunk */
                              size_t *pnwritten);       /* how much sent */
@@ -190,13 +191,11 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
 #  include <gss.h>
-# elif defined HAVE_GSSAPI_GSSAPI_H
-#  include <gssapi/gssapi.h>
-# else
+# elif defined(HAVE_GSSAPI_H)
 #  include <gssapi.h>
-# endif
-# ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
-#  include <gssapi/gssapi_generic.h>
+# else /* MIT Kerberos */
+#  include <gssapi/gssapi.h>
+#  include <gssapi/gssapi_krb5.h> /* for GSS_C_CHANNEL_BOUND_FLAG, in 1.19+ */
 # endif
 #endif
 
@@ -239,7 +238,7 @@ struct ssl_backend_data;
 struct Curl_ssl_scache_entry;
 
 struct ssl_primary_config {
-  char *CApath;          /* certificate dir (does not work on Windows) */
+  char *CApath;          /* certificate directory (does not work on Windows) */
   char *CAfile;          /* certificate to verify peer against */
   char *issuercert;      /* optional issuer certificate filename */
   char *clientcert;
@@ -424,33 +423,14 @@ struct hostname {
  * Flags on the keepon member of the Curl_transfer_keeper
  */
 
-#define KEEP_NONE  0
-#define KEEP_RECV  (1<<0)     /* there is or may be data to read */
-#define KEEP_SEND (1<<1)     /* there is or may be data to write */
-#define KEEP_RECV_HOLD (1<<2) /* when set, no reading should be done but there
-                                 might still be data to read */
-#define KEEP_SEND_HOLD (1<<3) /* when set, no writing should be done but there
-                                  might still be data to write */
-#define KEEP_RECV_PAUSE (1<<4) /* reading is paused */
-#define KEEP_SEND_PAUSE (1<<5) /* writing is paused */
+#define KEEP_NONE       0
+#define KEEP_RECV       (1<<0) /* there is or may be data to read */
+#define KEEP_SEND       (1<<1) /* there is or may be data to write */
 
-/* KEEP_SEND_TIMED is set when the transfer should attempt sending
- * at timer (or other) events. A transfer waiting on a timer will
-  * remove KEEP_SEND to suppress POLLOUTs of the connection.
-  * Adding KEEP_SEND_TIMED will then attempt to send whenever the transfer
-  * enters the "readwrite" loop, e.g. when a timer fires.
-  * This is used in HTTP for 'Expect: 100-continue' waiting. */
-#define KEEP_SEND_TIMED (1<<6)
-
-#define KEEP_RECVBITS (KEEP_RECV | KEEP_RECV_HOLD | KEEP_RECV_PAUSE)
-#define KEEP_SENDBITS (KEEP_SEND | KEEP_SEND_HOLD | KEEP_SEND_PAUSE)
-
-/* transfer wants to send is not PAUSE or HOLD */
-#define CURL_WANT_SEND(data) \
-  (((data)->req.keepon & KEEP_SENDBITS) == KEEP_SEND)
-/* transfer receive is not on PAUSE or HOLD */
-#define CURL_WANT_RECV(data) \
-  (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
+/* transfer wants to send */
+#define CURL_WANT_SEND(data) ((data)->req.keepon & KEEP_SEND)
+/* transfer wants to receive */
+#define CURL_WANT_RECV(data) ((data)->req.keepon & KEEP_RECV)
 
 #define FIRSTSOCKET     0
 #define SECONDARYSOCKET 1
@@ -547,11 +527,11 @@ struct Curl_handler {
   CURLcode (*follow)(struct Curl_easy *data, const char *newurl,
                      followtype type);
 
-  int defport;            /* Default port. */
-  curl_prot_t protocol;  /* See CURLPROTO_* - this needs to be the single
-                            specific protocol bit */
-  curl_prot_t family;    /* single bit for protocol family; basically the
-                            non-TLS name of the protocol this is */
+  uint16_t defport;       /* Default port. */
+  curl_prot_t protocol;   /* See CURLPROTO_* - this needs to be the single
+                             specific protocol bit */
+  curl_prot_t family;     /* single bit for protocol family; basically the
+                             non-TLS name of the protocol this is */
   unsigned int flags;     /* Extra particular characteristics, see PROTOPT_* */
 
 };
@@ -579,10 +559,14 @@ struct Curl_handler {
 #define PROTOPT_PROXY_AS_HTTP (1<<11) /* allow this non-HTTP scheme over a
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
-#define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
+#define PROTOPT_WILDCARD (1<<12)    /* protocol supports wildcard matching */
 #define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ASCII) in
                                        username and password */
-#define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
+#define PROTOPT_NOTCPPROXY (1<<14)  /* this protocol cannot proxy over TCP */
+#define PROTOPT_SSL_REUSE (1<<15)   /* this protocol may reuse an existing
+                                       SSL connection in the same family
+                                       without having PROTOPT_SSL. */
+#define PROTOPT_CONN_REUSE (1<<16)  /* this protocol can reuse connections */
 
 #define CONNCHECK_NONE 0                 /* No checks */
 #define CONNCHECK_ISDEAD (1<<0)          /* Check if the connection is dead. */
@@ -591,25 +575,31 @@ struct Curl_handler {
 #define CONNRESULT_NONE 0                /* No extra information. */
 #define CONNRESULT_DEAD (1<<0)           /* The connection is dead. */
 
-struct ip_quadruple {
-  char remote_ip[MAX_IPADR_LEN];
-  char local_ip[MAX_IPADR_LEN];
-  int remote_port;
-  int local_port;
-};
-
-struct proxy_info {
-  struct hostname host;
-  int port;
-  unsigned char proxytype; /* what kind of proxy that is in use */
-  char *user;    /* proxy username string, allocated */
-  char *passwd;  /* proxy password string, allocated */
-};
-
+#define TRNSPRT_NONE 0
 #define TRNSPRT_TCP 3
 #define TRNSPRT_UDP 4
 #define TRNSPRT_QUIC 5
 #define TRNSPRT_UNIX 6
+
+struct ip_quadruple {
+  char remote_ip[MAX_IPADR_LEN];
+  char local_ip[MAX_IPADR_LEN];
+  uint16_t remote_port;
+  uint16_t local_port;
+  uint8_t transport;
+};
+
+#define CUR_IP_QUAD_HAS_PORTS(x)  (((x)->transport == TRNSPRT_TCP) || \
+                                   ((x)->transport == TRNSPRT_UDP) || \
+                                   ((x)->transport == TRNSPRT_QUIC))
+
+struct proxy_info {
+  struct hostname host;
+  uint16_t port;
+  unsigned char proxytype; /* what kind of proxy that is in use */
+  char *user;    /* proxy username string, allocated */
+  char *passwd;  /* proxy password string, allocated */
+};
 
 /*
  * The connectdata struct contains all fields and variables that should be
@@ -626,8 +616,8 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) (!Curl_uint_spbset_empty(&(c)->xfers_attached))
-#define CONN_ATTACHED(c) Curl_uint_spbset_count(&(c)->xfers_attached)
+#define CONN_INUSE(c) (!Curl_uint32_spbset_empty(&(c)->xfers_attached))
+#define CONN_ATTACHED(c) Curl_uint32_spbset_count(&(c)->xfers_attached)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -687,7 +677,7 @@ struct connectdata {
      was used on this connection. */
   struct curltime keepalive;
 
-  struct uint_spbset xfers_attached; /* mids of attached transfers */
+  struct uint32_spbset xfers_attached; /* mids of attached transfers */
   /* A connection cache from a SHARE might be used in several multi handles.
    * We MUST not reuse connections that are running in another multi,
    * for concurrency reasons. That multi might run in another thread.
@@ -722,7 +712,6 @@ struct connectdata {
      wrong connections. */
   char *localdev;
   unsigned short localportrange;
-  int waitfor;      /* current READ/WRITE bits to wait for */
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   int socks5_gssapi_enctype;
 #endif
@@ -803,16 +792,11 @@ struct PureInfo {
   BIT(used_proxy); /* the transfer used a proxy */
 };
 
-struct pgrs_measure {
-  struct curltime start; /* when measure started */
-  curl_off_t start_size; /* the 'cur_size' the measure started at */
-};
-
 struct pgrs_dir {
   curl_off_t total_size; /* total expected bytes */
   curl_off_t cur_size; /* transferred bytes so far */
   curl_off_t speed; /* bytes per second transferred */
-  struct pgrs_measure limit;
+  struct Curl_rlimit rlimit; /* speed limiting / pausing */
 };
 
 struct Progress {
@@ -841,10 +825,10 @@ struct Progress {
   struct curltime t_startqueue;
   struct curltime t_acceptdata;
 
-#define CURR_TIME (5 + 1) /* 6 entries for 5 seconds */
+#define CURL_SPEED_RECORDS (5 + 1) /* 6 entries for 5 seconds */
 
-  curl_off_t speeder[ CURR_TIME ];
-  struct curltime speeder_time[ CURR_TIME ];
+  curl_off_t speed_amount[ CURL_SPEED_RECORDS ];
+  struct curltime speed_time[ CURL_SPEED_RECORDS ];
   unsigned char speeder_c;
   BIT(hide);
   BIT(ul_size_known);
@@ -982,10 +966,7 @@ struct UrlState {
   char *first_host;
   int first_remote_port;
   curl_prot_t first_remote_protocol;
-
-  int retrycount; /* number of retries on a new connection */
   int os_errno;  /* filled in with errno whenever an error occurs */
-  long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
 #ifdef HAVE_SIGNAL
   /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
@@ -1105,6 +1086,9 @@ struct UrlState {
 #ifndef CURL_DISABLE_HTTP
   struct http_negotiation http_neg;
 #endif
+  unsigned short followlocation; /* redirect counter */
+  unsigned char retrycount; /* number of retries on a new connection, up to
+                               CONN_MAX_RETRIES */
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
   unsigned int creds_from:2; /* where is the server credentials originating
@@ -1384,7 +1368,7 @@ struct UserDefined {
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
   struct curl_slist *proxyheaders; /* linked list of extra CONNECT headers */
-  unsigned short proxyport; /* If non-zero, use this port number by
+  uint16_t proxyport;       /* If non-zero, use this port number by
                                default. If the proxy string features a
                                ":[port]" that one will override this. */
   unsigned char proxytype; /* what kind of proxy */
@@ -1652,8 +1636,8 @@ struct Curl_easy {
   /* once an easy handle is added to a multi, either explicitly by the
    * libcurl application or implicitly during `curl_easy_perform()`,
    * a unique identifier inside this one multi instance. */
-  unsigned int mid;
-  unsigned int master_mid; /* if set, this transfer belongs to a master */
+  uint32_t mid;
+  uint32_t master_mid; /* if set, this transfer belongs to a master */
   multi_sub_xfer_done_cb *sub_xfer_done;
 
   struct connectdata *conn;

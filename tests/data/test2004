@@ -30,7 +30,14 @@ sftp
 TFTP RRQ, SFTP, FILE, SCP retrieval then in rev order
 </name>
 <command option="no-include">
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.txt file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/test%TESTNUMBER.txt file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.txt tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER:
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
+sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
+scp://%HOSTIP:%SSHPORT%SCP_PWD/%LOGDIR/test%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt
+sftp://%HOSTIP:%SSHPORT%SFTP_PWD/%LOGDIR/test%TESTNUMBER.txt
+tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER --insecure
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 This is test data

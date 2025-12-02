@@ -10,7 +10,7 @@ FETCH
 #
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 --
@@ -35,7 +35,7 @@ IMAP FETCH message by MAILINDEX and SECTION
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 LOGIN user secret
 A003 SELECT %TESTNUMBER

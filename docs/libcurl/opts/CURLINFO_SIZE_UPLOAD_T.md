@@ -16,7 +16,7 @@ Added-in: 7.55.0
 
 # NAME
 
-CURLINFO_SIZE_UPLOAD_T - get the number of uploaded bytes
+CURLINFO_SIZE_UPLOAD_T - number of uploaded bytes
 
 # SYNOPSIS
 

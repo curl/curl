@@ -13,7 +13,7 @@ CURLINFO_USED_PROXY
 #
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -55,7 +55,7 @@ proxy
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET http://usingproxy.com/ HTTP/1.1
 Host: usingproxy.com
 Accept: */*

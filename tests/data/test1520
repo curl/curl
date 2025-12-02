@@ -19,7 +19,7 @@ lib%TESTNUMBER
 <name>
 SMTP with CRLF-dot-CRLF in data
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -39,14 +39,14 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 From: different
 To: another
 

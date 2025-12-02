@@ -11,7 +11,7 @@ verbose logs
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 0
 
@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
@@ -65,7 +65,7 @@ Accept: */*
 == Info: Connection #1 to host %HOSTIP:%HTTPPORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /(closing|shutting down) connection #\d+/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /(closing|shutting down) connection #\d+/))
 </stripfile>
 </verify>
 </testcase>

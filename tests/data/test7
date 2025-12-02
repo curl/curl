@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -D %LOGDIR/heads%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

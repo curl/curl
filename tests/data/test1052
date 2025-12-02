@@ -9,7 +9,7 @@ followlocation
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 301 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
@@ -18,7 +18,7 @@ Content-Length: 0
 Connection: close
 
 </data>
-<data2>
+<data2 crlf="headers">
 HTTP/1.0 200 Followed here fine swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
@@ -26,7 +26,7 @@ Content-Length: 51
 
 If this is received, the location following worked
 </data2>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.0 301 Redirect swsclose
 Date: Thu, 29 Jul 2008 14:49:00 GMT
 Server: test-server/fake
@@ -74,7 +74,7 @@ the
 # the test HTTP server is blocking until it has read the entire request,
 # including the full request-body before it responds. So in this test the
 # server says 301 and 200 _after_ the entire PUT body has been sent.
-<protocol>
+<protocol crlf="headers">
 PUT /want/%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

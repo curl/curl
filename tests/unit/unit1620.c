@@ -26,8 +26,6 @@
 #include "urldata.h"
 #include "url.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1620_setup(void)
 {
   CURLcode res = CURLE_OK;
@@ -64,9 +62,9 @@ static void t1620_parse(
                 "options should be equal to exp_options");
   }
 
-  free(userstr);
-  free(passwdstr);
-  free(options);
+  curlx_free(userstr);
+  curlx_free(passwdstr);
+  curlx_free(options);
 }
 
 static CURLcode test_unit1620(const char *arg)
@@ -118,8 +116,7 @@ static CURLcode test_unit1620(const char *arg)
 
   Curl_freeset(empty);
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {
-    fail_unless(empty->set.str[i] == NULL,
-                "Curl_free() did not set to NULL");
+    fail_unless(empty->set.str[i] == NULL, "Curl_free() did not set to NULL");
   }
 
   rc = Curl_close(&empty);

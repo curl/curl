@@ -6,6 +6,7 @@ POP3
 Clear Text
 LIST
 --libcurl
+notxml
 </keywords>
 </info>
 
@@ -42,7 +43,7 @@ ftp
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret
@@ -108,6 +109,7 @@ $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_HTTP09_ALLOWED/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 $_ = '' if /CURLOPT_SSLVERSION/
+$_ = '' if /CURLOPT_TIMEOUT_MS/
 </stripfile>
 </verify>
 </testcase>

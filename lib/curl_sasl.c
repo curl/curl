@@ -43,7 +43,6 @@
 #include "urldata.h"
 
 #include "curlx/base64.h"
-#include "curl_md5.h"
 #include "vauth/vauth.h"
 #include "cfilters.h"
 #include "vtls/vtls.h"
@@ -51,10 +50,6 @@
 #include "curl_sasl.h"
 #include "curlx/warnless.h"
 #include "sendf.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* Supported mechanisms */
 static const struct {
@@ -97,7 +92,7 @@ unsigned short Curl_sasl_decode_mech(const char *ptr, size_t maxlen,
 
   for(i = 0; mechtable[i].name; i++) {
     if(maxlen >= mechtable[i].len &&
-       !memcmp(ptr, mechtable[i].name, mechtable[i].len)) {
+       curl_strnequal(ptr, mechtable[i].name, mechtable[i].len)) {
       if(len)
         *len = mechtable[i].len;
 
@@ -268,7 +263,7 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
       char *base64;
       size_t base64len;
 
-      result = curlx_base64_encode((const char *) Curl_bufref_ptr(msg),
+      result = curlx_base64_encode(Curl_bufref_ptr(msg),
                                    Curl_bufref_len(msg), &base64, &base64len);
       if(!result)
         Curl_bufref_set(msg, base64, base64len, curl_free);
@@ -710,7 +705,7 @@ CURLcode Curl_sasl_continue(struct SASL *sasl, struct Curl_easy *data,
   case SASL_NTLM_TYPE2MSG: {
     /* Decode the type-2 message */
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, FALSE);
-    result = !ntlm ? CURLE_FAILED_INIT :
+    result = !ntlm ? CURLE_OUT_OF_MEMORY :
       get_server_message(sasl, data, &serverdata);
     if(!result)
       result = Curl_auth_decode_ntlm_type2_message(data, &serverdata, ntlm);
@@ -933,10 +928,10 @@ CURLcode Curl_sasl_is_blocked(struct SASL *sasl, struct Curl_easy *data)
                   CURL_SASL_DIGEST, TRUE, NULL);
     sasl_unchosen(data, SASL_MECH_NTLM, enabledmechs,
                   CURL_SASL_NTLM, Curl_auth_is_ntlm_supported(), NULL);
-    sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs,  TRUE, TRUE,
+    sasl_unchosen(data, SASL_MECH_OAUTHBEARER, enabledmechs, TRUE, TRUE,
                   data->set.str[STRING_BEARER] ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
-    sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs,  TRUE, TRUE,
+    sasl_unchosen(data, SASL_MECH_XOAUTH2, enabledmechs, TRUE, TRUE,
                   data->set.str[STRING_BEARER] ?
                   NULL : "CURLOPT_XOAUTH2_BEARER");
   }

@@ -4,13 +4,14 @@
 HTTP
 HTTP POST
 --data-urlencode
+notxml
 </keywords>
 </info>
 
 #
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 I am cool swsclose
 Server: Cool server/10.0
 Content-Length: 0
@@ -31,14 +32,14 @@ http
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --data-urlencode "my name is moo[]" --data-urlencode "y e s=s_i_r" --data-urlencode "v_alue@%LOGDIR/%TESTNUMBER.txt" --data-urlencode @%LOGDIR/%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/%TESTNUMBER.txt">
-content to _?!#$'|<>
+content to _?!#$'|%LT%GT
 </file>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

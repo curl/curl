@@ -30,7 +30,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 <errorcode>
 67
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 </protocol>

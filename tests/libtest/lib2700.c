@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
@@ -121,8 +120,7 @@ static CURLcode send_chunk(CURL *curl, int flags, const char *buffer,
   size_t nsent;
 
 retry:
-    res = curl_ws_send(curl, buffer + *offset, size - *offset, &nsent, 0,
-                       flags);
+  res = curl_ws_send(curl, buffer + *offset, size - *offset, &nsent, 0, flags);
   if(res == CURLE_AGAIN) {
     assert(nsent == 0);
     goto retry;

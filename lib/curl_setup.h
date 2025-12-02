@@ -75,14 +75,14 @@
 #endif
 #endif
 
-#if defined(__MINGW32__) && !defined(__MINGW32CE__) && \
+#if defined(__MINGW32__) && \
   (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR < 3))
 #error "Building curl requires mingw-w64 3.0 or later"
 #endif
 
-/* Visual Studio 2008 is the minimum Visual Studio version we support.
+/* Visual Studio 2010 is the minimum Visual Studio version we support.
    Workarounds for older versions of Visual Studio have been removed. */
-#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
 #error "Ancient versions of Visual Studio are no longer supported due to bugs."
 #endif
 
@@ -90,11 +90,12 @@
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
-#ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
+#ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
+#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
 #endif
-#ifndef _CRT_SECURE_NO_DEPRECATE
-#define _CRT_SECURE_NO_DEPRECATE  /* for fopen(), getenv(), etc. */
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), gmtime(), strcpy(),
+                                    in tests: localtime(), sscanf() */
 #endif
 #endif /* _MSC_VER */
 
@@ -120,14 +121,6 @@
 #      define CURL_WINDOWS_UWP
 #    endif
 #  endif
-#endif
-
-/* Avoid bogus format check warnings with mingw32ce gcc 4.4.0 in
-   C99 (-std=gnu99) mode */
-#if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
-  (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) && \
-  (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 4))
-#define CURL_NO_FMT_CHECKS
 #endif
 
 /* Compatibility */
@@ -493,17 +486,14 @@
 #    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
 #    undef  fstat
 #    define fstat(fdes,stp)              _fstati64(fdes, stp)
-#    undef  stat
 #    define struct_stat                  struct _stati64
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
      /* Small file (<2Gb) support using Win32 functions. */
-#    ifndef UNDER_CE
-#      undef  lseek
-#      define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#      define fstat(fdes, stp)             _fstat(fdes, stp)
-#      define struct_stat                  struct _stat
-#    endif
+#    undef  lseek
+#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes, stp)             _fstat(fdes, stp)
+#    define struct_stat                  struct _stat
 #    define LSEEK_ERROR                  (long)-1
 #  endif
 #elif defined(__DJGPP__)
@@ -580,20 +570,6 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - 1)
 
-#if (SIZEOF_CURL_OFF_T != 8)
-#  error "curl_off_t must be exactly 64 bits"
-#else
-  typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
-  typedef CURL_TYPEOF_CURL_OFF_T  curl_int64_t;
-#  ifndef CURL_SUFFIX_CURL_OFF_TU
-#    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
-#  endif
-#  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
-#  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-#  define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-#  define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
-#endif
-
 #define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
@@ -633,6 +609,9 @@
 #endif
 #endif
 
+#if SIZEOF_LONG > SIZEOF_SIZE_T
+#error "unexpected: 'long' is larger than 'size_t'"
+#endif
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */
@@ -756,8 +735,9 @@
 
 /* Single point where USE_NTLM definition might be defined */
 #ifndef CURL_DISABLE_NTLM
-#  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
+#  if (defined(USE_OPENSSL) && defined(HAVE_DES_ECB_ENCRYPT)) ||        \
   defined(USE_GNUTLS) ||                                                \
+  (defined(USE_MBEDTLS) && defined(HAVE_MBEDTLS_DES_CRYPT_ECB)) ||      \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
   (defined(USE_WOLFSSL) && defined(HAVE_WOLFSSL_DES_ECB_ENCRYPT))
 #    define USE_CURL_NTLM_CORE
@@ -815,27 +795,6 @@
 
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
-#endif
-
-#ifdef UNDER_CE
-#define getenv curl_getenv  /* Windows CE does not support getenv() */
-#define raise(s) ((void)(s))
-/* Terrible workarounds to make Windows CE compile */
-#define errno 0
-#define CURL_SETERRNO(x) ((void)(x))
-#define EINTR  4
-#define EAGAIN 11
-#define ENOMEM 12
-#define EACCES 13
-#define EEXIST 17
-#define EISDIR 21
-#define EINVAL 22
-#define ENOSPC 28
-#define strerror(x) "?"
-#undef STDIN_FILENO
-#define STDIN_FILENO 0
-#else
-#define CURL_SETERRNO(x) (errno = (x))
 #endif
 
 /*
@@ -926,7 +885,7 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
-#  if defined(_WIN32) && !defined(UNDER_CE)
+#  ifdef _WIN32
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
 #  elif defined(HAVE_SA_FAMILY_T)
 #    define CURL_SA_FAMILY_T sa_family_t
@@ -981,7 +940,7 @@ extern curl_calloc_callback Curl_ccalloc;
  * This macro also assigns NULL to given pointer when free'd.
  */
 #define Curl_safefree(ptr) \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { curlx_free(ptr); (ptr) = NULL;} while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
 
@@ -1068,6 +1027,9 @@ CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fopen(const char *file, const char *mode,
                        int line, const char *source);
 CURL_EXTERN ALLOC_FUNC
+  FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
+                         int line, const char *source);
+CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 
@@ -1111,6 +1073,56 @@ CURL_EXTERN ALLOC_FUNC
 #endif
 #define CURL_SEND send
 #define CURL_RECV recv
+
+#endif /* CURLDEBUG */
+
+/* Allocator macros */
+
+#ifdef CURLDEBUG
+
+#define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
+#define curlx_calloc(nbelem,size) \
+                              curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define curlx_realloc(ptr,size)   \
+                              curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
+
+#else /* !CURLDEBUG */
+
+#ifdef BUILDING_LIBCURL
+#define curlx_strdup(ptr)         Curl_cstrdup(ptr)
+#define curlx_malloc(size)        Curl_cmalloc(size)
+#define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
+#define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
+#define curlx_free(ptr)           Curl_cfree(ptr)
+#else /* !BUILDING_LIBCURL */
+#ifdef _WIN32
+#define curlx_strdup(ptr)         _strdup(ptr)
+#else
+#define curlx_strdup(ptr)         strdup(ptr)
+#endif
+#define curlx_malloc(size)        malloc(size)
+#define curlx_calloc(nbelem,size) calloc(nbelem, size)
+#define curlx_realloc(ptr,size)   realloc(ptr, size)
+#define curlx_free(ptr)           free(ptr)
+#endif /* BUILDING_LIBCURL */
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         Curl_wcsdup(ptr)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
 
 #endif /* CURLDEBUG */
 
@@ -1204,5 +1216,3 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */
-
-#include "curl_mem_undef.h"

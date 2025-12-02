@@ -15,7 +15,7 @@ NTLM
 This is supposed to be returned when the server gets a first
 Authorization: NTLM line passed-in from the client -->
 
-<data1001>
+<data1001 crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -27,7 +27,7 @@ This is not the real page either!
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1002>
+<data1002 crlf="headers">
 HTTP/1.1 200 Things are fine in server land swsclose
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -36,7 +36,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1002>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -73,7 +73,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -d "data" -H "H
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes">
+<protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=

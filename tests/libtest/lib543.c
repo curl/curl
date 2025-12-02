@@ -25,8 +25,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib543(const char *URL)
 {
   static const unsigned char a[] = {
@@ -34,37 +32,37 @@ static CURLcode test_lib543(const char *URL)
       0xe0, 0xd8, 0x7c,  0x20, 0xb7, 0xef, 0x53, 0x29, 0xfa,
       0x1d, 0x57, 0xe1};
 
-  CURL *easy;
+  CURL *curl;
   CURLcode res = CURLE_OK;
   (void)URL;
 
   global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
-  if(!easy) {
+  curl = curl_easy_init();
+  if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     res = TEST_ERR_MAJOR_BAD;
   }
   else {
     int asize = (int)sizeof(a);
-    char *s = curl_easy_escape(easy, (const char *)a, asize);
+    char *s = curl_easy_escape(curl, (const char *)a, asize);
 
     if(s) {
       curl_mprintf("%s\n", s);
       curl_free(s);
     }
 
-    s = curl_easy_escape(easy, "", 0);
+    s = curl_easy_escape(curl, "", 0);
     if(s) {
       curl_mprintf("IN: '' OUT: '%s'\n", s);
       curl_free(s);
     }
-    s = curl_easy_escape(easy, " 123", 3);
+    s = curl_easy_escape(curl, " 123", 3);
     if(s) {
       curl_mprintf("IN: ' 12' OUT: '%s'\n", s);
       curl_free(s);
     }
 
-    curl_easy_cleanup(easy);
+    curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
 

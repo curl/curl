@@ -29,7 +29,7 @@ LC_ALL=C.UTF-8
 <name>
 SMTP without SMTPUTF8 support - UTF-8 based sender (local part only)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -47,9 +47,9 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 <errorcode>
 55
 </errorcode>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<Avs%hex[%c3%a4]hex%ndaren@example.com>
+MAIL FROM:%LTAvs%hex[%c3%a4]hex%ndaren@example.com%GT
 QUIT
 </protocol>
 </verify>

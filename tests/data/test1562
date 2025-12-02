@@ -48,7 +48,7 @@ Expire secure cookies over HTTPS
 </command>
 </client>
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
 User-Agent: curl/%VERSION

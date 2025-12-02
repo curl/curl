@@ -11,7 +11,7 @@ manpages
 # Client-side
 <client>
 <name>
-symbols-in-versions and manpages agree on added-in versions
+symbols-in-versions and man pages agree on added-in versions
 </name>
 
 <command type="perl">

@@ -42,7 +42,7 @@
 #define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
 
 #define tool_safefree(ptr)                      \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { curlx_free((ptr)); (ptr) = NULL;} while(0)
 
 extern struct GlobalConfig *global;
 
@@ -57,6 +57,10 @@ struct State {
   curl_off_t urlnum;    /* how many iterations this URL has with ranges etc */
   curl_off_t urlidx;    /* index for globbed URLs */
 };
+
+#define FAIL_NONE      0
+#define FAIL_WITH_BODY 1
+#define FAIL_WO_BODY   2
 
 struct OperationConfig {
   struct dynbuf postdata;
@@ -223,6 +227,7 @@ struct OperationConfig {
   unsigned short porttouse;
   unsigned char ssl_version;     /* 0 - 4, 0 being default */
   unsigned char ssl_version_max; /* 0 - 4, 0 being default */
+  unsigned char fail;            /* NONE, with body, without body */
   BIT(remote_name_all);   /* --remote-name-all */
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */
@@ -241,11 +246,9 @@ struct OperationConfig {
   BIT(ftp_append);          /* APPE on ftp */
   BIT(use_ascii);           /* select ASCII or text transfer */
   BIT(autoreferer);         /* automatically set referer */
-  BIT(failonerror);         /* fail on (HTTP) errors */
-  BIT(failwithbody);        /* fail on (HTTP) errors but still store body */
   BIT(show_headers);        /* show headers to data output */
   BIT(no_body);             /* do not get the body */
-  BIT(dirlistonly);         /* only get the FTP dir list */
+  BIT(dirlistonly);         /* only get the FTP directory list */
   BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
                                when following redirects, even when hostname
                                changed */
@@ -323,7 +326,7 @@ struct OperationConfig {
   BIT(skip_existing);
 };
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 struct termout {
   wchar_t *buf;
   DWORD len;
@@ -340,7 +343,7 @@ struct GlobalConfig {
   struct OperationConfig *first;
   struct OperationConfig *current;
   struct OperationConfig *last;
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   struct termout term;
 #endif
   timediff_t ms_per_transfer;     /* start next transfer after (at least) this

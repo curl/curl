@@ -27,9 +27,9 @@
 #define CURL_DISABLE_DEPRECATION
 
 /* Now include the curl_setup.h file from libcurl's private libdir (the source
-   version, but that might include "curl_config.h" from the build dir so we
-   need both of them in the include path), so that we get good in-depth
-   knowledge about the system we're building this on */
+   version, but that might include "curl_config.h" from the build directory so
+   we need both of them in the include path), so that we get good in-depth
+   knowledge about the system we are building this on */
 #include "curl_setup.h"
 
 #include <curl/curl.h>
@@ -79,7 +79,7 @@ extern struct curltime tv_test_start; /* for test timing */
 
 extern int coptind;
 extern const char *coptarg;
-int cgetopt(int argc, const char * const argv[], const char *optstring);
+int cgetopt(int argc, const char *const argv[], const char *optstring);
 
 extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                           struct timeval *tv);
@@ -461,7 +461,7 @@ void ws_close(CURL *curl);
 #define TEST_HANG_TIMEOUT 60 * 1000  /* global default */
 
 #define exe_test_timedout(T,Y,Z) do {                                   \
-  timediff_t timediff = curlx_timediff(curlx_now(), tv_test_start);     \
+  timediff_t timediff = curlx_timediff_ms(curlx_now(), tv_test_start);  \
   if(timediff > (T)) {                                                  \
     curl_mfprintf(stderr, "%s:%d ABORTING TEST, since it seems "        \
                   "that it would have run forever (%ld ms > %ld ms)\n", \

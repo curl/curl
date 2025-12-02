@@ -19,7 +19,7 @@ Content-Length: 3
 OK
 </data>
 <data1>
-HTTP/1.1 200 OK 
+HTTP/1.1 200 OK%SP
 Connection: close
 Content-Length: 15
 Content-Range: bytes 50-
@@ -32,7 +32,7 @@ HTTP/1.1 301 OK swsbounce
 Location: /%TESTNUMBER
 Content-Length: 3
 
-HTTP/1.1 200 OK 
+HTTP/1.1 200 OK%SP
 Connection: close
 Content-Length: 15
 Content-Range: bytes 50-
@@ -57,7 +57,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 50 -L
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=50-

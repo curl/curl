@@ -33,13 +33,8 @@
 
 #include "vauth.h"
 #include "../curl_sasl.h"
-#include "../urldata.h"
 #include "../curl_gssapi.h"
 #include "../sendf.h"
-
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
@@ -120,12 +115,12 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       Curl_gss_log_error(data, "gss_import_name() failed: ",
                          major_status, minor_status);
 
-      free(spn);
+      curlx_free(spn);
 
       return CURLE_AUTH_ERROR;
     }
 
-    free(spn);
+    curlx_free(spn);
   }
 
   if(chlg) {
@@ -163,7 +158,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     gss_release_buffer(&unused_status, &output_token);
   }
   else
-    Curl_bufref_set(out, mutual_auth ? "": NULL, 0, NULL);
+    Curl_bufref_set(out, mutual_auth ? "" : NULL, 0, NULL);
 
   return result;
 }
@@ -225,6 +220,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)");
+    gss_release_buffer(&unused_status, &output_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -257,7 +253,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   messagelen = 4;
   if(authzid)
     messagelen += strlen(authzid);
-  message = malloc(messagelen);
+  message = curlx_malloc(messagelen);
   if(!message)
     return CURLE_OUT_OF_MEMORY;
 
@@ -284,7 +280,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   if(GSS_ERROR(major_status)) {
     Curl_gss_log_error(data, "gss_wrap() failed: ",
                        major_status, minor_status);
-    free(message);
+    curlx_free(message);
     return CURLE_AUTH_ERROR;
   }
 
@@ -294,7 +290,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   gss_release_buffer(&unused_status, &output_token);
 
   /* Free the message buffer */
-  free(message);
+  curlx_free(message);
 
   return result;
 }

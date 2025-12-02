@@ -14,7 +14,7 @@ Added-in: 7.12.3
 
 # NAME
 
-CURLINFO_NUM_CONNECTS - get number of created connections
+CURLINFO_NUM_CONNECTS - number of created connections
 
 # SYNOPSIS
 

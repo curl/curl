@@ -46,7 +46,7 @@ CURL_SSL_BACKEND=schannel
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
 User-Agent: curl/%VERSION

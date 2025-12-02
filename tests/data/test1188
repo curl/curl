@@ -9,7 +9,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 404 Not Found
 Content-Length: 0
 Connection: close
@@ -32,7 +32,7 @@ http
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

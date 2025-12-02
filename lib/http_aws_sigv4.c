@@ -39,10 +39,6 @@
 
 #include <time.h>
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #include "slist.h"
 
 #define HMAC_SHA256(k, kl, d, dl, o)                \
@@ -210,12 +206,12 @@ static CURLcode merge_duplicate_headers(struct curl_slist *head)
       if(result)
         return result;
 
-      free(curr->data);
+      curlx_free(curr->data);
       curr->data = curlx_dyn_ptr(&buf);
 
       curr->next = next->next;
-      free(next->data);
-      free(next);
+      curlx_free(next->data);
+      curlx_free(next);
     }
     else {
       curr = curr->next;
@@ -269,11 +265,10 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(fullhost)
       head = Curl_slist_append_nodup(NULL, fullhost);
     if(!head) {
-      free(fullhost);
+      curlx_free(fullhost);
       goto fail;
     }
   }
-
 
   if(*content_sha256_header) {
     tmp_head = curl_slist_append(head, content_sha256_header);
@@ -308,13 +303,13 @@ static CURLcode make_headers(struct Curl_easy *data,
       ;
     if(!*ptr && ptr != sep + 1) /* a value of whitespace only */
       continue;
-    dupdata = strdup(l->data);
+    dupdata = curlx_strdup(l->data);
     if(!dupdata)
       goto fail;
     dupdata[sep - l->data] = ':';
     tmp_head = Curl_slist_append_nodup(head, dupdata);
     if(!tmp_head) {
-      free(dupdata);
+      curlx_free(dupdata);
       goto fail;
     }
     head = tmp_head;
@@ -329,6 +324,8 @@ static CURLcode make_headers(struct Curl_easy *data,
       goto fail;
     head = tmp_head;
     *date_header = curl_maprintf("%s: %s\r\n", date_hdr_key, timestamp);
+    if(!*date_header)
+      goto fail;
   }
   else {
     const char *value;
@@ -410,7 +407,8 @@ fail:
 static const char *parse_content_sha_hdr(struct Curl_easy *data,
                                          const char *provider1,
                                          size_t plen,
-                                         size_t *value_len) {
+                                         size_t *value_len)
+{
   char key[CONTENT_SHA256_KEY_LEN];
   size_t key_len;
   const char *value;
@@ -962,7 +960,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   Curl_strntoupper(&auth_headers[sizeof("Authorization: ") - 1],
                    curlx_str(&provider0), curlx_strlen(&provider0));
 
-  free(data->state.aptr.userpwd);
+  curlx_free(data->state.aptr.userpwd);
   data->state.aptr.userpwd = auth_headers;
   data->state.authhost.done = TRUE;
   result = CURLE_OK;
@@ -972,12 +970,12 @@ fail:
   curlx_dyn_free(&canonical_path);
   curlx_dyn_free(&canonical_headers);
   curlx_dyn_free(&signed_headers);
-  free(canonical_request);
-  free(request_type);
-  free(credential_scope);
-  free(str_to_sign);
-  free(secret);
-  free(date_header);
+  curlx_free(canonical_request);
+  curlx_free(request_type);
+  curlx_free(credential_scope);
+  curlx_free(str_to_sign);
+  curlx_free(secret);
+  curlx_free(date_header);
   return result;
 }
 
@@ -1139,10 +1137,10 @@ static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
 static bool should_urlencode(struct Curl_str *service_name)
 {
   /*
-   * These services require unmodified (not additionally url encoded) URL
+   * These services require unmodified (not additionally URL-encoded) URL
    * paths.
    * should_urlencode == true is equivalent to should_urlencode_uri_path
-   * from the AWS SDK. Urls are already normalized by the curl url parser
+   * from the AWS SDK. Urls are already normalized by the curl URL parser
    */
 
   if(curlx_str_cmp(service_name, "s3") ||

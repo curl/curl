@@ -10,7 +10,7 @@ cookies
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 25 Sep 2001 19:37:44 GMT
 Content-Type: text/html
@@ -41,7 +41,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://z.x.com/%TESTNUMBER HTTP/1.1
 Host: z.x.com
 User-Agent: curl/%VERSION

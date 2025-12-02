@@ -24,8 +24,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static int sockopt_766(void *clientp,
                        curl_socket_t curlfd,
                        curlsocktype purpose)
@@ -42,24 +40,24 @@ static int sockopt_766(void *clientp,
 
 static CURLcode test_lib766(const char *URL)
 {
-  CURL *easy = NULL;
+  CURL *curl = NULL;
   CURLcode res = CURLE_OK;
 
   start_test_timing();
 
   res_global_init(CURL_GLOBAL_ALL);
 
-  easy_init(easy);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-  easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_FTPPORT, "-");
-  easy_setopt(easy, CURLOPT_SOCKOPTFUNCTION, sockopt_766);
+  easy_init(curl);
+  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(curl, CURLOPT_FTPPORT, "-");
+  easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_766);
 
-  res = curl_easy_perform(easy);
+  res = curl_easy_perform(curl);
 
 test_cleanup:
 
-  curl_easy_cleanup(easy);
+  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;

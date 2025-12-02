@@ -32,7 +32,7 @@ CURL_WS_FORCE_ZERO_MASK=1
 upgrade
 </servercmd>
 
-# Full list of frames: see <verify.stdout> below
+# Full list of frames: see 'verify.stdout' below
 #   First a valid BINARY frame
 #   Second a fragmented message with the first frame missing
 <data nocheck="yes" nonewline="yes">
@@ -63,7 +63,7 @@ bin fin [1] b
 56
 </errorcode>
 
-# Strip HTTP header from <protocol>
+# Strip HTTP header from 'protocol'
 <strip>
 ^GET /.*
 ^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*

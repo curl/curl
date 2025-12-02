@@ -34,7 +34,7 @@ http
 <name>
 --remove-on-error
 </name>
- <command option="no-output">
+<command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save-%TESTNUMBER --remove-on-error
 </command>
 </client>
@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save-%TESTNUMBER --remove-on-err
 <errorcode>
 18
 </errorcode>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

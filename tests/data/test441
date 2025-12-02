@@ -11,7 +11,7 @@ trailing-dot
 <reply>
 
 # we use this as response to a CONNECT
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 403 not OK at all
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -39,7 +39,7 @@ this.hsts.example. "99991001 04:47:41"
 </file>
 
 <name>
-HSTS with no t-dot host name in URL but t-dot in file
+HSTS with no t-dot hostname in URL but t-dot in file
 </name>
 <command>
 -x http://%HOSTIP:%HTTPPORT http://this.hsts.example/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'
@@ -51,14 +51,14 @@ test-duphandle
 
 <verify>
 # we let it CONNECT to the server to confirm HSTS but deny from there
-<protocol>
+<protocol crlf="headers">
 CONNECT this.hsts.example:443 HTTP/1.1
 Host: this.hsts.example:443
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 403 not OK at all
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake

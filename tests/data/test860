@@ -30,7 +30,7 @@ pop3://%HOSTIP:%POP3PORT -u user:secret -X NOOP -I
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 CAPA
 USER user
 PASS secret

@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-Curl_timeleft
+Curl_timeleft_ms
 </keywords>
 </info>
 
@@ -13,7 +13,7 @@ Curl_timeleft
 unittest
 </features>
 <name>
-Curl_timeleft unit tests
+Curl_timeleft_ms unit tests
 </name>
 </client>
 </testcase>

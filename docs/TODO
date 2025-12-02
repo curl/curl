@@ -34,7 +34,6 @@
  1.20 SRV and URI DNS records
  1.22 CURLINFO_PAUSE_STATE
  1.25 Expose tried IP addresses that failed
- 1.28 FD_CLOEXEC
  1.30 config file parsing
  1.31 erase secrets from heap/stack after use
  1.32 add asynch getaddrinfo support
@@ -55,6 +54,7 @@
 
  4. FTP
  4.1 HOST
+ 4.2 A fixed directory listing format
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -180,6 +180,7 @@
  21.1 Support rate-limiting
  21.2 Support MQTTS
  21.3 Handle network blocks
+ 21.4 large payloads
 
  22. TFTP
  22.1 TFTP does not convert LF to CRLF for mode=netascii
@@ -349,14 +350,6 @@
 
  https://github.com/curl/curl/issues/2126
 
-1.28 FD_CLOEXEC
-
- It sets the close-on-exec flag for the file descriptor, which causes the file
- descriptor to be automatically (and atomically) closed when any of the
- exec-family functions succeed. Should probably be set by default?
-
- https://github.com/curl/curl/issues/2252
-
 1.30 config file parsing
 
  Consider providing an API, possibly in a separate companion library, for
@@ -493,11 +486,21 @@
 
  https://datatracker.ietf.org/doc/html/rfc7151
 
+4.2 A fixed directory listing format
+
+ Since listing the contents of a remove directory with FTP is returning the
+ list in a format and style the server likes without any estblished or even
+ defactor standard existing, it would be a feature to users if curl could
+ parse the directory listing and output a general curl format that is fixed
+ and the same, independent of the server's choice. This would allow users to
+ better and more reliably extract information about remote content via FTP
+ directory listings.
+
 4.6 GSSAPI via Windows SSPI
 
  In addition to currently supporting the SASL GSSAPI mechanism (Kerberos V5)
- via third-party GSS-API libraries, such as Heimdal or MIT Kerberos, also add
- support for GSSAPI authentication via Windows SSPI.
+ via third-party GSS-API libraries, such as MIT Kerberos, also add support
+ for GSSAPI authentication via Windows SSPI.
 
 4.7 STAT for LIST without data connection
 
@@ -1268,16 +1271,24 @@
 
 21.3 Handle network blocks
 
-  Running test suite with
-  `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes several
-  MQTT test cases fail where they should not.
+ Running test suite with `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes
+ several MQTT test cases fail where they should not.
+
+21.4 large payloads
+
+ libcurl unnecessarily allocates heap memory to hold the entire payload to get
+ sent, when the data is already perfectly accessible where it is when
+ `CURLOPT_POSTFIELDS` is used. This is highly inefficient for larger payloads.
+ Additionally, libcurl does not support using the read callback for sending
+ MQTT which is yet another way to avoid having to hold large payload in
+ memory.
 
 22. TFTP
 
 22.1 TFTP does not convert LF to CRLF for mode=netascii
 
- RFC 3617 defines that an TFTP transfer can be done using "netascii"
- mode. curl does not support extracting that mode from the URL nor does it treat
+ RFC 3617 defines that an TFTP transfer can be done using "netascii" mode.
+ curl does not support extracting that mode from the URL nor does it treat
  such transfers specifically. It should probably do LF to CRLF translations
  for them.
 

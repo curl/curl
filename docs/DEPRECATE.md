@@ -12,24 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## Windows CE
-
-Windows CE "mainstream support" ended on October 9, 2018, and "Extended
-Support" ended on October 10, 2023.
-
-curl drops all support in November 2025.
-
-## VS2008
-
-curl drops support for getting built with Microsoft Visual Studio 2008 in
-November 2025.
-
-The only reason we kept support for this version is for Windows CE - and we
-intend to remove support for that Operating System in this time frame as well.
-Bumping the minimum to VS2010. VS2008 is a pain to support.
-
-Previous discussion and details: https://github.com/curl/curl/discussions/15972
-
 ## Windows XP
 
 In January 2026, curl drops support for Windows XP and Server 2003. Their
@@ -40,20 +22,6 @@ Making the new minimum target Windows version Vista / Server 2008.
 ## c-ares 1.16.0
 
 In March 2026, we drop support for all c-ares versions before 1.16.0.
-
-## OpenSSL 1.0.2
-
-OpenSSL and others only ship fixes for this version to paying customers,
-meaning users of the free version risk being vulnerable.
-
-We remove support for this OpenSSL version from curl in December 2025.
-
-## OpenSSL 1.1.1
-
-OpenSSL and others only ship fixes to paying customers, meaning users of the
-free version risk being vulnerable.
-
-We remove support for this OpenSSL version from curl in December 2025.
 
 ## OpenSSL-QUIC
 
@@ -69,6 +37,18 @@ stack.
    means of ngtcp2
 
 We remove the OpenSSL-QUIC backend in March 2026.
+
+## RTMP
+
+RTMP in curl is powered by the 3rd party library librtmp.
+
+ - RTMP is barely used by curl users (2.2% in the 2025 survey)
+ - librtmp has no test cases, makes no proper releases and has not had a single
+   commit within the last year
+ - librtmp parses the URL itself and requires non-compliant URLs for this
+ - we have no RTMP tests
+
+Support for RTMP in libcurl gets removed in April 2026.
 
 ## Past removals
 
@@ -88,3 +68,6 @@ We remove the OpenSSL-QUIC backend in March 2026.
  - BearSSL (removed in 8.15.0)
  - msh3 (removed in 8.16.0)
  - winbuild build system (removed in 8.17.0)
+ - Windows CE (removed in 8.18.0)
+ - Support for Visual Studio 2008 (removed in 8.18.0)
+ - OpenSSL 1.1.1 and older (removed in 8.18.0)

@@ -36,8 +36,6 @@
 #include "tool_libinfo.h"
 #include "tool_strdup.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 static char *parse_filename(const char *ptr, size_t len);
 
 #ifdef _WIN32
@@ -156,7 +154,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           /*
            * Truncate the etag save stream, it can have an existing etag value.
            */
-#if defined(HAVE_FTRUNCATE) && !defined(__MINGW32CE__)
+#ifdef HAVE_FTRUNCATE
           if(ftruncate(fileno(etag_save->stream), 0)) {
             return CURL_WRITEFUNC_ERROR;
           }
@@ -212,14 +210,14 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
           if(filename) {
             if(outs->stream) {
               /* indication of problem, get out! */
-              free(filename);
+              curlx_free(filename);
               return CURL_WRITEFUNC_ERROR;
             }
 
             if(per->config->output_dir) {
               outs->filename = curl_maprintf("%s/%s", per->config->output_dir,
                                              filename);
-              free(filename);
+              curlx_free(filename);
               if(!outs->filename)
                 return CURL_WRITEFUNC_ERROR;
             }
@@ -252,7 +250,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         if(clone) {
           struct curl_slist *old = hdrcbdata->headlist;
           hdrcbdata->headlist = curl_slist_append(old, clone);
-          free(clone);
+          curlx_free(clone);
           if(!hdrcbdata->headlist) {
             curl_slist_free_all(old);
             return CURL_WRITEFUNC_ERROR;
@@ -479,7 +477,7 @@ locdone:
     curl_free(finalurl);
     curl_free(scheme);
     curl_url_cleanup(u);
-    free(copyloc);
+    curlx_free(copyloc);
   }
 }
 #endif

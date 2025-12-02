@@ -13,7 +13,7 @@ FILE
 #
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 302 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -52,7 +52,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -L
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -67,7 +67,7 @@ SIZE %TESTNUMBER0002
 RETR %TESTNUMBER0002
 QUIT
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 302 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose

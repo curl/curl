@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/this/is/the/%TESTNUMBER -O --output-dir %PWD/%LOGDIR/tm
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /this/is/the/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

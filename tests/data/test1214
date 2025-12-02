@@ -9,7 +9,7 @@ HTTP proxy
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -42,7 +42,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://we.want.that.site.com.%TESTNUMBER/?moo=foo HTTP/1.1
 Host: we.want.that.site.com.%TESTNUMBER
 User-Agent: curl/%VERSION

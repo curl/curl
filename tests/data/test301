@@ -40,7 +40,7 @@ HTTPS GET with user and password
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
 Authorization: Basic %b64[fake:user]b64%

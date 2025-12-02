@@ -6,6 +6,7 @@ HTTP
 HTTP FORMPOST
 HTTP file upload
 --libcurl
+notxml
 </keywords>
 </info>
 
@@ -31,13 +32,16 @@ Mime
 http
 </server>
 <name>
---libcurl plus -F with 3 files, one with explicit type & encoder
+--libcurl plus -F with 3 files, one with explicit type and encoder
 </name>
 <setenv>
 SSL_CERT_FILE
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=value -F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content;encoder=8bit,%LOGDIR/test%TESTNUMBER.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2' --libcurl %LOGDIR/test%TESTNUMBER.c
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+-F name=value
+-F 'file=@%LOGDIR/test%TESTNUMBER.txt,%LOGDIR/test%TESTNUMBER.txt;type=magic/content;encoder=8bit,%LOGDIR/test%TESTNUMBER.txt;headers=X-testheader-1: header 1;headers=X-testheader-2: header 2'
+--libcurl %LOGDIR/test%TESTNUMBER.c
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER.txt">
@@ -51,44 +55,44 @@ dummy data
 -----+\w+
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 930
-Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
-
-------------------------------9ef8d6205763
-Content-Disposition: form-data; name="name"
-
-value
-------------------------------9ef8d6205763
-Content-Disposition: form-data; name="file"
-Content-Type: multipart/mixed; boundary=----------------------------aaaaaaaaaaaa
-
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Type: text/plain
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 930%CR
+Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763%CR
+%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: form-data; name="name"%CR
+%CR
+value%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: form-data; name="file"%CR
+Content-Type: multipart/mixed; boundary=----------------------------aaaaaaaaaaaa%CR
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+%CR
 dummy data
-
-------------------------------9ef8d6205763
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Type: magic/content
-Content-Transfer-Encoding: 8bit
-
+%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+Content-Type: magic/content%CR
+Content-Transfer-Encoding: 8bit%CR
+%CR
 dummy data
-
-------------------------------9ef8d6205763
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Type: text/plain
-X-testheader-1: header 1
-X-testheader-2: header 2
-
+%CR
+------------------------------9ef8d6205763%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+X-testheader-1: header 1%CR
+X-testheader-2: header 2%CR
+%CR
 dummy data
-
-------------------------------aaaaaaaaaaaa--
-
-------------------------------9ef8d6205763--
+%CR
+------------------------------aaaaaaaaaaaa--%CR
+%CR
+------------------------------9ef8d6205763--%CR
 </protocol>
 <stripfile>
 # curl's default user-agent varies with version, libraries etc.
@@ -100,6 +104,7 @@ $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
 $_ = '' if /CURLOPT_HTTP_VERSION/
 $_ = '' if /CURLOPT_INTERLEAVEDATA/
 $_ = '' if /CURLOPT_SSLVERSION/
+$_ = '' if /CURLOPT_TIMEOUT_MS/
 # CURL_DOES_CONVERSION generates an extra comment.
 $_ = '' if /\/\* "value" \*\//
 </stripfile>

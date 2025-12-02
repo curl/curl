@@ -28,7 +28,7 @@ telnet
 <name>
 TELNET to HTTP server
 </name>
-<stdin>
+<stdin crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </stdin>
@@ -40,7 +40,7 @@ telnet://%HOSTIP:%HTTPPORT --upload-file -
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.0
 
 </protocol>

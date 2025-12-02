@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --retry 2 --retry-max-time 10
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

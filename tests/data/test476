@@ -29,7 +29,7 @@ FTP PASV upload ASCII file already using CRLF
 <upload crlf="yes" nonewline="yes">
 %repeat[1750 x a line of text used for verifying this !%0a]%
 </upload>
-<protocol>
+<protocol crlf="yes">
 USER anonymous
 PASS ftp@example.com
 PWD

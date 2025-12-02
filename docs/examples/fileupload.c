@@ -25,10 +25,17 @@
  * Upload to a file:// URL
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
-#include <curl/curl.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+
+#include <curl/curl.h>
 
 #ifdef _WIN32
 #undef stat
@@ -46,18 +53,20 @@ int main(void)
   curl_off_t speed_upload, total_time;
   FILE *fd;
 
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
+
   fd = fopen("debugit", "rb"); /* open file to upload */
-  if(!fd)
+  if(!fd) {
+    curl_global_cleanup();
     return 1; /* cannot continue */
+  }
 
   /* to get the file size */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat("debugit", &file_info) != 0) {
-#else
   if(fstat(fileno(fd), &file_info) != 0) {
-#endif
     fclose(fd);
+    curl_global_cleanup();
     return 1; /* cannot continue */
   }
 
@@ -91,14 +100,17 @@ int main(void)
       curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD_T, &speed_upload);
       curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME_T, &total_time);
 
-      fprintf(stderr, "Speed: %lu bytes/sec during %lu.%06lu seconds\n",
-              (unsigned long)speed_upload,
-              (unsigned long)(total_time / 1000000),
-              (unsigned long)(total_time % 1000000));
+      fprintf(stderr, "Speed: %" CURL_FORMAT_CURL_OFF_T " bytes/sec during "
+              "%" CURL_FORMAT_CURL_OFF_T
+              ".%06" CURL_FORMAT_CURL_OFF_T " seconds\n",
+              speed_upload,
+              total_time / 1000000,
+              total_time % 1000000);
     }
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
   fclose(fd);
+  curl_global_cleanup();
   return 0;
 }

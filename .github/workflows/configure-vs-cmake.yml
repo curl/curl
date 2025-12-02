@@ -30,6 +30,10 @@ name: 'configure-vs-cmake'
       - '.github/scripts/cmp-config.pl'
       - '.github/workflows/configure-vs-cmake.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions: {}
 
 jobs:
@@ -37,7 +41,7 @@ jobs:
     name: 'Linux'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -77,6 +81,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: 'install packages'
+        timeout-minutes: 2
         run: |
           # shellcheck disable=SC2181,SC2034
           while [[ $? == 0 ]]; do for i in 1 2 3; do if brew update && brew install automake libtool; then break 2; else echo Error: wait to try again; sleep 10; fi; done; false Too many retries; done
@@ -84,7 +89,7 @@ jobs:
       - name: 'toolchain versions'
         run: echo '::group::brew packages installed'; ls -l /opt/homebrew/opt; echo '::endgroup::'
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -133,7 +138,7 @@ jobs:
           sudo rm -f /var/lib/man-db/auto-update
           sudo apt-get -o Dpkg::Use-Pty=0 install gcc-mingw-w64-x86-64-win32
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 

@@ -114,6 +114,8 @@ man_MANS =                                      \
   CURLMOPT_MAX_TOTAL_CONNECTIONS.3              \
   CURLMOPT_MAXCONNECTS.3                        \
   CURLMOPT_NETWORK_CHANGED.3                    \
+  CURLMOPT_NOTIFYDATA.3                           \
+  CURLMOPT_NOTIFYFUNCTION.3                       \
   CURLMOPT_PIPELINING.3                         \
   CURLMOPT_PIPELINING_SERVER_BL.3               \
   CURLMOPT_PIPELINING_SITE_BL.3                 \

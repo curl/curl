@@ -22,8 +22,7 @@
  *
  ***************************************************************************/
 #include "unitcheck.h"
-#include "vssh/curl_path.h"
-#include "memdebug.h"
+#include "vssh/vssh.h"
 
 static CURLcode test_unit2604(const char *arg)
 {
@@ -36,7 +35,7 @@ static CURLcode test_unit2604(const char *arg)
     const char *expect; /* the returned content */
     const char *next;   /* what cp points to after the call */
     const char *home;
-    CURLcode result;
+    CURLcode res;
   };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
@@ -68,6 +67,10 @@ static CURLcode test_unit2604(const char *arg)
     { "\"\" c", "", "", "", CURLE_QUOTE_ERROR},
     { "foo\"", "foo\"", "", "/", CURLE_OK},
     { "foo \"", "foo", "\"", "/", CURLE_OK},
+    { "   \t\t   \t  ", "", "", "/", CURLE_QUOTE_ERROR},
+    { "              ", "", "", "/", CURLE_QUOTE_ERROR},
+    { "", "", "", "/", CURLE_QUOTE_ERROR},
+    { "       \r \n  ", "\r", "\n  ", "/", CURLE_OK},
     { NULL, NULL, NULL, NULL, CURLE_OK }
   };
 
@@ -75,21 +78,21 @@ static CURLcode test_unit2604(const char *arg)
 #pragma GCC diagnostic pop
 #endif
 
-  char *cp0 = calloc(1, too_long + 1);
+  char *cp0 = curlx_calloc(1, too_long + 1);
   fail_unless(cp0, "could not alloc too long value");
   memset(cp0, 'a', too_long);
 
   for(i = 0; list[i].home; i++) {
     char *path;
     const char *cp = i == 0 ? cp0 : list[i].cp;
-    CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
+    CURLcode res = Curl_get_pathname(&cp, &path, list[i].home);
     curl_mprintf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
-                 list[i].cp, list[i].home, list[i].result);
-    if(result != list[i].result) {
-      curl_mprintf("... returned %d\n", result);
+                 list[i].cp, list[i].home, list[i].res);
+    if(res != list[i].res) {
+      curl_mprintf("... returned %d\n", res);
       unitfail++;
     }
-    if(!result) {
+    if(!res) {
       if(cp && strcmp(cp, list[i].next)) {
         curl_mprintf("... cp points to '%s', not '%s' as expected \n",
                      cp, list[i].next);
@@ -104,7 +107,7 @@ static CURLcode test_unit2604(const char *arg)
     }
   }
 
-  free(cp0);
+  curlx_free(cp0);
 
 #endif
 

@@ -1,6 +1,6 @@
 # File: make_gnv_curl_install.sh
 #
-# Set up and run the make script for Curl.
+# Set up and run the make script for curl.
 #
 # This makes the library, the curl binary and attempts an install.
 # A search list should be set up for GNU (GNV$GNU).

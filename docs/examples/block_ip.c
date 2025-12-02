@@ -29,18 +29,16 @@
  * filter IP addresses.
  */
 
-#if defined(__AMIGA__) || defined(UNDER_CE)
+#ifdef __AMIGA__
 #include <stdio.h>
-int main(void) { printf("Platform not supported.\n"); return 1; }
+int main(void)
+{
+  printf("Platform not supported.\n");
+  return 1;
+}
 #else
 
 #ifdef _WIN32
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#ifndef _CRT_NONSTDC_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE
-#endif
 #if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0600
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0600  /* Requires Windows Vista */
@@ -48,6 +46,7 @@ int main(void) { printf("Platform not supported.\n"); return 1; }
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#define strdup _strdup
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -301,9 +300,10 @@ int main(void)
   if(!filter)
     return 1;
 
-  if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res) {
     free(filter);
-    return 1;
+    return (int)res;
   }
 
   curl = curl_easy_init();

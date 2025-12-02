@@ -33,7 +33,7 @@ simple HTTP GET over Unix socket
 </client>
 
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: server-interpreted.example.com
 User-Agent: curl/%VERSION

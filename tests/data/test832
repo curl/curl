@@ -50,7 +50,7 @@ IMAP DIGEST-MD5 graceful cancellation
 #
 # The multi interface considers a broken "CONNECT" as a prematurely broken
 # transfer and such a connection will not get a "LOGOUT"
-<protocol>
+<protocol crlf="yes">
 A001 CAPABILITY
 A002 AUTHENTICATE DIGEST-MD5
 *

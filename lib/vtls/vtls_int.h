@@ -71,8 +71,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   const unsigned char *proto,
                                   size_t proto_len);
 
-bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
-                              const char *proto);
+bool Curl_alpn_contains_proto(const struct alpn_spec *spec, const char *proto);
 
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
@@ -99,11 +98,11 @@ typedef enum {
 } ssl_earlydata_state;
 
 #define CURL_SSL_IO_NEED_NONE   (0)
-#define CURL_SSL_IO_NEED_RECV   (1<<0)
-#define CURL_SSL_IO_NEED_SEND   (1<<1)
+#define CURL_SSL_IO_NEED_RECV   (1 << 0)
+#define CURL_SSL_IO_NEED_SEND   (1 << 1)
 
 /* Max earlydata payload we want to send */
-#define CURL_SSL_EARLY_MAX       (64*1024)
+#define CURL_SSL_EARLY_MAX       (64 * 1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
@@ -130,11 +129,8 @@ struct ssl_connect_data {
   BIT(input_pending);               /* data for SSL_read() may be available */
 };
 
-
 #undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf)  \
-  ((struct ssl_connect_data *)(cf)->ctx)->call_data
-
+#define CF_CTX_CALL_DATA(cf) ((struct ssl_connect_data *)(cf)->ctx)->call_data
 
 /* Definitions for SSL Implementations */
 
@@ -157,8 +153,7 @@ struct Curl_ssl {
   /* data_pending() shall return TRUE when it wants to get called again to
      drain internal buffers and deliver data instead of waiting for the socket
      to get readable */
-  bool (*data_pending)(struct Curl_cfilter *cf,
-                       const struct Curl_easy *data);
+  bool (*data_pending)(struct Curl_cfilter *cf, const struct Curl_easy *data);
 
   /* return 0 if a find random is filled in */
   CURLcode (*random)(struct Curl_easy *data, unsigned char *entropy,
@@ -181,7 +176,7 @@ struct Curl_ssl {
   struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
-                    unsigned char *sha256sum, size_t sha256sumlen);
+                        unsigned char *sha256sum, size_t sha256sumlen);
   CURLcode (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                          char *buf, size_t len, size_t *pnread);
   CURLcode (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -189,7 +184,6 @@ struct Curl_ssl {
 
   CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
                                   struct dynbuf *binding);
-
 };
 
 extern const struct Curl_ssl *Curl_ssl;

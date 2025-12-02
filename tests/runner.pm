@@ -190,7 +190,7 @@ sub runner_init {
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
             eval {
-                # some msys2 perl versions don't define SIGUSR1, also missing from Win32 Perl
+                # some MSYS2 Perl versions do not define SIGUSR1, also missing from Win32 Perl
                 $SIG{USR1} = 'IGNORE';
             };
 
@@ -214,7 +214,7 @@ sub runner_init {
             # handle IPC calls
             event_loop();
 
-            # Can't rely on logmsg here in case it's buffered
+            # Cannot rely on logmsg here in case it is buffered
             print "Runner $thisrunnerid exiting\n" if($verbose);
 
             # To reach this point, either the controller has sent
@@ -234,7 +234,7 @@ sub runner_init {
         # Create our pid directory
         mkdir("$LOGDIR/$PIDDIR", 0777);
 
-        # Don't create a separate process
+        # Do not create a separate process
         $thisrunnerid = "integrated";
     }
 
@@ -299,7 +299,7 @@ sub prepro {
     my (@entiretest) = @_;
     my $show = 1;
     my @out;
-    my $data_crlf;
+    my $data_crlf = "";
     my @pshow;
     my @altshow;
     my $plvl;
@@ -351,21 +351,26 @@ sub prepro {
             next;
         }
         if($show) {
-            # The processor does CRLF replacements in the <data*> sections if
-            # necessary since those parts might be read by separate servers.
-            if($s =~ /^ *<data(.*)\>/) {
-                if($1 =~ /crlf="yes"/) {
-                    $data_crlf = 1;
+            # The processor does CRLF replacements in the <data*> and <connect*>
+            # sections if necessary since those parts might be read by separate
+            # servers.
+            if($s =~ /^ *<(data|connect)(.*)\>/) {
+                if($2 =~ /crlf="yes"/) {
+                    $data_crlf = "yes";
+                }
+                elsif($2 =~ /crlf="headers"/) {
+                    $data_crlf = "headers";
                 }
             }
-            elsif(($s =~ /^ *<\/data/) && $data_crlf) {
-                $data_crlf = 0;
+            elsif(($s =~ /^ *<\/(data|connect)/) && $data_crlf ne "") {
+                $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
-            subnewlines(0, \$s) if($data_crlf);
+            subnewlines(1, \$s) if($data_crlf eq "yes");
+            subnewlines(0, \$s) if($data_crlf eq "headers");
             push @out, $s;
         }
     }
@@ -517,7 +522,7 @@ sub torture {
         delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
 
         if(-r "core") {
-            # there's core file present now!
+            # there is core file present now!
             logmsg " core dumped\n";
             $dumped_core = 1;
             $fail = 2;
@@ -537,8 +542,8 @@ sub torture {
             }
         }
 
-        # verify that it returns a proper error code, doesn't leak memory
-        # and doesn't core dump
+        # verify that it returns a proper error code, does not leak memory
+        # and does not core dump
         if(($ret & 255) || ($ret >> 8) >= 128) {
             logmsg " system() returned $ret\n";
             $fail=1;
@@ -758,7 +763,6 @@ sub singletest_prepare {
                 logmsg " $testnum: IGNORED: Section client=>file has no name attribute\n";
                 return -1;
             }
-            my $fileContent = join('', @inputfile);
 
             # make directories if needed
             my $path = dirname($filename);
@@ -775,11 +779,15 @@ sub singletest_prepare {
             }
             if(open(my $outfile, ">", "$filename")) {
                 binmode $outfile; # for crapage systems, use binary
+
                 if($fileattr{'nonewline'}) {
                     # cut off the final newline
-                    chomp($fileContent);
+                    chomp($inputfile[-1]);
                 }
-                print $outfile $fileContent;
+                if($fileattr{'crlf'}) {
+                    subnewlines(1, \$_) for @inputfile;
+                }
+                print $outfile join('', @inputfile);
                 close($outfile);
             } else {
                 logmsg "ERROR: cannot write $filename\n";
@@ -796,10 +804,13 @@ sub singletest_run {
     my ($testnum, $testtimings) = @_;
 
     # get the command line options to use
-    my ($cmd, @blaha)= getpart("client", "command");
-    if($cmd) {
-        # make some nice replace operations
+    my $cmd;
+    my @cmd = getpart("client", "command");
+    if(@cmd) {
+        # allow splitting the command-line to multiple lines
+        $cmd = join(' ', @cmd);
         $cmd =~ s/\n//g; # no newlines please
+        chomp $cmd; # no newlines please
         # substitute variables in the command line
     }
     else {
@@ -829,6 +840,7 @@ sub singletest_run {
         $tool = $tool_name . exe_ext('TOOL');
     }
 
+    my $oldmemdebug;
     my $disablevalgrind;
     my $CMDLINE="";
     my $cmdargs;
@@ -874,7 +886,7 @@ sub singletest_run {
                 chomp $dis[0] if($dis[0]);
                 if($dis[0] eq "test-duphandle") {
                     # marked to not run with duphandle
-                    logmsg " $testnum: IGNORED: Can't run test-duphandle\n";
+                    logmsg " $testnum: IGNORED: Cannot run test-duphandle\n";
                     return (-1, 0, 0, "", "", 0);
                 }
             }
@@ -947,6 +959,10 @@ sub singletest_run {
             chomp($stdintest[-1]);
         }
 
+        if($hash{'crlf'}) {
+            subnewlines(1, \$_) for @stdintest;
+        }
+
         writearray($stdinfile, \@stdintest);
 
         $cmdargs .= " <$stdinfile";
@@ -956,6 +972,9 @@ sub singletest_run {
         $CMDLINE=exerunner() . shell_quote($CURL);
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
+        }
+        if($maxtime) {
+            $CMDLINE .= " --max-time $maxtime";
         }
     }
 
@@ -1007,6 +1026,11 @@ sub singletest_run {
     # timestamp starting of test command
     $$testtimings{"timetoolini"} = Time::HiRes::time();
 
+    if($cmdhash{'option'} && ($cmdhash{'option'} =~ /no-memdebug/)) {
+        $oldmemdebug = $ENV{'CURL_MEMDEBUG'};
+        delete $ENV{'CURL_MEMDEBUG'};
+    }
+
     # run the command line we built
     if($torture) {
         $cmdres = torture($CMDLINE,
@@ -1030,6 +1054,11 @@ sub singletest_run {
         ($cmdres, $dumped_core) = normalize_cmdres(runclient("$CMDLINE"));
     }
 
+    # restore contents
+    if($oldmemdebug) {
+        $ENV{'CURL_MEMDEBUG'} = $oldmemdebug;
+    }
+
     # timestamp finishing of test command
     $$testtimings{"timetoolend"} = Time::HiRes::time();
 
@@ -1044,7 +1073,7 @@ sub singletest_clean {
 
     if(!$dumped_core) {
         if(-r "core") {
-            # there's core file present now!
+            # there is core file present now!
             $dumped_core = 1;
         }
     }
@@ -1129,13 +1158,19 @@ sub singletest_postcheck {
             logmsg "postcheck $cmd\n" if($verbose);
             my $rc = runclient("$cmd");
             # Must run the postcheck command in torture mode in order
-            # to clean up, but the result can't be relied upon.
+            # to clean up, but the result cannot be relied upon.
             if($rc != 0 && !$torture) {
                 logmsg " $testnum: postcheck FAILED\n";
                 return -1;
             }
         }
     }
+
+    if($checktests && checktest("${TESTDIR}/test${testnum}")) {
+        logmsg " $testnum: postcheck FAILED: issue(s) found in test data\n";
+        return -1;
+    }
+
     return 0;
 }
 
@@ -1160,7 +1195,7 @@ sub runner_test_preprocess {
     # ignore any error here--if there were one, it would have been
     # caught during the selection phase and this test would not be
     # running now
-    loadtest("${TESTDIR}/test${testnum}");
+    loadtest("${TESTDIR}/test${testnum}", 1);
     readtestkeywords();
 
     ###################################################################
@@ -1296,7 +1331,7 @@ sub controlleripccall {
     # Get the name of the function from the reference
     my $cv = svref_2object($funcref);
     my $gv = $cv->GV;
-    # Prepend the name to the function arguments so it's marshalled along with them
+    # Prepend the name to the function arguments so it is marshalled along with them
     unshift @_, $gv->NAME;
     # Marshall the arguments into a flat string
     my $margs = freeze \@_;
@@ -1347,7 +1382,7 @@ sub runnerar {
     my $resarrayref = thaw $buf;
 
     # First argument is runner ID
-    # TODO: remove this; it's unneeded since it's passed in
+    # TODO: remove this; it is unneeded since it is passed in
     unshift @$resarrayref, $runnerid;
     return @$resarrayref;
 }
@@ -1355,7 +1390,7 @@ sub runnerar {
 ###################################################################
 # Returns runner ID if a response from an async call is ready or error
 # First value is ready, second is error, however an error case shows up
-# as ready in Linux, so you can't trust it.
+# as ready in Linux, so you cannot trust it.
 # argument is 0 for nonblocking, undef for blocking, anything else for timeout
 # Called by controller
 sub runnerar_ready {
@@ -1381,7 +1416,7 @@ sub runnerar_ready {
     my $e_in = $r_in;
     if(select(my $r_out=$r_in, undef, my $e_out=$e_in, $blocking) >= 1) {
         for my $fd (0..$maxfileno) {
-            # Return an error condition first in case it's both
+            # Return an error condition first in case it is both
             if(vec($e_out, $fd, 1)) {
                 return (undef, $idbyfileno{$fd});
             }

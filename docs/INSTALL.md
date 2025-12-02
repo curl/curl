@@ -141,7 +141,7 @@ These options are provided to select the TLS backend to use.
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
  - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
- - rustls: `--with-rustls`
+ - Rustls: `--with-rustls`
  - Schannel: `--with-schannel`
  - wolfSSL: `--with-wolfssl`
 
@@ -200,7 +200,7 @@ Building for Windows XP is required as a minimum.
 
 You can build curl with:
 
-- Microsoft Visual Studio 2008 v9.0 or later (`_MSC_VER >= 1500`)
+- Microsoft Visual Studio 2010 v10.0 or later (`_MSC_VER >= 1600`)
 - MinGW-w64 3.0 or later (`__MINGW64_VERSION_MAJOR >= 3`)
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
@@ -650,22 +650,22 @@ This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
 and runs on, that is not listed, please let us know.
 
-## 104 Operating Systems
+## 108 Operating Systems
 
-    AIX, AmigaOS, Android, ArcoOS, Aros, Atari FreeMiNT, BeOS, Blackberry
-    10, Blackberry Tablet OS, Cell OS, CheriBSD, Chrome OS, Cisco IOS,
-    DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS, Fuchsia,
-    Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I, illumos,
-    Integrity, iOS, ipadOS, IRIX, Linux, Lua RTOS, Mac OS 9, macOS, Maemo,
-    Mbed, Meego, Micrium, MINIX, Minoca, Moblin, MorphOS, MPE/iX, MS-DOS,
-    NCR MP-RAS, NetBSD, Netware, NextStep, Nintendo 3DS Nintendo Switch,
-    NonStop OS, NuttX, OpenBSD, OpenStep, Orbis OS, OS/2, OS21, Plan 9,
-    PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RISC OS, ROS,
-    RTEMS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, software,
-    Solaris, Sortix, SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS,
-    ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks, watchOS, Wear OS,
-    WebOS, Wii system Wii U, Windows CE, Windows, Xbox System, Xenix, z/OS,
-    z/TPF, z/VM, z/VSE, Zephyr
+    AIX, AmigaOS, Android, ArcaOS, Aros, Atari FreeMiNT, Azure Sphere, BeOS,
+    Blackberry 10, Blackberry Tablet OS, Cell OS, Cesium, CheriBSD, Chrome OS,
+    Cisco IOS, DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS,
+    Fuchsia, Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I,
+    illumos, Integrity, iOS, ipadOS, IRIX, KasperskyOS, Linux, Lua RTOS,
+    Mac OS 9, macOS, Maemo, Mbed, Meego, Micrium, MINIX, Minoca, Moblin,
+    MorphOS, MPE/iX, MS-DOS, NCR MP-RAS, NetBSD, Netware, NextStep,
+    Nintendo 3DS, Nintendo Switch, NonStop OS, NuttX, OpenBSD, OpenStep,
+    Orbis OS, OS/2, OS21, PikeOS, Plan 9, PlayStation Portable, QNX, Qubes OS,
+    ReactOS, Redox, RISC OS, ROS, RTEMS, Sailfish OS, SCO Unix, Serenity,
+    SINIX-Z, SkyOS, SmartOS, Solaris, Sortix, SunOS, Syllable OS, Symbian,
+    Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix, UNICOS, UnixWare, visionOS, VMS,
+    vxWorks, watchOS, Wear OS, WebOS, Wii System Software, Wii U, Windows,
+    Xbox System, Xenix, z/OS, z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures
 

@@ -32,7 +32,7 @@ CURL_WS_FORCE_ZERO_MASK=1
 upgrade
 </servercmd>
 
-# Full list of frames: see <verify.stdout> below
+# Full list of frames: see 'verify.stdout' below
 #   A fragmented CLOSE
 <data nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
@@ -62,7 +62,7 @@ Sec-WebSocket-Accept: HkPsVga7+8LuxM4RGQ5p9tZHeYs=
 56
 </errorcode>
 
-# Strip HTTP header from <protocol>
+# Strip HTTP header from 'protocol'
 <strip>
 ^GET /.*
 ^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*

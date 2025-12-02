@@ -27,9 +27,10 @@
  */
 #include <stdio.h>
 #include <fcntl.h>
+
 #include <curl/curl.h>
 
-static const char olivertwist[]=
+static const char olivertwist[] =
   "Among other public buildings in a certain town, which for many reasons "
   "it will be prudent to refrain from mentioning, and to which I will assign "
   "no fictitious name, there is one anciently common to most towns, great or "
@@ -58,7 +59,9 @@ int main(int argc, char **argv)
   url = argv[1];
 
   /* In Windows, this inits the Winsock stuff */
-  curl_global_init(CURL_GLOBAL_ALL);
+  res = curl_global_init(CURL_GLOBAL_ALL);
+  if(res)
+    return (int)res;
 
   /* get a curl handle */
   curl = curl_easy_init();
@@ -100,5 +103,5 @@ int main(int argc, char **argv)
   }
 
   curl_global_cleanup();
-  return 0;
+  return (int)res;
 }

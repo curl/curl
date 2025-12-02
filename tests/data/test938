@@ -30,34 +30,35 @@ smtp
 <name>
 SMTP multiple connection authentication
 </name>
-<file name="%LOGDIR/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER" crlf="yes">
 mail body
 </file>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T %LOGDIR/upload%TESTNUMBER -: smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T %LOGDIR/upload%TESTNUMBER
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER001 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.one:secret -T %LOGDIR/upload%TESTNUMBER -:
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER002 --mail-rcpt recipient@example.com --mail-from sender@example.com -u user.two:secret -T %LOGDIR/upload%TESTNUMBER
 </command>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="yes">
 EHLO %TESTNUMBER001
 AUTH PLAIN
 dXNlci5vbmUAdXNlci5vbmUAc2VjcmV0
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 EHLO %TESTNUMBER002
 AUTH PLAIN
 dXNlci50d28AdXNlci50d28Ac2VjcmV0
-MAIL FROM:<sender@example.com>
-RCPT TO:<recipient@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTrecipient@example.com%GT
 DATA
 QUIT
 </protocol>
-<upload>
+<upload crlf="yes">
 mail body
 .
 </upload>

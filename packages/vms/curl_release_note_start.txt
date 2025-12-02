@@ -16,16 +16,16 @@ OpenVMS specific building and kitting instructions are after the standard
 curl readme file.
 
 This product may be available for your platform in a PCSI kit.  The source kit
-contains files for building CURL using GNV or with a DCL procedure.
+contains files for building curl using GNV or with a DCL procedure.
 
 The GNV based build creates a libcurl share imaged which is supplied in the
 PCSI kit.
 
-This version of CURL will return VMS compatible status codes when run from
+This version of curl will return VMS compatible status codes when run from
 DCL and Unix compatible exit codes and messages when run with the SHELL
 environment variable set.
 
-This port of Curl uses the OpenSSL, Ldap, and Kerberos V5 that are bundled
+This port of curl uses the OpenSSL, Ldap, and Kerberos V5 that are bundled
 with OpenVMS or supplied as updates by HP.  Ldap and Kerberos are not available
 on the VAX platform.  See section below for a special note about HP OpenSSL
 on Alpha and IA64.
@@ -61,7 +61,7 @@ For the HP SSL work around to work for GNV do the following:
 Similar workarounds will be needed for any program linked with GNV$LIBCURL
 until the HP OpenSSL is upgraded to the current 1.4 version or later.
 
-If you are installing a "daily" build instead of a release build of Curl, some
+If you are installing a "daily" build instead of a release build of curl, some
 things have been changed so that it can be installed at the same time as
 a production build without conflicts.
 

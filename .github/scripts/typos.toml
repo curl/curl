@@ -4,7 +4,7 @@
 
 [default]
 extend-ignore-identifiers-re = [
-  "^(ba|pn|PN|UE)$",
+  "^(ba|fo|pn|PN|UE)$",
   "^(CNA|ser)$",
   "^(ECT0|ECT1|HELO|htpt|PASE)$",
   "^[A-Za-z0-9_-]*(EDE|GOST)[A-Z0-9_-]*$",  # ciphers
@@ -21,8 +21,8 @@ extend-ignore-re = [
 
 [files]
 extend-exclude = [
-  ".github/scripts/codespell-ignore.txt",
-  ".github/scripts/spellcheck.words",
+  ".github/scripts/codespell-ignore.words",
+  ".github/scripts/pyspelling.words",
   "docs/THANKS",
   "packages/*",
   "projects/Windows/tmpl/curl.vcxproj",

@@ -58,7 +58,7 @@ build_all_programs()
 
                 for FLAG in ${PGMCFLAGS}
                 do      case "${FLAG}" in
-                        -D?*)   # shellcheck disable=SC2001
+                        -D?*)
                                 DEFINE="$(echo "${FLAG}" | sed 's/^..//')"
                                 PGMDFNS="${PGMDFNS} '${DEFINE}'"
                                 ;;

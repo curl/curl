@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "first.h"
 
-/* build request url */
+/* build request URL */
 char *tutil_suburl(const char *base, int i);
 
 #ifdef HAVE_SYS_RESOURCE_H

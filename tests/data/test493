@@ -11,7 +11,7 @@ url_effective
 <reply>
 
 # we use this as response to a CONNECT
-<connect nocheck="yes">
+<connect crlf="headers" nocheck="yes">
 HTTP/1.1 403 not OK at all
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -50,14 +50,14 @@ test-duphandle
 
 <verify>
 # we let it CONNECT to the server to confirm HSTS but deny from there
-<protocol>
+<protocol crlf="headers">
 CONNECT this.hsts.example:443 HTTP/1.1
 Host: this.hsts.example:443
 User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 403 not OK at all
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
