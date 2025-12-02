@@ -639,7 +639,8 @@ static void cpool_discard_conn(struct cpool *cpool,
     done = TRUE;
   if(!done) {
     /* Attempt to shutdown the connection right away. */
-    Curl_cshutdn_run_once(cpool->idata, conn, &done);
+    if(Curl_cshutdn_run_once(cpool->idata, conn, &done))
+      return;
   }
 
   if(done || !data->multi)

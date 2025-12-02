@@ -114,6 +114,7 @@ CURLcode Curl_cshutdn_run_once(struct Curl_easy *data,
 {
   CURLcode result;
   DEBUGASSERT(!data->conn);
+  *done = FALSE;
   result = Curl_attach_connection(data, conn);
   if(result)
     return result;
