@@ -498,8 +498,8 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
  * family otherwise present in memdebug.c. I put these ones here since they
  * require a bunch of structs I did not want to include in memdebug.c
  */
-void curl_dbg_freeaddrinfo(struct addrinfo *freethis, int line,
-                           const char *source)
+void curl_dbg_freeaddrinfo(struct addrinfo *freethis,
+                           int line, const char *source)
 {
   curl_dbg_log("ADDR %s:%d freeaddrinfo(%p)\n",
                source, line, (void *)freethis);
