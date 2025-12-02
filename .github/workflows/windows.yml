@@ -638,13 +638,14 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
+              -DUSE_WIN32_LDAP=ON \
               -DCURL_USE_LIBPSL=OFF \
               -D_CURL_SKIP_BUILD_CERTS=ON \
               ${options}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
               --host="${TRIPLET}" \
-              --with-schannel --with-winidn \
+              --with-schannel --with-winidn --with-ldap \
               --without-libpsl \
               --disable-dependency-tracking --enable-option-checking=fatal
           fi
