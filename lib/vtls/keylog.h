@@ -53,6 +53,11 @@ void Curl_tls_keylog_close(void);
 bool Curl_tls_keylog_enabled(void);
 
 /*
+ * Returns a pointer to the filename keys are being written to, if enabled.
+ */
+const char *Curl_tls_keylog_file_name(void);
+
+/*
  * Appends a key log file entry.
  * Returns true iff the key log file is open and a valid entry was provided.
  */

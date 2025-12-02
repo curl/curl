@@ -50,6 +50,7 @@
 #include "vtls/vtls.h" /* generic SSL protos etc */
 #include "vtls/vtls_int.h"
 #include "vtls/vtls_scache.h"
+#include "vtls/keylog.h"
 
 #include "vtls/openssl.h"        /* OpenSSL versions */
 #include "vtls/gtls.h"           /* GnuTLS versions */
@@ -1366,6 +1367,13 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
     cf->connected = TRUE;
     if(connssl->state == ssl_connection_complete) {
       connssl->handshake_done = *Curl_pgrs_now(data);
+    }
+    if(Curl_tls_keylog_enabled()) {
+      infof(data, "SSLKEYLOGFILE set, all TLS secrets are logged to '%s'",
+            Curl_tls_keylog_file_name());
+#ifdef LIBRESSL_VERSION_NUMBER
+      infof(data, "Note LibreSSL only supports SSLKEYLOGFILE for TLS <= 1.2");
+#endif
     }
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||
