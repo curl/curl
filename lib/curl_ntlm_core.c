@@ -81,13 +81,13 @@
 #  include <wolfssl/openssl/ssl.h>
 #  include <wolfssl/openssl/rand.h>
 #  ifdef OPENSSL_COEXIST
-#    define DES_key_schedule WOLFSSL_DES_key_schedule
-#    define DES_cblock WOLFSSL_DES_cblock
-#    define DES_set_odd_parity wolfSSL_DES_set_odd_parity
-#    define DES_set_key wolfSSL_DES_set_key
+#    define DES_key_schedule      WOLFSSL_DES_key_schedule
+#    define DES_cblock            WOLFSSL_DES_cblock
+#    define DES_set_odd_parity    wolfSSL_DES_set_odd_parity
+#    define DES_set_key           wolfSSL_DES_set_key
 #    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
-#    define DES_ecb_encrypt wolfSSL_DES_ecb_encrypt
-#    define DESKEY(x) ((WOLFSSL_DES_key_schedule *)(x))
+#    define DES_ecb_encrypt       wolfSSL_DES_ecb_encrypt
+#    define DESKEY(x)             ((WOLFSSL_DES_key_schedule *)(x))
 #  else
 #    define DESKEY(x) &x
 #  endif
@@ -559,9 +559,9 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
                                        unsigned int *ntresp_len)
 {
   /* NTLMv2 response structure :
-  ------------------------------------------------------------------------------
+  -----------------------------------------------------------------------------
   0     HMAC MD5         16 bytes
-  ------BLOB--------------------------------------------------------------------
+  ------BLOB-------------------------------------------------------------------
   16    Signature        0x01010000
   20    Reserved         long (0x00000000)
   24    Timestamp        LE, 64-bit signed value representing the number of
@@ -570,7 +570,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
   40    Unknown          4 bytes
   44    Target Info      N bytes (from the type-2 message)
   44+N  Unknown          4 bytes
-  ------------------------------------------------------------------------------
+  -----------------------------------------------------------------------------
   */
 
   unsigned int len = 0;

@@ -355,8 +355,8 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
   struct gsasldata *gsasl;
   struct bufref nullmsg;
 
-  if(sctx->user &&
-     (sctx->enabledmechs & (SASL_MECH_SCRAM_SHA_256 | SASL_MECH_SCRAM_SHA_1))) {
+  if(sctx->user && (sctx->enabledmechs &
+                    (SASL_MECH_SCRAM_SHA_256 | SASL_MECH_SCRAM_SHA_1))) {
     gsasl = Curl_auth_gsasl_get(sctx->conn);
     if(!gsasl) {
       sctx->result = CURLE_OUT_OF_MEMORY;
@@ -364,14 +364,14 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
     }
 
     if((sctx->enabledmechs & SASL_MECH_SCRAM_SHA_256) &&
-      Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_256,
-                                   gsasl)) {
+       Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_256,
+                                    gsasl)) {
       sctx->mech = SASL_MECH_STRING_SCRAM_SHA_256;
       sctx->sasl->authused = SASL_MECH_SCRAM_SHA_256;
     }
     else if((sctx->enabledmechs & SASL_MECH_SCRAM_SHA_1) &&
-      Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_1,
-                                   gsasl)) {
+            Curl_auth_gsasl_is_supported(data, SASL_MECH_STRING_SCRAM_SHA_1,
+                                         gsasl)) {
       sctx->mech = SASL_MECH_STRING_SCRAM_SHA_1;
       sctx->sasl->authused = SASL_MECH_SCRAM_SHA_1;
     }
