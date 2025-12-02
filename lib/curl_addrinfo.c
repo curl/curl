@@ -529,10 +529,11 @@ void curl_dbg_freeaddrinfo(struct addrinfo *freethis, int line,
  * family otherwise present in memdebug.c. I put these ones here since they
  * require a bunch of structs I did not want to include in memdebug.c
  */
-int curl_dbg_getaddrinfo(const char *hostname, const char *service,
+int curl_dbg_getaddrinfo(const char *hostname,
+                         const char *service,
                          const struct addrinfo *hints,
-                         struct addrinfo **result, int line,
-                         const char *source)
+                         struct addrinfo **result,
+                         int line, const char *source)
 {
 #ifdef USE_LWIPSOCK
   int res = lwip_getaddrinfo(hostname, service, hints, result);
