@@ -32,7 +32,6 @@ use IO::Socket;
 use Time::HiRes;
 use strict;
 use warnings;
-use Cwd qw(cwd);
 
 BEGIN {
     use base qw(Exporter);
@@ -196,11 +195,10 @@ use File::Temp qw/ tempfile/;
 #######################################################################
 # Initialize configuration variables
 sub initserverconfig {
-    my $top = cwd;
-    my ($fh, $socks) = tempfile("curl-socksd-XXXXXXXX", DIR => "$top/$LOGDIR");
+    my ($fh, $socks) = tempfile("curl-socksd-XXXXXXXX", DIR => "$pwd/$LOGDIR");
     close($fh);
     unlink($socks);
-    my ($f2, $http) = tempfile("curl-http-XXXXXXXX", DIR => "$top/$LOGDIR");
+    my ($f2, $http) = tempfile("curl-http-XXXXXXXX", DIR => "$pwd/$LOGDIR");
     close($f2);
     unlink($http);
     $SOCKSUNIXPATH = $socks; # SOCKS Unix domain socket
