@@ -117,11 +117,10 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
   return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
-static
-CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len);
-static
-CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport);
-
+static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
+                                 size_t len);
+static CURLcode rtsp_parse_transport(struct Curl_easy *data,
+                                     const char *transport);
 
 /*
  * RTSP handler interface.
@@ -191,7 +190,6 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-
 /*
  * Function to check on various aspects of a connection.
  */
@@ -210,7 +208,6 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
 
   return ret_val;
 }
-
 
 static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
 {
@@ -274,7 +271,6 @@ static CURLcode rtsp_done(struct Curl_easy *data,
   return httpStatus;
 }
 
-
 static CURLcode rtsp_setup_body(struct Curl_easy *data,
                                 Curl_RtspReq rtspreq,
                                 struct dynbuf *reqp)
@@ -324,9 +320,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
          rtspreq == RTSPREQ_GET_PARAMETER) {
         if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-          result = curlx_dyn_addn(reqp,
-                                  STRCONST("Content-Type: "
-                                           "text/parameters\r\n"));
+          result = curlx_dyn_addn(reqp, STRCONST("Content-Type: "
+                                                 "text/parameters\r\n"));
           if(result)
             return result;
         }
@@ -334,9 +329,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
 
       if(rtspreq == RTSPREQ_ANNOUNCE) {
         if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-          result = curlx_dyn_addn(reqp,
-                                  STRCONST("Content-Type: "
-                                           "application/sdp\r\n"));
+          result = curlx_dyn_addn(reqp, STRCONST("Content-Type: "
+                                                 "application/sdp\r\n"));
           if(result)
             return result;
         }
@@ -931,7 +925,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                blen, rtspc->in_header, data->req.done, rtspc->state,
                data->req.size));
   if(!result && (is_eos || blen)) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY|
+    result = Curl_client_write(data, CLIENTWRITE_BODY |
                                (is_eos ? CLIENTWRITE_EOS : 0), buf, blen);
   }
 
@@ -954,8 +948,8 @@ static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
   return rtsp_rtp_write_resp(data, buf, blen, is_eos);
 }
 
-static
-CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
+static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
+                                 size_t len)
 {
   size_t wrote;
   curl_write_callback writeit;
@@ -1066,8 +1060,8 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
   return CURLE_OK;
 }
 
-static
-CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
+static CURLcode rtsp_parse_transport(struct Curl_easy *data,
+                                     const char *transport)
 {
   /* If we receive multiple Transport response-headers, the linterleaved
      channels of each response header is recorded and used together for
@@ -1108,6 +1102,5 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   }
   return CURLE_OK;
 }
-
 
 #endif /* CURL_DISABLE_RTSP */

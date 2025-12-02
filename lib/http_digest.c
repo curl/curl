@@ -148,7 +148,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
     }
   }
   if(!tmp)
-    path = (unsigned char *)curlx_strdup((const char *) uripath);
+    path = (unsigned char *)curlx_strdup((const char *)uripath);
 
   if(!path)
     return CURLE_OUT_OF_MEMORY;

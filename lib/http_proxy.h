@@ -46,7 +46,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         int http_version_major);
 
 /* Default proxy timeout in milliseconds */
-#define PROXY_TIMEOUT (3600*1000)
+#define PROXY_TIMEOUT (3600 * 1000)
 
 CURLcode Curl_cf_http_proxy_query(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,

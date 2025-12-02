@@ -22,9 +22,9 @@
  *
  ***************************************************************************/
 
- /*
-  * IDN conversions
-  */
+/*
+ * IDN conversions
+ */
 
 #include "curl_setup.h"
 #include "urldata.h"
@@ -87,18 +87,18 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
   size_t inlen = strlen(in);
   if(inlen < MAX_HOST_LENGTH) {
-    char iconv_buffer[MAX_HOST_LENGTH] = {0};
+    char iconv_buffer[MAX_HOST_LENGTH] = { 0 };
     char *iconv_outptr = iconv_buffer;
     size_t iconv_outlen = sizeof(iconv_buffer);
     CURLcode iconv_result = iconv_to_utf8(in, inlen,
                                           &iconv_outptr, &iconv_outlen);
     if(!iconv_result) {
       UErrorCode err = U_ZERO_ERROR;
-      UIDNA* idna = uidna_openUTS46(
-        UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
+      UIDNA *idna = uidna_openUTS46(
+        UIDNA_CHECK_BIDI | UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
       if(!U_FAILURE(err)) {
         UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-        char buffer[MAX_HOST_LENGTH] = {0};
+        char buffer[MAX_HOST_LENGTH] = { 0 };
         (void)uidna_nameToASCII_UTF8(idna, iconv_buffer, (int)iconv_outlen,
                                      buffer, sizeof(buffer) - 1, &info, &err);
         uidna_close(idna);
@@ -122,11 +122,11 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
   size_t inlen = strlen(in);
   if(inlen < MAX_HOST_LENGTH) {
     UErrorCode err = U_ZERO_ERROR;
-    UIDNA* idna = uidna_openUTS46(
-      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
+    UIDNA *idna = uidna_openUTS46(
+      UIDNA_CHECK_BIDI | UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
     if(!U_FAILURE(err)) {
       UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-      char buffer[MAX_HOST_LENGTH] = {0};
+      char buffer[MAX_HOST_LENGTH] = { 0 };
       (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
                                     sizeof(buffer) - 1, &info, &err);
       uidna_close(idna);

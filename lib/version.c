@@ -335,8 +335,8 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_LDAP
   "ldap",
 #if !defined(CURL_DISABLE_LDAPS) && \
-    ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
-     (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
+  ((defined(USE_OPENLDAP) && defined(USE_SSL)) || \
+   (!defined(USE_OPENLDAP) && defined(HAVE_LDAP_SSL)))
   "ldaps",
 #endif
 #endif
@@ -438,7 +438,7 @@ static int ech_present(curl_version_info_data *info)
  * Use FEATURE() macro to define an entry: this allows documentation check.
  */
 
-#define FEATURE(name, present, bitmask) {(name), (present), (bitmask)}
+#define FEATURE(name, present, bitmask) { (name), (present), (bitmask) }
 
 struct feat {
   const char *name;
