@@ -140,7 +140,8 @@ static CURLcode telrcv(struct Curl_easy *data,
                        struct TELNET *tn,
                        const unsigned char *inbuf, /* Data received from
                                                       socket */
-                       ssize_t count);             /* Number of bytes received */
+                       ssize_t count);             /* Number of bytes
+                                                      received */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void printoption(struct Curl_easy *data,
@@ -1077,7 +1078,8 @@ static CURLcode telrcv(struct Curl_easy *data,
                        struct TELNET *tn,
                        const unsigned char *inbuf, /* Data received from
                                                       socket */
-                       ssize_t count)              /* Number of bytes received */
+                       ssize_t count)              /* Number of bytes
+                                                      received */
 {
   unsigned char c;
   CURLcode result;
