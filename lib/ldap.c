@@ -1037,6 +1037,15 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp)
 }
 #endif /* !HAVE_LDAP_URL_PARSE */
 
+void Curl_ldap_version(char *buf, size_t bufsz)
+{
+#ifdef USE_WIN32_LDAP
+  curl_msnprintf(buf, bufsz, "WinLDAP");
+#else
+  curl_msnprintf(buf, bufsz, "LDAP/1");
+#endif
+}
+
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic pop
 #endif
