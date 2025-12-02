@@ -1918,7 +1918,8 @@ static CURLcode http2_handle_stream_close(struct Curl_cfilter *cf,
         break;
       Curl_debug(data, CURLINFO_HEADER_IN, curlx_dyn_ptr(&dbuf),
                  curlx_dyn_len(&dbuf));
-      result = Curl_client_write(data, CLIENTWRITE_HEADER | CLIENTWRITE_TRAILER,
+      result = Curl_client_write(data,
+                                 CLIENTWRITE_HEADER | CLIENTWRITE_TRAILER,
                                  curlx_dyn_ptr(&dbuf), curlx_dyn_len(&dbuf));
       if(result)
         break;
