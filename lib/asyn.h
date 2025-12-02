@@ -223,7 +223,7 @@ struct doh_probes;
 
 /* convert these functions if an asynch resolver is not used */
 #define Curl_async_get_impl(x, y)    (*(y) = NULL, CURLE_OK)
-#define Curl_async_is_resolved(x,y)  CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_await(x, y)       CURLE_COULDNT_RESOLVE_HOST
 #define Curl_async_global_init()     CURLE_OK
 #define Curl_async_global_cleanup()  Curl_nop_stmt

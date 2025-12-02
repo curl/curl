@@ -242,8 +242,8 @@ static int proxy_h2_client_new(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   nghttp2_option *o;
-  nghttp2_mem mem = {NULL, Curl_nghttp2_malloc, Curl_nghttp2_free,
-                     Curl_nghttp2_calloc, Curl_nghttp2_realloc};
+  nghttp2_mem mem = { NULL, Curl_nghttp2_malloc, Curl_nghttp2_free,
+                      Curl_nghttp2_calloc, Curl_nghttp2_realloc };
 
   int rc = nghttp2_option_new(&o);
   if(rc)

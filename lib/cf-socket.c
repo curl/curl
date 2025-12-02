@@ -643,8 +643,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_UNSUPPORTED_PROTOCOL;
     case IF2IP_FOUND:
       /*
-        * We now have the numerical IP address in the 'myhost' buffer
-        */
+       * We now have the numerical IP address in the 'myhost' buffer
+       */
       host = myhost;
       infof(data, "Local Interface %s is ip %s using address family %i",
             iface, host, af);

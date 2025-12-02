@@ -661,13 +661,12 @@ parse_cookie_header(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode
-parse_netscape(struct Cookie *co,
-               struct CookieInfo *ci,
-               bool *okay,
-               const char *lineptr,
-               bool secure)  /* TRUE if connection is over secure
-                                origin */
+static CURLcode parse_netscape(struct Cookie *co,
+                               struct CookieInfo *ci,
+                               bool *okay,
+                               const char *lineptr,
+                               bool secure) /* TRUE if connection is over
+                                               secure origin */
 {
   /*
    * This line is NOT an HTTP header style line, we do offer support for
