@@ -157,7 +157,6 @@
  18.23 Set the modification date on an uploaded file
  18.24 Use multiple parallel transfers for a single download
  18.25 Prevent terminal injection when writing to terminal
- 18.26 Custom progress meter update interval
  18.27 -J and -O with %-encoded filenames
  18.28 -J with -C -
  18.29 --retry and transfer timeouts
@@ -1137,13 +1136,6 @@
  clever tricks.
 
  See https://github.com/curl/curl/issues/6150
-
-18.26 Custom progress meter update interval
-
- Users who are for example doing large downloads in CI or remote setups might
- want the occasional progress meter update to see that the transfer is
- progressing and has not stuck, but they may not appreciate the
- many-times-a-second frequency curl can end up doing it with now.
 
 18.27 -J and -O with %-encoded filenames
 
