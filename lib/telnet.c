@@ -1506,9 +1506,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       if(events.lNetworkEvents & FD_CLOSE) {
         keepon = FALSE;
       }
+      break;
     }
-    break;
-    }
+    } /* switch */
 
     if(data->set.timeout) {
       now = curlx_now();
