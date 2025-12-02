@@ -280,39 +280,41 @@ bool Curl_bufq_is_full(const struct bufq *q)
   return chunk_is_full(q->tail);
 }
 
-static struct buf_chunk *get_spare(struct bufq *q)
+static CURLcode get_spare(struct bufq *q, struct buf_chunk **spare)
 {
   struct buf_chunk *chunk = NULL;
-
+  *spare = NULL;
   if(q->spare) {
     chunk = q->spare;
     q->spare = chunk->next;
     chunk_reset(chunk);
-    return chunk;
+    *spare = chunk;
+    return CURLE_OK;
   }
 
   if(q->chunk_count >= q->max_chunks && (!(q->opts & BUFQ_OPT_SOFT_LIMIT)))
-    return NULL;
+    return CURLE_OK;
 
   if(q->pool) {
     if(bufcp_take(q->pool, &chunk))
-      return NULL;
+      return CURLE_OK;
     ++q->chunk_count;
-    return chunk;
+    *spare = chunk;
+    return CURLE_OK;
   }
-  else {
-    /* Check for integer overflow before allocation */
-    if(q->chunk_size > SIZE_MAX - sizeof(*chunk)) {
-      return NULL;
-    }
 
-    chunk = curlx_calloc(1, sizeof(*chunk) + q->chunk_size);
-    if(!chunk)
-      return NULL;
-    chunk->dlen = q->chunk_size;
-    ++q->chunk_count;
-    return chunk;
+  /* Check for integer overflow before allocation */
+  if(q->chunk_size > SIZE_MAX - sizeof(*chunk)) {
+    return CURLE_OK;
   }
+
+  chunk = curlx_calloc(1, sizeof(*chunk) + q->chunk_size);
+  if(!chunk)
+    return CURLE_OUT_OF_MEMORY;
+  chunk->dlen = q->chunk_size;
+  ++q->chunk_count;
+  *spare = chunk;
+  return CURLE_OK;
 }
 
 static void prune_head(struct bufq *q)
@@ -343,13 +345,19 @@ static void prune_head(struct bufq *q)
   }
 }
 
-static struct buf_chunk *get_non_full_tail(struct bufq *q)
+static CURLcode get_non_full_tail(struct bufq *q, struct buf_chunk **tail)
 {
   struct buf_chunk *chunk;
+  CURLcode result;
 
-  if(q->tail && !chunk_is_full(q->tail))
-    return q->tail;
-  chunk = get_spare(q);
+  *tail = NULL;
+  if(q->tail && !chunk_is_full(q->tail)) {
+    *tail = q->tail;
+    return CURLE_OK;
+  }
+  result = get_spare(q, &chunk);
+  if(result)
+    return result;
   if(chunk) {
     /* new tail, and possibly new head */
     if(q->tail) {
@@ -361,7 +369,8 @@ static struct buf_chunk *get_non_full_tail(struct bufq *q)
       q->head = q->tail = chunk;
     }
   }
-  return chunk;
+  *tail = chunk;
+  return CURLE_OK;
 }
 
 CURLcode Curl_bufq_write(struct bufq *q,
@@ -374,7 +383,9 @@ CURLcode Curl_bufq_write(struct bufq *q,
   DEBUGASSERT(q->max_chunks > 0);
   *pnwritten = 0;
   while(len) {
-    tail = get_non_full_tail(q);
+    CURLcode result = get_non_full_tail(q, &tail);
+    if(result)
+      return result;
     if(!tail) {
       if((q->chunk_count < q->max_chunks) || (q->opts & BUFQ_OPT_SOFT_LIMIT))
         /* should have gotten a tail, but did not */
@@ -555,9 +566,13 @@ CURLcode Curl_bufq_sipn(struct bufq *q, size_t max_len,
                         size_t *pnread)
 {
   struct buf_chunk *tail = NULL;
+  CURLcode result;
 
   *pnread = 0;
-  tail = get_non_full_tail(q);
+  result = get_non_full_tail(q, &tail);
+  if(result)
+    return result;
+
   if(!tail) {
     if(q->chunk_count < q->max_chunks)
       return CURLE_OUT_OF_MEMORY;

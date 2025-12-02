@@ -93,6 +93,7 @@ uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
   struct uint32_spbset_chunk *chunk, **panchor = NULL;
   uint32_t i_offset = (i & ~CURL_UINT32_SPBSET_CH_MASK);
 
+  DEBUGASSERT(bset);
   if(!bset)
     return NULL;
 
@@ -129,7 +130,7 @@ uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
   return chunk;
 }
 
-
+/* returns FALSE for OOM */
 bool Curl_uint32_spbset_add(struct uint32_spbset *bset, uint32_t i)
 {
   struct uint32_spbset_chunk *chunk;

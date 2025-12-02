@@ -39,17 +39,17 @@ struct Curl_share;
  * Will shortly attach/detach `data` to `conn` while doing so.
  * `done` will be set TRUE if any error was encountered or if
  * the connection was shut down completely. */
-void Curl_cshutdn_run_once(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           bool *done);
+CURLcode Curl_cshutdn_run_once(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool *done);
 
 /* Terminates the connection, e.g. closes and destroys it.
  * If `run_shutdown` is TRUE, the shutdown will be run once before
  * terminating it.
  * Takes ownership of `conn`. */
-void Curl_cshutdn_terminate(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            bool run_shutdown);
+CURLcode Curl_cshutdn_terminate(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                bool run_shutdown);
 
 /* A `cshutdown` is always owned by a multi handle to maintain
  * the connections to be shut down. It registers timers and

@@ -919,14 +919,16 @@ void Curl_detach_connection(struct Curl_easy *data)
  *
  * This is the only function that should assign data->conn
  */
-void Curl_attach_connection(struct Curl_easy *data,
-                            struct connectdata *conn)
+CURLcode Curl_attach_connection(struct Curl_easy *data,
+                                 struct connectdata *conn)
 {
   DEBUGASSERT(data);
   DEBUGASSERT(!data->conn);
   DEBUGASSERT(conn);
   data->conn = conn;
-  Curl_uint32_spbset_add(&conn->xfers_attached, data->mid);
+  if(!Curl_uint32_spbset_add(&conn->xfers_attached, data->mid))
+    return CURLE_OUT_OF_MEMORY;
+
   /* all attached transfers must be from the same multi */
   if(!conn->attached_multi)
     conn->attached_multi = data->multi;
@@ -934,6 +936,7 @@ void Curl_attach_connection(struct Curl_easy *data,
 
   if(conn->handler && conn->handler->attach)
     conn->handler->attach(data, conn);
+  return CURLE_OK;
 }
 
 /* adjust pollset for rate limits/pauses */
@@ -1724,7 +1727,9 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
     /* take this handle to the perform state right away */
     multistate(data, MSTATE_PERFORMING);
-    Curl_attach_connection(data, conn);
+    result = Curl_attach_connection(data, conn);
+    if(result)
+      return CURLM_OUT_OF_MEMORY;
     k->keepon |= KEEP_RECV; /* setup to receive! */
   }
   return rc;

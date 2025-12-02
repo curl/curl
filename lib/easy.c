@@ -1235,13 +1235,14 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
     return CURLE_RECURSIVE_API_CALL;
 
   result = easy_connection(data, &c);
-  if(result)
-    return result;
 
-  if(!data->conn)
+  if(!result && !data->conn) {
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    result = Curl_attach_connection(data, c);
+  }
+  if(result)
+    return result;
 
   *n = 0;
   return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
@@ -1260,9 +1261,9 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
   if(!data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    result = Curl_attach_connection(data, c);
 
-  return CURLE_OK;
+  return result;
 }
 #endif /* !CURL_DISABLE_WEBSOCKETS */
 
@@ -1280,13 +1281,14 @@ CURLcode Curl_senddata(struct Curl_easy *data, const void *buffer,
 
   *n = 0;
   result = easy_connection(data, &c);
-  if(result)
-    return result;
 
-  if(!data->conn)
+  if(!result && !data->conn)
     /* on first invoke, the transfer has been detached from the connection and
        needs to be reattached */
-    Curl_attach_connection(data, c);
+    result = Curl_attach_connection(data, c);
+
+  if(result)
+    return result;
 
   sigpipe_ignore(data, &pipe_st);
   result = Curl_conn_send(data, FIRSTSOCKET, buffer, buflen, FALSE, n);

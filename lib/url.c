@@ -702,7 +702,9 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
 
       /* briefly attach the connection to this transfer for the purpose of
          checking it */
-      Curl_attach_connection(data, conn);
+      CURLcode result = Curl_attach_connection(data, conn);
+      if(result)
+        return TRUE;
 
       state = conn->handler->connection_check(data, conn, CONNCHECK_ISDEAD);
       dead = (state & CONNRESULT_DEAD);
@@ -713,7 +715,10 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
     else {
       bool input_pending = FALSE;
 
-      Curl_attach_connection(data, conn);
+      CURLcode result = Curl_attach_connection(data, conn);
+      if(result)
+        return TRUE;
+
       dead = !Curl_conn_is_alive(data, conn, &input_pending);
       if(input_pending) {
         /* For reuse, we want a "clean" connection state. The includes
@@ -749,7 +754,9 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
     return result;
 
   /* briefly attach for action */
-  Curl_attach_connection(data, conn);
+  result = Curl_attach_connection(data, conn);
+  if(result)
+    return result;
   if(conn->handler->connection_check) {
     /* Do a protocol-specific keepalive check on the connection. */
     unsigned int rc;
@@ -1267,14 +1274,16 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   return TRUE;
 }
 
-static bool url_match_result(bool result, void *userdata)
+static bool url_match_result(bool what, void *userdata)
 {
   struct url_conn_match *match = userdata;
-  (void)result;
+  (void)what;
   if(match->found) {
     /* Attach it now while still under lock, so the connection does
      * no longer appear idle and can be reaped. */
-    Curl_attach_connection(match->data, match->found);
+    CURLcode result = Curl_attach_connection(match->data, match->found);
+    if(result)
+      return FALSE;
     return TRUE;
   }
   else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
@@ -3577,8 +3586,9 @@ static CURLcode create_conn(struct Curl_easy *data,
       goto out;
 
     /* Setup a "faked" transfer that will do nothing */
-    Curl_attach_connection(data, conn);
-    result = Curl_cpool_add(data, conn);
+    result = Curl_attach_connection(data, conn);
+    if(!result)
+      result = Curl_cpool_add(data, conn);
     if(!result) {
       /* Setup whatever necessary for a resumed transfer */
       result = setup_range(data);
@@ -3716,8 +3726,9 @@ static CURLcode create_conn(struct Curl_easy *data,
         goto out;
       }
 
-      Curl_attach_connection(data, conn);
-      result = Curl_cpool_add(data, conn);
+      result = Curl_attach_connection(data, conn);
+      if(!result)
+        result = Curl_cpool_add(data, conn);
       if(result)
         goto out;
     }

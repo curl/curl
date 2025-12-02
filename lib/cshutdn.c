@@ -108,23 +108,28 @@ static void cshutdn_run_once(struct Curl_easy *data,
     conn->bits.shutdown_filters = TRUE;
 }
 
-void Curl_cshutdn_run_once(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           bool *done)
+CURLcode Curl_cshutdn_run_once(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               bool *done)
 {
+  CURLcode result;
   DEBUGASSERT(!data->conn);
-  Curl_attach_connection(data, conn);
+  result = Curl_attach_connection(data, conn);
+  if(result)
+    return result;
   cshutdn_run_once(data, conn, done);
   CURL_TRC_M(data, "[SHUTDOWN] shutdown, done=%d", *done);
   Curl_detach_connection(data);
+  return result;
 }
 
-void Curl_cshutdn_terminate(struct Curl_easy *data,
-                            struct connectdata *conn,
-                            bool do_shutdown)
+CURLcode Curl_cshutdn_terminate(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                bool do_shutdown)
 {
   struct Curl_easy *admin = data;
   bool done;
+  CURLcode result;
 
   /* there must be a connection to close */
   DEBUGASSERT(conn);
@@ -140,7 +145,9 @@ void Curl_cshutdn_terminate(struct Curl_easy *data,
   if(data->multi && data->multi->admin)
     admin = data->multi->admin;
 
-  Curl_attach_connection(admin, conn);
+  result = Curl_attach_connection(admin, conn);
+  if(result)
+    return result;
 
   cshutdn_run_conn_handler(admin, conn);
   if(do_shutdown) {
@@ -163,6 +170,7 @@ void Curl_cshutdn_terminate(struct Curl_easy *data,
     CURL_TRC_M(data, "[SHUTDOWN] trigger multi connchanged");
     Curl_multi_connchanged(data->multi);
   }
+  return result;
 }
 
 static bool cshutdn_destroy_oldest(struct cshutdn *cshutdn,
@@ -388,11 +396,14 @@ static CURLMcode cshutdn_update_ev(struct cshutdn *cshutdn,
                                    struct connectdata *conn)
 {
   CURLMcode mresult;
+  CURLcode result;
 
   DEBUGASSERT(cshutdn);
   DEBUGASSERT(cshutdn->multi->socket_cb);
 
-  Curl_attach_connection(data, conn);
+  result = Curl_attach_connection(data, conn);
+  if(result)
+    return CURLM_OUT_OF_MEMORY;
   mresult = Curl_multi_ev_assess_conn(cshutdn->multi, data, conn);
   Curl_detach_connection(data);
   return mresult;
@@ -480,7 +491,9 @@ void Curl_cshutdn_setfds(struct cshutdn *cshutdn,
       CURLcode result;
 
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(data, conn);
+      result = Curl_attach_connection(data, conn);
+      if(result)
+        break;
       result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
@@ -528,8 +541,9 @@ unsigned int Curl_cshutdn_add_waitfds(struct cshutdn *cshutdn,
     for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(data, conn);
-      result = Curl_conn_adjust_pollset(data, conn, &ps);
+      result = Curl_attach_connection(data, conn);
+      if(!result)
+        result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
       if(!result)
@@ -555,8 +569,9 @@ CURLcode Curl_cshutdn_add_pollfds(struct cshutdn *cshutdn,
     for(e = Curl_llist_head(&cshutdn->list); e; e = Curl_node_next(e)) {
       conn = Curl_node_elem(e);
       Curl_pollset_reset(&ps);
-      Curl_attach_connection(data, conn);
-      result = Curl_conn_adjust_pollset(data, conn, &ps);
+      result = Curl_attach_connection(data, conn);
+      if(!result)
+        result = Curl_conn_adjust_pollset(data, conn, &ps);
       Curl_detach_connection(data);
 
       if(!result)
