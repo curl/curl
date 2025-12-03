@@ -3,7 +3,6 @@
 <keywords>
 HTTP
 --variable
-notxml
 </keywords>
 </info>
 
@@ -22,7 +21,7 @@ http
 --variable with a file byte range, bad range
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[15-14]@&LOGDIR/fooo" --expand-data '{{name}}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[15-14]@%LOGDIR/fooo" --expand-data '{{name}}'
 </command>
 </client>
 
