@@ -1027,7 +1027,7 @@ struct UrlState {
   CURLU *uh; /* URL handle for the current parsed URL */
   struct urlpieces up;
   struct bufref url;        /* work URL, initially copied from UserDefined */
-  char *referer;    /* referer string */
+  struct bufref referer;    /* referer string */
   struct curl_slist *resolve; /* set to point to the set.resolve list when
                                  this should be dealt with in pretransfer */
 #ifndef CURL_DISABLE_HTTP
@@ -1123,7 +1123,6 @@ struct UrlState {
 #ifdef CURL_LIST_ONLY_PROTOCOL
   BIT(list_only);      /* list directory contents */
 #endif
-  BIT(referer_alloc); /* referer string is malloc()ed */
   BIT(wildcard_resolve); /* Set to true if any resolve change is a wildcard */
   BIT(upload);         /* upload request */
   BIT(internal); /* internal: true if this easy handle was created for

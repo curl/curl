@@ -40,6 +40,7 @@
 #include "connect.h"
 #include "cfilters.h"
 #include "strdup.h"
+#include "bufref.h"
 #include "curlx/strparse.h"
 
 
@@ -536,9 +537,10 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* Referrer */
   Curl_safefree(data->state.aptr.ref);
-  if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
-    data->state.aptr.ref = curl_maprintf("Referer: %s\r\n",
-                                         data->state.referer);
+  if(Curl_bufref_ptr(&data->state.referer) &&
+     !Curl_checkheaders(data, STRCONST("Referer")))
+    data->state.aptr.ref =
+      curl_maprintf("Referer: %s\r\n", Curl_bufref_ptr(&data->state.referer));
 
   p_referrer = data->state.aptr.ref;
 

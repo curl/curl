@@ -1235,11 +1235,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         /* We are asked to automatically set the previous URL as the referer
            when we get the next URL. We pick the ->url field, which may or may
            not be 100% correct */
-
-        if(data->state.referer_alloc) {
-          Curl_safefree(data->state.referer);
-          data->state.referer_alloc = FALSE;
-        }
+        Curl_bufref_free(&data->state.referer);
 
         /* Make a copy of the URL without credentials and fragment */
         u = curl_url();
@@ -1262,8 +1258,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
         if(uc || !referer)
           return CURLE_OUT_OF_MEMORY;
 
-        data->state.referer = referer;
-        data->state.referer_alloc = TRUE; /* yes, free this later */
+        Curl_bufref_set(&data->state.referer, referer, 0, curl_free);
       }
     }
   }
@@ -2867,8 +2862,10 @@ static CURLcode http_add_hd(struct Curl_easy *data,
 
   case H1_HD_REFERER:
     Curl_safefree(data->state.aptr.ref);
-    if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
-      result = curlx_dyn_addf(req, "Referer: %s\r\n", data->state.referer);
+    if(Curl_bufref_ptr(&data->state.referer) &&
+       !Curl_checkheaders(data, STRCONST("Referer")))
+      result = curlx_dyn_addf(req, "Referer: %s\r\n",
+                              Curl_bufref_ptr(&data->state.referer));
     break;
 
 #ifndef CURL_DISABLE_PROXY

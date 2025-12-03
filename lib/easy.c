@@ -977,6 +977,7 @@ CURL *curl_easy_duphandle(CURL *d)
                  Curl_hash_str, curlx_str_key_compare, dupeasy_meta_freeentry);
   curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_bufref_init(&outcurl->state.url);
+  Curl_bufref_init(&outcurl->state.referer);
   Curl_netrc_init(&outcurl->state.netrc);
 
   /* the connection pool is setup on demand */
@@ -1016,16 +1017,19 @@ CURL *curl_easy_duphandle(CURL *d)
   }
 #endif
 
-  if(Curl_bufref_ptr(&data->state.url))
+  if(Curl_bufref_ptr(&data->state.url)) {
     Curl_bufref_set(&outcurl->state.url,
                     curlx_strdup(Curl_bufref_ptr(&data->state.url)), 0,
                     curl_free);
-
-  if(data->state.referer) {
-    outcurl->state.referer = curlx_strdup(data->state.referer);
-    if(!outcurl->state.referer)
+    if(!Curl_bufref_ptr(&outcurl->state.url))
       goto fail;
-    outcurl->state.referer_alloc = TRUE;
+  }
+  if(Curl_bufref_ptr(&data->state.referer)) {
+    Curl_bufref_set(&outcurl->state.referer,
+                    curlx_strdup(Curl_bufref_ptr(&data->state.referer)), 0,
+                    curl_free);
+    if(!Curl_bufref_ptr(&outcurl->state.referer))
+      goto fail;
   }
 
   /* Reinitialize an SSL engine for the new handle
