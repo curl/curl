@@ -456,18 +456,19 @@ if($addrinfos) {
 }
 
 if($verbose) {
-    print "Mallocs: $mallocs\n",
-        "Reallocs: $reallocs\n",
-        "Callocs: $callocs\n",
-        "Strdups:  $strdups\n",
-        "Wcsdups:  $wcsdups\n",
-        "Frees: $frees\n",
-        "Sends: $sends\n",
-        "Recvs: $recvs\n",
-        "Sockets: $sockets\n",
-        "Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
-        "Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n";
+    print
+        "Info: Mallocs: $mallocs\n",
+        "Info: Reallocs: $reallocs\n",
+        "Info: Callocs: $callocs\n",
+        "Info: Strdups:  $strdups\n",
+        "Info: Wcsdups:  $wcsdups\n",
+        "Info: Frees: $frees\n",
+        "Info: Sends: $sends\n",
+        "Info: Recvs: $recvs\n",
+        "Info: Sockets: $sockets\n",
+        "Info: Allocations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups)."\n",
+        "Info: Operations: ".($mallocs + $callocs + $reallocs + $strdups + $wcsdups + $sends + $recvs + $sockets)."\n";
 
-    print "Maximum allocated: $maxmem\n";
-    print "Total allocated: $memsum\n";
+    print "Info: Maximum allocated: $maxmem\n";
+    print "Info: Total allocated: $memsum\n";
 }
