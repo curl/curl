@@ -44,6 +44,7 @@
 #include "rand.h"
 #include "curlx/strparse.h"
 #include "transfer.h"
+#include "bufref.h"
 #include "curlx/dynbuf.h"
 #include "curlx/warnless.h"
 #include "headers.h"
@@ -920,10 +921,7 @@ fail:
   if(rc)
     return rc;
 
-  if(data->state.url_alloc)
-    curlx_free(data->state.url);
-  data->state.url_alloc = TRUE;
-  data->state.url = url;
+  Curl_bufref_set(&data->state.url, url, 0, curl_free);
   return 0;
 }
 
@@ -2316,7 +2314,7 @@ static CURLcode h2_submit(struct h2_stream_ctx **pstream,
     size_t acc = 0, i;
 
     infof(data, "[HTTP/2] [%d] OPENED stream for %s",
-          stream_id, data->state.url);
+          stream_id, Curl_bufref_ptr(&data->state.url));
     for(i = 0; i < nheader; ++i) {
       acc += nva[i].namelen + nva[i].valuelen;
 

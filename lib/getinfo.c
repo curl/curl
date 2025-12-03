@@ -32,6 +32,7 @@
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
+#include "bufref.h"
 #include "curlx/strparse.h"
 
 /*
@@ -91,8 +92,10 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
                              const char **param_charp)
 {
   switch(info) {
-  case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->state.url ? data->state.url : "";
+  case CURLINFO_EFFECTIVE_URL: {
+    const char *s = Curl_bufref_ptr(&data->state.url);
+    *param_charp = s ? s : "";
+  }
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];

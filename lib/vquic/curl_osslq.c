@@ -54,6 +54,7 @@
 #include "../vtls/openssl.h"
 #include "curl_osslq.h"
 #include "../url.h"
+#include "../bufref.h"
 #include "../curlx/warnless.h"
 #include "../curlx/strerr.h"
 
@@ -1985,7 +1986,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRId64 "] OPENED stream for %s",
-          stream->s.id, data->state.url);
+          stream->s.id, Curl_bufref_ptr(&data->state.url));
     for(i = 0; i < nheader; ++i) {
       infof(data, "[HTTP/3] [%" PRId64 "] [%.*s: %.*s]",
             stream->s.id,

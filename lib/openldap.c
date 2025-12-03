@@ -52,6 +52,7 @@
 #include "connect.h"
 #include "curl_sasl.h"
 #include "strcase.h"
+#include "bufref.h"
 
 /*
  * Uncommenting this will enable the built-in debug logging of the openldap
@@ -272,7 +273,7 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   *ludp = NULL;
   if(!data->state.up.user && !data->state.up.password &&
      !data->state.up.options)
-    rc = ldap_url_parse(data->state.url, ludp);
+    rc = ldap_url_parse(Curl_bufref_ptr(&data->state.url), ludp);
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
 
@@ -988,7 +989,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
   if(!li)
     return CURLE_FAILED_INIT;
 
-  infof(data, "LDAP local: %s", data->state.url);
+  infof(data, "LDAP local: %s", Curl_bufref_ptr(&data->state.url));
 
   result = oldap_url_parse(data, &lud);
   if(result)
