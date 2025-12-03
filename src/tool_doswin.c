@@ -764,7 +764,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   SOCKADDR_IN clientAddr;
   int clientAddrLen = sizeof(clientAddr);
 
-  curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l, (SOCKADDR *)&clientAddr,
+  curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l,
+                                       (SOCKADDR *)&clientAddr,
                                        &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
