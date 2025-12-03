@@ -226,7 +226,7 @@ typedef CURLcode (Curl_recv)(struct Curl_easy *data,   /* transfer */
  * are not NULL, but no longer have the MAGIC touch. This gives
  * us early warning on things only discovered by valgrind otherwise. */
 #define GOOD_EASY_HANDLE(x) \
-  (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER))? TRUE: \
+  (((x) && ((x)->magic == CURLEASY_MAGIC_NUMBER)) ? TRUE : \
   (DEBUGASSERT(!(x)), FALSE))
 #else
 #define GOOD_EASY_HANDLE(x) \
@@ -269,7 +269,7 @@ struct ssl_config_data {
   long certverifyresult; /* result from the certificate verification */
   curl_ssl_ctx_callback fsslctx; /* function to initialize ssl ctx */
   void *fsslctxp;        /* parameter for call back */
-  char *cert_type; /* format for certificate (default: PEM)*/
+  char *cert_type; /* format for certificate (default: PEM) */
   char *key; /* private key filename */
   struct curl_blob *key_blob;
   char *key_type; /* format for private key (default: PEM) */
@@ -424,8 +424,8 @@ struct hostname {
  */
 
 #define KEEP_NONE       0
-#define KEEP_RECV       (1<<0) /* there is or may be data to read */
-#define KEEP_SEND       (1<<1) /* there is or may be data to write */
+#define KEEP_RECV       (1 << 0) /* there is or may be data to read */
+#define KEEP_SEND       (1 << 1) /* there is or may be data to write */
 
 /* transfer wants to send */
 #define CURL_WANT_SEND(data) ((data)->req.keepon & KEEP_SEND)
@@ -589,9 +589,10 @@ struct ip_quadruple {
   uint8_t transport;
 };
 
-#define CUR_IP_QUAD_HAS_PORTS(x)  (((x)->transport == TRNSPRT_TCP) || \
-                                   ((x)->transport == TRNSPRT_UDP) || \
-                                   ((x)->transport == TRNSPRT_QUIC))
+#define CUR_IP_QUAD_HAS_PORTS(x)      \
+  (((x)->transport == TRNSPRT_TCP) || \
+   ((x)->transport == TRNSPRT_UDP) || \
+   ((x)->transport == TRNSPRT_QUIC))
 
 struct proxy_info {
   struct hostname host;
@@ -911,14 +912,12 @@ typedef enum {
   EXPIRE_LAST /* not an actual timer, used as a marker only */
 } expire_id;
 
-
 typedef enum {
   TRAILERS_NONE,
   TRAILERS_INITIALIZED,
   TRAILERS_SENDING,
   TRAILERS_DONE
 } trailers_state;
-
 
 /*
  * One instance for each timeout an easy handle can set.
@@ -1295,7 +1294,6 @@ enum dupblob {
 #endif
   BLOB_LAST
 };
-
 
 struct UserDefined {
   FILE *err;         /* the stderr user data goes here */
