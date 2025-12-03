@@ -66,7 +66,7 @@ bool tool_create_output_file(struct OutStruct *outs,
       while(fd == -1 && /* have not successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
-            next_num < 100 /* and we have not reached the retry limit */ ) {
+            next_num < 100 /* and we have not reached the retry limit */) {
         curlx_dyn_reset(&fbuffer);
         if(curlx_dyn_addf(&fbuffer, "%s.%d", fname, next_num))
           return FALSE;
@@ -158,12 +158,12 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
     }
 
     if(complete) {
-      WCHAR prefix[3] = {0};  /* UTF-16 (1-2 WCHARs) + NUL */
+      WCHAR prefix[3] = { 0 }; /* UTF-16 (1-2 WCHARs) + NUL */
 
       if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)outs->utf8seq, -1,
                              prefix, CURL_ARRAYSIZE(prefix))) {
         DEBUGASSERT(prefix[2] == L'\0');
-        if(!WriteConsoleW((HANDLE) fhnd, prefix, prefix[1] ? 2 : 1,
+        if(!WriteConsoleW((HANDLE)fhnd, prefix, prefix[1] ? 2 : 1,
                           &chars_written, NULL)) {
           return CURL_WRITEFUNC_ERROR;
         }

@@ -33,7 +33,6 @@
 /* The maximum line length for an ecoded session ticket */
 #define MAX_SSLS_LINE (64 * 1024)
 
-
 static CURLcode tool_ssls_easy(struct OperationConfig *config,
                                CURLSH *share, CURL **peasy)
 {
@@ -193,8 +192,7 @@ CURLcode tool_ssls_save(struct OperationConfig *config,
   ctx.exported = 0;
   ctx.fp = curlx_fopen(filename, FOPEN_WRITETEXT);
   if(!ctx.fp) {
-    warnf("Warning: Failed to create SSL session file %s",
-          filename);
+    warnf("Warning: Failed to create SSL session file %s", filename);
     goto out;
   }
 

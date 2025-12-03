@@ -80,7 +80,7 @@ static int multiply(curl_off_t *amount, curl_off_t with)
       return 1;
 #else
     sum = *amount * with;
-    if(sum/with != *amount)
+    if(sum / with != *amount)
       return 1; /* did not fit, bail out */
 #endif
   }
@@ -99,7 +99,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
   bool done = FALSE;
   const char *pattern = *patternp;
   const char *opattern = pattern;
-  size_t opos = *posp-1;
+  size_t opos = *posp - 1;
   CURLcode result = CURLE_OK;
   size_t size = 0;
   char **elem = NULL;
@@ -441,7 +441,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
       /* only allow \ to escape known "special letters" */
       if(*pattern == '\\' &&
          (pattern[1] == '{' || pattern[1] == '[' ||
-          pattern[1] == '}' || pattern[1] == ']') ) {
+          pattern[1] == '}' || pattern[1] == ']')) {
 
         /* escape character, skip '\' */
         ++pattern;
@@ -463,7 +463,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
     else {
       if(!*pattern) /* done  */
         break;
-      else if(*pattern =='{') {
+      else if(*pattern == '{') {
         /* process set pattern */
         pattern++;
         pos++;
@@ -500,7 +500,7 @@ CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
   CURLcode res;
 
   memset(glob, 0, sizeof(struct URLGlob));
-  curlx_dyn_init(&glob->buf, 1024*1024);
+  curlx_dyn_init(&glob->buf, 1024 * 1024);
   glob->pattern = curlx_malloc(2 * sizeof(struct URLPattern));
   if(!glob->pattern)
     return CURLE_OUT_OF_MEMORY;
@@ -634,7 +634,7 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
   return CURLE_OK;
 }
 
-#define MAX_OUTPUT_GLOB_LENGTH (1024*1024)
+#define MAX_OUTPUT_GLOB_LENGTH (1024 * 1024)
 
 CURLcode glob_match_url(char **output, const char *filename,
                         struct URLGlob *glob)

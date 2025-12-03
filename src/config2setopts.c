@@ -142,8 +142,7 @@ static CURLcode url_proto_and_rewrite(char **url,
       curl_url_set(uh, CURLUPART_URL, *url,
                    CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(!uc) {
-      uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep,
-                        CURLU_DEFAULT_SCHEME);
+      uc = curl_url_get(uh, CURLUPART_SCHEME, &schemep, CURLU_DEFAULT_SCHEME);
       if(!uc) {
 #ifdef CURL_DISABLE_IPFS
         (void)config;
@@ -339,8 +338,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
     MY_SETOPT_STR(curl, CURLOPT_PROXY_CRLFILE, config->crlfile);
 
   if(config->pinnedpubkey) {
-    MY_SETOPT_STR(curl, CURLOPT_PINNEDPUBLICKEY,
-                  config->pinnedpubkey);
+    MY_SETOPT_STR(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
     if(result)
       warnf("ignoring %s, not supported by libcurl with %s",
             "--pinnedpubkey", ssl_backend());
@@ -417,8 +415,7 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
   {
     long mask =
       (config->proxy_ssl_allow_beast ? CURLSSLOPT_ALLOW_BEAST : 0) |
-      (config->proxy_ssl_auto_client_cert ?
-       CURLSSLOPT_AUTO_CLIENT_CERT : 0) |
+      (config->proxy_ssl_auto_client_cert ? CURLSSLOPT_AUTO_CLIENT_CERT : 0) |
       (config->proxy_native_ca_store ? CURLSSLOPT_NATIVE_CA : 0);
 
     if(mask)
@@ -486,15 +483,13 @@ static CURLcode ssl_setopts(struct OperationConfig *config, CURL *curl)
 }
 
 /* only called for HTTP transfers */
-static CURLcode http_setopts(struct OperationConfig *config,
-                             CURL *curl)
+static CURLcode http_setopts(struct OperationConfig *config, CURL *curl)
 {
   CURLcode result;
   long postRedir = 0;
 
   my_setopt_long(curl, CURLOPT_FOLLOWLOCATION, config->followlocation);
-  my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH,
-                 config->unrestricted_auth);
+  my_setopt_long(curl, CURLOPT_UNRESTRICTED_AUTH, config->unrestricted_auth);
   MY_SETOPT_STR(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
   my_setopt_long(curl, CURLOPT_AUTOREFERER, config->autoreferer);
 
@@ -590,8 +585,7 @@ static void tcp_setopts(struct OperationConfig *config, CURL *curl)
     my_setopt_long(curl, CURLOPT_TCP_FASTOPEN, 1);
 
   if(config->mptcp)
-    my_setopt_ptr(curl, CURLOPT_OPENSOCKETFUNCTION,
-                  tool_socket_open_mptcp_cb);
+    my_setopt_ptr(curl, CURLOPT_OPENSOCKETFUNCTION, tool_socket_open_mptcp_cb);
 
   /* curl 7.17.1 */
   if(!config->nokeepalive) {
@@ -946,8 +940,7 @@ CURLcode config2setopts(struct OperationConfig *config,
   my_setopt_long(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
                  (config->ftp_create_dirs ?
                   CURLFTP_CREATE_DIR_RETRY : CURLFTP_CREATE_DIR_NONE));
-  my_setopt_offt(curl, CURLOPT_MAXFILESIZE_LARGE,
-                 config->max_filesize);
+  my_setopt_offt(curl, CURLOPT_MAXFILESIZE_LARGE, config->max_filesize);
   my_setopt_long(curl, CURLOPT_IPRESOLVE, config->ip_version);
   if(config->socks5_gssapi_nec)
     my_setopt_long(curl, CURLOPT_SOCKS5_GSSAPI_NEC, 1);

@@ -51,8 +51,8 @@ int getfiletime(const char *filename, curl_off_t *stamp)
   if(hfile != INVALID_HANDLE_VALUE) {
     FILETIME ft;
     if(GetFileTime(hfile, NULL, NULL, &ft)) {
-      curl_off_t converted = (curl_off_t)ft.dwLowDateTime
-        | ((curl_off_t)ft.dwHighDateTime) << 32;
+      curl_off_t converted = (curl_off_t)ft.dwLowDateTime |
+        ((curl_off_t)ft.dwHighDateTime) << 32;
 
       if(converted < 116444736000000000)
         warnf("Failed to get filetime: underflow");

@@ -155,7 +155,7 @@ static curl_off_t vms_realfilesize(const char *name,
   char buffer[8192];
   curl_off_t count;
   int ret_stat;
-  FILE * file;
+  FILE *file;
 
   /* !checksrc! disable FOPENMODE 1 */
   file = curlx_fopen(name, "r"); /* VMS */
@@ -180,8 +180,7 @@ static curl_off_t vms_realfilesize(const char *name,
  *  if not to call a routine to get the correct size.
  *
  */
-static curl_off_t VmsSpecialSize(const char *name,
-                                 const struct_stat *stat_buf)
+static curl_off_t VmsSpecialSize(const char *name, const struct_stat *stat_buf)
 {
   switch(stat_buf->st_fab_rfm) {
   case FAB$C_VAR:
@@ -451,7 +450,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
   if(retry) {
     long sleeptime = 0;
     curl_off_t retry_after = 0;
-    static const char * const m[]={
+    static const char * const m[] = {
       NULL,
       "(retrying all errors)",
       ": timeout",
@@ -465,7 +464,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
       if(retry_after) {
         /* store in a 'long', make sure it does not overflow */
-        if(retry_after > LONG_MAX/1000)
+        if(retry_after > LONG_MAX / 1000)
           sleeptime = LONG_MAX;
         else if((retry_after * 1000) > sleeptime)
           sleeptime = (long)retry_after * 1000; /* milliseconds */
@@ -500,10 +499,10 @@ static CURLcode retrycheck(struct OperationConfig *config,
     warnf("Problem %s. "
           "Will retry in %ld%s%.*ld second%s. "
           "%ld retr%s left.",
-          m[retry], sleeptime/1000L,
-          (sleeptime%1000L ? "." : ""),
-          (sleeptime%1000L ? 3 : 0),
-          sleeptime%1000L,
+          m[retry], sleeptime / 1000L,
+          (sleeptime % 1000L ? "." : ""),
+          (sleeptime % 1000L ? 3 : 0),
+          sleeptime % 1000L,
           (sleeptime == 1000L ? "" : "s"),
           per->retry_remaining,
           (per->retry_remaining > 1 ? "ies" : "y"));
@@ -547,8 +546,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         outs->init += outs->bytes;
         outs->bytes = 0;
         config->resume_from = outs->init;
-        curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
-                         config->resume_from);
+        curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE, config->resume_from);
       }
     }
 
@@ -562,8 +560,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
         int rc;
         /* We have written data to an output file, we truncate file */
         fflush(outs->stream);
-        notef("Throwing away %"  CURL_FORMAT_CURL_OFF_T " bytes",
-              outs->bytes);
+        notef("Throwing away %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
         /* truncate file at the position where we started appending */
 #if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
@@ -594,7 +591,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
   }
   return result;
 }
-
 
 /*
  * Call this after a transfer has completed.
@@ -706,7 +702,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
   if(per->retry_remaining &&
      (!config->retry_maxtime_ms ||
       (curlx_timediff_ms(curlx_now(), per->retrystart) <
-       config->retry_maxtime_ms)) ) {
+       config->retry_maxtime_ms))) {
     result = retrycheck(config, per, result, retryp, delay);
     if(!result && *retryp)
       return CURLE_OK; /* retry! */
@@ -735,8 +731,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
           warnf("Failed removing: %s", outs->filename);
       }
       else
-        warnf("Skipping removal; not a regular file: %s",
-              outs->filename);
+        warnf("Skipping removal; not a regular file: %s", outs->filename);
     }
   }
 
@@ -825,8 +820,7 @@ static CURLcode append2query(struct OperationConfig *config,
   CURLU *uh = curl_url();
   if(uh) {
     CURLUcode uerr;
-    uerr = curl_url_set(uh, CURLUPART_URL, per->url,
-                        CURLU_GUESS_SCHEME);
+    uerr = curl_url_set(uh, CURLUPART_URL, per->url, CURLU_GUESS_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
       errorf("(%d) Could not parse the URL, "
@@ -837,8 +831,7 @@ static CURLcode append2query(struct OperationConfig *config,
       char *updated = NULL;
       uerr = curl_url_set(uh, CURLUPART_QUERY, q, CURLU_APPENDQUERY);
       if(!uerr)
-        uerr = curl_url_get(uh, CURLUPART_URL, &updated,
-                            CURLU_GUESS_SCHEME);
+        uerr = curl_url_get(uh, CURLUPART_URL, &updated, CURLU_GUESS_SCHEME);
       if(uerr)
         result = urlerr_cvt(uerr);
       else {
@@ -1333,8 +1326,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
         /*
          * We have specified a file to upload and it is not "-".
          */
-        result = add_file_name_to_url(per->curl, &per->url,
-                                      per->uploadfile);
+        result = add_file_name_to_url(per->curl, &per->url, per->uploadfile);
         if(result)
           return result;
       }
@@ -1370,8 +1362,7 @@ static CURLcode single_transfer(struct OperationConfig *config,
     }
 
     /* explicitly passed to stdout means okaying binary gunk */
-    config->terminal_binary_ok =
-      (per->outfile && !strcmp(per->outfile, "-"));
+    config->terminal_binary_ok = (per->outfile && !strcmp(per->outfile, "-"));
 
     hdrcbdata->honor_cd_filename =
       (config->content_disposition && u->useremote);
@@ -1428,7 +1419,7 @@ static CURLcode add_parallel_transfers(CURLM *multi, CURLSH *share,
     return CURLE_UNKNOWN_OPTION;
   }
 
-  if(nxfers < (curl_off_t)(global->parallel_max*2)) {
+  if(nxfers < (curl_off_t)(global->parallel_max * 2)) {
     bool skipped = FALSE;
     do {
       result = create_transfer(share, addedp, &skipped);
@@ -1513,7 +1504,7 @@ struct parastate {
 
 #if defined(DEBUGBUILD) && defined(USE_LIBUV)
 
-#define DEBUG_UV    0
+#define DEBUG_UV 0
 
 /* object to pass to the callbacks */
 struct datauv {
@@ -1535,7 +1526,7 @@ static void mnotify(CURLM *multi, unsigned int notification,
 static void on_uv_socket(uv_poll_t *req, int status, int events)
 {
   int flags = 0;
-  struct contextuv *c = (struct contextuv *) req->data;
+  struct contextuv *c = (struct contextuv *)req->data;
   (void)status;
   if(events & UV_READABLE)
     flags |= CURL_CSELECT_IN;
@@ -1550,7 +1541,7 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 /* callback from libuv when timeout expires */
 static void on_uv_timeout(uv_timer_t *req)
 {
-  struct datauv *uv = (struct datauv *) req->data;
+  struct datauv *uv = (struct datauv *)req->data;
 #if DEBUG_UV
   curl_mfprintf(tool_stderr, "parallel_event: on_uv_timeout\n");
 #endif
@@ -1599,13 +1590,13 @@ static struct contextuv *create_context(curl_socket_t sockfd,
 
 static void close_cb(uv_handle_t *handle)
 {
-  struct contextuv *c = (struct contextuv *) handle->data;
+  struct contextuv *c = (struct contextuv *)handle->data;
   curlx_free(c);
 }
 
 static void destroy_context(struct contextuv *c)
 {
-  uv_close((uv_handle_t *) &c->poll_handle, close_cb);
+  uv_close((uv_handle_t *)&c->poll_handle, close_cb);
 }
 
 /* callback from libcurl to update socket activity to wait for */
@@ -1625,8 +1616,7 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
   case CURL_POLL_IN:
   case CURL_POLL_OUT:
   case CURL_POLL_INOUT:
-    c = socketp ?
-      (struct contextuv *) socketp : create_context(s, uv);
+    c = socketp ? (struct contextuv *)socketp : create_context(s, uv);
 
     curl_multi_assign(uv->s->multi, s, c);
 
@@ -1753,7 +1743,7 @@ static CURLcode check_finished(struct parastate *s)
       if(retry) {
         ended->added = FALSE; /* add it again */
         /* we delay retries in full integer seconds only */
-        ended->startat = delay ? time(NULL) + delay/1000 : 0;
+        ended->startat = delay ? time(NULL) + delay / 1000 : 0;
       }
       else {
         /* result receives this transfer's error unless the transfer was
@@ -2221,7 +2211,6 @@ static CURLcode share_setup(CURLSH *share)
     result = share_setopt(share, options[i]);
   return result;
 }
-
 
 CURLcode operate(int argc, argv_item_t argv[])
 {

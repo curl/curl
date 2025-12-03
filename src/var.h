@@ -34,8 +34,7 @@ struct tool_var {
 };
 
 ParameterError setvariable(const char *input);
-ParameterError varexpand(const char *line, struct dynbuf *out,
-                         bool *replaced);
+ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced);
 
 /* free everything */
 void varcleanup(void);

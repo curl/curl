@@ -39,17 +39,17 @@
 static char *parse_filename(const char *ptr, size_t len);
 
 #ifdef _WIN32
-#define BOLD "\x1b[1m"
+#define BOLD    "\x1b[1m"
 #define BOLDOFF "\x1b[22m"
 #else
-#define BOLD "\x1b[1m"
+#define BOLD    "\x1b[1m"
 /* Switch off bold by setting "all attributes off" since the explicit
    bold-off code (21) is not supported everywhere - like in the mac
    Terminal. */
 #define BOLDOFF "\x1b[0m"
 /* OSC 8 hyperlink escape sequence */
-#define LINK "\x1b]8;;"
-#define LINKST "\x1b\\"
+#define LINK    "\x1b]8;;"
+#define LINKST  "\x1b\\"
 #define LINKOFF LINK LINKST
 #endif
 
@@ -75,7 +75,6 @@ fail:
   hdrcbdata->headlist = NULL;
   return rc;
 }
-
 
 /*
 ** callback for CURLOPT_HEADERFUNCTION
@@ -131,7 +130,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
-    if((response/100 != 2) && (response/100 != 3))
+    if((response / 100 != 2) && (response / 100 != 3))
       /* only care about etag and content-disposition headers in 2xx and 3xx
          responses */
       ;
@@ -299,7 +298,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 #else
       if(curl_strnequal("Location", ptr, namelen)) {
         write_linked_location(per->curl, &value[1], cb - namelen - 1,
-            outs->stream);
+                              outs->stream);
       }
       else
         fwrite(&value[1], cb - namelen - 1, 1, outs->stream);
@@ -320,7 +319,7 @@ static char *parse_filename(const char *ptr, size_t len)
   char *copy;
   char *p;
   char *q;
-  char  stop = '\0';
+  char stop = '\0';
 
   copy = memdup0(ptr, len);
   if(!copy)
@@ -426,7 +425,7 @@ static void write_linked_location(CURL *curl, const char *location,
   }
 
   /* Strip the trailing end-of-line characters, normally "\r\n" */
-  while(llen && (loc[llen-1] == '\n' || loc[llen-1] == '\r'))
+  while(llen && (loc[llen - 1] == '\n' || loc[llen - 1] == '\r'))
     --llen;
 
   /* CURLU makes it easy to handle the relative URL case */

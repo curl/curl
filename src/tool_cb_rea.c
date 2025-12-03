@@ -137,7 +137,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
   else {
-    rc = read(per->infd, buffer, sz*nmemb);
+    rc = read(per->infd, buffer, sz * nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
         errno = 0;
