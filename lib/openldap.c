@@ -112,7 +112,6 @@ static Curl_recv oldap_recv;
 /*
  * LDAP protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldap = {
   "ldap",                               /* scheme */
   oldap_setup_connection,               /* setup_connection */
@@ -143,7 +142,6 @@ const struct Curl_handler Curl_handler_ldap = {
 /*
  * LDAPS protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldaps = {
   "ldaps",                              /* scheme */
   oldap_setup_connection,               /* setup_connection */
