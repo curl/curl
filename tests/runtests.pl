@@ -1799,9 +1799,11 @@ sub singletest_check {
                     $lim_max = $1;
                 }
             }
-            logmsg "did $allocs allocations, $lim_allocs allowed\n";
+            logmsg "did $allocs allocations, $lim_allocs allowed\n"
+                if($verbose);
 
-            logmsg "allocated $max maximum, $lim_max allowed\n";
+            logmsg "allocated $max maximum, $lim_max allowed\n"
+                if($verbose);
 
             if($allocs > $lim_allocs) {
                 logmsg "\n** TOO MANY ALLOCS\n";
