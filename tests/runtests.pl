@@ -1758,6 +1758,25 @@ sub singletest_check {
             $ok .= "-"; # problem with memory checking
         }
         else {
+            my @memdata = memanalyze("$logdir/$MEMDUMP", 0, 0, 0);
+            my $leak=0;
+            for(@memdata) {
+                if($_ ne "") {
+                    # well it could be other memory problems as well, but
+                    # we call it leak for short here
+                    $leak=1;
+                }
+            }
+            if($leak) {
+                logmsg "\n** MEMORY FAILURE\n";
+                logmsg @memdata;
+                # timestamp test result verification end
+                $timevrfyend{$testnum} = Time::HiRes::time();
+                return -1;
+            }
+            else {
+                $ok .= "m";
+            }
             my @more = memanalyze("$logdir/$MEMDUMP", 1, 0, 0);
             my $allocs = 0;
             my $max = 0;
