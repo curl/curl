@@ -252,7 +252,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
         (form->flags & HTTPPOST_BUFFER)) &&
        !Curl_bufref_ptr(&form->contenttype)) {
       const char *f = Curl_bufref_ptr((form->flags & HTTPPOST_BUFFER) ?
-                                       &form->showfilename : &form->value);
+                                      &form->showfilename : &form->value);
       const char *type = Curl_mime_contenttype(f);
       if(!type)
         type = prevtype;
@@ -276,7 +276,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
     if(!(form->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE |
                         HTTPPOST_PTRCONTENTS | HTTPPOST_PTRBUFFER |
                         HTTPPOST_CALLBACK))) {
-      if(FormInfoCopyField(&form->value, (size_t) form->contentslength))
+      if(FormInfoCopyField(&form->value, (size_t)form->contentslength))
         return CURL_FORMADD_MEMORY;
     }
     post = AddHttpPost(form, post, httppost, last_post);
@@ -315,11 +315,11 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_httppost *newchain = NULL;
   struct curl_httppost *lastnode = NULL;
 
-#define form_ptr_arg(t) (forms ? (t) (void *) avalue : va_arg(params, t))
+#define form_ptr_arg(t) (forms ? (t)(void *)avalue : va_arg(params, t))
 #ifdef HAVE_STDINT_H
-#define form_int_arg(t) (forms ? (t) (uintptr_t) avalue : va_arg(params, t))
+#define form_int_arg(t) (forms ? (t)(uintptr_t)avalue : va_arg(params, t))
 #else
-#define form_int_arg(t) (forms ? (t) (void *) avalue : va_arg(params, t))
+#define form_int_arg(t) (forms ? (t)(void *)avalue : va_arg(params, t))
 #endif
 
   /*
@@ -391,7 +391,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(curr->namelength)
         retval = CURL_FORMADD_OPTION_TWICE;
       else
-        curr->namelength = (size_t) form_int_arg(long);
+        curr->namelength = (size_t)form_int_arg(long);
       break;
 
       /*
@@ -412,7 +412,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
       break;
     case CURLFORM_CONTENTSLENGTH:
-      curr->contentslength = (curl_off_t)(size_t) form_int_arg(long);
+      curr->contentslength = (curl_off_t)(size_t)form_int_arg(long);
       break;
 
     case CURLFORM_CONTENTLEN:
@@ -493,7 +493,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(curr->bufferlength)
         retval = CURL_FORMADD_OPTION_TWICE;
       else
-        curr->bufferlength = (size_t) form_int_arg(long);
+        curr->bufferlength = (size_t)form_int_arg(long);
       break;
 
     case CURLFORM_STREAM:
@@ -793,10 +793,10 @@ CURLcode Curl_getformdata(CURL *data,
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wcast-function-type-strict"
 #endif
-            result = curl_mime_data_cb(part, (curl_off_t) -1,
-                                       (curl_read_callback) fread,
+            result = curl_mime_data_cb(part, (curl_off_t)-1,
+                                       (curl_read_callback)fread,
                                        curlx_fseek,
-                                       NULL, (void *) stdin);
+                                       NULL, (void *)stdin);
 #if defined(__clang__) && __clang_major__ >= 16
 #pragma clang diagnostic pop
 #endif

@@ -102,7 +102,7 @@ const char *Curl_bufref_ptr(const struct bufref *br)
   DEBUGASSERT(br->signature == SIGNATURE);
   DEBUGASSERT(br->ptr || !br->len);
 
-  return (const char *) br->ptr;
+  return (const char *)br->ptr;
 }
 
 /*

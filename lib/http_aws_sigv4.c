@@ -448,7 +448,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+  result = Curl_sha256it(sha_hash, (const unsigned char *)post_data,
                          post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);

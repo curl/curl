@@ -217,7 +217,7 @@ static timediff_t dnscache_prune(struct Curl_hash *hostcache,
   user.oldest_ms = 0;
 
   Curl_hash_clean_with_criterium(hostcache,
-                                 (void *) &user,
+                                 (void *)&user,
                                  dnscache_entry_is_stale);
 
   return user.oldest_ms;

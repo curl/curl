@@ -452,10 +452,10 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     chlg_buf[0].cbBuffer   = 0;
     chlg_buf[1].BufferType = SECBUFFER_PKG_PARAMS;
     chlg_buf[1].pvBuffer   = CURL_UNCONST(request);
-    chlg_buf[1].cbBuffer   = curlx_uztoul(strlen((const char *) request));
+    chlg_buf[1].cbBuffer   = curlx_uztoul(strlen((const char *)request));
     chlg_buf[2].BufferType = SECBUFFER_PKG_PARAMS;
     chlg_buf[2].pvBuffer   = CURL_UNCONST(uripath);
-    chlg_buf[2].cbBuffer   = curlx_uztoul(strlen((const char *) uripath));
+    chlg_buf[2].cbBuffer   = curlx_uztoul(strlen((const char *)uripath));
     chlg_buf[3].BufferType = SECBUFFER_PKG_PARAMS;
     chlg_buf[3].pvBuffer   = NULL;
     chlg_buf[3].cbBuffer   = 0;
@@ -495,7 +495,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
       }
 
       /* Populate our identity domain */
-      if(Curl_override_sspi_http_realm((const char *) digest->input_token,
+      if(Curl_override_sspi_http_realm((const char *)digest->input_token,
                                        &identity)) {
         Curl_sspi_free_identity(&identity);
         curlx_free(output_token);
@@ -552,7 +552,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     chlg_buf[0].cbBuffer   = curlx_uztoul(digest->input_token_len);
     chlg_buf[1].BufferType = SECBUFFER_PKG_PARAMS;
     chlg_buf[1].pvBuffer   = CURL_UNCONST(request);
-    chlg_buf[1].cbBuffer   = curlx_uztoul(strlen((const char *) request));
+    chlg_buf[1].cbBuffer   = curlx_uztoul(strlen((const char *)request));
     chlg_buf[2].BufferType = SECBUFFER_PKG_PARAMS;
     chlg_buf[2].pvBuffer   = NULL;
     chlg_buf[2].cbBuffer   = 0;
@@ -565,7 +565,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     resp_buf.pvBuffer   = output_token;
     resp_buf.cbBuffer   = curlx_uztoul(token_max);
 
-    spn = curlx_convert_UTF8_to_tchar((const char *) uripath);
+    spn = curlx_convert_UTF8_to_tchar((const char *)uripath);
     if(!spn) {
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
 
