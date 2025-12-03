@@ -1757,10 +1757,10 @@ sub singletest_check {
             $ok .= "-"; # problem with memory checking
         }
         else {
-            my @memdata=`$memanalyze -v "$logdir/$MEMDUMP"`;
+            my @memdata=`$memanalyze "$logdir/$MEMDUMP"`;
             my $leak=0;
             for(@memdata) {
-                if($_ ne "" && $_ =~ /^Info:/) {
+                if($_ ne "") {
                     # well it could be other memory problems as well, but
                     # we call it leak for short here
                     $leak=1;
@@ -1776,13 +1776,14 @@ sub singletest_check {
             else {
                 $ok .= "m";
             }
+            my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
             my $allocs = 0;
             my $max = 0;
-            for(@memdata) {
-                if(/^Info: Allocations: (\d+)/) {
+            for(@more) {
+                if(/^Allocations: (\d+)/) {
                     $allocs = $1;
                 }
-                elsif(/^Info: Maximum allocated: (\d+)/) {
+                elsif(/^Maximum allocated: (\d+)/) {
                     $max = $1;
                 }
             }
