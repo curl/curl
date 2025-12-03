@@ -873,13 +873,6 @@ sub checksystemfeatures {
         # Only show if not the default for now
         logmsg "* Jobs: $jobs\n";
     }
-    # Disable memory tracking when using threaded resolver
-    if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
-        logmsg("*\n",
-               "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
-               "*\n");
-        $feature{"TrackMemory"} = 0;
-    }
 
     my $env = sprintf("%s%s%s%s%s",
                       $valgrind?"Valgrind ":"",
