@@ -795,16 +795,16 @@ curl_socket_t sockdaemon(curl_socket_t sock,
         }
       }
     } while(rc && maxretr--);
+
+    if(rc) {
+      logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. "
+             "Error (%d) %s", attempt, totdelay,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+      logmsg("Continuing anyway...");
+    }
 #if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   }
 #endif
-
-  if(rc) {
-    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error (%d) %s",
-           attempt, totdelay,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Continuing anyway...");
-  }
 
   /* When the specified listener port is zero, it is actually a
      request to let the system choose a non-zero available port. */
