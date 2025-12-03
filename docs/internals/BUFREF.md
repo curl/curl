@@ -72,7 +72,15 @@ Returns `CURLE_OK` if successful, else `CURLE_OUT_OF_MEMORY`.
 ## `ptr`
 
 ```c
-const unsigned char *Curl_bufref_ptr(const struct bufref *br);
+const char *Curl_bufref_ptr(const struct bufref *br);
+```
+
+Returns a `const char *` to the referenced buffer.
+
+## `uptr`
+
+```c
+const unsigned char *Curl_bufref_uptr(const struct bufref *br);
 ```
 
 Returns a `const unsigned char *` to the referenced buffer.

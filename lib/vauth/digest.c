@@ -271,7 +271,7 @@ static CURLcode auth_decode_digest_md5_message(const struct bufref *chlgref,
                                                char *alg, size_t alen,
                                                char *qop, size_t qlen)
 {
-  const char *chlg = (const char *)Curl_bufref_ptr(chlgref);
+  const char *chlg = Curl_bufref_ptr(chlgref);
 
   /* Ensure we have a valid challenge message */
   if(!Curl_bufref_len(chlgref))
