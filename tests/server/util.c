@@ -763,35 +763,41 @@ curl_socket_t sockdaemon(curl_socket_t sock,
   (void)unix_socket;
 #endif
 
-  do {
-    attempt++;
-    flag = 1;
-    rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                    (void *)&flag, sizeof(flag));
-    if(rc) {
-      error = SOCKERRNO;
-      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      if(maxretr) {
-        rc = curlx_wait_ms(delay);
-        if(rc) {
-          /* should not happen */
-          error = SOCKERRNO;
-          logmsg("curlx_wait_ms() failed with error (%d) %s",
-                 error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-          sclose(sock);
-          return CURL_SOCKET_BAD;
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
+  if(socket_domain != AF_UNIX) {
+#endif
+    do {
+      attempt++;
+      flag = 1;
+      rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                      (void *)&flag, sizeof(flag));
+      if(rc) {
+        error = SOCKERRNO;
+        logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+        if(maxretr) {
+          rc = curlx_wait_ms(delay);
+          if(rc) {
+            /* should not happen */
+            error = SOCKERRNO;
+            logmsg("curlx_wait_ms() failed with error (%d) %s",
+                   error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+            sclose(sock);
+            return CURL_SOCKET_BAD;
+          }
+          if(got_exit_signal) {
+            logmsg("signalled to die, exiting...");
+            sclose(sock);
+            return CURL_SOCKET_BAD;
+          }
+          totdelay += delay;
+          delay *= 2; /* double the sleep for next attempt */
         }
-        if(got_exit_signal) {
-          logmsg("signalled to die, exiting...");
-          sclose(sock);
-          return CURL_SOCKET_BAD;
-        }
-        totdelay += delay;
-        delay *= 2; /* double the sleep for next attempt */
       }
-    }
-  } while(rc && maxretr--);
+    } while(rc && maxretr--);
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
+  }
+#endif
 
   if(rc) {
     logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error (%d) %s",
