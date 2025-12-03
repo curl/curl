@@ -1746,7 +1746,7 @@ sub singletest_check {
         return -1;
     }
 
-    if($feature{"TrackMemory"}) {
+    if($feature{"TrackMemory"} && $torture) {
         if(! -f "$logdir/$MEMDUMP") {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
