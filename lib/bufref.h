@@ -39,7 +39,8 @@ struct bufref {
 void Curl_bufref_init(struct bufref *br);
 void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
                      void (*dtor)(void *));
-const unsigned char *Curl_bufref_ptr(const struct bufref *br);
+const char *Curl_bufref_ptr(const struct bufref *br);
+const unsigned char *Curl_bufref_uptr(const struct bufref *br);
 size_t Curl_bufref_len(const struct bufref *br);
 CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
 void Curl_bufref_free(struct bufref *br);

@@ -84,13 +84,25 @@ void Curl_bufref_set(struct bufref *br, const void *ptr, size_t len,
 /*
  * Get a pointer to the referenced buffer.
  */
-const unsigned char *Curl_bufref_ptr(const struct bufref *br)
+const unsigned char *Curl_bufref_uptr(const struct bufref *br)
 {
   DEBUGASSERT(br);
   DEBUGASSERT(br->signature == SIGNATURE);
   DEBUGASSERT(br->ptr || !br->len);
 
   return br->ptr;
+}
+
+/*
+ * Get a pointer to the referenced string.
+ */
+const char *Curl_bufref_ptr(const struct bufref *br)
+{
+  DEBUGASSERT(br);
+  DEBUGASSERT(br->signature == SIGNATURE);
+  DEBUGASSERT(br->ptr || !br->len);
+
+  return (const char *) br->ptr;
 }
 
 /*

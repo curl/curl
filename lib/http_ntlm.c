@@ -201,7 +201,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
                                                  hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
-      result = curlx_base64_encode(Curl_bufref_ptr(&ntlmmsg),
+      result = curlx_base64_encode(Curl_bufref_uptr(&ntlmmsg),
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         curlx_free(*allocuserpwd);
@@ -219,7 +219,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
                                                  ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
-      result = curlx_base64_encode(Curl_bufref_ptr(&ntlmmsg),
+      result = curlx_base64_encode(Curl_bufref_uptr(&ntlmmsg),
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         curlx_free(*allocuserpwd);

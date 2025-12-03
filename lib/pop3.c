@@ -623,7 +623,7 @@ static CURLcode pop3_perform_auth(struct Curl_easy *data,
   struct pop3_conn *pop3c =
     Curl_conn_meta_get(data->conn, CURL_META_POP3_CONN);
   CURLcode result = CURLE_OK;
-  const char *ir = (const char *)Curl_bufref_ptr(initresp);
+  const char *ir = Curl_bufref_ptr(initresp);
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
@@ -657,8 +657,7 @@ static CURLcode pop3_continue_auth(struct Curl_easy *data,
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
-  return Curl_pp_sendf(data, &pop3c->pp,
-                       "%s", (const char *) Curl_bufref_ptr(resp));
+  return Curl_pp_sendf(data, &pop3c->pp, "%s", Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************

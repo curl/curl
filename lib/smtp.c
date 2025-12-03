@@ -506,7 +506,7 @@ static CURLcode smtp_perform_auth(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct smtp_conn *smtpc =
     Curl_conn_meta_get(data->conn, CURL_META_SMTP_CONN);
-  const char *ir = (const char *)Curl_bufref_ptr(initresp);
+  const char *ir = Curl_bufref_ptr(initresp);
 
   if(!smtpc)
     return CURLE_FAILED_INIT;
@@ -539,8 +539,7 @@ static CURLcode smtp_continue_auth(struct Curl_easy *data,
   (void)mech;
   if(!smtpc)
     return CURLE_FAILED_INIT;
-  return Curl_pp_sendf(data, &smtpc->pp,
-                       "%s", (const char *)Curl_bufref_ptr(resp));
+  return Curl_pp_sendf(data, &smtpc->pp, "%s", Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************

@@ -636,7 +636,7 @@ static CURLcode imap_perform_authenticate(struct Curl_easy *data,
   struct imap_conn *imapc =
     Curl_conn_meta_get(data->conn, CURL_META_IMAP_CONN);
   CURLcode result = CURLE_OK;
-  const char *ir = (const char *)Curl_bufref_ptr(initresp);
+  const char *ir = Curl_bufref_ptr(initresp);
 
   if(!imapc)
     return CURLE_FAILED_INIT;
@@ -668,8 +668,7 @@ static CURLcode imap_continue_authenticate(struct Curl_easy *data,
   (void)mech;
   if(!imapc)
     return CURLE_FAILED_INIT;
-  return Curl_pp_sendf(data, &imapc->pp,
-                       "%s", (const char *)Curl_bufref_ptr(resp));
+  return Curl_pp_sendf(data, &imapc->pp, "%s", Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************
