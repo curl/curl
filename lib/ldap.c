@@ -89,6 +89,7 @@
 #include "progress.h"
 #include "transfer.h"
 #include "curlx/strparse.h"
+#include "bufref.h"
 #include "curl_ldap.h"
 #include "curlx/multibyte.h"
 #include "curlx/base64.h"
@@ -338,10 +339,10 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
   *done = TRUE; /* unconditionally */
   infof(data, "LDAP local: LDAP Vendor = %s ; LDAP Version = %d",
         LDAP_VENDOR_NAME, LDAP_VENDOR_VERSION);
-  infof(data, "LDAP local: %s", data->state.url);
+  infof(data, "LDAP local: %s", Curl_bufref_ptr(&data->state.url));
 
 #ifdef HAVE_LDAP_URL_PARSE
-  rc = ldap_url_parse(data->state.url, &ludp);
+  rc = ldap_url_parse(Curl_bufref_ptr(&data->state.url), &ludp);
 #else
   rc = ldap_url_parse_low(data, conn, &ludp);
 #endif

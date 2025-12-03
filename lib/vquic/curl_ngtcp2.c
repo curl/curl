@@ -61,6 +61,7 @@
 #include "../select.h"
 #include "../curlx/inet_pton.h"
 #include "../transfer.h"
+#include "../bufref.h"
 #include "vquic.h"
 #include "vquic_int.h"
 #include "vquic-tls.h"
@@ -1631,7 +1632,7 @@ static CURLcode h3_stream_open(struct Curl_cfilter *cf,
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRId64 "] OPENED stream for %s",
-          stream->id, data->state.url);
+          stream->id, Curl_bufref_ptr(&data->state.url));
     for(i = 0; i < nheader; ++i) {
       infof(data, "[HTTP/3] [%" PRId64 "] [%.*s: %.*s]", stream->id,
             (int)nva[i].namelen, nva[i].name,

@@ -33,6 +33,7 @@
 #include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
+#include "bufref.h"
 #include "curlx/warnless.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
@@ -233,7 +234,7 @@ static CURLcode rtmp_setup_connection(struct Curl_easy *data,
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if(!RTMP_SetupURL(r, data->state.url))
+  if(!RTMP_SetupURL(r, CURL_UNCONST(Curl_bufref_ptr(&data->state.url))))
     /* rtmp_conn_dtor() performs the cleanup */
     return CURLE_URL_MALFORMAT;
   return CURLE_OK;

@@ -46,6 +46,7 @@
 #include "curl_quiche.h"
 #include "../transfer.h"
 #include "../url.h"
+#include "../bufref.h"
 #include "../curlx/inet_pton.h"
 #include "../curlx/warnless.h"
 #include "../vtls/openssl.h"
@@ -1023,8 +1024,8 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
       goto out;
     }
     else {
-      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRId64,
-                  data->state.url, rv);
+      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRIu64,
+                  Curl_bufref_ptr(&data->state.url), rv);
     }
     result = CURLE_SEND_ERROR;
     goto out;
@@ -1038,7 +1039,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRIu64 "] OPENED stream for %s",
-          stream->id, data->state.url);
+          stream->id, Curl_bufref_ptr(&data->state.url));
     for(i = 0; i < nheader; ++i) {
       infof(data, "[HTTP/3] [%" PRIu64 "] [%.*s: %.*s]", stream->id,
             (int)nva[i].name_len, nva[i].name,

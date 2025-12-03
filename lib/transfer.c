@@ -79,6 +79,7 @@
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
+#include "bufref.h"
 #include "curlx/warnless.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
@@ -484,13 +485,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
   }
 
-  /* since the URL may have been redirected in a previous use of this handle */
-  if(data->state.url_alloc) {
-    Curl_safefree(data->state.url);
-    data->state.url_alloc = FALSE;
-  }
-
-  data->state.url = data->set.str[STRING_SET_URL];
+  Curl_bufref_set(&data->state.url, data->set.str[STRING_SET_URL], 0, NULL);
 
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
@@ -676,7 +671,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     }
     infof(data, "Connection died, retrying a fresh connect (retry count: %d)",
           data->state.retrycount);
-    *url = curlx_strdup(data->state.url);
+    *url = curlx_strdup(Curl_bufref_ptr(&data->state.url));
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 

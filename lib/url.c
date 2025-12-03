@@ -73,6 +73,7 @@
 #include "netrc.h"
 #include "formdata.h"
 #include "mime.h"
+#include "bufref.h"
 #include "vtls/vtls.h"
 #include "hostip.h"
 #include "transfer.h"
@@ -184,11 +185,7 @@ void Curl_freeset(struct Curl_easy *data)
     data->state.referer_alloc = FALSE;
   }
   data->state.referer = NULL;
-  if(data->state.url_alloc) {
-    Curl_safefree(data->state.url);
-    data->state.url_alloc = FALSE;
-  }
-  data->state.url = NULL;
+  Curl_bufref_free(&data->state.url);
 
   Curl_mime_cleanpart(&data->set.mimepost);
 
@@ -516,6 +513,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   Curl_hash_init(&data->meta_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, easy_meta_freeentry);
   curlx_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
+  Curl_bufref_init(&data->state.url);
   Curl_req_init(&data->req);
   Curl_initinfo(data);
 #ifndef CURL_DISABLE_HTTP
@@ -1769,22 +1767,19 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   if(data->set.str[STRING_DEFAULT_PROTOCOL] &&
-     !Curl_is_absolute_url(data->state.url, NULL, 0, TRUE)) {
+     !Curl_is_absolute_url(Curl_bufref_ptr(&data->state.url), NULL, 0, TRUE)) {
     char *url = curl_maprintf("%s://%s",
                               data->set.str[STRING_DEFAULT_PROTOCOL],
-                              data->state.url);
+                              Curl_bufref_ptr(&data->state.url));
     if(!url)
       return CURLE_OUT_OF_MEMORY;
-    if(data->state.url_alloc)
-      curlx_free(data->state.url);
-    data->state.url = url;
-    data->state.url_alloc = TRUE;
+    Curl_bufref_set(&data->state.url, url, 0, curl_free);
   }
 
   if(!use_set_uh) {
     char *newurl;
-    uc = curl_url_set(uh, CURLUPART_URL, data->state.url, (unsigned int)
-                      (CURLU_GUESS_SCHEME |
+    uc = curl_url_set(uh, CURLUPART_URL, Curl_bufref_ptr(&data->state.url),
+                      (unsigned int) (CURLU_GUESS_SCHEME |
                        CURLU_NON_SUPPORT_SCHEME |
                        (data->set.disallow_username_in_url ?
                         CURLU_DISALLOW_USER : 0) |
@@ -1798,10 +1793,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
     uc = curl_url_get(uh, CURLUPART_URL, &newurl, 0);
     if(uc)
       return Curl_uc_to_curlcode(uc);
-    if(data->state.url_alloc)
-      curlx_free(data->state.url);
-    data->state.url = newurl;
-    data->state.url_alloc = TRUE;
+    Curl_bufref_set(&data->state.url, newurl, 0, curl_free);
   }
 
   uc = curl_url_get(uh, CURLUPART_SCHEME, &data->state.up.scheme, 0);
@@ -1855,8 +1847,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
       uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
       if(uc)
         return Curl_uc_to_curlcode(uc);
-      if(data->state.url_alloc)
-        Curl_safefree(data->state.url);
+      Curl_bufref_free(&data->state.url);
       /* after update, get the updated version */
       uc = curl_url_get(uh, CURLUPART_URL, &url, 0);
       if(uc)
@@ -1866,10 +1857,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
         curlx_free(url);
         return Curl_uc_to_curlcode(uc);
       }
-      data->state.url = url;
-      data->state.url_alloc = TRUE;
-      infof(data, "Switched from HTTP to HTTPS due to HSTS => %s",
-            data->state.url);
+      Curl_bufref_set(&data->state.url, url, 0, curl_free);
+      infof(data, "Switched from HTTP to HTTPS due to HSTS => %s", url);
     }
   }
 #endif
@@ -3396,7 +3385,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   /*************************************************************
    * Check input data
    *************************************************************/
-  if(!data->state.url) {
+  if(!Curl_bufref_ptr(&data->state.url)) {
     result = CURLE_URL_MALFORMAT;
     goto out;
   }

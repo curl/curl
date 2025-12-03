@@ -40,6 +40,7 @@
 #include "rename.h"
 #include "strdup.h"
 #include "llist.h"
+#include "bufref.h"
 #include "curlx/strparse.h"
 
 static void strstore(char **str, const char *newstr, size_t len);
@@ -1622,7 +1623,7 @@ void Curl_flush_cookies(struct Curl_easy *data, bool cleanup)
      set), as otherwise the cookies were not completely initialized and there
      might be cookie files that were not loaded so saving the file is the wrong
      thing. */
-  if(data->set.str[STRING_COOKIEJAR] && data->state.url) {
+  if(data->set.str[STRING_COOKIEJAR] && Curl_bufref_ptr(&data->state.url)) {
     /* if we have a destination file for all the cookies to get dumped to */
     CURLcode result = cookie_output(data, data->cookies,
                                     data->set.str[STRING_COOKIEJAR]);
