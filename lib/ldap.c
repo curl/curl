@@ -173,7 +173,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done);
 /*
  * LDAP protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldap = {
   "ldap",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
@@ -203,7 +202,6 @@ const struct Curl_handler Curl_handler_ldap = {
 /*
  * LDAPS protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldaps = {
   "ldaps",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
