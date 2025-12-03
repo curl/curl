@@ -75,7 +75,7 @@ int struplocompare(const char *p1, const char *p2)
 /* Indirect version to use as qsort callback. */
 int struplocompare4sort(const void *p1, const void *p2)
 {
-  return struplocompare(* (char * const *) p1, * (char * const *) p2);
+  return struplocompare(*(char * const *)p1, *(char * const *)p2);
 }
 
 #ifdef USE_TOOL_FTRUNCATE

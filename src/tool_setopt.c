@@ -36,9 +36,9 @@
 /* For bit masks, put combinations first, then single bits, */
 /* and finally any "NONE" value. */
 
-#define NV(e) {#e, e}
-#define NV1(e, v) {#e, (v)}
-#define NVEND {NULL, 0}         /* sentinel to mark end of list */
+#define NV(e)     { #e, e }
+#define NV1(e, v) { #e, (v) }
+#define NVEND     { NULL, 0 }         /* sentinel to mark end of list */
 
 const struct NameValue setopt_nv_CURLPROXY[] = {
   NV(CURLPROXY_HTTP),
@@ -101,7 +101,7 @@ const struct NameValue setopt_nv_CURL_SSLVERSION[] = {
 };
 
 const struct NameValue setopt_nv_CURL_SSLVERSION_MAX[] = {
-  {"", CURL_SSLVERSION_MAX_NONE},
+  { "", CURL_SSLVERSION_MAX_NONE },
   NV(CURL_SSLVERSION_MAX_DEFAULT),
   NV(CURL_SSLVERSION_MAX_TLSv1_0),
   NV(CURL_SSLVERSION_MAX_TLSv1_1),
@@ -174,7 +174,7 @@ static const struct NameValue setopt_nv_CURLNONZERODEFAULTS[] = {
 
 /* Escape string to C string syntax. Return NULL if out of memory. */
 #define MAX_STRING_LENGTH_OUTPUT 2000
-#define ZERO_TERMINATED -1
+#define ZERO_TERMINATED          -1
 
 static char *c_escape(const char *str, curl_off_t len)
 {
@@ -216,7 +216,7 @@ static char *c_escape(const char *str, curl_off_t len)
                                 /* Octal escape to avoid >2 digit hex. */
                                 (len > 1 && ISXDIGIT(s[1])) ?
                                   "\\%03o" : "\\x%02x",
-                                (unsigned int) *(const unsigned char *) s);
+                                (unsigned int)*(const unsigned char *)s);
       }
     }
   }
@@ -337,9 +337,9 @@ CURLcode tool_setopt_bitmask(CURL *curl, const char *name, CURLoption tag,
     curl_msnprintf(preamble, sizeof(preamble),
                    "curl_easy_setopt(hnd, %s, ", name);
     for(nv = nvlist; nv->name; nv++) {
-      if((nv->value & ~ rest) == 0) {
+      if((nv->value & ~rest) == 0) {
         /* all value flags contained in rest */
-        rest &= ~ nv->value;    /* remove bits handled here */
+        rest &= ~nv->value;    /* remove bits handled here */
         ret = easysrc_addf(&easysrc_code, "%s(long)%s%s",
                            preamble, nv->name, rest ? " |" : ");");
         if(!rest || ret)
@@ -425,8 +425,7 @@ static CURLcode libcurl_generate_mime_part(CURL *curl,
                          mimeno, submimeno);
       if(!ret)
         /* Avoid freeing in CLEAN. */
-        ret = easysrc_addf(&easysrc_code,
-                           "mime%d = NULL;", submimeno);
+        ret = easysrc_addf(&easysrc_code, "mime%d = NULL;", submimeno);
     }
     break;
 
