@@ -102,6 +102,7 @@ use valgrind;  # valgrind report parser
 use globalconfig;
 use runner;
 use testutil;
+use memanalyzelow;
 
 my %custom_skip_reasons;
 
@@ -1757,7 +1758,7 @@ sub singletest_check {
             $ok .= "-"; # problem with memory checking
         }
         else {
-            my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
+            my @more = memanalyze("$logdir/$MEMDUMP", 1, 0, 0);
             my $allocs = 0;
             my $max = 0;
             for(@more) {
