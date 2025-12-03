@@ -148,7 +148,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_REFERER:
     /* Return the referrer header for this request, or NULL if unset */
-    *param_charp = data->state.referer;
+    *param_charp = Curl_bufref_ptr(&data->state.referer);
     break;
   case CURLINFO_PRIMARY_IP:
     /* Return the ip address of the most recent (primary) connection */

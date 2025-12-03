@@ -180,11 +180,7 @@ void Curl_freeset(struct Curl_easy *data)
     Curl_safefree(data->set.blobs[j]);
   }
 
-  if(data->state.referer_alloc) {
-    Curl_safefree(data->state.referer);
-    data->state.referer_alloc = FALSE;
-  }
-  data->state.referer = NULL;
+  Curl_bufref_free(&data->state.referer);
   Curl_bufref_free(&data->state.url);
 
   Curl_mime_cleanpart(&data->set.mimepost);
@@ -271,11 +267,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.first_host);
   Curl_ssl_free_certinfo(data);
 
-  if(data->state.referer_alloc) {
-    Curl_safefree(data->state.referer);
-    data->state.referer_alloc = FALSE;
-  }
-  data->state.referer = NULL;
+  Curl_bufref_free(&data->state.referer);
 
   up_free(data);
   curlx_dyn_free(&data->state.headerb);
@@ -514,6 +506,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
                  Curl_hash_str, curlx_str_key_compare, easy_meta_freeentry);
   curlx_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
   Curl_bufref_init(&data->state.url);
+  Curl_bufref_init(&data->state.referer);
   Curl_req_init(&data->req);
   Curl_initinfo(data);
 #ifndef CURL_DISABLE_HTTP
