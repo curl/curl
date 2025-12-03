@@ -377,16 +377,29 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     passwd = conn->passwd;
   }
 
-#ifdef LDAP_OPT_NETWORK_TIMEOUT
-  ldap_set_option(NULL, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
+#ifdef USE_WIN32_LDAP
+  if(ldap_ssl)
+    server = ldap_sslinit(host, (curl_ldap_num_t)ipquad.remote_port, 1);
+  else
+#else
+    server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
 #endif
-  ldap_set_option(NULL, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
+  if(!server) {
+    failf(data, "LDAP: cannot setup connect to %s:%u",
+          conn->host.dispname, ipquad.remote_port);
+    result = CURLE_COULDNT_CONNECT;
+    goto quit;
+  }
+
+#ifdef LDAP_OPT_NETWORK_TIMEOUT
+  ldap_set_option(server, LDAP_OPT_NETWORK_TIMEOUT, &ldap_timeout);
+#endif
+  ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
 
   if(ldap_ssl) {
 #ifdef HAVE_LDAP_SSL
 #ifdef USE_WIN32_LDAP
     /* Win32 LDAP SDK does not support insecure mode without CA! */
-    server = ldap_sslinit(host, (curl_ldap_num_t)ipquad.remote_port, 1);
     ldap_set_option(server, LDAP_OPT_SSL, LDAP_OPT_ON);
 #else /* !USE_WIN32_LDAP */
     int ldap_option;
@@ -406,7 +419,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         goto quit;
       }
       infof(data, "LDAP local: using PEM CA cert: %s", ldap_ca);
-      rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
+      rc = ldap_set_option(server, LDAP_OPT_X_TLS_CACERTFILE, ldap_ca);
       if(rc != LDAP_SUCCESS) {
         failf(data, "LDAP local: ERROR setting PEM CA cert: %s",
               ldap_err2string(rc));
@@ -418,18 +431,11 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     else
       ldap_option = LDAP_OPT_X_TLS_NEVER;
 
-    rc = ldap_set_option(NULL, LDAP_OPT_X_TLS_REQUIRE_CERT, &ldap_option);
+    rc = ldap_set_option(server, LDAP_OPT_X_TLS_REQUIRE_CERT, &ldap_option);
     if(rc != LDAP_SUCCESS) {
       failf(data, "LDAP local: ERROR setting cert verify mode: %s",
             ldap_err2string(rc));
       result = CURLE_SSL_CERTPROBLEM;
-      goto quit;
-    }
-    server = ldap_init(host, ipquad.remote_port);
-    if(!server) {
-      failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, ipquad.remote_port);
-      result = CURLE_COULDNT_CONNECT;
       goto quit;
     }
     ldap_option = LDAP_OPT_X_TLS_HARD;
@@ -440,16 +446,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       result = CURLE_SSL_CERTPROBLEM;
       goto quit;
     }
-#if 0
-    rc = ldap_start_tls_s(server, NULL, NULL);
-    if(rc != LDAP_SUCCESS) {
-      failf(data, "LDAP local: ERROR starting SSL/TLS mode: %s",
-            ldap_err2string(rc));
-      result = CURLE_SSL_CERTPROBLEM;
-      goto quit;
-    }
-#endif
-
 #else /* !LDAP_OPT_X_TLS */
     (void)ldap_option;
     (void)ldap_ca;
@@ -468,15 +464,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     result = CURLE_NOT_BUILT_IN;
     goto quit;
   }
-  else {
-    server = ldap_init(host, (curl_ldap_num_t)ipquad.remote_port);
-    if(!server) {
-      failf(data, "LDAP local: Cannot connect to %s:%u",
-            conn->host.dispname, ipquad.remote_port);
-      result = CURLE_COULDNT_CONNECT;
-      goto quit;
-    }
-  }
+
 #ifdef USE_WIN32_LDAP
   ldap_set_option(server, LDAP_OPT_PROTOCOL_VERSION, &ldap_proto);
   rc = ldap_win_bind(data, server, user, passwd);
