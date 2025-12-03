@@ -1863,7 +1863,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
     return CURL_SOCKET_BAD;
   }
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   if(socket_domain != AF_UNIX) {
 #endif
     if(setsockopt(msgsock, SOL_SOCKET, SO_KEEPALIVE,
@@ -1874,7 +1874,7 @@ static curl_socket_t accept_connection(curl_socket_t sock)
       sclose(msgsock);
       return CURL_SOCKET_BAD;
     }
-#ifdef _WIN32
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   }
 #endif
 
@@ -2182,7 +2182,7 @@ static int test_sws(int argc, char *argv[])
     goto sws_cleanup;
   }
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   if(socket_domain != AF_UNIX) {
 #endif
     flag = 1;
@@ -2193,7 +2193,7 @@ static int test_sws(int argc, char *argv[])
              error, curlx_strerror(error, errbuf, sizeof(errbuf)));
       goto sws_cleanup;
     }
-#ifdef _WIN32
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   }
 #endif
   if(curlx_nonblock(sock, TRUE)) {
