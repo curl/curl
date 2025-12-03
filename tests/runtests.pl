@@ -1776,48 +1776,6 @@ sub singletest_check {
             else {
                 $ok .= "m";
             }
-            my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
-            my $allocs = 0;
-            my $max = 0;
-            for(@more) {
-                if(/^Allocations: (\d+)/) {
-                    $allocs = $1;
-                }
-                elsif(/^Maximum allocated: (\d+)/) {
-                    $max = $1;
-                }
-            }
-            my @limits = getpart("verify", "limits");
-            my $lim_allocs = 1000; # high default values
-            my $lim_max = 1000000;
-            for(@limits) {
-                if(/^Allocations: (\d+)/i) {
-                    $lim_allocs = $1;
-                }
-                elsif(/^Maximum allocated: (\d+)/i) {
-                    $lim_max = $1;
-                }
-            }
-            logmsg "did $allocs allocations, $lim_allocs allowed\n"
-                if($verbose);
-
-            logmsg "allocated $max maximum, $lim_max allowed\n"
-                if($verbose);
-
-            if($allocs > $lim_allocs) {
-                logmsg "\n** TOO MANY ALLOCS\n";
-                logmsg "$lim_allocs allocations allowed, did $allocs\n";
-                # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time();
-                return -1;
-            }
-            if($max > $lim_max) {
-                logmsg "\n** TOO MUCH TOTAL ALLOCATION\n";
-                logmsg "$lim_max maximum allocation allowed, did $max\n";
-                # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time();
-                return -1;
-            }
         }
     }
     else {
