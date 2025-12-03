@@ -224,10 +224,16 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
       type = TYPE_IPV6;
     }
     else {
-      unsigned int address;
+      char address[16];
       namelen = strlen(name);
       if(curlx_inet_pton(AF_INET, name, &address) == 1)
         type = TYPE_IPV4;
+      /*
+       * name, even if an IPv6 address, does not necessarily have brackets
+       * around it at this point; so check if name could be an IPv6 address.
+       */
+      else if(curlx_inet_pton(AF_INET6, name, &address) == 1)
+        type = TYPE_IPV6;
       else {
         /* ignore trailing dots in the hostname */
         if(name[namelen - 1] == '.')
