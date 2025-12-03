@@ -43,7 +43,7 @@
 
 #define tool_safefree(ptr) \
   do {                     \
-    curlx_free((ptr));     \
+    curlx_free(ptr);       \
     (ptr) = NULL;          \
   } while(0)
 
