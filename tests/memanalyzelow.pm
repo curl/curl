@@ -42,8 +42,8 @@ BEGIN {
     );
 }
 
-my $memsum = 0; # the total number of memory allocated over the lifetime
-my $maxmem = 0; # the high water mark
+my $memsum;
+my $maxmem;
 
 sub newtotal {
     my ($newtot)=@_;
@@ -66,6 +66,9 @@ sub memanalyze {
     my $sends=0;
     my $recvs=0;
     my $sockets=0;
+
+    $memsum = 0; # the total number of memory allocated over the lifetime
+    $maxmem = 0; # the high water mark
 
     open(my $fileh, "<", "$file") or return ();
 
