@@ -55,6 +55,7 @@ int curlx_fseek(void *stream, curl_off_t offset, int whence)
 #define CURLX_FREE(x)   curlx_free(x)
 #endif
 
+#ifdef _UNICODE
 static wchar_t *fn_convert_UTF8_to_wchar(const char *str_utf8)
 {
   wchar_t *str_w = NULL;
@@ -98,6 +99,7 @@ static char *fn_convert_wchar_to_UTF8(const wchar_t *str_w)
 
   return str_utf8;
 }
+#endif
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
