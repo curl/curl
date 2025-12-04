@@ -257,7 +257,8 @@ static void usage_hx_download(const char *msg)
     "  -m number  max parallel downloads\n"
     "  -e         use TLS early data when possible\n"
     "  -f         forbid connection reuse\n"
-    "  -n number  total downloads\n"
+    "  -n number  total downloads\n");
+  curl_mfprintf(stderr,
     "  -A number  abort transfer after `number` response bytes\n"
     "  -F number  fail writing response after `number` response bytes\n"
     "  -M number  max concurrent connections to a host\n"
