@@ -831,7 +831,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size += hostlen;
 
   /* Return the binary blob. */
-  result = Curl_bufref_memdup(out, ntlmbuf, size);
+  result = Curl_bufref_memdup0(out, ntlmbuf, size);
 
 error:
   curlx_free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */

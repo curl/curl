@@ -54,10 +54,11 @@ specified as `NULL`: this is the case when the referenced buffer is static.
 
 if `buffer` is NULL, `length` must be zero.
 
-## `memdup`
+## `memdup0`
 
 ```c
-CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
+CURLcode Curl_bufref_memdup0(struct bufref *br, const void *data,
+                             size_t length);
 ```
 
 Releases the previously referenced buffer, then duplicates the `length`-byte
