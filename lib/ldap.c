@@ -1000,22 +1000,13 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp)
   if(!ludp)
     return;
 
-#ifdef USE_WIN32_LDAP
   curlx_free(ludp->lud_dn);
   curlx_free(ludp->lud_filter);
-#else
-  curlx_free(ludp->lud_dn);
-  curlx_free(ludp->lud_filter);
-#endif
 
   if(ludp->lud_attrs) {
     size_t i;
     for(i = 0; i < ludp->lud_attrs_dups; i++) {
-#ifdef USE_WIN32_LDAP
       curlx_free(ludp->lud_attrs[i]);
-#else
-      curlx_free(ludp->lud_attrs[i]);
-#endif
     }
     curlx_free(ludp->lud_attrs);
   }
