@@ -25,8 +25,11 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_LDAP) && defined(USE_OPENLDAP)
+#ifndef CURL_DISABLE_LDAP
 
+#include "curl_ldap.h"
+
+#ifdef USE_OPENLDAP
 /*
  * Notice that USE_OPENLDAP is only a source code selection switch. When
  * libcurl is built with USE_OPENLDAP defined the libcurl source code that
@@ -46,7 +49,6 @@
 #include "sendf.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
-#include "curl_ldap.h"
 #include "curlx/base64.h"
 #include "cfilters.h"
 #include "connect.h"
@@ -1325,8 +1327,23 @@ static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
 }
 #endif /* USE_SSL */
 
+#endif /* USE_OPENLDAP */
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 void Curl_ldap_version(char *buf, size_t bufsz)
 {
+#ifdef USE_WIN32_LDAP
+  curl_msnprintf(buf, bufsz, "WinLDAP");
+#else
+#if !defined(USE_OPENLDAP) && defined(__APPLE__)
+  static const char *flavor = "/Apple";
+#else
+  static const char *flavor = "";
+#endif
   LDAPAPIInfo api;
   api.ldapai_info_version = LDAP_API_INFO_VERSION;
 
@@ -1336,13 +1353,22 @@ void Curl_ldap_version(char *buf, size_t bufsz)
     unsigned int minor =
       (((unsigned int)api.ldapai_vendor_version - major * 10000)
        - patch) / 100;
-    curl_msnprintf(buf, bufsz, "%s/%u.%u.%u",
-                   api.ldapai_vendor_name, major, minor, patch);
+    curl_msnprintf(buf, bufsz, "%s/%u.%u.%u%s",
+                   api.ldapai_vendor_name, major, minor, patch, flavor);
     ldap_memfree(api.ldapai_vendor_name);
     ber_memvfree((void **)api.ldapai_extensions);
   }
   else
+#ifdef USE_OPENLDAP
     curl_msnprintf(buf, bufsz, "OpenLDAP");
+#else
+    curl_msnprintf(buf, bufsz, "LDAP/1");
+#endif
+#endif /* USE_WIN32_LDAP */
 }
 
-#endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
+
+#endif /* !CURL_DISABLE_LDAP */
