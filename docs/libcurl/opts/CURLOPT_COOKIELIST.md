@@ -77,7 +77,7 @@ NULL
 ~~~c
 /* an inline import of a cookie in Netscape format. */
 
-#define SEP  "\t"  /* Tab separates the fields */
+#define SEP "\t"  /* Tab separates the fields */
 
 int main(void)
 {

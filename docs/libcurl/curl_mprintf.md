@@ -274,7 +274,7 @@ const char *name = "John";
 int main(void)
 {
   curl_mprintf("My name is %s\n", name);
-  curl_mprintf("Pi is almost %f\n", (double)25.0/8);
+  curl_mprintf("Pi is almost %f\n", (double)25.0 / 8);
 }
 ~~~
 
