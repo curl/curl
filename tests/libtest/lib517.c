@@ -78,7 +78,7 @@ static CURLcode test_lib517(const char *URL)
     { "Sat, 15-Apr-17\"21:01:22\"GMT", 1492290082 },
     { "Partyday, 18- April-07 22:50:12", -1 },
     { "Partyday, 18 - Apri-07 22:50:12", -1 },
-    { "Wednes, 1-Januar-2003 00:00:00 GMT", -1 }, /*spellchecker:disable-line*/
+    { "Wednes, 1-Januar-2003 00:00:00 GMT", -1 },
     { "Sat, 15-Apr-17 21:01:22", 1492290082 },
     { "Sat, 15-Apr-17 21:01:22 GMT-2", 1492290082 },
     { "Sat, 15-Apr-17 21:01:22 GMT BLAH", 1492290082 },
