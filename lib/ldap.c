@@ -1029,7 +1029,27 @@ void Curl_ldap_version(char *buf, size_t bufsz)
 #ifdef USE_WIN32_LDAP
   curl_msnprintf(buf, bufsz, "WinLDAP");
 #else
-  curl_msnprintf(buf, bufsz, "LDAP/1");
+#ifdef __APPLE__
+  static const char *flavor = "/Apple";
+#else
+  static const char *flavor = "";
+#endif
+  LDAPAPIInfo api;
+  api.ldapai_info_version = LDAP_API_INFO_VERSION;
+
+  if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
+    unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
+    unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
+    unsigned int minor =
+      (((unsigned int)api.ldapai_vendor_version - major * 10000)
+       - patch) / 100;
+    curl_msnprintf(buf, bufsz, "%s/%u.%u.%u%s",
+                   api.ldapai_vendor_name, major, minor, patch, flavor);
+    ldap_memfree(api.ldapai_vendor_name);
+    ber_memvfree((void **)api.ldapai_extensions);
+  }
+  else
+    curl_msnprintf(buf, bufsz, "LDAP/1");
 #endif
 }
 
