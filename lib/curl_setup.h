@@ -180,7 +180,6 @@
  * AIX 4.3 and newer needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.
  */
-
 #ifdef NEED_THREAD_SAFE
 #  ifndef _THREAD_SAFE
 #  define _THREAD_SAFE
@@ -192,7 +191,6 @@
  * things to appear in the system header files. Unixware needs it
  * to build proper reentrant code. Others may also need it.
  */
-
 #ifdef NEED_REENTRANT
 #  ifndef _REENTRANT
 #  define _REENTRANT
@@ -219,7 +217,6 @@
 /*
  * Disable other protocols when http is the only one desired.
  */
-
 #ifdef HTTP_ONLY
 #  ifndef CURL_DISABLE_DICT
 #  define CURL_DISABLE_DICT
@@ -268,7 +265,6 @@
 /*
  * When http is disabled rtsp is not supported.
  */
-
 #if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
 #  define CURL_DISABLE_RTSP
 #endif
@@ -276,7 +272,6 @@
 /*
  * When HTTP is disabled, disable HTTP-only features
  */
-
 #ifdef CURL_DISABLE_HTTP
 #  define CURL_DISABLE_ALTSVC 1
 #  define CURL_DISABLE_COOKIES 1
@@ -298,7 +293,6 @@
 /*
  * OS/400 setup file includes some system headers.
  */
-
 #ifdef __OS400__
 #  include "setup-os400.h"
 #endif
@@ -306,7 +300,6 @@
 /*
  * VMS setup file includes some system headers.
  */
-
 #ifdef __VMS
 #  include "setup-vms.h"
 #endif
@@ -314,7 +307,6 @@
 /*
  * Windows setup file includes some system headers.
  */
-
 #ifdef _WIN32
 #  include "setup-win32.h"
 #endif
@@ -340,7 +332,6 @@
 #endif
 
 /* based on logic in "curl/mprintf.h" */
-
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
@@ -612,10 +603,10 @@
 #if SIZEOF_LONG > SIZEOF_SIZE_T
 #error "unexpected: 'long' is larger than 'size_t'"
 #endif
+
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */
-
 #ifndef GETHOSTNAME_TYPE_ARG2
 #  ifdef USE_WINSOCK
 #    define GETHOSTNAME_TYPE_ARG2 int
@@ -625,10 +616,9 @@
 #endif
 
 /* Below we define some functions. They should
-
    4. set the SIGALRM signal timeout
    5. set dir/file naming defines
-   */
+ */
 
 #ifdef _WIN32
 
@@ -664,7 +654,6 @@
 /*
  * Mutually exclusive CURLRES_* definitions.
  */
-
 #if defined(USE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
 #elif defined(USE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
@@ -792,7 +781,6 @@
 /*
  * Include macros and defines that should only be processed once.
  */
-
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
 #endif
@@ -800,7 +788,6 @@
 /*
  * Definition of our NOP statement Object-like macro
  */
-
 #ifndef Curl_nop_stmt
 #define Curl_nop_stmt do { } while(0)
 #endif
@@ -808,7 +795,6 @@
 /*
  * Ensure that Winsock and lwIP TCP/IP stacks are not mixed.
  */
-
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || defined(USE_WINSOCK)
 #    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
@@ -818,7 +804,6 @@
 /*
  * shutdown() flags for systems that do not define them
  */
-
 #ifndef SHUT_RD
 #define SHUT_RD 0x00
 #endif
