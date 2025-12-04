@@ -37,23 +37,9 @@
  * are duplicated via strdup and remain in whatever the passed in encoding is,
  * which is assumed to be UTF-8 but may be other encoding. Therefore the
  * significance of the conversion functions is primarily for Unicode builds.
- *
- * Allocated memory should be free'd with curlx_unicodefree().
- *
- * Use system allocators to avoid infinite recursion when called by curl's
- * memory tracker memdebug functions.
  */
 
-#ifdef CURLDEBUG
-#define CURLX_MALLOC(x) malloc(x)
-#define CURLX_FREE(x)   free(x)
-#else
-#define CURLX_MALLOC(x) curlx_malloc(x)
-#define CURLX_FREE(x)   curlx_free(x)
-#endif
-
-/* the purpose of this macro is to free() without being traced by memdebug */
-#define curlx_unicodefree(ptr) CURLX_FREE(ptr)
+#define curlx_unicodefree(ptr) curlx_free(ptr)
 
 #ifdef UNICODE
 
@@ -73,13 +59,8 @@ typedef union {
 
 #else /* !UNICODE */
 
-#ifdef CURLDEBUG
-#define curlx_convert_UTF8_to_tchar(ptr) _strdup(ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) _strdup(ptr)
-#else
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_strdup(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_strdup(ptr)
-#endif
 
 typedef union {
   char                *tchar_ptr;
