@@ -422,4 +422,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
+#undef CURLX_MALLOC
+#undef CURLX_FREE
+
 #endif /* _WIN32 */
