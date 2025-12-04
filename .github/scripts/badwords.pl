@@ -30,7 +30,7 @@ my %wl;
 if($ARGV[0] eq "-w") {
     shift @ARGV;
     my $file = shift @ARGV;
-    open(W, "<$file");
+    open(W, "<$file") or die "Cannot open '$file': $!";
     while(<W>) {
         if(/^#/) {
             # allow #-comments
