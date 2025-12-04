@@ -1493,14 +1493,14 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    uint64_t max_streams = CONN_ATTACHED(cf->conn);
+    uint64_t max_streams = cf->conn->attached_xfers;
     if(!ctx->goaway && ctx->qconn) {
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%u in use)",
-                cf->conn->connection_id, *pres1, CONN_ATTACHED(cf->conn));
+                cf->conn->connection_id, *pres1, cf->conn->attached_xfers);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:
