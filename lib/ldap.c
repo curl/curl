@@ -96,7 +96,7 @@
 #include "connect.h"
 
 #ifdef USE_WIN32_LDAP
-#define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
+#define FREE_ON_WINLDAP(x) curlx_free(x)
 #define curl_ldap_num_t    ULONG
 #else
 #define FREE_ON_WINLDAP(x)
@@ -296,8 +296,8 @@ static ULONG ldap_win_bind(struct Curl_easy *data, LDAP *server,
 
     rc = ldap_simple_bind_s(server, inuser, inpass);
 
-    curlx_unicodefree(inuser);
-    curlx_unicodefree(inpass);
+    curlx_free(inuser);
+    curlx_free(inpass);
   }
 #ifdef USE_WINDOWS_SSPI
   else {
@@ -1000,22 +1000,13 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp)
   if(!ludp)
     return;
 
-#ifdef USE_WIN32_LDAP
-  curlx_unicodefree(ludp->lud_dn);
-  curlx_unicodefree(ludp->lud_filter);
-#else
   curlx_free(ludp->lud_dn);
   curlx_free(ludp->lud_filter);
-#endif
 
   if(ludp->lud_attrs) {
     size_t i;
     for(i = 0; i < ludp->lud_attrs_dups; i++) {
-#ifdef USE_WIN32_LDAP
-      curlx_unicodefree(ludp->lud_attrs[i]);
-#else
       curlx_free(ludp->lud_attrs[i]);
-#endif
     }
     curlx_free(ludp->lud_attrs);
   }

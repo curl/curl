@@ -547,7 +547,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         failf(data, "schannel: Failed to get certificate location"
               " or file for %s",
               data->set.ssl.primary.clientcert);
-        curlx_unicodefree(cert_path);
+        curlx_free(cert_path);
         return result;
       }
     }
@@ -558,7 +558,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
             " for %s",
             blob ? "(memory blob)" : data->set.ssl.primary.clientcert);
       curlx_free(cert_store_path);
-      curlx_unicodefree(cert_path);
+      curlx_free(cert_path);
       if(fInCert)
         curlx_fclose(fInCert);
       return CURLE_SSL_CERTPROBLEM;
@@ -576,7 +576,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
       curlx_free(cert_store_path);
-      curlx_unicodefree(cert_path);
+      curlx_free(cert_path);
       if(fInCert) {
         long cert_tell = 0;
         bool continue_reading = fseek(fInCert, 0, SEEK_END) == 0;
@@ -686,8 +686,8 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
               (path_utf8 ? path_utf8 : "(unknown)"),
               GetLastError());
         curlx_free(cert_store_path);
-        curlx_unicodefree(path_utf8);
-        curlx_unicodefree(cert_path);
+        curlx_free(path_utf8);
+        curlx_free(cert_path);
         return CURLE_SSL_CERTPROBLEM;
       }
       curlx_free(cert_store_path);
@@ -701,7 +701,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                               cert_thumbprint_data,
                               &cert_thumbprint.cbData,
                               NULL, NULL)) {
-        curlx_unicodefree(cert_path);
+        curlx_free(cert_path);
         CertCloseStore(cert_store, 0);
         return CURLE_SSL_CERTPROBLEM;
       }
@@ -710,7 +710,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
         CERT_FIND_HASH, &cert_thumbprint, NULL);
 
-      curlx_unicodefree(cert_path);
+      curlx_free(cert_path);
 
       if(!client_certs[0]) {
         /* CRYPT_E_NOT_FOUND / E_INVALIDARG */
@@ -1485,7 +1485,7 @@ static void schannel_session_free(void *sessionid)
     cred->refcount--;
     if(cred->refcount == 0) {
       Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-      curlx_unicodefree(cred->sni_hostname);
+      curlx_free(cred->sni_hostname);
       if(cred->client_cert_store) {
         CertCloseStore(cred->client_cert_store, 0);
         cred->client_cert_store = NULL;

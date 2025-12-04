@@ -46,14 +46,14 @@ int Curl_rename(const char *oldpath, const char *newpath)
   for(;;) {
     timediff_t diff;
     if(MoveFileEx(tchar_oldpath, tchar_newpath, MOVEFILE_REPLACE_EXISTING)) {
-      curlx_unicodefree(tchar_oldpath);
-      curlx_unicodefree(tchar_newpath);
+      curlx_free(tchar_oldpath);
+      curlx_free(tchar_newpath);
       break;
     }
     diff = curlx_timediff_ms(curlx_now(), start);
     if(diff < 0 || diff > max_wait_ms) {
-      curlx_unicodefree(tchar_oldpath);
-      curlx_unicodefree(tchar_newpath);
+      curlx_free(tchar_oldpath);
+      curlx_free(tchar_newpath);
       return 1;
     }
     Sleep(1);
