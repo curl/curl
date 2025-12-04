@@ -412,6 +412,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
   for(i = 0; !result && (i < (int)numcerts); i++) {
     ASN1_INTEGER *num;
+    const unsigned char *numdata;
     X509 *x = sk_X509_value(sk, (ossl_valsize_t)i);
     EVP_PKEY *pubkey = NULL;
     int j;
@@ -433,10 +434,11 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
       break;
 
     num = X509_get_serialNumber(x);
-    if(num->type == V_ASN1_NEG_INTEGER)
+    if(ASN1_STRING_type(num) == V_ASN1_NEG_INTEGER)
       BIO_puts(mem, "-");
-    for(j = 0; j < num->length; j++)
-      BIO_printf(mem, "%02x", num->data[j]);
+    numdata = ASN1_STRING_get0_data(num);
+    for(j = 0; j < ASN1_STRING_length(num); j++)
+      BIO_printf(mem, "%02x", numdata[j]);
     result = push_certinfo(data, mem, "Serial Number", i);
     if(result)
       break;
@@ -503,8 +505,9 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     }
 
     if(!result && psig) {
-      for(j = 0; j < psig->length; j++)
-        BIO_printf(mem, "%02x:", psig->data[j]);
+      const unsigned char *psigdata = ASN1_STRING_get0_data(psig);
+      for(j = 0; j < ASN1_STRING_length(psig); j++)
+        BIO_printf(mem, "%02x:", psigdata[j]);
       result = push_certinfo(data, mem, "Signature", i);
     }
 
