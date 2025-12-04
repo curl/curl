@@ -10,6 +10,7 @@ Multi: single
 See-also:
   - socks5-hostname
   - socks4a
+Mutexed: proxy socks4 socks4a socks5-hostname
 Example:
   - --socks5 proxy.example:7000 $URL
   - --socks5 localhost/path/unix-domain $URL
