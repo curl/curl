@@ -181,15 +181,15 @@ struct timeval {
  * Function-like macro definition used to close a socket.
  */
 #ifdef HAVE_CLOSESOCKET
-#  define CURL_SCLOSE(x)  closesocket((x))
+#  define CURL_SCLOSE(x)  closesocket(x)
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
-#  define CURL_SCLOSE(x)  CloseSocket((x))
+#  define CURL_SCLOSE(x)  CloseSocket(x)
 #elif defined(MSDOS)  /* Watt-32 */
-#  define CURL_SCLOSE(x)  close_s((x))
+#  define CURL_SCLOSE(x)  close_s(x)
 #elif defined(USE_LWIPSOCK)
-#  define CURL_SCLOSE(x)  lwip_close((x))
+#  define CURL_SCLOSE(x)  lwip_close(x)
 #else
-#  define CURL_SCLOSE(x)  close((x))
+#  define CURL_SCLOSE(x)  close(x)
 #endif
 
 /*
