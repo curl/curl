@@ -22,11 +22,6 @@
  *
  ***************************************************************************/
 
-/*
- * Use system allocators to avoid infinite recursion when called by curl's
- * memory tracker memdebug functions.
- */
-
 #include "../curl_setup.h"
 
 #if defined(_WIN32) && defined(UNICODE)
