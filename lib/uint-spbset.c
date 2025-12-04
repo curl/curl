@@ -61,20 +61,6 @@ uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset)
   return n;
 }
 
-bool Curl_uint32_spbset_empty(struct uint32_spbset *bset)
-{
-  struct uint32_spbset_chunk *chunk;
-  uint32_t i;
-
-  for(chunk = &bset->head; chunk; chunk = chunk->next) {
-    for(i = 0; i < CURL_UINT32_SPBSET_CH_SLOTS; ++i) {
-      if(chunk->slots[i])
-        return FALSE;
-    }
-  }
-  return TRUE;
-}
-
 UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
 {
   struct uint32_spbset_chunk *next, *chunk;
