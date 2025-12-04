@@ -597,7 +597,7 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
     tool_safefree(config->cacert);
     if(mstr)
       config->cacert = curlx_strdup(mstr);
-    curlx_unicodefree(mstr);
+    curlx_free(mstr);
     if(!config->cacert)
       result = CURLE_OUT_OF_MEMORY;
   }

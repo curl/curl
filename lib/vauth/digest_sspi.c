@@ -273,7 +273,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
 
           dup_domain.tchar_ptr = curlx_tcsdup(domain.tchar_ptr);
           if(!dup_domain.tchar_ptr) {
-            curlx_unicodefree(domain.tchar_ptr);
+            curlx_free(domain.tchar_ptr);
             return CURLE_OUT_OF_MEMORY;
           }
 
@@ -282,7 +282,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
           identity->DomainLength = curlx_uztoul(_tcslen(dup_domain.tchar_ptr));
           dup_domain.tchar_ptr = NULL;
 
-          curlx_unicodefree(domain.tchar_ptr);
+          curlx_free(domain.tchar_ptr);
         }
         else {
           /* Unknown specifier, ignore it! */
@@ -579,7 +579,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     digest->http_context = curlx_calloc(1, sizeof(CtxtHandle));
     if(!digest->http_context) {
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
-      curlx_unicodefree(spn);
+      curlx_free(spn);
       Curl_sspi_free_identity(p_identity);
       curlx_free(output_token);
       return CURLE_OUT_OF_MEMORY;
@@ -592,7 +592,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
                                                   &chlg_desc, 0,
                                                   digest->http_context,
                                                   &resp_desc, &attrs, NULL);
-    curlx_unicodefree(spn);
+    curlx_free(spn);
 
     if(status == SEC_I_COMPLETE_NEEDED ||
        status == SEC_I_COMPLETE_AND_CONTINUE)
