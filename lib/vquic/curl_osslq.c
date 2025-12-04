@@ -70,13 +70,13 @@
  * spares. Memory consumption goes down when streams run empty,
  * have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE) / 2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
 #define H3_STREAM_RECV_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 #define H3_STREAM_SEND_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 
 #if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
 typedef uint32_t sslerr_t;
@@ -87,8 +87,7 @@ typedef unsigned long sslerr_t;
 
 /* How to access `call_data` from a cf_osslq filter */
 #undef CF_CTX_CALL_DATA
-#define CF_CTX_CALL_DATA(cf)  \
-  ((struct cf_osslq_ctx *)(cf)->ctx)->call_data
+#define CF_CTX_CALL_DATA(cf) ((struct cf_osslq_ctx *)(cf)->ctx)->call_data
 
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
                                     struct Curl_easy *data);
@@ -954,7 +953,7 @@ static int cb_h3_reset_stream(nghttp3_conn *conn, int64_t stream_id,
   (void)conn;
 
   if(stream && stream->s.ssl) {
-    SSL_STREAM_RESET_ARGS args = {0};
+    SSL_STREAM_RESET_ARGS args = { 0 };
     args.quic_error_code = app_error_code;
     rv = !SSL_stream_reset(stream->s.ssl, &args, sizeof(args));
     CURL_TRC_CF(data, cf, "[%" PRId64 "] reset -> %d", stream_id, rv);
