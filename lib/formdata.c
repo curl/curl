@@ -521,7 +521,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
           if(avalue) {
             form = NewFormInfo();
             if(!form || Curl_bufref_memdup0(&form->contenttype, avalue,
-                                           strlen(avalue))) {
+                                            strlen(avalue))) {
               curlx_free(form);
               retval = CURL_FORMADD_MEMORY;
             }
