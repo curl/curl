@@ -92,8 +92,13 @@ sub file {
                 my $c = length($p)+1;
 
                 my $ch = "$f:$l:$w";
-                my $ch_anyline = "$f:*:$w";
-                if($wl{$ch} || $wl{$ch_anyline}) {
+                if($wl{$ch}) {
+                    # whitelisted
+                    print STDERR "$ch found but whitelisted\n";
+                    next;
+                }
+                my $ch = "$f:*:$w";
+                if($wl{$ch}) {
                     # whitelisted
                     print STDERR "$ch found but whitelisted\n";
                     next;
