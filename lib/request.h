@@ -48,7 +48,6 @@ enum upgrade101 {
   UPGR101_RECEIVED            /* 101 response received */
 };
 
-
 /*
  * Request specific data in the easy handle (Curl_easy). Previously,
  * these members were on the connectdata struct but since a conn struct may

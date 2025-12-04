@@ -44,8 +44,8 @@ static char *max5data(curl_off_t bytes, char *max5)
     if(nbytes < 100) {
       /* display with a decimal */
       curl_msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
-                     CURL_FORMAT_CURL_OFF_T "%c", bytes/1024,
-                     (bytes%1024) / (1024/10), unit[k]);
+                     CURL_FORMAT_CURL_OFF_T "%c", bytes / 1024,
+                     (bytes % 1024) / (1024 / 10), unit[k]);
       break;
     }
     else if(nbytes < 10000) {
@@ -143,9 +143,7 @@ static void add_offt(curl_off_t *val, curl_off_t add)
   |DL% UL%  Dled  Uled  Xfers  Live Total     Current  Left    Speed
   |  6 --   9.9G     0     2     2   0:00:40  0:00:02  0:00:37 4087M
 */
-bool progress_meter(CURLM *multi,
-                    struct curltime *start,
-                    bool final)
+bool progress_meter(CURLM *multi, struct curltime *start, bool final)
 {
   static struct curltime stamp;
   static bool header = FALSE;
@@ -169,9 +167,9 @@ bool progress_meter(CURLM *multi,
     char time_total[10];
     char time_spent[10];
     char buffer[3][6];
-    curl_off_t spent = curlx_timediff_ms(now, *start)/1000;
-    char dlpercen[4]="--";
-    char ulpercen[4]="--";
+    curl_off_t spent = curlx_timediff_ms(now, *start) / 1000;
+    char dlpercen[4] = "--";
+    char ulpercen[4] = "--";
     struct per_transfer *per;
     curl_off_t all_dlnow = 0;
     curl_off_t all_ulnow = 0;
@@ -207,15 +205,15 @@ bool progress_meter(CURLM *multi,
     }
     if(dlknown && all_dltotal)
       curl_msnprintf(dlpercen, sizeof(dlpercen), "%3" CURL_FORMAT_CURL_OFF_T,
-                     all_dlnow < (CURL_OFF_T_MAX/100) ?
+                     all_dlnow < (CURL_OFF_T_MAX / 100) ?
                      (all_dlnow * 100 / all_dltotal) :
-                     (all_dlnow / (all_dltotal/100)));
+                     (all_dlnow / (all_dltotal / 100)));
 
     if(ulknown && all_ultotal)
       curl_msnprintf(ulpercen, sizeof(ulpercen), "%3" CURL_FORMAT_CURL_OFF_T,
-                     all_ulnow < (CURL_OFF_T_MAX/100) ?
+                     all_ulnow < (CURL_OFF_T_MAX / 100) ?
                      (all_ulnow * 100 / all_ultotal) :
-                     (all_ulnow / (all_ultotal/100)));
+                     (all_ulnow / (all_ultotal / 100)));
 
     /* get the transfer speed, the higher of the two */
 
@@ -248,8 +246,8 @@ bool progress_meter(CURLM *multi,
       }
       if(!deltams) /* no division by zero please */
         deltams++;
-      dls = (curl_off_t)((double)dl / ((double)deltams/1000.0));
-      uls = (curl_off_t)((double)ul / ((double)deltams/1000.0));
+      dls = (curl_off_t)((double)dl / ((double)deltams / 1000.0));
+      uls = (curl_off_t)((double)ul / ((double)deltams / 1000.0));
       speed = dls > uls ? dls : uls;
     }
 
@@ -291,7 +289,7 @@ bool progress_meter(CURLM *multi,
                   time_spent,
                   time_left,
                   max5data(speed, buffer[2]), /* speed */
-                  final ? "\n" :"");
+                  final ? "\n" : "");
     return TRUE;
   }
   return FALSE;

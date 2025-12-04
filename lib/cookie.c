@@ -661,13 +661,12 @@ parse_cookie_header(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static CURLcode
-parse_netscape(struct Cookie *co,
-               struct CookieInfo *ci,
-               bool *okay,
-               const char *lineptr,
-               bool secure)  /* TRUE if connection is over secure
-                                origin */
+static CURLcode parse_netscape(struct Cookie *co,
+                               struct CookieInfo *ci,
+                               bool *okay,
+                               const char *lineptr,
+                               bool secure) /* TRUE if connection is over
+                                               secure origin */
 {
   /*
    * This line is NOT an HTTP header style line, we do offer support for
@@ -1247,7 +1246,7 @@ static int cookie_sort_ct(const void *p1, const void *p2)
 
 bool Curl_secure_context(struct connectdata *conn, const char *host)
 {
-  return conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
+  return conn->handler->protocol & (CURLPROTO_HTTPS | CURLPROTO_WSS) ||
     curl_strequal("localhost", host) ||
     !strcmp(host, "127.0.0.1") ||
     !strcmp(host, "::1");

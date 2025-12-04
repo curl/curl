@@ -60,8 +60,8 @@ enum found_state {
 #define FOUND_LOGIN    1
 #define FOUND_PASSWORD 2
 
-#define MAX_NETRC_LINE 16384
-#define MAX_NETRC_FILE (128*1024)
+#define MAX_NETRC_LINE  16384
+#define MAX_NETRC_FILE  (128 * 1024)
 #define MAX_NETRC_TOKEN 4096
 
 /* convert a dynbuf call CURLcode error to a NETRCcode error */
@@ -318,7 +318,7 @@ static NETRCcode parsenetrc(struct store_netrc *store,
           if(!specific_login)
             Curl_safefree(login);
         }
-        if((found == (FOUND_PASSWORD|FOUND_LOGIN)) && our_login) {
+        if((found == (FOUND_PASSWORD | FOUND_LOGIN)) && our_login) {
           done = TRUE;
           break;
         }
@@ -412,8 +412,8 @@ NETRCcode Curl_parsenetrc(struct store_netrc *store, const char *host,
       }
       else {
         struct passwd pw, *pw_res;
-        if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res)
-           && pw_res) {
+        if(!getpwuid_r(geteuid(), &pw, pwbuf, sizeof(pwbuf), &pw_res) &&
+           pw_res) {
           home = pw.pw_dir;
         }
 #elif defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)

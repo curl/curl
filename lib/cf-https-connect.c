@@ -244,7 +244,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   return result;
 }
 
-
 static bool time_to_start_next(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                size_t idx, struct curltime now)

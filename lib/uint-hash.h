@@ -45,7 +45,6 @@ struct uint_hash {
 #endif
 };
 
-
 void Curl_uint32_hash_init(struct uint_hash *h,
                            uint32_t slots,
                            Curl_uint32_hash_dtor *dtor);
@@ -56,7 +55,6 @@ bool Curl_uint32_hash_set(struct uint_hash *h, uint32_t id, void *value);
 bool Curl_uint32_hash_remove(struct uint_hash *h, uint32_t id);
 void *Curl_uint32_hash_get(struct uint_hash *h, uint32_t id);
 uint32_t Curl_uint32_hash_count(struct uint_hash *h);
-
 
 typedef bool Curl_uint32_hash_visit_cb(uint32_t id, void *value,
                                        void *user_data);

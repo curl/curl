@@ -34,8 +34,7 @@
 #include "hsts.h"
 #include "url.h"
 
-CURLSH *
-curl_share_init(void)
+CURLSH *curl_share_init(void)
 {
   struct Curl_share *share = curlx_calloc(1, sizeof(struct Curl_share));
   if(share) {
@@ -60,8 +59,7 @@ curl_share_init(void)
 }
 
 #undef curl_share_setopt
-CURLSHcode
-curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
+CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 {
   va_list param;
   int type;
@@ -224,8 +222,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   return res;
 }
 
-CURLSHcode
-curl_share_cleanup(CURLSH *sh)
+CURLSHcode curl_share_cleanup(CURLSH *sh)
 {
   struct Curl_share *share = sh;
   if(!GOOD_SHARE_HANDLE(share))
@@ -273,10 +270,8 @@ curl_share_cleanup(CURLSH *sh)
   return CURLSHE_OK;
 }
 
-
-CURLSHcode
-Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
-                curl_lock_access accesstype)
+CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
+                           curl_lock_access accesstype)
 {
   struct Curl_share *share = data->share;
 
@@ -292,8 +287,7 @@ Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
   return CURLSHE_OK;
 }
 
-CURLSHcode
-Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
+CURLSHcode Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 {
   struct Curl_share *share = data->share;
 
@@ -302,7 +296,7 @@ Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 
   if(share->specifier & (unsigned int)(1 << type)) {
     if(share->unlockfunc) /* only call this if set! */
-      share->unlockfunc (data, type, share->clientdata);
+      share->unlockfunc(data, type, share->clientdata);
   }
 
   return CURLSHE_OK;

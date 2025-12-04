@@ -93,5 +93,4 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 
   return 0;
 #endif
-
 }

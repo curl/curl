@@ -112,7 +112,6 @@ static Curl_recv oldap_recv;
 /*
  * LDAP protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldap = {
   "ldap",                               /* scheme */
   oldap_setup_connection,               /* setup_connection */
@@ -136,14 +135,13 @@ const struct Curl_handler Curl_handler_ldap = {
   CURLPROTO_LDAP,                       /* protocol */
   CURLPROTO_LDAP,                       /* family */
   PROTOPT_SSL_REUSE |                   /* flags */
-  PROTOPT_CONN_REUSE
+    PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
 /*
  * LDAPS protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldaps = {
   "ldaps",                              /* scheme */
   oldap_setup_connection,               /* setup_connection */
@@ -167,7 +165,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   CURLPROTO_LDAPS,                      /* protocol */
   CURLPROTO_LDAP,                       /* family */
   PROTOPT_SSL |                         /* flags */
-  PROTOPT_CONN_REUSE
+    PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -281,7 +279,7 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
     result = rc == LDAP_URL_ERR_MEM ? CURLE_OUT_OF_MEMORY :
       CURLE_URL_MALFORMAT;
     rc -= LDAP_URL_SUCCESS;
-    if((size_t) rc < CURL_ARRAYSIZE(url_errs))
+    if((size_t)rc < CURL_ARRAYSIZE(url_errs))
       msg = url_errs[rc];
     failf(data, "LDAP local: %s", msg);
   }
@@ -507,8 +505,7 @@ static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
                                    ber_len_t len);
 static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod);
 
-static Sockbuf_IO ldapsb_tls =
-{
+static Sockbuf_IO ldapsb_tls = {
   ldapsb_tls_setup,
   ldapsb_tls_remove,
   ldapsb_tls_ctrl,
@@ -658,7 +655,7 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
   ldap_set_option(li->ld, LDAP_OPT_REFERRALS, LDAP_OPT_OFF);
 
   {
-    ber_len_t max = 256*1024;
+    ber_len_t max = 256 * 1024;
     Sockbuf *sb;
     if((ldap_get_option(li->ld, LDAP_OPT_SOCKBUF, &sb) != LDAP_OPT_SUCCESS) ||
        /* Set the maximum allowed size of an incoming message, which to
@@ -730,7 +727,7 @@ static CURLcode oldap_state_mechs_resp(struct Curl_easy *data,
       if(bvals) {
         for(i = 0; bvals[i].bv_val; i++) {
           size_t llen;
-          unsigned short mech = Curl_sasl_decode_mech((char *) bvals[i].bv_val,
+          unsigned short mech = Curl_sasl_decode_mech((char *)bvals[i].bv_val,
                                                       bvals[i].bv_len, &llen);
           if(bvals[i].bv_len == llen)
             li->sasl.authmechs |= mech;
@@ -829,7 +826,7 @@ static CURLcode oldap_connecting(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = Curl_conn_meta_get(conn, CURL_META_LDAP_CONN);
   LDAPMessage *msg = NULL;
-  struct timeval tv = {0, 0};
+  struct timeval tv = { 0, 0 };
   int code = LDAP_SUCCESS;
   int rc;
 
@@ -1091,7 +1088,7 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   int rc;
   LDAPMessage *msg = NULL;
   BerElement *ber = NULL;
-  struct timeval tv = {0, 0};
+  struct timeval tv = { 0, 0 };
   struct berval bv, *bvals;
   CURLcode result = CURLE_AGAIN;
   int code;
@@ -1246,30 +1243,26 @@ static CURLcode oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 }
 
 #ifdef USE_SSL
-static int
-ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
+static int ldapsb_tls_setup(Sockbuf_IO_Desc *sbiod, void *arg)
 {
   sbiod->sbiod_pvt = arg;
   return 0;
 }
 
-static int
-ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
+static int ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
 {
   sbiod->sbiod_pvt = NULL;
   return 0;
 }
 
 /* We do not need to do anything because libcurl does it already */
-static int
-ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
+static int ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
 {
   (void)sbiod;
   return 0;
 }
 
-static int
-ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
+static int ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
 {
   (void)arg;
   if(opt == LBER_SB_OPT_DATA_READY) {
@@ -1279,8 +1272,8 @@ ldapsb_tls_ctrl(Sockbuf_IO_Desc *sbiod, int opt, void *arg)
   return 0;
 }
 
-static ber_slen_t
-ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
+static ber_slen_t ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf,
+                                  ber_len_t len)
 {
   struct Curl_easy *data = sbiod->sbiod_pvt;
   ber_slen_t ret = 0;
@@ -1304,8 +1297,8 @@ ldapsb_tls_read(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   }
   return ret;
 }
-static ber_slen_t
-ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
+static ber_slen_t ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf,
+                                   ber_len_t len)
 {
   struct Curl_easy *data = sbiod->sbiod_pvt;
   ber_slen_t ret = 0;
@@ -1330,5 +1323,25 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
   return ret;
 }
 #endif /* USE_SSL */
+
+void Curl_ldap_version(char *buf, size_t bufsz)
+{
+  LDAPAPIInfo api;
+  api.ldapai_info_version = LDAP_API_INFO_VERSION;
+
+  if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
+    unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
+    unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
+    unsigned int minor =
+      (((unsigned int)api.ldapai_vendor_version - major * 10000)
+       - patch) / 100;
+    curl_msnprintf(buf, bufsz, "%s/%u.%u.%u",
+                   api.ldapai_vendor_name, major, minor, patch);
+    ldap_memfree(api.ldapai_vendor_name);
+    ber_memvfree((void **)api.ldapai_extensions);
+  }
+  else
+    curl_msnprintf(buf, bufsz, "OpenLDAP");
+}
 
 #endif /* !CURL_DISABLE_LDAP && USE_OPENLDAP */

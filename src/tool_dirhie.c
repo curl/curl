@@ -31,7 +31,7 @@
 #include "tool_msgs.h"
 
 #if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
-#  define mkdir(x,y) (mkdir)((x))
+#  define mkdir(x, y) (mkdir)((x))
 #  ifndef F_OK
 #  define F_OK 0
 #  endif
@@ -112,7 +112,7 @@ CURLcode create_dir_hierarchy(const char *outfile)
          exist, since we would be creating it erroneously. eg if outfile is
          X:\foo\bar\filename then do not mkdir X: This logic takes into
          account unsupported drives !:, 1:, etc. */
-      if(len > 1 && (outfile[1]==':'))
+      if(len > 1 && (outfile[1] == ':'))
         skip = TRUE;
     }
 #endif

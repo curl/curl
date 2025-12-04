@@ -215,7 +215,6 @@ struct ftp_parselist_data *Curl_ftp_parselist_data_alloc(void)
   return curlx_calloc(1, sizeof(struct ftp_parselist_data));
 }
 
-
 void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
 {
   struct ftp_parselist_data *parser = *parserp;
@@ -225,12 +224,10 @@ void Curl_ftp_parselist_data_free(struct ftp_parselist_data **parserp)
   *parserp = NULL;
 }
 
-
 CURLcode Curl_ftp_parselist_geterror(struct ftp_parselist_data *pl_data)
 {
   return pl_data->error;
 }
-
 
 #define FTP_LP_MALFORMATED_PERM 0x01000000
 
@@ -284,7 +281,7 @@ static unsigned int ftp_pl_get_permission(const char *str)
   if(str[7] == 'w')
     permissions |= 1 << 1;
   else if(str[7] != '-')
-      permissions |= FTP_LP_MALFORMATED_PERM;
+    permissions |= FTP_LP_MALFORMATED_PERM;
   if(str[8] == 'x')
     permissions |= 1;
   else if(str[8] == 't') {
@@ -430,7 +427,6 @@ static CURLcode parse_unix_totalsize(struct ftp_parselist_data *parser,
       }
       else
         return CURLE_FTP_BAD_FILE_LIST;
-
     }
     break;
   }
@@ -487,7 +483,7 @@ static CURLcode parse_unix_hlinks(struct ftp_parselist_data *parser,
     }
     break;
   case PL_UNIX_HLINKS_NUMBER:
-    parser->item_length ++;
+    parser->item_length++;
     if(c == ' ') {
       const char *p = &mem[parser->item_offset];
       curl_off_t hlinks;
@@ -623,7 +619,7 @@ static CURLcode parse_unix_time(struct ftp_parselist_data *parser,
   case PL_UNIX_TIME_PREPART1:
     if(c != ' ') {
       if(ISALNUM(c) && len) {
-        parser->item_offset = len -1;
+        parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.UNIX.sub.time = PL_UNIX_TIME_PART1;
       }
@@ -668,7 +664,7 @@ static CURLcode parse_unix_time(struct ftp_parselist_data *parser,
   case PL_UNIX_TIME_PART3:
     parser->item_length++;
     if(c == ' ') {
-      mem[parser->item_offset + parser->item_length -1] = 0;
+      mem[parser->item_offset + parser->item_length - 1] = 0;
       parser->offsets.time = parser->item_offset;
       if(finfo->filetype == CURLFILETYPE_SYMLINK) {
         parser->state.UNIX.main = PL_UNIX_SYMLINK;
@@ -924,7 +920,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
     case PL_WINNT_TIME_TIME:
       if(c == ' ') {
         parser->offsets.time = parser->item_offset;
-        mem[parser->item_offset + parser->item_length -1] = 0;
+        mem[parser->item_offset + parser->item_length - 1] = 0;
         parser->state.NT.main = PL_WINNT_DIRORSIZE;
         parser->state.NT.sub.dirorsize = PL_WINNT_DIRORSIZE_PRESPACE;
         parser->item_length = 0;
@@ -944,7 +940,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
       }
       break;
     case PL_WINNT_DIRORSIZE_CONTENT:
-      parser->item_length ++;
+      parser->item_length++;
       if(c == ' ') {
         mem[parser->item_offset + parser->item_length - 1] = 0;
         if(strcmp("<DIR>", mem + parser->item_offset) == 0) {
@@ -972,7 +968,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
     switch(parser->state.NT.sub.filename) {
     case PL_WINNT_FILENAME_PRESPACE:
       if(c != ' ' && len) {
-        parser->item_offset = len -1;
+        parser->item_offset = len - 1;
         parser->item_length = 1;
         parser->state.NT.sub.filename = PL_WINNT_FILENAME_CONTENT;
       }
@@ -1020,7 +1016,7 @@ static CURLcode parse_winnt(struct Curl_easy *data,
 size_t Curl_ftp_parselist(char *buffer, size_t size, size_t nmemb,
                           void *connptr)
 {
-  size_t bufflen = size*nmemb;
+  size_t bufflen = size * nmemb;
   struct Curl_easy *data = (struct Curl_easy *)connptr;
   struct ftp_wc *ftpwc = data->wildcard->ftpwc;
   struct ftp_parselist_data *parser = ftpwc->parser;

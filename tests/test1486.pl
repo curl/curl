@@ -45,7 +45,7 @@ sub getsrcvars {
             if($_ =~ /^}/) {
                 last;
             }
-            if($_ =~ /^  \{\"([^\"]*)/) {
+            if($_ =~ /^  \{ \"([^\"]*)/) {
                 my $var = $1;
                 $insrc{$var} = $srccount++;
             }

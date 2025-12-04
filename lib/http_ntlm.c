@@ -144,7 +144,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     userp = data->state.aptr.proxyuser;
     passwdp = data->state.aptr.proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-      data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
@@ -157,7 +157,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     userp = data->state.aptr.user;
     passwdp = data->state.aptr.passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
-      data->set.str[STRING_SERVICE_NAME] : "HTTP";
+              data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
@@ -202,12 +202,11 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
       result = curlx_base64_encode(Curl_bufref_ptr(&ntlmmsg),
-                                  Curl_bufref_len(&ntlmmsg), &base64, &len);
+                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
-                                      proxy ? "Proxy-" : "",
-                                      base64);
+                                      proxy ? "Proxy-" : "", base64);
         curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
@@ -225,8 +224,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
       if(!result) {
         curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
-                                      proxy ? "Proxy-" : "",
-                                      base64);
+                                      proxy ? "Proxy-" : "", base64);
         curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;

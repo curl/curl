@@ -38,7 +38,6 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
-
 /* When redirecting transfers. */
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
@@ -54,7 +53,6 @@ typedef enum {
 #define CURL_HTTP_V3x   (1 << 2)
 /* bitmask of CURL_HTTP_V* values */
 typedef unsigned char http_majors;
-
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -140,7 +138,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    selected to use no auth at all. Ie, we actively select no auth, as opposed
    to not having one selected. The other CURLAUTH_* defines are present in the
    public curl/curl.h header. */
-#define CURLAUTH_PICKNONE (1<<30) /* do not use auth */
+#define CURLAUTH_PICKNONE (1 << 30) /* do not use auth */
 
 /* MAX_INITIAL_POST_SIZE indicates the number of bytes that will make the POST
    data get included in the initial data chunk sent to the server. If the
@@ -155,7 +153,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    It must not be greater than 64K to work on VMS.
 */
 #ifndef MAX_INITIAL_POST_SIZE
-#define MAX_INITIAL_POST_SIZE (64*1024)
+#define MAX_INITIAL_POST_SIZE (64 * 1024)
 #endif
 
 /* EXPECT_100_THRESHOLD is the request body size limit for when libcurl will
@@ -164,13 +162,13 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
  *
  */
 #ifndef EXPECT_100_THRESHOLD
-#define EXPECT_100_THRESHOLD (1024*1024)
+#define EXPECT_100_THRESHOLD (1024 * 1024)
 #endif
 
 /* MAX_HTTP_RESP_HEADER_SIZE is the maximum size of all response headers
    combined that libcurl allows for a single HTTP response, any HTTP
    version. This count includes CONNECT response headers. */
-#define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
+#define MAX_HTTP_RESP_HEADER_SIZE (300 * 1024)
 
 /* MAX_HTTP_RESP_HEADER_COUNT is the maximum number of response headers that
    libcurl allows for a single HTTP response, including CONNECT and
@@ -243,11 +241,11 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
 
 void Curl_http_req_free(struct httpreq *req);
 
-#define HTTP_PSEUDO_METHOD ":method"
-#define HTTP_PSEUDO_SCHEME ":scheme"
+#define HTTP_PSEUDO_METHOD    ":method"
+#define HTTP_PSEUDO_SCHEME    ":scheme"
 #define HTTP_PSEUDO_AUTHORITY ":authority"
-#define HTTP_PSEUDO_PATH ":path"
-#define HTTP_PSEUDO_STATUS ":status"
+#define HTTP_PSEUDO_PATH      ":path"
+#define HTTP_PSEUDO_STATUS    ":status"
 
 /**
  * Create the list of HTTP/2 headers which represent the request,

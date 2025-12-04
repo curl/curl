@@ -52,7 +52,7 @@ struct Cookie {
  * draft-ietf-httpbis-rfc6265bis-02
  */
 #define COOKIE_PREFIX__SECURE (1 << 0)
-#define COOKIE_PREFIX__HOST (1 << 1)
+#define COOKIE_PREFIX__HOST   (1 << 1)
 
 #define COOKIE_HASH_SIZE 63
 

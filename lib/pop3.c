@@ -84,11 +84,11 @@
 #define POP3_TYPE_SASL      (1 << 2)
 
 /* Authentication type values */
-#define POP3_TYPE_NONE      0
-#define POP3_TYPE_ANY       (POP3_TYPE_CLEARTEXT|POP3_TYPE_APOP|POP3_TYPE_SASL)
+#define POP3_TYPE_NONE 0
+#define POP3_TYPE_ANY  (POP3_TYPE_CLEARTEXT | POP3_TYPE_APOP | POP3_TYPE_SASL)
 
 /* This is the 5-bytes End-Of-Body marker for POP3 */
-#define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"
+#define POP3_EOB     "\x0d\x0a\x2e\x0d\x0a"
 #define POP3_EOB_LEN 5
 
 /* meta key for storing protocol meta at easy handle */
@@ -196,8 +196,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   CURLPROTO_POP3,                   /* protocol */
   CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE |
-  PROTOPT_CONN_REUSE
+    PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -228,8 +227,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   CURLPROTO_POP3S,                  /* protocol */
   CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
-  PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS |
-  PROTOPT_CONN_REUSE
+    PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -512,7 +510,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
          result, ssldone));
   if(!result && ssldone) {
     pop3c->ssldone = ssldone;
-     /* perform CAPA now, changes pop3c->state out of POP3_UPGRADETLS */
+    /* perform CAPA now, changes pop3c->state out of POP3_UPGRADETLS */
     result = pop3_perform_capa(data, conn);
   }
 out:
@@ -589,10 +587,10 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *) pop3c->apoptimestamp,
+  Curl_MD5_update(ctxt, (const unsigned char *)pop3c->apoptimestamp,
                   curlx_uztoui(strlen(pop3c->apoptimestamp)));
 
-  Curl_MD5_update(ctxt, (const unsigned char *) conn->passwd,
+  Curl_MD5_update(ctxt, (const unsigned char *)conn->passwd,
                   curlx_uztoui(strlen(conn->passwd)));
 
   /* Finalise the digest */
@@ -625,7 +623,7 @@ static CURLcode pop3_perform_auth(struct Curl_easy *data,
   struct pop3_conn *pop3c =
     Curl_conn_meta_get(data->conn, CURL_META_POP3_CONN);
   CURLcode result = CURLE_OK;
-  const char *ir = (const char *) Curl_bufref_ptr(initresp);
+  const char *ir = (const char *)Curl_bufref_ptr(initresp);
 
   if(!pop3c)
     return CURLE_FAILED_INIT;

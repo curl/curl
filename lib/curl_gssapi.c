@@ -154,7 +154,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     }
 
     /* Server response, either D (RA==) or C (Qw==) */
-    if(((char *) input_token->value)[0] == 'D') {
+    if(((char *)input_token->value)[0] == 'D') {
       /* Done */
       switch(ctx->sent) {
       case STUB_GSS_KRB5:
@@ -170,7 +170,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       }
     }
 
-    if(((char *) input_token->value)[0] != 'C') {
+    if(((char *)input_token->value)[0] != 'C') {
       /* We only support Done or Continue */
       *min = STUB_GSS_SERVER_ERR;
       return GSS_S_FAILURE;

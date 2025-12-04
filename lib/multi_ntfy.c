@@ -38,7 +38,7 @@ struct mntfy_entry {
   uint32_t type;
 };
 
-#define CURL_MNTFY_CHUNK_SIZE   128
+#define CURL_MNTFY_CHUNK_SIZE 128
 
 struct mntfy_chunk {
   struct mntfy_chunk *next;
@@ -171,7 +171,7 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
      Curl_uint32_bset_contains(&multi->ntfy.enabled, (uint32_t)type)) {
     /* append to list of outstanding notifications */
     struct mntfy_chunk *tail = mntfy_non_full_tail(&multi->ntfy);
-  CURL_TRC_M(data, "[NTFY] add %d for xfer %u", type, data->mid);
+    CURL_TRC_M(data, "[NTFY] add %d for xfer %u", type, data->mid);
     if(tail)
       mntfy_chunk_append(tail, data, (uint32_t)type);
     else

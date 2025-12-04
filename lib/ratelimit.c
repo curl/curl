@@ -28,7 +28,7 @@
 #include "ratelimit.h"
 
 
-#define CURL_US_PER_SEC      1000000
+#define CURL_US_PER_SEC       1000000
 #define CURL_RLIMIT_MIN_CHUNK (16 * 1024)
 #define CURL_RLIMIT_MAX_STEPS 2   /* 500ms interval */
 

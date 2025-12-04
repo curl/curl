@@ -643,8 +643,8 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       return CURLE_UNSUPPORTED_PROTOCOL;
     case IF2IP_FOUND:
       /*
-        * We now have the numerical IP address in the 'myhost' buffer
-        */
+       * We now have the numerical IP address in the 'myhost' buffer
+       */
       host = myhost;
       infof(data, "Local Interface %s is ip %s using address family %i",
             iface, host, af);
@@ -2057,7 +2057,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
 #else
   struct sockaddr_in add;
 #endif
-  curl_socklen_t size = (curl_socklen_t) sizeof(add);
+  curl_socklen_t size = (curl_socklen_t)sizeof(add);
   curl_socket_t s_accepted = CURL_SOCKET_BAD;
   timediff_t timeout_ms;
   int socketstate = 0;

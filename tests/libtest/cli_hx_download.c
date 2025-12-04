@@ -449,7 +449,7 @@ static CURLcode test_cli_hx_download(const char *URL)
 
     if(still_running) {
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 500, NULL);
     }
 
     if(mc)

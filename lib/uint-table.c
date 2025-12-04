@@ -43,7 +43,6 @@ void Curl_uint32_tbl_init(struct uint32_tbl *tbl,
 #endif
 }
 
-
 static void uint32_tbl_clear_rows(struct uint32_tbl *tbl,
                                   uint32_t from,
                                   uint32_t upto_excluding)
@@ -60,7 +59,6 @@ static void uint32_tbl_clear_rows(struct uint32_tbl *tbl,
     }
   }
 }
-
 
 CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
 {
@@ -84,7 +82,6 @@ CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
   return CURLE_OK;
 }
 
-
 void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl)
 {
   DEBUGASSERT(tbl->init == CURL_UINT32_TBL_MAGIC);
@@ -101,24 +98,20 @@ UNITTEST void Curl_uint32_tbl_clear(struct uint32_tbl *tbl)
   tbl->last_key_added = UINT32_MAX;
 }
 
-
 uint32_t Curl_uint32_tbl_capacity(struct uint32_tbl *tbl)
 {
   return tbl->nrows;
 }
-
 
 uint32_t Curl_uint32_tbl_count(struct uint32_tbl *tbl)
 {
   return tbl->nentries;
 }
 
-
 void *Curl_uint32_tbl_get(struct uint32_tbl *tbl, uint32_t key)
 {
   return (key < tbl->nrows) ? tbl->rows[key] : NULL;
 }
-
 
 bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey)
 {
@@ -156,18 +149,15 @@ bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey)
   return FALSE;
 }
 
-
 void Curl_uint32_tbl_remove(struct uint32_tbl *tbl, uint32_t key)
 {
   uint32_tbl_clear_rows(tbl, key, key + 1);
 }
 
-
 bool Curl_uint32_tbl_contains(struct uint32_tbl *tbl, uint32_t key)
 {
   return (key < tbl->nrows) ? !!tbl->rows[key] : FALSE;
 }
-
 
 static bool uint32_tbl_next_at(struct uint32_tbl *tbl, uint32_t key,
                                uint32_t *pkey, void **pentry)
@@ -196,7 +186,6 @@ bool Curl_uint32_tbl_first(struct uint32_tbl *tbl,
   *pentry = NULL;
   return FALSE;
 }
-
 
 bool Curl_uint32_tbl_next(struct uint32_tbl *tbl, uint32_t last_key,
                           uint32_t *pkey, void **pentry)

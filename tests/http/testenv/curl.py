@@ -525,6 +525,7 @@ class ExecResult:
         }
         # stat keys where we expect a positive value
         ref_tl = []
+        somewhere_keys = []
         exact_match = True
         # redirects mess up the queue time, only count without
         if s['time_redirect'] == 0:
@@ -542,10 +543,13 @@ class ExecResult:
         # what kind of transfer was it?
         if s['size_upload'] == 0 and s['size_download'] > 0:
             # this is a download
-            dl_tl = ['time_pretransfer', 'time_starttransfer']
+            dl_tl = ['time_pretransfer']
             if s['size_request'] > 0:
                 dl_tl = ['time_posttransfer'] + dl_tl
             ref_tl += dl_tl
+            # the first byte of the response may arrive before we
+            # track the other times when the client is slow (CI).
+            somewhere_keys = ['time_starttransfer']
         elif s['size_upload'] > 0 and s['size_download'] == 0:
             # this is an upload
             ul_tl = ['time_pretransfer', 'time_posttransfer']
@@ -561,11 +565,14 @@ class ExecResult:
             self.check_stat_positive(s, idx, key)
         if exact_match:
             # assert all events not in reference timeline are 0
-            for key in [key for key in all_keys if key not in ref_tl]:
+            for key in [key for key in all_keys if key not in ref_tl and key not in somewhere_keys]:
                 self.check_stat_zero(s, key)
         # calculate the timeline that did happen
         seen_tl = sorted(ref_tl, key=lambda ts: s[ts])
         assert seen_tl == ref_tl, f'{[f"{ts}: {s[ts]}" for ts in seen_tl]}'
+        for key in somewhere_keys:
+            self.check_stat_positive(s, idx, key)
+            assert s[key] <= s['time_total']
 
     def dump_logs(self):
         lines = ['>>--stdout ----------------------------------------------\n']

@@ -96,7 +96,7 @@
 
 #ifdef USE_WIN32_LDAP
 #define FREE_ON_WINLDAP(x) curlx_unicodefree(x)
-#define curl_ldap_num_t ULONG
+#define curl_ldap_num_t    ULONG
 #else
 #define FREE_ON_WINLDAP(x)
 #define curl_ldap_num_t int
@@ -142,14 +142,15 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp);
 #endif /* !HAVE_LDAP_URL_PARSE */
 
 #ifdef DEBUG_LDAP
-  #define LDAP_TRACE(x)   do { \
-                            ldap_trace_low("%u: ", __LINE__); \
-                            ldap_trace_low x; \
-                          } while(0)
+#define LDAP_TRACE(x)               \
+do {                                \
+  ldap_trace_low("%u: ", __LINE__); \
+  ldap_trace_low x;                 \
+} while(0)
 
-  static void ldap_trace_low(const char *fmt, ...) CURL_PRINTF(1, 2);
+static void ldap_trace_low(const char *fmt, ...) CURL_PRINTF(1, 2);
 #else
-  #define LDAP_TRACE(x)   Curl_nop_stmt
+#define LDAP_TRACE(x) Curl_nop_stmt
 #endif
 
 #if defined(USE_WIN32_LDAP) && defined(ldap_err2string)
@@ -172,7 +173,6 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done);
 /*
  * LDAP protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldap = {
   "ldap",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
@@ -202,7 +202,6 @@ const struct Curl_handler Curl_handler_ldap = {
 /*
  * LDAPS protocol handler.
  */
-
 const struct Curl_handler Curl_handler_ldaps = {
   "ldaps",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
@@ -619,7 +618,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           }
 
           if((attr_len > 7) &&
-             curl_strequal(";binary", attr + (attr_len - 7)) ) {
+             curl_strequal(";binary", attr + (attr_len - 7))) {
             /* Binary attribute, encode to base64. */
             if(vals[i]->bv_len) {
               result = curlx_base64_encode((uint8_t *)vals[i]->bv_val,
@@ -886,8 +885,7 @@ static curl_ldap_num_t ldap_url_parse2_low(struct Curl_easy *data,
       LDAP_TRACE(("attr[%zu] '%.*s'\n", i, (int)out.len, out.str));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(out.str, out.len, &unescaped, NULL,
-                              REJECT_ZERO);
+      result = Curl_urldecode(out.str, out.len, &unescaped, NULL, REJECT_ZERO);
       if(result) {
         rc = LDAP_NO_MEMORY;
         goto quit;
@@ -1036,6 +1034,15 @@ static void ldap_free_urldesc_low(LDAPURLDesc *ludp)
   curlx_free(ludp);
 }
 #endif /* !HAVE_LDAP_URL_PARSE */
+
+void Curl_ldap_version(char *buf, size_t bufsz)
+{
+#ifdef USE_WIN32_LDAP
+  curl_msnprintf(buf, bufsz, "WinLDAP");
+#else
+  curl_msnprintf(buf, bufsz, "LDAP/1");
+#endif
+}
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic pop
