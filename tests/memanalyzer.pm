@@ -58,14 +58,14 @@ sub memanalyze {
     my ($file, $verbose, $trace, $showlimit) = @_;
     my @res;
 
-    my $mallocs=0;
-    my $callocs=0;
-    my $reallocs=0;
-    my $strdups=0;
-    my $wcsdups=0;
-    my $sends=0;
-    my $recvs=0;
-    my $sockets=0;
+    my $mallocs = 0;
+    my $callocs = 0;
+    my $reallocs = 0;
+    my $strdups = 0;
+    my $wcsdups = 0;
+    my $sends = 0;
+    my $recvs = 0;
+    my $sockets = 0;
 
     $memsum = 0; # the total number of memory allocated over the lifetime
     $maxmem = 0; # the high water mark
@@ -441,8 +441,8 @@ sub memanalyze {
             "Mallocs: $mallocs\n",
             "Reallocs: $reallocs\n",
             "Callocs: $callocs\n",
-            "Strdups:  $strdups\n",
-            "Wcsdups:  $wcsdups\n",
+            "Strdups: $strdups\n",
+            "Wcsdups: $wcsdups\n",
             "Frees: $frees\n",
             "Sends: $sends\n",
             "Recvs: $recvs\n",

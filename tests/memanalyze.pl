@@ -28,9 +28,9 @@ use warnings;
 
 use memanalyzer;
 
-my $showlimit=0;
-my $verbose=0;
-my $trace=0;
+my $showlimit = 0;
+my $verbose = 0;
+my $trace = 0;
 
 while(@ARGV) {
     if($ARGV[0] eq "-v") {
@@ -55,6 +55,6 @@ my $file = $ARGV[0] || '';
 
 my @res = memanalyze($file, $verbose, $trace, $showlimit);
 
-foreach my $line (@res) {
-    print $line;
+for (@res) {
+    print $_;
 }
