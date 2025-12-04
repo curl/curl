@@ -29,17 +29,15 @@
 
 /*
  * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
- * and curlx_unicodefree() main purpose is to minimize the number of
- * preprocessor conditional directives needed by code using these
- * to differentiate Unicode from non-Unicode builds.
+ * main purpose is to minimize the number of preprocessor conditional
+ * directives needed by code using these to differentiate Unicode from
+ * non-Unicode builds.
  *
  * In the case of a non-Unicode build the tchar strings are char strings that
  * are duplicated via strdup and remain in whatever the passed in encoding is,
  * which is assumed to be UTF-8 but may be other encoding. Therefore the
  * significance of the conversion functions is primarily for Unicode builds.
  */
-
-#define curlx_unicodefree(ptr) curlx_free(ptr)
 
 #ifdef UNICODE
 
