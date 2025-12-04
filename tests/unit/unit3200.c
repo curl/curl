@@ -40,8 +40,8 @@ static CURLcode test_unit3200(const char *arg)
    * so we write our own
    */
 
-#define C64   "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-#define C256  C64 C64 C64 C64
+#define C64 "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+#define C256 C64 C64 C64 C64
 #define C1024 C256 C256 C256 C256
 #define C4096 C1024 C1024 C1024 C1024
 
