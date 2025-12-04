@@ -12,6 +12,7 @@ See-also:
   - socks4a
 Example:
   - --socks5 proxy.example:7000 $URL
+  - --socks5 localhost/path/unix-domain $URL
 ---
 
 # `--socks5`
@@ -20,7 +21,7 @@ Use the specified SOCKS5 proxy - but resolve the hostname locally. If the
 port number is not specified, it is assumed at port 1080.
 
 To specify proxy on a Unix domain socket, use localhost for host, e.g.
-`socks5://localhost/path/to/socket.sock`
+`socks5://localhost/path/to/socket.sock` (the scheme may be omitted).
 
 This option overrides any previous use of --proxy, as they are mutually
 exclusive.
