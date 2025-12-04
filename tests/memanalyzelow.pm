@@ -147,8 +147,8 @@ sub memanalyze {
                 else {
                     $totalmem -= $sizeataddr{$addr};
                     if($trace) {
-                        push @res, "FREE: malloc at ".$getmem{$addr}." is freed again at $source:$linenum\n";
-                        push @res, "FREE: ", $sizeataddr{$addr}, " bytes freed, left allocated: $totalmem bytes\n";
+                        push @res, "FREE: malloc at $getmem{$addr} is freed again at $source:$linenum\n";
+                        push @res, "FREE: $sizeataddr{$addr} bytes freed, left allocated: $totalmem bytes\n";
                     }
 
                     newtotal($totalmem);
@@ -183,7 +183,7 @@ sub memanalyze {
                 $getmem{$addr}="$source:$linenum";
             }
             elsif($function =~ /calloc\((\d*),(\d*)\) = 0x([0-9a-f]*)/) {
-                $size = $1*$2;
+                $size = $1 * $2;
                 $addr = $3;
 
                 my $arg1 = $1;
@@ -194,7 +194,7 @@ sub memanalyze {
                     push @res, "Mixed debug compile, rebuild curl now\n";
                 }
 
-                $sizeataddr{$addr}=$size;
+                $sizeataddr{$addr} = $size;
                 $totalmem += $size;
                 $memsum += $size;
 
@@ -217,14 +217,14 @@ sub memanalyze {
                     $totalmem -= $oldsize;
                     if($trace) {
                     }
-                    $sizeataddr{$oldaddr}=0;
+                    $sizeataddr{$oldaddr} = 0;
 
-                    $getmem{$oldaddr}="";
+                    $getmem{$oldaddr} = "";
                 }
 
                 $totalmem += $newsize;
                 $memsum += $newsize;
-                $sizeataddr{$newaddr}=$newsize;
+                $sizeataddr{$newaddr} = $newsize;
 
                 if($trace) {
                     push @res, "REALLOC: $oldsize less bytes and $newsize more bytes ($source:$linenum)\n";
@@ -241,14 +241,14 @@ sub memanalyze {
                 $dup = $1;
                 $size = $2;
                 $addr = $3;
-                $getmem{$addr}="$source:$linenum";
-                $sizeataddr{$addr}=$size;
+                $getmem{$addr} = "$source:$linenum";
+                $sizeataddr{$addr} = $size;
 
                 $totalmem += $size;
                 $memsum += $size;
 
                 if($trace) {
-                    push @res, "STRDUP: $size bytes at ".$getmem{$addr}.", makes totally: $totalmem bytes\n";
+                    push @res, "STRDUP: $size bytes at $getmem{$addr}, makes totally: $totalmem bytes\n";
                 }
 
                 newtotal($totalmem);
@@ -267,7 +267,7 @@ sub memanalyze {
                 $memsum += $size;
 
                 if($trace) {
-                    push @res, "WCSDUP: $size bytes at ".$getmem{$addr}.", makes totally: $totalmem bytes\n";
+                    push @res, "WCSDUP: $size bytes at $getmem{$addr}, makes totally: $totalmem bytes\n";
                 }
 
                 newtotal($totalmem);
@@ -285,22 +285,22 @@ sub memanalyze {
             $function = $3;
 
             if($function =~ /socket\(\) = (\d*)/) {
-                $filedes{$1}=1;
-                $getfile{$1}="$source:$linenum";
+                $filedes{$1} = 1;
+                $getfile{$1} = "$source:$linenum";
                 $openfile++;
                 $sockets++; # number of socket() calls
             }
             elsif($function =~ /socketpair\(\) = (\d*) (\d*)/) {
-                $filedes{$1}=1;
-                $getfile{$1}="$source:$linenum";
+                $filedes{$1} = 1;
+                $getfile{$1} = "$source:$linenum";
                 $openfile++;
-                $filedes{$2}=1;
-                $getfile{$2}="$source:$linenum";
+                $filedes{$2} = 1;
+                $getfile{$2} = "$source:$linenum";
                 $openfile++;
             }
             elsif($function =~ /accept\(\) = (\d*)/) {
-                $filedes{$1}=1;
-                $getfile{$1}="$source:$linenum";
+                $filedes{$1} = 1;
+                $getfile{$1} = "$source:$linenum";
                 $openfile++;
             }
             elsif($function =~ /sclose\((\d*)\)/) {
@@ -325,8 +325,8 @@ sub memanalyze {
                     ;
                 }
                 else {
-                    $fopen{$4}=1;
-                    $fopenfile{$4}="$source:$linenum";
+                    $fopen{$4} = 1;
+                    $fopenfile{$4} = "$source:$linenum";
                     $fopens++;
                 }
             }
@@ -336,7 +336,7 @@ sub memanalyze {
                     push @res, "fclose() without fopen(): $line\n";
                 }
                 else {
-                    $fopen{$1}=0;
+                    $fopen{$1} = 0;
                     $fopens--;
                 }
             }
@@ -367,8 +367,8 @@ sub memanalyze {
                     ;
                 }
                 else {
-                    $addrinfo{$add}=1;
-                    $addrinfofile{$add}="$source:$linenum";
+                    $addrinfo{$add} = 1;
+                    $addrinfofile{$add} = "$source:$linenum";
                     $addrinfos++;
                 }
                 if($trace) {
@@ -382,7 +382,7 @@ sub memanalyze {
                     push @res, "freeaddrinfo() without getaddrinfo(): $line\n";
                 }
                 else {
-                    $addrinfo{$addr}=0;
+                    $addrinfo{$addr} = 0;
                     $addrinfos--;
                 }
                 if($trace) {
@@ -405,7 +405,7 @@ sub memanalyze {
             $size = $sizeataddr{$addr};
             if($size > 0) {
                 push @res, "At $addr, there is $size bytes.\n";
-                push @res, " allocated by ".$getmem{$addr}."\n";
+                push @res, " allocated by $getmem{$addr}\n";
             }
         }
     }
@@ -413,7 +413,7 @@ sub memanalyze {
     if($openfile) {
         for(keys %filedes) {
             if($filedes{$_} == 1) {
-                push @res, "Open file descriptor created at ".$getfile{$_}."\n";
+                push @res, "Open file descriptor created at $getfile{$_}.\n";
             }
         }
     }
@@ -422,7 +422,7 @@ sub memanalyze {
         push @res, "Open FILE handles left at:\n";
         for(keys %fopen) {
             if($fopen{$_} == 1) {
-                push @res, "fopen() called at ".$fopenfile{$_}."\n";
+                push @res, "fopen() called at $fopenfile{$_}.\n";
             }
         }
     }
@@ -431,7 +431,7 @@ sub memanalyze {
         push @res, "IPv6-style name resolve data left at:\n";
         for(keys %addrinfofile) {
             if($addrinfo{$_} == 1) {
-                push @res, "getaddrinfo() called at ".$addrinfofile{$_}."\n";
+                push @res, "getaddrinfo() called at $addrinfofile{$_}.\n";
             }
         }
     }
