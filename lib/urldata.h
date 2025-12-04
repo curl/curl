@@ -618,8 +618,7 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) (!Curl_uint32_spbset_empty(&(c)->xfers_attached))
-#define CONN_ATTACHED(c) Curl_uint32_spbset_count(&(c)->xfers_attached)
+#define CONN_INUSE(c) (!!(c)->attached_xfers)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -679,7 +678,6 @@ struct connectdata {
      was used on this connection. */
   struct curltime keepalive;
 
-  struct uint32_spbset xfers_attached; /* mids of attached transfers */
   /* A connection cache from a SHARE might be used in several multi handles.
    * We MUST not reuse connections that are running in another multi,
    * for concurrency reasons. That multi might run in another thread.
@@ -721,6 +719,9 @@ struct connectdata {
   int remote_port; /* the remote port, not the proxy port! */
   int conn_to_port; /* the remote port to connect to. valid only if
                        bits.conn_to_port is set */
+
+  uint32_t attached_xfers; /* # of attached easy handles */
+
 #ifdef USE_IPV6
   unsigned int scope_id;  /* Scope id for IPv6 */
 #endif

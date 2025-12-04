@@ -2786,7 +2786,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     CF_DATA_SAVE(save, cf, data);
     if(!ctx->h2 || !nghttp2_session_check_request_allowed(ctx->h2)) {
       /* the limit is what we have in use right now */
-      effective_max = CONN_ATTACHED(cf->conn);
+      effective_max = cf->conn->attached_xfers;
     }
     else {
       effective_max = ctx->max_concurrent_streams;

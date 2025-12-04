@@ -2323,7 +2323,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
       return CURLE_HTTP3;
     }
     /* we report avail + in_use */
-    v += CONN_ATTACHED(cf->conn);
+    v += cf->conn->attached_xfers;
     *pres1 = (v > INT_MAX) ? INT_MAX : (int)v;
 #else
     *pres1 = 100;

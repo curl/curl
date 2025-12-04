@@ -561,7 +561,6 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->unix_domain_socket);
 #endif
   Curl_safefree(conn->destination);
-  Curl_uint32_spbset_destroy(&conn->xfers_attached);
   Curl_hash_destroy(&conn->meta_hash);
 
   curlx_free(conn); /* free all the connection oriented data */
@@ -893,16 +892,16 @@ static bool url_match_multiplex_limits(struct connectdata *conn,
   if(CONN_INUSE(conn) && m->may_multiplex) {
     DEBUGASSERT(conn->bits.multiplex);
     /* If multiplexed, make sure we do not go over concurrency limit */
-    if(CONN_ATTACHED(conn) >=
+    if(conn->attached_xfers >=
             Curl_multi_max_concurrent_streams(m->data->multi)) {
       infof(m->data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%u)", CONN_ATTACHED(conn));
+            ", skip (%u)", conn->attached_xfers);
       return FALSE;
     }
-    if(CONN_ATTACHED(conn) >=
+    if(conn->attached_xfers >=
        Curl_conn_get_max_concurrent(m->data, conn, FIRSTSOCKET)) {
       infof(m->data, "MAX_CONCURRENT_STREAMS reached, skip (%u)",
-            CONN_ATTACHED(conn));
+            conn->attached_xfers);
       return FALSE;
     }
     /* When not multiplexed, we have a match here! */
@@ -1343,6 +1342,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->recv_idx = 0; /* default for receiving transfer data */
   conn->send_idx = 0; /* default for sending transfer data */
   conn->connection_id = -1;    /* no ID */
+  conn->attached_xfers = 0;
   conn->remote_port = -1; /* unknown at this point */
 
   /* Store creation time to help future close decision making */
@@ -1381,9 +1381,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
   conn->transport_wanted = TRNSPRT_TCP; /* most of them are TCP streams */
-
-  /* Initialize the attached xfers bitset */
-  Curl_uint32_spbset_init(&conn->xfers_attached);
 
   /* Store the local bind parameters that will be used for this connection */
   if(data->set.str[STRING_DEVICE]) {
@@ -3806,7 +3803,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     DEBUGASSERT(conn);
     Curl_pgrsTime(data, TIMER_POSTQUEUE);
     if(reused) {
-      if(CONN_ATTACHED(conn) > 1)
+      if(conn->attached_xfers > 1)
         /* multiplexed */
         *protocol_done = TRUE;
     }

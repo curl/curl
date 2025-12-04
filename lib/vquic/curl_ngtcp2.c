@@ -2718,7 +2718,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     }
     else if(ctx->max_bidi_streams) {
       uint64_t avail_bidi_streams = 0;
-      uint64_t max_streams = CONN_ATTACHED(cf->conn);
+      uint64_t max_streams = cf->conn->attached_xfers;
       if(ctx->max_bidi_streams > ctx->used_bidi_streams)
         avail_bidi_streams = ctx->max_bidi_streams - ctx->used_bidi_streams;
       max_streams += avail_bidi_streams;
@@ -2728,7 +2728,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
       *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%u in use)",
-                cf->conn->connection_id, *pres1, CONN_ATTACHED(cf->conn));
+                cf->conn->connection_id, *pres1, cf->conn->attached_xfers);
     CF_DATA_RESTORE(cf, save);
     return CURLE_OK;
   }
