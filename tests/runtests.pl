@@ -102,7 +102,7 @@ use valgrind;  # valgrind report parser
 use globalconfig;
 use runner;
 use testutil;
-use memanalyzelow;
+use memanalyzer;
 
 my %custom_skip_reasons;
 

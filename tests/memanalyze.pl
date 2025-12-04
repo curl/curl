@@ -26,7 +26,7 @@
 use strict;
 use warnings;
 
-use memanalyzelow;
+use memanalyzer;
 
 my $showlimit=0;
 my $verbose=0;

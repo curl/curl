@@ -29,7 +29,7 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
-package memanalyzelow;
+package memanalyzer;
 
 use strict;
 use warnings;
