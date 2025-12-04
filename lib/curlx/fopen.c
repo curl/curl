@@ -77,28 +77,6 @@ static wchar_t *fn_convert_UTF8_to_wchar(const char *str_utf8)
 
   return str_w;
 }
-
-static char *fn_convert_wchar_to_UTF8(const wchar_t *str_w)
-{
-  char *str_utf8 = NULL;
-
-  if(str_w) {
-    int bytes = WideCharToMultiByte(CP_UTF8, 0, str_w, -1,
-                                    NULL, 0, NULL, NULL);
-    if(bytes > 0) {
-      str_utf8 = CURLX_MALLOC(bytes);
-      if(str_utf8) {
-        if(WideCharToMultiByte(CP_UTF8, 0, str_w, -1, str_utf8, bytes,
-                               NULL, NULL) == 0) {
-          CURLX_FREE(str_utf8);
-          return NULL;
-        }
-      }
-    }
-  }
-
-  return str_utf8;
-}
 #endif
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
