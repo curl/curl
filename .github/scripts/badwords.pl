@@ -36,7 +36,7 @@ if($ARGV[0] eq "-w") {
             # allow #-comments
             next;
         }
-        if(/^([^:]*):(\d+):(.*)/) {
+        if(/^([^:]*):([\d*]+):(.*)/) {
             $wl{"$1:$2:$3"}=1;
             #print STDERR "whitelisted $1:$2:$3\n";
         }
@@ -92,7 +92,8 @@ sub file {
                 my $c = length($p)+1;
 
                 my $ch = "$f:$l:$w";
-                if($wl{$ch}) {
+                my $ch_anyline = "$f:*:$w";
+                if($wl{$ch} || $wl{$ch_anyline}) {
                     # whitelisted
                     print STDERR "$ch found but whitelisted\n";
                     next;

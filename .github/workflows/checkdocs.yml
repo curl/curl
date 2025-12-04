@@ -140,7 +140,7 @@ jobs:
           persist-credentials: false
 
       - name: 'badwords'
-        run: .github/scripts/badwords.pl '**.md' docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400 < .github/scripts/badwords.txt
+        run: .github/scripts/badwords.pl '**.md' docs/FAQ docs/KNOWN_BUGS docs/TODO packages/OS400/README.OS400 < .github/scripts/badwords.txt
 
       - name: 'verify synopsis'
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md
