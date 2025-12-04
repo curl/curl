@@ -45,4 +45,7 @@ size_t Curl_bufref_len(const struct bufref *br);
 CURLcode Curl_bufref_memdup(struct bufref *br, const void *ptr, size_t len);
 void Curl_bufref_free(struct bufref *br);
 
+/* return a strdup() version of the buffer */
+#define Curl_bufref_dup(x) curlx_strdup(Curl_bufref_ptr(x))
+
 #endif

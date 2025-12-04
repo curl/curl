@@ -1019,14 +1019,14 @@ CURL *curl_easy_duphandle(CURL *d)
 
   if(Curl_bufref_ptr(&data->state.url)) {
     Curl_bufref_set(&outcurl->state.url,
-                    curlx_strdup(Curl_bufref_ptr(&data->state.url)), 0,
+                    Curl_bufref_dup(&data->state.url), 0,
                     curl_free);
     if(!Curl_bufref_ptr(&outcurl->state.url))
       goto fail;
   }
   if(Curl_bufref_ptr(&data->state.referer)) {
     Curl_bufref_set(&outcurl->state.referer,
-                    curlx_strdup(Curl_bufref_ptr(&data->state.referer)), 0,
+                    Curl_bufref_dup(&data->state.referer), 0,
                     curl_free);
     if(!Curl_bufref_ptr(&outcurl->state.referer))
       goto fail;

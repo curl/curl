@@ -612,7 +612,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        out in bug #2284386 */
     curlx_free(data->req.newurl);
     /* clone URL */
-    data->req.newurl = curlx_strdup(Curl_bufref_ptr(&data->state.url));
+    data->req.newurl = Curl_bufref_dup(&data->state.url);
     if(!data->req.newurl)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -626,7 +626,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     if((data->state.httpreq != HTTPREQ_GET) &&
        (data->state.httpreq != HTTPREQ_HEAD)) {
       /* clone URL */
-      data->req.newurl = curlx_strdup(Curl_bufref_ptr(&data->state.url));
+      data->req.newurl = Curl_bufref_dup(&data->state.url);
       if(!data->req.newurl)
         return CURLE_OUT_OF_MEMORY;
       data->state.authhost.done = TRUE;
@@ -912,7 +912,7 @@ static CURLcode auth_spnego(struct Curl_easy *data,
         &conn->http_negotiate_state;
       if(!result) {
         curlx_free(data->req.newurl);
-        data->req.newurl = curlx_strdup(Curl_bufref_ptr(&data->state.url));
+        data->req.newurl = Curl_bufref_dup(&data->state.url);
         if(!data->req.newurl)
           return CURLE_OUT_OF_MEMORY;
         data->state.authproblem = FALSE;
@@ -4051,7 +4051,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
             data->state.disableexpect = TRUE;
             Curl_req_abort_sending(data);
             DEBUGASSERT(!data->req.newurl);
-            data->req.newurl = curlx_strdup(Curl_bufref_ptr(&data->state.url));
+            data->req.newurl = Curl_bufref_dup(&data->state.url);
             if(!data->req.newurl) {
               result = CURLE_OUT_OF_MEMORY;
               goto out;

@@ -92,3 +92,11 @@ size_t Curl_bufref_len(const struct bufref *br);
 ```
 
 Returns the stored length of the referenced buffer.
+
+## `dup`
+
+```c
+char *Curl_bufref_dup(struct bufref *br);
+```
+
+Returns a strdup() version of the buffer.

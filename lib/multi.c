@@ -2007,7 +2007,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
       data->state.errorbuf = FALSE;
       if(!newurl)
         /* typically for HTTP_1_1_REQUIRED error on first flight */
-        newurl = curlx_strdup(Curl_bufref_ptr(&data->state.url));
+        newurl = Curl_bufref_dup(&data->state.url);
       if(!newurl) {
         result = CURLE_OUT_OF_MEMORY;
       }
