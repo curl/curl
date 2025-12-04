@@ -52,36 +52,36 @@ static bool sws_prevbounce = FALSE; /* instructs the server to override the
 
 struct sws_httprequest {
   char reqbuf[2 * 1024 * 1024]; /* buffer area for the incoming request */
-  bool connect_request;         /* if a CONNECT */
-  unsigned short connect_port;  /* the port number CONNECT used */
-  size_t checkindex;            /* where to start checking of the request */
-  size_t offset;                /* size of the incoming request */
-  long testno;                  /* test number found in the request */
-  long partno;                  /* part number found in the request */
-  bool open;        /* keep connection open info, as found in the request */
-  bool auth_req;    /* authentication required, do not wait for body unless
-                       there is an Authorization header */
-  bool auth;        /* Authorization header present in the incoming request */
-  size_t cl;        /* Content-Length of the incoming request */
-  bool digest;      /* Authorization digest header found */
-  bool ntlm;        /* Authorization NTLM header found */
-  int delay;        /* if non-zero, delay this number of msec after connect */
-  int writedelay;   /* if non-zero, delay this number of milliseconds between
-                       writes in the response */
-  int skip;         /* if non-zero, the server is instructed to not read this
-                       many bytes from a PUT/POST request. Ie the client sends N
-                       bytes said in Content-Length, but the server only reads N
-                       - skip bytes. */
-  int rcmd;         /* doing a special command, see defines above */
-  int prot_version; /* HTTP version * 10 */
-  int callcount;    /* times sws_ProcessRequest() gets called */
-  bool skipall;     /* skip all incoming data */
-  bool noexpect;    /* refuse Expect: (do not read the body) */
-  bool connmon;     /* monitor the state of the connection, log disconnects */
-  bool upgrade;     /* test case allows upgrade */
+  bool connect_request; /* if a CONNECT */
+  unsigned short connect_port; /* the port number CONNECT used */
+  size_t checkindex; /* where to start checking of the request */
+  size_t offset;     /* size of the incoming request */
+  long testno;       /* test number found in the request */
+  long partno;       /* part number found in the request */
+  bool open;      /* keep connection open info, as found in the request */
+  bool auth_req;  /* authentication required, do not wait for body unless
+                     there is an Authorization header */
+  bool auth;      /* Authorization header present in the incoming request */
+  size_t cl;      /* Content-Length of the incoming request */
+  bool digest;    /* Authorization digest header found */
+  bool ntlm;      /* Authorization NTLM header found */
+  int delay;      /* if non-zero, delay this number of msec after connect */
+  int writedelay; /* if non-zero, delay this number of milliseconds between
+                     writes in the response */
+  int skip;       /* if non-zero, the server is instructed to not read this
+                     many bytes from a PUT/POST request. Ie the client sends N
+                     bytes said in Content-Length, but the server only reads N
+                     - skip bytes. */
+  int rcmd;       /* doing a special command, see defines above */
+  int prot_version;  /* HTTP version * 10 */
+  int callcount;  /* times sws_ProcessRequest() gets called */
+  bool skipall;   /* skip all incoming data */
+  bool noexpect;  /* refuse Expect: (do not read the body) */
+  bool connmon;   /* monitor the state of the connection, log disconnects */
+  bool upgrade;   /* test case allows upgrade */
   bool upgrade_request; /* upgrade request found and allowed */
-  bool close;       /* similar to swsclose in response: close connection
-                       after response is sent */
+  bool close;     /* similar to swsclose in response: close connection after
+                     response is sent */
   int done_processing;
 };
 
