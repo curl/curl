@@ -57,7 +57,8 @@ if `buffer` is NULL, `length` must be zero.
 ## `memdup`
 
 ```c
-CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
+CURLcode Curl_bufref_memdup0(struct bufref *br, const void *data,
+                             size_t length);
 ```
 
 Releases the previously referenced buffer, then duplicates the `length`-byte
