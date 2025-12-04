@@ -3200,13 +3200,8 @@ static CURLcode resolve_server(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     if(!unix_path && CONN_IS_PROXIED(conn) && conn->socks_proxy.host.name &&
        !strncmp(UNIX_SOCKET_PREFIX "/",
-                conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX))) {
+                conn->socks_proxy.host.name, sizeof(UNIX_SOCKET_PREFIX)))
       unix_path = conn->socks_proxy.host.name + sizeof(UNIX_SOCKET_PREFIX) - 1;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-      /* on Windows, skip the leading slash */
-      unix_path++;
-#endif
-    }
 #endif
 
     if(unix_path) {
