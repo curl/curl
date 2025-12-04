@@ -132,7 +132,7 @@ static CURLcode FormInfoCopyField(struct bufref *field, size_t len)
   if(value) {
     if(!len)
       len = strlen(value);
-    result = Curl_bufref_memdup(field, value, len);
+    result = Curl_bufref_memdup0(field, value, len);
   }
 
   return result;
@@ -260,7 +260,7 @@ static CURLFORMcode FormAddCheck(struct FormInfo *first_form,
         type = FILE_CONTENTTYPE_DEFAULT;
 
       /* our contenttype is missing */
-      if(Curl_bufref_memdup(&form->contenttype, type, strlen(type)))
+      if(Curl_bufref_memdup0(&form->contenttype, type, strlen(type)))
         return CURL_FORMADD_MEMORY;
     }
     if(name && form->namelength) {
@@ -427,7 +427,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
       else {
         avalue = form_ptr_arg(char *);
         if(avalue) {
-          if(Curl_bufref_memdup(&curr->value, avalue, strlen(avalue)))
+          if(Curl_bufref_memdup0(&curr->value, avalue, strlen(avalue)))
             retval = CURL_FORMADD_MEMORY;
           else
             curr->flags |= HTTPPOST_READFILE;
@@ -445,7 +445,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
           if(avalue) {
             form = NewFormInfo();
             if(!form ||
-               Curl_bufref_memdup(&form->value, avalue, strlen(avalue))) {
+               Curl_bufref_memdup0(&form->value, avalue, strlen(avalue))) {
               curlx_free(form);
               retval = CURL_FORMADD_MEMORY;
             }
@@ -463,7 +463,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
       else {
         if(avalue) {
-          if(Curl_bufref_memdup(&curr->value, avalue, strlen(avalue)))
+          if(Curl_bufref_memdup0(&curr->value, avalue, strlen(avalue)))
             retval = CURL_FORMADD_MEMORY;
           else
             curr->flags |= HTTPPOST_FILENAME;
@@ -520,7 +520,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if(curr->flags & HTTPPOST_FILENAME) {
           if(avalue) {
             form = NewFormInfo();
-            if(!form || Curl_bufref_memdup(&form->contenttype, avalue,
+            if(!form || Curl_bufref_memdup0(&form->contenttype, avalue,
                                            strlen(avalue))) {
               curlx_free(form);
               retval = CURL_FORMADD_MEMORY;
@@ -538,7 +538,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
           retval = CURL_FORMADD_OPTION_TWICE;
       }
       else if(avalue) {
-        if(Curl_bufref_memdup(&curr->contenttype, avalue, strlen(avalue)))
+        if(Curl_bufref_memdup0(&curr->contenttype, avalue, strlen(avalue)))
           retval = CURL_FORMADD_MEMORY;
       }
       else
@@ -562,7 +562,7 @@ static CURLFORMcode FormAdd(struct curl_httppost **httppost,
       avalue = form_ptr_arg(char *);
       if(Curl_bufref_ptr(&curr->showfilename))
         retval = CURL_FORMADD_OPTION_TWICE;
-      else if(Curl_bufref_memdup(&curr->showfilename, avalue, strlen(avalue)))
+      else if(Curl_bufref_memdup0(&curr->showfilename, avalue, strlen(avalue)))
         retval = CURL_FORMADD_MEMORY;
       break;
 
