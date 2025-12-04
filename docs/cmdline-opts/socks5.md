@@ -20,7 +20,8 @@ Example:
 Use the specified SOCKS5 proxy - but resolve the hostname locally. If the
 port number is not specified, it is assumed at port 1080.
 
-To specify proxy on a Unix domain socket, use localhost for host, e.g.
+To specify the proxy on a Unix domain socket, use localhost for host and
+append the absolute path to the domain socket. For example:
 `socks5://localhost/path/to/socket.sock` (the scheme may be omitted).
 
 This option overrides any previous use of --proxy, as they are mutually
