@@ -1919,7 +1919,8 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   uc = curl_url_get(uh, CURLUPART_PORT, &data->state.up.port,
                     CURLU_DEFAULT_PORT);
   if(uc) {
-    if(!curl_strequal("file", data->state.up.scheme))
+    if((uc == CURLUE_OUT_OF_MEMORY) ||
+       !curl_strequal("file", data->state.up.scheme))
       return CURLE_OUT_OF_MEMORY;
   }
   else {
