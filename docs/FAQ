@@ -666,7 +666,7 @@ FAQ
   does not require this, you do not need a client certificate.
 
   A client certificate is always used together with a private key, and the
-  private key has a pass phrase that protects it.
+  private key has a passphrase that protects it.
 
   SERVER CERTIFICATE
 

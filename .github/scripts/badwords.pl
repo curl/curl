@@ -30,13 +30,13 @@ my %wl;
 if($ARGV[0] eq "-w") {
     shift @ARGV;
     my $file = shift @ARGV;
-    open(W, "<$file");
+    open(W, "<$file") or die "Cannot open '$file': $!";
     while(<W>) {
         if(/^#/) {
             # allow #-comments
             next;
         }
-        if(/^([^:]*):(\d+):(.*)/) {
+        if(/^([^:]*):(\d*):(.*)/) {
             $wl{"$1:$2:$3"}=1;
             #print STDERR "whitelisted $1:$2:$3\n";
         }
@@ -93,7 +93,13 @@ sub file {
 
                 my $ch = "$f:$l:$w";
                 if($wl{$ch}) {
-                    # whitelisted
+                    # whitelisted filename + line + word
+                    print STDERR "$ch found but whitelisted\n";
+                    next;
+                }
+                $ch = $f . "::" . $w;
+                if($wl{$ch}) {
+                    # whitelisted filename + word
                     print STDERR "$ch found but whitelisted\n";
                     next;
                 }
