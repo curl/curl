@@ -185,8 +185,6 @@ static bool match_ip(int type, const char *token, size_t tokenlen,
  ****************************************************************/
 bool Curl_check_noproxy(const char *name, const char *no_proxy)
 {
-  char hostip[128];
-
   /*
    * If we do not have a hostname at all, like for example with a FILE
    * transfer, we have nothing to interrogate the noproxy list with.
