@@ -4382,7 +4382,6 @@ AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
     curl_typecheck_msg="no"
-    ;;
 )
 
 dnl ************************************************************
