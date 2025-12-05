@@ -68,7 +68,7 @@ static CURLcode test_lib1520(const char *URL)
   CURLcode res;
   CURL *curl;
   struct curl_slist *rcpt_list = NULL;
-  struct upload_status upload_ctx = {0};
+  struct upload_status upload_ctx = { 0 };
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

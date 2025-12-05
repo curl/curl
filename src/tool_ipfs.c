@@ -157,8 +157,8 @@ CURLcode ipfs_url_rewrite(CURLU *uh, const char *protocol, char **url,
   }
 
   /* check for unsupported gateway parts */
-  if(curl_url_get(gatewayurl, CURLUPART_QUERY, &gwquery, 0)
-                  != CURLUE_NO_QUERY) {
+  if(curl_url_get(gatewayurl, CURLUPART_QUERY, &gwquery, 0) !=
+     CURLUE_NO_QUERY) {
     result = CURLE_URL_MALFORMAT;
     goto clean;
   }

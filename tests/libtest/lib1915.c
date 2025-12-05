@@ -97,7 +97,7 @@ static CURLcode test_lib1915(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl;
-  struct state st = {0};
+  struct state st = { 0 };
 
   global_init(CURL_GLOBAL_ALL);
 

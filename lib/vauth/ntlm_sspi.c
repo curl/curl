@@ -209,7 +209,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   }
 
   /* Store the challenge for later use */
-  ntlm->input_token = Curl_memdup0((const char *)Curl_bufref_ptr(type2),
+  ntlm->input_token = Curl_memdup0(Curl_bufref_ptr(type2),
                                    Curl_bufref_len(type2));
   if(!ntlm->input_token)
     return CURLE_OUT_OF_MEMORY;
@@ -316,7 +316,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   }
 
   /* Return the response. */
-  result = Curl_bufref_memdup(out, ntlm->output_token, type_3_buf.cbBuffer);
+  result = Curl_bufref_memdup0(out, ntlm->output_token, type_3_buf.cbBuffer);
   Curl_auth_cleanup_ntlm(ntlm);
   return result;
 }

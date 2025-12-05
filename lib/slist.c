@@ -31,7 +31,7 @@
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
 {
-  struct curl_slist     *item;
+  struct curl_slist *item;
 
   /* if caller passed us a NULL, return now */
   if(!list)
@@ -57,8 +57,8 @@ static struct curl_slist *slist_get_last(struct curl_slist *list)
 struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
                                            const char *data)
 {
-  struct curl_slist     *last;
-  struct curl_slist     *new_item;
+  struct curl_slist *last;
+  struct curl_slist *new_item;
 
   DEBUGASSERT(data);
 
@@ -85,8 +85,7 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
  * bothersome, then simply create a separate _init function and call it
  * appropriately from within the program.
  */
-struct curl_slist *curl_slist_append(struct curl_slist *list,
-                                     const char *data)
+struct curl_slist *curl_slist_append(struct curl_slist *list, const char *data)
 {
   char *dupdata = curlx_strdup(data);
 
@@ -127,8 +126,8 @@ struct curl_slist *Curl_slist_duplicate(struct curl_slist *inlist)
 /* be nice and clean up resources */
 void curl_slist_free_all(struct curl_slist *list)
 {
-  struct curl_slist     *next;
-  struct curl_slist     *item;
+  struct curl_slist *next;
+  struct curl_slist *item;
 
   if(!list)
     return;

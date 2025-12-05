@@ -59,8 +59,8 @@ static int qname(const unsigned char **pkt, size_t *size)
   return 0;
 }
 
-#define QTYPE_A 1
-#define QTYPE_AAAA 28
+#define QTYPE_A     1
+#define QTYPE_AAAA  28
 #define QTYPE_HTTPS 0x41
 
 static const char *type2string(unsigned short qtype)
@@ -497,8 +497,7 @@ static int test_dnsd(int argc, char **argv)
   }
 
   flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));

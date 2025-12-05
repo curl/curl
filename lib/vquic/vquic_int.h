@@ -29,7 +29,7 @@
 
 #ifdef USE_HTTP3
 
-#define MAX_PKT_BURST 10
+#define MAX_PKT_BURST         10
 #define MAX_UDP_PAYLOAD_SIZE  1452
 
 struct cf_quic_ctx {

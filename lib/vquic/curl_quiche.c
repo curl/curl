@@ -46,6 +46,7 @@
 #include "curl_quiche.h"
 #include "../transfer.h"
 #include "../url.h"
+#include "../bufref.h"
 #include "../curlx/inet_pton.h"
 #include "../curlx/warnless.h"
 #include "../vtls/openssl.h"
@@ -64,11 +65,11 @@
  * stream buffer to not keep spares. Memory consumption goes down when streams
  * run empty, have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE) / 2
 /* Receive and Send max number of chunks just follows from the
  * chunk size and window size */
 #define H3_STREAM_RECV_CHUNKS \
-          (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
+  (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE)
 
 /*
  * Store quiche version info in this buffer.
@@ -1023,8 +1024,8 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
       goto out;
     }
     else {
-      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRId64,
-                  data->state.url, rv);
+      CURL_TRC_CF(data, cf, "send_request(%s) -> %" PRIu64,
+                  Curl_bufref_ptr(&data->state.url), rv);
     }
     result = CURLE_SEND_ERROR;
     goto out;
@@ -1038,7 +1039,7 @@ static CURLcode h3_open_stream(struct Curl_cfilter *cf,
 
   if(Curl_trc_is_verbose(data)) {
     infof(data, "[HTTP/3] [%" PRIu64 "] OPENED stream for %s",
-          stream->id, data->state.url);
+          stream->id, Curl_bufref_ptr(&data->state.url));
     for(i = 0; i < nheader; ++i) {
       infof(data, "[HTTP/3] [%" PRIu64 "] [%.*s: %.*s]", stream->id,
             (int)nva[i].name_len, nva[i].name,
@@ -1227,7 +1228,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   int rv;
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr;
-  static const struct alpn_spec ALPN_SPEC_H3 = {{ "h3" }, 1};
+  static const struct alpn_spec ALPN_SPEC_H3 = { { "h3" }, 1 };
 
   DEBUGASSERT(ctx->q.sockfd != CURL_SOCKET_BAD);
   DEBUGASSERT(ctx->initialized);
@@ -1492,14 +1493,14 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
 
   switch(query) {
   case CF_QUERY_MAX_CONCURRENT: {
-    uint64_t max_streams = CONN_ATTACHED(cf->conn);
+    uint64_t max_streams = cf->conn->attached_xfers;
     if(!ctx->goaway && ctx->qconn) {
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
     *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%u in use)",
-                cf->conn->connection_id, *pres1, CONN_ATTACHED(cf->conn));
+                cf->conn->connection_id, *pres1, cf->conn->attached_xfers);
     return CURLE_OK;
   }
   case CF_QUERY_CONNECT_REPLY_MS:

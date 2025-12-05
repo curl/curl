@@ -274,7 +274,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)cbp;
   struct SockInfo *fdp = (struct SockInfo *)sockp;
-  const char *whatstr[] = {"none", "IN", "OUT", "INOUT", "REMOVE"};
+  const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   fprintf(MSG_OUT, "socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {

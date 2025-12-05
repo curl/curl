@@ -42,7 +42,7 @@ static size_t write_response(void *ptr, size_t size, size_t nmemb, void *data)
   return fwrite(ptr, size, nmemb, writehere);
 }
 
-#define FTPBODY "ftp-list"
+#define FTPBODY    "ftp-list"
 #define FTPHEADERS "ftp-responses"
 
 int main(void)

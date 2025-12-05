@@ -75,7 +75,7 @@ const char *param2text(ParameterError error)
 int SetHTTPrequest(HttpReq req, HttpReq *store)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
-  const char *reqname[]= {
+  const char *reqname[] = {
     "", /* unspec */
     "GET (-G, --get)",
     "HEAD (-I, --head)",
@@ -99,7 +99,7 @@ int SetHTTPrequest(HttpReq req, HttpReq *store)
 void customrequest_helper(HttpReq req, char *method)
 {
   /* this mirrors the HttpReq enum in tool_sdecls.h */
-  const char *dflt[]= {
+  const char *dflt[] = {
     "GET",
     "GET",
     "HEAD",

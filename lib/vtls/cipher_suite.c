@@ -157,7 +157,7 @@ struct cs_entry {
 };
 
 /* !checksrc! disable COMMANOSPACE all */
-static const struct cs_entry cs_list [] = {
+static const struct cs_entry cs_list[] = {
   /* TLS 1.3 ciphers */
 #if defined(USE_MBEDTLS) || defined(USE_RUSTLS)
   CS_ENTRY(0x1301, TLS,AES,128,GCM,SHA256,,,),
@@ -549,7 +549,7 @@ static const struct cs_entry cs_list [] = {
 
 static int cs_str_to_zip(const char *cs_str, size_t cs_len, uint8_t zip[6])
 {
-  uint8_t indexes[8] = {0};
+  uint8_t indexes[8] = { 0 };
   const char *entry, *cur;
   const char *nxt = cs_str;
   const char *end = cs_str + cs_len;
@@ -597,7 +597,7 @@ static int cs_str_to_zip(const char *cs_str, size_t cs_len, uint8_t zip[6])
 
 static int cs_zip_to_str(const uint8_t zip[6], char *buf, size_t buf_size)
 {
-  uint8_t indexes[8] = {0};
+  uint8_t indexes[8] = { 0 };
   const char *entry;
   char separator = '-';
   int idx, i, r;

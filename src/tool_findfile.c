@@ -51,7 +51,7 @@ static const struct finder conf_list[] = {
 #ifdef _WIN32
   { "USERPROFILE", NULL, FALSE },
   { "APPDATA", NULL, FALSE },
-  { "USERPROFILE", "\\Application Data", FALSE},
+  { "USERPROFILE", "\\Application Data", FALSE },
 #endif
   /* these are for .curlrc if XDG_CONFIG_HOME is not defined */
   { "CURL_HOME", "/.config", TRUE },

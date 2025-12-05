@@ -620,7 +620,7 @@ static void cpool_discard_conn(struct cpool *cpool,
   if(CONN_INUSE(conn) && !aborted) {
     CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
                " still in use by %u transfers", conn->connection_id,
-               CONN_ATTACHED(conn));
+               conn->attached_xfers);
     return;
   }
 
@@ -664,7 +664,7 @@ void Curl_conn_terminate(struct Curl_easy *data,
    * are other users of it */
   if(CONN_INUSE(conn) && !aborted) {
     DEBUGASSERT(0); /* does this ever happen? */
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %u", CONN_ATTACHED(conn)));
+    DEBUGF(infof(data, "conn terminate when inuse: %u", conn->attached_xfers));
     return;
   }
 

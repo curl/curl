@@ -124,7 +124,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 #ifdef HAVE_SENDMSG
   struct iovec msg_iov;
-  struct msghdr msg = {0};
+  struct msghdr msg = { 0 };
   ssize_t rv;
 #if defined(__linux__) && defined(UDP_SEGMENT)
   uint8_t msg_ctrl[32];
@@ -153,8 +153,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #endif
 
-  while((rv = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
-        SOCKERRNO == SOCKEINTR)
+  while((rv = sendmsg(qctx->sockfd, &msg, 0)) == -1 && SOCKERRNO == SOCKEINTR)
     ;
 
   if(!curlx_sztouz(rv, psent)) {
@@ -516,7 +515,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       }
       curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
-                  rc, SOCKERRNO, errstr);
+            rc, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -581,7 +580,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
       }
       curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
-                  rv, SOCKERRNO, errstr);
+            rv, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }

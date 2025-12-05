@@ -173,7 +173,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 
 /* On Windows, we sometimes get this for a broken pipe, seemingly
  * when the client just closed stdin? */
-#define CURL_WIN32_EPIPE      109
+#define CURL_WIN32_EPIPE 109
 
 /*
  * fullread is a wrapper around the read() function. This will repeat the call
@@ -888,7 +888,6 @@ static bool disc_handshake(void)
       logmsg("Throwing away data bytes");
       if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
         return FALSE;
-
     }
     else if(!memcmp("QUIT", buffer, 4)) {
       /* just die */
@@ -1339,31 +1338,31 @@ static int test_sockfilt(int argc, char *argv[])
     /* Active mode, we should connect to the given port number */
     mode = ACTIVE;
     switch(socket_domain) {
-      case AF_INET:
-        memset(&me.sa4, 0, sizeof(me.sa4));
-        me.sa4.sin_family = AF_INET;
-        me.sa4.sin_port = htons(server_connectport);
-        me.sa4.sin_addr.s_addr = INADDR_ANY;
-        if(!addr)
-          addr = "127.0.0.1";
-        curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
+    case AF_INET:
+      memset(&me.sa4, 0, sizeof(me.sa4));
+      me.sa4.sin_family = AF_INET;
+      me.sa4.sin_port = htons(server_connectport);
+      me.sa4.sin_addr.s_addr = INADDR_ANY;
+      if(!addr)
+        addr = "127.0.0.1";
+      curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
-        rc = connect(sock, &me.sa, sizeof(me.sa4));
-        break;
+      rc = connect(sock, &me.sa, sizeof(me.sa4));
+      break;
 #ifdef USE_IPV6
-      case AF_INET6:
-        memset(&me.sa6, 0, sizeof(me.sa6));
-        me.sa6.sin6_family = AF_INET6;
-        me.sa6.sin6_port = htons(server_connectport);
-        if(!addr)
-          addr = "::1";
-        curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
+    case AF_INET6:
+      memset(&me.sa6, 0, sizeof(me.sa6));
+      me.sa6.sin6_family = AF_INET6;
+      me.sa6.sin6_port = htons(server_connectport);
+      if(!addr)
+        addr = "::1";
+      curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
-        rc = connect(sock, &me.sa, sizeof(me.sa6));
-        break;
+      rc = connect(sock, &me.sa, sizeof(me.sa6));
+      break;
 #endif /* USE_IPV6 */
-      default:
-        rc = 1;
+    default:
+      rc = 1;
     }
     if(rc) {
       error = SOCKERRNO;

@@ -26,8 +26,8 @@
 #ifndef CURL_STATICLIB
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(push)
-#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
+#pragma warning(push)
+#pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
 /* when libcurl is *not* static and we build libtests, the global pointers in
@@ -44,7 +44,7 @@ curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 #endif /* !CURL_STATICLIB */

@@ -32,6 +32,7 @@
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
+#include "bufref.h"
 #include "curlx/strparse.h"
 
 /*
@@ -91,8 +92,10 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
                              const char **param_charp)
 {
   switch(info) {
-  case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->state.url ? data->state.url : "";
+  case CURLINFO_EFFECTIVE_URL: {
+    const char *s = Curl_bufref_ptr(&data->state.url);
+    *param_charp = s ? s : "";
+  }
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];
@@ -145,7 +148,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
     break;
   case CURLINFO_REFERER:
     /* Return the referrer header for this request, or NULL if unset */
-    *param_charp = data->state.referer;
+    *param_charp = Curl_bufref_ptr(&data->state.referer);
     break;
   case CURLINFO_PRIMARY_IP:
     /* Return the ip address of the most recent (primary) connection */

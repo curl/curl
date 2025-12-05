@@ -225,7 +225,7 @@ int main(void)
     char file2[] = "your-face.jpg";
     /* add null character into htmlbuffer, to demonstrate that
        transfers of buffers containing null characters actually work
-    */
+     */
     htmlbuffer[8] = '\0';
 
     /* Add simple name/content section */

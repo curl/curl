@@ -38,10 +38,9 @@ static uint32_t uint32_hash_hash(uint32_t id, uint32_t slots)
   return (id % slots);
 }
 
-
 struct uint_hash_entry {
   struct uint_hash_entry *next;
-  void   *value;
+  void *value;
   uint32_t id;
 };
 
@@ -111,8 +110,8 @@ static void uint32_hash_elem_link(struct uint_hash *h,
   ++h->size;
 }
 
-#define CURL_UINT32_HASH_SLOT(h,id) h->table[uint32_hash_hash(id, h->slots)]
-#define CURL_UINT32_HASH_SLOT_ADDR(h,id) &CURL_UINT32_HASH_SLOT(h,id)
+#define CURL_UINT32_HASH_SLOT(h, id) h->table[uint32_hash_hash(id, h->slots)]
+#define CURL_UINT32_HASH_SLOT_ADDR(h, id) &CURL_UINT32_HASH_SLOT(h, id)
 
 bool Curl_uint32_hash_set(struct uint_hash *h, uint32_t id, void *value)
 {

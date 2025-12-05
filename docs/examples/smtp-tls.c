@@ -38,9 +38,9 @@
  * Note that this example requires libcurl 7.20.0 or above.
  */
 
-#define FROM_MAIL     "<sender@example.com>"
-#define TO_MAIL       "<recipient@example.com>"
-#define CC_MAIL       "<info@example.com>"
+#define FROM_MAIL "<sender@example.com>"
+#define TO_MAIL   "<recipient@example.com>"
+#define CC_MAIL   "<info@example.com>"
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -93,7 +93,7 @@ int main(void)
   curl = curl_easy_init();
   if(curl) {
     struct curl_slist *recipients = NULL;
-    struct upload_status upload_ctx = {0};
+    struct upload_status upload_ctx = { 0 };
 
     /* Set username and password */
     curl_easy_setopt(curl, CURLOPT_USERNAME, "user");

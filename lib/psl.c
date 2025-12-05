@@ -91,7 +91,7 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
         pslcache->expires = expires;
       }
     }
-    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
+    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL); /* Release exclusive lock. */
     Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   }
   psl = pslcache->psl;

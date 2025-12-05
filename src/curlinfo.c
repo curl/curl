@@ -39,7 +39,7 @@
 #include "fake_addrinfo.h" /* for USE_FAKE_GETADDRINFO */
 #include <stdio.h>
 
-static const char *disabled[]={
+static const char *disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
   "OFF"

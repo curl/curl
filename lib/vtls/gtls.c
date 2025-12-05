@@ -386,7 +386,7 @@ gnutls_set_ssl_version_min_max(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  failf(data, "GnuTLS: cannot set ssl protocol");
+  failf(data, "GnuTLS: cannot set TLS protocol");
   return CURLE_SSL_CONNECT_ERROR;
 }
 
@@ -460,7 +460,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
 #else
     rc = gnutls_certificate_set_x509_system_trust(creds);
     if(rc < 0)
-      infof(data, "error reading native ca store (%s), continuing anyway",
+      infof(data, "error reading native CA store (%s), continuing anyway",
             gnutls_strerror(rc));
     else {
       infof(data, "  Native: %d certificates from system trust", rc);
@@ -483,7 +483,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
                                                GNUTLS_X509_FMT_PEM);
     creds_are_empty = creds_are_empty && (rc <= 0);
     if(rc < 0) {
-      infof(data, "error reading ca cert blob (%s)%s", gnutls_strerror(rc),
+      infof(data, "error reading CA cert blob (%s)%s", gnutls_strerror(rc),
             (creds_are_empty ? "" : ", continuing anyway"));
       if(creds_are_empty) {
         ssl_config->certverifyresult = rc;
@@ -504,7 +504,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
                                                 GNUTLS_X509_FMT_PEM);
     creds_are_empty = creds_are_empty && (rc <= 0);
     if(rc < 0) {
-      infof(data, "error reading ca cert file %s (%s)%s",
+      infof(data, "error reading CA cert file %s (%s)%s",
             config->CAfile, gnutls_strerror(rc),
             (creds_are_empty ? "" : ", continuing anyway"));
       if(creds_are_empty) {
@@ -522,7 +522,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
                                                GNUTLS_X509_FMT_PEM);
     creds_are_empty = creds_are_empty && (rc <= 0);
     if(rc < 0) {
-      infof(data, "error reading ca cert file %s (%s)%s",
+      infof(data, "error reading CA cert file %s (%s)%s",
             config->CApath, gnutls_strerror(rc),
             (creds_are_empty ? "" : ", continuing anyway"));
       if(creds_are_empty) {
@@ -542,7 +542,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
     rc = gnutls_certificate_set_x509_crl_file(creds, config->CRLfile,
                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
-      failf(data, "error reading crl file %s (%s)",
+      failf(data, "error reading CRL file %s (%s)",
             config->CRLfile, gnutls_strerror(rc));
       return CURLE_SSL_CRL_BADFILE;
     }

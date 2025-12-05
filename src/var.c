@@ -35,7 +35,7 @@
 #include "var.h"
 
 #define MAX_EXPAND_CONTENT 10000000
-#define MAX_VAR_LEN 128 /* max length of a name */
+#define MAX_VAR_LEN        128 /* max length of a name */
 
 /* free everything */
 void varcleanup(void)
@@ -53,8 +53,7 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
 {
   struct tool_var *list = global->variables;
   while(list) {
-    if((strlen(list->name) == nlen) &&
-       !strncmp(name, list->name, nlen)) {
+    if((strlen(list->name) == nlen) && !strncmp(name, list->name, nlen)) {
       return list;
     }
     list = list->next;
@@ -63,18 +62,18 @@ static const struct tool_var *varcontent(const char *name, size_t nlen)
 }
 
 #define ENDOFFUNC(x) (((x) == '}') || ((x) == ':'))
-#define FUNCMATCH(ptr,name,len)                         \
+#define FUNCMATCH(ptr, name, len)                   \
   (!strncmp(ptr, name, len) && ENDOFFUNC(ptr[len]))
 
-#define FUNC_TRIM "trim"
-#define FUNC_TRIM_LEN (sizeof(FUNC_TRIM) - 1)
-#define FUNC_JSON "json"
-#define FUNC_JSON_LEN (sizeof(FUNC_JSON) - 1)
-#define FUNC_URL "url"
-#define FUNC_URL_LEN (sizeof(FUNC_URL) - 1)
-#define FUNC_B64 "b64"
-#define FUNC_B64_LEN (sizeof(FUNC_B64) - 1)
-#define FUNC_64DEC "64dec" /* base64 decode */
+#define FUNC_TRIM      "trim"
+#define FUNC_TRIM_LEN  (sizeof(FUNC_TRIM) - 1)
+#define FUNC_JSON      "json"
+#define FUNC_JSON_LEN  (sizeof(FUNC_JSON) - 1)
+#define FUNC_URL       "url"
+#define FUNC_URL_LEN   (sizeof(FUNC_URL) - 1)
+#define FUNC_B64       "b64"
+#define FUNC_B64_LEN   (sizeof(FUNC_B64) - 1)
+#define FUNC_64DEC     "64dec" /* base64 decode */
 #define FUNC_64DEC_LEN (sizeof(FUNC_64DEC) - 1)
 
 static ParameterError varfunc(char *c, /* content */
@@ -105,7 +104,7 @@ static ParameterError varfunc(char *c, /* content */
           c++;
           len--;
         }
-        while(len && ISSPACE(c[len-1]))
+        while(len && ISSPACE(c[len - 1]))
           len--;
       }
       /* put it in the output */
@@ -208,8 +207,7 @@ static ParameterError varfunc(char *c, /* content */
   return err;
 }
 
-ParameterError varexpand(const char *line, struct dynbuf *out,
-                         bool *replaced)
+ParameterError varexpand(const char *line, struct dynbuf *out, bool *replaced)
 {
   CURLcode result;
   char *envp;
@@ -274,13 +272,12 @@ ParameterError varexpand(const char *line, struct dynbuf *out,
         name[nlen] = 0;
 
         /* verify that the name looks sensible */
-        for(i = 0; (i < nlen) &&
-              (ISALNUM(name[i]) || (name[i] == '_')); i++);
+        for(i = 0; (i < nlen) && (ISALNUM(name[i]) || (name[i] == '_')); i++)
+          ;
         if(i != nlen) {
           warnf("bad variable name: %s", name);
           /* insert the text as-is since this is not an env variable */
-          result = curlx_dyn_addn(out, envp - prefix,
-                                  clp - envp + prefix + 2);
+          result = curlx_dyn_addn(out, envp - prefix, clp - envp + prefix + 2);
           if(result)
             return PARAM_NO_MEM;
         }

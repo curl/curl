@@ -76,15 +76,15 @@ struct socksd_configurable {
   char password[256];
 };
 
-#define CONFIG_VERSION 5
-#define CONFIG_NMETHODS_MIN 1 /* unauth, gssapi, auth */
-#define CONFIG_NMETHODS_MAX 3
+#define CONFIG_VERSION         5
+#define CONFIG_NMETHODS_MIN    1 /* unauth, gssapi, auth */
+#define CONFIG_NMETHODS_MAX    3
 #define CONFIG_RESPONSEVERSION CONFIG_VERSION
-#define CONFIG_RESPONSEMETHOD 0 /* no auth */
-#define CONFIG_REQCMD 1 /* CONNECT */
-#define CONFIG_PORT backendport
-#define CONFIG_ADDR backendaddr
-#define CONFIG_CONNECTREP 0
+#define CONFIG_RESPONSEMETHOD  0 /* no auth */
+#define CONFIG_REQCMD          1 /* CONNECT */
+#define CONFIG_PORT            backendport
+#define CONFIG_ADDR            backendaddr
+#define CONFIG_CONNECTREP      0
 
 static struct socksd_configurable s_config;
 
@@ -185,24 +185,24 @@ static void socksd_getconfig(void)
 }
 
 /* RFC 1928, SOCKS5 byte index */
-#define SOCKS5_VERSION 0
+#define SOCKS5_VERSION  0
 #define SOCKS5_NMETHODS 1 /* number of methods that is listed */
 
 /* in the request: */
-#define SOCKS5_REQCMD 1
+#define SOCKS5_REQCMD   1
 #define SOCKS5_RESERVED 2
-#define SOCKS5_ATYP 3
-#define SOCKS5_DSTADDR 4
+#define SOCKS5_ATYP     3
+#define SOCKS5_DSTADDR  4
 
 /* connect response */
-#define SOCKS5_REP 1
+#define SOCKS5_REP     1
 #define SOCKS5_BNDADDR 4
 
 /* auth request */
-#define SOCKS5_ULEN 1
+#define SOCKS5_ULEN  1
 #define SOCKS5_UNAME 2
 
-#define SOCKS4_CD 1
+#define SOCKS4_CD      1
 #define SOCKS4_DSTPORT 2
 
 /* connect to a given IPv4 address, not the one asked for */

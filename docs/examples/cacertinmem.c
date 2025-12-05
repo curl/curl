@@ -83,7 +83,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *pointer)
   BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
   X509_STORE *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
   ossl_valsize_t i;
-  STACK_OF(X509_INFO) *inf;
+  STACK_OF(X509_INFO) * inf;
 
   (void)curl;
   (void)pointer;

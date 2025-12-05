@@ -27,7 +27,7 @@
  */
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for '_snprintf(), fopen(), localtime(),
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), localtime(),
                                     strerror() */
 #endif
 #endif
@@ -72,8 +72,8 @@ static int my_gettimeofday(struct timeval *tp, void *tzp)
 {
   (void)tzp;
   if(tp) {
-    /* Offset between 1601-01-01 and 1970-01-01 in 100 nanosec units */
-    #define WIN32_FT_OFFSET (116444736000000000)
+/* Offset between 1601-01-01 and 1970-01-01 in 100 nanosec units */
+#define WIN32_FT_OFFSET (116444736000000000)
     union {
       CURL_TYPEOF_CURL_OFF_T ns100; /* time since 1 Jan 1601 in 100ns units */
       FILETIME ft;
