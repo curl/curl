@@ -48,6 +48,7 @@ CURLX_C = \
 
 # All libtest programs
 TESTS_C = \
+  cli_ftp_upload.c \
   cli_h2_pausing.c \
   cli_h2_serverpush.c \
   cli_h2_upgrade_extreme.c \
