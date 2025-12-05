@@ -2115,7 +2115,7 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     return CURLE_FTP_ACCEPT_FAILED;
   }
 #if !defined(HAVE_ACCEPT4)
-#ifdef HAVE_FCNTL)
+#ifdef HAVE_FCNTL
   if(fcntl(s_accepted, F_SETFD, FD_CLOEXEC) < 0) {
     failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
