@@ -66,15 +66,14 @@ static wchar_t *fn_convert_UTF8_to_wchar(const char *str_utf8)
     if(str_w_len > 0) {
       str_w = CURLX_MALLOC(str_w_len * sizeof(wchar_t));
       if(str_w) {
-        if(MultiByteToWideChar(CP_UTF8, 0, str_utf8, -1, str_w,
-                               str_w_len) == 0) {
+        if(MultiByteToWideChar(CP_UTF8, 0,
+                               str_utf8, -1, str_w, str_w_len) == 0) {
           CURLX_FREE(str_w);
           return NULL;
         }
       }
     }
   }
-
   return str_w;
 }
 #endif
