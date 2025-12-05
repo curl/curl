@@ -46,11 +46,6 @@
    4.   if you do not use a crypto engine:
    4.1. set pKeyName to the filename of your client key
    4.2. if the format of the key file is DER, set pKeyType to "DER"
-
-   !! verify of the server certificate is not implemented here !!
-
-   **** This example only works with libcurl 7.9.3 and later! ****
-
 */
 
 int main(void)
@@ -68,11 +63,11 @@ int main(void)
   const char *pKeyType;
 
 #ifdef USE_ENGINE
-  pKeyName  = "rsa_test";
-  pKeyType  = "ENG";
+  pKeyName = "rsa_test";
+  pKeyType = "ENG";
 #else
-  pKeyName  = "testkey.pem";
-  pKeyType  = "PEM";
+  pKeyName = "testkey.pem";
+  pKeyType = "PEM";
 #endif
 
   res = curl_global_init(CURL_GLOBAL_ALL);

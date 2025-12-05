@@ -42,6 +42,23 @@ elif [ "${APPVEYOR_BUILD_WORKER_IMAGE}" = 'Visual Studio 2019' ]; then
 fi
 
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  # Install custom cmake version
+  if [ -n "${CMAKE_VERSION:-}" ]; then
+    cmake_ver=$(printf '%02d%02d' \
+      "$(echo "${CMAKE_VERSION}" | cut -f1 -d.)" \
+      "$(echo "${CMAKE_VERSION}" | cut -f2 -d.)")
+    if [ "${cmake_ver}" -ge '0320' ]; then
+      fn="cmake-${CMAKE_VERSION}-windows-x86_64"
+    else
+      fn="cmake-${CMAKE_VERSION}-win64-x64"
+    fi
+    curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 --retry-connrefused \
+      --location "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.zip" --output bin.zip
+    7z x -y bin.zip >/dev/null
+    rm -f bin.zip
+    PATH="$PWD/${fn}/bin:$PATH"
+  fi
+
   # Set env CHKPREFILL to the value '_chkprefill' to compare feature detection
   # results with and without the pre-fill feature. They have to match.
   for _chkprefill in '' ${CHKPREFILL:-}; do

@@ -33,7 +33,7 @@
 
 #ifdef USE_SCHANNEL
 #ifndef USE_WINDOWS_SSPI
-#  error "cannot compile SCHANNEL support without SSPI."
+#error "cannot compile SCHANNEL support without SSPI."
 #endif
 
 #include "schannel.h"
@@ -49,15 +49,11 @@
 #include "hostcheck.h"
 #include "../curlx/version_win32.h"
 
-/* The last #include file should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
-#define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
-#define END_CERT "\n-----END CERTIFICATE-----"
+#define BEGIN_CERT      "-----BEGIN CERTIFICATE-----"
+#define END_CERT        "\n-----END CERTIFICATE-----"
 
 struct cert_chain_engine_config_win8 {
   DWORD cbSize;
@@ -161,8 +157,8 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
         const CERT_CONTEXT *cert_context = NULL;
         BOOL add_cert_result = FALSE;
         DWORD actual_content_type = 0;
-        DWORD cert_size = (DWORD)
-          ((end_cert_ptr + end_cert_len) - begin_cert_ptr);
+        DWORD cert_size =
+          (DWORD)((end_cert_ptr + end_cert_len) - begin_cert_ptr);
 
         cert_blob.pbData = (BYTE *)CURL_UNCONST(begin_cert_ptr);
         cert_blob.cbData = cert_size;
@@ -242,13 +238,11 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
 
   if(result == CURLE_OK) {
     if(!num_certs) {
-      infof(data,
-            "schannel: did not add any certificates from CA file '%s'",
+      infof(data, "schannel: did not add any certificates from CA file '%s'",
             ca_file_text);
     }
     else {
-      infof(data,
-            "schannel: added %d certificate(s) from CA file '%s'",
+      infof(data, "schannel: added %d certificate(s) from CA file '%s'",
             num_certs, ca_file_text);
     }
   }
@@ -270,9 +264,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   ca_file_tstr = curlx_convert_UTF8_to_tchar(ca_file);
   if(!ca_file_tstr) {
     char buffer[WINAPI_ERROR_LEN];
-    failf(data,
-          "schannel: invalid path name for CA file '%s': %s",
-          ca_file,
+    failf(data, "schannel: invalid path name for CA file '%s': %s", ca_file,
           curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
@@ -292,9 +284,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
                               NULL);
   if(ca_file_handle == INVALID_HANDLE_VALUE) {
     char buffer[WINAPI_ERROR_LEN];
-    failf(data,
-          "schannel: failed to open CA file '%s': %s",
-          ca_file,
+    failf(data, "schannel: failed to open CA file '%s': %s", ca_file,
           curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
@@ -302,8 +292,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
 
   if(!GetFileSizeEx(ca_file_handle, &file_size)) {
     char buffer[WINAPI_ERROR_LEN];
-    failf(data,
-          "schannel: failed to determine size of CA file '%s': %s",
+    failf(data, "schannel: failed to determine size of CA file '%s': %s",
           ca_file,
           curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
     result = CURLE_SSL_CACERT_BADFILE;
@@ -311,15 +300,14 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
   }
 
   if(file_size.QuadPart > MAX_CAFILE_SIZE) {
-    failf(data,
-          "schannel: CA file exceeds max size of %u bytes",
+    failf(data, "schannel: CA file exceeds max size of %u bytes",
           MAX_CAFILE_SIZE);
     result = CURLE_SSL_CACERT_BADFILE;
     goto cleanup;
   }
 
   ca_file_bufsize = (size_t)file_size.QuadPart;
-  ca_file_buffer = (char *)malloc(ca_file_bufsize + 1);
+  ca_file_buffer = (char *)curlx_malloc(ca_file_bufsize + 1);
   if(!ca_file_buffer) {
     result = CURLE_OUT_OF_MEMORY;
     goto cleanup;
@@ -332,9 +320,7 @@ static CURLcode add_certs_file_to_store(HCERTSTORE trust_store,
     if(!ReadFile(ca_file_handle, ca_file_buffer + total_bytes_read,
                  bytes_to_read, &bytes_read, NULL)) {
       char buffer[WINAPI_ERROR_LEN];
-      failf(data,
-            "schannel: failed to read from CA file '%s': %s",
-            ca_file,
+      failf(data, "schannel: failed to read from CA file '%s': %s", ca_file,
             curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
@@ -459,12 +445,11 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 }
 
 /*
-* Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
-* and populates the buffer with IPv4/IPv6 info.
-*/
+ * Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
+ * and populates the buffer with IPv4/IPv6 info.
+ */
 
-static bool get_num_host_info(struct num_ip_data *ip_blob,
-                              LPCSTR hostname)
+static bool get_num_host_info(struct num_ip_data *ip_blob, LPCSTR hostname)
 {
   struct in_addr ia;
   struct in6_addr ia6;
@@ -524,9 +509,8 @@ static bool get_alt_name_info(struct Curl_easy *data,
                           &decode_para,
                           alt_name_info,
                           alt_name_info_size)) {
-    failf(data,
-          "schannel: CryptDecodeObjectEx() returned no alternate name "
-          "information.");
+    failf(data, "schannel: CryptDecodeObjectEx() returned no alternate name "
+                "information.");
     return result;
   }
   result = TRUE;
@@ -534,8 +518,7 @@ static bool get_alt_name_info(struct Curl_easy *data,
 }
 
 /* Verify the server's hostname */
-CURLcode Curl_verify_host(struct Curl_cfilter *cf,
-                          struct Curl_easy *data)
+CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   struct ssl_connect_data *connssl = cf->ctx;
@@ -606,7 +589,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     /* CertGetNameString guarantees that the returned name will not contain
      * embedded null bytes. This appears to be undocumented behavior.
      */
-    cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
+    cert_hostname_buff = (LPTSTR)curlx_malloc(len * sizeof(TCHAR));
     if(!cert_hostname_buff) {
       result = CURLE_OUT_OF_MEMORY;
       goto cleanup;
@@ -844,7 +827,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
          * list URL, or when the list could not be downloaded because the
          * server is currently unreachable. */
         dwTrustErrorMask &= ~(DWORD)(CERT_TRUST_REVOCATION_STATUS_UNKNOWN |
-          CERT_TRUST_IS_OFFLINE_REVOCATION);
+                                     CERT_TRUST_IS_OFFLINE_REVOCATION);
       }
 
       if(dwTrustErrorMask) {

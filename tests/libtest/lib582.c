@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t582_Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
@@ -72,7 +70,7 @@ static void t582_addFd(struct t582_Sockets *sockets, curl_socket_t fd,
    * Allocate array storage when required.
    */
   if(!sockets->sockets) {
-    sockets->sockets = malloc(sizeof(curl_socket_t) * 20U);
+    sockets->sockets = curlx_malloc(sizeof(curl_socket_t) * 20U);
     if(!sockets->sockets)
       return;
     sockets->max_count = 20;
@@ -177,7 +175,7 @@ static ssize_t t582_getMicroSecondTimeout(struct curltime *timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set* fdset,
+static void t582_updateFdSet(struct t582_Sockets *sockets, fd_set *fdset,
                              curl_socket_t *maxFd)
 {
   int i;
@@ -231,9 +229,9 @@ static CURLcode test_lib582(const char *URL)
   int hd;
   struct_stat file_info;
   CURLM *multi = NULL;
-  struct t582_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
+  struct t582_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;
-  struct curltime timeout = {0};
+  struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
   assert(test_argc >= 5);
@@ -306,7 +304,7 @@ static CURLcode test_lib582(const char *URL)
   while(!t582_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
-    struct timeval tv = {0};
+    struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
     FD_ZERO(&readSet);
@@ -359,8 +357,8 @@ test_cleanup:
   curlx_fclose(hd_src);
 
   /* free local memory */
-  free(sockets.read.sockets);
-  free(sockets.write.sockets);
+  curlx_free(sockets.read.sockets);
+  curlx_free(sockets.write.sockets);
 
   return res;
 }

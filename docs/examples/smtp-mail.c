@@ -37,9 +37,9 @@
 /* The libcurl options want plain addresses, the viewable headers in the mail
  * can get a full name as well.
  */
-#define FROM_ADDR    "<sender@example.org>"
-#define TO_ADDR      "<addressee@example.net>"
-#define CC_ADDR      "<info@example.org>"
+#define FROM_ADDR "<sender@example.org>"
+#define TO_ADDR   "<addressee@example.net>"
+#define CC_ADDR   "<info@example.org>"
 
 #define FROM_MAIL "Sender Person " FROM_ADDR
 #define TO_MAIL   "A Receiver " TO_ADDR
@@ -70,7 +70,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   size_t room = size * nmemb;
   size_t len;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 

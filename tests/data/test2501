@@ -65,5 +65,8 @@ Via: 3 nghttpx
 
 moo
 </protocol>
+<limits>
+Maximum allocated: 1900000
+</limits>
 </verify>
 </testcase>

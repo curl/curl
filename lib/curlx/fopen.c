@@ -23,11 +23,8 @@
  ***************************************************************************/
 
 /*
- * This file is 'mem-include-scan' clean, which means its memory allocations
- * are not tracked by the curl memory tracker memdebug, so they must not use
- * `CURLDEBUG` macro replacements in memdebug.h for free, malloc, etc. To avoid
- * these macro replacements, wrap the names in parentheses to call the original
- * versions: `ptr = (malloc)(123)`, `(free)(ptr)`, etc.
+ * Use system allocators to avoid infinite recursion when called by curl's
+ * memory tracker memdebug functions.
  */
 
 #include "../curl_setup.h"
@@ -103,7 +100,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
     goto cleanup;
   if(!needed || needed >= max_path_len)
     goto cleanup;
-  ibuf = (malloc)(needed * sizeof(wchar_t));
+  ibuf = CURLX_MALLOC(needed * sizeof(wchar_t));
   if(!ibuf)
     goto cleanup;
   if(mbstowcs_s(&count, ibuf, needed, in, needed - 1))
@@ -124,7 +121,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
   /* skip paths that are not excessive and do not need modification */
   if(needed <= MAX_PATH)
     goto cleanup;
-  fbuf = (malloc)(needed * sizeof(wchar_t));
+  fbuf = CURLX_MALLOC(needed * sizeof(wchar_t));
   if(!fbuf)
     goto cleanup;
   count = (size_t)GetFullPathNameW(in_w, (DWORD)needed, fbuf, NULL);
@@ -157,16 +154,16 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
-      temp = (malloc)(needed * sizeof(wchar_t));
+      temp = CURLX_MALLOC(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
 
       if(wcsncpy_s(temp, needed, L"\\\\?\\UNC\\", 8)) {
-        (free)(temp);
+        CURLX_FREE(temp);
         goto cleanup;
       }
       if(wcscpy_s(temp + 8, needed, fbuf + 2)) {
-        (free)(temp);
+        CURLX_FREE(temp);
         goto cleanup;
       }
     }
@@ -176,21 +173,21 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
       if(needed > max_path_len)
         goto cleanup;
 
-      temp = (malloc)(needed * sizeof(wchar_t));
+      temp = CURLX_MALLOC(needed * sizeof(wchar_t));
       if(!temp)
         goto cleanup;
 
       if(wcsncpy_s(temp, needed, L"\\\\?\\", 4)) {
-        (free)(temp);
+        CURLX_FREE(temp);
         goto cleanup;
       }
       if(wcscpy_s(temp + 4, needed, fbuf)) {
-        (free)(temp);
+        CURLX_FREE(temp);
         goto cleanup;
       }
     }
 
-    (free)(fbuf);
+    CURLX_FREE(fbuf);
     fbuf = temp;
   }
 
@@ -200,7 +197,7 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
     goto cleanup;
   if(!needed || needed >= max_path_len)
     goto cleanup;
-  obuf = (malloc)(needed);
+  obuf = CURLX_MALLOC(needed);
   if(!obuf)
     goto cleanup;
   if(wcstombs_s(&count, obuf, needed, fbuf, needed - 1))
@@ -215,10 +212,10 @@ static bool fix_excessive_path(const TCHAR *in, TCHAR **out)
 #endif
 
 cleanup:
-  (free)(fbuf);
+  CURLX_FREE(fbuf);
 #ifndef _UNICODE
-  (free)(ibuf);
-  (free)(obuf);
+  CURLX_FREE(ibuf);
+  CURLX_FREE(obuf);
 #endif
   return *out ? true : false;
 }
@@ -260,7 +257,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
   errno = _sopen_s(&result, target, oflag, _SH_DENYNO, pmode);
 #endif
 
-  (free)(fixed);
+  CURLX_FREE(fixed);
   return result;
 }
 
@@ -293,7 +290,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
   errno = fopen_s(&result, target, mode);
 #endif
 
-  (free)(fixed);
+  CURLX_FREE(fixed);
   return result;
 }
 
@@ -331,7 +328,7 @@ FILE *curlx_win32_freopen(const char *filename, const char *mode, FILE *fp)
   errno = freopen_s(&result, target, mode, fp);
 #endif
 
-  (free)(fixed);
+  CURLX_FREE(fixed);
   return result;
 }
 
@@ -370,7 +367,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
 #endif
 #endif
 
-  (free)(fixed);
+  CURLX_FREE(fixed);
   return result;
 }
 

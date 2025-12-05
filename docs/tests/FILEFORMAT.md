@@ -88,6 +88,14 @@ lines:
     %SP  - space
     %TAB - horizontal tab
 
+## Special characters
+
+Macros to help keep data files XML-compliant:
+
+    %AMP - Ampersand: `&`
+    %GT  - Greater-than sign: `>`
+    %LT  - Less-than sign: `<`
+
 ## Insert capped epoch days
 
 Mostly to test capped cookie expire dates: `%days[NUM]` inserts the number of
@@ -586,7 +594,7 @@ command has been run.
 If the variable name has no assignment, no `=`, then that variable is just
 deleted.
 
-### `<command [option="no-q/no-output/no-include/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
+### `<command [option="no-q/no-output/no-include/no-memdebug/force-output/binary-trace"] [timeout="secs"][delay="secs"][type="perl/shell"]>`
 Command line to run.
 
 If the command spans multiple lines, they are concatenated with a space added
@@ -607,6 +615,9 @@ otherwise written to verify stdout.
 
 Set `option="no-include"` to prevent the test script to slap on the
 `--include` argument.
+
+Set `option="no-memdebug"` to make the test run without the memdebug tracking
+system. For tests that are incompatible - multi-threaded for example.
 
 Set `option="no-q"` avoid using `-q` as the first argument in the curl command
 line.

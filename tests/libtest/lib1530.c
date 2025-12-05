@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static curl_socket_t opensocket(void *clientp,
                                 curlsocktype purpose,
                                 struct curl_sockaddr *address)

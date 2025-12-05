@@ -47,10 +47,6 @@
 #include "../curlx/strerr.h"
 #include "../curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 
@@ -128,7 +124,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 #ifdef HAVE_SENDMSG
   struct iovec msg_iov;
-  struct msghdr msg = {0};
+  struct msghdr msg = { 0 };
   ssize_t rv;
 #if defined(__linux__) && defined(UDP_SEGMENT)
   uint8_t msg_ctrl[32];
@@ -145,6 +141,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   if(pktlen > gsolen) {
     /* Only set this, when we need it. macOS, for example,
      * does not seem to like a msg_control of length 0. */
+    memset(msg_ctrl, 0, sizeof(msg_ctrl));
     msg.msg_control = msg_ctrl;
     assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(int)));
     msg.msg_controllen = CMSG_SPACE(sizeof(int));
@@ -156,8 +153,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
   }
 #endif
 
-  while((rv = sendmsg(qctx->sockfd, &msg, 0)) == -1 &&
-        SOCKERRNO == SOCKEINTR)
+  while((rv = sendmsg(qctx->sockfd, &msg, 0)) == -1 && SOCKERRNO == SOCKEINTR)
     ;
 
   if(!curlx_sztouz(rv, psent)) {
@@ -269,7 +265,7 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
     unsigned char c;
     *psent = 0;
     Curl_rand(data, &c, 1);
-    if(c >= ((100-qctx->wblock_percent)*256/100)) {
+    if(c >= ((100 - qctx->wblock_percent) * 256 / 100)) {
       CURL_TRC_CF(data, cf, "vquic_flush() simulate EWOULDBLOCK");
       return CURLE_AGAIN;
     }
@@ -337,8 +333,7 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
   CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
-              qctx->split_len, qctx->split_gsolen,
-              tail_len, qctx->gsolen);
+              qctx->split_len, qctx->split_gsolen, tail_len, qctx->gsolen);
   return vquic_flush(cf, data, qctx);
 }
 
@@ -479,7 +474,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 {
   struct iovec msg_iov;
   struct msghdr msg;
-  uint8_t buf[64*1024];
+  uint8_t buf[64 * 1024];
   struct sockaddr_storage remote_addr;
   size_t total_nread, pkts, calls;
   ssize_t rc;
@@ -520,7 +515,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
       }
       curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
-                  rc, SOCKERRNO, errstr);
+            rc, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -554,7 +549,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
                                  size_t max_pkts,
                                  vquic_recv_pkts_cb *recv_cb, void *userp)
 {
-  uint8_t buf[64*1024];
+  uint8_t buf[64 * 1024];
   int bufsize = (int)sizeof(buf);
   struct sockaddr_storage remote_addr;
   socklen_t remote_addrlen = sizeof(remote_addr);
@@ -585,7 +580,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
       }
       curlx_strerror(SOCKERRNO, errstr, sizeof(errstr));
       failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
-                  rv, SOCKERRNO, errstr);
+            rv, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
     }
@@ -674,7 +669,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
         *qlogfdp = qlogfd;
     }
     curlx_dyn_free(&fname);
-    free(qlog_dir);
+    curlx_free(qlog_dir);
     if(result)
       return result;
   }
@@ -686,7 +681,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              const struct Curl_addrinfo *ai,
-                             int transport)
+                             uint8_t transport)
 {
   (void)transport;
   DEBUGASSERT(transport == TRNSPRT_QUIC);

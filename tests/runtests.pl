@@ -102,6 +102,7 @@ use valgrind;  # valgrind report parser
 use globalconfig;
 use runner;
 use testutil;
+use memanalyzer;
 
 my %custom_skip_reasons;
 
@@ -846,15 +847,9 @@ sub checksystemfeatures {
     }
     # 'socks' was once here but is now removed
 
-    if($torture) {
-        if(!$feature{"TrackMemory"}) {
-            die "cannot run torture tests since curl was built without ".
-                "TrackMemory feature (--enable-curldebug)";
-        }
-        if($feature{"threaded-resolver"} && !$valgrind) {
-            die "cannot run torture tests since curl was built with the ".
-                "threaded resolver, and we are not running with valgrind";
-        }
+    if($torture && !$feature{"TrackMemory"}) {
+        die "cannot run torture tests since curl was built without ".
+            "TrackMemory feature (--enable-curldebug)";
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
@@ -879,19 +874,12 @@ sub checksystemfeatures {
         # Only show if not the default for now
         logmsg "* Jobs: $jobs\n";
     }
-    # Disable memory tracking when using threaded resolver
-    if($feature{"TrackMemory"} && $feature{"threaded-resolver"}) {
-        logmsg("*\n",
-               "*** DISABLES TrackMemory (memory tracking) when using threaded resolver\n",
-               "*\n");
-        $feature{"TrackMemory"} = 0;
-    }
 
     my $env = sprintf("%s%s%s%s%s",
                       $valgrind?"Valgrind ":"",
                       $run_duphandle?"test-duphandle ":"",
                       $run_event_based?"event-based ":"",
-                      $nghttpx_h3,
+                      $nghttpx_h3?"nghttpx-h3 " :"",
                       $libtool?"Libtool ":"");
     if($env) {
         logmsg "* Env: $env\n";
@@ -1763,12 +1751,14 @@ sub singletest_check {
         if(! -f "$logdir/$MEMDUMP") {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
-            logmsg "\n** ALERT! memory tracking with no output file?\n"
-                if($cmdtype ne "perl");
+            if($cmdhash{'option'} && $cmdhash{'option'} !~ /no-memdebug/) {
+                logmsg "\n** ALERT! memory tracking with no output file?\n"
+                    if($cmdtype ne "perl");
+            }
             $ok .= "-"; # problem with memory checking
         }
         else {
-            my @memdata=`$memanalyze "$logdir/$MEMDUMP"`;
+            my @memdata = memanalyze("$logdir/$MEMDUMP", 0, 0, 0);
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
@@ -1787,7 +1777,7 @@ sub singletest_check {
             else {
                 $ok .= "m";
             }
-            my @more=`$memanalyze -v "$logdir/$MEMDUMP"`;
+            my @more = memanalyze("$logdir/$MEMDUMP", 1, 0, 0);
             my $allocs = 0;
             my $max = 0;
             for(@more) {

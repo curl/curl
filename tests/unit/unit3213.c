@@ -75,7 +75,7 @@ static void check_spbset(const char *name, const unsigned int *s, size_t slen)
   }
   /* The count is half */
   c = Curl_uint32_spbset_count(&bset);
-  fail_unless(c == slen/2, "set count is wrong");
+  fail_unless(c == slen / 2, "set count is wrong");
 
   Curl_uint32_spbset_clear(&bset);
   c = Curl_uint32_spbset_count(&bset);
@@ -96,11 +96,12 @@ static CURLcode test_unit3213(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static const unsigned int s1[] = { /* spread numbers, some at slot edges */
-    0, 1, 4, 17, 63, 64, 65, 66,
-    90, 99,
+  static const unsigned int s1[] = {
+    /* spread numbers, some at slot edges */
+    0, 1, 4, 17, 63, 64, 65, 66, 90, 99,
   };
-  static const unsigned int s2[] = { /* set with all bits in slot1 set */
+  static const unsigned int s2[] = {
+    /* set with all bits in slot1 set */
     64, 65, 66, 67, 68, 69, 70, 71,
     72, 73, 74, 75, 76, 77, 78, 79,
     80, 81, 82, 83, 84, 85, 86, 87,
@@ -110,7 +111,8 @@ static CURLcode test_unit3213(const char *arg)
     112, 113, 114, 115, 116, 117, 118, 119,
     120, 121, 122, 123, 124, 125, 126, 127,
   };
-  static const unsigned int s3[] = {  /* very spread numbers */
+  static const unsigned int s3[] = {
+    /* very spread numbers */
     2232, 5167, 8204, 8526, 8641, 10056, 10140, 10611,
     10998, 11626, 13735, 15539, 17947, 24295, 27833, 30318,
   };

@@ -52,7 +52,7 @@ static int runawhile(struct Curl_easy *easy,
                      int dec)
 {
   int counter = 1;
-  struct curltime now = {1, 0};
+  struct curltime now = { 1, 0 };
   CURLcode res;
   int finaltime;
 
@@ -82,18 +82,12 @@ static CURLcode test_unit1606(const char *arg)
 
   UNITTEST_BEGIN(t1606_setup(&easy))
 
-  fail_unless(runawhile(easy, 41, 41, 40, 0) == 41,
-              "wrong low speed timeout");
-  fail_unless(runawhile(easy, 21, 21, 20, 0) == 21,
-              "wrong low speed timeout");
-  fail_unless(runawhile(easy, 60, 60, 40, 0) == 60,
-              "wrong log speed timeout");
-  fail_unless(runawhile(easy, 50, 50, 40, 0) == 50,
-              "wrong log speed timeout");
-  fail_unless(runawhile(easy, 40, 40, 40, 0) == 99,
-              "should not time out");
-  fail_unless(runawhile(easy, 10, 50, 100, 2) == 36,
-              "bad timeout");
+  fail_unless(runawhile(easy, 41, 41, 40, 0) == 41, "wrong low speed timeout");
+  fail_unless(runawhile(easy, 21, 21, 20, 0) == 21, "wrong low speed timeout");
+  fail_unless(runawhile(easy, 60, 60, 40, 0) == 60, "wrong log speed timeout");
+  fail_unless(runawhile(easy, 50, 50, 40, 0) == 50, "wrong log speed timeout");
+  fail_unless(runawhile(easy, 40, 40, 40, 0) == 99, "should not time out");
+  fail_unless(runawhile(easy, 10, 50, 100, 2) == 36, "bad timeout");
 
   UNITTEST_END(t1606_stop(easy))
 }

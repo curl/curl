@@ -37,10 +37,6 @@
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static void cf_cntrl_update_info(struct Curl_easy *data,
                                  struct connectdata *conn);
 
@@ -85,7 +81,7 @@ bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
 }
 
 CURLcode Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, bool eos,
+                          const uint8_t *buf, size_t len, bool eos,
                           size_t *pnwritten)
 {
   if(cf->next)
@@ -143,7 +139,7 @@ void Curl_conn_cf_discard_chain(struct Curl_cfilter **pcf,
        */
       cf->next = NULL;
       cf->cft->destroy(cf, data);
-      free(cf);
+      curlx_free(cf);
       cf = cfn;
     }
   }
@@ -246,7 +242,7 @@ CURLcode Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
 }
 
 CURLcode Curl_cf_send(struct Curl_easy *data, int num,
-                      const void *mem, size_t len, bool eos,
+                      const uint8_t *mem, size_t len, bool eos,
                       size_t *pnwritten)
 {
   struct Curl_cfilter *cf;
@@ -296,12 +292,11 @@ CURLcode Curl_cf_recv_bufq(struct Curl_cfilter *cf,
 }
 
 static CURLcode cf_bufq_writer(void *writer_ctx,
-                               const unsigned char *buf, size_t buflen,
+                               const uint8_t *buf, size_t buflen,
                                size_t *pnwritten)
 {
   struct cf_io_ctx *io = writer_ctx;
-  return Curl_conn_cf_send(io->cf, io->data, (const char *)buf,
-                           buflen, FALSE, pnwritten);
+  return Curl_conn_cf_send(io->cf, io->data, buf, buflen, FALSE, pnwritten);
 }
 
 CURLcode Curl_cf_send_bufq(struct Curl_cfilter *cf,
@@ -333,7 +328,7 @@ CURLcode Curl_cf_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(cft);
-  cf = calloc(1, sizeof(*cf));
+  cf = curlx_calloc(1, sizeof(*cf));
   if(!cf)
     goto out;
 
@@ -422,7 +417,7 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 CURLcode Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                           const void *buf, size_t len, bool eos,
+                           const uint8_t *buf, size_t len, bool eos,
                            size_t *pnwritten)
 {
   if(cf)
@@ -516,8 +511,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     }
     else if(result) {
-      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d",
-                  result);
+      CURL_TRC_CF(data, cf, "Curl_conn_connect(), filter returned %d", result);
       conn_report_connect_stats(cf, data);
       goto out;
     }
@@ -658,7 +652,7 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_MULTIPLEX)
       return TRUE;
-    if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
       return FALSE;
   }
   return FALSE;
@@ -696,7 +690,7 @@ unsigned char Curl_conn_http_version(struct Curl_easy *data,
         v = (unsigned char)value;
       break;
     }
-    if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_SSL))
       break;
   }
   return (unsigned char)(result ? 0 : v);
@@ -808,9 +802,9 @@ void Curl_conn_get_current_host(struct Curl_easy *data, int sockindex,
   cf = CONN_SOCK_IDX_VALID(sockindex) ? data->conn->cfilter[sockindex] : NULL;
   /* Find the "lowest" tunneling proxy filter that has not connected yet. */
   while(cf && !cf->connected) {
-    if((cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY)) ==
-       (CF_TYPE_IP_CONNECT|CF_TYPE_PROXY))
-       cf_proxy = cf;
+    if((cf->cft->flags & (CF_TYPE_IP_CONNECT | CF_TYPE_PROXY)) ==
+       (CF_TYPE_IP_CONNECT | CF_TYPE_PROXY))
+      cf_proxy = cf;
     cf = cf->next;
   }
   /* cf_proxy (!= NULL) is not connected yet. It is talking
@@ -931,19 +925,6 @@ Curl_conn_get_remote_addr(struct Curl_easy *data, int sockindex)
   return cf ? cf_get_remote_addr(cf, data) : NULL;
 }
 
-void Curl_conn_forget_socket(struct Curl_easy *data, int sockindex)
-{
-  struct connectdata *conn = data->conn;
-  if(conn && CONN_SOCK_IDX_VALID(sockindex)) {
-    struct Curl_cfilter *cf = conn->cfilter[sockindex];
-    if(cf)
-      (void)Curl_conn_cf_cntrl(cf, data, TRUE,
-                               CF_CTRL_FORGET_SOCKET, 0, NULL);
-    fake_sclose(conn->sock[sockindex]);
-    conn->sock[sockindex] = CURL_SOCKET_BAD;
-  }
-}
-
 static CURLcode cf_cntrl_all(struct connectdata *conn,
                              struct Curl_easy *data,
                              bool ignore_result,
@@ -963,8 +944,7 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
 
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
 {
-  return cf_cntrl_all(data->conn, data, FALSE,
-                      CF_CTRL_DATA_SETUP, 0, NULL);
+  return cf_cntrl_all(data->conn, data, FALSE, CF_CTRL_DATA_SETUP, 0, NULL);
 }
 
 CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
@@ -1118,8 +1098,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #ifdef DEBUGBUILD
   if(write_len) {
-    /* Allow debug builds to override this logic to force short sends
-    */
+    /* Allow debug builds to override this logic to force short sends */
     const char *p = getenv("CURL_SMALLSENDS");
     if(p) {
       curl_off_t altsize;

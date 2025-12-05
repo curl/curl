@@ -28,7 +28,6 @@
 #include "tool_urlglob.h"
 #include "tool_vms.h"
 #include "tool_strdup.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 static CURLcode globerror(struct URLGlob *glob, const char *err,
                           size_t pos, CURLcode error)
@@ -45,7 +44,7 @@ static CURLcode glob_fixed(struct URLGlob *glob, char *fixed, size_t len)
   pat->globindex = -1;
   pat->c.set.size = 0;
   pat->c.set.idx = 0;
-  pat->c.set.elem = malloc(sizeof(char *));
+  pat->c.set.elem = curlx_malloc(sizeof(char *));
 
   if(!pat->c.set.elem)
     return globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
@@ -81,7 +80,7 @@ static int multiply(curl_off_t *amount, curl_off_t with)
       return 1;
 #else
     sum = *amount * with;
-    if(sum/with != *amount)
+    if(sum / with != *amount)
       return 1; /* did not fit, bail out */
 #endif
   }
@@ -100,7 +99,7 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
   bool done = FALSE;
   const char *pattern = *patternp;
   const char *opattern = pattern;
-  size_t opos = *posp-1;
+  size_t opos = *posp - 1;
   CURLcode result = CURLE_OK;
   size_t size = 0;
   char **elem = NULL;
@@ -137,10 +136,10 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
 
       if(!palloc) {
         palloc = 5; /* a reasonable default */
-        elem = malloc(palloc * sizeof(char *));
+        elem = curlx_malloc(palloc * sizeof(char *));
       }
       else if(size >= palloc) {
-        char **arr = realloc(elem, palloc * 2 * sizeof(char *));
+        char **arr = curlx_realloc(elem, palloc * 2 * sizeof(char *));
         if(!arr) {
           result = globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
           goto error;
@@ -154,8 +153,8 @@ static CURLcode glob_set(struct URLGlob *glob, const char **patternp,
         goto error;
       }
 
-      elem[size] =
-        strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
+      elem[size] = curlx_strdup(curlx_dyn_ptr(&glob->buf) ?
+                                curlx_dyn_ptr(&glob->buf) : "");
       if(!elem[size]) {
         result = globerror(glob, NULL, 0, CURLE_OUT_OF_MEMORY);
         goto error;
@@ -206,7 +205,7 @@ error:
     for(i = 0; i < size; i++)
       tool_safefree(elem[i]);
   }
-  free(elem);
+  curlx_free(elem);
   return result;
 }
 
@@ -344,7 +343,7 @@ static CURLcode glob_range(struct URLGlob *glob, const char **patternp,
 
 #define MAX_IP6LEN 128
 
-static bool peek_ipv6(const char *str, size_t *skip)
+static CURLcode peek_ipv6(const char *str, size_t *skip, bool *ipv6p)
 {
   /*
    * Scan for a potential IPv6 literal.
@@ -356,27 +355,33 @@ static bool peek_ipv6(const char *str, size_t *skip)
   char *endbr = strchr(str, ']');
   size_t hlen;
   CURLUcode rc;
+  CURLcode result = CURLE_OK;
+  *ipv6p = FALSE; /* default to nope */
+  *skip = 0;
   if(!endbr)
-    return FALSE;
+    return CURLE_OK;
 
   hlen = endbr - str + 1;
   if(hlen >= MAX_IP6LEN)
-    return FALSE;
+    return CURLE_OK;
 
   u = curl_url();
   if(!u)
-    return FALSE;
+    return CURLE_OUT_OF_MEMORY;
 
   memcpy(hostname, str, hlen);
   hostname[hlen] = 0;
 
   /* ask to "guess scheme" as then it works without an https:// prefix */
   rc = curl_url_set(u, CURLUPART_URL, hostname, CURLU_GUESS_SCHEME);
-
   curl_url_cleanup(u);
-  if(!rc)
+  if(rc == CURLUE_OUT_OF_MEMORY)
+    return CURLE_OUT_OF_MEMORY;
+  if(!rc) {
     *skip = hlen;
-  return rc ? FALSE : TRUE;
+    *ipv6p = TRUE;
+  }
+  return result;
 }
 
 static CURLcode add_glob(struct URLGlob *glob, size_t pos)
@@ -387,7 +392,8 @@ static CURLcode add_glob(struct URLGlob *glob, size_t pos)
     struct URLPattern *np = NULL;
     glob->palloc *= 2;
     if(glob->pnum < 255) { /* avoid ridiculous amounts */
-      np = realloc(glob->pattern, glob->palloc * sizeof(struct URLPattern));
+      np = curlx_realloc(glob->pattern,
+                         glob->palloc * sizeof(struct URLPattern));
       if(!np)
         return globerror(glob, NULL, pos, CURLE_OUT_OF_MEMORY);
     }
@@ -414,7 +420,11 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
       if(*pattern == '[') {
         /* skip over IPv6 literals and [] */
         size_t skip = 0;
-        if(!peek_ipv6(pattern, &skip) && (pattern[1] == ']'))
+        bool ipv6;
+        res = peek_ipv6(pattern, &skip, &ipv6);
+        if(res)
+          return res;
+        if(!ipv6 && (pattern[1] == ']'))
           skip = 2;
         if(skip) {
           if(curlx_dyn_addn(&glob->buf, pattern, skip))
@@ -431,7 +441,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
       /* only allow \ to escape known "special letters" */
       if(*pattern == '\\' &&
          (pattern[1] == '{' || pattern[1] == '[' ||
-          pattern[1] == '}' || pattern[1] == ']') ) {
+          pattern[1] == '}' || pattern[1] == ']')) {
 
         /* escape character, skip '\' */
         ++pattern;
@@ -453,7 +463,7 @@ static CURLcode glob_parse(struct URLGlob *glob, const char *pattern,
     else {
       if(!*pattern) /* done  */
         break;
-      else if(*pattern =='{') {
+      else if(*pattern == '{') {
         /* process set pattern */
         pattern++;
         pos++;
@@ -490,8 +500,8 @@ CURLcode glob_url(struct URLGlob *glob, char *url, curl_off_t *urlnum,
   CURLcode res;
 
   memset(glob, 0, sizeof(struct URLGlob));
-  curlx_dyn_init(&glob->buf, 1024*1024);
-  glob->pattern = malloc(2 * sizeof(struct URLPattern));
+  curlx_dyn_init(&glob->buf, 1024 * 1024);
+  glob->pattern = curlx_malloc(2 * sizeof(struct URLPattern));
   if(!glob->pattern)
     return CURLE_OUT_OF_MEMORY;
   glob->palloc = 2;
@@ -617,14 +627,14 @@ CURLcode glob_next_url(char **globbed, struct URLGlob *glob)
   }
 
   *globbed =
-    strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
+    curlx_strdup(curlx_dyn_ptr(&glob->buf) ? curlx_dyn_ptr(&glob->buf) : "");
   if(!*globbed)
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
 }
 
-#define MAX_OUTPUT_GLOB_LENGTH (1024*1024)
+#define MAX_OUTPUT_GLOB_LENGTH (1024 * 1024)
 
 CURLcode glob_match_url(char **output, const char *filename,
                         struct URLGlob *glob)

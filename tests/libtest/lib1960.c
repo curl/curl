@@ -32,8 +32,6 @@
 #include <arpa/inet.h>
 #endif
 
-#include "memdebug.h"
-
 /* to prevent libcurl from closing our socket */
 static int closesocket_cb(void *clientp, curl_socket_t item)
 {
@@ -65,11 +63,10 @@ static int sockopt_cb(void *clientp,
 }
 
 #ifdef __AMIGA__
-#define my_inet_pton(x,y,z) inet_pton(x,(unsigned char *)y,z)
+#define my_inet_pton(x, y, z) inet_pton(x, (unsigned char *)y, z)
 #else
-#define my_inet_pton(x,y,z) inet_pton(x,y,z)
+#define my_inet_pton(x, y, z) inet_pton(x, y, z)
 #endif
-
 
 /* Expected args: URL IP PORT */
 static CURLcode test_lib1960(const char *URL)
@@ -111,7 +108,8 @@ static CURLcode test_lib1960(const char *URL)
     goto test_cleanup;
   }
 
-  status = connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+  status = connect(client_fd, (struct sockaddr *)&serv_addr,
+                   sizeof(serv_addr));
   if(status < 0) {
     curl_mfprintf(stderr, "connection failed\n");
     goto test_cleanup;

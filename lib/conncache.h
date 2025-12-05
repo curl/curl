@@ -49,7 +49,7 @@ void Curl_conn_terminate(struct Curl_easy *data,
                          bool aborted);
 
 struct cpool {
-   /* the pooled connections, bundled per destination */
+  /* the pooled connections, bundled per destination */
   struct Curl_hash dest2bundle;
   size_t num_conn;
   curl_off_t next_connection_id;
@@ -165,6 +165,5 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
 
 /* Close all unused connections, prevent reuse of existing ones. */
 void Curl_cpool_nw_changed(struct Curl_easy *data);
-
 
 #endif /* HEADER_CURL_CONNCACHE_H */

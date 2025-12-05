@@ -28,14 +28,10 @@
 
 #include "slist.h"
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
 {
-  struct curl_slist     *item;
+  struct curl_slist *item;
 
   /* if caller passed us a NULL, return now */
   if(!list)
@@ -61,12 +57,12 @@ static struct curl_slist *slist_get_last(struct curl_slist *list)
 struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
                                            const char *data)
 {
-  struct curl_slist     *last;
-  struct curl_slist     *new_item;
+  struct curl_slist *last;
+  struct curl_slist *new_item;
 
   DEBUGASSERT(data);
 
-  new_item = malloc(sizeof(struct curl_slist));
+  new_item = curlx_malloc(sizeof(struct curl_slist));
   if(!new_item)
     return NULL;
 
@@ -89,17 +85,16 @@ struct curl_slist *Curl_slist_append_nodup(struct curl_slist *list,
  * bothersome, then simply create a separate _init function and call it
  * appropriately from within the program.
  */
-struct curl_slist *curl_slist_append(struct curl_slist *list,
-                                     const char *data)
+struct curl_slist *curl_slist_append(struct curl_slist *list, const char *data)
 {
-  char *dupdata = strdup(data);
+  char *dupdata = curlx_strdup(data);
 
   if(!dupdata)
     return NULL;
 
   list = Curl_slist_append_nodup(list, dupdata);
   if(!list)
-    free(dupdata);
+    curlx_free(dupdata);
 
   return list;
 }
@@ -131,8 +126,8 @@ struct curl_slist *Curl_slist_duplicate(struct curl_slist *inlist)
 /* be nice and clean up resources */
 void curl_slist_free_all(struct curl_slist *list)
 {
-  struct curl_slist     *next;
-  struct curl_slist     *item;
+  struct curl_slist *next;
+  struct curl_slist *item;
 
   if(!list)
     return;
@@ -141,7 +136,7 @@ void curl_slist_free_all(struct curl_slist *list)
   do {
     next = item->next;
     Curl_safefree(item->data);
-    free(item);
+    curlx_free(item);
     item = next;
   } while(next);
 }

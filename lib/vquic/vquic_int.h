@@ -29,29 +29,29 @@
 
 #ifdef USE_HTTP3
 
-#define MAX_PKT_BURST 10
+#define MAX_PKT_BURST         10
 #define MAX_UDP_PAYLOAD_SIZE  1452
 
 struct cf_quic_ctx {
-  curl_socket_t sockfd; /* connected UDP socket */
+  curl_socket_t sockfd;               /* connected UDP socket */
   struct sockaddr_storage local_addr; /* address socket is bound to */
-  socklen_t local_addrlen; /* length of local address */
+  socklen_t local_addrlen;            /* length of local address */
 
-  struct bufq sendbuf; /* buffer for sending one or more packets */
-  struct curltime first_byte_at;     /* when first byte was recvd */
-  struct curltime last_op; /* last (attempted) send/recv operation */
-  struct curltime last_io; /* last successful socket IO */
-  size_t gsolen; /* length of individual packets in send buf */
-  size_t split_len; /* if != 0, buffer length after which GSO differs */
+  struct bufq sendbuf;           /* buffer for sending one or more packets */
+  struct curltime first_byte_at; /* when first byte was recvd */
+  struct curltime last_op;       /* last (attempted) send/recv operation */
+  struct curltime last_io;       /* last successful socket IO */
+  size_t gsolen;                 /* length of individual packets in send buf */
+  size_t split_len;    /* if != 0, buffer length after which GSO differs */
   size_t split_gsolen; /* length of individual packets after split_len */
 #ifdef DEBUGBUILD
-  int wblock_percent; /* percent of writes doing EAGAIN */
+  int wblock_percent;  /* percent of writes doing EAGAIN */
 #endif
   BIT(got_first_byte); /* if first byte was received */
-  BIT(no_gso); /* do not use gso on sending */
+  BIT(no_gso);         /* do not use gso on sending */
 };
 
-#define H3_STREAM_CTX(ctx,data)                                         \
+#define H3_STREAM_CTX(ctx, data)                                        \
   (data ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
@@ -76,7 +76,6 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
                      struct cf_quic_ctx *qctx);
-
 
 typedef CURLcode vquic_recv_pkts_cb(const unsigned char *buf, size_t buflen,
                                     size_t gso_size,

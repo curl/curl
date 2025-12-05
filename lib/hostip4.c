@@ -50,10 +50,6 @@
 #include "curl_share.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 #ifdef CURLRES_SYNCH
 
@@ -139,7 +135,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    */
   int h_errnop;
 
-  buf = calloc(1, CURL_HOSTENT_SIZE);
+  buf = curlx_calloc(1, CURL_HOSTENT_SIZE);
   if(!buf)
     return NULL; /* major failure */
   /*
@@ -170,11 +166,11 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   /* Linux */
 
   (void)gethostbyname_r(hostname,
-                      (struct hostent *)buf,
-                      (char *)buf + sizeof(struct hostent),
-                      CURL_HOSTENT_SIZE - sizeof(struct hostent),
-                      &h, /* DIFFERENCE */
-                      &h_errnop);
+                        (struct hostent *)buf,
+                        (char *)buf + sizeof(struct hostent),
+                        CURL_HOSTENT_SIZE - sizeof(struct hostent),
+                        &h, /* DIFFERENCE */
+                        &h_errnop);
   /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
    * sudden this function returns EAGAIN if the given buffer size is too
    * small. Previous versions are known to return ERANGE for the same
@@ -253,8 +249,8 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
      * Since we do not know how big buffer this particular lookup required,
      * we cannot realloc down the huge alloc without doing closer analysis of
      * the returned data. Thus, we always use CURL_HOSTENT_SIZE for every
-     * name lookup. Fixing this would require an extra malloc() and then
-     * calling Curl_addrinfo_copy() that subsequent realloc()s down the new
+     * name lookup. Fixing this would require an extra allocation and then
+     * calling Curl_addrinfo_copy() that subsequent reallocation down the new
      * memory area to the actually used amount.
      */
   }
@@ -262,7 +258,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #endif /* HAVE_...BYNAME_R_5 || HAVE_...BYNAME_R_6 || HAVE_...BYNAME_R_3 */
   {
     h = NULL; /* set return code to NULL */
-    free(buf);
+    curlx_free(buf);
   }
 #else /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
           HAVE_GETHOSTBYNAME_R */
@@ -280,7 +276,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     ai = Curl_he2ai(h, port);
 
     if(buf) /* used a *_r() function */
-      free(buf);
+      curlx_free(buf);
   }
 #endif
 

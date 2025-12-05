@@ -28,10 +28,8 @@
 #include "tool_cb_prg.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
-#define WARN_PREFIX "Warning: "
-#define NOTE_PREFIX "Note: "
+#define WARN_PREFIX  "Warning: "
+#define NOTE_PREFIX  "Note: "
 #define ERROR_PREFIX "curl: "
 
 static void voutf(const char *prefix,
@@ -55,7 +53,7 @@ static void voutf(const char *prefix,
     fputs(prefix, tool_stderr);
 
     if(len > width) {
-      size_t cut = width-1;
+      size_t cut = width - 1;
 
       while(!ISBLANK(ptr[cut]) && cut) {
         cut--;
@@ -63,7 +61,7 @@ static void voutf(const char *prefix,
       if(cut == 0)
         /* not a single cutting position was found, just cut it at the
            max text width then! */
-        cut = width-1;
+        cut = width - 1;
 
       (void)fwrite(ptr, cut + 1, 1, tool_stderr);
       fputs("\n", tool_stderr);
@@ -123,9 +121,9 @@ void helpf(const char *fmt, ...)
   }
   curl_mfprintf(tool_stderr, "curl: try 'curl --help' "
 #ifdef USE_MANUAL
-                "or 'curl --manual' "
+                             "or 'curl --manual' "
 #endif
-                "for more information\n");
+                             "for more information\n");
 }
 
 /*

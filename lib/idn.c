@@ -22,15 +22,14 @@
  *
  ***************************************************************************/
 
- /*
-  * IDN conversions
-  */
+/*
+ * IDN conversions
+ */
 
 #include "curl_setup.h"
 #include "urldata.h"
 #include "idn.h"
 #include "sendf.h"
-#include "curlx/multibyte.h"
 #include "curlx/warnless.h"
 
 #ifdef USE_LIBIDN2
@@ -44,10 +43,6 @@
   idn2_lookup_ul((const char *)name, (char **)host, flags)
 #endif
 #endif  /* USE_LIBIDN2 */
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* for macOS and iOS targets */
 #ifdef USE_APPLE_IDN
@@ -92,23 +87,23 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
   size_t inlen = strlen(in);
   if(inlen < MAX_HOST_LENGTH) {
-    char iconv_buffer[MAX_HOST_LENGTH] = {0};
+    char iconv_buffer[MAX_HOST_LENGTH] = { 0 };
     char *iconv_outptr = iconv_buffer;
     size_t iconv_outlen = sizeof(iconv_buffer);
     CURLcode iconv_result = iconv_to_utf8(in, inlen,
                                           &iconv_outptr, &iconv_outlen);
     if(!iconv_result) {
       UErrorCode err = U_ZERO_ERROR;
-      UIDNA* idna = uidna_openUTS46(
-        UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
+      UIDNA *idna = uidna_openUTS46(
+        UIDNA_CHECK_BIDI | UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
       if(!U_FAILURE(err)) {
         UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-        char buffer[MAX_HOST_LENGTH] = {0};
+        char buffer[MAX_HOST_LENGTH] = { 0 };
         (void)uidna_nameToASCII_UTF8(idna, iconv_buffer, (int)iconv_outlen,
                                      buffer, sizeof(buffer) - 1, &info, &err);
         uidna_close(idna);
         if(!U_FAILURE(err) && !info.errors) {
-          *out = strdup(buffer);
+          *out = curlx_strdup(buffer);
           if(*out)
             return CURLE_OK;
           else
@@ -127,16 +122,16 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
   size_t inlen = strlen(in);
   if(inlen < MAX_HOST_LENGTH) {
     UErrorCode err = U_ZERO_ERROR;
-    UIDNA* idna = uidna_openUTS46(
-      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
+    UIDNA *idna = uidna_openUTS46(
+      UIDNA_CHECK_BIDI | UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
     if(!U_FAILURE(err)) {
       UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-      char buffer[MAX_HOST_LENGTH] = {0};
+      char buffer[MAX_HOST_LENGTH] = { 0 };
       (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
                                     sizeof(buffer) - 1, &info, &err);
       uidna_close(idna);
       if(!U_FAILURE(err)) {
-        *out = strdup(buffer);
+        *out = curlx_strdup(buffer);
         if(*out)
           return CURLE_OK;
         else
@@ -167,24 +162,36 @@ WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
 
 #define IDN_MAX_LENGTH 255
 
+static char *idn_curlx_convert_wchar_to_UTF8(const wchar_t *str_w, int chars)
+{
+  char *str_utf8 = NULL;
+  int bytes = WideCharToMultiByte(CP_UTF8, 0, str_w, chars, NULL, 0,
+                                  NULL, NULL);
+  if(bytes > 0) {
+    str_utf8 = curlx_malloc(bytes);
+    if(str_utf8) {
+      if(WideCharToMultiByte(CP_UTF8, 0, str_w, chars, str_utf8, bytes,
+                             NULL, NULL) == 0) {
+        curlx_free(str_utf8);
+        return NULL;
+      }
+    }
+  }
+  return str_utf8;
+}
+
 static CURLcode win32_idn_to_ascii(const char *in, char **out)
 {
-  wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
+  wchar_t in_w[IDN_MAX_LENGTH];
+  int in_w_len;
   *out = NULL;
-  if(in_w) {
+  in_w_len = MultiByteToWideChar(CP_UTF8, 0, in, -1, in_w, IDN_MAX_LENGTH);
+  if(in_w_len) {
     wchar_t punycode[IDN_MAX_LENGTH];
-    int chars = IdnToAscii(0, in_w, (int)(wcslen(in_w) + 1), punycode,
-                           IDN_MAX_LENGTH);
-    curlx_unicodefree(in_w);
-    if(chars) {
-      char *mstr = curlx_convert_wchar_to_UTF8(punycode);
-      if(mstr) {
-        *out = strdup(mstr);
-        curlx_unicodefree(mstr);
-        if(!*out)
-          return CURLE_OUT_OF_MEMORY;
-      }
-      else
+    int chars = IdnToAscii(0, in_w, in_w_len, punycode, IDN_MAX_LENGTH);
+    if(chars > 0) {
+      *out = idn_curlx_convert_wchar_to_UTF8(punycode, chars);
+      if(!*out)
         return CURLE_OUT_OF_MEMORY;
     }
     else
@@ -196,31 +203,26 @@ static CURLcode win32_idn_to_ascii(const char *in, char **out)
   return CURLE_OK;
 }
 
-static CURLcode win32_ascii_to_idn(const char *in, char **output)
+static CURLcode win32_ascii_to_idn(const char *in, char **out)
 {
-  char *out = NULL;
-
-  wchar_t *in_w = curlx_convert_UTF8_to_wchar(in);
-  if(in_w) {
+  wchar_t in_w[IDN_MAX_LENGTH];
+  int in_w_len;
+  *out = NULL;
+  in_w_len = MultiByteToWideChar(CP_UTF8, 0, in, -1, in_w, IDN_MAX_LENGTH);
+  if(in_w_len) {
     WCHAR idn[IDN_MAX_LENGTH]; /* stores a UTF-16 string */
-    int chars = IdnToUnicode(0, in_w, (int)(wcslen(in_w) + 1), idn,
-                             IDN_MAX_LENGTH);
-    if(chars) {
-      /* 'chars' is "the number of characters retrieved" */
-      char *mstr = curlx_convert_wchar_to_UTF8(idn);
-      if(mstr) {
-        out = strdup(mstr);
-        curlx_unicodefree(mstr);
-        if(!out)
-          return CURLE_OUT_OF_MEMORY;
-      }
+    int chars = IdnToUnicode(0, in_w, in_w_len, idn, IDN_MAX_LENGTH);
+    if(chars > 0) {  /* 'chars' is "the number of characters retrieved" */
+      *out = idn_curlx_convert_wchar_to_UTF8(idn, chars);
+      if(!*out)
+        return CURLE_OUT_OF_MEMORY;
     }
     else
       return CURLE_URL_MALFORMAT;
   }
   else
     return CURLE_URL_MALFORMAT;
-  *output = out;
+
   return CURLE_OK;
 }
 
@@ -314,7 +316,7 @@ CURLcode Curl_idn_decode(const char *input, char **output)
   CURLcode result = idn_decode(input, &d);
 #ifdef USE_LIBIDN2
   if(!result) {
-    char *c = strdup(d);
+    char *c = curlx_strdup(d);
     idn2_free(d);
     if(c)
       d = c;
@@ -325,7 +327,7 @@ CURLcode Curl_idn_decode(const char *input, char **output)
   if(!result) {
     if(!d[0]) { /* ended up zero length, not acceptable */
       result = CURLE_URL_MALFORMAT;
-      free(d);
+      curlx_free(d);
     }
     else
       *output = d;
@@ -339,7 +341,7 @@ CURLcode Curl_idn_encode(const char *puny, char **output)
   CURLcode result = idn_encode(puny, &d);
 #ifdef USE_LIBIDN2
   if(!result) {
-    char *c = strdup(d);
+    char *c = curlx_strdup(d);
     idn2_free(d);
     if(c)
       d = c;

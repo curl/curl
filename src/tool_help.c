@@ -33,8 +33,6 @@
 #include "tool_cfgable.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct category_descriptors {
   const char *opt;
   const char *desc;
@@ -248,7 +246,8 @@ void tool_help(const char *category)
   unsigned int cols = get_terminal_columns();
   /* If no category was provided */
   if(!category) {
-    const char *category_note = "\nThis is not the full help; this "
+    const char *category_note =
+      "\nThis is not the full help; this "
       "menu is split into categories.\nUse \"--help category\" to get "
       "an overview of all categories, which are:";
     const char *category_note2 =
@@ -328,7 +327,7 @@ void tool_help(const char *category)
 
 static bool is_debug(void)
 {
-  const char *const *builtin;
+  const char * const *builtin;
   for(builtin = feature_names; *builtin; ++builtin)
     if(curl_strequal("debug", *builtin))
       return TRUE;
@@ -337,7 +336,7 @@ static bool is_debug(void)
 
 void tool_version_info(void)
 {
-  const char *const *builtin;
+  const char * const *builtin;
   if(is_debug())
     curl_mfprintf(tool_stderr, "WARNING: this libcurl is Debug-enabled, "
                   "do not use in production\n\n");
@@ -387,7 +386,7 @@ void tool_version_info(void)
 #ifdef CURL_CA_EMBED
     ++feat_ext_count;
 #endif
-    feat_ext = malloc(sizeof(*feature_names) * (feat_ext_count + 1));
+    feat_ext = curlx_malloc(sizeof(*feature_names) * (feat_ext_count + 1));
     if(feat_ext) {
       memcpy((void *)feat_ext, feature_names,
              sizeof(*feature_names) * feature_count);
@@ -402,7 +401,7 @@ void tool_version_info(void)
       for(builtin = feat_ext; *builtin; ++builtin)
         curl_mprintf(" %s", *builtin);
       puts(""); /* newline */
-      free((void *)feat_ext);
+      curlx_free((void *)feat_ext);
     }
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {

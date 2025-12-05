@@ -4,7 +4,6 @@
 HTTP
 verbose logs
 flaky
-notxml
 </keywords>
 </info>
 
@@ -90,7 +89,7 @@ Accept: */*
 * Connection #3 to host server4.example.com:%HTTPPORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
 </verify>
 </testcase>

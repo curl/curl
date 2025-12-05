@@ -32,10 +32,6 @@
 #include "vtls_spack.h"
 #include "../strdup.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff
 #endif
@@ -56,8 +52,8 @@ static CURLcode spack_enc8(struct dynbuf *buf, uint8_t b)
   return curlx_dyn_addn(buf, &b, 1);
 }
 
-static CURLcode
-spack_dec8(uint8_t *val, const uint8_t **src, const uint8_t *end)
+static CURLcode spack_dec8(uint8_t *val, const uint8_t **src,
+                           const uint8_t *end)
 {
   if(end - *src < 1)
     return CURLE_READ_ERROR;
@@ -74,8 +70,8 @@ static CURLcode spack_enc16(struct dynbuf *buf, uint16_t val)
   return curlx_dyn_addn(buf, nval, sizeof(nval));
 }
 
-static CURLcode
-spack_dec16(uint16_t *val, const uint8_t **src, const uint8_t *end)
+static CURLcode spack_dec16(uint16_t *val, const uint8_t **src,
+                            const uint8_t *end)
 {
   if(end - *src < 2)
     return CURLE_READ_ERROR;
@@ -94,8 +90,8 @@ static CURLcode spack_enc32(struct dynbuf *buf, uint32_t val)
   return curlx_dyn_addn(buf, nval, sizeof(nval));
 }
 
-static CURLcode
-spack_dec32(uint32_t *val, const uint8_t **src, const uint8_t *end)
+static CURLcode spack_dec32(uint32_t *val, const uint8_t **src,
+                            const uint8_t *end)
 {
   if(end - *src < 4)
     return CURLE_READ_ERROR;
@@ -111,7 +107,7 @@ static CURLcode spack_enc64(struct dynbuf *buf, uint64_t val)
   nval[0] = (uint8_t)(val >> 56);
   nval[1] = (uint8_t)(val >> 48);
   nval[2] = (uint8_t)(val >> 40);
-  nval[3] = (uint8_t)(val >> 32);                  \
+  nval[3] = (uint8_t)(val >> 32);
   nval[4] = (uint8_t)(val >> 24);
   nval[5] = (uint8_t)(val >> 16);
   nval[6] = (uint8_t)(val >> 8);
@@ -119,8 +115,8 @@ static CURLcode spack_enc64(struct dynbuf *buf, uint64_t val)
   return curlx_dyn_addn(buf, nval, sizeof(nval));
 }
 
-static CURLcode
-spack_dec64(uint64_t *val, const uint8_t **src, const uint8_t *end)
+static CURLcode spack_dec64(uint64_t *val, const uint8_t **src,
+                            const uint8_t *end)
 {
   if(end - *src < 8)
     return CURLE_READ_ERROR;
@@ -145,8 +141,8 @@ static CURLcode spack_encstr16(struct dynbuf *buf, const char *s)
   return r;
 }
 
-static CURLcode
-spack_decstr16(char **val, const uint8_t **src, const uint8_t *end)
+static CURLcode spack_decstr16(char **val, const uint8_t **src,
+                               const uint8_t *end)
 {
   uint16_t slen;
   CURLcode r;
@@ -162,8 +158,8 @@ spack_decstr16(char **val, const uint8_t **src, const uint8_t *end)
   return *val ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
-static CURLcode spack_encdata16(struct dynbuf *buf,
-                                const uint8_t *data, size_t data_len)
+static CURLcode spack_encdata16(struct dynbuf *buf, const uint8_t *data,
+                                size_t data_len)
 {
   CURLcode r;
   if(data_len > UINT16_MAX)
@@ -175,9 +171,8 @@ static CURLcode spack_encdata16(struct dynbuf *buf,
   return r;
 }
 
-static CURLcode
-spack_decdata16(uint8_t **val, size_t *val_len,
-                const uint8_t **src, const uint8_t *end)
+static CURLcode spack_decdata16(uint8_t **val, size_t *val_len,
+                                const uint8_t **src, const uint8_t *end)
 {
   uint16_t data_len;
   CURLcode r;
@@ -267,7 +262,7 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
     goto out;
   }
 
-  s = calloc(1, sizeof(*s));
+  s = curlx_calloc(1, sizeof(*s));
   if(!s) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;

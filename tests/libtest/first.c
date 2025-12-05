@@ -27,8 +27,6 @@
 #include <locale.h> /* for setlocale() */
 #endif
 
-#include "memdebug.h"
-
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
 {
@@ -143,7 +141,7 @@ static void memory_tracking_init(void)
   }
 }
 #else
-#  define memory_tracking_init() Curl_nop_stmt
+#define memory_tracking_init() Curl_nop_stmt
 #endif
 
 /* returns a hexdump in a static memory area */
@@ -205,7 +203,6 @@ void ws_close(CURL *curl)
   curl_mfprintf(stderr, "ws: curl_ws_send returned %u, sent %zu\n", res, sent);
 }
 #endif /* CURL_DISABLE_WEBSOCKETS */
-
 
 int main(int argc, const char **argv)
 {

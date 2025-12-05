@@ -42,7 +42,7 @@ static size_t write_response(void *ptr, size_t size, size_t nmemb, void *data)
   return fwrite(ptr, size, nmemb, writehere);
 }
 
-#define FTPBODY "ftp-list"
+#define FTPBODY    "ftp-list"
 #define FTPHEADERS "ftp-responses"
 
 int main(void)
@@ -90,7 +90,7 @@ int main(void)
     curl_easy_cleanup(curl);
   }
 
-  fclose(ftpfile); /* close the local file */
+  fclose(ftpfile);  /* close the local file */
   fclose(respfile); /* close the response file */
 
   curl_global_cleanup();

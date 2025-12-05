@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "uint-table.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_TBL_MAGIC  0x62757473
 #endif
@@ -47,7 +43,6 @@ void Curl_uint32_tbl_init(struct uint32_tbl *tbl,
 #endif
 }
 
-
 static void uint32_tbl_clear_rows(struct uint32_tbl *tbl,
                                   uint32_t from,
                                   uint32_t upto_excluding)
@@ -65,7 +60,6 @@ static void uint32_tbl_clear_rows(struct uint32_tbl *tbl,
   }
 }
 
-
 CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
 {
   /* we use `tbl->nrows + 1` during iteration, want that to work */
@@ -73,14 +67,14 @@ CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
   if(!nrows)
     return CURLE_BAD_FUNCTION_ARGUMENT;
   if(nrows != tbl->nrows) {
-    void **rows = calloc(nrows, sizeof(void *));
+    void **rows = curlx_calloc(nrows, sizeof(void *));
     if(!rows)
       return CURLE_OUT_OF_MEMORY;
     if(tbl->rows) {
       memcpy(rows, tbl->rows, (CURLMIN(nrows, tbl->nrows) * sizeof(void *)));
       if(nrows < tbl->nrows)
         uint32_tbl_clear_rows(tbl, nrows, tbl->nrows);
-      free(tbl->rows);
+      curlx_free(tbl->rows);
     }
     tbl->rows = rows;
     tbl->nrows = nrows;
@@ -88,12 +82,11 @@ CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nrows)
   return CURLE_OK;
 }
 
-
 void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl)
 {
   DEBUGASSERT(tbl->init == CURL_UINT32_TBL_MAGIC);
   Curl_uint32_tbl_clear(tbl);
-  free(tbl->rows);
+  curlx_free(tbl->rows);
   memset(tbl, 0, sizeof(*tbl));
 }
 
@@ -105,24 +98,20 @@ UNITTEST void Curl_uint32_tbl_clear(struct uint32_tbl *tbl)
   tbl->last_key_added = UINT32_MAX;
 }
 
-
 uint32_t Curl_uint32_tbl_capacity(struct uint32_tbl *tbl)
 {
   return tbl->nrows;
 }
-
 
 uint32_t Curl_uint32_tbl_count(struct uint32_tbl *tbl)
 {
   return tbl->nentries;
 }
 
-
 void *Curl_uint32_tbl_get(struct uint32_tbl *tbl, uint32_t key)
 {
   return (key < tbl->nrows) ? tbl->rows[key] : NULL;
 }
-
 
 bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey)
 {
@@ -160,18 +149,15 @@ bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey)
   return FALSE;
 }
 
-
 void Curl_uint32_tbl_remove(struct uint32_tbl *tbl, uint32_t key)
 {
   uint32_tbl_clear_rows(tbl, key, key + 1);
 }
 
-
 bool Curl_uint32_tbl_contains(struct uint32_tbl *tbl, uint32_t key)
 {
   return (key < tbl->nrows) ? !!tbl->rows[key] : FALSE;
 }
-
 
 static bool uint32_tbl_next_at(struct uint32_tbl *tbl, uint32_t key,
                                uint32_t *pkey, void **pentry)
@@ -200,7 +186,6 @@ bool Curl_uint32_tbl_first(struct uint32_tbl *tbl,
   *pentry = NULL;
   return FALSE;
 }
-
 
 bool Curl_uint32_tbl_next(struct uint32_tbl *tbl, uint32_t last_key,
                           uint32_t *pkey, void **pentry)

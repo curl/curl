@@ -47,7 +47,6 @@
 #include "multiif.h"
 #include "select.h"
 #include "curl_trc.h"
-#include "memdebug.h"
 
 static CURLcode t2600_setup(CURL **easy)
 {
@@ -110,7 +109,7 @@ static int test_idx;
 struct cf_test_ctx {
   int idx;
   int ai_family;
-  int transport;
+  uint8_t transport;
   char id[16];
   struct curltime started;
   timediff_t fail_delay_ms;
@@ -126,7 +125,7 @@ static void cf_test_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 #else
   (void)data;
 #endif
-  free(ctx);
+  curlx_free(ctx);
   cf->ctx = NULL;
 }
 
@@ -166,7 +165,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
                                struct Curl_easy *data,
                                struct connectdata *conn,
                                const struct Curl_addrinfo *ai,
-                               int transport)
+                               uint8_t transport)
 {
   static const struct Curl_cftype cft_test = {
     "TEST",
@@ -193,7 +192,7 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
 
   (void)data;
   (void)conn;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     res = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -233,14 +232,13 @@ static CURLcode cf_test_create(struct Curl_cfilter **pcf,
 out:
   *pcf = (!res) ? cf : NULL;
   if(res) {
-    free(cf);
-    free(ctx);
+    curlx_free(cf);
+    curlx_free(ctx);
   }
   return res;
 }
 
-static void check_result(const struct test_case *tc,
-                         struct test_result *tr)
+static void check_result(const struct test_case *tc, struct test_result *tr)
 {
   char msg[256];
   timediff_t duration_ms;
@@ -248,8 +246,7 @@ static void check_result(const struct test_case *tc,
   duration_ms = curlx_timediff_ms(tr->ended, tr->started);
   curl_mfprintf(stderr, "%d: test case took %dms\n", tc->id, (int)duration_ms);
 
-  if(tr->res != tc->exp_res
-    && CURLE_OPERATION_TIMEDOUT != tr->res) {
+  if(tr->res != tc->exp_res && CURLE_OPERATION_TIMEDOUT != tr->res) {
     /* on CI we encounter the TIMEOUT result, since images get less CPU
      * and events are not as sharply timed. */
     curl_msprintf(msg, "%d: expected result %d but got %d",

@@ -64,13 +64,9 @@
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* RFC2348 allows the block size to be negotiated */
 #define TFTP_BLKSIZE_DEFAULT 512
-#define TFTP_OPTION_BLKSIZE "blksize"
+#define TFTP_OPTION_BLKSIZE  "blksize"
 
 /* from RFC2349: */
 #define TFTP_OPTION_TSIZE    "tsize"
@@ -163,7 +159,6 @@ static CURLcode tftp_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);
 static CURLcode tftp_translate_code(tftp_error_t error);
 
-
 /*
  * TFTP protocol handler.
  */
@@ -225,7 +220,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     timeout = 15;
 
   /* Average reposting an ACK after 5 seconds */
-  state->retry_max = (int)timeout/5;
+  state->retry_max = (int)timeout / 5;
 
   /* But bound the total number */
   if(state->retry_max < 3)
@@ -235,7 +230,7 @@ static CURLcode tftp_set_timeouts(struct tftp_conn *state)
     state->retry_max = 50;
 
   /* Compute the re-ACK interval to suit the timeout */
-  state->retry_time = (int)(timeout/state->retry_max);
+  state->retry_time = (int)(timeout / state->retry_max);
   if(state->retry_time < 1)
     state->retry_time = 1;
 
@@ -263,7 +258,6 @@ static void setpacketevent(struct tftp_packet *packet, unsigned short num)
   packet->data[1] = (unsigned char)(num & 0xff);
 }
 
-
 static void setpacketblock(struct tftp_packet *packet, unsigned short num)
 {
   packet->data[2] = (unsigned char)(num >> 8);
@@ -283,7 +277,7 @@ static unsigned short getrpacketblock(const struct tftp_packet *packet)
 static size_t tftp_strnlen(const char *string, size_t maxlen)
 {
   const char *end = memchr(string, '\0', maxlen);
-  return end ? (size_t) (end - string) : maxlen;
+  return end ? (size_t)(end - string) : maxlen;
 }
 
 static const char *tftp_option_get(const char *buf, size_t len,
@@ -298,7 +292,7 @@ static const char *tftp_option_get(const char *buf, size_t len,
     return NULL;
   *option = buf;
 
-  loc += tftp_strnlen(buf + loc, len-loc);
+  loc += tftp_strnlen(buf + loc, len - loc);
   loc++; /* NULL term */
 
   if(loc > len)
@@ -470,7 +464,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
     if(strlen(filename) > (state->blksize - strlen(mode) - 4)) {
       failf(data, "TFTP filename too long");
-      free(filename);
+      curlx_free(filename);
       return CURLE_TFTP_ILLEGAL; /* too long filename field */
     }
 
@@ -478,7 +472,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
                    state->blksize,
                    "%s%c%s%c", filename, '\0', mode, '\0');
     sbytes = 4 + strlen(filename) + strlen(mode);
-    free(filename);
+    curlx_free(filename);
 
     /* optional addition of TFTP options */
     if(!data->set.tftp_no_options) {
@@ -574,7 +568,7 @@ static CURLcode tftp_send_first(struct tftp_conn *state,
 
 /* the next blocknum is x + 1 but it needs to wrap at an unsigned 16bit
    boundary */
-#define NEXT_BLOCKNUM(x) (((x) + 1)&0xffff)
+#define NEXT_BLOCKNUM(x) (((x) + 1) & 0xffff)
 
 /**********************************************************
  *
@@ -788,7 +782,7 @@ static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event)
       bufptr += cb;
     } while(state->sbytes < state->blksize && cb);
 
-    sbytes = sendto(state->sockfd, (void *) state->spacket.data,
+    sbytes = sendto(state->sockfd, (void *)state->spacket.data,
                     4 + (SEND_TYPE_ARG3)state->sbytes, SEND_4TH_ARG,
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
@@ -946,7 +940,7 @@ static void tftp_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_safefree(state->rpacket.data);
   Curl_safefree(state->spacket.data);
-  free(state);
+  curlx_free(state);
 }
 
 /**********************************************************
@@ -967,7 +961,7 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
 
   blksize = TFTP_BLKSIZE_DEFAULT;
 
-  state = calloc(1, sizeof(*state));
+  state = curlx_calloc(1, sizeof(*state));
   if(!state ||
      Curl_conn_meta_set(conn, CURL_META_TFTP_CONN, state, tftp_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
@@ -983,14 +977,14 @@ static CURLcode tftp_connect(struct Curl_easy *data, bool *done)
     need_blksize = TFTP_BLKSIZE_DEFAULT;
 
   if(!state->rpacket.data) {
-    state->rpacket.data = calloc(1, need_blksize + 2 + 2);
+    state->rpacket.data = curlx_calloc(1, need_blksize + 2 + 2);
 
     if(!state->rpacket.data)
       return CURLE_OUT_OF_MEMORY;
   }
 
   if(!state->spacket.data) {
-    state->spacket.data = calloc(1, need_blksize + 2 + 2);
+    state->spacket.data = curlx_calloc(1, need_blksize + 2 + 2);
 
     if(!state->spacket.data)
       return CURLE_OUT_OF_MEMORY;
@@ -1140,15 +1134,14 @@ static CURLcode tftp_receive_packet(struct Curl_easy *data,
          (NEXT_BLOCKNUM(state->block) == getrpacketblock(&state->rpacket))) {
         result = Curl_client_write(data, CLIENTWRITE_BODY,
                                    (char *)state->rpacket.data + 4,
-                                   state->rbytes-4);
+                                   state->rbytes - 4);
         if(result) {
           tftp_state_machine(state, TFTP_EVENT_ERROR);
           return result;
         }
       }
       break;
-    case TFTP_EVENT_ERROR:
-    {
+    case TFTP_EVENT_ERROR: {
       unsigned short error = getrpacketblock(&state->rpacket);
       char *str = (char *)state->rpacket.data + 4;
       size_t strn = state->rbytes - 4;
@@ -1331,7 +1324,6 @@ static CURLcode tftp_perform(struct Curl_easy *data, bool *dophase_done)
 
   return result;
 }
-
 
 /**********************************************************
  *

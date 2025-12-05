@@ -35,8 +35,6 @@
 #define USE_IDN
 #endif
 
-#include "memdebug.h" /* LAST include file */
-
 static int checkparts(CURLU *u, const char *in, const char *wanted,
                       unsigned int getflags)
 {
@@ -70,10 +68,10 @@ static int checkparts(CURLU *u, const char *in, const char *wanted,
     size_t n;
     rc = curl_url_get(u, parts[i].part, &p, getflags);
     if(!rc && p) {
-      curl_msnprintf(bufp, len, "%s%s", buf[0]?" | ":"", p);
+      curl_msnprintf(bufp, len, "%s%s", buf[0] ? " | " : "", p);
     }
     else
-      curl_msnprintf(bufp, len, "%s[%d]", buf[0]?" | ":"", rc);
+      curl_msnprintf(bufp, len, "%s[%d]", buf[0] ? " | " : "", rc);
 
     n = strlen(bufp);
     bufp += n;
@@ -1861,18 +1859,18 @@ static int get_nothing(void)
   return 0;
 }
 
-static const struct clearurlcase clear_url_list[] ={
-  {CURLUPART_SCHEME, "http", NULL, CURLUE_NO_SCHEME},
-  {CURLUPART_USER, "user", NULL, CURLUE_NO_USER},
-  {CURLUPART_PASSWORD, "password", NULL, CURLUE_NO_PASSWORD},
-  {CURLUPART_OPTIONS, "options", NULL, CURLUE_NO_OPTIONS},
-  {CURLUPART_HOST, "host", NULL, CURLUE_NO_HOST},
-  {CURLUPART_ZONEID, "eth0", NULL, CURLUE_NO_ZONEID},
-  {CURLUPART_PORT, "1234", NULL, CURLUE_NO_PORT},
-  {CURLUPART_PATH, "/hello", "/", CURLUE_OK},
-  {CURLUPART_QUERY, "a=b", NULL, CURLUE_NO_QUERY},
-  {CURLUPART_FRAGMENT, "anchor", NULL, CURLUE_NO_FRAGMENT},
-  {CURLUPART_URL, NULL, NULL, CURLUE_OK},
+static const struct clearurlcase clear_url_list[] = {
+  { CURLUPART_SCHEME, "http", NULL, CURLUE_NO_SCHEME },
+  { CURLUPART_USER, "user", NULL, CURLUE_NO_USER },
+  { CURLUPART_PASSWORD, "password", NULL, CURLUE_NO_PASSWORD },
+  { CURLUPART_OPTIONS, "options", NULL, CURLUE_NO_OPTIONS },
+  { CURLUPART_HOST, "host", NULL, CURLUE_NO_HOST },
+  { CURLUPART_ZONEID, "eth0", NULL, CURLUE_NO_ZONEID },
+  { CURLUPART_PORT, "1234", NULL, CURLUE_NO_PORT },
+  { CURLUPART_PATH, "/hello", "/", CURLUE_OK },
+  { CURLUPART_QUERY, "a=b", NULL, CURLUE_NO_QUERY },
+  { CURLUPART_FRAGMENT, "anchor", NULL, CURLUE_NO_FRAGMENT },
+  { CURLUPART_URL, NULL, NULL, CURLUE_OK },
 };
 
 static int clear_url(void)
@@ -1937,7 +1935,7 @@ static int huge(void)
   memset(&bigpart[1], 'a', sizeof(bigpart) - 2);
   bigpart[sizeof(bigpart) - 1] = 0;
 
-  for(i = 0; i <  7; i++) {
+  for(i = 0; i < 7; i++) {
     char *partp;
     curl_msnprintf(total, sizeof(total),
                    "%s://%s:%s@%s/%s?%s#%s",

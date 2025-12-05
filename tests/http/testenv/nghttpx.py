@@ -138,7 +138,7 @@ class Nghttpx:
                 except subprocess.TimeoutExpired:
                     log.warning(f'nghttpx({running.pid}), not shut down yet.')
                     os.kill(running.pid, signal.SIGQUIT)
-            if datetime.now() >= end_wait:
+            if running and datetime.now() >= end_wait:
                 log.error(f'nghttpx({running.pid}), terminate forcefully.')
                 os.kill(running.pid, signal.SIGKILL)
                 running.terminate()

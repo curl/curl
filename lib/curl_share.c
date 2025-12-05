@@ -34,21 +34,16 @@
 #include "hsts.h"
 #include "url.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-CURLSH *
-curl_share_init(void)
+CURLSH *curl_share_init(void)
 {
-  struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
+  struct Curl_share *share = curlx_calloc(1, sizeof(struct Curl_share));
   if(share) {
     share->magic = CURL_GOOD_SHARE;
     share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
     Curl_dnscache_init(&share->dnscache, 23);
     share->admin = curl_easy_init();
     if(!share->admin) {
-      free(share);
+      curlx_free(share);
       return NULL;
     }
     /* admin handles have mid 0 */
@@ -64,8 +59,7 @@ curl_share_init(void)
 }
 
 #undef curl_share_setopt
-CURLSHcode
-curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
+CURLSHcode curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 {
   va_list param;
   int type;
@@ -228,8 +222,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   return res;
 }
 
-CURLSHcode
-curl_share_cleanup(CURLSH *sh)
+CURLSHcode curl_share_cleanup(CURLSH *sh)
 {
   struct Curl_share *share = sh;
   if(!GOOD_SHARE_HANDLE(share))
@@ -272,15 +265,13 @@ curl_share_cleanup(CURLSH *sh)
   if(share->unlockfunc)
     share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
   share->magic = 0;
-  free(share);
+  curlx_free(share);
 
   return CURLSHE_OK;
 }
 
-
-CURLSHcode
-Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
-                curl_lock_access accesstype)
+CURLSHcode Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
+                           curl_lock_access accesstype)
 {
   struct Curl_share *share = data->share;
 
@@ -296,8 +287,7 @@ Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
   return CURLSHE_OK;
 }
 
-CURLSHcode
-Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
+CURLSHcode Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 {
   struct Curl_share *share = data->share;
 
@@ -306,7 +296,7 @@ Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
 
   if(share->specifier & (unsigned int)(1 << type)) {
     if(share->unlockfunc) /* only call this if set! */
-      share->unlockfunc (data, type, share->clientdata);
+      share->unlockfunc(data, type, share->clientdata);
   }
 
   return CURLSHE_OK;

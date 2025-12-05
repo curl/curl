@@ -46,7 +46,7 @@
 #define NUMT 4
 
 /* List of URLs to fetch.*/
-static const char * const urls[]= {
+static const char * const urls[] = {
   "https://www.example.com/",
   "https://www2.example.com/",
   "https://www3.example.com/",

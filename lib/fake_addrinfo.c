@@ -31,10 +31,6 @@
 #include <stdlib.h>
 #include <ares.h>
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 void r_freeaddrinfo(struct addrinfo *cahead)
 {
   struct addrinfo *canext;
@@ -42,7 +38,7 @@ void r_freeaddrinfo(struct addrinfo *cahead)
 
   for(ca = cahead; ca; ca = canext) {
     canext = ca->ai_next;
-    free(ca);
+    curlx_free(ca);
   }
 }
 
@@ -90,7 +86,7 @@ static struct addrinfo *mk_getaddrinfo(const struct ares_addrinfo *aihead)
     if((size_t)ai->ai_addrlen < ss_size)
       continue;
 
-    ca = malloc(sizeof(struct addrinfo) + ss_size + namelen);
+    ca = curlx_malloc(sizeof(struct addrinfo) + ss_size + namelen);
     if(!ca) {
       r_freeaddrinfo(cafirst);
       return NULL;
@@ -185,8 +181,7 @@ int r_getaddrinfo(const char *node,
     }
   }
 
-  ares_getaddrinfo(channel, node, service, &ahints,
-                   async_addrinfo_cb, &ctx);
+  ares_getaddrinfo(channel, node, service, &ahints, async_addrinfo_cb, &ctx);
 
   /* Wait until no more requests are left to be processed */
   ares_queue_wait_empty(channel, -1);

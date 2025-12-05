@@ -81,10 +81,6 @@
 #include <wincrypt.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_GNUTLS
 
 typedef struct md5_ctx my_md5_ctx;
@@ -318,9 +314,9 @@ static void my_md5_final(unsigned char *result, void *ctx);
  * The MD5 transformation for all four rounds.
  */
 #define MD5_STEP(f, a, b, c, d, x, t, s) \
-        (a) += f((b), (c), (d)) + (x) + (t); \
-        (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
-        (a) += (b);
+  (a) += f((b), (c), (d)) + (x) + (t); \
+  (a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
+  (a) += (b);
 
 /*
  * SET reads 4 input bytes in little-endian byte order and stores them
@@ -331,19 +327,15 @@ static void my_md5_final(unsigned char *result, void *ctx);
  * does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
-#define MD5_SET(n) \
-        (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
-#define MD5_GET(n) \
-        MD5_SET(n)
+#define MD5_SET(n) (*(const MD5_u32plus *)(const void *)&ptr[(n) * 4])
+#define MD5_GET(n) MD5_SET(n)
 #else
-#define MD5_SET(n) \
-        (ctx->block[(n)] = \
-        (MD5_u32plus)ptr[(n) * 4] | \
-        ((MD5_u32plus)ptr[(n) * 4 + 1] << 8) | \
-        ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
-        ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
-#define MD5_GET(n) \
-        (ctx->block[(n)])
+#define MD5_SET(n) (ctx->block[(n)] = \
+   (MD5_u32plus)ptr[(n) * 4] | \
+  ((MD5_u32plus)ptr[(n) * 4 + 1] <<  8) | \
+  ((MD5_u32plus)ptr[(n) * 4 + 2] << 16) | \
+  ((MD5_u32plus)ptr[(n) * 4 + 3] << 24))
+#define MD5_GET(n) (ctx->block[(n)])
 #endif
 
 /*
@@ -531,32 +523,32 @@ static void my_md5_final(unsigned char *result, void *in)
   memset(&ctx->buffer[used], 0, available - 8);
 
   ctx->lo <<= 3;
-  ctx->buffer[56] = curlx_ultouc((ctx->lo)&0xff);
-  ctx->buffer[57] = curlx_ultouc((ctx->lo >> 8)&0xff);
-  ctx->buffer[58] = curlx_ultouc((ctx->lo >> 16)&0xff);
+  ctx->buffer[56] = curlx_ultouc((ctx->lo) & 0xff);
+  ctx->buffer[57] = curlx_ultouc((ctx->lo >> 8) & 0xff);
+  ctx->buffer[58] = curlx_ultouc((ctx->lo >> 16) & 0xff);
   ctx->buffer[59] = curlx_ultouc(ctx->lo >> 24);
-  ctx->buffer[60] = curlx_ultouc((ctx->hi)&0xff);
-  ctx->buffer[61] = curlx_ultouc((ctx->hi >> 8)&0xff);
-  ctx->buffer[62] = curlx_ultouc((ctx->hi >> 16)&0xff);
+  ctx->buffer[60] = curlx_ultouc((ctx->hi) & 0xff);
+  ctx->buffer[61] = curlx_ultouc((ctx->hi >> 8) & 0xff);
+  ctx->buffer[62] = curlx_ultouc((ctx->hi >> 16) & 0xff);
   ctx->buffer[63] = curlx_ultouc(ctx->hi >> 24);
 
   my_md5_body(ctx, ctx->buffer, 64);
 
-  result[0] = curlx_ultouc((ctx->a)&0xff);
-  result[1] = curlx_ultouc((ctx->a >> 8)&0xff);
-  result[2] = curlx_ultouc((ctx->a >> 16)&0xff);
+  result[0] = curlx_ultouc((ctx->a) & 0xff);
+  result[1] = curlx_ultouc((ctx->a >> 8) & 0xff);
+  result[2] = curlx_ultouc((ctx->a >> 16) & 0xff);
   result[3] = curlx_ultouc(ctx->a >> 24);
-  result[4] = curlx_ultouc((ctx->b)&0xff);
-  result[5] = curlx_ultouc((ctx->b >> 8)&0xff);
-  result[6] = curlx_ultouc((ctx->b >> 16)&0xff);
+  result[4] = curlx_ultouc((ctx->b) & 0xff);
+  result[5] = curlx_ultouc((ctx->b >> 8) & 0xff);
+  result[6] = curlx_ultouc((ctx->b >> 16) & 0xff);
   result[7] = curlx_ultouc(ctx->b >> 24);
-  result[8] = curlx_ultouc((ctx->c)&0xff);
-  result[9] = curlx_ultouc((ctx->c >> 8)&0xff);
-  result[10] = curlx_ultouc((ctx->c >> 16)&0xff);
+  result[8] = curlx_ultouc((ctx->c) & 0xff);
+  result[9] = curlx_ultouc((ctx->c >> 8) & 0xff);
+  result[10] = curlx_ultouc((ctx->c >> 16) & 0xff);
   result[11] = curlx_ultouc(ctx->c >> 24);
-  result[12] = curlx_ultouc((ctx->d)&0xff);
-  result[13] = curlx_ultouc((ctx->d >> 8)&0xff);
-  result[14] = curlx_ultouc((ctx->d >> 16)&0xff);
+  result[12] = curlx_ultouc((ctx->d) & 0xff);
+  result[13] = curlx_ultouc((ctx->d >> 8) & 0xff);
+  result[14] = curlx_ultouc((ctx->d >> 16) & 0xff);
   result[15] = curlx_ultouc(ctx->d >> 24);
 
   memset(ctx, 0, sizeof(*ctx));
@@ -604,23 +596,23 @@ struct MD5_context *Curl_MD5_init(const struct MD5_params *md5params)
   struct MD5_context *ctxt;
 
   /* Create MD5 context */
-  ctxt = malloc(sizeof(*ctxt));
+  ctxt = curlx_malloc(sizeof(*ctxt));
 
   if(!ctxt)
     return ctxt;
 
-  ctxt->md5_hashctx = malloc(md5params->md5_ctxtsize);
+  ctxt->md5_hashctx = curlx_malloc(md5params->md5_ctxtsize);
 
   if(!ctxt->md5_hashctx) {
-    free(ctxt);
+    curlx_free(ctxt);
     return NULL;
   }
 
   ctxt->md5_hash = md5params;
 
   if((*md5params->md5_init_func)(ctxt->md5_hashctx)) {
-    free(ctxt->md5_hashctx);
-    free(ctxt);
+    curlx_free(ctxt->md5_hashctx);
+    curlx_free(ctxt);
     return NULL;
   }
 
@@ -640,8 +632,8 @@ CURLcode Curl_MD5_final(struct MD5_context *context, unsigned char *result)
 {
   (*context->md5_hash->md5_final_func)(result, context->md5_hashctx);
 
-  free(context->md5_hashctx);
-  free(context);
+  curlx_free(context->md5_hashctx);
+  curlx_free(context);
 
   return CURLE_OK;
 }

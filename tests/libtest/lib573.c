@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 /*
  * Get a single URL without select().
@@ -42,7 +41,7 @@ static CURLcode test_lib573(const char *URL)
   dbl_epsilon = 1.0;
   do {
     dbl_epsilon /= 2.0;
-  } while((double)(1.0 + (dbl_epsilon/2.0)) > (double)1.0);
+  } while((double)(1.0 + (dbl_epsilon / 2.0)) > (double)1.0);
 
   start_test_timing();
 

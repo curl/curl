@@ -37,10 +37,6 @@
 #include "multiif.h"
 #include "vtls/vtls.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef USE_PINGPONG
 
 /* Returns timeout in ms. 0 or negative number means the timeout has already
@@ -217,7 +213,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 
   return CURLE_OK;
 }
-
 
 /***********************************************************************
  *

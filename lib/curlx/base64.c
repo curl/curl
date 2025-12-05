@@ -30,19 +30,13 @@
 #include "warnless.h"
 #include "base64.h"
 
-/* The last 2 #include files should be in this order */
-#ifdef BUILDING_LIBCURL
-#include "../curl_memory.h"
-#endif
-#include "../memdebug.h"
-
 /* ---- Base64 Encoding/Decoding Table --- */
-const char Curl_base64encdec[]=
+const char Curl_base64encdec[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* The Base 64 encoding with a URL and filename safe alphabet, RFC 4648
    section 5 */
-static const char base64url[]=
+static const char base64url[] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 static const unsigned char decodetable[] =
@@ -66,7 +60,7 @@ static const unsigned char decodetable[] =
  * @unittest: 1302
  */
 CURLcode curlx_base64_decode(const char *src,
-                             unsigned char **outptr, size_t *outlen)
+                             uint8_t **outptr, size_t *outlen)
 {
   size_t srclen = 0;
   size_t padding = 0;
@@ -103,7 +97,7 @@ CURLcode curlx_base64_decode(const char *src,
   rawlen = (numQuantums * 3) - padding;
 
   /* Allocate our buffer including room for a null-terminator */
-  newstr = malloc(rawlen + 1);
+  newstr = curlx_malloc(rawlen + 1);
   if(!newstr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -165,13 +159,13 @@ CURLcode curlx_base64_decode(const char *src,
 
   return CURLE_OK;
 bad:
-  free(newstr);
+  curlx_free(newstr);
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
 static CURLcode base64_encode(const char *table64,
-                              unsigned char padbyte,
-                              const char *inputbuff, size_t insize,
+                              uint8_t padbyte,
+                              const uint8_t *inputbuff, size_t insize,
                               char **outptr, size_t *outlen)
 {
   char *output;
@@ -189,23 +183,23 @@ static CURLcode base64_encode(const char *table64,
   if(insize > CURL_MAX_BASE64_INPUT)
     return CURLE_TOO_LARGE;
 
-  base64data = output = malloc((insize + 2) / 3 * 4 + 1);
+  base64data = output = curlx_malloc((insize + 2) / 3 * 4 + 1);
   if(!output)
     return CURLE_OUT_OF_MEMORY;
 
   while(insize >= 3) {
-    *output++ = table64[ in[0] >> 2 ];
-    *output++ = table64[ ((in[0] & 0x03) << 4) | (in[1] >> 4) ];
-    *output++ = table64[ ((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6) ];
-    *output++ = table64[ in[2] & 0x3F ];
+    *output++ = table64[in[0] >> 2];
+    *output++ = table64[((in[0] & 0x03) << 4) | (in[1] >> 4)];
+    *output++ = table64[((in[1] & 0x0F) << 2) | ((in[2] & 0xC0) >> 6)];
+    *output++ = table64[in[2] & 0x3F];
     insize -= 3;
     in += 3;
   }
   if(insize) {
     /* this is only one or two bytes now */
-    *output++ = table64[ in[0] >> 2 ];
+    *output++ = table64[in[0] >> 2];
     if(insize == 1) {
-      *output++ = table64[ ((in[0] & 0x03) << 4) ];
+      *output++ = table64[((in[0] & 0x03) << 4)];
       if(padbyte) {
         *output++ = padbyte;
         *output++ = padbyte;
@@ -213,8 +207,8 @@ static CURLcode base64_encode(const char *table64,
     }
     else {
       /* insize == 2 */
-      *output++ = table64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4) ];
-      *output++ = table64[ ((in[1] & 0x0F) << 2) ];
+      *output++ = table64[((in[0] & 0x03) << 4) | ((in[1] & 0xF0) >> 4)];
+      *output++ = table64[((in[1] & 0x0F) << 2)];
       if(padbyte)
         *output++ = padbyte;
     }
@@ -245,7 +239,7 @@ static CURLcode base64_encode(const char *table64,
  *
  * @unittest: 1302
  */
-CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
+CURLcode curlx_base64_encode(const uint8_t *inputbuff, size_t insize,
                              char **outptr, size_t *outlen)
 {
   return base64_encode(Curl_base64encdec, '=',
@@ -267,7 +261,7 @@ CURLcode curlx_base64_encode(const char *inputbuff, size_t insize,
  *
  * @unittest: 1302
  */
-CURLcode curlx_base64url_encode(const char *inputbuff, size_t insize,
+CURLcode curlx_base64url_encode(const uint8_t *inputbuff, size_t insize,
                                 char **outptr, size_t *outlen)
 {
   return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);

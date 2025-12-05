@@ -25,8 +25,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib591(const char *URL)
 {
   CURL *curl = NULL;
@@ -116,8 +114,8 @@ static CURLcode test_lib591(const char *URL)
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
       interval.tv_sec = 0;

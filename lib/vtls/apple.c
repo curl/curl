@@ -50,39 +50,35 @@
 #include <Security/Security.h>
 #endif
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 #ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
-  && MAC_OS_X_VERSION_MAX_ALLOWED >= 101400)    \
-  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
-  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
+     MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
+   __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
-#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
-  && ((defined(MAC_OS_X_VERSION_MIN_REQUIRED)     \
-  && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)     \
-  || (defined(__IPHONE_OS_VERSION_MIN_REQUIRED)   \
-  && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+#if defined(SUPPORTS_SecTrustEvaluateWithError) && \
+  ((defined(MAC_OS_X_VERSION_MIN_REQUIRED) &&      \
+    MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) ||    \
+   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) &&   \
+    __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
-#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
-  && !defined(HAVE_BUILTIN_AVAILABLE)             \
-  && !defined(REQUIRES_SecTrustEvaluateWithError)
+#if defined(SUPPORTS_SecTrustEvaluateWithError) && \
+  !defined(HAVE_BUILTIN_AVAILABLE) &&              \
+  !defined(REQUIRES_SecTrustEvaluateWithError)
 #undef SUPPORTS_SecTrustEvaluateWithError
 #endif
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
-  && MAC_OS_X_VERSION_MAX_ALLOWED >= 100900)    \
-  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
-  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
+     MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
+   __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
 #define SUPPORTS_SecOCSP 1
 #endif
 
@@ -211,8 +207,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
 #if defined(HAVE_BUILTIN_AVAILABLE) && defined(SUPPORTS_SecOCSP)
   if(ocsp_len > 0) {
     if(__builtin_available(macOS 10.9, iOS 7, tvOS 9, watchOS 2, *)) {
-      CFDataRef ocspdata =
-        CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
+      CFDataRef ocspdata = CFDataCreate(NULL, ocsp_buf, (CFIndex)ocsp_len);
 
       status = SecTrustSetOCSPResponse(trust, ocspdata);
       CFRelease(ocspdata);
@@ -244,11 +239,11 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
       if(error_ref) {
         CFIndex size = CFStringGetMaximumSizeForEncoding(
           CFStringGetLength(error_ref), kCFStringEncodingUTF8);
-        err_desc = malloc(size + 1);
+        err_desc = curlx_malloc(size + 1);
         if(err_desc) {
           if(!CFStringGetCString(error_ref, err_desc, size,
-             kCFStringEncodingUTF8)) {
-            free(err_desc);
+                                 kCFStringEncodingUTF8)) {
+            curlx_free(err_desc);
             err_desc = NULL;
           }
         }
@@ -276,7 +271,7 @@ CURLcode Curl_vtls_apple_verify(struct Curl_cfilter *cf,
   }
 
 out:
-  free(err_desc);
+  curlx_free(err_desc);
   if(error_ref)
     CFRelease(error_ref);
   if(error)

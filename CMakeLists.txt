@@ -66,9 +66,9 @@ project(CURL
   LANGUAGES C)
 
 # CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
-if(WINDOWS_STORE AND MINGW)  # mingw UWP build
+if(WINDOWS_STORE AND MINGW)  # MinGW UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
-  # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
+  # template to windres. Reset it to the windres template as in 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
 elseif(DOS AND CMAKE_C_COMPILER_ID STREQUAL "GNU")  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
@@ -358,23 +358,14 @@ else()
 endif()
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use_pkgconfig_default})
 
-# Initialize variables collecting dependency libs, paths, pkg-config names.
+# Initialize variables collecting system and dependency libs.
 set(CURL_NETWORK_AND_TIME_LIBS "")
 set(CURL_LIBS "")
-set(CURL_LIBDIRS "")
-set(LIBCURL_PC_REQUIRES_PRIVATE "")
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(Cares REQUIRED)
-  list(APPEND CURL_LIBS ${CARES_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${CARES_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${CARES_PC_REQUIRES})
-  include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
-  link_directories(${CARES_LIBRARY_DIRS})
-  if(CARES_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${CARES_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::cares)
 endif()
 
 include(CurlSymbolHiding)
@@ -762,7 +753,7 @@ if(CURL_USE_OPENSSL)
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
+  set_target_properties(OpenSSL::SSL PROPERTIES INTERFACE_LIBCURL_PC_MODULES "openssl")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
@@ -809,14 +800,7 @@ if(CURL_USE_MBEDTLS)
   endif()
   set(_ssl_enabled ON)
   set(USE_MBEDTLS ON)
-  list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${MBEDTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${MBEDTLS_PC_REQUIRES})
-  include_directories(SYSTEM ${MBEDTLS_INCLUDE_DIRS})
-  link_directories(${MBEDTLS_LIBRARY_DIRS})
-  if(MBEDTLS_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${MBEDTLS_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::mbedtls)
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "mbedtls")
     set(_valid_default_ssl_backend TRUE)
@@ -828,9 +812,7 @@ if(CURL_USE_MBEDTLS)
   endif()
   if(NOT DEFINED HAVE_MBEDTLS_DES_CRYPT_ECB)
     cmake_push_check_state()
-    list(APPEND CMAKE_REQUIRED_INCLUDES "${MBEDTLS_INCLUDE_DIRS}")
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${MBEDTLS_LIBRARIES}")
-    curl_required_libpaths("${MBEDTLS_LIBRARY_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::mbedtls)
     check_function_exists("mbedtls_des_crypt_ecb" HAVE_MBEDTLS_DES_CRYPT_ECB)  # in mbedTLS <4
     cmake_pop_check_state()
   endif()
@@ -840,14 +822,7 @@ if(CURL_USE_WOLFSSL)
   find_package(WolfSSL REQUIRED)
   set(_ssl_enabled ON)
   set(USE_WOLFSSL ON)
-  list(APPEND CURL_LIBS ${WOLFSSL_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${WOLFSSL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${WOLFSSL_PC_REQUIRES})
-  include_directories(SYSTEM ${WOLFSSL_INCLUDE_DIRS})
-  link_directories(${WOLFSSL_LIBRARY_DIRS})
-  if(WOLFSSL_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${WOLFSSL_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::wolfssl)
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "wolfssl")
     set(_valid_default_ssl_backend TRUE)
@@ -857,26 +832,11 @@ endif()
 
 if(CURL_USE_GNUTLS)
   find_package(GnuTLS REQUIRED)
-  list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${GNUTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${GNUTLS_PC_REQUIRES})
-  include_directories(SYSTEM ${GNUTLS_INCLUDE_DIRS})
-  link_directories(${GNUTLS_LIBRARY_DIRS})
-  if(GNUTLS_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${GNUTLS_CFLAGS}")
-  endif()
-
+  list(APPEND CURL_LIBS CURL::gnutls)
   find_package(Nettle REQUIRED)
+  list(APPEND CURL_LIBS CURL::nettle)
   set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
-  list(APPEND CURL_LIBS ${NETTLE_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NETTLE_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NETTLE_PC_REQUIRES})
-  include_directories(SYSTEM ${NETTLE_INCLUDE_DIRS})
-  link_directories(${NETTLE_LIBRARY_DIRS})
-  if(NETTLE_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${NETTLE_CFLAGS}")
-  endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "gnutls")
     set(_valid_default_ssl_backend TRUE)
@@ -885,9 +845,7 @@ if(CURL_USE_GNUTLS)
 
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
-    list(APPEND CMAKE_REQUIRED_INCLUDES "${GNUTLS_INCLUDE_DIRS}")
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${GNUTLS_LIBRARIES}")
-    curl_required_libpaths("${GNUTLS_LIBRARY_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::gnutls)
     # In GnuTLS 3.8.0 (2023-02-10) and upper, this check always succeeds.
     # Detecting actual TLS-SRP support needs poking the API at runtime.
     check_symbol_exists("gnutls_srp_verifier" "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
@@ -899,23 +857,14 @@ if(CURL_USE_RUSTLS)
   find_package(Rustls REQUIRED)
   set(_ssl_enabled ON)
   set(USE_RUSTLS ON)
-  list(APPEND CURL_LIBS ${RUSTLS_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${RUSTLS_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${RUSTLS_PC_REQUIRES})
-  include_directories(SYSTEM ${RUSTLS_INCLUDE_DIRS})
-  link_directories(${RUSTLS_LIBRARY_DIRS})
-  if(RUSTLS_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${RUSTLS_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::rustls)
 
   if(NOT DEFINED HAVE_RUSTLS_SUPPORTED_HPKE)
     if(RUSTLS_VERSION AND RUSTLS_VERSION VERSION_GREATER_EQUAL 0.15)
       set(HAVE_RUSTLS_SUPPORTED_HPKE TRUE)
     elseif(NOT RUSTLS_VERSION)
       cmake_push_check_state()
-      list(APPEND CMAKE_REQUIRED_INCLUDES "${RUSTLS_INCLUDE_DIRS}")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "${RUSTLS_LIBRARIES}")
-      curl_required_libpaths("${RUSTLS_LIBRARY_DIRS}")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::rustls)
       check_symbol_exists("rustls_supported_hpke" "rustls.h" HAVE_RUSTLS_SUPPORTED_HPKE)
       cmake_pop_check_state()
     endif()
@@ -944,21 +893,14 @@ if(ZLIB_FOUND)
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS ZLIB::ZLIB)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
+  set_target_properties(ZLIB::ZLIB PROPERTIES INTERFACE_LIBCURL_PC_MODULES "zlib")
 endif()
 
 set(HAVE_BROTLI OFF)
 curl_dependency_option(CURL_BROTLI Brotli "brotli")
 if(BROTLI_FOUND)
   set(HAVE_BROTLI ON)
-  list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${BROTLI_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${BROTLI_PC_REQUIRES})
-  include_directories(SYSTEM ${BROTLI_INCLUDE_DIRS})
-  link_directories(${BROTLI_LIBRARY_DIRS})
-  if(BROTLI_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${BROTLI_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::brotli)
 endif()
 
 set(HAVE_ZSTD OFF)
@@ -966,14 +908,7 @@ curl_dependency_option(CURL_ZSTD Zstd "zstd")
 if(ZSTD_FOUND)
   if(ZSTD_VERSION VERSION_GREATER_EQUAL 1.0.0)
     set(HAVE_ZSTD ON)
-    list(APPEND CURL_LIBS ${ZSTD_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${ZSTD_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${ZSTD_PC_REQUIRES})
-    include_directories(SYSTEM ${ZSTD_INCLUDE_DIRS})
-    link_directories(${ZSTD_LIBRARY_DIRS})
-    if(ZSTD_CFLAGS)
-      string(APPEND CMAKE_C_FLAGS " ${ZSTD_CFLAGS}")
-    endif()
+    list(APPEND CURL_LIBS CURL::zstd)
   else()
     message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
   endif()
@@ -993,9 +928,7 @@ macro(curl_openssl_check_exists)
     endif()
   endif()
   if(USE_WOLFSSL)
-    list(APPEND CMAKE_REQUIRED_INCLUDES "${WOLFSSL_INCLUDE_DIRS}")
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${WOLFSSL_LIBRARIES}")
-    curl_required_libpaths("${WOLFSSL_LIBRARY_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::wolfssl)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
     endif()
@@ -1097,14 +1030,7 @@ option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)
   find_package(NGHTTP2)
   if(NGHTTP2_FOUND)
-    list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${NGHTTP2_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP2_PC_REQUIRES})
-    include_directories(SYSTEM ${NGHTTP2_INCLUDE_DIRS})
-    link_directories(${NGHTTP2_LIBRARY_DIRS})
-    if(NGHTTP2_CFLAGS)
-      string(APPEND CMAKE_C_FLAGS " ${NGHTTP2_CFLAGS}")
-    endif()
+    list(APPEND CURL_LIBS CURL::nghttp2)
   else()
     set(USE_NGHTTP2 OFF)
   endif()
@@ -1140,25 +1066,11 @@ if(USE_NGTCP2)
   else()
     message(FATAL_ERROR "ngtcp2 requires a supported TLS-backend")
   endif()
-  list(APPEND CURL_LIBS ${NGTCP2_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NGTCP2_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGTCP2_PC_REQUIRES})
-  include_directories(SYSTEM ${NGTCP2_INCLUDE_DIRS})
-  link_directories(${NGTCP2_LIBRARY_DIRS})
-  if(NGTCP2_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${NGTCP2_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::ngtcp2)
 
   find_package(NGHTTP3 REQUIRED)
   set(USE_NGHTTP3 ON)
-  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NGHTTP3_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
-  include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
-  link_directories(${NGHTTP3_LIBRARY_DIRS})
-  if(NGHTTP3_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${NGHTTP3_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::nghttp3)
 endif()
 
 option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
@@ -1173,18 +1085,10 @@ if(USE_QUICHE)
     message(FATAL_ERROR "quiche requires BoringSSL")
   endif()
   curl_openssl_check_quic()
-  list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${QUICHE_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${QUICHE_PC_REQUIRES})
-  include_directories(SYSTEM ${QUICHE_INCLUDE_DIRS})
-  link_directories(${QUICHE_LIBRARY_DIRS})
-  if(QUICHE_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${QUICHE_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::quiche)
   if(NOT DEFINED HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_push_check_state()
-    list(APPEND CMAKE_REQUIRED_INCLUDES "${QUICHE_INCLUDE_DIRS}")
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${QUICHE_LIBRARIES}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::quiche)
     check_symbol_exists("quiche_conn_set_qlog_fd" "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_pop_check_state()
   endif()
@@ -1200,14 +1104,7 @@ if(USE_OPENSSL_QUIC)
 
   find_package(NGHTTP3 REQUIRED)
   set(USE_NGHTTP3 ON)
-  list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${NGHTTP3_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
-  include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
-  link_directories(${NGHTTP3_LIBRARY_DIRS})
-  if(NGHTTP3_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${NGHTTP3_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::nghttp3)
 endif()
 
 if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
@@ -1235,22 +1132,12 @@ if(NOT CURL_DISABLE_LDAP)
     find_package(LDAP)
     if(LDAP_FOUND)
       set(HAVE_LBER_H 1)
-      set(CURL_LIBS ${LDAP_LIBRARIES} ${CURL_LIBS})
-      list(APPEND CURL_LIBDIRS ${LDAP_LIBRARY_DIRS})
-      if(LDAP_PC_REQUIRES)
-        set(LIBCURL_PC_REQUIRES_PRIVATE ${LDAP_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
-      endif()
-      include_directories(SYSTEM ${LDAP_INCLUDE_DIRS})
-      link_directories(${LDAP_LIBRARY_DIRS})
-      if(LDAP_CFLAGS)
-        string(APPEND CMAKE_C_FLAGS " ${LDAP_CFLAGS}")
-      endif()
+      set(CURL_LIBS CURL::ldap ${CURL_LIBS})
 
       # LDAP feature checks
 
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "${LDAP_LIBRARIES}")
-      curl_required_libpaths("${LDAP_LIBRARY_DIRS}")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES CURL::ldap)
 
       check_function_exists("ldap_url_parse" HAVE_LDAP_URL_PARSE)
       check_function_exists("ldap_init_fd" HAVE_LDAP_INIT_FD)
@@ -1312,14 +1199,7 @@ set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
   find_package(Libidn2)
   if(LIBIDN2_FOUND)
-    set(CURL_LIBS ${LIBIDN2_LIBRARIES} ${CURL_LIBS})
-    list(APPEND CURL_LIBDIRS ${LIBIDN2_LIBRARY_DIRS})
-    set(LIBCURL_PC_REQUIRES_PRIVATE ${LIBIDN2_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
-    include_directories(SYSTEM ${LIBIDN2_INCLUDE_DIRS})
-    link_directories(${LIBIDN2_LIBRARY_DIRS})
-    if(LIBIDN2_CFLAGS)
-      string(APPEND CMAKE_C_FLAGS " ${LIBIDN2_CFLAGS}")
-    endif()
+    set(CURL_LIBS CURL::libidn2 ${CURL_LIBS})
     set(HAVE_IDN2_H 1)
     set(HAVE_LIBIDN2 1)
   endif()
@@ -1329,17 +1209,9 @@ endif()
 option(CURL_USE_LIBPSL "Use libpsl" ON)
 mark_as_advanced(CURL_USE_LIBPSL)
 set(USE_LIBPSL OFF)
-
 if(CURL_USE_LIBPSL)
   find_package(Libpsl REQUIRED)
-  list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBPSL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBPSL_PC_REQUIRES})
-  include_directories(SYSTEM ${LIBPSL_INCLUDE_DIRS})
-  link_directories(${LIBPSL_LIBRARY_DIRS})
-  if(LIBPSL_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${LIBPSL_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::libpsl)
   set(USE_LIBPSL ON)
 endif()
 
@@ -1347,18 +1219,10 @@ endif()
 option(CURL_USE_LIBSSH2 "Use libssh2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
-
 if(CURL_USE_LIBSSH2)
   find_package(Libssh2)
   if(LIBSSH2_FOUND)
-    set(CURL_LIBS ${LIBSSH2_LIBRARIES} ${CURL_LIBS})  # keep it before TLS-crypto, compression
-    list(APPEND CURL_LIBDIRS ${LIBSSH2_LIBRARY_DIRS})
-    set(LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH2_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
-    include_directories(SYSTEM ${LIBSSH2_INCLUDE_DIRS})
-    link_directories(${LIBSSH2_LIBRARY_DIRS})
-    if(LIBSSH2_CFLAGS)
-      string(APPEND CMAKE_C_FLAGS " ${LIBSSH2_CFLAGS}")
-    endif()
+    set(CURL_LIBS CURL::libssh2 ${CURL_LIBS})  # keep it before TLS-crypto, compression
     set(USE_LIBSSH2 ON)
   endif()
 endif()
@@ -1368,14 +1232,7 @@ option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(Libssh REQUIRED)
-  set(CURL_LIBS ${LIBSSH_LIBRARIES} ${CURL_LIBS})  # keep it before TLS-crypto, compression
-  list(APPEND CURL_LIBDIRS ${LIBSSH_LIBRARY_DIRS})
-  set(LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH_PC_REQUIRES} ${LIBCURL_PC_REQUIRES_PRIVATE})
-  include_directories(SYSTEM ${LIBSSH_INCLUDE_DIRS})
-  link_directories(${LIBSSH_LIBRARY_DIRS})
-  if(LIBSSH_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${LIBSSH_CFLAGS}")
-  endif()
+  set(CURL_LIBS CURL::libssh ${CURL_LIBS})  # keep it before TLS-crypto, compression
   set(USE_LIBSSH ON)
 endif()
 
@@ -1383,14 +1240,7 @@ option(CURL_USE_GSASL "Use libgsasl" OFF)
 mark_as_advanced(CURL_USE_GSASL)
 if(CURL_USE_GSASL)
   find_package(Libgsasl REQUIRED)
-  list(APPEND CURL_LIBS ${LIBGSASL_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBGSASL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBGSASL_PC_REQUIRES})
-  include_directories(SYSTEM ${LIBGSASL_INCLUDE_DIRS})
-  link_directories(${LIBGSASL_LIBRARY_DIRS})
-  if(LIBGSASL_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${LIBGSASL_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::libgsasl)
   set(USE_GSASL ON)
 endif()
 
@@ -1402,16 +1252,10 @@ if(CURL_USE_GSSAPI)
 
   set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
-    list(APPEND CURL_LIBS ${GSS_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${GSS_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${GSS_PC_REQUIRES})
-    include_directories(SYSTEM ${GSS_INCLUDE_DIRS})
-    link_directories(${GSS_LIBRARY_DIRS})
-    if(GSS_CFLAGS)
-      string(APPEND CMAKE_C_FLAGS " ${GSS_CFLAGS}")
-    endif()
+    list(APPEND CURL_LIBS CURL::gss)
 
-    if(GSS_FLAVOUR STREQUAL "GNU")
+    get_target_property(_gss_flavour CURL::gss INTERFACE_CURL_GSS_FLAVOUR)
+    if(_gss_flavour STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
     elseif(GSS_VERSION)  # MIT
       set(CURL_KRB5_VERSION "\"${GSS_VERSION}\"")
@@ -1431,8 +1275,7 @@ if(CURL_USE_LIBBACKTRACE)
     message(FATAL_ERROR "libbacktrace requires debug information")
   endif()
   find_package(Libbacktrace REQUIRED)
-  list(APPEND CURL_LIBS ${LIBBACKTRACE_LIBRARIES})
-  include_directories(SYSTEM ${LIBBACKTRACE_INCLUDE_DIRS})
+  list(APPEND CURL_LIBS CURL::libbacktrace)
   set(USE_BACKTRACE ON)
 endif()
 
@@ -1443,14 +1286,7 @@ if(CURL_USE_LIBUV)
     message(FATAL_ERROR "Using libuv without debug support enabled is useless")
   endif()
   find_package(Libuv REQUIRED)
-  list(APPEND CURL_LIBS ${LIBUV_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBUV_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBUV_PC_REQUIRES})
-  include_directories(SYSTEM ${LIBUV_INCLUDE_DIRS})
-  link_directories(${LIBUV_LIBRARY_DIRS})
-  if(LIBUV_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${LIBUV_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::libuv)
   set(USE_LIBUV ON)
   set(HAVE_UV_H ON)
 endif()
@@ -1458,14 +1294,7 @@ endif()
 option(USE_LIBRTMP "Enable librtmp from rtmpdump" OFF)
 if(USE_LIBRTMP)
   find_package(Librtmp REQUIRED)
-  list(APPEND CURL_LIBS ${LIBRTMP_LIBRARIES})
-  list(APPEND CURL_LIBDIRS ${LIBRTMP_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBRTMP_PC_REQUIRES})
-  include_directories(SYSTEM ${LIBRTMP_INCLUDE_DIRS})
-  link_directories(${LIBRTMP_LIBRARY_DIRS})
-  if(LIBRTMP_CFLAGS)
-    string(APPEND CMAKE_C_FLAGS " ${LIBRTMP_CFLAGS}")
-  endif()
+  list(APPEND CURL_LIBS CURL::librtmp)
 endif()
 
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
@@ -1964,6 +1793,28 @@ if(CURL_CODE_COVERAGE)
   list(APPEND CURL_LIBS ${CURL_COVERAGE_LIBS})
 endif()
 
+# Hack to add some libraries to the end of the library list to make binutils ld
+# for GCC find symbols when linking statically. Necessary for libs detected via
+# CMake's built-in find modules, which CMake adds to the beginning of the lib
+# list on the linker command-line for some reason. This makes them appear
+# before dependencies detected via curl's custom Find modules, and breaks
+# linkers sensitive to lib order. There must be a better solution to this.
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  foreach(_lib IN ITEMS OpenSSL::Crypto ZLIB::ZLIB)
+    if(TARGET "${_lib}")
+      add_library(CURL::${_lib} INTERFACE IMPORTED)
+      get_target_property(_libname "${_lib}" LOCATION)
+      set_target_properties(${_lib} PROPERTIES INTERFACE_LINK_LIBRARIES "${_libname}")
+      list(APPEND CURL_LIBS ${_lib})
+    endif()
+  endforeach()
+  if(WIN32)
+    add_library(CURL::win32_winsock INTERFACE IMPORTED)
+    set_target_properties(CURL::win32_winsock PROPERTIES INTERFACE_LINK_LIBRARIES "ws2_32")
+    list(APPEND CURL_LIBS CURL::win32_winsock)
+  endif()
+endif()
+
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
 endif()
@@ -2027,8 +1878,6 @@ if(PERL_FOUND)
 endif()
 
 add_subdirectory(scripts)  # for shell completions
-
-list(REMOVE_DUPLICATES CURL_LIBDIRS)
 
 add_subdirectory(lib)
 
@@ -2252,7 +2101,91 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  foreach(_libdir IN LISTS _custom_libdirs CURL_LIBDIRS)
+  set(_implicit_libs "")
+  if(NOT MINGW AND NOT UNIX)
+    set(_implicit_libs "${CMAKE_C_IMPLICIT_LINK_LIBRARIES}")
+  endif()
+
+  set(_explicit_libdirs "")
+  set(LIBCURL_PC_REQUIRES_PRIVATE "")
+  set(LIBCURL_PC_LIBS_PRIVATE_LIST "")
+  foreach(_lib IN LISTS CURL_LIBS _custom_libs _implicit_libs)
+    if(TARGET "${_lib}")
+      set(_explicit_libs "")
+      get_target_property(_imported "${_lib}" IMPORTED)
+      if(NOT _imported)
+        # Reading the LOCATION property on non-imported target will error out.
+        # Assume the user will not need this information in the .pc file.
+        continue()
+      endif()
+      if(_lib MATCHES "CURL::")
+        # This is empty for 'CURL::*' targets and safe to ignore.
+        # Explicitly skip this query to avoid CMake v3.18 and older erroring out.
+        set(_libname "")
+      else()
+        get_target_property(_libname "${_lib}" LOCATION)
+      endif()
+      if(_libname)
+        list(APPEND _explicit_libs "${_libname}")
+      else()
+        get_target_property(_libs "${_lib}" INTERFACE_LINK_LIBRARIES)
+        if(_libs)
+          list(APPEND _explicit_libs "${_libs}")
+        endif()
+        get_target_property(_libdirs "${_lib}" INTERFACE_LINK_DIRECTORIES)
+        if(_libdirs)
+          list(APPEND _explicit_libdirs "${_libdirs}")
+        endif()
+      endif()
+      if(NOT _libname AND NOT _libs AND NOT _libdirs)
+        message(WARNING "Bad lib in library list: ${_lib}")
+      endif()
+      get_target_property(_modules "${_lib}" INTERFACE_LIBCURL_PC_MODULES)
+      if(_modules)
+        list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "${_modules}")
+      endif()
+
+      foreach(_lib IN LISTS _explicit_libs)
+        if(_lib MATCHES "/")
+          # This gets a bit more complex, because we want to specify the
+          # directory separately, and only once per directory
+          if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+            cmake_path(GET _lib PARENT_PATH _libdir)
+            cmake_path(GET _lib STEM _libname)
+          else()
+            get_filename_component(_libdir "${_lib}" DIRECTORY)
+            get_filename_component(_libname "${_lib}" NAME_WE)
+          endif()
+          if(_libname MATCHES "^lib")
+            if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+              cmake_path(SET _libdir NORMALIZE "${_libdir}")
+            endif()
+            list(FIND _sys_libdirs "${_libdir}" _libdir_index)
+            if(_libdir_index LESS 0)
+              list(APPEND _ldflags "-L${_libdir}")
+            endif()
+            string(REGEX REPLACE "^lib" "" _libname "${_libname}")
+            list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_libname}")
+            list(APPEND LIBCURL_PC_LIBS_PRIVATE_LIST "${_lib}")
+          else()
+            list(APPEND LIBCURL_PC_LIBS_PRIVATE "${_lib}")
+            list(APPEND LIBCURL_PC_LIBS_PRIVATE_LIST "${_lib}")
+          endif()
+        else()
+          list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_lib}")
+          list(APPEND LIBCURL_PC_LIBS_PRIVATE_LIST "${_lib}")
+        endif()
+      endforeach()
+    elseif(_lib MATCHES "^-")  # '-framework <name>'
+      list(APPEND _ldflags "${_lib}")
+      list(APPEND LIBCURL_PC_LIBS_PRIVATE_LIST "${_lib}")
+    else()
+      list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_lib}")
+      list(APPEND LIBCURL_PC_LIBS_PRIVATE_LIST "${_lib}")
+    endif()
+  endforeach()
+
+  foreach(_libdir IN LISTS _custom_libdirs _explicit_libdirs)
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
       cmake_path(SET _libdir NORMALIZE "${_libdir}")
     endif()
@@ -2262,57 +2195,10 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  set(_implicit_libs "")
-  if(NOT MINGW AND NOT UNIX)
-    set(_implicit_libs "${CMAKE_C_IMPLICIT_LINK_LIBRARIES}")
-  endif()
-
-  foreach(_lib IN LISTS _implicit_libs _custom_libs CURL_LIBS)
-    if(TARGET "${_lib}")
-      set(_libname "${_lib}")
-      get_target_property(_imported "${_libname}" IMPORTED)
-      if(NOT _imported)
-        # Reading the LOCATION property on non-imported target will error out.
-        # Assume the user will not need this information in the .pc file.
-        continue()
-      endif()
-      get_target_property(_lib "${_libname}" LOCATION)
-      if(NOT _lib)
-        message(WARNING "Bad lib in library list: ${_libname}")
-        continue()
-      endif()
-    endif()
-    if(_lib MATCHES "^-")  # '-framework <name>'
-      list(APPEND _ldflags "${_lib}")
-    elseif(_lib MATCHES "/")
-      # This gets a bit more complex, because we want to specify the
-      # directory separately, and only once per directory
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
-        cmake_path(GET _lib PARENT_PATH _libdir)
-        cmake_path(GET _lib STEM _libname)
-      else()
-        get_filename_component(_libdir "${_lib}" DIRECTORY)
-        get_filename_component(_libname "${_lib}" NAME_WE)
-      endif()
-      if(_libname MATCHES "^lib")
-        if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
-          cmake_path(SET _libdir NORMALIZE "${_libdir}")
-        endif()
-        list(FIND _sys_libdirs "${_libdir}" _libdir_index)
-        if(_libdir_index LESS 0)
-          list(APPEND _ldflags "-L${_libdir}")
-        endif()
-        string(REGEX REPLACE "^lib" "" _libname "${_libname}")
-        list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_libname}")
-      else()
-        list(APPEND LIBCURL_PC_LIBS_PRIVATE "${_lib}")
-      endif()
-    else()
-      list(APPEND LIBCURL_PC_LIBS_PRIVATE "-l${_lib}")
-    endif()
-  endforeach()
+  list(REMOVE_DUPLICATES _ldflags)
 
   if(LIBCURL_PC_REQUIRES_PRIVATE)
+    list(REMOVE_DUPLICATES LIBCURL_PC_REQUIRES_PRIVATE)
     string(REPLACE ";" "," LIBCURL_PC_REQUIRES_PRIVATE "${LIBCURL_PC_REQUIRES_PRIVATE}")
   endif()
   if(LIBCURL_PC_LIBS_PRIVATE)
@@ -2423,14 +2309,38 @@ if(NOT CURL_DISABLE_INSTALL)
     ${_generated_version_config}")
 
   # Consumed custom variables:
+  #   CMAKE_MINIMUM_REQUIRED_VERSION
   #   CURLVERSION
+  #   LIBCURL_PC_LIBS_PRIVATE_LIST
   #   LIB_NAME
   #   LIB_SELECTED
+  #   LIB_STATIC
   #   TARGETS_EXPORT_NAME
-  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
-  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
   #   CURL_SUPPORTED_FEATURES_LIST
   #   CURL_SUPPORTED_PROTOCOLS_LIST
+  #   HAVE_BROTLI
+  #   HAVE_GSSAPI
+  #   HAVE_LIBIDN2
+  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
+  #   HAVE_ZSTD
+  #   USE_ARES
+  #   USE_BACKTRACE
+  #   USE_GNUTLS
+  #   USE_GSASL
+  #   USE_LIBPSL
+  #   USE_LIBRTMP
+  #   USE_LIBSSH
+  #   USE_LIBSSH2
+  #   USE_LIBUV
+  #   USE_MBEDTLS
+  #   USE_NGHTTP2
+  #   USE_NGHTTP3
+  #   USE_NGTCP2
+  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
+  #   USE_QUICHE
+  #   USE_RUSTLS
+  #   USE_WIN32_LDAP CURL_DISABLE_LDAP
+  #   USE_WOLFSSL
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
@@ -2442,7 +2352,32 @@ if(NOT CURL_DISABLE_INSTALL)
       DESTINATION ${_install_cmake_dir})
   endif()
 
-  install(FILES ${_version_config} ${_project_config}
+  install(
+    FILES
+      ${_version_config}
+      ${_project_config}
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindBrotli.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindCares.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGSS.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindGnuTLS.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLDAP.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibbacktrace.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibrtmp.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindLibuv.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindMbedTLS.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGHTTP3.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNGTCP2.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindNettle.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindQuiche.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindRustls.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
+      "${CMAKE_CURRENT_SOURCE_DIR}/CMake/FindZstd.cmake"
     DESTINATION ${_install_cmake_dir})
 
   if(NOT TARGET curl_uninstall)

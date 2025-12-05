@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define WAKEUP_NUM 10
 
 static CURLcode test_lib1564(const char *URL)

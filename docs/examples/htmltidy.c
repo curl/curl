@@ -48,14 +48,14 @@ static uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 static void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 {
   TidyNode child;
-  for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
+  for(child = tidyGetChild(tnod); child; child = tidyGetNext(child)) {
     ctmbstr name = tidyNodeGetName(child);
     if(name) {
       /* if it has a name, then it is an HTML tag ... */
       TidyAttr attr;
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
-      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
+      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr)) {
         printf("%s", tidyAttrName(attr));
         tidyAttrValue(attr) ? printf("=\"%s\" ",
                                      tidyAttrValue(attr)) : printf(" ");
@@ -79,8 +79,8 @@ int main(int argc, char **argv)
   CURL *curl;
   char curl_errbuf[CURL_ERROR_SIZE];
   TidyDoc tdoc;
-  TidyBuffer docbuf = {0};
-  TidyBuffer tidy_errbuf = {0};
+  TidyBuffer docbuf = { 0 };
+  TidyBuffer tidy_errbuf = { 0 };
   CURLcode res;
 
   if(argc != 2) {

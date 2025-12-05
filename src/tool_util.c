@@ -24,23 +24,22 @@
 #include "tool_setup.h"
 
 #include "tool_util.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef _WIN32
 
 struct timeval tvrealnow(void)
 {
   /* UNIX EPOCH (1970-01-01) in FILETIME (1601-01-01) as 64-bit value */
-  static const curl_uint64_t EPOCH = (curl_uint64_t)116444736000000000ULL;
+  static const uint64_t EPOCH = UINT64_C(116444736000000000);
   SYSTEMTIME systime;
   FILETIME ftime; /* 100ns since 1601-01-01, as double 32-bit value */
-  curl_uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
+  uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
   struct timeval now;
 
   GetSystemTime(&systime);
   SystemTimeToFileTime(&systime, &ftime);
-  time = ((curl_uint64_t)ftime.dwLowDateTime);
-  time += ((curl_uint64_t)ftime.dwHighDateTime) << 32;
+  time = ((uint64_t)ftime.dwLowDateTime);
+  time += ((uint64_t)ftime.dwHighDateTime) << 32;
 
   now.tv_sec  = (long)((time - EPOCH) / 10000000L); /* unit is 100ns */
   now.tv_usec = (long)(systime.wMilliseconds * 1000);
@@ -76,7 +75,7 @@ int struplocompare(const char *p1, const char *p2)
 /* Indirect version to use as qsort callback. */
 int struplocompare4sort(const void *p1, const void *p2)
 {
-  return struplocompare(* (char * const *) p1, * (char * const *) p2);
+  return struplocompare(*(char * const *)p1, *(char * const *)p2);
 }
 
 #ifdef USE_TOOL_FTRUNCATE

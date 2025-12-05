@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t643_WriteThis {
   const char *readptr;
   curl_off_t sizeleft;
@@ -35,7 +33,7 @@ static size_t t643_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t643_WriteThis *pooh = (struct t643_WriteThis *)userp;
   int eof;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   if(testnum == 643) {
@@ -102,8 +100,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
   if(oldstyle) {
     res = curl_mime_name(part, "sendfile");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, t643_read_cb,
-                              NULL, NULL, &pooh);
+      res = curl_mime_data_cb(part, datasize, t643_read_cb, NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "postit2.c");
   }
@@ -111,8 +108,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
     /* new style */
     res = curl_mime_name(part, "sendfile alternative");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, t643_read_cb,
-                              NULL, NULL, &pooh);
+      res = curl_mime_data_cb(part, datasize, t643_read_cb, NULL, NULL, &pooh);
     if(!res)
       res = curl_mime_filename(part, "filename 2 ");
   }
@@ -139,8 +135,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
   /* Fill in the file upload part */
   res = curl_mime_name(part, "callbackdata");
   if(!res)
-    res = curl_mime_data_cb(part, datasize, t643_read_cb,
-                            NULL, NULL, &pooh2);
+    res = curl_mime_data_cb(part, datasize, t643_read_cb, NULL, NULL, &pooh2);
 
   if(res)
     curl_mprintf("curl_mime_xxx(2) = %s\n", curl_easy_strerror(res));
@@ -157,8 +152,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
   /* Fill in the filename field */
   res = curl_mime_name(part, "filename");
   if(!res)
-    res = curl_mime_data(part, "postit2.c",
-                         CURL_ZERO_TERMINATED);
+    res = curl_mime_data(part, "postit2.c", CURL_ZERO_TERMINATED);
 
   if(res)
     curl_mprintf("curl_mime_xxx(3) = %s\n", curl_easy_strerror(res));
@@ -174,8 +168,7 @@ static CURLcode t643_test_once(const char *URL, bool oldstyle)
   }
   res = curl_mime_name(part, "submit");
   if(!res)
-    res = curl_mime_data(part, "send",
-                         CURL_ZERO_TERMINATED);
+    res = curl_mime_data(part, "send", CURL_ZERO_TERMINATED);
 
   if(res)
     curl_mprintf("curl_mime_xxx(4) = %s\n", curl_easy_strerror(res));

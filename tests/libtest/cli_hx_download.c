@@ -25,8 +25,6 @@
 
 #include "testtrace.h"
 
-#include "curl_mem_undef.h"
-
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
 #include <openssl/ssl.h>
 #endif
@@ -44,8 +42,6 @@
 #ifdef USE_RUSTLS
 #include <rustls.h>
 #endif
-
-#include "memdebug.h"
 
 static int verbose_d = 1;
 
@@ -92,7 +88,7 @@ static size_t my_write_d_cb(char *buf, size_t nitems, size_t buflen,
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
+    curl_msnprintf(t->filename, sizeof(t->filename) - 1, "download_%zu.data",
                    t->idx);
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
@@ -153,7 +149,7 @@ static int my_progress_d_cb(void *userdata,
       switch(tls->backend) {
 #if defined(USE_QUICHE) || defined(USE_OPENSSL)
       case CURLSSLBACKEND_OPENSSL: {
-        const char *version = SSL_get_version((SSL*)tls->internals);
+        const char *version = SSL_get_version((SSL *)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info OpenSSL using %s\n",
@@ -163,7 +159,7 @@ static int my_progress_d_cb(void *userdata,
 #endif
 #ifdef USE_WOLFSSL
       case CURLSSLBACKEND_WOLFSSL: {
-        const char *version = wolfSSL_get_version((WOLFSSL*)tls->internals);
+        const char *version = wolfSSL_get_version((WOLFSSL *)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info wolfSSL using %s\n",
@@ -182,8 +178,8 @@ static int my_progress_d_cb(void *userdata,
 #endif
 #ifdef USE_MBEDTLS
       case CURLSSLBACKEND_MBEDTLS: {
-        const char *version = mbedtls_ssl_get_version(
-          (mbedtls_ssl_context*)tls->internals);
+        const char *version =
+          mbedtls_ssl_get_version((mbedtls_ssl_context *)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info mbedTLS using %s\n",
@@ -194,7 +190,7 @@ static int my_progress_d_cb(void *userdata,
 #ifdef USE_RUSTLS
       case CURLSSLBACKEND_RUSTLS: {
         int v = rustls_connection_get_protocol_version(
-          (struct rustls_connection*)tls->internals);
+          (struct rustls_connection *)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
                       t->idx, v);
@@ -346,8 +342,8 @@ static CURLcode test_cli_hx_download(const char *URL)
         pause_offset = (size_t)num;
       break;
     case 'r':
-      free(resolve);
-      resolve = strdup(coptarg);
+      curlx_free(resolve);
+      resolve = curlx_strdup(coptarg);
       break;
     case 'T':
       if(!curlx_str_number(&opt, &num, LONG_MAX))
@@ -407,7 +403,7 @@ static CURLcode test_cli_hx_download(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfer_d = calloc(transfer_count_d, sizeof(*transfer_d));
+  transfer_d = curlx_calloc(transfer_count_d, sizeof(*transfer_d));
   if(!transfer_d) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
     res = (CURLcode)1;
@@ -453,7 +449,7 @@ static CURLcode test_cli_hx_download(const char *URL)
 
     if(still_running) {
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 500, NULL);
     }
 
     if(mc)
@@ -518,8 +514,8 @@ static CURLcode test_cli_hx_download(const char *URL)
           if(!t->started) {
             t->curl = curl_easy_init();
             if(!t->curl ||
-              setup_hx_download(t->curl, url, t, http_version, host, share,
-                                use_earlydata, fresh_connect)) {
+               setup_hx_download(t->curl, url, t, http_version, host, share,
+                                 use_earlydata, fresh_connect)) {
               curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
               res = (CURLcode)1;
               goto cleanup;
@@ -559,7 +555,7 @@ cleanup:
       else /* on success we expect ssl to have been checked */
         assert(t->checked_ssl);
     }
-    free(transfer_d);
+    curlx_free(transfer_d);
   }
 
   curl_share_cleanup(share);
@@ -569,7 +565,7 @@ cleanup:
 
 optcleanup:
 
-  free(resolve);
+  curlx_free(resolve);
 
   return res;
 }

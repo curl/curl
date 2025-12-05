@@ -39,26 +39,25 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 /* ---------------------------------------------------------------- */
 
-#define test_check(expected_fds) \
-  if(res != CURLE_OK) { \
-    curl_mfprintf(stderr, "test failed with code: %d\n", res); \
-    goto test_cleanup; \
-  } \
-  else if(fd_count != expected_fds) { \
+#define test_check(expected_fds)                                             \
+  if(res != CURLE_OK) {                                                      \
+    curl_mfprintf(stderr, "test failed with code: %d\n", res);               \
+    goto test_cleanup;                                                       \
+  }                                                                          \
+  else if(fd_count != expected_fds) {                                        \
     curl_mfprintf(stderr, "Max number of waitfds: %u not as expected: %u\n", \
-      fd_count, expected_fds); \
-    res = TEST_ERR_FAILURE; \
-    goto test_cleanup; \
+                  fd_count, expected_fds);                                   \
+    res = TEST_ERR_FAILURE;                                                  \
+    goto test_cleanup;                                                       \
   }
 
-#define test_run_check(option, expected_fds) do { \
-  res = test_run(URL, option, &fd_count); \
-  test_check(expected_fds); \
-} while(0)
+#define test_run_check(option, expected_fds) \
+  do {                                       \
+    res = test_run(URL, option, &fd_count);  \
+    test_check(expected_fds);                \
+  } while(0)
 
 /* ---------------------------------------------------------------- */
 
@@ -68,9 +67,10 @@ enum {
   TEST_USE_HTTP2_MPLEX
 };
 
-static size_t emptyWriteFunc(char *ptr, size_t size, size_t nmemb,
-                             void *data) {
-  (void)ptr; (void)data;
+static size_t emptyWriteFunc(char *ptr, size_t size, size_t nmemb, void *data)
+{
+  (void)ptr;
+  (void)data;
   return size * nmemb;
 }
 

@@ -40,10 +40,6 @@
 #include "escape.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
  * Forward declarations.
  */
@@ -153,7 +149,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(query)
     gopherpath = curl_maprintf("%s?%s", path, query);
   else
-    gopherpath = strdup(path);
+    gopherpath = curlx_strdup(path);
 
   if(!gopherpath)
     return CURLE_OUT_OF_MEMORY;
@@ -162,7 +158,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(strlen(gopherpath) <= 2) {
     buf = "";
     buf_len = 0;
-    free(gopherpath);
+    curlx_free(gopherpath);
   }
   else {
     char *newp;
@@ -173,7 +169,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
 
     /* ... and finally unescape */
     result = Curl_urldecode(newp, 0, &buf_alloc, &buf_len, REJECT_ZERO);
-    free(gopherpath);
+    curlx_free(gopherpath);
     if(result)
       return result;
     buf = buf_alloc;
@@ -224,7 +220,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     }
   }
 
-  free(buf_alloc);
+  curlx_free(buf_alloc);
 
   if(!result)
     result = Curl_xfer_send(data, "\r\n", 2, FALSE, &nwritten);

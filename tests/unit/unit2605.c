@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "vssh/vssh.h"
-#include "memdebug.h"
 
 static CURLcode test_unit2605(const char *arg)
 {
@@ -41,32 +40,32 @@ static CURLcode test_unit2605(const char *arg)
 
   int i;
   struct range list[] = {
-    { "0-9", 100, 0, 10, CURLE_OK},
-    { "1-10", 100, 1, 10, CURLE_OK},
-    { "222222-222222", 300000, 222222, 1, CURLE_OK},
-    { "4294967296 - 4294967297", 4294967298, 4294967296, 2, CURLE_OK},
-    { "-10", 100, 90, 10, CURLE_OK},
-    { "-20", 100, 80, 20, CURLE_OK},
-    { "-1", 100, 99, 1, CURLE_OK},
-    { "-0", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "--2", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "-100", 100, 0, 100, CURLE_OK},
-    { "-101", 100, 0, 100, CURLE_OK},
-    { "-1000", 100, 0, 100, CURLE_OK},
-    { "2-1000", 100, 2, 98, CURLE_OK},
-    { ".2-3", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "+2-3", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "2 - 3", 100, 2, 2, CURLE_OK},
-    { " 2 - 3", 100, 2, 2, CURLE_RANGE_ERROR}, /* no leading space */
-    { "2 - 3 ", 100, 2, 2, CURLE_RANGE_ERROR}, /* no trailing space */
-    { "3-2", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "2.-3", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "-3-2", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "101-102", 100, 0, 0, CURLE_RANGE_ERROR},
-    { "0-", 100, 0, 100, CURLE_OK},
-    { "1-", 100, 1, 99, CURLE_OK},
-    { "99-", 100, 99, 1, CURLE_OK},
-    { "100-", 100, 0, 0, CURLE_RANGE_ERROR},
+    { "0-9", 100, 0, 10, CURLE_OK },
+    { "1-10", 100, 1, 10, CURLE_OK },
+    { "222222-222222", 300000, 222222, 1, CURLE_OK },
+    { "4294967296 - 4294967297", 4294967298, 4294967296, 2, CURLE_OK },
+    { "-10", 100, 90, 10, CURLE_OK },
+    { "-20", 100, 80, 20, CURLE_OK },
+    { "-1", 100, 99, 1, CURLE_OK },
+    { "-0", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "--2", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "-100", 100, 0, 100, CURLE_OK },
+    { "-101", 100, 0, 100, CURLE_OK },
+    { "-1000", 100, 0, 100, CURLE_OK },
+    { "2-1000", 100, 2, 98, CURLE_OK },
+    { ".2-3", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "+2-3", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "2 - 3", 100, 2, 2, CURLE_OK },
+    { " 2 - 3", 100, 2, 2, CURLE_RANGE_ERROR }, /* no leading space */
+    { "2 - 3 ", 100, 2, 2, CURLE_RANGE_ERROR }, /* no trailing space */
+    { "3-2", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "2.-3", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "-3-2", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "101-102", 100, 0, 0, CURLE_RANGE_ERROR },
+    { "0-", 100, 0, 100, CURLE_OK },
+    { "1-", 100, 1, 99, CURLE_OK },
+    { "99-", 100, 99, 1, CURLE_OK },
+    { "100-", 100, 0, 0, CURLE_RANGE_ERROR },
     { NULL, 0, 0, 0, CURLE_OK }
   };
 
@@ -79,10 +78,9 @@ static CURLcode test_unit2605(const char *arg)
       curl_off_t start;
       curl_off_t size;
       CURLcode res;
-      curl_mprintf("%u: '%s' (file size: %" FMT_OFF_T ")\n",
-                   i, list[i].r, list[i].filesize);
-      res = Curl_ssh_range(curl, list[i].r, list[i].filesize,
-                           &start, &size);
+      curl_mprintf("%u: '%s' (file size: %" FMT_OFF_T ")\n", i, list[i].r,
+                   list[i].filesize);
+      res = Curl_ssh_range(curl, list[i].r, list[i].filesize, &start, &size);
       if(res != list[i].res) {
         curl_mprintf("... returned %d\n", res);
         unitfail++;

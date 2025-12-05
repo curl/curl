@@ -66,9 +66,9 @@
 
 #include <curl/curl.h>
 
-#define MSG_OUT g_print   /* Change to "g_error" to write to stderr */
-#define SHOW_VERBOSE 0L   /* Set to non-zero for libcurl messages */
-#define SHOW_PROGRESS 0   /* Set to non-zero to enable progress callback */
+#define MSG_OUT       g_print /* Change to "g_error" to write to stderr */
+#define SHOW_VERBOSE  0L      /* Set to non-zero for libcurl messages */
+#define SHOW_PROGRESS 0       /* Set to non-zero to enable progress callback */
 
 /* Global information, common to all connections */
 struct GlobalInfo {
@@ -171,8 +171,8 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 {
   struct timeval timeout;
   struct GlobalInfo *g = (struct GlobalInfo *)userp;
-  timeout.tv_sec = timeout_ms/1000;
-  timeout.tv_usec = (timeout_ms%1000)*1000;
+  timeout.tv_sec = timeout_ms / 1000;
+  timeout.tv_usec = (timeout_ms % 1000) * 1000;
 
   MSG_OUT("*** update_timeout_cb %ld => %ld:%ld ***\n",
           timeout_ms, timeout.tv_sec, timeout.tv_usec);
@@ -191,7 +191,7 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 /* Called by glib when we get action on a multi socket */
 static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
-  struct GlobalInfo *g = (struct GlobalInfo*) data;
+  struct GlobalInfo *g = (struct GlobalInfo *)data;
   CURLMcode rc;
   int fd = g_io_channel_unix_get_fd(ch);
 
@@ -259,9 +259,9 @@ static void addsock(curl_socket_t s, CURL *curl, int action,
 /* CURLMOPT_SOCKETFUNCTION */
 static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 {
-  struct GlobalInfo *g = (struct GlobalInfo*) cbp;
-  struct SockInfo *fdp = (struct SockInfo*) sockp;
-  static const char *whatstr[]={ "none", "IN", "OUT", "INOUT", "REMOVE" };
+  struct GlobalInfo *g = (struct GlobalInfo *)cbp;
+  struct SockInfo *fdp = (struct SockInfo *)sockp;
+  static const char *whatstr[] = { "none", "IN", "OUT", "INOUT", "REMOVE" };
 
   MSG_OUT("socket callback: s=%d e=%p what=%s ", s, e, whatstr[what]);
   if(what == CURL_POLL_REMOVE) {
@@ -276,8 +276,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
       addsock(s, e, what, g);
     }
     else {
-      MSG_OUT(
-        "Changing action from %d to %d\n", fdp->action, what);
+      MSG_OUT("Changing action from %d to %d\n", fdp->action, what);
       setsock(fdp, s, e, what, g);
     }
   }
@@ -288,7 +287,7 @@ static int sock_cb(CURL *e, curl_socket_t s, int what, void *cbp, void *sockp)
 static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 {
   size_t realsize = size * nmemb;
-  struct ConnInfo *conn = (struct ConnInfo*) data;
+  struct ConnInfo *conn = (struct ConnInfo *)data;
   (void)ptr;
   (void)conn;
   return realsize;
@@ -302,8 +301,8 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
-          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T "/"
+          "%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
@@ -357,18 +356,18 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
     rv = g_io_channel_read_line(ch, &buf, &len, &tp, &err);
     if(buf) {
       if(tp) {
-        buf[tp]='\0';
+        buf[tp] = '\0';
       }
-      new_conn(buf, (struct GlobalInfo*)data);
+      new_conn(buf, (struct GlobalInfo *)data);
       g_free(buf);
     }
     else {
       buf = g_malloc(BUF_SIZE + 1);
       while(TRUE) {
-        buf[BUF_SIZE]='\0';
+        buf[BUF_SIZE] = '\0';
         g_io_channel_read_chars(ch, buf, BUF_SIZE, &len, &err);
         if(len) {
-          buf[len]='\0';
+          buf[len] = '\0';
           if(all) {
             tmp = all;
             all = g_strdup_printf("%s%s", tmp, buf);
@@ -383,7 +382,7 @@ static gboolean fifo_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
         }
       }
       if(all) {
-        new_conn(all, (struct GlobalInfo*)data);
+        new_conn(all, (struct GlobalInfo *)data);
         g_free(all);
       }
       g_free(buf);

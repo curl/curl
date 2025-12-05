@@ -71,8 +71,7 @@ static int print_cookies(CURL *curl)
   return 0;
 }
 
-int
-main(void)
+int main(void)
 {
   CURL *curl;
   CURLcode res;

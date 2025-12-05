@@ -62,7 +62,8 @@ static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
   void *data = NULL;
   const char *key = "mod_curltest_init_counter";
 
-  (void)plog;(void)ptemp;
+  (void)plog;
+  (void)ptemp;
 
   apr_pool_userdata_get(&data, key, s->process->pool);
   if(!data) {
@@ -93,8 +94,8 @@ static void curltest_hooks(apr_pool_t *pool)
   ap_hook_handler(curltest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
-#define SECS_PER_HOUR      (60*60)
-#define SECS_PER_DAY       (24*SECS_PER_HOUR)
+#define SECS_PER_HOUR      (60 * 60)
+#define SECS_PER_DAY       (24 * SECS_PER_HOUR)
 
 static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
                                    const char *value, const char *def_unit)
@@ -124,12 +125,12 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     break;
   case 's':
   case 'S':
-    *ptimeout = (apr_interval_time_t) apr_time_from_sec(n);
+    *ptimeout = (apr_interval_time_t)apr_time_from_sec(n);
     break;
   case 'h':
   case 'H':
     /* Time is in hours */
-    *ptimeout = (apr_interval_time_t) apr_time_from_sec(n * SECS_PER_HOUR);
+    *ptimeout = (apr_interval_time_t)apr_time_from_sec(n * SECS_PER_HOUR);
     break;
   case 'm':
   case 'M':
@@ -137,12 +138,12 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     /* Time is in milliseconds */
     case 's':
     case 'S':
-      *ptimeout = (apr_interval_time_t) n * 1000;
+      *ptimeout = (apr_interval_time_t)n * 1000;
       break;
     /* Time is in minutes */
     case 'i':
     case 'I':
-      *ptimeout = (apr_interval_time_t) apr_time_from_sec(n * 60);
+      *ptimeout = (apr_interval_time_t)apr_time_from_sec(n * 60);
       break;
     default:
       return APR_EGENERAL;
@@ -154,7 +155,7 @@ static apr_status_t duration_parse(apr_interval_time_t *ptimeout,
     /* Time is in microseconds */
     case 's':
     case 'S':
-      *ptimeout = (apr_interval_time_t) n;
+      *ptimeout = (apr_interval_time_t)n;
       break;
     default:
       return APR_EGENERAL;
@@ -266,8 +267,7 @@ static int curltest_echo_handler(request_rec *r)
                    apr_table_get(r->headers_in, "TE"));
 
   if(read_delay) {
-    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
-                  "put_handler: read_delay");
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: read_delay");
     apr_sleep(read_delay);
   }
 
@@ -343,7 +343,7 @@ static int curltest_tweak_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[16*1024];
+  char buffer[16 * 1024];
   int i, chunks = 3, error_bucket = 1;
   size_t chunk_size = sizeof(buffer);
   const char *request_id = "none";
@@ -570,6 +570,10 @@ cleanup:
     APR_BRIGADE_INSERT_TAIL(bb, b);
     ap_pass_brigade(r->output_filters, bb);
   }
+  if(rv == APR_ECONNRESET) {
+    r->connection->aborted = 1;
+    return rv;
+  }
   return AP_FILTER_ERROR;
 }
 
@@ -579,7 +583,7 @@ static int curltest_put_handler(request_rec *r)
   apr_bucket_brigade *bb;
   apr_bucket *b;
   apr_status_t rv;
-  char buffer[128*1024];
+  char buffer[128 * 1024];
   const char *ct;
   apr_off_t rbody_len = 0;
   apr_off_t rbody_max_len = -1;
@@ -650,8 +654,7 @@ static int curltest_put_handler(request_rec *r)
   ap_set_content_type(r, ct ? ct : "text/plain");
 
   if(read_delay) {
-    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r,
-                  "put_handler: read_delay");
+    ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: read_delay");
     apr_sleep(read_delay);
   }
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
@@ -674,7 +677,7 @@ static int curltest_put_handler(request_rec *r)
     }
   }
   /* we are done */
-  s_rbody_len = apr_psprintf(r->pool, "%"APR_OFF_T_FMT, rbody_len);
+  s_rbody_len = apr_psprintf(r->pool, "%" APR_OFF_T_FMT, rbody_len);
   apr_table_setn(r->headers_out, "Received-Length", s_rbody_len);
   rv = apr_brigade_puts(bb, NULL, NULL, s_rbody_len);
   if(APR_SUCCESS != rv)

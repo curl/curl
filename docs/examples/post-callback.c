@@ -31,8 +31,9 @@
 #include <curl/curl.h>
 
 /* silly test data to POST */
-static const char data[]="Lorem ipsum dolor sit amet, consectetur adipiscing "
-  "elit. Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
+static const char data[] =
+  "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+  "Sed vel urna neque. Ut quis leo metus. Quisque eleifend, ex at "
   "laoreet rhoncus, odio ipsum semper metus, at tempus ante urna in mauris. "
   "Suspendisse ornare tempor venenatis. Ut dui neque, pellentesque a ______ "
   "eget, mattis vitae ligula. Fusce ut pharetra est. Ut ullamcorper mi ac "
@@ -47,7 +48,7 @@ struct WriteThis {
 static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *wt = (struct WriteThis *)userp;
-  size_t buffer_size = size*nmemb;
+  size_t buffer_size = size * nmemb;
 
   if(wt->sizeleft) {
     /* copy as much as possible from the source to the destination */
@@ -61,7 +62,7 @@ static size_t read_cb(char *dest, size_t size, size_t nmemb, void *userp)
     return copy_this_much; /* we copied this many bytes */
   }
 
-  return 0; /* no more data left to deliver */
+  return 0;  /* no more data left to deliver */
 }
 
 int main(void)

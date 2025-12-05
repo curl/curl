@@ -31,14 +31,9 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "../urldata.h"
 #include "../sendf.h"
 
 #include <gsasl.h>
-
-/* The last 2 #include files should be in this order */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
                                   const char *mech,
@@ -103,8 +98,7 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
   char *response;
   size_t outlen;
 
-  res = gsasl_step(gsasl->client,
-                   (const char *) Curl_bufref_ptr(chlg), Curl_bufref_len(chlg),
+  res = gsasl_step(gsasl->client, Curl_bufref_ptr(chlg), Curl_bufref_len(chlg),
                    &response, &outlen);
   if(res != GSASL_OK && res != GSASL_NEEDS_MORE) {
     failf(data, "GSASL step: %s", gsasl_strerror(res));

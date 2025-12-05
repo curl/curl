@@ -63,7 +63,7 @@ struct tcase {
 static void parse_success(const struct tcase *t)
 {
   struct h1_req_parser p;
-  const char *buf;
+  const uint8_t *buf;
   size_t buflen, i, in_len, in_consumed;
   CURLcode err;
   size_t nread;
@@ -71,8 +71,8 @@ static void parse_success(const struct tcase *t)
   Curl_h1_req_parse_init(&p, 1024);
   in_len = in_consumed = 0;
   for(i = 0; t->input[i]; ++i) {
-    buf = t->input[i];
-    buflen = strlen(buf);
+    buf = (const uint8_t *)t->input[i];
+    buflen = strlen(t->input[i]);
     in_len += buflen;
     err = Curl_h1_req_parse_read(&p, buf, buflen, t->default_scheme,
                                  t->custom_method, 0, &nread);

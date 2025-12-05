@@ -4,7 +4,6 @@
 HTTP
 HTTP PUT
 followlocation
-notxml
 </keywords>
 </info>
 #
@@ -12,7 +11,7 @@ notxml
 <reply>
 <data>
 HTTP/1.1 303 OK swsclose
-Location: moo.html&testcase=/%TESTNUMBER0002
+Location: moo.html%AMPtestcase=/%TESTNUMBER0002
 Connection: close
 
 </data>
@@ -25,7 +24,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 303 OK swsclose
-Location: moo.html&testcase=/%TESTNUMBER0002
+Location: moo.html%AMPtestcase=/%TESTNUMBER0002
 Connection: close
 
 HTTP/1.1 200 OK swsclose
@@ -64,7 +63,7 @@ Accept: */*
 Content-Length: 4
 
 moo
-GET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1
+GET /blah/moo.html%AMPtestcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

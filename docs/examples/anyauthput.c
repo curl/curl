@@ -65,9 +65,9 @@
 /* seek callback function */
 static int my_seek(void *userp, curl_off_t offset, int origin)
 {
-  FILE *fp = (FILE *) userp;
+  FILE *fp = (FILE *)userp;
 
-  if(fseek(fp, (long) offset, origin) == -1)
+  if(fseek(fp, (long)offset, origin) == -1)
     /* could not seek */
     return CURL_SEEKFUNC_CANTSEEK;
 
@@ -128,13 +128,13 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
 
     /* which file to upload */
-    curl_easy_setopt(curl, CURLOPT_READDATA, (void *) fp);
+    curl_easy_setopt(curl, CURLOPT_READDATA, (void *)fp);
 
     /* set the seek function */
     curl_easy_setopt(curl, CURLOPT_SEEKFUNCTION, my_seek);
 
     /* pass the file descriptor to the seek callback as well */
-    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *) fp);
+    curl_easy_setopt(curl, CURLOPT_SEEKDATA, (void *)fp);
 
     /* enable "uploading" (which means PUT when doing HTTP) */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
@@ -150,7 +150,7 @@ int main(int argc, char **argv)
 
     /* tell libcurl we can use "any" auth, which lets the lib pick one, but it
        also costs one extra round-trip and possibly sending of all the PUT
-       data twice!!! */
+       data twice */
     curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 
     /* set username and password for the authentication */

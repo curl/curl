@@ -36,8 +36,6 @@
 #include "tool_findfile.h"
 #include "tool_cfgable.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 struct finder {
   const char *env;
   const char *append;
@@ -53,7 +51,7 @@ static const struct finder conf_list[] = {
 #ifdef _WIN32
   { "USERPROFILE", NULL, FALSE },
   { "APPDATA", NULL, FALSE },
-  { "USERPROFILE", "\\Application Data", FALSE},
+  { "USERPROFILE", "\\Application Data", FALSE },
 #endif
   /* these are for .curlrc if XDG_CONFIG_HOME is not defined */
   { "CURL_HOME", "/.config", TRUE },
@@ -75,7 +73,7 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
     if(c) {
       int fd = curlx_open(c, O_RDONLY);
       if(fd >= 0) {
-        char *path = strdup(c);
+        char *path = curlx_strdup(c);
         close(fd);
         curl_free(c);
         return path;

@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "unitcheck.h"
 #include "bufref.h"
-#include "memdebug.h"
 
 static int freecount = 0;
 
@@ -31,7 +30,7 @@ static void test_free(void *p)
 {
   fail_unless(p, "pointer to free may not be NULL");
   freecount++;
-  free(p);
+  curlx_free(p);
 }
 
 static CURLcode t1661_setup(struct bufref *bufref)
@@ -68,7 +67,7 @@ static CURLcode test_unit1661(const char *arg)
   /**
    * testing Curl_bufref_set
    */
-  buffer = malloc(13);
+  buffer = curlx_malloc(13);
   abort_unless(buffer, "Out of memory");
   Curl_bufref_set(&bufref, buffer, 13, test_free);
 
@@ -79,7 +78,7 @@ static CURLcode test_unit1661(const char *arg)
   /**
    * testing Curl_bufref_ptr
    */
-  fail_unless((const char *) Curl_bufref_ptr(&bufref) == buffer,
+  fail_unless((const char *)Curl_bufref_ptr(&bufref) == buffer,
               "Wrong pointer value returned");
 
   /**
@@ -88,9 +87,9 @@ static CURLcode test_unit1661(const char *arg)
   fail_unless(Curl_bufref_len(&bufref) == 13, "Wrong data size returned");
 
   /**
-   * testing Curl_bufref_memdup
+   * testing Curl_bufref_memdup0
    */
-  res = Curl_bufref_memdup(&bufref, "1661", 3);
+  res = Curl_bufref_memdup0(&bufref, "1661", 3);
   abort_unless(res == CURLE_OK, curl_easy_strerror(res));
   fail_unless(freecount == 1, "Destructor not called");
   fail_unless((const char *)bufref.ptr != buffer, "Returned pointer not set");

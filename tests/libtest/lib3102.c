@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Verify correct order of certificates in the chain by comparing the
  * subject and issuer attributes of each certificate.
@@ -49,11 +47,11 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
       static const char issuer_prefix[] = "Issuer:";
       static const char subject_prefix[] = "Subject:";
 
-      if(!strncmp(slist->data, issuer_prefix, sizeof(issuer_prefix)-1)) {
-        issuer = slist->data + sizeof(issuer_prefix)-1;
+      if(!strncmp(slist->data, issuer_prefix, sizeof(issuer_prefix) - 1)) {
+        issuer = slist->data + sizeof(issuer_prefix) - 1;
       }
-      if(!strncmp(slist->data, subject_prefix, sizeof(subject_prefix)-1)) {
-        subject = slist->data + sizeof(subject_prefix)-1;
+      if(!strncmp(slist->data, subject_prefix, sizeof(subject_prefix) - 1)) {
+        subject = slist->data + sizeof(subject_prefix) - 1;
       }
     }
 
@@ -82,7 +80,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
   return true;
 }
 
-static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
+static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)stream;
   (void)ptr;

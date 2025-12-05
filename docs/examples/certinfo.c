@@ -29,7 +29,7 @@
 
 #include <curl/curl.h>
 
-static size_t write_cb(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
+static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   (void)stream;
   (void)ptr;
@@ -74,10 +74,8 @@ int main(void)
 
           for(slist = certinfo->certinfo[i]; slist; slist = slist->next)
             printf("%s\n", slist->data);
-
         }
       }
-
     }
 
     curl_easy_cleanup(curl);

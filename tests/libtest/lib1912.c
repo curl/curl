@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define print_err(name, exp)                                            \
   curl_mfprintf(stderr, "Type mismatch for CURLOPT_%s (expected %s)\n", \
                 name, exp)
@@ -35,9 +33,7 @@ static CURLcode test_lib1912(const char *URL)
   int error = 0;
 #ifdef CURLINC_TYPECHECK_GCC_H
   const struct curl_easyoption *o;
-  for(o = curl_easy_option_next(NULL);
-      o;
-      o = curl_easy_option_next(o)) {
+  for(o = curl_easy_option_next(NULL); o; o = curl_easy_option_next(o)) {
     /* Test for mismatch OR missing typecheck macros */
     if(curlcheck_long_option(o->id) !=
        (o->type == CURLOT_LONG || o->type == CURLOT_VALUES)) {

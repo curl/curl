@@ -28,7 +28,6 @@
 #include "tool_doswin.h"
 #include "tool_operhlp.h"
 #include "tool_msgs.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 void clean_getout(struct OperationConfig *config)
 {
@@ -92,7 +91,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
   if(uh) {
     char *ptr;
     uerr = curl_url_set(uh, CURLUPART_URL, *inurlp,
-                        CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME);
+                        CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME);
     if(uerr) {
       result = urlerr_cvt(uerr);
       goto fail;
@@ -144,7 +143,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
         if(!newpath)
           goto fail;
         uerr = curl_url_set(uh, CURLUPART_PATH, newpath, 0);
-        free(newpath);
+        curlx_free(newpath);
         if(uerr) {
           result = urlerr_cvt(uerr);
           goto fail;
@@ -154,7 +153,7 @@ CURLcode add_file_name_to_url(CURL *curl, char **inurlp, const char *filename)
           result = urlerr_cvt(uerr);
           goto fail;
         }
-        free(*inurlp);
+        curlx_free(*inurlp);
         *inurlp = newurl;
         result = CURLE_OK;
       }
@@ -206,11 +205,11 @@ CURLcode get_url_file_name(char **filename, const char *url)
 
       if(pc) {
         /* duplicate the string beyond the slash */
-        *filename = strdup(pc + 1);
+        *filename = curlx_strdup(pc + 1);
       }
       else {
         /* no slash => empty string, use default */
-        *filename = strdup("curl_response");
+        *filename = curlx_strdup("curl_response");
         warnf("No remote filename, uses \"%s\"", *filename);
       }
 

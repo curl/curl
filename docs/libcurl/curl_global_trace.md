@@ -130,6 +130,10 @@ states.
 Traces reading of upload data from the application in order to send it to the
 server.
 
+## `ssh`
+
+Tracing of SSH related protocols SCP and SFTP.
+
 ## `ssls`
 
 Tracing of SSL Session handling, e.g. caching/import/export.

@@ -31,10 +31,6 @@
 #include "rand.h"
 #include "curl_fopen.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /*
   The dirslash() function breaks a null-terminated pathname string into
   directory and filename components then returns the directory component up
@@ -66,10 +62,10 @@ static char *dirslash(const char *path)
   n = strlen(path);
   if(n) {
     /* find the rightmost path separator, if any */
-    while(n && !IS_SEP(path[n-1]))
+    while(n && !IS_SEP(path[n - 1]))
       --n;
     /* skip over all the path separators, if any */
-    while(n && IS_SEP(path[n-1]))
+    while(n && IS_SEP(path[n - 1]))
       --n;
   }
   if(curlx_dyn_addn(&out, path, n))
@@ -120,7 +116,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     /* The temp filename should not end up too long for the target file
        system */
     tempstore = curl_maprintf("%s%s.tmp", dir, randbuf);
-    free(dir);
+    curlx_free(dir);
   }
 
   if(!tempstore) {
@@ -156,7 +152,7 @@ fail:
     unlink(tempstore);
   }
 
-  free(tempstore);
+  curlx_free(tempstore);
   return result;
 }
 

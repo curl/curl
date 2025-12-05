@@ -32,7 +32,7 @@ struct dynbuf {
   size_t allc;   /* size of the current allocation */
   size_t toobig; /* size limit for the buffer */
 #ifdef DEBUGBUILD
-  int init;     /* detect API usage mistakes */
+  int init;      /* detect API usage mistakes */
 #endif
 };
 
@@ -62,24 +62,24 @@ int curlx_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 char *curlx_dyn_take(struct dynbuf *s, size_t *plen);
 
 /* Dynamic buffer max sizes */
-#define MAX_DYNBUF_SIZE (SIZE_MAX/2)
+#define MAX_DYNBUF_SIZE (SIZE_MAX / 2)
 
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256
 #define DYN_PAUSE_BUFFER    (64 * 1024 * 1024)
 #define DYN_HAXPROXY        2048
-#define DYN_HTTP_REQUEST    (1024*1024)
+#define DYN_HTTP_REQUEST    (1024 * 1024)
 #define DYN_APRINTF         8000000
-#define DYN_RTSP_REQ_HEADER (64*1024)
-#define DYN_TRAILERS        (64*1024)
+#define DYN_RTSP_REQ_HEADER (64 * 1024)
+#define DYN_TRAILERS        (64 * 1024)
 #define DYN_PROXY_CONNECT_HEADERS 16384
 #define DYN_QLOG_NAME       1024
 #define DYN_H1_TRAILER      4096
-#define DYN_PINGPPONG_CMD   (64*1024)
-#define DYN_IMAP_CMD        (64*1024)
-#define DYN_MQTT_RECV       (64*1024)
+#define DYN_PINGPPONG_CMD   (64 * 1024)
+#define DYN_IMAP_CMD        (64 * 1024)
+#define DYN_MQTT_RECV       (64 * 1024)
 #define DYN_MQTT_SEND       0xFFFFFFF
-#define DYN_CRLFILE_SIZE    (400*1024*1024) /* 400mb */
-#define DYN_CERTFILE_SIZE   (100*1024) /* 100KiB */
-#define DYN_KEYFILE_SIZE    (100*1024) /* 100KiB */
+#define DYN_CRLFILE_SIZE    (400 * 1024 * 1024) /* 400MiB */
+#define DYN_CERTFILE_SIZE   (100 * 1024) /* 100KiB */
+#define DYN_KEYFILE_SIZE    (100 * 1024) /* 100KiB */
 #endif

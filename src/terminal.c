@@ -28,7 +28,6 @@
 #endif
 
 #include "terminal.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 #ifdef HAVE_TERMIOS_H
 #  include <termios.h>
@@ -75,8 +74,7 @@ unsigned int get_terminal_columns(void)
          * Do not use +1 to get the true screen-width since writing a
          * character at the right edge will cause a line wrap.
          */
-        cols = (int)
-          (console_info.srWindow.Right - console_info.srWindow.Left);
+        cols = (int)(console_info.srWindow.Right - console_info.srWindow.Left);
       }
     }
 #endif /* TIOCGSIZE */

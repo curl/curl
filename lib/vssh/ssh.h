@@ -156,7 +156,8 @@ struct ssh_conn {
   int secondCreateDirs;         /* counter use by the code to see if the
                                    second attempt has been made to change
                                    to/create a directory */
-  int orig_waitfor;             /* default READ/WRITE bits wait for */
+  int waitfor;                  /* KEEP_RECV/KEEP_SEND bits overriding
+                                   pollset given flags */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
 #ifdef USE_LIBSSH
@@ -216,7 +217,7 @@ struct ssh_conn {
 
 #ifdef USE_LIBSSH
 #if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
-#  error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#error "SCP/SFTP protocols require libssh 0.9.0 or later"
 #endif
 #endif
 
@@ -226,7 +227,7 @@ struct ssh_conn {
    non-configure platforms */
 
 #if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010208)
-#  error "SCP/SFTP protocols require libssh2 1.2.8 or later"
+#error "SCP/SFTP protocols require libssh2 1.2.8 or later"
 /* 1.2.8 was released on April 5 2011 */
 #endif
 
@@ -246,7 +247,7 @@ void Curl_ssh_attach(struct Curl_easy *data,
 #else
 /* for non-SSH builds */
 #define Curl_ssh_cleanup()
-#define Curl_ssh_attach(x,y)
+#define Curl_ssh_attach(x, y)
 #define Curl_ssh_init() 0
 #endif
 

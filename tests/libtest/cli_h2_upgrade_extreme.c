@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static size_t write_h2_upg_extreme_cb(char *ptr, size_t size, size_t nmemb,
                                       void *opaque)
@@ -121,7 +120,7 @@ static CURLcode test_cli_h2_upgrade_extreme(const char *URL)
         curl_easy_getinfo(msg->easy_handle, CURLINFO_XFER_ID, &xfer_id);
         curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &status);
         if(msg->data.result == CURLE_SEND_ERROR ||
-            msg->data.result == CURLE_RECV_ERROR) {
+           msg->data.result == CURLE_RECV_ERROR) {
           /* We get these if the server had a GOAWAY in transit on
            * reusing a connection */
         }

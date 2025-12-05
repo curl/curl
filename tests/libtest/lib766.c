@@ -24,8 +24,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static int sockopt_766(void *clientp,
                        curl_socket_t curlfd,
                        curlsocktype purpose)

@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "bufq.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 static bool chunk_is_empty(const struct buf_chunk *chunk)
 {
   return chunk->r_offset >= chunk->w_offset;
@@ -143,10 +139,9 @@ static void chunk_list_free(struct buf_chunk **anchor)
   while(*anchor) {
     chunk = *anchor;
     *anchor = chunk->next;
-    free(chunk);
+    curlx_free(chunk);
   }
 }
-
 
 void Curl_bufcp_init(struct bufc_pool *pool,
                      size_t chunk_size, size_t spare_max)
@@ -178,7 +173,7 @@ static CURLcode bufcp_take(struct bufc_pool *pool,
     return CURLE_OUT_OF_MEMORY;
   }
 
-  chunk = calloc(1, sizeof(*chunk) + pool->chunk_size);
+  chunk = curlx_calloc(1, sizeof(*chunk) + pool->chunk_size);
   if(!chunk) {
     *pchunk = NULL;
     return CURLE_OUT_OF_MEMORY;
@@ -192,7 +187,7 @@ static void bufcp_put(struct bufc_pool *pool,
                       struct buf_chunk *chunk)
 {
   if(pool->spare_count >= pool->spare_max) {
-    free(chunk);
+    curlx_free(chunk);
   }
   else {
     chunk_reset(chunk);
@@ -311,7 +306,7 @@ static struct buf_chunk *get_spare(struct bufq *q)
       return NULL;
     }
 
-    chunk = calloc(1, sizeof(*chunk) + q->chunk_size);
+    chunk = curlx_calloc(1, sizeof(*chunk) + q->chunk_size);
     if(!chunk)
       return NULL;
     chunk->dlen = q->chunk_size;
@@ -334,11 +329,11 @@ static void prune_head(struct bufq *q)
       --q->chunk_count;
     }
     else if((q->chunk_count > q->max_chunks) ||
-       (q->opts & BUFQ_OPT_NO_SPARES)) {
+            (q->opts & BUFQ_OPT_NO_SPARES)) {
       /* SOFT_LIMIT allowed us more than max. free spares until
        * we are at max again. Or free them if we are configured
        * to not use spares. */
-      free(chunk);
+      curlx_free(chunk);
       --q->chunk_count;
     }
     else {

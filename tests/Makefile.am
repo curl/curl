@@ -25,7 +25,6 @@
 # scripts used in test cases
 TESTSCRIPTS = \
  test1119.pl  \
- test1132.pl  \
  test1135.pl  \
  test1139.pl  \
  test1140.pl  \
@@ -62,6 +61,7 @@ EXTRA_DIST =        \
  http2-server.pl    \
  http3-server.pl    \
  memanalyze.pl      \
+ memanalyzer.pm     \
  negtelnetserver.py \
  nghttpx.conf       \
  pathhelp.pm        \

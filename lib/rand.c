@@ -38,10 +38,6 @@
 #include "rand.h"
 #include "escape.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef _WIN32
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_VISTA && \
@@ -231,8 +227,7 @@ CURLcode Curl_rand_bytes(struct Curl_easy *data,
  * size.
  */
 
-CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
-                       size_t num)
+CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd, size_t num)
 {
   CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
   unsigned char buffer[128];
@@ -244,7 +239,7 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
   memset(buffer, 0, sizeof(buffer));
 #endif
 
-  if((num/2 >= sizeof(buffer)) || !(num&1)) {
+  if((num / 2 >= sizeof(buffer)) || !(num & 1)) {
     /* make sure it fits in the local buffer and that it is an odd number! */
     DEBUGF(infof(data, "invalid buffer size with Curl_rand_hex"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -252,11 +247,11 @@ CURLcode Curl_rand_hex(struct Curl_easy *data, unsigned char *rnd,
 
   num--; /* save one for null-termination */
 
-  result = Curl_rand(data, buffer, num/2);
+  result = Curl_rand(data, buffer, num / 2);
   if(result)
     return result;
 
-  Curl_hexencode(buffer, num/2, rnd, num + 1);
+  Curl_hexencode(buffer, num / 2, rnd, num + 1);
   return result;
 }
 

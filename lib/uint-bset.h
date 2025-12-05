@@ -99,9 +99,8 @@ bool Curl_uint32_bset_first(struct uint32_bset *bset, uint32_t *pfirst);
 bool Curl_uint32_bset_next(struct uint32_bset *bset, uint32_t last,
                            uint32_t *pnext);
 
-
 #ifndef CURL_POPCOUNT64
-#define CURL_POPCOUNT64(x)   Curl_popcount64(x)
+#define CURL_POPCOUNT64(x)  Curl_popcount64(x)
 #define CURL_POPCOUNT64_IMPLEMENT
 uint32_t Curl_popcount64(uint64_t x);
 #endif /* !CURL_POPCOUNT64 */

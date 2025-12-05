@@ -27,10 +27,6 @@
 #include <curl/curl.h>
 
 #include "curl_memrchr.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #ifndef HAVE_MEMRCHR
 /*
@@ -41,9 +37,7 @@
  * backwards from the end of the n bytes pointed to by s instead of forward
  * from the beginning.
  */
-
-void *
-Curl_memrchr(const void *s, int c, size_t n)
+void *Curl_memrchr(const void *s, int c, size_t n)
 {
   if(n > 0) {
     const unsigned char *p = s;

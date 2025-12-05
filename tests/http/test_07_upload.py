@@ -663,10 +663,10 @@ class TestUpload:
             pytest.skip("h3 not supported")
         if proto != 'h3' and sys.platform.startswith('darwin') and env.ci_run:
             pytest.skip('failing on macOS CI runners')
-        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('wolfssl'):
-            pytest.skip('h3 wolfssl early data failing on macOS')
-        if proto == 'h3' and sys.platform.startswith('darwin') and env.curl_uses_lib('gnutls'):
-            pytest.skip('h3 gnutls early data failing on macOS')
+        if proto == 'h3' and env.curl_uses_lib('wolfssl'):
+            pytest.skip('h3 wolfssl early data failing')
+        if proto == 'h3' and env.curl_uses_lib('gnutls'):
+            pytest.skip('h3 gnutls early data failing')
         count = 2
         # we want this test to always connect to nghttpx, since it is
         # the only server we have that supports TLS earlydata

@@ -38,8 +38,6 @@
 #include "tool_util.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifndef _WIN32
 /* Wait up to a number of milliseconds for socket activity. This function
    waits on read activity on a file descriptor that is not a socket which
@@ -139,7 +137,7 @@ size_t tool_read_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 #endif
   }
   else {
-    rc = read(per->infd, buffer, sz*nmemb);
+    rc = read(per->infd, buffer, sz * nmemb);
     if(rc < 0) {
       if(errno == EAGAIN) {
         errno = 0;

@@ -25,10 +25,6 @@
 #include "curl_setup.h"
 #include "uint-bset.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #ifdef DEBUGBUILD
 #define CURL_UINT32_BSET_MAGIC  0x62757473
 #endif
@@ -41,22 +37,21 @@ void Curl_uint32_bset_init(struct uint32_bset *bset)
 #endif
 }
 
-
 CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax)
 {
-  uint32_t nslots = (nmax < (UINT32_MAX-63)) ?
+  uint32_t nslots = (nmax < (UINT32_MAX - 63)) ?
                     ((nmax + 63) / 64) : (UINT32_MAX / 64);
 
   DEBUGASSERT(bset->init == CURL_UINT32_BSET_MAGIC);
   if(nslots != bset->nslots) {
-    uint64_t *slots = calloc(nslots, sizeof(uint64_t));
+    uint64_t *slots = curlx_calloc(nslots, sizeof(uint64_t));
     if(!slots)
       return CURLE_OUT_OF_MEMORY;
 
     if(bset->slots) {
       memcpy(slots, bset->slots,
              (CURLMIN(nslots, bset->nslots) * sizeof(uint64_t)));
-      free(bset->slots);
+      curlx_free(bset->slots);
     }
     bset->slots = slots;
     bset->nslots = nslots;
@@ -65,11 +60,10 @@ CURLcode Curl_uint32_bset_resize(struct uint32_bset *bset, uint32_t nmax)
   return CURLE_OK;
 }
 
-
 void Curl_uint32_bset_destroy(struct uint32_bset *bset)
 {
   DEBUGASSERT(bset->init == CURL_UINT32_BSET_MAGIC);
-  free(bset->slots);
+  curlx_free(bset->slots);
   memset(bset, 0, sizeof(*bset));
 }
 
@@ -101,7 +95,6 @@ bool Curl_uint32_bset_empty(struct uint32_bset *bset)
   return TRUE;
 }
 
-
 void Curl_uint32_bset_clear(struct uint32_bset *bset)
 {
   if(bset->nslots) {
@@ -109,7 +102,6 @@ void Curl_uint32_bset_clear(struct uint32_bset *bset)
     bset->first_slot_used = UINT32_MAX;
   }
 }
-
 
 bool Curl_uint32_bset_add(struct uint32_bset *bset, uint32_t i)
 {
@@ -122,14 +114,12 @@ bool Curl_uint32_bset_add(struct uint32_bset *bset, uint32_t i)
   return TRUE;
 }
 
-
 void Curl_uint32_bset_remove(struct uint32_bset *bset, uint32_t i)
 {
   size_t islot = i / 64;
   if(islot < bset->nslots)
     bset->slots[islot] &= ~((uint64_t)1 << (i % 64));
 }
-
 
 bool Curl_uint32_bset_contains(struct uint32_bset *bset, uint32_t i)
 {
@@ -138,7 +128,6 @@ bool Curl_uint32_bset_contains(struct uint32_bset *bset, uint32_t i)
     return FALSE;
   return (bset->slots[islot] & ((uint64_t)1 << (i % 64))) != 0;
 }
-
 
 bool Curl_uint32_bset_first(struct uint32_bset *bset, uint32_t *pfirst)
 {
@@ -201,7 +190,6 @@ uint32_t Curl_popcount64(uint64_t x)
   return (uint32_t)((x * h01) >> 56);
 }
 #endif /* CURL_POPCOUNT64_IMPLEMENT */
-
 
 #ifdef CURL_CTZ64_IMPLEMENT
 uint32_t Curl_ctz64(uint64_t x)

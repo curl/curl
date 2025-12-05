@@ -129,19 +129,18 @@ CURLcode Curl_ares_pollset(struct Curl_easy *data,
                            ares_channel channel,
                            struct easy_pollset *ps);
 
-int Curl_ares_perform(ares_channel channel,
-                      timediff_t timeout_ms);
+int Curl_ares_perform(ares_channel channel, timediff_t timeout_ms);
 #endif
 
 #ifdef CURLRES_ARES
 /* async resolving implementation using c-ares alone */
 struct async_ares_ctx {
   ares_channel channel;
-  int num_pending; /* number of outstanding c-ares requests */
+  int num_pending;               /* number of outstanding c-ares requests */
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
-  int ares_status; /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
-  CURLcode result; /* CURLE_OK or error handling response */
+  int ares_status;               /* ARES_SUCCESS, ARES_ENOTFOUND, etc. */
+  CURLcode result;               /* CURLE_OK or error handling response */
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #endif
@@ -223,11 +222,11 @@ struct doh_probes;
 #else /* CURLRES_ASYNCH */
 
 /* convert these functions if an asynch resolver is not used */
-#define Curl_async_get_impl(x,y)    (*(y) = NULL, CURLE_OK)
-#define Curl_async_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_async_await(x,y) CURLE_COULDNT_RESOLVE_HOST
-#define Curl_async_global_init() CURLE_OK
-#define Curl_async_global_cleanup() Curl_nop_stmt
+#define Curl_async_get_impl(x, y)    (*(y) = NULL, CURLE_OK)
+#define Curl_async_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_await(x, y)       CURLE_COULDNT_RESOLVE_HOST
+#define Curl_async_global_init()     CURLE_OK
+#define Curl_async_global_cleanup()  Curl_nop_stmt
 
 #endif /* !CURLRES_ASYNCH */
 
@@ -267,9 +266,8 @@ void Curl_async_shutdown(struct Curl_easy *data);
 void Curl_async_destroy(struct Curl_easy *data);
 #else /* !USE_CURL_ASYNC */
 #define Curl_async_shutdown(x) Curl_nop_stmt
-#define Curl_async_destroy(x) Curl_nop_stmt
+#define Curl_async_destroy(x)  Curl_nop_stmt
 #endif /* USE_CURL_ASYNC */
-
 
 /********** end of generic resolver interface functions *****************/
 #endif /* HEADER_CURL_ASYN_H */

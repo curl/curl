@@ -79,14 +79,11 @@
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
+#include "bufref.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
-    !defined(CURL_DISABLE_IMAP)
+  !defined(CURL_DISABLE_IMAP)
 /*
  * checkheaders() checks the linked list of custom headers for a
  * particular header (prefix). Provide the prefix without colon!
@@ -99,11 +96,11 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 {
   struct curl_slist *head;
   DEBUGASSERT(thislen);
-  DEBUGASSERT(thisheader[thislen-1] != ':');
+  DEBUGASSERT(thisheader[thislen - 1] != ':');
 
   for(head = data->set.headers; head; head = head->next) {
     if(curl_strnequal(head->data, thisheader, thislen) &&
-       Curl_headersep(head->data[thislen]) )
+       Curl_headersep(head->data[thislen]))
       return head->data;
   }
 
@@ -115,13 +112,13 @@ static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
 {
   struct connectdata *conn = data->conn;
 
-  if(conn->handler->protocol&PROTO_FAMILY_FTP)
+  if(conn->handler->protocol & PROTO_FAMILY_FTP)
     return Curl_conn_data_pending(data, SECONDARYSOCKET);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return (!rcvd_eagain &&
-          conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP)) ||
+          conn->handler->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
          Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
@@ -333,7 +330,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, mark as dirty");
   }
 
-  if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
+  if(((k->keepon & (KEEP_RECV | KEEP_SEND)) == KEEP_SEND) &&
      (conn->bits.close || is_multiplex)) {
     /* When we have read the entire thing and the close bit is set, the server
        may now close the connection. If there is now any kind of sending going
@@ -432,7 +429,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if((k->keepon & (KEEP_RECV|KEEP_SEND)) == 0)
+  if((k->keepon & (KEEP_RECV | KEEP_SEND)) == 0)
     data->req.done = TRUE;
 
   result = Curl_pgrsUpdate(data);
@@ -479,7 +476,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
      is allowed to be changed by the user between transfers */
   if(data->set.uh) {
     CURLUcode uc;
-    free(data->set.str[STRING_SET_URL]);
+    curlx_free(data->set.str[STRING_SET_URL]);
     uc = curl_url_get(data->set.uh,
                       CURLUPART_URL, &data->set.str[STRING_SET_URL], 0);
     if(uc) {
@@ -488,13 +485,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
   }
 
-  /* since the URL may have been redirected in a previous use of this handle */
-  if(data->state.url_alloc) {
-    Curl_safefree(data->state.url);
-    data->state.url_alloc = FALSE;
-  }
-
-  data->state.url = data->set.str[STRING_SET_URL];
+  Curl_bufref_set(&data->state.url, data->set.str[STRING_SET_URL], 0, NULL);
 
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
@@ -574,7 +565,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     if(data->state.wildcardmatch) {
       struct WildcardData *wc;
       if(!data->wildcard) {
-        data->wildcard = calloc(1, sizeof(struct WildcardData));
+        data->wildcard = curlx_calloc(1, sizeof(struct WildcardData));
         if(!data->wildcard)
           return CURLE_OUT_OF_MEMORY;
       }
@@ -597,7 +588,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
    * protocol.
    */
   if(!result && data->set.str[STRING_USERAGENT]) {
-    free(data->state.aptr.uagent);
+    curlx_free(data->state.aptr.uagent);
     data->state.aptr.uagent =
       curl_maprintf("User-Agent: %s\r\n", data->set.str[STRING_USERAGENT]);
     if(!data->state.aptr.uagent)
@@ -629,7 +620,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
 /* Returns CURLE_OK *and* sets '*url' if a request retry is wanted.
 
-   NOTE: that the *url is malloc()ed. */
+   NOTE: that the *url is curlx_malloc()ed. */
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
 {
   struct connectdata *conn = data->conn;
@@ -640,7 +631,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      protocol is HTTP as when uploading over HTTP we will still get a
      response */
   if(data->state.upload &&
-     !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
+     !(conn->handler->protocol & (PROTO_FAMILY_HTTP | CURLPROTO_RTSP)))
     return CURLE_OK;
 
   if(conn->bits.reuse &&
@@ -660,7 +651,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
        it again. Bad luck. Retry the same request on a fresh connect! */
     retry = TRUE;
   else if(data->state.refused_stream &&
-          (data->req.bytecount + data->req.headerbytecount == 0) ) {
+          (data->req.bytecount + data->req.headerbytecount == 0)) {
     /* This was sent on a refused stream, safe to rerun. A refused stream
        error can typically only happen on HTTP/2 level if the stream is safe
        to issue again, but the nghttp2 API can deliver the message to other
@@ -680,7 +671,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     }
     infof(data, "Connection died, retrying a fresh connect (retry count: %d)",
           data->state.retrycount);
-    *url = strdup(data->state.url);
+    *url = Curl_bufref_dup(&data->state.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 
@@ -820,6 +811,7 @@ CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos)
 {
   if(data->conn->handler->write_resp_hd) {
+    DEBUGASSERT(!hd0[hdlen]); /* null terminated */
     /* protocol handlers offering this function take full responsibility
      * for writing all received download data to the client. */
     return data->conn->handler->write_resp_hd(data, hd0, hdlen, is_eos);

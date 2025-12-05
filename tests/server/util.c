@@ -37,7 +37,7 @@
  */
 char *data_to_hex(char *data, size_t len)
 {
-  static char buf[256*3];
+  static char buf[256 * 3];
   size_t i;
   char *optr = buf;
   char *iptr = data;
@@ -177,18 +177,18 @@ int win32_init(void)
     }
 
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
-       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
+       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
       WSACleanup();
       win32_perror("Winsock init failed");
       logmsg("No suitable winsock.dll found -- aborting");
       return 1;
     }
   }
-#endif  /* USE_WINSOCK */
+#endif /* USE_WINSOCK */
   atexit(win32_cleanup);
   return 0;
 }
-#endif  /* _WIN32 */
+#endif /* _WIN32 */
 
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir2)
@@ -370,8 +370,7 @@ static void exit_signal_handler(int signum)
        fd != -1) {
 #else
     /* !checksrc! disable BANNEDFUNC 1 */
-    fd = open(serverlogfile,
-              O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+    fd = open(serverlogfile, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
     if(fd != -1) {
 #endif
       static const char msg[] = "exit_signal_handler: called\n";
@@ -546,7 +545,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
 
 #ifdef HAVE_SIGINTERRUPT
   if(oldhdlr != SIG_ERR)
-    siginterrupt(signum, (int) restartable);
+    siginterrupt(signum, (int)restartable);
 #else
   (void)restartable;
 #endif
@@ -693,7 +692,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     return -1;
   }
   strcpy(sau->sun_path, unix_socket);
-  rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
+  rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   if(rc && SOCKERRNO == SOCKEADDRINUSE) {
     struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
@@ -738,7 +737,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
       return rc;
     }
     /* stale socket is gone, retry bind */
-    rc = bind(sock, (struct sockaddr*)sau, sizeof(struct sockaddr_un));
+    rc = bind(sock, (struct sockaddr *)sau, sizeof(struct sockaddr_un));
   }
   return rc;
 }
@@ -764,70 +763,76 @@ curl_socket_t sockdaemon(curl_socket_t sock,
   (void)unix_socket;
 #endif
 
-  do {
-    attempt++;
-    flag = 1;
-    rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                    (void *)&flag, sizeof(flag));
-    if(rc) {
-      error = SOCKERRNO;
-      logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
-             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-      if(maxretr) {
-        rc = curlx_wait_ms(delay);
-        if(rc) {
-          /* should not happen */
-          error = SOCKERRNO;
-          logmsg("curlx_wait_ms() failed with error (%d) %s",
-                 error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-          sclose(sock);
-          return CURL_SOCKET_BAD;
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
+  if(socket_domain != AF_UNIX) {
+#endif
+    do {
+      attempt++;
+      flag = 1;
+      rc = setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
+                      (void *)&flag, sizeof(flag));
+      if(rc) {
+        error = SOCKERRNO;
+        logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
+               error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+        if(maxretr) {
+          rc = curlx_wait_ms(delay);
+          if(rc) {
+            /* should not happen */
+            error = SOCKERRNO;
+            logmsg("curlx_wait_ms() failed with error (%d) %s",
+                   error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+            sclose(sock);
+            return CURL_SOCKET_BAD;
+          }
+          if(got_exit_signal) {
+            logmsg("signalled to die, exiting...");
+            sclose(sock);
+            return CURL_SOCKET_BAD;
+          }
+          totdelay += delay;
+          delay *= 2; /* double the sleep for next attempt */
         }
-        if(got_exit_signal) {
-          logmsg("signalled to die, exiting...");
-          sclose(sock);
-          return CURL_SOCKET_BAD;
-        }
-        totdelay += delay;
-        delay *= 2; /* double the sleep for next attempt */
       }
-    }
-  } while(rc && maxretr--);
+    } while(rc && maxretr--);
 
-  if(rc) {
-    logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. Error (%d) %s",
-           attempt, totdelay,
-           error, curlx_strerror(error, errbuf, sizeof(errbuf)));
-    logmsg("Continuing anyway...");
+    if(rc) {
+      logmsg("setsockopt(SO_REUSEADDR) failed %d times in %d ms. "
+             "Error (%d) %s", attempt, totdelay,
+             error, curlx_strerror(error, errbuf, sizeof(errbuf)));
+      logmsg("Continuing anyway...");
+    }
+#if defined(_WIN32) && defined(USE_UNIX_SOCKETS)
   }
+#endif
 
   /* When the specified listener port is zero, it is actually a
      request to let the system choose a non-zero available port. */
 
   switch(socket_domain) {
-    case AF_INET:
-      memset(&listener.sa4, 0, sizeof(listener.sa4));
-      listener.sa4.sin_family = AF_INET;
-      listener.sa4.sin_addr.s_addr = INADDR_ANY;
-      listener.sa4.sin_port = htons(*listenport);
-      rc = bind(sock, &listener.sa, sizeof(listener.sa4));
-      break;
+  case AF_INET:
+    memset(&listener.sa4, 0, sizeof(listener.sa4));
+    listener.sa4.sin_family = AF_INET;
+    listener.sa4.sin_addr.s_addr = INADDR_ANY;
+    listener.sa4.sin_port = htons(*listenport);
+    rc = bind(sock, &listener.sa, sizeof(listener.sa4));
+    break;
 #ifdef USE_IPV6
-    case AF_INET6:
-      memset(&listener.sa6, 0, sizeof(listener.sa6));
-      listener.sa6.sin6_family = AF_INET6;
-      listener.sa6.sin6_addr = in6addr_any;
-      listener.sa6.sin6_port = htons(*listenport);
-      rc = bind(sock, &listener.sa, sizeof(listener.sa6));
-      break;
+  case AF_INET6:
+    memset(&listener.sa6, 0, sizeof(listener.sa6));
+    listener.sa6.sin6_family = AF_INET6;
+    listener.sa6.sin6_addr = in6addr_any;
+    listener.sa6.sin6_port = htons(*listenport);
+    rc = bind(sock, &listener.sa, sizeof(listener.sa6));
+    break;
 #endif /* USE_IPV6 */
 #ifdef USE_UNIX_SOCKETS
-    case AF_UNIX:
-      rc = bind_unix_socket(sock, unix_socket, &listener.sau);
-      break;
+  case AF_UNIX:
+    rc = bind_unix_socket(sock, unix_socket, &listener.sau);
+    break;
 #endif
-    default:
-      rc = 1;
+  default:
+    rc = 1;
   }
 
   if(rc) {

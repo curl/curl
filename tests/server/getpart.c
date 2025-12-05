@@ -182,8 +182,8 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
   return GPE_OK;
 }
 
-static int decodedata(char  **buf,   /* dest buffer */
-                      size_t *len)   /* dest buffer data length */
+static int decodedata(char  **buf, /* dest buffer */
+                      size_t *len) /* dest buffer data length */
 {
   CURLcode error = CURLE_OK;
   unsigned char *buf64 = NULL;
@@ -243,7 +243,7 @@ static int decodedata(char  **buf,   /* dest buffer */
 int getpart(char **outbuf, size_t *outlen,
             const char *main, const char *sub, FILE *stream)
 {
-# define MAX_TAG_LEN 200
+#define MAX_TAG_LEN 200
   char curouter[MAX_TAG_LEN + 1]; /* current outermost section */
   char curmain[MAX_TAG_LEN + 1];  /* current main section */
   char cursub[MAX_TAG_LEN + 1];   /* current sub section */
@@ -254,7 +254,7 @@ int getpart(char **outbuf, size_t *outlen,
   char *end;
   union {
     ssize_t sig;
-     size_t uns;
+    size_t uns;
   } len;
   size_t bufsize = 0;
   size_t outalloc = 256;
@@ -288,8 +288,7 @@ int getpart(char **outbuf, size_t *outlen,
     if('<' != *ptr) {
       if(in_wanted_part) {
         show(("=> %s", buffer));
-        error = appenddata(outbuf, outlen, &outalloc, buffer, datalen,
-                           base64);
+        error = appenddata(outbuf, outlen, &outalloc, buffer, datalen, base64);
         if(error)
           break;
       }
@@ -353,7 +352,6 @@ int getpart(char **outbuf, size_t *outlen,
         if(in_wanted_part)
           break;
       }
-
     }
     else if(!in_wanted_part) {
       /*
@@ -411,9 +409,9 @@ int getpart(char **outbuf, size_t *outlen,
           /* start of wanted part */
           in_wanted_part = 1;
           if(strstr(patt, "base64="))
-              /* bit rough test, but "mostly" functional, */
-              /* treat wanted part data as base64 encoded */
-              base64 = 1;
+            /* bit rough test, but "mostly" functional, */
+            /* treat wanted part data as base64 encoded */
+            base64 = 1;
           if(strstr(patt, "nonewline=")) {
             show(("* setting nonewline\n"));
             nonewline = 1;
@@ -421,7 +419,6 @@ int getpart(char **outbuf, size_t *outlen,
         }
         continue;
       }
-
     }
 
     if(in_wanted_part) {

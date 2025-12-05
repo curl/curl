@@ -76,10 +76,6 @@
 #include "http_proxy.h"
 #include "socks.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
 enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len)
@@ -238,7 +234,7 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
 /* retrieves ip address and port from a sockaddr structure. note it calls
    curlx_inet_ntop which sets errno on fail, not SOCKERRNO. */
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, int *port)
+                      char *addr, uint16_t *port)
 {
   struct sockaddr_in *si = NULL;
 #ifdef USE_IPV6
@@ -251,38 +247,35 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #endif
 
   switch(sa->sa_family) {
-    case AF_INET:
-      si = (struct sockaddr_in *)(void *) sa;
-      if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
-        unsigned short us_port = ntohs(si->sin_port);
-        *port = us_port;
-        return TRUE;
-      }
-      break;
+  case AF_INET:
+    si = (struct sockaddr_in *)(void *)sa;
+    if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
+      *port = ntohs(si->sin_port);
+      return TRUE;
+    }
+    break;
 #ifdef USE_IPV6
-    case AF_INET6:
-      si6 = (struct sockaddr_in6 *)(void *) sa;
-      if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr,
-                         MAX_IPADR_LEN)) {
-        unsigned short us_port = ntohs(si6->sin6_port);
-        *port = us_port;
-        return TRUE;
-      }
-      break;
+  case AF_INET6:
+    si6 = (struct sockaddr_in6 *)(void *)sa;
+    if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
+      *port = ntohs(si6->sin6_port);
+      return TRUE;
+    }
+    break;
 #endif
 #if (defined(HAVE_SYS_UN_H) || defined(WIN32_SOCKADDR_UN)) && defined(AF_UNIX)
-    case AF_UNIX:
-      if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
-        su = (struct sockaddr_un*)sa;
-        curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
-      }
-      else
-        addr[0] = 0; /* socket with no name */
-      *port = 0;
-      return TRUE;
+  case AF_UNIX:
+    if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
+      su = (struct sockaddr_un *)sa;
+      curl_msnprintf(addr, MAX_IPADR_LEN, "%s", su->sun_path);
+    }
+    else
+      addr[0] = 0; /* socket with no name */
+    *port = 0;
+    return TRUE;
 #endif
-    default:
-      break;
+  default:
+    break;
   }
 
   addr[0] = '\0';
@@ -344,7 +337,7 @@ void Curl_conncontrol(struct connectdata *conn,
 #endif
   is_multiplex = Curl_conn_is_multiplex(conn, FIRSTSOCKET);
   closeit = (ctrl == CONNCTRL_CONNECTION) ||
-    ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
+            ((ctrl == CONNCTRL_STREAM) && !is_multiplex);
   if((ctrl == CONNCTRL_STREAM) && is_multiplex)
     ;  /* stream signal on multiplex conn never affects close state */
   else if((bit)closeit != conn->bits.close) {
@@ -366,7 +359,7 @@ typedef enum {
 struct cf_setup_ctx {
   cf_setup_state state;
   int ssl_mode;
-  int transport;
+  uint8_t transport;
 };
 
 static CURLcode cf_setup_connect(struct Curl_cfilter *cf,
@@ -415,8 +408,8 @@ connect_sub_chain:
 
   if(ctx->state < CF_SETUP_CNNCT_HTTP_PROXY && cf->conn->bits.httpproxy) {
 #ifdef USE_SSL
-    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype)
-       && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
+    if(IS_HTTPS_PROXY(cf->conn->http_proxy.proxytype) &&
+       !Curl_conn_is_ssl(cf->conn, cf->sockindex)) {
       result = Curl_cf_ssl_proxy_insert_after(cf, data);
       if(result)
         return result;
@@ -456,9 +449,9 @@ connect_sub_chain:
 
   if(ctx->state < CF_SETUP_CNNCT_SSL) {
 #ifdef USE_SSL
-    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE
-        || (ctx->ssl_mode != CURL_CF_SSL_DISABLE
-           && cf->conn->handler->flags & PROTOPT_SSL)) /* we want SSL */
+    if((ctx->ssl_mode == CURL_CF_SSL_ENABLE ||
+        (ctx->ssl_mode != CURL_CF_SSL_DISABLE &&
+         cf->conn->handler->flags & PROTOPT_SSL))       /* we want SSL */
        && !Curl_conn_is_ssl(cf->conn, cf->sockindex)) { /* it is missing */
       result = Curl_cf_ssl_insert_after(cf, data);
       if(result)
@@ -500,7 +493,6 @@ static void cf_setup_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   Curl_safefree(ctx);
 }
 
-
 struct Curl_cftype Curl_cft_setup = {
   "SETUP",
   0,
@@ -521,7 +513,7 @@ struct Curl_cftype Curl_cft_setup = {
 
 static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
                                 struct Curl_easy *data,
-                                int transport,
+                                uint8_t transport,
                                 int ssl_mode)
 {
   struct Curl_cfilter *cf = NULL;
@@ -529,7 +521,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = calloc(1, sizeof(*ctx));
+  ctx = curlx_calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -546,7 +538,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
 out:
   *pcf = result ? NULL : cf;
   if(ctx) {
-    free(ctx);
+    curlx_free(ctx);
   }
   return result;
 }
@@ -554,7 +546,7 @@ out:
 static CURLcode cf_setup_add(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex,
-                             int transport,
+                             uint8_t transport,
                              int ssl_mode)
 {
   struct Curl_cfilter *cf;
@@ -571,7 +563,7 @@ out:
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
-                                    int transport,
+                                    uint8_t transport,
                                     int ssl_mode)
 {
   struct Curl_cfilter *cf;

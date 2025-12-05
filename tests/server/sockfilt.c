@@ -173,7 +173,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 
 /* On Windows, we sometimes get this for a broken pipe, seemingly
  * when the client just closed stdin? */
-#define CURL_WIN32_EPIPE      109
+#define CURL_WIN32_EPIPE 109
 
 /*
  * fullread is a wrapper around the read() function. This will repeat the call
@@ -420,7 +420,7 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
   DWORD type, length, ret;
 
   /* retrieve handles from internal structure */
-  data = (struct select_ws_wait_data *) lpParameter;
+  data = (struct select_ws_wait_data *)lpParameter;
   if(data) {
     handle = data->handle;
     handles[0] = data->abort;
@@ -434,120 +434,120 @@ static DWORD WINAPI select_ws_wait_thread(void *lpParameter)
   /* retrieve the type of file to wait on */
   type = GetFileType(handle);
   switch(type) {
-    case FILE_TYPE_DISK:
-       /* The handle represents a file on disk, this means:
-        * - WaitForMultipleObjectsEx will always be signalled for it.
-        * - comparison of current position in file and total size of
-        *   the file can be used to check if we reached the end yet.
-        *
-        * Approach: Loop till either the internal event is signalled
-        *           or if the end of the file has already been reached.
-        */
-      while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
-            == WAIT_TIMEOUT) {
-        /* get total size of file */
-        length = 0;
-        size.QuadPart = 0;
-        size.LowPart = GetFileSize(handle, &length);
-        if((size.LowPart != INVALID_FILE_SIZE) ||
+  case FILE_TYPE_DISK:
+    /* The handle represents a file on disk, this means:
+     * - WaitForMultipleObjectsEx will always be signalled for it.
+     * - comparison of current position in file and total size of
+     *   the file can be used to check if we reached the end yet.
+     *
+     * Approach: Loop till either the internal event is signalled
+     *           or if the end of the file has already been reached.
+     */
+    while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
+          == WAIT_TIMEOUT) {
+      /* get total size of file */
+      length = 0;
+      size.QuadPart = 0;
+      size.LowPart = GetFileSize(handle, &length);
+      if((size.LowPart != INVALID_FILE_SIZE) ||
+         (GetLastError() == NO_ERROR)) {
+        size.HighPart = (LONG)length;
+        /* get the current position within the file */
+        pos.QuadPart = 0;
+        pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
+        if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
            (GetLastError() == NO_ERROR)) {
-          size.HighPart = (LONG)length;
-          /* get the current position within the file */
-          pos.QuadPart = 0;
-          pos.LowPart = SetFilePointer(handle, 0, &pos.HighPart, FILE_CURRENT);
-          if((pos.LowPart != INVALID_SET_FILE_POINTER) ||
-             (GetLastError() == NO_ERROR)) {
-            /* compare position with size, abort if not equal */
-            if(size.QuadPart == pos.QuadPart) {
-              /* sleep and continue waiting */
-              SleepEx(0, FALSE);
-              continue;
-            }
-          }
-        }
-        /* there is some data available, stop waiting */
-        logmsg("[select_ws_wait_thread] data available, DISK: %p", handle);
-        SetEvent(signal);
-      }
-      break;
-
-    case FILE_TYPE_CHAR:
-       /* The handle represents a character input, this means:
-        * - WaitForMultipleObjectsEx will be signalled on any kind of input,
-        *   including mouse and window size events we do not care about.
-        *
-        * Approach: Loop till either the internal event is signalled
-        *           or we get signalled for an actual key-event.
-        */
-      while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
-            == WAIT_OBJECT_0 + 1) {
-        /* check if this is an actual console handle */
-        if(GetConsoleMode(handle, &ret)) {
-          /* retrieve an event from the console buffer */
-          length = 0;
-          if(PeekConsoleInput(handle, &inputrecord, 1, &length)) {
-            /* check if the event is not an actual key-event */
-            if(length == 1 && inputrecord.EventType != KEY_EVENT) {
-              /* purge the non-key-event and continue waiting */
-              ReadConsoleInput(handle, &inputrecord, 1, &length);
-              continue;
-            }
-          }
-        }
-        /* there is some data available, stop waiting */
-        logmsg("[select_ws_wait_thread] data available, CHAR: %p", handle);
-        SetEvent(signal);
-      }
-      break;
-
-    case FILE_TYPE_PIPE:
-       /* The handle represents an anonymous or named pipe, this means:
-        * - WaitForMultipleObjectsEx will always be signalled for it.
-        * - peek into the pipe and retrieve the amount of data available.
-        *
-        * Approach: Loop till either the internal event is signalled
-        *           or there is data in the pipe available for reading.
-        */
-      while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
-            == WAIT_TIMEOUT) {
-        /* peek into the pipe and retrieve the amount of data available */
-        length = 0;
-        if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
-          /* if there is no data available, sleep and continue waiting */
-          if(length == 0) {
+          /* compare position with size, abort if not equal */
+          if(size.QuadPart == pos.QuadPart) {
+            /* sleep and continue waiting */
             SleepEx(0, FALSE);
             continue;
           }
-          else {
-            logmsg("[select_ws_wait_thread] PeekNamedPipe len: %lu", length);
+        }
+      }
+      /* there is some data available, stop waiting */
+      logmsg("[select_ws_wait_thread] data available, DISK: %p", handle);
+      SetEvent(signal);
+    }
+    break;
+
+  case FILE_TYPE_CHAR:
+    /* The handle represents a character input, this means:
+     * - WaitForMultipleObjectsEx will be signalled on any kind of input,
+     *   including mouse and window size events we do not care about.
+     *
+     * Approach: Loop till either the internal event is signalled
+     *           or we get signalled for an actual key-event.
+     */
+    while(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
+          == WAIT_OBJECT_0 + 1) {
+      /* check if this is an actual console handle */
+      if(GetConsoleMode(handle, &ret)) {
+        /* retrieve an event from the console buffer */
+        length = 0;
+        if(PeekConsoleInput(handle, &inputrecord, 1, &length)) {
+          /* check if the event is not an actual key-event */
+          if(length == 1 && inputrecord.EventType != KEY_EVENT) {
+            /* purge the non-key-event and continue waiting */
+            ReadConsoleInput(handle, &inputrecord, 1, &length);
+            continue;
           }
+        }
+      }
+      /* there is some data available, stop waiting */
+      logmsg("[select_ws_wait_thread] data available, CHAR: %p", handle);
+      SetEvent(signal);
+    }
+    break;
+
+  case FILE_TYPE_PIPE:
+    /* The handle represents an anonymous or named pipe, this means:
+     * - WaitForMultipleObjectsEx will always be signalled for it.
+     * - peek into the pipe and retrieve the amount of data available.
+     *
+     * Approach: Loop till either the internal event is signalled
+     *           or there is data in the pipe available for reading.
+     */
+    while(WaitForMultipleObjectsEx(1, handles, FALSE, 0, FALSE)
+          == WAIT_TIMEOUT) {
+      /* peek into the pipe and retrieve the amount of data available */
+      length = 0;
+      if(PeekNamedPipe(handle, NULL, 0, NULL, &length, NULL)) {
+        /* if there is no data available, sleep and continue waiting */
+        if(length == 0) {
+          SleepEx(0, FALSE);
+          continue;
         }
         else {
-          /* if the pipe has NOT been closed, sleep and continue waiting */
-          ret = GetLastError();
-          if(ret != ERROR_BROKEN_PIPE) {
-            logmsg("[select_ws_wait_thread] PeekNamedPipe error (%lu)", ret);
-            SleepEx(0, FALSE);
-            continue;
-          }
-          else {
-            logmsg("[select_ws_wait_thread] pipe closed, PIPE: %p", handle);
-          }
+          logmsg("[select_ws_wait_thread] PeekNamedPipe len: %lu", length);
         }
-        /* there is some data available, stop waiting */
-        logmsg("[select_ws_wait_thread] data available, PIPE: %p", handle);
-        SetEvent(signal);
       }
-      break;
+      else {
+        /* if the pipe has NOT been closed, sleep and continue waiting */
+        ret = GetLastError();
+        if(ret != ERROR_BROKEN_PIPE) {
+          logmsg("[select_ws_wait_thread] PeekNamedPipe error (%lu)", ret);
+          SleepEx(0, FALSE);
+          continue;
+        }
+        else {
+          logmsg("[select_ws_wait_thread] pipe closed, PIPE: %p", handle);
+        }
+      }
+      /* there is some data available, stop waiting */
+      logmsg("[select_ws_wait_thread] data available, PIPE: %p", handle);
+      SetEvent(signal);
+    }
+    break;
 
-    default:
-      /* The handle has an unknown type, try to wait on it */
-      if(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
-         == WAIT_OBJECT_0 + 1) {
-        logmsg("[select_ws_wait_thread] data available, HANDLE: %p", handle);
-        SetEvent(signal);
-      }
-      break;
+  default:
+    /* The handle has an unknown type, try to wait on it */
+    if(WaitForMultipleObjectsEx(2, handles, FALSE, INFINITE, FALSE)
+       == WAIT_OBJECT_0 + 1) {
+      logmsg("[select_ws_wait_thread] data available, HANDLE: %p", handle);
+      SetEvent(signal);
+    }
+    break;
   }
 
   return 0;
@@ -658,12 +658,12 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
     if(FD_ISSET(wsasock, readfds)) {
       FD_SET(wsasock, &readsock);
-      wsaevents.lNetworkEvents |= FD_READ|FD_ACCEPT|FD_CLOSE;
+      wsaevents.lNetworkEvents |= FD_READ | FD_ACCEPT | FD_CLOSE;
     }
 
     if(FD_ISSET(wsasock, writefds)) {
       FD_SET(wsasock, &writesock);
-      wsaevents.lNetworkEvents |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+      wsaevents.lNetworkEvents |= FD_WRITE | FD_CONNECT | FD_CLOSE;
     }
 
     if(FD_ISSET(wsasock, exceptfds)) {
@@ -800,11 +800,11 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
           wsaevents.lNetworkEvents |= data[i].wsastate;
 
           /* remove from descriptor set if not ready for read/accept/close */
-          if(!(wsaevents.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE)))
+          if(!(wsaevents.lNetworkEvents & (FD_READ | FD_ACCEPT | FD_CLOSE)))
             FD_CLR(wsasock, readfds);
 
           /* remove from descriptor set if not ready for write/connect */
-          if(!(wsaevents.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE)))
+          if(!(wsaevents.lNetworkEvents & (FD_WRITE | FD_CONNECT | FD_CLOSE)))
             FD_CLR(wsasock, writefds);
 
           /* remove from descriptor set if not exceptional */
@@ -851,10 +851,10 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   return ret;
 }
-#define SOCKFILT_select(a,b,c,d,e) select_ws(a,b,c,d,e)
+#define SOCKFILT_select(a, b, c, d, e) select_ws(a, b, c, d, e)
 #else
-#define SOCKFILT_select(a,b,c,d,e) select(a,b,c,d,e)
-#endif  /* USE_WINSOCK */
+#define SOCKFILT_select(a, b, c, d, e) select(a, b, c, d, e)
+#endif /* USE_WINSOCK */
 
 /* Perform the disconnect handshake with sockfilt
  * This involves waiting for the disconnect acknowledgment after the DISC
@@ -867,46 +867,44 @@ static bool disc_handshake(void)
     return FALSE;
 
   do {
-      unsigned char buffer[BUFFER_SIZE];
-      ssize_t buffer_len;
-      if(!read_stdin(buffer, 5))
-        return FALSE;
-      logmsg("Received %c%c%c%c (on stdin)",
-             buffer[0], buffer[1], buffer[2], buffer[3]);
+    unsigned char buffer[BUFFER_SIZE];
+    ssize_t buffer_len;
+    if(!read_stdin(buffer, 5))
+      return FALSE;
+    logmsg("Received %c%c%c%c (on stdin)",
+           buffer[0], buffer[1], buffer[2], buffer[3]);
 
-      if(!memcmp("ACKD", buffer, 4)) {
-        /* got the ack we were waiting for */
-        break;
-      }
-      else if(!memcmp("DISC", buffer, 4)) {
-        logmsg("Crikey! Client also wants to disconnect");
-        if(!write_stdout("ACKD\n", 5))
-          return FALSE;
-      }
-      else if(!memcmp("DATA", buffer, 4)) {
-        /* We must read more data to stay in sync */
-        logmsg("Throwing away data bytes");
-        if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
-          return FALSE;
-
-      }
-      else if(!memcmp("QUIT", buffer, 4)) {
-        /* just die */
-        logmsg("quits");
+    if(!memcmp("ACKD", buffer, 4)) {
+      /* got the ack we were waiting for */
+      break;
+    }
+    else if(!memcmp("DISC", buffer, 4)) {
+      logmsg("Crikey! Client also wants to disconnect");
+      if(!write_stdout("ACKD\n", 5))
         return FALSE;
-      }
-      else {
-        logmsg("Unexpected message error; aborting");
-        /*
-         * The only other messages that could occur here are PING and PORT,
-         * and both of them occur at the start of a test when nothing should be
-         * trying to DISC. Therefore, we should not ever get here, but if we
-         * do, it is probably due to some kind of unclean shutdown situation so
-         * us shutting down is what we probably ought to be doing, anyway.
-         */
+    }
+    else if(!memcmp("DATA", buffer, 4)) {
+      /* We must read more data to stay in sync */
+      logmsg("Throwing away data bytes");
+      if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
         return FALSE;
-      }
-
+    }
+    else if(!memcmp("QUIT", buffer, 4)) {
+      /* just die */
+      logmsg("quits");
+      return FALSE;
+    }
+    else {
+      logmsg("Unexpected message error; aborting");
+      /*
+       * The only other messages that could occur here are PING and PORT,
+       * and both of them occur at the start of a test when nothing should be
+       * trying to DISC. Therefore, we should not ever get here, but if we
+       * do, it is probably due to some kind of unclean shutdown situation so
+       * us shutting down is what we probably ought to be doing, anyway.
+       */
+      return FALSE;
+    }
   } while(TRUE);
   return TRUE;
 }
@@ -1034,7 +1032,6 @@ static bool juggle(curl_socket_t *sockfdp,
 
   } /* switch(*mode) */
 
-
   do {
 
     /* select() blocking behavior call on blocking descriptors please */
@@ -1057,7 +1054,6 @@ static bool juggle(curl_socket_t *sockfdp,
   if(rc == 0)
     /* timeout */
     return TRUE;
-
 
   if(FD_ISSET(fileno(stdin), &fds_read)) {
     ssize_t buffer_len;
@@ -1146,8 +1142,7 @@ static bool juggle(curl_socket_t *sockfdp,
     }
   }
 
-
-  if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read)) ) {
+  if((sockfd != CURL_SOCKET_BAD) && (FD_ISSET(sockfd, &fds_read))) {
     ssize_t nread_socket;
     if(*mode == PASSIVE_LISTEN) {
       /* there is no stream set up yet, this is an indication that there is a
@@ -1228,7 +1223,7 @@ static int test_sockfilt(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--verbose", argv[arg])) {
@@ -1343,31 +1338,31 @@ static int test_sockfilt(int argc, char *argv[])
     /* Active mode, we should connect to the given port number */
     mode = ACTIVE;
     switch(socket_domain) {
-      case AF_INET:
-        memset(&me.sa4, 0, sizeof(me.sa4));
-        me.sa4.sin_family = AF_INET;
-        me.sa4.sin_port = htons(server_connectport);
-        me.sa4.sin_addr.s_addr = INADDR_ANY;
-        if(!addr)
-          addr = "127.0.0.1";
-        curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
+    case AF_INET:
+      memset(&me.sa4, 0, sizeof(me.sa4));
+      me.sa4.sin_family = AF_INET;
+      me.sa4.sin_port = htons(server_connectport);
+      me.sa4.sin_addr.s_addr = INADDR_ANY;
+      if(!addr)
+        addr = "127.0.0.1";
+      curlx_inet_pton(AF_INET, addr, &me.sa4.sin_addr);
 
-        rc = connect(sock, &me.sa, sizeof(me.sa4));
-        break;
+      rc = connect(sock, &me.sa, sizeof(me.sa4));
+      break;
 #ifdef USE_IPV6
-      case AF_INET6:
-        memset(&me.sa6, 0, sizeof(me.sa6));
-        me.sa6.sin6_family = AF_INET6;
-        me.sa6.sin6_port = htons(server_connectport);
-        if(!addr)
-          addr = "::1";
-        curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
+    case AF_INET6:
+      memset(&me.sa6, 0, sizeof(me.sa6));
+      me.sa6.sin6_family = AF_INET6;
+      me.sa6.sin6_port = htons(server_connectport);
+      if(!addr)
+        addr = "::1";
+      curlx_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
 
-        rc = connect(sock, &me.sa, sizeof(me.sa6));
-        break;
+      rc = connect(sock, &me.sa, sizeof(me.sa6));
+      break;
 #endif /* USE_IPV6 */
-      default:
-        rc = 1;
+    default:
+      rc = 1;
     }
     if(rc) {
       error = SOCKERRNO;

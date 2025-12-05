@@ -60,6 +60,8 @@ jobs:
     runs-on: 'ubuntu-latest'
     container: 'debian:stretch'
 
+    env:
+      CMAKE_VERSION: '3.7.0'  # Earliest version supported by curl
     steps:
       - name: 'install prereqs'
         # Remember, this shell is dash, not bash
@@ -72,13 +74,22 @@ jobs:
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get -o Dpkg::Use-Pty=0 update
-          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libc-ares-dev libkrb5-dev libldap2-dev librtmp-dev stunnel4 groff
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libc-ares-dev libkrb5-dev libldap2-dev librtmp-dev stunnel4
           # GitHub's actions/checkout needs newer glibc and libstdc++. The latter also depends on
           # gcc-8-base, but it does not actually seem used in our situation and is not available in
           # the main repo, so force the install.
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/glibc/libc6_2.28-10+deb10u5_amd64.deb
           httrack --get https://deb.freexian.com/extended-lts/pool/main/g/gcc-8/libstdc++6_8.3.0-6_amd64.deb
           dpkg -i --force-depends libc6_*_amd64.deb libstdc++6_*_amd64.deb
+
+      - name: 'install prereqs (cmake)'
+        run: |
+          cd ~
+          fn="cmake-${CMAKE_VERSION}-linux-x86_64"
+          httrack --get "https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/${fn}.tar.gz"
+          tar -xf "${fn}".tar*.gz
+          rm -f "${fn}".tar*.gz
+          mv "cmake-${CMAKE_VERSION}-Linux-x86_64" cmake
 
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
@@ -88,7 +99,7 @@ jobs:
         run: |
           mkdir bld-1
           cd bld-1
-          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          "$HOME"/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
 
       - name: 'CM build-only build'
@@ -112,7 +123,7 @@ jobs:
         run: |
           mkdir bld-cares
           cd bld-cares
-          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          "$HOME"/cmake/bin/cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DCURL_ENABLE_SSL=OFF -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 

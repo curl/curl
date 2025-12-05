@@ -42,12 +42,7 @@
 #include "cipher_suite.h"
 #include "x509asn1.h"
 
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
-struct rustls_ssl_backend_data
-{
+struct rustls_ssl_backend_data {
   const struct rustls_client_config *config;
   struct rustls_connection *conn;
   size_t plain_out_buffered;
@@ -62,17 +57,17 @@ static CURLcode map_error(const rustls_result r)
     return CURLE_PEER_FAILED_VERIFICATION;
   }
   switch(r) {
-    case RUSTLS_RESULT_OK:
-      return CURLE_OK;
-    case RUSTLS_RESULT_NULL_PARAMETER:
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    default:
-      return CURLE_RECV_ERROR;
+  case RUSTLS_RESULT_OK:
+    return CURLE_OK;
+  case RUSTLS_RESULT_NULL_PARAMETER:
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  default:
+    return CURLE_RECV_ERROR;
   }
 }
 
-static void
-rustls_failf(struct Curl_easy *data, const rustls_result rr, const char *msg)
+static void rustls_failf(struct Curl_easy *data, const rustls_result rr,
+                         const char *msg)
 {
   char errorbuf[STRERROR_LEN];
   size_t errorlen;
@@ -80,8 +75,8 @@ rustls_failf(struct Curl_easy *data, const rustls_result rr, const char *msg)
   failf(data, "%s: %.*s", msg, (int)errorlen, errorbuf);
 }
 
-static bool
-cr_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
+static bool cr_data_pending(struct Curl_cfilter *cf,
+                            const struct Curl_easy *data)
 {
   const struct ssl_connect_data *ctx = cf->ctx;
   struct rustls_ssl_backend_data *backend;
@@ -97,11 +92,11 @@ struct io_ctx {
   struct Curl_easy *data;
 };
 
-static int
-read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
+static int read_cb(void *userdata, uint8_t *buf, uintptr_t len,
+                   uintptr_t *out_n)
 {
   const struct io_ctx *io_ctx = userdata;
-  struct ssl_connect_data *const connssl = io_ctx->cf->ctx;
+  struct ssl_connect_data * const connssl = io_ctx->cf->ctx;
   CURLcode result;
   int ret = 0;
   size_t nread;
@@ -124,8 +119,8 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   return ret;
 }
 
-static int
-write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
+static int write_cb(void *userdata, const uint8_t *buf, uintptr_t len,
+                    uintptr_t *out_n)
 {
   const struct io_ctx *io_ctx = userdata;
   CURLcode result;
@@ -133,7 +128,7 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   size_t nwritten;
 
   result = Curl_conn_cf_send(io_ctx->cf->next, io_ctx->data,
-                             (const char *)buf, len, FALSE, &nwritten);
+                             buf, len, FALSE, &nwritten);
   if(result) {
     nwritten = 0;
     if(CURLE_AGAIN == result)
@@ -150,8 +145,8 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
 static ssize_t tls_recv_more(struct Curl_cfilter *cf,
                              struct Curl_easy *data, CURLcode *err)
 {
-  const struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct ssl_connect_data * const connssl = cf->ctx;
+  struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct io_ctx io_ctx;
   size_t tls_bytes_read = 0;
@@ -190,12 +185,11 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
  * Filter receive method implementation. `plainbuf` and `plainlen`
  * are always not NULL/0.
  */
-static CURLcode
-cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-        char *plainbuf, size_t plainlen, size_t *pnread)
+static CURLcode cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                        char *plainbuf, size_t plainlen, size_t *pnread)
 {
-  const struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct ssl_connect_data * const connssl = cf->ctx;
+  struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
   CURLcode result = CURLE_OK;
@@ -304,12 +298,12 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
  * In that case, it will not read anything into Rustls' plaintext input buffer.
  * It will only drain Rustls' plaintext output buffer into the socket.
  */
-static CURLcode
-cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-        const void *plainbuf, size_t plainlen, size_t *pnwritten)
+static CURLcode cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                        const void *plainbuf, size_t plainlen,
+                        size_t *pnwritten)
 {
-  const struct ssl_connect_data *const connssl = cf->ctx;
-  struct rustls_ssl_backend_data *const backend =
+  const struct ssl_connect_data * const connssl = cf->ctx;
+  struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   struct rustls_connection *rconn = NULL;
   size_t plainwritten = 0;
@@ -383,18 +377,15 @@ out:
 
 /* A server certificate verify callback for Rustls that always returns
    RUSTLS_RESULT_OK, or in other words disable certificate verification. */
-static uint32_t
-cr_verify_none(void *userdata,
-               const rustls_verify_server_cert_params *params)
+static uint32_t cr_verify_none(void *userdata,
+                               const rustls_verify_server_cert_params *params)
 {
   (void)userdata;
   (void)params;
   return RUSTLS_RESULT_OK;
 }
 
-static int
-read_file_into(const char *filename,
-               struct dynbuf *out)
+static int read_file_into(const char *filename, struct dynbuf *out)
 {
   FILE *f = curlx_fopen(filename, FOPEN_READTEXT);
   if(!f) {
@@ -468,16 +459,17 @@ add_ciphers:
     if(!id) {
       if(ptr[0] != '\0')
         infof(data, "rustls: unknown cipher in list: \"%.*s\"",
-              (int) (end - ptr), ptr);
+              (int)(end - ptr), ptr);
       continue;
     }
 
     /* No duplicates allowed (so selected cannot overflow) */
-    for(i = 0; i < count && selected[i] != entry; i++);
+    for(i = 0; i < count && selected[i] != entry; i++)
+      ;
     if(i < count) {
       if(i >= default13_count)
         infof(data, "rustls: duplicate cipher in list: \"%.*s\"",
-              (int) (end - ptr), ptr);
+              (int)(end - ptr), ptr);
       continue;
     }
 
@@ -498,7 +490,8 @@ add_ciphers:
         continue;
 
       /* No duplicates allowed (so selected cannot overflow) */
-      for(i = 0; i < count && selected[i] != entry; i++);
+      for(i = 0; i < count && selected[i] != entry; i++)
+        ;
       if(i < count)
         continue;
 
@@ -509,10 +502,10 @@ add_ciphers:
   *selected_size = count;
 }
 
-static void
-cr_keylog_log_cb(struct rustls_str label,
-                 const uint8_t *client_random, size_t client_random_len,
-                 const uint8_t *secret, size_t secret_len)
+static void cr_keylog_log_cb(struct rustls_str label,
+                             const uint8_t *client_random,
+                             size_t client_random_len, const uint8_t *secret,
+                             size_t secret_len)
 {
   char clabel[KEYLOG_LABEL_MAXLEN];
   (void)client_random_len;
@@ -532,12 +525,11 @@ init_config_builder(struct Curl_easy *data,
   const struct rustls_crypto_provider *custom_provider = NULL;
 
   uint16_t tls_versions[2] = {
-      RUSTLS_TLS_VERSION_TLSV1_2,
-      RUSTLS_TLS_VERSION_TLSV1_3,
+    RUSTLS_TLS_VERSION_TLSV1_2,
+    RUSTLS_TLS_VERSION_TLSV1_3,
   };
   size_t tls_versions_len = 2;
-  size_t cipher_suites_len =
-    rustls_default_crypto_provider_ciphersuites_len();
+  size_t cipher_suites_len = rustls_default_crypto_provider_ciphersuites_len();
 
   CURLcode result = CURLE_OK;
   rustls_result rr;
@@ -586,7 +578,7 @@ init_config_builder(struct Curl_easy *data,
   }
 #endif /* USE_ECH */
 
-  cipher_suites = malloc(sizeof(*cipher_suites) * (cipher_suites_len));
+  cipher_suites = curlx_malloc(sizeof(*cipher_suites) * (cipher_suites_len));
   if(!cipher_suites) {
     result = CURLE_OUT_OF_MEMORY;
     goto cleanup;
@@ -606,7 +598,7 @@ init_config_builder(struct Curl_easy *data,
     &custom_provider_builder);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr,
-      "failed to create crypto provider builder from default");
+                 "failed to create crypto provider builder from default");
     result = CURLE_SSL_CIPHER;
     goto cleanup;
   }
@@ -618,13 +610,13 @@ init_config_builder(struct Curl_easy *data,
       cipher_suites_len);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr,
-      "failed to set ciphersuites for crypto provider builder");
+                 "failed to set ciphersuites for crypto provider builder");
     result = CURLE_SSL_CIPHER;
     goto cleanup;
   }
 
-  rr = rustls_crypto_provider_builder_build(
-    custom_provider_builder, &custom_provider);
+  rr = rustls_crypto_provider_builder_build(custom_provider_builder,
+                                            &custom_provider);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build custom crypto provider");
     result = CURLE_SSL_CIPHER;
@@ -632,9 +624,9 @@ init_config_builder(struct Curl_easy *data,
   }
 
   rr = rustls_client_config_builder_new_custom(custom_provider,
-                                                     tls_versions,
-                                                     tls_versions_len,
-                                                     config_builder);
+                                               tls_versions,
+                                               tls_versions_len,
+                                               config_builder);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to create client config builder");
     result = CURLE_SSL_CIPHER;
@@ -643,7 +635,7 @@ init_config_builder(struct Curl_easy *data,
 
 cleanup:
   if(cipher_suites) {
-    free(cipher_suites);
+    curlx_free(cipher_suites);
   }
   if(custom_provider_builder) {
     rustls_crypto_provider_builder_free(custom_provider_builder);
@@ -673,8 +665,7 @@ init_config_builder_alpn(struct Curl_easy *data,
   infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
 }
 
-static CURLcode
-init_config_builder_verifier_crl(
+static CURLcode init_config_builder_verifier_crl(
   struct Curl_easy *data,
   const struct ssl_primary_config *conn_config,
   struct rustls_web_pki_server_cert_verifier_builder *builder)
@@ -727,7 +718,6 @@ init_config_builder_verifier(struct Curl_easy *data,
                                                 1);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "failed to parse trusted certificates from blob");
-
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
@@ -738,7 +728,6 @@ init_config_builder_verifier(struct Curl_easy *data,
                                                              1);
     if(rr != RUSTLS_RESULT_OK) {
       rustls_failf(data, rr, "failed to load trusted certificates");
-
       result = CURLE_SSL_CACERT_BADFILE;
       goto cleanup;
     }
@@ -748,17 +737,19 @@ init_config_builder_verifier(struct Curl_easy *data,
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build trusted root certificate store");
     result = CURLE_SSL_CACERT_BADFILE;
-    if(result) {
-      goto cleanup;
-    }
+    goto cleanup;
   }
 
   verifier_builder = rustls_web_pki_server_cert_verifier_builder_new(roots);
+  if(!verifier_builder) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto cleanup;
+  }
 
   if(conn_config->CRLfile) {
     result = init_config_builder_verifier_crl(data,
-                                             conn_config,
-                                             verifier_builder);
+                                              conn_config,
+                                              verifier_builder);
     if(result) {
       goto cleanup;
     }
@@ -791,8 +782,7 @@ cleanup:
   return result;
 }
 
-static CURLcode
-init_config_builder_platform_verifier(
+static CURLcode init_config_builder_platform_verifier(
   struct Curl_easy *data,
   struct rustls_client_config_builder *builder)
 {
@@ -892,10 +882,8 @@ init_config_builder_client_auth(struct Curl_easy *data,
 
   rr = rustls_certified_key_keys_match(certified_key);
   if(rr != RUSTLS_RESULT_OK) {
-    rustls_failf(data,
-                 rr,
+    rustls_failf(data, rr,
                  "rustls: client certificate and keypair files do not match:");
-
     result = CURLE_SSL_CERTPROBLEM;
     goto cleanup;
   }
@@ -1004,7 +992,7 @@ init_config_builder_ech(struct Curl_easy *data,
 cleanup:
   /* if we base64 decoded, we can free now */
   if(data->set.tls_ech & CURLECH_CLA_CFG && data->set.str[STRING_ECH_CONFIG]) {
-    free(ech_config);
+    curlx_free(ech_config);
   }
   if(dns) {
     Curl_resolv_unlink(data, &dns);
@@ -1013,9 +1001,9 @@ cleanup:
 }
 #endif /* USE_ECH */
 
-static CURLcode
-cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
-                struct rustls_ssl_backend_data *const backend)
+static CURLcode cr_init_backend(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                struct rustls_ssl_backend_data * const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   const struct ssl_primary_config *conn_config =
@@ -1093,9 +1081,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     return result;
   }
 
-  rr = rustls_client_config_builder_build(
-    config_builder,
-    &backend->config);
+  rr = rustls_client_config_builder_build(config_builder, &backend->config);
   if(rr != RUSTLS_RESULT_OK) {
     rustls_failf(data, rr, "failed to build client config");
     return CURLE_SSL_CONNECT_ERROR;
@@ -1118,11 +1104,11 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   return result;
 }
 
-static void
-cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
-  const struct rustls_connection *rconn)
+static void cr_set_negotiated_alpn(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   const struct rustls_connection *rconn)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
+  struct ssl_connect_data * const connssl = cf->ctx;
   const uint8_t *protocol = NULL;
   size_t len = 0;
 
@@ -1135,12 +1121,11 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
  * This function will set `*done` to true once the handshake is complete.
  * This function never reads the value of `*done*`.
  */
-static CURLcode
-cr_connect(struct Curl_cfilter *cf,
-           struct Curl_easy *data, bool *done)
+static CURLcode cr_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
+                           bool *done)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
-  const struct rustls_ssl_backend_data *const backend =
+  struct ssl_connect_data * const connssl = cf->ctx;
+  const struct rustls_ssl_backend_data * const backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
   const struct rustls_connection *rconn = NULL;
   CURLcode tmperr = CURLE_OK;
@@ -1167,9 +1152,9 @@ cr_connect(struct Curl_cfilter *cf,
   /* Read/write data until the handshake is done or the socket would block. */
   for(;;) {
     /*
-    * Connection has been established according to Rustls. Set send/recv
-    * handlers, and update the state machine.
-    */
+     * Connection has been established according to Rustls. Set send/recv
+     * handlers, and update the state machine.
+     */
     connssl->io_need = CURL_SSL_IO_NEED_NONE;
     if(!rustls_connection_is_handshaking(rconn)) {
       /* Rustls claims it is no longer handshaking *before* it has
@@ -1188,8 +1173,7 @@ cr_connect(struct Curl_cfilter *cf,
       }
       /* REALLY Done with the handshake. */
       {
-        const uint16_t proto =
-          rustls_connection_get_protocol_version(rconn);
+        const uint16_t proto = rustls_connection_get_protocol_version(rconn);
         const rustls_str ciphersuite_name =
           rustls_connection_get_negotiated_ciphersuite_name(rconn);
         const rustls_str kex_group_name =
@@ -1299,9 +1283,7 @@ cr_connect(struct Curl_cfilter *cf,
   DEBUGASSERT(FALSE);
 }
 
-static void *
-cr_get_internals(struct ssl_connect_data *connssl,
-                 CURLINFO info)
+static void *cr_get_internals(struct ssl_connect_data *connssl, CURLINFO info)
 {
   struct rustls_ssl_backend_data *backend =
     (struct rustls_ssl_backend_data *)connssl->backend;
@@ -1310,10 +1292,8 @@ cr_get_internals(struct ssl_connect_data *connssl,
   return backend->conn;
 }
 
-static CURLcode
-cr_shutdown(struct Curl_cfilter *cf,
-            struct Curl_easy *data,
-            const bool send_shutdown, bool *done)
+static CURLcode cr_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data,
+                            const bool send_shutdown, bool *done)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct rustls_ssl_backend_data *backend =
@@ -1375,8 +1355,7 @@ out:
   return result;
 }
 
-static void
-cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
+static void cr_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   struct rustls_ssl_backend_data *backend =
@@ -1400,13 +1379,12 @@ static size_t cr_version(char *buffer, size_t size)
   return curl_msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
-static CURLcode
-cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+static CURLcode cr_random(struct Curl_easy *data, unsigned char *entropy,
+                          size_t length)
 {
   rustls_result rresult = 0;
   (void)data;
-  rresult =
-    rustls_default_crypto_provider_random(entropy, length);
+  rresult = rustls_default_crypto_provider_random(entropy, length);
   return map_error(rresult);
 }
 

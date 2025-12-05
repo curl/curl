@@ -28,8 +28,6 @@
 #include "tool_cb_wrt.h"
 #include "tool_operate.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef _WIN32
 #define OPENMODE S_IREAD | S_IWRITE
 #else
@@ -68,7 +66,7 @@ bool tool_create_output_file(struct OutStruct *outs,
       while(fd == -1 && /* have not successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
-            next_num < 100 /* and we have not reached the retry limit */ ) {
+            next_num < 100 /* and we have not reached the retry limit */) {
         curlx_dyn_reset(&fbuffer);
         if(curlx_dyn_addf(&fbuffer, "%s.%d", fname, next_num))
           return FALSE;
@@ -160,12 +158,12 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
     }
 
     if(complete) {
-      WCHAR prefix[3] = {0};  /* UTF-16 (1-2 WCHARs) + NUL */
+      WCHAR prefix[3] = { 0 }; /* UTF-16 (1-2 WCHARs) + NUL */
 
       if(MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)outs->utf8seq, -1,
                              prefix, CURL_ARRAYSIZE(prefix))) {
         DEBUGASSERT(prefix[2] == L'\0');
-        if(!WriteConsoleW((HANDLE) fhnd, prefix, prefix[1] ? 2 : 1,
+        if(!WriteConsoleW((HANDLE)fhnd, prefix, prefix[1] ? 2 : 1,
                           &chars_written, NULL)) {
           return CURL_WRITEFUNC_ERROR;
         }
@@ -211,8 +209,8 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
 
     /* grow the buffer if needed */
     if(len > global->term.len) {
-      wchar_t *buf = (wchar_t *) realloc(global->term.buf,
-                                         len * sizeof(wchar_t));
+      wchar_t *buf = (wchar_t *)curlx_realloc(global->term.buf,
+                                              len * sizeof(wchar_t));
       if(!buf)
         return CURL_WRITEFUNC_ERROR;
       global->term.len = len;

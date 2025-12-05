@@ -52,10 +52,10 @@
 #include <unistd.h>
 #endif
 
-#define LOCAL_FILE      "/tmp/uploadthis.txt"
-#define UPLOAD_FILE_AS  "while-uploading.txt"
-#define REMOTE_URL      "ftp://example.com/"  UPLOAD_FILE_AS
-#define RENAME_FILE_TO  "renamed-and-fine.txt"
+#define LOCAL_FILE     "/tmp/uploadthis.txt"
+#define UPLOAD_FILE_AS "while-uploading.txt"
+#define REMOTE_URL     "ftp://example.com/" UPLOAD_FILE_AS
+#define RENAME_FILE_TO "renamed-and-fine.txt"
 
 /* NOTE: if you want this example to work on Windows with libcurl as a DLL,
    you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to

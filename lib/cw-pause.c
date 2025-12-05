@@ -34,10 +34,6 @@
 #include "sendf.h"
 #include "cw-pause.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /* body dynbuf sizes */
 #define CW_PAUSE_BUF_CHUNK         (16 * 1024)
@@ -52,12 +48,12 @@ struct cw_pause_buf {
 
 static struct cw_pause_buf *cw_pause_buf_create(int type, size_t buflen)
 {
-  struct cw_pause_buf *cwbuf = calloc(1, sizeof(*cwbuf));
+  struct cw_pause_buf *cwbuf = curlx_calloc(1, sizeof(*cwbuf));
   if(cwbuf) {
     cwbuf->type = type;
     if(type & CLIENTWRITE_BODY)
       Curl_bufq_init2(&cwbuf->b, CW_PAUSE_BUF_CHUNK, 1,
-                      (BUFQ_OPT_SOFT_LIMIT|BUFQ_OPT_NO_SPARES));
+                      (BUFQ_OPT_SOFT_LIMIT | BUFQ_OPT_NO_SPARES));
     else
       Curl_bufq_init(&cwbuf->b, buflen, 1);
   }
@@ -68,7 +64,7 @@ static void cw_pause_buf_free(struct cw_pause_buf *cwbuf)
 {
   if(cwbuf) {
     Curl_bufq_free(&cwbuf->b);
-    free(cwbuf);
+    curlx_free(cwbuf);
   }
 }
 

@@ -45,7 +45,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              struct Curl_easy *data,
                              struct connectdata *conn,
                              const struct Curl_addrinfo *ai,
-                             int transport);
+                             uint8_t transport);
 
 extern struct Curl_cftype Curl_cft_http3;
 

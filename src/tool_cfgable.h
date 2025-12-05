@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-#include <curl/mprintf.h>
 #include "tool_setup.h"
 #include "tool_sdecls.h"
 #include "tool_urlglob.h"
@@ -39,10 +38,13 @@
 #endif
 #endif
 
-#define checkprefix(a,b)    curl_strnequal(b, STRCONST(a))
+#define checkprefix(a, b) curl_strnequal(b, STRCONST(a))
 
-#define tool_safefree(ptr)                      \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+#define tool_safefree(ptr) \
+  do {                     \
+    curlx_free(ptr);       \
+    (ptr) = NULL;          \
+  } while(0)
 
 extern struct GlobalConfig *global;
 

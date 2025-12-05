@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static int verbose_u = 1;
 
@@ -73,7 +72,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
+    curl_msnprintf(t->filename, sizeof(t->filename) - 1, "download_%zu.data",
                    t->idx);
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
@@ -358,7 +357,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
+  transfer_u = curlx_calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
     res = (CURLcode)1;
@@ -463,7 +462,6 @@ static CURLcode test_cli_hx_upload(const char *URL)
           }
         }
 
-
         /* nothing happening, maintenance */
         if(abort_paused) {
           /* abort paused transfers */
@@ -539,7 +537,7 @@ cleanup:
         curl_mime_free(t->mime);
       }
     }
-    free(transfer_u);
+    curlx_free(transfer_u);
   }
 
   curl_share_cleanup(share);

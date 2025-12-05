@@ -47,7 +47,7 @@ static struct curl_context *create_curl_context(curl_socket_t sockfd)
 {
   struct curl_context *context;
 
-  context = (struct curl_context *) malloc(sizeof(*context));
+  context = (struct curl_context *)malloc(sizeof(*context));
 
   context->sockfd = sockfd;
 
@@ -134,10 +134,9 @@ static void curl_perform(int fd, short event, void *arg)
   if(event & EV_WRITE)
     flags |= CURL_CSELECT_OUT;
 
-  context = (struct curl_context *) arg;
+  context = (struct curl_context *)arg;
 
-  curl_multi_socket_action(multi, context->sockfd, flags,
-                           &running_handles);
+  curl_multi_socket_action(multi, context->sockfd, flags, &running_handles);
 
   check_multi_info();
 }
@@ -148,8 +147,7 @@ static void on_timeout(evutil_socket_t fd, short events, void *arg)
   (void)fd;
   (void)events;
   (void)arg;
-  curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
-                           &running_handles);
+  curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0, &running_handles);
   check_multi_info();
 }
 
@@ -185,10 +183,10 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
   case CURL_POLL_IN:
   case CURL_POLL_OUT:
   case CURL_POLL_INOUT:
-    curl_context = socketp ?
-      (struct curl_context *) socketp : create_curl_context(s);
+    curl_context =
+      socketp ? (struct curl_context *)socketp : create_curl_context(s);
 
-    curl_multi_assign(multi, s, (void *) curl_context);
+    curl_multi_assign(multi, s, (void *)curl_context);
 
     if(action != CURL_POLL_IN)
       events |= EV_WRITE;
@@ -199,14 +197,14 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
 
     event_del(curl_context->event);
     event_assign(curl_context->event, base, curl_context->sockfd,
-      (short)events, curl_perform, curl_context);
+                 (short)events, curl_perform, curl_context);
     event_add(curl_context->event, NULL);
 
     break;
   case CURL_POLL_REMOVE:
     if(socketp) {
-      event_del(((struct curl_context*) socketp)->event);
-      destroy_curl_context((struct curl_context*) socketp);
+      event_del(((struct curl_context *)socketp)->event);
+      destroy_curl_context((struct curl_context *)socketp);
       curl_multi_assign(multi, s, NULL);
     }
     break;

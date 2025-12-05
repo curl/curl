@@ -36,17 +36,17 @@
 #define MATCH   CURL_FNMATCH_MATCH
 #define NOMATCH CURL_FNMATCH_NOMATCH
 
-#define LINUX_DIFFER 0x80
-#define LINUX_SHIFT 8
-#define LINUX_MATCH ((CURL_FNMATCH_MATCH << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_DIFFER  0x80
+#define LINUX_SHIFT   8
+#define LINUX_MATCH   ((CURL_FNMATCH_MATCH   << LINUX_SHIFT) | LINUX_DIFFER)
 #define LINUX_NOMATCH ((CURL_FNMATCH_NOMATCH << LINUX_SHIFT) | LINUX_DIFFER)
-#define LINUX_FAIL ((CURL_FNMATCH_FAIL << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_FAIL    ((CURL_FNMATCH_FAIL    << LINUX_SHIFT) | LINUX_DIFFER)
 
-#define MAC_DIFFER 0x40
-#define MAC_SHIFT 16
-#define MAC_MATCH ((CURL_FNMATCH_MATCH << MAC_SHIFT) | MAC_DIFFER)
-#define MAC_NOMATCH ((CURL_FNMATCH_NOMATCH << MAC_SHIFT) | MAC_DIFFER)
-#define MAC_FAIL ((CURL_FNMATCH_FAIL << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_DIFFER    0x40
+#define MAC_SHIFT     16
+#define MAC_MATCH     ((CURL_FNMATCH_MATCH   << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_NOMATCH   ((CURL_FNMATCH_NOMATCH << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_FAIL      ((CURL_FNMATCH_FAIL    << MAC_SHIFT) | MAC_DIFFER)
 
 static const char *ret2name(int i)
 {
@@ -290,7 +290,7 @@ static CURLcode test_unit1307(const char *arg)
   for(i = 0; i < CURL_ARRAYSIZE(tests); i++) {
     int result = tests[i].result;
     int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
-    if(result & (LINUX_DIFFER|MAC_DIFFER)) {
+    if(result & (LINUX_DIFFER | MAC_DIFFER)) {
       if((result & LINUX_DIFFER) && (machine == SYSTEM_LINUX))
         result >>= LINUX_SHIFT;
       else if((result & MAC_DIFFER) && (machine == SYSTEM_MACOS))

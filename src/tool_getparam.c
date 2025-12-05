@@ -38,22 +38,20 @@
 #include "tool_help.h"
 #include "var.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #define ALLOW_BLANK TRUE
-#define DENY_BLANK FALSE
+#define DENY_BLANK  FALSE
 
 static ParameterError getstr(char **str, const char *val, bool allowblank)
 {
   if(*str) {
-    free(*str);
+    curlx_free(*str);
     *str = NULL;
   }
   DEBUGASSERT(val);
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = strdup(val);
+  *str = curlx_strdup(val);
   if(!*str)
     return PARAM_NO_MEM;
 
@@ -64,14 +62,14 @@ static ParameterError getstrn(char **str, const char *val,
                               size_t len, bool allowblank)
 {
   if(*str) {
-    free(*str);
+    curlx_free(*str);
     *str = NULL;
   }
   DEBUGASSERT(val);
   if(!allowblank && !val[0])
     return PARAM_BLANK_STRING;
 
-  *str = malloc(len + 1);
+  *str = curlx_malloc(len + 1);
   if(!*str)
     return PARAM_NO_MEM;
 
@@ -407,13 +405,13 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
    * means no passphrase was given and no characters escaped */
   if(curl_strnequal(cert_parameter, "pkcs11:", 7) ||
      !strpbrk(cert_parameter, ":\\")) {
-    *certname = strdup(cert_parameter);
+    *certname = curlx_strdup(cert_parameter);
     if(!*certname)
       return PARAM_NO_MEM;
     return PARAM_OK;
   }
   /* deal with escaped chars; find unescaped colon if it exists */
-  certname_place = malloc(param_length + 1);
+  certname_place = curlx_malloc(param_length + 1);
   if(!certname_place) {
     err = PARAM_NO_MEM;
     goto done;
@@ -434,22 +432,22 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
     case '\\':
       param_place++;
       switch(*param_place) {
-        case '\0':
-          *certname_place++ = '\\';
-          break;
-        case '\\':
-          *certname_place++ = '\\';
-          param_place++;
-          break;
-        case ':':
-          *certname_place++ = ':';
-          param_place++;
-          break;
-        default:
-          *certname_place++ = '\\';
-          *certname_place++ = *param_place;
-          param_place++;
-          break;
+      case '\0':
+        *certname_place++ = '\\';
+        break;
+      case '\\':
+        *certname_place++ = '\\';
+        param_place++;
+        break;
+      case ':':
+        *certname_place++ = ':';
+        param_place++;
+        break;
+      default:
+        *certname_place++ = '\\';
+        *certname_place++ = *param_place;
+        param_place++;
+        break;
       }
       break;
     case ':':
@@ -461,7 +459,7 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
 #ifdef _WIN32
       if((param_place == &cert_parameter[1]) &&
          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
-         (ISALPHA(cert_parameter[0])) ) {
+         (ISALPHA(cert_parameter[0]))) {
         /* colon in the second column, followed by a backslash, and the
            first character is an alphabetic letter:
 
@@ -475,7 +473,7 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
        * above; if we are still here, this is a separating colon */
       param_place++;
       if(*param_place) {
-        *passphrase = strdup(param_place);
+        *passphrase = curlx_strdup(param_place);
         if(!*passphrase)
           err = PARAM_NO_MEM;
       }
@@ -505,7 +503,7 @@ static size_t replace_url_encoded_space_by_plus(char *url)
       url[new_index] = '+';
       orig_index += 3;
     }
-    else{
+    else {
       if(new_index != orig_index) {
         url[new_index] = url[orig_index];
       }
@@ -519,18 +517,18 @@ static size_t replace_url_encoded_space_by_plus(char *url)
   return new_index; /* new size */
 }
 
-static ParameterError
-GetFileAndPassword(const char *nextarg, char **file, char **password)
+static ParameterError GetFileAndPassword(const char *nextarg, char **file,
+                                         char **password)
 {
   char *certname, *passphrase;
   ParameterError err;
   /* nextarg is never NULL here */
   err = parse_cert_parameter(nextarg, &certname, &passphrase);
   if(!err) {
-    free(*file);
+    curlx_free(*file);
     *file = certname;
     if(passphrase) {
-      free(*password);
+      curlx_free(*password);
       *password = passphrase;
     }
   }
@@ -560,15 +558,15 @@ static ParameterError GetSizeParameter(const char *arg,
   switch(*unit) {
   case 'G':
   case 'g':
-    if(value > (CURL_OFF_T_MAX / (1024*1024*1024)))
+    if(value > (CURL_OFF_T_MAX / (1024 * 1024 * 1024)))
       return PARAM_NUMBER_TOO_LARGE;
-    value *= 1024*1024*1024;
+    value *= 1024 * 1024 * 1024;
     break;
   case 'M':
   case 'm':
-    if(value > (CURL_OFF_T_MAX / (1024*1024)))
+    if(value > (CURL_OFF_T_MAX / (1024 * 1024)))
       return PARAM_NUMBER_TOO_LARGE;
-    value *= 1024*1024;
+    value *= 1024 * 1024;
     break;
   case 'K':
   case 'k':
@@ -604,7 +602,7 @@ static void cleanarg(char *str)
 #endif
 
 /* the maximum size we allow the dynbuf generated string */
-#define MAX_DATAURLENCODE (500*1024*1024)
+#define MAX_DATAURLENCODE (500 * 1024 * 1024)
 
 /* --data-urlencode */
 static ParameterError data_urlencode(const char *nextarg,
@@ -668,7 +666,7 @@ static ParameterError data_urlencode(const char *nextarg,
   if(!postdata) {
     /* no data from the file, point to a zero byte string to make this
        get sent as a POST anyway */
-    postdata = strdup("");
+    postdata = curlx_strdup("");
     if(!postdata)
       return PARAM_NO_MEM;
     size = 0;
@@ -708,8 +706,7 @@ error:
   return err;
 }
 
-static void sethttpver(struct OperationConfig *config,
-                       long httpversion)
+static void sethttpver(struct OperationConfig *config, long httpversion)
 {
   if(config->httpversion &&
      (config->httpversion != httpversion))
@@ -734,20 +731,20 @@ static CURLcode set_trace_config(const char *token)
       len = strlen(token);
 
     switch(*token) {
-      case '-':
-        toggle = FALSE;
-        name = token + 1;
-        len--;
-        break;
-      case '+':
-        toggle = TRUE;
-        name = token + 1;
-        len--;
-        break;
-      default:
-        toggle = TRUE;
-        name = token;
-        break;
+    case '-':
+      toggle = FALSE;
+      name = token + 1;
+      len--;
+      break;
+    case '+':
+      toggle = TRUE;
+      name = token + 1;
+      len--;
+      break;
+    default:
+      toggle = TRUE;
+      name = token;
+      break;
     }
 
     if((len == 3) && curl_strnequal(name, "all", 3)) {
@@ -818,37 +815,37 @@ struct TOSEntry {
 };
 
 static const struct TOSEntry tos_entries[] = {
-  {"AF11", 0x28},
-  {"AF12", 0x30},
-  {"AF13", 0x38},
-  {"AF21", 0x48},
-  {"AF22", 0x50},
-  {"AF23", 0x58},
-  {"AF31", 0x68},
-  {"AF32", 0x70},
-  {"AF33", 0x78},
-  {"AF41", 0x88},
-  {"AF42", 0x90},
-  {"AF43", 0x98},
-  {"CE",   0x03},
-  {"CS0",  0x00},
-  {"CS1",  0x20},
-  {"CS2",  0x40},
-  {"CS3",  0x60},
-  {"CS4",  0x80},
-  {"CS5",  0xa0},
-  {"CS6",  0xc0},
-  {"CS7",  0xe0},
-  {"ECT0", 0x02},
-  {"ECT1", 0x01},
-  {"EF",   0xb8},
-  {"LE",   0x04},
-  {"LOWCOST",     0x02},
-  {"LOWDELAY",    0x10},
-  {"MINCOST",     0x02},
-  {"RELIABILITY", 0x04},
-  {"THROUGHPUT",  0x08},
-  {"VOICE-ADMIT", 0xb0}
+  { "AF11", 0x28 },
+  { "AF12", 0x30 },
+  { "AF13", 0x38 },
+  { "AF21", 0x48 },
+  { "AF22", 0x50 },
+  { "AF23", 0x58 },
+  { "AF31", 0x68 },
+  { "AF32", 0x70 },
+  { "AF33", 0x78 },
+  { "AF41", 0x88 },
+  { "AF42", 0x90 },
+  { "AF43", 0x98 },
+  { "CE",   0x03 },
+  { "CS0",  0x00 },
+  { "CS1",  0x20 },
+  { "CS2",  0x40 },
+  { "CS3",  0x60 },
+  { "CS4",  0x80 },
+  { "CS5",  0xa0 },
+  { "CS6",  0xc0 },
+  { "CS7",  0xe0 },
+  { "ECT0", 0x02 },
+  { "ECT1", 0x01 },
+  { "EF",   0xb8 },
+  { "LE",   0x04 },
+  { "LOWCOST",     0x02 },
+  { "LOWDELAY",    0x10 },
+  { "MINCOST",     0x02 },
+  { "RELIABILITY", 0x04 },
+  { "THROUGHPUT",  0x08 },
+  { "VOICE-ADMIT", 0xb0 }
 };
 
 static int find_tos(const void *a, const void *b)
@@ -870,7 +867,7 @@ static ParameterError url_query(const char *nextarg,
 
   if(*nextarg == '+') {
     /* use without encoding */
-    query = strdup(&nextarg[1]);
+    query = curlx_strdup(&nextarg[1]);
     if(!query)
       err = PARAM_NO_MEM;
   }
@@ -880,11 +877,11 @@ static ParameterError url_query(const char *nextarg,
   if(!err) {
     if(config->query) {
       CURLcode result = curlx_dyn_addf(&dyn, "%s&%s", config->query, query);
-      free(query);
+      curlx_free(query);
       if(result)
         err = PARAM_NO_MEM;
       else {
-        free(config->query);
+        curlx_free(config->query);
         config->query = curlx_dyn_ptr(&dyn);
       }
     }
@@ -944,7 +941,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!postdata) {
       /* no data from the file, point to a zero byte string to make this
          get sent as a POST anyway */
-      postdata = strdup("");
+      postdata = curlx_strdup("");
       if(!postdata)
         return PARAM_NO_MEM;
     }
@@ -988,9 +985,9 @@ static ParameterError set_rate(const char *nextarg)
   const char *div = strchr(nextarg, '/');
   char number[26];
   long denominator;
-  long numerator = 60*60*1000; /* default per hour */
+  long numerator = 60 * 60 * 1000; /* default per hour */
   size_t numlen = div ? (size_t)(div - nextarg) : strlen(nextarg);
-  if(numlen > sizeof(number) -1)
+  if(numlen > sizeof(number) - 1)
     return PARAM_NUMBER_TOO_LARGE;
 
   memcpy(number, nextarg, numlen);
@@ -1014,12 +1011,12 @@ static ParameterError set_rate(const char *nextarg)
       numerator = 1000;
       break;
     case 'm': /* per minute */
-      numerator = 60*1000;
+      numerator = 60 * 1000;
       break;
     case 'h': /* per hour */
       break;
     case 'd': /* per day */
-      numerator = 24*60*60*1000;
+      numerator = 24 * 60 * 60 * 1000;
       break;
     default:
       errorf("unsupported --rate unit");
@@ -1042,7 +1039,7 @@ static ParameterError set_rate(const char *nextarg)
   else if(denominator > numerator)
     err = PARAM_NUMBER_TOO_LARGE;
   else
-    global->ms_per_transfer = numerator/denominator;
+    global->ms_per_transfer = numerator / denominator;
 
   return err;
 }
@@ -1135,7 +1132,6 @@ static ParameterError parse_url(struct OperationConfig *config,
   return add_url(config, nextarg, FALSE);
 }
 
-
 static ParameterError parse_localport(struct OperationConfig *config,
                                       const char *nextarg)
 {
@@ -1165,7 +1161,7 @@ static ParameterError parse_localport(struct OperationConfig *config,
   else {
     if(str2unummax(&config->localportrange, pp, 65535))
       return PARAM_BAD_USE;
-    config->localportrange -= (config->localport-1);
+    config->localportrange -= (config->localport - 1);
     if(config->localportrange < 1)
       return PARAM_BAD_USE;
   }
@@ -1239,8 +1235,8 @@ static ParameterError parse_ech(struct OperationConfig *config,
         curlx_fclose(file);
       if(err)
         return err;
-      config->ech_config = curl_maprintf("ecl:%s",tmpcfg);
-      free(tmpcfg);
+      config->ech_config = curl_maprintf("ecl:%s", tmpcfg);
+      curlx_free(tmpcfg);
       if(!config->ech_config)
         return PARAM_NO_MEM;
     } /* file done */
@@ -1270,7 +1266,7 @@ static ParameterError parse_header(struct OperationConfig *config,
     else {
       struct dynbuf line;
       bool error = FALSE;
-      curlx_dyn_init(&line, 1024*100);
+      curlx_dyn_init(&line, 1024 * 100);
       while(my_get_line(file, &line, &error)) {
         const char *ptr = curlx_dyn_ptr(&line);
         err = add2list(cmd == C_PROXY_HEADER ? /* --proxy-header? */
@@ -1289,7 +1285,7 @@ static ParameterError parse_header(struct OperationConfig *config,
   else {
     if(!strchr(nextarg, ':') && !strchr(nextarg, ';')) {
       warnf("The provided %s header '%s' does not look like a header?",
-            (cmd == C_PROXY_HEADER) ? "proxy": "HTTP", nextarg);
+            (cmd == C_PROXY_HEADER) ? "proxy" : "HTTP", nextarg);
     }
     if(cmd == C_PROXY_HEADER) /* --proxy-header */
       err = add2list(&config->proxyheaders, nextarg);
@@ -1424,8 +1420,8 @@ static ParameterError parse_range(struct OperationConfig *config,
           "Appending one for you");
     curl_msnprintf(buffer, sizeof(buffer), "%" CURL_FORMAT_CURL_OFF_T "-",
                    value);
-    free(config->range);
-    config->range = strdup(buffer);
+    curlx_free(config->range);
+    config->range = curlx_strdup(buffer);
     if(!config->range)
       err = PARAM_NO_MEM;
   }
@@ -1509,8 +1505,8 @@ static ParameterError parse_verbose(bool toggle)
   switch(global->verbosity) {
   case 0:
     global->verbosity = 1;
-    free(global->trace_dump);
-    global->trace_dump = strdup("%");
+    curlx_free(global->trace_dump);
+    global->trace_dump = curlx_strdup("%");
     if(!global->trace_dump)
       err = PARAM_NO_MEM;
     else {
@@ -1631,12 +1627,12 @@ struct flagmap {
 };
 
 static const struct flagmap flag_table[] = {
-  {"answered", 8, CURLULFLAG_ANSWERED},
-  {"deleted",  7, CURLULFLAG_DELETED},
-  {"draft",    5, CURLULFLAG_DRAFT},
-  {"flagged",  7, CURLULFLAG_FLAGGED},
-  {"seen",     4, CURLULFLAG_SEEN},
-  {NULL,       0, 0}
+  { "answered", 8, CURLULFLAG_ANSWERED },
+  { "deleted",  7, CURLULFLAG_DELETED },
+  { "draft",    5, CURLULFLAG_DRAFT },
+  { "flagged",  7, CURLULFLAG_FLAGGED },
+  { "seen",     4, CURLULFLAG_SEEN },
+  { NULL,       0, 0 }
 };
 
 static ParameterError parse_upload_flags(struct OperationConfig *config,
@@ -2904,7 +2900,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     p = word;
     /* is there an '=' ? */
     if(!curlx_str_until(&p, &out, MAX_OPTION_LEN, '=') &&
-       !curlx_str_single(&p, '=') ) {
+       !curlx_str_single(&p, '=')) {
       /* there is an equal sign */
       char tempword[MAX_OPTION_LEN + 1];
       memcpy(tempword, curlx_str(&out), curlx_strlen(&out));
@@ -3021,7 +3017,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 
 error:
   if(nextalloc)
-    free(CURL_UNCONST(nextarg));
+    curlx_free(CURL_UNCONST(nextarg));
   return err;
 }
 

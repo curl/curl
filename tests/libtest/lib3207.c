@@ -23,15 +23,13 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #ifdef USE_THREADS_POSIX
 #include <pthread.h>
 #endif
 
 #include "curl_threads.h"
 
-#define THREAD_SIZE 16
+#define THREAD_SIZE     16
 #define PER_THREAD_SIZE 8
 
 struct Ctx {
@@ -48,7 +46,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   /* append the data to contents */
   size_t realsize = size * nmemb;
   struct Ctx *mem = (struct Ctx *)userp;
-  char *data = (char *)malloc(realsize + 1);
+  char *data = (char *)curlx_malloc(realsize + 1);
   struct curl_slist *item_append = NULL;
   if(!data) {
     curl_mprintf("not enough memory (malloc returned NULL)\n");
@@ -57,7 +55,7 @@ static size_t write_memory_callback(char *contents, size_t size,
   memcpy(data, contents, realsize);
   data[realsize] = '\0';
   item_append = curl_slist_append(mem->contents, data);
-  free(data);
+  curlx_free(data);
   if(item_append) {
     mem->contents = item_append;
   }
@@ -118,7 +116,7 @@ test_cleanup:
 static void t3207_test_lock(CURL *curl, curl_lock_data data,
                             curl_lock_access laccess, void *useptr)
 {
-  curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
+  curl_mutex_t *mutexes = (curl_mutex_t *)useptr;
   (void)curl;
   (void)laccess;
   Curl_mutex_acquire(&mutexes[data]);
@@ -126,7 +124,7 @@ static void t3207_test_lock(CURL *curl, curl_lock_data data,
 
 static void t3207_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 {
-  curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
+  curl_mutex_t *mutexes = (curl_mutex_t *)useptr;
   (void)curl;
   Curl_mutex_release(&mutexes[data]);
 }
@@ -177,7 +175,7 @@ static CURLcode test_lib3207(const char *URL)
 {
   CURLcode res = CURLE_OK;
   size_t i;
-  CURLSH* share;
+  CURLSH *share;
   struct Ctx ctx[THREAD_SIZE];
 
   curl_global_init(CURL_GLOBAL_ALL);

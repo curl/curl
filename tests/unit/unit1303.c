@@ -25,7 +25,6 @@
 
 #include "urldata.h"
 #include "connect.h"
-#include "memdebug.h" /* LAST include file */
 
 static CURLcode t1303_setup(struct Curl_easy **easy)
 {

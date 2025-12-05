@@ -23,12 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib2402(const char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES] = {0};
+  CURL *curl[NUM_HANDLES] = { 0 };
   int running;
   CURLM *multi = NULL;
   size_t i;
@@ -40,8 +38,7 @@ static CURLcode test_lib2402(const char *URL)
 
   (void)URL;
 
-  curl_msnprintf(dnsentry, sizeof(dnsentry), "localhost:%s:%s",
-                 port, address);
+  curl_msnprintf(dnsentry, sizeof(dnsentry), "localhost:%s:%s", port, address);
   curl_mprintf("%s\n", dnsentry);
   slist = curl_slist_append(slist, dnsentry);
   if(!slist) {
@@ -63,8 +60,7 @@ static CURLcode test_lib2402(const char *URL)
     easy_init(curl[i]);
     /* specify target */
     curl_msnprintf(target_url, sizeof(target_url),
-                   "https://localhost:%s/path/2402%04zu",
-                   port, i + 1);
+                   "https://localhost:%s/path/2402%04zu", port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
     easy_setopt(curl[i], CURLOPT_URL, target_url);
     /* go http2 */

@@ -25,32 +25,29 @@
 #
 # Input variables:
 #
-# - `LIBRTMP_INCLUDE_DIR`:   Absolute path to librtmp include directory.
-# - `LIBRTMP_LIBRARY`:       Absolute path to `librtmp` library.
+# - `LIBRTMP_INCLUDE_DIR`:  Absolute path to librtmp include directory.
+# - `LIBRTMP_LIBRARY`:      Absolute path to `librtmp` library.
 #
-# Result variables:
+# Defines:
 #
-# - `LIBRTMP_FOUND`:         System has librtmp.
-# - `LIBRTMP_INCLUDE_DIRS`:  The librtmp include directories.
-# - `LIBRTMP_LIBRARIES`:     The librtmp library names.
-# - `LIBRTMP_LIBRARY_DIRS`:  The librtmp library directories.
-# - `LIBRTMP_PC_REQUIRES`:   The librtmp pkg-config packages.
-# - `LIBRTMP_CFLAGS`:        Required compiler flags.
-# - `LIBRTMP_VERSION`:       Version of librtmp.
+# - `LIBRTMP_FOUND`:        System has librtmp.
+# - `LIBRTMP_VERSION`:      Version of librtmp.
+# - `CURL::librtmp`:        librtmp library target.
 
-set(LIBRTMP_PC_REQUIRES "librtmp")
+set(_librtmp_pc_requires "librtmp")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBRTMP_INCLUDE_DIR AND
    NOT DEFINED LIBRTMP_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBRTMP ${LIBRTMP_PC_REQUIRES})
+  pkg_check_modules(_librtmp ${_librtmp_pc_requires})
 endif()
 
-if(LIBRTMP_FOUND AND LIBRTMP_INCLUDE_DIRS)
+if(_librtmp_FOUND AND _librtmp_INCLUDE_DIRS)
   set(Librtmp_FOUND TRUE)
-  string(REPLACE ";" " " LIBRTMP_CFLAGS "${LIBRTMP_CFLAGS}")
-  message(STATUS "Found Librtmp (via pkg-config): ${LIBRTMP_INCLUDE_DIRS} (found version \"${LIBRTMP_VERSION}\")")
+  set(LIBRTMP_FOUND TRUE)
+  set(LIBRTMP_VERSION ${_librtmp_VERSION})
+  message(STATUS "Found Librtmp (via pkg-config): ${_librtmp_INCLUDE_DIRS} (found version \"${LIBRTMP_VERSION}\")")
 else()
   find_path(LIBRTMP_INCLUDE_DIR NAMES "librtmp/rtmp.h")
   find_library(LIBRTMP_LIBRARY NAMES "rtmp")
@@ -85,8 +82,8 @@ else()
   )
 
   if(LIBRTMP_FOUND)
-    set(LIBRTMP_INCLUDE_DIRS ${LIBRTMP_INCLUDE_DIR})
-    set(LIBRTMP_LIBRARIES    ${LIBRTMP_LIBRARY})
+    set(_librtmp_INCLUDE_DIRS ${LIBRTMP_INCLUDE_DIR})
+    set(_librtmp_LIBRARIES    ${LIBRTMP_LIBRARY})
   endif()
 
   mark_as_advanced(LIBRTMP_INCLUDE_DIR LIBRTMP_LIBRARY)
@@ -94,10 +91,26 @@ else()
   # Necessary when linking a static librtmp
   find_package(OpenSSL)
   if(OPENSSL_FOUND)
-    list(APPEND LIBRTMP_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+    list(APPEND _librtmp_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
   endif()
 endif()
 
-if(LIBRTMP_FOUND AND WIN32)
-  list(APPEND LIBRTMP_LIBRARIES "winmm")
+if(LIBRTMP_FOUND)
+  if(WIN32)
+    list(APPEND _librtmp_LIBRARIES "winmm")
+  endif()
+
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_librtmp_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::librtmp)
+    add_library(CURL::librtmp INTERFACE IMPORTED)
+    set_target_properties(CURL::librtmp PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_librtmp_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_librtmp_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_librtmp_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_librtmp_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_librtmp_LIBRARIES}")
+  endif()
 endif()

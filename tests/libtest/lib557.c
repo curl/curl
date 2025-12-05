@@ -33,8 +33,6 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#include "memdebug.h"
-
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
@@ -48,8 +46,7 @@
 #endif
 #endif
 
-#define BUFSZ    256
-
+#define BUFSZ 256
 
 struct unsshort_st {
   unsigned short num;   /* unsigned short  */
@@ -57,13 +54,11 @@ struct unsshort_st {
   char result[BUFSZ];   /* result string   */
 };
 
-
 struct sigshort_st {
   short num;            /* signed short    */
   const char *expected; /* expected string */
   char result[BUFSZ];   /* result string   */
 };
-
 
 struct unsint_st {
   unsigned int num;     /* unsigned int    */
@@ -71,13 +66,11 @@ struct unsint_st {
   char result[BUFSZ];   /* result string   */
 };
 
-
 struct sigint_st {
   int num;              /* signed int      */
   const char *expected; /* expected string */
   char result[BUFSZ];   /* result string   */
 };
-
 
 struct unslong_st {
   unsigned long num;    /* unsigned long   */
@@ -85,20 +78,17 @@ struct unslong_st {
   char result[BUFSZ];   /* result string   */
 };
 
-
 struct siglong_st {
   long num;             /* signed long     */
   const char *expected; /* expected string */
   char result[BUFSZ];   /* result string   */
 };
 
-
 struct curloff_st {
   curl_off_t num;       /* curl_off_t      */
   const char *expected; /* expected string */
   char result[BUFSZ];   /* result string   */
 };
-
 
 static struct unsshort_st us_test[1 + 100];
 static struct sigshort_st ss_test[1 + 100];
@@ -107,7 +97,6 @@ static struct sigint_st   si_test[1 + 100];
 static struct unslong_st  ul_test[1 + 100];
 static struct siglong_st  sl_test[1 + 100];
 static struct curloff_st  co_test[1 + 100];
-
 
 static int test_unsigned_short_formatting(void)
 {
@@ -138,7 +127,7 @@ static int test_unsigned_short_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       us_test[i].result[j] = 'X';
-    us_test[i].result[BUFSZ-1] = '\0';
+    us_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(us_test[i].result, "%hu", us_test[i].num);
 
@@ -150,7 +139,6 @@ static int test_unsigned_short_formatting(void)
                    i, us_test[i].expected, us_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -160,7 +148,6 @@ static int test_unsigned_short_formatting(void)
 
   return failed;
 }
-
 
 static int test_signed_short_formatting(void)
 {
@@ -213,7 +200,7 @@ static int test_signed_short_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       ss_test[i].result[j] = 'X';
-    ss_test[i].result[BUFSZ-1] = '\0';
+    ss_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(ss_test[i].result, "%hd", ss_test[i].num);
 
@@ -224,7 +211,6 @@ static int test_signed_short_formatting(void)
                    i, ss_test[i].expected, ss_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -234,7 +220,6 @@ static int test_signed_short_formatting(void)
 
   return failed;
 }
-
 
 static int test_unsigned_int_formatting(void)
 {
@@ -363,7 +348,7 @@ static int test_unsigned_int_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       ui_test[i].result[j] = 'X';
-    ui_test[i].result[BUFSZ-1] = '\0';
+    ui_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(ui_test[i].result, "%u", ui_test[i].num);
 
@@ -374,7 +359,6 @@ static int test_unsigned_int_formatting(void)
                    i, ui_test[i].expected, ui_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -384,7 +368,6 @@ static int test_unsigned_int_formatting(void)
 
   return failed;
 }
-
 
 static int test_signed_int_formatting(void)
 {
@@ -591,7 +574,7 @@ static int test_signed_int_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       si_test[i].result[j] = 'X';
-    si_test[i].result[BUFSZ-1] = '\0';
+    si_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(si_test[i].result, "%d", si_test[i].num);
 
@@ -602,7 +585,6 @@ static int test_signed_int_formatting(void)
                    i, si_test[i].expected, si_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -612,7 +594,6 @@ static int test_signed_int_formatting(void)
 
   return failed;
 }
-
 
 static int test_unsigned_long_formatting(void)
 {
@@ -740,7 +721,7 @@ static int test_unsigned_long_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       ul_test[i].result[j] = 'X';
-    ul_test[i].result[BUFSZ-1] = '\0';
+    ul_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(ul_test[i].result, "%lu", ul_test[i].num);
 
@@ -751,7 +732,6 @@ static int test_unsigned_long_formatting(void)
                    i, ul_test[i].expected, ul_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -761,7 +741,6 @@ static int test_unsigned_long_formatting(void)
 
   return failed;
 }
-
 
 static int test_signed_long_formatting(void)
 {
@@ -968,7 +947,7 @@ static int test_signed_long_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       sl_test[i].result[j] = 'X';
-    sl_test[i].result[BUFSZ-1] = '\0';
+    sl_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(sl_test[i].result, "%ld", sl_test[i].num);
 
@@ -979,7 +958,6 @@ static int test_signed_long_formatting(void)
                    i, sl_test[i].expected, sl_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -989,7 +967,6 @@ static int test_signed_long_formatting(void)
 
   return failed;
 }
-
 
 static int test_curl_off_t_formatting(void)
 {
@@ -1082,7 +1059,7 @@ static int test_curl_off_t_formatting(void)
 
     for(j = 0; j < BUFSZ; j++)
       co_test[i].result[j] = 'X';
-    co_test[i].result[BUFSZ-1] = '\0';
+    co_test[i].result[BUFSZ - 1] = '\0';
 
     (void)curl_msprintf(co_test[i].result, "%" CURL_FORMAT_CURL_OFF_T,
                         co_test[i].num);
@@ -1094,7 +1071,6 @@ static int test_curl_off_t_formatting(void)
                    i, co_test[i].expected, co_test[i].result);
       failed++;
     }
-
   }
 
   if(!failed)
@@ -1115,7 +1091,7 @@ static int string_check_low(int linenumber, char *buf, const char *buf2)
   }
   return 0;
 }
-#define string_check(x,y) string_check_low(__LINE__, x, y)
+#define string_check(x, y) string_check_low(__LINE__, x, y)
 
 static int strlen_check_low(int linenumber, char *buf, size_t len)
 {
@@ -1128,7 +1104,7 @@ static int strlen_check_low(int linenumber, char *buf, size_t len)
   }
   return 0;
 }
-#define strlen_check(x,y) strlen_check_low(__LINE__, x, y)
+#define strlen_check(x, y) strlen_check_low(__LINE__, x, y)
 
 /*
  * The output strings in this test need to have been verified with a system
@@ -1190,9 +1166,9 @@ static int test_width_precision(void)
 {
   /* 325 is max precision (and width) for a double */
   char larger[1024];
-#define SPACE60 "                                                            "
+#define SPACE60  "                                                            "
 #define SPACE300 SPACE60 SPACE60 SPACE60 SPACE60 SPACE60
-#define OK325 SPACE300 "                        0"
+#define OK325    SPACE300 "                        0"
 
   int rc;
   int errors = 0;
@@ -1223,7 +1199,6 @@ static int test_width_precision(void)
 
   return errors;
 }
-
 
 static int test_weird_arguments(void)
 {
@@ -1277,7 +1252,7 @@ static int test_weird_arguments(void)
                       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 10 9 */
                       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 10 10 */
                       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, /* 10 11 */
-                      0, 1, 2, 3, 4, 5, 6, 7); /* 8 */
+                      0, 1, 2, 3, 4, 5, 6, 7);      /* 8 */
 
   if(rc != 128) {
     curl_mprintf("curl_mprintf() returned %d and not 128!\n", rc);

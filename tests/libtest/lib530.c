@@ -30,9 +30,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
-
 static struct t530_ctx {
   int socket_calls;
   int max_socket_calls;
@@ -54,7 +51,6 @@ static void t530_msg(const char *msg)
 {
   curl_mfprintf(stderr, "%s %s\n", t530_tag(), msg);
 }
-
 
 struct t530_Sockets {
   curl_socket_t *sockets;
@@ -106,14 +102,15 @@ static int t530_addFd(struct t530_Sockets *sockets, curl_socket_t fd,
    * Allocate array storage when required.
    */
   if(!sockets->sockets) {
-    sockets->sockets = malloc(sizeof(curl_socket_t) * 20U);
+    sockets->sockets = curlx_malloc(sizeof(curl_socket_t) * 20U);
     if(!sockets->sockets)
       return 1;
     sockets->max_count = 20;
   }
   else if(sockets->count + 1 > sockets->max_count) {
-    curl_socket_t *ptr = realloc(sockets->sockets, sizeof(curl_socket_t) *
-                                 (sockets->max_count + 20));
+    curl_socket_t *ptr = curlx_realloc(sockets->sockets,
+                                       sizeof(curl_socket_t) *
+                                       (sockets->max_count + 20));
     if(!ptr)
       /* cleanup in test_cleanup */
       return 1;
@@ -231,7 +228,7 @@ static ssize_t t530_getMicroSecondTimeout(struct curltime *timeout)
 /**
  * Update a fd_set with all of the sockets in use.
  */
-static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set* fdset,
+static void t530_updateFdSet(struct t530_Sockets *sockets, fd_set *fdset,
                              curl_socket_t *maxFd)
 {
   int i;
@@ -287,9 +284,9 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;
   CURLM *multi = NULL;
-  struct t530_ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
+  struct t530_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
   int success = 0;
-  struct curltime timeout = {0};
+  struct curltime timeout = { 0 };
   timeout.tv_sec = (time_t)-1;
 
   /* set the limits */
@@ -330,7 +327,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   while(!t530_checkForCompletion(multi, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
-    struct timeval tv = {0};
+    struct timeval tv = { 0 };
     tv.tv_sec = 10;
 
     FD_ZERO(&readSet);
@@ -390,8 +387,8 @@ test_cleanup:
   curl_global_cleanup();
 
   /* free local memory */
-  free(sockets.read.sockets);
-  free(sockets.write.sockets);
+  curlx_free(sockets.read.sockets);
+  curlx_free(sockets.write.sockets);
   t530_msg("done");
 
   return res;

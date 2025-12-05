@@ -91,8 +91,7 @@
 #pragma warning(disable:4127)
 /* Avoid VS2005 and upper complaining about portable C functions. */
 #ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
-#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), strdup(),
-                                      unlink(), etc. */
+#define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for getenv(), gmtime(), strcpy(),
@@ -326,8 +325,8 @@
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
  */
-#define CURL_CONC_MACROS_(A,B) A ## B
-#define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
+#define CURL_CONC_MACROS_(A, B) A ## B
+#define CURL_CONC_MACROS(A, B) CURL_CONC_MACROS_(A, B)
 
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that it matches the GNU format attribute we
@@ -432,9 +431,9 @@
 #    ifdef __amigaos4__
        int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                              fd_set *errorfds, struct timeval *timeout);
-#      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
+#      define select(a, b, c, d, e) Curl_amiga_select(a, b, c, d, e)
 #    else
-#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#      define select(a, b, c, d, e) WaitSelect(a, b, c, d, e, 0)
 #    endif
      /* must not use libc's fcntl() on bsdsocket.library sockfds! */
 #    undef HAVE_FCNTL
@@ -486,7 +485,7 @@
 #    undef  lseek
 #    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
 #    undef  fstat
-#    define fstat(fdes,stp)              _fstati64(fdes, stp)
+#    define fstat(fdes, stp)             _fstati64(fdes, stp)
 #    define struct_stat                  struct _stati64
 #    define LSEEK_ERROR                  (__int64)-1
 #  else
@@ -501,8 +500,8 @@
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
 #  undef  lseek
-#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
-#  define LSEEK_ERROR                (offset_t)-1
+#  define lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                  (offset_t)-1
 #endif
 
 #ifndef struct_stat
@@ -571,21 +570,7 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - 1)
 
-#if (SIZEOF_CURL_OFF_T != 8)
-#  error "curl_off_t must be exactly 64 bits"
-#else
-  typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
-  typedef CURL_TYPEOF_CURL_OFF_T  curl_int64_t;
-#  ifndef CURL_SUFFIX_CURL_OFF_TU
-#    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
-#  endif
-#  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
-#  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-#  define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-#  define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
-#endif
-
-#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
+#define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
@@ -654,8 +639,8 @@
 #  ifdef MSDOS  /* Watt-32 */
 
 #    include <sys/ioctl.h>
-#    define select(n,r,w,x,t) select_s(n,r,w,x,t)
-#    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
+#    define select(n, r, w, x, t)  select_s(n, r, w, x, t)
+#    define ioctl(x, y, z)         ioctlsocket(x, y, (char *)(z))
 #    include <tcp.h>
 #    undef word
 #    undef byte
@@ -914,15 +899,15 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
-#define CURLMAX(x,y) ((x)>(y)?(x):(y))
-#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+#define CURLMAX(x, y) ((x) > (y) ? (x) : (y))
+#define CURLMIN(x, y) ((x) < (y) ? (x) : (y))
 
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x,sizeof(x)-1
+#define STRCONST(x) x, sizeof(x) - 1
 
-#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#define CURL_ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 /* Buffer size for error messages retrieved via
    curlx_strerror() and Curl_sspi_strerror() */
@@ -955,7 +940,7 @@ extern curl_calloc_callback Curl_ccalloc;
  * This macro also assigns NULL to given pointer when free'd.
  */
 #define Curl_safefree(ptr) \
-  do { free((ptr)); (ptr) = NULL;} while(0)
+  do { curlx_free(ptr); (ptr) = NULL;} while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
 
@@ -1048,28 +1033,28 @@ CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 
-#define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
-#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
+#define sclose(sockfd) curl_dbg_sclose(sockfd, __LINE__, __FILE__)
+#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd, __LINE__, __FILE__)
 
-#define CURL_GETADDRINFO(host,serv,hint,res) \
+#define CURL_GETADDRINFO(host, serv, hint, res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-#define CURL_SOCKET(domain,type,protocol) \
+#define CURL_SOCKET(domain, type, protocol) \
   curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
-#define CURL_SOCKETPAIR(domain,type,protocol,socket_vector) \
+#define CURL_SOCKETPAIR(domain, type, protocol, socket_vector) \
   curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
                       __LINE__, __FILE__)
 #endif
-#define CURL_ACCEPT(sock,addr,len) \
+#define CURL_ACCEPT(sock, addr, len) \
   curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_ACCEPT4
-#define CURL_ACCEPT4(sock,addr,len,flags) \
+#define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
-#define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
+#define CURL_SEND(a, b, c, d) curl_dbg_send(a, b, c, d, __LINE__, __FILE__)
+#define CURL_RECV(a, b, c, d) curl_dbg_recv(a, b, c, d, __LINE__, __FILE__)
 
 #else /* !CURLDEBUG */
 
@@ -1088,6 +1073,56 @@ CURL_EXTERN ALLOC_FUNC
 #endif
 #define CURL_SEND send
 #define CURL_RECV recv
+
+#endif /* CURLDEBUG */
+
+/* Allocator macros */
+
+#ifdef CURLDEBUG
+
+#define curlx_strdup(ptr)         curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#define curlx_malloc(size)        curl_dbg_malloc(size, __LINE__, __FILE__)
+#define curlx_calloc(nbelem,size) \
+                              curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#define curlx_realloc(ptr,size)   \
+                              curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#define curlx_free(ptr)           curl_dbg_free(ptr, __LINE__, __FILE__)
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
+
+#else /* !CURLDEBUG */
+
+#ifdef BUILDING_LIBCURL
+#define curlx_strdup(ptr)         Curl_cstrdup(ptr)
+#define curlx_malloc(size)        Curl_cmalloc(size)
+#define curlx_calloc(nbelem,size) Curl_ccalloc(nbelem, size)
+#define curlx_realloc(ptr,size)   Curl_crealloc(ptr, size)
+#define curlx_free(ptr)           Curl_cfree(ptr)
+#else /* !BUILDING_LIBCURL */
+#ifdef _WIN32
+#define curlx_strdup(ptr)         _strdup(ptr)
+#else
+#define curlx_strdup(ptr)         strdup(ptr)
+#endif
+#define curlx_malloc(size)        malloc(size)
+#define curlx_calloc(nbelem,size) calloc(nbelem, size)
+#define curlx_realloc(ptr,size)   realloc(ptr, size)
+#define curlx_free(ptr)           free(ptr)
+#endif /* BUILDING_LIBCURL */
+
+#ifdef _WIN32
+#ifdef UNICODE
+#define curlx_tcsdup(ptr)         Curl_wcsdup(ptr)
+#else
+#define curlx_tcsdup(ptr)         curlx_strdup(ptr)
+#endif
+#endif /* _WIN32 */
 
 #endif /* CURLDEBUG */
 
@@ -1181,5 +1216,3 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */
-
-#include "curl_mem_undef.h"

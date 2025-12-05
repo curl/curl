@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct upload_status {
   int lines_read;
 };
@@ -48,7 +46,7 @@ static size_t t1520_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct upload_status *upload_ctx = (struct upload_status *)userp;
   const char *data;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
@@ -70,7 +68,7 @@ static CURLcode test_lib1520(const char *URL)
   CURLcode res;
   CURL *curl;
   struct curl_slist *rcpt_list = NULL;
-  struct upload_status upload_ctx = {0};
+  struct upload_status upload_ctx = { 0 };
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

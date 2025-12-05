@@ -25,32 +25,29 @@
 #
 # Input variables:
 #
-# - `LIBPSL_INCLUDE_DIR`:   Absolute path to libpsl include directory.
-# - `LIBPSL_LIBRARY`:       Absolute path to `libpsl` library.
+# - `LIBPSL_INCLUDE_DIR`:  Absolute path to libpsl include directory.
+# - `LIBPSL_LIBRARY`:      Absolute path to `libpsl` library.
 #
-# Result variables:
+# Defines:
 #
-# - `LIBPSL_FOUND`:         System has libpsl.
-# - `LIBPSL_INCLUDE_DIRS`:  The libpsl include directories.
-# - `LIBPSL_LIBRARIES`:     The libpsl library names.
-# - `LIBPSL_LIBRARY_DIRS`:  The libpsl library directories.
-# - `LIBPSL_PC_REQUIRES`:   The libpsl pkg-config packages.
-# - `LIBPSL_CFLAGS`:        Required compiler flags.
-# - `LIBPSL_VERSION`:       Version of libpsl.
+# - `LIBPSL_FOUND`:        System has libpsl.
+# - `LIBPSL_VERSION`:      Version of libpsl.
+# - `CURL::libpsl`:        libpsl library target.
 
-set(LIBPSL_PC_REQUIRES "libpsl")
+set(_libpsl_pc_requires "libpsl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBPSL_INCLUDE_DIR AND
    NOT DEFINED LIBPSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBPSL ${LIBPSL_PC_REQUIRES})
+  pkg_check_modules(_libpsl ${_libpsl_pc_requires})
 endif()
 
-if(LIBPSL_FOUND AND LIBPSL_INCLUDE_DIRS)
+if(_libpsl_FOUND AND _libpsl_INCLUDE_DIRS)
   set(Libpsl_FOUND TRUE)
-  string(REPLACE ";" " " LIBPSL_CFLAGS "${LIBPSL_CFLAGS}")
-  message(STATUS "Found Libpsl (via pkg-config): ${LIBPSL_INCLUDE_DIRS} (found version \"${LIBPSL_VERSION}\")")
+  set(LIBPSL_FOUND TRUE)
+  set(LIBPSL_VERSION ${_libpsl_VERSION})
+  message(STATUS "Found Libpsl (via pkg-config): ${_libpsl_INCLUDE_DIRS} (found version \"${LIBPSL_VERSION}\")")
 else()
   find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h")
   find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
@@ -75,9 +72,25 @@ else()
   )
 
   if(LIBPSL_FOUND)
-    set(LIBPSL_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
-    set(LIBPSL_LIBRARIES    ${LIBPSL_LIBRARY})
+    set(_libpsl_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
+    set(_libpsl_LIBRARIES    ${LIBPSL_LIBRARY})
   endif()
 
   mark_as_advanced(LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY)
+endif()
+
+if(LIBPSL_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_libpsl_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::libpsl)
+    add_library(CURL::libpsl INTERFACE IMPORTED)
+    set_target_properties(CURL::libpsl PROPERTIES
+      INTERFACE_LIBCURL_PC_MODULES "${_libpsl_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_libpsl_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_libpsl_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_libpsl_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_libpsl_LIBRARIES}")
+  endif()
 endif()

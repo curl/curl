@@ -76,15 +76,15 @@ struct socksd_configurable {
   char password[256];
 };
 
-#define CONFIG_VERSION 5
-#define CONFIG_NMETHODS_MIN 1 /* unauth, gssapi, auth */
-#define CONFIG_NMETHODS_MAX 3
+#define CONFIG_VERSION         5
+#define CONFIG_NMETHODS_MIN    1 /* unauth, gssapi, auth */
+#define CONFIG_NMETHODS_MAX    3
 #define CONFIG_RESPONSEVERSION CONFIG_VERSION
-#define CONFIG_RESPONSEMETHOD 0 /* no auth */
-#define CONFIG_REQCMD 1 /* CONNECT */
-#define CONFIG_PORT backendport
-#define CONFIG_ADDR backendaddr
-#define CONFIG_CONNECTREP 0
+#define CONFIG_RESPONSEMETHOD  0 /* no auth */
+#define CONFIG_REQCMD          1 /* CONNECT */
+#define CONFIG_PORT            backendport
+#define CONFIG_ADDR            backendaddr
+#define CONFIG_CONNECTREP      0
 
 static struct socksd_configurable s_config;
 
@@ -185,24 +185,24 @@ static void socksd_getconfig(void)
 }
 
 /* RFC 1928, SOCKS5 byte index */
-#define SOCKS5_VERSION 0
+#define SOCKS5_VERSION  0
 #define SOCKS5_NMETHODS 1 /* number of methods that is listed */
 
 /* in the request: */
-#define SOCKS5_REQCMD 1
+#define SOCKS5_REQCMD   1
 #define SOCKS5_RESERVED 2
-#define SOCKS5_ATYP 3
-#define SOCKS5_DSTADDR 4
+#define SOCKS5_ATYP     3
+#define SOCKS5_DSTADDR  4
 
 /* connect response */
-#define SOCKS5_REP 1
+#define SOCKS5_REP     1
 #define SOCKS5_BNDADDR 4
 
 /* auth request */
-#define SOCKS5_ULEN 1
+#define SOCKS5_ULEN  1
 #define SOCKS5_UNAME 2
 
-#define SOCKS4_CD 1
+#define SOCKS4_CD      1
 #define SOCKS4_DSTPORT 2
 
 /* connect to a given IPv4 address, not the one asked for */
@@ -289,8 +289,8 @@ static curl_socket_t socks4(curl_socket_t fd,
 
 static curl_socket_t sockit(curl_socket_t fd)
 {
-  unsigned char buffer[2*256 + 16];
-  unsigned char response[2*256 + 16];
+  unsigned char buffer[2 * 256 + 16];
+  unsigned char response[2 * 256 + 16];
   ssize_t rc;
   unsigned char len;
   unsigned char type;
@@ -483,7 +483,7 @@ static curl_socket_t sockit(curl_socket_t fd)
       case 3:
         /* The first octet of the address field contains the number of octets
            of name that follow */
-        fprintf(dump, " %.*s\n", len-1, &address[1]);
+        fprintf(dump, " %.*s\n", len - 1, &address[1]);
         break;
       case 4:
         /* 16 bytes IPv6 address */
@@ -579,8 +579,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     /* read from client, send to remote */
     nread = recv(cp->clientfd, buffer, sizeof(buffer), 0);
     if(nread > 0) {
-      nwrite = send(cp->remotefd, (char *)buffer,
-                    (SEND_TYPE_ARG3)nread, 0);
+      nwrite = send(cp->remotefd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
       if(nwrite != nread)
         return 1;
       cp->fromclient += nwrite;
@@ -592,8 +591,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
     /* read from remote, send to client */
     nread = recv(cp->remotefd, buffer, sizeof(buffer), 0);
     if(nread > 0) {
-      nwrite = send(cp->clientfd, (char *)buffer,
-                    (SEND_TYPE_ARG3)nread, 0);
+      nwrite = send(cp->clientfd, (char *)buffer, (SEND_TYPE_ARG3)nread, 0);
       if(nwrite != nread)
         return 1;
       cp->fromremote += nwrite;
@@ -725,7 +723,6 @@ static bool socksd_incoming(curl_socket_t listenfd)
           cp->used = TRUE;
           clients++;
         }
-
       }
     }
     for(i = 0; i < 2; i++) {
@@ -777,7 +774,7 @@ static int test_socksd(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {

@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testutil.h"
-#include "memdebug.h"
 
 /*
  * Test GET_PARAMETER: PUT, HEARTBEAT, and POST
@@ -103,7 +102,7 @@ static CURLcode test_lib572(const char *URL)
 
   test_setopt(curl, CURLOPT_READDATA, paramsf);
   test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t) file_info.st_size);
+  test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
   res = curl_easy_perform(curl);
   if(res)

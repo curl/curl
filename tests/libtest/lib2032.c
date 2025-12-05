@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #define MAX_EASY_HANDLES 3
 
 static int ntlm_counter[MAX_EASY_HANDLES];
@@ -34,7 +32,7 @@ static CURLcode ntlmcb_res = CURLE_OK;
 
 static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
-  ssize_t idx = ((CURL **) data) - ntlm_curls;
+  ssize_t idx = ((CURL **)data) - ntlm_curls;
   curl_socket_t sock;
   long longdata;
   CURLcode code;
@@ -77,7 +75,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
+static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
 {
   enum HandleState {
     ReadyForNewHandle,
@@ -92,7 +90,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
   int num_handles = 0;
   enum HandleState state = ReadyForNewHandle;
   size_t urllen = strlen(URL) + 4 + 1;
-  char *full_url = malloc(urllen);
+  char *full_url = curlx_malloc(urllen);
 
   start_test_timing();
 
@@ -108,7 +106,7 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 
   res_global_init(CURL_GLOBAL_ALL);
   if(res) {
-    free(full_url);
+    curlx_free(full_url);
     return res;
   }
 
@@ -177,10 +175,9 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
                       "handle (trying again)\n");
         continue;
       }
-      state = num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle
-                                             : NoMoreHandles;
-      curl_mfprintf(stderr, "%s:%d new state %d\n",
-                    __FILE__, __LINE__, state);
+      state =
+        num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle : NoMoreHandles;
+      curl_mfprintf(stderr, "%s:%d new state %d\n", __FILE__, __LINE__, state);
     }
 
     multi_timeout(multi, &timeout);
@@ -197,8 +194,8 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
 #else
       itimeout = (int)timeout;
 #endif
-      interval.tv_sec = itimeout/1000;
-      interval.tv_usec = (itimeout%1000)*1000;
+      interval.tv_sec = itimeout / 1000;
+      interval.tv_usec = (itimeout % 1000) * 1000;
     }
     else {
       interval.tv_sec = 0;
@@ -230,7 +227,7 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  free(full_url);
+  curlx_free(full_url);
 
   return res;
 }

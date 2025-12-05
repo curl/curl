@@ -31,8 +31,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 struct cb_data {
   CURL *curl;
   int response_received;
@@ -120,7 +118,6 @@ static CURLcode perform_and_check_connections(CURL *curl,
 
   return TEST_ERR_SUCCESS;
 }
-
 
 static CURLcode test_lib1533(const char *URL)
 {

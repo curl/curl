@@ -78,21 +78,17 @@
 #include "curlx/warnless.h"
 #include "strdup.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Authentication type flags */
 #define POP3_TYPE_CLEARTEXT (1 << 0)
 #define POP3_TYPE_APOP      (1 << 1)
 #define POP3_TYPE_SASL      (1 << 2)
 
 /* Authentication type values */
-#define POP3_TYPE_NONE      0
-#define POP3_TYPE_ANY       (POP3_TYPE_CLEARTEXT|POP3_TYPE_APOP|POP3_TYPE_SASL)
+#define POP3_TYPE_NONE 0
+#define POP3_TYPE_ANY  (POP3_TYPE_CLEARTEXT | POP3_TYPE_APOP | POP3_TYPE_SASL)
 
 /* This is the 5-bytes End-Of-Body marker for POP3 */
-#define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"
+#define POP3_EOB     "\x0d\x0a\x2e\x0d\x0a"
 #define POP3_EOB_LEN 5
 
 /* meta key for storing protocol meta at easy handle */
@@ -200,7 +196,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   CURLPROTO_POP3,                   /* protocol */
   CURLPROTO_POP3,                   /* family */
   PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY | /* flags */
-  PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE
+    PROTOPT_URLOPTIONS | PROTOPT_SSL_REUSE | PROTOPT_CONN_REUSE
 };
 
 #ifdef USE_SSL
@@ -230,8 +226,8 @@ const struct Curl_handler Curl_handler_pop3s = {
   PORT_POP3S,                       /* defport */
   CURLPROTO_POP3S,                  /* protocol */
   CURLPROTO_POP3,                   /* family */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL
-  | PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL | /* flags */
+    PROTOPT_NOURLQUERY | PROTOPT_URLOPTIONS | PROTOPT_CONN_REUSE
 };
 #endif
 
@@ -514,7 +510,7 @@ static CURLcode pop3_perform_upgrade_tls(struct Curl_easy *data,
          result, ssldone));
   if(!result && ssldone) {
     pop3c->ssldone = ssldone;
-     /* perform CAPA now, changes pop3c->state out of POP3_UPGRADETLS */
+    /* perform CAPA now, changes pop3c->state out of POP3_UPGRADETLS */
     result = pop3_perform_capa(data, conn);
   }
 out:
@@ -591,10 +587,10 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
-  Curl_MD5_update(ctxt, (const unsigned char *) pop3c->apoptimestamp,
+  Curl_MD5_update(ctxt, (const unsigned char *)pop3c->apoptimestamp,
                   curlx_uztoui(strlen(pop3c->apoptimestamp)));
 
-  Curl_MD5_update(ctxt, (const unsigned char *) conn->passwd,
+  Curl_MD5_update(ctxt, (const unsigned char *)conn->passwd,
                   curlx_uztoui(strlen(conn->passwd)));
 
   /* Finalise the digest */
@@ -627,7 +623,7 @@ static CURLcode pop3_perform_auth(struct Curl_easy *data,
   struct pop3_conn *pop3c =
     Curl_conn_meta_get(data->conn, CURL_META_POP3_CONN);
   CURLcode result = CURLE_OK;
-  const char *ir = (const char *) Curl_bufref_ptr(initresp);
+  const char *ir = Curl_bufref_ptr(initresp);
 
   if(!pop3c)
     return CURLE_FAILED_INIT;
@@ -661,8 +657,7 @@ static CURLcode pop3_continue_auth(struct Curl_easy *data,
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
-  return Curl_pp_sendf(data, &pop3c->pp,
-                       "%s", (const char *) Curl_bufref_ptr(resp));
+  return Curl_pp_sendf(data, &pop3c->pp, "%s", Curl_bufref_ptr(resp));
 }
 
 /***********************************************************************
@@ -1295,9 +1290,6 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   if(!pop3c)
     return CURLE_FAILED_INIT;
 
-  /* We always support persistent connections in POP3 */
-  connkeep(conn, "POP3 default");
-
   PINGPONG_SETUP(pp, pop3_statemachine, pop3_endofresp);
 
   /* Set the default preferred authentication type and mechanism */
@@ -1524,7 +1516,7 @@ static void pop3_easy_dtor(void *key, size_t klen, void *entry)
   /* Cleanup our per-request based variables */
   Curl_safefree(pop3->id);
   Curl_safefree(pop3->custom);
-  free(pop3);
+  curlx_free(pop3);
 }
 
 static void pop3_conn_dtor(void *key, size_t klen, void *entry)
@@ -1535,19 +1527,19 @@ static void pop3_conn_dtor(void *key, size_t klen, void *entry)
   DEBUGASSERT(pop3c);
   Curl_pp_disconnect(&pop3c->pp);
   Curl_safefree(pop3c->apoptimestamp);
-  free(pop3c);
+  curlx_free(pop3c);
 }
 
 static CURLcode pop3_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn)
 {
   struct pop3_conn *pop3c;
-  struct POP3 *pop3 = calloc(1, sizeof(*pop3));
+  struct POP3 *pop3 = curlx_calloc(1, sizeof(*pop3));
   if(!pop3 ||
      Curl_meta_set(data, CURL_META_POP3_EASY, pop3, pop3_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  pop3c = calloc(1, sizeof(*pop3c));
+  pop3c = curlx_calloc(1, sizeof(*pop3c));
   if(!pop3c ||
      Curl_conn_meta_set(conn, CURL_META_POP3_CONN, pop3c, pop3_conn_dtor))
     return CURLE_OUT_OF_MEMORY;

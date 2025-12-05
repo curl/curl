@@ -55,7 +55,7 @@ struct mqttd_configurable {
   int testnum;
 };
 
-#define REQUEST_DUMP  "server.input"
+#define REQUEST_DUMP   "server.input"
 #define CONFIG_VERSION 5
 
 static struct mqttd_configurable m_config;
@@ -152,11 +152,10 @@ static void logprotocol(mqttdir dir,
           prefix, (int)remlen, data);
 }
 
-
 /* return 0 on success */
 static int connack(FILE *dump, curl_socket_t fd)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_CONNACK, 0x02,
     0x00, 0x00
   };
@@ -179,7 +178,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 /* return 0 on success */
 static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_SUBACK, 0x03,
     0, 0, /* filled in below */
     0x00
@@ -202,7 +201,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 /* return 0 on success */
 static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_PUBACK, 0x00,
     0, 0 /* filled in below */
   };
@@ -225,7 +224,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 /* return 0 on success */
 static int disconnect(FILE *dump, curl_socket_t fd)
 {
-  unsigned char packet[]={
+  unsigned char packet[] = {
     MQTT_MSG_DISCONNECT, 0x00,
   };
   ssize_t rc = swrite(fd, (char *)packet, sizeof(packet));
@@ -283,7 +282,6 @@ static size_t encode_length(size_t packetlen,
   return bytes;
 }
 
-
 static size_t decode_length(unsigned char *buffer,
                             size_t buflen, size_t *lenbytes)
 {
@@ -303,7 +301,6 @@ static size_t decode_length(unsigned char *buffer,
 
   return len;
 }
-
 
 /* return 0 on success */
 static int publish(FILE *dump,
@@ -366,7 +363,7 @@ static int publish(FILE *dump,
   return 1;
 }
 
-#define MAX_TOPIC_LENGTH 65535
+#define MAX_TOPIC_LENGTH     65535
 #define MAX_CLIENT_ID_LENGTH 32
 
 static char topic[MAX_TOPIC_LENGTH + 1];
@@ -408,7 +405,7 @@ static int fixedheader(curl_socket_t fd,
 
 static curl_socket_t mqttit(curl_socket_t fd)
 {
-  size_t buff_size = 10*1024;
+  size_t buff_size = 10 * 1024;
   unsigned char *buffer = NULL;
   ssize_t rc;
   unsigned char byte;
@@ -482,8 +479,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
     }
 
     if(byte == MQTT_MSG_CONNECT) {
-      logprotocol(FROM_CLIENT, "CONNECT", remaining_length,
-                  dump, buffer, rc);
+      logprotocol(FROM_CLIENT, "CONNECT", remaining_length, dump, buffer, rc);
 
       if(memcmp(protocol, buffer, sizeof(protocol))) {
         logmsg("Protocol preamble mismatch");
@@ -607,8 +603,7 @@ static curl_socket_t mqttit(curl_socket_t fd)
       size_t topiclen;
 
       logmsg("Incoming PUBLISH");
-      logprotocol(FROM_CLIENT, "PUBLISH", remaining_length,
-                  dump, buffer, rc);
+      logprotocol(FROM_CLIENT, "PUBLISH", remaining_length, dump, buffer, rc);
 
       topiclen = (size_t)(buffer[1 + bytes] << 8) | buffer[2 + bytes];
       logmsg("Got %zu bytes topic", topiclen);
@@ -754,7 +749,7 @@ static int test_mqttd(int argc, char *argv[])
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {
@@ -802,8 +797,7 @@ static int test_mqttd(int argc, char *argv[])
       if(argc > arg) {
         opt = argv[arg];
         if(curlx_str_number(&opt, &num, 0xffff)) {
-          fprintf(stderr, "mqttd: invalid --port argument (%s)\n",
-                  argv[arg]);
+          fprintf(stderr, "mqttd: invalid --port argument (%s)\n", argv[arg]);
           return 0;
         }
         server_port = (unsigned short)num;

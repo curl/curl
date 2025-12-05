@@ -43,10 +43,6 @@
 #include "curlx/strparse.h"
 #include "curlx/warnless.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 /***
     RFC 6455 Section 5.2
@@ -58,11 +54,11 @@
      |N|V|V|V|       |
      | |1|2|3|       |
 */
-#define WSBIT_FIN  (0x80)
-#define WSBIT_RSV1 (0x40)
-#define WSBIT_RSV2 (0x20)
-#define WSBIT_RSV3 (0x10)
-#define WSBIT_RSV_MASK (WSBIT_RSV1 | WSBIT_RSV2 | WSBIT_RSV3)
+#define WSBIT_FIN          (0x80)
+#define WSBIT_RSV1         (0x40)
+#define WSBIT_RSV2         (0x20)
+#define WSBIT_RSV3         (0x10)
+#define WSBIT_RSV_MASK     (WSBIT_RSV1 | WSBIT_RSV2 | WSBIT_RSV3)
 #define WSBIT_OPCODE_CONT  (0x0)
 #define WSBIT_OPCODE_TEXT  (0x1)
 #define WSBIT_OPCODE_BIN   (0x2)
@@ -74,9 +70,8 @@
 #define WSBIT_MASK 0x80
 
 /* buffer dimensioning */
-#define WS_CHUNK_SIZE 65535
+#define WS_CHUNK_SIZE  65535
 #define WS_CHUNK_COUNT 2
-
 
 /* a client-side WS frame decoder, parsing frame headers and
  * payload, keeping track of current position and stats */
@@ -91,7 +86,7 @@ struct ws_decoder {
   int frame_flags;      /* See the CURLWS_* defines */
   curl_off_t payload_offset;   /* the offset parsing is at */
   curl_off_t payload_len;
-  unsigned char head[10];
+  uint8_t head[10];
   int head_len, head_total;
   enum ws_dec_state state;
   int cont_flags;
@@ -103,8 +98,8 @@ struct ws_encoder {
   curl_off_t payload_len;  /* payload length of current frame */
   curl_off_t payload_remain;  /* remaining payload of current */
   unsigned int xori; /* xor index */
-  unsigned char mask[4]; /* 32-bit mask for this connection */
-  unsigned char firstbyte; /* first byte of frame we encode */
+  uint8_t mask[4]; /* 32-bit mask for this connection */
+  uint8_t firstbyte; /* first byte of frame we encode */
   BIT(contfragment); /* set TRUE if the previous fragment sent was not final */
 };
 
@@ -114,7 +109,7 @@ struct ws_encoder {
 struct ws_cntrl_frame {
   unsigned int type;
   size_t payload_len;
-  unsigned char payload[WS_MAX_CNTRL_LEN];
+  uint8_t payload[WS_MAX_CNTRL_LEN];
 };
 
 /* A websocket connection with en- and decoder that treat frames
@@ -130,166 +125,165 @@ struct websocket {
   size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
-
-static const char *ws_frame_name_of_op(unsigned char firstbyte)
+static const char *ws_frame_name_of_op(uint8_t firstbyte)
 {
   switch(firstbyte & WSBIT_OPCODE_MASK) {
-    case WSBIT_OPCODE_CONT:
-      return "CONT";
-    case WSBIT_OPCODE_TEXT:
-      return "TEXT";
-    case WSBIT_OPCODE_BIN:
-      return "BIN";
-    case WSBIT_OPCODE_CLOSE:
-      return "CLOSE";
-    case WSBIT_OPCODE_PING:
-      return "PING";
-    case WSBIT_OPCODE_PONG:
-      return "PONG";
-    default:
-      return "???";
+  case WSBIT_OPCODE_CONT:
+    return "CONT";
+  case WSBIT_OPCODE_TEXT:
+    return "TEXT";
+  case WSBIT_OPCODE_BIN:
+    return "BIN";
+  case WSBIT_OPCODE_CLOSE:
+    return "CLOSE";
+  case WSBIT_OPCODE_PING:
+    return "PING";
+  case WSBIT_OPCODE_PONG:
+    return "PONG";
+  default:
+    return "???";
   }
 }
 
 static int ws_frame_firstbyte2flags(struct Curl_easy *data,
-                                    unsigned char firstbyte, int cont_flags)
+                                    uint8_t firstbyte, int cont_flags)
 {
   switch(firstbyte) {
-    /* 0x00 - intermediate TEXT/BINARY fragment */
-    case WSBIT_OPCODE_CONT:
-      if(!(cont_flags & CURLWS_CONT)) {
-        failf(data, "[WS] no ongoing fragmented message to resume");
-        return 0;
-      }
-      return cont_flags | CURLWS_CONT;
-    /* 0x80 - final TEXT/BIN fragment */
-    case (WSBIT_OPCODE_CONT | WSBIT_FIN):
-      if(!(cont_flags & CURLWS_CONT)) {
-        failf(data, "[WS] no ongoing fragmented message to resume");
-        return 0;
-      }
-      return cont_flags & ~CURLWS_CONT;
-    /* 0x01 - first TEXT fragment */
-    case WSBIT_OPCODE_TEXT:
-      if(cont_flags & CURLWS_CONT) {
-        failf(data, "[WS] fragmented message interrupted by new TEXT msg");
-        return 0;
-      }
-      return CURLWS_TEXT | CURLWS_CONT;
-    /* 0x81 - unfragmented TEXT msg */
-    case (WSBIT_OPCODE_TEXT | WSBIT_FIN):
-      if(cont_flags & CURLWS_CONT) {
-        failf(data, "[WS] fragmented message interrupted by new TEXT msg");
-        return 0;
-      }
-      return CURLWS_TEXT;
-    /* 0x02 - first BINARY fragment */
-    case WSBIT_OPCODE_BIN:
-      if(cont_flags & CURLWS_CONT) {
-        failf(data, "[WS] fragmented message interrupted by new BINARY msg");
-        return 0;
-      }
-      return CURLWS_BINARY | CURLWS_CONT;
-    /* 0x82 - unfragmented BINARY msg */
-    case (WSBIT_OPCODE_BIN | WSBIT_FIN):
-      if(cont_flags & CURLWS_CONT) {
-        failf(data, "[WS] fragmented message interrupted by new BINARY msg");
-        return 0;
-      }
-      return CURLWS_BINARY;
-    /* 0x08 - first CLOSE fragment */
-    case WSBIT_OPCODE_CLOSE:
-      failf(data, "[WS] invalid fragmented CLOSE frame");
+  /* 0x00 - intermediate TEXT/BINARY fragment */
+  case WSBIT_OPCODE_CONT:
+    if(!(cont_flags & CURLWS_CONT)) {
+      failf(data, "[WS] no ongoing fragmented message to resume");
       return 0;
-    /* 0x88 - unfragmented CLOSE */
-    case (WSBIT_OPCODE_CLOSE | WSBIT_FIN):
-      return CURLWS_CLOSE;
-    /* 0x09 - first PING fragment */
-    case WSBIT_OPCODE_PING:
-      failf(data, "[WS] invalid fragmented PING frame");
+    }
+    return cont_flags | CURLWS_CONT;
+  /* 0x80 - final TEXT/BIN fragment */
+  case (WSBIT_OPCODE_CONT | WSBIT_FIN):
+    if(!(cont_flags & CURLWS_CONT)) {
+      failf(data, "[WS] no ongoing fragmented message to resume");
       return 0;
-    /* 0x89 - unfragmented PING */
-    case (WSBIT_OPCODE_PING | WSBIT_FIN):
-      return CURLWS_PING;
-    /* 0x0a - first PONG fragment */
-    case WSBIT_OPCODE_PONG:
-      failf(data, "[WS] invalid fragmented PONG frame");
+    }
+    return cont_flags & ~CURLWS_CONT;
+  /* 0x01 - first TEXT fragment */
+  case WSBIT_OPCODE_TEXT:
+    if(cont_flags & CURLWS_CONT) {
+      failf(data, "[WS] fragmented message interrupted by new TEXT msg");
       return 0;
-    /* 0x8a - unfragmented PONG */
-    case (WSBIT_OPCODE_PONG | WSBIT_FIN):
-      return CURLWS_PONG;
-    /* invalid first byte */
-    default:
-      if(firstbyte & WSBIT_RSV_MASK)
-        /* any of the reserved bits 0x40/0x20/0x10 are set */
-        failf(data, "[WS] invalid reserved bits: %02x", firstbyte);
-      else
-        /* any of the reserved opcodes 0x3-0x7 or 0xb-0xf is used */
-        failf(data, "[WS] invalid opcode: %02x", firstbyte);
+    }
+    return CURLWS_TEXT | CURLWS_CONT;
+  /* 0x81 - unfragmented TEXT msg */
+  case (WSBIT_OPCODE_TEXT | WSBIT_FIN):
+    if(cont_flags & CURLWS_CONT) {
+      failf(data, "[WS] fragmented message interrupted by new TEXT msg");
       return 0;
+    }
+    return CURLWS_TEXT;
+  /* 0x02 - first BINARY fragment */
+  case WSBIT_OPCODE_BIN:
+    if(cont_flags & CURLWS_CONT) {
+      failf(data, "[WS] fragmented message interrupted by new BINARY msg");
+      return 0;
+    }
+    return CURLWS_BINARY | CURLWS_CONT;
+  /* 0x82 - unfragmented BINARY msg */
+  case (WSBIT_OPCODE_BIN | WSBIT_FIN):
+    if(cont_flags & CURLWS_CONT) {
+      failf(data, "[WS] fragmented message interrupted by new BINARY msg");
+      return 0;
+    }
+    return CURLWS_BINARY;
+  /* 0x08 - first CLOSE fragment */
+  case WSBIT_OPCODE_CLOSE:
+    failf(data, "[WS] invalid fragmented CLOSE frame");
+    return 0;
+  /* 0x88 - unfragmented CLOSE */
+  case (WSBIT_OPCODE_CLOSE | WSBIT_FIN):
+    return CURLWS_CLOSE;
+  /* 0x09 - first PING fragment */
+  case WSBIT_OPCODE_PING:
+    failf(data, "[WS] invalid fragmented PING frame");
+    return 0;
+  /* 0x89 - unfragmented PING */
+  case (WSBIT_OPCODE_PING | WSBIT_FIN):
+    return CURLWS_PING;
+  /* 0x0a - first PONG fragment */
+  case WSBIT_OPCODE_PONG:
+    failf(data, "[WS] invalid fragmented PONG frame");
+    return 0;
+  /* 0x8a - unfragmented PONG */
+  case (WSBIT_OPCODE_PONG | WSBIT_FIN):
+    return CURLWS_PONG;
+  /* invalid first byte */
+  default:
+    if(firstbyte & WSBIT_RSV_MASK)
+      /* any of the reserved bits 0x40/0x20/0x10 are set */
+      failf(data, "[WS] invalid reserved bits: %02x", firstbyte);
+    else
+      /* any of the reserved opcodes 0x3-0x7 or 0xb-0xf is used */
+      failf(data, "[WS] invalid opcode: %02x", firstbyte);
+    return 0;
   }
 }
 
 static CURLcode ws_frame_flags2firstbyte(struct Curl_easy *data,
                                          unsigned int flags,
                                          bool contfragment,
-                                         unsigned char *pfirstbyte)
+                                         uint8_t *pfirstbyte)
 {
   *pfirstbyte = 0;
   switch(flags & ~CURLWS_OFFSET) {
-    case 0:
-      if(contfragment) {
-        CURL_TRC_WS(data, "no flags given; interpreting as continuation "
-                    "fragment for compatibility");
-        *pfirstbyte = (WSBIT_OPCODE_CONT | WSBIT_FIN);
-        return CURLE_OK;
-      }
-      failf(data, "[WS] no flags given");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    case CURLWS_CONT:
-      if(contfragment) {
-        infof(data, "[WS] setting CURLWS_CONT flag without message type is "
-                    "supported for compatibility but highly discouraged");
-        *pfirstbyte = WSBIT_OPCODE_CONT;
-        return CURLE_OK;
-      }
-      failf(data, "[WS] No ongoing fragmented message to continue");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    case CURLWS_TEXT:
-      *pfirstbyte = contfragment ? (WSBIT_OPCODE_CONT | WSBIT_FIN)
-                                 : (WSBIT_OPCODE_TEXT | WSBIT_FIN);
+  case 0:
+    if(contfragment) {
+      CURL_TRC_WS(data, "no flags given; interpreting as continuation "
+                  "fragment for compatibility");
+      *pfirstbyte = (WSBIT_OPCODE_CONT | WSBIT_FIN);
       return CURLE_OK;
-    case (CURLWS_TEXT | CURLWS_CONT):
-      *pfirstbyte = contfragment ? WSBIT_OPCODE_CONT : WSBIT_OPCODE_TEXT;
+    }
+    failf(data, "[WS] no flags given");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  case CURLWS_CONT:
+    if(contfragment) {
+      infof(data, "[WS] setting CURLWS_CONT flag without message type is "
+                  "supported for compatibility but highly discouraged");
+      *pfirstbyte = WSBIT_OPCODE_CONT;
       return CURLE_OK;
-    case CURLWS_BINARY:
-      *pfirstbyte = contfragment ? (WSBIT_OPCODE_CONT | WSBIT_FIN)
-                                 : (WSBIT_OPCODE_BIN | WSBIT_FIN);
-      return CURLE_OK;
-    case (CURLWS_BINARY | CURLWS_CONT):
-      *pfirstbyte = contfragment ? WSBIT_OPCODE_CONT : WSBIT_OPCODE_BIN;
-      return CURLE_OK;
-    case CURLWS_CLOSE:
-      *pfirstbyte = WSBIT_OPCODE_CLOSE | WSBIT_FIN;
-      return CURLE_OK;
-    case (CURLWS_CLOSE | CURLWS_CONT):
-      failf(data, "[WS] CLOSE frame must not be fragmented");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    case CURLWS_PING:
-      *pfirstbyte = WSBIT_OPCODE_PING | WSBIT_FIN;
-      return CURLE_OK;
-    case (CURLWS_PING | CURLWS_CONT):
-      failf(data, "[WS] PING frame must not be fragmented");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    case CURLWS_PONG:
-      *pfirstbyte = WSBIT_OPCODE_PONG | WSBIT_FIN;
-      return CURLE_OK;
-    case (CURLWS_PONG | CURLWS_CONT):
-      failf(data, "[WS] PONG frame must not be fragmented");
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    default:
-      failf(data, "[WS] unknown flags: %x", flags);
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+    }
+    failf(data, "[WS] No ongoing fragmented message to continue");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  case CURLWS_TEXT:
+    *pfirstbyte = contfragment ? (WSBIT_OPCODE_CONT | WSBIT_FIN)
+                               : (WSBIT_OPCODE_TEXT | WSBIT_FIN);
+    return CURLE_OK;
+  case (CURLWS_TEXT | CURLWS_CONT):
+    *pfirstbyte = contfragment ? WSBIT_OPCODE_CONT : WSBIT_OPCODE_TEXT;
+    return CURLE_OK;
+  case CURLWS_BINARY:
+    *pfirstbyte = contfragment ? (WSBIT_OPCODE_CONT | WSBIT_FIN)
+                               : (WSBIT_OPCODE_BIN | WSBIT_FIN);
+    return CURLE_OK;
+  case (CURLWS_BINARY | CURLWS_CONT):
+    *pfirstbyte = contfragment ? WSBIT_OPCODE_CONT : WSBIT_OPCODE_BIN;
+    return CURLE_OK;
+  case CURLWS_CLOSE:
+    *pfirstbyte = WSBIT_OPCODE_CLOSE | WSBIT_FIN;
+    return CURLE_OK;
+  case (CURLWS_CLOSE | CURLWS_CONT):
+    failf(data, "[WS] CLOSE frame must not be fragmented");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  case CURLWS_PING:
+    *pfirstbyte = WSBIT_OPCODE_PING | WSBIT_FIN;
+    return CURLE_OK;
+  case (CURLWS_PING | CURLWS_CONT):
+    failf(data, "[WS] PING frame must not be fragmented");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  case CURLWS_PONG:
+    *pfirstbyte = WSBIT_OPCODE_PONG | WSBIT_FIN;
+    return CURLE_OK;
+  case (CURLWS_PONG | CURLWS_CONT):
+    failf(data, "[WS] PONG frame must not be fragmented");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  default:
+    failf(data, "[WS] unknown flags: %x", flags);
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 }
 
@@ -326,7 +320,7 @@ static CURLcode ws_send_raw_blocking(struct Curl_easy *data,
                                      struct websocket *ws,
                                      const char *buffer, size_t buflen);
 
-typedef CURLcode ws_write_payload(const unsigned char *buf, size_t buflen,
+typedef CURLcode ws_write_payload(const uint8_t *buf, size_t buflen,
                                   int frame_age, int frame_flags,
                                   curl_off_t payload_offset,
                                   curl_off_t payload_len,
@@ -364,7 +358,7 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
                                  struct Curl_easy *data,
                                  struct bufq *inraw)
 {
-  const unsigned char *inbuf;
+  const uint8_t *inbuf;
   size_t inlen;
 
   while(Curl_bufq_peek(inraw, &inbuf, &inlen)) {
@@ -456,13 +450,14 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
         failf(data, "[WS] frame length longer than 63 bit not supported");
         return CURLE_RECV_ERROR;
       }
-      dec->payload_len = ((curl_off_t)dec->head[2] << 56) |
+      dec->payload_len =
+        (curl_off_t)dec->head[2] << 56 |
         (curl_off_t)dec->head[3] << 48 |
         (curl_off_t)dec->head[4] << 40 |
         (curl_off_t)dec->head[5] << 32 |
         (curl_off_t)dec->head[6] << 24 |
         (curl_off_t)dec->head[7] << 16 |
-        (curl_off_t)dec->head[8] << 8 |
+        (curl_off_t)dec->head[8] <<  8 |
         dec->head[9];
       break;
     default:
@@ -486,7 +481,7 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
                                     ws_write_payload *write_cb,
                                     void *write_ctx)
 {
-  const unsigned char *inbuf;
+  const uint8_t *inbuf;
   size_t inlen;
   size_t nwritten;
   CURLcode result;
@@ -544,7 +539,7 @@ static CURLcode ws_dec_pass(struct ws_decoder *dec,
     dec->state = WS_DEC_PAYLOAD;
     if(dec->payload_len == 0) {
       size_t nwritten;
-      const unsigned char tmp = '\0';
+      const uint8_t tmp = '\0';
       /* special case of a 0 length frame, need to write once */
       result = write_cb(&tmp, 0, dec->frame_age, dec->frame_flags,
                         0, 0, write_ctx, &nwritten);
@@ -617,7 +612,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
                          bool blocking);
 static CURLcode ws_enc_send(struct Curl_easy *data,
                             struct websocket *ws,
-                            const unsigned char *buffer,
+                            const uint8_t *buffer,
                             size_t buflen,
                             curl_off_t fragsize,
                             unsigned int flags,
@@ -627,7 +622,7 @@ static CURLcode ws_enc_add_pending(struct Curl_easy *data,
 
 static CURLcode ws_enc_add_cntrl(struct Curl_easy *data,
                                  struct websocket *ws,
-                                 const unsigned char *payload,
+                                 const uint8_t *payload,
                                  size_t plen,
                                  unsigned int frame_type)
 {
@@ -663,7 +658,7 @@ static curl_off_t ws_payload_remain(curl_off_t payload_total,
   return remain - buffered;
 }
 
-static CURLcode ws_cw_dec_next(const unsigned char *buf, size_t buflen,
+static CURLcode ws_cw_dec_next(const uint8_t *buf, size_t buflen,
                                int frame_age, int frame_flags,
                                curl_off_t payload_offset,
                                curl_off_t payload_len,
@@ -729,7 +724,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
 
   if(nbytes) {
     size_t nwritten;
-    result = Curl_bufq_write(&ctx->buf, (const unsigned char *)buf,
+    result = Curl_bufq_write(&ctx->buf, (const uint8_t *)buf,
                              nbytes, &nwritten);
     if(result) {
       infof(data, "[WS] error adding data to buffer %d", result);
@@ -827,8 +822,8 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
                                  curl_off_t payload_len,
                                  struct bufq *out)
 {
-  unsigned char firstb = 0;
-  unsigned char head[14];
+  uint8_t firstb = 0;
+  uint8_t head[14];
   CURLcode result;
   size_t hlen, nwritten;
 
@@ -871,24 +866,24 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
   head[0] = enc->firstbyte = firstb;
   if(payload_len > 65535) {
     head[1] = 127 | WSBIT_MASK;
-    head[2] = (unsigned char)((payload_len >> 56) & 0xff);
-    head[3] = (unsigned char)((payload_len >> 48) & 0xff);
-    head[4] = (unsigned char)((payload_len >> 40) & 0xff);
-    head[5] = (unsigned char)((payload_len >> 32) & 0xff);
-    head[6] = (unsigned char)((payload_len >> 24) & 0xff);
-    head[7] = (unsigned char)((payload_len >> 16) & 0xff);
-    head[8] = (unsigned char)((payload_len >> 8) & 0xff);
-    head[9] = (unsigned char)(payload_len & 0xff);
+    head[2] = (uint8_t)((payload_len >> 56) & 0xff);
+    head[3] = (uint8_t)((payload_len >> 48) & 0xff);
+    head[4] = (uint8_t)((payload_len >> 40) & 0xff);
+    head[5] = (uint8_t)((payload_len >> 32) & 0xff);
+    head[6] = (uint8_t)((payload_len >> 24) & 0xff);
+    head[7] = (uint8_t)((payload_len >> 16) & 0xff);
+    head[8] = (uint8_t)((payload_len >> 8) & 0xff);
+    head[9] = (uint8_t)(payload_len & 0xff);
     hlen = 10;
   }
   else if(payload_len >= 126) {
     head[1] = 126 | WSBIT_MASK;
-    head[2] = (unsigned char)((payload_len >> 8) & 0xff);
-    head[3] = (unsigned char)(payload_len & 0xff);
+    head[2] = (uint8_t)((payload_len >> 8) & 0xff);
+    head[3] = (uint8_t)(payload_len & 0xff);
     hlen = 4;
   }
   else {
-    head[1] = (unsigned char)payload_len | WSBIT_MASK;
+    head[1] = (uint8_t)payload_len | WSBIT_MASK;
     hlen = 2;
   }
 
@@ -897,7 +892,7 @@ static CURLcode ws_enc_add_frame(struct Curl_easy *data,
 
   /* 4 bytes random */
 
-  result = Curl_rand(data, (unsigned char *)&enc->mask, sizeof(enc->mask));
+  result = Curl_rand(data, (uint8_t *)&enc->mask, sizeof(enc->mask));
   if(result)
     return result;
 
@@ -943,7 +938,7 @@ static CURLcode ws_enc_write_head(struct Curl_easy *data,
 
 static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
                                      struct Curl_easy *data,
-                                     const unsigned char *buf, size_t buflen,
+                                     const uint8_t *buf, size_t buflen,
                                      struct bufq *out, size_t *pnwritten)
 {
   CURLcode result;
@@ -960,7 +955,7 @@ static CURLcode ws_enc_write_payload(struct ws_encoder *enc,
     len = remain;
 
   for(i = 0; i < len; ++i) {
-    unsigned char c = buf[i] ^ enc->mask[enc->xori];
+    uint8_t c = buf[i] ^ enc->mask[enc->xori];
     result = Curl_bufq_write(out, &c, 1, &n);
     if(result) {
       if((result != CURLE_AGAIN) || !i)
@@ -1020,7 +1015,7 @@ out:
 
 static CURLcode ws_enc_send(struct Curl_easy *data,
                             struct websocket *ws,
-                            const unsigned char *buffer,
+                            const uint8_t *buffer,
                             size_t buflen,
                             curl_off_t fragsize,
                             unsigned int flags,
@@ -1198,7 +1193,7 @@ static CURLcode cr_ws_read(struct Curl_easy *data,
         goto out;
     }
 
-    result = ws_enc_write_payload(&ws->enc, data, (unsigned char *)buf,
+    result = ws_enc_write_payload(&ws->enc, data, (uint8_t *)buf,
                                   nread, &ws->sendbuf, &n);
     if(result)
       goto out;
@@ -1234,7 +1229,6 @@ static const struct Curl_crtype ws_cr_encode = {
   sizeof(struct cr_ws_ctx)
 };
 
-
 struct wsfield {
   const char *name;
   const char *val;
@@ -1244,12 +1238,12 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
 {
   unsigned int i;
   CURLcode result = CURLE_OK;
-  unsigned char rand[16];
+  uint8_t rand[16];
   char *randstr;
   size_t randlen;
   char keyval[40];
   struct SingleRequest *k = &data->req;
-  struct wsfield heads[]= {
+  struct wsfield heads[] = {
     {
       /* The request MUST contain an |Upgrade| header field whose value
          MUST include the "websocket" keyword. */
@@ -1273,23 +1267,22 @@ CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
   heads[2].val = &keyval[0];
 
   /* 16 bytes random */
-  result = Curl_rand(data, (unsigned char *)rand, sizeof(rand));
+  result = Curl_rand(data, rand, sizeof(rand));
   if(result)
     return result;
-  result = curlx_base64_encode((char *)rand, sizeof(rand), &randstr, &randlen);
+  result = curlx_base64_encode(rand, sizeof(rand), &randstr, &randlen);
   if(result)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));
   if(randlen >= sizeof(keyval)) {
-    free(randstr);
+    curlx_free(randstr);
     return CURLE_FAILED_INIT;
   }
   strcpy(keyval, randstr);
-  free(randstr);
+  curlx_free(randstr);
   for(i = 0; !result && (i < CURL_ARRAYSIZE(heads)); i++) {
     if(!Curl_checkheaders(data, heads[i].name, strlen(heads[i].name))) {
-      result = curlx_dyn_addf(req, "%s: %s\r\n", heads[i].name,
-                              heads[i].val);
+      result = curlx_dyn_addf(req, "%s: %s\r\n", heads[i].name, heads[i].val);
     }
   }
   data->state.http_hd_upgrade = TRUE;
@@ -1305,7 +1298,7 @@ static void ws_conn_dtor(void *key, size_t klen, void *entry)
   (void)klen;
   Curl_bufq_free(&ws->recvbuf);
   Curl_bufq_free(&ws->sendbuf);
-  free(ws);
+  curlx_free(ws);
 }
 
 /*
@@ -1325,7 +1318,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
   if(!ws) {
     size_t chunk_size = WS_CHUNK_SIZE;
-    ws = calloc(1, sizeof(*ws));
+    ws = curlx_calloc(1, sizeof(*ws));
     if(!ws)
       return CURLE_OUT_OF_MEMORY;
 #ifdef DEBUGBUILD
@@ -1333,7 +1326,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       const char *p = getenv("CURL_WS_CHUNK_SIZE");
       if(p) {
         curl_off_t l;
-        if(!curlx_str_number(&p, &l, 1*1024*1024))
+        if(!curlx_str_number(&p, &l, 1 * 1024 * 1024))
           chunk_size = (size_t)l;
       }
     }
@@ -1393,7 +1386,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
     /* In CONNECT_ONLY setup, the payloads from `mem` need to be received
      * when using `curl_ws_recv` later on after this transfer is already
      * marked as DONE. */
-    result = Curl_bufq_write(&ws->recvbuf, (const unsigned char *)mem,
+    result = Curl_bufq_write(&ws->recvbuf, (const uint8_t *)mem,
                              nread, &nwritten);
     if(result)
       goto out;
@@ -1452,7 +1445,7 @@ out:
 struct ws_collect {
   struct Curl_easy *data;
   struct websocket *ws;
-  unsigned char *buffer;
+  uint8_t *buffer;
   size_t buflen;
   size_t bufidx;
   int frame_age;
@@ -1462,7 +1455,7 @@ struct ws_collect {
   bool written;
 };
 
-static CURLcode ws_client_collect(const unsigned char *buf, size_t buflen,
+static CURLcode ws_client_collect(const uint8_t *buf, size_t buflen,
                                   int frame_age, int frame_flags,
                                   curl_off_t payload_offset,
                                   curl_off_t payload_len,
@@ -1519,7 +1512,7 @@ static CURLcode ws_client_collect(const unsigned char *buf, size_t buflen,
 }
 
 static CURLcode nw_in_recv(void *reader_ctx,
-                           unsigned char *buf, size_t buflen,
+                           uint8_t *buf, size_t buflen,
                            size_t *pnread)
 {
   struct Curl_easy *data = reader_ctx;
@@ -1628,7 +1621,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
 {
   if(!Curl_bufq_is_empty(&ws->sendbuf)) {
     CURLcode result;
-    const unsigned char *out;
+    const uint8_t *out;
     size_t outlen, n;
 #ifdef DEBUGBUILD
     /* Simulate a blocking send after this chunk has been sent */
@@ -1637,7 +1630,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     const char *p = getenv("CURL_WS_CHUNK_EAGAIN");
     if(p) {
       curl_off_t l;
-      if(!curlx_str_number(&p, &l, 1*1024*1024))
+      if(!curlx_str_number(&p, &l, 1 * 1024 * 1024))
         chunk_egain = (size_t)l;
     }
 #endif
@@ -1766,7 +1759,7 @@ CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
                       unsigned int flags)
 {
   struct websocket *ws;
-  const unsigned char *buffer = buffer_arg;
+  const uint8_t *buffer = buffer_arg;
   CURLcode result = CURLE_OK;
   struct Curl_easy *data = d;
   size_t ndummy;
@@ -1848,7 +1841,6 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
   return Curl_http_setup_conn(data, conn);
 }
 
-
 const struct curl_ws_frame *curl_ws_meta(CURL *d)
 {
   /* we only return something for websocket, called from within the callback
@@ -1860,7 +1852,6 @@ const struct curl_ws_frame *curl_ws_meta(CURL *d)
     ws = Curl_conn_meta_get(data->conn, CURL_META_PROTO_WS_CONN);
     if(ws)
       return &ws->recvframe;
-
   }
   return NULL;
 }
@@ -1967,10 +1958,9 @@ const struct Curl_handler Curl_handler_wss = {
   CURLPROTO_WSS,                        /* protocol */
   CURLPROTO_HTTP,                       /* family */
   PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
-  PROTOPT_USERPWDCTRL
+    PROTOPT_USERPWDCTRL
 };
 #endif
-
 
 #else
 

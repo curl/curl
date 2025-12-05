@@ -70,8 +70,8 @@
 #include <ctype.h>
 
 /*****************************************************************************
-*  This is a rewrite/clone of the arpa/tftp.h file for systems without it.   *
-*****************************************************************************/
+ *  This is a rewrite/clone of the arpa/tftp.h file for systems without it.  *
+ *****************************************************************************/
 #define SEGSIZE 512 /* data segment size */
 
 #if defined(__GNUC__) && ((__GNUC__ >= 3) || \
@@ -105,8 +105,8 @@ struct tftphdr {
 #define TFTP_ENOUSER   7
 
 /*****************************************************************************
-*                      STRUCT DECLARATIONS AND DEFINES                       *
-*****************************************************************************/
+ *                      STRUCT DECLARATIONS AND DEFINES                      *
+ *****************************************************************************/
 
 #ifndef PKTSIZE
 #define PKTSIZE (SEGSIZE + 4)  /* SEGSIZE defined in arpa/tftp.h */
@@ -157,13 +157,13 @@ struct bf {
 #define opcode_ACK   4
 #define opcode_ERROR 5
 
-#define TIMEOUT      5
+#define TIMEOUT 5
 
-#define REQUEST_DUMP  "server.input"
+#define REQUEST_DUMP "server.input"
 
 /*****************************************************************************
-*                              GLOBAL VARIABLES                              *
-*****************************************************************************/
+ *                              GLOBAL VARIABLES                             *
+ *****************************************************************************/
 
 static struct errmsg errmsgs[] = {
   { TFTP_EUNDEF,       "Undefined error code" },
@@ -212,8 +212,8 @@ static const unsigned int rexmtval = TIMEOUT;
 #endif
 
 /*****************************************************************************
-*                            FUNCTION PROTOTYPES                             *
-*****************************************************************************/
+ *                            FUNCTION PROTOTYPES                            *
+ *****************************************************************************/
 
 static struct tftphdr *rw_init(int);
 
@@ -249,8 +249,8 @@ static void justtimeout(int signum);
 #endif /* HAVE_ALARM && SIGALRM */
 
 /*****************************************************************************
-*                          FUNCTION IMPLEMENTATIONS                          *
-*****************************************************************************/
+ *                          FUNCTION IMPLEMENTATIONS                         *
+ *****************************************************************************/
 
 #if defined(HAVE_ALARM) && defined(SIGALRM)
 
@@ -380,7 +380,7 @@ static void read_ahead(struct testcase *test,
   }
 
   p = dp->th_data;
-  for(i = 0 ; i < SEGSIZE; i++) {
+  for(i = 0; i < SEGSIZE; i++) {
     if(newline) {
       if(prevchar == '\n')
         c = '\n';       /* lf to cr,lf */
@@ -482,9 +482,8 @@ static ssize_t write_behind(struct testcase *test, int convert)
     if(prevchar == '\r') {        /* if prev char was cr */
       if(c == '\n')               /* if have cr,lf then just */
         lseek(test->ofile, -1, SEEK_CUR); /* smash lf on top of the cr */
-      else
-        if(c == '\0')             /* if have cr,nul then */
-          goto skipit;            /* just skip over the putc */
+      else if(c == '\0')          /* if have cr,nul then */
+        goto skipit;              /* just skip over the putc */
       /* else just fall through and allow it */
     }
     /* formerly
@@ -536,8 +535,7 @@ static int synchnet(curl_socket_t f /* socket to flush */)
       else
         fromaddrlen = sizeof(fromaddr.sa6);
 #endif
-      (void)recvfrom(f, rbuf, sizeof(rbuf), 0,
-                     &fromaddr.sa, &fromaddrlen);
+      (void)recvfrom(f, rbuf, sizeof(rbuf), 0, &fromaddr.sa, &fromaddrlen);
     }
     else
       break;
@@ -578,7 +576,7 @@ static int test_tftpd(int argc, char **argv)
 #else
              ""
 #endif
-             );
+      );
       return 0;
     }
     else if(!strcmp("--pidfile", argv[arg])) {
@@ -674,8 +672,7 @@ static int test_tftpd(int argc, char **argv)
   }
 
   flag = 1;
-  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR,
-                (void *)&flag, sizeof(flag))) {
+  if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof(flag))) {
     error = SOCKERRNO;
     logmsg("setsockopt(SO_REUSEADDR) failed with error (%d) %s",
            error, curlx_strerror(error, errbuf, sizeof(errbuf)));
@@ -825,7 +822,7 @@ static int test_tftpd(int argc, char **argv)
     }
 #endif
 
-    maxtimeout = 5*TIMEOUT;
+    maxtimeout = 5 * TIMEOUT;
 
     tp = &trsbuf.hdr;
     tp->th_opcode = ntohs(tp->th_opcode);
@@ -1076,7 +1073,6 @@ static int tftpd_parse_servercmd(struct testcase *req)
   return 0; /* OK! */
 }
 
-
 /*
  * Validate file access.
  */
@@ -1104,7 +1100,7 @@ static int validate_access(struct testcase *test,
   ptr = strrchr(filename, '/');
 
   if(ptr) {
-    char partbuf[80]="data";
+    char partbuf[80] = "data";
     long partno;
     long testno;
     const char *pval;
@@ -1207,9 +1203,8 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
     (void)sigsetjmp(timeoutbuf, 1);
 #endif
     if(test->writedelay) {
-      logmsg("Pausing %d seconds before %d bytes", test->writedelay,
-             size);
-      curlx_wait_ms(1000*test->writedelay);
+      logmsg("Pausing %d seconds before %d bytes", test->writedelay, size);
+      curlx_wait_ms(1000 * test->writedelay);
     }
 
 send_data:
@@ -1249,11 +1244,10 @@ send_data:
         }
         /* Re-synchronize with the other side */
         (void)synchnet(peer);
-        if(sap->th_block == (sendblock-1)) {
+        if(sap->th_block == (sendblock - 1)) {
           goto send_data;
         }
       }
-
     }
     sendblock++;
   } while(size == SEGSIZE);
@@ -1303,7 +1297,7 @@ send_ack:
 #endif
       if(got_exit_signal)
         goto abort;
-      if(n < 0) {                       /* really? */
+      if(n < 0) {                        /* really? */
         logmsg("read: fail");
         goto abort;
       }
@@ -1317,13 +1311,13 @@ send_ack:
         }
         /* Re-synchronize with the other side */
         (void)synchnet(peer);
-        if(rdp->th_block == (recvblock-1))
+        if(rdp->th_block == (recvblock - 1))
           goto send_ack;                 /* rexmit */
       }
     }
 
     size = writeit(test, &rdp, (int)(n - 4), pf->f_convert);
-    if(size != (n-4)) {                 /* ahem */
+    if(size != (n - 4)) {                /* ahem */
       if(size < 0)
         nak(errno + 100);
       else

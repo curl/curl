@@ -45,13 +45,13 @@
 #endif
 
 #if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
-#  include <pthread.h>
+#include <pthread.h>
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#  define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
+#define RESOLVER_ENOMEM  EAI_MEMORY  /* = WSA_NOT_ENOUGH_MEMORY on Windows */
 #else
-#  define RESOLVER_ENOMEM  SOCKENOMEM
+#define RESOLVER_ENOMEM  SOCKENOMEM
 #endif
 
 #include "urldata.h"
@@ -71,10 +71,6 @@
 #define USE_HTTPSRR_ARES  /* the combo */
 #endif
 #endif
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 
 /*
@@ -136,7 +132,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
 
   if(destroy) {
     Curl_mutex_destroy(&addr_ctx->mutx);
-    free(addr_ctx->hostname);
+    curlx_free(addr_ctx->hostname);
     if(addr_ctx->res)
       Curl_freeaddrinfo(addr_ctx->res);
 #ifndef CURL_DISABLE_SOCKETPAIR
@@ -145,7 +141,7 @@ static void addr_ctx_unlink(struct async_thrdd_addr_ctx **paddr_ctx,
 #endif
     wakeup_close(addr_ctx->sock_pair[0]);
 #endif
-    free(addr_ctx);
+    curlx_free(addr_ctx);
   }
   *paddr_ctx = NULL;
 }
@@ -156,7 +152,7 @@ addr_ctx_create(struct Curl_easy *data,
                 const char *hostname, int port,
                 const struct addrinfo *hints)
 {
-  struct async_thrdd_addr_ctx *addr_ctx = calloc(1, sizeof(*addr_ctx));
+  struct async_thrdd_addr_ctx *addr_ctx = curlx_calloc(1, sizeof(*addr_ctx));
   if(!addr_ctx)
     return NULL;
 
@@ -186,7 +182,7 @@ addr_ctx_create(struct Curl_easy *data,
   /* Copying hostname string because original can be destroyed by parent
    * thread during gethostbyname execution.
    */
-  addr_ctx->hostname = strdup(hostname);
+  addr_ctx->hostname = curlx_strdup(hostname);
   if(!addr_ctx->hostname)
     goto err_exit;
 
@@ -249,7 +245,6 @@ static CURL_THREAD_RETURN_T CURL_STDCALL getaddrinfo_thread(void *arg)
       }
     }
 #endif
-
   }
 
   addr_ctx_unlink(&addr_ctx, NULL);
@@ -376,7 +371,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
   status = ares_init_options(&thrdd->rr.channel, NULL, 0);
   if(status != ARES_SUCCESS) {
     thrdd->rr.channel = NULL;
-    free(rrname);
+    curlx_free(rrname);
     return CURLE_FAILED_INIT;
   }
 #ifdef CURLDEBUG
@@ -384,7 +379,7 @@ static CURLcode async_rr_start(struct Curl_easy *data, int port)
     const char *servers = getenv("CURL_DNS_SERVER");
     status = ares_set_servers_ports_csv(thrdd->rr.channel, servers);
     if(status) {
-      free(rrname);
+      curlx_free(rrname);
       return CURLE_FAILED_INIT;
     }
   }
@@ -435,8 +430,8 @@ static bool async_thrdd_init(struct Curl_easy *data,
   data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
-  free(data->state.async.hostname);
-  data->state.async.hostname = strdup(hostname);
+  curlx_free(data->state.async.hostname);
+  data->state.async.hostname = curlx_strdup(hostname);
   if(!data->state.async.hostname)
     goto err_exit;
 
@@ -490,8 +485,8 @@ static void async_thrdd_shutdown(struct Curl_easy *data)
 
   Curl_mutex_acquire(&addr_ctx->mutx);
 #ifndef CURL_DISABLE_SOCKETPAIR
-    if(!addr_ctx->do_abort)
-      Curl_multi_will_close(data, addr_ctx->sock_pair[0]);
+  if(!addr_ctx->do_abort)
+    Curl_multi_will_close(data, addr_ctx->sock_pair[0]);
 #endif
   addr_ctx->do_abort = TRUE;
   done = addr_ctx->thrd_done;
@@ -707,7 +702,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 
   if(!thrd_done) {
 #ifndef CURL_DISABLE_SOCKETPAIR
-  /* return read fd to client for polling the DNS resolution status */
+    /* return read fd to client for polling the DNS resolution status */
     result = Curl_pollset_add_in(data, ps, thrdd->addr->sock_pair[0]);
 #else
     timediff_t milli;
@@ -715,7 +710,7 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
     if(ms < 3)
       milli = 0;
     else if(ms <= 50)
-      milli = ms/3;
+      milli = ms / 3;
     else if(ms <= 250)
       milli = 50;
     else

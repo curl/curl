@@ -27,8 +27,6 @@
 #include "curl/urlapi.h"
 #include "urlapi-int.h"
 
-#define free_and_clear(x) free(x); x = NULL
-
 static CURLUcode parse_port(CURLU *url, char *h, bool has_scheme)
 {
   struct dynbuf host;
@@ -55,32 +53,32 @@ static CURLcode test_unit1653(const char *arg)
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15]");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15]");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
   ret = curl_url_get(u, CURLUPART_PORT, &portnum, CURLU_NO_DEFAULT_PORT);
   fail_unless(ret != CURLUE_OK, "curl_url_get portnum returned something");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Invalid IPv6 */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15|");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15|");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret != CURLUE_OK, "parse_port true on error");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff;fea7:da15]:808");
+  ipv6port = curlx_strdup("[fe80::250:56ff;fea7:da15]:808");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
@@ -90,14 +88,14 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(portnum && !strcmp(portnum, "808"), "Check portnumber");
 
   curl_free(portnum);
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with zone index and port number */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15%25eth3]:80");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15%25eth3]:80");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
@@ -106,26 +104,26 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
   fail_unless(portnum && !strcmp(portnum, "80"), "Check portnumber");
   curl_free(portnum);
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with zone index without port number */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15%25eth3]");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15%25eth3]");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with port number */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15]:81");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15]:81");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
@@ -134,30 +132,30 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
   fail_unless(portnum && !strcmp(portnum, "81"), "Check portnumber");
   curl_free(portnum);
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with syntax error in the port number */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15];81");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15];81");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret != CURLUE_OK, "parse_port true on error");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15]80");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15]80");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret != CURLUE_OK, "parse_port true on error");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Valid IPv6 with no port after the colon, should use default if a scheme
@@ -165,19 +163,19 @@ static CURLcode test_unit1653(const char *arg)
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15]:");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15]:");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, TRUE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Incorrect zone index syntax, but the port extractor does not care */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15!25eth3]:180");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15!25eth3]:180");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
@@ -186,19 +184,19 @@ static CURLcode test_unit1653(const char *arg)
   fail_unless(ret == CURLUE_OK, "curl_url_get portnum returned error");
   fail_unless(portnum && !strcmp(portnum, "180"), "Check portnumber");
   curl_free(portnum);
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* Non percent-encoded zone index */
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("[fe80::250:56ff:fea7:da15%eth3]:80");
+  ipv6port = curlx_strdup("[fe80::250:56ff:fea7:da15%eth3]:80");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_OK, "parse_port returned error");
-  free_and_clear(ipv6port);
+  Curl_safefree(ipv6port);
   curl_url_cleanup(u);
 
   /* No scheme and no digits following the colon - not accepted. Because that
@@ -206,14 +204,14 @@ static CURLcode test_unit1653(const char *arg)
   u = curl_url();
   if(!u)
     goto fail;
-  ipv6port = strdup("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-                    "aaaaaaaaaaaaaaaaaaaaaa:");
+  ipv6port = curlx_strdup("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                          "aaaaaaaaaaaaaaaaaaaaaa:");
   if(!ipv6port)
     goto fail;
   ret = parse_port(u, ipv6port, FALSE);
   fail_unless(ret == CURLUE_BAD_PORT_NUMBER, "parse_port did wrong");
 fail:
-  free(ipv6port);
+  curlx_free(ipv6port);
   curl_url_cleanup(u);
 
   UNITTEST_END_SIMPLE

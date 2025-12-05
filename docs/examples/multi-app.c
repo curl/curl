@@ -36,7 +36,7 @@
  */
 
 #define HTTP_HANDLE 0   /* Index for the HTTP transfer */
-#define FTP_HANDLE 1    /* Index for the FTP transfer */
+#define FTP_HANDLE  1   /* Index for the FTP transfer */
 #define HANDLECOUNT 2   /* Number of simultaneous transfers */
 
 int main(void)
@@ -66,7 +66,7 @@ int main(void)
 
     int still_running = 1; /* keep number of running handles */
 
-    CURLMsg *msg; /* for picking up messages with the transfer status */
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
     int msgs_left; /* how many messages are left */
 
     /* add the individual transfers */

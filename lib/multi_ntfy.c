@@ -32,18 +32,13 @@
 #include "multiif.h"
 #include "multi_ntfy.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 struct mntfy_entry {
   uint32_t mid;
   uint32_t type;
 };
 
-#define CURL_MNTFY_CHUNK_SIZE   128
+#define CURL_MNTFY_CHUNK_SIZE 128
 
 struct mntfy_chunk {
   struct mntfy_chunk *next;
@@ -54,12 +49,12 @@ struct mntfy_chunk {
 
 static struct mntfy_chunk *mnfty_chunk_create(void)
 {
-  return calloc(1, sizeof(struct mntfy_chunk));
+  return curlx_calloc(1, sizeof(struct mntfy_chunk));
 }
 
 static void mnfty_chunk_destroy(struct mntfy_chunk *chunk)
 {
-  free(chunk);
+  curlx_free(chunk);
 }
 
 static void mnfty_chunk_reset(struct mntfy_chunk *chunk)
@@ -176,7 +171,7 @@ void Curl_mntfy_add(struct Curl_easy *data, unsigned int type)
      Curl_uint32_bset_contains(&multi->ntfy.enabled, (uint32_t)type)) {
     /* append to list of outstanding notifications */
     struct mntfy_chunk *tail = mntfy_non_full_tail(&multi->ntfy);
-  CURL_TRC_M(data, "[NTFY] add %d for xfer %u", type, data->mid);
+    CURL_TRC_M(data, "[NTFY] add %d for xfer %u", type, data->mid);
     if(tail)
       mntfy_chunk_append(tail, data, (uint32_t)type);
     else

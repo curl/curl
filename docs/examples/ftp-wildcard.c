@@ -85,8 +85,7 @@ static long file_is_downloaded(void *input)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-static size_t write_cb(char *buff, size_t size, size_t nmemb,
-                       void *cb_data)
+static size_t write_cb(char *buff, size_t size, size_t nmemb, void *cb_data)
 {
   struct callback_data *data = cb_data;
   size_t written = 0;

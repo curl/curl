@@ -53,8 +53,7 @@ struct state {
 
 /* "read" is from the point of the library, it wants data from us. One domain
    entry per invoke. */
-static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e,
-                            void *userp)
+static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
 {
   const char *host;
   const char *expire;
@@ -94,7 +93,7 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    struct state st = {0};
+    struct state st = { 0 };
 
     /* enable HSTS for this handle */
     curl_easy_setopt(curl, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);

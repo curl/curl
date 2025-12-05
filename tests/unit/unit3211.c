@@ -84,7 +84,7 @@ static void check_set(const char *name, unsigned int capacity,
   }
   /* The count is half */
   c = Curl_uint32_bset_count(&bset);
-  fail_unless(c == slen/2, "set count is wrong");
+  fail_unless(c == slen / 2, "set count is wrong");
 
   Curl_uint32_bset_clear(&bset);
   c = Curl_uint32_bset_count(&bset);
@@ -107,7 +107,7 @@ static void check_set(const char *name, unsigned int capacity,
   for(i = 0; i < slen; i++)  /* all still present after resize back */
     fail_unless(Curl_uint32_bset_contains(&bset, s[i]), "unexpectedly lost");
 
-  fail_unless(!Curl_uint32_bset_resize(&bset, capacity/2),
+  fail_unless(!Curl_uint32_bset_resize(&bset, capacity / 2),
               "resize half failed");
   /* halved the size, what numbers remain in set? */
   c = Curl_uint32_bset_capacity(&bset);
@@ -127,11 +127,12 @@ static CURLcode test_unit3211(const char *arg)
 {
   UNITTEST_BEGIN_SIMPLE
 
-  static const unsigned int s1[] = {  /* spread numbers, some at slot edges */
-    0, 1, 4, 17, 63, 64, 65, 66,
-    90, 99,
+  static const unsigned int s1[] = {
+    /* spread numbers, some at slot edges */
+    0, 1, 4, 17, 63, 64, 65, 66, 90, 99,
   };
-  static const unsigned int s2[] = { /* set with all bits in slot1 set */
+  static const unsigned int s2[] = {
+    /* set with all bits in slot1 set */
     64, 65, 66, 67, 68, 69, 70, 71,
     72, 73, 74, 75, 76, 77, 78, 79,
     80, 81, 82, 83, 84, 85, 86, 87,

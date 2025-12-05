@@ -32,8 +32,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURL *t540_curl[2];
 
 static CURLcode init(int num, CURLM *multi, const char *url,
@@ -140,8 +138,8 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
 #else
         itimeout = (int)L;
 #endif
-        T.tv_sec = itimeout/1000;
-        T.tv_usec = (itimeout%1000)*1000;
+        T.tv_sec = itimeout / 1000;
+        T.tv_usec = (itimeout % 1000) * 1000;
       }
       else {
         T.tv_sec = 5;

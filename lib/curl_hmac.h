@@ -56,7 +56,6 @@ struct HMAC_context {
   void *hashctxt2;         /* Hash function context 2. */
 };
 
-
 /* Prototypes. */
 struct HMAC_context *Curl_HMAC_init(const struct HMAC_params *hashparams,
                                     const unsigned char *key,

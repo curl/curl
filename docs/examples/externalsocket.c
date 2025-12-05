@@ -43,17 +43,17 @@
 #ifdef _WIN32
 #define close closesocket
 #else
-#include <sys/types.h>        /*  socket types              */
-#include <sys/socket.h>       /*  socket definitions        */
+#include <sys/types.h>   /* socket types */
+#include <sys/socket.h>  /* socket definitions */
 #include <netinet/in.h>
-#include <arpa/inet.h>        /*  inet (3) functions        */
-#include <unistd.h>           /*  misc. Unix functions      */
+#include <arpa/inet.h>   /* inet (3) functions */
+#include <unistd.h>      /* misc. Unix functions */
 #endif
 
 #include <errno.h>
 
 /* The IP address and port number to connect to */
-#define IPADDR "127.0.0.1"
+#define IPADDR  "127.0.0.1"
 #define PORTNUM 80
 
 #ifndef INADDR_NONE
@@ -124,7 +124,7 @@ int main(void)
 
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port   = htons(PORTNUM);
+    servaddr.sin_port = htons(PORTNUM);
 
     servaddr.sin_addr.s_addr = inet_addr(IPADDR);
     if(INADDR_NONE == servaddr.sin_addr.s_addr) {
@@ -132,8 +132,7 @@ int main(void)
       return 2;
     }
 
-    if(connect(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr)) ==
-       -1) {
+    if(connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) == -1) {
       close(sockfd);
       printf("client error: connect: %s\n", strerror(errno));
       return 1;

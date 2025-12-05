@@ -28,10 +28,8 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char t547_uploadthis[] = "this is the blurb we want to upload\n";
-#define T547_DATALEN (sizeof(t547_uploadthis)-1)
+#define T547_DATALEN (sizeof(t547_uploadthis) - 1)
 
 static size_t t547_read_cb(char *ptr, size_t size, size_t nmemb, void *clientp)
 {

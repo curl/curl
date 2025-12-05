@@ -36,8 +36,7 @@ struct MemoryStruct {
   size_t size;
 };
 
-static size_t write_cb(void *contents, size_t size, size_t nmemb,
-                                  void *userp)
+static size_t write_cb(void *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)userp;
@@ -69,7 +68,7 @@ int main(void)
     return (int)res;
 
   chunk.memory = malloc(1);  /* grown as needed by realloc above */
-  chunk.size = 0;    /* no data at this point */
+  chunk.size = 0;            /* no data at this point */
 
   curl = curl_easy_init();
   if(curl) {
@@ -104,7 +103,7 @@ int main(void)
        *
        * Do something nice with it!
        */
-      printf("%s\n",chunk.memory);
+      printf("%s\n", chunk.memory);
     }
 
     /* always cleanup */

@@ -36,10 +36,6 @@
 #include "url.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 void Curl_req_init(struct SingleRequest *req)
 {
   memset(req, 0, sizeof(*req));
@@ -115,7 +111,7 @@ CURLcode Curl_req_done(struct SingleRequest *req,
 
 void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
-  struct curltime t0 = {0, 0};
+  struct curltime t0 = { 0, 0 };
 
   Curl_safefree(req->newurl);
   Curl_client_reset(data);
@@ -477,6 +473,6 @@ CURLcode Curl_req_stop_send_recv(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   if(data->req.keepon & KEEP_SEND)
     result = Curl_req_abort_sending(data);
-  data->req.keepon &= ~(KEEP_RECV|KEEP_SEND);
+  data->req.keepon &= ~(KEEP_RECV | KEEP_SEND);
   return result;
 }

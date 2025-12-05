@@ -55,10 +55,6 @@
 #include "curlx/warnless.h"
 #include "ws.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 
 static CURLcode do_init_writer_stack(struct Curl_easy *data);
 
@@ -73,13 +69,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   CURLcode result;
 
   /* it is one of those, at least */
-  DEBUGASSERT(type & (CLIENTWRITE_BODY|CLIENTWRITE_HEADER|CLIENTWRITE_INFO));
+  DEBUGASSERT(type &
+              (CLIENTWRITE_BODY | CLIENTWRITE_HEADER | CLIENTWRITE_INFO));
   /* BODY is only BODY (with optional EOS) */
   DEBUGASSERT(!(type & CLIENTWRITE_BODY) ||
-              ((type & ~(CLIENTWRITE_BODY|CLIENTWRITE_EOS)) == 0));
+              ((type & ~(CLIENTWRITE_BODY | CLIENTWRITE_EOS)) == 0));
   /* INFO is only INFO (with optional EOS) */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
-              ((type & ~(CLIENTWRITE_INFO|CLIENTWRITE_EOS)) == 0));
+              ((type & ~(CLIENTWRITE_INFO | CLIENTWRITE_EOS)) == 0));
 
   if(!data->req.writer_stack) {
     result = do_init_writer_stack(data);
@@ -100,7 +97,7 @@ static void cl_reset_writer(struct Curl_easy *data)
   while(writer) {
     data->req.writer_stack = writer->next;
     writer->cwt->do_close(data, writer);
-    free(writer);
+    curlx_free(writer);
     writer = data->req.writer_stack;
   }
 }
@@ -112,7 +109,7 @@ static void cl_reset_reader(struct Curl_easy *data)
   while(reader) {
     data->req.reader_stack = reader->next;
     reader->crt->do_close(data, reader);
-    free(reader);
+    curlx_free(reader);
     reader = data->req.reader_stack;
   }
 }
@@ -231,7 +228,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   bool is_connect = !!(type & CLIENTWRITE_CONNECT);
 
   if(!ctx->started_response &&
-     !(type & (CLIENTWRITE_INFO|CLIENTWRITE_CONNECT))) {
+     !(type & (CLIENTWRITE_INFO | CLIENTWRITE_CONNECT))) {
     Curl_pgrsTime(data, TIMER_STARTTRANSFER);
     Curl_rlimit_start(&data->progress.dl.rlimit, curlx_now());
     ctx->started_response = TRUE;
@@ -374,7 +371,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
   void *p;
 
   DEBUGASSERT(cwt->cwriter_size >= sizeof(struct Curl_cwriter));
-  p = calloc(1, cwt->cwriter_size);
+  p = curlx_calloc(1, cwt->cwriter_size);
   if(!p)
     goto out;
 
@@ -387,7 +384,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
 out:
   *pwriter = result ? NULL : writer;
   if(result)
-    free(writer);
+    curlx_free(writer);
   return result;
 }
 
@@ -396,7 +393,7 @@ void Curl_cwriter_free(struct Curl_easy *data,
 {
   if(writer) {
     writer->cwt->do_close(data, writer);
-    free(writer);
+    curlx_free(writer);
   }
 }
 
@@ -788,7 +785,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
     }
     /* when seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
     do {
-      char scratch[4*1024];
+      char scratch[4 * 1024];
       size_t readthisamountnow =
         (offset - passed > (curl_off_t)sizeof(scratch)) ?
         sizeof(scratch) :
@@ -938,7 +935,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
   void *p;
 
   DEBUGASSERT(crt->creader_size >= sizeof(struct Curl_creader));
-  p = calloc(1, crt->creader_size);
+  p = curlx_calloc(1, crt->creader_size);
   if(!p)
     goto out;
 
@@ -951,7 +948,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
 out:
   *preader = result ? NULL : reader;
   if(result)
-    free(reader);
+    curlx_free(reader);
   return result;
 }
 
@@ -959,7 +956,7 @@ void Curl_creader_free(struct Curl_easy *data, struct Curl_creader *reader)
 {
   if(reader) {
     reader->crt->do_close(data, reader);
-    free(reader);
+    curlx_free(reader);
   }
 }
 
@@ -1093,8 +1090,7 @@ static CURLcode cr_lc_add(struct Curl_easy *data)
   struct Curl_creader *reader = NULL;
   CURLcode result;
 
-  result = Curl_creader_create(&reader, data, &cr_lc,
-                               CURL_CR_CONTENT_ENCODE);
+  result = Curl_creader_create(&reader, data, &cr_lc, CURL_CR_CONTENT_ENCODE);
   if(!result)
     result = Curl_creader_add(data, reader);
 
@@ -1485,5 +1481,4 @@ struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
       return r;
   }
   return NULL;
-
 }

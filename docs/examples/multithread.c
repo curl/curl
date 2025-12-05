@@ -45,7 +45,7 @@
   https://curl.se/libcurl/c/threadsafe.html
 
 */
-static const char * const urls[NUMT]= {
+static const char * const urls[NUMT] = {
   "https://curl.se/",
   "ftp://example.com/",
   "https://example.net/",
@@ -55,7 +55,6 @@ static const char * const urls[NUMT]= {
 struct targ {
   const char *url;
 };
-
 
 static void *pull_one_url(void *p)
 {
@@ -71,7 +70,6 @@ static void *pull_one_url(void *p)
 
   return NULL;
 }
-
 
 /*
    int pthread_create(pthread_t *new_thread_ID,

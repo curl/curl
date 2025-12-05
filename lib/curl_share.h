@@ -38,7 +38,7 @@ struct Curl_ssl_scache;
 #define GOOD_SHARE_HANDLE(x) ((x) && (x)->magic == CURL_GOOD_SHARE)
 
 #define CURL_SHARE_KEEP_CONNECT(s)    \
-        ((s) && ((s)->specifier & (1<< CURL_LOCK_DATA_CONNECT)))
+        ((s) && ((s)->specifier & (1 << CURL_LOCK_DATA_CONNECT)))
 
 /* this struct is libcurl-private, do not export details */
 struct Curl_share {
@@ -71,8 +71,8 @@ CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,
 CURLSHcode Curl_share_unlock(struct Curl_easy *, curl_lock_data);
 
 /* convenience macro to check if this handle is using a shared SSL spool */
-#define CURL_SHARE_ssl_scache(data) (data->share &&                      \
+#define CURL_SHARE_ssl_scache(data) (data->share &&                     \
                                     (data->share->specifier &           \
-                                     (1<<CURL_LOCK_DATA_SSL_SESSION)))
+                                     (1 << CURL_LOCK_DATA_SSL_SESSION)))
 
 #endif /* HEADER_CURL_SHARE_H */

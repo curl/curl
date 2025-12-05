@@ -40,13 +40,13 @@
 /* The libcurl options want plain addresses, the viewable headers in the mail
  * can get a full name as well.
  */
-#define FROM_ADDR    "<ursel@example.org>"
-#define SENDER_ADDR  "<kurt@example.org>"
-#define TO_ADDR      "<addressee@example.net>"
+#define FROM_ADDR   "<ursel@example.org>"
+#define SENDER_ADDR "<kurt@example.org>"
+#define TO_ADDR     "<addressee@example.net>"
 
-#define FROM_MAIL    "Ursel " FROM_ADDR
-#define SENDER_MAIL  "Kurt " SENDER_ADDR
-#define TO_MAIL      "A Receiver " TO_ADDR
+#define FROM_MAIL   "Ursel " FROM_ADDR
+#define SENDER_MAIL "Kurt " SENDER_ADDR
+#define TO_MAIL     "A Receiver " TO_ADDR
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -73,7 +73,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   size_t room = size * nmemb;
   size_t len;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 
