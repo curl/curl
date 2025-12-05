@@ -62,7 +62,7 @@ int main(void)
     CURLcode res;
     struct curl_blob blob;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     blob.data = certificateData;
     blob.len = filesize;
     blob.flags = CURL_BLOB_COPY;
