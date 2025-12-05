@@ -94,6 +94,7 @@ EXTRA_DIST =                                    \
  ECH.md                                         \
  EXPERIMENTAL.md                                \
  FAQ                                            \
+ FAQ.md                                         \
  FEATURES.md                                    \
  GOVERNANCE.md                                  \
  HELP-US.md                                     \
@@ -109,6 +110,7 @@ EXTRA_DIST =                                    \
  INTERNALS.md                                   \
  IPFS.md                                        \
  KNOWN_BUGS                                     \
+ KNOWN_BUGS.md                                  \
  KNOWN_RISKS.md                                 \
  MAIL-ETIQUETTE.md                              \
  MANUAL.md                                      \
@@ -122,6 +124,7 @@ EXTRA_DIST =                                    \
  SSL-PROBLEMS.md                                \
  SSLCERTS.md                                    \
  THANKS TODO                                    \
+ TODO.md                                        \
  TheArtOfHttpScripting.md                       \
  URL-SYNTAX.md                                  \
  VERSIONS.md                                    \
