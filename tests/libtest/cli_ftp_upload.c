@@ -36,17 +36,17 @@ struct test_cli_ftp_upload_data {
   int done;
 };
 
-static size_t test_cli_ftp_upload_read(void *buffer,
-                                       size_t blen, size_t nmemb,
+static size_t test_cli_ftp_upload_read(char *buf,
+                                       size_t nitems, size_t blen,
                                        void *userdata)
 {
   struct test_cli_ftp_upload_data *d = userdata;
   size_t nread = d->data_len - d->offset;
 
   if(nread) {
-    if(nread > (nmemb * blen))
-      nread = (nmemb * blen);
-    memcpy(buffer, d->data + d->offset, nread);
+    if(nread > (nitems * blen))
+      nread = (nitems * blen);
+    memcpy(buf, d->data + d->offset, nread);
     d->offset += nread;
   }
   else
