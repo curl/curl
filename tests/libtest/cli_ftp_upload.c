@@ -82,6 +82,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   const char *resolve = NULL, *url;
   int ch;
   CURLcode result = CURLE_FAILED_INIT;
+  curl_off_t uploadsize = -1;
 
   (void)URL;
   while((ch = cgetopt(test_argc, test_argv, "r:"))
@@ -128,7 +129,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION,
                    test_cli_ftp_upload_read);
   curl_easy_setopt(curl_handle, CURLOPT_READDATA, &data);
-  curl_easy_setopt(curl_handle, CURLOPT_INFILESIZE_LARGE, -1L);
+  curl_easy_setopt(curl_handle, CURLOPT_INFILESIZE_LARGE, uploadsize);
 
   curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_DEBUGFUNCTION, cli_debug_cb);
