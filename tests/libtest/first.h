@@ -144,349 +144,349 @@ void ws_close(CURL *curl);
 
 /* ---------------------------------------------------------------- */
 
-#define exe_easy_init(A, Y, Z)                                            \
-  do {                                                                    \
-    if(((A) = curl_easy_init()) == NULL) {                                \
-      curl_mfprintf(stderr, "%s:%d curl_easy_init() failed\n", (Y), (Z)); \
-      res = TEST_ERR_EASY_INIT;                                           \
-    }                                                                     \
+#define exe_easy_init(A, Y, Z)                                        \
+  do {                                                                \
+    if(((A) = curl_easy_init()) == NULL) {                            \
+      curl_mfprintf(stderr, "%s:%d curl_easy_init() failed\n", Y, Z); \
+      res = TEST_ERR_EASY_INIT;                                       \
+    }                                                                 \
   } while(0)
 
 #define res_easy_init(A) \
-  exe_easy_init((A), __FILE__, __LINE__)
+  exe_easy_init(A, __FILE__, __LINE__)
 
-#define chk_easy_init(A, Y, Z)    \
-  do {                            \
-    exe_easy_init((A), (Y), (Z)); \
-    if(res)                       \
-      goto test_cleanup;          \
+#define chk_easy_init(A, Y, Z) \
+  do {                         \
+    exe_easy_init(A, Y, Z);    \
+    if(res)                    \
+      goto test_cleanup;       \
   } while(0)
 
 #define easy_init(A) \
-  chk_easy_init((A), __FILE__, __LINE__)
+  chk_easy_init(A, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_init(A, Y, Z)                                            \
-  do {                                                                     \
-    if(((A) = curl_multi_init()) == NULL) {                                \
-      curl_mfprintf(stderr, "%s:%d curl_multi_init() failed\n", (Y), (Z)); \
-      res = TEST_ERR_MULTI;                                                \
-    }                                                                      \
+#define exe_multi_init(A, Y, Z)                                        \
+  do {                                                                 \
+    if(((A) = curl_multi_init()) == NULL) {                            \
+      curl_mfprintf(stderr, "%s:%d curl_multi_init() failed\n", Y, Z); \
+      res = TEST_ERR_MULTI;                                            \
+    }                                                                  \
   } while(0)
 
 #define res_multi_init(A) \
-  exe_multi_init((A), __FILE__, __LINE__)
+  exe_multi_init(A, __FILE__, __LINE__)
 
-#define chk_multi_init(A, Y, Z)    \
-  do {                             \
-    exe_multi_init((A), (Y), (Z)); \
-    if(res)                        \
-      goto test_cleanup;           \
+#define chk_multi_init(A, Y, Z) \
+  do {                          \
+    exe_multi_init(A, Y, Z);    \
+    if(res)                     \
+      goto test_cleanup;        \
   } while(0)
 
 #define multi_init(A) \
-  chk_multi_init((A), __FILE__, __LINE__)
+  chk_multi_init(A, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_easy_setopt(A, B, C, Y, Z)                       \
-  do {                                                       \
-    CURLcode ec;                                             \
-    if((ec = curl_easy_setopt((A), (B), (C))) != CURLE_OK) { \
-      curl_mfprintf(stderr,                                  \
-                    "%s:%d curl_easy_setopt() failed, "      \
-                    "with code %d (%s)\n",                   \
-                    (Y), (Z), ec, curl_easy_strerror(ec));   \
-      res = ec;                                              \
-    }                                                        \
+#define exe_easy_setopt(A, B, C, Y, Z)                  \
+  do {                                                  \
+    CURLcode ec;                                        \
+    if((ec = curl_easy_setopt(A, B, C)) != CURLE_OK) {  \
+      curl_mfprintf(stderr,                             \
+                    "%s:%d curl_easy_setopt() failed, " \
+                    "with code %d (%s)\n",              \
+                    Y, Z, ec, curl_easy_strerror(ec));  \
+      res = ec;                                         \
+    }                                                   \
   } while(0)
 
 #define res_easy_setopt(A, B, C) \
-  exe_easy_setopt((A), (B), (C), __FILE__, __LINE__)
+  exe_easy_setopt(A, B, C, __FILE__, __LINE__)
 
-#define chk_easy_setopt(A, B, C, Y, Z)        \
-  do {                                        \
-    exe_easy_setopt((A), (B), (C), (Y), (Z)); \
-    if(res)                                   \
-      goto test_cleanup;                      \
+#define chk_easy_setopt(A, B, C, Y, Z) \
+  do {                                 \
+    exe_easy_setopt(A, B, C, Y, Z);    \
+    if(res)                            \
+      goto test_cleanup;               \
   } while(0)
 
 #define easy_setopt(A, B, C) \
-  chk_easy_setopt((A), (B), (C), __FILE__, __LINE__)
+  chk_easy_setopt(A, B, C, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_setopt(A, B, C, Y, Z)                       \
-  do {                                                        \
-    CURLMcode ec;                                             \
-    if((ec = curl_multi_setopt((A), (B), (C))) != CURLM_OK) { \
-      curl_mfprintf(stderr,                                   \
-                    "%s:%d curl_multi_setopt() failed, "      \
-                    "with code %d (%s)\n",                    \
-                    (Y), (Z), ec, curl_multi_strerror(ec));   \
-      res = TEST_ERR_MULTI;                                   \
-    }                                                         \
+#define exe_multi_setopt(A, B, C, Y, Z)                  \
+  do {                                                   \
+    CURLMcode ec;                                        \
+    if((ec = curl_multi_setopt(A, B, C)) != CURLM_OK) {  \
+      curl_mfprintf(stderr,                              \
+                    "%s:%d curl_multi_setopt() failed, " \
+                    "with code %d (%s)\n",               \
+                    Y, Z, ec, curl_multi_strerror(ec));  \
+      res = TEST_ERR_MULTI;                              \
+    }                                                    \
   } while(0)
 
 #define res_multi_setopt(A, B, C) \
-  exe_multi_setopt((A), (B), (C), __FILE__, __LINE__)
+  exe_multi_setopt(A, B, C, __FILE__, __LINE__)
 
-#define chk_multi_setopt(A, B, C, Y, Z)        \
-  do {                                         \
-    exe_multi_setopt((A), (B), (C), (Y), (Z)); \
-    if(res)                                    \
-      goto test_cleanup;                       \
+#define chk_multi_setopt(A, B, C, Y, Z) \
+  do {                                  \
+    exe_multi_setopt(A, B, C, Y, Z);    \
+    if(res)                             \
+      goto test_cleanup;                \
   } while(0)
 
 #define multi_setopt(A, B, C) \
-  chk_multi_setopt((A), (B), (C), __FILE__, __LINE__)
+  chk_multi_setopt(A, B, C, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
 #define exe_multi_add_handle(A, B, Y, Z)                     \
   do {                                                       \
     CURLMcode ec;                                            \
-    if((ec = curl_multi_add_handle((A), (B))) != CURLM_OK) { \
+    if((ec = curl_multi_add_handle(A, B)) != CURLM_OK) {     \
       curl_mfprintf(stderr,                                  \
                     "%s:%d curl_multi_add_handle() failed, " \
                     "with code %d (%s)\n",                   \
-                    (Y), (Z), ec, curl_multi_strerror(ec));  \
+                    Y, Z, ec, curl_multi_strerror(ec));      \
       res = TEST_ERR_MULTI;                                  \
     }                                                        \
   } while(0)
 
 #define res_multi_add_handle(A, B) \
-  exe_multi_add_handle((A), (B), __FILE__, __LINE__)
+  exe_multi_add_handle(A, B, __FILE__, __LINE__)
 
-#define chk_multi_add_handle(A, B, Y, Z)      \
-  do {                                        \
-    exe_multi_add_handle((A), (B), (Y), (Z)); \
-    if(res)                                   \
-      goto test_cleanup;                      \
+#define chk_multi_add_handle(A, B, Y, Z) \
+  do {                                   \
+    exe_multi_add_handle(A, B, Y, Z);    \
+    if(res)                              \
+      goto test_cleanup;                 \
   } while(0)
 
 #define multi_add_handle(A, B) \
-  chk_multi_add_handle((A), (B), __FILE__, __LINE__)
+  chk_multi_add_handle(A, B, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
 #define exe_multi_remove_handle(A, B, Y, Z)                     \
   do {                                                          \
     CURLMcode ec;                                               \
-    if((ec = curl_multi_remove_handle((A), (B))) != CURLM_OK) { \
+    if((ec = curl_multi_remove_handle(A, B)) != CURLM_OK) {     \
       curl_mfprintf(stderr,                                     \
                     "%s:%d curl_multi_remove_handle() failed, " \
                     "with code %d (%s)\n",                      \
-                    (Y), (Z), ec, curl_multi_strerror(ec));     \
+                    Y, Z, ec, curl_multi_strerror(ec));         \
       res = TEST_ERR_MULTI;                                     \
     }                                                           \
   } while(0)
 
 #define res_multi_remove_handle(A, B) \
-  exe_multi_remove_handle((A), (B), __FILE__, __LINE__)
+  exe_multi_remove_handle(A, B, __FILE__, __LINE__)
 
-#define chk_multi_remove_handle(A, B, Y, Z)      \
-  do {                                           \
-    exe_multi_remove_handle((A), (B), (Y), (Z)); \
-    if(res)                                      \
-      goto test_cleanup;                         \
+#define chk_multi_remove_handle(A, B, Y, Z) \
+  do {                                      \
+    exe_multi_remove_handle(A, B, Y, Z);    \
+    if(res)                                 \
+      goto test_cleanup;                    \
   } while(0)
 
 #define multi_remove_handle(A, B) \
-  chk_multi_remove_handle((A), (B), __FILE__, __LINE__)
+  chk_multi_remove_handle(A, B, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
 #define exe_multi_perform(A, B, Y, Z)                                    \
   do {                                                                   \
     CURLMcode ec;                                                        \
-    if((ec = curl_multi_perform((A), (B))) != CURLM_OK) {                \
+    if((ec = curl_multi_perform(A, B)) != CURLM_OK) {                    \
       curl_mfprintf(stderr,                                              \
                     "%s:%d curl_multi_perform() failed, "                \
                     "with code %d (%s)\n",                               \
-                    (Y), (Z), ec, curl_multi_strerror(ec));              \
+                    Y, Z, ec, curl_multi_strerror(ec));                  \
       res = TEST_ERR_MULTI;                                              \
     }                                                                    \
-    else if(*((B)) < 0) {                                                \
+    else if(*(B) < 0) {                                                  \
       curl_mfprintf(stderr,                                              \
                     "%s:%d curl_multi_perform() succeeded, "             \
                     "but returned invalid running_handles value (%d)\n", \
-                    (Y), (Z), (int)*((B)));                              \
+                    Y, Z, (int)*(B));                                    \
       res = TEST_ERR_NUM_HANDLES;                                        \
     }                                                                    \
   } while(0)
 
 #define res_multi_perform(A, B) \
-  exe_multi_perform((A), (B), __FILE__, __LINE__)
+  exe_multi_perform(A, B, __FILE__, __LINE__)
 
-#define chk_multi_perform(A, B, Y, Z)      \
-  do {                                     \
-    exe_multi_perform((A), (B), (Y), (Z)); \
-    if(res)                                \
-      goto test_cleanup;                   \
+#define chk_multi_perform(A, B, Y, Z) \
+  do {                                \
+    exe_multi_perform(A, B, Y, Z);    \
+    if(res)                           \
+      goto test_cleanup;              \
   } while(0)
 
 #define multi_perform(A, B) \
-  chk_multi_perform((A), (B), __FILE__, __LINE__)
+  chk_multi_perform(A, B, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_fdset(A, B, C, D, E, Y, Z)                           \
-  do {                                                                 \
-    CURLMcode ec;                                                      \
-    if((ec = curl_multi_fdset((A), (B), (C), (D), (E))) != CURLM_OK) { \
-      curl_mfprintf(stderr,                                            \
-                    "%s:%d curl_multi_fdset() failed, "                \
-                    "with code %d (%s)\n",                             \
-                    (Y), (Z), ec, curl_multi_strerror(ec));            \
-      res = TEST_ERR_MULTI;                                            \
-    }                                                                  \
-    else if(*((E)) < -1) {                                             \
-      curl_mfprintf(stderr,                                            \
-                    "%s:%d curl_multi_fdset() succeeded, "             \
-                    "but returned invalid max_fd value (%d)\n",        \
-                    (Y), (Z), (int)*((E)));                            \
-      res = TEST_ERR_NUM_HANDLES;                                      \
-    }                                                                  \
+#define exe_multi_fdset(A, B, C, D, E, Y, Z)                    \
+  do {                                                          \
+    CURLMcode ec;                                               \
+    if((ec = curl_multi_fdset(A, B, C, D, E)) != CURLM_OK) {    \
+      curl_mfprintf(stderr,                                     \
+                    "%s:%d curl_multi_fdset() failed, "         \
+                    "with code %d (%s)\n",                      \
+                    Y, Z, ec, curl_multi_strerror(ec));         \
+      res = TEST_ERR_MULTI;                                     \
+    }                                                           \
+    else if(*(E) < -1) {                                        \
+      curl_mfprintf(stderr,                                     \
+                    "%s:%d curl_multi_fdset() succeeded, "      \
+                    "but returned invalid max_fd value (%d)\n", \
+                    Y, Z, (int)*(E));                           \
+      res = TEST_ERR_NUM_HANDLES;                               \
+    }                                                           \
   } while(0)
 
 #define res_multi_fdset(A, B, C, D, E) \
-  exe_multi_fdset((A), (B), (C), (D), (E), __FILE__, __LINE__)
+  exe_multi_fdset(A, B, C, D, E, __FILE__, __LINE__)
 
-#define chk_multi_fdset(A, B, C, D, E, Y, Z)            \
-  do {                                                  \
-    exe_multi_fdset((A), (B), (C), (D), (E), (Y), (Z)); \
-    if(res)                                             \
-      goto test_cleanup;                                \
+#define chk_multi_fdset(A, B, C, D, E, Y, Z) \
+  do {                                       \
+    exe_multi_fdset(A, B, C, D, E, Y, Z);    \
+    if(res)                                  \
+      goto test_cleanup;                     \
   } while(0)
 
 #define multi_fdset(A, B, C, D, E) \
-  chk_multi_fdset((A), (B), (C), (D), (E), __FILE__, __LINE__)
+  chk_multi_fdset(A, B, C, D, E, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
 #define exe_multi_timeout(A, B, Y, Z)                             \
   do {                                                            \
     CURLMcode ec;                                                 \
-    if((ec = curl_multi_timeout((A), (B))) != CURLM_OK) {         \
+    if((ec = curl_multi_timeout(A, B)) != CURLM_OK) {             \
       curl_mfprintf(stderr,                                       \
                     "%s:%d curl_multi_timeout() failed, "         \
                     "with code %d (%s)\n",                        \
-                    (Y), (Z), ec, curl_multi_strerror(ec));       \
+                    Y, Z, ec, curl_multi_strerror(ec));           \
       res = TEST_ERR_BAD_TIMEOUT;                                 \
     }                                                             \
-    else if(*((B)) < -1L) {                                       \
+    else if(*(B) < -1L) {                                         \
       curl_mfprintf(stderr,                                       \
                     "%s:%d curl_multi_timeout() succeeded, "      \
                     "but returned invalid timeout value (%ld)\n", \
-                    (Y), (Z), (long)*((B)));                      \
+                    Y, Z, (long)*(B));                            \
       res = TEST_ERR_BAD_TIMEOUT;                                 \
     }                                                             \
   } while(0)
 
 #define res_multi_timeout(A, B) \
-  exe_multi_timeout((A), (B), __FILE__, __LINE__)
+  exe_multi_timeout(A, B, __FILE__, __LINE__)
 
-#define chk_multi_timeout(A, B, Y, Z)      \
-  do {                                     \
-    exe_multi_timeout((A), (B), (Y), (Z)); \
-    if(res)                                \
-      goto test_cleanup;                   \
+#define chk_multi_timeout(A, B, Y, Z) \
+  do {                                \
+    exe_multi_timeout(A, B, Y, Z);    \
+    if(res)                           \
+      goto test_cleanup;              \
   } while(0)
 
 #define multi_timeout(A, B) \
-  chk_multi_timeout((A), (B), __FILE__, __LINE__)
+  chk_multi_timeout(A, B, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_poll(A, B, C, D, E, Y, Z)                           \
-  do {                                                                \
-    CURLMcode ec;                                                     \
-    if((ec = curl_multi_poll((A), (B), (C), (D), (E))) != CURLM_OK) { \
-      curl_mfprintf(stderr,                                           \
-                    "%s:%d curl_multi_poll() failed, "                \
-                    "with code %d (%s)\n",                            \
-                    (Y), (Z), ec, curl_multi_strerror(ec));           \
-      res = TEST_ERR_MULTI;                                           \
-    }                                                                 \
-    else if(*((E)) < 0) {                                             \
-      curl_mfprintf(stderr,                                           \
-                    "%s:%d curl_multi_poll() succeeded, "             \
-                    "but returned invalid numfds value (%d)\n",       \
-                    (Y), (Z), (int)*((E)));                           \
-      res = TEST_ERR_NUM_HANDLES;                                     \
-    }                                                                 \
+#define exe_multi_poll(A, B, C, D, E, Y, Z)                     \
+  do {                                                          \
+    CURLMcode ec;                                               \
+    if((ec = curl_multi_poll(A, B, C, D, E)) != CURLM_OK) {     \
+      curl_mfprintf(stderr,                                     \
+                    "%s:%d curl_multi_poll() failed, "          \
+                    "with code %d (%s)\n",                      \
+                    Y, Z, ec, curl_multi_strerror(ec));         \
+      res = TEST_ERR_MULTI;                                     \
+    }                                                           \
+    else if(*(E) < 0) {                                         \
+      curl_mfprintf(stderr,                                     \
+                    "%s:%d curl_multi_poll() succeeded, "       \
+                    "but returned invalid numfds value (%d)\n", \
+                    Y, Z, (int)*(E));                           \
+      res = TEST_ERR_NUM_HANDLES;                               \
+    }                                                           \
   } while(0)
 
 #define res_multi_poll(A, B, C, D, E) \
-  exe_multi_poll((A), (B), (C), (D), (E), __FILE__, __LINE__)
+  exe_multi_poll(A, B, C, D, E, __FILE__, __LINE__)
 
-#define chk_multi_poll(A, B, C, D, E, Y, Z)            \
-  do {                                                 \
-    exe_multi_poll((A), (B), (C), (D), (E), (Y), (Z)); \
-    if(res)                                            \
-      goto test_cleanup;                               \
+#define chk_multi_poll(A, B, C, D, E, Y, Z) \
+  do {                                      \
+    exe_multi_poll(A, B, C, D, E, Y, Z);    \
+    if(res)                                 \
+      goto test_cleanup;                    \
   } while(0)
 
 #define multi_poll(A, B, C, D, E) \
-  chk_multi_poll((A), (B), (C), (D), (E), __FILE__, __LINE__)
+  chk_multi_poll(A, B, C, D, E, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_multi_wakeup(A, Y, Z)                           \
-  do {                                                      \
-    CURLMcode ec;                                           \
-    if((ec = curl_multi_wakeup((A))) != CURLM_OK) {         \
-      curl_mfprintf(stderr,                                 \
-                    "%s:%d curl_multi_wakeup() failed, "    \
-                    "with code %d (%s)\n",                  \
-                    (Y), (Z), ec, curl_multi_strerror(ec)); \
-      res = TEST_ERR_MULTI;                                 \
-    }                                                       \
+#define exe_multi_wakeup(A, Y, Z)                        \
+  do {                                                   \
+    CURLMcode ec;                                        \
+    if((ec = curl_multi_wakeup(A)) != CURLM_OK) {        \
+      curl_mfprintf(stderr,                              \
+                    "%s:%d curl_multi_wakeup() failed, " \
+                    "with code %d (%s)\n",               \
+                    Y, Z, ec, curl_multi_strerror(ec));  \
+      res = TEST_ERR_MULTI;                              \
+    }                                                    \
   } while(0)
 
 #define res_multi_wakeup(A) \
-  exe_multi_wakeup((A), __FILE__, __LINE__)
+  exe_multi_wakeup(A, __FILE__, __LINE__)
 
-#define chk_multi_wakeup(A, Y, Z)    \
-  do {                               \
-    exe_multi_wakeup((A), (Y), (Z)); \
-    if(res)                          \
-      goto test_cleanup;             \
+#define chk_multi_wakeup(A, Y, Z) \
+  do {                            \
+    exe_multi_wakeup(A, Y, Z);    \
+    if(res)                       \
+      goto test_cleanup;          \
   } while(0)
 
 #define multi_wakeup(A) \
-  chk_multi_wakeup((A), __FILE__, __LINE__)
+  chk_multi_wakeup(A, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_select_test(A, B, C, D, E, Y, Z)                                 \
-  do {                                                                       \
-    int ec;                                                                  \
-    if(select_wrapper((A), (B), (C), (D), (E)) == -1) {                      \
-      char ecbuf[STRERROR_LEN];                                              \
-      ec = SOCKERRNO;                                                        \
-      curl_mfprintf(stderr,                                                  \
-                    "%s:%d select() failed, with "                           \
-                    "errno %d (%s)\n",                                       \
-                    (Y), (Z), ec, curlx_strerror(ec, ecbuf, sizeof(ecbuf))); \
-      res = TEST_ERR_SELECT;                                                 \
-    }                                                                        \
+#define exe_select_test(A, B, C, D, E, Y, Z)                             \
+  do {                                                                   \
+    int ec;                                                              \
+    if(select_wrapper(A, B, C, D, E) == -1) {                            \
+      char ecbuf[STRERROR_LEN];                                          \
+      ec = SOCKERRNO;                                                    \
+      curl_mfprintf(stderr,                                              \
+                    "%s:%d select() failed, with "                       \
+                    "errno %d (%s)\n",                                   \
+                    Y, Z, ec, curlx_strerror(ec, ecbuf, sizeof(ecbuf))); \
+      res = TEST_ERR_SELECT;                                             \
+    }                                                                    \
   } while(0)
 
 #define res_select_test(A, B, C, D, E) \
-  exe_select_test((A), (B), (C), (D), (E), __FILE__, __LINE__)
+  exe_select_test(A, B, C, D, E, __FILE__, __LINE__)
 
-#define chk_select_test(A, B, C, D, E, Y, Z)            \
-  do {                                                  \
-    exe_select_test((A), (B), (C), (D), (E), (Y), (Z)); \
-    if(res)                                             \
-      goto test_cleanup;                                \
+#define chk_select_test(A, B, C, D, E, Y, Z) \
+  do {                                       \
+    exe_select_test(A, B, C, D, E, Y, Z);    \
+    if(res)                                  \
+      goto test_cleanup;                     \
   } while(0)
 
 #define select_test(A, B, C, D, E) \
-  chk_select_test((A), (B), (C), (D), (E), __FILE__, __LINE__)
+  chk_select_test(A, B, C, D, E, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
@@ -504,7 +504,7 @@ void ws_close(CURL *curl);
       curl_mfprintf(stderr,                                               \
                     "%s:%d ABORTING TEST, since it seems "                \
                     "that it would have run forever (%ld ms > %ld ms)\n", \
-                    (Y), (Z), (long)timediff, (long)(TEST_HANG_TIMEOUT)); \
+                    Y, Z, (long)timediff, (long)(TEST_HANG_TIMEOUT));     \
       res = TEST_ERR_RUNS_FOREVER;                                        \
     }                                                                     \
   } while(0)
@@ -513,7 +513,7 @@ void ws_close(CURL *curl);
   exe_test_timedout(TEST_HANG_TIMEOUT, __FILE__, __LINE__)
 
 #define res_test_timedout_custom(T) \
-  exe_test_timedout((T), __FILE__, __LINE__)
+  exe_test_timedout(T, __FILE__, __LINE__)
 
 #define chk_test_timedout(T, Y, Z) \
   do {                             \
@@ -526,37 +526,37 @@ void ws_close(CURL *curl);
   chk_test_timedout(TEST_HANG_TIMEOUT, __FILE__, __LINE__)
 
 #define abort_on_test_timeout_custom(T) \
-  chk_test_timedout((T), __FILE__, __LINE__)
+  chk_test_timedout(T, __FILE__, __LINE__)
 
 /* ---------------------------------------------------------------- */
 
-#define exe_global_init(A, Y, Z)                           \
-  do {                                                     \
-    CURLcode ec;                                           \
-    if((ec = curl_global_init((A))) != CURLE_OK) {         \
-      curl_mfprintf(stderr,                                \
-                    "%s:%d curl_global_init() failed, "    \
-                    "with code %d (%s)\n",                 \
-                    (Y), (Z), ec, curl_easy_strerror(ec)); \
-      res = ec;                                            \
-    }                                                      \
+#define exe_global_init(A, Y, Z)                        \
+  do {                                                  \
+    CURLcode ec;                                        \
+    if((ec = curl_global_init(A)) != CURLE_OK) {        \
+      curl_mfprintf(stderr,                             \
+                    "%s:%d curl_global_init() failed, " \
+                    "with code %d (%s)\n",              \
+                    Y, Z, ec, curl_easy_strerror(ec));  \
+      res = ec;                                         \
+    }                                                   \
   } while(0)
 
 #define res_global_init(A) \
-  exe_global_init((A), __FILE__, __LINE__)
+  exe_global_init(A, __FILE__, __LINE__)
 
-#define chk_global_init(A, Y, Z)    \
-  do {                              \
-    exe_global_init((A), (Y), (Z)); \
-    if(res)                         \
-      return res;                   \
+#define chk_global_init(A, Y, Z) \
+  do {                           \
+    exe_global_init(A, Y, Z);    \
+    if(res)                      \
+      return res;                \
   } while(0)
 
 /* global_init() is different than other macros. In case of
    failure it 'return's instead of going to 'test_cleanup'. */
 
 #define global_init(A) \
-  chk_global_init((A), __FILE__, __LINE__)
+  chk_global_init(A, __FILE__, __LINE__)
 
 #define NO_SUPPORT_BUILT_IN                     \
   {                                             \
