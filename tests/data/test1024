@@ -80,9 +80,6 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -c %LOGDIR/jar%TESTNUMBER
 <features>
 cookies
 </features>
-<setenv>
-SSLKEYLOGFILE=%LOGDIR/%TESTNUMBER.log.ssl
-</setenv>
 </client>
 
 # Verify data after the test has been "shot"
