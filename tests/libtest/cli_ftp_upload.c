@@ -124,7 +124,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   curl_easy_setopt(curl_handle, CURLOPT_URL, url);
   curl_easy_setopt(curl_handle, CURLOPT_USERPWD, NULL);
   curl_easy_setopt(curl_handle, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                  CURLFTP_CREATE_DIR);
+                   CURLFTP_CREATE_DIR);
   curl_easy_setopt(curl_handle, CURLOPT_UPLOAD, 1L);
   curl_easy_setopt(curl_handle, CURLOPT_READFUNCTION,
                    test_cli_ftp_upload_read);
@@ -170,6 +170,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   curl_easy_cleanup(curl_handle);
   curl_multi_cleanup(multi_handle);
   curl_global_cleanup();
+  curl_slist_free_all(host);
 
   curl_mfprintf(stderr, "transfer result: %d\n", result);
   return result;
