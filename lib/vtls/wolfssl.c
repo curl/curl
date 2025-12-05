@@ -414,7 +414,6 @@ static void wssl_bio_cf_free_methods(void)
 
 #endif /* !USE_BIO_CHAIN */
 
-#ifdef HAVE_EX_DATA
 CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -498,7 +497,6 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
   }
   return 0;
 }
-#endif
 
 static CURLcode wssl_on_session_reuse(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
@@ -1262,12 +1260,10 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
   }
 #endif
 
-#ifdef HAVE_EX_DATA
   if(Curl_ssl_scache_use(cf, data) && (transport != TRNSPRT_QUIC)) {
     /* Register to get notified when a new session is received */
     wolfSSL_CTX_sess_set_new_cb(wctx->ssl_ctx, wssl_vtls_new_session_cb);
   }
-#endif
 
   if(cb_setup) {
     result = cb_setup(cf, data, cb_user_data);
@@ -1308,11 +1304,7 @@ CURLcode Curl_wssl_ctx_init(struct wssl_ctx *wctx,
     goto out;
   }
 
-#ifdef HAVE_EX_DATA
   wolfSSL_set_app_data(wctx->ssl, ssl_user_data);
-#else
-  (void)ssl_user_data;
-#endif
 #ifdef WOLFSSL_QUIC
   if(transport == TRNSPRT_QUIC)
     wolfSSL_set_quic_use_legacy_codepoint(wctx->ssl, 0);
