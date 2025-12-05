@@ -4370,16 +4370,19 @@ AC_ARG_ENABLE(typecheck,
 AS_HELP_STRING([--enable-typecheck],[Enable type checking (default)])
 AS_HELP_STRING([--disable-typecheck],[Disable type checking]),
 [ case "$enableval" in
-  no)
+  yes)
+    AC_MSG_RESULT(yes)
+    ;;
+  *)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
     curl_typecheck_msg="no"
     ;;
-  *)
-    AC_MSG_RESULT(yes)
-    ;;
   esac ],
-    AC_MSG_RESULT(yes)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_TYPECHECK, 1, [to disable type checking])
+    curl_typecheck_msg="no"
+    ;;
 )
 
 dnl ************************************************************
