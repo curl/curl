@@ -56,7 +56,8 @@
 
 /* fail() is for when the test case figured out by itself that a check
    proved a failure */
-#define fail(msg) do {                                                  \
+#define fail(msg)                                                       \
+  do {                                                                  \
     curl_mfprintf(stderr, "%s:%d test FAILED: '%s'\n",                  \
                   __FILE__, __LINE__, msg);                             \
     unitfail++;                                                         \
