@@ -1029,7 +1029,7 @@ void Curl_ldap_version(char *buf, size_t bufsz)
 #ifdef USE_WIN32_LDAP
   curl_msnprintf(buf, bufsz, "WinLDAP");
 #else
-#ifdef __APPLE__
+#ifdef LDAP_OPT_X_TLS_PASSPHRASE
   static const char *flavor = "/Apple";
 #else
   static const char *flavor = "";
