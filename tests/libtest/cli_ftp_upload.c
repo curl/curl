@@ -91,7 +91,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
       resolve = coptarg;
       break;
     default:
-      usage_ftp_upload("unkown option");
+      usage_ftp_upload("unknown option");
       return (CURLcode)1;
     }
   }
@@ -110,8 +110,6 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   data.data = "abcdefghijklmnopqrstuvwxyz"
               "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   data.data_len = strlen(data.data);
-
-
 
   curl_global_init(CURL_GLOBAL_ALL);
   multi_handle = curl_multi_init();
