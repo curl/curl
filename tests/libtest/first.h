@@ -59,12 +59,12 @@ extern int unitfail; /* for unittests */
 #define CURL_GNUC_DIAG
 #endif
 
-#define test_setopt(A, B, C)                                    \
-  if((res = curl_easy_setopt((A), (B), (C))) != CURLE_OK)       \
+#define test_setopt(A, B, C)                        \
+  if((res = curl_easy_setopt(A, B, C)) != CURLE_OK) \
     goto test_cleanup
 
-#define test_multi_setopt(A, B, C)                              \
-  if((res = curl_multi_setopt((A), (B), (C))) != CURLE_OK)      \
+#define test_multi_setopt(A, B, C)                   \
+  if((res = curl_multi_setopt(A, B, C)) != CURLE_OK) \
     goto test_cleanup
 
 extern const char *libtest_arg2; /* set by first.c to the argv[2] or NULL */
