@@ -10,7 +10,7 @@ See-also:
   - ssl-auto-client-cert
   - proxy
 Example:
-  - --proxy-ssl-auto-client-cert -x https://proxy $URL
+  - --proxy-ssl-auto-client-cert -x https://proxy.example $URL
 ---
 
 # `--proxy-ssl-auto-client-cert`

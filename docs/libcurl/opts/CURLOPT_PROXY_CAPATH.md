@@ -64,7 +64,7 @@ int main(void)
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* using an HTTPS proxy */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
     curl_easy_setopt(curl, CURLOPT_PROXY_CAPATH, "/etc/cert-dir");
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);

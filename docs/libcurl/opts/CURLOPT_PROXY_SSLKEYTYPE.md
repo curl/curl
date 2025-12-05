@@ -53,7 +53,7 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT, "client.pem");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEYTYPE, "PEM");
