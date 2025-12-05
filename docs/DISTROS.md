@@ -49,8 +49,8 @@ archives](https://curl.se/mail/list.cgi?list=curl-distros)).
 
 *Rolling Release*
 
-- curl package source and patches: https://git.buildroot.net/buildroot/tree/package/libcurl
-- curl issues: https://bugs.buildroot.org/buglist.cgi?quicksearch=curl
+- curl package source and patches: **missing URL**
+- curl issues: **missing URL**
 
 ## Chimera
 
