@@ -2114,15 +2114,22 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     return CURLE_FTP_ACCEPT_FAILED;
   }
-#if !defined(HAVE_ACCEPT4) && defined(HAVE_FCNTL)
-  if((fcntl(s_accepted, F_SETFD, FD_CLOEXEC) < 0) ||
-     (curlx_nonblock(s_accepted, TRUE) < 0)) {
-    failf(data, "fcntl set CLOEXEC/NONBLOCK: %s",
+#ifndef HAVE_ACCEPT4
+#ifdef HAVE_FCNTL
+  if(fcntl(s_accepted, F_SETFD, FD_CLOEXEC) < 0) {
+    failf(data, "fcntl set CLOEXEC: %s",
           curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
     Curl_socket_close(data, cf->conn, s_accepted);
     return CURLE_FTP_ACCEPT_FAILED;
   }
-#endif
+#endif /* HAVE_FCNTL */
+  if(curlx_nonblock(s_accepted, TRUE) < 0) {
+    failf(data, "set socket NONBLOCK: %s",
+          curlx_strerror(SOCKERRNO, errbuf, sizeof(errbuf)));
+    Curl_socket_close(data, cf->conn, s_accepted);
+    return CURLE_FTP_ACCEPT_FAILED;
+  }
+#endif /* !HAVE_ACCEPT4 */
   infof(data, "Connection accepted from server");
 
   /* Replace any filter on SECONDARY with one listening on this socket */

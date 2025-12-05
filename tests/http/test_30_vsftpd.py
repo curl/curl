@@ -31,7 +31,7 @@ import os
 import shutil
 import pytest
 
-from testenv import Env, CurlClient, VsFTPD
+from testenv import Env, CurlClient, VsFTPD, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -234,6 +234,17 @@ class TestVsFTPD:
         r.check_exit_code(78)
         r.check_stats(count=1, exitcode=78)
         r.check_stats_timelines()
+
+    def test_30_12_upload_eprt(self, env: Env, vsftpd: VsFTPD):
+        docname = 'test_30_12'
+        client = LocalClient(name='cli_ftp_upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/{docname}'
+        r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpd.port}:127.0.0.1', url])
+        r.check_exit_code(0)
+        dstfile = os.path.join(vsftpd.docs_dir, docname)
+        assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
