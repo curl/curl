@@ -169,6 +169,7 @@ static int gtls_init(void)
 static void gtls_cleanup(void)
 {
   gnutls_global_deinit();
+  Curl_tls_keylog_close();
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS

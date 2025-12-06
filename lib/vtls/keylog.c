@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "../curl_setup.h"
+#include "keylog.h"
 
 #if defined(USE_OPENSSL) || \
   defined(USE_GNUTLS) || \
@@ -30,18 +31,17 @@
   defined(USE_QUICHE) || \
   defined(USE_RUSTLS)
 
-#include "keylog.h"
 #include <curl/curl.h>
 #include "../escape.h"
 #include "../curlx/fopen.h"
 
 /* The fp for the open SSLKEYLOGFILE, or NULL if not open */
 static FILE *keylog_file_fp;
+/* Used for verbose logging */
+static char *keylog_file_name;
 
 void Curl_tls_keylog_open(void)
 {
-  char *keylog_file_name;
-
   if(!keylog_file_fp) {
     keylog_file_name = curl_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
@@ -57,7 +57,6 @@ void Curl_tls_keylog_open(void)
           keylog_file_fp = NULL;
         }
       }
-      Curl_safefree(keylog_file_name);
     }
   }
 }
@@ -68,11 +67,17 @@ void Curl_tls_keylog_close(void)
     curlx_fclose(keylog_file_fp);
     keylog_file_fp = NULL;
   }
+  Curl_safefree(keylog_file_name);
 }
 
 bool Curl_tls_keylog_enabled(void)
 {
   return keylog_file_fp != NULL;
+}
+
+const char *Curl_tls_keylog_file_name(void)
+{
+  return keylog_file_name;
 }
 
 bool Curl_tls_keylog_write_line(const char *line)
@@ -143,6 +148,18 @@ bool Curl_tls_keylog_write(const char *label,
      may not be thread-safe. */
   fputs((char *)line, keylog_file_fp);
   return TRUE;
+}
+
+#else
+
+bool Curl_tls_keylog_enabled(void)
+{
+  return FALSE;
+}
+
+const char *Curl_tls_keylog_file_name(void)
+{
+  return NULL;
 }
 
 #endif  /* TLS or QUIC backend */
