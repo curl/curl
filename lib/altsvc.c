@@ -64,12 +64,7 @@ const char *Curl_alpnid2str(enum alpnid id)
   }
 }
 
-static void altsvc_free(struct altsvc *as)
-{
-  curlx_free(as->src.host);
-  curlx_free(as->dst.host);
-  curlx_free(as);
-}
+#define altsvc_free(x) curlx_free(as)
 
 static struct altsvc *altsvc_createid(const char *srchost,
                                       size_t hlen,
@@ -80,38 +75,37 @@ static struct altsvc *altsvc_createid(const char *srchost,
                                       size_t srcport,
                                       size_t dstport)
 {
-  struct altsvc *as = curlx_calloc(1, sizeof(struct altsvc));
-  if(!as)
-    return NULL;
-  DEBUGASSERT(hlen);
-  DEBUGASSERT(dlen);
-  if(!hlen || !dlen)
-    /* bad input */
-    goto error;
+  struct altsvc *as;
   if((hlen > 2) && srchost[0] == '[') {
     /* IPv6 address, strip off brackets */
     srchost++;
     hlen -= 2;
   }
-  else if(srchost[hlen - 1] == '.') {
+  else if(hlen && (srchost[hlen - 1] == '.')) {
     /* strip off trailing dot */
     hlen--;
-    if(!hlen)
-      goto error;
   }
   if((dlen > 2) && dsthost[0] == '[') {
     /* IPv6 address, strip off brackets */
     dsthost++;
     dlen -= 2;
   }
+  DEBUGASSERT(hlen);
+  DEBUGASSERT(dlen);
+  if(!hlen || !dlen)
+    /* bad input */
+    return NULL;
+  /* struct size plus both strings */
+  as = curlx_calloc(1, sizeof(struct altsvc) + (hlen + 1) + (dlen + 1));
+  if(!as)
+    return NULL;
+  as->src.host = (char *)as + sizeof(struct altsvc);
+  memcpy(as->src.host, srchost, hlen);
+  /* the null terminator is already there */
 
-  as->src.host = Curl_memdup0(srchost, hlen);
-  if(!as->src.host)
-    goto error;
-
-  as->dst.host = Curl_memdup0(dsthost, dlen);
-  if(!as->dst.host)
-    goto error;
+  as->dst.host = (char *)as + sizeof(struct altsvc) + hlen + 1;
+  memcpy(as->dst.host, dsthost, dlen);
+  /* the null terminator is already there */
 
   as->src.alpnid = srcalpnid;
   as->dst.alpnid = dstalpnid;
@@ -119,9 +113,6 @@ static struct altsvc *altsvc_createid(const char *srchost,
   as->dst.port = (unsigned short)dstport;
 
   return as;
-error:
-  altsvc_free(as);
-  return NULL;
 }
 
 static struct altsvc *altsvc_create(struct Curl_str *srchost,
@@ -194,6 +185,8 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
       as->persist = persist ? 1 : 0;
       Curl_llist_append(&asi->list, as, &as->node);
     }
+    else
+      return CURLE_OUT_OF_MEMORY;
   }
 
   return CURLE_OK;
@@ -600,6 +593,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                   (int)curlx_strlen(&dsthost), curlx_str(&dsthost),
                   dstport, Curl_alpnid2str(dstalpnid));
           }
+          else
+            return CURLE_OUT_OF_MEMORY;
         }
       }
       else

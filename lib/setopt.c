@@ -2532,7 +2532,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     if(result)
       return result;
     if(ptr)
-      (void)Curl_altsvc_load(data->asi, ptr);
+      return Curl_altsvc_load(data->asi, ptr);
     break;
 #endif /* ! CURL_DISABLE_ALTSVC */
 #ifdef USE_ECH
