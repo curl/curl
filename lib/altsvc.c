@@ -64,7 +64,7 @@ const char *Curl_alpnid2str(enum alpnid id)
   }
 }
 
-#define altsvc_free(x) curlx_free(as)
+#define altsvc_free(x) curlx_free(x)
 
 static struct altsvc *altsvc_createid(const char *srchost,
                                       size_t hlen,
