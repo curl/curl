@@ -90,8 +90,6 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dsthost++;
     dlen -= 2;
   }
-  DEBUGASSERT(hlen);
-  DEBUGASSERT(dlen);
   if(!hlen || !dlen)
     /* bad input */
     return NULL;
