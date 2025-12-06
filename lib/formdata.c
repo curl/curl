@@ -636,6 +636,10 @@ int curl_formget(struct curl_httppost *form, void *arg,
   CURLcode result;
   curl_mimepart toppart;
 
+  /* Validate callback is provided */
+  if(!append)
+    return (int)CURLE_BAD_FUNCTION_ARGUMENT;
+
   Curl_mime_initpart(&toppart); /* default form is empty */
   result = Curl_getformdata(NULL, &toppart, form, NULL);
   if(!result)
