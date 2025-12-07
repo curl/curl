@@ -185,7 +185,7 @@ jobs:
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     runs-on: ${{ matrix.image || 'windows-2022' }}
-    timeout-minutes: ${{ contains(matrix.tflags, '-t') && 18 || 15 }}
+    timeout-minutes: 15
     defaults:
       run:
         shell: msys2 {0}
@@ -206,14 +206,8 @@ jobs:
           - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: 'skiprun'             , config: '--enable-debug --with-openssl --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib CPPFLAGS=-D_WIN32_WINNT=0x0501', install: 'mingw-w64-x86_64-openssl mingw-w64-x86_64-libssh2', name: 'default XP' }
           - { build: 'autotools', sys: 'mingw64'   , env: 'x86_64'       , tflags: ''                    , config: '--enable-debug --with-openssl --enable-windows-unicode --enable-ares --with-openssl-quic --enable-shared=no', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-openssl mingw-w64-x86_64-nghttp3 mingw-w64-x86_64-libssh2', name: 'c-ares U' }
           - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: ''                    , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=20 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 20' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=19 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 19' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=18 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 18' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=17 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 17' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=16 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 16' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=15 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 15' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=14 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 14' }
-          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=13 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture 13' }
+          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=13 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', install: 'mingw-w64-x86_64-c-ares mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel c-ares U torture' }
+          - { build: 'cmake'    , sys: 'mingw64'   , env: 'x86_64'       , tflags: '-t --shallow=13 !FTP', config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', install: 'mingw-w64-x86_64-libssh2', type: 'Debug', name: 'schannel U torture' }
           # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
           #          read its configuration from, making it vulnerable to attacks on
           #          Windows. Do not use this component till there is a fix for these.
@@ -375,7 +369,7 @@ jobs:
 
       - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: ${{ contains(matrix.tflags, '-t') && 20 || 10 }}
+        timeout-minutes: ${{ contains(matrix.tflags, '-t') && 15 || 10 }}
         env:
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
