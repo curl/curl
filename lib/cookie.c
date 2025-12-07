@@ -67,7 +67,6 @@ static void freecookie(struct Cookie *co, bool maintoo)
 {
   curlx_free(co->domain);
   curlx_free(co->path);
-  curlx_free(co->spath);
   curlx_free(co->name);
   curlx_free(co->value);
   if(maintoo)
@@ -227,20 +226,19 @@ static size_t cookiehash(const char * const domain)
 /*
  * cookie path sanitize
  */
-static char *sanitize_cookie_path(const char *cookie_path)
+static char *sanitize_cookie_path(const char *cookie_path, size_t len)
 {
-  size_t len = strlen(cookie_path);
-
   /* some sites send path attribute within '"'. */
-  if(cookie_path[0] == '\"') {
+  if(len && (cookie_path[0] == '\"')) {
     cookie_path++;
     len--;
+
+    if(len && (cookie_path[len - 1] == '\"'))
+      len--;
   }
-  if(len && (cookie_path[len - 1] == '\"'))
-    len--;
 
   /* RFC6265 5.2.4 The Path Attribute */
-  if(cookie_path[0] != '/')
+  if(!len || (cookie_path[0] != '/'))
     /* Let cookie-path be the default-path. */
     return curlx_strdup("/");
 
@@ -393,23 +391,23 @@ static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
     result = strstore(&co->value, curlx_str(&cp[COOKIE_VALUE]),
                       curlx_strlen(&cp[COOKIE_VALUE]));
   if(!result) {
-    if(curlx_strlen(&cp[COOKIE_PATH]))
-      result = strstore(&co->path, curlx_str(&cp[COOKIE_PATH]),
-                        curlx_strlen(&cp[COOKIE_PATH]));
+    size_t plen = 0;
+    if(curlx_strlen(&cp[COOKIE_PATH])) {
+      path = curlx_str(&cp[COOKIE_PATH]);
+      plen = curlx_strlen(&cp[COOKIE_PATH]);
+    }
     else if(path) {
       /* No path was given in the header line, set the default */
       const char *endslash = strrchr(path, '/');
-      if(endslash) {
-        size_t pathlen = (endslash - path + 1); /* include end slash */
-        co->path = Curl_memdup0(path, pathlen);
-        if(!co->path)
-          result = CURLE_OUT_OF_MEMORY;
-      }
+      if(endslash)
+        plen = (endslash - path + 1); /* include end slash */
+      else
+        plen = strlen(path);
     }
 
-    if(!result && co->path) {
-      co->spath = sanitize_cookie_path(co->path);
-      if(!co->spath)
+    if(path) {
+      co->path = sanitize_cookie_path(path, plen);
+      if(!co->path)
         result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -734,23 +732,17 @@ static CURLcode parse_netscape(struct Cookie *co,
       /* The file format allows the path field to remain not filled in */
       if(strncmp("TRUE", ptr, len) && strncmp("FALSE", ptr, len)) {
         /* only if the path does not look like a boolean option! */
-        co->path = Curl_memdup0(ptr, len);
+        co->path = sanitize_cookie_path(ptr, len);
         if(!co->path)
           return CURLE_OUT_OF_MEMORY;
-        else {
-          co->spath = sanitize_cookie_path(co->path);
-          if(!co->spath)
-            return CURLE_OUT_OF_MEMORY;
-        }
         break;
       }
-      /* this does not look like a path, make one up! */
-      co->path = curlx_strdup("/");
-      if(!co->path)
-        return CURLE_OUT_OF_MEMORY;
-      co->spath = curlx_strdup("/");
-      if(!co->spath)
-        return CURLE_OUT_OF_MEMORY;
+      else {
+        /* this does not look like a path, make one up! */
+        co->path = curlx_strdup("/");
+        if(!co->path)
+          return CURLE_OUT_OF_MEMORY;
+      }
       fields++; /* add a field and fall down to secure */
       FALLTHROUGH();
     case 3:
@@ -875,7 +867,7 @@ static bool replace_existing(struct Curl_easy *data,
         matching_domains = TRUE;
 
       if(matching_domains && /* the domains were identical */
-         clist->spath && co->spath && /* both have paths */
+         clist->path && co->path && /* both have paths */
          clist->secure && !co->secure && !secure) {
         size_t cllen;
         const char *sep = NULL;
@@ -887,15 +879,15 @@ static bool replace_existing(struct Curl_easy *data,
          * "/loginhelper" is ok.
          */
 
-        DEBUGASSERT(clist->spath[0]);
-        if(clist->spath[0])
-          sep = strchr(clist->spath + 1, '/');
+        DEBUGASSERT(clist->path[0]);
+        if(clist->path[0])
+          sep = strchr(clist->path + 1, '/');
         if(sep)
-          cllen = sep - clist->spath;
+          cllen = sep - clist->path;
         else
-          cllen = strlen(clist->spath);
+          cllen = strlen(clist->path);
 
-        if(curl_strnequal(clist->spath, co->spath, cllen)) {
+        if(curl_strnequal(clist->path, co->path, cllen)) {
           infof(data, "cookie '%s' for domain '%s' dropped, would "
                 "overlay an existing cookie", co->name, co->domain);
           return FALSE;
@@ -918,10 +910,10 @@ static bool replace_existing(struct Curl_easy *data,
       if(replace_old) {
         /* the domains were identical */
 
-        if(clist->spath && co->spath &&
-           !curl_strequal(clist->spath, co->spath))
+        if(clist->path && co->path &&
+           !curl_strequal(clist->path, co->path))
           replace_old = FALSE;
-        else if(!clist->spath != !co->spath)
+        else if(!clist->path != !co->path)
           replace_old = FALSE;
       }
 
@@ -1007,7 +999,7 @@ Curl_cookie_add(struct Curl_easy *data,
      * The __Host- prefix requires the cookie to be secure, have a "/" path
      * and not have a domain set.
      */
-    if(co->secure && co->path && strcmp(co->path, "/") == 0 && !co->tailmatch)
+    if(co->secure && co->path && !strcmp(co->path, "/") && !co->tailmatch)
       ;
     else
       goto fail;
@@ -1324,7 +1316,7 @@ CURLcode Curl_cookie_getlist(struct Curl_easy *data,
          * now check the left part of the path with the cookies path
          * requirement
          */
-        if(!co->spath || pathmatch(co->spath, path)) {
+        if(!co->path || pathmatch(co->path, path)) {
 
           /*
            * This is a match and we add it to the return-linked-list
