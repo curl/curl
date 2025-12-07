@@ -441,85 +441,79 @@ parse_cookie_header(struct Curl_easy *data,
                                      origin */
 {
   /* This line was read off an HTTP-header */
-  time_t now;
+  time_t now = 0;
   size_t linelength = strlen(ptr);
-  CURLcode result;
-  struct Curl_str cookie[COOKIE_PIECES] = { 0 };
+  CURLcode result = CURLE_OK;
+  struct Curl_str cookie[COOKIE_PIECES];
   *okay = FALSE;
   if(linelength > MAX_COOKIE_LINE)
     /* discard overly long lines at once */
     return CURLE_OK;
 
-  now = time(NULL);
+  /* memset instead of initializer because gcc 4.8.1 is silly */
+  memset(cookie, 0, sizeof(cookie));
   do {
     struct Curl_str name;
     struct Curl_str val;
 
     /* we have a <name>=<value> pair or a stand-alone word here */
     if(!curlx_str_cspn(&ptr, &name, ";\t\r\n=")) {
-      bool done = FALSE;
       bool sep = FALSE;
       curlx_str_trimblanks(&name);
 
       if(!curlx_str_single(&ptr, '=')) {
         sep = TRUE; /* a '=' was used */
-        if(!curlx_str_cspn(&ptr, &val, ";\r\n")) {
+        if(!curlx_str_cspn(&ptr, &val, ";\r\n"))
           curlx_str_trimblanks(&val);
-
-          /* Reject cookies with a TAB inside the value */
-          if(memchr(curlx_str(&val), '\t', curlx_strlen(&val))) {
-            infof(data, "cookie contains TAB, dropping");
-            return CURLE_OK;
-          }
-        }
       }
-      else {
+      else
         curlx_str_init(&val);
-      }
-
-      /*
-       * Check for too long individual name or contents, or too long
-       * combination of name + contents. Chrome and Firefox support 4095 or
-       * 4096 bytes combo
-       */
-      if(curlx_strlen(&name) >= (MAX_NAME - 1) ||
-         curlx_strlen(&val) >= (MAX_NAME - 1) ||
-         ((curlx_strlen(&name) + curlx_strlen(&val)) > MAX_NAME)) {
-        infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
-              curlx_strlen(&name), curlx_strlen(&val));
-        return CURLE_OK;
-      }
-
-      /*
-       * Check if we have a reserved prefix set before anything else, as we
-       * otherwise have to test for the prefix in both the cookie name and
-       * "the rest". Prefixes must start with '__' and end with a '-', so
-       * only test for names where that can possibly be true.
-       */
-      if(!strncmp("__Secure-", curlx_str(&name), 9))
-        co->prefix_secure = TRUE;
-      else if(!strncmp("__Host-", curlx_str(&name), 7))
-        co->prefix_host = TRUE;
 
       if(!curlx_strlen(&cookie[COOKIE_NAME])) {
         /* The first name/value pair is the actual cookie name */
         if(!sep ||
            /* Bad name/value pair. */
            invalid_octets(curlx_str(&name), curlx_strlen(&name)) ||
-           invalid_octets(curlx_str(&val), curlx_strlen(&val))) {
+           invalid_octets(curlx_str(&val), curlx_strlen(&val)) ||
+           !curlx_strlen(&name)) {
           infof(data, "invalid octets in name/value, cookie dropped");
           return CURLE_OK;
         }
+
+        /*
+         * Check for too long individual name or contents, or too long
+         * combination of name + contents. Chrome and Firefox support 4095 or
+         * 4096 bytes combo
+         */
+        if(curlx_strlen(&name) >= (MAX_NAME - 1) ||
+           curlx_strlen(&val) >= (MAX_NAME - 1) ||
+           ((curlx_strlen(&name) + curlx_strlen(&val)) > MAX_NAME)) {
+          infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
+                curlx_strlen(&name), curlx_strlen(&val));
+          return CURLE_OK;
+        }
+
+        /* Reject cookies with a TAB inside the value */
+        if(curlx_strlen(&val) &&
+           memchr(curlx_str(&val), '\t', curlx_strlen(&val))) {
+          infof(data, "cookie contains TAB, dropping");
+          return CURLE_OK;
+        }
+
+        /* Check if we have a reserved prefix set. */
+        if(!strncmp("__Secure-", curlx_str(&name), 9))
+          co->prefix_secure = TRUE;
+        else if(!strncmp("__Host-", curlx_str(&name), 7))
+          co->prefix_host = TRUE;
+
         cookie[COOKIE_NAME] = name;
         cookie[COOKIE_VALUE] = val;
-        done = TRUE;
       }
-      else if(!curlx_strlen(&val)) {
+      else if(!sep) {
         /*
-         * this was a "<name>=" with no content, and we must allow
-         * 'secure' and 'httponly' specified this weirdly
+         * this is a "<name>" with no content
          */
-        done = TRUE;
+
         /*
          * secure cookies are only allowed to be set when the connection is
          * using a secure protocol, or when the cookie is being set by
@@ -529,18 +523,13 @@ parse_cookie_header(struct Curl_easy *data,
           if(secure || !ci->running)
             co->secure = TRUE;
           else {
-            infof(data, "skipped cookie %s because not 'secure'", co->name);
+            infof(data, "skipped cookie because not 'secure'");
             return CURLE_OK;
           }
         }
         else if(curlx_str_casecompare(&name, "httponly"))
           co->httponly = TRUE;
-        else if(sep)
-          /* there was a '=' so we are not done parsing this field */
-          done = FALSE;
       }
-      if(done)
-        ;
       else if(curlx_str_casecompare(&name, "path")) {
         cookie[COOKIE_PATH] = val;
       }
@@ -588,9 +577,6 @@ parse_cookie_header(struct Curl_easy *data,
           return CURLE_OK;
         }
       }
-      else if(curlx_str_casecompare(&name, "version")) {
-        /* just ignore */
-      }
       else if(curlx_str_casecompare(&name, "max-age") && curlx_strlen(&val)) {
         /*
          * Defined in RFC2109:
@@ -606,6 +592,8 @@ parse_cookie_header(struct Curl_easy *data,
         if(*maxage == '\"')
           maxage++;
         rc = curlx_str_number(&maxage, &co->expires, CURL_OFF_T_MAX);
+        if(!now)
+          now = time(NULL);
         switch(rc) {
         case STRE_OVERFLOW:
           /* overflow, used max value */
@@ -627,46 +615,38 @@ parse_cookie_header(struct Curl_easy *data,
         }
         cap_expires(now, co);
       }
-      else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val)) {
-        if(!co->expires && (curlx_strlen(&val) < MAX_DATE_LENGTH)) {
-          /*
-           * Let max-age have priority.
-           *
-           * If the date cannot get parsed for whatever reason, the cookie
-           * will be treated as a session cookie
-           */
-          char dbuf[MAX_DATE_LENGTH + 1];
-          time_t date = 0;
-          memcpy(dbuf, curlx_str(&val), curlx_strlen(&val));
-          dbuf[curlx_strlen(&val)] = 0;
-          if(!Curl_getdate_capped(dbuf, &date)) {
-            if(!date)
-              date++;
-            co->expires = (curl_off_t)date;
-          }
-          else
-            co->expires = 0;
-          cap_expires(now, co);
+      else if(curlx_str_casecompare(&name, "expires") && curlx_strlen(&val) &&
+              !co->expires && (curlx_strlen(&val) < MAX_DATE_LENGTH)) {
+        /*
+         * Let max-age have priority.
+         *
+         * If the date cannot get parsed for whatever reason, the cookie
+         * will be treated as a session cookie
+         */
+        char dbuf[MAX_DATE_LENGTH + 1];
+        time_t date = 0;
+        memcpy(dbuf, curlx_str(&val), curlx_strlen(&val));
+        dbuf[curlx_strlen(&val)] = 0;
+        if(!Curl_getdate_capped(dbuf, &date)) {
+          if(!date)
+            date++;
+          co->expires = (curl_off_t)date;
         }
+        else
+          co->expires = 0;
+        if(!now)
+          now = time(NULL);
+        cap_expires(now, co);
       }
-
-      /*
-       * Else, this is the second (or more) name we do not know about!
-       */
     }
+  } while(!curlx_str_single(&ptr, ';'));
 
-    if(curlx_str_single(&ptr, ';'))
-      break;
-  } while(1);
-
-  if(!curlx_strlen(&cookie[COOKIE_NAME]))
-    /* If we did not get a cookie name, or a bad one, bail out. */
-    return CURLE_OK;
-
-  /* the header was fine, now store the data */
-  result = storecookie(co, &cookie[0], path, domain);
-  if(!result)
-    *okay = TRUE;
+  if(curlx_strlen(&cookie[COOKIE_NAME])) {
+    /* the header was fine, now store the data */
+    result = storecookie(co, &cookie[0], path, domain);
+    if(!result)
+      *okay = TRUE;
+  }
   return result;
 }
 
