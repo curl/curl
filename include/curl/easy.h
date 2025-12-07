@@ -58,7 +58,6 @@ CURL_EXTERN void curl_easy_cleanup(CURL *curl);
  */
 CURL_EXTERN CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
 
-
 /*
  * NAME curl_easy_duphandle()
  *
@@ -107,7 +106,6 @@ CURL_EXTERN CURLcode curl_easy_recv(CURL *curl, void *buffer, size_t buflen,
  */
 CURL_EXTERN CURLcode curl_easy_send(CURL *curl, const void *buffer,
                                     size_t buflen, size_t *n);
-
 
 /*
  * NAME curl_easy_upkeep()

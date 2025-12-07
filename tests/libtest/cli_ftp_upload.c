@@ -21,11 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "first.h"
 
 #include "testtrace.h"
-
 
 #ifndef CURL_DISABLE_FTP
 
@@ -85,8 +83,7 @@ static CURLcode test_cli_ftp_upload(const char *URL)
   curl_off_t uploadsize = -1;
 
   (void)URL;
-  while((ch = cgetopt(test_argc, test_argv, "r:"))
-        != -1) {
+  while((ch = cgetopt(test_argc, test_argv, "r:")) != -1) {
     switch(ch) {
     case 'r':
       resolve = coptarg;

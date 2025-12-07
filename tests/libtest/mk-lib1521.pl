@@ -74,7 +74,6 @@ my @not_built_in_num = (
     'CURLOPT_SOCKS5_AUTH',
     );
 
-
 #
 # Generate a set of string checks
 #
@@ -625,7 +624,6 @@ MOO
        }
     }
 }
-
 
 print $fh <<FOOTER
 

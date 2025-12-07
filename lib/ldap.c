@@ -95,7 +95,7 @@
 #define curl_ldap_num_t    ULONG
 #else
 #define FREE_ON_WINLDAP(x)
-#define curl_ldap_num_t int
+#define curl_ldap_num_t    int
 #endif
 
 #ifndef HAVE_LDAP_URL_PARSE

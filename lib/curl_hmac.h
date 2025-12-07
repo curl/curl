@@ -48,7 +48,6 @@ struct HMAC_params {
   unsigned int     resultlen; /* Result length (bytes). */
 };
 
-
 /* HMAC computation context. */
 struct HMAC_context {
   const struct HMAC_params *hash; /* Hash function definition. */

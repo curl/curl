@@ -37,7 +37,6 @@ BEGIN {
     );
 }
 
-
 my %file_chmod1 = (
     'name'      => 'chmod1',
     'content'   => "This file should have permissions 444\n",

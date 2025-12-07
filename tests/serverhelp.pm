@@ -90,7 +90,6 @@ sub logmsg {
     }
 }
 
-
 #***************************************************************************
 # Return server characterization factors given a server id string.
 #
@@ -118,7 +117,6 @@ sub serverfactors {
     return($proto, $ipvnum, $idnum);
 }
 
-
 #***************************************************************************
 # Return server name string formatted for presentation purposes
 #
@@ -142,7 +140,6 @@ sub servername_str {
     return "${proto}${idnum}${ipver}";
 }
 
-
 #***************************************************************************
 # Return server name string formatted for identification purposes
 #
@@ -150,7 +147,6 @@ sub servername_id {
     my ($proto, $ipver, $idnum) = @_;
     return lc(servername_str($proto, $ipver, $idnum));
 }
-
 
 #***************************************************************************
 # Return server name string formatted for filename purposes
@@ -162,7 +158,6 @@ sub servername_canon {
     $string =~ s/\//_v/;
     return $string;
 }
-
 
 #***************************************************************************
 # Return filename for server pid file.
@@ -182,7 +177,6 @@ sub server_portfilename {
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return filename for server log file.
 #
@@ -193,7 +187,6 @@ sub server_logfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return filename for server commands file.
 #
@@ -202,7 +195,6 @@ sub server_cmdfilename {
     my $trailer = '_server.cmd';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # Return filename for server input file.
@@ -213,7 +205,6 @@ sub server_inputfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return filename for server output file.
 #
@@ -222,7 +213,6 @@ sub server_outputfilename {
     my $trailer = '_server.output';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # Return filename for a server executable
@@ -234,7 +224,6 @@ sub server_exe {
     }
     return exerunner() . $SRVDIR . "servers" . exe_ext($ext) . " $name";
 }
-
 
 #***************************************************************************
 # Return filename for a server executable as an argument list
@@ -251,7 +240,6 @@ sub server_exe_args {
     return @cmd;
 }
 
-
 #***************************************************************************
 # Return filename for main or primary sockfilter pid file.
 #
@@ -262,7 +250,6 @@ sub mainsockf_pidfilename {
     my $trailer = (lc($proto) =~ /^ftps?$/) ? '_sockctrl.pid':'_sockfilt.pid';
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # Return filename for main or primary sockfilter log file.
@@ -275,7 +262,6 @@ sub mainsockf_logfilename {
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return filename for data or secondary sockfilter pid file.
 #
@@ -287,7 +273,6 @@ sub datasockf_pidfilename {
     return "${piddir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
 
-
 #***************************************************************************
 # Return filename for data or secondary sockfilter log file.
 #
@@ -298,7 +283,6 @@ sub datasockf_logfilename {
     my $trailer = '_sockdata.log';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
 }
-
 
 #***************************************************************************
 # End of library

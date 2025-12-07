@@ -77,7 +77,6 @@ sub add {
     }
 }
 
-
 my $fl;
 while(<STDIN>) {
     my $l = $_;
@@ -121,7 +120,6 @@ while(<STDIN>) {
         }
     }
 }
-
 
 for my $name (sort @names) {
     my $oname = $name;

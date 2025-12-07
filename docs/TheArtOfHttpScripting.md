@@ -198,7 +198,6 @@ SPDX-License-Identifier: curl
 
     curl --data name=curl https://url1.example.com https://url2.example.com
 
-
 ## Multiple HTTP methods in a single command line
 
  Sometimes you need to operate on several URLs in a single command line and do

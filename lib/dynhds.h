@@ -126,7 +126,6 @@ size_t Curl_dynhds_remove(struct dynhds *dynhds,
                           const char *name, size_t namelen);
 size_t Curl_dynhds_cremove(struct dynhds *dynhds, const char *name);
 
-
 /**
  * Set the give header name and value, replacing any entries with
  * the same name. The header is added at the end of all (remaining)

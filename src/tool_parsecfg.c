@@ -273,7 +273,6 @@ ParameterError parseconfig(const char *filename, int max_recursive,
   return err;
 }
 
-
 static bool get_line(FILE *input, struct dynbuf *buf, bool *error)
 {
   CURLcode result;

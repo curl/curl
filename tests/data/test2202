@@ -50,7 +50,6 @@ client CONNECT 2e 00044d51545404c2003c000c6375726c
 server CONNACK 2 20020005
 </protocol>
 
-
 # 8 is CURLE_WEIRD_SERVER_REPLY
 <errorcode>
 8

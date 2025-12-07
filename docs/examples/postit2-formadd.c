@@ -74,7 +74,6 @@ int main(int argc, char *argv[])
                  CURLFORM_COPYCONTENTS, "postit2-formadd.c",
                  CURLFORM_END);
 
-
     /* Fill in the submit field too, even if this is rarely needed */
     curl_formadd(&formpost,
                  &lastptr,

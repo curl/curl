@@ -132,7 +132,6 @@
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
 
-
 /* The following define is needed on OS400 to enable strcmpi(), stricmp() and
    strdup(). */
 #define __cplusplus__strings__

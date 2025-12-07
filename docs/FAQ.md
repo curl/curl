@@ -827,7 +827,6 @@ chain.
 Details are also in [the SSL certificates
 document](https://curl.se/docs/sslcerts.html).
 
-
 ## Why is curl -R on Windows one hour off?
 
 Since curl 7.53.0 this issue should be fixed as long as curl was built with
@@ -891,7 +890,7 @@ the second. No more than three packets are sent, no matter how long the
 timeout is set.
 
 See option `TcpMaxConnectRetransmissions` on [this
-page](https://support.microsoft.com/bg-bg/topic/hotfix-enables-the-configuration-of-the-tcp-maximum-syn-retransmission-amount-in-windows-7-or-windows-server-2008-r2-1b6f8352-2c5f-58bb-ead7-2cf021407c8e).
+page](https://support.microsoft.com/topic/hotfix-enables-the-configuration-of-the-tcp-maximum-syn-retransmission-amount-in-windows-7-or-windows-server-2008-r2-1b6f8352-2c5f-58bb-ead7-2cf021407c8e).
 
 Also, even on non-Windows systems there may run a firewall or anti-virus
 software or similar that accepts the connection but does not actually do

@@ -116,7 +116,6 @@ my %commonrc = (
     '26' => 1,
     );
 
-
 sub runone {
     my $a;
     my $nargs = getnum(60) + 1;

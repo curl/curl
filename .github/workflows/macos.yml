@@ -618,7 +618,7 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ] ; then
+          if [ "${MATRIX_COMPILER}" = 'gcc-13' ] && [ "${MATRIX_IMAGE}" = 'macos-15' ]; then
             # Ref: https://github.com/Homebrew/homebrew-core/issues/194778#issuecomment-2793243409
             /opt/homebrew/opt/gcc@13/libexec/gcc/aarch64-apple-darwin24/13/install-tools/mkheaders
           fi

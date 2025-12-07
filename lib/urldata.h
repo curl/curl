@@ -133,7 +133,6 @@ typedef unsigned int curl_prot_t;
    input easier and better. */
 #define CURL_MAX_INPUT_LENGTH 8000000
 
-
 #include "cookie.h"
 #include "psl.h"
 #include "formdata.h"

@@ -103,8 +103,8 @@ sub getpartattr {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        if((1 ==$inside) && ( ($_ =~ /^ *\<$part ([^>]*)/) ||
-                              !(defined($part)) )
+        if((1 == $inside) && (($_ =~ /^ *\<$part ([^>]*)/) ||
+                              !(defined($part)))
              ) {
             $inside++;
             my $attr=$1;
@@ -118,10 +118,10 @@ sub getpartattr {
             last;
         }
         # detect end of section when part was not found
-        elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
+        elsif((1 == $inside) && ($_ =~ /^ *\<\/$section\>/)) {
             last;
         }
-        elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
+        elsif((2 == $inside) && ($_ =~ /^ *\<\/$part/)) {
             $inside--;
         }
     }
@@ -252,7 +252,6 @@ sub loadtest {
     return 0;
 }
 
-
 # Return entire document as list of lines
 sub fulltest {
     return @xml;
@@ -323,7 +322,6 @@ sub savetest {
 # Strip off all lines that match the specified pattern and return
 # the new array.
 #
-
 sub striparray {
     my ($pattern, $arrayref) = @_;
 
@@ -422,6 +420,5 @@ sub loadarray {
     }
     return @array;
 }
-
 
 1;

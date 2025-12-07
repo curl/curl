@@ -5,7 +5,6 @@ curl_multi_remove_handle
 </keywords>
 </info>
 
-
 #
 # Client-side
 <client>

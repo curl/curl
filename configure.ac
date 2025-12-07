@@ -520,7 +520,6 @@ if test "$xc_lt_build_static_only" = "yes"; then
 fi
 AC_SUBST([LIBCURL_PC_CFLAGS])
 
-
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
@@ -2152,7 +2151,6 @@ if test "x$OPT_LIBPSL" != "xno"; then
 fi
 AM_CONDITIONAL([USE_LIBPSL], [test "$curl_psl_msg" = "enabled"])
 
-
 dnl **********************************************************************
 dnl Check for libgsasl
 dnl **********************************************************************
@@ -2235,7 +2233,6 @@ AC_ARG_WITH(libssh2,dnl
 AS_HELP_STRING([--with-libssh2=PATH],[Where to look for libssh2, PATH points to the libssh2 installation; when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
 AS_HELP_STRING([--with-libssh2], [enable libssh2]),
   OPT_LIBSSH2=$withval, OPT_LIBSSH2=no)
-
 
 OPT_LIBSSH=off
 AC_ARG_WITH(libssh,dnl
@@ -2619,7 +2616,6 @@ if test "x$OPT_LIBRTMP" != "xno"; then
         dnl a pkgconfig file
         AC_MSG_ERROR([--librtmp was specified but could not find librtmp pkgconfig file.])
       fi
-
       ;;
     off)
       dnl no --with-librtmp option given, just check default places
@@ -3685,7 +3681,6 @@ if test "$want_nghttp3" != "no"; then
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
-
   else
     dnl no nghttp3 pkg-config found, deal with it
     if test "$want_nghttp3" != "default"; then
@@ -3898,7 +3893,6 @@ if test "$want_libuv" != "no"; then
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
-
   else
     dnl no libuv pkg-config found, deal with it
     if test "$want_libuv" != "default"; then
@@ -4041,7 +4035,6 @@ dnl default includes
 #endif
 ]
 )
-
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -4977,7 +4970,6 @@ if test "$hsts" != "yes"; then
   AC_DEFINE(CURL_DISABLE_HSTS, 1, [disable alt-svc])
 fi
 
-
 dnl *************************************************************
 dnl check whether ECH support, if desired, is actually available
 dnl
@@ -5041,7 +5033,6 @@ else
     fi
   fi
 fi
-
 
 dnl *************************************************************
 dnl check whether OpenSSL (lookalikes) have SSL_set0_wbio

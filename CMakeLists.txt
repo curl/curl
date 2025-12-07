@@ -1833,7 +1833,6 @@ if(CURL_LTO)
   endif()
 endif()
 
-
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
 function(curl_transform_makefile_inc _input_file _output_file)

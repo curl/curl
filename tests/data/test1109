@@ -30,7 +30,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER#test
 </command>
 </client>
 
-
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

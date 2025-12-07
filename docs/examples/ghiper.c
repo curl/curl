@@ -41,7 +41,6 @@
  of URL's and creates some new easy handles to fetch each URL via the
  curl_multi "hiper" API.
 
-
  Thus, you can try a single URL:
  % echo http://www.yahoo.com > hiper.fifo
 
