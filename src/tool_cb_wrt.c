@@ -313,7 +313,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     if(memchr(buffer, 0, bytes)) {
       warnf("Binary output can mess up your terminal. "
             "Use \"--output -\" to tell curl to output it to your terminal "
-            "anyway, or consider \"--output <FILE>\" to save to a file.");
+            "anyway, or consider \"--output <FILE>\" to save to a file."
+            "If the output may be compressed, use \"--compressed\" to tell"
+            "curl to decompress it");
       config->synthetic_error = TRUE;
       return CURL_WRITEFUNC_ERROR;
     }
