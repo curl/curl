@@ -43,8 +43,6 @@
 #include "bufref.h"
 #include "curlx/strparse.h"
 
-static void strstore(char **str, const char *newstr, size_t len);
-
 /* number of seconds in 400 days */
 #define COOKIES_MAXAGE (400 * 24 * 3600)
 
@@ -263,15 +261,17 @@ static char *sanitize_cookie_path(const char *cookie_path)
  * parsing in a last-wins scenario. The caller is responsible for checking
  * for OOM errors.
  */
-static void strstore(char **str, const char *newstr, size_t len)
+static CURLcode strstore(char **str, const char *newstr, size_t len)
 {
   DEBUGASSERT(str);
-  curlx_free(*str);
   if(!len) {
     len++;
     newstr = "";
   }
   *str = Curl_memdup0(newstr, len);
+  if(!*str)
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
 }
 
 /*
@@ -356,14 +356,15 @@ static bool bad_domain(const char *domain, size_t len)
   fine. The prime reason for filtering out control bytes is that some HTTP
   servers return 400 for requests that contain such.
 */
-static bool invalid_octets(const char *ptr)
+static bool invalid_octets(const char *ptr, size_t len)
 {
   const unsigned char *p = (const unsigned char *)ptr;
   /* Reject all bytes \x01 - \x1f (*except* \x09, TAB) + \x7f */
-  while(*p) {
+  while(len && *p) {
     if(((*p != 9) && (*p < 0x20)) || (*p == 0x7f))
       return TRUE;
     p++;
+    len--;
   }
   return FALSE;
 }
@@ -374,6 +375,57 @@ static bool invalid_octets(const char *ptr)
    there.
 */
 #define MAX_DATE_LENGTH 80
+
+#define COOKIE_NAME 0
+#define COOKIE_VALUE 1
+#define COOKIE_DOMAIN 2
+#define COOKIE_PATH 3
+
+#define COOKIE_PIECES 4 /* the list above */
+
+static CURLcode storecookie(struct Cookie *co, struct Curl_str *cp,
+                            const char *path, const char *domain)
+{
+  CURLcode result;
+  result = strstore(&co->name, curlx_str(&cp[COOKIE_NAME]),
+                    curlx_strlen(&cp[COOKIE_NAME]));
+  if(!result)
+    result = strstore(&co->value, curlx_str(&cp[COOKIE_VALUE]),
+                      curlx_strlen(&cp[COOKIE_VALUE]));
+  if(!result) {
+    if(curlx_strlen(&cp[COOKIE_PATH]))
+      result = strstore(&co->path, curlx_str(&cp[COOKIE_PATH]),
+                        curlx_strlen(&cp[COOKIE_PATH]));
+    else if(path) {
+      /* No path was given in the header line, set the default */
+      const char *endslash = strrchr(path, '/');
+      if(endslash) {
+        size_t pathlen = (endslash - path + 1); /* include end slash */
+        co->path = Curl_memdup0(path, pathlen);
+        if(!co->path)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+    }
+
+    if(!result && co->path) {
+      co->spath = sanitize_cookie_path(co->path);
+      if(!co->spath)
+        result = CURLE_OUT_OF_MEMORY;
+    }
+  }
+  if(!result) {
+    if(curlx_strlen(&cp[COOKIE_DOMAIN]))
+      result = strstore(&co->domain, curlx_str(&cp[COOKIE_DOMAIN]),
+                        curlx_strlen(&cp[COOKIE_DOMAIN]));
+    else if(domain) {
+      /* no domain was given in the header line, set the default */
+      co->domain = curlx_strdup(domain);
+      if(!co->domain)
+        result = CURLE_OUT_OF_MEMORY;
+    }
+  }
+  return result;
+}
 
 /* this function return errors on OOM etc, not on plain cookie format
    problems */
@@ -393,6 +445,8 @@ parse_cookie_header(struct Curl_easy *data,
   /* This line was read off an HTTP-header */
   time_t now;
   size_t linelength = strlen(ptr);
+  CURLcode result;
+  struct Curl_str cookie[COOKIE_PIECES] = { 0 };
   *okay = FALSE;
   if(linelength > MAX_COOKIE_LINE)
     /* discard overly long lines at once */
@@ -449,29 +503,18 @@ parse_cookie_header(struct Curl_easy *data,
       else if(!strncmp("__Host-", curlx_str(&name), 7))
         co->prefix_host = TRUE;
 
-      /*
-       * Use strstore() below to properly deal with received cookie
-       * headers that have the same string property set more than once,
-       * and then we use the last one.
-       */
-
-      if(!co->name) {
+      if(!curlx_strlen(&cookie[COOKIE_NAME])) {
         /* The first name/value pair is the actual cookie name */
-        if(!sep)
-          /* Bad name/value pair. */
-          return CURLE_OK;
-
-        strstore(&co->name, curlx_str(&name), curlx_strlen(&name));
-        if(co->name)
-          strstore(&co->value, curlx_str(&val), curlx_strlen(&val));
-        if(!co->name || !co->value)
-          return CURLE_OUT_OF_MEMORY;
-        done = TRUE;
-
-        if(invalid_octets(co->value) || invalid_octets(co->name)) {
+        if(!sep ||
+           /* Bad name/value pair. */
+           invalid_octets(curlx_str(&name), curlx_strlen(&name)) ||
+           invalid_octets(curlx_str(&val), curlx_strlen(&val))) {
           infof(data, "invalid octets in name/value, cookie dropped");
           return CURLE_OK;
         }
+        cookie[COOKIE_NAME] = name;
+        cookie[COOKIE_VALUE] = val;
+        done = TRUE;
       }
       else if(!curlx_strlen(&val)) {
         /*
@@ -501,13 +544,7 @@ parse_cookie_header(struct Curl_easy *data,
       if(done)
         ;
       else if(curlx_str_casecompare(&name, "path")) {
-        strstore(&co->path, curlx_str(&val), curlx_strlen(&val));
-        if(!co->path)
-          return CURLE_OUT_OF_MEMORY;
-        curlx_free(co->spath); /* if this is set again */
-        co->spath = sanitize_cookie_path(co->path);
-        if(!co->spath)
-          return CURLE_OUT_OF_MEMORY;
+        cookie[COOKIE_PATH] = val;
       }
       else if(curlx_str_casecompare(&name, "domain") && curlx_strlen(&val)) {
         bool is_ip;
@@ -538,10 +575,7 @@ parse_cookie_header(struct Curl_easy *data,
             (curlx_strlen(&val) == strlen(domain))) ||
            (!is_ip && cookie_tailmatch(curlx_str(&val),
                                           curlx_strlen(&val), domain))) {
-          strstore(&co->domain, curlx_str(&val), curlx_strlen(&val));
-          if(!co->domain)
-            return CURLE_OUT_OF_MEMORY;
-
+          cookie[COOKIE_DOMAIN] = val;
           if(!is_ip)
             co->tailmatch = TRUE; /* we always do that if the domain name was
                                      given */
@@ -627,40 +661,15 @@ parse_cookie_header(struct Curl_easy *data,
       break;
   } while(1);
 
-  if(!co->domain && domain) {
-    /* no domain was given in the header line, set the default */
-    co->domain = curlx_strdup(domain);
-    if(!co->domain)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
-  if(!co->path && path) {
-    /*
-     * No path was given in the header line, set the default.
-     */
-    const char *endslash = strrchr(path, '/');
-    if(endslash) {
-      size_t pathlen = (endslash - path + 1); /* include end slash */
-      co->path = Curl_memdup0(path, pathlen);
-      if(co->path) {
-        co->spath = sanitize_cookie_path(co->path);
-        if(!co->spath)
-          return CURLE_OUT_OF_MEMORY;
-      }
-      else
-        return CURLE_OUT_OF_MEMORY;
-    }
-  }
-
-  /*
-   * If we did not get a cookie name, or a bad one, the this is an illegal
-   * line so bail out.
-   */
-  if(!co->name)
+  if(!curlx_strlen(&cookie[COOKIE_NAME]))
+    /* If we did not get a cookie name, or a bad one, bail out. */
     return CURLE_OK;
 
-  *okay = TRUE;
-  return CURLE_OK;
+  /* the header was fine, now store the data */
+  result = storecookie(co, &cookie[0], path, domain);
+  if(!result)
+    *okay = TRUE;
+  return result;
 }
 
 static CURLcode parse_netscape(struct Cookie *co,
