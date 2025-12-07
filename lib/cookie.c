@@ -65,14 +65,15 @@ static void cap_expires(time_t now, struct Cookie *co)
   }
 }
 
-static void freecookie(struct Cookie *co)
+static void freecookie(struct Cookie *co, bool maintoo)
 {
   curlx_free(co->domain);
   curlx_free(co->path);
   curlx_free(co->spath);
   curlx_free(co->name);
   curlx_free(co->value);
-  curlx_free(co);
+  if(maintoo)
+    curlx_free(co);
 }
 
 static bool cookie_tailmatch(const char *cookie_domain,
@@ -312,7 +313,7 @@ static void remove_expired(struct CookieInfo *ci)
       if(co->expires) {
         if(co->expires < now) {
           Curl_node_remove(n);
-          freecookie(co);
+          freecookie(co, TRUE);
           ci->numcookies--;
         }
         else if(co->expires < ci->next_expiration)
@@ -938,7 +939,7 @@ static bool replace_existing(struct Curl_easy *data,
     Curl_node_remove(replace_n);
 
     /* free the old cookie */
-    freecookie(repl);
+    freecookie(repl, TRUE);
   }
   *replacep = replace_old;
   return TRUE;
@@ -964,6 +965,7 @@ Curl_cookie_add(struct Curl_easy *data,
                                        unless set */
                 bool secure)  /* TRUE if connection is over secure origin */
 {
+  struct Cookie comem;
   struct Cookie *co;
   size_t myhash;
   CURLcode result;
@@ -975,10 +977,8 @@ Curl_cookie_add(struct Curl_easy *data,
   if(data->req.setcookies >= MAX_SET_COOKIE_AMOUNT)
     return CURLE_OK; /* silently ignore */
 
-  /* First, alloc and init a new struct for it */
-  co = curlx_calloc(1, sizeof(struct Cookie));
-  if(!co)
-    return CURLE_OUT_OF_MEMORY; /* bail out if we are this low on memory */
+  co = &comem;
+  memset(co, 0, sizeof(comem));
 
   if(httpheader)
     result = parse_cookie_header(data, co, ci, &okay,
@@ -1028,6 +1028,13 @@ Curl_cookie_add(struct Curl_easy *data,
   if(!replace_existing(data, co, ci, secure, &replaces))
     goto fail;
 
+  /* clone the stack struct into heap */
+  co = Curl_memdup(&comem, sizeof(comem));
+  if(!co) {
+    co = &comem;
+    goto fail; /* bail out if we are this low on memory */
+  }
+
   /* add this cookie to the list */
   myhash = cookiehash(co->domain);
   Curl_llist_append(&ci->cookielist[myhash], co, &co->node);
@@ -1054,7 +1061,7 @@ Curl_cookie_add(struct Curl_easy *data,
 
   return result;
 fail:
-  freecookie(co);
+  freecookie(co, FALSE);
   return result;
 }
 
@@ -1382,7 +1389,7 @@ void Curl_cookie_clearall(struct CookieInfo *ci)
         struct Cookie *c = Curl_node_elem(n);
         struct Curl_llist_node *e = Curl_node_next(n);
         Curl_node_remove(n);
-        freecookie(c);
+        freecookie(c, TRUE);
         n = e;
       }
     }
@@ -1411,7 +1418,7 @@ void Curl_cookie_clearsess(struct CookieInfo *ci)
       e = Curl_node_next(n); /* in case the node is removed, get it early */
       if(!curr->expires) {
         Curl_node_remove(n);
-        freecookie(curr);
+        freecookie(curr, TRUE);
         ci->numcookies--;
       }
     }
