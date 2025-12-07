@@ -75,11 +75,7 @@ struct hsts *Curl_hsts_init(void)
   return h;
 }
 
-static void hsts_free(struct stsentry *e)
-{
-  curlx_free(CURL_UNCONST(e->host));
-  curlx_free(e);
-}
+#define hsts_free(x) curlx_free(x)
 
 void Curl_hsts_cleanup(struct hsts **hp)
 {
@@ -111,18 +107,11 @@ static CURLcode hsts_create(struct hsts *h,
     /* strip off any trailing dot */
     --hlen;
   if(hlen) {
-    char *duphost;
-    struct stsentry *sts = curlx_calloc(1, sizeof(struct stsentry));
+    struct stsentry *sts = curlx_calloc(1, sizeof(struct stsentry) + hlen);
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
-
-    duphost = Curl_memdup0(hostname, hlen);
-    if(!duphost) {
-      curlx_free(sts);
-      return CURLE_OUT_OF_MEMORY;
-    }
-
-    sts->host = duphost;
+    /* the null terminator is already there */
+    memcpy(sts->host, hostname, hlen);
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
     Curl_llist_append(&h->list, sts, &sts->node);
@@ -294,7 +283,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
   struct tm stamp;
   CURLcode result;
 
-  e.name = (char *)CURL_UNCONST(sts->host);
+  e.name = (char *)sts->host;
   e.namelen = strlen(sts->host);
   e.includeSubDomains = sts->includeSubDomains;
 
