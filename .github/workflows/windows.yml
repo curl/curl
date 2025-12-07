@@ -379,6 +379,9 @@ jobs:
             if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
             fi
+            if [[ "${TFLAGS}" = *'-t'* ]]; then
+              TFLAGS+=' !2300'  # Leak memory and file handle via tool_doswin.c / win32_stdin_read_thread()
+            fi
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
