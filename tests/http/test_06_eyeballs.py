@@ -133,3 +133,19 @@ class TestEyeballs:
             he_timers_set = [line for line in r.trace_lines
                              if re.match(r'.*\[TIMER] \[HAPPY_EYEBALLS] set for', line)]
             assert len(he_timers_set) == 2, f'found: {"".join(he_timers_set)}\n{r.dump_logs()}'
+
+    # download using HTTP/3 on missing server with alt-svc pointing there
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
+    def test_06_07_h3_altsvc_fail(self, env: Env, httpd, nghttpx):
+        curl = CurlClient(env=env)
+        urln = f'https://{env.domain1}:{env.https_only_tcp_port}/data.json'
+        altsvc_file = curl.mk_altsvc_file('test_06_17',
+                                          'h2', env.domain1, env.https_only_tcp_port,
+                                          'h3', env.domain1, env.https_only_tcp_port)
+        r = curl.http_download(urls=[urln], extra_args=[
+            '--alt-svc', altsvc_file
+        ])
+        # Limit of our Alt-Svc implementation. Once we switch to QUIC, we
+        # do not eyeball back to h2. See #19740
+        r.check_exit_code(7)  # CURLE_COULDNT_CONNECT
+
