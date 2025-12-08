@@ -166,6 +166,7 @@ static const struct alpn_spec *alpn_get_spec(http_majors wanted,
   }
 #else
   (void)wanted;
+  (void)preferred;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
      Avoid "http/1.0" because some servers do not support it. */
