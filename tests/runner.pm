@@ -371,6 +371,7 @@ sub prepro {
             subvariables(\$s, $testnum, "%");
             subtextfile(\$s);
             subchars(\$s);
+            subvariables(\$s, $testnum, "%");
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
