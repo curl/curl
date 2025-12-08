@@ -1667,10 +1667,10 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
       }
     }
 
-   if(!map->name) {
-     err = PARAM_OPTION_UNKNOWN;
-     break;
-   }
+    if(!map->name) {
+      err = PARAM_OPTION_UNKNOWN;
+      break;
+    }
 
    if(next)
      /* move over the comma */
