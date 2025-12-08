@@ -163,7 +163,7 @@ sub findlinks {
         # ignore trailing: dot, quote, asterisk, hash, comma, question mark,
         # colon, closing parenthesis, closing angle bracket, whitespace, pipe,
         # backtick, semicolon
-        elsif(/(https:\/\/[a-z0-9.\/:%_@-]+[^."*\#,?:\)> \t|`;])/i) {
+        elsif(/(https:\/\/[a-z0-9.\/:%_+@-]+[^."*\#,?:\)> \t|`;])/i) {
             #print "RAW ";
             storelink($f, $line, $1);
         }
