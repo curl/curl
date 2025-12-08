@@ -38,6 +38,8 @@ BEGIN {
         runclientoutput
         setlogfunc
         exerunner
+        subtextfile
+        subchars
         subbase64
         subnewlines
         subsha256base64file
@@ -110,6 +112,24 @@ sub includefile {
     return join("", @a);
 }
 
+sub subtextfile {
+    my ($thing) = @_;
+
+    # include a file, expand space macros
+    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
+}
+
+sub subchars {
+    my ($thing) = @_;
+
+    $$thing =~ s/%SP/ /g;    # space
+    $$thing =~ s/%TAB/\t/g;  # horizontal tab
+    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
+    $$thing =~ s/%LT/</g;
+    $$thing =~ s/%GT/>/g;
+    $$thing =~ s/%AMP/&/g;
+}
+
 sub subbase64 {
     my ($thing) = @_;
 
@@ -149,16 +169,6 @@ sub subbase64 {
         my $d2 = $d + 60;
         $$thing =~ s/%%DAYS%%/%alternatives[$d,$d2]/;
     }
-
-    # include a file, expand space macros
-    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
-
-    $$thing =~ s/%SP/ /g;    # space
-    $$thing =~ s/%TAB/\t/g;  # horizontal tab
-    $$thing =~ s/%CR/\r/g;   # carriage return aka \r aka 0x0d
-    $$thing =~ s/%LT/</g;
-    $$thing =~ s/%GT/>/g;
-    $$thing =~ s/%AMP/&/g;
 
     # include a file
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1, 0)/ge;

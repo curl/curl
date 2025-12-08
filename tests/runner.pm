@@ -101,6 +101,8 @@ use testutil qw(
     logmsg
     runclient
     exerunner
+    subtextfile
+    subchars
     subbase64
     subsha256base64file
     substrippemfile
@@ -367,6 +369,8 @@ sub prepro {
                 $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");
+            subtextfile(\$s);
+            subchars(\$s);
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
