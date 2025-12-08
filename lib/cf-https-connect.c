@@ -714,7 +714,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
     if(data->state.http_neg.preferred &&
        (alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
        (data->state.http_neg.preferred & data->state.http_neg.allowed)) {
-      enum alpnid alpn_pref = 0;
+      enum alpnid alpn_pref = ALPN_none;
       switch(data->state.http_neg.preferred) {
       case CURL_HTTP_V3x:
         if(!Curl_conn_may_http3(data, conn, conn->transport_wanted))
