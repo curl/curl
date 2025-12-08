@@ -433,22 +433,22 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
     case '\\':
       param_place++;
       switch(*param_place) {
-        case '\0':
-          *certname_place++ = '\\';
-          break;
-        case '\\':
-          *certname_place++ = '\\';
-          param_place++;
-          break;
-        case ':':
-          *certname_place++ = ':';
-          param_place++;
-          break;
-        default:
-          *certname_place++ = '\\';
-          *certname_place++ = *param_place;
-          param_place++;
-          break;
+      case '\0':
+        *certname_place++ = '\\';
+        break;
+      case '\\':
+        *certname_place++ = '\\';
+        param_place++;
+        break;
+      case ':':
+        *certname_place++ = ':';
+        param_place++;
+        break;
+      default:
+        *certname_place++ = '\\';
+        *certname_place++ = *param_place;
+        param_place++;
+        break;
       }
       break;
     case ':':
@@ -527,11 +527,11 @@ static ParameterError GetFileAndPassword(const char *nextarg, char **file,
   err = parse_cert_parameter(nextarg, &certname, &passphrase);
   if(!err) {
     curlx_free(*file);
-  *file = certname;
-  if(passphrase) {
+    *file = certname;
+    if(passphrase) {
       curlx_free(*password);
-    *password = passphrase;
-  }
+      *password = passphrase;
+    }
   }
   return err;
 }
@@ -732,20 +732,20 @@ static CURLcode set_trace_config(const char *token)
       len = strlen(token);
 
     switch(*token) {
-      case '-':
-        toggle = FALSE;
-        name = token + 1;
-        len--;
-        break;
-      case '+':
-        toggle = TRUE;
-        name = token + 1;
-        len--;
-        break;
-      default:
-        toggle = TRUE;
-        name = token;
-        break;
+    case '-':
+      toggle = FALSE;
+      name = token + 1;
+      len--;
+      break;
+    case '+':
+      toggle = TRUE;
+      name = token + 1;
+      len--;
+      break;
+    default:
+      toggle = TRUE;
+      name = token;
+      break;
     }
 
     if((len == 3) && curl_strnequal(name, "all", 3)) {
@@ -1672,10 +1672,10 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
       break;
     }
 
-   if(next)
-     /* move over the comma */
-     next++;
-   flag = next;
+    if(next)
+      /* move over the comma */
+      next++;
+    flag = next;
   }
 
   return err;
@@ -2270,7 +2270,7 @@ static ParameterError opt_file(struct OperationConfig *config,
     break;
   case C_PROXY_CERT: /* --proxy-cert */
     err = GetFileAndPassword(nextarg, &config->proxy_cert,
-                       &config->proxy_key_passwd);
+                             &config->proxy_key_passwd);
     break;
   case C_PROXY_CRLFILE: /* --proxy-crlfile */
     err = existingfile(&config->proxy_crlfile, a, nextarg);
