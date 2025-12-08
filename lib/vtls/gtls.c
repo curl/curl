@@ -305,16 +305,17 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
   return GNUTLS_X509_FMT_PEM; /* default to PEM */
 }
 
-#define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
+#define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:"\
+  "-CTYPE-ALL:+CTYPE-X509"
 /* If GnuTLS was compiled without support for SRP it will error out if SRP is
    requested in the priority string, so treat it specially
  */
 #define GNUTLS_SRP "+SRP"
 
 #define QUIC_PRIORITY \
-  "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
-  "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
-  "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
+  "NORMAL:%PROFILE_MEDIUM:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:" \
+  "+AES-256-GCM:+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:" \
+  "+GROUP-SECP256R1:+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
   "%DISABLE_TLS13_COMPAT_MODE"
 
 static CURLcode

@@ -175,7 +175,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                              &output_desc,
                                              &sspi_ret_flags, NULL);
 
-    curlx_unicodefree(sname);
+    curlx_free(sname);
 
     Curl_safefree(sspi_recv_token.pvBuffer);
     sspi_recv_token.cbBuffer = 0;
@@ -298,7 +298,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName);
     infof(data, "SOCKS5 server authenticated user %s with GSS-API.",
           (user_utf8 ? user_utf8 : "(unknown)"));
-    curlx_unicodefree(user_utf8);
+    curlx_free(user_utf8);
 #endif
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
     names.sUserName = NULL;

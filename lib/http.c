@@ -3501,8 +3501,11 @@ static CURLcode http_header_s(struct Curl_easy *data,
   if(v) {
     CURLcode check =
       Curl_hsts_parse(data->hsts, conn->host.name, v);
-    if(check)
+    if(check) {
+      if(check == CURLE_OUT_OF_MEMORY)
+        return check;
       infof(data, "Illegal STS header skipped");
+    }
 #ifdef DEBUGBUILD
     else
       infof(data, "Parsed STS header fine (%zu entries)",

@@ -211,8 +211,10 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
     namelen = strlen(name);
     if(curlx_inet_pton(AF_INET, name, &address) == 1)
       type = TYPE_IPV4;
+#ifdef USE_IPV6
     else if(curlx_inet_pton(AF_INET6, name, &address) == 1)
       type = TYPE_IPV6;
+#endif
     else {
       /* ignore trailing dots in the hostname */
       if(name[namelen - 1] == '.')

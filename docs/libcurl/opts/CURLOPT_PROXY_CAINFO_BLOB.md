@@ -73,7 +73,7 @@ int main(void)
     struct curl_blob blob;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* using an HTTPS proxy */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
     blob.data = strpem;
     blob.len = strlen(strpem);
     blob.flags = CURL_BLOB_COPY;

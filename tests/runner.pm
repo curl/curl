@@ -107,6 +107,7 @@ use testutil qw(
     subnewlines
     );
 use valgrind;
+use memanalyzer;
 
 
 #######################################################################
@@ -449,7 +450,7 @@ sub torture {
 
     # memanalyze -v is our friend, get the number of allocations made
     my $count=0;
-    my @out = `$memanalyze -v "$LOGDIR/$MEMDUMP"`;
+    my @out = memanalyze("$LOGDIR/$MEMDUMP", 1, 0, 0);
     for(@out) {
         if(/^Operations: (\d+)/) {
             $count = $1;
@@ -549,7 +550,7 @@ sub torture {
             $fail=1;
         }
         else {
-            my @memdata=`$memanalyze "$LOGDIR/$MEMDUMP"`;
+            my @memdata = memanalyze("$LOGDIR/$MEMDUMP", 0, 0, 0);
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
@@ -561,7 +562,7 @@ sub torture {
             if($leak) {
                 logmsg "** MEMORY FAILURE\n";
                 logmsg @memdata;
-                logmsg `$memanalyze -l "$LOGDIR/$MEMDUMP"`;
+                logmsg memanalyze("$LOGDIR/$MEMDUMP", 0, 0, 1);
                 $fail = 1;
             }
         }

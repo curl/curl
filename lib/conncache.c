@@ -48,9 +48,9 @@
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)
 
-#define CPOOL_LOCK(c,d)                                                 \
+#define CPOOL_LOCK(c, d)                                                \
   do {                                                                  \
-    if((c)) {                                                           \
+    if(c) {                                                             \
       if(CURL_SHARE_KEEP_CONNECT((c)->share))                           \
         Curl_share_lock((d), CURL_LOCK_DATA_CONNECT,                    \
                         CURL_LOCK_ACCESS_SINGLE);                       \
@@ -61,7 +61,7 @@
 
 #define CPOOL_UNLOCK(c,d)                                               \
   do {                                                                  \
-    if((c)) {                                                           \
+    if(c) {                                                             \
       DEBUGASSERT((c)->locked);                                         \
       (c)->locked = FALSE;                                              \
       if(CURL_SHARE_KEEP_CONNECT((c)->share))                           \

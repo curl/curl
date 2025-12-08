@@ -45,7 +45,7 @@ struct Curl_str {
 void curlx_str_init(struct Curl_str *out);
 void curlx_str_assign(struct Curl_str *out, const char *str, size_t len);
 
-#define curlx_str(x) ((x)->str)
+#define curlx_str(x)    ((x)->str)
 #define curlx_strlen(x) ((x)->len)
 
 /* Get a word until the first space

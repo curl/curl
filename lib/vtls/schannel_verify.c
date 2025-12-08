@@ -347,7 +347,7 @@ cleanup:
     CloseHandle(ca_file_handle);
   }
   Curl_safefree(ca_file_buffer);
-  curlx_unicodefree(ca_file_tstr);
+  curlx_free(ca_file_tstr);
 
   return result;
 }
@@ -648,7 +648,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
 
           result = CURLE_PEER_FAILED_VERIFICATION;
         }
-        curlx_unicodefree(cert_hostname);
+        curlx_free(cert_hostname);
       }
     }
 
