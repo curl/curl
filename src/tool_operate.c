@@ -126,6 +126,42 @@ static bool is_fatal_error(CURLcode code)
 }
 
 /*
+ * Check if the file needs to be replaced by a
+ * newer version. If --sync is set, clobbering is mandatory.
+ */
+bool file_needs_sync(struct per_transfer *per)
+{
+  struct_stat statbuf;
+
+  /* no '--sync' option ==> download always. */
+  if(!per->config->sync)
+    return TRUE;
+
+  /* time already compared. we need an update. */
+  if(per->sync_needed)
+    return TRUE;
+
+
+  /* The function should not affect the program flow if
+    not all variables have been transferred with the header. */
+  if(!per->outs.filename || !per->last_modified)
+    return TRUE;
+
+  /* check, if we need to update the file. */
+  if(curlx_stat(per->outs.filename, &statbuf)) {
+    per->sync_needed = TRUE;
+    per->config->file_clobber_mode = CLOBBER_ALWAYS;
+    return TRUE;
+  }
+  if(statbuf.st_mtime < per->last_modified) {
+    per->sync_needed = TRUE;
+    per->config->file_clobber_mode = CLOBBER_ALWAYS;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/*
  * Check if a given string is a PKCS#11 URI
  */
 static bool is_pkcs11_uri(const char *string)
@@ -628,7 +664,7 @@ static CURLcode post_per_transfer(struct per_transfer *per,
     }
   }
 
-  if(per->skip)
+  if(per->skip || (per->config->sync && !per->sync_needed))
     goto skip;
 
 #ifdef __VMS
@@ -1937,6 +1973,10 @@ static CURLcode serial_transfers(CURLSH *share)
       else
 #endif
         result = curl_easy_perform(per->curl);
+
+      if(per->config->sync && !file_needs_sync(per)) {
+        result = CURLE_OK;
+      }
     }
 
     returncode = post_per_transfer(per, result, &retry, &delay_ms);
