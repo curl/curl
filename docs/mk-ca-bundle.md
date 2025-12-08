@@ -122,6 +122,5 @@ Returns 0 on success. Returns 1 if it fails to download data.
 
 # FILE FORMAT
 
-The file format used by Mozilla for this trust information is documented here:
-
-https://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html
+The file format used by Mozilla for this trust information is [documented
+here](https://p11-glue.github.io/p11-glue/doc/storing-trust-policy/storing-trust-existing.html).
