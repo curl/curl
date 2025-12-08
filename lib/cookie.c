@@ -521,7 +521,7 @@ parse_cookie_header(struct Curl_easy *data,
           if(secure || !ci->running)
             co->secure = TRUE;
           else {
-            infof(data, "skipped cookie %s because not 'secure'", co->name);
+            infof(data, "skipped cookie because not 'secure'");
             return CURLE_OK;
           }
         }
