@@ -45,7 +45,7 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example.com");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example");
     curl_easy_setopt(curl, CURLOPT_PROXYAUTH,
                      CURLAUTH_BASIC | CURLAUTH_DIGEST);
     curl_easy_setopt(curl, CURLOPT_PROXYUSERNAME, "shrek");

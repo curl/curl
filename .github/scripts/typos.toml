@@ -6,7 +6,7 @@
 extend-ignore-identifiers-re = [
   "^(ba|fo|pn|PN|UE)$",
   "^(CNA|ser)$",
-  "^(ECT0|ECT1|HELO|htpt|PASE)$",
+  "^(ECT0|ECT1|HELO|htpts|PASE)$",
   "^[A-Za-z0-9_-]*(EDE|GOST)[A-Z0-9_-]*$",  # ciphers
   "^0x[0-9a-fA-F]+FUL$",  # unsigned long hex literals ending with 'F'
   "^(eyeballers|HELO_smtp|Januar|optin|passin|perfec|SMTP_HELO)$",
