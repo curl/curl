@@ -284,7 +284,6 @@ test3209 test3210 test3211 test3212 test3213 test3214 test3215 test3216 \
 test4000 test4001
 
 EXTRA_DIST = $(TESTCASES) DISABLED \
-\
 data-xml1 \
 \
 data1400.c data1401.c data1402.c data1403.c data1404.c data1405.c data1406.c \
