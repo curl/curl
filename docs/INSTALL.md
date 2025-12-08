@@ -18,7 +18,7 @@ libcurl from [source code](https://curl.se/download.html).
 You can download and install curl and libcurl using
 the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
 
-    git clone https://github.com/Microsoft/vcpkg.git
+    git clone https://github.com/Microsoft/vcpkg
     cd vcpkg
     ./bootstrap-vcpkg.sh
     ./vcpkg integrate install
@@ -244,7 +244,7 @@ Either run setup-x86_64.exe, then search and select packages individually, or tr
     setup-x86_64.exe -P binutils -P gcc-core -P libpsl-devel -P libtool -P perl -P make
 
 If the latter, matching packages should appear in the install rows (*is fickle though*) after selecting
-the download site i.e. `https://mirrors.kernel.org`. In either case, follow the GUI prompts
+the download site i.e. `https://mirrors.kernel.org/`. In either case, follow the GUI prompts
 until you reach the "Select Packages" window; then select packages, click next, and finish
 the `cygwin` package installation.
 

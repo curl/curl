@@ -289,7 +289,7 @@ Just ask if this is what you would want. You are required to have posted
 several high quality patches first, before you can be granted push access.
 
 ## Useful resources
- - [Webinar on getting code into curl](https://www.youtube.com/watch?v=QmZ3W1d6LQI)
+ - [Webinar on getting code into curl](https://youtu.be/QmZ3W1d6LQI)
 
 # Update copyright and license information
 

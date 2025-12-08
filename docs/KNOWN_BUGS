@@ -321,6 +321,8 @@ problems may have been fixed or changed somewhat since this was written.
 
 6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
 
+ Code point: U+00A7
+
  https://en.wikipedia.org/wiki/Section_sign
  https://github.com/curl/curl/issues/2120
 
