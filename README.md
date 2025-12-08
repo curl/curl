@@ -50,7 +50,7 @@ Visit the [curl website](https://curl.se/) for the latest news and downloads.
 
 Download the latest source from the Git server:
 
-    git clone https://github.com/curl/curl.git
+    git clone https://github.com/curl/curl
 
 ## Security problems
 

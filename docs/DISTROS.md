@@ -256,7 +256,7 @@ can also be used on other distributions
 ## Rocky Linux
 
 - curl: https://git.rockylinux.org/staging/rpms/curl/-/blob/r9/SPECS/curl.spec
-- curl issues: https://bugs.rockylinux.org
+- curl issues: https://bugs.rockylinux.org/
 - curl patches: https://git.rockylinux.org/staging/rpms/curl/-/tree/r9/SOURCES
 
 ## SerenityOS

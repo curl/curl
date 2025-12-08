@@ -140,7 +140,7 @@ Build curl:
 
 Build GnuTLS:
 
-     % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
+     % git clone --depth 1 https://gitlab.com/gnutls/gnutls
      % cd gnutls
      % ./bootstrap
      % ./configure --prefix=<somewhere1>
@@ -182,7 +182,7 @@ Build curl:
 
 Build wolfSSL:
 
-     % git clone https://github.com/wolfSSL/wolfssl.git
+     % git clone https://github.com/wolfSSL/wolfssl
      % cd wolfssl
      % autoreconf -fi
      % ./configure --prefix=<somewhere1> --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
@@ -386,7 +386,7 @@ above.
 
 Get, build and install nghttp2:
 
-     % git clone https://github.com/nghttp2/nghttp2.git
+     % git clone https://github.com/nghttp2/nghttp2
      % cd nghttp2
      % autoreconf -fi
      % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd

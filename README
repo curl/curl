@@ -38,7 +38,7 @@ GIT
 
   To download the latest source code off the GIT server, do this:
 
-    git clone https://github.com/curl/curl.git
+    git clone https://github.com/curl/curl
 
   (you will get a directory named curl created, filled with the source code)
 
