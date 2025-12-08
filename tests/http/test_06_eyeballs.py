@@ -148,4 +148,3 @@ class TestEyeballs:
         # Limit of our Alt-Svc implementation. Once we switch to QUIC, we
         # do not eyeball back to h2. See #19740
         r.check_exit_code(7)  # CURLE_COULDNT_CONNECT
-
