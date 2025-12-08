@@ -30,8 +30,7 @@ server.
 ### Verifiable responses
 
 By explicitly requesting
-[application/vnd.ipld.raw](https://www.iana.org/assignments/media-types/application/vnd.ipld.raw)
-or
+[application/vnd.ipld.raw](https://www.iana.org/assignments/media-types/application/vnd.ipld.raw) or
 [application/vnd.ipld.car](https://www.iana.org/assignments/media-types/application/vnd.ipld.car)
 responses, by means defined in
 [Trustless Gateway Specification](https://specs.ipfs.tech/http-gateways/trustless-gateway/),
