@@ -533,7 +533,7 @@ FAQ
   that informs the client about this is only interpreted if you are using the
   -L/--location option. As in:
 
-     curl -L http://example.com
+     curl -L https://example.com
 
   Not all redirects are HTTP ones, see 4.14
 
@@ -719,13 +719,13 @@ FAQ
   Set a custom Host: header that identifies the server name you want to reach
   but use the target IP address in the URL:
 
-    curl --header "Host: www.example.com" http://127.0.0.1/
+    curl --header "Host: www.example.com" https://somewhere.example/
 
   You can also opt to add faked hostname entries to curl with the --resolve
   option. That has the added benefit that things like redirects will also work
   properly. The above operation would instead be done as:
 
-    curl --resolve www.example.com:80:127.0.0.1 http://www.example.com/
+    curl --resolve www.example.com:80:127.0.0.1 https://www.example.com/
 
   3.20 How to SFTP from my user's home directory?
 
@@ -753,8 +753,8 @@ FAQ
   be disabled or not supported.
 
   Note that this error will also occur if you pass a wrongly spelled protocol
-  part as in "htpt://example.com" or as in the less evident case if you prefix
-  the protocol part with a space as in " http://example.com/".
+  part as in "htpts://example.com" or as in the less evident case if you
+  prefix the protocol part with a space as in " https://example.com/".
 
   3.22 curl -X gives me HTTP problems
 
@@ -762,7 +762,7 @@ FAQ
 
   By default you use curl without explicitly saying which request method to
   use when the URL identifies an HTTP transfer. If you just pass in a URL like
-  "curl http://example.com" it will use GET. If you use -d or -F curl will use
+  "curl https://example.com" it will use GET. If you use -d or -F curl will use
   POST, -I will cause a HEAD and -T will make it a PUT.
 
   If for whatever reason you are not happy with these default choices that curl
@@ -796,7 +796,7 @@ FAQ
 
   An example that would invoke a remote CGI that uses &-symbols could be:
 
-     curl 'http://www.example.com/cgi-bin/query?text=yes&q=curl'
+     curl 'https://www.example.com/cgi-bin/query?text=yes&q=curl'
 
   In Windows, the standard DOS shell treats the percent sign specially and you
   need to use TWO percent signs for each single one you want to use in the
@@ -865,7 +865,7 @@ FAQ
     If you get this return code and an HTML output similar to this:
 
        <H1>Moved Permanently</H1> The document has moved <A
-       HREF="http://same_url_now_with_a_trailing_slash/">here</A>.
+       HREF="https://same_url_now_with_a_trailing_slash.example/">here</A>.
 
     it might be because you requested a directory URL but without the trailing
     slash. Try the same operation again _with_ the trailing URL, or use the

@@ -194,7 +194,7 @@ One of the most basic properties to set in the handle is the URL. You set your
 preferred URL to transfer with CURLOPT_URL(3) in a manner similar to:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_URL, "http://example.com/");
+ curl_easy_setopt(handle, CURLOPT_URL, "https://example.com/");
 ~~~
 
 Let's assume for a while that you want to receive data as the URL identifies a
@@ -470,7 +470,7 @@ libcurl to post it all to the remote site:
 ~~~c
     char *data = "name=daniel&project=curl";
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handle, CURLOPT_URL, "http://posthere.com/");
+    curl_easy_setopt(handle, CURLOPT_URL, "https://posthere.example/");
 
     curl_easy_perform(handle); /* post away! */
 ~~~
