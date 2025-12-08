@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_URL, "pop3://%HOSTIP:%POP3PORT/%TESTNUMBER");
   curl_easy_setopt(hnd, CURLOPT_DIRLISTONLY, 1L);
   curl_easy_setopt(hnd, CURLOPT_USERPWD, "user:secret");
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
   /* Here is a list of options the curl code used that cannot get generated

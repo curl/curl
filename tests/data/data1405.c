@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "ftp://%HOSTIP:%FTPPORT/%TESTNUMBER");
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(hnd, CURLOPT_FTP_SKIP_PASV_IP, 1L);
   curl_easy_setopt(hnd, CURLOPT_QUOTE, slist1);
   curl_easy_setopt(hnd, CURLOPT_POSTQUOTE, slist2);

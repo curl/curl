@@ -51,7 +51,9 @@ QUIT
 </protocol>
 <stripfile>
 # These options vary with configurations - just ignore them
+# CURLOPT_USERAGENT and CURLOPT_MAXREDIRS requires HTTP protocol
 # CURLOPT_INTERLEAVEDATA requires RTSP (HTTP) protocol
+$_ = '' if /CURLOPT_USERAGENT/
 $_ = '' if /CURLOPT_MAXREDIRS/
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
 $_ = '' if /CURLOPT_SSH_KNOWNHOSTS/
