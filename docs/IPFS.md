@@ -7,22 +7,38 @@ SPDX-License-Identifier: curl
 # IPFS
 For an overview about IPFS, visit the [IPFS project site](https://ipfs.tech/).
 
-In IPFS there are two protocols. IPFS and IPNS (their workings are explained in detail [here](https://docs.ipfs.tech/concepts/)). The ideal way to access data on the IPFS network is through those protocols. For example to access the Big Buck Bunny video the ideal way to access it is like: `ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
+In IPFS there are two protocols. IPFS and IPNS (their workings are explained
+in detail [here](https://docs.ipfs.tech/concepts/)). The ideal way to access
+data on the IPFS network is through those protocols. For example to access
+the Big Buck Bunny video the ideal way to access it is like:
+`ipfs://bafybeigagd5nmnn2iys2f3doro7ydrevyr2mzarwidgadawmamiteydbzi`
 
 ## IPFS Gateways
 
 IPFS Gateway acts as a bridge between traditional HTTP clients and IPFS.
-IPFS Gateway specifications of HTTP semantics can be found [here](https://specs.ipfs.tech/http-gateways/).
+IPFS Gateway specifications of HTTP semantics can be found
+[here](https://specs.ipfs.tech/http-gateways/).
 
 ### Deserialized responses
 
-By default, a gateway acts as a bridge between traditional HTTP clients and IPFS and performs necessary hash verification and deserialization. Through such gateway, users can download files, directories, and other content-addressed data stored with IPFS or IPNS as if they were stored in a traditional web server.
+By default, a gateway acts as a bridge between traditional HTTP clients and
+IPFS and performs necessary hash verification and deserialization. Through such
+gateway, users can download files, directories, and other content-addressed
+data stored with IPFS or IPNS as if they were stored in a traditional web
+server.
 
 ### Verifiable responses
 
-By explicitly requesting [application/vnd.ipld.raw](https://www.iana.org/assignments/media-types/application/vnd.ipld.raw) or [application/vnd.ipld.car](https://www.iana.org/assignments/media-types/application/vnd.ipld.car) responses, by means defined in [Trustless Gateway Specification](https://specs.ipfs.tech/http-gateways/trustless-gateway/), the user is able to fetch raw content-addressed data and [perform hash verification themselves](https://docs.ipfs.tech/reference/http/gateway/#trustless-verifiable-retrieval).
+By explicitly requesting
+[application/vnd.ipld.raw](https://www.iana.org/assignments/media-types/application/vnd.ipld.raw) or
+[application/vnd.ipld.car](https://www.iana.org/assignments/media-types/application/vnd.ipld.car)
+responses, by means defined in
+[Trustless Gateway Specification](https://specs.ipfs.tech/http-gateways/trustless-gateway/),
+the user is able to fetch raw content-addressed data and
+[perform hash verification themselves](https://docs.ipfs.tech/reference/http/gateway/#trustless-verifiable-retrieval).
 
-This enables users to use untrusted, public gateways without worrying they might return invalid/malicious bytes.
+This enables users to use untrusted, public gateways without worrying they
+might return invalid/malicious bytes.
 
 ## IPFS and IPNS protocol handling
 
