@@ -306,7 +306,7 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
   return GNUTLS_X509_FMT_PEM; /* default to PEM */
 }
 
-#define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:"\
+#define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:" \
   "-CTYPE-ALL:+CTYPE-X509"
 /* If GnuTLS was compiled without support for SRP it will error out if SRP is
    requested in the priority string, so treat it specially
