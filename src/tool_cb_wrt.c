@@ -253,6 +253,9 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   if(outs->out_null)
     return bytes;
 
+  if(per->sync_needed && per->last_modified) {
+    per->sync_needed = TRUE;
+  }
   if(!file_needs_sync(per)) {
     return 0;
   }
