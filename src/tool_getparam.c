@@ -330,6 +330,7 @@ static const struct LongShort aliases[]= {
   {"stderr",                     ARG_FILE, ' ', C_STDERR},
   {"styled-output",              ARG_BOOL, ' ', C_STYLED_OUTPUT},
   {"suppress-connect-headers",   ARG_BOOL, ' ', C_SUPPRESS_CONNECT_HEADERS},
+  {"sync",                       ARG_BOOL, ' ', C_SYNC},
   {"tcp-fastopen",               ARG_BOOL, ' ', C_TCP_FASTOPEN},
   {"tcp-nodelay",                ARG_BOOL, ' ', C_TCP_NODELAY},
   {"telnet-option",              ARG_STRG, 't', C_TELNET_OPTION},
@@ -384,8 +385,8 @@ static const struct LongShort aliases[]= {
 static
 #endif
 ParameterError parse_cert_parameter(const char *cert_parameter,
-                                    char **certname,
-                                    char **passphrase)
+                          char **certname,
+                          char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
   size_t span;
@@ -432,22 +433,22 @@ ParameterError parse_cert_parameter(const char *cert_parameter,
     case '\\':
       param_place++;
       switch(*param_place) {
-      case '\0':
-        *certname_place++ = '\\';
-        break;
-      case '\\':
-        *certname_place++ = '\\';
-        param_place++;
-        break;
-      case ':':
-        *certname_place++ = ':';
-        param_place++;
-        break;
-      default:
-        *certname_place++ = '\\';
-        *certname_place++ = *param_place;
-        param_place++;
-        break;
+        case '\0':
+          *certname_place++ = '\\';
+          break;
+        case '\\':
+          *certname_place++ = '\\';
+          param_place++;
+          break;
+        case ':':
+          *certname_place++ = ':';
+          param_place++;
+          break;
+        default:
+          *certname_place++ = '\\';
+          *certname_place++ = *param_place;
+          param_place++;
+          break;
       }
       break;
     case ':':
@@ -485,7 +486,7 @@ done:
     tool_safefree(*certname);
   }
   else
-    *certname_place = '\0';
+  *certname_place = '\0';
   return err;
 }
 
@@ -526,11 +527,11 @@ static ParameterError GetFileAndPassword(const char *nextarg, char **file,
   err = parse_cert_parameter(nextarg, &certname, &passphrase);
   if(!err) {
     curlx_free(*file);
-    *file = certname;
-    if(passphrase) {
+  *file = certname;
+  if(passphrase) {
       curlx_free(*password);
-      *password = passphrase;
-    }
+    *password = passphrase;
+  }
   }
   return err;
 }
@@ -731,20 +732,20 @@ static CURLcode set_trace_config(const char *token)
       len = strlen(token);
 
     switch(*token) {
-    case '-':
-      toggle = FALSE;
-      name = token + 1;
-      len--;
-      break;
-    case '+':
-      toggle = TRUE;
-      name = token + 1;
-      len--;
-      break;
-    default:
-      toggle = TRUE;
-      name = token;
-      break;
+      case '-':
+        toggle = FALSE;
+        name = token + 1;
+        len--;
+        break;
+      case '+':
+        toggle = TRUE;
+        name = token + 1;
+        len--;
+        break;
+      default:
+        toggle = TRUE;
+        name = token;
+        break;
     }
 
     if((len == 3) && curl_strnequal(name, "all", 3)) {
@@ -1666,15 +1667,15 @@ static ParameterError parse_upload_flags(struct OperationConfig *config,
       }
     }
 
-    if(!map->name) {
-      err = PARAM_OPTION_UNKNOWN;
-      break;
-    }
+   if(!map->name) {
+     err = PARAM_OPTION_UNKNOWN;
+     break;
+   }
 
-    if(next)
-      /* move over the comma */
-      next++;
-    flag = next;
+   if(next)
+     /* move over the comma */
+     next++;
+   flag = next;
   }
 
   return err;
@@ -2076,6 +2077,9 @@ static ParameterError opt_bool(struct OperationConfig *config,
   case C_SHOW_HEADERS: /* --show-headers */
     config->show_headers = toggle;
     break;
+  case C_SYNC:
+    config->sync = toggle;
+    break;
   case C_JUNK_SESSION_COOKIES: /* --junk-session-cookies */
     config->cookiesession = toggle;
     break;
@@ -2266,7 +2270,7 @@ static ParameterError opt_file(struct OperationConfig *config,
     break;
   case C_PROXY_CERT: /* --proxy-cert */
     err = GetFileAndPassword(nextarg, &config->proxy_cert,
-                             &config->proxy_key_passwd);
+                       &config->proxy_key_passwd);
     break;
   case C_PROXY_CRLFILE: /* --proxy-crlfile */
     err = existingfile(&config->proxy_crlfile, a, nextarg);

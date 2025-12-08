@@ -210,7 +210,7 @@ static size_t win_console(intptr_t fhnd, struct OutStruct *outs,
     /* grow the buffer if needed */
     if(len > global->term.len) {
       wchar_t *buf = (wchar_t *)curlx_realloc(global->term.buf,
-                                              len * sizeof(wchar_t));
+                                         len * sizeof(wchar_t));
       if(!buf)
         return CURL_WRITEFUNC_ERROR;
       global->term.len = len;
@@ -252,6 +252,10 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
   if(outs->out_null)
     return bytes;
+
+  if(!file_needs_sync(per)) {
+    return 0;
+  }
 
 #ifdef DEBUGBUILD
   {

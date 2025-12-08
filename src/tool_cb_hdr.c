@@ -130,6 +130,17 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
     long response = 0;
     curl_easy_getinfo(per->curl, CURLINFO_RESPONSE_CODE, &response);
 
+    if(cb > 14 && checkprefix("Last-Modified:", str)) {
+      const char *date_str = str + 14;
+      per->last_modified = curl_getdate(date_str, NULL);
+      if(!file_needs_sync(per)) {
+        if(per->hdrcbdata.headlist) {
+          curl_slist_free_all(per->hdrcbdata.headlist);
+          hdrcbdata->headlist = NULL;
+        }
+        return 0;
+      }
+    }
     if((response / 100 != 2) && (response / 100 != 3))
       /* only care about etag and content-disposition headers in 2xx and 3xx
          responses */
@@ -228,12 +239,26 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
             outs->fopened = FALSE;
             outs->alloc_filename = TRUE;
             hdrcbdata->honor_cd_filename = FALSE; /* done now! */
+            if(!file_needs_sync(per)) {
+              if(per->hdrcbdata.headlist) {
+                curl_slist_free_all(per->hdrcbdata.headlist);
+                hdrcbdata->headlist = NULL;
+              }
+              return 0;
+            }
             if(!tool_create_output_file(outs, per->config))
               return CURL_WRITEFUNC_ERROR;
             if(tool_write_headers(&per->hdrcbdata, outs->stream))
               return CURL_WRITEFUNC_ERROR;
           }
           break;
+        }
+        if(!file_needs_sync(per)) {
+          if(per->hdrcbdata.headlist) {
+            curl_slist_free_all(per->hdrcbdata.headlist);
+            hdrcbdata->headlist = NULL;
+          }
+          return 0;
         }
         if(!outs->stream && !tool_create_output_file(outs, per->config))
           return CURL_WRITEFUNC_ERROR;
@@ -262,6 +287,25 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
         }
         return cb; /* done for now */
       }
+    }
+    if(hdrcbdata->config->show_headers && per->config->sync
+      && (!per->last_modified || !per->outs.filename)) {
+      struct curl_slist *old = hdrcbdata->headlist;
+      hdrcbdata->headlist = curl_slist_append(old, ptr);
+      if(!hdrcbdata->headlist) {
+        curl_slist_free_all(old);
+        return CURL_WRITEFUNC_ERROR;
+      }
+      return cb;
+    }
+    else if(hdrcbdata->config->show_headers && per->config->sync) {
+      if(!outs->stream && !tool_create_output_file(outs, per->config)) {
+        if(hdrcbdata->headlist)
+          curl_slist_free_all(hdrcbdata->headlist);
+        return CURL_WRITEFUNC_ERROR;
+      }
+      if(tool_write_headers(&per->hdrcbdata, outs->stream))
+        return CURL_WRITEFUNC_ERROR;
     }
   }
   if(hdrcbdata->config->writeout) {
@@ -298,7 +342,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 #else
       if(curl_strnequal("Location", ptr, namelen)) {
         write_linked_location(per->curl, &value[1], cb - namelen - 1,
-                              outs->stream);
+            outs->stream);
       }
       else
         fwrite(&value[1], cb - namelen - 1, 1, outs->stream);

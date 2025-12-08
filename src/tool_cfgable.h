@@ -249,6 +249,7 @@ struct OperationConfig {
   BIT(use_ascii);           /* select ASCII or text transfer */
   BIT(autoreferer);         /* automatically set referer */
   BIT(show_headers);        /* show headers to data output */
+  BIT(sync);
   BIT(no_body);             /* do not get the body */
   BIT(dirlistonly);         /* only get the FTP directory list */
   BIT(unrestricted_auth);   /* Continue to send authentication (user+password)
