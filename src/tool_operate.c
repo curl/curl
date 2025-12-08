@@ -141,7 +141,6 @@ bool file_needs_sync(struct per_transfer *per)
   if(per->sync_needed)
     return TRUE;
 
-
   /* The function should not affect the program flow if
     not all variables have been transferred with the header. */
   if(!per->outs.filename || !per->last_modified)
