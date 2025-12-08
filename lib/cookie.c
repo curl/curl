@@ -444,12 +444,14 @@ parse_cookie_header(struct Curl_easy *data,
   time_t now = 0;
   size_t linelength = strlen(ptr);
   CURLcode result = CURLE_OK;
-  struct Curl_str cookie[COOKIE_PIECES] = { 0 };
+  struct Curl_str cookie[COOKIE_PIECES];
   *okay = FALSE;
   if(linelength > MAX_COOKIE_LINE)
     /* discard overly long lines at once */
     return CURLE_OK;
 
+  /* memset instead of initializer because gcc 4.8.1 is silly */
+  memset(cookie, 0, sizeof(cookie));
   do {
     struct Curl_str name;
     struct Curl_str val;
