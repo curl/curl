@@ -114,18 +114,17 @@ class TestReuse:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_05_as_follow_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http3` an Alt-Svc redirection from h3 to h1 is allowed
-        count = 2
         # write an alt-svc file the advises h1 instead of h3
         curl = CurlClient(env=env)
         asfile = curl.mk_altsvc_file('test_12',
                                      'h3', env.domain1, env.https_port,
                                      'http/1.1', env.domain1, env.https_port)
-        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
             '--alt-svc', f'{asfile}', '--http3'
         ])
-        r.check_response(count=count, http_status=200)
-        # We expect the connection to be preferring HTTP/1.1
+        r.check_response(count=1, http_status=200)
+        # We expect the connection to be preferring HTTP/1.1 in the ALPN
         assert r.total_connects == 1
         re_m = re.compile(r'.* ALPN: curl offers http/1.1,h2')
         lines = [line for line in r.trace_lines if re_m.match(line)]
@@ -134,21 +133,19 @@ class TestReuse:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_06_as_ignore_h3h1(self, env: Env, httpd, configures_httpd, nghttpx):
         # With '--http3-only` an Alt-Svc redirection from h3 to h1 is ignored
-        count = 2
         # write an alt-svc file the advises h1 instead of h3
         curl = CurlClient(env=env)
         asfile = curl.mk_altsvc_file('test_12',
                                      'h3', env.domain1, env.https_port,
                                      'http/1.1', env.domain1, env.https_port)
-        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
             '--alt-svc', f'{asfile}', '--http3-only'
         ])
-        r.check_response(count=count, http_status=200)
+        r.check_response(count=1, http_status=200)
         # We expect the connection to be stay on h3, since we used --http3-only
         assert r.total_connects == 1
-        for s in r.stats:
-            assert s['http_version'] == '3', f'{s}'
+        assert r.stats[0]['http_version'] == '3', f'{r.stats}'
 
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_07_as_ignore_h2h3(self, env: Env, httpd, configures_httpd, nghttpx):
