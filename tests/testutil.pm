@@ -116,7 +116,9 @@ sub subtextfile {
     my ($thing) = @_;
 
     # include a file, expand space macros
-    $$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge;
+    my $count = ($$thing =~ s/%includetext ([^%]*)%[\n\r]+/includefile($1, 1)/ge);
+
+    return $count > 0;
 }
 
 sub subchars {
