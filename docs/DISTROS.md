@@ -165,7 +165,7 @@ unless it is specific to Homebrew's way of packaging software.
 - curl: https://svnweb.mageia.org/packages/cauldron/curl/current/SPECS/curl.spec?view=markup
 - curl issues: https://bugs.mageia.org/buglist.cgi?bug_status=NEW&bug_status=UNCONFIRMED&bug_status=NEEDINFO&bug_status=UPSTREAM&bug_status=ASSIGNED&component=RPM%20Packages&f1=cf_rpmpkg&list_id=176576&o1=casesubstring&product=Mageia&query_format=advanced&v1=curl
 - curl patches: https://svnweb.mageia.org/packages/cauldron/curl/current/SOURCES/
-- curl patches in stable distro releases: https://svnweb.mageia.org/packages/updates/<STABLE_VERSION>/curl/current/SOURCES/
+- curl patches in stable distro releases: https://svnweb.mageia.org/packages/updates/9/curl/current/SOURCES/
 - curl security: https://advisories.mageia.org/src_curl.html
 
 ## MSYS2
