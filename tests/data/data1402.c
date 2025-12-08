@@ -12,10 +12,10 @@ int main(int argc, char *argv[])
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_URL, "http://HOSTIP:HTTPPORT/we/want/1402");
+  curl_easy_setopt(hnd, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
   curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, "foo=bar&baz=quux");
   curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)16);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
+  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 

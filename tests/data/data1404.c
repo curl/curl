@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
   hnd = curl_easy_init();
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
-  curl_easy_setopt(hnd, CURLOPT_URL, "http://HOSTIP:HTTPPORT/we/want/1404");
+  curl_easy_setopt(hnd, CURLOPT_URL, "http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER");
   mime1 = curl_mime_init(hnd);
   part1 = curl_mime_addpart(mime1);
   curl_mime_data(part1, "value", CURL_ZERO_TERMINATED);
@@ -31,20 +31,20 @@ int main(int argc, char *argv[])
   part1 = curl_mime_addpart(mime1);
   mime2 = curl_mime_init(hnd);
   part2 = curl_mime_addpart(mime2);
-  curl_mime_filedata(part2, "LOGDIR/test1404.txt");
+  curl_mime_filedata(part2, "%LOGDIR/test1404.txt");
   part2 = curl_mime_addpart(mime2);
-  curl_mime_filedata(part2, "LOGDIR/test1404.txt");
+  curl_mime_filedata(part2, "%LOGDIR/test1404.txt");
   curl_mime_encoder(part2, "8bit");
   curl_mime_type(part2, "magic/content");
   part2 = curl_mime_addpart(mime2);
-  curl_mime_filedata(part2, "LOGDIR/test1404.txt");
+  curl_mime_filedata(part2, "%LOGDIR/test1404.txt");
   curl_mime_headers(part2, slist1, 1);
   slist1 = NULL;
   curl_mime_subparts(part1, mime2);
   mime2 = NULL;
   curl_mime_name(part1, "file");
   curl_easy_setopt(hnd, CURLOPT_MIMEPOST, mime1);
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
+  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 

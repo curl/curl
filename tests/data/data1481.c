@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
   curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
   curl_easy_setopt(hnd, CURLOPT_URL, "http://moo/");
-  curl_easy_setopt(hnd, CURLOPT_PROXY, "http://HOSTIP:HTTPPORT");
-  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "stripped");
+  curl_easy_setopt(hnd, CURLOPT_PROXY, "http://%HOSTIP:%HTTPPORT");
+  curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/%VERSION");
   curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
   curl_easy_setopt(hnd, CURLOPT_SSLVERSION, (long)(CURL_SSLVERSION_TLSv1_2 | CURL_SSLVERSION_MAX_TLSv1_3));
   curl_easy_setopt(hnd, CURLOPT_PROXY_SSLVERSION, (long)CURL_SSLVERSION_TLSv1);

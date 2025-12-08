@@ -48,8 +48,6 @@ Accept: */*
 
 </protocol>
 <stripfile>
-s/(URL, \"http:\/\/)%HOSTIP:%HTTPPORT/${1}HOSTIP:HTTPPORT/
-s/(USERAGENT, \")[^\"]+/${1}stripped/
 # CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with
 # CURLOPT_INTERLEAVEDATA requires RTSP protocol
 # configurations - just ignore them

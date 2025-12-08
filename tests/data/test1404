@@ -94,10 +94,6 @@ dummy data
 ------------------------------9ef8d6205763--%CR
 </protocol>
 <stripfile>
-s/(URL, \"http:\/\/)%HOSTIP:%HTTPPORT/${1}HOSTIP:HTTPPORT/
-s|%LOGDIR|LOGDIR|
-# curl's default user-agent varies with version, libraries etc.
-s/(USERAGENT, \")[^\"]+/${1}stripped/
 # CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with
 # configurations - just ignore them
 $_ = '' if /CURLOPT_SSL_VERIFYPEER/
