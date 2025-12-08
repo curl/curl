@@ -62,7 +62,7 @@ class RunProfile:
     def __init__(self, pid: int, started_at: datetime, run_dir):
         self._pid = pid
         self._started_at = started_at
-        self._duration = datetime.timedelta(seconds=0)
+        self._duration = timedelta(seconds=0)
         self._run_dir = run_dir
         self._samples = []
         self._psu = None
