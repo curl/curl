@@ -381,6 +381,7 @@ jobs:
               TFLAGS+=' ~SCP ~SFTP'  # Flaky: `-8, Unable to exchange encryption keys`. https://github.com/libssh2/libssh2/issues/804
             fi
             if [[ "${TFLAGS}" = *'-t'* ]]; then
+              TFLAGS+=' -j20'
               TFLAGS+=' !2300'  # Leak memory and file handle via tool_doswin.c / win32_stdin_read_thread()
             fi
           fi
