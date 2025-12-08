@@ -120,6 +120,9 @@ sub storelink {
         elsif($link =~ /^https:\/\/github.com\/curl\/curl(\/|$)/) {
             #print "-- curl github repo: $link\n";
         }
+        elsif($link =~ /^(https|http):\/\/[0-9.]+(\/|$)/) {
+            #print "-- IPv4 number: $link\n";
+        }
         else {
             #print "ADD '$link'\n";
             $url{$link} .= "$f:$line ";
@@ -160,7 +163,7 @@ sub findlinks {
         # ignore trailing: dot, quote, asterisk, hash, comma, question mark,
         # colon, closing parenthesis, closing angle bracket, whitespace, pipe,
         # backtick, semicolon
-        elsif(/(https:\/\/[a-z0-9.\/:%_-]+[^."*\#,?:\)> \t|`;])/i) {
+        elsif(/(https:\/\/[a-z0-9.\/:%_+@-]+[^."*\#,?:\)> \t|`;])/i) {
             #print "RAW ";
             storelink($f, $line, $1);
         }
