@@ -369,9 +369,10 @@ sub prepro {
                 $data_crlf = "";
             }
             subvariables(\$s, $testnum, "%");
-            subtextfile(\$s);
+            if(subtextfile(\$s)) {
+                subvariables(\$s, $testnum, "%");
+            }
             subchars(\$s);
-            subvariables(\$s, $testnum, "%");
             subbase64(\$s);
             subsha256base64file(\$s);
             substrippemfile(\$s);
