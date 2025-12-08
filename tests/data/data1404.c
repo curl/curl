@@ -31,13 +31,13 @@ int main(int argc, char *argv[])
   part1 = curl_mime_addpart(mime1);
   mime2 = curl_mime_init(hnd);
   part2 = curl_mime_addpart(mime2);
-  curl_mime_filedata(part2, "%LOGDIR/test1404.txt");
+  curl_mime_filedata(part2, "%LOGDIR/test%TESTNUMBER.txt");
   part2 = curl_mime_addpart(mime2);
-  curl_mime_filedata(part2, "%LOGDIR/test1404.txt");
+  curl_mime_filedata(part2, "%LOGDIR/test%TESTNUMBER.txt");
   curl_mime_encoder(part2, "8bit");
   curl_mime_type(part2, "magic/content");
   part2 = curl_mime_addpart(mime2);
-  curl_mime_filedata(part2, "%LOGDIR/test1404.txt");
+  curl_mime_filedata(part2, "%LOGDIR/test%TESTNUMBER.txt");
   curl_mime_headers(part2, slist1, 1);
   slist1 = NULL;
   curl_mime_subparts(part1, mime2);
