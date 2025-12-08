@@ -136,15 +136,16 @@ class TestEyeballs:
 
     # download using HTTP/3 on missing server with alt-svc pointing there
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="missing HTTP/3 support")
-    def test_06_07_h3_altsvc_fail(self, env: Env, httpd, nghttpx):
+    def test_06_20_h2_altsvc_h3_fallback(self, env: Env, httpd, nghttpx):
         curl = CurlClient(env=env)
         urln = f'https://{env.domain1}:{env.https_only_tcp_port}/data.json'
-        altsvc_file = curl.mk_altsvc_file('test_06_17',
+        altsvc_file = curl.mk_altsvc_file('test_06',
                                           'h2', env.domain1, env.https_only_tcp_port,
                                           'h3', env.domain1, env.https_only_tcp_port)
         r = curl.http_download(urls=[urln], extra_args=[
             '--alt-svc', altsvc_file
         ])
-        # Limit of our Alt-Svc implementation. Once we switch to QUIC, we
-        # do not eyeball back to h2. See #19740
-        r.check_exit_code(7)  # CURLE_COULDNT_CONNECT
+        # Should try a QUIC connection that fails and fallback to h2
+        r.check_exit_code(0)
+        r.check_response(count=1, http_status=200)
+        assert r.stats[0]['http_version'] == '2'
