@@ -115,7 +115,8 @@ the include instruction:
     %include filename%
 
 Or, a variant of the above where the file is loaded as a newline-agnostic
-text file, and macros expanded after inclusion:
+text file, and whitespace, special character macros and variables expanded
+after inclusion:
 
     %includetext filename%
 
