@@ -322,7 +322,6 @@ problems may have been fixed or changed somewhat since this was written.
 6.5 NTLM does not support password with Unicode 'SECTION SIGN' character
 
  https://en.wikipedia.org/wiki/Section_sign
- https://codepoints.net/U+00A7 SECTION SIGN
  https://github.com/curl/curl/issues/2120
 
 6.6 libcurl can fail to try alternatives with --proxy-any
