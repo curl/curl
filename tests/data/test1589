@@ -18,27 +18,20 @@ Content-Type: text/plain
 new file
 </data>
 </reply>
-
-
 <client>
-
 <server>
 http
 </server>
-
 <name>
 sync HTTP GET
 </name>
-
 <precheck>
 %PERL -e 'use Date::Parse; open(my $fh, ">", "%LOGDIR/curl%TESTNUMBER.out") or die "$!\n"; print $fh "old file\r\n"; close($fh);'
 </precheck>
-
 <command>
 --sync http://%HOSTIP:%HTTPPORT/testfile.txt
 </command>
 </client>
-
 <verify>
 <file name="%LOGDIR/curl%TESTNUMBER.out" crlf="yes">
 HTTP/1.1 200 OK
@@ -52,5 +45,4 @@ Content-Type: text/plain
 new file
 </file>
 </verify>
-
 </testcase>

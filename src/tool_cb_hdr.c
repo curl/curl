@@ -342,7 +342,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
 #else
       if(curl_strnequal("Location", ptr, namelen)) {
         write_linked_location(per->curl, &value[1], cb - namelen - 1,
-            outs->stream);
+                              outs->stream);
       }
       else
         fwrite(&value[1], cb - namelen - 1, 1, outs->stream);

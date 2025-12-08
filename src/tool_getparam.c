@@ -385,8 +385,8 @@ static const struct LongShort aliases[]= {
 static
 #endif
 ParameterError parse_cert_parameter(const char *cert_parameter,
-                          char **certname,
-                          char **passphrase)
+                                    char **certname,
+                                    char **passphrase)
 {
   size_t param_length = strlen(cert_parameter);
   size_t span;
@@ -486,7 +486,7 @@ done:
     tool_safefree(*certname);
   }
   else
-  *certname_place = '\0';
+    *certname_place = '\0';
   return err;
 }
 
