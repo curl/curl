@@ -3060,6 +3060,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     struct altsvc *as = NULL;
     int allowed_alpns = ALPN_none;
     struct http_negotiation *neg = &data->state.http_neg;
+    bool same_dest = FALSE;
 
     DEBUGF(infof(data, "Alt-svc check wanted=%x, allowed=%x",
                  neg->wanted, neg->allowed));
@@ -3083,7 +3084,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       hit = Curl_altsvc_lookup(data->asi,
                                ALPN_h3, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_alpns);
+                               allowed_alpns, &same_dest);
     }
 #endif
 #ifdef USE_HTTP2
@@ -3093,7 +3094,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       hit = Curl_altsvc_lookup(data->asi,
                                ALPN_h2, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_alpns);
+                               allowed_alpns, &same_dest);
     }
 #endif
     if(!hit && (neg->wanted & CURL_HTTP_V1x) &&
@@ -3102,10 +3103,29 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       hit = Curl_altsvc_lookup(data->asi,
                                ALPN_h1, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_alpns);
+                               allowed_alpns, &same_dest);
     }
 
-    if(hit) {
+    if(hit && same_dest) {
+      /* same destination, but more HTTPS version options */
+      switch(as->dst.alpnid) {
+      case ALPN_h1:
+        neg->wanted |= CURL_HTTP_V1x;
+        neg->preferred = CURL_HTTP_V1x;
+        break;
+      case ALPN_h2:
+        neg->wanted |= CURL_HTTP_V2x;
+        neg->preferred = CURL_HTTP_V2x;
+        break;
+      case ALPN_h3:
+        neg->wanted |= CURL_HTTP_V3x;
+        neg->preferred = CURL_HTTP_V3x;
+        break;
+      default: /* should not be possible */
+        break;
+      }
+    }
+    else if(hit) {
       char *hostd = curlx_strdup((char *)as->dst.host);
       if(!hostd)
         return CURLE_OUT_OF_MEMORY;

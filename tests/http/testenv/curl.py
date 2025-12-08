@@ -36,7 +36,7 @@ import re
 import shutil
 import subprocess
 from statistics import mean, fmean
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from typing import List, Optional, Dict, Union, Any
 from urllib.parse import urlparse
 
@@ -1211,3 +1211,12 @@ class CurlClient:
             rc = p.returncode
             if rc != 0:
                 raise Exception(f'{fg_gen_flame} returned error {rc}')
+
+    def mk_altsvc_file(self, name, src_alpn, src_host, src_port,
+                       dest_alpn, dest_host, dest_port):
+        fpath = os.path.join(self.run_dir, f'{name}.altsvc')
+        ts = datetime.now(timezone.utc) + timedelta(hours=1)
+        ts = ts.strftime('%Y%m%d %H:%M:%S')
+        with open(fpath, 'w') as fd:
+            fd.write(f'{src_alpn} {src_host} {src_port} {dest_alpn} {dest_host} {dest_port} "{ts}" 1 0\n')
+        return fpath

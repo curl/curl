@@ -622,7 +622,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
                         enum alpnid srcalpnid, const char *srchost,
                         int srcport,
                         struct altsvc **dstentry,
-                        const int versions) /* one or more bits */
+                        const int versions, /* one or more bits */
+                        bool *psame_destination)
 {
   struct Curl_llist_node *e;
   struct Curl_llist_node *n;
@@ -631,6 +632,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   DEBUGASSERT(srchost);
   DEBUGASSERT(dstentry);
 
+  *psame_destination = FALSE;
   for(e = Curl_llist_head(&asi->list); e; e = n) {
     struct altsvc *as = Curl_node_elem(e);
     n = Curl_node_next(e);
@@ -646,6 +648,8 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
        (versions & (int)as->dst.alpnid)) {
       /* match */
       *dstentry = as;
+      *psame_destination = (srcport == as->dst.port) &&
+                           hostcompare(srchost, as->dst.host);
       return TRUE;
     }
   }
