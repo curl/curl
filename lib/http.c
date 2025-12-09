@@ -121,7 +121,7 @@ const struct Curl_handler Curl_handler_http = {
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
@@ -152,7 +152,7 @@ const struct Curl_handler Curl_handler_https = {
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connect_it */
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_pollset */
@@ -1531,15 +1531,6 @@ bool Curl_compareheader(const char *headerline, /* line to check */
     }
   }
   return FALSE; /* no match */
-}
-
-/*
- * Curl_http_connect() performs HTTP stuff to do at connect-time, called from
- * the generic Curl_connect().
- */
-CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
-{
-  return Curl_conn_connect(data, FIRSTSOCKET, FALSE, done);
 }
 
 /* this returns the socket to wait for in the DO and DOING state for the multi

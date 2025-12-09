@@ -142,7 +142,6 @@ static void mstate(struct Curl_easy *data, CURLMstate state
     Curl_init_CONNECT, /* CONNECT */
     NULL,              /* RESOLVING */
     NULL,              /* CONNECTING */
-    NULL,              /* TUNNELING */
     NULL,              /* PROTOCONNECT */
     NULL,              /* PROTOCONNECTING */
     NULL,              /* DO */
@@ -1122,7 +1121,6 @@ CURLMcode Curl_multi_pollset(struct Curl_easy *data,
     break;
 
   case MSTATE_CONNECTING:
-  case MSTATE_TUNNELING:
     result = mstate_connecting_pollset(data, ps);
     break;
 
@@ -1862,43 +1860,29 @@ static CURLcode protocol_doing(struct Curl_easy *data, bool *done)
  */
 static CURLcode protocol_connect(struct Curl_easy *data, bool *protocol_done)
 {
-  CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
+  CURLcode result = CURLE_OK;
+
   DEBUGASSERT(conn);
   DEBUGASSERT(protocol_done);
+  DEBUGASSERT(Curl_conn_is_connected(conn, FIRSTSOCKET));
 
   *protocol_done = FALSE;
-
-  if(Curl_conn_is_connected(conn, FIRSTSOCKET) && conn->bits.protoconnstart) {
-    /* We already are connected, get back. This may happen when the connect
-       worked fine in the first call, like when we connect to a local server
-       or proxy. Note that we do not know if the protocol is actually done.
-
-       Unless this protocol does not have any protocol-connect callback, as
-       then we know we are done. */
-    if(!conn->handler->connecting)
-      *protocol_done = TRUE;
-
-    return CURLE_OK;
-  }
-
   if(!conn->bits.protoconnstart) {
     if(conn->handler->connect_it) {
-      /* is there a protocol-specific connect() procedure? */
-
       /* Call the protocol-specific connect function */
       result = conn->handler->connect_it(data, protocol_done);
+      if(result)
+        return result;
     }
-    else
-      *protocol_done = TRUE;
-
-    /* it has started, possibly even completed but that knowledge is not stored
-       in this bit! */
-    if(!result)
-      conn->bits.protoconnstart = TRUE;
+    conn->bits.protoconnstart = TRUE;
   }
 
-  return result; /* pass back status */
+  /* Unless this protocol does not have any protocol-connect callback, as
+     then we know we are done. */
+  if(!conn->handler->connecting)
+    *protocol_done = TRUE;
+  return CURLE_OK;
 }
 
 static void set_in_callback(struct Curl_multi *multi, bool value)
@@ -2468,21 +2452,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* awaiting an asynch name resolve to complete */
       rc = state_resolving(multi, data, &stream_error, &result);
       break;
-
-#ifndef CURL_DISABLE_HTTP
-    case MSTATE_TUNNELING:
-      /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
-      DEBUGASSERT(data->conn);
-      result = Curl_http_connect(data, &protocol_connected);
-      if(!result) {
-        rc = CURLM_CALL_MULTI_PERFORM;
-        /* initiate protocol connect phase */
-        multistate(data, MSTATE_PROTOCONNECT);
-      }
-      else
-        stream_error = TRUE;
-      break;
-#endif
 
     case MSTATE_CONNECTING:
       /* awaiting a completion of an asynch TCP connect */
