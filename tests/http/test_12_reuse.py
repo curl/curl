@@ -25,8 +25,6 @@
 ###########################################################################
 #
 import logging
-import os
-from datetime import datetime, timedelta
 import pytest
 
 from testenv import Env, CurlClient
