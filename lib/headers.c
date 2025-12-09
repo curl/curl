@@ -266,7 +266,8 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
 
 /*
  * Curl_headers_push() gets passed a full HTTP header to store. It gets called
- * immediately before the header callback. The header is CRLF terminated.
+ * immediately before the header callback. The header is CRLF, CR or LF
+ * terminated.
  */
 CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
                            size_t hlen, /* length of header */
