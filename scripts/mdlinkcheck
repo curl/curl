@@ -202,6 +202,12 @@ for my $f (@files) {
     }
 }
 
+for my $u (sort keys %whitelist) {
+    if($whitelist{$u} == 1) {
+        printf "warning: unused whitelist entry: '$u'\n";
+    }
+}
+
 #for my $u (sort keys %url) {
 #    print "$u\n";
 #}
@@ -226,12 +232,6 @@ for my $l (sort keys %flink) {
             push @errlist, sprintf "%s ERROR links to missing file %s\n", $f, $l;
             $error++;
         }
-    }
-}
-
-for my $u (sort keys %whitelist) {
-    if($whitelist{$u} == 1) {
-        printf "warning: unused whitelist entry: '$u'\n";
     }
 }
 
