@@ -160,7 +160,7 @@ sub findlinks {
             #print "$f:$line $link\n";
             storelink($f, $line, $link);
         }
-        # ignore trailing: dot, double-quote, single-quote, asterisk, hash,
+        # ignore trailing: dot, double quote, single quote, asterisk, hash,
         # comma, question mark, colon, closing parenthesis, backslash,
         # closing angle bracket, whitespace, pipe, backtick, semicolon
         elsif(/(https:\/\/[a-z0-9.\/:%_+@-]+[^."'*\#,?:\)> \t|`;\\])/i) {
