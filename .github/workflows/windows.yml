@@ -37,7 +37,6 @@ permissions: {}
 
 env:
   CURL_CI: github
-  CURL_TEST_NO_TASKKILL: '1'
 
 jobs:
   cygwin:
