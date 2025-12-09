@@ -46,7 +46,7 @@ CURLcode Curl_headers_init(struct Curl_easy *data);
  * Curl_headers_push() gets passed a full header to store.
  */
 CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
-                           unsigned char type);
+                           size_t hlen, unsigned char type);
 
 /*
  * Curl_headers_cleanup(). Free all stored headers and associated memory.

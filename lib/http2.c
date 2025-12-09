@@ -1664,15 +1664,16 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
      memcmp(HTTP_PSEUDO_STATUS, name, namelen) == 0) {
     /* nghttp2 guarantees :status is received first and only once. */
     char buffer[32];
+    size_t hlen;
     result = Curl_http_decode_status(&stream->status_code,
                                      (const char *)value, valuelen);
     if(result) {
       cf_h2_header_error(cf, data_s, stream, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
     }
-    curl_msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%u\r",
-                   stream->status_code);
-    result = Curl_headers_push(data_s, buffer, CURLH_PSEUDO);
+    hlen = curl_msnprintf(buffer, sizeof(buffer), HTTP_PSEUDO_STATUS ":%u\r",
+                          stream->status_code);
+    result = Curl_headers_push(data_s, buffer, hlen, CURLH_PSEUDO);
     if(result) {
       cf_h2_header_error(cf, data_s, stream, result);
       return NGHTTP2_ERR_CALLBACK_FAILURE;
