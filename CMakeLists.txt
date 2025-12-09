@@ -1970,8 +1970,7 @@ curl_add_if("asyn-rr"       USE_ARES AND ENABLE_THREADED_RESOLVER AND USE_HTTPSR
 curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
                             USE_WIN32_IDN OR
                             USE_APPLE_IDN)
-curl_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
-                            ((SIZEOF_OFF_T GREATER 4) OR WIN32))
+curl_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND ((SIZEOF_OFF_T GREATER 4) OR WIN32))
 curl_add_if("SSPI"          USE_WINDOWS_SSPI)
 curl_add_if("GSS-API"       HAVE_GSSAPI)
 curl_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
