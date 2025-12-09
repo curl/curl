@@ -46,9 +46,9 @@
 //
 
 #ifdef _WIN32
-#define COMPARE(a, b) (!_stricmp((a), (b)))
+#define COMPARE(a, b) (!_stricmp(a, b))
 #else
-#define COMPARE(a, b) (!strcasecmp((a), (b)))
+#define COMPARE(a, b) (!strcasecmp(a, b))
 #endif
 
 //
