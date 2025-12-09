@@ -1351,6 +1351,19 @@ As can be seen [here](https://curl.se/docs/companies.html) and elsewhere, more
 and more companies are discovering the power of libcurl and take advantage of
 it even in commercial environments.
 
+## What license does curl use exactly?
+
+curl is released under an [MIT derivative
+license](https://curl.se/docs/copyright.html). It is similar but not identical
+to the MIT license.
+
+The difference is considered big enough to make SPDX list it under its own
+identifier: [curl](https://spdx.org/licenses/curl.html).
+
+The changes done to the license that make it uniquely curl were tiny and
+well-intented, but the reasons for them have been forgotten and we strongly
+discourage others from doing the same thing.
+
 # PHP/CURL
 
 ## What is PHP/CURL?
