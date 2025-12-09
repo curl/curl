@@ -87,7 +87,7 @@ my %url;
 my %flink;
 
 # list all files to scan for links
-my @files=`git ls-files - docs src lib scripts`;
+my @files=`git ls-files docs src lib scripts`;
 
 sub storelink {
     my ($f, $line, $link) = @_;
