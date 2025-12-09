@@ -28,4 +28,3 @@ jobs:
 
       - name: 'mdlinkcheck'
         run: ./scripts/mdlinkcheck
-
