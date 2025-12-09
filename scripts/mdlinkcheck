@@ -163,7 +163,7 @@ sub findlinks {
         # comma, question mark, colon, closing parenthesis, backslash,
         # closing angle bracket, whitespace, pipe, backtick, semicolon
         elsif(/(https:\/\/[a-z0-9.\/:%_+@-]+[^."'*\#,?:\)> \t|`;\\])/i) {
-            #print "RAW ";
+            #print "RAW '$_'\n";
             storelink($f, $line, $1);
         }
         $line++;
