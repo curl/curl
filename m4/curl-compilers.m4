@@ -936,6 +936,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "1700"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
           fi
+          dnl clang 19 or later
+          if test "$compiler_num" -ge "1900"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-signedness"
+          fi
           dnl clang 20 or later
           if test "$compiler_num" -ge "2001"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [array-compare])
@@ -1115,6 +1119,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 5 or later
           if test "$compiler_num" -ge "500"; then
             tmp_CFLAGS="$tmp_CFLAGS -Warray-bounds=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-signedness"
           fi
           #
           dnl Only gcc 6 or later
