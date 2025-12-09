@@ -908,12 +908,12 @@ format:
 you will find that even if `D:\blah.txt` does exist, curl returns a 'file not
 found' error.
 
-According to [RFC 1738](https://www.ietf.org/rfc/rfc1738.txt), `file://` URLs
-must contain a host component, but it is ignored by most implementations. In
-the above example, `D:` is treated as the host component, and is taken away.
-Thus, curl tries to open `/blah.txt`. If your system is installed to drive C:,
-that will resolve to `C:\blah.txt`, and if that does not exist you will get
-the not found error.
+According to [RFC 1738](https://datatracker.ietf.org/doc/html/rfc1738),
+`file://` URLs must contain a host component, but it is ignored by most
+implementations. In the above example, `D:` is treated as the host component,
+and is taken away. Thus, curl tries to open `/blah.txt`. If your system is
+installed to drive C:, that will resolve to `C:\blah.txt`, and if that does
+not exist you will get the not found error.
 
 To fix this problem, use `file://` URLs with *three* leading slashes:
 

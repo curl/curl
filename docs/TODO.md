@@ -530,8 +530,8 @@ for 1) efficiency and 2) safety.
 ## Support DANE
 
 [DNS-Based Authentication of Named Entities
-(DANE)](https://www.rfc-editor.org/rfc/rfc6698.txt) is a way to provide SSL
-keys and certs over DNS using DNSSEC as an alternative to the CA model.
+(DANE)](https://datatracker.ietf.org/doc/html/rfc6698) is a way to provide
+SSL keys and certs over DNS using DNSSEC as an alternative to the CA model.
 
 A patch was posted on March 7 2013
 (https://curl.se/mail/lib-2013-03/0075.html) but it was a too simple approach.

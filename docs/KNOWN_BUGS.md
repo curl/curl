@@ -161,7 +161,7 @@ Passing in a Unicode filename with -o:
 
 Passing in Unicode character with -d:
 
- [curl issue 12231](https://github.com/curl/curl/issues/12231)
+[curl issue 12231](https://github.com/curl/curl/issues/12231)
 
 Windows Unicode builds use the home directory in current locale.
 
@@ -215,8 +215,10 @@ what `winhttp` does. See https://curl.se/bug/view.cgi?id=535
 
 ## NTLM does not support password with Unicode 'SECTION SIGN' character
 
- https://en.wikipedia.org/wiki/Section_sign
- [curl issue 2120](https://github.com/curl/curl/issues/2120)
+Code point: U+00A7
+
+https://en.wikipedia.org/wiki/Section_sign
+[curl issue 2120](https://github.com/curl/curl/issues/2120)
 
 ## libcurl can fail to try alternatives with `--proxy-any`
 
@@ -231,7 +233,7 @@ using NTLM.
 
 ## Do not clear digest for single realm
 
- [curl issue 3267](https://github.com/curl/curl/issues/3267)
+[curl issue 3267](https://github.com/curl/curl/issues/3267)
 
 ## SHA-256 digest not supported in Windows SSPI builds
 
@@ -243,7 +245,7 @@ with `SEC_E_QOP_NOT_SUPPORTED` which causes curl to fail with
 Microsoft does not document supported digest algorithms and that `SEC_E` error
 code is not a documented error for `InitializeSecurityContext` (digest).
 
- [curl issue 6302](https://github.com/curl/curl/issues/6302)
+[curl issue 6302](https://github.com/curl/curl/issues/6302)
 
 ## curl never completes Negotiate over HTTP
 
@@ -306,7 +308,7 @@ In the `SSH_SFTP_INIT` state for libssh, the ssh session working mode is set
 to blocking mode. If the network is suddenly disconnected during sftp
 transmission, curl is stuck, even if curl is configured with a timeout.
 
- [curl issue 8632](https://github.com/curl/curl/issues/8632)
+[curl issue 8632](https://github.com/curl/curl/issues/8632)
 
 ## Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
@@ -494,7 +496,7 @@ cannot be built.
 
 ## HTTP/2 prior knowledge over proxy
 
- [curl issue 12641](https://github.com/curl/curl/issues/12641)
+[curl issue 12641](https://github.com/curl/curl/issues/12641)
 
 ## HTTP/2 frames while in the connection pool kill reuse
 
