@@ -4066,7 +4066,6 @@ CPPFLAGS=$o
 AC_CHECK_TYPE(long long,
   [AC_DEFINE(HAVE_LONGLONG, 1,
     [Define to 1 if the compiler supports the 'long long' data type.])]
-  longlong="yes"
 )
 
 if test ${ac_cv_sizeof_curl_off_t} -lt 8; then
