@@ -19,6 +19,7 @@ permissions: {}
 
 jobs:
   linkcheck:
+    if: ${{ github.repository_owner == 'curl' }}
     name: 'linkcheck'
     runs-on: ubuntu-latest
     steps:
