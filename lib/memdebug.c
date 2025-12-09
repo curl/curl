@@ -92,7 +92,7 @@ static void curl_dbg_unlock(bool was_locked)
 #endif
 }
 
-static void curl_dbg_log_locked(const char * const fmt, ...) CURL_PRINTF(1, 2);
+static void curl_dbg_log_locked(const char *format, ...) CURL_PRINTF(1, 2);
 
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
