@@ -267,7 +267,7 @@ Here's a rough step-by-step:
    detected by the preprocessor, in the style others already exist
 4. compile `lib/*.c` and make them into a library
 
-# Install problems
+# Install
 
 ## configure fails when using static libraries
 
@@ -318,7 +318,7 @@ Windows](https://curl.se/windows) into a separate location.
 
 Yes, SOCKS 4 and 5 are supported.
 
-# Usage problems
+# Usage
 
 ## curl: (1) SSL is disabled, https: not supported
 
@@ -646,7 +646,7 @@ Accordingly, by using `-XPOST` on a command line that for example would follow
 a 303 redirect, you will effectively prevent curl from behaving correctly. Be
 aware.
 
-# Running problems
+# Running
 
 ## Why do I get problems when I use & or % in the URL?
 
@@ -980,7 +980,7 @@ speak).
 You can also use the `-w` option and the variable `%{response_code}` to
 extract the exact response code that was returned in the response.
 
-# libcurl problems
+# libcurl
 
 ## Is libcurl thread-safe?
 
@@ -1272,7 +1272,7 @@ built to work like that, but in those cases it will create the child threads
 by itself and they will only be used and then killed internally by libcurl and
 never exposed to the outside.
 
-# License problems
+# License
 
 curl and libcurl are released under an MIT/X derivative license. The license
 is liberal and should not impose a problem for your project. This section is
@@ -1351,7 +1351,7 @@ As can be seen [here](https://curl.se/docs/companies.html) and elsewhere, more
 and more companies are discovering the power of libcurl and take advantage of
 it even in commercial environments.
 
-# PHP/CURL Issues
+# PHP/CURL
 
 ## What is PHP/CURL?
 
