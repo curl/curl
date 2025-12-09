@@ -1402,7 +1402,7 @@ enough of a benefit to warrant the risk of cutting off a share of users.
 
 ## Will curl be rewritten?
 
-In one go: no. Little by little over time? Maybe.
+In one go: no. Little by little over time? Sure.
 
 Over the years, new languages and clever operating environments come and go.
 Every now and then the urge apparently arises to request that we rewrite curl
