@@ -1361,7 +1361,7 @@ The difference is considered big enough to make SPDX list it under its own
 identifier: [curl](https://spdx.org/licenses/curl.html).
 
 The changes done to the license that make it uniquely curl were tiny and
-well-intented, but the reasons for them have been forgotten and we strongly
+well-intended, but the reasons for them have been forgotten and we strongly
 discourage others from doing the same thing.
 
 # PHP/CURL
