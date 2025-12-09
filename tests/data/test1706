@@ -51,6 +51,7 @@ option2.md:15:1:WARN: see-also a non-existing option: proto-default
 </stderr>
 <stdout>
 %includetext %SRCDIR/data/data%TESTNUMBER-stdout.txt%
+
 </stdout>
 </verify>
 
