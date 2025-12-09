@@ -79,9 +79,6 @@
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the <arpa/inet.h> header file. */
-/* #define HAVE_ARPA_INET_H 1 */
-
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
@@ -90,12 +87,6 @@
 
 /* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
-
-/* Define if you have the <netdb.h> header file. */
-/* #define HAVE_NETDB_H 1 */
-
-/* Define if you have the <netinet/in.h> header file. */
-/* #define HAVE_NETINET_IN_H 1 */
 
 /* Define to 1 if you have the <stdbool.h> header file. */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
@@ -112,23 +103,11 @@
 #define HAVE_SYS_PARAM_H 1
 #endif
 
-/* Define if you have the <sys/select.h> header file. */
-/* #define HAVE_SYS_SELECT_H 1 */
-
-/* Define if you have the <sys/sockio.h> header file. */
-/* #define HAVE_SYS_SOCKIO_H 1 */
-
 /* Define if you have the <sys/types.h> header file. */
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <sys/utime.h> header file. */
 #define HAVE_SYS_UTIME_H 1
-
-/* Define if you have the <termio.h> header file. */
-/* #define HAVE_TERMIO_H 1 */
-
-/* Define if you have the <termios.h> header file. */
-/* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
 #ifdef __MINGW32__
@@ -306,15 +285,6 @@
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
 
-/* Define to nothing if compiler does not support 'const' qualifier. */
-/* #define const */
-
-/* Define to nothing if compiler does not support 'volatile' qualifier. */
-/* #define volatile */
-
-/* Windows should not have HAVE_GMTIME_R defined */
-/* #undef HAVE_GMTIME_R */
-
 /* Define if the compiler supports the 'long long' data type. */
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #define HAVE_LONGLONG 1
@@ -376,9 +346,6 @@
 /*
  * Undefine both USE_ARES and USE_THREADS_WIN32 for synchronous DNS.
  */
-
-/* Define to enable c-ares asynchronous DNS lookups. */
-/* #define USE_ARES 1 */
 
 /* Default define to enable threaded asynchronous DNS lookups. */
 #if !defined(USE_SYNC_DNS) && !defined(USE_ARES) && \
