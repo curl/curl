@@ -100,7 +100,7 @@ while(my $filename = <$git_ls_files>) {
     my @err = ();
 
     if(!fn_match($filename, @tabs) &&
-        $content =~ /\t/) {
+       $content =~ /\t/) {
         push @err, "content: has tab";
     }
 
@@ -111,12 +111,12 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($eol ne "crlf" &&
-        fn_match($filename, @need_crlf)) {
+       fn_match($filename, @need_crlf)) {
         push @err, "content: must use CRLF EOL for this file type";
     }
 
     if($eol ne "lf" && $content ne "" &&
-        !fn_match($filename, @need_crlf)) {
+       !fn_match($filename, @need_crlf)) {
         push @err, "content: must use LF EOL for this file type";
     }
 
@@ -131,17 +131,17 @@ while(my $filename = <$git_ls_files>) {
     }
 
     if($content ne "" &&
-        $content !~ /\n\z/) {
+       $content !~ /\n\z/) {
         push @err, "content: has no EOL at EOF";
     }
 
     if($content =~ /\n\n\z/ ||
-        $content =~ /\r\n\r\n\z/) {
+       $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
     }
 
     if($content =~ /\n\n\n\n/ ||
-        $content =~ /\r\n\r\n\r\n\r\n/) {
+       $content =~ /\r\n\r\n\r\n\r\n/) {
         push @err, "content: has 3 or more consecutive empty lines";
     }
 
