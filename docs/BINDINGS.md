@@ -102,7 +102,7 @@ Bailiff and Bálint Szilakszi,
 
 [PureBasic](https://web.archive.org/web/20250325015028/www.purebasic.com/documentation/http/index.html) uses libcurl in its "native" HTTP subsystem
 
-[Python](http://pycurl.io/) PycURL by Kjetil Jacobsen
+[Python](https://github.com/pycurl/pycurl) PycURL by Kjetil Jacobsen
 
 [Python](https://pypi.org/project/pymcurl/) mcurl by Ganesh Viswanathan
 
