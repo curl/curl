@@ -26,6 +26,7 @@
 #
 import logging
 import os
+import time
 from typing import Generator
 import pytest
 
@@ -42,6 +43,7 @@ class TestSocks:
     def danted(self, env: Env) -> Generator[Dante, None, None]:
         danted = Dante(env=env)
         assert danted.initial_start()
+        time.sleep(1)
         yield danted
         danted.stop()
 
