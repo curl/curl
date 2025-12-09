@@ -303,7 +303,7 @@ library comparison](https://curl.se/docs/ssl-compared.html).
 The curl tool that is shipped as an integrated component of Windows 10 and
 Windows 11 is managed by Microsoft. If you were to delete the file or replace
 it with a newer version downloaded from [the curl
-website](https://curl.se/windows), then Windows Update will cease to work on
+website](https://curl.se/windows/), then Windows Update will cease to work on
 your system.
 
 There is no way to independently force an upgrade of the curl.exe that is part
@@ -312,7 +312,7 @@ also nothing the curl project itself can do about this, since this is managed
 and controlled entirely by Microsoft as owners of the operating system.
 
 You can always download and install [the latest version of curl for
-Windows](https://curl.se/windows) into a separate location.
+Windows](https://curl.se/windows/) into a separate location.
 
 ## Does curl support SOCKS (RFC 1928) ?
 
@@ -908,12 +908,12 @@ format:
 you will find that even if `D:\blah.txt` does exist, curl returns a 'file not
 found' error.
 
-According to [RFC 1738](https://www.ietf.org/rfc/rfc1738.txt), `file://` URLs
-must contain a host component, but it is ignored by most implementations. In
-the above example, `D:` is treated as the host component, and is taken away.
-Thus, curl tries to open `/blah.txt`. If your system is installed to drive C:,
-that will resolve to `C:\blah.txt`, and if that does not exist you will get
-the not found error.
+According to [RFC 1738](https://datatracker.ietf.org/doc/html/rfc1738),
+`file://` URLs must contain a host component, but it is ignored by most
+implementations. In the above example, `D:` is treated as the host component,
+and is taken away. Thus, curl tries to open `/blah.txt`. If your system is
+installed to drive C:, that will resolve to `C:\blah.txt`, and if that does
+not exist you will get the not found error.
 
 To fix this problem, use `file://` URLs with *three* leading slashes:
 
