@@ -110,4 +110,3 @@ class TestReuse:
         assert r.total_connects == 1
         for s in r.stats:
             assert s['http_version'] == '2', f'{s}'
-
