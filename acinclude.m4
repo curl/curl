@@ -1307,33 +1307,6 @@ AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the cu
   fi
 ])
 
-dnl CURL_CHECK_WIN32_LARGEFILE
-dnl -------------------------------------------------
-dnl Check if curl's Win32 large file will be used
-
-AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  if test "$curl_cv_native_windows" = 'yes'; then
-    AC_MSG_CHECKING([whether build target supports Win32 large files])
-    dnl All mingw-w64 versions support large files
-    curl_win32_has_largefile='yes'
-    case "$curl_win32_has_largefile" in
-      yes)
-        if test x"$enable_largefile" = 'xno'; then
-          AC_MSG_RESULT([yes (large file disabled)])
-        else
-          AC_MSG_RESULT([yes (large file enabled)])
-          AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
-            [Define to 1 if you are building a Windows target with large file support.])
-        fi
-        ;;
-      *)
-        AC_MSG_RESULT([no])
-        ;;
-    esac
-  fi
-])
-
 dnl CURL_CHECK_WIN32_CRYPTO
 dnl -------------------------------------------------
 dnl Check if curl's Win32 crypto lib can be used

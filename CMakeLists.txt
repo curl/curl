@@ -1772,8 +1772,6 @@ if(WIN32)
   endif()
   list(APPEND CURL_LIBS "bcrypt")
 
-  set(USE_WIN32_LARGE_FILES ON)
-
   # We use crypto functions that are not available for UWP apps
   if(NOT WINDOWS_STORE)
     set(USE_WIN32_CRYPTO ON)
@@ -1973,7 +1971,7 @@ curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
                             USE_WIN32_IDN OR
                             USE_APPLE_IDN)
 curl_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
-                            ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
+                            ((SIZEOF_OFF_T GREATER 4) OR WIN32))
 curl_add_if("SSPI"          USE_WINDOWS_SSPI)
 curl_add_if("GSS-API"       HAVE_GSSAPI)
 curl_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)

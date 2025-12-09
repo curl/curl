@@ -618,7 +618,6 @@ dnl **********************************************************************
 dnl Compilation based checks should not be done before this point.
 dnl **********************************************************************
 
-CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
 curl_cv_apple='no'

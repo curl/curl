@@ -351,13 +351,10 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
-#  ifdef __MINGW32__
-#    ifndef _FILE_OFFSET_BITS
-#    define _FILE_OFFSET_BITS 64
-#    endif
+#ifdef __MINGW32__
+#  ifndef _FILE_OFFSET_BITS
+#  define _FILE_OFFSET_BITS 64
 #  endif
 #endif
 
