@@ -303,7 +303,7 @@ library comparison](https://curl.se/docs/ssl-compared.html).
 The curl tool that is shipped as an integrated component of Windows 10 and
 Windows 11 is managed by Microsoft. If you were to delete the file or replace
 it with a newer version downloaded from [the curl
-website](https://curl.se/windows), then Windows Update will cease to work on
+website](https://curl.se/windows/), then Windows Update will cease to work on
 your system.
 
 There is no way to independently force an upgrade of the curl.exe that is part
@@ -312,7 +312,7 @@ also nothing the curl project itself can do about this, since this is managed
 and controlled entirely by Microsoft as owners of the operating system.
 
 You can always download and install [the latest version of curl for
-Windows](https://curl.se/windows) into a separate location.
+Windows](https://curl.se/windows/) into a separate location.
 
 ## Does curl support SOCKS (RFC 1928) ?
 

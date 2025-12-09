@@ -91,7 +91,7 @@ SPDX-License-Identifier: curl
 
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you have seen URLs like
- https://curl.se or https://example.com a million times. RFC 3986 is the
+ https://curl.se/ or https://example.com/ a million times. RFC 3986 is the
  canonical spec. The formal name is not URL, it is **URI**.
 
 ## Host
@@ -158,7 +158,7 @@ SPDX-License-Identifier: curl
  issues a GET request to the server and receives the document it asked for.
  If you issue the command line
 
-    curl https://curl.se
+    curl https://curl.se/
 
  you get a webpage returned in your terminal window. The entire HTML document
  this URL identifies.

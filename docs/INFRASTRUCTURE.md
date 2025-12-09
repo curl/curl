@@ -100,7 +100,7 @@ company). The machine is physically located in Sweden.
 curl release tarballs are hosted on https://curl.se/download.html. They are
 uploaded there at release-time by the release manager.
 
-curl-for-win downloads are hosted on https://curl.se/windows and are uploaded
+curl-for-win downloads are hosted on https://curl.se/windows/ and are uploaded
 to the server by Viktor Szakats.
 
 curl-for-QNX downloads are hosted on <https://curl.se/qnx> and are uploaded to

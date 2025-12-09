@@ -62,7 +62,7 @@ static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
 
 /*
- * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu
+ * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu/
  */
 
 const struct Curl_handler Curl_handler_rtmp = {
