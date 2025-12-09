@@ -265,9 +265,6 @@
 /* Define to the size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
-/* Define to the size of `long long', as computed by sizeof. */
-/* #define SIZEOF_LONG_LONG 8 */
-
 /* Define to the size of `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
 
