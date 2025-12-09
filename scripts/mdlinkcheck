@@ -197,7 +197,9 @@ sub checkurl {
 
 for my $f (@files) {
     chomp $f;
-    findlinks($f);
+    if($f !~ /\/mdlinkcheck$/) {
+        findlinks($f);
+    }
 }
 
 #for my $u (sort keys %url) {
