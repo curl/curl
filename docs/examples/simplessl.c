@@ -84,7 +84,7 @@ int main(void)
     goto error;
 
   /* what call to write: */
-  curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://secure.site.example");
+  curl_easy_setopt(curl, CURLOPT_URL, "https://secure.site.example/");
   curl_easy_setopt(curl, CURLOPT_HEADERDATA, headerfile);
 
 #ifdef USE_ENGINE
