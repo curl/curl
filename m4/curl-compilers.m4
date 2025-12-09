@@ -937,7 +937,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
           fi
           dnl clang 19 or later
-          if test "$compiler_num" -ge "1900"; then
+          if test "$compiler_num" -ge "1901"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wno-format-signedness"
           fi
           dnl clang 20 or later
