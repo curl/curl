@@ -86,8 +86,8 @@ my %whitelist = (
 my %url;
 my %flink;
 
-# list all .md files in the repo
-my @files=`git ls-files '**.md'`;
+# list all files to scan for links
+my @files=`git ls-files docs src lib scripts`;
 
 sub storelink {
     my ($f, $line, $link) = @_;

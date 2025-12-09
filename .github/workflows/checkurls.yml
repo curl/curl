@@ -1,0 +1,28 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: 'URLs'
+
+'on':
+  schedule:
+    - cron: '10 5 * * *'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  linkcheck:
+    if: ${{ github.repository_owner == 'curl' }}
+    name: 'linkcheck'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'mdlinkcheck'
+        run: ./scripts/mdlinkcheck
