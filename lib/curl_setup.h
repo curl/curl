@@ -471,22 +471,13 @@
 #  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifdef USE_WIN32_LARGE_FILES
-     /* Large file (>2Gb) support using Win32 functions. */
-#    undef  lseek
-#    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
-#    undef  fstat
-#    define fstat(fdes, stp)             _fstati64(fdes, stp)
-#    define struct_stat                  struct _stati64
-#    define LSEEK_ERROR                  (__int64)-1
-#  else
-     /* Small file (<2Gb) support using Win32 functions. */
-#    undef  lseek
-#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#    define fstat(fdes, stp)             _fstat(fdes, stp)
-#    define struct_stat                  struct _stat
-#    define LSEEK_ERROR                  (long)-1
-#  endif
+   /* Large file (>2Gb) support using Win32 functions. */
+#  undef  lseek
+#  define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
+#  undef  fstat
+#  define fstat(fdes, stp)             _fstati64(fdes, stp)
+#  define struct_stat                  struct _stati64
+#  define LSEEK_ERROR                  (__int64)-1
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>

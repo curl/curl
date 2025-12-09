@@ -318,19 +318,14 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
-#  ifdef __MINGW32__
-#    ifndef _FILE_OFFSET_BITS
-#    define _FILE_OFFSET_BITS 64
-#    endif
-#  endif
+#ifdef __MINGW32__
+#  undef _FILE_OFFSET_BITS
+#  define _FILE_OFFSET_BITS 64
 #endif
 
 /* Define to the size of `off_t', as computed by sizeof. */
-#if defined(__MINGW32__) && \
-  defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
+#ifdef __MINGW32__
 #  define SIZEOF_OFF_T 8
 #else
 #  define SIZEOF_OFF_T 4
