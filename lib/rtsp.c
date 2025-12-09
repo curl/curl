@@ -225,6 +225,7 @@ static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
     data->state.rtsp_next_server_CSeq = 1;
 
   rtspc->rtp_channel = -1;
+  *done = TRUE;
   return CURLE_OK;
 }
 
