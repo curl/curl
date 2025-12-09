@@ -1167,7 +1167,7 @@ IP address but instead the address of the proxy.
 Also note that on many networks NATs or other IP-munging techniques are used
 that makes you see and use a different IP address locally than what the remote
 server will see you coming from. You may also consider using
-[Tor]()https://www.torproject.org/).
+[Tor](https://www.torproject.org/).
 
 ## How do I stop an ongoing transfer?
 
