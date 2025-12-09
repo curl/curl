@@ -4,7 +4,7 @@ curl and libcurl 8.18.0
  Command line options:         273
  curl_easy_setopt() options:   308
  Public functions in libcurl:  100
- Contributors:                 3556
+ Contributors:                 3557
 
 This release includes the following changes:
 
@@ -17,10 +17,12 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o _PROGRESS.md: add the E unit, mention kibibyte [24]
+ o altsvc: make it one malloc instead of three per entry [266]
  o AmigaOS: increase minimum stack size for tool_main [137]
  o apple-sectrust: always ask when `native_ca_store` is in use [162]
  o asyn-ares: handle Curl_dnscache_mk_entry() OOM error [199]
  o asyn-ares: remove hostname free on OOM [122]
+ o asyn-thrdd: fix Curl_async_getaddrinfo() on systems without getaddrinfo [265]
  o asyn-thrdd: release rrname if ares_init_options fails [41]
  o auth: always treat Curl_auth_ntlm_get() returning NULL as OOM [186]
  o autotools: add nettle library detection via pkg-config (for GnuTLS) [178]
@@ -51,8 +53,11 @@ This release includes the following bugfixes:
  o conncontrol: reuse handling [170]
  o connect: reshuffle Curl_timeleft_ms to avoid 'redundant condition' [100]
  o connection: attached transfer count [228]
+ o cookie: allocate the main struct once cookie is fine [259]
+ o cookie: only keep and use the canonical cleaned up path [256]
  o cookie: propagate errors better, cleanup the internal API [118]
  o cookie: return error on OOM [131]
+ o cookie: when parsing a cookie header, delay all allocations until okay [258]
  o cshutdn: acknowledge FD_SETSIZE for shutdown descriptors [25]
  o curl: fix progress meter in parallel mode [15]
  o curl_fopen: do not pass invalid mode flags to `open()` on Windows [84]
@@ -77,6 +82,7 @@ This release includes the following bugfixes:
  o digest_sspi: fix a memory leak on error path [149]
  o digest_sspi: properly free sspi identity [12]
  o DISTROS.md: add OpenBSD [126]
+ o DISTROS: fix a Mageia URL
  o DISTROS: remove broken URLs for buildroot
  o doc: some returned in-memory data may not be altered [196]
  o docs/libcurl: fix C formatting nits [207]
@@ -85,6 +91,7 @@ This release includes the following bugfixes:
  o docs: mention umask need when curl creates files [56]
  o docs: remove dead URLs
  o docs: spell it Rustls with a capital R [181]
+ o docs: switch more URLs to https:// [229]
  o docs: use .example URLs for proxies
  o example: fix formatting nits [232]
  o examples/crawler: fix variable [92]
@@ -95,23 +102,29 @@ This release includes the following bugfixes:
  o examples: tidy-up headers and includes [138]
  o FAQ: fix hackerone URL
  o file: do not pass invalid mode flags to `open()` on upload (Windows) [83]
+ o formdata: validate callback is non-NULL before use [267]
+ o ftp: make EPRT connections non-blocking [268]
  o ftp: refactor a piece of code by merging the repeated part [40]
  o ftp: remove #ifdef for define that is always defined [76]
  o getinfo: improve perf in debug mode [99]
+ o gnutls: add PROFILE_MEDIUM as default [233]
  o gnutls: report accurate error when TLS-SRP is not built-in [18]
  o gtls: add return checks and optimize the code [2]
  o gtls: skip session resumption when verifystatus is set
  o h2/h3: handle methods with spaces [146]
+ o hostcheck: fail wildcard match if host starts with a dot [235]
  o hostip: don't store negative lookup on OOM [61]
  o hostip: make more functions return CURLcode [202]
  o hostip: only store negative response for CURLE_COULDNT_RESOLVE_HOST [183]
  o hsts: propagate and error out correctly on OOM [130]
+ o hsts: use one malloc instead of two per entry [263]
  o http: acknowledge OOM errors from Curl_input_ntlm [185]
  o http: avoid two strdup()s and do minor simplifications [144]
  o http: error on OOM when creating range header [59]
  o http: fix OOM exit in Curl_http_follow [179]
  o http: handle oom error from Curl_input_digest() [192]
  o http: replace atoi use in Curl_http_follow with curlx_str_number [65]
+ o http: return OOM errors from hsts properly [262]
  o http: the :authority header should never contain user+password [147]
  o idn: avoid allocations and wcslen on Windows [247]
  o idn: fix memory leak in `win32_ascii_to_idn()` [173]
@@ -147,7 +160,9 @@ This release includes the following bugfixes:
  o mbedtls: fix potential use of uninitialized `nread` [8]
  o mbedtls: sync format across log messages [213]
  o mbedtls_threadlock: avoid calloc, use array [244]
+ o mdlinkcheck: ignore IP numbers, allow '@' in raw URLs
  o memdebug: add mutex for thread safety [184]
+ o mk-ca-bundle.md: the file format docs URL is permaredirected [188]
  o mk-ca-bundle.pl: default to SHA256 fingerprints with `-t` option [73]
  o mk-ca-bundle.pl: use `open()` with argument list to replace backticks [71]
  o mqtt: reject overly big messages [39]
@@ -156,6 +171,7 @@ This release includes the following bugfixes:
  o multibyte: limit `curlx_convert_*wchar*()` functions to Unicode builds [135]
  o ngtcp2+openssl: fix leak of session [172]
  o ngtcp2: remove the unused Curl_conn_is_ngtcp2 function [85]
+ o noproxy: fix build on systems without IPv6 [264]
  o noproxy: fix ipv6 handling [239]
  o noproxy: replace atoi with curlx_str_number [67]
  o openssl: exit properly on OOM when getting certchain [133]
@@ -180,6 +196,7 @@ This release includes the following bugfixes:
  o rtmp: fix double-free on URL parse errors [27]
  o rtmp: precaution for a potential integer truncation [54]
  o rtmp: stop redefining `setsockopt` system symbol on Windows [211]
+ o runner.pm: run memanalyzer as a Perl module [260]
  o runtests: detect bad libssh differently for test 1459 [11]
  o runtests: drop Python 2 support remains [45]
  o runtests: enable torture testing with threaded resolver [176]
@@ -203,15 +220,18 @@ This release includes the following bugfixes:
  o speedlimit: also reset on send unpausing [197]
  o src: fix formatting nits [246]
  o ssh: tracing and better pollset handling [230]
+ o sspi: fix memory leaks on error paths in `Curl_create_sspi_identity()` [237]
  o sws: fix binding to unix socket on Windows [214]
  o telnet: replace atoi for BINARY handling with curlx_str_number [66]
  o TEST-SUITE.md: correct the man page's path [136]
  o test07_22: fix flakiness [95]
+ o test1475: consistently use %CR in headers [234]
  o test1498: disable 'HTTP PUT from stdin' test on Windows [115]
  o test2045: replace HTML multi-line comment markup with `#` comments [36]
  o test3207: enable memdebug for this test again [249]
  o test363: delete stray character (typo) from a section tag [52]
  o test787: fix possible typo `&` -> `%` in curl option [241]
+ o tests/data: move `--libcurl` output to external data files [34]
  o tests/data: replace hard-coded test numbers with `%TESTNUMBER` [33]
  o tests/data: support using native newlines on disk, drop `.gitattributes` [91]
  o tests/server: do not fall back to original data file in `test2fopen()` [32]
@@ -223,6 +243,7 @@ This release includes the following bugfixes:
  o tftpd: fix/tidy up `open()` mode flags [57]
  o tidy-up: avoid `(())`, clang-format fixes and more [141]
  o tidy-up: move `CURL_UNCONST()` out from macro `curl_unicodefree()` [121]
+ o tidy-up: URLs [182]
  o TODO: remove a mandriva.com reference
  o tool: consider (some) curl_easy_setopt errors fatal [7]
  o tool: log when loading .curlrc in verbose mode [191]
@@ -260,6 +281,7 @@ This release includes the following bugfixes:
  o wolfssl: avoid NULL dereference in OOM situation [77]
  o wolfssl: fix a potential memory leak of session [6]
  o wolfssl: fix cipher list, skip 5.8.4 regression [117]
+ o wolfssl: fix possible assert with `!HAVE_NO_EX` wolfSSL builds [261]
  o wolfssl: simplify wssl_send_earlydata [111]
 
 This release includes the following known bugs:
@@ -284,16 +306,16 @@ advice from friends like these:
 
   Aleksandr Sergeev, Aleksei Bavshin, Andrew Kirillov, BANADDA, boingball,
   Brad King, bttrfl on github, Christian Schmitz, Dan Fandrich,
-  Daniel McCarney, Daniel Stenberg, Deniz Parlak, Fd929c2CE5fA on github,
-  ffath-vo on github, Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson,
-  Jiyong Yang, Juliusz Sosinowicz, Kai Pastor, Leonardo Taccari,
-  letshack9707 on hackerone, Marc Aldorasi, Marcel Raad, Max Faxälv,
-  nait-furry, ncaklovic on github, Nick Korepanov, Omdahake on github,
-  Patrick Monnerat, pelioro on hackerone, Ray Satiro, renovate[bot],
-  Samuel Henrique, st751228051 on github, Stanislav Fort, Stefan Eissing,
-  Sunny, Theo Buehler, Thomas Klausner, Viktor Szakats, Wesley Moore,
-  Xiaoke Wang, Yedaya Katsman
-  (44 contributors)
+  Daniel McCarney, Daniel Stenberg, Denis Goleshchikhin, Deniz Parlak,
+  dependabot[bot], Fabian Keil, Fd929c2CE5fA on github, ffath-vo on github,
+  Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson, Harry Sintonen, Jiyong Yang,
+  Juliusz Sosinowicz, Kai Pastor, Leonardo Taccari, letshack9707 on hackerone,
+  Marc Aldorasi, Marcel Raad, Max Faxälv, nait-furry, ncaklovic on github,
+  Nick Korepanov, Omdahake on github, Patrick Monnerat, pelioro on hackerone,
+  Ray Satiro, renovate[bot], Robert W. Van Kirk, Samuel Henrique,
+  st751228051 on github, Stanislav Fort, Stefan Eissing, Sunny, Theo Buehler,
+  Thomas Klausner, Viktor Szakats, Wesley Moore, Xiaoke Wang, Yedaya Katsman
+  (49 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -330,6 +352,7 @@ References to bug reports and discussions on issues:
  [31] = https://curl.se/bug/?i=19716
  [32] = https://curl.se/bug/?i=19429
  [33] = https://curl.se/bug/?i=19427
+ [34] = https://curl.se/bug/?i=19799
  [35] = https://curl.se/bug/?i=19420
  [36] = https://curl.se/bug/?i=19498
  [37] = https://curl.se/bug/?i=19419
@@ -477,11 +500,13 @@ References to bug reports and discussions on issues:
  [179] = https://curl.se/bug/?i=19705
  [180] = https://curl.se/bug/?i=19704
  [181] = https://curl.se/bug/?i=19702
+ [182] = https://curl.se/bug/?i=19879
  [183] = https://curl.se/bug/?i=19701
  [184] = https://curl.se/bug/?i=19785
  [185] = https://curl.se/bug/?i=19781
  [186] = https://curl.se/bug/?i=19782
  [187] = https://curl.se/bug/?i=19164
+ [188] = https://curl.se/bug/?i=19877
  [189] = https://curl.se/bug/?i=19604
  [190] = https://curl.se/bug/?i=19269
  [191] = https://curl.se/bug/?i=19663
@@ -518,9 +543,14 @@ References to bug reports and discussions on issues:
  [225] = https://curl.se/bug/?i=19754
  [226] = https://curl.se/bug/?i=19751
  [228] = https://curl.se/bug/?i=19836
+ [229] = https://curl.se/bug/?i=19872
  [230] = https://curl.se/bug/?i=19745
  [232] = https://curl.se/bug/?i=19746
+ [233] = https://curl.se/bug/?i=19853
+ [234] = https://curl.se/bug/?i=19870
+ [235] = https://curl.se/bug/?i=19869
  [236] = https://curl.se/bug/?i=19830
+ [237] = https://curl.se/bug/?i=19866
  [238] = https://curl.se/bug/?i=19786
  [239] = https://curl.se/bug/?i=19828
  [240] = https://curl.se/bug/?i=19829
@@ -538,4 +568,16 @@ References to bug reports and discussions on issues:
  [253] = https://curl.se/bug/?i=19800
  [254] = https://curl.se/bug/?i=19808
  [255] = https://curl.se/bug/?i=19803
+ [256] = https://curl.se/bug/?i=19864
  [257] = https://curl.se/bug/?i=19802
+ [258] = https://curl.se/bug/?i=19864
+ [259] = https://curl.se/bug/?i=19864
+ [260] = https://curl.se/bug/?i=19863
+ [261] = https://curl.se/bug/?i=19816
+ [262] = https://curl.se/bug/?i=19862
+ [263] = https://curl.se/bug/?i=19861
+ [264] = https://curl.se/bug/?i=19860
+ [265] = https://github.com/curl/curl/commit/ce06fe7771052549ff430c86173b2eaca91f8a9c#r172215567
+ [266] = https://curl.se/bug/?i=19857
+ [267] = https://curl.se/bug/?i=19858
+ [268] = https://curl.se/bug/?i=19753
