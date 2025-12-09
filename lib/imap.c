@@ -1314,7 +1314,7 @@ static CURLcode imap_state_select_resp(struct Curl_easy *data,
     /* See if this is an UIDVALIDITY response */
     const char *line = curlx_dyn_ptr(&imapc->pp.recvbuf);
     size_t len = curlx_dyn_len(&imapc->pp.recvbuf);
-    if((len > 2) && checkprefix("OK [UIDVALIDITY ", &line[2])) {
+    if((len >= 18) && checkprefix("OK [UIDVALIDITY ", &line[2])) {
       curl_off_t value;
       const char *p = &line[2] + strlen("OK [UIDVALIDITY ");
       if(!curlx_str_number(&p, &value, UINT_MAX)) {
