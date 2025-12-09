@@ -35,10 +35,6 @@ my @tabs = (
     "^tests/data/test",
 );
 
-my @multiple_eol_at_eof = (
-    "^tests/data/data1706-stdout.txt",
-);
-
 my @need_crlf = (
     "\\.(bat|sln)\$",
 );
@@ -139,9 +135,8 @@ while(my $filename = <$git_ls_files>) {
         push @err, "content: has no EOL at EOF";
     }
 
-    if(($content =~ /\n\n\z/ ||
-        $content =~ /\r\n\r\n\z/) &&
-       !fn_match($filename, @multiple_eol_at_eof)) {
+    if($content =~ /\n\n\z/ ||
+        $content =~ /\r\n\r\n\z/) {
         push @err, "content: has multiple EOL at EOF";
     }
 
