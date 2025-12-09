@@ -71,14 +71,13 @@ my %whitelist = (
     'https://curl.se/rfc/rfc2255.txt' => 1,
     'https://curl.se/sponsors.html' => 1,
     'https://curl.se/support.html' => 1,
-    'https://curl.se/windows' => 1,
     'https://curl.se/windows/' => 1,
 
     'https://testclutch.curl.se/' => 1,
 
     'https://github.com/curl/curl-fuzzer' => 1,
     'https://github.com/curl/curl-www' => 1,
-    'https://github.com/curl/curl.git' => 1,
+    'https://github.com/curl/curl' => 1,
     'https://github.com/curl/curl/wcurl' => 1,
 
     );
@@ -103,6 +102,7 @@ sub storelink {
     if($link =~ /^(https|http):/) {
         if($whitelist{$link}) {
             #print "-- whitelisted: $link\n";
+            $whitelist{$link}++;
         }
         # example.com is just example
         elsif($link =~ /^https:\/\/(.*)example.(com|org|net)/) {
@@ -226,6 +226,12 @@ for my $l (sort keys %flink) {
             push @errlist, sprintf "%s ERROR links to missing file %s\n", $f, $l;
             $error++;
         }
+    }
+}
+
+for my $u (sort keys %whitelist) {
+    if($whitelist{$u} == 1) {
+        printf "warning: unused whitelist entry: '$u'\n";
     }
 }
 
