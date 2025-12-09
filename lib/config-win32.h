@@ -353,9 +353,8 @@
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #ifdef __MINGW32__
-#  ifndef _FILE_OFFSET_BITS
+#  undef _FILE_OFFSET_BITS
 #  define _FILE_OFFSET_BITS 64
-#  endif
 #endif
 
 /* Define to the size of `off_t', as computed by sizeof. */
