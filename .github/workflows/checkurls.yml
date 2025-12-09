@@ -2,9 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 
-# This workflow contains tests that operate on documentation files only. Some
-# checks modify the source so they cannot be combined into a single job.
-
 name: 'URLs'
 
 'on':
