@@ -44,9 +44,9 @@
 #ifdef _WIN32
 #include <io.h>
 #undef stat
-#define stat _stat
+#define stat _stati64
 #undef fstat
-#define fstat _fstat
+#define fstat _fstati64
 #define fileno _fileno
 #else
 #include <unistd.h>
