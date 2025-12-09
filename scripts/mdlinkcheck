@@ -77,7 +77,6 @@ my %whitelist = (
 
     'https://github.com/curl/curl-fuzzer' => 1,
     'https://github.com/curl/curl-www' => 1,
-    'https://github.com/curl/curl' => 1,
     'https://github.com/curl/curl/wcurl' => 1,
 
     );
