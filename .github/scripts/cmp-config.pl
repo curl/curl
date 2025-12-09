@@ -93,7 +93,6 @@ my %remove = (
     '#define PACKAGE_VERSION "-"' => 1,
     '#define SIZEOF_LONG_LONG 8' => 1,
     '#define VERSION "-"' => 1,
-    '#define _FILE_OFFSET_BITS 64' => 1,
     );
 
 sub filter {
