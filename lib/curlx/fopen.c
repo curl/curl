@@ -28,7 +28,7 @@
 
 int curlx_fseek(void *stream, curl_off_t offset, int whence)
 {
-#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
+#ifdef _WIN32
   return _fseeki64(stream, (__int64)offset, whence);
 #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   return fseeko(stream, (off_t)offset, whence);
@@ -373,11 +373,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
       target = fixed;
     else
       target = path_w;
-#ifndef USE_WIN32_LARGE_FILES
-    result = _wstat(target, buffer);
-#else
     result = _wstati64(target, buffer);
-#endif
     CURLX_FREE(path_w);
   }
   else
@@ -388,11 +384,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     target = fixed;
   else
     target = path;
-#ifndef USE_WIN32_LARGE_FILES
-  result = _stat(target, buffer);
-#else
   result = _stati64(target, buffer);
-#endif
 #endif
 
   CURLX_FREE(fixed);

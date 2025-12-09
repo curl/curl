@@ -38,7 +38,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 {
   struct per_transfer *per = userdata;
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(_WIN32)
 
 /* OUR_MAX_SEEK_L has 'long' data type, OUR_MAX_SEEK_O has 'curl_off_t,
    both represent the same value. Maximum offset used here when we lseek
