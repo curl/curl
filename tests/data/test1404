@@ -106,7 +106,7 @@ $_ = '' if /CURLOPT_TIMEOUT_MS/
 $_ = '' if /\/\* "value" \*\//
 </stripfile>
 <file name="%LOGDIR/test%TESTNUMBER.c" mode="text">
-%includetext %SRCDIR/data/data1404.c%
+%includetext %SRCDIR/data/data%TESTNUMBER.c%
 </file>
 </verify>
 </testcase>

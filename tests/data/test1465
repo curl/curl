@@ -66,7 +66,7 @@ $_ = '' if /CURLOPT_SSLVERSION/
 $_ = '' if /CURLOPT_TIMEOUT_MS/
 </stripfile>
 <file name="%LOGDIR/test%TESTNUMBER.c" mode="text">
-%includetext %SRCDIR/data/data1465.c%
+%includetext %SRCDIR/data/data%TESTNUMBER.c%
 </file>
 </verify>
 </testcase>
