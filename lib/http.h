@@ -112,7 +112,6 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_doing_pollset(struct Curl_easy *data,
                                  struct easy_pollset *ps);
 CURLcode Curl_http_perform_pollset(struct Curl_easy *data,

@@ -214,12 +214,9 @@ static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
 {
   struct rtsp_conn *rtspc =
     Curl_conn_meta_get(data->conn, CURL_META_RTSP_CONN);
-  CURLcode httpStatus;
 
   if(!rtspc)
     return CURLE_FAILED_INIT;
-
-  httpStatus = Curl_http_connect(data, done);
 
   /* Initialize the CSeq if not already done */
   if(data->state.rtsp_next_client_CSeq == 0)
@@ -228,8 +225,7 @@ static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
     data->state.rtsp_next_server_CSeq = 1;
 
   rtspc->rtp_channel = -1;
-
-  return httpStatus;
+  return CURLE_OK;
 }
 
 static CURLcode rtsp_done(struct Curl_easy *data,

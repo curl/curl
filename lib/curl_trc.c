@@ -332,7 +332,6 @@ static const char * const Curl_trc_mstate_names[] = {
   "CONNECT",
   "RESOLVING",
   "CONNECTING",
-  "TUNNELING",
   "PROTOCONNECT",
   "PROTOCONNECTING",
   "DO",

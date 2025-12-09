@@ -1914,7 +1914,7 @@ const struct Curl_handler Curl_handler_ws = {
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_pollset */
@@ -1941,7 +1941,7 @@ const struct Curl_handler Curl_handler_wss = {
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
+  ZERO_NULL,                            /* connect_it */
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_pollset */
