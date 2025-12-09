@@ -114,3 +114,4 @@ PROXY PROTOCOL PREFIXES
     socks5h://
 
 	Makes it the equivalent of --socks5-hostname
+
