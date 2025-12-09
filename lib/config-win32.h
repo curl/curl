@@ -362,8 +362,7 @@
 #endif
 
 /* Define to the size of `off_t', as computed by sizeof. */
-#if defined(__MINGW32__) && \
-  defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
+#ifdef __MINGW32__
 #  define SIZEOF_OFF_T 8
 #else
 #  define SIZEOF_OFF_T 4
