@@ -32,7 +32,7 @@ curl file category --help
 0
 </errorcode>
 <stdout mode="text">
-%includetext %SRCDIR/data/data1463.txt%
+%includetext %SRCDIR/data/data%TESTNUMBER.txt%
 </stdout>
 </verify>
 </testcase>

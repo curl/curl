@@ -31,7 +31,7 @@ curl important --help
 0
 </errorcode>
 <stdout mode="text">
-%includetext %SRCDIR/data/data1461.txt%
+%includetext %SRCDIR/data/data%TESTNUMBER.txt%
 </stdout>
 </verify>
 </testcase>

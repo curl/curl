@@ -11,7 +11,7 @@ notxml
 # Server-side
 <reply>
 <data nocheck="yes">
-%includetext %SRCDIR/data/data320.html%
+%includetext %SRCDIR/data/data%TESTNUMBER.html%
 </data>
 </reply>
 

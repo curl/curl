@@ -22,16 +22,16 @@ _footer.md
 </file>
 
 <file1 name="%LOGDIR/_header.md">
-%includetext %SRCDIR/data/data1706-1.md%
+%includetext %SRCDIR/data/data%TESTNUMBER-1.md%
 </file1>
 <file2 name="%LOGDIR/option1.md">
-%includetext %SRCDIR/data/data1706-2.md%
+%includetext %SRCDIR/data/data%TESTNUMBER-2.md%
 </file2>
 <file3 name="%LOGDIR/option2.md">
-%includetext %SRCDIR/data/data1706-3.md%
+%includetext %SRCDIR/data/data%TESTNUMBER-3.md%
 </file3>
 <file4 name="%LOGDIR/_footer.md">
-%includetext %SRCDIR/data/data1706-4.md%
+%includetext %SRCDIR/data/data%TESTNUMBER-4.md%
 </file4>
 
 <command type="perl">
@@ -50,7 +50,7 @@ WARN: option1.md mutexes a non-existing option: trace-ascii
 option2.md:15:1:WARN: see-also a non-existing option: proto-default
 </stderr>
 <stdout>
-%includetext %SRCDIR/data/data1706-stdout.txt%
+%includetext %SRCDIR/data/data%TESTNUMBER-stdout.txt%
 </stdout>
 </verify>
 
