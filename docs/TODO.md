@@ -19,17 +19,6 @@ document](https://curl.se/docs/knownbugs.html) are subject for fixing.
 
 # libcurl
 
-## TCP Fast Open support on Windows
-
-libcurl supports the `CURLOPT_TCP_FASTOPEN` option since 7.49.0 for Linux and
-macOS. Windows supports TCP Fast Open starting with Windows 10, version 1607
-and we should add support for it.
-
-TCP Fast Open is supported on several platforms but not on Windows. Work on
-this was once started but never finished.
-
-See [curl pull request 3378](https://github.com/curl/curl/pull/3378)
-
 ## Consult `%APPDATA%` also for `.netrc`
 
 `%APPDATA%\.netrc` is not considered when running on Windows. Should not it?
@@ -58,33 +47,12 @@ See [curl issue 4915](https://github.com/curl/curl/issues/4915) and lib1541.c
 The share interface offers CURL_LOCK_DATA_HSTS to have multiple easy handle
 share an HSTS cache, but this is not thread-safe.
 
-## get rid of PATH_MAX
-
-Having code use and rely on PATH_MAX is not nice:
-https://insanecoding.blogspot.com/2007/11/pathmax-simply-isnt.html
-
-Currently the libssh2 SSH based code uses it, but to remove PATH_MAX from
-there we need libssh2 to properly tell us when we pass in a too small buffer
-and its current API (as of libssh2 1.2.7) does not.
-
 ## thread-safe sharing
 
 Using the share interface users can share some data between easy handles but
 several of the sharing options are documented as not safe and supported to
 share between multiple concurrent threads. Fixing this would enable more users
 to share data in more powerful ways.
-
-## auto-detect proxy
-
-libcurl could be made to detect the system proxy setup automatically and use
-that. On Windows, macOS and Linux desktops for example.
-
-The [pull-request to use *libproxy*](https://github.com/curl/curl/pull/977)
-for this was deferred due to doubts on the reliability of the dependency and
-how to use it.
-
-[*libdetectproxy*](https://github.com/paulharris/libdetectproxy) is a (C++)
-library for detecting the proxy on Windows.
 
 ## updated DNS server while running
 
@@ -156,11 +124,6 @@ for each redirect.
 
 [curl issue 6743](https://github.com/curl/curl/issues/6743)
 
-## `SRV` and `URI` DNS records
-
-Offer support for resolving `SRV` and `URI` DNS records for libcurl to know which
-server to connect to for various protocols (including HTTP).
-
 ## CURLINFO_PAUSE_STATE
 
 Return information about the transfer's current pause state, in both
@@ -175,14 +138,6 @@ callback. Perhaps also provide reason.
 
 [curl issue 2126](https://github.com/curl/curl/issues/2126)
 
-## config file parsing
-
-Consider providing an API, possibly in a separate companion library, for
-parsing a config file like curl's `-K`/`--config` option to allow applications
-to get the same ability to read curl options from files.
-
-See [curl issue 3698](https://github.com/curl/curl/issues/3698)
-
 ## erase secrets from heap/stack after use
 
 Introducing a concept and system to erase secrets from memory after use, it
@@ -191,15 +146,6 @@ However: most secrets are passed to libcurl as clear text from the application
 and then clearing them within the library adds nothing...
 
 [curl issue 7268](https://github.com/curl/curl/issues/7268)
-
-## add asynch getaddrinfo support
-
-Use `getaddrinfo_a()` to provide an asynch name resolver backend to libcurl
-that does not use threads and does not depend on c-ares. The `getaddrinfo_a`
-function is (probably?) glibc specific but that is a widely used libc among
-our users.
-
-[curl pull request 6746](https://github.com/curl/curl/pull/6746)
 
 ## make DoH inherit more transfer properties
 
@@ -296,13 +242,6 @@ See [curl issue 4829](https://github.com/curl/curl/issues/4829)
 See [curl issue 6968](https://github.com/curl/curl/issues/6968)
 
 # FTP
-
-## HOST
-
-HOST is a command for a client to tell which hostname to use, to offer FTP
-servers named-based virtual hosting:
-
-https://datatracker.ietf.org/doc/html/rfc7151
 
 ## A fixed directory listing format
 
@@ -471,18 +410,18 @@ capabilities returned from the CAPA command.
 
 ## Enhanced capability support
 
- Add the ability, for an application that uses libcurl, to obtain the list of
- capabilities returned from the CAPABILITY command.
+Add the ability, for an application that uses libcurl, to obtain the list of
+capabilities returned from the CAPABILITY command.
 
 # LDAP
 
 ## SASL based authentication mechanisms
 
-Currently the LDAP module only supports ldap_simple_bind_s() in order to bind
-to an LDAP server. However, this function sends username and password details
-using the simple authentication mechanism (as clear text). However, it should
-be possible to use ldap_bind_s() instead specifying the security context
-information ourselves.
+Currently the LDAP module only supports `ldap_simple_bind_s()` in order to
+bind to an LDAP server. However, this function sends username and password
+details using the simple authentication mechanism (as clear text). However, it
+should be possible to use `ldap_bind_s()` instead specifying the security
+context information ourselves.
 
 ## `CURLOPT_SSL_CTX_FUNCTION` for LDAPS
 
