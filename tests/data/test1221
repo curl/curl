@@ -5,7 +5,6 @@ HTTP
 HTTP POST
 --data-urlencode
 --url-query
-notxml
 </keywords>
 </info>
 
@@ -47,7 +46,7 @@ content to _?!#$'|%LT%GT
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
-POST /%TESTNUMBER?my+name+is+moo%5b%5d&yes=s+i+r&v_alue=content+to+_%3f%21%23%24%27%7c%3c%3e%0a&content+to+_%3f%21%23%24%27%7c%3c%3e%0a&%3d%3d HTTP/1.1
+POST /%TESTNUMBER?my+name+is+moo%5b%5d%AMPyes=s+i+r%AMPv_alue=content+to+_%3f%21%23%24%27%7c%3c%3e%0a%AMPcontent+to+_%3f%21%23%24%27%7c%3c%3e%0a%AMP%3d%3d HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
