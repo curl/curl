@@ -64,12 +64,7 @@
 #  pragma warning(pop)
 # endif
 # include <winldap.h>
-# ifndef LDAP_VENDOR_NAME
-#  error Your Platform SDK is NOT sufficient for LDAP support! \
-         Update your Platform SDK, or disable LDAP support!
-# else
-#  include <winber.h>
-# endif
+# include <winber.h>
 #else
 # define LDAP_DEPRECATED 1      /* Be sure ldap_init() is defined. */
 # ifdef HAVE_LBER_H
