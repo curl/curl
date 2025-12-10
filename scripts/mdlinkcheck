@@ -85,8 +85,9 @@ my %url;
 my %flink;
 
 my $dry;
-if($ARGV[0] eq "--dry-run") {
+if(defined $ARGV[0] && $ARGV[0] eq "--dry-run") {
     $dry = 1;
+    shift @ARGV;
 }
 
 # list all files to scan for links
