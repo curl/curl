@@ -1886,7 +1886,7 @@ if test "$want_gss" = "yes"; then
       fi
     fi
     gss_version=""
-    if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+    if test -n "$host_alias" && test -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
       gss_version=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --version | $SED 's/Kerberos 5 release //'`
     elif test "$PKGCONFIG" != "no"; then
       gss_version=`$PKGCONFIG --modversion mit-krb5-gssapi`
