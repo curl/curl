@@ -47,7 +47,7 @@ When writing code (mostly for generating stuff included in release tarballs)
 we use a few "build tools" and we make sure that we remain functional with
 these versions:
 
-- cmake          3.18.0 (2020-07-15)
+- cmake          3.18 (2020-07-15)
 - GNU autoconf   2.59 (2003-11-06)
 - GNU automake   1.7 (2002-09-25)
 - GNU libtool    1.4.2 (2001-09-11)
