@@ -452,7 +452,9 @@ static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
+  const char *oauth_bearer =
+    (!data->state.this_is_a_follow || data->set.allow_auth_to_other_hosts) ?
+    data->set.str[STRING_BEARER] : NULL;
 
   if(sctx->user && oauth_bearer &&
      (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
@@ -477,7 +479,9 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_oauth2(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  const char *oauth_bearer = data->set.str[STRING_BEARER];
+  const char *oauth_bearer =
+    (!data->state.this_is_a_follow || data->set.allow_auth_to_other_hosts) ?
+    data->set.str[STRING_BEARER] : NULL;
 
   if(sctx->user && oauth_bearer &&
      (sctx->enabledmechs & SASL_MECH_XOAUTH2)) {
