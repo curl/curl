@@ -353,10 +353,7 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#ifdef CURL_HAS_OPENLDAP_LDAPSDK
-#undef USE_WIN32_LDAP
-#define HAVE_LDAP_URL_PARSE 1
-#elif !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
 #undef HAVE_LDAP_URL_PARSE
 #define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
