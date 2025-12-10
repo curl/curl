@@ -36,7 +36,7 @@ http
 HTTP with -d, -G and {}
 </name>
 <command>
--d "foo=moo&moo=poo" "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER}" -G
+-d "foo=moo%AMPmoo=poo" "http://%HOSTIP:%HTTPPORT/{%TESTNUMBER,%TESTNUMBER}" -G
 </command>
 </client>
 
@@ -44,12 +44,12 @@ HTTP with -d, -G and {}
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
+GET /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-GET /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
+GET /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

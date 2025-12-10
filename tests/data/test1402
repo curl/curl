@@ -50,7 +50,7 @@ Accept: */*
 Content-Length: 16
 Content-Type: application/x-www-form-urlencoded
 
-foo=bar&baz=quux
+foo=bar%AMPbaz=quux
 </protocol>
 <stripfile>
 # CURLOPT_SSL_VERIFYPEER, SSH_KNOWNHOSTS and HTTP_VERSION vary with

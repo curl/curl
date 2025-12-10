@@ -24,7 +24,7 @@ http
 IPNS path and query args for gateway and IPFS URL (malformed gateway URL)
 </name>
 <command>
---ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar&aaa=bbb"
+--ipfs-gateway "http://%HOSTIP:%HTTPPORT/some/path?biz=baz" "ipns://fancy.tld/a/b?foo=bar%AMPaaa=bbb"
 </command>
 </client>
 

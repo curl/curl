@@ -38,7 +38,7 @@ http
 IPFS with path, query args and gateway with path
 </name>
 <command>
---ipfs-gateway http://%HOSTIP:%HTTPPORT/some/path "ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u/a/b?foo=bar&aaa=bbb"
+--ipfs-gateway http://%HOSTIP:%HTTPPORT/some/path "ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u/a/b?foo=bar%AMPaaa=bbb"
 </command>
 </client>
 
@@ -46,7 +46,7 @@ IPFS with path, query args and gateway with path
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-GET /some/path/ipfs/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u/a/b?foo=bar&aaa=bbb HTTP/1.1
+GET /some/path/ipfs/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u/a/b?foo=bar%AMPaaa=bbb HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

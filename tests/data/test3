@@ -37,7 +37,7 @@ http
 HTTP POST with auth and contents but with content-length set to 0
 </name>
 <command>
- -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+ -d "fooo=mooo%AMPpooo=clue%AMPdoo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -53,7 +53,7 @@ Accept: */*
 Content-Length: 37
 Content-Type: application/x-www-form-urlencoded
 
-fooo=mooo&pooo=clue&doo=%20%20%20++++
+fooo=mooo%AMPpooo=clue%AMPdoo=%20%20%20++++
 </protocol>
 </verify>
 </testcase>

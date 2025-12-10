@@ -36,7 +36,7 @@ http
 HTTP with cookie parser and header recording
 </name>
 <command>
-"http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?parm1=this*that/other/thing&parm2=foobar/%TESTNUMBER" -c %LOGDIR/cookie%TESTNUMBER.txt -d "userid=myname&password=mypassword"
+"http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER?parm1=this*that/other/thing%AMPparm2=foobar/%TESTNUMBER" -c %LOGDIR/cookie%TESTNUMBER.txt -d "userid=myname%AMPpassword=mypassword"
 </command>
 <features>
 cookies
@@ -47,14 +47,14 @@ local-http
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
-POST /we/want/%TESTNUMBER?parm1=this*that/other/thing&parm2=foobar/%TESTNUMBER HTTP/1.1
+POST /we/want/%TESTNUMBER?parm1=this*that/other/thing%AMPparm2=foobar/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 Content-Length: 33
 Content-Type: application/x-www-form-urlencoded
 
-userid=myname&password=mypassword
+userid=myname%AMPpassword=mypassword
 </protocol>
 <file name="%LOGDIR/cookie%TESTNUMBER.txt" mode="text">
 # Netscape HTTP Cookie File
