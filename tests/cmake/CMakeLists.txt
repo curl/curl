@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-cmake_minimum_required(VERSION 3.16.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18.0 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 option(TEST_CPP "Test C++" OFF)
