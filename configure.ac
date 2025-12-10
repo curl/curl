@@ -817,27 +817,27 @@ AC_MSG_CHECKING([whether to support rtsp])
 AC_ARG_ENABLE(rtsp,
 AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
 AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
-  [ case "$enableval" in
-      no)
+[ case "$enableval" in
+    no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
+    CURL_DISABLE_RTSP=1
+    ;;
+  *)
+    if test "$CURL_DISABLE_HTTP" = "1"; then
+      AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
+    else
+      AC_MSG_RESULT(yes)
+      curl_rtsp_msg="enabled"
+    fi
+    ;;
+  esac ],
+    if test "$CURL_DISABLE_HTTP" != "1"; then
+      AC_MSG_RESULT(yes)
+      curl_rtsp_msg="enabled"
+    else
       AC_MSG_RESULT(no)
-      AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-      CURL_DISABLE_RTSP=1
-      ;;
-    *)
-      if test "$CURL_DISABLE_HTTP" = "1"; then
-        AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
-      else
-        AC_MSG_RESULT(yes)
-        curl_rtsp_msg="enabled"
-      fi
-      ;;
-    esac ],
-      if test "$CURL_DISABLE_HTTP" != "1"; then
-        AC_MSG_RESULT(yes)
-        curl_rtsp_msg="enabled"
-      else
-        AC_MSG_RESULT(no)
-      fi
+    fi
 )
 
 AC_MSG_CHECKING([whether to support proxies])
