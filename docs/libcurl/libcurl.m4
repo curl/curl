@@ -86,7 +86,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
     AS_HELP_STRING([--with-libcurl=PREFIX],[look for the curl library in PREFIX/lib and headers in PREFIX/include]),
     [_libcurl_with=$withval],[_libcurl_with=ifelse([$1],,[yes],[$1])])
 
-  if test "$_libcurl_with" != "no"; then
+  if test "x$_libcurl_with" != "xno"; then
 
     AC_PROG_AWK
 
@@ -261,7 +261,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
     unset _libcurl_ldflags
   fi
 
-  if test "$_libcurl_with" = "no" || test "$libcurl_cv_lib_curl_usable" != "yes"; then
+  if test "x$_libcurl_with" = "xno" || test "$libcurl_cv_lib_curl_usable" != "yes"; then
     # This is the IF-NO path
     ifelse([$4],,:,[$4])
   else
