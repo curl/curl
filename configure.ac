@@ -4777,12 +4777,12 @@ AS_HELP_STRING([--disable-form-api],[Disable form API support]),
     ;;
   *)
     AC_MSG_RESULT(yes)
-    test "$enable_mime" = "no" &&
+    test "x$enable_mime" = "xno" &&
       AC_MSG_ERROR(MIME support needs to be enabled in order to enable form API support)
     ;;
   esac ],
 [
-  if test "$enable_mime" = "no"; then
+  if test "x$enable_mime" = "xno"; then
     enable_form_api=no
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_FORM_API, 1, [disable form API])
