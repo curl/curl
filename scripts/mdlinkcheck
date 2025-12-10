@@ -84,6 +84,11 @@ my %whitelist = (
 my %url;
 my %flink;
 
+my $dry;
+if($ARGV[0] eq "--dry-run") {
+    $dry = 1;
+}
+
 # list all files to scan for links
 my @files=`git ls-files docs include lib scripts src`;
 
@@ -207,10 +212,12 @@ for my $u (sort keys %whitelist) {
     }
 }
 
-for my $u (sort keys %url) {
-    print "$u\n";
+if($dry) {
+    for my $u (sort keys %url) {
+        print "$u\n";
+    }
+    exit;
 }
-exit;
 
 my $error;
 my @errlist;
