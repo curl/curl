@@ -225,7 +225,7 @@ AS_HELP_STRING([--with-ssl=PATH],[old version of --with-openssl])
 AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
   OPT_SSL=$withval
   OPT_OPENSSL=$withval
-  if test "$withval" != "no"; then
+  if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
   else
     SSL_DISABLED="D"
@@ -235,7 +235,7 @@ AS_HELP_STRING([--without-ssl], [build without any TLS library]),[
 AC_ARG_WITH(openssl,dnl
 AS_HELP_STRING([--with-openssl=PATH],[Where to look for OpenSSL, PATH points to the SSL installation (default: /usr/local/ssl); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option]),[
   OPT_OPENSSL=$withval
-  if test "$withval" != "no"; then
+  if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }OpenSSL"
   fi
 ])
@@ -244,7 +244,7 @@ OPT_GNUTLS=no
 AC_ARG_WITH(gnutls,dnl
 AS_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root]),[
   OPT_GNUTLS=$withval
-  if test "$withval" != "no"; then
+  if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }GnuTLS"
   fi
 ])
@@ -253,7 +253,7 @@ OPT_MBEDTLS=no
 AC_ARG_WITH(mbedtls,dnl
 AS_HELP_STRING([--with-mbedtls=PATH],[where to look for mbedTLS, PATH points to the installation root]),[
   OPT_MBEDTLS=$withval
-  if test "$withval" != "no"; then
+  if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }mbedTLS"
   fi
 ])
@@ -262,7 +262,7 @@ OPT_WOLFSSL=no
 AC_ARG_WITH(wolfssl,dnl
 AS_HELP_STRING([--with-wolfssl=PATH],[where to look for wolfSSL, PATH points to the installation root (default: system lib default)]),[
   OPT_WOLFSSL=$withval
-  if test "$withval" != "no"; then
+  if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }wolfSSL"
   fi
 ])
@@ -271,7 +271,7 @@ OPT_RUSTLS=no
 AC_ARG_WITH(rustls,dnl
 AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to the installation root]),[
   OPT_RUSTLS=$withval
-  if test "$withval" != "no"; then
+  if test "x$withval" != "xno"; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }Rustls"
     experimental="$experimental Rustls"
   fi
@@ -291,7 +291,7 @@ TEST_NGHTTPX=nghttpx
 AC_ARG_WITH(test-nghttpx,dnl
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
   TEST_NGHTTPX=$withval
-  if test "$TEST_NGHTTPX" = "no"; then
+  if test "x$TEST_NGHTTPX" = "xno"; then
     TEST_NGHTTPX=""
   fi
 )
@@ -307,7 +307,7 @@ fi
 AC_ARG_WITH(test-caddy,dnl
 AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
   CADDY=$withval
-  if test "$CADDY" = "no"; then
+  if test "x$CADDY" = "xno"; then
     CADDY=""
   fi
 )
@@ -323,7 +323,7 @@ fi
 AC_ARG_WITH(test-vsftpd,dnl
 AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
   VSFTPD=$withval
-  if test "$VSFTPD" = "no"; then
+  if test "x$VSFTPD" = "xno"; then
     VSFTPD=""
   fi
 )
@@ -335,7 +335,7 @@ HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
                          [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
-if test "$request_httpd" = "check" || test "$request_httpd" = "yes"; then
+if test "x$request_httpd" = "xcheck" || test "x$request_httpd" = "xyes"; then
   if test -x "/usr/sbin/apache2"; then
     # common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
@@ -359,7 +359,7 @@ if test "$request_httpd" = "check" || test "$request_httpd" = "yes"; then
       HTTPD_ENABLED="no"
     fi
   fi
-elif test "$request_httpd" != "no"; then
+elif test "x$request_httpd" != "xno"; then
   HTTPD="${request_httpd}/bin/httpd"
   APXS="${request_httpd}/bin/apxs"
   if test ! -x "${HTTPD}"; then
@@ -429,7 +429,7 @@ AC_SUBST(CADDY)
 dnl If no TLS choice has been made, check if it was explicitly disabled or
 dnl error out to force the user to decide.
 if test -z "$TLSCHOICE"; then
-  if test "$OPT_SSL" != "no"; then
+  if test "x$OPT_SSL" != "xno"; then
     AC_MSG_ERROR([select TLS backend(s) or disable TLS with --without-ssl.
 
 Select from these:
@@ -1331,10 +1331,10 @@ AS_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
 AS_HELP_STRING([--without-zlib],[disable use of zlib]),
   [OPT_ZLIB="$withval"])
 
-if test "$OPT_ZLIB" = "no"; then
+if test "x$OPT_ZLIB" = "xno"; then
   AC_MSG_WARN([zlib disabled])
 else
-  if test "$OPT_ZLIB" = "yes"; then
+  if test "x$OPT_ZLIB" = "xyes"; then
     OPT_ZLIB=""
   fi
 
@@ -1450,7 +1450,7 @@ AS_HELP_STRING([--with-brotli=PATH],[Where to look for brotli, PATH points to th
 AS_HELP_STRING([--without-brotli], [disable BROTLI]),
   OPT_BROTLI=$withval)
 
-if test "$OPT_BROTLI" != "no"; then
+if test "x$OPT_BROTLI" != "xno"; then
   dnl backup the pre-brotli variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -1509,7 +1509,7 @@ if test "$OPT_BROTLI" != "no"; then
     AC_DEFINE(HAVE_BROTLI, 1, [if BROTLI is in use])
   )
 
-  if test "$OPT_BROTLI" != "off" &&
+  if test "x$OPT_BROTLI" != "xoff" &&
      test "$HAVE_BROTLI" != "1"; then
     AC_MSG_ERROR([BROTLI libs and/or directories were not found where specified!])
   fi
@@ -1547,7 +1547,7 @@ AS_HELP_STRING([--with-zstd=PATH],[Where to look for libzstd, PATH points to the
 AS_HELP_STRING([--without-zstd], [disable libzstd]),
   OPT_ZSTD=$withval)
 
-if test "$OPT_ZSTD" != "no"; then
+if test "x$OPT_ZSTD" != "xno"; then
   dnl backup the pre-zstd variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -1598,7 +1598,7 @@ if test "$OPT_ZSTD" != "no"; then
     AC_DEFINE(HAVE_ZSTD, 1, [if libzstd is in use])
   )
 
-  if test "$OPT_ZSTD" != "off" &&
+  if test "x$OPT_ZSTD" != "xoff" &&
      test "$HAVE_ZSTD" != "1"; then
     AC_MSG_ERROR([libzstd was not found where specified!])
   fi
@@ -2090,7 +2090,7 @@ AS_HELP_STRING([--with-libpsl=PATH],[Where to look for libpsl, PATH points to th
 AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
   OPT_LIBPSL=$withval)
 
-if test "$OPT_LIBPSL" != "no"; then
+if test "x$OPT_LIBPSL" != "xno"; then
   dnl backup the pre-libpsl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -2163,7 +2163,7 @@ AS_HELP_STRING([--with-libgsasl=PATH],[Where to look for libgsasl, PATH points t
 AS_HELP_STRING([--without-libgsasl], [disable libgsasl support for SCRAM]),
   OPT_LIBGSASL=$withval)
 
-if test "$OPT_LIBGSASL" != "no"; then
+if test "x$OPT_LIBGSASL" != "xno"; then
   dnl backup the pre-libgsasl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -2243,7 +2243,7 @@ AS_HELP_STRING([--with-libssh=PATH],[Where to look for libssh, PATH points to th
 AS_HELP_STRING([--with-libssh], [enable libssh]),
   OPT_LIBSSH=$withval, OPT_LIBSSH=no)
 
-if test "$OPT_LIBSSH2" != "no"; then
+if test "x$OPT_LIBSSH2" != "xno"; then
   dnl backup the pre-libssh2 variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -2295,7 +2295,7 @@ if test "$OPT_LIBSSH2" != "no"; then
     USE_LIBSSH2=1
   )
 
-  if test "$OPT_LIBSSH2" != "off" &&
+  if test "x$OPT_LIBSSH2" != "xoff" &&
      test "$USE_LIBSSH2" != "1"; then
     AC_MSG_ERROR([libssh2 libs and/or directories were not found where specified!])
   fi
@@ -2320,7 +2320,7 @@ if test "$OPT_LIBSSH2" != "no"; then
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
-elif test "$OPT_LIBSSH" != "no"; then
+elif test "x$OPT_LIBSSH" != "xno"; then
   dnl backup the pre-libssh variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -2371,7 +2371,7 @@ elif test "$OPT_LIBSSH" != "no"; then
     USE_LIBSSH=1
   )
 
-  if test "$OPT_LIBSSH" != "off" &&
+  if test "x$OPT_LIBSSH" != "xoff" &&
      test "$USE_LIBSSH" != "1"; then
     AC_MSG_ERROR([libssh libs and/or directories were not found where specified!])
   fi
@@ -2596,7 +2596,7 @@ AS_HELP_STRING([--with-librtmp=PATH],[Where to look for librtmp, PATH points to 
 AS_HELP_STRING([--without-librtmp], [disable LIBRTMP]),
   OPT_LIBRTMP=$withval)
 
-if test "$OPT_LIBRTMP" != "no"; then
+if test "x$OPT_LIBRTMP" != "xno"; then
   dnl backup the pre-librtmp variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -2660,7 +2660,7 @@ if test "$OPT_LIBRTMP" != "no"; then
       LIBS=$CLEANLIBS
   )
 
-  if test "$OPT_LIBRTMP" != "off" &&
+  if test "x$OPT_LIBRTMP" != "xoff" &&
      test "$USE_LIBRTMP" != "1"; then
     AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
   fi

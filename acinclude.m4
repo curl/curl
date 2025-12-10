@@ -1125,7 +1125,7 @@ AS_HELP_STRING([--with-ca-bundle=FILE],
 AS_HELP_STRING([--without-ca-bundle], [Do not use a default CA bundle]),
   [
     want_ca="$withval"
-    if test "$want_ca" = "yes"; then
+    if test "x$want_ca" = "xyes"; then
       AC_MSG_ERROR([--with-ca-bundle=FILE requires a path to the CA bundle])
     fi
   ],
@@ -1139,7 +1139,7 @@ GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
   [
     want_capath="$withval"
-    if test "$want_capath" = "yes"; then
+    if test "x$want_capath" = "xyes"; then
       AC_MSG_ERROR([--with-ca-path=DIRECTORY requires a path to the CA path directory])
     fi
   ],
@@ -1286,7 +1286,7 @@ AS_HELP_STRING([--with-ca-embed=FILE],
 AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the curl tool]),
   [
     want_ca_embed="$withval"
-    if test "$want_ca_embed" = "yes"; then
+    if test "x$want_ca_embed" = "xyes"; then
       AC_MSG_ERROR([--with-ca-embed=FILE requires a path to the CA bundle])
     fi
   ],
