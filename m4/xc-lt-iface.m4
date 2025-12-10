@@ -259,9 +259,9 @@ m4_define([_XC_CHECK_LT_SHLIB_USE_NO_UNDEFINED],
 
 AC_MSG_CHECKING([whether to build shared libraries with -no-undefined])
 xc_lt_shlib_use_no_undefined='no'
-if test "$allow_undefined" = "no"; then
+if test "x$allow_undefined" = "xno"; then
   xc_lt_shlib_use_no_undefined='yes'
-elif test "$allow_undefined_flag" = "unsupported"; then
+elif test "x$allow_undefined_flag" = "xunsupported"; then
   xc_lt_shlib_use_no_undefined='yes'
 fi
 case $host_os in @%:@ (

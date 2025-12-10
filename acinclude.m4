@@ -1155,16 +1155,16 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     ca_native="no"
   fi
 
-  if test "$want_ca" != "no" && test "$want_ca" != "unset" &&
-     test "$want_capath" != "no" && test "$want_capath" != "unset"; then
+  if test "x$want_ca" != "xno" && test "x$want_ca" != "xunset" &&
+     test "x$want_capath" != "xno" && test "x$want_capath" != "xunset"; then
     dnl both given
     ca="$want_ca"
     capath="$want_capath"
-  elif test "$want_ca" != "no" && test "$want_ca" != "unset"; then
+  elif test "x$want_ca" != "xno" && test "x$want_ca" != "xunset"; then
     dnl --with-ca-bundle given
     ca="$want_ca"
     capath="no"
-  elif test "$want_capath" != "no" && test "$want_capath" != "unset"; then
+  elif test "x$want_capath" != "xno" && test "x$want_capath" != "xunset"; then
     dnl --with-ca-path given
     capath="$want_capath"
     ca="no"
@@ -1181,11 +1181,11 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
        test "$curl_cv_native_windows" != "yes"; then
       dnl NOT cross-compiling and...
       dnl neither of the --with-ca-* options are provided
-      if test "$want_ca" = "unset"; then
+      if test "x$want_ca" = "xunset"; then
         dnl the path we previously would have installed the curl CA bundle
         dnl to, and thus we now check for an already existing cert in that
         dnl place in case we find no other
-        if test "$prefix" != "NONE"; then
+        if test "x$prefix" != "xNONE"; then
           cac="${prefix}/share/curl/curl-ca-bundle.crt"
         else
           cac="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
@@ -1204,7 +1204,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
         done
       fi
       AC_MSG_NOTICE([want $want_capath ca $ca])
-      if test "$want_capath" = "unset"; then
+      if test "x$want_capath" = "xunset"; then
         check_capath="/etc/ssl/certs"
       fi
     else
@@ -1213,11 +1213,11 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     fi
   fi
 
-  if test "$ca" = "no" || test -f "$ca"; then
+  if test "x$ca" = "xno" || test -f "$ca"; then
     ca_warning=""
   fi
 
-  if test "$capath" != "no"; then
+  if test "x$capath" != "xno"; then
     check_capath="$capath"
   fi
 
@@ -1233,22 +1233,22 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
     done
   fi
 
-  if test "$capath" = "no"; then
+  if test "x$capath" = "xno"; then
     capath_warning=""
   fi
 
-  if test "$ca" != "no"; then
+  if test "x$ca" != "xno"; then
     CURL_CA_BUNDLE="$ca"
     AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default ca bundle])
     AC_SUBST(CURL_CA_BUNDLE)
     AC_MSG_RESULT([$ca])
   fi
-  if test "$capath" != "no"; then
+  if test "x$capath" != "xno"; then
     CURL_CA_PATH="\"$capath\""
     AC_DEFINE_UNQUOTED(CURL_CA_PATH, "$capath", [Location of default ca path])
     AC_MSG_RESULT([$capath (capath)])
   fi
-  if test "$ca" = "no" && test "$capath" = "no"; then
+  if test "x$ca" = "xno" && test "x$capath" = "xno"; then
     AC_MSG_RESULT([no])
   fi
 
@@ -1293,7 +1293,7 @@ AS_HELP_STRING([--without-ca-embed], [Do not embed a default CA bundle in the cu
   [ want_ca_embed="unset" ])
 
   CURL_CA_EMBED=''
-  if test "$want_ca_embed" != "no" && test "$want_ca_embed" != "unset" && test -f "$want_ca_embed"; then
+  if test "x$want_ca_embed" != "xno" && test "x$want_ca_embed" != "xunset" && test -f "$want_ca_embed"; then
     if test -n "$PERL"; then
       CURL_CA_EMBED="$want_ca_embed"
       AC_SUBST(CURL_CA_EMBED)
