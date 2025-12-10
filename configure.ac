@@ -385,7 +385,7 @@ DANTED_ENABLED="maybe"
 AC_ARG_WITH(test-danted, [AS_HELP_STRING([--with-test-danted=PATH],
                          [where to find danted socks daemon for testing])],
   [request_danted=$withval], [request_danted=check])
-if test "$request_danted" = "check" || test "$request_danted" = "yes"; then
+if test "x$request_danted" = "xcheck" || test "x$request_danted" = "xyes"; then
   if test -x "/usr/sbin/danted"; then
     # common location on distros (debian/ubuntu)
     DANTED="/usr/sbin/danted"
@@ -395,7 +395,7 @@ if test "$request_danted" = "check" || test "$request_danted" = "yes"; then
       AC_PATH_PROG([DANTED], [danted])
     fi
   fi
-elif test "$request_danted" != "no"; then
+elif test "x$request_danted" != "xno"; then
   DANTED="${request_danted}"
   if test ! -x "${DANTED}"; then
     AC_MSG_NOTICE([danted not found as ${DANTED}, danted tests disabled])
@@ -410,7 +410,7 @@ fi
 AC_SUBST(DANTED)
 
 dnl the nghttpx we might use in httpd testing
-if test -n "$TEST_NGHTTPX" && test "$TEST_NGHTTPX" != "nghttpx"; then
+if test -n "$TEST_NGHTTPX" && test "x$TEST_NGHTTPX" != "xnghttpx"; then
   HTTPD_NGHTTPX="$TEST_NGHTTPX"
 else
   AC_PATH_PROG([HTTPD_NGHTTPX], [nghttpx], [],
