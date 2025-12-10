@@ -5317,7 +5317,7 @@ fi
 
 if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
   if test ${ac_cv_sizeof_off_t} -gt 4 -o \
-     "$curl_win32_file_api" = "win32_large_files"; then
+     "$curl_cv_native_windows" = "yes"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES Largefile"
   fi
 fi
