@@ -25,7 +25,6 @@ ensure that the order does not matter. -->
 
 -->
 
-
 <!-- First request has NTLM auth, wrong password -->
 <data100 crlf="headers">
 HTTP/1.1 401 Need Digest or NTLM auth

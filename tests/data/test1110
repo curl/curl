@@ -31,7 +31,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment
 </command>
 </client>
 
-
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
