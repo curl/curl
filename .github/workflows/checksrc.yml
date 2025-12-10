@@ -139,8 +139,8 @@ jobs:
       - name: 'check'
         run: |
           {
-            git grep -z -i -l -E '^<\?xml' || true
-            git grep -z -L -F 'notxml' 'tests/data/test*' || true
+            git grep -i -l -E '^<\?xml' -z || true
+            git ls-files 'tests/data/test*' -z || true
           } | xargs -0 -r xmllint >/dev/null
 
   miscchecks:
