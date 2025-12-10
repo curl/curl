@@ -663,7 +663,7 @@ elseif(AMIGA)
 elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
-    set(CURL_NETWORK_AND_TIME_LIBS "socket" ${CURL_NETWORK_AND_TIME_LIBS})
+    list(PREPEND CURL_NETWORK_AND_TIME_LIBS "socket")
   endif()
 endif()
 
@@ -1179,7 +1179,7 @@ if(NOT CURL_DISABLE_LDAP)
     find_package(LDAP)
     if(LDAP_FOUND)
       set(HAVE_LBER_H 1)
-      set(CURL_LIBS CURL::ldap ${CURL_LIBS})
+      list(PREPEND CURL_LIBS CURL::ldap)
 
       # LDAP feature checks
 
@@ -1246,7 +1246,7 @@ set(HAVE_LIBIDN2 OFF)
 if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
   find_package(Libidn2)
   if(LIBIDN2_FOUND)
-    set(CURL_LIBS CURL::libidn2 ${CURL_LIBS})
+    list(PREPEND CURL_LIBS CURL::libidn2)
     set(HAVE_IDN2_H 1)
     set(HAVE_LIBIDN2 1)
   endif()
@@ -1269,7 +1269,7 @@ set(USE_LIBSSH2 OFF)
 if(CURL_USE_LIBSSH2)
   find_package(Libssh2)
   if(LIBSSH2_FOUND)
-    set(CURL_LIBS CURL::libssh2 ${CURL_LIBS})  # keep it before TLS-crypto, compression
+    list(PREPEND CURL_LIBS CURL::libssh2)  # keep it before TLS-crypto, compression
     set(USE_LIBSSH2 ON)
   endif()
 endif()
@@ -1279,7 +1279,7 @@ option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(Libssh REQUIRED)
-  set(CURL_LIBS CURL::libssh ${CURL_LIBS})  # keep it before TLS-crypto, compression
+  list(PREPEND CURL_LIBS CURL::libssh)  # keep it before TLS-crypto, compression
   set(USE_LIBSSH ON)
 endif()
 
