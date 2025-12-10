@@ -118,10 +118,10 @@ sub getpartattr {
             last;
         }
         # detect end of section when part was not found
-        elsif((1 ==$inside) && ($_ =~ /^ *\<\/$section\>/)) {
+        elsif((1 == $inside) && ($_ =~ /^ *\<\/$section\>/)) {
             last;
         }
-        elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
+        elsif((2 == $inside) && ($_ =~ /^ *\<\/$part/)) {
             $inside--;
         }
     }
