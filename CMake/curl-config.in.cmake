@@ -57,7 +57,7 @@ if("@HAVE_LIBZ@")
 endif()
 
 set(_curl_cmake_module_path_save ${CMAKE_MODULE_PATH})
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_MODULE_PATH})
+list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(_curl_libs "")
 
