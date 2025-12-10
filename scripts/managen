@@ -85,7 +85,6 @@ sub manpageify {
     return "--$k$trail";
 }
 
-
 my $colwidth=79; # max number of columns
 
 sub prefixline {
@@ -499,7 +498,6 @@ sub render {
         $d =~ s/\\([><])/$1/g;
         # convert single backslash to double-backslash
         $d =~ s/\\/\\\\/g if($manpage);
-
 
         if($manpage) {
             if(!$quote && $d =~ /--/) {
@@ -1046,7 +1044,6 @@ sub header {
     close($fh);
     printdesc($manpage, 0, @d);
 }
-
 
 sub sourcecategories {
     my ($dir) = @_;
