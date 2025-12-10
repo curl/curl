@@ -14,19 +14,7 @@ mode="${1:-all}"; shift
 cmake_consumer="${TEST_CMAKE_CONSUMER:-cmake}"
 cmake_provider="${TEST_CMAKE_PROVIDER:-${cmake_consumer}}"
 
-# 'modern': supports Ninja (3.17+)
-"${cmake_consumer}" --help | grep -q -- 'Ninja' && cmake_consumer_modern=1
-"${cmake_provider}" --help | grep -q -- 'Ninja' && cmake_provider_modern=1
-
-if [ -n "${TEST_CMAKE_GENERATOR:-}" ]; then
-  gen="${TEST_CMAKE_GENERATOR}"
-elif [ -n "${cmake_consumer_modern:-}" ] && \
-     [ -n "${cmake_provider_modern:-}" ] && \
-     command -v ninja >/dev/null; then
-  gen='Ninja'  # 3.17+
-else
-  gen='Unix Makefiles'
-fi
+gen="${TEST_CMAKE_GENERATOR:-Ninja}"
 
 cmake_opts='-DBUILD_CURL_EXE=OFF -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF'
 
