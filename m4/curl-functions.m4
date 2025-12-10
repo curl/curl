@@ -4294,7 +4294,7 @@ AC_DEFUN([CURL_COVERAGE],[
   AS_IF([test "$compiler_id" != "GNU_C" && test "$compiler_id" != "CLANG" && test "$compiler_id" != "APPLECLANG"], coverage="no" )
   AC_MSG_RESULT($coverage)
 
-  if test "$coverage" = "yes"; then
+  if test "x$coverage" = "xyes"; then
     curl_coverage_msg="enabled"
 
     CPPFLAGS="$CPPFLAGS -DNDEBUG"

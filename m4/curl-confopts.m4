@@ -93,7 +93,7 @@ AS_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
     *)
       dnl --enable-ares option used
       want_ares="yes"
-      if test -n "$enableval" && test "$enableval" != "yes"; then
+      if test -n "$enableval" && test "x$enableval" != "xyes"; then
         want_ares_path="$enableval"
       fi
       ;;

@@ -2688,7 +2688,7 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
       AC_MSG_WARN([You need an ld version supporting the --version-script option])
     else
       AC_MSG_RESULT(yes)
-      if test "$enableval" != "yes"; then
+      if test "x$enableval" != "xyes"; then
         versioned_symbols_flavour="$enableval"
       elif test "$CURL_WITH_MULTI_SSL" = "1"; then
         versioned_symbols_flavour="MULTISSL_"
