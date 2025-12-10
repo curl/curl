@@ -4,7 +4,6 @@
 HTTP
 HTTP GET
 --libcurl
-notxml
 </keywords>
 </info>
 
