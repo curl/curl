@@ -412,7 +412,7 @@ else
   if test -z "$PATH_SEPARATOR"; then
     # Simply use the auto-detected one when not already set.
     PATH_SEPARATOR=$xc_tst_auto_separator
-  elif test "$PATH_SEPARATOR" != "$xc_tst_auto_separator"; then
+  elif test "x$PATH_SEPARATOR" != "x$xc_tst_auto_separator"; then
     echo "$xc_msg_warn 'PATH_SEPARATOR' does not match auto-detected one." >&2
   fi
 fi
@@ -656,7 +656,7 @@ if test -z "$PATH_SEPARATOR"; then
 fi
 AC_MSG_CHECKING([for path separator])
 AC_MSG_RESULT([$PATH_SEPARATOR])
-if test "$PATH_SEPARATOR" != "$xc_PATH_SEPARATOR"; then
+if test "x$PATH_SEPARATOR" != "x$xc_PATH_SEPARATOR"; then
   AC_MSG_CHECKING([for initial path separator])
   AC_MSG_RESULT([$xc_PATH_SEPARATOR])
   AC_MSG_ERROR([path separator mismatch (internal or config.site problem)])
