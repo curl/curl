@@ -207,10 +207,10 @@ for my $u (sort keys %whitelist) {
     }
 }
 
-#for my $u (sort keys %url) {
-#    print "$u\n";
-#}
-#exit;
+for my $u (sort keys %url) {
+    print "$u\n";
+}
+exit;
 
 my $error;
 my @errlist;

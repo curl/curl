@@ -49,7 +49,7 @@ Clojure: [clj-curl](https://github.com/lsevero/clj-curl) by Lucas Severo
 
 [Fortran](https://github.com/interkosmos/fortran-curl) Written by Philipp Engel
 
-[Gambas](https://gambas.sourceforge.net/)
+[Gambas](https://gambaswiki.org/website/en/main.html)
 
 [glib/GTK+](https://web.archive.org/web/20100526203452/atterer.net/glibcurl) Written by Richard Atterer
 
@@ -112,7 +112,7 @@ Bailiff and Bálint Szilakszi,
 
 [Rexx](https://rexxcurl.sourceforge.net/) Written Mark Hessling
 
-[Ring](https://ring-lang.sourceforge.io/doc1.3/libcurl.html) RingLibCurl by Mahmoud Fayed
+[Ring](https://ring-lang.github.io/doc1.24/libcurl.html) RingLibCurl by Mahmoud Fayed
 
 RPG, support for ILE/RPG on OS/400 is included in source distribution
 
