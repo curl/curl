@@ -3208,6 +3208,7 @@ if test "$want_tcp2" != "no"; then
 fi
 
 if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$HAVE_LIBRESSL" = "1"; then
+
   dnl backup the pre-ngtcp2_crypto_libressl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3266,8 +3267,9 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$HAVE_LIBR
   fi
 fi
 
-if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && \
-   test "$OPENSSL_IS_BORINGSSL" != "1" && test "$OPENSSL_QUIC_API2" != "1"; then
+if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$OPENSSL_IS_BORINGSSL" != "1" &&
+   test "$OPENSSL_QUIC_API2" != "1"; then
+
   dnl backup the pre-ngtcp2_crypto_quictls variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3324,8 +3326,9 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && \
   fi
 fi
 
-if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && \
-   test "$OPENSSL_IS_BORINGSSL" != "1" && test "$OPENSSL_QUIC_API2" = "1"; then
+if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$OPENSSL_IS_BORINGSSL" != "1" &&
+   test "$OPENSSL_QUIC_API2" = "1"; then
+
   dnl backup the pre-ngtcp2_crypto_ossl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3384,6 +3387,7 @@ if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && \
 fi
 
 if test "$USE_NGTCP2" = "1" && test "$OPENSSL_ENABLED" = "1" && test "$OPENSSL_IS_BORINGSSL" = "1"; then
+
   dnl backup the pre-ngtcp2_crypto_boringssl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
