@@ -293,7 +293,7 @@ AC_MSG_CHECKING([whether to build shared libraries with -mimpure-text])
 xc_lt_shlib_use_mimpure_text='no'
 case $host_os in @%:@ (
   solaris2*)
-    if test "$GCC" = "yes"; then
+    if test "x$GCC" = "xyes"; then
       xc_lt_shlib_use_mimpure_text='yes'
     fi
     ;;
