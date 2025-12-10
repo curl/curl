@@ -93,7 +93,6 @@ lines:
 Macros to help keep data files XML-compliant:
 
     %AMP - Ampersand: `&`
-    %DQ  - Double quote: `"`
     %GT  - Greater-than sign: `>`
     %LT  - Less-than sign: `<`
 
