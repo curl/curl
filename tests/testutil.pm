@@ -129,6 +129,7 @@ sub subchars {
     $$thing =~ s/%LT/</g;
     $$thing =~ s/%GT/>/g;
     $$thing =~ s/%AMP/&/g;
+    $$thing =~ s/%DQ/\"/g;
 }
 
 sub subbase64 {
