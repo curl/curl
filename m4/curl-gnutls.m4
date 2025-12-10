@@ -192,7 +192,7 @@ if test "$GNUTLS_ENABLED" = "1"; then
         fi
       fi
     fi
-    if test "$USE_GNUTLS_NETTLE" = ""; then
+    if test -z "$USE_GNUTLS_NETTLE"; then
       AC_MSG_ERROR([GnuTLS found, but nettle was not found])
     fi
   else
