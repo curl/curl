@@ -160,9 +160,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/@TARGETS_EXPORT_NAME@.cmake")
 
 # Alias for either shared or static library
 if(NOT TARGET @PROJECT_NAME@::@LIB_NAME@)
-  if(CMAKE_VERSION VERSION_LESS 3.18)
-    set_target_properties(@PROJECT_NAME@::@LIB_SELECTED@ PROPERTIES IMPORTED_GLOBAL TRUE)
-  endif()
   add_library(@PROJECT_NAME@::@LIB_NAME@ ALIAS @PROJECT_NAME@::@LIB_SELECTED@)
 endif()
 
