@@ -1224,7 +1224,7 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
   if test -n "$check_capath"; then
     for a in "$check_capath"; do
       if test -d "$a" && ls "$a"/[[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]].0 >/dev/null 2>/dev/null; then
-        if test "$capath" = "no"; then
+        if test "x$capath" = "xno"; then
           capath="$a"
         fi
         capath_warning=""
@@ -1257,13 +1257,13 @@ AS_HELP_STRING([--without-ca-path], [Do not use a default CA path]),
 AS_HELP_STRING([--with-ca-fallback], [Use OpenSSL's built-in CA store])
 AS_HELP_STRING([--without-ca-fallback], [Do not use OpenSSL's built-in CA store]),
   [
-    if test "$with_ca_fallback" != "yes" && test "$with_ca_fallback" != "no"; then
+    if test "x$with_ca_fallback" != "xyes" && test "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
     fi
   ],
   [ with_ca_fallback="no"])
   AC_MSG_RESULT([$with_ca_fallback])
-  if test "$with_ca_fallback" = "yes"; then
+  if test "x$with_ca_fallback" = "xyes"; then
     if test "$OPENSSL_ENABLED" != "1"; then
       AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL])
     fi
