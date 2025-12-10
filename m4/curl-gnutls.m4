@@ -27,10 +27,10 @@ dnl check for GnuTLS
 dnl ----------------------------------------------------
 
 AC_DEFUN([CURL_WITH_GNUTLS], [
-if test "$OPT_GNUTLS" != "no"; then
+if test "x$OPT_GNUTLS" != "xno"; then
   ssl_msg=
 
-  if test "$OPT_GNUTLS" != "no"; then
+  if test "x$OPT_GNUTLS" != "xno"; then
 
     addld=""
     addlib=""
@@ -38,7 +38,7 @@ if test "$OPT_GNUTLS" != "no"; then
     version=""
     addcflags=""
 
-    if test "$OPT_GNUTLS" = "yes"; then
+    if test "x$OPT_GNUTLS" = "xyes"; then
       dnl this is with no particular path given
       CURL_CHECK_PKGCONFIG(gnutls)
 

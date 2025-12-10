@@ -27,15 +27,15 @@ dnl check for mbedTLS
 dnl ----------------------------------------------------
 AC_DEFUN([CURL_WITH_MBEDTLS], [
 
-if test "$OPT_MBEDTLS" != "no"; then
+if test "x$OPT_MBEDTLS" != "xno"; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
   _ldflagspc=$LDFLAGSPC
   ssl_msg=
 
-  if test "$OPT_MBEDTLS" != "no"; then
+  if test "x$OPT_MBEDTLS" != "xno"; then
 
-    if test "$OPT_MBEDTLS" = "yes"; then
+    if test "x$OPT_MBEDTLS" = "xyes"; then
       OPT_MBEDTLS=""
     fi
 

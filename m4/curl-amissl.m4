@@ -25,7 +25,7 @@
 AC_DEFUN([CURL_WITH_AMISSL], [
 AC_MSG_CHECKING([whether to enable Amiga native SSL/TLS (AmiSSL v5)])
 if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
-  if test "$OPT_AMISSL" != "no"; then
+  if test "x$OPT_AMISSL" != "xno"; then
     ssl_msg=
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
