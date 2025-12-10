@@ -247,7 +247,6 @@ class NghttpxQuic(Nghttpx):
                 '--frontend-quic-early-data',
             ])
         args.extend([
-            f'--backend=127.0.0.1,{self.env.https_port};{self._domain};sni={self._domain};proto=h2;tls',
             f'--backend=127.0.0.1,{self.env.http_port}',
             '--log-level=ERROR',
             f'--pid-file={self._pid_file}',
