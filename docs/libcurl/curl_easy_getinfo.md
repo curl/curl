@@ -398,7 +398,6 @@ An overview of the time values available from curl_easy_getinfo(3)
         |--|--|--|--|--|--|--|--TOTAL
         |--|--|--|--|--|--|--|--REDIRECT
 
-
  CURLINFO_QUEUE_TIME_T(3), CURLINFO_NAMELOOKUP_TIME_T(3),
  CURLINFO_CONNECT_TIME_T(3), CURLINFO_APPCONNECT_TIME_T(3),
  CURLINFO_PRETRANSFER_TIME_T(3), CURLINFO_POSTTRANSFER_TIME_T(3),

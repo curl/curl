@@ -827,7 +827,6 @@ chain.
 Details are also in [the SSL certificates
 document](https://curl.se/docs/sslcerts.html).
 
-
 ## Why is curl -R on Windows one hour off?
 
 Since curl 7.53.0 this issue should be fixed as long as curl was built with

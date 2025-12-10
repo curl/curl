@@ -398,7 +398,6 @@ honest a bit of a hack.
 Please see the following thread for more information:
 https://curl.se/mail/lib-2012-05/0178.html
 
-
 # POP3
 
 ## Enhanced capability support

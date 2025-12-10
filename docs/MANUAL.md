@@ -276,7 +276,6 @@ this:
 
     curl --trace my-trace.txt www.haxx.se
 
-
 ## Detailed Information
 
 Different protocols provide different ways of getting detailed information
