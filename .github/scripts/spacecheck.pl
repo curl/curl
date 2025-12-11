@@ -39,6 +39,14 @@ my @need_crlf = (
     "\\.(bat|sln)\$",
 );
 
+my @double_empty = (
+    "^lib/.+\\.(c|h)\$",
+    "^packages/",
+    "^tests/data/data",
+    "^tests/data/test",
+    "\\.(ac|m4|py)\$",
+);
+
 my @non_ascii_allowed = (
     '\xC3\xB6',  # UTF-8 for https://codepoints.net/U+00F6 LATIN SMALL LETTER O WITH DIAERESIS
 );
@@ -143,6 +151,13 @@ while(my $filename = <$git_ls_files>) {
     if($content =~ /\n\n\n\n/ ||
        $content =~ /\r\n\r\n\r\n\r\n/) {
         push @err, "content: has 3 or more consecutive empty lines";
+    }
+
+    if(!fn_match($filename, @double_empty)) {
+        if($content =~ /\n\n\n/ ||
+           $content =~ /\r\n\r\n\r\n/) {
+            push @err, "content: has 2 consecutive empty lines";
+        }
     }
 
     if($content =~ /([\x00-\x08\x0b\x0c\x0e-\x1f\x7f])/) {
