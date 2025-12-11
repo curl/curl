@@ -116,7 +116,6 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #define Curl_ipv6works(x) FALSE
 #endif
 
-
 /* unlink a dns entry, potentially shared with a cache */
 void Curl_resolv_unlink(struct Curl_easy *data,
                         struct Curl_dns_entry **pdns);

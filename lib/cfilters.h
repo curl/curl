@@ -316,7 +316,6 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
                               struct connectdata *conn,
                               int sockindex);
 
-
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               bool *done);

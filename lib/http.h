@@ -213,7 +213,6 @@ Curl_http_output_auth(struct Curl_easy *data,
 /* Decode HTTP status code string. */
 CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len);
 
-
 /**
  * All about a core HTTP request, excluding body and trailers
  */

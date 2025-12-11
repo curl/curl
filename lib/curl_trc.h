@@ -65,7 +65,6 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_LOG_LVL_NONE  0
 #define CURL_LOG_LVL_INFO  1
 
-
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #define CURL_HAVE_C99
 #endif
