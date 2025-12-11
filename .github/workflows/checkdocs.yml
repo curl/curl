@@ -71,7 +71,7 @@ jobs:
           source ~/venv/bin/activate
           git ls-files README '*.md' -z | grep -Evz '(CHECKSRC|DISTROS|CURLOPT_INTERFACE|interface)\.md' | xargs -0 proselint check --
 
-      - name: 'check special prose'  # This is for CHECKSRC and files with aggressive exclamation mark needs
+      - name: 'check special prose'  # For CHECKSRC and files with aggressive exclamation mark needs
         run: |
           cat <<JSON > ~/.proselintrc.json
           {
