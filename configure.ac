@@ -409,6 +409,36 @@ if test "$DANTED_ENABLED" = "no"; then
 fi
 AC_SUBST(DANTED)
 
+dnl we would like a sshd as test server
+dnl
+SSHD_ENABLED="maybe"
+AC_ARG_WITH(test-sshd, [AS_HELP_STRING([--with-test-sshd=PATH],
+                         [where to find sshd for testing])],
+  [request_sshd=$withval], [request_sshd=check])
+if test "x$request_sshd" = "xcheck" || test "x$request_sshd" = "xyes"; then
+  if test -x "/usr/sbin/sshd"; then
+    # common location on distros (debian/ubuntu)
+    SSHD="/usr/sbin/sshd"
+  else
+    AC_PATH_PROG([SSHD], [sshd])
+    if test -z "$SSHD"; then
+      AC_PATH_PROG([SSHD], [sshd])
+    fi
+  fi
+elif test "x$request_sshd" != "xno"; then
+  SSHD="${request_sshd}"
+  if test ! -x "${SSHD}"; then
+    AC_MSG_NOTICE([sshd not found as ${SSHD}, sshd tests disabled])
+    SSHD_ENABLED="no"
+  else
+    AC_MSG_NOTICE([using SSHD=$SSHD for tests])
+  fi
+fi
+if test "$DANTED_ENABLED" = "no"; then
+  SSHD=""
+fi
+AC_SUBST(SSHD)
+
 dnl the nghttpx we might use in httpd testing
 if test -n "$TEST_NGHTTPX" && test "x$TEST_NGHTTPX" != "xnghttpx"; then
   HTTPD_NGHTTPX="$TEST_NGHTTPX"

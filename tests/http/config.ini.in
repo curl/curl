@@ -40,3 +40,6 @@ vsftpd = @VSFTPD@
 
 [danted]
 danted = @DANTED@
+
+[sshd]
+sshd = @SSHD@

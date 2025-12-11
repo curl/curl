@@ -916,6 +916,65 @@ class CurlClient:
                                with_tcpdump=with_tcpdump,
                                extra_args=extra_args)
 
+    def scp_download(self, urls: List[str],
+                     with_stats: bool = True,
+                     with_profile: bool = False,
+                     with_tcpdump: bool = False,
+                     no_save: bool = False,
+                     extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        if no_save:
+            extra_args.extend([
+                '--out-null',
+            ])
+        else:
+            extra_args.extend([
+                '-o', 'download_#1.data',
+            ])
+        # remove any existing ones
+        for i in range(100):
+            self._rmf(self.download_file(i))
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
+
+    def scp_upload(self, urls: List[str],
+                   fupload: Optional[Any] = None,
+                   updata: Optional[str] = None,
+                   with_stats: bool = True,
+                   with_profile: bool = False,
+                   with_tcpdump: bool = False,
+                   extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        if fupload is not None:
+            extra_args.extend([
+                '--upload-file', fupload
+            ])
+        elif updata is not None:
+            extra_args.extend([
+                '--upload-file', '-'
+            ])
+        else:
+            raise Exception('need either file or data to upload')
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         intext=updata,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
+
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
