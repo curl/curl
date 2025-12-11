@@ -181,7 +181,6 @@ CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
  * @param buf          buffer to keep response data received
  * @param blen         length of `buf`
  * @param eos_reliable if EOS detection in underlying connection is reliable
- * @param err error    code in case of -1 return
  * @return number of bytes read or -1 for error
  */
 static CURLcode xfer_recv_resp(struct Curl_easy *data,
