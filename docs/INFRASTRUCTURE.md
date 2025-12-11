@@ -76,7 +76,7 @@ domain names, including `curl.se` and `curl.dev`. Daniel Stenberg owns these
 domain names.
 
 Until a few years ago, the curl website was present at `curl.haxx.se`. The
-`haxx.se` domain is owned by Haxx AB, administrated by Daniel Stenberg. The
+`haxx.se` domain is owned by Haxx AB, administered by Daniel Stenberg. The
 curl.haxx.se name is meant to keep working and be redirecting to curl.se for
 the foreseeable future.
 
