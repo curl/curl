@@ -59,7 +59,8 @@ jobs:
               "lexical_illusions": false,
               "annotations.misc": false,
               "security.password": false,
-              "misc.annotations": false
+              "misc.annotations": false,
+              "redundancy.misc.garner": false
             }
           }
           JSON
