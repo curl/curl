@@ -53,9 +53,6 @@ HTTP with credentials redirects to IMAP
 <command>
 http://@%HOSTIP:%HTTPPORT/page/%TESTNUMBER -u user:secret --location --proto-redir imap --resolve host:%IMAPPORT:%HOSTIP
 </command>
-<features>
-proxy
-</features>
 </client>
 
 #

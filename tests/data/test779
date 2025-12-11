@@ -54,9 +54,6 @@ HTTP --oauth2-bearer redirects to IMAP
 <command>
 http://%HOSTIP:%HTTPPORT/page/%TESTNUMBER --oauth2-bearer s3cr3t --location --proto-redir imap --resolve host:%IMAPPORT:%HOSTIP
 </command>
-<features>
-proxy
-</features>
 </client>
 
 #
