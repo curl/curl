@@ -60,7 +60,8 @@ jobs:
               "annotations.misc": false,
               "security.password": false,
               "misc.annotations": false,
-              "redundancy.misc.garner": false
+              "redundancy.misc.garner": false,
+              "spelling.ve_of": false
             }
           }
           JSON
