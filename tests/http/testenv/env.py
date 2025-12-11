@@ -298,6 +298,35 @@ class EnvConfig:
             except Exception:
                 self.danted = None
 
+        self.sshd = self.config['sshd']['sshd']
+        if self.sshd == '':
+            self.sshd = None
+        self._sshd_version = None
+        if self.sshd is not None:
+            try:
+                p = subprocess.run(args=[self.sshd, '-V'],
+                                   capture_output=True, text=True)
+                assert p.returncode == 0
+                if p.returncode != 0:
+                    self.sshd = None
+                else:
+                    m = re.match(r'^OpenSSH_(\d+\.\d+.*),.*', p.stderr)
+                    assert m, f'version: {p.stderr}'
+                    if m:
+                        self._sshd_version = m.group(1)
+                    else:
+                        self.sshd = None
+                        raise Exception(f'Unable to determine sshd version from: {p.stderr}')
+            except Exception:
+                self.sshd = None
+
+        if self.sshd:
+            self.sftpd = self.config['sshd']['sftpd']
+            if self.sftpd == '':
+                self.sftpd = None
+        else:
+            self.sftpd = None
+
         self._tcpdump = shutil.which('tcpdump')
 
     @property
@@ -575,6 +604,14 @@ class Env:
     @staticmethod
     def has_danted() -> bool:
         return Env.CONFIG.danted is not None
+
+    @staticmethod
+    def has_sshd() -> bool:
+        return Env.CONFIG.sshd is not None
+
+    @staticmethod
+    def has_sftpd() -> bool:
+        return Env.has_sshd() and Env.CONFIG.sftpd is not None
 
     @staticmethod
     def tcpdump() -> Optional[str]:
