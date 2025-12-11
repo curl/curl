@@ -56,7 +56,7 @@ jobs:
             "checks": {
               "typography.diacritical_marks": false,
               "typography.symbols": false,
-              "lexical_illusions.misc": false,
+              "lexical_illusions": false,
               "annotations.misc": false,
               "security.password": false,
               "misc.annotations": false
@@ -81,7 +81,7 @@ jobs:
               "typography.diacritical_marks": false,
               "typography.symbols": false,
               "typography.exclamation": false,
-              "lexical_illusions.misc": false,
+              "lexical_illusions": false,
               "annotations.misc": false
             }
           }
