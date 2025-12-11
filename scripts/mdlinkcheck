@@ -159,7 +159,7 @@ sub findlinks {
         return;
 
     # is it a markdown extension?
-    my $md = ($f =~ /\.md$/);
+    my $md = ($f =~ /\.md$/i);
 
     while(<F>) {
         chomp;
