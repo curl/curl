@@ -72,7 +72,7 @@ jobs:
       - name: 'check prose'
         run: |
           source ~/venv/bin/activate
-          git ls-files README '*.md' -z | grep -Evz 'CHECKSRC\.md|DISTROS\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint check --
+          git ls-files README '*.md' -z | grep -Evz '(CHECKSRC|DISTROS|CURLOPT_INTERFACE|interface)\.md' | xargs -0 proselint check --
 
       # This is for CHECKSRC and files with aggressive exclamation mark needs
       - name: 'create second proselint config'
