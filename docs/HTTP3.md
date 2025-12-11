@@ -317,7 +317,7 @@ See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 ### HTTPS eyeballing
 
 With option `--http3` curl attempts earlier HTTP versions as well should the
-connect attempt via HTTP/3 not succeed "fast enough". This strategy is similar
+connect attempt via HTTP/3 fail "fast enough". This strategy is similar
 to IPv4/6 happy eyeballing where the alternate address family is used in
 parallel after a short delay.
 
