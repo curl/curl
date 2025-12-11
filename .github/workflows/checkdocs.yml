@@ -72,7 +72,7 @@ jobs:
       - name: 'check prose'
         run: |
           source ~/venv/bin/activate
-          git ls-files '*.md' -z | grep -Evz 'CHECKSRC\.md|DISTROS\.md|curl_mprintf\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint check -- README
+          git ls-files '*.md' -z | grep -Evz 'CHECKSRC\.md|DISTROS\.md|CURLOPT_INTERFACE\.md|interface\.md' | xargs -0 proselint check -- README
 
       # This is for CHECKSRC and files with aggressive exclamation mark needs
       - name: 'create second proselint config'
@@ -92,7 +92,7 @@ jobs:
       - name: 'check special prose'
         run: |
           source ~/venv/bin/activate
-          proselint check docs/internals/CHECKSRC.md docs/libcurl/curl_mprintf.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
+          proselint check docs/internals/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
 
   pyspelling:
     name: 'pyspelling'
