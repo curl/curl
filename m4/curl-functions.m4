@@ -2414,7 +2414,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
       AC_LANG_PROGRAM([[
         $curl_includes_arpa_inet
       ]],[[
-        unsigned char ipv4a[4+1] = "";
+        unsigned char ipv4a[4 + 1] = "";
         const char *ipv4src = "192.168.100.1";
         if(inet_pton(0, ipv4src, ipv4a) != 0)
           return 1;
@@ -4380,8 +4380,8 @@ AC_DEFUN([CURL_SIZEOF], [
         $2
       ]],[
         switch(0) {
-          case 0:
-          case (sizeof($1) == $typesize):;
+        case 0:
+        case (sizeof($1) == $typesize):;
         }
       ])
     ],[

@@ -769,7 +769,7 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
         #include <time.h>
       ]],[[
         struct timeval ts;
-        ts.tv_sec  = 0;
+        ts.tv_sec = 0;
         ts.tv_usec = 0;
         (void)ts;
       ]])
