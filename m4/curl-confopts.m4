@@ -73,7 +73,6 @@ dnl --enable-ares or --disable-ares, and
 dnl set shell variable want_ares as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_ARES], [
-dnl   AC_BEFORE([$0],[CURL_CHECK_OPTION_THREADS])dnl
   AC_BEFORE([$0],[CURL_CHECK_LIB_ARES])dnl
   AC_MSG_CHECKING([whether to enable c-ares for DNS lookups])
   OPT_ARES="default"
@@ -109,7 +108,6 @@ dnl --enable-curldebug or --disable-curldebug, and set
 dnl shell variable want_curldebug value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_CURLDEBUG], [
-  AC_BEFORE([$0],[CURL_CHECK_CURLDEBUG])dnl
   AC_MSG_CHECKING([whether to enable curl debug memory tracking])
   OPT_CURLDEBUG_BUILD="default"
   AC_ARG_ENABLE(curldebug,
