@@ -103,8 +103,8 @@ sub getpartattr {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        if((1 ==$inside) && ( ($_ =~ /^ *\<$part ([^>]*)/) ||
-                              !(defined($part)) )
+        if((1 == $inside) && (($_ =~ /^ *\<$part ([^>]*)/) ||
+                              !(defined($part)))
              ) {
             $inside++;
             my $attr=$1;
