@@ -3116,8 +3116,8 @@ while() {
                     $total++; # number of tests we have run
                     $executed++;
 
-                    if($error>0) {
-                        if($error==2) {
+                    if($error > 0) {
+                        if($error == 2) {
                             # ignored test failures
                             $failedign .= "$testnum ";
                         }
@@ -3138,7 +3138,7 @@ while() {
                             # display all files in $LOGDIR/ in a nice way
                             displaylogs($ridready, $testnum);
                         }
-                        if($error==2) {
+                        if($error == 2) {
                             $ign++; # ignored test result counter
                         }
                         elsif(!$anyway) {
