@@ -60,7 +60,7 @@ account.
 
 We regularly run our code through the [Coverity static code
 analyzer](https://scan.coverity.com/) thanks to them offering this service to
-us for free.
+us free or charge.
 
 ## CodeSonar
 
