@@ -49,7 +49,10 @@ jobs:
           python3 -m venv ~/venv
           ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r .github/scripts/requirements-proselint.txt
 
-      - name: 'create proselint config'
+      - name: 'trim headers off all *.md files'
+        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
+
+      - name: 'check prose'
         run: |
           cat <<JSON > ~/.proselintrc.json
           {
@@ -65,17 +68,10 @@ jobs:
             }
           }
           JSON
-
-      - name: 'trim headers off all *.md files'
-        run: git ls-files '*.md' -z | xargs -0 -n1 .github/scripts/trimmarkdownheader.pl
-
-      - name: 'check prose'
-        run: |
           source ~/venv/bin/activate
           git ls-files README '*.md' -z | grep -Evz '(CHECKSRC|DISTROS|CURLOPT_INTERFACE|interface)\.md' | xargs -0 proselint check --
 
-      # This is for CHECKSRC and files with aggressive exclamation mark needs
-      - name: 'create second proselint config'
+      - name: 'check special prose'  # This is for CHECKSRC and files with aggressive exclamation mark needs
         run: |
           cat <<JSON > ~/.proselintrc.json
           {
@@ -88,9 +84,6 @@ jobs:
             }
           }
           JSON
-
-      - name: 'check special prose'
-        run: |
           source ~/venv/bin/activate
           proselint check docs/internals/CHECKSRC.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
 
