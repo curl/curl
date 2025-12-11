@@ -843,7 +843,7 @@ typedef enum {
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1)<<7)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
-#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
+#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE))
 
 #define CURLSSH_AUTH_ANY       ~0L     /* all types supported by the server */
 #define CURLSSH_AUTH_NONE      0L      /* none allowed, silly but complete */
@@ -3008,7 +3008,7 @@ typedef enum {
 
 #define CURL_GLOBAL_SSL (1<<0) /* no purpose since 7.57.0 */
 #define CURL_GLOBAL_WIN32 (1<<1)
-#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL|CURL_GLOBAL_WIN32)
+#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WIN32)
 #define CURL_GLOBAL_NOTHING 0
 #define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
 #define CURL_GLOBAL_ACK_EINTR (1<<2)
@@ -3253,8 +3253,8 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_SEND      (1<<2)
 #define CURLPAUSE_SEND_CONT (0)
 
-#define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
-#define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
+#define CURLPAUSE_ALL       (CURLPAUSE_RECV | CURLPAUSE_SEND)
+#define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT | CURLPAUSE_SEND_CONT)
 
 /*
  * NAME curl_easy_ssls_import()
