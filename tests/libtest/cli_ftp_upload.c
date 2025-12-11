@@ -21,11 +21,9 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "first.h"
 
 #include "testtrace.h"
-
 
 #ifndef CURL_DISABLE_FTP
 
