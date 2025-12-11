@@ -42,7 +42,6 @@ my @need_crlf = (
 my @double_empty = (
     "^lib/.+\\.(c|h)\$",
     "^packages/",
-    "^tests/data/data",
     "^tests/data/test",
     "\\.(ac|m4|py)\$",
 );
