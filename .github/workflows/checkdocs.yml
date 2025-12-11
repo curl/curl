@@ -82,7 +82,7 @@ jobs:
             "checks": {
               "typography.diacritical_marks": false,
               "typography.symbols": false,
-              "typography.exclamation": false,
+              "typography.punctuation.exclamation": false,
               "lexical_illusions": false,
               "annotations.misc": false
             }
