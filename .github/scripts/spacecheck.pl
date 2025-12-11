@@ -43,7 +43,7 @@ my @double_empty_lines = (
     "^lib/.+\\.(c|h)\$",
     "^packages/",
     "^tests/data/test",
-    "\\.(ac|m4|py)\$",
+    "\\.(m4|py)\$",
 );
 
 my @non_ascii_allowed = (
