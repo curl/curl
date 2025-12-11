@@ -59,7 +59,7 @@ Via curl's `configure` script you may specify:
    somewhere outside your `$PATH`.
 
   * `--with-test-httpd=<httpd-install-path>` if you have an Apache httpd
-   installed somewhere else. On Debian/Ubuntu it will otherwise look into
+   installed somewhere else. On Debian/Ubuntu it otherwise looks into
    `/usr/bin` and `/usr/sbin` to find those.
 
   * `--with-test-caddy=<caddy-install-path>` if you have a Caddy web server
