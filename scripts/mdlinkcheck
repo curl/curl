@@ -158,9 +158,12 @@ sub findlinks {
     open(F, "<:crlf", "$f") ||
         return;
 
+    # is it a markdown extension?
+    my $md = ($f =~ /\.md$/);
+
     while(<F>) {
         chomp;
-        if(/\]\(([^)]*)/) {
+        if($md && /\]\(([^)]*)/) {
             my $link = $1;
             #print "$f:$line $link\n";
             storelink($f, $line, $link);
@@ -209,7 +212,7 @@ for my $f (@files) {
 
 for my $u (sort keys %whitelist) {
     if($whitelist{$u} == 1) {
-        printf "warning: unused whitelist entry: '$u'\n";
+        printf STDERR "warning: unused whitelist entry: '$u'\n";
     }
 }
 
