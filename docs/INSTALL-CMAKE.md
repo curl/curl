@@ -226,6 +226,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF` (turns to `ON` if `BUILD_SHARED_LIBS` is `OFF`)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
+                                            If enabled, it implies `CMAKE_UNITY_BUILD=OFF` and `CURL_DISABLE_TYPECHECK=ON`.
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
 - `CURL_CODE_COVERAGE`:                     Enable code coverage build options. Default: `OFF`
 - `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
