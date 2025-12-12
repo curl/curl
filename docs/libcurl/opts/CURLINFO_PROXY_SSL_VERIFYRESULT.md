@@ -50,7 +50,7 @@ int main(void)
     long verifyresult;
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
 
     res = curl_easy_perform(curl);
     if(res) {

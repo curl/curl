@@ -13,7 +13,7 @@ See-also:
   - capath
   - dump-ca-embed
 Example:
-  - --proxy-capath /local/directory -x https://proxy $URL
+  - --proxy-capath /local/directory -x https://proxy.example $URL
 ---
 
 # `--proxy-capath`

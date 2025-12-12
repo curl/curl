@@ -195,14 +195,8 @@ use File::Temp qw/ tempfile/;
 #######################################################################
 # Initialize configuration variables
 sub initserverconfig {
-    my ($fh, $socks) = tempfile("curl-socksd-XXXXXXXX", TMPDIR => 1);
-    close($fh);
-    unlink($socks);
-    my ($f2, $http) = tempfile("curl-http-XXXXXXXX", TMPDIR => 1);
-    close($f2);
-    unlink($http);
-    $SOCKSUNIXPATH = $socks; # SOCKS Unix domain socket
-    $HTTPUNIXPATH = $http;   # HTTP Unix domain socket
+    $SOCKSUNIXPATH = "$pwd/$LOGDIR/$PIDDIR/socks-uds"; # SOCKS Unix domain socket
+    $HTTPUNIXPATH = "$pwd/$LOGDIR/$PIDDIR/http-uds";   # HTTP Unix domain socket
     $stunnel = checkcmd("stunnel4") || checkcmd("tstunnel") || checkcmd("stunnel");
 
     # get the name of the current user

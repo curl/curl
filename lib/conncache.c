@@ -48,9 +48,9 @@
 
 #define CPOOL_IS_LOCKED(c)    ((c) && (c)->locked)
 
-#define CPOOL_LOCK(c,d)                                                 \
+#define CPOOL_LOCK(c, d)                                                \
   do {                                                                  \
-    if((c)) {                                                           \
+    if(c) {                                                             \
       if(CURL_SHARE_KEEP_CONNECT((c)->share))                           \
         Curl_share_lock((d), CURL_LOCK_DATA_CONNECT,                    \
                         CURL_LOCK_ACCESS_SINGLE);                       \
@@ -61,7 +61,7 @@
 
 #define CPOOL_UNLOCK(c,d)                                               \
   do {                                                                  \
-    if((c)) {                                                           \
+    if(c) {                                                             \
       DEBUGASSERT((c)->locked);                                         \
       (c)->locked = FALSE;                                              \
       if(CURL_SHARE_KEEP_CONNECT((c)->share))                           \
@@ -76,7 +76,6 @@ struct cpool_bundle {
   size_t dest_len; /* total length of destination, including NUL */
   char dest[1]; /* destination of bundle, allocated to keep dest_len bytes */
 };
-
 
 static void cpool_discard_conn(struct cpool *cpool,
                                struct Curl_easy *data,
@@ -621,7 +620,7 @@ static void cpool_discard_conn(struct cpool *cpool,
   if(CONN_INUSE(conn) && !aborted) {
     CURL_TRC_M(data, "[CPOOL] not discarding #%" FMT_OFF_T
                " still in use by %u transfers", conn->connection_id,
-               CONN_ATTACHED(conn));
+               conn->attached_xfers);
     return;
   }
 
@@ -665,7 +664,7 @@ void Curl_conn_terminate(struct Curl_easy *data,
    * are other users of it */
   if(CONN_INUSE(conn) && !aborted) {
     DEBUGASSERT(0); /* does this ever happen? */
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %u", CONN_ATTACHED(conn)));
+    DEBUGF(infof(data, "conn terminate when inuse: %u", conn->attached_xfers));
     return;
   }
 

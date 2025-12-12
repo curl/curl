@@ -24,8 +24,8 @@ need to copy the style already used in the source code and there are no
 particularly unusual rules in our set of rules.
 
 We also work hard on writing code that are warning-free on all the major
-platforms and in general on as many platforms as possible. Code that obviously
-causes warnings is not accepted as-is.
+platforms and in general on as many platforms as possible. Code that causes
+warnings is not accepted as-is.
 
 ## Readability
 

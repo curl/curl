@@ -28,7 +28,7 @@
 #include "curl_trc.h"
 #include "unitprotos.h"
 
-#define TBL_SIZE    100
+#define TBL_SIZE 100
 
 static CURLcode t3212_setup(struct uint32_tbl *tbl)
 {

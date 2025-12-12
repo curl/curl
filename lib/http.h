@@ -38,7 +38,6 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
-
 /* When redirecting transfers. */
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
@@ -54,7 +53,6 @@ typedef enum {
 #define CURL_HTTP_V3x   (1 << 2)
 /* bitmask of CURL_HTTP_V* values */
 typedef unsigned char http_majors;
-
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -74,6 +72,7 @@ struct http_negotiation {
   unsigned char rcvd_min; /* minimum version seen in responses, 09, 10, 11 */
   http_majors wanted;  /* wanted major versions when talking to server */
   http_majors allowed; /* allowed major versions when talking to server */
+  http_majors preferred; /* preferred major version when talking to server */
   BIT(h2_upgrade);  /* Do HTTP Upgrade from 1.1 to 2 */
   BIT(h2_prior_knowledge); /* Directly do HTTP/2 without ALPN/SSL */
   BIT(accept_09); /* Accept an HTTP/0.9 response */
@@ -114,7 +113,6 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn);
 CURLcode Curl_http(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_done(struct Curl_easy *data, CURLcode, bool premature);
-CURLcode Curl_http_connect(struct Curl_easy *data, bool *done);
 CURLcode Curl_http_doing_pollset(struct Curl_easy *data,
                                  struct easy_pollset *ps);
 CURLcode Curl_http_perform_pollset(struct Curl_easy *data,
@@ -140,7 +138,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    selected to use no auth at all. Ie, we actively select no auth, as opposed
    to not having one selected. The other CURLAUTH_* defines are present in the
    public curl/curl.h header. */
-#define CURLAUTH_PICKNONE (1<<30) /* do not use auth */
+#define CURLAUTH_PICKNONE (1 << 30) /* do not use auth */
 
 /* MAX_INITIAL_POST_SIZE indicates the number of bytes that will make the POST
    data get included in the initial data chunk sent to the server. If the
@@ -155,7 +153,7 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
    It must not be greater than 64K to work on VMS.
 */
 #ifndef MAX_INITIAL_POST_SIZE
-#define MAX_INITIAL_POST_SIZE (64*1024)
+#define MAX_INITIAL_POST_SIZE (64 * 1024)
 #endif
 
 /* EXPECT_100_THRESHOLD is the request body size limit for when libcurl will
@@ -164,13 +162,13 @@ CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
  *
  */
 #ifndef EXPECT_100_THRESHOLD
-#define EXPECT_100_THRESHOLD (1024*1024)
+#define EXPECT_100_THRESHOLD (1024 * 1024)
 #endif
 
 /* MAX_HTTP_RESP_HEADER_SIZE is the maximum size of all response headers
    combined that libcurl allows for a single HTTP response, any HTTP
    version. This count includes CONNECT response headers. */
-#define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
+#define MAX_HTTP_RESP_HEADER_SIZE (300 * 1024)
 
 /* MAX_HTTP_RESP_HEADER_COUNT is the maximum number of response headers that
    libcurl allows for a single HTTP response, including CONNECT and
@@ -243,11 +241,11 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
 
 void Curl_http_req_free(struct httpreq *req);
 
-#define HTTP_PSEUDO_METHOD ":method"
-#define HTTP_PSEUDO_SCHEME ":scheme"
+#define HTTP_PSEUDO_METHOD    ":method"
+#define HTTP_PSEUDO_SCHEME    ":scheme"
 #define HTTP_PSEUDO_AUTHORITY ":authority"
-#define HTTP_PSEUDO_PATH ":path"
-#define HTTP_PSEUDO_STATUS ":status"
+#define HTTP_PSEUDO_PATH      ":path"
+#define HTTP_PSEUDO_STATUS    ":status"
 
 /**
  * Create the list of HTTP/2 headers which represent the request,

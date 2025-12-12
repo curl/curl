@@ -27,19 +27,19 @@ dnl check for mbedTLS
 dnl ----------------------------------------------------
 AC_DEFUN([CURL_WITH_MBEDTLS], [
 
-if test "x$OPT_MBEDTLS" != xno; then
+if test "x$OPT_MBEDTLS" != "xno"; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
   _ldflagspc=$LDFLAGSPC
   ssl_msg=
 
-  if test X"$OPT_MBEDTLS" != Xno; then
+  if test "x$OPT_MBEDTLS" != "xno"; then
 
-    if test "$OPT_MBEDTLS" = "yes"; then
+    if test "x$OPT_MBEDTLS" = "xyes"; then
       OPT_MBEDTLS=""
     fi
 
-    if test -z "$OPT_MBEDTLS" ; then
+    if test -z "$OPT_MBEDTLS"; then
       dnl check for lib first without setting any new path
 
       AC_CHECK_LIB(mbedtls, mbedtls_havege_init,
@@ -49,7 +49,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         MBEDTLS_ENABLED=1
         USE_MBEDTLS="yes"
         ssl_msg="mbedTLS"
-        test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test "mbedtls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
       ], [], -lmbedx509 -lmbedcrypto)
     fi
 
@@ -58,7 +58,7 @@ if test "x$OPT_MBEDTLS" != xno; then
     addcflags=""
     mbedtlslib=""
 
-    if test "x$USE_MBEDTLS" != "xyes"; then
+    if test "$USE_MBEDTLS" != "yes"; then
       dnl add the path and test again
       addld=-L$OPT_MBEDTLS/lib$libsuff
       addcflags=-I$OPT_MBEDTLS/include
@@ -76,7 +76,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         MBEDTLS_ENABLED=1
         USE_MBEDTLS="yes"
         ssl_msg="mbedTLS"
-        test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test "mbedtls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         ],
         [
           CPPFLAGS=$_cppflags
@@ -85,7 +85,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         ], -lmbedx509 -lmbedcrypto)
     fi
 
-    if test "x$USE_MBEDTLS" = "xyes"; then
+    if test "$USE_MBEDTLS" = "yes"; then
       AC_MSG_NOTICE([detected mbedTLS])
       check_for_ca_bundle=1
 
@@ -96,7 +96,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         dnl linker does not search through, we need to add it to
         dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
         dnl due to this
-        if test "x$cross_compiling" != "xyes"; then
+        if test "$cross_compiling" != "yes"; then
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$mbedtlslib"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])

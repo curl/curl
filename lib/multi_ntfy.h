@@ -47,11 +47,12 @@ CURLMcode Curl_mntfy_disable(struct Curl_multi *multi, unsigned int type);
 
 void Curl_mntfy_add(struct Curl_easy *data, unsigned int type);
 
-#define CURLM_NTFY(d,t) \
-  do { if((d) && (d)->multi && (d)->multi->ntfy.ntfy_cb) \
-       Curl_mntfy_add((d), (t)); } while(0)
+#define CURLM_NTFY(d, t)                              \
+  do {                                                \
+    if((d) && (d)->multi && (d)->multi->ntfy.ntfy_cb) \
+      Curl_mntfy_add((d), (t));                       \
+  } while(0)
 
 CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi);
-
 
 #endif /* HEADER_CURL_MULTI_NTFY_H */

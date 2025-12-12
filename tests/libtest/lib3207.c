@@ -29,7 +29,7 @@
 
 #include "curl_threads.h"
 
-#define THREAD_SIZE 16
+#define THREAD_SIZE     16
 #define PER_THREAD_SIZE 8
 
 struct Ctx {

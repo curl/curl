@@ -5,7 +5,6 @@
 HTTP
 HTTP POST
 followlocation
-notxml
 </keywords>
 </info>
 #
@@ -13,7 +12,7 @@ notxml
 <reply>
 <data>
 HTTP/1.1 303 OK swsclose
-Location: moo.html&testcase=/%TESTNUMBER0002
+Location: moo.html%AMPtestcase=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
@@ -28,7 +27,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 303 OK swsclose
-Location: moo.html&testcase=/%TESTNUMBER0002
+Location: moo.html%AMPtestcase=/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 
@@ -66,7 +65,7 @@ Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
-mooPOST /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1
+mooPOST /blah/moo.html%AMPtestcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

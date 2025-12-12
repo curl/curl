@@ -154,7 +154,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
     }
 
     /* Server response, either D (RA==) or C (Qw==) */
-    if(((char *) input_token->value)[0] == 'D') {
+    if(((char *)input_token->value)[0] == 'D') {
       /* Done */
       switch(ctx->sent) {
       case STUB_GSS_KRB5:
@@ -170,7 +170,7 @@ stub_gss_init_sec_context(OM_uint32 *min,
       }
     }
 
-    if(((char *) input_token->value)[0] != 'C') {
+    if(((char *)input_token->value)[0] != 'C') {
       /* We only support Done or Continue */
       *min = STUB_GSS_SERVER_ERR;
       return GSS_S_FAILURE;
@@ -428,7 +428,7 @@ static size_t display_gss_error(OM_uint32 status, int type,
 void Curl_gss_log_error(struct Curl_easy *data, const char *prefix,
                         OM_uint32 major, OM_uint32 minor)
 {
-  char buf[GSS_LOG_BUFFER_LEN];
+  char buf[GSS_LOG_BUFFER_LEN] = "";
   size_t len = 0;
 
   if(major != GSS_S_FAILURE)

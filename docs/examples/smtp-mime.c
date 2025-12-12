@@ -37,9 +37,9 @@
  * Note that this example requires libcurl 7.56.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM "<sender@example.org>"
+#define TO   "<addressee@example.net>"
+#define CC   "<info@example.org>"
 
 static const char *headers_text[] = {
   "Date: Tue, 22 Aug 2017 14:08:43 +0100",
@@ -47,7 +47,7 @@ static const char *headers_text[] = {
   "From: " FROM " (Example User)",
   "Cc: " CC " (Another example User)",
   "Message-ID: <dcd7cb36-11db-487a-9f3a-e652a9458efd@"
-    "rfcpedant.example.org>",
+  "rfcpedant.example.org>",
   "Subject: example sending a MIME-formatted message",
   NULL
 };
@@ -65,7 +65,6 @@ static const char inline_html[] =
   "<p>It could be a lot of HTML data that would be displayed by "
   "email viewers able to handle HTML.</p>"
   "</body></html>\r\n";
-
 
 int main(void)
 {

@@ -194,7 +194,7 @@ One of the most basic properties to set in the handle is the URL. You set your
 preferred URL to transfer with CURLOPT_URL(3) in a manner similar to:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_URL, "http://example.com/");
+ curl_easy_setopt(handle, CURLOPT_URL, "https://example.com/");
 ~~~
 
 Let's assume for a while that you want to receive data as the URL identifies a
@@ -448,7 +448,7 @@ claims to support. This method does however add a round-trip since libcurl
 must first ask the server what it supports:
 
 ~~~c
- curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST|CURLAUTH_BASIC);
+ curl_easy_setopt(handle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST | CURLAUTH_BASIC);
 ~~~
 
 For convenience, you can use the *CURLAUTH_ANY* define (instead of a list with
@@ -468,9 +468,9 @@ pages using the \<form\> tag uses. We provide a pointer to the data and tell
 libcurl to post it all to the remote site:
 
 ~~~c
-    char *data="name=daniel&project=curl";
+    char *data = "name=daniel&project=curl";
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, data);
-    curl_easy_setopt(handle, CURLOPT_URL, "http://posthere.com/");
+    curl_easy_setopt(handle, CURLOPT_URL, "https://posthere.example/");
 
     curl_easy_perform(handle); /* post away! */
 ~~~
@@ -487,7 +487,7 @@ done in a generic way, by building a list of our own headers and then passing
 that list to libcurl.
 
 ~~~c
- struct curl_slist *headers=NULL;
+ struct curl_slist *headers = NULL;
  headers = curl_slist_append(headers, "Content-Type: text/xml");
 
  /* post binary data */
@@ -574,8 +574,8 @@ parts, you post the whole form.
 The MIME API example above is expressed as follows using this function:
 
 ~~~c
- struct curl_httppost *post=NULL;
- struct curl_httppost *last=NULL;
+ struct curl_httppost *post = NULL;
+ struct curl_httppost *last = NULL;
  curl_formadd(&post, &last,
               CURLFORM_COPYNAME, "name",
               CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
@@ -605,7 +605,7 @@ shows how you set headers to one specific part when you add that to the post
 handle:
 
 ~~~c
- struct curl_slist *headers=NULL;
+ struct curl_slist *headers = NULL;
  headers = curl_slist_append(headers, "Content-Type: text/xml");
 
  curl_formadd(&post, &last,
@@ -675,7 +675,7 @@ becomes:
 ~~~c
  part = curl_mime_addpart(multipart);
  curl_mime_name(part, "logotype-image");
- curl_mime_data_cb(part, (curl_off_t) -1, fread, fseek, NULL, stdin);
+ curl_mime_data_cb(part, (curl_off_t)-1, fread, fseek, NULL, stdin);
 ~~~
 
 curl_mime_name(3) always copies the field name. The special filename "-" is
@@ -717,7 +717,7 @@ becomes:
 ~~~c
  part = curl_mime_addpart(multipart);
  curl_mime_name(part, "stream");
- curl_mime_data_cb(part, (curl_off_t) datasize,
+ curl_mime_data_cb(part, (curl_off_t)datasize,
                    myreadfunc, NULL, NULL, arg);
  curl_mime_filename(part, "archive.zip");
  curl_mime_type(part, "application/zip");
@@ -738,7 +738,7 @@ becomes:
 ~~~c
  part = curl_mime_addpart(multipart);
  curl_mime_name(part, "memfile");
- curl_mime_data(part, databuffer, (curl_off_t) sizeof databuffer);
+ curl_mime_data(part, databuffer, (curl_off_t)sizeof(databuffer));
  curl_mime_filename(part, "memfile.bin");
 ~~~
 
@@ -802,12 +802,12 @@ Example C++ code:
 
 ~~~c
 class AClass {
-    static size_t write_data(void *ptr, size_t size, size_t nmemb,
-                             void *ourpointer)
-    {
-      /* do what you want with the data */
-    }
- }
+  static size_t write_data(void *ptr, size_t size, size_t nmemb,
+                           void *ourpointer)
+  {
+    /* do what you want with the data */
+  }
+}
 ~~~
 
 # Proxies
@@ -1046,7 +1046,7 @@ request, and you are free to pass any amount of extra headers that you
 think fit. Adding headers is this easy:
 
 ~~~c
-struct curl_slist *headers=NULL; /* init to NULL is important */
+struct curl_slist *headers = NULL; /* init to NULL is important */
 
 headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
 headers = curl_slist_append(headers, "X-silly-content: yes");

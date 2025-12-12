@@ -27,7 +27,10 @@ use strict;
 use warnings;
 
 my %whitelist = (
+    'https://curl.se' => 1,
     'https://curl.se/' => 1,
+    'https://curl.se/bug/' => 1,
+    'https://curl.se/bug/view.cgi' => 1,
     'https://curl.se/changes.html' => 1,
     'https://curl.se/dev/advisory.html' => 1,
     'https://curl.se/dev/builds.html' => 1,
@@ -40,19 +43,25 @@ my %whitelist = (
     'https://curl.se/docs/bugbounty.html' => 1,
     'https://curl.se/docs/caextract.html' => 1,
     'https://curl.se/docs/copyright.html' => 1,
+    'https://curl.se/docs/http-cookies.html' => 1,
     'https://curl.se/docs/install.html' => 1,
     'https://curl.se/docs/knownbugs.html' => 1,
     'https://curl.se/docs/manpage.html' => 1,
+    'https://curl.se/docs/releases.html' => 1,
     'https://curl.se/docs/security.html' => 1,
+    'https://curl.se/docs/ssl-ciphers.html' => 1,
+    'https://curl.se/docs/ssl-compared.html' => 1,
     'https://curl.se/docs/sslcerts.html' => 1,
     'https://curl.se/docs/thanks.html' => 1,
     'https://curl.se/docs/todo.html' => 1,
     'https://curl.se/docs/vulnerabilities.html' => 1,
+    'https://curl.se/download.html' => 1,
     'https://curl.se/libcurl/' => 1,
-    'https://curl.se/libcurl/c/CURLOPT_SSLVERSION.html' => 1,
     'https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html' => 1,
+    'https://curl.se/libcurl/c/CURLOPT_SSLVERSION.html' => 1,
     'https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html' => 1,
     'https://curl.se/libcurl/c/libcurl.html' => 1,
+    'https://curl.se/libcurl/c/threadsafe.html' => 1,
     'https://curl.se/logo/curl-logo.svg' => 1,
     'https://curl.se/mail/' => 1,
     'https://curl.se/mail/etiquette.html' => 1,
@@ -62,22 +71,27 @@ my %whitelist = (
     'https://curl.se/rfc/rfc2255.txt' => 1,
     'https://curl.se/sponsors.html' => 1,
     'https://curl.se/support.html' => 1,
+    'https://curl.se/windows/' => 1,
 
-    'https://github.com/curl/curl' => 1,
+    'https://testclutch.curl.se/' => 1,
+
     'https://github.com/curl/curl-fuzzer' => 1,
     'https://github.com/curl/curl-www' => 1,
-    'https://github.com/curl/curl/discussions' => 1,
-    'https://github.com/curl/curl/issues' => 1,
-    'https://github.com/curl/curl/labels/help%20wanted' => 1,
-    'https://github.com/curl/curl/pulls' => 1,
+    'https://github.com/curl/curl/wcurl' => 1,
 
     );
 
 my %url;
 my %flink;
 
-# list all .md files in the repo
-my @files=`git ls-files '**.md'`;
+my $dry;
+if(defined $ARGV[0] && $ARGV[0] eq "--dry-run") {
+    $dry = 1;
+    shift @ARGV;
+}
+
+# list all files to scan for links
+my @files=`git ls-files docs include lib scripts src`;
 
 sub storelink {
     my ($f, $line, $link) = @_;
@@ -91,7 +105,33 @@ sub storelink {
     $link =~ s:\#.*\z::;
 
     if($link =~ /^(https|http):/) {
-        $url{$link} .= "$f:$line ";
+        if($whitelist{$link}) {
+            #print "-- whitelisted: $link\n";
+            $whitelist{$link}++;
+        }
+        # example.com is just example
+        elsif($link =~ /^https:\/\/(.*)example.(com|org|net)/) {
+            #print "-- example: $link\n";
+        }
+        # so is using the .example TLD
+        elsif($link =~ /^https:\/\/(.*)\.example(\/|$|:)/) {
+            #print "-- .example: $link\n";
+        }
+        # so is using anything on localhost
+        elsif($link =~ /^http(s|):\/\/localhost/) {
+            #print "-- localhost: $link\n";
+        }
+        # ignore all links to curl's github repo
+        elsif($link =~ /^https:\/\/github.com\/curl\/curl(\/|$)/) {
+            #print "-- curl github repo: $link\n";
+        }
+        elsif($link =~ /^(https|http):\/\/[0-9.]+(\/|$)/) {
+            #print "-- IPv4 number: $link\n";
+        }
+        else {
+            #print "ADD '$link'\n";
+            $url{$link} .= "$f:$line ";
+        }
         return;
     }
 
@@ -118,11 +158,22 @@ sub findlinks {
     open(F, "<:crlf", "$f") ||
         return;
 
+    # is it a markdown extension?
+    my $md = ($f =~ /\.md$/i);
+
     while(<F>) {
-        if(/\]\(([^)]*)/) {
+        chomp;
+        if($md && /\]\(([^)]*)/) {
             my $link = $1;
             #print "$f:$line $link\n";
             storelink($f, $line, $link);
+        }
+        # ignore trailing: dot, double quote, single quote, asterisk, hash,
+        # comma, question mark, colon, closing parenthesis, backslash,
+        # closing angle bracket, whitespace, pipe, backtick, semicolon
+        elsif(/(https:\/\/[a-z0-9.\/:%_+@-]+[^."'*\#,?:\)> \t|`;\\])/i) {
+            #print "RAW '$_'\n";
+            storelink($f, $line, $1);
         }
         $line++;
     }
@@ -133,11 +184,10 @@ sub checkurl {
     my ($url) = @_;
 
     if($whitelist{$url}) {
-        #print "$url is whitelisted\n";
+        #print STDERR "$url is whitelisted\n";
         return 0;
     }
 
-    print "check $url\n";
     $url =~ s/\+/%2B/g;
     my @content;
     if(open(my $fh, '-|', 'curl', '-ILfsm10', '--retry', '2', '--retry-delay', '5',
@@ -146,25 +196,41 @@ sub checkurl {
         close $fh;
     }
     if(!$content[0]) {
-        print STDERR "FAIL\n";
+        print "FAIL: $url\n";
         return 1; # fail
     }
+    print "OK: $url\n";
     return 0; # ok
 }
 
 for my $f (@files) {
     chomp $f;
-    findlinks($f);
+    if($f !~ /\/mdlinkcheck$/) {
+        findlinks($f);
+    }
+}
+
+for my $u (sort keys %whitelist) {
+    if($whitelist{$u} == 1) {
+        printf STDERR "warning: unused whitelist entry: '$u'\n";
+    }
+}
+
+if($dry) {
+    for my $u (sort keys %url) {
+        print "$u\n";
+    }
+    exit;
 }
 
 my $error;
-
+my @errlist;
 for my $u (sort keys %url) {
     my $r = checkurl($u);
 
     if($r) {
         for my $f (split(/ /, $url{$u})) {
-            printf "%s ERROR links to missing URL %s\n", $f, $u;
+            push @errlist, sprintf "%s ERROR links to missing URL %s\n", $f, $u;
             $error++;
         }
     }
@@ -173,10 +239,17 @@ for my $u (sort keys %url) {
 for my $l (sort keys %flink) {
     if(! -r $l) {
         for my $f (split(/ /, $flink{$l})) {
-            printf "%s ERROR links to missing file %s\n", $f, $l;
+            push @errlist, sprintf "%s ERROR links to missing file %s\n", $f, $l;
             $error++;
         }
     }
 }
 
+printf "Checked %d URLs\n", scalar(keys %url);
+if($error) {
+    print "$error URLs had problems:\n";
+    for(@errlist) {
+        print $_;
+    }
+}
 exit 1 if($error);

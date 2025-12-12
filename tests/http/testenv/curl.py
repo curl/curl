@@ -36,7 +36,7 @@ import re
 import shutil
 import subprocess
 from statistics import mean, fmean
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from typing import List, Optional, Dict, Union, Any
 from urllib.parse import urlparse
 
@@ -525,6 +525,7 @@ class ExecResult:
         }
         # stat keys where we expect a positive value
         ref_tl = []
+        somewhere_keys = []
         exact_match = True
         # redirects mess up the queue time, only count without
         if s['time_redirect'] == 0:
@@ -542,10 +543,13 @@ class ExecResult:
         # what kind of transfer was it?
         if s['size_upload'] == 0 and s['size_download'] > 0:
             # this is a download
-            dl_tl = ['time_pretransfer', 'time_starttransfer']
+            dl_tl = ['time_pretransfer']
             if s['size_request'] > 0:
                 dl_tl = ['time_posttransfer'] + dl_tl
             ref_tl += dl_tl
+            # the first byte of the response may arrive before we
+            # track the other times when the client is slow (CI).
+            somewhere_keys = ['time_starttransfer']
         elif s['size_upload'] > 0 and s['size_download'] == 0:
             # this is an upload
             ul_tl = ['time_pretransfer', 'time_posttransfer']
@@ -561,11 +565,14 @@ class ExecResult:
             self.check_stat_positive(s, idx, key)
         if exact_match:
             # assert all events not in reference timeline are 0
-            for key in [key for key in all_keys if key not in ref_tl]:
+            for key in [key for key in all_keys if key not in ref_tl and key not in somewhere_keys]:
                 self.check_stat_zero(s, key)
         # calculate the timeline that did happen
         seen_tl = sorted(ref_tl, key=lambda ts: s[ts])
         assert seen_tl == ref_tl, f'{[f"{ts}: {s[ts]}" for ts in seen_tl]}'
+        for key in somewhere_keys:
+            self.check_stat_positive(s, idx, key)
+            assert s[key] <= s['time_total']
 
     def dump_logs(self):
         lines = ['>>--stdout ----------------------------------------------\n']
@@ -1204,3 +1211,12 @@ class CurlClient:
             rc = p.returncode
             if rc != 0:
                 raise Exception(f'{fg_gen_flame} returned error {rc}')
+
+    def mk_altsvc_file(self, name, src_alpn, src_host, src_port,
+                       dest_alpn, dest_host, dest_port):
+        fpath = os.path.join(self.run_dir, f'{name}.altsvc')
+        ts = datetime.now(timezone.utc) + timedelta(hours=1)
+        ts = ts.strftime('%Y%m%d %H:%M:%S')
+        with open(fpath, 'w') as fd:
+            fd.write(f'{src_alpn} {src_host} {src_port} {dest_alpn} {dest_host} {dest_port} "{ts}" 1 0\n')
+        return fpath

@@ -180,7 +180,6 @@
  * AIX 4.3 and newer needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.
  */
-
 #ifdef NEED_THREAD_SAFE
 #  ifndef _THREAD_SAFE
 #  define _THREAD_SAFE
@@ -192,7 +191,6 @@
  * things to appear in the system header files. Unixware needs it
  * to build proper reentrant code. Others may also need it.
  */
-
 #ifdef NEED_REENTRANT
 #  ifndef _REENTRANT
 #  define _REENTRANT
@@ -219,7 +217,6 @@
 /*
  * Disable other protocols when http is the only one desired.
  */
-
 #ifdef HTTP_ONLY
 #  ifndef CURL_DISABLE_DICT
 #  define CURL_DISABLE_DICT
@@ -268,7 +265,6 @@
 /*
  * When http is disabled rtsp is not supported.
  */
-
 #if defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_RTSP)
 #  define CURL_DISABLE_RTSP
 #endif
@@ -276,7 +272,6 @@
 /*
  * When HTTP is disabled, disable HTTP-only features
  */
-
 #ifdef CURL_DISABLE_HTTP
 #  define CURL_DISABLE_ALTSVC 1
 #  define CURL_DISABLE_COOKIES 1
@@ -298,7 +293,6 @@
 /*
  * OS/400 setup file includes some system headers.
  */
-
 #ifdef __OS400__
 #  include "setup-os400.h"
 #endif
@@ -306,7 +300,6 @@
 /*
  * VMS setup file includes some system headers.
  */
-
 #ifdef __VMS
 #  include "setup-vms.h"
 #endif
@@ -314,7 +307,6 @@
 /*
  * Windows setup file includes some system headers.
  */
-
 #ifdef _WIN32
 #  include "setup-win32.h"
 #endif
@@ -325,8 +317,8 @@
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
  */
-#define CURL_CONC_MACROS_(A,B) A ## B
-#define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
+#define CURL_CONC_MACROS_(A, B) A ## B
+#define CURL_CONC_MACROS(A, B) CURL_CONC_MACROS_(A, B)
 
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that it matches the GNU format attribute we
@@ -340,7 +332,6 @@
 #endif
 
 /* based on logic in "curl/mprintf.h" */
-
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
@@ -431,9 +422,9 @@
 #    ifdef __amigaos4__
        int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
                              fd_set *errorfds, struct timeval *timeout);
-#      define select(a,b,c,d,e) Curl_amiga_select(a,b,c,d,e)
+#      define select(a, b, c, d, e) Curl_amiga_select(a, b, c, d, e)
 #    else
-#      define select(a,b,c,d,e) WaitSelect(a,b,c,d,e,0)
+#      define select(a, b, c, d, e) WaitSelect(a, b, c, d, e, 0)
 #    endif
      /* must not use libc's fcntl() on bsdsocket.library sockfds! */
 #    undef HAVE_FCNTL
@@ -480,28 +471,19 @@
 #  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifdef USE_WIN32_LARGE_FILES
-     /* Large file (>2Gb) support using Win32 functions. */
-#    undef  lseek
-#    define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
-#    undef  fstat
-#    define fstat(fdes,stp)              _fstati64(fdes, stp)
-#    define struct_stat                  struct _stati64
-#    define LSEEK_ERROR                  (__int64)-1
-#  else
-     /* Small file (<2Gb) support using Win32 functions. */
-#    undef  lseek
-#    define lseek(fdes, offset, whence)  _lseek(fdes, (long)offset, whence)
-#    define fstat(fdes, stp)             _fstat(fdes, stp)
-#    define struct_stat                  struct _stat
-#    define LSEEK_ERROR                  (long)-1
-#  endif
+   /* Large file (>2Gb) support using Win32 functions. */
+#  undef  lseek
+#  define lseek(fdes, offset, whence)  _lseeki64(fdes, offset, whence)
+#  undef  fstat
+#  define fstat(fdes, stp)             _fstati64(fdes, stp)
+#  define struct_stat                  struct _stati64
+#  define LSEEK_ERROR                  (__int64)-1
 #elif defined(__DJGPP__)
    /* Requires DJGPP 2.04 */
 #  include <unistd.h>
 #  undef  lseek
-#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
-#  define LSEEK_ERROR                (offset_t)-1
+#  define lseek(fdes, offset, whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                  (offset_t)-1
 #endif
 
 #ifndef struct_stat
@@ -528,9 +510,13 @@
 #endif
 
 #if SIZEOF_CURL_SOCKET_T < 8
+#ifdef _WIN32
+#  define FMT_SOCKET_T "u"
+#else
 #  define FMT_SOCKET_T "d"
-#elif defined(__MINGW32__)
-#  define FMT_SOCKET_T "zd"
+#endif
+#elif defined(_WIN32)
+#  define FMT_SOCKET_T "zu"
 #else
 #  define FMT_SOCKET_T "qd"
 #endif
@@ -570,7 +556,7 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - 1)
 
-#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
+#define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
 #define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
@@ -612,10 +598,10 @@
 #if SIZEOF_LONG > SIZEOF_SIZE_T
 #error "unexpected: 'long' is larger than 'size_t'"
 #endif
+
 /*
  * Arg 2 type for gethostname in case it has not been defined in config file.
  */
-
 #ifndef GETHOSTNAME_TYPE_ARG2
 #  ifdef USE_WINSOCK
 #    define GETHOSTNAME_TYPE_ARG2 int
@@ -625,10 +611,9 @@
 #endif
 
 /* Below we define some functions. They should
-
    4. set the SIGALRM signal timeout
    5. set dir/file naming defines
-   */
+ */
 
 #ifdef _WIN32
 
@@ -639,8 +624,8 @@
 #  ifdef MSDOS  /* Watt-32 */
 
 #    include <sys/ioctl.h>
-#    define select(n,r,w,x,t) select_s(n,r,w,x,t)
-#    define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
+#    define select(n, r, w, x, t)  select_s(n, r, w, x, t)
+#    define ioctl(x, y, z)         ioctlsocket(x, y, (char *)(z))
 #    include <tcp.h>
 #    undef word
 #    undef byte
@@ -664,7 +649,6 @@
 /*
  * Mutually exclusive CURLRES_* definitions.
  */
-
 #if defined(USE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
 #elif defined(USE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
@@ -792,7 +776,6 @@
 /*
  * Include macros and defines that should only be processed once.
  */
-
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
 #endif
@@ -800,7 +783,6 @@
 /*
  * Definition of our NOP statement Object-like macro
  */
-
 #ifndef Curl_nop_stmt
 #define Curl_nop_stmt do { } while(0)
 #endif
@@ -808,7 +790,6 @@
 /*
  * Ensure that Winsock and lwIP TCP/IP stacks are not mixed.
  */
-
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || defined(USE_WINSOCK)
 #    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
@@ -818,7 +799,6 @@
 /*
  * shutdown() flags for systems that do not define them
  */
-
 #ifndef SHUT_RD
 #define SHUT_RD 0x00
 #endif
@@ -899,15 +879,15 @@ endings either CRLF or LF so 't' is appropriate.
 
 /* Some convenience macros to get the larger/smaller value out of two given.
    We prefix with CURL to prevent name collisions. */
-#define CURLMAX(x,y) ((x)>(y)?(x):(y))
-#define CURLMIN(x,y) ((x)<(y)?(x):(y))
+#define CURLMAX(x, y) ((x) > (y) ? (x) : (y))
+#define CURLMIN(x, y) ((x) < (y) ? (x) : (y))
 
 /* A convenience macro to provide both the string literal and the length of
    the string literal in one go, useful for functions that take "string,len"
    as their argument */
-#define STRCONST(x) x,sizeof(x)-1
+#define STRCONST(x) x, sizeof(x) - 1
 
-#define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#define CURL_ARRAYSIZE(A) (sizeof(A) / sizeof((A)[0]))
 
 /* Buffer size for error messages retrieved via
    curlx_strerror() and Curl_sspi_strerror() */
@@ -1033,28 +1013,28 @@ CURL_EXTERN ALLOC_FUNC
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 
-#define sclose(sockfd) curl_dbg_sclose(sockfd,__LINE__,__FILE__)
-#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd,__LINE__,__FILE__)
+#define sclose(sockfd) curl_dbg_sclose(sockfd, __LINE__, __FILE__)
+#define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd, __LINE__, __FILE__)
 
-#define CURL_GETADDRINFO(host,serv,hint,res) \
+#define CURL_GETADDRINFO(host, serv, hint, res) \
   curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
 #define CURL_FREEADDRINFO(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
-#define CURL_SOCKET(domain,type,protocol) \
+#define CURL_SOCKET(domain, type, protocol) \
   curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
-#define CURL_SOCKETPAIR(domain,type,protocol,socket_vector) \
+#define CURL_SOCKETPAIR(domain, type, protocol, socket_vector) \
   curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
                       __LINE__, __FILE__)
 #endif
-#define CURL_ACCEPT(sock,addr,len) \
+#define CURL_ACCEPT(sock, addr, len) \
   curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_ACCEPT4
-#define CURL_ACCEPT4(sock,addr,len,flags) \
+#define CURL_ACCEPT4(sock, addr, len, flags) \
   curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
-#define CURL_SEND(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
-#define CURL_RECV(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
+#define CURL_SEND(a, b, c, d) curl_dbg_send(a, b, c, d, __LINE__, __FILE__)
+#define CURL_RECV(a, b, c, d) curl_dbg_recv(a, b, c, d, __LINE__, __FILE__)
 
 #else /* !CURLDEBUG */
 

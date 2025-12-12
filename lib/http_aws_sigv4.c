@@ -133,7 +133,7 @@ static void trim_headers(struct curl_slist *head)
 }
 
 /* maximum length for the aws sivg4 parts */
-#define MAX_SIGV4_LEN 64
+#define MAX_SIGV4_LEN    64
 #define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
 
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
@@ -400,8 +400,7 @@ fail:
 
 #define CONTENT_SHA256_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Content-Sha256"))
 /* add 2 for ": " between header name and value */
-#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + \
-                                SHA256_HEX_LENGTH)
+#define CONTENT_SHA256_HDR_LEN (CONTENT_SHA256_KEY_LEN + 2 + SHA256_HEX_LENGTH)
 
 /* try to parse a payload hash from the content-sha256 header */
 static const char *parse_content_sha_hdr(struct Curl_easy *data,
@@ -429,7 +428,7 @@ static const char *parse_content_sha_hdr(struct Curl_easy *data,
   curlx_str_passblanks(&value);
 
   len = strlen(value);
-  while(len > 0 && ISBLANK(value[len-1]))
+  while(len > 0 && ISBLANK(value[len - 1]))
     --len;
 
   *value_len = len;
@@ -449,7 +448,7 @@ static CURLcode calc_payload_hash(struct Curl_easy *data,
     else
       post_data_len = (size_t)data->set.postfieldsize;
   }
-  result = Curl_sha256it(sha_hash, (const unsigned char *) post_data,
+  result = Curl_sha256it(sha_hash, (const unsigned char *)post_data,
                          post_data_len);
   if(!result)
     sha256_to_hex(sha_hex, sha_hash);
@@ -530,7 +529,6 @@ static int compare_func(const void *a, const void *b)
   compare = strcmp(curlx_dyn_ptr(&aa->value), curlx_dyn_ptr(&bb->value));
 
   return compare;
-
 }
 
 UNITTEST CURLcode canon_path(const char *q, size_t len,
@@ -572,14 +570,13 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
   if(!query)
     return result;
 
-  result = split_to_dyn_array(query, &query_array[0],
-                              &num_query_components);
+  result = split_to_dyn_array(query, &query_array[0], &num_query_components);
   if(result) {
     goto fail;
   }
 
   /* Create list of pairs, each pair containing an encoded query
-    * component */
+   * component */
 
   for(index = 0; index < num_query_components; index++) {
     const char *in_key;
@@ -599,8 +596,8 @@ UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq)
       in_key_len = offset - in_key;
     }
 
-    curlx_dyn_init(&encoded_query_array[index].key, query_part_len*3 + 1);
-    curlx_dyn_init(&encoded_query_array[index].value, query_part_len*3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].key, query_part_len * 3 + 1);
+    curlx_dyn_init(&encoded_query_array[index].value, query_part_len * 3 + 1);
     counted_query_components++;
 
     /* Decode/encode the key */
@@ -672,8 +669,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   const char *line;
   struct Curl_str provider0;
   struct Curl_str provider1;
-  struct Curl_str region = { NULL, 0};
-  struct Curl_str service = { NULL, 0};
+  struct Curl_str region = { NULL, 0 };
+  struct Curl_str service = { NULL, 0 };
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;
@@ -697,8 +694,8 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   char *str_to_sign = NULL;
   const char *user = data->state.aptr.user ? data->state.aptr.user : "";
   char *secret = NULL;
-  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = {0};
-  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = {0};
+  unsigned char sign0[CURL_SHA256_DIGEST_LENGTH] = { 0 };
+  unsigned char sign1[CURL_SHA256_DIGEST_LENGTH] = { 0 };
   char *auth_headers = NULL;
 
   if(data->set.path_as_is) {
@@ -782,7 +779,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     /* AWS S3 requires a x-amz-content-sha256 header, and supports special
      * values like UNSIGNED-PAYLOAD */
     bool sign_as_s3 = curlx_str_casecompare(&provider0, "aws") &&
-      curlx_str_casecompare(&service, "s3");
+                      curlx_str_casecompare(&service, "s3");
 
     if(sign_as_s3)
       result = calc_s3_payload_hash(data, httpreq, curlx_str(&provider1),
@@ -864,7 +861,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
     goto fail;
 
   infof(data, "aws_sigv4: Canonical request (enclosed in []) - [%s]",
-    canonical_request);
+        canonical_request);
 
   request_type = curl_maprintf("%.*s4_request",
                                (int)curlx_strlen(&provider0),
@@ -885,7 +882,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
   if(!credential_scope)
     goto fail;
 
-  if(Curl_sha256it(sha_hash, (unsigned char *) canonical_request,
+  if(Curl_sha256it(sha_hash, (unsigned char *)canonical_request,
                    strlen(canonical_request)))
     goto fail;
 
@@ -912,7 +909,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
                    curlx_strlen(&provider0));
 
   infof(data, "aws_sigv4: String to sign (enclosed in []) - [%s]",
-    str_to_sign);
+        str_to_sign);
 
   secret = curl_maprintf("%.*s4%s", (int)curlx_strlen(&provider0),
                          curlx_str(&provider0), data->state.aptr.passwd ?
@@ -980,8 +977,8 @@ fail:
 }
 
 /*
-* Frees all allocated strings in a dynbuf pair array, and the dynbuf itself
-*/
+ * Frees all allocated strings in a dynbuf pair array, and the dynbuf itself
+ */
 
 static void pair_array_free(struct pair *pair_array, size_t num_elements)
 {
@@ -991,12 +988,11 @@ static void pair_array_free(struct pair *pair_array, size_t num_elements)
     curlx_dyn_free(&pair_array[index].key);
     curlx_dyn_free(&pair_array[index].value);
   }
-
 }
 
 /*
-* Frees all allocated strings in a split dynbuf, and the dynbuf itself
-*/
+ * Frees all allocated strings in a split dynbuf, and the dynbuf itself
+ */
 
 static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 {
@@ -1007,10 +1003,10 @@ static void dyn_array_free(struct dynbuf *db, size_t num_elements)
 }
 
 /*
-* Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
-* db is initialized by this function.
-* Caller is responsible for freeing the array elements with dyn_array_free
-*/
+ * Splits source string by SPLIT_BY, and creates an array of dynbuf in db.
+ * db is initialized by this function.
+ * Caller is responsible for freeing the array elements with dyn_array_free
+ */
 
 #define SPLIT_BY '&'
 
@@ -1032,8 +1028,7 @@ static CURLcode split_to_dyn_array(const char *source,
     if(source[pos] == SPLIT_BY) {
       if(segment_length) {
         curlx_dyn_init(&db[index], segment_length + 1);
-        result = curlx_dyn_addn(&db[index], &source[start],
-                                segment_length);
+        result = curlx_dyn_addn(&db[index], &source[start], segment_length);
         if(result)
           goto fail;
 
@@ -1064,7 +1059,6 @@ fail:
   return result;
 }
 
-
 static bool is_reserved_char(const char c)
 {
   return (ISALNUM(c) || ISURLPUNTCS(c));
@@ -1091,7 +1085,6 @@ static CURLcode uri_encode_path(struct Curl_str *original_path,
   return CURLE_OK;
 }
 
-
 static CURLcode encode_query_component(char *component, size_t len,
                                        struct dynbuf *db)
 {
@@ -1116,8 +1109,8 @@ static CURLcode encode_query_component(char *component, size_t len,
 }
 
 /*
-* Populates a dynbuf containing url_encode(url_decode(in))
-*/
+ * Populates a dynbuf containing url_encode(url_decode(in))
+ */
 
 static CURLcode http_aws_decode_encode(const char *in, size_t in_len,
                                        struct dynbuf *out)

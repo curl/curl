@@ -26,7 +26,7 @@
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 
-#define CONN_NUM 3
+#define CONN_NUM                3
 #define TIME_BETWEEN_START_SECS 2
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;

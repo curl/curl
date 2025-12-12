@@ -178,8 +178,8 @@ static int my_progress_d_cb(void *userdata,
 #endif
 #ifdef USE_MBEDTLS
       case CURLSSLBACKEND_MBEDTLS: {
-        const char *version = mbedtls_ssl_get_version(
-          (mbedtls_ssl_context*)tls->internals);
+        const char *version =
+          mbedtls_ssl_get_version((mbedtls_ssl_context *)tls->internals);
         assert(version);
         assert(strcmp(version, "unknown"));
         curl_mfprintf(stderr, "[t-%zu] info mbedTLS using %s\n",
@@ -190,7 +190,7 @@ static int my_progress_d_cb(void *userdata,
 #ifdef USE_RUSTLS
       case CURLSSLBACKEND_RUSTLS: {
         int v = rustls_connection_get_protocol_version(
-          (struct rustls_connection*)tls->internals);
+          (struct rustls_connection *)tls->internals);
         assert(v);
         curl_mfprintf(stderr, "[t-%zu] info rustls TLS version 0x%x\n",
                       t->idx, v);
@@ -449,7 +449,7 @@ static CURLcode test_cli_hx_download(const char *URL)
 
     if(still_running) {
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+      mc = curl_multi_poll(multi, NULL, 0, 500, NULL);
     }
 
     if(mc)
@@ -514,8 +514,8 @@ static CURLcode test_cli_hx_download(const char *URL)
           if(!t->started) {
             t->curl = curl_easy_init();
             if(!t->curl ||
-              setup_hx_download(t->curl, url, t, http_version, host, share,
-                                use_earlydata, fresh_connect)) {
+               setup_hx_download(t->curl, url, t, http_version, host, share,
+                                 use_earlydata, fresh_connect)) {
               curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
               res = (CURLcode)1;
               goto cleanup;

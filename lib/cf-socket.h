@@ -52,7 +52,7 @@ struct Curl_sockaddr_ex {
     struct Curl_sockaddr_storage buf;
   } addr;
 };
-#define curl_sa_addr addr.sa
+#define curl_sa_addr    addr.sa
 #define curl_sa_addrbuf addr.buf
 
 /*

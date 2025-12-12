@@ -88,7 +88,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     AC_MSG_RESULT([yes])
     AC_MSG_CHECKING([if compiler is xlclang])
     CURL_CHECK_DEF([__ibmxl__], [], [silent])
-    if test "$curl_cv_have_def___ibmxl__" = "yes" ; then
+    if test "$curl_cv_have_def___ibmxl__" = "yes"; then
       dnl IBM's almost-compatible clang version
       AC_MSG_RESULT([yes])
       compiler_id="XLCLANG"
@@ -118,7 +118,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     clangvlo=`echo $clangver | cut -d . -f2`
     compiler_ver="$clangver"
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
-    if test "$appleclang" = '1' && test "$oldapple" = '0'; then
+    if test "$appleclang" = "1" && test "$oldapple" = "0"; then
       dnl Starting with Xcode 7 / clang 3.7, Apple clang does not tell its upstream version
       if   test "$compiler_num" -ge '1700'; then compiler_num='1901'
       elif test "$compiler_num" -ge '1600'; then compiler_num='1700'
@@ -396,7 +396,8 @@ AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_CHECK_COMPILER])dnl
   AC_MSG_CHECKING([convert -I options to -isystem])
   if test "$compiler_id" = "GNU_C" ||
-    test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
+     test "$compiler_id" = "CLANG" ||
+     test "$compiler_id" = "APPLECLANG"; then
     AC_MSG_RESULT([yes])
     tmp_has_include="no"
     tmp_chg_FLAGS="$CFLAGS"
@@ -475,7 +476,7 @@ AC_DEFUN([CURL_COMPILER_WORKS_IFELSE], [
     ])
   fi
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tmp_compiler_works" = "yes"; then
     CURL_RUN_IFELSE([
       AC_LANG_PROGRAM([[
@@ -632,7 +633,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
     squeeze tmp_CPPFLAGS
     squeeze tmp_CFLAGS
     #
-    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
+    if test -n "$tmp_CFLAGS" || test -n "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts some basic options])
       CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
@@ -936,6 +937,10 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "1700"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [cast-function-type-strict])  # with Apple clang it requires 16.0 or above
           fi
+          dnl clang 19 or later
+          if test "$compiler_num" -ge "1901"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-signedness"
+          fi
           dnl clang 20 or later
           if test "$compiler_num" -ge "2001"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [array-compare])
@@ -968,7 +973,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Do not enable -pedantic when cross-compiling with a gcc older
           dnl than 3.0, to avoid warnings from third party system headers.
-          if test "x$cross_compiling" != "xyes" ||
+          if test "$cross_compiling" != "yes" ||
             test "$compiler_num" -ge "300"; then
             tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           fi
@@ -981,7 +986,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "104"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pointer-arith write-strings])
             dnl If not cross-compiling with a gcc older than 3.0
-            if test "x$cross_compiling" != "xyes" ||
+            if test "$cross_compiling" != "yes" ||
               test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [unused shadow])
             fi
@@ -991,7 +996,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           if test "$compiler_num" -ge "207"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [nested-externs])
             dnl If not cross-compiling with a gcc older than 3.0
-            if test "x$cross_compiling" != "xyes" ||
+            if test "$cross_compiling" != "yes" ||
               test "$compiler_num" -ge "300"; then
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-declarations])
               CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
@@ -1115,6 +1120,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 5 or later
           if test "$compiler_num" -ge "500"; then
             tmp_CFLAGS="$tmp_CFLAGS -Warray-bounds=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-signedness"
           fi
           #
           dnl Only gcc 6 or later
@@ -1168,7 +1174,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
         else
           dnl When cross-compiling with a gcc older than 3.0, disable
           dnl some warnings triggered on third party system headers.
-          if test "x$cross_compiling" = "xyes"; then
+          if test "$cross_compiling" = "yes"; then
             if test "$compiler_num" -ge "104"; then
               dnl gcc 1.4 or later
               tmp_CFLAGS="$tmp_CFLAGS -Wno-unused -Wno-shadow"
@@ -1185,19 +1191,19 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
           tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
         fi
-        if test "$compiler_num" -ge "402" -a "$compiler_num" -lt "406"; then
+        if test "$compiler_num" -ge "402" && test "$compiler_num" -lt "406"; then
           dnl GCC <4.6 do not support #pragma to suppress warnings locally. Disable globally instead.
           tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
         fi
-        if test "$compiler_num" -ge "400" -a "$compiler_num" -lt "407"; then
+        if test "$compiler_num" -ge "400" && test "$compiler_num" -lt "407"; then
           dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685
           tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-field-initializers"
         fi
-        if test "$compiler_num" -ge "403" -a "$compiler_num" -lt "408"; then
+        if test "$compiler_num" -ge "403" && test "$compiler_num" -lt "408"; then
           dnl Avoid false positives
           tmp_CFLAGS="$tmp_CFLAGS -Wno-type-limits"
         fi
-        if test "$compiler_num" -ge "501" -a "$compiler_num" -lt "505"; then
+        if test "$compiler_num" -ge "501" && test "$compiler_num" -lt "505"; then
           dnl Avoid false positives
           tmp_CFLAGS="$tmp_CFLAGS -Wno-conversion"
         fi
@@ -1303,7 +1309,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
     squeeze tmp_CPPFLAGS
     squeeze tmp_CFLAGS
     #
-    if test ! -z "$tmp_CFLAGS" || test ! -z "$tmp_CPPFLAGS"; then
+    if test -n "$tmp_CFLAGS" || test -n "$tmp_CPPFLAGS"; then
       AC_MSG_CHECKING([if compiler accepts strict warning options])
       CPPFLAGS="$tmp_save_CPPFLAGS $tmp_CPPFLAGS"
       CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
@@ -1486,7 +1492,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
     GNU_C)
       dnl Only gcc 3.4 or later
       if test "$compiler_num" -ge "304"; then
-        if $CC --help --verbose 2>/dev/null | grep fvisibility= >/dev/null ; then
+        if $CC --help --verbose 2>/dev/null | grep fvisibility= >/dev/null; then
           tmp_EXTERN="__attribute__((__visibility__(\"default\")))"
           tmp_CFLAGS="-fvisibility=hidden"
           supports_symbol_hiding="yes"
@@ -1496,7 +1502,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
     INTEL_UNIX_C)
       dnl Only icc 9.0 or later
       if test "$compiler_num" -ge "900"; then
-        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null; then
           tmp_save_CFLAGS="$CFLAGS"
           CFLAGS="$CFLAGS -fvisibility=hidden"
           AC_LINK_IFELSE([
@@ -1515,7 +1521,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
       fi
       ;;
     SUNPRO_C)
-      if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
+      if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null; then
         tmp_EXTERN="__global"
         tmp_CFLAGS="-xldscope=hidden"
         supports_symbol_hiding="yes"

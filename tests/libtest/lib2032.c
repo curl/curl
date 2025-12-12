@@ -75,7 +75,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size * nmemb;
 }
 
-static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
+static CURLcode test_lib2032(const char *URL) /* libntlmconnect */
 {
   enum HandleState {
     ReadyForNewHandle,
@@ -175,10 +175,9 @@ static CURLcode test_lib2032(const char *URL)  /* libntlmconnect */
                       "handle (trying again)\n");
         continue;
       }
-      state = num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle
-                                             : NoMoreHandles;
-      curl_mfprintf(stderr, "%s:%d new state %d\n",
-                    __FILE__, __LINE__, state);
+      state =
+        num_handles < MAX_EASY_HANDLES ? ReadyForNewHandle : NoMoreHandles;
+      curl_mfprintf(stderr, "%s:%d new state %d\n", __FILE__, __LINE__, state);
     }
 
     multi_timeout(multi, &timeout);

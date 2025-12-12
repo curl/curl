@@ -5,7 +5,6 @@
 <keywords>
 RTSP
 ANNOUNCE
-notxml
 </keywords>
 </info>
 
@@ -107,7 +106,7 @@ CSeq: 3
 Content-Type: posty goodness
 Content-Length: 35
 
-postyfield=postystuff&project=curl
+postyfield=postystuff%AMPproject=curl
 OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0004 RTSP/1.0
 CSeq: 4
 

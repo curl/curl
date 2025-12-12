@@ -61,20 +61,6 @@ uint32_t Curl_uint32_spbset_count(struct uint32_spbset *bset)
   return n;
 }
 
-bool Curl_uint32_spbset_empty(struct uint32_spbset *bset)
-{
-  struct uint32_spbset_chunk *chunk;
-  uint32_t i;
-
-  for(chunk = &bset->head; chunk; chunk = chunk->next) {
-    for(i = 0; i < CURL_UINT32_SPBSET_CH_SLOTS; ++i) {
-      if(chunk->slots[i])
-        return FALSE;
-    }
-  }
-  return TRUE;
-}
-
 UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
 {
   struct uint32_spbset_chunk *next, *chunk;
@@ -85,7 +71,6 @@ UNITTEST void Curl_uint32_spbset_clear(struct uint32_spbset *bset)
   }
   memset(&bset->head, 0, sizeof(bset->head));
 }
-
 
 static struct uint32_spbset_chunk *
 uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
@@ -129,7 +114,6 @@ uint32_spbset_get_chunk(struct uint32_spbset *bset, uint32_t i, bool grow)
   return chunk;
 }
 
-
 bool Curl_uint32_spbset_add(struct uint32_spbset *bset, uint32_t i)
 {
   struct uint32_spbset_chunk *chunk;
@@ -146,7 +130,6 @@ bool Curl_uint32_spbset_add(struct uint32_spbset *bset, uint32_t i)
   return TRUE;
 }
 
-
 void Curl_uint32_spbset_remove(struct uint32_spbset *bset, uint32_t i)
 {
   struct uint32_spbset_chunk *chunk;
@@ -160,7 +143,6 @@ void Curl_uint32_spbset_remove(struct uint32_spbset *bset, uint32_t i)
     chunk->slots[(i_chunk / 64)] &= ~((uint64_t)1 << (i_chunk % 64));
   }
 }
-
 
 bool Curl_uint32_spbset_contains(struct uint32_spbset *bset, uint32_t i)
 {
@@ -195,7 +177,6 @@ bool Curl_uint32_spbset_first(struct uint32_spbset *bset, uint32_t *pfirst)
   return FALSE;
 }
 
-
 static bool uint32_spbset_chunk_first(struct uint32_spbset_chunk *chunk,
                                       uint32_t *pfirst)
 {
@@ -209,7 +190,6 @@ static bool uint32_spbset_chunk_first(struct uint32_spbset_chunk *chunk,
   *pfirst = UINT32_MAX; /* a value we cannot store */
   return FALSE;
 }
-
 
 static bool uint32_spbset_chunk_next(struct uint32_spbset_chunk *chunk,
                                      uint32_t last,

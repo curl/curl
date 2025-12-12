@@ -29,40 +29,24 @@
 
 /*
  * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
- * and curlx_unicodefree() main purpose is to minimize the number of
- * preprocessor conditional directives needed by code using these
- * to differentiate Unicode from non-Unicode builds.
+ * main purpose is to minimize the number of preprocessor conditional
+ * directives needed by code using these to differentiate Unicode from
+ * non-Unicode builds.
  *
  * In the case of a non-Unicode build the tchar strings are char strings that
  * are duplicated via strdup and remain in whatever the passed in encoding is,
  * which is assumed to be UTF-8 but may be other encoding. Therefore the
  * significance of the conversion functions is primarily for Unicode builds.
- *
- * Allocated memory should be free'd with curlx_unicodefree().
- *
- * Use system allocators to avoid infinite recursion when called by curl's
- * memory tracker memdebug functions.
  */
 
-#ifdef CURLDEBUG
-#define CURLX_MALLOC(x) malloc(x)
-#define CURLX_FREE(x)   free(x)
-#else
-#define CURLX_MALLOC(x) curlx_malloc(x)
-#define CURLX_FREE(x)   curlx_free(x)
-#endif
+#ifdef UNICODE
 
 /* MultiByte conversions using Windows kernel32 library. */
 wchar_t *curlx_convert_UTF8_to_wchar(const char *str_utf8);
 char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
 
-/* the purpose of this macro is to free() without being traced by memdebug */
-#define curlx_unicodefree(ptr) CURLX_FREE(ptr)
-
-#ifdef UNICODE
-
-#define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar((ptr))
-#define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8((ptr))
+#define curlx_convert_UTF8_to_tchar(ptr) curlx_convert_UTF8_to_wchar(ptr)
+#define curlx_convert_tchar_to_UTF8(ptr) curlx_convert_wchar_to_UTF8(ptr)
 
 typedef union {
   unsigned short       *tchar_ptr;
@@ -73,13 +57,8 @@ typedef union {
 
 #else /* !UNICODE */
 
-#ifdef CURLDEBUG
-#define curlx_convert_UTF8_to_tchar(ptr) _strdup(ptr)
-#define curlx_convert_tchar_to_UTF8(ptr) _strdup(ptr)
-#else
 #define curlx_convert_UTF8_to_tchar(ptr) curlx_strdup(ptr)
 #define curlx_convert_tchar_to_UTF8(ptr) curlx_strdup(ptr)
-#endif
 
 typedef union {
   char                *tchar_ptr;

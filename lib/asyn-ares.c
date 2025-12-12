@@ -180,8 +180,7 @@ static CURLcode async_ares_init(struct Curl_easy *data)
   status = ares_init_options(&ares->channel, &options, optmask);
   if(status != ARES_SUCCESS) {
     ares->channel = NULL;
-    rc = (status == ARES_ENOMEM) ?
-         CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
+    rc = (status == ARES_ENOMEM) ? CURLE_OUT_OF_MEMORY : CURLE_FAILED_INIT;
     goto out;
   }
 

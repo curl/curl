@@ -52,8 +52,8 @@
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
 #define MAX_CAFILE_SIZE 1048576 /* 1 MiB */
-#define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
-#define END_CERT "\n-----END CERTIFICATE-----"
+#define BEGIN_CERT      "-----BEGIN CERTIFICATE-----"
+#define END_CERT        "\n-----END CERTIFICATE-----"
 
 struct cert_chain_engine_config_win8 {
   DWORD cbSize;
@@ -347,7 +347,7 @@ cleanup:
     CloseHandle(ca_file_handle);
   }
   Curl_safefree(ca_file_buffer);
-  curlx_unicodefree(ca_file_tstr);
+  curlx_free(ca_file_tstr);
 
   return result;
 }
@@ -532,7 +532,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
   DWORD actual_len = 0;
   PCERT_ALT_NAME_INFO alt_name_info = NULL;
   DWORD alt_name_info_size = 0;
-  struct num_ip_data ip_blob = {0};
+  struct num_ip_data ip_blob = { 0 };
   bool Win8_compat;
   struct num_ip_data *p = &ip_blob;
   DWORD i;
@@ -648,7 +648,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf, struct Curl_easy *data)
 
           result = CURLE_PEER_FAILED_VERIFICATION;
         }
-        curlx_unicodefree(cert_hostname);
+        curlx_free(cert_hostname);
       }
     }
 

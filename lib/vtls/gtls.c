@@ -169,6 +169,7 @@ static int gtls_init(void)
 static void gtls_cleanup(void)
 {
   gnutls_global_deinit();
+  Curl_tls_keylog_close();
 }
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
@@ -305,16 +306,17 @@ static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
   return GNUTLS_X509_FMT_PEM; /* default to PEM */
 }
 
-#define GNUTLS_CIPHERS "NORMAL:-ARCFOUR-128:-CTYPE-ALL:+CTYPE-X509"
+#define GNUTLS_CIPHERS "NORMAL:%PROFILE_MEDIUM:-ARCFOUR-128:"\
+  "-CTYPE-ALL:+CTYPE-X509"
 /* If GnuTLS was compiled without support for SRP it will error out if SRP is
    requested in the priority string, so treat it specially
  */
 #define GNUTLS_SRP "+SRP"
 
 #define QUIC_PRIORITY \
-  "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
-  "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
-  "+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
+  "NORMAL:%PROFILE_MEDIUM:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:" \
+  "+AES-256-GCM:+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:" \
+  "+GROUP-SECP256R1:+GROUP-X25519:+GROUP-SECP384R1:+GROUP-SECP521R1:" \
   "%DISABLE_TLS13_COMPAT_MODE"
 
 static CURLcode
@@ -386,7 +388,7 @@ gnutls_set_ssl_version_min_max(struct Curl_easy *data,
     return CURLE_OK;
   }
 
-  failf(data, "GnuTLS: cannot set ssl protocol");
+  failf(data, "GnuTLS: cannot set TLS protocol");
   return CURLE_SSL_CONNECT_ERROR;
 }
 
@@ -460,7 +462,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
 #else
     rc = gnutls_certificate_set_x509_system_trust(creds);
     if(rc < 0)
-      infof(data, "error reading native ca store (%s), continuing anyway",
+      infof(data, "error reading native CA store (%s), continuing anyway",
             gnutls_strerror(rc));
     else {
       infof(data, "  Native: %d certificates from system trust", rc);
@@ -483,7 +485,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
                                                GNUTLS_X509_FMT_PEM);
     creds_are_empty = creds_are_empty && (rc <= 0);
     if(rc < 0) {
-      infof(data, "error reading ca cert blob (%s)%s", gnutls_strerror(rc),
+      infof(data, "error reading CA cert blob (%s)%s", gnutls_strerror(rc),
             (creds_are_empty ? "" : ", continuing anyway"));
       if(creds_are_empty) {
         ssl_config->certverifyresult = rc;
@@ -504,7 +506,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
                                                 GNUTLS_X509_FMT_PEM);
     creds_are_empty = creds_are_empty && (rc <= 0);
     if(rc < 0) {
-      infof(data, "error reading ca cert file %s (%s)%s",
+      infof(data, "error reading CA cert file %s (%s)%s",
             config->CAfile, gnutls_strerror(rc),
             (creds_are_empty ? "" : ", continuing anyway"));
       if(creds_are_empty) {
@@ -522,7 +524,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
                                                GNUTLS_X509_FMT_PEM);
     creds_are_empty = creds_are_empty && (rc <= 0);
     if(rc < 0) {
-      infof(data, "error reading ca cert file %s (%s)%s",
+      infof(data, "error reading CA cert file %s (%s)%s",
             config->CApath, gnutls_strerror(rc),
             (creds_are_empty ? "" : ", continuing anyway"));
       if(creds_are_empty) {
@@ -542,7 +544,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
     rc = gnutls_certificate_set_x509_crl_file(creds, config->CRLfile,
                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
-      failf(data, "error reading crl file %s (%s)",
+      failf(data, "error reading CRL file %s (%s)",
             config->CRLfile, gnutls_strerror(rc));
       return CURLE_SSL_CRL_BADFILE;
     }

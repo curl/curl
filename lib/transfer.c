@@ -79,10 +79,11 @@
 #include "hsts.h"
 #include "setopt.h"
 #include "headers.h"
+#include "bufref.h"
 #include "curlx/warnless.h"
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_SMTP) || \
-    !defined(CURL_DISABLE_IMAP)
+  !defined(CURL_DISABLE_IMAP)
 /*
  * checkheaders() checks the linked list of custom headers for a
  * particular header (prefix). Provide the prefix without colon!
@@ -95,11 +96,11 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 {
   struct curl_slist *head;
   DEBUGASSERT(thislen);
-  DEBUGASSERT(thisheader[thislen-1] != ':');
+  DEBUGASSERT(thisheader[thislen - 1] != ':');
 
   for(head = data->set.headers; head; head = head->next) {
     if(curl_strnequal(head->data, thisheader, thislen) &&
-       Curl_headersep(head->data[thislen]) )
+       Curl_headersep(head->data[thislen]))
       return head->data;
   }
 
@@ -111,13 +112,13 @@ static int data_pending(struct Curl_easy *data, bool rcvd_eagain)
 {
   struct connectdata *conn = data->conn;
 
-  if(conn->handler->protocol&PROTO_FAMILY_FTP)
+  if(conn->handler->protocol & PROTO_FAMILY_FTP)
     return Curl_conn_data_pending(data, SECONDARYSOCKET);
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
   return (!rcvd_eagain &&
-          conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP)) ||
+          conn->handler->protocol & (CURLPROTO_SCP | CURLPROTO_SFTP)) ||
          Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
@@ -180,7 +181,6 @@ CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
  * @param buf          buffer to keep response data received
  * @param blen         length of `buf`
  * @param eos_reliable if EOS detection in underlying connection is reliable
- * @param err error    code in case of -1 return
  * @return number of bytes read or -1 for error
  */
 static CURLcode xfer_recv_resp(struct Curl_easy *data,
@@ -329,7 +329,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     CURL_TRC_M(data, "sendrecv_dl() no EAGAIN/pending data, mark as dirty");
   }
 
-  if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
+  if(((k->keepon & (KEEP_RECV | KEEP_SEND)) == KEEP_SEND) &&
      (conn->bits.close || is_multiplex)) {
     /* When we have read the entire thing and the close bit is set, the server
        may now close the connection. If there is now any kind of sending going
@@ -428,7 +428,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if((k->keepon & (KEEP_RECV|KEEP_SEND)) == 0)
+  if((k->keepon & (KEEP_RECV | KEEP_SEND)) == 0)
     data->req.done = TRUE;
 
   result = Curl_pgrsUpdate(data);
@@ -484,13 +484,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
     }
   }
 
-  /* since the URL may have been redirected in a previous use of this handle */
-  if(data->state.url_alloc) {
-    Curl_safefree(data->state.url);
-    data->state.url_alloc = FALSE;
-  }
-
-  data->state.url = data->set.str[STRING_SET_URL];
+  Curl_bufref_set(&data->state.url, data->set.str[STRING_SET_URL], 0, NULL);
 
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
@@ -636,7 +630,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      protocol is HTTP as when uploading over HTTP we will still get a
      response */
   if(data->state.upload &&
-     !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
+     !(conn->handler->protocol & (PROTO_FAMILY_HTTP | CURLPROTO_RTSP)))
     return CURLE_OK;
 
   if(conn->bits.reuse &&
@@ -656,7 +650,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
        it again. Bad luck. Retry the same request on a fresh connect! */
     retry = TRUE;
   else if(data->state.refused_stream &&
-          (data->req.bytecount + data->req.headerbytecount == 0) ) {
+          (data->req.bytecount + data->req.headerbytecount == 0)) {
     /* This was sent on a refused stream, safe to rerun. A refused stream
        error can typically only happen on HTTP/2 level if the stream is safe
        to issue again, but the nghttp2 API can deliver the message to other
@@ -676,7 +670,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
     }
     infof(data, "Connection died, retrying a fresh connect (retry count: %d)",
           data->state.retrycount);
-    *url = curlx_strdup(data->state.url);
+    *url = Curl_bufref_dup(&data->state.url);
     if(!*url)
       return CURLE_OUT_OF_MEMORY;
 

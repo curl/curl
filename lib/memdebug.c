@@ -71,6 +71,29 @@ static bool dbg_mutex_init = 0;
 static curl_mutex_t dbg_mutex;
 #endif
 
+static bool curl_dbg_lock(void)
+{
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+  if(dbg_mutex_init) {
+    Curl_mutex_acquire(&dbg_mutex);
+    return TRUE;
+  }
+#endif
+  return FALSE;
+}
+
+static void curl_dbg_unlock(bool was_locked)
+{
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+  if(was_locked)
+    Curl_mutex_release(&dbg_mutex);
+#else
+  (void)was_locked;
+#endif
+}
+
+static void curl_dbg_log_locked(const char *format, ...) CURL_PRINTF(1, 2);
+
 /* LeakSantizier (LSAN) calls _exit() instead of exit() when a leak is detected
    on exit so the logfile must be closed explicitly or data could be lost.
    Though _exit() does not call atexit handlers such as this, LSAN's call to
@@ -165,8 +188,7 @@ static bool countcheck(const char *func, int line, const char *source)
   if(memlimit && source) {
     if(!memsize) {
       /* log to file */
-      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n",
-                   source, line, func);
+      curl_dbg_log("LIMIT %s:%d %s reached memlimit\n", source, line, func);
       /* log to stderr also */
       curl_mfprintf(stderr, "LIMIT %s:%d %s reached memlimit\n",
                     source, line, func);
@@ -296,6 +318,7 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
                        int line, const char *source)
 {
   struct memdebug *mem = NULL;
+  bool was_locked;
 
   size_t size = sizeof(struct memdebug) + wantedsize;
 
@@ -304,6 +327,10 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
   if(countcheck("realloc", line, source))
     return NULL;
 
+  /* need to realloc under lock, as we get out-of-order log
+   * entries otherwise, since another thread might alloc the
+   * memory released by realloc() before otherwise would log it. */
+  was_locked = curl_dbg_lock();
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
 #  pragma warning(disable:1684)
@@ -319,10 +346,11 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 
   mem = (Curl_crealloc)(mem, size);
   if(source)
-    curl_dbg_log("MEM %s:%d realloc(%p, %zu) = %p\n",
-                source, line, (void *)ptr, wantedsize,
-                mem ? (void *)mem->mem : (void *)0);
+    curl_dbg_log_locked("MEM %s:%d realloc(%p, %zu) = %p\n",
+                        source, line, (void *)ptr, wantedsize,
+                        mem ? (void *)mem->mem : (void *)0);
 
+  curl_dbg_unlock(was_locked);
   if(mem) {
     mem->size = wantedsize;
     return mem->mem;
@@ -336,8 +364,8 @@ void curl_dbg_free(void *ptr, int line, const char *source)
   if(ptr) {
     struct memdebug *mem;
 
-  if(source)
-    curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
+    if(source)
+      curl_dbg_log("MEM %s:%d free(%p)\n", source, line, (void *)ptr);
 
 #ifdef __INTEL_COMPILER
 #  pragma warning(push)
@@ -386,7 +414,7 @@ SEND_TYPE_RETV curl_dbg_send(SEND_TYPE_ARG1 sockfd,
   rc = send(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("SEND %s:%d send(%lu) = %ld\n",
-                source, line, (unsigned long)len, (long)rc);
+                 source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
@@ -401,7 +429,7 @@ RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd, RECV_TYPE_ARG2 buf,
   rc = recv(sockfd, buf, len, flags);
   if(source)
     curl_dbg_log("RECV %s:%d recv(%lu) = %ld\n",
-                source, line, (unsigned long)len, (long)rc);
+                 source, line, (unsigned long)len, (long)rc);
   return rc;
 }
 
@@ -515,8 +543,7 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
   DEBUGASSERT(file != NULL);
 
   if(source)
-    curl_dbg_log("FILE %s:%d fclose(%p)\n",
-                 source, line, (void *)file);
+    curl_dbg_log("FILE %s:%d fclose(%p)\n", source, line, (void *)file);
 
   /* !checksrc! disable BANNEDFUNC 1 */
   res = fclose(file);
@@ -524,29 +551,18 @@ int curl_dbg_fclose(FILE *file, int line, const char *source)
   return res;
 }
 
-/* this does the writing to the memory tracking log file */
-void curl_dbg_log(const char *format, ...)
+static void curl_dbg_vlog(const char * const fmt,
+                          va_list ap) CURL_PRINTF(1, 0);
+
+static void curl_dbg_vlog(const char * const fmt, va_list ap)
 {
   char buf[1024];
-  size_t nchars;
-  va_list ap;
-
-  if(!curl_dbg_logfile)
-    return;
-
-  va_start(ap, format);
-  nchars = curl_mvsnprintf(buf, sizeof(buf), format, ap);
-  va_end(ap);
+  size_t nchars = curl_mvsnprintf(buf, sizeof(buf), fmt, ap);
 
   if(nchars > (int)sizeof(buf) - 1)
     nchars = (int)sizeof(buf) - 1;
 
   if(nchars > 0) {
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-    bool lock_mutex = dbg_mutex_init;
-    if(lock_mutex)
-      Curl_mutex_acquire(&dbg_mutex);
-#endif
     if(sizeof(membuf) - nchars < memwidx) {
       /* flush */
       fwrite(membuf, 1, memwidx, curl_dbg_logfile);
@@ -559,11 +575,35 @@ void curl_dbg_log(const char *format, ...)
     }
     memcpy(&membuf[memwidx], buf, nchars);
     memwidx += nchars;
-#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-    if(lock_mutex)
-      Curl_mutex_release(&dbg_mutex);
-#endif
   }
+}
+
+static void curl_dbg_log_locked(const char *format, ...)
+{
+  va_list ap;
+
+  if(!curl_dbg_logfile)
+    return;
+
+  va_start(ap, format);
+  curl_dbg_vlog(format, ap);
+  va_end(ap);
+}
+
+/* this does the writing to the memory tracking log file */
+void curl_dbg_log(const char *format, ...)
+{
+  bool was_locked;
+  va_list ap;
+
+  if(!curl_dbg_logfile)
+    return;
+
+  was_locked = curl_dbg_lock();
+  va_start(ap, format);
+  curl_dbg_vlog(format, ap);
+  va_end(ap);
+  curl_dbg_unlock(was_locked);
 }
 
 #endif /* CURLDEBUG */

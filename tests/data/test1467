@@ -30,9 +30,11 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+# --socks5 cannot accept Windows absolute paths
 <features>
 proxy
 UnixSockets
+!win32
 </features>
 <server>
 http

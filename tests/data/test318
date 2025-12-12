@@ -62,7 +62,7 @@ contents
 http
 </server>
 <name>
-HTTP with custom Authorization: and redirect to new host
+HTTP with custom Authorization: then trusted redirect to new host
 </name>
 <command>
 http://first.host.it.is/we/want/that/page/%TESTNUMBER -x %HOSTIP:%HTTPPORT -H "Authorization: s3cr3t" --proxy-user testing:this --location-trusted

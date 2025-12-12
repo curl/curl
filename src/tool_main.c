@@ -109,7 +109,7 @@ static void memory_tracking_init(void)
     /* use the value as filename */
     char fname[512];
     if(strlen(env) >= sizeof(fname))
-      env[sizeof(fname)-1] = '\0';
+      env[sizeof(fname) - 1] = '\0';
     strcpy(fname, env);
     curl_free(env);
     curl_dbg_memdebug(fname);

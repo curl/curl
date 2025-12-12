@@ -60,6 +60,9 @@ class TestErrors:
     def test_05_02_partial_20(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip("openssl-quic is flaky in yielding proper error codes")
+        if proto == 'h3' and env.curl_uses_lib('quiche') and \
+                not env.curl_lib_version_at_least('quiche', '0.24.7'):
+            pytest.skip("quiche issue #2277 not fixed")
         count = 20
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
@@ -73,8 +76,8 @@ class TestErrors:
         invalid_stats = []
         for idx, s in enumerate(r.stats):
             if 'exitcode' not in s or s['exitcode'] not in [18, 55, 56, 92, 95]:
-                invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{s}')
-        assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
+                invalid_stats.append(f'request {idx} exit with {s["exitcode"]}\n{r.dump_logs()}')
+        assert len(invalid_stats) == 0, f'failed: {invalid_stats}\n{r.dump_logs()}'
 
     # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
     @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")

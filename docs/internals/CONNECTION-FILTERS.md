@@ -233,7 +233,7 @@ Users of `curl` may activate them by adding the name of the filter type to the
 of an HTTP/2 request, invoke curl with:
 
 ```
-> curl -v --trace-config ids,time,http/2  https://curl.se
+> curl -v --trace-config ids,time,http/2 https://curl.se/
 ```
 
 Which gives you trace output with time information, transfer+connection ids
@@ -260,7 +260,7 @@ into IPv4 and IPv6 and makes parallel attempts. The connection filter chain
 looks like this:
 
 ```
-* create connection for http://curl.se
+* create connection for http://curl.se/
 conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
 * start connect
 conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> NULL
@@ -271,12 +271,17 @@ conn[curl.se] --> SETUP[TCP] --> HAPPY-EYEBALLS --> TCP[2a04:4e42:c00::347]:443
 * transfer
 ```
 
-The modular design of connection filters and that we can plug them into each other is used to control the parallel attempts. When a `TCP` filter does not connect (in time), it is torn down and another one is created for the next address. This keeps the `TCP` filter simple.
+The modular design of connection filters and that we can plug them into each
+other is used to control the parallel attempts. When a `TCP` filter does not
+connect (in time), it is torn down and another one is created for the next
+address. This keeps the `TCP` filter simple.
 
-The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the problem. We can use it also to make other type of connection by just giving it another filter type to try to have happy eyeballing for QUIC:
+The `HAPPY-EYEBALLS` on the other hand stays focused on its side of the
+problem. We can use it also to make other type of connection by just giving it
+another filter type to try to have happy eyeballing for QUIC:
 
 ```
-* create connection for --http3-only https://curl.se
+* create connection for --http3-only https://curl.se/
 conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
 * start connect
 conn[curl.se] --> SETUP[QUIC] --> HAPPY-EYEBALLS --> NULL
@@ -292,7 +297,7 @@ type that is used for `--http3` when **both** HTTP/3 and HTTP/2 or HTTP/1.1
 shall be attempted:
 
 ```
-* create connection for --http3 https://curl.se
+* create connection for --http3 https://curl.se/
 conn[curl.se] --> HTTPS-CONNECT --> NULL
 * start connect
 conn[curl.se] --> HTTPS-CONNECT --> NULL

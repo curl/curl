@@ -27,10 +27,10 @@ dnl check for GnuTLS
 dnl ----------------------------------------------------
 
 AC_DEFUN([CURL_WITH_GNUTLS], [
-if test "x$OPT_GNUTLS" != xno; then
+if test "x$OPT_GNUTLS" != "xno"; then
   ssl_msg=
 
-  if test X"$OPT_GNUTLS" != Xno; then
+  if test "x$OPT_GNUTLS" != "xno"; then
 
     addld=""
     addlib=""
@@ -42,7 +42,7 @@ if test "x$OPT_GNUTLS" != xno; then
       dnl this is with no particular path given
       CURL_CHECK_PKGCONFIG(gnutls)
 
-      if test "$PKGCONFIG" != "no" ; then
+      if test "$PKGCONFIG" != "no"; then
         addlib=`$PKGCONFIG --libs-only-l gnutls`
         addld=`$PKGCONFIG --libs-only-L gnutls`
         addcflags=`$PKGCONFIG --cflags-only-I gnutls`
@@ -106,7 +106,7 @@ if test "x$OPT_GNUTLS" != xno; then
         USE_GNUTLS="yes"
         ssl_msg="GnuTLS"
         QUIC_ENABLED=yes
-        test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        test "gnutls" != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
       ],
       [
         LIBS="$CLEANLIBS"
@@ -115,7 +115,7 @@ if test "x$OPT_GNUTLS" != xno; then
         LDFLAGSPC="$CLEANLDFLAGSPC"
       ])
 
-      if test "x$USE_GNUTLS" = "xyes"; then
+      if test "$USE_GNUTLS" = "yes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
         check_for_ca_bundle=1
         if test -n "$gtlslib"; then
@@ -123,7 +123,7 @@ if test "x$OPT_GNUTLS" != xno; then
           dnl linker does not search through, we need to add it to
           dnl CURL_LIBRARY_PATH to prevent further configure tests to fail
           dnl due to this
-          if test "x$cross_compiling" != "xyes"; then
+          if test "$cross_compiling" != "yes"; then
             CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$gtlslib"
             export CURL_LIBRARY_PATH
             AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
@@ -147,12 +147,12 @@ if test "$GNUTLS_ENABLED" = "1"; then
   AC_CHECK_LIB(gnutls, nettle_MD5Init, [ USE_GNUTLS_NETTLE=1 ])
 
   # If not, try linking directly to both of them to see if they are available
-  if test "$USE_GNUTLS_NETTLE" = ""; then
+  if test -z "$USE_GNUTLS_NETTLE"; then
 
     dnl this is with no particular path given
     CURL_CHECK_PKGCONFIG(nettle)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       addlib=`$PKGCONFIG --libs-only-l nettle`
       addld=`$PKGCONFIG --libs-only-L nettle`
       addcflags=`$PKGCONFIG --cflags-only-I nettle`
@@ -192,7 +192,7 @@ if test "$GNUTLS_ENABLED" = "1"; then
         fi
       fi
     fi
-    if test "$USE_GNUTLS_NETTLE" = ""; then
+    if test -z "$USE_GNUTLS_NETTLE"; then
       AC_MSG_ERROR([GnuTLS found, but nettle was not found])
     fi
   else

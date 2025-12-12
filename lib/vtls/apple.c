@@ -54,31 +54,31 @@
 #ifdef USE_APPLE_SECTRUST
 #define SSL_SYSTEM_VERIFIER
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
-  && MAC_OS_X_VERSION_MAX_ALLOWED >= 101400)    \
-  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
-  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
+     MAC_OS_X_VERSION_MAX_ALLOWED >= 101400) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
+   __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000)
 #define SUPPORTS_SecTrustEvaluateWithError 1
 #endif
 
-#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
-  && ((defined(MAC_OS_X_VERSION_MIN_REQUIRED)     \
-  && MAC_OS_X_VERSION_MIN_REQUIRED >= 101400)     \
-  || (defined(__IPHONE_OS_VERSION_MIN_REQUIRED)   \
-  && __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
+#if defined(SUPPORTS_SecTrustEvaluateWithError) && \
+  ((defined(MAC_OS_X_VERSION_MIN_REQUIRED) &&      \
+    MAC_OS_X_VERSION_MIN_REQUIRED >= 101400) ||    \
+   (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) &&   \
+    __IPHONE_OS_VERSION_MIN_REQUIRED >= 120000))
 #define REQUIRES_SecTrustEvaluateWithError 1
 #endif
 
-#if defined(SUPPORTS_SecTrustEvaluateWithError)   \
-  && !defined(HAVE_BUILTIN_AVAILABLE)             \
-  && !defined(REQUIRES_SecTrustEvaluateWithError)
+#if defined(SUPPORTS_SecTrustEvaluateWithError) && \
+  !defined(HAVE_BUILTIN_AVAILABLE) &&              \
+  !defined(REQUIRES_SecTrustEvaluateWithError)
 #undef SUPPORTS_SecTrustEvaluateWithError
 #endif
 
-#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED)      \
-  && MAC_OS_X_VERSION_MAX_ALLOWED >= 100900)    \
-  || (defined(__IPHONE_OS_VERSION_MAX_ALLOWED)  \
-  && __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
+#if (defined(MAC_OS_X_VERSION_MAX_ALLOWED) &&   \
+     MAC_OS_X_VERSION_MAX_ALLOWED >= 100900) || \
+  (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) &&  \
+   __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000)
 #define SUPPORTS_SecOCSP 1
 #endif
 

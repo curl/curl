@@ -50,7 +50,7 @@ static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
   return size;
 }
 
-#define NUM_HEADERS 8
+#define NUM_HEADERS  8
 #define SIZE_HEADERS 5000
 
 static CURLcode test_lib553(const char *URL)

@@ -175,7 +175,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                              &output_desc,
                                              &sspi_ret_flags, NULL);
 
-    curlx_unicodefree(sname);
+    curlx_free(sname);
 
     Curl_safefree(sspi_recv_token.pvBuffer);
     sspi_recv_token.cbBuffer = 0;
@@ -187,8 +187,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
 
     if(sspi_send_token.cbBuffer) {
-      socksreq[0] = 1;    /* GSS-API subnegotiation version */
-      socksreq[1] = 1;    /* authentication message type */
+      socksreq[0] = 1; /* GSS-API subnegotiation version */
+      socksreq[1] = 1; /* authentication message type */
       if(sspi_send_token.cbBuffer > 0xffff) {
         /* needs to fit in an unsigned 16 bit field */
         result = CURLE_COULDNT_CONNECT;
@@ -298,15 +298,15 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     char *user_utf8 = curlx_convert_tchar_to_UTF8(names.sUserName);
     infof(data, "SOCKS5 server authenticated user %s with GSS-API.",
           (user_utf8 ? user_utf8 : "(unknown)"));
-    curlx_unicodefree(user_utf8);
+    curlx_free(user_utf8);
 #endif
     Curl_pSecFn->FreeContextBuffer(names.sUserName);
     names.sUserName = NULL;
   }
 
   /* Do encryption */
-  socksreq[0] = 1;    /* GSS-API subnegotiation version */
-  socksreq[1] = 2;    /* encryption message type */
+  socksreq[0] = 1; /* GSS-API subnegotiation version */
+  socksreq[1] = 2; /* encryption message type */
 
   gss_enc = 0; /* no data protection */
   /* do confidentiality protection if supported */
@@ -318,7 +318,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
         (gss_enc == 0) ? "no" :
-        ((gss_enc == 1) ? "integrity":"confidentiality") );
+        ((gss_enc == 1) ? "integrity" : "confidentiality") );
 
   /*
    * Sending the encryption type in clear seems wrong. It should be
@@ -399,7 +399,7 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     }
 
     etbuf_size = sspi_w_token[0].cbBuffer + sspi_w_token[1].cbBuffer +
-      sspi_w_token[2].cbBuffer;
+                 sspi_w_token[2].cbBuffer;
     if(etbuf_size > 0xffff) {
       /* needs to fit in an unsigned 16 bit field */
       result = CURLE_COULDNT_CONNECT;

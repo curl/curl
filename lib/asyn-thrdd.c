@@ -725,24 +725,18 @@ CURLcode Curl_async_pollset(struct Curl_easy *data, struct easy_pollset *ps)
 /*
  * Curl_async_getaddrinfo() - for platforms without getaddrinfo
  */
-struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
-                                             const char *hostname,
-                                             int port,
-                                             int ip_version,
-                                             int *waitp)
+CURLcode Curl_async_getaddrinfo(struct Curl_easy *data, const char *hostname,
+                                int port, int ip_version)
 {
   (void)ip_version;
-  *waitp = 0; /* default to synchronous response */
 
   /* fire up a new resolver thread! */
   if(async_thrdd_init(data, hostname, port, ip_version, NULL)) {
-    *waitp = 1; /* expect asynchronous response */
-    return NULL;
+    return CURLE_OK;
   }
 
   failf(data, "getaddrinfo() thread failed");
-
-  return NULL;
+  return CURLE_FAILED_INIT;
 }
 
 #else /* !HAVE_GETADDRINFO */

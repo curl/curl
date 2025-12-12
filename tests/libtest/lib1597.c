@@ -36,7 +36,7 @@ static CURLcode test_lib1597(const char *URL)
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
   curl_version_info_data *curlinfo;
-  const char *const *proto;
+  const char * const *proto;
   int n;
   int i;
   static CURLcode ok = CURLE_OK;
@@ -47,22 +47,22 @@ static CURLcode test_lib1597(const char *URL)
   static char protolist[1024];
 
   static const struct pair prots[] = {
-    {"goobar", &unsup},
-    {"http ", &unsup},
-    {" http", &unsup},
-    {"http", &httpcode},
-    {"http,", &httpcode},
-    {"https,", &httpscode},
-    {"https,http", &httpscode},
-    {"http,http", &httpcode},
-    {"HTTP,HTTP", &httpcode},
-    {",HTTP,HTTP", &httpcode},
-    {"http,http,ft", &unsup},
-    {"", &bad},
-    {",,", &bad},
-    {protolist, &ok},
-    {"all", &ok},
-    {NULL, NULL},
+    { "goobar", &unsup },
+    { "http ", &unsup },
+    { " http", &unsup },
+    { "http", &httpcode },
+    { "http,", &httpcode },
+    { "https,", &httpscode },
+    { "https,http", &httpscode },
+    { "http,http", &httpcode },
+    { "HTTP,HTTP", &httpcode },
+    { ",HTTP,HTTP", &httpcode },
+    { "http,http,ft", &unsup },
+    { "", &bad },
+    { ",,", &bad },
+    { protolist, &ok },
+    { "all", &ok },
+    { NULL, NULL },
   };
   (void)URL;
 

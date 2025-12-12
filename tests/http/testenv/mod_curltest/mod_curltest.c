@@ -570,6 +570,10 @@ cleanup:
     APR_BRIGADE_INSERT_TAIL(bb, b);
     ap_pass_brigade(r->output_filters, bb);
   }
+  if(rv == APR_ECONNRESET) {
+    r->connection->aborted = 1;
+    return rv;
+  }
   return AP_FILTER_ERROR;
 }
 

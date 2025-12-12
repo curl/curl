@@ -62,10 +62,10 @@ static char *dirslash(const char *path)
   n = strlen(path);
   if(n) {
     /* find the rightmost path separator, if any */
-    while(n && !IS_SEP(path[n-1]))
+    while(n && !IS_SEP(path[n - 1]))
       --n;
     /* skip over all the path separators, if any */
-    while(n && IS_SEP(path[n-1]))
+    while(n && IS_SEP(path[n - 1]))
       --n;
   }
   if(curlx_dyn_addn(&out, path, n))

@@ -29,12 +29,12 @@
 #define CURL_PROGRESS_BAR   1
 
 struct ProgressData {
-  int         calls;
-  curl_off_t  prev;
+  int calls;
+  curl_off_t prev;
   struct curltime prevtime;
-  int         width;
-  FILE       *out;  /* where to write everything to */
-  curl_off_t  initial_size;
+  int width;
+  FILE *out;  /* where to write everything to */
+  curl_off_t initial_size;
   unsigned int tick;
   int bar;
   int barmove;

@@ -33,17 +33,18 @@
 #include "curlx/nonblock.h" /* for curlx_nonblock */
 #include "progress.h" /* for Curl_pgrsSetUploadSize */
 #include "transfer.h"
+#include "bufref.h"
 #include "curlx/warnless.h"
 #include <curl/curl.h>
 #include <librtmp/rtmp.h>
 
 #if defined(USE_WINSOCK) || defined(LWIP_SO_SNDRCVTIMEO_NONSTANDARD)
-#define SET_RCVTIMEO(tv,s)   int tv = s*1000
+#define SET_RCVTIMEO(tv, s)  int tv = s * 1000
 #else
-#define SET_RCVTIMEO(tv,s)   struct timeval tv = {s,0}
+#define SET_RCVTIMEO(tv, s)  struct timeval tv = { s, 0 }
 #endif
 
-#define DEF_BUFTIME    (2*60*60*1000)    /* 2 hours */
+#define DEF_BUFTIME    (2 * 60 * 60 * 1000)    /* 2 hours */
 
 /* meta key for storing RTMP* at connection */
 #define CURL_META_RTMP_CONN   "meta:proto:rtmp:conn"
@@ -61,7 +62,7 @@ static Curl_recv rtmp_recv;
 static Curl_send rtmp_send;
 
 /*
- * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu
+ * RTMP protocol handler.h, based on https://rtmpdump.mplayerhq.hu/
  */
 
 const struct Curl_handler Curl_handler_rtmp = {
@@ -233,7 +234,7 @@ static CURLcode rtmp_setup_connection(struct Curl_easy *data,
 
   RTMP_Init(r);
   RTMP_SetBufferMS(r, DEF_BUFTIME);
-  if(!RTMP_SetupURL(r, data->state.url))
+  if(!RTMP_SetupURL(r, CURL_UNCONST(Curl_bufref_ptr(&data->state.url))))
     /* rtmp_conn_dtor() performs the cleanup */
     return CURLE_URL_MALFORMAT;
   return CURLE_OK;

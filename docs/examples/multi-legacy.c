@@ -41,9 +41,9 @@
  * Download an HTTP file and upload an FTP file simultaneously.
  */
 
-#define HTTP_HANDLE 0   /* Index for the HTTP transfer */
-#define FTP_HANDLE 1    /* Index for the FTP transfer */
-#define HANDLECOUNT 2   /* Number of simultaneous transfers */
+#define HTTP_HANDLE 0  /* Index for the HTTP transfer */
+#define FTP_HANDLE  1  /* Index for the FTP transfer */
+#define HANDLECOUNT 2  /* Number of simultaneous transfers */
 
 int main(void)
 {
@@ -140,7 +140,7 @@ int main(void)
         rc = 0;
 #else
         /* Portable sleep for platforms other than Windows. */
-        struct timeval wait = {0};
+        struct timeval wait = { 0 };
         wait.tv_usec = 100 * 1000; /* 100ms */
         rc = select(0, NULL, NULL, NULL, &wait);
 #endif
@@ -155,7 +155,7 @@ int main(void)
       case -1:
         /* select error */
         break;
-      case 0:  /* timeout */
+      case 0: /* timeout */
       default: /* action */
         curl_multi_perform(multi, &still_running);
         break;

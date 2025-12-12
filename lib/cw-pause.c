@@ -53,7 +53,7 @@ static struct cw_pause_buf *cw_pause_buf_create(int type, size_t buflen)
     cwbuf->type = type;
     if(type & CLIENTWRITE_BODY)
       Curl_bufq_init2(&cwbuf->b, CW_PAUSE_BUF_CHUNK, 1,
-                      (BUFQ_OPT_SOFT_LIMIT|BUFQ_OPT_NO_SPARES));
+                      (BUFQ_OPT_SOFT_LIMIT | BUFQ_OPT_NO_SPARES));
     else
       Curl_bufq_init(&cwbuf->b, buflen, 1);
   }

@@ -36,7 +36,7 @@ stack.
  - curl users building with vanilla OpenSSL can still use QUIC through the
    means of ngtcp2
 
-We remove the OpenSSL-QUIC backend in March 2026.
+We remove the OpenSSL-QUIC backend in January 2026.
 
 ## RTMP
 
@@ -49,6 +49,12 @@ RTMP in curl is powered by the 3rd party library librtmp.
  - we have no RTMP tests
 
 Support for RTMP in libcurl gets removed in April 2026.
+
+## CMake 3.17 and earlier
+
+We remove support for CMake <3.18 in April 2026.
+
+CMake 3.18 was released on 2020-07-15.
 
 ## Past removals
 

@@ -34,8 +34,7 @@ struct Cookie {
   struct Curl_llist_node getnode; /* for getlist */
   char *name;                     /* <this> = value */
   char *value;                    /* name = <this> */
-  char *path;                     /* path = <this> which is in Set-Cookie: */
-  char *spath;                    /* sanitized cookie path */
+  char *path;                     /* canonical path */
   char *domain;                   /* domain = <this> */
   curl_off_t expires;             /* expires = <this> */
   unsigned int creationtime;      /* time when the cookie was written */
@@ -52,7 +51,7 @@ struct Cookie {
  * draft-ietf-httpbis-rfc6265bis-02
  */
 #define COOKIE_PREFIX__SECURE (1 << 0)
-#define COOKIE_PREFIX__HOST (1 << 1)
+#define COOKIE_PREFIX__HOST   (1 << 1)
 
 #define COOKIE_HASH_SIZE 63
 

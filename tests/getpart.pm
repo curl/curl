@@ -76,9 +76,10 @@ sub testcaseattr {
     for(@xml) {
         if(($_ =~ /^ *\<testcase ([^>]*)/)) {
             my $attr=$1;
-            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\> ]*))//) {
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|\'([^\']*)\')//) {
                 my ($var, $cont)=($1, $2);
                 $cont =~ s/^\"(.*)\"$/$1/;
+                $cont =~ s/^\'(.*)\'$/$1/;
                 $hash{$var}=$cont;
             }
         }
@@ -108,9 +109,10 @@ sub getpartattr {
             $inside++;
             my $attr=$1;
 
-            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|([^\> ]*))//) {
+            while($attr =~ s/ *([^=]*)= *(\"([^\"]*)\"|\'([^\']*)\')//) {
                 my ($var, $cont)=($1, $2);
                 $cont =~ s/^\"(.*)\"$/$1/;
+                $cont =~ s/^\'(.*)\'$/$1/;
                 $hash{$var}=$cont;
             }
             last;

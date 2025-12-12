@@ -31,6 +31,7 @@ my @tabs = (
     "Makefile\\.(am|example)\$",
     "/mkfile",
     "\\.sln\$",
+    "^tests/data/data1706-stdout.txt",
     "^tests/data/test",
 );
 

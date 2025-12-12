@@ -577,7 +577,11 @@ bool Curl_conn_is_connected(struct connectdata *conn, int sockindex)
   if(!CONN_SOCK_IDX_VALID(sockindex))
     return FALSE;
   cf = conn->cfilter[sockindex];
-  return cf && cf->connected;
+  if(cf)
+    return cf->connected;
+  else if(conn->handler->flags & PROTOPT_NONETWORK)
+    return TRUE;
+  return FALSE;
 }
 
 bool Curl_conn_is_ip_connected(struct Curl_easy *data, int sockindex)

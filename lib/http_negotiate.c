@@ -47,7 +47,6 @@ static void http_auth_nego_reset(struct connectdata *conn,
     Curl_auth_cleanup_spnego(neg_ctx);
 }
 
-
 CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
                               bool proxy, const char *header)
 {
@@ -124,8 +123,8 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #ifdef USE_SSL
   curlx_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
   if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
-    result = Curl_ssl_get_channel_binding(
-      data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
+    result = Curl_ssl_get_channel_binding(data, FIRSTSOCKET,
+                                          &neg_ctx->channel_binding_data);
     if(result) {
       http_auth_nego_reset(conn, neg_ctx, proxy);
       return result;

@@ -145,22 +145,28 @@ static const struct alpn_spec ALPN_SPEC_H2 = {
 static const struct alpn_spec ALPN_SPEC_H2_H11 = {
   { ALPN_H2, ALPN_HTTP_1_1 }, 2
 };
+static const struct alpn_spec ALPN_SPEC_H11_H2 = {
+  { ALPN_HTTP_1_1, ALPN_H2 }, 2
+};
 #endif
 
 #if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
-static const struct alpn_spec *alpn_get_spec(http_majors allowed,
+static const struct alpn_spec *alpn_get_spec(http_majors wanted,
+                                             http_majors preferred,
                                              bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
-  if(allowed & CURL_HTTP_V2x) {
-    if(allowed & CURL_HTTP_V1x)
-      return &ALPN_SPEC_H2_H11;
+  if(wanted & CURL_HTTP_V2x) {
+    if(wanted & CURL_HTTP_V1x)
+      return (preferred == CURL_HTTP_V1x) ?
+        &ALPN_SPEC_H11_H2 : &ALPN_SPEC_H2_H11;
     return &ALPN_SPEC_H2;
   }
 #else
-  (void)allowed;
+  (void)wanted;
+  (void)preferred;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
      Avoid "http/1.0" because some servers do not support it. */
@@ -1718,6 +1724,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
   ctx = cf_ctx_new(data, NULL);
 #else
   ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
+                                       data->state.http_neg.preferred,
                                        conn->bits.tls_enable_alpn));
 #endif
   if(!ctx) {
@@ -1770,17 +1777,17 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   CURLcode result;
   /* ALPN is default, but if user explicitly disables it, obey */
   bool use_alpn = data->set.ssl_enable_alpn;
-  http_majors allowed = CURL_HTTP_V1x;
+  http_majors wanted = CURL_HTTP_V1x;
 
   (void)conn;
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    allowed = (CURL_HTTP_V1x | CURL_HTTP_V2x);
+    wanted = (CURL_HTTP_V1x | CURL_HTTP_V2x);
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(allowed, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(wanted, 0, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

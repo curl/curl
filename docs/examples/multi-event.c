@@ -183,8 +183,8 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
   case CURL_POLL_IN:
   case CURL_POLL_OUT:
   case CURL_POLL_INOUT:
-    curl_context = socketp ?
-      (struct curl_context *)socketp : create_curl_context(s);
+    curl_context =
+      socketp ? (struct curl_context *)socketp : create_curl_context(s);
 
     curl_multi_assign(multi, s, (void *)curl_context);
 
@@ -197,7 +197,7 @@ static int handle_socket(CURL *curl, curl_socket_t s, int action, void *userp,
 
     event_del(curl_context->event);
     event_assign(curl_context->event, base, curl_context->sockfd,
-      (short)events, curl_perform, curl_context);
+                 (short)events, curl_perform, curl_context);
     event_add(curl_context->event, NULL);
 
     break;

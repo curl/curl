@@ -75,6 +75,7 @@
 #include "system_win32.h"
 #include "http2.h"
 #include "curlx/dynbuf.h"
+#include "bufref.h"
 #include "altsvc.h"
 #include "hsts.h"
 
@@ -87,7 +88,7 @@ static long          easy_init_flags;
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
 static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
-#define global_init_lock() curl_simple_lock_lock(&s_lock)
+#define global_init_lock()   curl_simple_lock_lock(&s_lock)
 #define global_init_unlock() curl_simple_lock_unlock(&s_lock)
 
 #else
@@ -207,7 +208,6 @@ fail:
   initialized--; /* undo the increase */
   return CURLE_FAILED_INIT;
 }
-
 
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
@@ -411,7 +411,6 @@ static int events_timer(CURLM *multi,    /* multi handle */
   return 0;
 }
 
-
 /* poll2cselect
  *
  * convert from poll() bit definitions to libcurl's CURL_CSELECT_* ones
@@ -427,7 +426,6 @@ static int poll2cselect(int pollmask)
     omask |= CURL_CSELECT_ERR;
   return omask;
 }
-
 
 /* socketcb2poll
  *
@@ -485,10 +483,9 @@ static int events_socket(CURL *easy,      /* easy handle */
         /* The socket 's' is already being monitored, update the activity
            mask. Convert from libcurl bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
-        infof(data, "socket cb: socket %" FMT_SOCKET_T
-              " UPDATED as %s%s", s,
-              (what&CURL_POLL_IN) ? "IN" : "",
-              (what&CURL_POLL_OUT) ? "OUT" : "");
+        infof(data, "socket cb: socket %" FMT_SOCKET_T " UPDATED as %s%s", s,
+              (what & CURL_POLL_IN) ? "IN" : "",
+              (what & CURL_POLL_OUT) ? "OUT" : "");
       }
       break;
     }
@@ -512,8 +509,8 @@ static int events_socket(CURL *easy,      /* easy handle */
         m->socket.revents = 0;
         ev->list = m;
         infof(data, "socket cb: socket %" FMT_SOCKET_T " ADDED as %s%s", s,
-              (what&CURL_POLL_IN) ? "IN" : "",
-              (what&CURL_POLL_OUT) ? "OUT" : "");
+              (what & CURL_POLL_IN) ? "IN" : "",
+              (what & CURL_POLL_OUT) ? "OUT" : "");
       }
       else
         return CURLE_OUT_OF_MEMORY;
@@ -522,7 +519,6 @@ static int events_socket(CURL *easy,      /* easy handle */
 
   return 0;
 }
-
 
 /*
  * events_setup()
@@ -681,7 +677,6 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
   return result;
 }
 
-
 /* easy_events()
  *
  * Runs a transfer in a blocking manner using the events-based API
@@ -690,7 +685,7 @@ static CURLcode easy_events(struct Curl_multi *multi)
 {
   /* this struct is made static to allow it to be used after this function
      returns and curl_multi_remove_handle() is called */
-  static struct events evs = {-1, FALSE, 0, NULL, 0};
+  static struct events evs = { -1, FALSE, 0, NULL, 0 };
 
   /* if running event-based, do some further multi inits */
   events_setup(multi, &evs);
@@ -737,7 +732,6 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
   return result;
 }
-
 
 /*
  * easy_perform() is the internal interface that performs a blocking
@@ -982,6 +976,8 @@ CURL *curl_easy_duphandle(CURL *d)
   Curl_hash_init(&outcurl->meta_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, dupeasy_meta_freeentry);
   curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
+  Curl_bufref_init(&outcurl->state.url);
+  Curl_bufref_init(&outcurl->state.referer);
   Curl_netrc_init(&outcurl->state.netrc);
 
   /* the connection pool is setup on demand */
@@ -1021,18 +1017,19 @@ CURL *curl_easy_duphandle(CURL *d)
   }
 #endif
 
-  if(data->state.url) {
-    outcurl->state.url = curlx_strdup(data->state.url);
-    if(!outcurl->state.url)
+  if(Curl_bufref_ptr(&data->state.url)) {
+    Curl_bufref_set(&outcurl->state.url,
+                    Curl_bufref_dup(&data->state.url), 0,
+                    curl_free);
+    if(!Curl_bufref_ptr(&outcurl->state.url))
       goto fail;
-    outcurl->state.url_alloc = TRUE;
   }
-
-  if(data->state.referer) {
-    outcurl->state.referer = curlx_strdup(data->state.referer);
-    if(!outcurl->state.referer)
+  if(Curl_bufref_ptr(&data->state.referer)) {
+    Curl_bufref_set(&outcurl->state.referer,
+                    Curl_bufref_dup(&data->state.referer), 0,
+                    curl_free);
+    if(!Curl_bufref_ptr(&outcurl->state.referer))
       goto fail;
-    outcurl->state.referer_alloc = TRUE;
   }
 
   /* Reinitialize an SSL engine for the new handle
@@ -1200,7 +1197,6 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   return result;
 }
-
 
 static CURLcode easy_connection(struct Curl_easy *data,
                                 struct connectdata **connp)

@@ -4,7 +4,6 @@
 HTTP
 HTTP HEAD
 -G
-notxml
 </keywords>
 </info>
 #
@@ -30,7 +29,7 @@ http
 HTTP with -d and -G and -I
 </name>
 <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+-d "foo=moo%AMPmoo=poo" http://%HOSTIP:%HTTPPORT/%TESTNUMBER -G -I http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
@@ -38,12 +37,12 @@ HTTP with -d and -G and -I
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">
-HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
+HEAD /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
-HEAD /%TESTNUMBER?foo=moo&moo=poo HTTP/1.1
+HEAD /%TESTNUMBER?foo=moo%AMPmoo=poo HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

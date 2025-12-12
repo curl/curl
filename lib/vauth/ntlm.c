@@ -255,7 +255,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
 {
   unsigned short target_info_len = 0;
   unsigned int target_info_offset = 0;
-  const unsigned char *type2 = Curl_bufref_ptr(type2ref);
+  const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
@@ -355,7 +355,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   */
 
   CURLcode result = CURLE_OK;
-  const unsigned char *type2 = Curl_bufref_ptr(type2ref);
+  const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
@@ -831,7 +831,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size += hostlen;
 
   /* Return the binary blob. */
-  result = Curl_bufref_memdup(out, ntlmbuf, size);
+  result = Curl_bufref_memdup0(out, ntlmbuf, size);
 
 error:
   curlx_free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */

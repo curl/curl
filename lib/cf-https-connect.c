@@ -244,7 +244,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   return result;
 }
 
-
 static bool time_to_start_next(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                size_t idx, struct curltime now)
@@ -710,6 +709,31 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
       }
     }
 #endif
+
+    /* Add preferred HTTP version ALPN first */
+    if(data->state.http_neg.preferred &&
+       (alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
+       (data->state.http_neg.preferred & data->state.http_neg.allowed)) {
+      enum alpnid alpn_pref = ALPN_none;
+      switch(data->state.http_neg.preferred) {
+      case CURL_HTTP_V3x:
+        if(!Curl_conn_may_http3(data, conn, conn->transport_wanted))
+          alpn_pref = ALPN_h3;
+        break;
+      case CURL_HTTP_V2x:
+        alpn_pref = ALPN_h2;
+        break;
+      case CURL_HTTP_V1x:
+        alpn_pref = ALPN_h1;
+        break;
+      default:
+        break;
+      }
+      if(alpn_pref &&
+         !cf_https_alpns_contain(alpn_pref, alpn_ids, alpn_count)) {
+        alpn_ids[alpn_count++] = alpn_pref;
+      }
+    }
 
     if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
        (data->state.http_neg.wanted & CURL_HTTP_V3x) &&

@@ -46,9 +46,7 @@ static size_t t2301_write_cb(char *b, size_t size, size_t nitems, void *p)
   unsigned char *buffer = (unsigned char *)b;
   size_t i;
   size_t sent;
-  unsigned char pong[] = {
-    0x8a, 0x0
-  };
+  unsigned char pong[] = { 0x8a, 0x0 };
   size_t incoming = nitems;
   curl_mfprintf(stderr, "Called CURLOPT_WRITEFUNCTION with %zu bytes: ",
                 nitems);

@@ -25,6 +25,9 @@ blablabla
 <server>
 http
 </server>
+<features>
+!win32
+</features>
 <name>
 HTTP PUT from stdin using period
 </name>

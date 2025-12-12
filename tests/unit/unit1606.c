@@ -52,7 +52,7 @@ static int runawhile(struct Curl_easy *easy,
                      int dec)
 {
   int counter = 1;
-  struct curltime now = {1, 0};
+  struct curltime now = { 1, 0 };
   CURLcode res;
   int finaltime;
 

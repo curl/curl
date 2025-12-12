@@ -103,7 +103,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   if(handle && global->traceids &&
      !curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
-        conn_id >= 0) {
+       conn_id >= 0) {
       curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
                      xfer_id, conn_id);
     }
@@ -224,7 +224,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     break;
   }
 
-  dump(timebuf, idsbuf, text, output, (unsigned char *) data, size,
+  dump(timebuf, idsbuf, text, output, (unsigned char *)data, size,
        global->tracetype, type);
   return 0;
 }
