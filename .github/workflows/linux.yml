@@ -157,7 +157,8 @@ jobs:
             generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
           - name: 'openssl'
-            install_steps: libssh-dev pytest
+            install_packages: libssh-dev
+            install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
           - name: 'openssl arm'
