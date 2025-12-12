@@ -182,7 +182,12 @@ Lists all test case names.
 
 ## `-m=[seconds]`
 
-Set timeout for curl commands in tests
+Set timeout for curl commands in tests.
+
+## `--min=[count]`
+
+Set the minimum number of tests to run. This overrides the `CURL_TEST_MIN`
+environment variable, if any.
 
 ## `-n`
 

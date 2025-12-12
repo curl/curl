@@ -52,6 +52,7 @@ permissions: {}
 env:
   MAKEFLAGS: -j 5
   CURL_CI: github
+  CURL_TEST_MIN: 1500
   DEBIAN_FRONTEND: noninteractive
 
 jobs:

@@ -20,6 +20,7 @@ concurrency:
 permissions: {}
 
 env:
+  CURL_TEST_MIN: 1450
   MAKEFLAGS: -j 5
 
 jobs:
