@@ -235,7 +235,7 @@ jobs:
           - name: '!ssl'
             compiler: clang
             configure: --enable-debug --without-ssl
-            tflags: '--min=950'
+            tflags: '--min=1500'
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
             configure: --enable-debug --with-libssh2=/opt/homebrew/opt/libssh2 --without-ssl --with-apple-idn
@@ -254,6 +254,7 @@ jobs:
             tflags: '--min=1500'
           - name: '!ssl HTTP-only'
             compiler: clang
+            tflags: '--min=950'
             configure: >-
               --enable-debug
               --disable-alt-svc --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap
@@ -283,7 +284,7 @@ jobs:
           - name: 'OpenSSL event-based'
             compiler: clang
             configure: --enable-debug --with-openssl=/opt/homebrew/opt/openssl
-            tflags: '--test-event --max=1300'
+            tflags: '--test-event --min=1300'
           # cmake
           - name: 'OpenSSL gsasl rtmp AppleIDN SecTrust +examples'
             install: libnghttp3 libngtcp2 gsasl rtmpdump
@@ -334,6 +335,7 @@ jobs:
             compiler: clang
             install: rustls-ffi
             generate: -DENABLE_DEBUG=ON -DCURL_USE_RUSTLS=ON -DUSE_ECH=ON -DCURL_DISABLE_LDAP=ON
+            tflags: '--min=1650'
           - name: 'OpenSSL torture !FTP'
             compiler: clang
             install: libnghttp3
