@@ -353,14 +353,12 @@ jobs:
       matrix:
         build:
           - name: 'openssl'
-            install_packages: libssh2-1-dev
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2 --with-libssh2 --enable-ssls-export
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2 --enable-ssls-export
 
           - name: 'openssl'
-            install_packages: libssh2-1-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
@@ -440,15 +438,13 @@ jobs:
               -DUSE_ECH=ON
 
           - name: 'openssl-quic'
-            install_packages: libssh2-1-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-openssl=/home/runner/openssl/build --with-openssl-quic --with-libssh2
+              --with-openssl=/home/runner/openssl/build --with-openssl-quic
 
           - name: 'openssl-quic'
-            install_packages: libssh-dev
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
