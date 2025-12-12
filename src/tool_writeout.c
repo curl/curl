@@ -602,8 +602,7 @@ static const char *outtime(const char *ptr, /* %time{ ... */
         result = curlx_dyn_addn(&format, &ptr[i], 1);
     }
     if(!result) {
-      /* !checksrc! disable BANNEDFUNC 1 */
-      utc = gmtime(&secs);
+      utc = curlx_gmtime(&secs);
       if(curlx_dyn_len(&format) && utc &&
          strftime(output, sizeof(output), curlx_dyn_ptr(&format), utc))
         fputs(output, stream);
