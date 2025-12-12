@@ -186,7 +186,7 @@ Set timeout for curl commands in tests.
 
 ## `--min=[count]`
 
-Set the minimum number of tests to run. Overriding the `CURL_TEST_MIN`
+Set the minimum number of tests to run. This overrides the `CURL_TEST_MIN`
 environment variable, if any.
 
 ## `-n`

@@ -3346,7 +3346,7 @@ if($mintotal) {
         exit 1;
     }
     else {
-        logmsg "TESTDONE: minimum number of tests to run: $mintotal\n";
+        logmsg "TESTDONE: minimum number of tests was met: $mintotal\n";
     }
 }
 
