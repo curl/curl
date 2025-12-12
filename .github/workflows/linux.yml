@@ -79,7 +79,7 @@ jobs:
           - name: 'libressl krb5'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev
             install_steps: libressl pytest codeset-test
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl -with-libssh2 --with-gssapi --enable-debug
 
           - name: 'libressl krb5 valgrind'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
