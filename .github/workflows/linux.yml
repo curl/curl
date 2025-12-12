@@ -77,7 +77,7 @@ jobs:
       matrix:
         build:
           - name: 'libressl krb5'
-            install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
+            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev
             install_steps: libressl pytest codeset-test
             configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
@@ -112,12 +112,12 @@ jobs:
               -DCURL_USE_GSSAPI=ON
 
           - name: 'mbedtls clang'
-            install_packages: libnghttp2-dev libldap-dev clang
+            install_packages: libssh-dev libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
             configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
-            install_packages: libnghttp2-dev libuv1-dev
+            install_packages: libssh2-1-dev libnghttp2-dev libuv1-dev
             install_steps: mbedtls-prev pytest
             PKG_CONFIG_PATH: /home/runner/mbedtls-prev/lib/pkgconfig  # Requires v3.6.0
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_USE_LIBUV=ON -DENABLE_DEBUG=ON
@@ -149,15 +149,15 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
           - name: 'openssl default'
-            install_steps: pytest
+            install_steps: libssh2-1-dev pytest
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: 'openssl libssh2 sync-resolver valgrind'
             install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev valgrind
-            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF -DCURL_USE_LIBSSH2=ON
+            generate: -DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF
 
           - name: 'openssl'
-            install_steps: pytest
+            install_steps: libssh-dev pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
           - name: 'openssl arm'
@@ -176,12 +176,13 @@ jobs:
             configure: CC=clang --disable-shared --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual --with-ldap=/home/runner/openldap-static --with-ldap-lib=ldap --with-lber-lib=lber
 
           - name: 'openssl clang krb5 LTO'
-            install_packages: libkrb5-dev clang
+            install_packages: libssh2-1-dev libkrb5-dev clang
             install_steps: skiprun
             CC: clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
+            install_packages: libkrb5-dev clang
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
 
           - name: 'openssl https-only'
@@ -259,7 +260,7 @@ jobs:
               --disable-debug --disable-unity --disable-typecheck
 
           - name: 'scan-build H3 c-ares'
-            install_packages: clang-tools clang libidn2-dev libnghttp2-dev
+            install_packages: clang-tools clang libidn2-dev libssh-dev libnghttp2-dev
             install_steps: skipall
             install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
             CC: clang
@@ -284,7 +285,7 @@ jobs:
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang libubsan1 libasan8 libtsan2
             install_steps: pytest
-            install_steps_brew: openssl libngtcp2 libnghttp3 c-ares
+            install_steps_brew: openssl libssh2-1-dev libngtcp2 libnghttp3 c-ares
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
