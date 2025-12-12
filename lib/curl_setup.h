@@ -93,10 +93,6 @@
 #ifndef _CRT_NONSTDC_NO_DEPRECATE  /* mingw-w64 v2+. MS SDK ~10+/~VS2017+. */
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for close(), fileno(), unlink(), etc. */
 #endif
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for getenv(), gmtime(), strcpy(),
-                                    in tests: localtime(), sscanf() */
-#endif
 #endif /* _MSC_VER */
 
 #ifdef _WIN32

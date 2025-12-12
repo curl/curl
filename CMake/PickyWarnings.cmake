@@ -26,7 +26,7 @@ include(CheckCCompilerFlag)
 set(_picky "")
 set(_picky_nocheck "")  # not to pass to feature checks
 
-if(CURL_WERROR)
+if(CURL_WERROR AND NOT MSVC)
   if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
     set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
   elseif(MSVC)
