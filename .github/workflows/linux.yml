@@ -226,7 +226,7 @@ jobs:
             CC: /home/runner/filc/build/bin/filcc
             PKG_CONFIG_PATH: /home/runner/nghttp2/lib/pkgconfig
             generate: >-
-              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF
+              -DBUILD_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_UNITY_BUILD=OFF -DCURL_DISABLE_TYPECHECK=ON
               -DOPENSSL_ROOT_DIR=/home/runner/libressl -DCURL_USE_LIBPSL=OFF
               -DCURL_ZLIB=OFF -DCURL_BROTLI=OFF -DCURL_ZSTD=OFF
               -DCURL_DISABLE_LDAP=ON -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF
@@ -241,7 +241,7 @@ jobs:
             configure: >-
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
-              --enable-ech --with-gssapi --enable-ssls-export
+              --enable-ech --with-gssapi --enable-ssls-export --disable-typecheck
 
           - name: 'scan-build'
             install_packages: clang-tools clang libssl-dev libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libgss-dev librtmp-dev libgnutls28-dev
@@ -256,7 +256,7 @@ jobs:
               --with-wolfssl=/home/runner/wolfssl-opensslextra --with-openssl --with-rustls --with-mbedtls=/home/runner/mbedtls --with-gnutls --with-libgsasl
               --with-librtmp --with-libssh2 --with-libidn2
               --enable-ech --with-gssapi --enable-ssls-export
-              --disable-debug --disable-unity
+              --disable-debug --disable-unity --disable-typecheck
 
           - name: 'scan-build H3 c-ares'
             install_packages: clang-tools clang libidn2-dev libnghttp2-dev
@@ -270,7 +270,7 @@ jobs:
             configure: >-
               --with-openssl=/home/linuxbrew/.linuxbrew/opt/openssl --with-ngtcp2 --with-nghttp3=
               --with-libidn2 --enable-httpsrr --enable-ares
-              --disable-debug --disable-unity
+              --disable-debug --disable-unity --disable-typecheck
               --disable-verbose
 
           - name: 'address-sanitizer'
