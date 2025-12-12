@@ -59,7 +59,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 - Set-Cookie == onecookie=data; (0/3)
 - Set-Cookie == secondcookie=2data; (1/3)
 - Set-Cookie == cookie3=data3; (2/3)
- Fold == is folding a line
+ Fold == is folding a        line
  Blank ==%SP
  Blank2 ==%SP
 </stdout>
