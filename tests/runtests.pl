@@ -3337,7 +3337,7 @@ else {
     }
 }
 
-if(!$mintotal && $ENV{"CURL_TEST_MIN"}}
+if(!$mintotal && $ENV{"CURL_TEST_MIN"}) {
     $mintotal = $ENV{"CURL_TEST_MIN"};
 }
 if($mintotal && $total < $mintotal) {
