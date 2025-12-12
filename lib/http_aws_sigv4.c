@@ -36,6 +36,7 @@
 #include "sendf.h"
 #include "escape.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 
 #include <time.h>
 
@@ -806,7 +807,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data)
 #else
   clock = time(NULL);
 #endif
-  result = Curl_gmtime(clock, &tm);
+  result = curlx_gmtime(clock, &tm);
   if(result) {
     goto fail;
   }

@@ -57,6 +57,7 @@
 #include "../strdup.h"
 #include "../curlx/fopen.h"
 #include "../curlx/warnless.h"
+#include "../curlx/timeval.h"
 #include "x509asn1.h"
 #include "../multiif.h"
 
@@ -178,7 +179,7 @@ static void showtime(struct Curl_easy *data, const char *text, time_t stamp)
   struct tm buffer;
   const struct tm *tm = &buffer;
   char str[96];
-  CURLcode result = Curl_gmtime(stamp, &buffer);
+  CURLcode result = curlx_gmtime(stamp, &buffer);
   if(result)
     return;
 
