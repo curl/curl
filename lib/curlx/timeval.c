@@ -266,7 +266,7 @@ timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
  */
 CURLcode curlx_gmtime(time_t intime, struct tm *store)
 {
-#ifdef WIN32
+#ifdef _WIN32
   if(gmtime_s(store, &intime))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_GMTIME_R)
