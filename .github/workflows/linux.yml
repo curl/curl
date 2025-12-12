@@ -182,7 +182,6 @@ jobs:
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
           - name: 'openssl !ipv6 !--libcurl !--digest-auth'
-            install_packages: libkrb5-dev clang
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity --disable-libcurl-option --disable-digest-auth
 
           - name: 'openssl https-only'
