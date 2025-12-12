@@ -266,7 +266,7 @@ endif()
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   set(CMAKE_UNITY_BUILD OFF)  # clang-tidy is not looking into #included sources, thus not compatible with unity builds.
-  set(CURL_DISABLE_TYPECHECK ON)
+  set(CURL_DISABLE_TYPECHECK ON)  # to improve performance and avoid potential interference.
   set(_tidy_checks "")
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.bzero")  # for FD_ZERO() (seen on macOS)
   list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
