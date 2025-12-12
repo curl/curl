@@ -16,7 +16,6 @@ name: 'Source'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
-      - 'tests/data/**'
   pull_request:
     branches:
       - master
@@ -25,7 +24,6 @@ name: 'Source'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
-      - 'tests/data/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
