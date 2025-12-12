@@ -3332,6 +3332,14 @@ else {
     }
 }
 
+if($ENV{"CURL_TEST_MIN"}) {
+    my $mintotal = $ENV{"CURL_TEST_MIN"};
+    if($total < $mintotal) {
+        logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
+        exit 1;
+    }
+}
+
 if(($total && (($ok+$ign) != $total)) || !$total || $unexpected) {
     exit 1;
 }
