@@ -2403,6 +2403,10 @@ while(@ARGV) {
         my ($num)=($1);
         $maxtime=$num;
     }
+    elsif($ARGV[0] =~ /--min=(\d+)/) {
+        my ($num)=($1);
+        $mintotal=$num;
+    }
     elsif($ARGV[0] eq "-n") {
         # no valgrind
         undef $valgrind;
@@ -2546,6 +2550,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -L path  require an additional perl library file to replace certain functions
   -l       list all test case names/descriptions
   -m=[seconds] set timeout for curl commands in tests
+  -min=[count] minimum number of tests to run.
   -n       no valgrind
   --no-debuginfod disable the valgrind debuginfod functionality
   -o variable=value set internal variable to the specified value
