@@ -43,3 +43,4 @@ danted = @DANTED@
 
 [sshd]
 sshd = @SSHD@
+sftpd = @SFTPD@

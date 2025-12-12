@@ -320,6 +320,13 @@ class EnvConfig:
             except Exception:
                 self.sshd = None
 
+        if self.sshd:
+            self.sftpd = self.config['sshd']['sftpd']
+            if self.sftpd == '':
+                self.sftpd = None
+        else:
+            self.sftpd = None
+
         self._tcpdump = shutil.which('tcpdump')
 
     @property
@@ -601,6 +608,10 @@ class Env:
     @staticmethod
     def has_sshd() -> bool:
         return Env.CONFIG.sshd is not None
+
+    @staticmethod
+    def has_sftpd() -> bool:
+        return Env.has_sshd() and Env.CONFIG.sftpd is not None
 
     @staticmethod
     def tcpdump() -> Optional[str]:

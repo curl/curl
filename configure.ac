@@ -434,10 +434,25 @@ elif test "x$request_sshd" != "xno"; then
     AC_MSG_NOTICE([using SSHD=$SSHD for tests])
   fi
 fi
-if test "$DANTED_ENABLED" = "no"; then
+if test "$SSHD_ENABLED" = "no"; then
   SSHD=""
+  SFTPD=""
+else
+  if test -x "/usr/libexec/sftp-server"; then
+    # common location on macOS)
+    SFTPD="/usr/libexec/sftp-server"
+  elif test -x "/usr/lib/openssh/sftp-server"; then
+    # common location on debian
+    SFTPD="/usr/lib/openssh/sftp-server"
+  else
+    AC_PATH_PROG([SFTPD], [sftp-server])
+    if test -z "$SFTPD"; then
+      AC_PATH_PROG([SFTPD], [sftp-server])
+    fi
+  fi
 fi
 AC_SUBST(SSHD)
+AC_SUBST(SFTPD)
 
 dnl the nghttpx we might use in httpd testing
 if test -n "$TEST_NGHTTPX" && test "x$TEST_NGHTTPX" != "xnghttpx"; then

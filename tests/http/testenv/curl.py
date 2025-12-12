@@ -916,7 +916,7 @@ class CurlClient:
                                with_tcpdump=with_tcpdump,
                                extra_args=extra_args)
 
-    def scp_download(self, urls: List[str],
+    def ssh_download(self, urls: List[str],
                      with_stats: bool = True,
                      with_profile: bool = False,
                      with_tcpdump: bool = False,
@@ -945,7 +945,7 @@ class CurlClient:
                          with_profile=with_profile,
                          with_tcpdump=with_tcpdump)
 
-    def scp_upload(self, urls: List[str],
+    def ssh_upload(self, urls: List[str],
                    fupload: Optional[Any] = None,
                    updata: Optional[str] = None,
                    with_stats: bool = True,

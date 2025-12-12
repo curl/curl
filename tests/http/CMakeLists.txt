@@ -64,6 +64,12 @@ if(NOT SSHD)
 endif()
 mark_as_advanced(SSHD)
 
+find_program(SFTPD "sftp-server" PATHS "/usr/libexec" "/usr/lib/openssh")
+if(NOT SFTPD)
+  set(SFTPD "")
+endif()
+mark_as_advanced(SFTPD)
+
 
 # Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, DANTED, VSFTPD, SSHD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)

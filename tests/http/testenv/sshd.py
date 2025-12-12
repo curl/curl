@@ -45,7 +45,8 @@ class Sshd:
 
     def __init__(self, env: Env):
         self.env = env
-        self._cmd = '/usr/sbin/sshd'
+        self._cmd = Env.CONFIG.sshd
+        self._sftpd = Env.CONFIG.sftpd
         self._keygen = 'ssh-keygen'
         self._port = 0
         self.name = 'sshd'
@@ -272,11 +273,12 @@ class Sshd:
             # in CI, we might run as root, allow this
             'PermitRootLogin yes',
             'LogLevel VERBOSE',
-            # 'Subsystem internal-sftp',
             f'AuthorizedKeysFile {self._auth_keys}',
             f'PidFile {self._pid_file}',
         ]
         conf.extend([f'HostKey {key_file}' for key_file in self._host_key_files])
+        if self._sftpd:
+            conf.append(f'Subsystem sftp {self._sftpd}')
         conf.append('\n')
         with open(self._conf_file, 'w') as fd:
             fd.write("\n".join(conf))

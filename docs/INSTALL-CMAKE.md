@@ -483,6 +483,8 @@ Examples:
 - `DANTED`:                                 Default: `danted`
 - `TEST_NGHTTPX`:                           Default: `nghttpx`
 - `VSFTPD`:                                 Default: `vsftps`
+- `SSHD`:                                   Default: `sshd`
+- `SFTPD`:                                  Default: `sftp-server`
 
 ## Feature detection variables
 
