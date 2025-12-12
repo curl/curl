@@ -919,7 +919,10 @@ extern curl_calloc_callback Curl_ccalloc;
  * This macro also assigns NULL to given pointer when free'd.
  */
 #define Curl_safefree(ptr) \
-  do { curlx_free(ptr); (ptr) = NULL;} while(0)
+  do {
+    curlx_free(ptr);
+    (ptr) = NULL;
+  } while(0)
 
 #include <curl/curl.h> /* for CURL_EXTERN, mprintf.h */
 
