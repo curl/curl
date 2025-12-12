@@ -1063,7 +1063,7 @@ CURL_EXTERN ALLOC_FUNC
 #define curlx_malloc(size)         curl_dbg_malloc(size, __LINE__, __FILE__)
 #define curlx_calloc(nbelem, size) \
   curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
-#define curlx_realloc(ptr, size)   \
+#define curlx_realloc(ptr, size) \
   curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
 #define curlx_free(ptr)            curl_dbg_free(ptr, __LINE__, __FILE__)
 
