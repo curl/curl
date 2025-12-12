@@ -28,7 +28,6 @@ import difflib
 import filecmp
 import logging
 import os
-from typing import Generator
 import pytest
 
 from testenv import Env, CurlClient, Sshd
