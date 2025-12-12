@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ cookies
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -38,7 +38,6 @@ Content-Type: text/html
 
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -56,7 +55,6 @@ cookies
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

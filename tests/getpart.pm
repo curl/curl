@@ -240,6 +240,16 @@ sub loadtest {
             push @xml, $_;
         }
         close($xmlh);
+        if(!@xml) {
+            print STDERR "file $file is empty!\n";
+            return 1;
+        }
+        my $prolog = @xml[0];
+        chomp $prolog;
+        if($prolog ne '<?xml version="1.0" encoding="US-ASCII"?>') {
+            print STDERR "file $file missing the XML prolog!\n";
+            return 1;
+        }
     }
     else {
         # failure

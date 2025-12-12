@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Based on test100 and test101
 <info>
@@ -7,7 +8,6 @@ PASV
 LIST
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data mode="text">
@@ -25,7 +25,6 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -39,7 +38,6 @@ ftp://%HOSTIP:%FTPPORT/test-%TESTNUMBER/ -P %CLIENTIP --ftp-pasv
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

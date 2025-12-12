@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ IPFS
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -20,7 +19,6 @@ ipfs
 http
 </server>
 <setenv>
-#
 # Set a home that does not have a ".ipfs" folder. %PWD should be good.
 # This is to prevent the automatic gateway detection from finding a gateway file in your home folder.
 HOME=%PWD
@@ -33,7 +31,6 @@ ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
 </client>
 
-#
 # Verify with no gateway URL and no auto detection
 <verify>
 <errorcode>

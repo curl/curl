@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 # This test is a copy of test 67, modified to use an HTTP proxy.

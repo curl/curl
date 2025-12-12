@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ HTTP
 HTTP POST
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -22,7 +22,6 @@ skip: 2300
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -45,7 +44,6 @@ Here's 2000 x 'O':
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">

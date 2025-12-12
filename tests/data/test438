@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ HTTP/2
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -24,7 +24,6 @@ Alt-Svc: h1="%HOST6IP:%HTTP6PORT", ma=315360000; persist=0
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -52,7 +51,6 @@ h1 %HOSTIP %HTTPPORT h1 %HOST6IP %HTTP6PORT "20290222 22:19:28" 0 0
 
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">

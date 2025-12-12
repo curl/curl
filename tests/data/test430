@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Derived from on https://github.com/curl/curl/issues/5120
 <info>
@@ -8,7 +9,6 @@ POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data1>
@@ -34,7 +34,6 @@ Content-Type: text/3
 </data3>
 </reply>
 
-#
 # Client-side
 <client>
 <file1 name="%LOGDIR/config%TESTNUMBER-a">
@@ -67,7 +66,6 @@ Three -K uses with --next and --data in each
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">

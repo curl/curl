@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,9 +13,7 @@ retry
 # Server-side
 <reply>
 
-#
 # the first chunk
-#
 <data crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 200 OK swsbounce swsclose
 Accept-Ranges: bytes
@@ -24,9 +23,7 @@ Content-Length: 26
 abcde
 </data>
 
-#
 # the second chunk
-#
 <data1 crlf="headers" nocheck="yes" nonewline="yes">
 HTTP/1.1 206 Partial Content swsbounce swsclose
 Content-Type: text/html
@@ -36,9 +33,7 @@ Content-Range: bytes 5-25/26
 fghijk
 </data1>
 
-#
 # some nonsense that curl should ignore as unresumable
-#
 <data2 crlf="headers" nocheck="yes">
 HTTP/1.1 404 Not Found swsbounce
 Content-Type: text/html
@@ -47,9 +42,7 @@ Content-Length: 5
 body
 </data2>
 
-#
 # some more nonsense that curl should ignore as unresumable
-#
 <data3 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK swsbounce
 Accept-Ranges: bytes
@@ -59,9 +52,7 @@ Content-Length: 30
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 </data3>
 
-#
 # the third chunk
-#
 <data4 nocheck="yes" nonewline="yes">
 HTTP/1.1 206 Partial Content swsbounce swsclose
 Content-Type: text/html

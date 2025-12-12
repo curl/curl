@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ xattr
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -22,7 +22,6 @@ Content-Type: fake/data
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -44,7 +43,6 @@ basic --xattr with -O
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

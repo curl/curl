@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ CURLFOLLOW_OBEYCODE
 CURLOPT_FOLLOWLOCATION
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
