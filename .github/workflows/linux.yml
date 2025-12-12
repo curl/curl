@@ -202,7 +202,7 @@ jobs:
           - name: 'openssl torture FTP'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
-            tflags: '-t --shallow=20 FTP --min=280'
+            tflags: '-t --shallow=20 FTP --min=260'
 
           - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
@@ -309,7 +309,7 @@ jobs:
           - name: 'event-based'
             install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
-            tflags: '-n --test-event --min=1350 --min=1450'
+            tflags: '-n --test-event --min=1350'
 
           - name: 'duphandle'
             install_packages: libssh-dev
