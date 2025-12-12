@@ -70,5 +70,5 @@ if(NOT SFTPD)
 endif()
 mark_as_advanced(SFTPD)
 
-# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, DANTED, VSFTPD, SSHD
+# Consumed variables: APXS, CADDY, DANTED, HTTPD, HTTPD_NGHTTPX, SFTPD, SSHD, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)
