@@ -198,11 +198,13 @@ jobs:
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: '-t --shallow=25 !FTP --min=1450'
+            torture: true
 
           - name: 'openssl torture FTP'
             install_packages: libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: '-t --shallow=20 FTP --min=260'
+            torture: true
 
           - name: 'openssl i686'
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
@@ -763,7 +765,7 @@ jobs:
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 20 || 10 }}
         env:
-          TEST_TARGET: ${{ contains(matrix.build.tflags, '-t') && 'test-torture' || 'test-ci' }}
+          TEST_TARGET: ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           if [ "${TEST_TARGET}" = 'test-ci' ] && [[ "${MATRIX_INSTALL_PACKAGES}" = *'valgrind'* ]]; then
