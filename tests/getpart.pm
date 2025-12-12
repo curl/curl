@@ -240,6 +240,10 @@ sub loadtest {
             push @xml, $_;
         }
         close($xmlh);
+        if(!@xml || @xml[0] ne '<?xml version="1.0" encoding="US-ASCII"?>') {
+            print STDERR "file $file missing the XML prolog!\n";
+            return 1;
+        }
     }
     else {
         # failure
