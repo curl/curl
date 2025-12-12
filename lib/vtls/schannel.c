@@ -1590,8 +1590,8 @@ static void delete_imported_key(PCCERT_CONTEXT imported_cert)
       DEBUGASSERT(prov == 0);
 
       #ifndef UNICODE
-      curlx_unicodefree(container_name);
-      curlx_unicodefree(prov_name);
+      curlx_free(container_name);
+      curlx_free(prov_name);
       #endif
   }
 
