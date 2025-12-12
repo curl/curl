@@ -3340,9 +3340,14 @@ else {
 if(!$mintotal && $ENV{"CURL_TEST_MIN"}) {
     $mintotal = $ENV{"CURL_TEST_MIN"};
 }
-if($mintotal && $total < $mintotal) {
-    logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
-    exit 1;
+if($mintotal) {
+    if($total < $mintotal) {
+        logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
+        exit 1;
+    }
+    else {
+        logmsg "TESTDONE: minimum number of tests to run: $mintotal\n";
+    }
 }
 
 if(($total && (($ok+$ign) != $total)) || !$total || $unexpected) {
