@@ -77,9 +77,9 @@ jobs:
       matrix:
         build:
           - name: 'libressl krb5'
-            install_packages: libidn2-dev libssh2-1-dev libnghttp2-dev libldap-dev libkrb5-dev
+            install_packages: libidn2-dev libnghttp2-dev libldap-dev libkrb5-dev
             install_steps: libressl pytest codeset-test
-            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl -with-libssh2 --with-gssapi --enable-debug
+            configure: LDFLAGS=-Wl,-rpath,/home/runner/libressl/lib --with-openssl=/home/runner/libressl --with-gssapi --enable-debug
 
           - name: 'libressl krb5 valgrind'
             install_packages: libnghttp2-dev libldap-dev libkrb5-dev valgrind
@@ -140,12 +140,12 @@ jobs:
             configure: LDFLAGS=-Wl,-rpath,/home/runner/awslc/lib --with-openssl=/home/runner/awslc --enable-ech
 
           - name: 'awslc'
-            install_packages: libidn2-dev
+            install_packages: libidn2-dev libssh2-1-dev
             install_steps: awslc
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'boringssl'
-            install_packages: libssh2-1-dev
+            install_packages: libssh-dev
             install_steps: boringssl pytest
             generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
