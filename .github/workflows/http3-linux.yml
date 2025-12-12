@@ -353,12 +353,14 @@ jobs:
       matrix:
         build:
           - name: 'openssl'
+            install_packages: libssh2-1-dev
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-openssl=/home/runner/openssl/build --with-ngtcp2 --enable-ssls-export
+              --with-openssl=/home/runner/openssl/build --with-ngtcp2 --with-libssh2 --enable-ssls-export
 
           - name: 'openssl'
+            install_packages: libssh2-1-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
@@ -406,15 +408,15 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'gnutls'
-            install_packages: libp11-kit-dev
+            install_packages: libp11-kit-dev libssh-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib -Wl,-rpath,/home/runner/nettle/build/lib64 -Wl,-rpath,/home/runner/ngtcp2/build/lib
             configure: >-
-              --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --enable-ssls-export
+              --with-gnutls=/home/runner/gnutls/build --with-ngtcp2 --with-libssh --enable-ssls-export
 
           - name: 'gnutls'
-            install_packages: libp11-kit-dev
+            install_packages: libp11-kit-dev libssh-dev
             PKG_CONFIG_PATH: /home/runner/nettle/build/lib64/pkgconfig:/home/runner/gnutls/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             LDFLAGS: -Wl,-rpath,/home/runner/gnutls/build/lib
             generate: >-
@@ -422,27 +424,31 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON
 
           - name: 'wolfssl'
+            install_packages: libssh-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/wolfssl/build/lib
-              --with-wolfssl=/home/runner/wolfssl/build --with-ngtcp2 --enable-ech --enable-ssls-export
+              --with-wolfssl=/home/runner/wolfssl/build --with-ngtcp2 --enable-ech --with-libssh --enable-ssls-export
               --enable-unity
 
           - name: 'wolfssl'
+            install_packages: libssh2-1-dev
             PKG_CONFIG_PATH: /home/runner/wolfssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/ngtcp2/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DUSE_ECH=ON
 
           - name: 'openssl-quic'
+            install_packages: libssh2-1-dev
             install_steps: skipall
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             configure: >-
               LDFLAGS=-Wl,-rpath,/home/runner/openssl/build/lib
-              --with-openssl=/home/runner/openssl/build --with-openssl-quic
+              --with-openssl=/home/runner/openssl/build --with-openssl-quic --with-libssh2
 
           - name: 'openssl-quic'
+            install_packages: libssh-dev
             PKG_CONFIG_PATH: /home/runner/openssl/build/lib/pkgconfig:/home/runner/nghttp3/build/lib/pkgconfig:/home/runner/nghttp2/build/lib/pkgconfig
             generate: >-
               -DOPENSSL_ROOT_DIR=/home/runner/openssl/build -DUSE_OPENSSL_QUIC=ON
