@@ -114,7 +114,7 @@ jobs:
           - name: 'mbedtls clang'
             install_packages: libssh-dev libnghttp2-dev libldap-dev clang
             install_steps: mbedtls pytest
-            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
+            configure: CC=clang LDFLAGS=-Wl,-rpath,/home/runner/mbedtls/lib --with-mbedtls=/home/runner/mbedtls --with-libssh --enable-debug --with-fish-functions-dir --with-zsh-functions-dir
 
           - name: 'mbedtls-prev'
             install_packages: libssh2-1-dev libnghttp2-dev libuv1-dev
@@ -158,7 +158,7 @@ jobs:
 
           - name: 'openssl'
             install_steps: libssh-dev pytest
-            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+            configure: CFLAGS=-std=gnu89 --with-openssl --with-libssh --enable-debug
 
           - name: 'openssl arm'
             install_steps: pytest
@@ -270,7 +270,7 @@ jobs:
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
             configure: >-
               --with-openssl=/home/linuxbrew/.linuxbrew/opt/openssl --with-ngtcp2 --with-nghttp3=
-              --with-libidn2 --enable-httpsrr --enable-ares
+              --with-libidn2 --with-libssh --enable-httpsrr --enable-ares
               --disable-debug --disable-unity --disable-typecheck
               --disable-verbose
 
