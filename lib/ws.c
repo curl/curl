@@ -43,7 +43,6 @@
 #include "curlx/strparse.h"
 #include "curlx/warnless.h"
 
-
 /***
     RFC 6455 Section 5.2
 
@@ -769,7 +768,6 @@ static const struct Curl_cwtype ws_cw_decode = {
   ws_cw_close,
   sizeof(struct ws_cw_ctx)
 };
-
 
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)

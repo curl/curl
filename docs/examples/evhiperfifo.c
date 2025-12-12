@@ -410,12 +410,10 @@ static int init_fifo(struct GlobalInfo *g)
   return 0;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURLcode result;
   struct GlobalInfo g;
-  (void)argc;
-  (void)argv;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
   if(result)

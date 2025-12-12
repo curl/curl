@@ -43,7 +43,6 @@
 #include "bufref.h"
 #include "curlx/strparse.h"
 
-
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_RTSP_EASY   "meta:proto:rtsp:easy"
 /* meta key for storing protocol meta at connection */
@@ -71,7 +70,6 @@ struct RTSP {
   long CSeq_sent; /* CSeq of this request */
   long CSeq_recv; /* CSeq received */
 };
-
 
 #define RTP_PKT_LENGTH(p) ((((unsigned int)((unsigned char)((p)[2]))) << 8) | \
                             ((unsigned int)((unsigned char)((p)[3]))))

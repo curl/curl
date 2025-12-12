@@ -44,8 +44,8 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
    both represent the same value. Maximum offset used here when we lseek
    using a 'long' data type offset */
 
-#define OUR_MAX_SEEK_L  2147483647L - 1L
-#define OUR_MAX_SEEK_O  0x7FFFFFFF - 0x1
+#define OUR_MAX_SEEK_L (2147483647L - 1L)
+#define OUR_MAX_SEEK_O (0x7FFFFFFF - 0x1)
 
   /* The offset check following here is only interesting if curl_off_t is
      larger than off_t and we are not using the Win32 large file support

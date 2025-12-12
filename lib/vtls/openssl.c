@@ -1443,7 +1443,6 @@ fail:
   return 1;
 }
 
-
 static CURLcode client_cert(struct Curl_easy *data,
                             SSL_CTX* ctx,
                             char *cert_file,
@@ -3629,7 +3628,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
                                      alpns_requested, sess_reuse_cb);
 }
 
-
 static CURLcode ossl_init_method(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct ssl_peer *peer,
@@ -3828,7 +3826,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      OpenSSL supports processing "jumbo TLS record" (8 TLS records) in one go
      for some algorithms, so match that here.
      Experimentation shows that a slightly larger buffer is needed
-      to avoid short reads.
+     to avoid short reads.
 
      However using a large buffer (8 packets) actually decreases performance.
      4 packets is better.
@@ -4668,7 +4666,6 @@ out:
   return result;
 }
 #endif /* ! CURL_DISABLE_VERBOSE_STRINGS */
-
 
 #ifdef USE_APPLE_SECTRUST
 struct ossl_certs_ctx {

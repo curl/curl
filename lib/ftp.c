@@ -3685,7 +3685,6 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
   return result;
 }
 
-
 /***********************************************************************
  *
  * ftp_perform()

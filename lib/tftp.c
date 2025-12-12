@@ -143,7 +143,6 @@ struct tftp_conn {
   BIT(remote_pinned);
 };
 
-
 /* Forward declarations */
 static CURLcode tftp_rx(struct tftp_conn *state, tftp_event_t event);
 static CURLcode tftp_tx(struct tftp_conn *state, tftp_event_t event);
@@ -162,7 +161,6 @@ static CURLcode tftp_translate_code(tftp_error_t error);
 /*
  * TFTP protocol handler.
  */
-
 const struct Curl_handler Curl_handler_tftp = {
   "tftp",                               /* scheme */
   tftp_setup_connection,                /* setup_connection */

@@ -229,8 +229,7 @@ int tool_progress_cb(void *clientp,
   return 0;
 }
 
-void progressbarinit(struct ProgressData *bar,
-                     struct OperationConfig *config)
+void progressbarinit(struct ProgressData *bar, struct OperationConfig *config)
 {
   memset(bar, 0, sizeof(struct ProgressData));
 

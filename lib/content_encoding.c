@@ -287,8 +287,10 @@ static const struct Curl_cwtype deflate_encoding = {
   sizeof(struct zlib_writer)
 };
 
+/*
+ * Gzip handler.
+ */
 
-/* Gzip handler. */
 static CURLcode gzip_do_init(struct Curl_easy *data,
                              struct Curl_cwriter *writer)
 {

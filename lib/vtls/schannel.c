@@ -70,8 +70,8 @@
 #define SCH_DEV_SHOWBOOL(x)                                   \
   infof(data, "schannel: " #x " %s", (x) ? "TRUE" : "FALSE");
 #else
-#define SCH_DEV(x) do { } while(0)
-#define SCH_DEV_SHOWBOOL(x) do { } while(0)
+#define SCH_DEV(x) do {} while(0)
+#define SCH_DEV_SHOWBOOL(x) do {} while(0)
 #endif
 
 /* Offered by mingw-w64 v8+. MS SDK 7.0A+. */

@@ -123,7 +123,6 @@ const struct Curl_handler Curl_handler_scp = {
   PROTOPT_NOURLQUERY | PROTOPT_CONN_REUSE
 };
 
-
 /*
  * SFTP protocol handler.
  */
@@ -352,7 +351,6 @@ static const char *myssh_statename(sshstate state)
 #else
 #define myssh_statename(x)    ""
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
-
 
 #define myssh_state(x, y, z) myssh_set_state(x, y, z)
 

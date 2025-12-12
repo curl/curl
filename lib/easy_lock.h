@@ -59,7 +59,7 @@
 #endif
 #endif
 
-#endif
+#endif /* !__INTEL_COMPILER */
 
 static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
 {
