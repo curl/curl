@@ -7,15 +7,6 @@
   "semanticCommitType": "ci",
   "packageRules": [
     {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "commitMessagePrefix": "GHA: ",
-      "labels": [
-        "CI"
-      ]
-    },
-    {
       "matchUpdateTypes": [
         "pin",
         "pinDigest",
@@ -47,7 +38,6 @@
     {
       "description": "Schedule package updates on the 10th of each month",
       "matchPackageNames": [
-        "/codeql/i",
         "/ruff/i"
       ],
       "groupName": "monthly updates by name",
