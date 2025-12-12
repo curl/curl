@@ -145,11 +145,12 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'boringssl'
+            install_packages: libssh2-1-dev
             install_steps: boringssl pytest
             generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
           - name: 'openssl default'
-            install_steps: libssh2-1-dev pytest
+            install_steps: pytest
             configure: --with-openssl --enable-debug --disable-unity
 
           - name: 'openssl libssh2 sync-resolver valgrind'
