@@ -178,7 +178,7 @@ jobs:
 
           - name: 'openssl clang krb5 LTO'
             install_packages: libssh2-1-dev libkrb5-dev clang
-            install_steps: skiprun
+            install_steps: skipall pytest
             CC: clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LTO=ON
 
