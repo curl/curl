@@ -926,7 +926,11 @@ extern curl_calloc_callback Curl_ccalloc;
 
 #ifdef CURLDEBUG
 #ifdef __clang__
-#  define ALLOC_FUNC         __attribute__((__malloc__))
+#  if __clang_major__ >= 21
+#  define ALLOC_FUNC(ff)     __attribute__((__malloc__(ff)))
+#  else
+#  define ALLOC_FUNC(ff)     __attribute__((__malloc__))
+#  endif
 #  if __clang_major__ >= 4
 #  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
 #  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
@@ -935,15 +939,19 @@ extern curl_calloc_callback Curl_ccalloc;
 #  define ALLOC_SIZE2(n, s)
 #  endif
 #elif defined(__GNUC__) && __GNUC__ >= 3
-#  define ALLOC_FUNC         __attribute__((__malloc__))
+#  if __GNUC__ >= 11
+#  define ALLOC_FUNC(ff)     __attribute__((__malloc__(ff)))
+#  else
+#  define ALLOC_FUNC(ff)     __attribute__((__malloc__))
+#  endif
 #  define ALLOC_SIZE(s)      __attribute__((__alloc_size__(s)))
 #  define ALLOC_SIZE2(n, s)  __attribute__((__alloc_size__(n, s)))
 #elif defined(_MSC_VER)
-#  define ALLOC_FUNC         __declspec(restrict)
+#  define ALLOC_FUNC(ff)     __declspec(restrict)
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #else
-#  define ALLOC_FUNC
+#  define ALLOC_FUNC(ff)
 #  define ALLOC_SIZE(s)
 #  define ALLOC_SIZE2(n, s)
 #endif
@@ -952,16 +960,16 @@ extern FILE *curl_dbg_logfile;
 
 /* memory functions */
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC ALLOC_SIZE(1)
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free) ALLOC_SIZE(1)
   void *curl_dbg_malloc(size_t size, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC ALLOC_SIZE2(1, 2)
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free) ALLOC_SIZE2(1, 2)
   void *curl_dbg_calloc(size_t n, size_t size, int line, const char *source);
 CURL_EXTERN ALLOC_SIZE(2)
   void *curl_dbg_realloc(void *ptr, size_t size, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free)
   char *curl_dbg_strdup(const char *str, int line, const char *src);
 #if defined(_WIN32) && defined(UNICODE)
-CURL_EXTERN ALLOC_FUNC
+CURL_EXTERN ALLOC_FUNC(curl_dbg_free)
   wchar_t *curl_dbg_wcsdup(const wchar_t *str, int line, const char *source);
 #endif
 
@@ -1003,13 +1011,13 @@ CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
 
 /* FILE functions */
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
+CURL_EXTERN ALLOC_FUNC(curl_dbg_fclose)
   FILE *curl_dbg_fopen(const char *file, const char *mode,
                        int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
+CURL_EXTERN ALLOC_FUNC(curl_dbg_fclose)
   FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
                          int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
+CURL_EXTERN ALLOC_FUNC(curl_dbg_fclose)
   FILE *curl_dbg_fdopen(int filedes, const char *mode,
                         int line, const char *source);
 
