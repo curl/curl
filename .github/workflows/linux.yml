@@ -284,8 +284,8 @@ jobs:
 
           - name: 'address-sanitizer H3 c-ares'
             install_packages: clang libubsan1 libasan8 libtsan2
-            install_steps: pytest
-            install_steps_brew: openssl libssh2-1-dev libngtcp2 libnghttp3 c-ares
+            install_steps: libssh2-1-dev pytest
+            install_steps_brew: openssllibngtcp2 libnghttp3 c-ares
             CFLAGS: -fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g
             LDFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=undefined,integer -ldl -lubsan -Wl,-rpath,/home/linuxbrew/.linuxbrew/opt/c-ares/lib
             PKG_CONFIG_PATH: /home/linuxbrew/.linuxbrew/opt/libngtcp2/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/libnghttp3/lib/pkgconfig:/home/linuxbrew/.linuxbrew/opt/c-ares/lib/pkgconfig
