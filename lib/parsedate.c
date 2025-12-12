@@ -607,18 +607,24 @@ int Curl_getdate_capped(const char *p, time_t *tp)
 
 CURLcode Curl_gmtime(time_t intime, struct tm *store)
 {
+#ifdef WIN32
+  if(gmtime_s(store, &intime))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#elif defined(HAVE_GMTIME_R)
   const struct tm *tm;
-#ifdef HAVE_GMTIME_R
   /* thread-safe version */
   tm = (struct tm *)gmtime_r(&intime, store);
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 #else
+  const struct tm *tm;
   /* !checksrc! disable BANNEDFUNC 1 */
   tm = gmtime(&intime);
   if(tm)
     *store = *tm; /* copy the pointed struct to the local copy */
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 #endif
 
-  if(!tm)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
   return CURLE_OK;
 }
