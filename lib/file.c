@@ -65,6 +65,7 @@
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
 #include "curlx/fopen.h"
+#include "curlx/timeval.h"
 #include "curlx/warnless.h"
 #include "curl_range.h"
 
@@ -490,7 +491,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     }
 
     filetime = (time_t)statbuf.st_mtime;
-    result = Curl_gmtime(filetime, &buffer);
+    result = curlx_gmtime(filetime, &buffer);
     if(result)
       return result;
 

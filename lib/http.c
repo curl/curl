@@ -87,6 +87,7 @@
 #include "bufref.h"
 #include "curl_ctype.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 
 /*
  * Forward declarations.
@@ -1786,7 +1787,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
     /* no condition was asked for */
     return CURLE_OK;
 
-  result = Curl_gmtime(data->set.timevalue, &keeptime);
+  result = curlx_gmtime(data->set.timevalue, &keeptime);
   if(result) {
     failf(data, "Invalid TIMEVALUE");
     return result;
