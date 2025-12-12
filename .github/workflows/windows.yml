@@ -431,7 +431,6 @@ jobs:
             url: 'https://github.com/skeeto/w64devkit/releases/download/v2.2.0/w64devkit-x64-2.2.0.7z.exe'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-            tflags: 'skiprun'
           - name: 'schannel'  # mingw-w64 10.0
             sys: 'mingw64'
             dir: 'mingw64'
@@ -440,6 +439,7 @@ jobs:
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
+            tflags: 'skiprun'
           - name: 'schannel mbedtls U'  # mingw-w64 6.0
             sys: 'mingw64'
             dir: 'mingw64'
