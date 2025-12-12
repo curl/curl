@@ -16,6 +16,7 @@ Server: RTSPD/libcurl-test
 CSeq: 1
 Public: DESCRIBE, OPTIONS, SETUP, TEARDOWN, PLAY, PAUSE
 Curl-Private: swsclose
+
 </data>
 </reply>
 
