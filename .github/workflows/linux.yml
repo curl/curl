@@ -404,7 +404,7 @@ jobs:
 
       - name: 'cache libressl'
         if: ${{ contains(matrix.build.install_steps, 'libressl') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -424,7 +424,7 @@ jobs:
 
       - name: 'cache libressl (filc)'
         if: ${{ contains(matrix.build.install_steps, 'libressl-filc') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-libressl-filc
         env:
           cache-name: cache-libressl-filc
@@ -445,7 +445,7 @@ jobs:
 
       - name: 'cache nghttp2 (filc)'
         if: ${{ contains(matrix.build.install_steps, 'nghttp2-filc') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-nghttp2-filc
         env:
           cache-name: cache-nghttp2-filc
@@ -467,7 +467,7 @@ jobs:
 
       - name: 'cache wolfssl (all)'
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-all') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-wolfssl-all
         env:
           cache-name: cache-wolfssl-all
@@ -488,7 +488,7 @@ jobs:
 
       - name: 'cache wolfssl (opensslextra)'  # does support `OPENSSL_COEXIST`
         if: ${{ contains(matrix.build.install_steps, 'wolfssl-opensslextra') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-wolfssl-opensslextra
         env:
           cache-name: cache-wolfssl-opensslextra
@@ -509,7 +509,7 @@ jobs:
 
       - name: 'cache mbedtls'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-mbedtls-threadsafe
         env:
           cache-name: cache-mbedtls-threadsafe
@@ -532,7 +532,7 @@ jobs:
 
       - name: 'cache mbedtls (prev)'
         if: ${{ contains(matrix.build.install_steps, 'mbedtls-prev') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-mbedtls-threadsafe-prev
         env:
           cache-name: cache-mbedtls-threadsafe-prev
@@ -555,7 +555,7 @@ jobs:
 
       - name: 'cache openldap (static)'
         if: ${{ contains(matrix.build.install_steps, 'openldap-static') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-openldap-static
         env:
           cache-name: cache-openldap-static
@@ -574,7 +574,7 @@ jobs:
 
       - name: 'cache openssl (thread sanitizer)'
         if: ${{ contains(matrix.build.install_steps, 'openssl-tsan') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-openssl-tsan
         env:
           cache-name: cache-openssl-tsan
@@ -593,7 +593,7 @@ jobs:
 
       - name: 'cache awslc'
         if: ${{ contains(matrix.build.install_steps, 'awslc') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -613,7 +613,7 @@ jobs:
 
       - name: 'cache boringssl'
         if: ${{ contains(matrix.build.install_steps, 'boringssl') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-boringssl
         env:
           cache-name: cache-boringssl
@@ -634,7 +634,7 @@ jobs:
 
       - name: 'cache rustls'
         if: ${{ contains(matrix.build.install_steps, 'rustls') }}
-        uses: actions/cache@a7833574556fa59680c1b7cb190c1735db73ebf0 # v5.0.0
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
         id: cache-rustls
         env:
           cache-name: cache-rustls
