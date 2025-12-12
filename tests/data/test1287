@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ proxytunnel
 verbose logs
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data crlf="headers">
@@ -47,7 +47,6 @@ contents
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -66,7 +65,6 @@ verbose-strings
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <proxy crlf="headers">

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,7 +11,6 @@ HTTPS
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -47,7 +46,6 @@ HTTP/2 GET using %{header_json}
 
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout crlf="headers">

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ TFTP RRQ
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -41,7 +41,6 @@ condition in the TFTP receive code.
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -55,7 +54,6 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>

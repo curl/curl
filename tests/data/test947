@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,7 +12,6 @@ RFC7628
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -20,7 +20,6 @@ REPLY AUTH 235 Authenticated
 </servercmd>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -37,7 +36,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

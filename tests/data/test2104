@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,14 +6,12 @@ DNS cache
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <dns>
 </dns>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -32,7 +31,6 @@ http://examplehost.example/%TESTNUMBER http://examplehost.example/%TESTNUMBER ht
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # curl: (6) Could not resolve host: examplehost.example

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP added headers
 HTTP replaced headers
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -20,7 +20,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -34,7 +33,6 @@ Replaced internal headers with a blank one
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

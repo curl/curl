@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ DELAY
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -21,7 +21,6 @@ writedelay: 2000
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -44,7 +43,6 @@ tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER -Y1000 -y2
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>

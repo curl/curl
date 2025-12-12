@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ Curl_timeleft_ms
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <features>

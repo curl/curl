@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ HTTP CONNECT
 HTTP proxy
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 
@@ -41,7 +41,6 @@ body
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -60,7 +59,6 @@ pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:se
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

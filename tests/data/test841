@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ CUSTOMREQUEST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="yes">
@@ -28,7 +28,6 @@ body
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -42,7 +41,6 @@ IMAP custom request does not check continuation data
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

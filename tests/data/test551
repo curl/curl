@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 # this test is meant to be exactly like 547 but using Digest instead of NTLM

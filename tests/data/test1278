@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data crlf="headers" nocheck="yes">
@@ -24,7 +24,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -38,7 +37,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter -o %LOGDIR/out%TESTNUMB
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">

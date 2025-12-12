@@ -1,5 +1,5 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
-#
 # This case with an unexpected 1xx response used to cause a "hang" before the fix
 # got 7.19.0
 <info>
@@ -9,7 +9,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -30,7 +29,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -44,7 +42,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="headers">

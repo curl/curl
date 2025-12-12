@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ TrackMemory
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
@@ -26,7 +26,6 @@ libtest memory tracking operational
 </name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <file name="%LOGDIR/memdump">
