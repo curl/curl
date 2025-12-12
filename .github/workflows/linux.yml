@@ -145,9 +145,8 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=/home/runner/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: 'boringssl'
-            install_packages: libssh-dev
             install_steps: boringssl pytest
-            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DCURL_USE_LIBSSH=ON -DUSE_ECH=ON
+            generate: -DOPENSSL_ROOT_DIR=/home/runner/boringssl -DUSE_ECH=ON
 
           - name: 'openssl default'
             install_steps: pytest
