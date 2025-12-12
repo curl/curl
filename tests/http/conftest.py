@@ -135,7 +135,7 @@ def nghttpx_fwd(env, httpd) -> Generator[Union[Nghttpx,bool], None, None]:
 
 
 @pytest.fixture(scope='session')
-def sshd(env: Env) -> Generator[Sshd, None, None]:
+def sshd(env: Env) -> Generator[Union[Sshd,bool], None, None]:
     if env.has_sshd():
         sshd = Sshd(env=env)
         assert sshd.initial_start(), f'{sshd.dump_log()}'

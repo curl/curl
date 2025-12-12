@@ -68,6 +68,7 @@ test_31_vsftpds.py     \
 test_32_ftps_vsftpd.py \
 test_40_socks.py       \
 test_50_scp.py         \
+test_51_sftp.py        \
 $(TESTENV)
 
 clean-local:
