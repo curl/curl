@@ -1002,15 +1002,13 @@ CURL_EXTERN RECV_TYPE_RETV curl_dbg_recv(RECV_TYPE_ARG1 sockfd,
 
 /* FILE functions */
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_fopen(const char *file, const char *mode,
-                       int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_freopen(const char *file, const char *mode, FILE *fh,
-                         int line, const char *source);
-CURL_EXTERN ALLOC_FUNC
-  FILE *curl_dbg_fdopen(int filedes, const char *mode,
-                        int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fopen(const char *file, const char *mode,
+                                            int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_freopen(const char *file,
+                                              const char *mode, FILE *fh,
+                                              int line, const char *source);
+CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
+                                             int line, const char *source);
 
 #define sclose(sockfd) curl_dbg_sclose(sockfd, __LINE__, __FILE__)
 #define fake_sclose(sockfd) curl_dbg_mark_sclose(sockfd, __LINE__, __FILE__)
