@@ -48,4 +48,5 @@ clean-local:
 	  test-ca.cnt* \
 	  test-ca.db* \
 	  test-ca.raw* \
-	  test-ca.srl
+	  test-ca.srl \
+	  test-*.p12

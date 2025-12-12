@@ -17,14 +17,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 [curl issue 10457](https://github.com/curl/curl/issues/10457)
 
-## Access violation sending client cert with Schannel
-
-When using Schannel to do client certs, curl sets `PKCS12_NO_PERSIST_KEY` to
-avoid leaking the private key into the filesystem. Unfortunately that flag
-instead seems to trigger a crash.
-
-See [curl issue 17626](https://github.com/curl/curl/issues/17626)
-
 ## Client cert handling with Issuer `DN` differs between backends
 
 When the specified client certificate does not match any of the

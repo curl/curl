@@ -102,6 +102,7 @@ struct Curl_schannel_cred {
   CredHandle cred_handle;
   TCHAR *sni_hostname;
   HCERTSTORE client_cert_store;
+  PCCERT_CONTEXT imported_cert;
   int refcount;
 };
 
