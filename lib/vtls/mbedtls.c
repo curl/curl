@@ -67,7 +67,6 @@
 #include "vtls_int.h"
 #include "vtls_scache.h"
 #include "x509asn1.h"
-#include "../parsedate.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../select.h"
 #include "../multiif.h"
