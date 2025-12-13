@@ -25,9 +25,9 @@
  * Download many files in parallel, in the same thread.
  * </DESC>
  */
-
 #include <stdlib.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 static const char *urls[] = {
