@@ -31,6 +31,7 @@
 #include "../system_win32.h"
 
 #if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR <= 3)
+#warning TRACE-1
 #include <sec_api/time_s.h>  /* for gmtime_s() */
 #endif
 
