@@ -108,6 +108,9 @@
 /* Define if you have the GNU gssapi libraries */
 #undef HAVE_GSSGNU
 
+/* Define if you have the `localtime_r' function. */
+#define HAVE_LOCALTIME_R
+
 /* Define if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H
 

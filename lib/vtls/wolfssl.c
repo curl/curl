@@ -63,7 +63,6 @@
 #include "vtls_int.h"
 #include "vtls_scache.h"
 #include "keylog.h"
-#include "../parsedate.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../progress.h"
 #include "../select.h"

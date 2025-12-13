@@ -34,7 +34,6 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
 
 /*
  * Return the formatted HH:MM:SS for the tv_sec given.
- * NOT thread safe.
  */
 static const char *hms_for_sec(time_t tv_sec)
 {
@@ -42,10 +41,10 @@ static const char *hms_for_sec(time_t tv_sec)
   static char hms_buf[12];
 
   if(tv_sec != cached_tv_sec) {
-    /* !checksrc! disable BANNEDFUNC 1 */
-    struct tm *now = localtime(&tv_sec);  /* not thread safe either */
+    struct tm now;
+    curlx_localtime(tv_sec, &now);
     curl_msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
-                   now->tm_hour, now->tm_min, now->tm_sec);
+                   now.tm_hour, now.tm_min, now.tm_sec);
     cached_tv_sec = tv_sec;
   }
   return hms_buf;

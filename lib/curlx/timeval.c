@@ -258,3 +258,60 @@ timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
     return TIMEDIFF_T_MIN;
   return diff * 1000000 + newer.tv_usec - older.tv_usec;
 }
+
+/*
+ * curlx_gmtime() is a gmtime() replacement for portability. Do not use
+ * the gmtime_s(), gmtime_r() or gmtime() functions anywhere else but here.
+ */
+CURLcode curlx_gmtime(time_t intime, struct tm *store)
+{
+#if defined(_WIN32) && \
+  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR >= 4))
+  if(gmtime_s(store, &intime)) /* thread-safe */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#elif defined(HAVE_GMTIME_R)
+  const struct tm *tm;
+  tm = (struct tm *)gmtime_r(&intime, store); /* thread-safe */
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#else
+  const struct tm *tm;
+  /* !checksrc! disable BANNEDFUNC 1 */
+  tm = gmtime(&intime); /* not thread-safe */
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#endif
+
+  return CURLE_OK;
+}
+
+/*
+ * curlx_localtime() is a localtime() replacement for portability. Do not use
+ * the localtime_s(), localtime_r() or localtime() functions anywhere else but
+ * here.
+ */
+CURLcode curlx_localtime(time_t intime, struct tm *store)
+{
+#if defined(_WIN32) && \
+  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR >= 4))
+  if(localtime_s(store, &intime)) /* thread-safe */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#elif defined(HAVE_LOCALTIME_R)
+  const struct tm *tm;
+  tm = (struct tm *)localtime_r(&intime, store); /* thread-safe */
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#else
+  const struct tm *tm;
+  /* !checksrc! disable BANNEDFUNC 1 */
+  tm = localtime(&intime); /* not thread-safe */
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#endif
+
+  return CURLE_OK;
+}

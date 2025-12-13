@@ -84,7 +84,7 @@ void logmsg(const char *msg, ...)
   FILE *logfp;
   struct curltime tv;
   time_t sec;
-  struct tm *now;
+  struct tm now;
   char timebuf[50];
   static time_t epoch_offset;
   static int    known_offset;
@@ -100,12 +100,10 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
-  /* !checksrc! disable BANNEDFUNC 1 */
-  now = localtime(&sec); /* not thread safe but we do not care */
+  curlx_localtime(sec, &now);
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
-           (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec,
-           (long)tv.tv_usec);
+           now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
 
   va_start(ap, msg);
 #ifdef __clang__

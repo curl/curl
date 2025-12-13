@@ -40,6 +40,7 @@
 #include "curl_share.h"
 #include "strdup.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 
 #define MAX_HSTS_LINE    4095
 #define MAX_HSTS_HOSTLEN 2048
@@ -288,7 +289,7 @@ static CURLcode hsts_push(struct Curl_easy *data,
   e.includeSubDomains = sts->includeSubDomains;
 
   if(sts->expires != TIME_T_MAX) {
-    result = Curl_gmtime((time_t)sts->expires, &stamp);
+    result = curlx_gmtime((time_t)sts->expires, &stamp);
     if(result)
       return result;
 
@@ -311,7 +312,7 @@ static CURLcode hsts_out(struct stsentry *sts, FILE *fp)
 {
   struct tm stamp;
   if(sts->expires != TIME_T_MAX) {
-    CURLcode result = Curl_gmtime((time_t)sts->expires, &stamp);
+    CURLcode result = curlx_gmtime((time_t)sts->expires, &stamp);
     if(result)
       return result;
     curl_mfprintf(fp, "%s%s \"%d%02d%02d %02d:%02d:%02d\"\n",
