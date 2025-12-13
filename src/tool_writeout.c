@@ -548,7 +548,6 @@ static const char *outtime(const char *ptr, /* %time{ ... */
   ptr += 6;
   end = strchr(ptr, '}');
   if(end) {
-    struct tm *utc;
     struct dynbuf format;
     char output[256]; /* max output time length */
 #ifdef HAVE_GETTIMEOFDAY
@@ -602,10 +601,10 @@ static const char *outtime(const char *ptr, /* %time{ ... */
         result = curlx_dyn_addn(&format, &ptr[i], 1);
     }
     if(!result) {
-      /* !checksrc! disable BANNEDFUNC 1 */
-      utc = gmtime(&secs);
-      if(curlx_dyn_len(&format) && utc &&
-         strftime(output, sizeof(output), curlx_dyn_ptr(&format), utc))
+      struct tm utc;
+      result = curlx_gmtime(secs, &utc);
+      if(curlx_dyn_len(&format) && !result &&
+         strftime(output, sizeof(output), curlx_dyn_ptr(&format), &utc))
         fputs(output, stream);
       curlx_dyn_free(&format);
     }

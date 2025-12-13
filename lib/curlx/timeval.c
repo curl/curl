@@ -30,6 +30,11 @@
 #include "version_win32.h"
 #include "../system_win32.h"
 
+#if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR <= 3)
+#warning TRACE-1
+#include <sec_api/time_s.h>  /* for gmtime_s() */
+#endif
+
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
 
@@ -257,4 +262,31 @@ timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
   else if(diff <= (TIMEDIFF_T_MIN / 1000000))
     return TIMEDIFF_T_MIN;
   return diff * 1000000 + newer.tv_usec - older.tv_usec;
+}
+
+/*
+ * curlx_gmtime() is a gmtime() replacement for portability. Do not use
+ * the gmtime_s(), gmtime_r() or gmtime() functions anywhere else but here.
+ */
+CURLcode curlx_gmtime(time_t intime, struct tm *store)
+{
+#ifdef _WIN32
+  if(gmtime_s(store, &intime)) /* thread-safe */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#elif defined(HAVE_GMTIME_R)
+  const struct tm *tm;
+  tm = (struct tm *)gmtime_r(&intime, store); /* thread-safe */
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#else
+  const struct tm *tm;
+  /* !checksrc! disable BANNEDFUNC 1 */
+  tm = gmtime(&intime); /* not thread-safe */
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+  else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#endif
+
+  return CURLE_OK;
 }

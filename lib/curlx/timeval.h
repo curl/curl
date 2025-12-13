@@ -65,4 +65,6 @@ timediff_t curlx_timediff_ceil_ms(struct curltime newer,
  */
 timediff_t curlx_timediff_us(struct curltime newer, struct curltime older);
 
+CURLcode curlx_gmtime(time_t intime, struct tm *store);
+
 #endif /* HEADER_CURL_TIMEVAL_H */

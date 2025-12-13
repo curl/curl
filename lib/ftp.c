@@ -71,6 +71,7 @@
 #include "strdup.h"
 #include "curlx/strerr.h"
 #include "curlx/strparse.h"
+#include "curlx/timeval.h"
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -2110,7 +2111,7 @@ static CURLcode ftp_state_mdtm_resp(struct Curl_easy *data,
       struct tm buffer;
       const struct tm *tm = &buffer;
 
-      result = Curl_gmtime(filetime, &buffer);
+      result = curlx_gmtime(filetime, &buffer);
       if(result)
         return result;
 
