@@ -30,6 +30,10 @@
 #include "version_win32.h"
 #include "../system_win32.h"
 
+#if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR <= 3)
+#include <sec_api/time_s.h>  /* for gmtime_s() */
+#endif
+
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
 
@@ -265,8 +269,7 @@ timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
  */
 CURLcode curlx_gmtime(time_t intime, struct tm *store)
 {
-#if defined(_WIN32) && \
-  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR >= 4))
+#ifdef _WIN32
   if(gmtime_s(store, &intime)) /* thread-safe */
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_GMTIME_R)
