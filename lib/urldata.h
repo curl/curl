@@ -1133,6 +1133,7 @@ struct UrlState {
   BIT(http_hd_te); /* Added HTTP header TE: */
   BIT(http_hd_upgrade); /* Added HTTP header Upgrade: */
   BIT(http_hd_h2_settings); /* Added HTTP header H2Settings: */
+  BIT(maybe_folded);
 #endif
 };
 

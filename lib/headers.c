@@ -215,55 +215,6 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   return CURLE_OK;
 }
 
-static CURLcode unfold_value(struct Curl_easy *data, const char *value,
-                             size_t vlen)  /* length of the incoming header */
-{
-  struct Curl_header_store *hs;
-  struct Curl_header_store *newhs;
-  size_t olen; /* length of the old value */
-  size_t oalloc; /* length of the old name + value + separator */
-  size_t offset;
-  DEBUGASSERT(data->state.prevhead);
-  hs = data->state.prevhead;
-  olen = strlen(hs->value);
-  offset = hs->value - hs->buffer;
-  oalloc = olen + offset + 1;
-
-  /* skip all trailing space letters */
-  while(vlen && ISBLANK(value[vlen - 1]))
-    vlen--;
-
-  /* save only one leading space */
-  while((vlen > 1) && ISBLANK(value[0]) && ISBLANK(value[1])) {
-    vlen--;
-    value++;
-  }
-
-  /* since this header block might move in the realloc below, it needs to
-     first be unlinked from the list and then re-added again after the
-     realloc */
-  Curl_node_remove(&hs->node);
-
-  /* new size = struct + new value length + old name+value length */
-  newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);
-  if(!newhs)
-    return CURLE_OUT_OF_MEMORY;
-  /* ->name and ->value point into ->buffer (to keep the header allocation
-     in a single memory block), which now potentially have moved. Adjust
-     them. */
-  newhs->name = newhs->buffer;
-  newhs->value = &newhs->buffer[offset];
-
-  /* put the data at the end of the previous data, not the newline */
-  memcpy(&newhs->value[olen], value, vlen);
-  newhs->value[olen + vlen] = 0; /* null-terminate at newline */
-
-  /* insert this node into the list of headers */
-  Curl_llist_append(&data->state.httphdrs, newhs, &newhs->node);
-  data->state.prevhead = newhs;
-  return CURLE_OK;
-}
-
 /*
  * Curl_headers_push() gets passed a full HTTP header to store. It gets called
  * immediately before the header callback. The header is CRLF, CR or LF
@@ -292,20 +243,14 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     /* neither CR nor LF as terminator is not a valid header */
     return CURLE_WEIRD_SERVER_REPLY;
 
-  if((header[0] == ' ') || (header[0] == '\t')) {
-    if(data->state.prevhead)
-      /* line folding, append value to the previous header's value */
-      return unfold_value(data, header, hlen);
-    else {
-      /* cannot unfold without a previous header. Instead of erroring, just
-         pass the leading blanks. */
-      while(hlen && ISBLANK(*header)) {
-        header++;
-        hlen--;
-      }
-      if(!hlen)
-        return CURLE_WEIRD_SERVER_REPLY;
+  if(ISBLANK(header[0])) {
+    /* pass leading blanks */
+    while(hlen && ISBLANK(*header)) {
+      header++;
+      hlen--;
     }
+    if(!hlen)
+      return CURLE_WEIRD_SERVER_REPLY;
   }
   if(Curl_llist_count(&data->state.httphdrs) >= MAX_HTTP_RESP_HEADER_COUNT) {
     failf(data, "Too many response headers, %d is max",
