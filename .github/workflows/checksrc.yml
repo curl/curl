@@ -135,7 +135,7 @@ jobs:
           persist-credentials: false
 
       - name: 'check'
-        run: git grep -i -l -E '^<\?xml' -z | xargs -0 -r xmllint >/dev/null
+        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint --output /dev/null
 
   miscchecks:
     name: 'misc checks'
