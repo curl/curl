@@ -90,7 +90,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
 CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
-  req->start = curlx_now();
+  req->start = data->state.now;
   return Curl_req_soft_reset(req, data);
 }
 

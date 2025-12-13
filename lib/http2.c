@@ -305,7 +305,8 @@ static void h2_stream_hash_free(unsigned int id, void *stream)
 static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
                                            struct Curl_easy *data)
 {
-  curl_off_t avail = Curl_rlimit_avail(&data->progress.dl.rlimit, curlx_now());
+  curl_off_t avail =
+    Curl_rlimit_avail(&data->progress.dl.rlimit, &data->state.now);
 
   (void)cf;
   if(avail < CURL_OFF_T_MAX) { /* limit in place */

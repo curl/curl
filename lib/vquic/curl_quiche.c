@@ -865,7 +865,7 @@ static CURLcode cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   *pnread = 0;
   (void)buf;
   (void)blen;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(data, &ctx->q);
 
   if(!stream)
     return CURLE_RECV_ERROR;
@@ -1075,7 +1075,7 @@ static CURLcode cf_quiche_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   CURLcode result;
 
   *pnwritten = 0;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(data, &ctx->q);
 
   result = cf_process_ingress(cf, data);
   if(result)
@@ -1233,7 +1233,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   DEBUGASSERT(ctx->q.sockfd != CURL_SOCKET_BAD);
   DEBUGASSERT(ctx->initialized);
 
-  result = vquic_ctx_init(&ctx->q);
+  result = vquic_ctx_init(data, &ctx->q);
   if(result)
     return result;
 
@@ -1352,7 +1352,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  vquic_ctx_update_time(&ctx->q);
+  vquic_ctx_update_time(data, &ctx->q);
 
   if(!ctx->qconn) {
     result = cf_quiche_ctx_open(cf, data);
@@ -1434,7 +1434,7 @@ static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
     int err;
 
     ctx->shutdown_started = TRUE;
-    vquic_ctx_update_time(&ctx->q);
+    vquic_ctx_update_time(data, &ctx->q);
     err = quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
     if(err) {
       CURL_TRC_CF(data, cf, "error %d adding shutdown packet, "

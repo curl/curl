@@ -947,6 +947,7 @@ struct urlpieces {
 #define CREDS_NETRC  3 /* found in netrc */
 
 struct UrlState {
+  struct curltime now; /* time of processing transfers */
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 

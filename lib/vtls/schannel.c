@@ -1806,7 +1806,7 @@ schannel_recv_renegotiate(struct Curl_cfilter *cf, struct Curl_easy *data,
       remaining = MAX_RENEG_BLOCK_TIME - elapsed;
 
       if(blocking) {
-        timeout_ms = Curl_timeleft_ms(data, NULL, FALSE);
+        timeout_ms = Curl_timeleft_ms(data, FALSE);
 
         if(timeout_ms < 0) {
           result = CURLE_OPERATION_TIMEDOUT;
@@ -1959,7 +1959,7 @@ static CURLcode schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     while(len > *pnwritten) {
       size_t this_write = 0;
       int what;
-      timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, FALSE);
+      timediff_t timeout_ms = Curl_timeleft_ms(data, FALSE);
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(data, "schannel: timed out sending data "

@@ -1329,7 +1329,6 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   curl_off_t total_ul = 0;
   ssize_t snread;
 #endif
-  struct curltime now;
   bool keepon = TRUE;
   char buffer[4 * 1024];
   struct TELNET *tn;
@@ -1511,8 +1510,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     } /* switch */
 
     if(data->set.timeout) {
-      now = curlx_now();
-      if(curlx_timediff_ms(now, conn->created) >= data->set.timeout) {
+      data->state.now = curlx_now();
+      if(curlx_timediff_ms(data->state.now, conn->created) >=
+         data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;
@@ -1632,8 +1632,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     } /* poll switch statement */
 
     if(data->set.timeout) {
-      now = curlx_now();
-      if(curlx_timediff_ms(now, conn->created) >= data->set.timeout) {
+      data->state.now = curlx_now();
+      if(curlx_timediff_ms(data->state.now, conn->created) >=
+         data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;

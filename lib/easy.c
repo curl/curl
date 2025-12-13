@@ -980,6 +980,7 @@ CURL *curl_easy_duphandle(CURL *d)
   Curl_bufref_init(&outcurl->state.referer);
   Curl_netrc_init(&outcurl->state.netrc);
 
+  outcurl->state.now = curlx_now(); /* start of API call */
   /* the connection pool is setup on demand */
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
@@ -1155,6 +1156,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
   if(Curl_is_in_callback(data))
     recursive = TRUE;
 
+  data->state.now = curlx_now(); /* start of API call */
   recv_paused = Curl_xfer_recv_is_paused(data);
   recv_paused_new = (action & CURLPAUSE_RECV);
   send_paused = Curl_xfer_send_is_paused(data);
@@ -1179,7 +1181,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
       Curl_multi_mark_dirty(data); /* make it run */
       /* On changes, tell application to update its timers. */
       if(changed) {
-        if(Curl_update_timer(data->multi) && !result)
+        if(Curl_update_timer(data->multi, &data->state.now) && !result)
           result = CURLE_ABORTED_BY_CALLBACK;
       }
     }
