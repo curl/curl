@@ -652,7 +652,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         if(spent_ms > 0) {
 #if DEBUG_EV_POLL
         curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
-                      "time spent %ldms\n", ev->ms, (long)timediff);
+                      "time spent %ldms\n", ev->ms, (long)spent_ms);
 #endif
           if(spent_ms > ev->ms)
             ev->ms = 0;
