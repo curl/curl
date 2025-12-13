@@ -95,7 +95,7 @@
 #endif
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS  /* for getenv(), gmtime(), strcpy(),
-                                    in tests: localtime(), sscanf() */
+                                    in tests: sscanf() */
 #endif
 #endif /* _MSC_VER */
 

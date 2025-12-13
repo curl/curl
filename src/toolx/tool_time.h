@@ -1,3 +1,5 @@
+#ifndef HEADER_TOOLX_TOOL_TIME_H
+#define HEADER_TOOLX_TOOL_TIME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,35 +23,10 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "testutil.h"
+#include "curl_setup.h"
 
-#include <toolx/toolx.h>
+#include "tool_time.h"
 
-/* build request URL */
-char *tutil_suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
+CURLcode toolx_localtime(time_t intime, struct tm *store);
 
-#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
-void tutil_rlim2str(char *buf, size_t len, rlim_t val)
-{
-#ifdef RLIM_INFINITY
-  if(val == RLIM_INFINITY) {
-    curl_msnprintf(buf, len, "INFINITY");
-    return;
-  }
-#endif
-#ifdef HAVE_LONGLONG
-  if(sizeof(rlim_t) > sizeof(long))
-    curl_msnprintf(buf, len, "%llu", (unsigned long long)val);
-  else
-#endif
-  {
-    if(sizeof(rlim_t) < sizeof(long))
-      curl_msnprintf(buf, len, "%u", (unsigned int)val);
-    else
-      curl_msnprintf(buf, len, "%lu", (unsigned long)val);
-  }
-}
-#endif
+#endif /* HEADER_TOOLX_TOOL_TIME_H */

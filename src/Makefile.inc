@@ -107,7 +107,8 @@ CURL_CFILES = \
   tool_writeout.c \
   tool_writeout_json.c \
   tool_xattr.c \
-  var.c
+  var.c \
+  toolx/tool_time.c
 
 CURL_HFILES = \
   config2setopts.h \
@@ -154,6 +155,7 @@ CURL_HFILES = \
   tool_writeout.h \
   tool_writeout_json.h \
   tool_xattr.h \
-  var.h
+  var.h \
+  toolx/tool_time.h
 
 CURL_RCFILES = curl.rc

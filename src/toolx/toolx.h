@@ -1,3 +1,5 @@
+#ifndef HEADER_TOOLX_TOOLX_H
+#define HEADER_TOOLX_TOOLX_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -21,35 +23,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "testutil.h"
 
-#include <toolx/toolx.h>
+/*
+ * Defines protos and includes all header files that provide the toolx_*
+ * functions. The toolx_* functions are stand-alone functions whose sources
+ * can be built and linked by the curl tool and curl tests if need be.
+ */
 
-/* build request URL */
-char *tutil_suburl(const char *base, int i)
-{
-  return curl_maprintf("%s%.4d", base, i);
-}
+#include "tool_time.h"
 
-#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
-void tutil_rlim2str(char *buf, size_t len, rlim_t val)
-{
-#ifdef RLIM_INFINITY
-  if(val == RLIM_INFINITY) {
-    curl_msnprintf(buf, len, "INFINITY");
-    return;
-  }
-#endif
-#ifdef HAVE_LONGLONG
-  if(sizeof(rlim_t) > sizeof(long))
-    curl_msnprintf(buf, len, "%llu", (unsigned long long)val);
-  else
-#endif
-  {
-    if(sizeof(rlim_t) < sizeof(long))
-      curl_msnprintf(buf, len, "%u", (unsigned int)val);
-    else
-      curl_msnprintf(buf, len, "%lu", (unsigned long)val);
-  }
-}
-#endif
+#endif /* HEADER_TOOLX_TOOLX_H */

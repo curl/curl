@@ -21,35 +21,33 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "testutil.h"
+#include "tool_time.h"
 
-#include <toolx/toolx.h>
-
-/* build request URL */
-char *tutil_suburl(const char *base, int i)
+/*
+ * toolx_localtime() is a localtime() replacement for portability. Do not use
+ * the localtime_s(), localtime_r() or localtime() functions anywhere else but
+ * here.
+ */
+CURLcode toolx_localtime(time_t intime, struct tm *store)
 {
-  return curl_maprintf("%s%.4d", base, i);
-}
-
-#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
-void tutil_rlim2str(char *buf, size_t len, rlim_t val)
-{
-#ifdef RLIM_INFINITY
-  if(val == RLIM_INFINITY) {
-    curl_msnprintf(buf, len, "INFINITY");
-    return;
-  }
-#endif
-#ifdef HAVE_LONGLONG
-  if(sizeof(rlim_t) > sizeof(long))
-    curl_msnprintf(buf, len, "%llu", (unsigned long long)val);
+#if defined(_WIN32) && \
+  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR >= 4))
+  if(localtime_s(store, &intime)) /* thread-safe */
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#elif defined(HAVE_LOCALTIME_R)
+  const struct tm *tm;
+  tm = (struct tm *)localtime_r(&intime, store); /* thread-safe */
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#else
+  const struct tm *tm;
+  /* !checksrc! disable BANNEDFUNC 1 */
+  tm = localtime(&intime); /* not thread-safe */
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
   else
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 #endif
-  {
-    if(sizeof(rlim_t) < sizeof(long))
-      curl_msnprintf(buf, len, "%u", (unsigned int)val);
-    else
-      curl_msnprintf(buf, len, "%lu", (unsigned long)val);
-  }
+
+  return CURLE_OK;
 }
-#endif

@@ -46,6 +46,9 @@ CURLX_C = \
   ../../lib/curlx/warnless.c \
   ../../lib/curlx/winapi.c
 
+TOOLX_C = \
+  ../../src/toolx/tool_time.c
+
 # All libtest programs
 TESTS_C = \
   cli_ftp_upload.c \

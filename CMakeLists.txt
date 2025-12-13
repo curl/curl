@@ -1570,6 +1570,7 @@ check_function_exists("getpwuid_r"    HAVE_GETPWUID_R)
 check_function_exists("geteuid"       HAVE_GETEUID)
 check_function_exists("utime"         HAVE_UTIME)
 check_symbol_exists("gmtime_r"        "stdlib.h;time.h" HAVE_GMTIME_R)
+check_symbol_exists("localtime_r"     "stdlib.h;time.h" HAVE_LOCALTIME_R)
 
 check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
 check_symbol_exists("gethostname"     "${CURL_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
