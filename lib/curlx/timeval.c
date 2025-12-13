@@ -260,13 +260,13 @@ timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
 }
 
 /*
- * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
- * gmtime_r() or gmtime() functions anywhere else but here.
- *
+ * curlx_gmtime() is a gmtime() replacement for portability. Do not use the
+ * gmtime_s(), gmtime_r() or gmtime() functions anywhere else but here.
  */
 CURLcode curlx_gmtime(time_t intime, struct tm *store)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && \
+  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR >= 4))
   if(gmtime_s(store, &intime))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_GMTIME_R)
