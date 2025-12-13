@@ -202,6 +202,17 @@ static int do_file_type(const char *type)
   return -1;
 }
 
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+  /* Set our preference for verification to be for both the native and
+   * alternative chains. Ultimately, its the server's choice. This will be
+   * used in the call to wolfSSL_UseCKS(). */
+  static byte cks_order[3] = {
+    WOLFSSL_CKS_SIGSPEC_BOTH,
+    WOLFSSL_CKS_SIGSPEC_ALTERNATIVE,
+    WOLFSSL_CKS_SIGSPEC_NATIVE,
+  };
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
+
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
  * layer and do all necessary magic.
@@ -438,6 +449,14 @@ wolfssl_connect_step1(struct Curl_easy *data, struct connectdata *conn,
     failf(data, "SSL: couldn't create a context (handle)!");
     return CURLE_OUT_OF_MEMORY;
   }
+
+#ifdef WOLFSSL_DUAL_ALG_CERTS
+  if(!wolfSSL_UseCKS(backend->handle, cks_order, sizeof(cks_order))) {
+    failf(data, "unable to set the CKS order.");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+#endif /* WOLFSSL_DUAL_ALG_CERTS */
+
 
 #ifdef HAVE_ALPN
   if(conn->bits.tls_enable_alpn) {
