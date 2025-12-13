@@ -56,8 +56,8 @@
 #include "../select.h"
 #include "../strdup.h"
 #include "../curlx/fopen.h"
-#include "../curlx/warnless.h"
 #include "../curlx/timeval.h"
+#include "../curlx/warnless.h"
 #include "x509asn1.h"
 #include "../multiif.h"
 
