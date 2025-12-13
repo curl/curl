@@ -226,6 +226,10 @@ rem
       for /f "delims=" %%c in ('dir /b ..\lib\vtls\*.c') do call :element lib\vtls "%%c" %3
     ) else if "!var!" == "CURL_LIB_VTLS_H_FILES" (
       for /f "delims=" %%h in ('dir /b ..\lib\vtls\*.h') do call :element lib\vtls "%%h" %3
+    ) else if "!var!" == "CURL_SRC_TOOLX_C_FILES" (
+      for /f "delims=" %%c in ('dir /b ..\src\toolx\*.c') do call :element src\toolx "%%c" %3
+    ) else if "!var!" == "CURL_SRC_TOOLX_H_FILES" (
+      for /f "delims=" %%h in ('dir /b ..\src\toolx\*.h') do call :element src\toolx "%%h" %3
     ) else (
       echo.!var!>> %3
     )
