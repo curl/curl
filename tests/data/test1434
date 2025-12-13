@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,11 +12,11 @@ Resume
 <reply>
 # Some servers (e.g. Apache 1.2) respond this way to an invalid byte range
 <data>
-HTTP/1.1 200 OK
-Connection: close
-Content-Length: 100
-Content-Type: text/plain
-
+HTTP/1.1 200 OK%CR
+Connection: close%CR
+Content-Length: 100%CR
+Content-Type: text/plain%CR
+%CR
 012345678
 012345678
 012345678
@@ -41,11 +42,11 @@ Content-Type: text/plain
 012345678
 012345678
 012345678
-HTTP/1.1 200 OK
-Connection: close
-Content-Length: 100
-Content-Type: text/plain
-
+HTTP/1.1 200 OK%CR
+Connection: close%CR
+Content-Length: 100%CR
+Content-Type: text/plain%CR
+%CR
 </datacheck>
 </reply>
 
@@ -76,7 +77,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 100
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-

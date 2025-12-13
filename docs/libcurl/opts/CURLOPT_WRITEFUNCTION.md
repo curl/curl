@@ -106,7 +106,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 
 int main(void)
 {
-  struct memory chunk = {0};
+  struct memory chunk = { 0 };
   CURLcode res;
   CURL *curl = curl_easy_init();
   if(curl) {

@@ -25,16 +25,23 @@
  * HTTP PUT with easy interface and read callback
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
 #include <curl/curl.h>
 
 #ifdef _WIN32
 #undef stat
-#define stat _stat
+#define stat _stati64
 #undef fstat
-#define fstat _fstat
+#define fstat _fstati64
 #define fileno _fileno
 #endif
 
@@ -70,7 +77,7 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  FILE * hd_src;
+  FILE *hd_src;
   struct stat file_info;
 
   char *file;
@@ -90,12 +97,7 @@ int main(int argc, char **argv)
     return 2;
 
   /* get the file size of the local file */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(file, &file_info) != 0) {
-#else
   if(fstat(fileno(hd_src), &file_info) != 0) {
-#endif
     fclose(hd_src);
     return 1; /* cannot continue */
   }

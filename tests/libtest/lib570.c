@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testutil.h"
-#include "memdebug.h"
 
 static CURLcode test_lib570(const char *URL)
 {
@@ -71,7 +70,7 @@ static CURLcode test_lib570(const char *URL)
 
   test_setopt(curl, CURLOPT_RTSP_CLIENT_CSEQ, 999L);
   test_setopt(curl, CURLOPT_RTSP_TRANSPORT,
-                    "RAW/RAW/UDP;unicast;client_port=3056-3057");
+              "RAW/RAW/UDP;unicast;client_port=3056-3057");
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_SETUP);
 
   stream_uri = tutil_suburl(URL, request++);

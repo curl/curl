@@ -42,8 +42,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib526(const char *URL)
 {
   CURLcode res = CURLE_OK;
@@ -157,7 +155,6 @@ test_cleanup:
 
     curl_multi_cleanup(multi);
     curl_global_cleanup();
-
   }
   else if(testnum == 532) {
     /* undocumented cleanup sequence - type UB */

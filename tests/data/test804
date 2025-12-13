@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,10 +8,9 @@ SELECT
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="yes">
 body
 
 --
@@ -18,21 +18,19 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 imap
 </server>
 <name>
-IMAP doesn't perform SELECT if reusing the same mailbox
+IMAP does not perform SELECT if reusing the same mailbox
 </name>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=123/;SECTION=1' 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=456/;SECTION=2.3' -u user:secret
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

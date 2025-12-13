@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,7 @@ HTTP CONNECT
 </info>
 
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Accept-Ranges: bytes
@@ -17,7 +18,7 @@ Content-Type: text/html
 
 -foo-
 </data>
-<connect crlf="yes">
+<connect crlf="headers">
 HTTP/1.1 200 fine
 Connection: close
 Content-Length: 0
@@ -25,7 +26,6 @@ Content-Length: 0
 </connect>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -43,11 +43,10 @@ http://hello/wanted/page -p -x %HOSTIP:%HTTPPORT --header "User-Agent: myapp/1.0
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 
-<protocol crlf="yes">
+<protocol crlf="headers">
 CONNECT hello:80 HTTP/1.1
 Proxy-Connection: Keep-Alive
 User-Agent: Benjamin/2

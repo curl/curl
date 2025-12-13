@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,7 +12,7 @@ Range
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Type: text/html
 Content-Length: 5
@@ -19,7 +20,7 @@ Content-Length: 5
 body
 </data>
 
-<data1 nocheck="yes">
+<data1 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Type: text/html
 Content-Length: 5
@@ -28,7 +29,7 @@ Content-Range: bytes 3/7
 body
 </data1>
 
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Content-Type: text/html
 Content-Length: 5
@@ -36,7 +37,7 @@ Content-Length: 5
 body
 </data2>
 
-<data3 nocheck="yes">
+<data3 crlf="headers" nocheck="yes">
 HTTP/1.1 416 Requested Range Not Satisfiable
 Content-Type: text/html
 Content-Length: 5

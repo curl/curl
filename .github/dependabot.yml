@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: curl
 
+# https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+
 version: 2
 updates:
   - package-ecosystem: 'github-actions'
@@ -11,7 +13,7 @@ updates:
     cooldown:
       default-days: 7
     groups:
-      actions-deps:
+      gha-dependencies:
         patterns:
           - '*'
     commit-message:
@@ -19,8 +21,8 @@ updates:
 
   - package-ecosystem: 'pip'
     directories:
-      - '/.github/scripts'
-      - '/tests'
+      - '.github/scripts'
+      - 'tests'
     schedule:
       interval: 'monthly'
     cooldown:
@@ -29,7 +31,7 @@ updates:
       semver-minor-days: 7
       semver-patch-days: 3
     groups:
-      actions-deps:
+      pip-dependencies:
         patterns:
           - '*'
     commit-message:

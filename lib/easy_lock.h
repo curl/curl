@@ -30,10 +30,10 @@
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 
-#define curl_simple_lock SRWLOCK
+#define curl_simple_lock      SRWLOCK
 #define CURL_SIMPLE_LOCK_INIT SRWLOCK_INIT
 
-#define curl_simple_lock_lock(m) AcquireSRWLockExclusive(m)
+#define curl_simple_lock_lock(m)   AcquireSRWLockExclusive(m)
 #define curl_simple_lock_unlock(m) ReleaseSRWLockExclusive(m)
 
 #elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
@@ -42,7 +42,7 @@
 #include <sched.h>
 #endif
 
-#define curl_simple_lock atomic_int
+#define curl_simple_lock      atomic_int
 #define CURL_SIMPLE_LOCK_INIT 0
 
 #ifndef __INTEL_COMPILER
@@ -91,14 +91,14 @@ static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
 
 #include <pthread.h>
 
-#define curl_simple_lock pthread_mutex_t
-#define CURL_SIMPLE_LOCK_INIT PTHREAD_MUTEX_INITIALIZER
-#define curl_simple_lock_lock(m) pthread_mutex_lock(m)
+#define curl_simple_lock           pthread_mutex_t
+#define CURL_SIMPLE_LOCK_INIT      PTHREAD_MUTEX_INITIALIZER
+#define curl_simple_lock_lock(m)   pthread_mutex_lock(m)
 #define curl_simple_lock_unlock(m) pthread_mutex_unlock(m)
 
 #else
 
-#undef  GLOBAL_INIT_IS_THREADSAFE
+#undef GLOBAL_INIT_IS_THREADSAFE
 
 #endif
 

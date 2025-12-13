@@ -25,19 +25,15 @@
 #
 # Input variables:
 #
-# - `GSS_ROOT_DIR`:      Absolute path to the root installation of GSS. (also supported as environment)
+# - `GSS_ROOT_DIR`:       Absolute path to the root installation of GSS. (also supported as environment)
 #
-# Result variables:
+# Defines:
 #
-# - `GSS_FOUND`:         System has a GSS library.
-# - `GSS_FLAVOUR`:       "GNU" or "MIT" if anything found.
-# - `GSS_INCLUDE_DIRS`:  The GSS include directories.
-# - `GSS_LIBRARIES`:     The GSS library names.
-# - `GSS_LIBRARY_DIRS`:  The GSS library directories.
-# - `GSS_PC_REQUIRES`:   The GSS pkg-config packages.
-# - `GSS_CFLAGS`:        Required compiler flags.
-# - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
-#                        In case the library is found but no version info available it is set to "unknown"
+# - `GSS_FOUND`:          System has a GSS library.
+# - `GSS_VERSION`:        This is set to version advertised by pkg-config or read from manifest.
+#                         In case the library is found but no version info available it is set to "unknown"
+# - `CURL::gss`:          GSS library target.
+#   - CURL_GSS_FLAVOUR`:  Custom property. "GNU" or "MIT" if detected.
 
 set(_gnu_modname "gss")
 set(_mit_modname "mit-krb5-gssapi")
@@ -140,7 +136,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     # Older versions may not have the "--vendor" parameter. In this case we just do not care.
     if(NOT _gss_configure_failed AND NOT _gss_vendor MATCHES "Heimdal|heimdal")
-      set(GSS_FLAVOUR "MIT")  # assume a default, should not really matter
+      set(_gss_flavour "MIT")  # assume a default, should not really matter
     endif()
 
   else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
@@ -156,7 +152,7 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       cmake_pop_check_state()
 
       if(_gss_have_mit_headers)
-        set(GSS_FLAVOUR "MIT")
+        set(_gss_flavour "MIT")
         if(WIN32)
           if(CMAKE_SIZEOF_VOID_P EQUAL 8)
             list(APPEND _gss_libdir_suffixes "lib/AMD64")
@@ -174,14 +170,14 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       find_path(_gss_INCLUDE_DIRS NAMES "gss.h" HINTS ${_gss_root_hints} PATH_SUFFIXES "include")
 
       if(_gss_INCLUDE_DIRS)
-        set(GSS_FLAVOUR "GNU")
-        set(GSS_PC_REQUIRES ${_gnu_modname})
+        set(_gss_flavour "GNU")
+        set(_gss_pc_requires ${_gnu_modname})
         set(_gss_libname "gss")
       endif()
     endif()
 
     # If we have headers, look up libraries
-    if(GSS_FLAVOUR)
+    if(_gss_flavour)
       set(_gss_libdir_hints ${_gss_root_hints})
       if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
         cmake_path(GET _gss_INCLUDE_DIRS PARENT_PATH _gss_calculated_potential_root)
@@ -193,34 +189,28 @@ if(NOT _gss_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       find_library(_gss_LIBRARIES NAMES ${_gss_libname} HINTS ${_gss_libdir_hints} PATH_SUFFIXES ${_gss_libdir_suffixes})
     endif()
   endif()
-  if(NOT GSS_FLAVOUR)
+  if(NOT _gss_flavour)
     message(FATAL_ERROR "GNU or MIT GSS is required")
   endif()
 else()
   # _gss_MODULE_NAME set since CMake 3.16.
   # _pkg_check_modules_pkg_name is undocumented and used as a fallback for CMake <3.16 versions.
   if(_gss_MODULE_NAME STREQUAL _gnu_modname OR _pkg_check_modules_pkg_name STREQUAL _gnu_modname)
-    set(GSS_FLAVOUR "GNU")
-    set(GSS_PC_REQUIRES ${_gnu_modname})
+    set(_gss_flavour "GNU")
+    set(_gss_pc_requires ${_gnu_modname})
   elseif(_gss_MODULE_NAME STREQUAL _mit_modname OR _pkg_check_modules_pkg_name STREQUAL _mit_modname)
-    set(GSS_FLAVOUR "MIT")
-    set(GSS_PC_REQUIRES ${_mit_modname})
+    set(_gss_flavour "MIT")
+    set(_gss_pc_requires ${_mit_modname})
   else()
     message(FATAL_ERROR "GNU or MIT GSS is required")
   endif()
-  message(STATUS "Found GSS/${GSS_FLAVOUR} (via pkg-config): ${_gss_INCLUDE_DIRS} (found version \"${_gss_version}\")")
+  message(STATUS "Found GSS/${_gss_flavour} (via pkg-config): ${_gss_INCLUDE_DIRS} (found version \"${_gss_version}\")")
 endif()
 
-string(REPLACE ";" " " _gss_CFLAGS "${_gss_CFLAGS}")
-
-set(GSS_INCLUDE_DIRS ${_gss_INCLUDE_DIRS})
-set(GSS_LIBRARIES ${_gss_LIBRARIES})
-set(GSS_LIBRARY_DIRS ${_gss_LIBRARY_DIRS})
-set(GSS_CFLAGS ${_gss_CFLAGS})
 set(GSS_VERSION ${_gss_version})
 
 if(NOT GSS_VERSION)
-  if(GSS_FLAVOUR STREQUAL "MIT")
+  if(_gss_flavour STREQUAL "MIT")
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
       cmake_host_system_information(RESULT _mit_version QUERY WINDOWS_REGISTRY
         "HKLM/SOFTWARE/MIT/Kerberos/SDK/CurrentVersion" VALUE "VersionString")
@@ -234,9 +224,9 @@ if(NOT GSS_VERSION)
       set(GSS_VERSION "MIT Unknown")
     endif()
   else()  # GNU
-    if(GSS_INCLUDE_DIRS AND EXISTS "${GSS_INCLUDE_DIRS}/gss.h")
+    if(_gss_INCLUDE_DIRS AND EXISTS "${_gss_INCLUDE_DIRS}/gss.h")
       set(_version_regex "#[\t ]*define[\t ]+GSS_VERSION[\t ]+\"([^\"]*)\"")
-      file(STRINGS "${GSS_INCLUDE_DIRS}/gss.h" _version_str REGEX "${_version_regex}")
+      file(STRINGS "${_gss_INCLUDE_DIRS}/gss.h" _version_str REGEX "${_version_regex}")
       string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
       set(GSS_VERSION "${_version_str}")
       unset(_version_regex)
@@ -248,8 +238,8 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GSS
   REQUIRED_VARS
-    GSS_FLAVOUR
-    GSS_LIBRARIES
+    _gss_flavour
+    _gss_LIBRARIES
   VERSION_VAR
     GSS_VERSION
   FAIL_MESSAGE
@@ -266,3 +256,20 @@ mark_as_advanced(
   _gss_PREFIX
   _gss_version
 )
+
+if(GSS_FOUND)
+  if(CMAKE_VERSION VERSION_LESS 3.13)
+    link_directories(${_gss_LIBRARY_DIRS})
+  endif()
+
+  if(NOT TARGET CURL::gss)
+    add_library(CURL::gss INTERFACE IMPORTED)
+    set_target_properties(CURL::gss PROPERTIES
+      INTERFACE_CURL_GSS_FLAVOUR "${_gss_flavour}"
+      INTERFACE_LIBCURL_PC_MODULES "${_gss_pc_requires}"
+      INTERFACE_COMPILE_OPTIONS "${_gss_CFLAGS}"
+      INTERFACE_INCLUDE_DIRECTORIES "${_gss_INCLUDE_DIRS}"
+      INTERFACE_LINK_DIRECTORIES "${_gss_LIBRARY_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${_gss_LIBRARIES}")
+  endif()
+endif()

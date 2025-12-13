@@ -77,7 +77,6 @@ sub add {
     }
 }
 
-
 my $fl;
 while(<STDIN>) {
     my $l = $_;
@@ -122,7 +121,6 @@ while(<STDIN>) {
     }
 }
 
-
 for my $name (sort @names) {
     my $oname = $name;
     my $a = $alias{$name};
@@ -131,19 +129,19 @@ for my $name (sort @names) {
         $name = $alias{$name};
         $flag = "CURLOT_FLAG_ALIAS";
     }
-    my $o = sprintf("  {\"%s\", %s, %s, %s},\n",
+    my $o = sprintf("  { \"%s\", %s, %s, %s },\n",
                     $oname, $opt{$name}, $type{$name}, $flag);
     if(length($o) < 80) {
         print $o;
     }
     else {
-        printf("  {\"%s\", %s,\n   %s, %s},\n",
-                 $oname, $opt{$name}, $type{$name}, $flag);
+        printf("  { \"%s\", %s,\n    %s, %s },\n",
+               $oname, $opt{$name}, $type{$name}, $flag);
     }
 }
 
 print <<FOOT
-  {NULL, CURLOPT_LASTENTRY, CURLOT_LONG, 0} /* end of table */
+  { NULL, CURLOPT_LASTENTRY, CURLOT_LONG, 0 } /* end of table */
 };
 
 #ifdef DEBUGBUILD

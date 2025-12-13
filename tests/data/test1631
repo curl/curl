@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,7 +12,7 @@ flaky
 <reply>
 
 # This is the HTTPS proxy response
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -56,20 +57,19 @@ proxy
 <verify>
 
 # The second CONNECT will be made to the dynamic port number the FTP server
-# opens for us, so we can't compare with a known pre-existing number!
+# opens for us, so we cannot compare with a known pre-existing number!
 <strippart>
 s/((https.proxy):(\d+))/$2:12345/
-s/^(User-Agent: curl).*/$1/
 </strippart>
-<proxy>
+<proxy crlf="headers">
 CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
 Host: ftp.site.thru.https.proxy:12345
-User-Agent: curl
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 CONNECT ftp.site.thru.https.proxy:12345 HTTP/1.1
 Host: ftp.site.thru.https.proxy:12345
-User-Agent: curl
+User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

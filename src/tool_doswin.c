@@ -40,8 +40,6 @@
 #include "tool_doswin.h"
 #include "tool_msgs.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef _WIN32
 #  undef  PATH_MAX
 #  define PATH_MAX MAX_PATH
@@ -65,13 +63,12 @@
 /* only used by msdosify() */
 static SANITIZEcode truncate_dryrun(const char *path,
                                     const size_t truncate_pos);
-static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
+static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
                              int flags);
 #endif
-static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
+static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
                                            const char *file_name,
                                            int flags);
-
 
 /*
 Sanitize a file or path name.
@@ -98,7 +95,7 @@ is in a UNC prefixed path.
 Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
 Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
 */
-SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
+SANITIZEcode sanitize_file_name(char ** const sanitized, const char *file_name,
                                 int flags)
 {
   char *p, *target;
@@ -118,22 +115,22 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 #ifndef MSDOS
     if(file_name[0] == '\\' && file_name[1] == '\\')
       /* UNC prefixed path \\ (eg \\?\C:\foo) */
-      max_sanitized_len = 32767-1;
+      max_sanitized_len = 32767 - 1;
     else
 #endif
-      max_sanitized_len = PATH_MAX-1;
+      max_sanitized_len = PATH_MAX - 1;
   }
   else
     /* The maximum length of a filename. FILENAME_MAX is often the same as
        PATH_MAX, in other words it is 260 and does not discount the path
        information therefore we should not use it. */
-    max_sanitized_len = (PATH_MAX-1 > 255) ? 255 : PATH_MAX-1;
+    max_sanitized_len = (PATH_MAX - 1 > 255) ? 255 : PATH_MAX - 1;
 
   len = strlen(file_name);
   if(len > max_sanitized_len)
     return SANITIZE_ERR_INVALID_PATH;
 
-  target = strdup(file_name);
+  target = curlx_strdup(file_name);
   if(!target)
     return SANITIZE_ERR_OUT_OF_MEMORY;
 
@@ -183,28 +180,28 @@ SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
 
 #ifdef MSDOS
   sc = msdosify(&p, target, flags);
-  free(target);
+  curlx_free(target);
   if(sc)
     return sc;
   target = p;
   len = strlen(target);
 
   if(len > max_sanitized_len) {
-    free(target);
+    curlx_free(target);
     return SANITIZE_ERR_INVALID_PATH;
   }
 #endif
 
   if(!(flags & SANITIZE_ALLOW_RESERVED)) {
     sc = rename_if_reserved_dos(&p, target, flags);
-    free(target);
+    curlx_free(target);
     if(sc)
       return sc;
     target = p;
     len = strlen(target);
 
     if(len > max_sanitized_len) {
-      free(target);
+      curlx_free(target);
       return SANITIZE_ERR_INVALID_PATH;
     }
   }
@@ -289,17 +286,18 @@ sanitize_file_name.
 Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
 Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
 */
-static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
+static SANITIZEcode msdosify(char ** const sanitized, const char *file_name,
                              int flags)
 {
   char dos_name[PATH_MAX];
-  static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */
+  static const char illegal_chars_dos[] =
+    ".+, ;=[]"     /* illegal in DOS */
     "|<>/\\\":?*"; /* illegal in DOS & W95 */
   static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   const char *s = file_name;
   char *d = dos_name;
-  const char *const dlimit = dos_name + sizeof(dos_name) - 1;
+  const char * const dlimit = dos_name + sizeof(dos_name) - 1;
   const char *illegal_aliens = illegal_chars_dos;
   size_t len = sizeof(illegal_chars_dos) - 1;
 
@@ -311,7 +309,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
   if(!file_name)
     return SANITIZE_ERR_BAD_ARGUMENT;
 
-  if(strlen(file_name) > PATH_MAX-1)
+  if(strlen(file_name) > PATH_MAX - 1)
     return SANITIZE_ERR_INVALID_PATH;
 
   /* Support for Windows 9X VFAT systems, when available. */
@@ -324,7 +322,8 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
   if(s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
     *d++ = *s++;
     *d = ((flags & SANITIZE_ALLOW_PATH)) ? ':' : '_';
-    ++d; ++s;
+    ++d;
+    ++s;
   }
 
   for(idx = 0, dot_idx = -1; *s && d < dlimit; s++, d++) {
@@ -375,7 +374,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
           *d++ = 'x';
           if(d == dlimit)
             break;
-          *d   = 'x';
+          *d = 'x';
         }
         else {
           /* libg++ etc.  */
@@ -383,7 +382,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
             *d++ = 'x';
             if(d == dlimit)
               break;
-            *d   = 'x';
+            *d = 'x';
           }
           else {
             memcpy(d, "plus", 4);
@@ -415,7 +414,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
       return SANITIZE_ERR_INVALID_PATH;
   }
 
-  *sanitized = strdup(dos_name);
+  *sanitized = curlx_strdup(dos_name);
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 #endif /* MSDOS */
@@ -433,7 +432,7 @@ sanitize_file_name.
 Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
 Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
 */
-static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
+static SANITIZEcode rename_if_reserved_dos(char ** const sanitized,
                                            const char *file_name,
                                            int flags)
 {
@@ -457,14 +456,14 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 #ifndef MSDOS
   if((flags & SANITIZE_ALLOW_PATH) &&
      file_name[0] == '\\' && file_name[1] == '\\') {
-    *sanitized = strdup(file_name);
+    *sanitized = curlx_strdup(file_name);
     if(!*sanitized)
       return SANITIZE_ERR_OUT_OF_MEMORY;
     return SANITIZE_ERR_OK;
   }
 #endif
 
-  if(len > PATH_MAX-1)
+  if(len > PATH_MAX - 1)
     return SANITIZE_ERR_INVALID_PATH;
 
   memcpy(fname, file_name, len);
@@ -513,7 +512,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
     p_len = strlen(p);
 
     /* Prepend a '_' */
-    if(strlen(fname) == PATH_MAX-1)
+    if(strlen(fname) == PATH_MAX - 1)
       return SANITIZE_ERR_INVALID_PATH;
     memmove(p + 1, p, p_len + 1);
     p[0] = '_';
@@ -536,7 +535,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
     /* Prepend a '_' */
     size_t blen = strlen(base);
     if(blen) {
-      if(strlen(fname) >= PATH_MAX-1)
+      if(strlen(fname) >= PATH_MAX - 1)
         return SANITIZE_ERR_INVALID_PATH;
       memmove(base + 1, base, blen + 1);
       base[0] = '_';
@@ -544,7 +543,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
   }
 #endif
 
-  *sanitized = strdup(fname);
+  *sanitized = curlx_strdup(fname);
   return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 
@@ -561,7 +560,7 @@ char **__crt0_glob_function(char *arg)
 
 #ifdef _WIN32
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+#if !defined(CURL_WINDOWS_UWP) && \
   !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 /* Search and set the CA cert file for Windows.
  *
@@ -594,11 +593,8 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 
   res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
   if(res_len > 0) {
-    char *mstr = curlx_convert_tchar_to_UTF8(buf);
-    tool_safefree(config->cacert);
-    if(mstr)
-      config->cacert = strdup(mstr);
-    curlx_unicodefree(mstr);
+    curlx_free(config->cacert);
+    config->cacert = curlx_convert_tchar_to_UTF8(buf);
     if(!config->cacert)
       result = CURLE_OUT_OF_MEMORY;
   }
@@ -613,9 +609,9 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
 struct curl_slist *GetLoadedModulePaths(void)
 {
   struct curl_slist *slist = NULL;
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   HANDLE hnd = INVALID_HANDLE_VALUE;
-  MODULEENTRY32 mod = {0};
+  MODULEENTRY32 mod = { 0 };
 
   mod.dwSize = sizeof(MODULEENTRY32);
 
@@ -664,7 +660,7 @@ cleanup:
 
 bool tool_term_has_bold;
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
 /* The terminal settings to restore on exit */
 static struct TerminalSettings {
   HANDLE hStdOut;
@@ -735,14 +731,14 @@ static void init_terminal(void)
 CURLcode win32_init(void)
 {
   curlx_now_init();
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
   init_terminal();
 #endif
 
   return CURLE_OK;
 }
 
-#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+#ifndef CURL_WINDOWS_UWP
 /* The following STDIN non - blocking read techniques are heavily inspired
    by nmap and ncat (https://nmap.org/ncat/) */
 struct win_thread_data {
@@ -765,7 +761,8 @@ static DWORD WINAPI win_stdin_thread_func(void *thread_data)
   SOCKADDR_IN clientAddr;
   int clientAddrLen = sizeof(clientAddr);
 
-  curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l, (SOCKADDR*)&clientAddr,
+  curl_socket_t socket_w = CURL_ACCEPT(tdata->socket_l,
+                                       (SOCKADDR *)&clientAddr,
                                        &clientAddrLen);
 
   if(socket_w == CURL_SOCKET_BAD) {
@@ -801,10 +798,7 @@ ThreadCleanup:
   if(socket_w != CURL_SOCKET_BAD)
     sclose(socket_w);
 
-  if(tdata) {
-    free(tdata);
-  }
-
+  curlx_free(tdata);
   return 0;
 }
 
@@ -827,9 +821,10 @@ curl_socket_t win32_stdin_read_thread(void)
 
   do {
     /* Prepare handles for thread */
-    tdata = (struct win_thread_data*)calloc(1, sizeof(struct win_thread_data));
+    tdata = (struct win_thread_data *)
+      curlx_calloc(1, sizeof(struct win_thread_data));
     if(!tdata) {
-      errorf("calloc() error");
+      errorf("curlx_calloc() error");
       break;
     }
     /* Create the listening socket for the thread. When it starts, it will
@@ -845,14 +840,14 @@ curl_socket_t win32_stdin_read_thread(void)
     selfaddr.sin_family = AF_INET;
     selfaddr.sin_addr.S_un.S_addr = htonl(INADDR_LOOPBACK);
     /* Bind to any available loopback port */
-    result = bind(tdata->socket_l, (SOCKADDR*)&selfaddr, socksize);
+    result = bind(tdata->socket_l, (SOCKADDR *)&selfaddr, socksize);
     if(result == SOCKET_ERROR) {
       errorf("bind error: %d", SOCKERRNO);
       break;
     }
 
     /* Bind to any available loopback port */
-    result = getsockname(tdata->socket_l, (SOCKADDR*)&selfaddr, &socksize);
+    result = getsockname(tdata->socket_l, (SOCKADDR *)&selfaddr, &socksize);
     if(result == SOCKET_ERROR) {
       errorf("getsockname error: %d", SOCKERRNO);
       break;
@@ -874,7 +869,7 @@ curl_socket_t win32_stdin_read_thread(void)
       break;
     }
 
-    /* Start up the thread. We don't bother keeping a reference to it
+    /* Start up the thread. We do not bother keeping a reference to it
        because it runs until program termination. From here on out all reads
        from the stdin handle or file descriptor 0 will be reading from the
        socket that is fed by the thread. */
@@ -884,6 +879,7 @@ curl_socket_t win32_stdin_read_thread(void)
       errorf("CreateThread error: 0x%08lx", GetLastError());
       break;
     }
+    tdata = NULL; /* win_stdin_thread_func owns it now */
 
     /* Connect to the thread and rearrange our own STDIN handles */
     socket_r = CURL_SOCKET(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -895,7 +891,7 @@ curl_socket_t win32_stdin_read_thread(void)
     /* Hard close the socket on closesocket() */
     setsockopt(socket_r, SOL_SOCKET, SO_DONTLINGER, 0, 0);
 
-    if(connect(socket_r, (SOCKADDR*)&selfaddr, socksize) == SOCKET_ERROR) {
+    if(connect(socket_r, (SOCKADDR *)&selfaddr, socksize) == SOCKET_ERROR) {
       errorf("connect error: %d", SOCKERRNO);
       break;
     }
@@ -939,7 +935,7 @@ curl_socket_t win32_stdin_read_thread(void)
       if(tdata->socket_l != CURL_SOCKET_BAD)
         sclose(tdata->socket_l);
 
-      free(tdata);
+      curlx_free(tdata);
     }
 
     return CURL_SOCKET_BAD;
@@ -949,7 +945,7 @@ curl_socket_t win32_stdin_read_thread(void)
   return socket_r;
 }
 
-#endif /* !CURL_WINDOWS_UWP && !UNDER_CE */
+#endif /* !CURL_WINDOWS_UWP */
 
 #endif /* _WIN32 */
 

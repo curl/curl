@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t654_WriteThis {
   const char *readptr;
   curl_off_t sizeleft;
@@ -33,7 +31,7 @@ struct t654_WriteThis {
 
 static void free_callback(void *userp)
 {
-  struct t654_WriteThis *pooh = (struct t654_WriteThis *) userp;
+  struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
 
   pooh->freecount++;
 }
@@ -43,7 +41,7 @@ static size_t t654_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t654_WriteThis *pooh = (struct t654_WriteThis *)userp;
   int eof;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   eof = pooh->sizeleft <= 0;
@@ -94,7 +92,7 @@ static CURLcode test_lib654(const char *URL)
 
   /* Prepare the callback structure. */
   pooh.readptr = testdata;
-  pooh.sizeleft = (curl_off_t) strlen(testdata);
+  pooh.sizeleft = (curl_off_t)strlen(testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */
@@ -109,7 +107,7 @@ static CURLcode test_lib654(const char *URL)
   part = curl_mime_addpart(mime);
   curl_mime_filedata(part, libtest_arg2);
   part = curl_mime_addpart(mime);
-  curl_mime_data_cb(part, (curl_off_t) -1, t654_read_cb, NULL,
+  curl_mime_data_cb(part, (curl_off_t)-1, t654_read_cb, NULL,
                     free_callback, &pooh);
 
   /* Bind mime data to its easy handle. */

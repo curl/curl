@@ -25,8 +25,15 @@
  * FTP wildcard pattern matching
  * </DESC>
  */
-#include <curl/curl.h>
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
+
+#include <curl/curl.h>
 
 struct callback_data {
   FILE *output;
@@ -78,8 +85,7 @@ static long file_is_downloaded(void *input)
   return CURL_CHUNK_END_FUNC_OK;
 }
 
-static size_t write_cb(char *buff, size_t size, size_t nmemb,
-                       void *cb_data)
+static size_t write_cb(char *buff, size_t size, size_t nmemb, void *cb_data)
 {
   struct callback_data *data = cb_data;
   size_t written = 0;

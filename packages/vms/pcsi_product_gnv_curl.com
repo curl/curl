@@ -1,6 +1,6 @@
 $! File: PCSI_PRODUCT_GNV_CURL.COM
 $!
-$! This command file packages up the product CURL into a sequential
+$! This command file packages up the product curl into a sequential
 $! format kit
 $!
 $! Copyright (C) John Malmberg
@@ -85,8 +85,8 @@ $   endif
 $   @gnv_link_curl.com
 $ endif
 $!
-$! Make sure that the release note file name is up to date
-$!---------------------------------------------------------
+$! Make sure that the release note filename is up to date
+$!--------------------------------------------------------
 $ @BUILD_GNV_CURL_RELEASE_NOTES.COM
 $!
 $!

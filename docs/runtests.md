@@ -180,6 +180,15 @@ regression test suite.
 
 Lists all test case names.
 
+## `-m=[seconds]`
+
+Set timeout for curl commands in tests.
+
+## `--min=[count]`
+
+Set the minimum number of tests to run. This overrides the `CURL_TEST_MIN`
+environment variable, if any.
+
 ## `-n`
 
 Disable the check for and use of valgrind.
@@ -288,6 +297,10 @@ Error instead of warning on server unexpectedly alive.
 Enable verbose output. Speaks more than by default. If used in conjunction
 with parallel testing, it is difficult to associate the logs with the specific
 test being run.
+
+## `-w`
+
+Verify test data.
 
 ## `-vc \<curl\>`
 

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -37,7 +38,7 @@ PASS ftp@example.com
 PWD
 PRET RETR %TESTNUMBER
 </protocol>
-# we expect that the server doesn't understand PRET
+# we expect that the server does not understand PRET
 <errorcode>
 84
 </errorcode>

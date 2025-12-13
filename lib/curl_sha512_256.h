@@ -35,9 +35,8 @@ extern const struct HMAC_params Curl_HMAC_SHA512_256[1];
 
 #define CURL_SHA512_256_DIGEST_LENGTH 32
 
-CURLcode
-Curl_sha512_256it(unsigned char *output, const unsigned char *input,
-                  size_t input_size);
+CURLcode Curl_sha512_256it(unsigned char *output, const unsigned char *input,
+                           size_t input_size);
 
 #endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
 

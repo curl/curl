@@ -39,26 +39,25 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 /* ---------------------------------------------------------------- */
 
-#define test_check(expected_fds) \
-  if(res != CURLE_OK) { \
-    curl_mfprintf(stderr, "test failed with code: %d\n", res); \
-    goto test_cleanup; \
-  } \
-  else if(fd_count != expected_fds) { \
-    curl_mfprintf(stderr, "Max number of waitfds: %d not as expected: %d\n", \
-      fd_count, expected_fds); \
-    res = TEST_ERR_FAILURE; \
-    goto test_cleanup; \
+#define test_check(expected_fds)                                             \
+  if(res != CURLE_OK) {                                                      \
+    curl_mfprintf(stderr, "test failed with code: %d\n", res);               \
+    goto test_cleanup;                                                       \
+  }                                                                          \
+  else if(fd_count != expected_fds) {                                        \
+    curl_mfprintf(stderr, "Max number of waitfds: %u not as expected: %u\n", \
+                  fd_count, expected_fds);                                   \
+    res = TEST_ERR_FAILURE;                                                  \
+    goto test_cleanup;                                                       \
   }
 
-#define test_run_check(option, expected_fds) do { \
-  res = test_run(URL, option, &fd_count); \
-  test_check(expected_fds); \
-} while(0)
+#define test_run_check(option, expected_fds) \
+  do {                                       \
+    res = test_run(URL, option, &fd_count);  \
+    test_check(expected_fds);                \
+  } while(0)
 
 /* ---------------------------------------------------------------- */
 
@@ -68,9 +67,10 @@ enum {
   TEST_USE_HTTP2_MPLEX
 };
 
-static size_t emptyWriteFunc(void *ptr, size_t size, size_t nmemb,
-    void *data) {
-  (void)ptr; (void)data;
+static size_t emptyWriteFunc(char *ptr, size_t size, size_t nmemb, void *data)
+{
+  (void)ptr;
+  (void)data;
   return size * nmemb;
 }
 
@@ -218,12 +218,12 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return at least the number "
-                    "of fds needed\n");
+                    "of fds needed (%u vs. %u)\n", fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
     }
 
-    /* checking case when we don't have enough space for waitfds */
+    /* checking case when we do not have enough space for waitfds */
     mc = curl_multi_waitfds(multi, ufds1, fd_count - 1, &fd_count_chk);
 
     if(mc != CURLM_OUT_OF_MEMORY) {
@@ -236,7 +236,8 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return the amount of fds "
-                    "needed if enough isn't passed in.\n");
+                    "needed if enough is not passed in (%u vs. %u).\n",
+                    fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
     }
@@ -263,7 +264,8 @@ static CURLcode test_run(const char *URL, long option,
     if(fd_count_chk < fd_count) {
       curl_mfprintf(stderr,
                     "curl_multi_waitfds() should return the amount of fds "
-                    "needed if enough isn't passed in.\n");
+                    "needed if enough is not passed in (%u vs. %u).\n",
+                    fd_count_chk, fd_count);
       res = TEST_ERR_FAILURE;
       break;
     }
@@ -275,7 +277,7 @@ static CURLcode test_run(const char *URL, long option,
     mc = curl_multi_poll(multi1, ufds, fd_count, 500, &numfds);
 
     if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_poll() failed, code %d.\\n", mc);
+      curl_mfprintf(stderr, "curl_multi_poll() failed, code %d.\n", mc);
       res = TEST_ERR_FAILURE;
       break;
     }
@@ -379,14 +381,19 @@ static CURLcode test_lib2405(const char *URL)
   if(res != CURLE_OK)
     goto test_cleanup;
 
-  /* HTTP1, expected 2 waitfds - one for each transfer */
-  test_run_check(TEST_USE_HTTP1, 2);
+  if(testnum == 2405) {
+    /* HTTP1, expected 2 waitfds - one for each transfer */
+    test_run_check(TEST_USE_HTTP1, 2);
+  }
+#ifdef USE_HTTP2
+  else { /* 2407 */
+    /* HTTP2, expected 2 waitfds - one for each transfer */
+    test_run_check(TEST_USE_HTTP2, 2);
 
-  /* HTTP2, expected 2 waitfds - one for each transfer */
-  test_run_check(TEST_USE_HTTP2, 2);
-
-  /* HTTP2 with multiplexing, expected 1 waitfds - one for all transfers */
-  test_run_check(TEST_USE_HTTP2_MPLEX, 1);
+    /* HTTP2 with multiplexing, expected 1 waitfds - one for all transfers */
+    test_run_check(TEST_USE_HTTP2_MPLEX, 1);
+  }
+#endif
 
 test_cleanup:
   curl_global_cleanup();

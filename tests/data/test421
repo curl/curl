@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,10 +6,9 @@ header_json
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data crlf="yes">
+<data crlf="headers">
 HTTP/1.1 200 OK
 server: nginx
 date: Tue, 07 Mar 2023 15:14:41 GMT
@@ -21,7 +21,7 @@ referrer-policy: strict-origin-when-cross-origin
 access-control-allow-methods: GET, POST, PUT, DELETE, OPTIONS
 access-control-max-age: 1728000
 access-control-allow-headers: Authorization, Content-Type, AuthorizationOauth, X-EARLY-ACCESS
-access-control-expose-headers:%spc%
+access-control-expose-headers:%SP
 vary: Accept
 etag: W/"2678f9ab2ba550d164e7cc014aefd31e"
 cache-control: max-age=0, private, must-revalidate
@@ -36,7 +36,6 @@ feature-policy: accelerometer 'none'; camera 'none'; geolocation 'none'; gyrosco
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -50,10 +49,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{stderr}%{header_json}\n' -s
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

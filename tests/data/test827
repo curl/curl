@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,6 @@ NTLM
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
@@ -18,7 +18,7 @@ CAPA SASL-IR
 REPLY AUTHENTICATE + TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 REPLY TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04= A002 OK AUTHENTICATE completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -29,7 +29,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -48,7 +47,6 @@ IMAP NTLM authentication with initial response
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

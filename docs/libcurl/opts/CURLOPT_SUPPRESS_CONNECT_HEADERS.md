@@ -83,7 +83,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
-    curl_easy_setopt(curl, CURLOPT_PROXY, "http://foo:3128");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "http://proxy.example:3128");
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
     curl_easy_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS, 1L);
 

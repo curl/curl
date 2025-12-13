@@ -16,7 +16,7 @@ Added-in: 7.21.0
 
 # NAME
 
-CURLINFO_PRIMARY_PORT - get the latest destination port number
+CURLINFO_PRIMARY_PORT - last destination port number
 
 # SYNOPSIS
 
@@ -35,6 +35,11 @@ This is the destination port of the actual TCP or UDP connection libcurl used.
 If a proxy was used for the most recent transfer, this is the port number of
 the proxy, if no proxy was used it is the port number of the most recently
 accessed URL.
+
+If the connection was done using QUIC, the port number is a UDP port number.
+
+If no connection was established or if the protocol does not use ports, -1
+is returned.
 
 # %PROTOCOLS%
 

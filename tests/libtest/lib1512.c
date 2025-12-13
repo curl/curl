@@ -30,12 +30,10 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1512(const char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl[2] = {NULL, NULL};
+  CURL *curl[2] = { NULL, NULL };
   const char *port = libtest_arg3;
   const char *address = libtest_arg2;
   char dnsentry[256];

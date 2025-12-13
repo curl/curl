@@ -35,15 +35,14 @@
 #include <stsdef.h>
 #include <errno.h>
 
-unsigned long LIB$SET_SYMBOL(
-  const struct dsc$descriptor_s * symbol,
-  const struct dsc$descriptor_s * value,
-  const unsigned long *table_type);
+unsigned long LIB$SET_SYMBOL(const struct dsc$descriptor_s *symbol,
+                             const struct dsc$descriptor_s *value,
+                             const unsigned long *table_type);
 
 int main(int argc, char **argv)
 {
   void *libptr;
-  const char * (*ssl_version)(int t);
+  const char *(*ssl_version)(int t);
   const char *version;
 
   if(argc < 1) {
@@ -53,11 +52,11 @@ int main(int argc, char **argv)
 
   libptr = dlopen(argv[1], 0);
 
-  ssl_version = (const char * (*)(int))dlsym(libptr, "SSLeay_version");
+  ssl_version = (const char *(*)(int))dlsym(libptr, "SSLeay_version");
   if(!ssl_version) {
-    ssl_version = (const char * (*)(int))dlsym(libptr, "ssleay_version");
+    ssl_version = (const char *(*)(int))dlsym(libptr, "ssleay_version");
     if(!ssl_version) {
-      ssl_version = (const char * (*)(int))dlsym(libptr, "SSLEAY_VERSION");
+      ssl_version = (const char *(*)(int))dlsym(libptr, "SSLEAY_VERSION");
     }
   }
 

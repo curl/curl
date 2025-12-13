@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -17,8 +18,7 @@ curl_easy_escape
 </client>
 
 # Verify data after the test has been "shot"
-#
-# There's no MTDM in the protocol here since this code doesn't ask for the
+# There is no MTDM in the protocol here since this code does not ask for the
 # time/date of the file
 <verify>
 <stdout>

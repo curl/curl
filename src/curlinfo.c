@@ -39,7 +39,7 @@
 #include "fake_addrinfo.h" /* for USE_FAKE_GETADDRINFO */
 #include <stdio.h>
 
-static const char *disabled[]={
+static const char *disabled[] = {
   "bindlocal: "
 #ifdef CURL_DISABLE_BINDLOCAL
   "OFF"
@@ -232,6 +232,13 @@ static const char *disabled[]={
   "override-dns: "
 #if defined(CURLDEBUG) &&                                       \
   (defined(CURLRES_ARES) || defined(USE_FAKE_GETADDRINFO))
+  "ON"
+#else
+  "OFF"
+#endif
+  ,
+  "ssl-sessions: "
+#ifdef USE_SSLS_EXPORT
   "ON"
 #else
   "OFF"

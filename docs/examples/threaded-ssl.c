@@ -46,7 +46,7 @@
 #define NUMT 4
 
 /* List of URLs to fetch.*/
-static const char * const urls[]= {
+static const char * const urls[] = {
   "https://www.example.com/",
   "https://www2.example.com/",
   "https://www3.example.com/",
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
                                pull_one_url,
                                (void *)&i);
     if(error)
-      fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
+      fprintf(stderr, "Could not run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }

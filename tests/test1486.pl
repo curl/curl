@@ -26,7 +26,7 @@
 use strict;
 use warnings;
 
-# we may get the dir root pointed out
+# we may get the directory root pointed out
 my $root=$ARGV[0] || ".";
 
 my %insrc; # variable set in source
@@ -45,7 +45,7 @@ sub getsrcvars {
             if($_ =~ /^}/) {
                 last;
             }
-            if($_ =~ /^  \{\"([^\"]*)/) {
+            if($_ =~ /^  \{ \"([^\"]*)/) {
                 my $var = $1;
                 $insrc{$var} = $srccount++;
             }

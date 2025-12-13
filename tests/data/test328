@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -26,7 +27,7 @@ Q- What did 0 say to 8? A- Nice Belt!
 http
 </server>
 
-# we're actually more interested in any compression support but this is the
+# we are actually more interested in any compression support but this is the
 # best we can do right now
 <features>
 libz
@@ -44,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/hello/%TESTNUMBER --compressed
 <strip>
 ^Accept-Encoding:.*
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /hello/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

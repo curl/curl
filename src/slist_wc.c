@@ -28,15 +28,11 @@
 
 #include "slist_wc.h"
 
-/* The last #include files should be: */
-#include "memdebug.h"
-
 /*
  * slist_wc_append() appends a string to the linked list. This function can be
  * used as an initialization function as well as an append function.
  */
-struct slist_wc *slist_wc_append(struct slist_wc *list,
-                                 const char *data)
+struct slist_wc *slist_wc_append(struct slist_wc *list, const char *data)
 {
   struct curl_slist *new_item = curl_slist_append(NULL, data);
 
@@ -44,7 +40,7 @@ struct slist_wc *slist_wc_append(struct slist_wc *list,
     return NULL;
 
   if(!list) {
-    list = malloc(sizeof(struct slist_wc));
+    list = curlx_malloc(sizeof(struct slist_wc));
 
     if(!list) {
       curl_slist_free_all(new_item);
@@ -68,7 +64,7 @@ void slist_wc_free_all(struct slist_wc *list)
     return;
 
   curl_slist_free_all(list->first);
-  free(list);
+  curlx_free(list);
 }
 
 #endif /* CURL_DISABLE_LIBCURL_OPTION */

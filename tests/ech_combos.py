@@ -31,7 +31,7 @@
 # ECH command line args
 
 def CombinationRepetitionUtil(chosen, arr, badarr, index,
-                            r, start, end):
+                              r, start, end):
 
     # Current combination is ready,
     # print it
@@ -68,9 +68,9 @@ def CombinationRepetitionUtil(chosen, arr, badarr, index,
     # with next (Note that i+1 is passed,
     # but index is not changed)
     CombinationRepetitionUtil(chosen, arr, badarr, index + 1,
-                            r, start, end)
+                              r, start, end)
     CombinationRepetitionUtil(chosen, arr, badarr, index,
-                            r, start + 1, end)
+                              r, start + 1, end)
 
 # The main function that prints all
 # combinations of size r in arr[] of
@@ -94,5 +94,3 @@ r = 8
 n = len(arr) - 1
 
 CombinationRepetition(arr, badarr, n, r)
-
-# This code is contributed by Vaibhav Kumar 12.

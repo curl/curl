@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
 multi
 HTTP
-HTTP/2
+flaky
 </keywords>
 </info>
 
@@ -29,7 +30,7 @@ Funny-head: yesyes
 # Client-side
 <client>
 <server>
-http/2
+http
 </server>
 <tool>
 lib%TESTNUMBER
@@ -38,7 +39,7 @@ lib%TESTNUMBER
 checking curl_multi_waitfds functionality
 </name>
 <command>
-http://%HOSTIP:%HTTP2PORT/%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 

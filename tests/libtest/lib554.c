@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t554_WriteThis {
   const char *readptr;
   size_t sizeleft;
@@ -34,7 +32,7 @@ static size_t t554_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t554_WriteThis *pooh = (struct t554_WriteThis *)userp;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   if(pooh->sizeleft) {
@@ -90,7 +88,7 @@ static CURLcode t554_test_once(const char *URL, bool oldstyle)
                           CURLFORM_COPYNAME, "sendfile alternative",
                           CURLFORM_STREAM, &pooh,
                           CURLFORM_CONTENTLEN, (curl_off_t)pooh.sizeleft,
-                          CURLFORM_FILENAME, "file name 2",
+                          CURLFORM_FILENAME, "filename 2 ",
                           CURLFORM_END);
   }
 

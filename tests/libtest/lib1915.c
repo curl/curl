@@ -24,15 +24,13 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 struct state {
   int index;
 };
 
 /* "read" is from the point of the library, it wants data from us */
-static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e,
-                            void *userp)
+static CURLSTScode hstsread(CURL *curl, struct curl_hstsentry *e, void *userp)
 {
   struct entry {
     const char *name;
@@ -99,7 +97,7 @@ static CURLcode test_lib1915(const char *URL)
 {
   CURLcode res = CURLE_OK;
   CURL *curl;
-  struct state st = {0};
+  struct state st = { 0 };
 
   global_init(CURL_GLOBAL_ALL);
 

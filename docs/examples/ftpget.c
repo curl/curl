@@ -21,14 +21,19 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Get a single file from an FTP server.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+
+#include <curl/curl.h>
 
 struct FtpFile {
   const char *filename;
@@ -46,7 +51,6 @@ static size_t write_cb(void *buffer, size_t size, size_t nmemb, void *stream)
   }
   return fwrite(buffer, size, nmemb, out->stream);
 }
-
 
 int main(void)
 {

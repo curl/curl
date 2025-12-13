@@ -16,7 +16,7 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_SPEED_DOWNLOAD - get download speed
+CURLINFO_SPEED_DOWNLOAD - download speed
 
 # SYNOPSIS
 

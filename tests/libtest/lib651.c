@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib651(const char *URL)
 {
   static char testbuf[17000]; /* more than 16K */
@@ -37,12 +35,12 @@ static CURLcode test_lib651(const char *URL)
 
   /* create a buffer with AAAA...BBBBB...CCCC...etc */
   int i;
-  int size = (int)sizeof(testbuf)/1000;
+  int size = (int)sizeof(testbuf) / 1000;
 
-  for(i = 0; i < size ; i++)
+  for(i = 0; i < size; i++)
     memset(&testbuf[i * 1000], 65 + i, 1000);
 
-  testbuf[sizeof(testbuf)-1] = 0; /* null-terminate */
+  testbuf[sizeof(testbuf) - 1] = 0; /* null-terminate */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -56,7 +54,6 @@ static CURLcode test_lib651(const char *URL)
                         CURLFORM_END);
   if(formrc)
     curl_mprintf("curl_formadd(1) = %d\n", formrc);
-
 
   curl = curl_easy_init();
   if(!curl) {

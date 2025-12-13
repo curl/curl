@@ -26,7 +26,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static void usage_h2_pausing(const char *msg)
 {
@@ -39,8 +38,7 @@ static void usage_h2_pausing(const char *msg)
   );
 }
 
-struct handle
-{
+struct handle {
   size_t idx;
   int paused;
   int resumed;
@@ -52,7 +50,7 @@ struct handle
 static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
   size_t realsize = size * nmemb;
-  struct handle *handle = (struct handle *) clientp;
+  struct handle *handle = (struct handle *)clientp;
   curl_off_t totalsize;
 
   (void)data;
@@ -88,7 +86,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   size_t i;
   CURLMsg *msg;
   int rounds = 0;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
   CURLU *cu;
   struct curl_slist *resolve = NULL;
   char resolve_buf[1024];
@@ -145,26 +143,26 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   cu = curl_url();
   if(!cu) {
     curl_mfprintf(stderr, "out of memory\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   if(curl_url_set(cu, CURLUPART_URL, url, 0)) {
     curl_mfprintf(stderr, "not a URL: '%s'\n", url);
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_HOST, &host, 0)) {
     curl_mfprintf(stderr, "could not get host of '%s'\n", url);
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   if(curl_url_get(cu, CURLUPART_PORT, &port, 0)) {
     curl_mfprintf(stderr, "could not get port of '%s'\n", url);
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   memset(&resolve, 0, sizeof(resolve));
-  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
+  curl_msnprintf(resolve_buf, sizeof(resolve_buf) - 1, "%s:%s:127.0.0.1",
                  host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
@@ -176,23 +174,23 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     handles[i].fail_write = 1;
     handles[i].curl = curl_easy_init();
     if(!handles[i].curl ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_WRITEFUNCTION, cb)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_WRITEDATA, &handles[i])
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_FOLLOWLOCATION, 1L)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_SSL_VERIFYPEER, 0L)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_RESOLVE, resolve)
-        != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_PIPEWAIT, 1L) != CURLE_OK ||
-      curl_easy_setopt(handles[i].curl, CURLOPT_URL, url) != CURLE_OK) {
-      curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
-      result = (CURLcode)2;
+       curl_easy_setopt(handles[i].curl, CURLOPT_WRITEFUNCTION, cb)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_WRITEDATA, &handles[i])
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_FOLLOWLOCATION, 1L)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_VERBOSE, 1L) != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_DEBUGFUNCTION, cli_debug_cb)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_SSL_VERIFYPEER, 0L)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_RESOLVE, resolve)
+         != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_PIPEWAIT, 1L) != CURLE_OK ||
+       curl_easy_setopt(handles[i].curl, CURLOPT_URL, url) != CURLE_OK) {
+       curl_mfprintf(stderr, "failed configuring easy handle - bailing out\n");
+      res = (CURLcode)2;
       goto cleanup;
     }
     curl_easy_setopt(handles[i].curl, CURLOPT_HTTP_VERSION, http_version);
@@ -201,14 +199,14 @@ static CURLcode test_cli_h2_pausing(const char *URL)
   multi = curl_multi_init();
   if(!multi) {
     curl_mfprintf(stderr, "curl_multi_init() failed - bailing out\n");
-    result = (CURLcode)2;
+    res = (CURLcode)2;
     goto cleanup;
   }
 
   for(i = 0; i < CURL_ARRAYSIZE(handles); i++) {
     if(curl_multi_add_handle(multi, handles[i].curl) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_add_handle() failed - bailing out\n");
-      result = (CURLcode)2;
+      res = (CURLcode)2;
       goto cleanup;
     }
   }
@@ -217,7 +215,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
     curl_mfprintf(stderr, "INFO: multi_perform round %d\n", rounds);
     if(curl_multi_perform(multi, &still_running) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_perform() failed - bailing out\n");
-      result = (CURLcode)2;
+      res = (CURLcode)2;
       goto cleanup;
     }
 
@@ -247,14 +245,14 @@ static CURLcode test_cli_h2_pausing(const char *URL)
       if(!as_expected) {
         curl_mfprintf(stderr, "ERROR: handles not in expected state "
                       "after %d rounds\n", rounds);
-        result = (CURLcode)1;
+        res = (CURLcode)1;
       }
       break;
     }
 
     if(curl_multi_poll(multi, NULL, 0, 100, &numfds) != CURLM_OK) {
       curl_mfprintf(stderr, "curl_multi_poll() failed - bailing out\n");
-      result = (CURLcode)2;
+      res = (CURLcode)2;
       goto cleanup;
     }
 
@@ -268,7 +266,7 @@ static CURLcode test_cli_h2_pausing(const char *URL)
                             "resumed=%d, result %d - wtf?\n", i,
                             handles[i].paused,
                             handles[i].resumed, msg->data.result);
-              result = (CURLcode)1;
+              res = (CURLcode)1;
               goto cleanup;
             }
           }
@@ -314,5 +312,5 @@ cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return result;
+  return res;
 }

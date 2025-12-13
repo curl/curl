@@ -17,7 +17,7 @@ TLS-backend:
   - Schannel
   - wolfSSL
   - mbedTLS
-  - rustls
+  - Rustls
   - GnuTLS
 Added-in: 7.9
 ---

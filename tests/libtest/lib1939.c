@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1939(const char *URL)
 {
   CURLM *multi;
@@ -48,7 +46,7 @@ static CURLcode test_lib1939(const char *URL)
 
       if(!c) {
 
-        /* We're going to drive the transfer using multi interface here,
+        /* We are going to drive the transfer using multi interface here,
            because we want to stop during the middle. */
         m = curl_multi_add_handle(multi, curl);
 

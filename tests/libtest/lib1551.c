@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #include <curl/multi.h>
 
 static CURLcode test_lib1551(const char *URL)

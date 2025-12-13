@@ -17,7 +17,7 @@ Added-in: 7.55.0
 
 # NAME
 
-CURLINFO_SIZE_DOWNLOAD_T - get the number of downloaded bytes
+CURLINFO_SIZE_DOWNLOAD_T - number of downloaded bytes
 
 # SYNOPSIS
 

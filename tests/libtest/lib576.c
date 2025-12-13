@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct chunk_data {
   int remains;
   int print_content;
@@ -100,7 +98,7 @@ static CURLcode test_lib576(const char *URL)
 {
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
-  struct chunk_data chunk_data = {0, 0};
+  struct chunk_data chunk_data = { 0, 0 };
   curl_global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(!curl) {

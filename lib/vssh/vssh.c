@@ -26,12 +26,11 @@
 
 #ifdef USE_SSH
 
-#include "curl_path.h"
+#include "vssh.h"
 #include <curl/curl.h>
 #include "../curlx/strparse.h"
-#include "../curl_memory.h"
+#include "../curl_trc.h"
 #include "../escape.h"
-#include "../memdebug.h"
 
 #define MAX_SSHPATH_LEN 100000 /* arbitrary */
 
@@ -58,7 +57,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
      (working_path_len > 3) && (!memcmp(working_path, "/~/", 3))) {
     /* It is referenced to the home directory, so strip the leading '/~/' */
     if(curlx_dyn_addn(&npath, &working_path[3], working_path_len - 3)) {
-      free(working_path);
+      curlx_free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
   }
@@ -66,7 +65,7 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
           (!strcmp("/~", working_path) ||
            ((working_path_len > 2) && !memcmp(working_path, "/~/", 3)))) {
     if(curlx_dyn_add(&npath, homedir)) {
-      free(working_path);
+      curlx_free(working_path);
       return CURLE_OUT_OF_MEMORY;
     }
     if(working_path_len > 2) {
@@ -76,25 +75,25 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
       /* Copy a separating '/' if homedir does not end with one */
       len = curlx_dyn_len(&npath);
       p = curlx_dyn_ptr(&npath);
-      if(len && (p[len-1] != '/'))
+      if(len && (p[len - 1] != '/'))
         copyfrom = 2;
 
       if(curlx_dyn_addn(&npath, &working_path[copyfrom],
                         working_path_len - copyfrom)) {
-        free(working_path);
+        curlx_free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
     else {
       if(curlx_dyn_add(&npath, "/")) {
-        free(working_path);
+        curlx_free(working_path);
         return CURLE_OUT_OF_MEMORY;
       }
     }
   }
 
   if(curlx_dyn_len(&npath)) {
-    free(working_path);
+    curlx_free(working_path);
 
     /* store the pointer for the caller to receive */
     *path = curlx_dyn_ptr(&npath);
@@ -148,7 +147,6 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 
     if(!curlx_dyn_len(&out))
       goto fail;
-
   }
   else {
     struct Curl_str word;
@@ -194,6 +192,52 @@ CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir)
 fail:
   curlx_dyn_free(&out);
   return CURLE_QUOTE_ERROR;
+}
+
+CURLcode Curl_ssh_range(struct Curl_easy *data,
+                        const char *p, curl_off_t filesize,
+                        curl_off_t *startp, curl_off_t *sizep)
+{
+  curl_off_t from, to;
+  int to_t;
+  int from_t = curlx_str_number(&p, &from, CURL_OFF_T_MAX);
+  if(from_t == STRE_OVERFLOW)
+    return CURLE_RANGE_ERROR;
+  curlx_str_passblanks(&p);
+  (void)curlx_str_single(&p, '-');
+
+  to_t = curlx_str_numblanks(&p, &to);
+  if((to_t == STRE_OVERFLOW) || (to_t && from_t) || *p)
+    return CURLE_RANGE_ERROR;
+
+  if(from_t) {
+    /* no start point given, set from relative to end of file */
+    if(!to)
+      /* "-0" is not a fine range */
+      return CURLE_RANGE_ERROR;
+    else if(to > filesize)
+      to = filesize;
+    from = filesize - to;
+    to = filesize - 1;
+  }
+  else if(from > filesize) {
+    failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+          FMT_OFF_T ")", from, filesize);
+    return CURLE_RANGE_ERROR;
+  }
+  else if((to_t == STRE_NO_NUM) || (to >= filesize))
+    to = filesize - 1;
+
+  if(from > to) {
+    failf(data, "Bad range: start offset larger than end offset");
+    return CURLE_RANGE_ERROR;
+  }
+  if((to - from) == CURL_OFF_T_MAX)
+    return CURLE_RANGE_ERROR;
+
+  *startp = from;
+  *sizep = to - from + 1;
+  return CURLE_OK;
 }
 
 #endif /* if SSH is used */

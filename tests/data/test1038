@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -26,7 +27,7 @@ FTP PASV upload resume from end of file
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -C -
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
-this is the *****cr@p******** that we're gonna upload
+this is the *****cr@p******** that we are gonna upload
 
 worx?
 </file>
@@ -45,7 +46,7 @@ APPE %TESTNUMBER
 QUIT
 </protocol>
 <upload>
-cr@p******** that we're gonna upload
+cr@p******** that we are gonna upload
 
 worx?
 </upload>

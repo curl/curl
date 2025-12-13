@@ -29,9 +29,8 @@
  * libcurl and that it works unconditionally no matter how libcurl is built,
  * nothing more.
  *
- * Do not include memdebug.h in this source file, and do not use directly
- * memory related functions in this file except those used inside custom
- * memory callbacks which should be calling 'the real thing'.
+ * Do not use directly memory related functions in this file except those used
+ * inside custom memory callbacks which should be calling 'the real thing'.
  */
 
 static int seen;
@@ -39,38 +38,48 @@ static int seen;
 static void *custom_calloc(size_t nmemb, size_t size)
 {
   seen++;
-  return (calloc)(nmemb, size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return calloc(nmemb, size);
 }
 
 static void *custom_malloc(size_t size)
 {
   seen++;
-  return (malloc)(size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return malloc(size);
 }
 
 static char *custom_strdup(const char *ptr)
 {
   seen++;
-  return (strdup)(ptr);
+#ifdef _WIN32
+  return _strdup(ptr);
+#else
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return strdup(ptr);
+#endif
 }
 
 static void *custom_realloc(void *ptr, size_t size)
 {
   seen++;
-  return (realloc)(ptr, size);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  return realloc(ptr, size);
 }
 
 static void custom_free(void *ptr)
 {
   seen++;
-  (free)(ptr);
+  /* !checksrc! disable BANNEDFUNC 1 */
+  free(ptr);
 }
-
 
 static CURLcode test_lib509(const char *URL)
 {
-  static const unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
-                                    0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7};
+  static const unsigned char a[] = {
+    0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
+    0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7
+  };
   CURLcode res;
   CURL *curl;
   int asize;
@@ -95,10 +104,11 @@ static CURLcode test_lib509(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses strdup() */
+  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses curlx_strdup() */
 
   asize = (int)sizeof(a);
-  str = curl_easy_escape(curl, (const char *)a, asize); /* uses realloc() */
+  /* uses curlx_realloc() */
+  str = curl_easy_escape(curl, (const char *)a, asize);
 
   if(seen)
     curl_mprintf("Callbacks were invoked!\n");

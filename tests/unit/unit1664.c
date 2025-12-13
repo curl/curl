@@ -30,8 +30,6 @@
 #include <netinet/in6.h>
 #endif
 
-#include "memdebug.h" /* LAST include file */
-
 static CURLcode t1664_setup(void)
 {
   CURLcode res = CURLE_OK;

@@ -116,7 +116,6 @@ bool Curl_ipv6works(struct Curl_easy *data);
 #define Curl_ipv6works(x) FALSE
 #endif
 
-
 /* unlink a dns entry, potentially shared with a cache */
 void Curl_resolv_unlink(struct Curl_easy *data,
                         struct Curl_dns_entry **pdns);
@@ -175,10 +174,9 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
  * The returned data *MUST* be "released" with Curl_resolv_unlink() after
  * use, or we will leak memory!
  */
-struct Curl_dns_entry *
-Curl_dnscache_get(struct Curl_easy *data,
-                  const char *hostname,
-                  int port, int ip_version);
+struct Curl_dns_entry *Curl_dnscache_get(struct Curl_easy *data,
+                                         const char *hostname, int port,
+                                         int ip_version);
 
 /*
  * Curl_dnscache_addr() adds `entry` to the cache, increasing its
@@ -196,7 +194,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data);
 CURLcode Curl_resolv_check(struct Curl_easy *data,
                            struct Curl_dns_entry **dns);
 #else
-#define Curl_resolv_check(x,y) CURLE_NOT_BUILT_IN
+#define Curl_resolv_check(x, y) CURLE_NOT_BUILT_IN
 #endif
 CURLcode Curl_resolv_pollset(struct Curl_easy *data,
                              struct easy_pollset *ps);

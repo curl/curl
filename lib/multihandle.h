@@ -51,26 +51,23 @@ struct Curl_message {
  */
 typedef enum {
   MSTATE_INIT,         /* 0 - start in this state */
-  MSTATE_PENDING,      /* 1 - no connections, waiting for one */
-  MSTATE_SETUP,        /* 2 - start a new transfer */
-  MSTATE_CONNECT,      /* 3 - resolve/connect has been sent off */
-  MSTATE_RESOLVING,    /* 4 - awaiting the resolve to finalize */
-  MSTATE_CONNECTING,   /* 5 - awaiting the TCP connect to finalize */
-  MSTATE_TUNNELING,    /* 6 - awaiting HTTPS proxy SSL initialization to
-                          complete and/or proxy CONNECT to finalize */
-  MSTATE_PROTOCONNECT, /* 7 - initiate protocol connect procedure */
-  MSTATE_PROTOCONNECTING, /* 8 - completing the protocol-specific connect
-                             phase */
-  MSTATE_DO,           /* 9 - start send off the request (part 1) */
-  MSTATE_DOING,        /* 10 - sending off the request (part 1) */
-  MSTATE_DOING_MORE,   /* 11 - send off the request (part 2) */
-  MSTATE_DID,          /* 12 - done sending off request */
-  MSTATE_PERFORMING,   /* 13 - transfer data */
-  MSTATE_RATELIMITING, /* 14 - wait because limit-rate exceeded */
-  MSTATE_DONE,         /* 15 - post data transfer operation */
-  MSTATE_COMPLETED,    /* 16 - operation complete */
-  MSTATE_MSGSENT,      /* 17 - the operation complete message is sent */
-  MSTATE_LAST          /* 18 - not a true state, never use this */
+  MSTATE_PENDING,      /* no connections, waiting for one */
+  MSTATE_SETUP,        /* start a new transfer */
+  MSTATE_CONNECT,      /* resolve/connect has been sent off */
+  MSTATE_RESOLVING,    /* awaiting the resolve to finalize */
+  MSTATE_CONNECTING,   /* awaiting the TCP connect to finalize */
+  MSTATE_PROTOCONNECT, /* initiate protocol connect procedure */
+  MSTATE_PROTOCONNECTING, /* completing the protocol-specific connect phase */
+  MSTATE_DO,           /* start send off the request (part 1) */
+  MSTATE_DOING,        /* sending off the request (part 1) */
+  MSTATE_DOING_MORE,   /* send off the request (part 2) */
+  MSTATE_DID,          /* done sending off request */
+  MSTATE_PERFORMING,   /* transfer data */
+  MSTATE_RATELIMITING, /* wait because limit-rate exceeded */
+  MSTATE_DONE,         /* post data transfer operation */
+  MSTATE_COMPLETED,    /* operation complete */
+  MSTATE_MSGSENT,      /* the operation complete message is sent */
+  MSTATE_LAST          /* not a true state, never use this */
 } CURLMstate;
 
 #define CURLPIPE_ANY (CURLPIPE_MULTIPLEX)
@@ -91,12 +88,12 @@ struct Curl_multi {
   unsigned int xfers_alive; /* amount of added transfers that have
                                not yet reached COMPLETE state */
   curl_off_t xfers_total_ever; /* total of added transfers, ever. */
-  struct uint_tbl xfers; /* transfers added to this multi */
+  struct uint32_tbl xfers; /* transfers added to this multi */
   /* Each transfer's mid may be present in at most one of these */
-  struct uint_bset process; /* transfer being processed */
-  struct uint_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
-  struct uint_bset pending; /* transfers in waiting (conn limit etc.) */
-  struct uint_bset msgsent; /* transfers done with message for application */
+  struct uint32_bset process; /* transfer being processed */
+  struct uint32_bset dirty; /* transfer to be run NOW, e.g. ASAP. */
+  struct uint32_bset pending; /* transfers in waiting (conn limit etc.) */
+  struct uint32_bset msgsent; /* transfers done with message for application */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
@@ -149,11 +146,10 @@ struct Curl_multi {
   struct cshutdn cshutdn; /* connection shutdown handling */
   struct cpool cpool;     /* connection pool (bundles) */
 
-  long max_host_connections; /* if >0, a fixed limit of the maximum number
-                                of connections per host */
-
-  long max_total_connections; /* if >0, a fixed limit of the maximum number
-                                 of connections in total */
+  size_t max_host_connections; /* if >0, a fixed limit of the maximum number
+                                  of connections per host */
+  size_t max_total_connections; /* if >0, a fixed limit of the maximum number
+                                   of connections in total */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;

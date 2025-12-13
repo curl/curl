@@ -31,10 +31,6 @@
 #endif
 
 #include "strdup.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #ifndef HAVE_STRDUP
 char *Curl_strdup(const char *str)
@@ -47,7 +43,7 @@ char *Curl_strdup(const char *str)
 
   len = strlen(str) + 1;
 
-  newstr = malloc(len);
+  newstr = curlx_malloc(len);
   if(!newstr)
     return (char *)NULL;
 
@@ -90,7 +86,7 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
  ***************************************************************************/
 void *Curl_memdup(const void *src, size_t length)
 {
-  void *buffer = malloc(length);
+  void *buffer = curlx_malloc(length);
   if(!buffer)
     return NULL; /* fail */
 
@@ -111,7 +107,7 @@ void *Curl_memdup(const void *src, size_t length)
  ***************************************************************************/
 void *Curl_memdup0(const char *src, size_t length)
 {
-  char *buf = (length < SIZE_MAX) ? malloc(length + 1) : NULL;
+  char *buf = (length < SIZE_MAX) ? curlx_malloc(length + 1) : NULL;
   if(!buf)
     return NULL;
   if(length) {
@@ -126,7 +122,7 @@ void *Curl_memdup0(const char *src, size_t length)
  *
  * Curl_saferealloc(ptr, size)
  *
- * Does a normal realloc(), but will free the data pointer if the realloc
+ * Does a normal curlx_realloc(), but will free the data pointer if the realloc
  * fails. If 'size' is non-zero, it will free the data and return a failure.
  *
  * This convenience function is provided and used to help us avoid a common
@@ -138,9 +134,9 @@ void *Curl_memdup0(const char *src, size_t length)
  ***************************************************************************/
 void *Curl_saferealloc(void *ptr, size_t size)
 {
-  void *datap = realloc(ptr, size);
+  void *datap = curlx_realloc(ptr, size);
   if(size && !datap)
     /* only free 'ptr' if size was non-zero */
-    free(ptr);
+    curlx_free(ptr);
   return datap;
 }

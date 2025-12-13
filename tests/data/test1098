@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,10 +8,9 @@ CURLOPT_PROXY
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6
@@ -20,7 +20,6 @@ hello
 
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -40,10 +39,9 @@ ftp://ftp-site/moo/%TESTNUMBER ftp://ftp-site/moo/%TESTNUMBER --proxy http://%HO
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET ftp://ftp-site/moo/%TESTNUMBER HTTP/1.1
 Host: ftp-site:21
 User-Agent: curl/%VERSION
@@ -57,7 +55,7 @@ Accept: */*
 Proxy-Connection: Keep-Alive
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Length: 6

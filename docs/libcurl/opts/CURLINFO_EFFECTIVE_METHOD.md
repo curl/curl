@@ -16,7 +16,7 @@ Added-in: 7.72.0
 
 # NAME
 
-CURLINFO_EFFECTIVE_METHOD - get the last used HTTP method
+CURLINFO_EFFECTIVE_METHOD - last used HTTP request method
 
 # SYNOPSIS
 

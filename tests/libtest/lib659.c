@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Get a single URL without select().
  */
@@ -45,7 +43,7 @@ static CURLcode test_lib659(const char *URL)
     goto test_cleanup;
   }
 
-  /* this doesn't set the PATH part */
+  /* this does not set the PATH part */
   if(curl_url_set(urlp, CURLUPART_HOST, "www.example.com", 0) ||
      curl_url_set(urlp, CURLUPART_SCHEME, "http", 0) ||
      curl_url_set(urlp, CURLUPART_PORT, "80", 0)) {

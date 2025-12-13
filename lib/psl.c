@@ -29,11 +29,7 @@
 #ifdef USE_LIBPSL
 
 #include "psl.h"
-#include "share.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "curl_share.h"
 
 void Curl_psl_destroy(struct PslCache *pslcache)
 {
@@ -95,7 +91,7 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
         pslcache->expires = expires;
       }
     }
-    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL);  /* Release exclusive lock. */
+    Curl_share_unlock(easy, CURL_LOCK_DATA_PSL); /* Release exclusive lock. */
     Curl_share_lock(easy, CURL_LOCK_DATA_PSL, CURL_LOCK_ACCESS_SHARED);
   }
   psl = pslcache->psl;

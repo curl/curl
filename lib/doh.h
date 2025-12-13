@@ -96,7 +96,7 @@ struct doh_request {
 };
 
 struct doh_response {
-  unsigned int probe_mid;
+  uint32_t probe_mid;
   struct dynbuf body;
   DNStype dnstype;
   CURLcode result;
@@ -112,20 +112,17 @@ struct doh_probes {
 };
 
 /*
- * Curl_doh() resolve a name using DoH (DNS-over-HTTPS). It resolves a name
- * and returns a 'Curl_addrinfo *' with the address information.
+ * Curl_doh() starts a name resolve using DoH (DNS-over-HTTPS). It resolves a
+ * name and returns a 'Curl_addrinfo *' with the address information.
  */
 
-struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
-                               const char *hostname,
-                               int port,
-                               int ip_version,
-                               int *waitp);
+CURLcode Curl_doh(struct Curl_easy *data, const char *hostname,
+                  int port, int ip_version);
 
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dns);
 
-#define DOH_MAX_ADDR 24
+#define DOH_MAX_ADDR  24
 #define DOH_MAX_CNAME 4
 #define DOH_MAX_HTTPS 4
 
@@ -183,8 +180,8 @@ UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
 #else /* if DoH is disabled */
-#define Curl_doh(a,b,c,d,e) NULL
-#define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
+#define Curl_doh(a, b, c, d, e)    NULL
+#define Curl_doh_is_resolved(x, y) CURLE_COULDNT_RESOLVE_HOST
 #endif
 
 #endif /* HEADER_CURL_DOH_H */

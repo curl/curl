@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ SMTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -19,7 +18,7 @@ smtp
 <name>
 SMTP with invalid --mail-rcpt
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -30,7 +29,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt invalid --mail-from sender@exam
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 55 - CURLE_SEND_ERROR
@@ -39,8 +37,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt invalid --mail-from sender@exam
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<invalid>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTinvalid%GT
 QUIT
 </protocol>
 </verify>

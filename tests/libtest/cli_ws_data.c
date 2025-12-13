@@ -24,14 +24,12 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-static CURLcode
-test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
-                           size_t r_offset, size_t nread,
-                           size_t exp_len)
+static CURLcode test_ws_data_m2_check_recv(const struct curl_ws_frame *frame,
+                                           size_t r_offset, size_t nread,
+                                           size_t exp_len)
 {
   if(!frame)
     return CURLE_OK;
@@ -83,8 +81,8 @@ static CURLcode test_ws_data_m2_echo(const char *url,
   size_t i, scount = count, rcount = count;
   int rblock, sblock;
 
-  send_buf = calloc(1, plen_max + 1);
-  recv_buf = calloc(1, plen_max + 1);
+  send_buf = curlx_calloc(1, plen_max + 1);
+  recv_buf = curlx_calloc(1, plen_max + 1);
   if(!send_buf || !recv_buf) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -184,8 +182,8 @@ out:
       ws_close(curl);
     curl_easy_cleanup(curl);
   }
-  free(send_buf);
-  free(recv_buf);
+  curlx_free(send_buf);
+  curlx_free(recv_buf);
   return r;
 }
 
@@ -294,8 +292,8 @@ static CURLcode test_ws_data_m1_echo(const char *url,
   curl_mfprintf(stderr, "test_ws_data_m1_echo(min=%zu, max=%zu)\n",
                 plen_min, plen_max);
   memset(&m1_ctx, 0, sizeof(m1_ctx));
-  m1_ctx.send_buf = calloc(1, plen_max + 1);
-  m1_ctx.recv_buf = calloc(1, plen_max + 1);
+  m1_ctx.send_buf = curlx_calloc(1, plen_max + 1);
+  m1_ctx.recv_buf = curlx_calloc(1, plen_max + 1);
   if(!m1_ctx.send_buf || !m1_ctx.recv_buf) {
     r = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -363,7 +361,6 @@ static CURLcode test_ws_data_m1_echo(const char *url,
         r = CURLE_RECV_ERROR;
         goto out;
       }
-
     }
 
     curl_multi_remove_handle(multi, m1_ctx.curl);
@@ -389,11 +386,10 @@ out:
   if(m1_ctx.curl) {
     curl_easy_cleanup(m1_ctx.curl);
   }
-  free(m1_ctx.send_buf);
-  free(m1_ctx.recv_buf);
+  curlx_free(m1_ctx.send_buf);
+  curlx_free(m1_ctx.recv_buf);
   return r;
 }
-
 
 static void test_ws_data_usage(const char *msg)
 {
@@ -411,7 +407,7 @@ static void test_ws_data_usage(const char *msg)
 static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
   const char *url;
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch, model = 2;
@@ -419,6 +415,8 @@ static CURLcode test_cli_ws_data(const char *URL)
   (void)URL;
 
   while((ch = cgetopt(test_argc, test_argv, "12c:hm:M:")) != -1) {
+    const char *opt = coptarg;
+    curl_off_t num;
     switch(ch) {
     case '1':
       model = 1;
@@ -430,13 +428,16 @@ static CURLcode test_cli_ws_data(const char *URL)
       test_ws_data_usage(NULL);
       return CURLE_BAD_FUNCTION_ARGUMENT;
     case 'c':
-      count = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        count = (size_t)num;
       break;
     case 'm':
-      plen_min = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        plen_min = (size_t)num;
       break;
     case 'M':
-      plen_max = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        plen_max = (size_t)num;
       break;
     default:
       test_ws_data_usage("invalid option");
@@ -467,13 +468,13 @@ static CURLcode test_cli_ws_data(const char *URL)
   }
 
   if(model == 1)
-    result = test_ws_data_m1_echo(url, plen_min, plen_max);
+    res = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
-    result = test_ws_data_m2_echo(url, count, plen_min, plen_max);
+    res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
   curl_global_cleanup();
 
-  return result;
+  return res;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

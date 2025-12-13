@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,10 +7,9 @@
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -23,7 +23,7 @@ Funny-head: yesyes
 Location: http://anotherhost.example:2023/%TESTNUMBER0002?moo.html
 
 </data>
-<data2 crlf="yes" nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -38,7 +38,6 @@ Funny-head: yesyes
 </data2>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -51,11 +50,15 @@ http
 -w with urle.* variables
 </name>
 <command option="no-include">
-"http://uuuu:pppp@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff" "h55p://hello2000:1/%TESTNUMBER?qqqq#ffff" "local host" "http://u22u:p22p@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff" -w '%{urle.host}+%{urle.path}+%{urle.scheme}+%{urle.user}+%{urle.password}+%{urle.port}+%{urle.query}+%{urle.fragment}\n' -x http://%HOSTIP:%HTTPPORT/ -L
+"http://uuuu:pppp@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff"
+"h55p://hello2000:1/%TESTNUMBER?qqqq#ffff"
+"local host"
+"http://u22u:p22p@%HOSTIP:%HTTPPORT/%TESTNUMBER?qqqq#ffff"
+-w '%{urle.host}+%{urle.path}+%{urle.scheme}+%{urle.user}+%{urle.password}+%{urle.port}+%{urle.query}+%{urle.fragment}\n'
+-x http://%HOSTIP:%HTTPPORT/ -L
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>

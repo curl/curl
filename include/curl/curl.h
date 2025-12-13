@@ -229,7 +229,6 @@ struct curl_httppost {
                                        set. Added in 7.46.0 */
 };
 
-
 /* This is a return code for the progress callback that, when returned, will
    signal libcurl to continue executing the default progress function */
 #define CURL_PROGRESSFUNC_CONTINUE 0x10000001
@@ -844,7 +843,7 @@ typedef enum {
 #define CURLAUTH_AWS_SIGV4    (((unsigned long)1)<<7)
 #define CURLAUTH_ONLY         (((unsigned long)1)<<31)
 #define CURLAUTH_ANY          (~CURLAUTH_DIGEST_IE)
-#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC|CURLAUTH_DIGEST_IE))
+#define CURLAUTH_ANYSAFE      (~(CURLAUTH_BASIC | CURLAUTH_DIGEST_IE))
 
 #define CURLSSH_AUTH_ANY       ~0L     /* all types supported by the server */
 #define CURLSSH_AUTH_NONE      0L      /* none allowed, silly but complete */
@@ -915,7 +914,6 @@ typedef int
                           size_t keylen); /* length of the key */
                           /* return CURLE_OK to accept */
                           /* or something else to refuse */
-
 
 /* parameter for the CURLOPT_USE_SSL option */
 #define CURLUSESSL_NONE    0L /* do not attempt to use SSL */
@@ -1114,7 +1112,6 @@ typedef CURLSTScode (*curl_hstswrite_callback)(CURL *easy,
 
 /* *STRINGPOINT is an alias for OBJECTPOINT to allow tools to extract the
    string options from the header file */
-
 
 #define CURLOPT(na,t,nu) na = t + nu
 #define CURLOPTDEPRECATED(na,t,nu,v,m) na CURL_DEPRECATED(v,m) = t + nu
@@ -1874,9 +1871,7 @@ typedef enum {
 
      libcurl will ask for the compressed methods it knows of, and if that
      is not any, it will not ask for transfer-encoding at all even if this
-     option is set to 1.
-
-  */
+     option is set to 1. */
   CURLOPT(CURLOPT_TRANSFER_ENCODING, CURLOPTTYPE_LONG, 207),
 
   /* Callback function for closing socket (instead of close(2)). The callback
@@ -2294,10 +2289,9 @@ typedef enum {
 #undef CURLOPT_DNS_USE_GLOBAL_CACHE /* soon obsolete */
 #endif
 
-
-  /* Below here follows defines for the CURLOPT_IPRESOLVE option. If a host
-     name resolves addresses using more than one IP protocol version, this
-     option might be handy to force libcurl to use a specific IP version. */
+/* Below here follows defines for the CURLOPT_IPRESOLVE option. If a host
+   name resolves addresses using more than one IP protocol version, this
+   option might be handy to force libcurl to use a specific IP version. */
 #define CURL_IPRESOLVE_WHATEVER 0L /* default, uses addresses to all IP
                                      versions that your system allows */
 #define CURL_IPRESOLVE_V4       1L /* uses only IPv4 addresses/connections */
@@ -2381,7 +2375,7 @@ enum CURL_NETRC_OPTION {
 #define CURL_SSLVERSION_MAX_TLSv1_2 (CURL_SSLVERSION_TLSv1_2 << 16)
 #define CURL_SSLVERSION_MAX_TLSv1_3 (CURL_SSLVERSION_TLSv1_3 << 16)
 
-  /* never use, keep last */
+/* never use, keep last */
 #define CURL_SSLVERSION_MAX_LAST    (CURL_SSLVERSION_LAST    << 16)
 
 #define CURL_TLSAUTH_NONE 0L
@@ -2403,7 +2397,7 @@ enum CURL_TLSAUTH {
 #define CURL_REDIR_POST_302 2L
 #define CURL_REDIR_POST_303 4L
 #define CURL_REDIR_POST_ALL \
-    (CURL_REDIR_POST_301|CURL_REDIR_POST_302|CURL_REDIR_POST_303)
+  (CURL_REDIR_POST_301 | CURL_REDIR_POST_302 | CURL_REDIR_POST_303)
 
 #define CURL_TIMECOND_NONE         0L
 #define CURL_TIMECOND_IFMODSINCE   1L
@@ -2418,7 +2412,7 @@ typedef enum {
 } curl_TimeCond;
 
 /* Special size_t value signaling a null-terminated string. */
-#define CURL_ZERO_TERMINATED ((size_t) -1)
+#define CURL_ZERO_TERMINATED ((size_t)-1)
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future
    release */
@@ -2705,7 +2699,6 @@ CURL_EXTERN char *curl_easy_escape(CURL *handle,
 CURL_EXTERN char *curl_escape(const char *string,
                               int length);
 
-
 /*
  * NAME curl_easy_unescape()
  *
@@ -2743,10 +2736,9 @@ CURL_EXTERN void curl_free(void *p);
  *
  * curl_global_init() should be invoked exactly once for each application that
  * uses libcurl and before any call of other libcurl functions.
-
+ *
  * This function is thread-safe if CURL_VERSION_THREADSAFE is set in the
  * curl_version_info_data.features flag (fetch by curl_version_info()).
-
  */
 CURL_EXTERN CURLcode curl_global_init(long flags);
 
@@ -2787,10 +2779,9 @@ CURL_EXTERN void curl_global_cleanup(void);
  *
  * curl_global_trace() can be invoked at application start to
  * configure which components in curl should participate in tracing.
-
+ *
  * This function is thread-safe if CURL_VERSION_THREADSAFE is set in the
  * curl_version_info_data.features flag (fetch by curl_version_info()).
-
  */
 CURL_EXTERN CURLcode curl_global_trace(const char *config);
 
@@ -3017,11 +3008,10 @@ typedef enum {
 
 #define CURL_GLOBAL_SSL (1<<0) /* no purpose since 7.57.0 */
 #define CURL_GLOBAL_WIN32 (1<<1)
-#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL|CURL_GLOBAL_WIN32)
+#define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL | CURL_GLOBAL_WIN32)
 #define CURL_GLOBAL_NOTHING 0
 #define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
 #define CURL_GLOBAL_ACK_EINTR (1<<2)
-
 
 /*****************************************************************************
  * Setup defines, protos etc for the sharing stuff.
@@ -3059,7 +3049,6 @@ typedef void (*curl_lock_function)(CURL *handle,
 typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
                                      void *userptr);
-
 
 typedef enum {
   CURLSHE_OK,  /* all is fine */
@@ -3264,8 +3253,8 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define CURLPAUSE_SEND      (1<<2)
 #define CURLPAUSE_SEND_CONT (0)
 
-#define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
-#define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
+#define CURLPAUSE_ALL       (CURLPAUSE_RECV | CURLPAUSE_SEND)
+#define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT | CURLPAUSE_SEND_CONT)
 
 /*
  * NAME curl_easy_ssls_import()
@@ -3309,7 +3298,6 @@ typedef CURLcode curl_ssls_export_cb(CURL *handle,
 CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
                                            curl_ssls_export_cb *export_fn,
                                            void *userptr);
-
 
 #ifdef __cplusplus
 } /* end of extern "C" */

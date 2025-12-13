@@ -42,7 +42,7 @@
 #  include iodef
 #endif
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 #  include <conio.h>
 #endif
 
@@ -51,8 +51,6 @@
 #endif
 #include "tool_getpass.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef __VMS
 /* VMS implementation */
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
@@ -60,15 +58,12 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   long sts;
   short chan;
 
-  /* MSK, 23-JAN-2004, iosbdef.h was not in VAX V7.2 or CC 6.4  */
-  /* distribution so I created this. May revert back later to */
-  /* struct _iosb iosb;                                        */
-  struct _iosb
-     {
-     short int iosb$w_status; /* status     */
-     short int iosb$w_bcnt;   /* byte count */
-     int       unused;        /* unused     */
-     } iosb;
+  /* iosbdef.h was not in VAX V7.2 or CC 6.4  */
+  struct _isb {
+    short int iosb$w_status; /* status     */
+    short int iosb$w_bcnt;   /* byte count */
+    int unused;              /* unused     */
+  } iosb;
 
   $DESCRIPTOR(ttdesc, "TT");
 
@@ -103,22 +98,21 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
       buffer[i] = '\0';
       break;
     }
-    else
-      if(buffer[i] == '\b')
-        /* remove this letter and if this is not the first key, remove the
+    else if(buffer[i] == '\b')
+      /* remove this letter and if this is not the first key, remove the
            previous one as well */
-        i = i - (i >= 1 ? 2 : 1);
+      i = i - (i >= 1 ? 2 : 1);
   }
   /* since echo is disabled, print a newline */
   fputs("\n", tool_stderr);
   /* if user did not hit ENTER, terminate buffer */
   if(i == buflen)
-    buffer[buflen-1] = '\0';
+    buffer[buflen - 1] = '\0';
 
   return buffer; /* we always return success */
 }
 #define DONE
-#endif /* _WIN32 && !UNDER_CE */
+#endif /* _WIN32 */
 
 #ifndef DONE /* not previously provided */
 

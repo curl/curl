@@ -16,7 +16,6 @@ name: 'Source'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
-      - 'tests/data/**'
   pull_request:
     branches:
       - master
@@ -25,7 +24,6 @@ name: 'Source'
       - 'appveyor.*'
       - 'Dockerfile'
       - 'plan9/**'
-      - 'tests/data/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -38,7 +36,7 @@ jobs:
     name: 'checksrc'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -49,7 +47,7 @@ jobs:
     name: 'spellcheck, linters, REUSE'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -73,6 +71,7 @@ jobs:
           .github/scripts/codespell.sh
 
       - name: 'typos'
+        timeout-minutes: 2
         run: |
           HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install typos-cli
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -91,7 +90,7 @@ jobs:
       - name: 'pytype'
         run: |
           source ~/venv/bin/activate
-          find . -name '*.py' -exec pytype -j auto -k {} +
+          find . -name '*.py' -exec pytype -j auto -k -- {} +
 
       - name: 'ruff'
         run: |
@@ -103,10 +102,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
-
       - name: 'install pmccabe'
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -115,8 +110,32 @@ jobs:
           sudo apt-get -o Dpkg::Use-Pty=0 install \
             pmccabe
 
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
       - name: 'check scores'
         run: ./scripts/top-complexity
+
+  xmllint:
+    name: 'xmllint'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: 'install prereqs'
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo rm -f /var/lib/man-db/auto-update
+          sudo apt-get -o Dpkg::Use-Pty=0 install \
+            libxml2-utils
+
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+
+      - name: 'check'
+        run: git grep -z -i -l -E '^<\?xml' | xargs -0 -r xmllint --output /dev/null
 
   miscchecks:
     name: 'misc checks'
@@ -124,9 +143,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: 'install prereqs'
-        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install shellcheck zizmor
+        timeout-minutes: 2
+        run: HOMEBREW_NO_AUTO_UPDATE=1 /home/linuxbrew/.linuxbrew/bin/brew install actionlint shellcheck zizmor
 
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -136,6 +156,13 @@ jobs:
         run: |
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
           zizmor --pedantic .github/workflows/*.yml .github/dependabot.yml
+
+      - name: 'actionlint'
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          export SHELLCHECK_OPTS='--exclude=1090,1091,2086,2153 --enable=avoid-nullary-conditions,deprecate-which'
+          actionlint --version
+          actionlint --ignore matrix .github/workflows/*.yml
 
       - name: 'shellcheck CI'
         run: |
@@ -155,9 +182,7 @@ jobs:
       - name: 'yamlcheck'
         run: .github/scripts/yamlcheck.sh
 
-      # we allow some extra in source code
       - name: 'badwords'
         run: |
-          # shellcheck disable=SC2046
-          grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
-          .github/scripts/badwords.pl $(git ls-files -- src lib include)
+          # we allow some extra in source code
+          grep -Ev '(\\bwill| But: | So : )' .github/scripts/badwords.txt | .github/scripts/badwords.pl -a src lib include docs/examples

@@ -63,19 +63,19 @@ static CURLcode test_unit1309(const char *arg)
 #define NUM_NODES 50
 
   struct Curl_tree *root, *removed;
-  struct Curl_tree nodes[NUM_NODES*3];
-  size_t storage[NUM_NODES*3];
+  struct Curl_tree nodes[NUM_NODES * 3];
+  size_t storage[NUM_NODES * 3];
   int rc;
   int i, j;
-  struct curltime tv_now = {0, 0};
-  root = NULL;              /* the empty tree */
+  struct curltime tv_now = { 0, 0 };
+  root = NULL; /* the empty tree */
 
   /* add nodes */
   for(i = 0; i < NUM_NODES; i++) {
     struct curltime key;
 
     key.tv_sec = 0;
-    key.tv_usec = (541*i)%1023;
+    key.tv_usec = (541 * i) % 1023;
     storage[i] = key.tv_usec;
     Curl_splayset(&nodes[i], &storage[i]);
     root = Curl_splayinsert(key, root, &nodes[i]);
@@ -85,7 +85,7 @@ static CURLcode test_unit1309(const char *arg)
   splayprint(root, 0, 1);
 
   for(i = 0; i < NUM_NODES; i++) {
-    int rem = (i + 7)%NUM_NODES;
+    int rem = (i + 7) % NUM_NODES;
     curl_mprintf("Tree look:\n");
     splayprint(root, 0, 1);
     curl_mprintf("remove pointer %d, payload %zu\n", rem,
@@ -105,11 +105,11 @@ static CURLcode test_unit1309(const char *arg)
     struct curltime key;
 
     key.tv_sec = 0;
-    key.tv_usec = (541*i)%1023;
+    key.tv_usec = (541 * i) % 1023;
 
     /* add some nodes with the same key */
     for(j = 0; j <= i % 3; j++) {
-      storage[i * 3 + j] = key.tv_usec*10 + j;
+      storage[i * 3 + j] = key.tv_usec * 10 + j;
       Curl_splayset(&nodes[i * 3 + j], &storage[i * 3 + j]);
       root = Curl_splayinsert(key, root, &nodes[i * 3 + j]);
     }

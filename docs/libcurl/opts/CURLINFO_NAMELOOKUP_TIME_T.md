@@ -15,7 +15,7 @@ Added-in: 7.61.0
 
 # NAME
 
-CURLINFO_NAMELOOKUP_TIME_T - get the name lookup time in microseconds
+CURLINFO_NAMELOOKUP_TIME_T - name lookup time in microseconds
 
 # SYNOPSIS
 

@@ -41,7 +41,8 @@ are out of sync.
 
 The order of the easy handles within the array is not guaranteed.
 
-The returned array must be freed with a call to curl_free(3) after use.
+The returned array may not be overwritten and must be freed with a call to
+curl_free(3) after use.
 
 # %PROTOCOLS%
 

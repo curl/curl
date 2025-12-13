@@ -25,9 +25,15 @@
  * Upload to SFTP, resuming a previously aborted transfer.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* read data to upload */
@@ -53,7 +59,7 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
   CURL *curl = curl_easy_init();
 
   if(curl) {
-    CURLcode result;
+    CURLcode res;
 
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
@@ -63,12 +69,11 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
     curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
     curl_easy_setopt(curl, CURLOPT_FILETIME, 1L);
 
-    result = curl_easy_perform(curl);
-    if(CURLE_OK == result) {
-      result = curl_easy_getinfo(curl,
-                                 CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
-                                 &remoteFileSizeByte);
-      if(result)
+    res = curl_easy_perform(curl);
+    if(CURLE_OK == res) {
+      res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+                              &remoteFileSizeByte);
+      if(res)
         return -1;
       printf("filesize: %" CURL_FORMAT_CURL_OFF_T "\n", remoteFileSizeByte);
     }
@@ -78,12 +83,11 @@ static curl_off_t sftpGetRemoteFileSize(const char *i_remoteFile)
   return remoteFileSizeByte;
 }
 
-
 static int sftpResumeUpload(CURL *curl, const char *remotepath,
                             const char *localpath)
 {
   FILE *f = NULL;
-  CURLcode result = CURLE_GOT_NOTHING;
+  CURLcode res = CURLE_GOT_NOTHING;
 
   curl_off_t remoteFileSizeByte = sftpGetRemoteFileSize(remotepath);
   if(remoteFileSizeByte == -1) {
@@ -93,9 +97,7 @@ static int sftpResumeUpload(CURL *curl, const char *remotepath,
 
   f = fopen(localpath, "rb");
   if(!f) {
-#ifndef UNDER_CE
     perror(NULL);
-#endif
     return 0;
   }
 
@@ -104,20 +106,20 @@ static int sftpResumeUpload(CURL *curl, const char *remotepath,
   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_cb);
   curl_easy_setopt(curl, CURLOPT_READDATA, f);
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
   _fseeki64(f, remoteFileSizeByte, SEEK_SET);
 #else
   fseek(f, (long)remoteFileSizeByte, SEEK_SET);
 #endif
   curl_easy_setopt(curl, CURLOPT_APPEND, 1L);
-  result = curl_easy_perform(curl);
+  res = curl_easy_perform(curl);
 
   fclose(f);
 
-  if(result == CURLE_OK)
+  if(res == CURLE_OK)
     return 1;
   else {
-    fprintf(stderr, "%s\n", curl_easy_strerror(result));
+    fprintf(stderr, "%s\n", curl_easy_strerror(res));
     return 0;
   }
 }

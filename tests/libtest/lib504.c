@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /*
  * Source code in here hugely as reported in bug report 651464 by
  * Christopher R. Palmer.

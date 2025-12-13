@@ -3,16 +3,18 @@
 # SPDX-License-Identifier: curl
 
 allowfunc accept
-allowfunc fclose
-allowfunc fopen
+allowfunc calloc
 allowfunc fprintf
+allowfunc free
 allowfunc freeaddrinfo
 allowfunc getaddrinfo
-allowfunc open
+allowfunc malloc
 allowfunc printf
+allowfunc realloc
 allowfunc recv
 allowfunc send
 allowfunc snprintf
 allowfunc socket
 allowfunc sscanf
+allowfunc strdup
 allowfunc vsnprintf

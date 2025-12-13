@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ connect to non-listen
 # Server-side
 <reply>
 <servercmd>
-# Assuming there's nothing listening on port 1
+# Assuming there is nothing listening on port 1
 REPLY EPSV 229 Entering Passive Mode (|||1|)
 </servercmd>
 <data>

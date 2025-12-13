@@ -29,20 +29,7 @@
  */
 #ifdef _WIN32
 #include "winapi.h"
-
-#ifndef WITHOUT_LIBCURL
-#include <curl/mprintf.h>
-#define SNPRINTF curl_msnprintf
-#else
-/* when built for the test servers */
-
-/* adjust for old MSVC */
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define SNPRINTF _snprintf
-#else
-#define SNPRINTF snprintf
-#endif
-#endif /* !WITHOUT_LIBCURL */
+#include "snprintf.h"
 
 /* This is a helper function for curlx_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
@@ -52,6 +39,7 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 {
   char *p;
   wchar_t wbuf[256];
+  DWORD wlen;
 
   if(!buflen)
     return NULL;
@@ -61,25 +49,19 @@ const char *curlx_get_winapi_error(DWORD err, char *buf, size_t buflen)
 
   /* We return the local codepage version of the error string because if it is
      output to the user's terminal it will likely be with functions which
-     expect the local codepage (eg fprintf, failf, infof).
-     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
-  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
-                    LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL)) {
-    size_t written = wcstombs(buf, wbuf, buflen - 1);
-    if(written != (size_t)-1)
-      buf[written] = '\0';
-    else
-      *buf = '\0';
-  }
-
-  /* Truncate multiple lines */
-  p = strchr(buf, '\n');
-  if(p) {
-    if(p > buf && *(p-1) == '\r')
-      *(p-1) = '\0';
-    else
-      *p = '\0';
+     expect the local codepage (eg fprintf, failf, infof). */
+  wlen = FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                         FORMAT_MESSAGE_IGNORE_INSERTS), NULL, err,
+                        LANG_NEUTRAL, wbuf, CURL_ARRAYSIZE(wbuf), NULL);
+  if(wlen && !wcstombs_s(NULL, buf, buflen, wbuf, wlen)) {
+    /* Truncate multiple lines */
+    p = strchr(buf, '\n');
+    if(p) {
+      if(p > buf && *(p - 1) == '\r')
+        *(p - 1) = '\0';
+      else
+        *p = '\0';
+    }
   }
 
   return *buf ? buf : NULL;
@@ -107,7 +89,6 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #if defined(__GNUC__) && __GNUC__ >= 7
 #pragma GCC diagnostic pop
 #endif
-
   }
 #else
   {
@@ -118,7 +99,7 @@ const char *curlx_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    CURL_SETERRNO(old_errno);
+    errno = old_errno;
 
   if(old_win_err != GetLastError())
     SetLastError(old_win_err);

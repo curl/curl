@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,10 +6,9 @@
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 6
 Content-Type: text/1
@@ -17,7 +17,6 @@ Content-Type: text/1
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <file1 name="%LOGDIR/curlrc">
@@ -36,12 +35,15 @@ CURL_HOME
 <name>
 Verify XDG_CONFIG_HOME use to find curlrc
 </name>
+# set the terminal wide to avoid word wrap in the message
+<setenv>
+COLUMNS=300
+</setenv>
 <command option="no-q">
-%HOSTIP:%HTTPPORT/%TESTNUMBER
+%HOSTIP:%HTTPPORT/%TESTNUMBER --no-progress-meter
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes" nonewline="yes">
@@ -55,5 +57,13 @@ Content-Type: application/x-www-form-urlencoded
 
 curlrc read
 </protocol>
+
+# On Windows curl may use a backslash, convert that for the comparison
+<stripfile>
+s:\\:/:g
+</stripfile>
+<stderr mode="text">
+Note: Read config file from '%PWD/%LOGDIR/curlrc'
+</stderr>
 </verify>
 </testcase>

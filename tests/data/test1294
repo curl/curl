@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -25,7 +25,6 @@ Funny-head: yesyes
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -44,15 +43,15 @@ HTTP GET with split initial request send
 CURL_SMALLREQSEND=128
 </setenv>
 <command>
-http://%HOSTIP:%HTTPPORT/012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679/%TESTNUMBER -H "Among other public buildings in a certain town, which for many reasons it will be prudent to refrain from mentioning, and to which I will assign no fictitious name, there is one anciently common to most towns, great or small to ___, a workhouse; and in this workhouse was born; on a day and date which I need not trouble myself to repeat, inasmuch as it can be of no possible consequence to the reader, in this stage of the business at all events; the item of mortality whose name is prefixed to the head of this chapter: 511"
+http://%HOSTIP:%HTTPPORT/%repeat[30 x 012345679]%/%TESTNUMBER
+-H "Among other public buildings in a certain town, which for many reasons it will be prudent to refrain from mentioning, and to which I will assign no fictitious name, there is one anciently common to most towns, great or small to ___, a workhouse; and in this workhouse was born; on a day and date which I need not trouble myself to repeat, inasmuch as it can be of no possible consequence to the reader, in this stage of the business at all events; the item of mortality whose name is prefixed to the head of this chapter: 511"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
-GET /012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679012345679/%TESTNUMBER HTTP/1.1
+GET /%repeat[30 x 012345679]%/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*

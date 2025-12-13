@@ -40,7 +40,7 @@ should be using curl directly if your use case is not covered.
 
 By default, **wcurl** does:
 
-## * Percent-encode whitespaces in URLs;
+## * Percent-encode whitespace in URLs;
 
 ## * Download multiple URLs in parallel
     if the installed curl's version is \>= 7.66.0 (--parallel);
@@ -87,8 +87,8 @@ last value is considered.
 
 ## --no-decode-filename
 
-Don't percent-decode the output filename, even if the percent-encoding in the
-URL was done by **wcurl**, e.g.: The URL contained whitespaces.
+Do not percent-decode the output filename, even if the percent-encoding in the
+URL was done by **wcurl**, e.g.: The URL contained whitespace.
 
 ## --dry-run
 
@@ -110,7 +110,7 @@ is instead forwarded to the curl invocation.
 # URL
 
 URL to be downloaded. Anything that is not a parameter is considered
-an URL. Whitespaces are percent-encoded and the URL is passed to curl, which
+an URL. Whitespace is percent-encoded and the URL is passed to curl, which
 then performs the parsing. May be specified more than once.
 
 # EXAMPLES
@@ -144,7 +144,7 @@ Download multiple files without a limit of concurrent connections per host (the 
 # REPORTING BUGS
 
 If you experience any problems with **wcurl** that you do not experience with
-curl, submit an issue on Github: https://github.com/curl/wcurl
+curl, submit an issue on GitHub: https://github.com/curl/wcurl
 
 # COPYRIGHT
 

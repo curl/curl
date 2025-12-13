@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ parallel
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -24,7 +24,6 @@ Content-Type: text/html
 
 </reply>
 
-#
 # Client-side
 <client>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
@@ -42,7 +41,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER file://localhost%FILE_PWD/%LOGDIR/test%TEST
 </command>
 </client>
 
-#
 <verify>
 </verify>
 </testcase>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ SHA256
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -15,7 +15,6 @@ test
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 # so far only the libssh2 backend supports SHA256
@@ -41,7 +40,6 @@ test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

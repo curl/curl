@@ -70,35 +70,37 @@ environment:
       SCHANNEL: 'ON'
       SHARED: 'ON'
       EXAMPLES: 'ON'
-    - job_name: 'CM VS2012, Release, x86, OpenSSL 1.1.1 + Schannel, Shared, Build-tests'
+    - job_name: 'CM VS2012, Release, x86, Schannel, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       PRJ_GEN: 'Visual Studio 11 2012'
       TARGET: '-A Win32'
       PRJ_CFG: Release
-      OPENSSL: 'ON'
       SCHANNEL: 'ON'
       SHARED: 'ON'
-    - job_name: 'CM VS2013, Debug, x64, OpenSSL 1.1.1, Shared, Build-only'
+    - job_name: 'CM VS2013, Debug, x64, Schannel, Shared, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      CMAKE_VERSION: '3.18.4'
       PRJ_GEN: 'Visual Studio 12 2013'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      OPENSSL: 'ON'
+      SCHANNEL: 'ON'
       SHARED: 'ON'
       TFLAGS: 'skipall'
-    - job_name: 'CM VS2015, Debug, x64, OpenSSL 1.1.1, Static, Build-only'
+    - job_name: 'CM VS2015, Debug, x64, Schannel, Static, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      CMAKE_VERSION: '3.19.8'
       PRJ_GEN: 'Visual Studio 14 2015'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      OPENSSL: 'ON'
+      SCHANNEL: 'ON'
       TFLAGS: 'skipall'
-    - job_name: 'CM VS2017, Debug, x64, OpenSSL 1.1.1, Shared, Build-only'
+    - job_name: 'CM VS2017, Debug, x64, Schannel, Shared, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
+      CMAKE_VERSION: '3.20.6'
       PRJ_GEN: 'Visual Studio 15 2017'
       TARGET: '-A x64'
       PRJ_CFG: Debug
-      OPENSSL: 'ON'
+      SCHANNEL: 'ON'
       SHARED: 'ON'
       TFLAGS: 'skipall'
     - job_name: 'CM VS2019, Debug, x64, OpenSSL 3.0 + Schannel, Shared, Build-tests'
@@ -149,10 +151,17 @@ environment:
 
     # generated VisualStudioSolution-based builds
 
-    - job_name: 'VisualStudioSolution VS2013, Debug, x86, Schannel, Build-only'
+    - job_name: 'VisualStudioSolution VS2010, Release, x86, Schannel, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2013'
+      BUILD_SYSTEM: VisualStudioSolution
+      PRJ_CFG: 'DLL Release - DLL Windows SSPI - DLL WinIDN'
+      PLAT: 'Win32'
+      VC_VERSION: VC10
+    - job_name: 'VisualStudioSolution VS2013, Debug, x64, Schannel, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: VisualStudioSolution
       PRJ_CFG: 'DLL Debug - DLL Windows SSPI - DLL WinIDN'
+      PLAT: 'x64'
       VC_VERSION: VC12
 
 install:

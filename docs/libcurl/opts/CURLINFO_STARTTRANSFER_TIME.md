@@ -16,7 +16,7 @@ Added-in: 7.9.2
 
 # NAME
 
-CURLINFO_STARTTRANSFER_TIME - get the time until the first byte is received
+CURLINFO_STARTTRANSFER_TIME - time to first byte received
 
 # SYNOPSIS
 

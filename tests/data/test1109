@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Test that the fragment is not send as part of the path.
 <info>
@@ -30,10 +31,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER#test
 </command>
 </client>
 
-
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

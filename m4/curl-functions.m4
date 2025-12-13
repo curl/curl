@@ -508,7 +508,7 @@ AC_DEFUN([CURL_CHECK_FUNC_ALARM], [
       AC_LANG_PROGRAM([[
         $curl_includes_unistd
       ]],[[
-        if(0 != alarm(0))
+        if(alarm(0) != 0)
           return 1;
       ]])
     ],[
@@ -599,7 +599,7 @@ AC_DEFUN([CURL_CHECK_FUNC_BASENAME], [
         $curl_includes_libgen
         $curl_includes_unistd
       ]],[[
-        if(0 != basename(0))
+        if(basename(0) != 0)
           return 1;
       ]])
     ],[
@@ -659,7 +659,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
     ]],[[
-      if(0 != closesocket(0))
+      if(closesocket(0) != 0)
         return 1;
     ]])
   ],[
@@ -689,7 +689,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
       ]],[[
-        if(0 != closesocket(0))
+        if(closesocket(0) != 0)
           return 1;
       ]])
     ],[
@@ -750,7 +750,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(0 != CloseSocket(0))
+      if(CloseSocket(0) != 0)
         return 1;
     ]])
   ],[
@@ -768,7 +768,7 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET_CAMEL], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(0 != CloseSocket(0))
+        if(CloseSocket(0) != 0)
           return 1;
       ]])
     ],[
@@ -851,7 +851,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL], [
       AC_LANG_PROGRAM([[
         $curl_includes_fcntl
       ]],[[
-        if(0 != fcntl(0, 0, 0))
+        if(fcntl(0, 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -917,7 +917,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FCNTL_O_NONBLOCK], [
         $curl_includes_fcntl
       ]],[[
         int flags = 0;
-        if(0 != fcntl(0, F_SETFL, flags | O_NONBLOCK))
+        if(fcntl(0, F_SETFL, flags | O_NONBLOCK) != 0)
           return 1;
       ]])
     ],[
@@ -1098,7 +1098,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
         AC_LANG_PROGRAM([[
           $curl_includes_sys_xattr
         ]],[[
-          if(0 != fsetxattr(0, "", 0, 0, 0))
+          if(fsetxattr(0, "", 0, 0, 0) != 0)
             return 1;
         ]])
       ],[
@@ -1116,7 +1116,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FSETXATTR], [
         AC_LANG_PROGRAM([[
           $curl_includes_sys_xattr
         ]],[[
-          if(0 != fsetxattr(0, 0, 0, 0, 0, 0))
+          if(fsetxattr(0, 0, 0, 0, 0, 0) != 0)
             return 1;
         ]])
       ],[
@@ -1218,7 +1218,7 @@ AC_DEFUN([CURL_CHECK_FUNC_FTRUNCATE], [
       AC_LANG_PROGRAM([[
         $curl_includes_unistd
       ]],[[
-        if(0 != ftruncate(0, 0))
+        if(ftruncate(0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -1291,7 +1291,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
       $curl_includes_netdb
     ]],[[
       struct addrinfo *ai = 0;
-      if(0 != getaddrinfo(0, 0, 0, &ai))
+      if(getaddrinfo(0, 0, 0, &ai) != 0)
         return 1;
     ]])
   ],[
@@ -1326,7 +1326,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         $curl_includes_netdb
       ]],[[
         struct addrinfo *ai = 0;
-        if(0 != getaddrinfo(0, 0, 0, &ai))
+        if(getaddrinfo(0, 0, 0, &ai) != 0)
           return 1;
       ]])
     ],[
@@ -1339,7 +1339,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo seems to work])
     CURL_RUN_IFELSE([
@@ -1415,7 +1415,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
-    if test "$curl_cv_apple" = 'yes'; then
+    if test "$curl_cv_apple" = "yes"; then
       dnl Darwin 6.0 and macOS 10.2.X and newer
       tst_tsafe_getaddrinfo="yes"
     fi
@@ -1537,7 +1537,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
           $curl_includes_netdb
           $curl_includes_bsdsocket
         ]],[[
-          if(0 != gethostbyname_r(0, 0, 0))
+          if(gethostbyname_r(0, 0, 0) != 0)
             return 1;
         ]])
       ],[
@@ -1556,7 +1556,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
           $curl_includes_netdb
           $curl_includes_bsdsocket
         ]],[[
-          if(0 != gethostbyname_r(0, 0, 0, 0, 0))
+          if(gethostbyname_r(0, 0, 0, 0, 0) != 0)
             return 1;
         ]])
       ],[
@@ -1575,7 +1575,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTBYNAME_R], [
           $curl_includes_netdb
           $curl_includes_bsdsocket
         ]],[[
-          if(0 != gethostbyname_r(0, 0, 0, 0, 0, 0))
+          if(gethostbyname_r(0, 0, 0, 0, 0, 0) != 0)
             return 1;
         ]])
       ],[
@@ -1660,7 +1660,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
       $curl_includes_bsdsocket
     ]],[[
       char s[1];
-      if(0 != gethostname((void *)s, 0))
+      if(gethostname((void *)s, 0) != 0)
         return 1;
     ]])
   ],[
@@ -1695,7 +1695,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
         $curl_includes_bsdsocket
       ]],[[
         char s[1];
-        if(0 != gethostname((void *)s, 0))
+        if(gethostname((void *)s, 0) != 0)
           return 1;
       ]])
     ],[
@@ -1727,7 +1727,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETHOSTNAME], [
               int FUNCALLCONV gethostname($tst_arg1, $tst_arg2);
             ]],[[
               char s[1];
-              if(0 != gethostname(($tst_arg1)s, 0))
+              if(gethostname(($tst_arg1)s, 0) != 0)
                 return 1;
             ]])
           ],[
@@ -1795,7 +1795,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(0 != getpeername(0, (void *)0, (void *)0))
+      if(getpeername(0, (void *)0, (void *)0) != 0)
         return 1;
     ]])
   ],[
@@ -1829,7 +1829,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETPEERNAME], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(0 != getpeername(0, (void *)0, (void *)0))
+        if(getpeername(0, (void *)0, (void *)0) != 0)
           return 1;
       ]])
     ],[
@@ -1893,7 +1893,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(0 != getsockname(0, (void *)0, (void *)0))
+      if(getsockname(0, (void *)0, (void *)0) != 0)
         return 1;
     ]])
   ],[
@@ -1927,7 +1927,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(0 != getsockname(0, (void *)0, (void *)0))
+        if(getsockname(0, (void *)0, (void *)0) != 0)
           return 1;
       ]])
     ],[
@@ -2014,7 +2014,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
       AC_LANG_PROGRAM([[
         $curl_includes_ifaddrs
       ]],[[
-        if(0 != getifaddrs(0))
+        if(getifaddrs(0) != 0)
           return 1;
       ]])
     ],[
@@ -2027,7 +2027,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETIFADDRS], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_getifaddrs" = "yes"; then
     AC_MSG_CHECKING([if getifaddrs seems to work])
     CURL_RUN_IFELSE([
@@ -2134,7 +2134,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
       ]],[[
         time_t tm = 1170352587;
         struct tm result;
-        if(0 != gmtime_r(&tm, &result))
+        if(gmtime_r(&tm, &result) != 0)
           return 1;
         (void)result;
       ]])
@@ -2148,7 +2148,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_gmtime_r" = "yes"; then
     AC_MSG_CHECKING([if gmtime_r seems to work])
     CURL_RUN_IFELSE([
@@ -2255,7 +2255,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
       ]],[[
         char ipv4res[sizeof("255.255.255.255")];
         unsigned char ipv4a[5] = "";
-        if(0 != inet_ntop(0, ipv4a, ipv4res, 0))
+        if(inet_ntop(0, ipv4a, ipv4res, 0) != 0)
           return 1;
       ]])
     ],[
@@ -2268,7 +2268,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_NTOP], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_inet_ntop" = "yes"; then
     AC_MSG_CHECKING([if inet_ntop seems to work])
     CURL_RUN_IFELSE([
@@ -2414,9 +2414,9 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
       AC_LANG_PROGRAM([[
         $curl_includes_arpa_inet
       ]],[[
-        unsigned char ipv4a[4+1] = "";
+        unsigned char ipv4a[4 + 1] = "";
         const char *ipv4src = "192.168.100.1";
-        if(0 != inet_pton(0, ipv4src, ipv4a))
+        if(inet_pton(0, ipv4src, ipv4a) != 0)
           return 1;
       ]])
     ],[
@@ -2429,7 +2429,7 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_compi_inet_pton" = "yes"; then
     AC_MSG_CHECKING([if inet_pton seems to work])
     CURL_RUN_IFELSE([
@@ -2438,45 +2438,45 @@ AC_DEFUN([CURL_CHECK_FUNC_INET_PTON], [
         $curl_includes_arpa_inet
         $curl_includes_string
       ]],[[
-        unsigned char ipv6a[16+1];
-        unsigned char ipv4a[4+1];
+        unsigned char ipv6a[16 + 1];
+        unsigned char ipv4a[4 + 1];
         const char *ipv6src = "fe80::214:4fff:fe0b:76c8";
         const char *ipv4src = "192.168.100.1";
         /* - */
         memset(ipv4a, 1, sizeof(ipv4a));
-        if(1 != inet_pton(AF_INET, ipv4src, ipv4a))
+        if(inet_pton(AF_INET, ipv4src, ipv4a) != 1)
           return 1; /* fail */
         /* - */
-        if( (ipv4a[0] != 0xc0) ||
-            (ipv4a[1] != 0xa8) ||
-            (ipv4a[2] != 0x64) ||
-            (ipv4a[3] != 0x01) ||
-            (ipv4a[4] != 0x01) )
+        if((ipv4a[0] != 0xc0) ||
+           (ipv4a[1] != 0xa8) ||
+           (ipv4a[2] != 0x64) ||
+           (ipv4a[3] != 0x01) ||
+           (ipv4a[4] != 0x01))
           return 1; /* fail */
         /* - */
         memset(ipv6a, 1, sizeof(ipv6a));
-        if(1 != inet_pton(AF_INET6, ipv6src, ipv6a))
+        if(inet_pton(AF_INET6, ipv6src, ipv6a) != 1)
           return 1; /* fail */
         /* - */
-        if( (ipv6a[0]  != 0xfe) ||
-            (ipv6a[1]  != 0x80) ||
-            (ipv6a[8]  != 0x02) ||
-            (ipv6a[9]  != 0x14) ||
-            (ipv6a[10] != 0x4f) ||
-            (ipv6a[11] != 0xff) ||
-            (ipv6a[12] != 0xfe) ||
-            (ipv6a[13] != 0x0b) ||
-            (ipv6a[14] != 0x76) ||
-            (ipv6a[15] != 0xc8) ||
-            (ipv6a[16] != 0x01) )
+        if((ipv6a[0]  != 0xfe) ||
+           (ipv6a[1]  != 0x80) ||
+           (ipv6a[8]  != 0x02) ||
+           (ipv6a[9]  != 0x14) ||
+           (ipv6a[10] != 0x4f) ||
+           (ipv6a[11] != 0xff) ||
+           (ipv6a[12] != 0xfe) ||
+           (ipv6a[13] != 0x0b) ||
+           (ipv6a[14] != 0x76) ||
+           (ipv6a[15] != 0xc8) ||
+           (ipv6a[16] != 0x01))
           return 1; /* fail */
         /* - */
-        if( (ipv6a[2]  != 0x0) ||
-            (ipv6a[3]  != 0x0) ||
-            (ipv6a[4]  != 0x0) ||
-            (ipv6a[5]  != 0x0) ||
-            (ipv6a[6]  != 0x0) ||
-            (ipv6a[7]  != 0x0) )
+        if((ipv6a[2] != 0x0) ||
+           (ipv6a[3] != 0x0) ||
+           (ipv6a[4] != 0x0) ||
+           (ipv6a[5] != 0x0) ||
+           (ipv6a[6] != 0x0) ||
+           (ipv6a[7] != 0x0))
           return 1; /* fail */
         /* - */
         return 0;
@@ -2565,7 +2565,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stropts
       ]],[[
-        if(0 != ioctl(0, 0, 0))
+        if(ioctl(0, 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -2623,7 +2623,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_FIONBIO], [
         $curl_includes_stropts
       ]],[[
         int flags = 0;
-        if(0 != ioctl(0, FIONBIO, &flags))
+        if(ioctl(0, FIONBIO, &flags) != 0)
           return 1;
       ]])
     ],[
@@ -2680,7 +2680,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR], [
         #include <net/if.h>
       ]],[[
         struct ifreq ifr;
-        if(0 != ioctl(0, SIOCGIFADDR, &ifr))
+        if(ioctl(0, SIOCGIFADDR, &ifr) != 0)
           return 1;
       ]])
     ],[
@@ -2738,7 +2738,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
     ]],[[
-      if(0 != ioctlsocket(0, 0, 0))
+      if(ioctlsocket(0, 0, 0) != 0)
         return 1;
     ]])
   ],[
@@ -2768,7 +2768,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET], [
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
       ]],[[
-        if(0 != ioctlsocket(0, 0, 0))
+        if(ioctlsocket(0, 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -2827,7 +2827,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_FIONBIO], [
         $curl_includes_winsock2
       ]],[[
         unsigned long flags = 0;
-        if(0 != ioctlsocket(0, FIONBIO, &flags))
+        if(ioctlsocket(0, FIONBIO, &flags) != 0)
           return 1;
       ]])
     ],[
@@ -2884,7 +2884,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
     AC_LANG_PROGRAM([[
       $curl_includes_bsdsocket
     ]],[[
-      if(0 != IoctlSocket(0, 0, 0))
+      if(IoctlSocket(0, 0, 0) != 0)
         return 1;
     ]])
   ],[
@@ -2901,7 +2901,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
       AC_LANG_PROGRAM([[
         $curl_includes_bsdsocket
       ]],[[
-        if(0 != IoctlSocket(0, 0, 0))
+        if(IoctlSocket(0, 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -2959,7 +2959,7 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL_FIONBIO], [
         $curl_includes_bsdsocket
       ]],[[
         long flags = 0;
-        if(0 != IoctlSocket(0, FIONBIO, &flags))
+        if(IoctlSocket(0, FIONBIO, &flags) != 0)
           return 1;
       ]])
     ],[
@@ -3030,7 +3030,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != memrchr("", 0, 0))
+        if(memrchr("", 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3062,7 +3062,7 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != memrchr("", 0, 0))
+        if(memrchr("", 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3147,7 +3147,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGACTION], [
       AC_LANG_PROGRAM([[
         $curl_includes_signal
       ]],[[
-        if(0 != sigaction(0, 0, 0))
+        if(sigaction(0, 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3232,7 +3232,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGINTERRUPT], [
       AC_LANG_PROGRAM([[
         $curl_includes_signal
       ]],[[
-        if(0 != siginterrupt(0, 0))
+        if(siginterrupt(0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3317,7 +3317,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGNAL], [
       AC_LANG_PROGRAM([[
         $curl_includes_signal
       ]],[[
-        if(0 != signal(0, 0))
+        if(signal(0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3391,7 +3391,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
         $curl_includes_setjmp
       ]],[[
         sigjmp_buf env;
-        if(0 != sigsetjmp(env, 0))
+        if(sigsetjmp(env, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3424,7 +3424,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SIGSETJMP], [
         $curl_includes_setjmp
       ]],[[
         sigjmp_buf env;
-        if(0 != sigsetjmp(env, 0))
+        if(sigsetjmp(env, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3487,7 +3487,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
     ]],[[
-      if(0 != socket(0, 0, 0))
+      if(socket(0, 0, 0) != 0)
         return 1;
     ]])
   ],[
@@ -3521,7 +3521,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
       ]],[[
-        if(0 != socket(0, 0, 0))
+        if(socket(0, 0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3607,7 +3607,7 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
         $curl_includes_sys_socket
       ]],[[
         int sv[2];
-        if(0 != socketpair(0, 0, 0, sv))
+        if(socketpair(0, 0, 0, sv) != 0)
           return 1;
       ]])
     ],[
@@ -3692,7 +3692,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCASECMP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strcasecmp("", ""))
+        if(strcasecmp("", "") != 0)
           return 1;
       ]])
     ],[
@@ -3776,7 +3776,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRCMPI], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != strcmpi(0, 0))
+        if(strcmpi(0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3915,7 +3915,7 @@ dnl      char *strerror_r(int errnum, char *workbuf, size_t bufsize);
 dnl
 dnl  glibc-style strerror_r returns a pointer to the error string,
 dnl  and might use the provided workbuf as a scratch area if needed. A
-dnl  quick test on a few systems shows that it's usually not used at all.
+dnl  quick test on a few systems shows that it is usually not used at all.
 dnl
 dnl POSIX-style strerror_r:
 dnl
@@ -3971,7 +3971,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
         $curl_includes_string
       ]],[[
         char s[1];
-        if(0 != strerror_r(0, s, 0))
+        if(strerror_r(0, s, 0) != 0)
           return 1;
       ]])
     ],[
@@ -3994,7 +3994,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             char *strerror_r(int errnum, char *workbuf, $arg3 bufsize);
           ]],[[
             char s[1];
-            if(0 != strerror_r(0, s, 0))
+            if(strerror_r(0, s, 0) != 0)
               return 1;
             (void)s;
           ]])
@@ -4016,7 +4016,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_glibc_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
@@ -4057,7 +4057,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
             int strerror_r(int errnum, char *resultbuf, $arg3 bufsize);
           ]],[[
             char s[1];
-            if(0 != strerror_r(0, s, 0))
+            if(strerror_r(0, s, 0) != 0)
               return 1;
             (void)s;
           ]])
@@ -4079,7 +4079,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRERROR_R], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
+  if test "$cross_compiling" != "yes" &&
     test "$tst_posix_strerror_r" = "yes"; then
     AC_MSG_CHECKING([if strerror_r seems to work])
     CURL_RUN_IFELSE([
@@ -4213,7 +4213,7 @@ AC_DEFUN([CURL_CHECK_FUNC_STRICMP], [
       AC_LANG_PROGRAM([[
         $curl_includes_string
       ]],[[
-        if(0 != stricmp(0, 0))
+        if(stricmp(0, 0) != 0)
           return 1;
       ]])
     ],[
@@ -4259,7 +4259,7 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  if test "$curl_cv_apple" = 'yes'; then
+  if test "$curl_cv_apple" = "yes"; then
     AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
   else
     oldcc=$CC
@@ -4291,7 +4291,7 @@ AC_DEFUN([CURL_COVERAGE],[
     coverage="$enableval")
 
   dnl if not gcc or clang switch off again
-  AS_IF([test "$compiler_id" != "GNU_C" -a "$compiler_id" != "CLANG" -a "$compiler_id" != "APPLECLANG"], coverage="no" )
+  AS_IF([test "$compiler_id" != "GNU_C" && test "$compiler_id" != "CLANG" && test "$compiler_id" != "APPLECLANG"], coverage="no" )
   AC_MSG_RESULT($coverage)
 
   if test "x$coverage" = "xyes"; then
@@ -4380,8 +4380,8 @@ AC_DEFUN([CURL_SIZEOF], [
         $2
       ]],[
         switch(0) {
-          case 0:
-          case (sizeof($1) == $typesize):;
+        case 0:
+        case (sizeof($1) == $typesize):;
         }
       ])
     ],[
@@ -4390,11 +4390,11 @@ AC_DEFUN([CURL_SIZEOF], [
       r=0
     ])
     dnl get out of the loop once matched
-    if test $r -gt 0; then
+    if test "$r" -gt 0; then
       break;
     fi
   done
-  if test $r -eq 0; then
+  if test "$r" -eq 0; then
     AC_MSG_ERROR([Failed to find size of $1])
   fi
   AC_MSG_RESULT($r)

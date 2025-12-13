@@ -23,9 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
-#define PAUSE_TIME      5
+#define PAUSE_TIME 5
 
 struct t670_ReadThis {
   CURL *curl;
@@ -35,7 +33,7 @@ struct t670_ReadThis {
 
 static size_t t670_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
-  struct t670_ReadThis *pooh = (struct t670_ReadThis *) userp;
+  struct t670_ReadThis *pooh = (struct t670_ReadThis *)userp;
   time_t delta;
 
   if(size * nmemb < 1)
@@ -63,7 +61,7 @@ static int t670_xferinfo(void *clientp,
                          curl_off_t dltotal, curl_off_t dlnow,
                          curl_off_t ultotal, curl_off_t ulnow)
 {
-  struct t670_ReadThis *pooh = (struct t670_ReadThis *) clientp;
+  struct t670_ReadThis *pooh = (struct t670_ReadThis *)clientp;
 
   (void)dltotal;
   (void)dlnow;
@@ -104,7 +102,7 @@ static CURLcode test_lib670(const char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  pooh.origin = (time_t) 0;
+  pooh.origin = (time_t)0;
   pooh.count = 0;
   pooh.curl = curl_easy_init();
 
@@ -130,7 +128,7 @@ static CURLcode test_lib670(const char *URL)
       goto test_cleanup;
     }
 
-    res = curl_mime_data_cb(part, (curl_off_t) 2, t670_read_cb,
+    res = curl_mime_data_cb(part, (curl_off_t)2, t670_read_cb,
                             NULL, NULL, &pooh);
 
     /* Bind mime data to its easy handle. */

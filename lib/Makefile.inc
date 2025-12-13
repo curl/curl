@@ -50,6 +50,7 @@ LIB_CURLX_HFILES = \
   curlx/inet_pton.h \
   curlx/multibyte.h \
   curlx/nonblock.h \
+  curlx/snprintf.h \
   curlx/strerr.h   \
   curlx/strparse.h \
   curlx/timediff.h \
@@ -133,10 +134,10 @@ LIB_VQUIC_HFILES = \
 LIB_VSSH_CFILES =  \
   vssh/libssh.c    \
   vssh/libssh2.c   \
-  vssh/curl_path.c
+  vssh/vssh.c
 
 LIB_VSSH_HFILES =    \
-  vssh/curl_path.h   \
+  vssh/vssh.h        \
   vssh/ssh.h
 
 LIB_CFILES =         \
@@ -172,6 +173,7 @@ LIB_CFILES =         \
   curl_rtmp.c        \
   curl_sasl.c        \
   curl_sha512_256.c  \
+  curl_share.c       \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
@@ -234,6 +236,7 @@ LIB_CFILES =         \
   progress.c         \
   psl.c              \
   rand.c             \
+  ratelimit.c        \
   rename.c           \
   request.c          \
   rtsp.c             \
@@ -241,7 +244,6 @@ LIB_CFILES =         \
   sendf.c            \
   setopt.c           \
   sha256.c           \
-  share.c            \
   slist.c            \
   smb.c              \
   smtp.c             \
@@ -249,7 +251,6 @@ LIB_CFILES =         \
   socks.c            \
   socks_gssapi.c     \
   socks_sspi.c       \
-  speedcheck.c       \
   splay.c            \
   strcase.c          \
   strdup.c           \
@@ -299,8 +300,6 @@ LIB_HFILES =         \
   curl_ldap.h        \
   curl_md4.h         \
   curl_md5.h         \
-  curl_mem_undef.h   \
-  curl_memory.h      \
   curl_memrchr.h     \
   curl_ntlm_core.h   \
   curl_printf.h      \
@@ -311,6 +310,7 @@ LIB_HFILES =         \
   curl_setup_once.h  \
   curl_sha256.h      \
   curl_sha512_256.h  \
+  curl_share.h       \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
@@ -351,7 +351,6 @@ LIB_HFILES =         \
   imap.h             \
   llist.h            \
   macos.h            \
-  memdebug.h         \
   mime.h             \
   mqtt.h             \
   multihandle.h      \
@@ -366,6 +365,7 @@ LIB_HFILES =         \
   progress.h         \
   psl.h              \
   rand.h             \
+  ratelimit.h        \
   rename.h           \
   request.h          \
   rtsp.h             \
@@ -375,7 +375,6 @@ LIB_HFILES =         \
   setup-os400.h      \
   setup-vms.h        \
   setup-win32.h      \
-  share.h            \
   sigpipe.h          \
   slist.h            \
   smb.h              \
@@ -383,7 +382,6 @@ LIB_HFILES =         \
   sockaddr.h         \
   socketpair.h       \
   socks.h            \
-  speedcheck.h       \
   splay.h            \
   strcase.h          \
   strdup.h           \

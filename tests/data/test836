@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,14 +9,13 @@ connection reuse
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 REPLY "LOGIN user.one secret" A002 OK LOGIN completed
 REPLY "LOGIN user.two secret" B002 OK LOGIN completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -26,7 +26,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -40,7 +39,6 @@ IMAP multiple connection authentication
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

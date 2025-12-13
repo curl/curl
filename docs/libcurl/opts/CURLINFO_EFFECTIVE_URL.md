@@ -15,7 +15,7 @@ Added-in: 7.4
 
 # NAME
 
-CURLINFO_EFFECTIVE_URL - get the last used URL
+CURLINFO_EFFECTIVE_URL - last used URL
 
 # SYNOPSIS
 

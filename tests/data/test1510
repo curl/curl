@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ flaky
 
 # Server-side
 <reply>
-<data1>
+<data1 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -17,7 +18,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data1>
-<data2>
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -25,7 +26,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data2>
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -33,7 +34,7 @@ Content-Length: 47
 
 file contents should appear once for each file
 </data3>
-<data4>
+<data4 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -61,7 +62,7 @@ HTTP GET connection cache limit (CURLOPT_MAXCONNECTS)
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Accept: */*
@@ -89,7 +90,7 @@ Accept: */*
 * Connection #3 to host server4.example.com:%HTTPPORT left intact
 </file>
 <stripfile>
-$_ = '' if(($_ !~ /left intact/) && ($_ !~ /Closing connection/))
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /Closing connection/))
 </stripfile>
 </verify>
 </testcase>

@@ -53,6 +53,7 @@ axTLS
 backend
 backends
 backoff
+backtick
 backticks
 balancers
 Baratov
@@ -149,7 +150,6 @@ CSeq
 csh
 cshrc
 CTRL
-cURL
 CURLcode
 curldown
 CURLE
@@ -172,8 +172,10 @@ dbg
 Debian
 DEBUGBUILD
 decrypt
+decrypted
 decrypting
 deepcode
+defacto
 DELE
 DER
 dereference
@@ -202,6 +204,7 @@ DLLs
 DNS
 dns
 dnsop
+DNSSEC
 DoH
 DoT
 doxygen
@@ -215,6 +218,7 @@ dynbuf
 EAGAIN
 EBCDIC
 ECC
+ECCN
 ECDHE
 ECH
 ECHConfig
@@ -245,6 +249,7 @@ et
 etag
 ETag
 ETags
+exa
 exe
 executables
 EXPN
@@ -258,6 +263,7 @@ Fedora
 Feltzing
 ffi
 filesize
+filesystem
 FindCURL
 FLOSS
 fnmatch
@@ -299,6 +305,7 @@ Ghedini
 giga
 Gisle
 Glesys
+glibc
 globbed
 globbing
 gmail
@@ -380,6 +387,7 @@ imap
 IMAPS
 imaps
 impacket
+implementers
 init
 initializer
 inlined
@@ -418,6 +426,7 @@ kerberos
 Keychain
 keychain
 KiB
+kibibyte
 kickstart
 Kirei
 Knauf
@@ -432,7 +441,9 @@ ldap
 LDAPS
 ldaps
 LF
+LGPL
 LGTM
+libbacktrace
 libbrotlidec
 libc
 libcurl
@@ -462,6 +473,7 @@ libWebSocket
 libz
 libzstd
 LineageOS
+linter
 linux
 lldb
 ln
@@ -492,6 +504,7 @@ Mavrogiannopoulos
 Mbed
 mbedTLS
 md
+mebibyte
 Meglio
 memdebug
 MesaLink
@@ -564,6 +577,7 @@ Necko
 NetBSD
 netrc
 netstat
+NetWare
 Netware
 NFS
 nghttp
@@ -707,6 +721,7 @@ ROADMAP
 Roadmap
 Rockbox
 roffit
+RPC
 RPG
 RR
 RRs
@@ -794,6 +809,7 @@ sprintf
 src
 SRP
 SRWLOCK
+SSI
 SSL
 ssl
 SSLeay
@@ -889,6 +905,7 @@ UI
 UID
 UIDL
 Ultrix
+umask
 Unary
 unassign
 UNC
@@ -954,12 +971,13 @@ watchOS
 WAV
 WB
 wcurl
-web page
 WebDAV
 WebOS
 webpage
+webpages
 WebSocket
 WEBSOCKET
+Wget
 WHATWG
 whitespace
 Whitespaces
@@ -978,7 +996,9 @@ www
 Xbox
 XDG
 xdigit
+XHTML
 Xilinx
+xmllint
 XP
 Xtensa
 XYZ

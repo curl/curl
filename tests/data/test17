@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -25,17 +26,14 @@ http
 <name>
 HTTP with config file on stdin
 </name>
- <stdin>
-#
+<stdin>
 # Use a silly request without '--':
 request MOOO
-#
 # Set the user-agent using a short-option:
 -A "agent007 license to drill\t"
-#
 # long option *with* '--':
 --max-time 180
- </stdin>
+</stdin>
 <command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/%TESTNUMBER
 </command>
@@ -46,7 +44,7 @@ request MOOO
 <protocol crlf="yes">
 MOOO /that.site.com/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: agent007 license to drill%tab%
+User-Agent: agent007 license to drill%TAB
 Accept: */*
 
 </protocol>

@@ -9,7 +9,7 @@ Multi: mutex
 See-also:
   - proxy
 Example:
-  - --proxy-tlsv1 -x https://proxy $URL
+  - --proxy-tlsv1 -x https://proxy.example $URL
 ---
 
 # `--proxy-tlsv1`

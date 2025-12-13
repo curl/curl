@@ -28,10 +28,6 @@
 
 #include "hash.h"
 #include "llist.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 /* random patterns for API verification */
 #ifdef DEBUGBUILD
@@ -41,8 +37,7 @@
 
 
 #if 0 /* useful function for debugging hashes and their contents */
-void Curl_hash_print(struct Curl_hash *h,
-                     void (*func)(void *))
+void Curl_hash_print(struct Curl_hash *h, void (*func)(void *))
 {
   struct Curl_hash_iterator iter;
   struct Curl_hash_element *he;
@@ -84,12 +79,11 @@ void Curl_hash_print(struct Curl_hash *h,
  * @unittest: 1602
  * @unittest: 1603
  */
-void
-Curl_hash_init(struct Curl_hash *h,
-               size_t slots,
-               hash_function hfunc,
-               comp_function comparator,
-               Curl_hash_dtor dtor)
+void Curl_hash_init(struct Curl_hash *h,
+                    size_t slots,
+                    hash_function hfunc,
+                    comp_function comparator,
+                    Curl_hash_dtor dtor)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(slots);
@@ -108,14 +102,15 @@ Curl_hash_init(struct Curl_hash *h,
 #endif
 }
 
-static struct Curl_hash_element *
-hash_elem_create(const void *key, size_t key_len, const void *p,
-                 Curl_hash_elem_dtor dtor)
+static struct Curl_hash_element *hash_elem_create(const void *key,
+                                                  size_t key_len,
+                                                  const void *p,
+                                                  Curl_hash_elem_dtor dtor)
 {
   struct Curl_hash_element *he;
 
   /* allocate the struct plus memory after it to store the key */
-  he = malloc(sizeof(struct Curl_hash_element) + key_len);
+  he = curlx_malloc(sizeof(struct Curl_hash_element) + key_len);
   if(he) {
     he->next = NULL;
     /* copy the key */
@@ -145,7 +140,7 @@ static void hash_elem_destroy(struct Curl_hash *h,
                               struct Curl_hash_element *he)
 {
   hash_elem_clear_ptr(h, he);
-  free(he);
+  curlx_free(he);
 }
 
 static void hash_elem_unlink(struct Curl_hash *h,
@@ -165,8 +160,8 @@ static void hash_elem_link(struct Curl_hash *h,
   ++h->size;
 }
 
-#define CURL_HASH_SLOT(x,y,z)      x->table[x->hash_func(y, z, x->slots)]
-#define CURL_HASH_SLOT_ADDR(x,y,z) &CURL_HASH_SLOT(x,y,z)
+#define CURL_HASH_SLOT(x, y, z)      x->table[x->hash_func(y, z, x->slots)]
+#define CURL_HASH_SLOT_ADDR(x, y, z) &CURL_HASH_SLOT(x, y, z)
 
 void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor)
@@ -177,7 +172,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
   DEBUGASSERT(h->slots);
   DEBUGASSERT(h->init == HASHINIT);
   if(!h->table) {
-    h->table = calloc(h->slots, sizeof(struct Curl_hash_element *));
+    h->table = curlx_calloc(h->slots, sizeof(struct Curl_hash_element *));
     if(!h->table)
       return NULL; /* OOM */
   }
@@ -209,8 +204,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
  * @unittest: 1602
  * @unittest: 1603
  */
-void *
-Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
+void *Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
 {
   return Curl_hash_add2(h, key, key_len, p, NULL);
 }
@@ -246,8 +240,7 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
  *
  * @unittest: 1603
  */
-void *
-Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
+void *Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->init == HASHINIT);
@@ -272,8 +265,7 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
  * @unittest: 1602
  * @unittest: 1603
  */
-void
-Curl_hash_destroy(struct Curl_hash *h)
+void Curl_hash_destroy(struct Curl_hash *h)
 {
   DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
@@ -312,9 +304,8 @@ size_t Curl_hash_count(struct Curl_hash *h)
 }
 
 /* Cleans all entries that pass the comp function criteria. */
-void
-Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
-                               int (*comp)(void *, void *))
+void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
+                                    int (*comp)(void *, void *))
 {
   size_t i;
 
@@ -339,7 +330,7 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
 
 size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num)
 {
-  const char *key_str = (const char *) key;
+  const char *key_str = (const char *)key;
   const char *end = key_str + key_length;
   size_t h = 5381;
 

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t579_WriteThis {
   int counter;
 };
@@ -41,7 +39,7 @@ static void progress_final_report(void)
   if(moo)
     curlx_fclose(moo);
   else
-    curl_mfprintf(stderr, "Progress: end UL, can't open %s\n", libtest_arg2);
+    curl_mfprintf(stderr, "Progress: end UL, cannot open %s\n", libtest_arg2);
   started = FALSE;
 }
 
@@ -65,7 +63,7 @@ static int t579_progress_callback(void *clientp, double dltotal, double dlnow,
     if(moo)
       curlx_fclose(moo);
     else
-      curl_mfprintf(stderr, "Progress: start UL, can't open %s\n",
+      curl_mfprintf(stderr, "Progress: start UL, cannot open %s\n",
                     libtest_arg2);
     started = TRUE;
   }
@@ -86,7 +84,7 @@ static size_t t579_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t579_WriteThis *pooh = (struct t579_WriteThis *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   data = testpost[pooh->counter];

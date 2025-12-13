@@ -127,7 +127,7 @@ text file:
     curl -F '=(;type=multipart/alternative' \
          -F '=plain text message' \
          -F '= <body>HTML message</body>;type=text/html' \
-         -F '=)' -F '=@textfile.txt' ...  smtp://example.com
+         -F '=)' -F '=@textfile.txt' ... smtp://example.com
 
 Data can be encoded for transfer using encoder=. Available encodings are
 *binary* and *8bit* that do nothing else than adding the corresponding

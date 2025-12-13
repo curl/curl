@@ -31,7 +31,7 @@ if($#ARGV != 0) {
     exit 3;
 }
 if(!open(CURL, "$ARGV[0] -s --engine list|")) {
-    print "Can't get SSL engine list\n";
+    print "Cannot get SSL engine list\n";
     exit 2;
 }
 while(<CURL>) {

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -12,10 +13,10 @@ NTLM
 <reply>
 
 <!-- Alternate the order that Basic and NTLM headers appear in responses to
-ensure that the order doesn't matter. -->
+ensure that the order does not matter. -->
 
 <!-- First request has Basic auth, wrong password -->
-<data100>
+<data100 crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -27,7 +28,7 @@ This is a bad password page!
 </data100>
 
 <!-- Second request has NTLM auth, right password -->
-<data200>
+<data200 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -38,7 +39,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data200>
 
-<data1201>
+<data1201 crlf="headers">
 HTTP/1.1 401 NTLM intermediate
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -48,7 +49,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1201>
 
-<data1202>
+<data1202 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -58,7 +59,7 @@ Finally, this is the real page!
 </data1202>
 
 <!-- Third request has Basic auth, wrong password -->
-<data300>
+<data300 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -70,7 +71,7 @@ This is a bad password page!
 </data300>
 
 <!-- Fourth request has NTLM auth, wrong password -->
-<data400>
+<data400 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -81,7 +82,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data400>
 
-<data1401>
+<data1401 crlf="headers">
 HTTP/1.1 401 NTLM intermediate (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -91,7 +92,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1401>
 
-<data1402>
+<data1402 crlf="headers">
 HTTP/1.1 401 Sorry wrong password (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -103,7 +104,7 @@ This is a bad password page!
 </data1402>
 
 <!-- Fifth request has NTLM auth, right password -->
-<data500>
+<data500 crlf="headers">
 HTTP/1.1 401 Need Basic or NTLM auth (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -114,7 +115,7 @@ WWW-Authenticate: NTLM
 This is not the real page!
 </data500>
 
-<data1501>
+<data1501 crlf="headers">
 HTTP/1.1 401 NTLM intermediate (3)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -124,7 +125,7 @@ WWW-Authenticate: NTLM TlRMTVNTUAACAAAACAAIADAAAACGgAEAq6U1NAWaJCIAAAAAAAAAAAAAA
 This is still not the real page!
 </data1501>
 
-<data1502>
+<data1502 crlf="headers">
 HTTP/1.1 200 Things are fine in server land (2)
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -133,7 +134,7 @@ Content-Length: 32
 Finally, this is the real page!
 </data1502>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Sorry wrong password
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -216,7 +217,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER basic ntlm
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER0100 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[testuser:wrongpass]b64%

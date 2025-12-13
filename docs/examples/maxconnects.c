@@ -26,6 +26,7 @@
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)
@@ -38,8 +39,9 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    const char *urls[] = { "https://example.com",
-      "https://curl.se",
+    const char *urls[] = {
+      "https://example.com/",
+      "https://curl.se/",
       "https://www.example/",
       NULL /* end of list */
     };

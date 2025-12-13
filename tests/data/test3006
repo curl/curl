@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ SMTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -19,18 +18,25 @@ smtp
 <name>
 SMTP with multiple invalid (all) --mail-rcpt and --mail-rcpt-allowfails
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
 body
 </stdin>
 <command>
-smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.one --mail-rcpt invalid.two --mail-rcpt invalid.three --mail-rcpt invalid.four --mail-rcpt invalid.five --mail-from sender@example.com -T -
+smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER
+--mail-rcpt-allowfails
+--mail-rcpt invalid.one
+--mail-rcpt invalid.two
+--mail-rcpt invalid.three
+--mail-rcpt invalid.four
+--mail-rcpt invalid.five
+--mail-from sender@example.com
+-T -
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 55 - CURLE_SEND_ERROR
@@ -39,12 +45,12 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<invalid.one>
-RCPT TO:<invalid.two>
-RCPT TO:<invalid.three>
-RCPT TO:<invalid.four>
-RCPT TO:<invalid.five>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTinvalid.one%GT
+RCPT TO:%LTinvalid.two%GT
+RCPT TO:%LTinvalid.three%GT
+RCPT TO:%LTinvalid.four%GT
+RCPT TO:%LTinvalid.five%GT
 QUIT
 </protocol>
 </verify>

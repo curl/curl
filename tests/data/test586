@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ PASV
 CURLOPT_PORT
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 <data>
@@ -25,7 +25,6 @@ last line
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -42,7 +41,6 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

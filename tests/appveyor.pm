@@ -38,7 +38,6 @@ BEGIN {
     );
 }
 
-
 my %APPVEYOR_TEST_NAMES;  # JSON and shell-quoted test names by test number
 
 sub appveyor_check_environment {

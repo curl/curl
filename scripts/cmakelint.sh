@@ -34,7 +34,7 @@
 # cmake-lint can be installed from PyPi with the command "python3 -m pip
 # install cmakelang".
 #
-# The xargs invocation is portable, but does not preserve spaces in file names.
+# The xargs invocation is portable, but does not preserve spaces in filenames.
 # If such a file is ever added, then this can be portably fixed by switching to
 # "xargs -I{}" and appending {} to the end of the xargs arguments (which will
 # call cmakelint once per file) or by using the GNU extension "xargs -d'\n'".
@@ -52,7 +52,7 @@ cd "$(dirname "$0")"/..
     # strip off the leading ./ to make the grep regexes work properly
     find . -type f | sed 's@^\./@@'
   fi
-} | grep -E '(^CMake|/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in|\.c)$' \
+} | grep -E '(^CMake|/CMake|\.cmake$|\.cmake\.in$)' | grep -v -E '(\.h\.cmake|\.c)$' \
   | xargs \
   cmake-lint \
     --suppress-decorations \

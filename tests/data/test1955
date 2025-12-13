@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -55,7 +56,6 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
@@ -66,7 +66,7 @@ Authorization: XXX4-HMAC-SHA256 Credential=xxx/19700101/ple/exam/xxx4_request, S
 X-Xxx-Date: 19700101T000000Z
 test3: 1234
 test2:
-test_space: t%tab%s  m%tab%   end%repeat[4 x  ]%
+test_space: t%TABs  m%TAB   end%repeat[4 x  ]%
 tesMixCase: MixCase
 
 </protocol>

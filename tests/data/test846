@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,14 +6,13 @@ IMAP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <servercmd>
 REPLY welcome * PREAUTH ready to serve already!
 REPLY CAPABILITY * CAPABILITY IMAP4REV1 I18NLEVEL=1 LITERAL+ IDLE UIDPLUS NAMESPACE CHILDREN MAILBOX-REFERRALS BINARY UNSELECT ESEARCH WITHIN SCAN SORT THREAD=REFERENCES THREAD=ORDEREDSUBJECT MULTIAPPEND SASL-IR LOGIN-REFERRALS STARTTLS LOGINDISABLED\r\nA001 OK CAPABILITY completed
 </servercmd>
-<data>
+<data crlf="yes">
 From: me@somewhere
 To: fake@nowhere
 
@@ -23,7 +23,6 @@ body
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -37,7 +36,6 @@ IMAP PREAUTH response
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">

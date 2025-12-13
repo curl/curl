@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,10 +8,9 @@ FORM
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -20,7 +20,7 @@ Location: /%TESTNUMBER0002
 
 hello
 </data>
-<data2 crlf="yes">
+<data2 crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -59,7 +59,6 @@ This is data from a file.
 </file>
 </client>
 
-#
 # Verify data bbter the test has been "shot"
 <verify>
 <strippart>
@@ -70,150 +69,150 @@ s/boundary=------------------------[A-Za-z0-9]*/boundary=-----------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Transfer-Encoding: chunked
-Content-Type: multipart/form-data; boundary=----------------------------
-Expect: 100-continue
-
-385
-------------------------------
-Content-Disposition: form-data; name="fieldname"
-Content-Type: text/plain
-X-customheader-1: Header 1 data
-X-customheader-2: Header 2 data
-
-this is what we post to the silly web server
-------------------------------
-Content-Disposition: form-data; name="fieldnam"
-
-uhis is what we post to the silly web serve
-------------------------------
-Content-Disposition: form-data; name="multifile"
-Content-Type: multipart/mixed; boundary=----------------------------
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
-Content-Type: application/octet-stream
-
+POST /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Transfer-Encoding: chunked%CR
+Content-Type: multipart/form-data; boundary=----------------------------%CR
+Expect: 100-continue%CR
+%CR
+385%CR
+------------------------------%CR
+Content-Disposition: form-data; name="fieldname"%CR
+Content-Type: text/plain%CR
+X-customheader-1: Header 1 data%CR
+X-customheader-2: Header 2 data%CR
+%CR
+this is what we post to the silly web server%CR
+------------------------------%CR
+Content-Disposition: form-data; name="fieldnam"%CR
+%CR
+uhis is what we post to the silly web serve%CR
+------------------------------%CR
+Content-Disposition: form-data; name="multifile"%CR
+Content-Type: multipart/mixed; boundary=----------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"%CR
+Content-Type: application/octet-stream%CR
+%CR
 This is data from a file.
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
-Content-Type: text/whatever
-
-
-ab
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"%CR
+Content-Type: text/whatever%CR
+%CR
+%CR
+ab%CR
 This is data from a file.
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
-Content-Type: text/whatever
-
-
-bb
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"%CR
+Content-Type: text/whatever%CR
+%CR
+%CR
+bb%CR
 This is data from a file.
-
---------------------------------
-
-------------------------------
-Content-Disposition: form-data; name="filecontents"
-
-
-11b
+%CR
+--------------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="filecontents"%CR
+%CR
+%CR
+11b%CR
 This is data from a file.
-
-------------------------------
-Content-Disposition: form-data; name="formlength"
-
-1433
-------------------------------
-Content-Disposition: form-data; name="standardinput"
-Content-Type: application/octet-stream
-
-
-16
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="formlength"%CR
+%CR
+1433%CR
+------------------------------%CR
+Content-Disposition: form-data; name="standardinput"%CR
+Content-Type: application/octet-stream%CR
+%CR
+%CR
+16%CR
  Some data from stdin
-
-36
-
---------------------------------
-
-0
-
-POST /%TESTNUMBER0002 HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Transfer-Encoding: chunked
-Content-Type: multipart/form-data; boundary=----------------------------
-Expect: 100-continue
-
-385
-------------------------------
-Content-Disposition: form-data; name="fieldname"
-Content-Type: text/plain
-X-customheader-1: Header 1 data
-X-customheader-2: Header 2 data
-
-this is what we post to the silly web server
-------------------------------
-Content-Disposition: form-data; name="fieldnam"
-
-uhis is what we post to the silly web serve
-------------------------------
-Content-Disposition: form-data; name="multifile"
-Content-Type: multipart/mixed; boundary=----------------------------
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
-Content-Type: application/octet-stream
-
+%CR
+36%CR
+%CR
+--------------------------------%CR
+%CR
+0%CR
+%CR
+POST /%TESTNUMBER0002 HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Transfer-Encoding: chunked%CR
+Content-Type: multipart/form-data; boundary=----------------------------%CR
+Expect: 100-continue%CR
+%CR
+385%CR
+------------------------------%CR
+Content-Disposition: form-data; name="fieldname"%CR
+Content-Type: text/plain%CR
+X-customheader-1: Header 1 data%CR
+X-customheader-2: Header 2 data%CR
+%CR
+this is what we post to the silly web server%CR
+------------------------------%CR
+Content-Disposition: form-data; name="fieldnam"%CR
+%CR
+uhis is what we post to the silly web serve%CR
+------------------------------%CR
+Content-Disposition: form-data; name="multifile"%CR
+Content-Type: multipart/mixed; boundary=----------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"%CR
+Content-Type: application/octet-stream%CR
+%CR
 This is data from a file.
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
-Content-Type: text/whatever
-
-
-ab
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"%CR
+Content-Type: text/whatever%CR
+%CR
+%CR
+ab%CR
 This is data from a file.
-
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"
-Content-Type: text/whatever
-
-
-bb
+%CR
+------------------------------%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER.filedata"%CR
+Content-Type: text/whatever%CR
+%CR
+%CR
+bb%CR
 This is data from a file.
-
---------------------------------
-
-------------------------------
-Content-Disposition: form-data; name="filecontents"
-
-
-11b
+%CR
+--------------------------------%CR
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="filecontents"%CR
+%CR
+%CR
+11b%CR
 This is data from a file.
-
-------------------------------
-Content-Disposition: form-data; name="formlength"
-
-1433
-------------------------------
-Content-Disposition: form-data; name="standardinput"
-Content-Type: application/octet-stream
-
-
-16
+%CR
+------------------------------%CR
+Content-Disposition: form-data; name="formlength"%CR
+%CR
+1433%CR
+------------------------------%CR
+Content-Disposition: form-data; name="standardinput"%CR
+Content-Type: application/octet-stream%CR
+%CR
+%CR
+16%CR
  Some data from stdin
-
-36
-
---------------------------------
-
-0
-
+%CR
+36%CR
+%CR
+--------------------------------%CR
+%CR
+0%CR
+%CR
 </protocol>
 </verify>
 </testcase>

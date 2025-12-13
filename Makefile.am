@@ -37,6 +37,7 @@ CMAKE_DIST =                                    \
  CMake/FindGnuTLS.cmake                         \
  CMake/FindGSS.cmake                            \
  CMake/FindLDAP.cmake                           \
+ CMake/FindLibbacktrace.cmake                   \
  CMake/FindLibgsasl.cmake                       \
  CMake/FindLibidn2.cmake                        \
  CMake/FindLibpsl.cmake                         \
@@ -91,7 +92,7 @@ pkgconfig_DATA = libcurl.pc
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
-	find $(distdir) -name "*.dist" -exec rm {} \;
+	find $(distdir) -name "*.dist" -exec rm -- {} \;
 	(distit=`find $(srcdir) -name "*.dist" | grep -v Makefile`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
@@ -111,7 +112,7 @@ pytest: test
 pytest-ci: test
 
 test:
-	@echo "NOTICE: we can't run the tests when cross-compiling!"
+	@echo "NOTICE: we cannot run the tests when cross-compiling!"
 
 else
 
