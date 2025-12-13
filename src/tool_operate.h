@@ -42,6 +42,8 @@ struct per_transfer {
   struct curltime start; /* start of this transfer */
   struct curltime retrystart;
   char *url;
+  time_t last_modified;
+  BIT(sync_needed);
   curl_off_t urlnum; /* the index of the given URL */
   char *outfile;
   int infd;
@@ -80,6 +82,7 @@ struct per_transfer {
 
 CURLcode operate(int argc, argv_item_t argv[]);
 void single_transfer_cleanup(void);
+bool file_needs_sync(struct per_transfer *per);
 
 extern struct per_transfer *transfers; /* first node */
 
