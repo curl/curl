@@ -68,7 +68,7 @@ void Curl_pgrsReset(struct Curl_easy *data);
 /* Reset sizes for up- and download. */
 void Curl_pgrsResetTransferSizes(struct Curl_easy *data);
 
-struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer);
+void Curl_pgrsTime(struct Curl_easy *data, timerid timer);
 /**
  * Update progress timer with the elapsed time from its start to `timestamp`.
  * This allows updating timers later and is used by happy eyeballing, where

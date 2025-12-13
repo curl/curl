@@ -480,7 +480,8 @@ static struct easy_pollset *mev_get_last_pollset(struct Curl_easy *data,
   return NULL;
 }
 
-static CURLMcode mev_assess(struct Curl_multi *multi, struct Curl_easy *data,
+static CURLMcode mev_assess(struct Curl_multi *multi,
+                            struct Curl_easy *data,
                             struct connectdata *conn)
 {
   struct easy_pollset ps, *last_ps;
@@ -536,7 +537,8 @@ CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
 }
 
 CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
-                                         struct uint32_bset *set)
+                                         struct uint32_bset *set,
+                                         struct curltime *pnow)
 {
   uint32_t mid;
   CURLMcode result = CURLM_OK;
@@ -544,8 +546,10 @@ CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
   if(multi && multi->socket_cb && Curl_uint32_bset_first(set, &mid)) {
     do {
       struct Curl_easy *data = Curl_multi_get_easy(multi, mid);
-      if(data)
+      if(data) {
+        data->state.now = *pnow;
         result = Curl_multi_ev_assess_xfer(multi, data);
+      }
     } while(!result && Curl_uint32_bset_next(set, mid, &mid));
   }
   return result;

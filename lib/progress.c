@@ -288,19 +288,17 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
  *
  * @unittest: 1399
  */
-struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct curltime now = curlx_now();
-
-  Curl_pgrsTimeWas(data, timer, now);
-  return now;
+  data->state.now = curlx_now(); /* update on real progress */
+  Curl_pgrsTimeWas(data, timer, data->state.now);
 }
 
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   struct Progress *p = &data->progress;
   p->speeder_c = 0; /* reset the progress meter display */
-  p->start = curlx_now();
+  p->start = data->state.now;
   p->is_t_startransfer_set = FALSE;
   p->dl.cur_size = 0;
   p->ul.cur_size = 0;
@@ -618,18 +616,16 @@ static CURLcode pgrs_update(struct Curl_easy *data, struct curltime *pnow)
 
 CURLcode Curl_pgrsUpdate(struct Curl_easy *data)
 {
-  struct curltime now = curlx_now(); /* what time is it */
-  return pgrs_update(data, &now);
+  return pgrs_update(data, &data->state.now);
 }
 
 CURLcode Curl_pgrsCheck(struct Curl_easy *data)
 {
-  struct curltime now = curlx_now();
   CURLcode result;
 
-  result = pgrs_update(data, &now);
+  result = pgrs_update(data, &data->state.now);
   if(!result && !data->req.done)
-    result = pgrs_speedcheck(data, &now);
+    result = pgrs_speedcheck(data, &data->state.now);
   return result;
 }
 
@@ -638,6 +634,5 @@ CURLcode Curl_pgrsCheck(struct Curl_easy *data)
  */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
 {
-  struct curltime now = curlx_now(); /* what time is it */
-  (void)progress_calc(data, &now);
+  (void)progress_calc(data, &data->state.now);
 }

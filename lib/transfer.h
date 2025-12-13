@@ -34,7 +34,7 @@ void Curl_init_CONNECT(struct Curl_easy *data);
 
 CURLcode Curl_pretransfer(struct Curl_easy *data);
 
-CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp);
+CURLcode Curl_sendrecv(struct Curl_easy *data);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
 bool Curl_meets_timecondition(struct Curl_easy *data, time_t timeofdoc);
 
