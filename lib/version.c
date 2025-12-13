@@ -553,7 +553,6 @@ static const struct feat features_table[] = {
 
 static const char *feature_names[CURL_ARRAYSIZE(features_table)] = { NULL };
 
-
 static curl_version_info_data version_info = {
   CURLVERSION_NOW,
   LIBCURL_VERSION,

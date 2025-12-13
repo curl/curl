@@ -282,7 +282,6 @@ static const char *myssh_statename(sshstate state)
 #define myssh_statename(x)    ""
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
-
 #define myssh_to(x, y, z) myssh_set_state(x, y, z)
 
 /*

@@ -1443,7 +1443,6 @@ fail:
   return 1;
 }
 
-
 static CURLcode client_cert(struct Curl_easy *data,
                             SSL_CTX* ctx,
                             char *cert_file,
@@ -3628,7 +3627,6 @@ static CURLcode ossl_init_ssl(struct ossl_ctx *octx,
   return ossl_init_session_and_alpns(octx, cf, data, peer,
                                      alpns_requested, sess_reuse_cb);
 }
-
 
 static CURLcode ossl_init_method(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,

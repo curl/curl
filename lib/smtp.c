@@ -1703,7 +1703,6 @@ static CURLcode smtp_regular_transfer(struct Curl_easy *data,
   return result;
 }
 
-
 static void smtp_easy_dtor(void *key, size_t klen, void *entry)
 {
   struct SMTP *smtp = entry;

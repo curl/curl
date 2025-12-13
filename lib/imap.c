@@ -142,7 +142,6 @@ struct IMAP {
   BIT(uidvalidity_set);
 };
 
-
 /* Local API functions */
 static CURLcode imap_regular_transfer(struct Curl_easy *data,
                                       struct IMAP *imap,

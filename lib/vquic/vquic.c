@@ -54,7 +54,6 @@
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    1
 
-
 int Curl_vquic_init(void)
 {
 #if defined(USE_NGTCP2) && defined(OPENSSL_QUIC_API2)

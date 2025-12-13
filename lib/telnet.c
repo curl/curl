@@ -94,7 +94,6 @@
 #define CURL_EMPTY       0
 #define CURL_OPPOSITE    1
 
-
 /* meta key for storing protocol meta at easy handle */
 #define CURL_META_TELNET_EASY   "meta:proto:telnet:easy"
 

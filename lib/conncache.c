@@ -69,7 +69,6 @@
     }                                                                   \
   } while(0)
 
-
 /* A list of connections to the same destination. */
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
@@ -166,7 +165,6 @@ static struct cpool_bundle *cpool_find_bundle(struct cpool *cpool,
   return Curl_hash_pick(&cpool->dest2bundle,
                         conn->destination, strlen(conn->destination) + 1);
 }
-
 
 static void cpool_remove_bundle(struct cpool *cpool,
                                 struct cpool_bundle *bundle)

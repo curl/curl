@@ -92,7 +92,6 @@
 /* #define CURL_ASN1_CHARACTER_STRING      29 */
 #define CURL_ASN1_BMP_STRING            30
 
-
 #ifdef WANT_EXTRACT_CERTINFO
 /* ASN.1 OID table entry. */
 struct Curl_OID {
