@@ -588,7 +588,7 @@ static CURLcode schannel_acquire_credential_handle(struct Curl_cfilter *cf,
           certsize = (size_t)cert_tell;
         if(continue_reading)
           continue_reading = fseek(fInCert, 0, SEEK_SET) == 0;
-        if(continue_reading)
+        if(continue_reading && (certsize < CURL_MAX_INPUT_LENGTH))
           certdata = curlx_malloc(certsize + 1);
         if((!certdata) ||
            ((int) fread(certdata, certsize, 1, fInCert) != 1))
