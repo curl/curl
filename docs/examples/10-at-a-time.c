@@ -56,7 +56,6 @@ static const char *urls[] = {
   "https://www.nist.gov/",
   "https://www.ebay.com/",
   "https://www.playstation.com/",
-  "https://www.uefa.com/",
   "https://www.ieee.org/",
   "https://www.apple.com/",
   "https://www.symantec.com/",
