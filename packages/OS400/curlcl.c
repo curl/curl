@@ -48,16 +48,13 @@ struct arguments {
   struct vary2 *cmdargs;        /* Command line arguments. */
 };
 
-static int
-is_ifs(char c)
+static int is_ifs(char c)
 {
   return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 }
 
-static int
-parse_command_line(const char *cmdargs, size_t len,
-                   size_t *argc, char **argv,
-                   size_t *argsize, char *argbuf)
+static int parse_command_line(const char *cmdargs, size_t len, size_t *argc,
+                              char **argv, size_t *argsize, char *argbuf)
 {
   const char *endline = cmdargs + len;
   char quote = '\0';
@@ -126,9 +123,7 @@ parse_command_line(const char *cmdargs, size_t len,
   return 0;
 }
 
-
-int
-main(int argsc, struct arguments *args)
+int main(int argsc, struct arguments *args)
 {
   size_t argc;
   char **argv;
@@ -154,20 +149,20 @@ main(int argsc, struct arguments *args)
 
   if(!exitcode) {
     /* Allocate space for parsed arguments. */
-    argv = (char **) malloc((argc + 1) * sizeof(*argv) + argsize);
+    argv = (char **)malloc((argc + 1) * sizeof(*argv) + argsize);
     if(!argv) {
       fputs("Memory allocation error\n", stderr);
       exitcode = -2;
     }
     else {
-      _SYSPTR pgmptr = rslvsp(WLI_PGM, (char *) CURLPGM, library, _AUTH_NONE);
-      _LU_Work_Area_T *luwrka = (_LU_Work_Area_T *) _LUWRKA();
+      _SYSPTR pgmptr = rslvsp(WLI_PGM, (char *)CURLPGM, library, _AUTH_NONE);
+      _LU_Work_Area_T *luwrka = (_LU_Work_Area_T *)_LUWRKA();
 
-      parse_command_line(args->cmdargs->string, args->cmdargs->len,
-                         &argc, argv, &argsize, (char *) (argv + argc + 1));
+      parse_command_line(args->cmdargs->string, args->cmdargs->len, &argc,
+                         argv, &argsize, (char *)(argv + argc + 1));
 
       /* Call program. */
-      _CALLPGMV((void *) &pgmptr, argv, argc);
+      _CALLPGMV((void *)&pgmptr, argv, argc);
       exitcode = luwrka->LU_RC;
 
       free(argv);

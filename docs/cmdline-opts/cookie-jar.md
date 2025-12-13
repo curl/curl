@@ -37,3 +37,6 @@ If the cookie jar cannot be created or written to, the whole curl operation
 does not fail or even report an error clearly. Using --verbose gets a warning
 displayed, but that is the only visible feedback you get about this possibly
 lethal situation.
+
+You may want to restrict your umask to prevent other users on the same system
+to access the created file.

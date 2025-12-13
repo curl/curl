@@ -26,8 +26,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1594(const char *URL)
 {
   struct curl_slist *header = NULL;

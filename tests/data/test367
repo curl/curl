@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP Basic auth
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -19,24 +19,22 @@ Connection: close
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
 <name>
-Empty user name provided in URL
+Empty username provided in URL
 </name>
 <command>
 http://:example@%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[:example]b64%

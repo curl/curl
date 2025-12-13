@@ -232,20 +232,26 @@ if(PICKY_COMPILER)
           -Wcast-function-type-strict      # clang 16.0            appleclang 16.0
         )
       endif()
-      if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.0)
+      if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.1) OR
+         (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 17.0))
         list(APPEND _picky_enable
-          -Warray-compare                  # clang 20.0  gcc 12.0  appleclang ?
-          -Wc++-hidden-decl                # clang 21.0            appleclang ?
-          -Wno-implicit-void-ptr-cast      # clang 21.0            appleclang ?
-          -Wtentative-definition-compat    # clang 21.0            appleclang ?
+          -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0  # In clang-cl enums are signed ints by default
+        )
+      endif()
+      if(CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 21.1)
+        list(APPEND _picky_enable
+          -Warray-compare                  # clang 20.1  gcc 12.0  appleclang ?
+          -Wc++-hidden-decl                # clang 21.1            appleclang ?
+          -Wno-implicit-void-ptr-cast      # clang 21.1            appleclang ?
+          -Wtentative-definition-compat    # clang 21.1            appleclang ?
         )
         if(WIN32)
           list(APPEND _picky_enable
-            -Wno-c++-keyword               # clang 21.0            appleclang ?  # `wchar_t` triggers it on Windows
+            -Wno-c++-keyword               # clang 21.1            appleclang ?  # `wchar_t` triggers it on Windows
           )
         else()
           list(APPEND _picky_enable
-            -Wc++-keyword                  # clang 21.0            appleclang ?
+            -Wc++-keyword                  # clang 21.1            appleclang ?
           )
         endif()
       endif()
@@ -282,6 +288,7 @@ if(PICKY_COMPILER)
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 5.0)
         list(APPEND _picky_enable
           -Warray-bounds=2                 # clang  3.0  gcc  5.0 (clang default: -Warray-bounds)
+          -Wno-format-signedness           # clang 19.1  gcc  5.1  appleclang 17.0
         )
       endif()
       if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)

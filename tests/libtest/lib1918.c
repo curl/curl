@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1918(const char *URL)
 {
   const struct curl_easyoption *o;
@@ -32,20 +30,18 @@ static CURLcode test_lib1918(const char *URL)
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  for(o = curl_easy_option_next(NULL);
-      o;
-      o = curl_easy_option_next(o)) {
+  for(o = curl_easy_option_next(NULL); o; o = curl_easy_option_next(o)) {
     const struct curl_easyoption *ename =
       curl_easy_option_by_name(o->name);
     const struct curl_easyoption *eid =
       curl_easy_option_by_id(o->id);
 
     if(ename->id != o->id) {
-      curl_mprintf("name lookup id %d doesn't match %d\n",
+      curl_mprintf("name lookup id %d does not match %d\n",
                    ename->id, o->id);
     }
     else if(eid->id != o->id) {
-      curl_mprintf("ID lookup %d doesn't match %d\n",
+      curl_mprintf("ID lookup %d does not match %d\n",
                    ename->id, o->id);
     }
   }

@@ -176,7 +176,7 @@ while(@ARGV) {
         $mtls = 1;
     }
     else {
-        print STDERR "\nWarning: secureserver.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: secureserver.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }
@@ -217,7 +217,7 @@ foreach my $veropt (('-version', '-V')) {
             $ver_minor = $2;
         }
         elsif($verstr =~ /^sslVersion.*fips *= *yes/) {
-            # the fips option causes an error if stunnel doesn't support it
+            # the fips option causes an error if stunnel does not support it
             $fips_support = 1;
             last
         }
@@ -304,7 +304,7 @@ if($stunnel_version >= 400) {
             print $stunconf "verifyChain = yes\n";
         }
         if($fips_support) {
-            # disable fips in case OpenSSL doesn't support it
+            # disable fips in case OpenSSL does not support it
             print $stunconf "fips = no\n";
         }
         if(!$tstunnel_windows) {
@@ -358,7 +358,7 @@ if($tstunnel_windows) {
 
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
-    exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    exec("exec $cmd") || die "Cannot exec() $cmd: $!";
     # exec() will create a new process, but ties the existence of the
     # new process to the parent waiting perl.exe and sh.exe processes.
 

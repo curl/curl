@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t508_WriteThis {
   const char *readptr;
   size_t sizeleft;
@@ -34,7 +32,7 @@ static size_t t508_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct t508_WriteThis *pooh = (struct t508_WriteThis *)userp;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   if(pooh->sizeleft) {

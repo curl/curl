@@ -27,10 +27,6 @@
 #include <curl/curl.h>
 
 #include "llist.h"
-#include "curl_memory.h"
-
-/* this must be the last include file */
-#include "memdebug.h"
 
 #ifdef DEBUGBUILD
 #define LLISTINIT 0x100cc001 /* random pattern */
@@ -49,8 +45,7 @@ static struct Curl_llist_node *verifynode(struct Curl_llist_node *n)
 /*
  * @unittest: 1300
  */
-void
-Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
+void Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
 {
   l->_size = 0;
   l->_dtor = dtor;
@@ -72,11 +67,10 @@ Curl_llist_init(struct Curl_llist *l, Curl_llist_dtor dtor)
  *
  * @unittest: 1300
  */
-void
-Curl_llist_insert_next(struct Curl_llist *list,
-                       struct Curl_llist_node *e, /* may be NULL */
-                       const void *p,
-                       struct Curl_llist_node *ne)
+void Curl_llist_insert_next(struct Curl_llist *list,
+                            struct Curl_llist_node *e, /* may be NULL */
+                            const void *p,
+                            struct Curl_llist_node *ne)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
@@ -123,9 +117,8 @@ Curl_llist_insert_next(struct Curl_llist *list,
  *
  * @unittest: 1300
  */
-void
-Curl_llist_append(struct Curl_llist *list, const void *p,
-                  struct Curl_llist_node *ne)
+void Curl_llist_append(struct Curl_llist *list, const void *p,
+                       struct Curl_llist_node *ne)
 {
   DEBUGASSERT(list);
   DEBUGASSERT(list->_init == LLISTINIT);
@@ -181,9 +174,8 @@ void *Curl_node_take_elem(struct Curl_llist_node *e)
 /*
  * @unittest: 1300
  */
-UNITTEST void Curl_node_uremove(struct Curl_llist_node *, void *);
-UNITTEST void
-Curl_node_uremove(struct Curl_llist_node *e, void *user)
+UNITTEST void Curl_node_uremove(struct Curl_llist_node *e, void *user);
+UNITTEST void Curl_node_uremove(struct Curl_llist_node *e, void *user)
 {
   struct Curl_llist *list;
   void *ptr;
@@ -204,8 +196,7 @@ void Curl_node_remove(struct Curl_llist_node *e)
   Curl_node_uremove(e, NULL);
 }
 
-void
-Curl_llist_destroy(struct Curl_llist *list, void *user)
+void Curl_llist_destroy(struct Curl_llist *list, void *user)
 {
   if(list) {
     DEBUGASSERT(list->_init == LLISTINIT);

@@ -29,7 +29,9 @@
 /* Requires: HAVE_PTHREAD_H */
 
 #include <stdio.h>
+
 #include <pthread.h>
+
 #include <curl/curl.h>
 
 #define NUMT 4
@@ -43,28 +45,31 @@
   https://curl.se/libcurl/c/threadsafe.html
 
 */
-static const char * const urls[NUMT]= {
+static const char * const urls[NUMT] = {
   "https://curl.se/",
   "ftp://example.com/",
   "https://example.net/",
   "www.example"
 };
 
-static void *pull_one_url(void *pindex)
+struct targ {
+  const char *url;
+};
+
+static void *pull_one_url(void *p)
 {
   CURL *curl;
+  struct targ *targ = p;
 
   curl = curl_easy_init();
   if(curl) {
-    int i = *(int *)pindex;
-    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+    curl_easy_setopt(curl, CURLOPT_URL, targ->url);
     (void)curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
   }
 
   return NULL;
 }
-
 
 /*
    int pthread_create(pthread_t *new_thread_ID,
@@ -76,6 +81,7 @@ int main(void)
 {
   CURLcode res;
   pthread_t tid[NUMT];
+  struct targ targs[NUMT];
   int i;
 
   /* Must initialize libcurl before any threads are started */
@@ -84,12 +90,14 @@ int main(void)
     return (int)res;
 
   for(i = 0; i < NUMT; i++) {
-    int error = pthread_create(&tid[i],
-                               NULL, /* default attributes please */
-                               pull_one_url,
-                               (void *)&i);
+    int error;
+    targs[i].url = urls[i];
+    error = pthread_create(&tid[i],
+                           NULL, /* default attributes please */
+                           pull_one_url,
+                           (void *)&targs[i]);
     if(error)
-      fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
+      fprintf(stderr, "Could not run thread number %d, errno %d\n", i, error);
     else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }

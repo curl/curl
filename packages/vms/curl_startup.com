@@ -1,6 +1,6 @@
 $! File: curl_Startup.com
 $!
-$! Procedure to setup the CURL libraries for use by programs from the
+$! Procedure to setup the curl libraries for use by programs from the
 $! VMS SYSTARTUP*.COM procedure.
 $!
 $! Copyright (C) John Malmberg
@@ -75,7 +75,7 @@ $ define/system/exec gnv$curl_ssl_libcryptoshr32 'curl_ssl_libcrypto32'
 $ define/system/exec gnv$curl_ssl_libsslshr32 'curl_ssl_libssl32'
 $!
 $!
-$! CURL setup
+$! curl setup
 $ define/system/exec gnv$libcurl gnv$gnu:[usr.lib]GNV$LIBCURL.EXE
 $ define/system/exec gnv$curl_include gnv$gnu:[usr.include.curl]
 $ if .not. f$file_attributes("gnv$libcurl", "known")

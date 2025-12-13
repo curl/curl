@@ -65,7 +65,6 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_LOG_LVL_NONE  0
 #define CURL_LOG_LVL_INFO  1
 
-
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 #define CURL_HAVE_C99
 #endif
@@ -115,6 +114,11 @@ void Curl_trc_smtp(struct Curl_easy *data,
 #ifdef USE_SSL
 extern struct curl_trc_feat Curl_trc_feat_ssls;
 void Curl_trc_ssls(struct Curl_easy *data,
+                   const char *fmt, ...) CURL_PRINTF(2, 3);
+#endif
+#ifdef USE_SSH
+extern struct curl_trc_feat Curl_trc_feat_ssh;
+void Curl_trc_ssh(struct Curl_easy *data,
                    const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
@@ -168,6 +172,11 @@ void Curl_trc_ws(struct Curl_easy *data,
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) \
          Curl_trc_ssls(data, __VA_ARGS__); } while(0)
 #endif /* USE_SSL */
+#ifdef USE_SSH
+#define CURL_TRC_SSH(data, ...) \
+  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssh)) \
+         Curl_trc_ssh(data, __VA_ARGS__); } while(0)
+#endif /* USE_SSH */
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS(data, ...)                             \
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
@@ -176,9 +185,9 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #else /* CURL_HAVE_C99 */
 
-#define infof Curl_infof
-#define CURL_TRC_M  Curl_trc_multi
-#define CURL_TRC_CF Curl_trc_cf_infof
+#define infof          Curl_infof
+#define CURL_TRC_M     Curl_trc_multi
+#define CURL_TRC_CF    Curl_trc_cf_infof
 #define CURL_TRC_WRITE Curl_trc_write
 #define CURL_TRC_READ  Curl_trc_read
 #define CURL_TRC_DNS   Curl_trc_dns
@@ -192,6 +201,9 @@ void Curl_trc_ws(struct Curl_easy *data,
 #endif
 #ifdef USE_SSL
 #define CURL_TRC_SSLS  Curl_trc_ssls
+#endif
+#ifdef USE_SSH
+#define CURL_TRC_SSH   Curl_trc_ssh
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS    Curl_trc_ws
@@ -227,8 +239,8 @@ extern struct curl_trc_feat Curl_trc_feat_timer;
 /* All informational messages are not compiled in for size savings */
 
 #define Curl_trc_is_verbose(d)        (FALSE)
-#define Curl_trc_cf_is_verbose(x,y)   (FALSE)
-#define Curl_trc_ft_is_verbose(x,y)   (FALSE)
+#define Curl_trc_cf_is_verbose(x, y)  (FALSE)
+#define Curl_trc_ft_is_verbose(x, y)  (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
 #define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
 

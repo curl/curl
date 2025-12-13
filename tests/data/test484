@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ etag
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <name>
@@ -22,7 +21,6 @@ http://example.com/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-sav
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

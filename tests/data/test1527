@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,12 +12,12 @@ proxytunnel
 
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 OK
 We-are: good
 
 </connect>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -24,7 +25,7 @@ Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 We-are: good
 
@@ -59,7 +60,7 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT the.old.moo.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Proxy-Connection: Keep-Alive
@@ -67,7 +68,7 @@ User-Agent: Http Agent
 Expect: 100-continue
 
 </proxy>
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: the.old.moo.%TESTNUMBER:%HTTPPORT
 Accept: */*

@@ -64,7 +64,7 @@ open(F, "git ls-files '*.c'|");
 while(<F>) {
     chomp $_;
     my $file = $_;
-    # we can't filter these with git so do it here
+    # we cannot filter these with git so do it here
     if($file =~ /^(lib|src)/) {
         push @files, $file;
     }

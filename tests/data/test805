@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,12 +9,10 @@ UPLOAD
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -25,12 +24,12 @@ IMAP APPEND message
 <command>
 imap://%HOSTIP:%IMAPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER -u user:secret
 </command>
-<file name="%LOGDIR/upload%TESTNUMBER">
+<file name="%LOGDIR/upload%TESTNUMBER" crlf="yes">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
-From: Fred Foobar <foobar@example.COM>
+From: Fred Foobar %LTfoobar@example.COM%GT
 Subject: afternoon meeting
 To: joe@example.com
-Message-Id: <B27397-0100000@example.COM>
+Message-Id: %LTB27397-0100000@example.COM%GT
 MIME-Version: 1.0
 Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 
@@ -38,7 +37,6 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
@@ -49,10 +47,10 @@ A004 LOGOUT
 </protocol>
 <upload crlf="yes">
 Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)
-From: Fred Foobar <foobar@example.COM>
+From: Fred Foobar %LTfoobar@example.COM%GT
 Subject: afternoon meeting
 To: joe@example.com
-Message-Id: <B27397-0100000@example.COM>
+Message-Id: %LTB27397-0100000@example.COM%GT
 MIME-Version: 1.0
 Content-Type: TEXT/PLAIN; CHARSET=US-ASCII
 

@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Perform a POP3 noop
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to perform a noop using libcurl's POP3

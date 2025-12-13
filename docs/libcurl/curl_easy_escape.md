@@ -30,7 +30,8 @@ char *curl_easy_escape(CURL *curl, const char *string, int length);
 This function converts the given input *string* to a URL encoded string and
 returns that as a new allocated string. All input characters that are not a-z,
 A-Z, 0-9, '-', '.', '_' or '~' are converted to their "URL escaped" version
-(**%NN** where **NN** is a two-digit hexadecimal number).
+(**%NN** where **NN** is a two-digit hexadecimal number). Although not
+constrained by its type, the returned string may not be altered.
 
 If *length* is set to 0 (zero), curl_easy_escape(3) uses strlen() on the input
 *string* to find out the size. This function does not accept input strings

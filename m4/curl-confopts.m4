@@ -73,7 +73,6 @@ dnl --enable-ares or --disable-ares, and
 dnl set shell variable want_ares as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_ARES], [
-dnl   AC_BEFORE([$0],[CURL_CHECK_OPTION_THREADS])dnl
   AC_BEFORE([$0],[CURL_CHECK_LIB_ARES])dnl
   AC_MSG_CHECKING([whether to enable c-ares for DNS lookups])
   OPT_ARES="default"
@@ -93,7 +92,7 @@ AS_HELP_STRING([--disable-ares],[Disable c-ares for DNS lookups]),
     *)
       dnl --enable-ares option used
       want_ares="yes"
-      if test -n "$enableval" && test "$enableval" != "yes"; then
+      if test -n "$enableval" && test "x$enableval" != "xyes"; then
         want_ares_path="$enableval"
       fi
       ;;
@@ -109,7 +108,6 @@ dnl --enable-curldebug or --disable-curldebug, and set
 dnl shell variable want_curldebug value as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_CURLDEBUG], [
-  AC_BEFORE([$0],[CURL_CHECK_CURLDEBUG])dnl
   AC_MSG_CHECKING([whether to enable curl debug memory tracking])
   OPT_CURLDEBUG_BUILD="default"
   AC_ARG_ENABLE(curldebug,
@@ -392,15 +390,15 @@ AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET], [
   tst_method="unknown"
 
   AC_MSG_CHECKING([how to set a socket into non-blocking mode])
-  if test "x$curl_cv_func_fcntl_o_nonblock" = "xyes"; then
+  if test "$curl_cv_func_fcntl_o_nonblock" = "yes"; then
     tst_method="fcntl O_NONBLOCK"
-  elif test "x$curl_cv_func_ioctl_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctl_fionbio" = "yes"; then
     tst_method="ioctl FIONBIO"
-  elif test "x$curl_cv_func_ioctlsocket_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctlsocket_fionbio" = "yes"; then
     tst_method="ioctlsocket FIONBIO"
-  elif test "x$curl_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+  elif test "$curl_cv_func_ioctlsocket_camel_fionbio" = "yes"; then
     tst_method="IoctlSocket FIONBIO"
-  elif test "x$curl_cv_func_setsockopt_so_nonblock" = "xyes"; then
+  elif test "$curl_cv_func_setsockopt_so_nonblock" = "yes"; then
     tst_method="setsockopt SO_NONBLOCK"
   fi
   AC_MSG_RESULT([$tst_method])
@@ -433,7 +431,7 @@ AC_DEFUN([CURL_CONFIGURE_SYMBOL_HIDING], [
   else
     AC_MSG_RESULT([no])
   fi
-  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test x$doing_symbol_hiding = xyes)
+  AM_CONDITIONAL(DOING_CURL_SYMBOL_HIDING, test "$doing_symbol_hiding" = "yes")
   AC_SUBST(CFLAG_CURL_SYMBOL_HIDING)
 ])
 
@@ -456,7 +454,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       dnl c-ares library path has been specified
       ARES_PCDIR="$want_ares_path/lib/pkgconfig"
       CURL_CHECK_PKGCONFIG(libcares, [$ARES_PCDIR])
-      if test "$PKGCONFIG" != "no" ; then
+      if test "$PKGCONFIG" != "no"; then
         ares_LIBS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
           $PKGCONFIG --libs-only-l libcares`
         ares_LDFLAGS=`CURL_EXPORT_PCDIR([$ARES_PCDIR])
@@ -475,7 +473,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     else
       dnl c-ares path not specified, use defaults
       CURL_CHECK_PKGCONFIG(libcares)
-      if test "$PKGCONFIG" != "no" ; then
+      if test "$PKGCONFIG" != "no"; then
         ares_LIBS=`$PKGCONFIG --libs-only-l libcares`
         ares_LDFLAGS=`$PKGCONFIG --libs-only-L libcares`
         ares_CPPFLAGS=`$PKGCONFIG --cflags-only-I libcares`

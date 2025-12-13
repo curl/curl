@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct headerinfo {
   size_t largest;
 };
@@ -47,7 +45,7 @@ static CURLcode test_lib1556(const char *URL)
   CURLcode code;
   CURL *curl = NULL;
   CURLcode res = CURLE_OK;
-  struct headerinfo info = {0};
+  struct headerinfo info = { 0 };
 
   global_init(CURL_GLOBAL_ALL);
 

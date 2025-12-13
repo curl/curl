@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testutil.h"
-#include "memdebug.h"
 
 /*
  * Test Session ID capture
@@ -40,7 +39,7 @@ static CURLcode test_lib569(const char *URL)
 
   FILE *idfile = curlx_fopen(libtest_arg2, "wb");
   if(!idfile) {
-    curl_mfprintf(stderr, "couldn't open the Session ID File\n");
+    curl_mfprintf(stderr, "Could not open the Session ID File\n");
     return TEST_ERR_MAJOR_BAD;
   }
 

@@ -36,9 +36,9 @@ enum Curl_proxy_use {
   HEADER_CONNECT  /* sending CONNECT to a proxy */
 };
 
-CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
-                                         const char **phostname,
-                                         int *pport, bool *pipv6_ip);
+void Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
+                                     const char **phostname,
+                                     int *pport, bool *pipv6_ip);
 
 CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         struct Curl_cfilter *cf,
@@ -46,7 +46,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
                                         int http_version_major);
 
 /* Default proxy timeout in milliseconds */
-#define PROXY_TIMEOUT (3600*1000)
+#define PROXY_TIMEOUT (3600 * 1000)
 
 CURLcode Curl_cf_http_proxy_query(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,

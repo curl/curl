@@ -76,10 +76,8 @@ The above works for these test sites:
 
 ```sh
 https://defo.ie/ech-check.php
-https://draft-13.esni.defo.ie:8413/stats
-https://draft-13.esni.defo.ie:8414/stats
 https://crypto.cloudflare.com/cdn-cgi/trace
-https://tls-ech.dev
+https://tls-ech.dev/
 ```
 
 The list above has 4 different server technologies, implemented by 3 different

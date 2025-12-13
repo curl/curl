@@ -11,7 +11,7 @@ See-also:
   - proxy-cert
   - proxy-key
 Example:
-  - --proxy-cert-type PEM --proxy-cert file -x https://proxy $URL
+  - --proxy-cert-type PEM --proxy-cert file -x https://proxy.example $URL
 ---
 
 # `--proxy-cert-type`

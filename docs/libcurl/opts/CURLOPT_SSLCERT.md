@@ -11,11 +11,7 @@ See-also:
 Protocol:
   - TLS
 TLS-backend:
-  - OpenSSL
-  - GnuTLS
-  - mbedTLS
-  - Schannel
-  - wolfSSL
+  - All
 Added-in: 7.1
 ---
 

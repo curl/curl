@@ -28,10 +28,8 @@
 #include "tool_cb_prg.h"
 #include "terminal.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
-#define WARN_PREFIX "Warning: "
-#define NOTE_PREFIX "Note: "
+#define WARN_PREFIX  "Warning: "
+#define NOTE_PREFIX  "Note: "
 #define ERROR_PREFIX "curl: "
 
 static void voutf(const char *prefix,
@@ -42,23 +40,20 @@ static void voutf(const char *prefix,
                   const char *fmt,
                   va_list ap)
 {
-  size_t width = (get_terminal_columns() - strlen(prefix));
   size_t len;
   char *ptr;
-  char *print_buffer;
+  char buffer[1024];
+  size_t termw = get_terminal_columns();
+  size_t prefw = strlen(prefix);
+  size_t width = termw > prefw ? termw - prefw : SIZE_MAX;
   DEBUGASSERT(!strchr(fmt, '\n'));
-
-  print_buffer = curl_mvaprintf(fmt, ap);
-  if(!print_buffer)
-    return;
-  len = strlen(print_buffer);
-
-  ptr = print_buffer;
+  len = curl_mvsnprintf(buffer, sizeof(buffer), fmt, ap);
+  ptr = buffer;
   while(len > 0) {
     fputs(prefix, tool_stderr);
 
     if(len > width) {
-      size_t cut = width-1;
+      size_t cut = width - 1;
 
       while(!ISBLANK(ptr[cut]) && cut) {
         cut--;
@@ -66,7 +61,7 @@ static void voutf(const char *prefix,
       if(cut == 0)
         /* not a single cutting position was found, just cut it at the
            max text width then! */
-        cut = width-1;
+        cut = width - 1;
 
       (void)fwrite(ptr, cut + 1, 1, tool_stderr);
       fputs("\n", tool_stderr);
@@ -79,7 +74,6 @@ static void voutf(const char *prefix,
       len = 0;
     }
   }
-  curl_free(print_buffer);
 }
 
 /*
@@ -127,9 +121,9 @@ void helpf(const char *fmt, ...)
   }
   curl_mfprintf(tool_stderr, "curl: try 'curl --help' "
 #ifdef USE_MANUAL
-                "or 'curl --manual' "
+                             "or 'curl --manual' "
 #endif
-                "for more information\n");
+                             "for more information\n");
 }
 
 /*

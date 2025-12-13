@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib677(const char *URL)
 {
   static const char testcmd[] = "A1 IDLE\r\n";

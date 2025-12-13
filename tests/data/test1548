@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,14 +6,12 @@ TELNET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -33,7 +32,6 @@ GET /we/want/%TESTNUMBER HTTP/1.0
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

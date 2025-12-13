@@ -33,7 +33,7 @@ static CURLcode test_unit1398(const char *arg)
   UNITTEST_BEGIN_SIMPLE
 
   int rc;
-  char buf[3] = {'b', 'u', 'g'};
+  char buf[3] = { 'b', 'u', 'g' };
   static const char *str = "bug";
   int width = 3;
   char output[130];
@@ -118,7 +118,7 @@ static CURLcode test_unit1398(const char *arg)
                       "%s%s%s%s%s%s%s%s%s%s" /* 100 */
                       "%s%s%s%s%s%s%s%s%s%s" /* 110 */
                       "%s%s%s%s%s%s%s%s%s%s" /* 120 */
-                      "%s%s%s%s%s%s%s%s%s", /* 129 */
+                      "%s%s%s%s%s%s%s%s%s",  /* 129 */
 
                       "a", "", "", "", "", "", "", "", "", "", /* 10 */
                       "b", "", "", "", "", "", "", "", "", "", /* 20 */
@@ -132,8 +132,8 @@ static CURLcode test_unit1398(const char *arg)
                       "j", "", "", "", "", "", "", "", "", "", /* 100 */
                       "k", "", "", "", "", "", "", "", "", "", /* 110 */
                       "l", "", "", "", "", "", "", "", "", "", /* 120 */
-                      "m", "", "", "", "", "", "", "", ""  /* 129 */
-    );
+                      "m", "", "", "", "", "", "", "", ""      /* 129 */
+  );
   fail_unless(rc == 0, "return code should be 0");
 
   /* 128 input % flags */
@@ -150,7 +150,7 @@ static CURLcode test_unit1398(const char *arg)
                       "%s%s%s%s%s%s%s%s%s%s" /* 100 */
                       "%s%s%s%s%s%s%s%s%s%s" /* 110 */
                       "%s%s%s%s%s%s%s%s%s%s" /* 120 */
-                      "%s%s%s%s%s%s%s%s", /* 128 */
+                      "%s%s%s%s%s%s%s%s",    /* 128 */
 
                       "a", "", "", "", "", "", "", "", "", "", /* 10 */
                       "b", "", "", "", "", "", "", "", "", "", /* 20 */
@@ -164,8 +164,8 @@ static CURLcode test_unit1398(const char *arg)
                       "j", "", "", "", "", "", "", "", "", "", /* 100 */
                       "k", "", "", "", "", "", "", "", "", "", /* 110 */
                       "l", "", "", "", "", "", "", "", "", "", /* 120 */
-                      "m", "", "", "", "", "", "", ""  /* 128 */
-    );
+                      "m", "", "", "", "", "", "", ""          /* 128 */
+  );
   fail_unless(rc == 13, "return code should be 13");
 
   /* 129 output segments */
@@ -176,8 +176,8 @@ static CURLcode test_unit1398(const char *arg)
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 80 */
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 100 */
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 120 */
-                      "%%%%%%%%%%%%%%%%%%" /* 129 */
-    );
+                      "%%%%%%%%%%%%%%%%%%"                       /* 129 */
+  );
   fail_unless(rc == 0, "return code should be 0");
 
   /* 128 output segments */
@@ -188,8 +188,8 @@ static CURLcode test_unit1398(const char *arg)
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 80 */
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 100 */
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 120 */
-                      "%%%%%%%%%%%%%%%%" /* 128 */
-    );
+                      "%%%%%%%%%%%%%%%%"                         /* 128 */
+  );
   fail_unless(rc == 128, "return code should be 128");
 
   UNITTEST_END_SIMPLE

@@ -108,7 +108,6 @@ my %defaulton = (
 
     );
 
-
 sub configureopts {
     my ($opts)=@_;
     my %thisin;
@@ -182,15 +181,14 @@ for my $w (sort keys %avail) {
     }
 }
 
-print "Never ENABLED configure options that aren't on by default\n";
+print "Never ENABLED configure options that are not on by default\n";
 for my $w (sort keys %avail) {
     if(!$with{$w} && !$defaulton{$w}) {
         printf "  %s\n", $w;
     }
 }
 
-
-print "ENABLED configure options that aren't available\n";
+print "ENABLED configure options that are not available\n";
 for my $w (sort keys %with) {
     if(!$avail{$w}) {
         printf "  %s\n", $w;

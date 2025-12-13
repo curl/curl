@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,7 +14,6 @@ data for %TESTNUMBER
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -27,7 +27,6 @@ tftp://%HOSTIP:%TFTPPORT/an/invalid-file tftp://%HOSTIP:%TFTPPORT//%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>

@@ -27,13 +27,10 @@
 #ifndef CURL_DISABLE_FTP
 
 #include "fileinfo.h"
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
 
 struct fileinfo *Curl_fileinfo_alloc(void)
 {
-  return calloc(1, sizeof(struct fileinfo));
+  return curlx_calloc(1, sizeof(struct fileinfo));
 }
 
 void Curl_fileinfo_cleanup(struct fileinfo *finfo)
@@ -42,7 +39,7 @@ void Curl_fileinfo_cleanup(struct fileinfo *finfo)
     return;
 
   curlx_dyn_free(&finfo->buf);
-  free(finfo);
+  curlx_free(finfo);
 }
 
 #endif

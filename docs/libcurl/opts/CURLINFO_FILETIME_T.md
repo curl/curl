@@ -17,7 +17,7 @@ Added-in: 7.59.0
 
 # NAME
 
-CURLINFO_FILETIME_T - get the remote time of the retrieved document
+CURLINFO_FILETIME_T - remote time of the retrieved resource
 
 # SYNOPSIS
 

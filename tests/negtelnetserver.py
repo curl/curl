@@ -43,11 +43,9 @@ log = logging.getLogger(__name__)
 HOST = "localhost"
 IDENT = "NTEL"
 
-
 # The strings that indicate the test framework is checking our aliveness
 VERIFIED_REQ = "verifiedserver"
 VERIFIED_RSP = "WE ROOLZ: {pid}"
-
 
 def telnetserver(options):
     """Start up a TCP server with a telnet handler and serve DICT requests forever."""
@@ -68,7 +66,6 @@ def telnetserver(options):
         server.serve_forever()
     # leaving `with` calls server.close() automatically
     return ScriptRC.SUCCESS
-
 
 class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
     """Handler class for Telnet connections."""
@@ -113,7 +110,6 @@ class NegotiatingTelnetHandler(socketserver.BaseRequestHandler):
         except IOError:
             log.exception("IOError hit during request")
 
-
 class Negotiator(object):
     NO_NEG = 0
     START_NEG = 1
@@ -135,7 +131,7 @@ class Negotiator(object):
         """
         buffer = bytearray()
 
-        # If we keep receiving negotiation sequences, we won't fill the buffer.
+        # If we keep receiving negotiation sequences, we will not fill the buffer.
         # Keep looping while we can, and until we have something to give back
         # to the caller.
         while len(buffer) == 0:
@@ -190,8 +186,8 @@ class Negotiator(object):
             log.debug("Client can do")
             self.state = self.DO
         elif byte_int == NegTokens.DONT:
-            # Client is indicating they can't do an option
-            log.debug("Client can't do")
+            # Client is indicating they cannot do an option
+            log.debug("Client cannot do")
             self.state = self.DONT
         else:
             # Received an unexpected byte. Stop negotiations
@@ -242,7 +238,6 @@ class Negotiator(object):
         log.debug("Sending WONT %s", option_str)
         self.send_iac([NegTokens.WONT, NegOptions.to_val(option_str)])
 
-
 class NegBase(object):
     @classmethod
     def to_val(cls, name):
@@ -255,7 +250,6 @@ class NegBase(object):
                 return k
 
         return "<unknown>"
-
 
 class NegTokens(NegBase):
     # The start of a negotiation sequence
@@ -274,7 +268,6 @@ class NegTokens(NegBase):
     # The end of sub-negotiation options.
     SE = 240
 
-
 class NegOptions(NegBase):
     # Binary Transmission
     BINARY = 0
@@ -287,7 +280,6 @@ class NegOptions(NegBase):
     # Charset option
     CHARSET = 42
 
-
 def get_options():
     parser = argparse.ArgumentParser()
 
@@ -296,16 +288,15 @@ def get_options():
     parser.add_argument("--verbose", action="store", type=int, default=0,
                         help="verbose output")
     parser.add_argument("--pidfile", action="store",
-                        help="file name for the PID")
+                        help="filename for the PID")
     parser.add_argument("--logfile", action="store",
-                        help="file name for the log")
+                        help="filename for the log")
     parser.add_argument("--srcdir", action="store", help="test directory")
     parser.add_argument("--id", action="store", help="server ID")
     parser.add_argument("--ipv4", action="store_true", default=0,
                         help="IPv4 flag")
 
     return parser.parse_args()
-
 
 def setup_logging(options):
     """Set up logging from the command line options."""
@@ -323,7 +314,7 @@ def setup_logging(options):
         handler.setLevel(logging.DEBUG)
         root_logger.addHandler(handler)
     else:
-        # The logfile wasn't specified. Add a stdout logger.
+        # The logfile was not specified. Add a stdout logger.
         add_stdout = True
 
     if options.verbose:
@@ -339,14 +330,12 @@ def setup_logging(options):
         stdout_handler.setLevel(logging.DEBUG)
         root_logger.addHandler(stdout_handler)
 
-
 class ScriptRC(object):
     """Enum for script return codes."""
 
     SUCCESS = 0
     FAILURE = 1
     EXCEPTION = 2
-
 
 if __name__ == '__main__':
     # Get the options from the user.

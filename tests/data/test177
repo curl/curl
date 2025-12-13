@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -10,7 +11,7 @@ followlocation
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 302 *MOVED* swsclose swsbounce
 Server: Microsoft-IIS/6.0
 Location: /mooooo/%TESTNUMBER
@@ -21,7 +22,6 @@ Content-Type: text/html; charset=iso-8859-1
 
 # Client-side
 <client>
-#
 <server>
 http
 </server>
@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

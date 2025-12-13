@@ -31,14 +31,16 @@
 
 struct Curl_dns_entry;
 struct ip_quadruple;
+struct Curl_str;
 
-enum alpnid Curl_alpn2alpnid(const char *name, size_t len);
+enum alpnid Curl_alpn2alpnid(const unsigned char *name, size_t len);
+enum alpnid Curl_str2alpnid(const struct Curl_str *str);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
-timediff_t Curl_timeleft(struct Curl_easy *data,
-                         struct curltime *nowp,
-                         bool duringconnect);
+timediff_t Curl_timeleft_ms(struct Curl_easy *data,
+                            struct curltime *nowp,
+                            bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
 
@@ -72,7 +74,7 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp);
 
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
-                      char *addr, int *port);
+                      char *addr, uint16_t *port);
 
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
@@ -98,18 +100,18 @@ void Curl_conncontrol(struct connectdata *conn,
   );
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
-#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
-#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
+#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM, y)
+#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION, y)
+#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP, y)
 #else /* if !DEBUGBUILD || CURL_DISABLE_VERBOSE_STRINGS */
-#define streamclose(x,y) Curl_conncontrol(x, CONNCTRL_STREAM)
-#define connclose(x,y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
-#define connkeep(x,y) Curl_conncontrol(x, CONNCTRL_KEEP)
+#define streamclose(x, y) Curl_conncontrol(x, CONNCTRL_STREAM)
+#define connclose(x, y) Curl_conncontrol(x, CONNCTRL_CONNECTION)
+#define connkeep(x, y) Curl_conncontrol(x, CONNCTRL_KEEP)
 #endif
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
-                                    int transport,
+                                    uint8_t transport,
                                     int ssl_mode);
 
 /**

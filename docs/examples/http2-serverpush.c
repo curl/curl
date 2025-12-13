@@ -25,19 +25,24 @@
  * HTTP/2 server push
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
-#endif
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
 #endif
 
 static FILE *out_download;
@@ -78,7 +83,7 @@ static void dump(const char *text, unsigned char *ptr, size_t size, char nohex)
       }
       fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
         i += (c + 3 - width);
@@ -131,7 +136,7 @@ static int setup(CURL *curl, const char *url)
 {
   out_download = fopen(OUTPUTFILE, "wb");
   if(!out_download)
-    return 1;  /* failed */
+    return 1; /* failed */
 
   /* set the same URL */
   curl_easy_setopt(curl, CURLOPT_URL, url);

@@ -28,8 +28,7 @@ different levels of encryption required.
 This option is handled in LDAP (added in 7.81.0). It is fully supported by the
 OpenLDAP backend and ignored by the generic ldap backend.
 
-Please note that a server may close the connection if the negotiation does
-not succeed.
+Please note that a server may close the connection if the negotiation fails.
 
 This option was formerly known as --ftp-ssl (added in 7.11.0). That option
 name can still be used but might be removed in a future version.

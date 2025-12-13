@@ -15,7 +15,7 @@ Added-in: 8.2.0
 
 # NAME
 
-CURLINFO_CONN_ID - get the ID of the last connection used by the handle
+CURLINFO_CONN_ID - ID of the last connection
 
 # SYNOPSIS
 

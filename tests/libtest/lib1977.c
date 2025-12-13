@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1977(const char *URL)
 {
   CURLcode res = CURLE_OK;
@@ -50,7 +48,6 @@ static CURLcode test_lib1977(const char *URL)
     goto test_cleanup;
   curl_mprintf("effective URL: %s\n", effective);
 
-
   /* second transfer: set URL + query in the second CURLU handle */
   curl_url_set(curlu_2, CURLUPART_URL, URL, CURLU_DEFAULT_SCHEME);
   curl_url_set(curlu_2, CURLUPART_QUERY, "foo", 0);
@@ -65,7 +62,6 @@ static CURLcode test_lib1977(const char *URL)
   if(res)
     goto test_cleanup;
   curl_mprintf("effective URL: %s\n", effective);
-
 
   /* third transfer: append extra query in the second CURLU handle, but do not
      set CURLOPT_CURLU again. this is to test that the contents of the handle
@@ -82,7 +78,6 @@ static CURLcode test_lib1977(const char *URL)
   if(res)
     goto test_cleanup;
   curl_mprintf("effective URL: %s\n", effective);
-
 
 test_cleanup:
   curl_easy_cleanup(curl);

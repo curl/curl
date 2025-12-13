@@ -55,10 +55,6 @@
 #include "curlx/inet_ntop.h"
 #include "if2ip.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* ------------------------------------------------------------------ */
 
 #ifdef USE_IPV6
@@ -66,10 +62,10 @@
 unsigned int Curl_ipv6_scope(const struct sockaddr *sa)
 {
   if(sa->sa_family == AF_INET6) {
-    const struct sockaddr_in6 * sa6 =
-      (const struct sockaddr_in6 *)(const void *) sa;
+    const struct sockaddr_in6 *sa6 =
+      (const struct sockaddr_in6 *)(const void *)sa;
     const unsigned char *b = sa6->sin6_addr.s6_addr;
-    unsigned short w = (unsigned short) ((b[0] << 8) | b[1]);
+    unsigned short w = (unsigned short)((b[0] << 8) | b[1]);
 
     if((b[0] & 0xFE) == 0xFC) /* Handle ULAs */
       return IPV6_SCOPE_UNIQUELOCAL;
@@ -107,8 +103,7 @@ if2ip_result_t Curl_if2ip(int af,
   struct ifaddrs *iface, *head;
   if2ip_result_t res = IF2IP_NOT_FOUND;
 
-#if defined(USE_IPV6) && \
-    !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+#if defined(USE_IPV6) && !defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   (void)local_scope_id;
 #endif
 
@@ -142,7 +137,7 @@ if2ip_result_t Curl_if2ip(int af,
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
               /* Include the scope of this interface as part of the address */
               scopeid = ((struct sockaddr_in6 *)(void *)iface->ifa_addr)
-                            ->sin6_scope_id;
+                          ->sin6_scope_id;
 
               /* If given, scope id should match. */
               if(local_scope_id && scopeid != local_scope_id) {
@@ -252,15 +247,15 @@ if2ip_result_t Curl_if2ip(int af,
                           const char *interf,
                           char *buf, size_t buf_size)
 {
-    (void)af;
+  (void)af;
 #ifdef USE_IPV6
-    (void)remote_scope;
-    (void)local_scope_id;
+  (void)remote_scope;
+  (void)local_scope_id;
 #endif
-    (void)interf;
-    (void)buf;
-    (void)buf_size;
-    return IF2IP_NOT_FOUND;
+  (void)interf;
+  (void)buf;
+  (void)buf_size;
+  return IF2IP_NOT_FOUND;
 }
 
 #endif

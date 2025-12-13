@@ -27,8 +27,6 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURL *t1555_curl;
 
 static int progressCallback(void *arg,

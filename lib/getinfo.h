@@ -24,6 +24,6 @@
  *
  ***************************************************************************/
 CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...);
-CURLcode Curl_initinfo(struct Curl_easy *data);
+void Curl_initinfo(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_GETINFO_H */

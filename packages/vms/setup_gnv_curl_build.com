@@ -1,6 +1,6 @@
 $! File: setup_gnv_curl_build.com
 $!
-$! Set up build environment for building Curl under GNV on VMS.
+$! Set up build environment for building curl under GNV on VMS.
 $!
 $! GNV needs some files moved into the other directories to help with
 $! the configure script and the build.

@@ -25,10 +25,6 @@
 #include "../curl_setup.h"
 #include "dynbuf.h"
 #include "../curl_printf.h"
-#ifdef BUILDING_LIBCURL
-#include "../curl_memory.h"
-#endif
-#include "../memdebug.h"
 
 #define MIN_FIRST_ALLOC 32
 
@@ -108,7 +104,7 @@ static CURLcode dyn_nappend(struct dynbuf *s,
   if(a != s->allc) {
     /* this logic is not using Curl_saferealloc() to make the tool not have to
        include that as well when it uses this code */
-    void *p = realloc(s->bufr, a);
+    void *p = curlx_realloc(s->bufr, a);
     if(!p) {
       curlx_dyn_free(s);
       return CURLE_OUT_OF_MEMORY;
@@ -160,7 +156,6 @@ CURLcode curlx_dyn_tail(struct dynbuf *s, size_t trail)
     s->bufr[s->leng] = 0;
   }
   return CURLE_OK;
-
 }
 
 /*
@@ -212,7 +207,7 @@ CURLcode curlx_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
 
   if(str) {
     CURLcode result = dyn_nappend(s, (const unsigned char *)str, strlen(str));
-    free(str);
+    curlx_free(str);
     return result;
   }
   /* If we failed, we cleanup the whole buffer and return error */

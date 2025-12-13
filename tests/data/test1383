@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -46,11 +47,11 @@ fooo
 mooo
 </file1>
 
-<file2 name="%LOGDIR/heads%TESTNUMBER">
-220-        _   _ ____  _     
-220-    ___| | | |  _ \| |    
-220-   / __| | | | |_) | |    
-220-  | (__| |_| |  _ {| |___ 
+<file2 name="%LOGDIR/heads%TESTNUMBER" crlf="yes">
+220-        _   _ ____  _
+220-    ___| | | |  _ \| |
+220-   / __| | | | |_) | |
+220-  | (__| |_| |  _ {| |___
 220    \___|\___/|_| \_\_____|
 331 We are happy you popped in!
 230 Welcome you silly person

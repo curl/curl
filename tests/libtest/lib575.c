@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* 3x download!
  * 1. normal
  * 2. dup handle

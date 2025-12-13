@@ -40,6 +40,7 @@ struct URLPattern {
       char **elem;
       curl_off_t size;
       curl_off_t idx;
+      size_t palloc; /* elem entries allocated */
     } set;
     struct {
       int min;
@@ -64,7 +65,7 @@ struct URLGlob {
   struct dynbuf buf;
   struct URLPattern *pattern;
   size_t palloc; /* number of pattern entries allocated */
-  size_t size;
+  size_t pnum; /* number of patterns used */
   char beenhere;
   const char *error; /* error message */
   size_t pos;        /* column position of error or 0 */

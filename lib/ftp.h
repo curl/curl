@@ -61,11 +61,11 @@ enum {
   FTP_STOR_PREQUOTE,
   FTP_LIST_PREQUOTE,
   FTP_POSTQUOTE,
-  FTP_CWD,  /* change dir */
-  FTP_MKD,  /* if the dir did not exist */
+  FTP_CWD,  /* change directory */
+  FTP_MKD,  /* if the directory did not exist */
   FTP_MDTM, /* to figure out the datestamp */
   FTP_TYPE, /* to set type when doing a head-like request */
-  FTP_LIST_TYPE, /* set type when about to do a dir list */
+  FTP_LIST_TYPE, /* set type when about to do a directory list */
   FTP_RETR_LIST_TYPE,
   FTP_RETR_TYPE, /* set type when about to RETR a file */
   FTP_STOR_TYPE, /* set type when about to STOR a file */

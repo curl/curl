@@ -33,4 +33,8 @@ CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              char **path);
 
 CURLcode Curl_get_pathname(const char **cpp, char **path, const char *homedir);
+
+CURLcode Curl_ssh_range(struct Curl_easy *data,
+                        const char *range, curl_off_t filesize,
+                        curl_off_t *startp, curl_off_t *sizep);
 #endif /* HEADER_CURL_PATH_H */

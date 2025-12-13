@@ -25,8 +25,6 @@
 
 /* test case and code based on https://github.com/curl/curl/issues/3927 */
 
-#include "memdebug.h"
-
 static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
                              curl_off_t d, curl_off_t e)
 {
@@ -43,7 +41,7 @@ static size_t t1523_write_cb(char *d, size_t n, size_t l, void *p)
   /* take care of the data here, ignored in this example */
   (void)d;
   (void)p;
-  return n*l;
+  return n * l;
 }
 
 static CURLcode run(CURL *curl, long limit, long time)
@@ -55,7 +53,7 @@ static CURLcode run(CURL *curl, long limit, long time)
 
 static CURLcode test_lib1523(const char *URL)
 {
-  CURLcode ret;
+  CURLcode res;
   CURL *curl;
   char buffer[CURL_ERROR_SIZE];
   curl_global_init(CURL_GLOBAL_ALL);
@@ -66,18 +64,18 @@ static CURLcode test_lib1523(const char *URL)
   curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
 
-  ret = run(curl, 1, 2);
-  if(ret)
-    curl_mfprintf(stderr, "error (%d) %s\n", ret, buffer);
+  res = run(curl, 1, 2);
+  if(res)
+    curl_mfprintf(stderr, "error (%d) %s\n", res, buffer);
 
-  ret = run(curl, 12000, 1);
-  if(ret != CURLE_OPERATION_TIMEDOUT)
-    curl_mfprintf(stderr, "error (%d) %s\n", ret, buffer);
+  res = run(curl, 12000, 1);
+  if(res != CURLE_OPERATION_TIMEDOUT)
+    curl_mfprintf(stderr, "error (%d) %s\n", res, buffer);
   else
-    ret = CURLE_OK;
+    res = CURLE_OK;
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return ret;
+  return res;
 }

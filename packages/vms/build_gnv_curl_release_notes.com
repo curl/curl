@@ -3,7 +3,7 @@ $!
 $! Build the release note file from the four components:
 $!    1. The curl_release_note_start.txt
 $!    2. The hp_ssl_release_info.txt
-$!    3. [--]readme. file from the Curl distribution.
+$!    3. [--]readme. file from the curl distribution.
 $!    4. The Curl_gnv-build_steps.txt.
 $!
 $! Set the name of the release notes from the GNV_PCSI_FILENAME_BASE
@@ -42,7 +42,7 @@ $   curl_readme = f$search("sys$disk:[--]$README.")
 $ endif
 $ if curl_readme .eqs. ""
 $ then
-$    write sys$output "Can not find Curl readme file."
+$    write sys$output "Can not find curl readme file."
 $    goto all_exit
 $ endif
 $!
@@ -53,7 +53,7 @@ $   curl_copying = f$search("sys$disk:[--]$COPYING.")
 $ endif
 $ if curl_copying .eqs. ""
 $ then
-$    write sys$output "Can not find Curl copying file."
+$    write sys$output "Can not find curl copying file."
 $    goto all_exit
 $ endif
 $!
@@ -64,7 +64,7 @@ $   vms_readme = f$search("sys$disk:[]$README.")
 $ endif
 $ if vms_readme .eqs. ""
 $ then
-$   write sys$output "Can not find VMS specific Curl readme file."
+$   write sys$output "Can not find VMS specific curl readme file."
 $   goto all_exit
 $ endif
 $!
@@ -75,7 +75,7 @@ $   curl_release_notes = f$search("sys$disk:[--]$RELEASE-NOTES.")
 $ endif
 $ if curl_release_notes .eqs. ""
 $ then
-$    write sys$output "Can not find Curl release-notes file."
+$    write sys$output "Can not find curl release-notes file."
 $    goto all_exit
 $ endif
 $!

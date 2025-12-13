@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -40,7 +40,6 @@ Funny-head: yesyes
 
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -57,7 +56,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -L -w '%header{this:all:***}\n' -o %LOGDIR/
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout mode="text">

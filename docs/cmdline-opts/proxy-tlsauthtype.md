@@ -12,7 +12,7 @@ See-also:
   - proxy-tlsuser
   - proxy-tlspassword
 Example:
-  - --proxy-tlsauthtype SRP -x https://proxy $URL
+  - --proxy-tlsauthtype SRP -x https://proxy.example $URL
 ---
 
 # `--proxy-tlsauthtype`

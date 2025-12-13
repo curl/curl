@@ -67,7 +67,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
     curl_easy_setopt(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
                      "sha256//YhKJKSzoTt2b5FP18fvpHo7fJYqQCjA"
                      "a3HWY3tvRMwE=;sha256//t62CeU2tQiqkexU74"

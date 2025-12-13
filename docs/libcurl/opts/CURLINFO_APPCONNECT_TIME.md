@@ -15,7 +15,7 @@ Added-in: 7.19.0
 
 # NAME
 
-CURLINFO_APPCONNECT_TIME - get the time until the SSL/SSH handshake is completed
+CURLINFO_APPCONNECT_TIME - time until the SSL/SSH handshake is completed
 
 # SYNOPSIS
 

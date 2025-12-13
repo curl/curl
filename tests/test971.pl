@@ -24,7 +24,7 @@
 ###########################################################################
 #
 # - Get all options mentioned in the $cmddir.
-# - Make sure they're all mentioned in the $opts document
+# - Make sure they are all mentioned in the $opts document
 # - Make sure that the version in $opts matches the version in the file in
 #   $cmddir
 #
@@ -45,7 +45,7 @@ my $error = 0;
 sub cmdfiles {
     my ($dir)=@_;
 
-    opendir(my $dh, $dir) || die "Can't opendir $dir: $!";
+    opendir(my $dh, $dir) || die "Cannot opendir $dir: $!";
     my @opts = grep { /[a-z0-9].*\.md$/ && -f "$dir/$_" } readdir($dh);
     closedir $dh;
 

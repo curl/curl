@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Delete a single file from an FTP server.
  * </DESC>
  */
+#include <stdio.h>
+
+#include <curl/curl.h>
 
 static size_t write_cb(void *buffer, size_t size, size_t nmemb, void *stream)
 {

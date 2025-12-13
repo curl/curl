@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-/* wraps curl_easy_setopt() with typechecking */
+/* wraps curl_easy_setopt() with type checking */
 
 /* To add a new kind of warning, add an
  *   if(curlcheck_sometype_option(_curl_opt))
@@ -159,7 +159,7 @@
       curl_easy_setopt(handle, option, value);                          \
     })
 
-/* wraps curl_easy_getinfo() with typechecking */
+/* wraps curl_easy_getinfo() with type checking */
 #define curl_easy_getinfo(handle, info, arg)                            \
   __extension__({                                                       \
       if(__builtin_constant_p(info)) {                                  \
@@ -263,7 +263,6 @@
  * For now, just make sure that the functions are called with three arguments
  */
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
-
 
 /* the actual warnings, triggered by calling the Wcurl_easy_setopt_err*
  * functions */
@@ -590,8 +589,9 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
 #define curlcheck_off_t_info(info)              \
   (CURLINFO_OFF_T < (info))
 
-
-/* typecheck helpers -- check whether given expression has requested type */
+/*
+ * typecheck helpers -- check whether given expression has requested type
+ */
 
 /* For pointers, you can use the curlcheck_ptr/curlcheck_arr macros,
  * otherwise define a new macro. Search for __builtin_types_compatible_p
@@ -640,7 +640,6 @@ CURLWARNING(Wcurl_easy_getinfo_err_curl_off_t,
 #define curlcheck_curl(expr)                                            \
   (curlcheck_NULL(expr) ||                                              \
    __builtin_types_compatible_p(__typeof__(expr), CURL *))
-
 
 /* evaluates to true if expr is a long (no matter the signedness)
  * XXX: for now, int is also accepted (and therefore short and char, which

@@ -24,8 +24,6 @@
 #include "tool_setup.h"
 #include "tool_xattr.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
 #ifdef USE_XATTR
 
 /* mapping table of curl metadata to extended attribute names */

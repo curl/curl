@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -18,7 +19,7 @@ non-existing host
 http
 </server>
 <name>
-multi interface get with non-existing host name
+multi interface get with non-existing hostname
 </name>
 <tool>
 lib%TESTNUMBER

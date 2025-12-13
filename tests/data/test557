@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ printf
 unittest
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 </reply>
@@ -22,7 +22,6 @@ curl_mprintf() testing
 </name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
@@ -35,7 +34,7 @@ All curl_mprintf() signed long tests OK!
 All curl_mprintf() curl_off_t tests OK!
 All curl_mprintf() strings tests OK!
 All float strings tests OK!
-All curl_mprintf() octal & hexadecimal tests OK!
+All curl_mprintf() octal and hexadecimal tests OK!
 </stdout>
 </verify>
 

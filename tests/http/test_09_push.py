@@ -60,6 +60,7 @@ class TestPush:
         httpd.reload_if_config_changed()
 
     # download a file that triggers a "103 Early Hints" response
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_09_01_h2_early_hints(self, env: Env, httpd, configures_httpd):
         self.httpd_configure(env, httpd)
         curl = CurlClient(env=env)
@@ -72,6 +73,7 @@ class TestPush:
         assert 'link' in r.responses[0]['header'], f'{r.responses[0]}'
         assert r.responses[0]['header']['link'] == '</push/data2>; rel=preload', f'{r.responses[0]}'
 
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_09_02_h2_push(self, env: Env, httpd, configures_httpd):
         self.httpd_configure(env, httpd)
         # use localhost as we do not have resolve support in local client

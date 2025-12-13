@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -11,7 +12,7 @@ followlocation
 
 # Server-side
 <reply>
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: ht3p://localhost/
 Content-Length: 62
@@ -36,14 +37,14 @@ http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w '%{redirect_url}\n'
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 301 This is a weirdo text message swsclose
 Location: ht3p://localhost/
 Content-Length: 62

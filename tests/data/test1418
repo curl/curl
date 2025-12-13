@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -13,7 +14,7 @@ connection reuse
 connection-monitor
 </servercmd>
 
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authentication please!
 Content-Length: 20
 WWW-Authenticate: Digest realm="loonie", nonce="314156592"
@@ -22,7 +23,7 @@ WWW-Authenticate: Basic
 Please auth with me
 </data>
 
-<data3>
+<data3 crlf="headers">
 HTTP/1.1 401 Authentication please!
 Content-Length: 20
 WWW-Authenticate: Digest realm="loonie", nonce="314156592"
@@ -33,7 +34,7 @@ Please auth with me
 
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 Things are fine in server land
 Server: Microsoft-IIS/5.0
 Content-Length: 4
@@ -41,7 +42,7 @@ Content-Length: 4
 moo
 </data1000>
 
-<data1003>
+<data1003 crlf="headers">
 HTTP/1.1 200 OK
 Server: Another one/1.0
 Content-Length: 4
@@ -50,7 +51,7 @@ boo
 </data1003>
 
 # This is the first reply after the redirection
-<data1011>
+<data1011 crlf="headers">
 HTTP/1.1 200 OK
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -59,7 +60,7 @@ Content-Length: 34
 This is not the real page either!
 </data1011>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authentication please!
 Content-Length: 20
 WWW-Authenticate: Digest realm="loonie", nonce="314156592"
@@ -94,7 +95,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOST
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

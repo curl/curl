@@ -67,7 +67,7 @@ the value of *ap* is undefined after the call.
 
 The functions **curl_maprintf()** and **curl_mvaprintf()** return the
 output string as pointer to a newly allocated memory area. The returned string
-must be curl_free(3)ed by the receiver.
+may not be overwritten and must be curl_free(3)ed by the receiver.
 
 All of these functions write the output under the control of a format string
 that specifies how subsequent arguments are converted for output.
@@ -274,7 +274,7 @@ const char *name = "John";
 int main(void)
 {
   curl_mprintf("My name is %s\n", name);
-  curl_mprintf("Pi is almost %f\n", (double)25.0/8);
+  curl_mprintf("Pi is almost %f\n", (double)25.0 / 8);
 }
 ~~~
 

@@ -18,7 +18,7 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLINFO_PROXY_SSL_VERIFYRESULT - get the result of the proxy certificate verification
+CURLINFO_PROXY_SSL_VERIFYRESULT - result of proxy certificate verification
 
 # SYNOPSIS
 
@@ -50,7 +50,7 @@ int main(void)
     long verifyresult;
 
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
 
     res = curl_easy_perform(curl);
     if(res) {

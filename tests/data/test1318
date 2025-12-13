@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -26,24 +26,22 @@ Content-Length: 0
 </data1>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
 http
 </server>
 <name>
-HTTP with --resolve and same host name using different cases
+HTTP with --resolve and same hostname using different cases
 </name>
 <command>
 --resolve MiXeDcAsE.cOm:%HTTPPORT:%HOSTIP http://MiXeDcAsE.cOm:%HTTPPORT/%TESTNUMBER http://mixedcase.com:%HTTPPORT/%TESTNUMBER0001
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: MiXeDcAsE.cOm:%HTTPPORT
 User-Agent: curl/%VERSION

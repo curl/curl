@@ -10,7 +10,7 @@ See-also:
   - ssl-allow-beast
   - proxy
 Example:
-  - --proxy-ssl-allow-beast -x https://proxy $URL
+  - --proxy-ssl-allow-beast -x https://proxy.example $URL
 ---
 
 # `--proxy-ssl-allow-beast`

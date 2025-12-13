@@ -14,7 +14,6 @@ to and read from. It manages read and write positions and has a maximum size.
 Its basic read/write functions have a similar signature and return code
 handling as many internal curl read and write ones.
 
-
 ```
 ssize_t Curl_bufq_write(struct bufq *q, const unsigned char *buf, size_t len, CURLcode *err);
 
@@ -149,7 +148,6 @@ There is another variation to this. If you initialized a `bufq` with option
 reports **full**, but one can **still** write. This option is necessary, if
 partial writes need to be avoided. It means that you need other checks to keep
 the `bufq` from growing ever larger and larger.
-
 
 ## pools
 

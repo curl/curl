@@ -102,6 +102,9 @@
 /* Define if you have GSS API. */
 #define HAVE_GSSAPI
 
+/* Define if you have the <gssapi.h> header file. */
+#define HAVE_GSSAPI_H
+
 /* Define if you have the GNU gssapi libraries */
 #undef HAVE_GSSGNU
 
@@ -128,7 +131,6 @@
 
 /* Define if you have the `socket' function. */
 #define HAVE_SOCKET
-
 
 /* The following define is needed on OS400 to enable strcmpi(), stricmp() and
    strdup(). */

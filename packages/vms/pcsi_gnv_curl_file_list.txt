@@ -1,7 +1,7 @@
 ! File: PCSI_GNV_CURL_FILE_LIST.TXT
 !
 ! File list for building a PCSI kit.
-! Very simple format so that the parsing logic can be simple.
+! Simple format so that the parsing logic can be simple.
 ! links first, directory second, and files third.
 !
 ! link -> file tells procedure to create/remove a link on install/uninstall

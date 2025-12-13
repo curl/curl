@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
@@ -25,16 +25,13 @@ lib%TESTNUMBER
 send HTTP POST using read callback that returns CURL_READFUNC_ABORT
 </name>
 # the 1s post-command delay helps to prevent a spurious failure on s390
- <command delay="1">
+<command delay="1">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
-</protocol>
 # 42 - aborted by callback
 <errorcode>
 42

@@ -1,6 +1,6 @@
 $! File: GENERATE_CONFIG_H_CURL.COM
 $!
-$! Curl like most open source products uses a variant of a config.h file.
+$! curl like most open source products uses a variant of a config.h file.
 $! Depending on the curl version, this could be config.h or curl_config.h.
 $!
 $! For GNV based builds, the configure script is run and that produces
@@ -197,7 +197,7 @@ $write cvh "#define __CONFIG_VMS_H__"
 $write cvh ""
 $write cvh "/* Define cpu-machine-OS */"
 $!
-$! Curl uses an OS macro to set the build environment.
+$! curl uses an OS macro to set the build environment.
 $!----------------------------------------------------
 $! Now the DCL builds usually say xxx-HP-VMS and configure scripts
 $! may put DEC or COMPAQ or HP for the middle part.
@@ -345,7 +345,7 @@ $!
 $!
 $! I can not figure out where the C compiler is finding the ALLOCA.H file
 $! in the text libraries, so CONFIG_H.COM can not find it either.
-$! Usually the header file name is the module name in the text library.
+$! Usually the header filename is the module name in the text library.
 $! It does not appear to hurt anything to not find header file, so we
 $! are not overriding it here.
 $!

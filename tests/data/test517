@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ getdate
 unittest
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 </reply>
@@ -22,7 +22,6 @@ curl_getdate() testing
 </name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
@@ -30,9 +29,9 @@ curl_getdate() testing
 
 # This test case previously tested an overflow case ("2094 Nov 6 =>
 # 2147483647") for 32-bit time_t, but since some systems have 64-bit time_t and
-# handles this (returning 3939840000), and some 64-bit time_t systems don't
-# handle this and return -1 for this, it turned very tricky to write a fine
-# test case and thus it is now removed until we have a way to write test cases
+# handles this (returning 3939840000), and some 64-bit time_t systems do not
+# handle this and return -1 for this, it turned tricky to write a fine test
+# case and thus it is now removed until we have a way to write test cases
 # for this kind of things.
 
 </verify>

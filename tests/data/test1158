@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,7 @@ HTTP FORMPOST
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -30,10 +31,13 @@ http
 HTTP RFC1867-type formposting with filename containing '"'
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "file=@\"%LOGDIR/test%TESTNUMBER\\\".txt\";type=mo/foo;filename=\"test%TESTNUMBER\\\".txt\"" -F 'file2=@"%LOGDIR/test%TESTNUMBER\".txt"' -F 'file3=@"%LOGDIR/test%TESTNUMBER\".txt";type=m/f,"%LOGDIR/test%TESTNUMBER\".txt"'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER
+-F "file=@\"%LOGDIR/test%TESTNUMBER\\\".txt\";type=mo/foo;filename=\"test%TESTNUMBER\\\".txt\""
+-F 'file2=@"%LOGDIR/test%TESTNUMBER\".txt"'
+-F 'file3=@"%LOGDIR/test%TESTNUMBER\".txt";type=m/f,"%LOGDIR/test%TESTNUMBER\".txt"'
 </command>
 # We create this file before the command is invoked!
-<file name=%LOGDIR/test%TESTNUMBER".txt>
+<file name='%LOGDIR/test%TESTNUMBER".txt'>
 foo bar
 This is a bar foo
 bar
@@ -47,53 +51,53 @@ foo
 ^(Content-Type: multipart/form-data;|Content-Type: multipart/mixed; boundary=|-------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 1006
-Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER%22.txt"
-Content-Type: mo/foo
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 1006%CR
+Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32%CR
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER%22.txt"%CR
+Content-Type: mo/foo%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER%22.txt"
-Content-Type: text/plain
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file2"; filename="test%TESTNUMBER%22.txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-------------------------------24e78000bd32
-Content-Disposition: form-data; name="file3"
-Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b
-
-Content-Disposition: attachment; filename="test%TESTNUMBER%22.txt"
-Content-Type: m/f
-
+%CR
+------------------------------24e78000bd32%CR
+Content-Disposition: form-data; name="file3"%CR
+Content-Type: multipart/mixed; boundary=----------------------------7f0e85a48b0b%CR
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER%22.txt"%CR
+Content-Type: m/f%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-Content-Disposition: attachment; filename="test%TESTNUMBER%22.txt"
-Content-Type: text/plain
-
+%CR
+Content-Disposition: attachment; filename="test%TESTNUMBER%22.txt"%CR
+Content-Type: text/plain%CR
+%CR
 foo bar
 This is a bar foo
 bar
 foo
-
-
-------------------------------24e78000bd32--
+%CR
+%CR
+------------------------------24e78000bd32--%CR
 </protocol>
 </verify>
 </testcase>

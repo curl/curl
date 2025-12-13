@@ -134,10 +134,6 @@ int Curl_socketpair(int domain, int type, int protocol,
 #include "curlx/timeval.h"  /* needed before select.h */
 #include "select.h"   /* for Curl_poll */
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 int Curl_socketpair(int domain, int type, int protocol,
                     curl_socket_t socks[2], bool nonblocking)
 {
@@ -228,7 +224,7 @@ int Curl_socketpair(int domain, int type, int protocol,
       if(nread == -1) {
         int sockerr = SOCKERRNO;
         /* Do not block forever */
-        if(curlx_timediff(curlx_now(), start) > (60 * 1000))
+        if(curlx_timediff_ms(curlx_now(), start) > (60 * 1000))
           goto error;
         if(
 #ifdef USE_WINSOCK

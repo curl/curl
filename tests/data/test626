@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,12 +8,10 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -29,7 +28,6 @@ Test file for rename test
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

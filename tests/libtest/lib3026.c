@@ -59,7 +59,7 @@ static CURLcode test_lib3026(const char *URL)
     results[i] = CURL_LAST; /* initialize with invalid value */
     th = CreateThread(NULL, 0, t3026_run_thread, &results[i], 0, NULL);
     if(!th) {
-      curl_mfprintf(stderr, "%s:%d Couldn't create thread, "
+      curl_mfprintf(stderr, "%s:%d Could not create thread, "
                     "GetLastError 0x%08lx\n",
                     __FILE__, __LINE__, GetLastError());
       tid_count = i;
@@ -120,7 +120,7 @@ static CURLcode test_lib3026(const char *URL)
     results[i] = CURL_LAST; /* initialize with invalid value */
     res = pthread_create(&tids[i], NULL, t3026_run_thread, &results[i]);
     if(res) {
-      curl_mfprintf(stderr, "%s:%d Couldn't create thread, errno %d\n",
+      curl_mfprintf(stderr, "%s:%d Could not create thread, errno %d\n",
                     __FILE__, __LINE__, res);
       tid_count = i;
       test_failure = TEST_ERR_MAJOR_BAD;
@@ -142,7 +142,7 @@ cleanup:
   return test_failure;
 }
 
-#else /* without pthread or Windows, this test doesn't work */
+#else /* without pthread or Windows, this test does not work */
 static CURLcode test_lib3026(const char *URL)
 {
   curl_version_info_data *ver;

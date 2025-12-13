@@ -28,16 +28,12 @@
 #include <openssl/crypto.h>
 #endif
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* DllMain() must only be defined for Windows DLL builds. */
 #if defined(_WIN32) && !defined(CURL_STATICLIB)
 
 #if defined(USE_OPENSSL) && \
   !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC) && \
-  !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
+  !defined(LIBRESSL_VERSION_NUMBER)
 #define PREVENT_OPENSSL_MEMLEAK
 #endif
 

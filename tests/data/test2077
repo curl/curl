@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ GSS-API
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Content-Length: 23
 

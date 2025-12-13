@@ -30,10 +30,6 @@
 #include "headers.h"
 #include "curlx/strparse.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
 /* Generate the curl_header struct for the user. This function MUST assign all
@@ -51,7 +47,7 @@ static void copy_header_external(struct Curl_header_store *hs,
   h->index = index;
   /* this will randomly OR a reserved bit for the sole purpose of making it
      impossible for applications to do == comparisons, as that would otherwise
-     be very tempting and then lead to the reserved bits not being reserved
+     be tempting and then lead to the reserved bits not being reserved
      anymore. */
   h->origin = (unsigned int)(hs->type | (1 << 27));
   h->anchor = e;
@@ -73,7 +69,7 @@ CURLHcode curl_easy_header(CURL *easy,
   struct Curl_header_store *hs = NULL;
   struct Curl_header_store *pick = NULL;
   if(!name || !hout || !data ||
-     (type > (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|CURLH_1XX|
+     (type > (CURLH_HEADER | CURLH_TRAILER | CURLH_CONNECT | CURLH_1XX |
               CURLH_PSEUDO)) || !type || (request < -1))
     return CURLHE_BAD_ARGUMENT;
   if(!Curl_llist_count(&data->state.httphdrs))
@@ -268,33 +264,33 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   return CURLE_OK;
 }
 
-
 /*
  * Curl_headers_push() gets passed a full HTTP header to store. It gets called
- * immediately before the header callback. The header is CRLF terminated.
+ * immediately before the header callback. The header is CRLF, CR or LF
+ * terminated.
  */
 CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
+                           size_t hlen, /* length of header */
                            unsigned char type)
 {
   char *value = NULL;
   char *name = NULL;
-  char *end;
-  size_t hlen; /* length of the incoming header */
   struct Curl_header_store *hs;
   CURLcode result = CURLE_OUT_OF_MEMORY;
+  const size_t ilen = hlen;
 
   if((header[0] == '\r') || (header[0] == '\n'))
     /* ignore the body separator */
     return CURLE_OK;
 
-  end = strchr(header, '\r');
-  if(!end) {
-    end = strchr(header, '\n');
-    if(!end)
-      /* neither CR nor LF as terminator is not a valid header */
-      return CURLE_WEIRD_SERVER_REPLY;
-  }
-  hlen = end - header;
+  /* trim off newline characters */
+  if(hlen && (header[hlen - 1] == '\n'))
+    hlen--;
+  if(hlen && (header[hlen - 1] == '\r'))
+    hlen--;
+  if(hlen == ilen)
+    /* neither CR nor LF as terminator is not a valid header */
+    return CURLE_WEIRD_SERVER_REPLY;
 
   if((header[0] == ' ') || (header[0] == '\t')) {
     if(data->state.prevhead)
@@ -317,7 +313,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     return CURLE_TOO_LARGE;
   }
 
-  hs = calloc(1, sizeof(*hs) + hlen);
+  hs = curlx_calloc(1, sizeof(*hs) + hlen);
   if(!hs)
     return CURLE_OUT_OF_MEMORY;
   memcpy(hs->buffer, header, hlen);
@@ -336,7 +332,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   }
   else {
     failf(data, "Invalid response header");
-    free(hs);
+    curlx_free(hs);
   }
   return result;
 }
@@ -364,7 +360,7 @@ static CURLcode hds_cw_collect_write(struct Curl_easy *data,
        (type & CLIENTWRITE_1XX ? CURLH_1XX :
         (type & CLIENTWRITE_TRAILER ? CURLH_TRAILER :
          CURLH_HEADER)));
-    CURLcode result = Curl_headers_push(data, buf, htype);
+    CURLcode result = Curl_headers_push(data, buf, blen, htype);
     CURL_TRC_WRITE(data, "header_collect pushed(type=%x, len=%zu) -> %d",
                    htype, blen, result);
     if(result)
@@ -417,7 +413,7 @@ CURLcode Curl_headers_cleanup(struct Curl_easy *data)
   for(e = Curl_llist_head(&data->state.httphdrs); e; e = n) {
     struct Curl_header_store *hs = Curl_node_elem(e);
     n = Curl_node_next(e);
-    free(hs);
+    curlx_free(hs);
   }
   headers_reset(data);
   return CURLE_OK;

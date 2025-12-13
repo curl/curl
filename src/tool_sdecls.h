@@ -109,7 +109,6 @@ typedef enum {
   TRACE_PLAIN  /* -v/--verbose type */
 } trace;
 
-
 /*
  * 'HttpReq' enumeration represents HTTP request types.
  */
@@ -122,7 +121,6 @@ typedef enum {
   TOOL_HTTPREQ_SIMPLEPOST,
   TOOL_HTTPREQ_PUT
 } HttpReq;
-
 
 /*
  * Complete struct declarations which have OperationConfig struct members,

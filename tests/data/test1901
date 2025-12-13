@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,7 +10,7 @@ CURLOPT_READFUNCTION
 
 # Server-side
 <reply>
-<data crlf="yes" nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 6
 Content-Type: text/html

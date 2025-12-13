@@ -15,7 +15,7 @@ Added-in: 7.10.3
 
 # NAME
 
-CURLINFO_PRIVATE - get the private pointer
+CURLINFO_PRIVATE - private pointer
 
 # SYNOPSIS
 

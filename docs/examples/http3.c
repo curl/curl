@@ -22,10 +22,11 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Very simple HTTP/3 GET
+ * Simple HTTP/3 GET
  * </DESC>
  */
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 int main(void)

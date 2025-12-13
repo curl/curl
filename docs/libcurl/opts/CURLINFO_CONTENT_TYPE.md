@@ -16,7 +16,7 @@ Added-in: 7.9.4
 
 # NAME
 
-CURLINFO_CONTENT_TYPE - get Content-Type
+CURLINFO_CONTENT_TYPE - Content-Type of response
 
 # SYNOPSIS
 

@@ -15,7 +15,7 @@ Added-in: 7.52.0
 
 # NAME
 
-CURLINFO_PROTOCOL - get the protocol used in the connection
+CURLINFO_PROTOCOL - URL scheme used in transfer
 
 # SYNOPSIS
 
@@ -27,12 +27,12 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROTOCOL, long *p);
 
 # DESCRIPTION
 
-This option is deprecated. We strongly recommend using
-CURLINFO_SCHEME(3) instead, because this option cannot return all
-possible protocols.
+This option is deprecated. We strongly recommend using CURLINFO_SCHEME(3)
+instead, because this option cannot return all possible schemes. The scheme
+might also sometimes be referred to as the protocol.
 
-Pass a pointer to a long to receive the version used in the last http
-connection. The returned value is set to one of these values:
+Pass a pointer to a long to receive the scheme used in the last transfer. The
+returned value is set to one of these values:
 
 ~~~c
 CURLPROTO_DICT, CURLPROTO_FILE, CURLPROTO_FTP, CURLPROTO_FTPS,
@@ -57,8 +57,8 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     res = curl_easy_perform(curl);
     if(res == CURLE_OK) {
-      long protocol;
-      curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
+      long scheme;
+      curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &scheme);
     }
     curl_easy_cleanup(curl);
   }

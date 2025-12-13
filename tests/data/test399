@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,15 +6,13 @@ URL
 </keywords>
 </info>
 
-
-#
 # Client-side
 <client>
 <server>
 http
 </server>
 <name>
-65536 bytes long host name in URL
+65536 bytes long hostname in URL
 </name>
 <file name="%LOGDIR/input%TESTNUM">
 url = http://%repeat[65536 x a]%/399

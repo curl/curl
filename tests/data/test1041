@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 # Similar to test33
 <info>
@@ -11,7 +12,7 @@ Content-Range
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
@@ -50,9 +51,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T%LOGDIR/test%TESTNUMBER.txt -C -
 
 # Verify data after the test has been "shot"
 <verify>
-# curl doesn't do a HEAD request on the remote file so it has no idea whether
+# curl does not do a HEAD request on the remote file so it has no idea whether
 # it can skip part of the file or not.  Instead, it sends the entire file.
-<protocol>
+<protocol crlf="headers">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 0-99/100

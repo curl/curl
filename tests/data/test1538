@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ verbose logs
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
@@ -25,7 +25,6 @@ libcurl strerror API call tests
 </name>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>

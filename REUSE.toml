@@ -13,16 +13,11 @@ SPDX-PackageDownloadLocation = "https://curl.se/"
 
 [[annotations]]
 path = [
-  ".mailmap",
-  "docs/FAQ",
   "docs/INSTALL",
-  "docs/KNOWN_BUGS",
   "docs/libcurl/symbols-in-versions",
   "docs/MAIL-ETIQUETTE",
   "docs/options-in-versions",
   "docs/THANKS",
-  "docs/TODO",
-  "GIT-INFO.md",
   "lib/libcurl.vers.in",
   "lib/libcurl.def",
   "packages/OS400/README.OS400",
@@ -37,6 +32,7 @@ path = [
   "RELEASE-NOTES",
   "renovate.json",
   "tests/certs/**",
+  "tests/data/data**",
   "tests/data/test**",
   "tests/valgrind.supp",
 ]

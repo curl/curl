@@ -143,8 +143,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
           if(++i >= a)
             break;
           fputc(',', stream);
-          if(curl_easy_header(per->curl, name, i, CURLH_HEADER,
-                              -1, &header))
+          if(curl_easy_header(per->curl, name, i, CURLH_HEADER, -1, &header))
             break;
         } while(1);
         fputc(']', stream);

@@ -27,10 +27,6 @@
 #include "curl_printf.h"
 #include "curlx/strparse.h"
 
-#include "curl_memory.h"
-/* The last #include file should be: */
-#include "memdebug.h"
-
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE
@@ -175,8 +171,8 @@ static int dollarstring(const char *p, const char **end)
   return (int)num - 1;
 }
 
-#define is_arg_used(x,y) ((x)[(y)/8] & (1 << ((y)&7)))
-#define mark_arg_used(x,y) ((x)[y/8] |= (unsigned char)(1 << ((y)&7)))
+#define is_arg_used(x, y)   ((x)[(y) / 8] & (1 << ((y) & 7)))
+#define mark_arg_used(x, y) ((x)[y / 8] |= (unsigned char)(1 << ((y) & 7)))
 
 /*
  * Parse the format string.
@@ -210,7 +206,7 @@ static int parsefmt(const char *format,
   int max_param = -1;
   int i;
   int ocount = 0;
-  unsigned char usedinput[MAX_PARAMETERS/8];
+  unsigned char usedinput[MAX_PARAMETERS / 8];
   size_t outlen = 0;
   struct outsegment *optr;
   int use_dollar = DOLLAR_UNKNOWN;
@@ -368,8 +364,15 @@ static int parsefmt(const char *format,
           if(!(flags & FLAGS_LEFT))
             flags |= FLAGS_PAD_NIL;
           FALLTHROUGH();
-        case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9': {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': {
           curl_off_t num;
           flags |= FLAGS_WIDTH;
           fmt--;
@@ -435,7 +438,7 @@ static int parsefmt(const char *format,
           type = FORMAT_LONGU;
         else
           type = FORMAT_INTU;
-        flags |= FLAGS_OCTAL|FLAGS_UNSIGNED;
+        flags |= FLAGS_OCTAL | FLAGS_UNSIGNED;
         break;
       case 'x':
         if(flags & FLAGS_LONGLONG)
@@ -444,7 +447,7 @@ static int parsefmt(const char *format,
           type = FORMAT_LONGU;
         else
           type = FORMAT_INTU;
-        flags |= FLAGS_HEX|FLAGS_UNSIGNED;
+        flags |= FLAGS_HEX | FLAGS_UNSIGNED;
         break;
       case 'X':
         if(flags & FLAGS_LONGLONG)
@@ -453,7 +456,7 @@ static int parsefmt(const char *format,
           type = FORMAT_LONGU;
         else
           type = FORMAT_INTU;
-        flags |= FLAGS_HEX|FLAGS_UPPER|FLAGS_UNSIGNED;
+        flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
         break;
       case 'c':
         type = FORMAT_INT;
@@ -468,7 +471,7 @@ static int parsefmt(const char *format,
         break;
       case 'E':
         type = FORMAT_DOUBLE;
-        flags |= FLAGS_FLOATE|FLAGS_UPPER;
+        flags |= FLAGS_FLOATE | FLAGS_UPPER;
         break;
       case 'g':
         type = FORMAT_DOUBLE;
@@ -476,7 +479,7 @@ static int parsefmt(const char *format,
         break;
       case 'G':
         type = FORMAT_DOUBLE;
-        flags |= FLAGS_FLOATG|FLAGS_UPPER;
+        flags |= FLAGS_FLOATG | FLAGS_UPPER;
         break;
       default:
         /* invalid instruction, disregard and continue */
@@ -631,9 +634,9 @@ static bool out_double(void *userp,
                        double dnum,
                        char *work, int *donep)
 {
-  char formatbuf[32]="%";
+  char formatbuf[32] = "%";
   char *fptr = &formatbuf[1];
-  size_t left = sizeof(formatbuf)-strlen(formatbuf);
+  size_t left = sizeof(formatbuf) - strlen(formatbuf);
   int flags = p->flags;
   int width = p->width;
   int prec = p->prec;
@@ -749,7 +752,7 @@ static bool out_number(void *userp,
     if(!(flags & FLAGS_LEFT))
       while(--width > 0)
         OUTCHAR(' ');
-    OUTCHAR((char) num);
+    OUTCHAR((char)num);
     if(flags & FLAGS_LEFT)
       while(--width > 0)
         OUTCHAR(' ');
@@ -872,7 +875,7 @@ static bool out_string(void *userp,
 
   if(!str) {
     /* Write null string if there is space.  */
-    if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
+    if(prec == -1 || prec >= (int)sizeof(nilstr) - 1) {
       str = nilstr;
       len = sizeof(nilstr) - 1;
       /* Disable quotes around (nil) */
@@ -920,10 +923,10 @@ static bool out_pointer(void *userp,
 {
   /* Generic pointer.  */
   if(ptr) {
-    size_t num = (size_t) ptr;
+    size_t num = (size_t)ptr;
 
     /* If the pointer is not NULL, write it as a %#x spec.  */
-    p->flags |= FLAGS_HEX|FLAGS_ALT;
+    p->flags |= FLAGS_HEX | FLAGS_ALT;
     if(out_number(userp, stream, p, num, 0, work, donep))
       return TRUE;
   }
@@ -962,13 +965,12 @@ static bool out_pointer(void *userp,
  * All output is sent to the 'stream()' callback, one byte at a time.
  */
 
-static int formatf(
-  void *userp, /* untouched by format(), just sent to the stream() function in
-                  the second argument */
-  /* function pointer called for each output character */
-  int (*stream)(unsigned char, void *),
-  const char *format,    /* %-formatted string */
-  va_list ap_save) /* list of parameters */
+static int formatf(void *userp, /* untouched by format(), just sent to the
+                                   stream() function in the second argument */
+                   /* function pointer called for each output character */
+                   int (*stream)(unsigned char, void *),
+                   const char *format, /* %-formatted string */
+                   va_list ap_save) /* list of parameters */
 {
   int done = 0;   /* number of characters written  */
   int i;
@@ -1069,15 +1071,15 @@ static int formatf(
       /* Answer the count of characters written.  */
 #ifdef HAVE_LONG_LONG_TYPE
       if(p.flags & FLAGS_LONGLONG)
-        *(LONG_LONG_TYPE *) iptr->val.ptr = (LONG_LONG_TYPE)done;
+        *(LONG_LONG_TYPE *)iptr->val.ptr = (LONG_LONG_TYPE)done;
       else
 #endif
         if(p.flags & FLAGS_LONG)
-          *(long *) iptr->val.ptr = (long)done;
+          *(long *)iptr->val.ptr = (long)done;
       else if(!(p.flags & FLAGS_SHORT))
-        *(int *) iptr->val.ptr = (int)done;
+        *(int *)iptr->val.ptr = (int)done;
       else
-        *(short *) iptr->val.ptr = (short)done;
+        *(short *)iptr->val.ptr = (short)done;
       break;
 
     default:
@@ -1142,7 +1144,7 @@ static int alloc_addbyter(unsigned char outc, void *f)
   CURLcode result = curlx_dyn_addn(infop->b, &outc, 1);
   if(result) {
     infop->merr = result == CURLE_TOO_LARGE ? MERR_TOO_LARGE : MERR_MEM;
-    return 1 ; /* fail */
+    return 1; /* fail */
   }
   return 0;
 }
@@ -1177,7 +1179,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   }
   if(curlx_dyn_len(info.b))
     return curlx_dyn_ptr(info.b);
-  return strdup("");
+  return curlx_strdup("");
 }
 
 char *curl_maprintf(const char *format, ...)

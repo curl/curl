@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t t1971_read_cb(char *ptr, size_t size, size_t nitems, void *userp)
 {
   (void)ptr;

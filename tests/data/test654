@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,10 +8,9 @@ HTTP MIME POST
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -19,7 +19,7 @@ Content-Type: text/html
 
 hello
 </data>
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
@@ -61,7 +61,6 @@ This is data from a file
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
@@ -72,55 +71,55 @@ s/boundary=------------------------[A-Za-z0-9]*/boundary=-----------------------
 # boundary string and since 5 of them are in the body contents, we see
 # (5*12) == 60 bytes less
 <protocol>
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Content-Length: 0
-
-POST /%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-Accept: */*
-Transfer-Encoding: chunked
-Content-Type: multipart/form-data; boundary=----------------------------
-Expect: 100-continue
-
-1c1
-------------------------------
-Content-Disposition: form-data; name="greeting"
-Content-Type: application/X-Greeting
-Content-Transfer-Encoding: base64
-X-Test-Number: %TESTNUMBER
-
-aGVsbG8=
-------------------------------
-Content-Disposition: form-data; filename="file%TESTNUMBER.txt"
-Content-Type: text/plain
-
+POST /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Content-Length: 0%CR
+%CR
+POST /%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+Accept: */*%CR
+Transfer-Encoding: chunked%CR
+Content-Type: multipart/form-data; boundary=----------------------------%CR
+Expect: 100-continue%CR
+%CR
+1c1%CR
+------------------------------%CR
+Content-Disposition: form-data; name="greeting"%CR
+Content-Type: application/X-Greeting%CR
+Content-Transfer-Encoding: base64%CR
+X-Test-Number: %TESTNUMBER%CR
+%CR
+aGVsbG8=%CR
+------------------------------%CR
+Content-Disposition: form-data; filename="file%TESTNUMBER.txt"%CR
+Content-Type: text/plain%CR
+%CR
 This is data from a file
+%CR
+------------------------------%CR
+Content-Disposition: form-data%CR
+%CR
+%CR
+1%CR
+d%CR
+1%CR
+u%CR
+1%CR
+m%CR
+1%CR
+m%CR
+1%CR
+y%CR
+1%CR
 
-------------------------------
-Content-Disposition: form-data
-
-
-1
-d
-1
-u
-1
-m
-1
-m
-1
-y
-1
-
-
-36
-
---------------------------------
-
-0
-
+%CR
+36%CR
+%CR
+--------------------------------%CR
+%CR
+0%CR
+%CR
 </protocol>
 </verify>
 </testcase>

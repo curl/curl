@@ -21,7 +21,7 @@ Added-in: 7.48.0
 
 # NAME
 
-CURLINFO_TLS_SESSION, CURLINFO_TLS_SSL_PTR - get TLS session info
+CURLINFO_TLS_SSL_PTR - TLS session info
 
 # SYNOPSIS
 
@@ -29,12 +29,6 @@ CURLINFO_TLS_SESSION, CURLINFO_TLS_SSL_PTR - get TLS session info
 #include <curl/curl.h>
 
 CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SSL_PTR,
-                           struct curl_tlssessioninfo **session);
-
-/* if you need compatibility with libcurl < 7.48.0 use
-   CURLINFO_TLS_SESSION instead: */
-
-CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_TLS_SESSION,
                            struct curl_tlssessioninfo **session);
 ~~~
 

@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 struct t510_WriteThis {
   int counter;
 };
@@ -42,14 +40,14 @@ static size_t t510_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t510_WriteThis *pooh = (struct t510_WriteThis *)userp;
   const char *data;
 
-  if(size*nmemb < 1)
+  if(size * nmemb < 1)
     return 0;
 
   data = testpost[pooh->counter];
 
   if(data) {
     size_t len = strlen(data);
-    if(size*nmemb < len) {
+    if(size * nmemb < len) {
       curl_mfprintf(stderr, "read buffer is too small to run test\n");
       return 0;
     }

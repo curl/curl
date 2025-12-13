@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -28,7 +29,6 @@ hello
 </file>
 </client>
 
-#
 # Verify that the test runs to completion without crashing
 <verify>
 <errorcode>

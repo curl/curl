@@ -28,20 +28,20 @@
 
 #ifdef USE_EVENTFD
 
-#define wakeup_write  write
-#define wakeup_read   read
-#define wakeup_close  close
-#define wakeup_create(p,nb) Curl_eventfd(p,nb)
+#define wakeup_write         write
+#define wakeup_read          read
+#define wakeup_close         close
+#define wakeup_create(p, nb) Curl_eventfd(p, nb)
 
 #include <curl/curl.h>
 int Curl_eventfd(curl_socket_t socks[2], bool nonblocking);
 
 #elif defined(HAVE_PIPE)
 
-#define wakeup_write  write
-#define wakeup_read   read
-#define wakeup_close  close
-#define wakeup_create(p,nb) Curl_pipe(p,nb)
+#define wakeup_write         write
+#define wakeup_read          read
+#define wakeup_close         close
+#define wakeup_create(p, nb) Curl_pipe(p, nb)
 
 #include <curl/curl.h>
 int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
@@ -67,7 +67,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking);
 #endif
 
 #define USE_SOCKETPAIR
-#define wakeup_create(p,nb)                                     \
+#define wakeup_create(p, nb)                                    \
   Curl_socketpair(SOCKETPAIR_FAMILY, SOCKETPAIR_TYPE, 0, p, nb)
 
 #endif /* USE_EVENTFD */

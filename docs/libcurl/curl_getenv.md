@@ -29,7 +29,8 @@ curl_getenv() is a portable wrapper for the getenv() function, meant to
 emulate its behavior and provide an identical interface for all operating
 systems libcurl builds on (including Windows).
 
-You must curl_free(3) the returned string when you are done with it.
+You must curl_free(3) the returned string when you are done with it and,
+although not constrained by its type, it may not be altered.
 
 # %PROTOCOLS%
 

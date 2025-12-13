@@ -68,7 +68,7 @@ int main(void)
     blob.len = filesize;
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLKEY, "key.pem");
     curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "s3cret");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSLCERT_BLOB, &blob);

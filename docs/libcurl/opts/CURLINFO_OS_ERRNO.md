@@ -14,7 +14,7 @@ Added-in: 7.12.2
 
 # NAME
 
-CURLINFO_OS_ERRNO - get errno number from last connect failure
+CURLINFO_OS_ERRNO - errno number from last connect failure
 
 # SYNOPSIS
 

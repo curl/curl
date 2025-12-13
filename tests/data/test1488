@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,11 +8,10 @@ manpages
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <name>
-symbols-in-versions and manpages agree on added-in versions
+symbols-in-versions and man pages agree on added-in versions
 </name>
 
 <command type="perl">

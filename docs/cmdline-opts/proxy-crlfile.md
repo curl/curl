@@ -11,7 +11,7 @@ See-also:
   - crlfile
   - proxy
 Example:
-  - --proxy-crlfile rejects.txt -x https://proxy $URL
+  - --proxy-crlfile rejects.txt -x https://proxy.example $URL
 ---
 
 # `--proxy-crlfile`

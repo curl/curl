@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
       long used;
       res = curl_easy_getinfo(curl, CURLINFO_USED_PROXY, &used);
       if(!res) {
-        printf("The proxy was %sused\n", used ? "": "NOT ");
+        printf("The proxy was %sused\n", used ? "" : "NOT ");
       }
     }
     curl_easy_cleanup(curl);

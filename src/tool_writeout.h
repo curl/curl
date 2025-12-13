@@ -56,7 +56,7 @@ typedef enum {
   VAR_INPUT_URLQUERY,
   VAR_INPUT_URLFRAGMENT,
   VAR_INPUT_URLZONEID,
-  /* the same ones again for url *effective* */
+  /* the same ones again for URL *effective* */
   VAR_INPUT_URLESCHEME, /* keep this the first URLE* variable */
   VAR_INPUT_URLEUSER,
   VAR_INPUT_URLEPASSWORD,

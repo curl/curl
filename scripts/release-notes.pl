@@ -31,10 +31,10 @@
 #
 # $ ./scripts/release-notes.pl
 #
-# 2. Edit RELEASE-NOTES and remove all entries that don't belong.  Unused
+# 2. Edit RELEASE-NOTES and remove all entries that do not belong.  Unused
 # references below will be cleaned up in the next step. Make sure to move
 # "changes" up to the changes section. All entries will by default be listed
-# under bug-fixes as this script can't know where to put them.
+# under bug-fixes as this script cannot know where to put them.
 #
 # 3. Run the cleanup script and let it sort the entries and remove unused
 # references from lines you removed in step (2):

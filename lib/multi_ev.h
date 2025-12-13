@@ -29,7 +29,7 @@
 struct Curl_easy;
 struct Curl_multi;
 struct easy_pollset;
-struct uint_bset;
+struct uint32_bset;
 
 /* meta key for event pollset at easy handle or connection */
 #define CURL_META_MEV_POLLSET   "meta:mev:ps"
@@ -55,7 +55,7 @@ CURLMcode Curl_multi_ev_assess_xfer(struct Curl_multi *multi,
                                     struct Curl_easy *data);
 /* Assess all easy handles on the list */
 CURLMcode Curl_multi_ev_assess_xfer_bset(struct Curl_multi *multi,
-                                         struct uint_bset *set);
+                                         struct uint32_bset *set);
 /* Assess the connection by getting its current pollset */
 CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
                                     struct Curl_easy *data,
@@ -63,8 +63,7 @@ CURLMcode Curl_multi_ev_assess_conn(struct Curl_multi *multi,
 
 /* Mark all transfers tied to the given socket as dirty */
 void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
-                               curl_socket_t s,
-                               bool *run_cpool);
+                               curl_socket_t s);
 
 /* Socket will be closed, forget anything we know about it. */
 void Curl_multi_ev_socket_done(struct Curl_multi *multi,

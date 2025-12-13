@@ -53,7 +53,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
-#include "share.h"
+#include "curl_share.h"
 #include "strdup.h"
 #include "progress.h"
 #include "easyif.h"
@@ -75,14 +75,11 @@
 #include "system_win32.h"
 #include "http2.h"
 #include "curlx/dynbuf.h"
+#include "bufref.h"
 #include "altsvc.h"
 #include "hsts.h"
 
 #include "easy_lock.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized;
@@ -91,7 +88,7 @@ static long          easy_init_flags;
 #ifdef GLOBAL_INIT_IS_THREADSAFE
 
 static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
-#define global_init_lock() curl_simple_lock_lock(&s_lock)
+#define global_init_lock()   curl_simple_lock_lock(&s_lock)
 #define global_init_unlock() curl_simple_lock_unlock(&s_lock)
 
 #else
@@ -106,12 +103,14 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#ifdef UNDER_CE
+#ifdef HAVE_STRDUP
+#ifdef _WIN32
 #define system_strdup _strdup
-#elif !defined(HAVE_STRDUP)
-#define system_strdup Curl_strdup
 #else
 #define system_strdup strdup
+#endif
+#else
+#define system_strdup Curl_strdup
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -200,7 +199,7 @@ static CURLcode global_init(long flags, bool memoryfuncs)
 #ifdef DEBUGBUILD
   if(getenv("CURL_GLOBAL_INIT"))
     /* alloc data that will leak if *cleanup() is not called! */
-    leakpointer = malloc(1);
+    leakpointer = curlx_malloc(1);
 #endif
 
   return CURLE_OK;
@@ -209,7 +208,6 @@ fail:
   initialized--; /* undo the increase */
   return CURLE_FAILED_INIT;
 }
-
 
 /**
  * curl_global_init() globally initializes curl given a bitwise set of the
@@ -299,7 +297,7 @@ void curl_global_cleanup(void)
   Curl_ssh_cleanup();
 
 #ifdef DEBUGBUILD
-  free(leakpointer);
+  curlx_free(leakpointer);
 #endif
 
   easy_init_flags = 0;
@@ -413,7 +411,6 @@ static int events_timer(CURLM *multi,    /* multi handle */
   return 0;
 }
 
-
 /* poll2cselect
  *
  * convert from poll() bit definitions to libcurl's CURL_CSELECT_* ones
@@ -429,7 +426,6 @@ static int poll2cselect(int pollmask)
     omask |= CURL_CSELECT_ERR;
   return omask;
 }
-
 
 /* socketcb2poll
  *
@@ -480,17 +476,16 @@ static int events_socket(CURL *easy,      /* easy handle */
           prev->next = nxt;
         else
           ev->list = nxt;
-        free(m);
+        curlx_free(m);
         infof(data, "socket cb: socket %" FMT_SOCKET_T " REMOVED", s);
       }
       else {
         /* The socket 's' is already being monitored, update the activity
            mask. Convert from libcurl bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
-        infof(data, "socket cb: socket %" FMT_SOCKET_T
-              " UPDATED as %s%s", s,
-              (what&CURL_POLL_IN) ? "IN" : "",
-              (what&CURL_POLL_OUT) ? "OUT" : "");
+        infof(data, "socket cb: socket %" FMT_SOCKET_T " UPDATED as %s%s", s,
+              (what & CURL_POLL_IN) ? "IN" : "",
+              (what & CURL_POLL_OUT) ? "OUT" : "");
       }
       break;
     }
@@ -506,7 +501,7 @@ static int events_socket(CURL *easy,      /* easy handle */
       DEBUGASSERT(0);
     }
     else {
-      m = malloc(sizeof(struct socketmonitor));
+      m = curlx_malloc(sizeof(struct socketmonitor));
       if(m) {
         m->next = ev->list;
         m->socket.fd = s;
@@ -514,8 +509,8 @@ static int events_socket(CURL *easy,      /* easy handle */
         m->socket.revents = 0;
         ev->list = m;
         infof(data, "socket cb: socket %" FMT_SOCKET_T " ADDED as %s%s", s,
-              (what&CURL_POLL_IN) ? "IN" : "",
-              (what&CURL_POLL_OUT) ? "OUT" : "");
+              (what & CURL_POLL_IN) ? "IN" : "",
+              (what & CURL_POLL_OUT) ? "OUT" : "");
       }
       else
         return CURLE_OUT_OF_MEMORY;
@@ -524,7 +519,6 @@ static int events_socket(CURL *easy,      /* easy handle */
 
   return 0;
 }
-
 
 /*
  * events_setup()
@@ -615,7 +609,7 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
   if(!pollrc) {
     /* timeout! */
     ev->ms = 0;
-    /* fprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
+    /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
     mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                                      &ev->running_handles);
   }
@@ -640,16 +634,16 @@ static CURLMcode monitor_sockets(struct Curl_multi *multi,
       /* If nothing updated the timeout, we decrease it by the spent time.
        * If it was updated, it has the new timeout time stored already.
        */
-      timediff_t timediff = curlx_timediff(curlx_now(), *before);
-      if(timediff > 0) {
+      timediff_t spent_ms = curlx_timediff_ms(curlx_now(), *before);
+      if(spent_ms > 0) {
 #if DEBUG_EV_POLL
         curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
-                      "time spent %ldms\n", ev->ms, (long)timediff);
+                      "time spent %ldms\n", ev->ms, (long)spent_ms);
 #endif
-        if(timediff > ev->ms)
+        if(spent_ms > ev->ms)
           ev->ms = 0;
         else
-          ev->ms -= (long)timediff;
+          ev->ms -= (long)spent_ms;
       }
     }
   }
@@ -699,7 +693,6 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
   return result;
 }
 
-
 /* easy_events()
  *
  * Runs a transfer in a blocking manner using the events-based API
@@ -708,7 +701,7 @@ static CURLcode easy_events(struct Curl_multi *multi)
 {
   /* this struct is made static to allow it to be used after this function
      returns and curl_multi_remove_handle() is called */
-  static struct events evs = {-1, FALSE, 0, NULL, 0};
+  static struct events evs = { -1, FALSE, 0, NULL, 0 };
 
   /* if running event-based, do some further multi inits */
   events_setup(multi, &evs);
@@ -755,7 +748,6 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
   return result;
 }
-
 
 /*
  * easy_perform() is the internal interface that performs a blocking
@@ -945,7 +937,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   i = STRING_COPYPOSTFIELDS;
   if(src->set.str[i]) {
     if(src->set.postfieldsize == -1)
-      dst->set.str[i] = strdup(src->set.str[i]);
+      dst->set.str[i] = curlx_strdup(src->set.str[i]);
     else
       /* postfieldsize is curl_off_t, Curl_memdup() takes a size_t ... */
       dst->set.str[i] = Curl_memdup(src->set.str[i],
@@ -986,7 +978,7 @@ CURL *curl_easy_duphandle(CURL *d)
 
   if(!GOOD_EASY_HANDLE(data))
     goto fail;
-  outcurl = calloc(1, sizeof(struct Curl_easy));
+  outcurl = curlx_calloc(1, sizeof(struct Curl_easy));
   if(!outcurl)
     goto fail;
 
@@ -1000,14 +992,16 @@ CURL *curl_easy_duphandle(CURL *d)
   Curl_hash_init(&outcurl->meta_hash, 23,
                  Curl_hash_str, curlx_str_key_compare, dupeasy_meta_freeentry);
   curlx_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
+  Curl_bufref_init(&outcurl->state.url);
+  Curl_bufref_init(&outcurl->state.referer);
   Curl_netrc_init(&outcurl->state.netrc);
 
   /* the connection pool is setup on demand */
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
-  outcurl->mid = UINT_MAX;
-  outcurl->master_mid = UINT_MAX;
+  outcurl->mid = UINT32_MAX;
+  outcurl->master_mid = UINT32_MAX;
 
 #ifndef CURL_DISABLE_HTTP
   Curl_llist_init(&outcurl->state.httphdrs, NULL);
@@ -1026,10 +1020,10 @@ CURL *curl_easy_duphandle(CURL *d)
   if(data->cookies && data->state.cookie_engine) {
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
-    outcurl->cookies = Curl_cookie_init(outcurl, NULL, outcurl->cookies,
-                                        data->set.cookiesession);
+    outcurl->cookies = Curl_cookie_init();
     if(!outcurl->cookies)
       goto fail;
+    outcurl->state.cookie_engine = TRUE;
   }
 
   if(data->state.cookielist) {
@@ -1039,18 +1033,19 @@ CURL *curl_easy_duphandle(CURL *d)
   }
 #endif
 
-  if(data->state.url) {
-    outcurl->state.url = strdup(data->state.url);
-    if(!outcurl->state.url)
+  if(Curl_bufref_ptr(&data->state.url)) {
+    Curl_bufref_set(&outcurl->state.url,
+                    Curl_bufref_dup(&data->state.url), 0,
+                    curl_free);
+    if(!Curl_bufref_ptr(&outcurl->state.url))
       goto fail;
-    outcurl->state.url_alloc = TRUE;
   }
-
-  if(data->state.referer) {
-    outcurl->state.referer = strdup(data->state.referer);
-    if(!outcurl->state.referer)
+  if(Curl_bufref_ptr(&data->state.referer)) {
+    Curl_bufref_set(&outcurl->state.referer,
+                    Curl_bufref_dup(&data->state.referer), 0,
+                    curl_free);
+    if(!Curl_bufref_ptr(&outcurl->state.referer))
       goto fail;
-    outcurl->state.referer_alloc = TRUE;
   }
 
   /* Reinitialize an SSL engine for the new handle
@@ -1091,13 +1086,13 @@ fail:
 
   if(outcurl) {
 #ifndef CURL_DISABLE_COOKIES
-    free(outcurl->cookies);
+    curlx_free(outcurl->cookies);
 #endif
     curlx_dyn_free(&outcurl->state.headerb);
     Curl_altsvc_cleanup(&outcurl->asi);
     Curl_hsts_cleanup(&outcurl->hsts);
     Curl_freeset(outcurl);
-    free(outcurl);
+    curlx_free(outcurl);
   }
 
   return NULL;
@@ -1144,7 +1139,7 @@ void curl_easy_reset(CURL *d)
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_DIGEST_AUTH)
   Curl_http_auth_cleanup_digest(data);
 #endif
-  data->master_mid = UINT_MAX;
+  data->master_mid = UINT32_MAX;
 }
 
 /*
@@ -1218,7 +1213,6 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   return result;
 }
-
 
 static CURLcode easy_connection(struct Curl_easy *data,
                                 struct connectdata **connp)

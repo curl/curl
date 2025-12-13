@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ mode=
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -18,7 +18,6 @@ returned
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -32,7 +31,6 @@ TFTP retrieve with mode=octet
 </command>
 </client>
 
-#
 # Verify pseudo protocol after the test has been "shot"
 <verify>
 <strip>

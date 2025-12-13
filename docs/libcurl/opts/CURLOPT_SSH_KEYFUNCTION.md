@@ -141,7 +141,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_SSH_KNOWNHOSTS, "/home/user/known_hosts");
 
     curl_easy_perform(curl);
-}
+  }
 }
 ~~~
 

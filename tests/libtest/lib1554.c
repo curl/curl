@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char *ldata_names[] = {
   "NONE",
   "SHARE",
@@ -44,7 +42,7 @@ static void t1554_test_lock(CURL *curl, curl_lock_data data,
   (void)data;
   (void)laccess;
   (void)useptr;
-  curl_mprintf("-> Mutex lock %s\n", ldata_names[data]);
+  curl_mprintf("-] Mutex lock %s\n", ldata_names[data]);
 }
 
 static void t1554_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
@@ -52,7 +50,7 @@ static void t1554_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
   (void)curl;
   (void)data;
   (void)useptr;
-  curl_mprintf("<- Mutex unlock %s\n", ldata_names[data]);
+  curl_mprintf("[- Mutex unlock %s\n", ldata_names[data]);
 }
 
 /* test function */

@@ -40,11 +40,8 @@
 #include "connect.h"
 #include "cfilters.h"
 #include "strdup.h"
+#include "bufref.h"
 #include "curlx/strparse.h"
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 
 /* meta key for storing protocol meta at easy handle */
@@ -121,11 +118,10 @@ static CURLcode rtsp_do_pollset(struct Curl_easy *data,
   return Curl_pollset_add_out(data, ps, data->conn->sock[FIRSTSOCKET]);
 }
 
-static
-CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len);
-static
-CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport);
-
+static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
+                                 size_t len);
+static CURLcode rtsp_parse_transport(struct Curl_easy *data,
+                                     const char *transport);
 
 /*
  * RTSP handler interface.
@@ -142,7 +138,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   ZERO_NULL,                            /* proto_pollset */
   rtsp_do_pollset,                      /* doing_pollset */
   ZERO_NULL,                            /* domore_pollset */
-  ZERO_NULL,                            /* perform_pollset */
+  Curl_http_perform_pollset,            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   rtsp_rtp_write_resp,                  /* write_resp */
   rtsp_rtp_write_resp_hd,               /* write_resp_hd */
@@ -152,7 +148,7 @@ const struct Curl_handler Curl_handler_rtsp = {
   PORT_RTSP,                            /* defport */
   CURLPROTO_RTSP,                       /* protocol */
   CURLPROTO_RTSP,                       /* family */
-  PROTOPT_NONE                          /* flags */
+  PROTOPT_CONN_REUSE                    /* flags */
 };
 
 #define MAX_RTP_BUFFERSIZE 1000000 /* arbitrary */
@@ -162,7 +158,7 @@ static void rtsp_easy_dtor(void *key, size_t klen, void *entry)
   struct RTSP *rtsp = entry;
   (void)key;
   (void)klen;
-  free(rtsp);
+  curlx_free(rtsp);
 }
 
 static void rtsp_conn_dtor(void *key, size_t klen, void *entry)
@@ -171,7 +167,7 @@ static void rtsp_conn_dtor(void *key, size_t klen, void *entry)
   (void)key;
   (void)klen;
   curlx_dyn_free(&rtspc->buf);
-  free(rtspc);
+  curlx_free(rtspc);
 }
 
 static CURLcode rtsp_setup_connection(struct Curl_easy *data,
@@ -180,21 +176,20 @@ static CURLcode rtsp_setup_connection(struct Curl_easy *data,
   struct rtsp_conn *rtspc;
   struct RTSP *rtsp;
 
-  rtspc = calloc(1, sizeof(*rtspc));
+  rtspc = curlx_calloc(1, sizeof(*rtspc));
   if(!rtspc)
     return CURLE_OUT_OF_MEMORY;
   curlx_dyn_init(&rtspc->buf, MAX_RTP_BUFFERSIZE);
   if(Curl_conn_meta_set(conn, CURL_META_RTSP_CONN, rtspc, rtsp_conn_dtor))
     return CURLE_OUT_OF_MEMORY;
 
-  rtsp = calloc(1, sizeof(struct RTSP));
+  rtsp = curlx_calloc(1, sizeof(struct RTSP));
   if(!rtsp ||
      Curl_meta_set(data, CURL_META_RTSP_EASY, rtsp, rtsp_easy_dtor))
     return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
 }
-
 
 /*
  * Function to check on various aspects of a connection.
@@ -215,17 +210,13 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
   return ret_val;
 }
 
-
 static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
 {
   struct rtsp_conn *rtspc =
     Curl_conn_meta_get(data->conn, CURL_META_RTSP_CONN);
-  CURLcode httpStatus;
 
   if(!rtspc)
     return CURLE_FAILED_INIT;
-
-  httpStatus = Curl_http_connect(data, done);
 
   /* Initialize the CSeq if not already done */
   if(data->state.rtsp_next_client_CSeq == 0)
@@ -234,8 +225,8 @@ static CURLcode rtsp_connect(struct Curl_easy *data, bool *done)
     data->state.rtsp_next_server_CSeq = 1;
 
   rtspc->rtp_channel = -1;
-
-  return httpStatus;
+  *done = TRUE;
+  return CURLE_OK;
 }
 
 static CURLcode rtsp_done(struct Curl_easy *data,
@@ -278,7 +269,6 @@ static CURLcode rtsp_done(struct Curl_easy *data,
   return httpStatus;
 }
 
-
 static CURLcode rtsp_setup_body(struct Curl_easy *data,
                                 Curl_RtspReq rtspreq,
                                 struct dynbuf *reqp)
@@ -298,7 +288,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
     else {
       if(data->set.postfields) {
-        size_t plen = strlen(data->set.postfields);
+        size_t plen = (data->set.postfieldsize >= 0) ?
+          (size_t)data->set.postfieldsize : strlen(data->set.postfields);
         req_clen = (curl_off_t)plen;
         result = Curl_creader_set_buf(data, data->set.postfields, plen);
       }
@@ -327,9 +318,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
       if(rtspreq == RTSPREQ_SET_PARAMETER ||
          rtspreq == RTSPREQ_GET_PARAMETER) {
         if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-          result = curlx_dyn_addn(reqp,
-                                  STRCONST("Content-Type: "
-                                           "text/parameters\r\n"));
+          result = curlx_dyn_addn(reqp, STRCONST("Content-Type: "
+                                                 "text/parameters\r\n"));
           if(result)
             return result;
         }
@@ -337,9 +327,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
 
       if(rtspreq == RTSPREQ_ANNOUNCE) {
         if(!Curl_checkheaders(data, STRCONST("Content-Type"))) {
-          result = curlx_dyn_addn(reqp,
-                                  STRCONST("Content-Type: "
-                                           "application/sdp\r\n"));
+          result = curlx_dyn_addn(reqp, STRCONST("Content-Type: "
+                                                 "application/sdp\r\n"));
           if(result)
             return result;
         }
@@ -391,7 +380,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
      to this origin */
 
   if(!data->state.first_host) {
-    data->state.first_host = strdup(conn->host.name);
+    data->state.first_host = curlx_strdup(conn->host.name);
     if(!data->state.first_host)
       return CURLE_OUT_OF_MEMORY;
 
@@ -480,7 +469,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(rtspreq == RTSPREQ_SETUP && !p_transport) {
     /* New Transport: setting? */
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
-      free(data->state.aptr.rtsp_transport);
+      curlx_free(data->state.aptr.rtsp_transport);
       data->state.aptr.rtsp_transport =
         curl_maprintf("Transport: %s\r\n",
                       data->set.str[STRING_RTSP_TRANSPORT]);
@@ -506,7 +495,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
        data->set.str[STRING_ENCODING]) {
-      free(data->state.aptr.accept_encoding);
+      curlx_free(data->state.aptr.accept_encoding);
       data->state.aptr.accept_encoding =
         curl_maprintf("Accept-Encoding: %s\r\n",
                       data->set.str[STRING_ENCODING]);
@@ -545,9 +534,10 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
   /* Referrer */
   Curl_safefree(data->state.aptr.ref);
-  if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
-    data->state.aptr.ref = curl_maprintf("Referer: %s\r\n",
-                                         data->state.referer);
+  if(Curl_bufref_ptr(&data->state.referer) &&
+     !Curl_checkheaders(data, STRCONST("Referer")))
+    data->state.aptr.ref =
+      curl_maprintf("Referer: %s\r\n", Curl_bufref_ptr(&data->state.referer));
 
   p_referrer = data->state.aptr.ref;
 
@@ -562,7 +552,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
-      free(data->state.aptr.rangeline);
+      curlx_free(data->state.aptr.rangeline);
       data->state.aptr.rangeline = curl_maprintf("Range: %s\r\n",
                                                  data->state.range);
       p_range = data->state.aptr.rangeline;
@@ -667,8 +657,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     /* if a request-body has been sent off, we make sure this progress is
        noted properly */
     Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
-    if(Curl_pgrsUpdate(data))
-      result = CURLE_ABORTED_BY_CALLBACK;
+    result = Curl_pgrsUpdate(data);
   }
 out:
   curlx_dyn_free(&req_buffer);
@@ -935,7 +924,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                blen, rtspc->in_header, data->req.done, rtspc->state,
                data->req.size));
   if(!result && (is_eos || blen)) {
-    result = Curl_client_write(data, CLIENTWRITE_BODY|
+    result = Curl_client_write(data, CLIENTWRITE_BODY |
                                (is_eos ? CLIENTWRITE_EOS : 0), buf, blen);
   }
 
@@ -958,8 +947,8 @@ static CURLcode rtsp_rtp_write_resp_hd(struct Curl_easy *data,
   return rtsp_rtp_write_resp(data, buf, blen, is_eos);
 }
 
-static
-CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
+static CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr,
+                                 size_t len)
 {
   size_t wrote;
   curl_write_callback writeit;
@@ -1070,8 +1059,8 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
   return CURLE_OK;
 }
 
-static
-CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
+static CURLcode rtsp_parse_transport(struct Curl_easy *data,
+                                     const char *transport)
 {
   /* If we receive multiple Transport response-headers, the linterleaved
      channels of each response header is recorded and used together for
@@ -1112,6 +1101,5 @@ CURLcode rtsp_parse_transport(struct Curl_easy *data, const char *transport)
   }
   return CURLE_OK;
 }
-
 
 #endif /* CURL_DISABLE_RTSP */

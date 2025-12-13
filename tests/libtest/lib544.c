@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib544(const char *URL)
 {
   CURL *curl;
@@ -34,7 +32,8 @@ static CURLcode test_lib544(const char *URL)
     'T', 'h', 'i', 's', '\0', ' ', 'i', 's', ' ', 't', 'e', 's', 't', ' ',
     'b', 'i', 'n', 'a', 'r', 'y', ' ', 'd', 'a', 't', 'a', ' ',
     'w', 'i', 't', 'h', ' ', 'a', 'n', ' ',
-    'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'};
+    'e', 'm', 'b', 'e', 'd', 'd', 'e', 'd', ' ', 'N', 'U', 'L'
+  };
 
   char teststring[sizeof(teststring_init)];
 

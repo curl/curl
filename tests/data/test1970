@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -55,11 +56,10 @@ http://exam.ple.com:9000/aws_sigv4/testapi/test exam.ple.com:9000:%HOSTIP:%HTTPP
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol crlf="yes">
+<protocol crlf="headers">
 PUT /aws_sigv4/testapi/test HTTP/1.1
 Host: exam.ple.com:9000
 Authorization: AWS4-HMAC-SHA256 Credential=xxx/19700101/us-east-1/s3/aws4_request, SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=a028756f42a859122e9609c1f90cae4b272d6b03bf60d9fd354138176dfa2260

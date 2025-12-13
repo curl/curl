@@ -29,7 +29,7 @@
 
 char *tool_basename(char *path);
 
-#define basename(x) tool_basename((x))
+#define basename(x) tool_basename(x)
 
 #endif /* HAVE_BASENAME */
 

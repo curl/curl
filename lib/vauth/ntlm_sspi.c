@@ -29,16 +29,10 @@
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "../urldata.h"
 #include "../curl_ntlm_core.h"
 #include "../curlx/warnless.h"
-#include "../curlx/multibyte.h"
 #include "../sendf.h"
 #include "../strdup.h"
-
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 /*
  * Curl_auth_is_ntlm_supported()
@@ -117,7 +111,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   Curl_pSecFn->FreeContextBuffer(SecurityPackage);
 
   /* Allocate our output buffer */
-  ntlm->output_token = malloc(ntlm->token_max);
+  ntlm->output_token = curlx_malloc(ntlm->token_max);
   if(!ntlm->output_token)
     return CURLE_OUT_OF_MEMORY;
 
@@ -137,7 +131,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
     ntlm->p_identity = NULL;
 
   /* Allocate our credentials handle */
-  ntlm->credentials = calloc(1, sizeof(CredHandle));
+  ntlm->credentials = curlx_calloc(1, sizeof(CredHandle));
   if(!ntlm->credentials)
     return CURLE_OUT_OF_MEMORY;
 
@@ -151,7 +145,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
     return CURLE_LOGIN_DENIED;
 
   /* Allocate our new context handle */
-  ntlm->context = calloc(1, sizeof(CtxtHandle));
+  ntlm->context = curlx_calloc(1, sizeof(CtxtHandle));
   if(!ntlm->context)
     return CURLE_OUT_OF_MEMORY;
 
@@ -215,7 +209,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   }
 
   /* Store the challenge for later use */
-  ntlm->input_token = Curl_memdup0((const char *)Curl_bufref_ptr(type2),
+  ntlm->input_token = Curl_memdup0(Curl_bufref_ptr(type2),
                                    Curl_bufref_len(type2));
   if(!ntlm->input_token)
     return CURLE_OUT_OF_MEMORY;
@@ -225,7 +219,6 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
 }
 
 /*
-* Curl_auth_create_ntlm_type3_message()
  * Curl_auth_create_ntlm_type3_message()
  *
  * This is used to generate an already encoded NTLM type-3 message ready for
@@ -271,12 +264,12 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   /* ssl context comes from schannel.
-  * When extended protection is used in IIS server,
-  * we have to pass a second SecBuffer to the SecBufferDesc
-  * otherwise IIS will not pass the authentication (401 response).
-  * Minimum supported version is Windows 7.
-  * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
-  */
+   * When extended protection is used in IIS server,
+   * we have to pass a second SecBuffer to the SecBufferDesc
+   * otherwise IIS will not pass the authentication (401 response).
+   * Minimum supported version is Windows 7.
+   * https://learn.microsoft.com/security-updates/SecurityAdvisories/2009/973811
+   */
   if(ntlm->sslContext) {
     SEC_CHANNEL_BINDINGS channelBindings;
     SecPkgContext_Bindings pkgBindings;
@@ -323,7 +316,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   }
 
   /* Return the response. */
-  result = Curl_bufref_memdup(out, ntlm->output_token, type_3_buf.cbBuffer);
+  result = Curl_bufref_memdup0(out, ntlm->output_token, type_3_buf.cbBuffer);
   Curl_auth_cleanup_ntlm(ntlm);
   return result;
 }
@@ -343,14 +336,14 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
   /* Free our security context */
   if(ntlm->context) {
     Curl_pSecFn->DeleteSecurityContext(ntlm->context);
-    free(ntlm->context);
+    curlx_free(ntlm->context);
     ntlm->context = NULL;
   }
 
   /* Free our credentials handle */
   if(ntlm->credentials) {
     Curl_pSecFn->FreeCredentialsHandle(ntlm->credentials);
-    free(ntlm->credentials);
+    curlx_free(ntlm->credentials);
     ntlm->credentials = NULL;
   }
 

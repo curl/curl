@@ -15,7 +15,7 @@ Added-in: 7.50.0
 
 # NAME
 
-CURLINFO_HTTP_VERSION - get the http version used in the connection
+CURLINFO_HTTP_VERSION - HTTP version used in the transfer
 
 # SYNOPSIS
 
@@ -27,10 +27,10 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_HTTP_VERSION, long *p);
 
 # DESCRIPTION
 
-Pass a pointer to a long to receive the version used in the last http
-connection done using this handle. The returned value is
-CURL_HTTP_VERSION_1_0, CURL_HTTP_VERSION_1_1, CURL_HTTP_VERSION_2_0,
-CURL_HTTP_VERSION_3 or 0 if the version cannot be determined.
+Pass a pointer to a long to receive the version used in the last http transfer
+done using this handle. The returned value is CURL_HTTP_VERSION_1_0,
+CURL_HTTP_VERSION_1_1, CURL_HTTP_VERSION_2_0, CURL_HTTP_VERSION_3 or 0 if the
+version cannot be determined.
 
 # %PROTOCOLS%
 

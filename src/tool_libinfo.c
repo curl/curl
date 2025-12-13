@@ -24,7 +24,6 @@
 #include "tool_setup.h"
 
 #include "tool_libinfo.h"
-#include "memdebug.h" /* keep this as LAST include */
 
 /* global variable definitions, for libcurl runtime info */
 
@@ -138,7 +137,7 @@ size_t feature_count;
 CURLcode get_libcurl_info(void)
 {
   CURLcode result = CURLE_OK;
-  const char *const *builtin;
+  const char * const *builtin;
 
   /* Pointer to libcurl's runtime version information */
   curlinfo = curl_version_info(CURLVERSION_NOW);

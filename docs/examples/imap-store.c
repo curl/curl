@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Modify the properties of an email over IMAP
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to modify an existing mail using

@@ -36,8 +36,6 @@
 #include "hash.h"
 #include "hostip.h"
 
-#include "memdebug.h" /* LAST include file */
-
 static struct Curl_dnscache hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
@@ -52,9 +50,9 @@ static void t1305_stop(void)
 {
   if(data_node) {
     Curl_freeaddrinfo(data_node->addr);
-    free(data_node);
+    curlx_free(data_node);
   }
-  free(data_key);
+  curlx_free(data_key);
   Curl_dnscache_destroy(&hp);
 }
 
@@ -64,8 +62,9 @@ static struct Curl_addrinfo *fake_ai(void)
   static const char dummy[] = "dummy";
   size_t namelen = sizeof(dummy); /* including the null-terminator */
 
-  ai = calloc(1, sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
-              namelen);
+  ai = curlx_calloc(1,
+                    sizeof(struct Curl_addrinfo) + sizeof(struct sockaddr_in) +
+                    namelen);
   if(!ai)
     return NULL;
 
@@ -86,7 +85,7 @@ static CURLcode create_node(void)
   if(!data_key)
     return CURLE_OUT_OF_MEMORY;
 
-  data_node = calloc(1, sizeof(struct Curl_dns_entry));
+  data_node = curlx_calloc(1, sizeof(struct Curl_dns_entry));
   if(!data_node)
     return CURLE_OUT_OF_MEMORY;
 

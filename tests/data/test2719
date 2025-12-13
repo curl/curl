@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -32,7 +33,7 @@ CURL_WS_FORCE_ZERO_MASK=1
 upgrade
 </servercmd>
 
-# Full list of frames: see <verify.stdout> below
+# Full list of frames: see 'verify.stdout' below
 #   Fragmented TEXT/BINARY messages, each with 2/3 fragments
 <data nocheck="yes" nonewline="yes">
 HTTP/1.1 101 Switching to WebSockets
@@ -71,7 +72,7 @@ close [0]
 0
 </errorcode>
 
-# Strip HTTP header from <protocol>
+# Strip HTTP header from 'protocol'
 <strip>
 ^GET /.*
 ^(Host|User-Agent|Accept|Upgrade|Connection|Sec-WebSocket-(Version|Key)): .*

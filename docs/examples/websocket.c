@@ -49,10 +49,10 @@ static CURLcode ping(CURL *curl, const char *send_payload)
       buf += sent; /* deduct what was sent */
       blen -= sent;
     }
-    else if(res == CURLE_AGAIN) {  /* blocked on sending */
+    else if(res == CURLE_AGAIN) { /* blocked on sending */
       fprintf(stderr, "ws: sent PING blocked, waiting a second\n");
-      sleep(1);  /* either select() on socket or max timeout would
-                    be good here. */
+      sleep(1); /* either select() on socket or max timeout would
+                   be good here. */
     }
     else /* real error sending */
       break;
@@ -85,8 +85,7 @@ retry:
               same ? "same" : "different");
     }
     else if(meta->flags & CURLWS_TEXT) {
-      fprintf(stderr, "ws: received TEXT frame '%.*s'\n", (int)rlen,
-              buffer);
+      fprintf(stderr, "ws: received TEXT frame '%.*s'\n", (int)rlen, buffer);
     }
     else if(meta->flags & CURLWS_BINARY) {
       fprintf(stderr, "ws: received BINARY frame of %u bytes\n",
@@ -99,10 +98,10 @@ retry:
       goto retry;
     }
   }
-  else if(res == CURLE_AGAIN) {  /* blocked on receiving */
+  else if(res == CURLE_AGAIN) { /* blocked on receiving */
     fprintf(stderr, "ws: PONG not there yet, waiting a second\n");
-    sleep(1);  /* either select() on socket or max timeout would
-                  be good here. */
+    sleep(1); /* either select() on socket or max timeout would
+                 be good here. */
     goto retry;
   }
   if(res)

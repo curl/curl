@@ -202,17 +202,17 @@ Other Notes:
 This release fixes known bugs #22, and #57 in the [curl.docs]known_bugs.
 file.
 
-The libcurl formdata.c module and Curl tools post form now have some
+The libcurl formdata.c module and curl tools post form now have some
 understanding of VMS file types.  Files will be posted in STREAM_LF format.
 
-The Curl tool now has some understanding of VMS file types and will upload the
+The curl tool now has some understanding of VMS file types and will upload the
 files in STREAM_LF format.
 
-When CURL is uploading a VARIABLE format VMS file, it is less efficient as in
+When curl is uploading a VARIABLE format VMS file, it is less efficient as in
 order to get the file size, it will first read the entire file once, and then
 read the file again for the actual upload.
 
-The Curl tool will now always download files into STREAM_LF format.  Even if a
+The curl tool will now always download files into STREAM_LF format.  Even if a
 file by that name with a different format already exists.  This is needed to
 allow interrupted downloads to be continued.
 
@@ -225,4 +225,4 @@ The test suites are not supported as of 7.11.0.
 The curlmsg.sdl and curlmsg.h files are generated from curlmsg.msg.
 This is not done automatically, since the .MSG file is a hand edit
 of the relevant stuff from the curl.h file.  If you want to do this
-yourself you'll need the SDL package from the freeware collection.
+yourself you need the SDL package from the freeware collection.

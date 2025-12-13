@@ -34,7 +34,7 @@ Get the definition of curl from a dictionary:
 
 Fetch two documents at once:
 
-    curl ftp://ftp.example.com/ http://www.example.com:8000/
+    curl ftp://ftp.example.com/ https://www.example.com:8000/
 
 Get a file off an FTPS server:
 
@@ -71,12 +71,12 @@ Get a file from an SMB server:
 
 Get a webpage and store in a local file with a specific name:
 
-    curl -o thatpage.html http://www.example.com/
+    curl -o thatpage.html https://www.example.com/
 
 Get a webpage and store in a local file, make the local file get the name of
 the remote document (if no filename part is specified in the URL, this fails):
 
-    curl -O http://www.example.com/index.html
+    curl -O https://www.example.com/index.html
 
 Fetch two files and store them with their remote names:
 
@@ -115,14 +115,14 @@ matching public key file must be specified using the `--pubkey` option.
 
 ### HTTP
 
-curl also supports user and password in HTTP URLs, thus you can pick a file
+curl also supports user and password in HTTP(S) URLs. You can download a file
 like:
 
-    curl http://name:passwd@http.server.example/full/path/to/file
+    curl https://name:passwd@http.server.example/full/path/to/file
 
 or specify user and password separately like in
 
-    curl -u name:passwd http://http.server.example/full/path/to/file
+    curl -u name:passwd https://http.server.example/full/path/to/file
 
 HTTP offers many different methods of authentication and curl supports
 several: Basic, Digest, NTLM and Negotiate (SPNEGO). Without telling which
@@ -151,19 +151,19 @@ Get an ftp file using an HTTP proxy named my-proxy that uses port 888:
 
     curl -x my-proxy:888 ftp://ftp.example.com/README
 
-Get a file from an HTTP server that requires user and password, using the
+Get a file from an HTTPS server that requires user and password, using the
 same proxy as above:
 
-    curl -u user:passwd -x my-proxy:888 http://www.example.com/
+    curl -u user:passwd -x my-proxy:888 https://www.example.com/
 
 Some proxies require special authentication. Specify by using -U as above:
 
-    curl -U user:passwd -x my-proxy:888 http://www.example.com/
+    curl -U user:passwd -x my-proxy:888 https://www.example.com/
 
 A comma-separated list of hosts and domains which do not use the proxy can be
 specified as:
 
-    curl --noproxy example.com -x my-proxy:888 http://www.example.com/
+    curl --noproxy example.com -x my-proxy:888 https://www.example.com/
 
 If the proxy is specified with `--proxy1.0` instead of `--proxy` or `-x`, then
 curl uses HTTP/1.0 instead of HTTP/1.1 for any `CONNECT` attempts.
@@ -204,11 +204,11 @@ one or more sub-parts of a specified document. curl supports this with the
 
 Get the first 100 bytes of a document:
 
-    curl -r 0-99 http://www.example.com/
+    curl -r 0-99 https://www.example.com/
 
 Get the last 500 bytes of a document:
 
-    curl -r -500 http://www.example.com/
+    curl -r -500 https://www.example.com/
 
 curl also supports simple ranges for FTP files as well. Then you can only
 specify start and stop position.
@@ -251,9 +251,9 @@ fashion similar to:
 
 ### HTTP
 
-Upload all data on stdin to a specified HTTP site:
+Upload all data on stdin to a specified HTTPS site:
 
-    curl -T - http://www.example.com/myfile
+    curl -T - https://www.example.com/myfile
 
 Note that the HTTP server must have been configured to accept PUT before this
 can be done successfully.
@@ -275,7 +275,6 @@ To get even more details and information on what curl does, try using the
 this:
 
     curl --trace my-trace.txt www.haxx.se
-
 
 ## Detailed Information
 
@@ -305,12 +304,12 @@ The post data must be urlencoded.
 
 Post a simple `name` and `phone` guestbook.
 
-    curl -d "name=Rafael%20Sagula&phone=3320780" http://www.example.com/guest.cgi
+    curl -d "name=Rafael%20Sagula&phone=3320780" https://www.example.com/guest.cgi
 
 Or automatically [URL encode the data](https://everything.curl.dev/http/post/url-encode).
 
     curl --data-urlencode "name=Rafael Sagula&phone=3320780"
-      http://www.example.com/guest.cgi
+      https://www.example.com/guest.cgi
 
 How to post a form with curl, lesson #1:
 
@@ -329,7 +328,7 @@ of the letter's ASCII code.
 
 Example:
 
-(say if `http://example.com` had the following html)
+(say if `https://example.com` had the following html)
 
 ```html
 <form action="post.cgi" method="post">
@@ -345,7 +344,7 @@ We want to enter user `foobar` with password `12345`.
 To post to this, you would enter a curl command line like:
 
     curl -d "user=foobar&pass=12345&id=blablabla&ding=submit"
-      http://example.com/post.cgi
+      https://example.com/post.cgi
 
 While `-d` uses the application/x-www-form-urlencoded mime-type, generally
 understood by CGI's and similar, curl also supports the more capable
@@ -359,7 +358,7 @@ example, the field name `coolfiles` is used to send three files, with
 different content types using the following syntax:
 
     curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html"
-      http://www.example.com/postit.cgi
+      https://www.example.com/postit.cgi
 
 If the content-type is not specified, curl tries to guess from the file
 extension (it only knows a few), or use the previously specified type (from an
@@ -376,7 +375,7 @@ the names of the input fields. In our example, the input field names are
 
     curl -F "file=@cooltext.txt" -F "yourname=Daniel"
       -F "filedescription=Cool text file with cool text inside"
-      http://www.example.com/postit.cgi
+      https://www.example.com/postit.cgi
 
 To send two files in one post you can do it in two ways:
 
@@ -402,7 +401,7 @@ used on the command line. It is especially useful to fool or trick stupid
 servers or CGI scripts that rely on that information being available or
 contain certain data.
 
-    curl -e www.example.org http://www.example.com/
+    curl -e www.example.org https://www.example.com/
 
 ## User Agent
 
@@ -413,7 +412,7 @@ accept certain browsers.
 
 Example:
 
-    curl -A 'Mozilla/3.0 (Win95; I)' http://www.bank.example.com/
+    curl -A 'Mozilla/3.0 (Win95; I)' https://www.bank.example.com/
 
 Other common strings:
 
@@ -596,14 +595,14 @@ Force curl to get and display a local help page in case it is invoked without
 URL by making a config file similar to:
 
     # default url to get
-    url = "http://help.with.curl.example.com/curlhelp.html"
+    url = "https://help.with.curl.example.com/curlhelp.html"
 
 You can specify another config file to be read by using the `-K`/`--config`
 flag. If you set config filename to `-` it reads the config from stdin, which
 can be handy if you want to hide options from being visible in process tables
 etc:
 
-    echo "user = user:passwd" | curl -K - http://that.secret.example.com
+    echo "user = user:passwd" | curl -K - https://that.secret.example.com
 
 ## Extra Headers
 
@@ -685,11 +684,11 @@ Download with `PORT` but use 192.168.0.10 as our IP address to use:
 
 Get a webpage from a server using a specified port for the interface:
 
-    curl --interface eth0:1 http://www.example.com/
+    curl --interface eth0:1 https://www.example.com/
 
 or
 
-    curl --interface 192.168.1.10 http://www.example.com/
+    curl --interface 192.168.1.10 https://www.example.com/
 
 ## HTTPS
 
@@ -740,7 +739,7 @@ Continue uploading a document:
 
 Continue downloading a document from a web server
 
-    curl -C - -o file http://www.example.com/
+    curl -C - -o file https://www.example.com/
 
 ## Time Conditions
 
@@ -751,17 +750,17 @@ them with the `-z`/`--time-cond` flag.
 For example, you can easily make a download that only gets performed if the
 remote file is newer than a local copy. It would be made like:
 
-    curl -z local.html http://remote.example.com/remote.html
+    curl -z local.html https://remote.example.com/remote.html
 
 Or you can download a file only if the local file is newer than the remote
 one. Do this by prepending the date string with a `-`, as in:
 
-    curl -z -local.html http://remote.example.com/remote.html
+    curl -z -local.html https://remote.example.com/remote.html
 
 You can specify a plain text date as condition. Tell curl to only download the
 file if it was updated since January 12, 2012:
 
-    curl -z "Jan 12 2012" http://remote.example.com/remote.html
+    curl -z "Jan 12 2012" https://remote.example.com/remote.html
 
 curl accepts a wide range of date formats. You always make the date check the
 other way around by prepending it with a dash (`-`).
@@ -944,7 +943,7 @@ URL you specify. Note that this also goes for the `-O` option (but not
 For example: get two files and use `-O` for the first and a custom file
 name for the second:
 
-    curl -O http://example.com/file.txt ftp://example.com/moo.exe -o moo.jpg
+    curl -O https://example.com/file.txt ftp://example.com/moo.exe -o moo.jpg
 
 You can also upload multiple files in a similar fashion:
 
@@ -957,7 +956,7 @@ and fall back to IPv4 if the connection fails. The `--ipv4` and `--ipv6`
 options can specify which address to use when both are available. IPv6
 addresses can also be specified directly in URLs using the syntax:
 
-    http://[2001:1890:1112:1::20]/overview.html
+    https://[2001:1890:1112:1::20]/overview.html
 
 When this style is used, the `-g` option must be given to stop curl from
 interpreting the square brackets as special globbing characters. Link local

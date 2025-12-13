@@ -92,7 +92,7 @@ int main(void)
   int maxfd;
   int rc;
   CURLMcode mc;
-  struct timeval timeout = {1, 0};
+  struct timeval timeout = { 1, 0 };
 
   CURLM *multi = curl_multi_init();
 

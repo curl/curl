@@ -16,7 +16,7 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_TOTAL_TIME - get total time of previous transfer
+CURLINFO_TOTAL_TIME - total time of previous transfer
 
 # SYNOPSIS
 

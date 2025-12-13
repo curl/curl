@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,7 +7,6 @@ HTTP GET
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -25,7 +25,6 @@ Content-Type: text/html
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -39,7 +38,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-redirs 400 --location
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # curl: (56) Too large response headers: 6144086 > 6144000

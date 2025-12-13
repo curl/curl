@@ -65,7 +65,7 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example");
     curl_easy_setopt(curl, CURLOPT_PROXY_TLSAUTH_TYPE, "SRP");
     curl_easy_setopt(curl, CURLOPT_PROXY_TLSAUTH_USERNAME, "user");
     curl_easy_setopt(curl, CURLOPT_PROXY_TLSAUTH_PASSWORD, "secret");

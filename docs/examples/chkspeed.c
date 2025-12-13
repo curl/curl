@@ -34,6 +34,11 @@
  * dd if=/dev/urandom of=file_1M.bin bs=1M count=1
  *
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for ctime() */
+#endif
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -23,15 +23,13 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1938(const char *URL)
 {
   CURL *curl;
   CURLcode res = TEST_ERR_MAJOR_BAD;
   struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL;
-  unsigned char data[] = {0x70, 0x6f, 0x73, 0x74, 0, 0x44, 0x61, 0x74, 0x61};
+  unsigned char data[] = { 0x70, 0x6f, 0x73, 0x74, 0, 0x44, 0x61, 0x74, 0x61 };
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");

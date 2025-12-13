@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 #include <curl/multi.h>
 
 static CURLcode test_lib1550(const char *URL)
@@ -32,9 +30,9 @@ static CURLcode test_lib1550(const char *URL)
   CURLM *multi;
   CURLcode res = CURLE_OK;
   static const char * const bl_servers[] =
-     {"Microsoft-IIS/6.0", "nginx/0.8.54", NULL};
+     { "Microsoft-IIS/6.0", "nginx/0.8.54", NULL };
   static const char * const bl_sites[] =
-     {"curl.se:443", "example.com:80", NULL};
+     { "curl.se:443", "example.com:80", NULL };
 
   global_init(CURL_GLOBAL_ALL);
   multi = curl_multi_init();

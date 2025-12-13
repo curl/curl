@@ -22,16 +22,15 @@
  *
  ***************************************************************************/
 
-/* Unset redefined system symbols. */
+/* Raw snprintf() for curlx */
 
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#ifdef _WIN32
-#undef Curl_tcsdup
+#ifdef WITHOUT_LIBCURL /* when built for the test servers */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)  /* adjust for old MSVC */
+#define SNPRINTF _snprintf
+#else
+#define SNPRINTF snprintf
 #endif
-
-#undef HEADER_CURL_MEMORY_H
-#undef HEADER_CURL_MEMDEBUG_H
+#else /* !WITHOUT_LIBCURL */
+#include <curl/mprintf.h>
+#define SNPRINTF curl_msnprintf
+#endif /* WITHOUT_LIBCURL */

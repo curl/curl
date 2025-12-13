@@ -26,6 +26,7 @@
 #
 import logging
 import os
+import time
 from typing import Generator
 import pytest
 
@@ -42,6 +43,7 @@ class TestSocks:
     def danted(self, env: Env) -> Generator[Dante, None, None]:
         danted = Dante(env=env)
         assert danted.initial_start()
+        time.sleep(1)
         yield danted
         danted.stop()
 
@@ -61,10 +63,8 @@ class TestSocks:
         r.check_response(http_status=200)
 
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    @pytest.mark.parametrize("proto", Env.http_protos())
     def test_40_02_socks_https(self, env: Env, sproto, proto, danted: Dante, httpd):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
         curl = CurlClient(env=env, socks_args=[
             f'--{sproto}', f'127.0.0.1:{danted.port}'
         ])
@@ -76,7 +76,7 @@ class TestSocks:
             r.check_response(http_status=200)
 
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_40_03_dl_serial(self, env: Env, httpd, danted, proto, sproto):
         count = 3
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
@@ -87,7 +87,7 @@ class TestSocks:
         r.check_response(count=count, http_status=200)
 
     @pytest.mark.parametrize("sproto", ['socks4', 'socks5'])
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", Env.http_h1_h2_protos())
     def test_40_04_ul_serial(self, env: Env, httpd, danted, proto, sproto):
         fdata = os.path.join(env.gen_dir, 'data-10m')
         count = 2

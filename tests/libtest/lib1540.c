@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 struct t1540_transfer_status {
   CURL *curl;

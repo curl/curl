@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -17,7 +18,7 @@ non-existing host
 http
 </features>
 <name>
-attempt connect to non-existing host name
+attempt connect to non-existing hostname
 </name>
 <command>
 --ipv4 non-existing-host.haxx.se.

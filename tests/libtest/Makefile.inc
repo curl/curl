@@ -38,6 +38,7 @@ CURLX_C = \
   ../../lib/curlx/fopen.c \
   ../../lib/curlx/multibyte.c \
   ../../lib/curlx/strerr.c \
+  ../../lib/curlx/strparse.c \
   ../../lib/curlx/timediff.c \
   ../../lib/curlx/timeval.c \
   ../../lib/curlx/version_win32.c \
@@ -47,6 +48,7 @@ CURLX_C = \
 
 # All libtest programs
 TESTS_C = \
+  cli_ftp_upload.c \
   cli_h2_pausing.c \
   cli_h2_serverpush.c \
   cli_h2_upgrade_extreme.c \

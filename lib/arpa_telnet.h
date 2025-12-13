@@ -43,8 +43,7 @@
 /*
  * The telnet options represented as strings
  */
-static const char * const telnetoptions[]=
-{
+static const char * const telnetoptions[] = {
   "BINARY",      "ECHO",           "RCP",           "SUPPRESS GO AHEAD",
   "NAME",        "STATUS",         "TIMING MARK",   "RCTE",
   "NAOL",        "NAOP",           "NAOCRD",        "NAOHTS",
@@ -79,15 +78,14 @@ static const char * const telnetoptions[]=
 #define CURL_WILL 251 /* Our side WILL use this option */
 #define CURL_WONT 252 /* Our side will not use this option */
 #define CURL_DO   253 /* DO use this option! */
-#define CURL_DONT 254 /* DON'T use this option! */
+#define CURL_DONT 254 /* DO NOT use this option! */
 #define CURL_IAC  255 /* Interpret As Command */
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /*
  * Then those numbers represented as strings:
  */
-static const char * const telnetcmds[]=
-{
+static const char * const telnetcmds[] = {
   "EOF",  "SUSP",  "ABORT", "EOR",  "SE",
   "NOP",  "DMARK", "BRK",   "IP",   "AO",
   "AYT",  "EC",    "EL",    "GA",   "SB",
@@ -103,11 +101,11 @@ static const char * const telnetcmds[]=
 #define CURL_TELQUAL_INFO 2
 #define CURL_TELQUAL_NAME 3
 
-#define CURL_TELCMD_OK(x) ( ((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
-                       ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
+#define CURL_TELCMD_OK(x)  (((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
+                            ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM))
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
-#define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
+#define CURL_TELCMD(x)    telnetcmds[(x) - CURL_TELCMD_MINIMUM]
 #else
 #define CURL_TELCMD(x)    ""
 #endif

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ HTTP POST
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 100 Continue swsclose
 Silly-header: yeeeees
 

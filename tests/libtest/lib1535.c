@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test CURLINFO_PROTOCOL */
 
 static CURLcode test_lib1535(const char *URL)
@@ -38,7 +36,7 @@ static CURLcode test_lib1535(const char *URL)
   easy_init(curl);
 
   /* Test that protocol is properly initialized on curl_easy_init.
-  */
+   */
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
 
@@ -67,7 +65,7 @@ static CURLcode test_lib1535(const char *URL)
   }
 
   /* Test that a protocol is properly set after receiving an HTTP resource.
-  */
+   */
 
   res = curl_easy_getinfo(curl, CURLINFO_PROTOCOL, &protocol);
 
@@ -87,7 +85,7 @@ static CURLcode test_lib1535(const char *URL)
   }
 
   /* Test that a protocol is properly initialized on curl_easy_duphandle.
-  */
+   */
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
@@ -114,7 +112,7 @@ static CURLcode test_lib1535(const char *URL)
   }
 
   /* Test that a protocol is properly initialized on curl_easy_reset.
-  */
+   */
 
   curl_easy_reset(curl);
 

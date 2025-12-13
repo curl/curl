@@ -43,6 +43,7 @@ allocated string with the contents.
 The *flags* argument is a bitmask with individual features.
 
 The returned content pointer must be freed with curl_free(3) after use.
+Although not constrained by its type, the pointed string may not be altered.
 
 # FLAGS
 

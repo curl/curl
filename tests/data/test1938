@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -56,11 +57,10 @@ http://127.0.0.1:9000/%TESTNUMBER/testapi/test 127.0.0.1:9000:%HOSTIP:%HTTPPORT
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^User-Agent:.*
 ^Content-Type:.*
 ^Accept:.*
 </strip>
-<protocol nonewline="yes">
+<protocol crlf="headers" nonewline="yes">
 POST /%TESTNUMBER/testapi/test HTTP/1.1
 Host: 127.0.0.1:9000
 Authorization: PROVIDER14-HMAC-SHA256 Credential=keyId/19700101/region/service/provider14_request, SignedHeaders=content-type;host;x-provider2-date, Signature=3436256c7c23adeb66dc15984eaa527edc4a504def61da2e0bf4b01ace4f3c0b

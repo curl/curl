@@ -11,7 +11,7 @@ See-also:
   - proxy
   - proxy-tlspassword
 Example:
-  - --proxy-tlsuser smith -x https://proxy $URL
+  - --proxy-tlsuser smith -x https://proxy.example $URL
 ---
 
 # `--proxy-tlsuser`

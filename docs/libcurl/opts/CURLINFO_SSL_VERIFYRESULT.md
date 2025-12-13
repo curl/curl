@@ -18,7 +18,7 @@ Added-in: 7.5
 
 # NAME
 
-CURLINFO_SSL_VERIFYRESULT - get the result of the certificate verification
+CURLINFO_SSL_VERIFYRESULT - result of the certificate verification
 
 # SYNOPSIS
 

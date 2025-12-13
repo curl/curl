@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,12 +7,10 @@ FAILURE
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -25,7 +24,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -D loggg/save-here/fails
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

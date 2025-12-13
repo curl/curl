@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -6,14 +7,12 @@ MQTT SUBSCRIBE
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -23,7 +22,7 @@ mqtt
 mqtt
 </server>
 <name>
-MQTT with very long user name
+MQTT with 64 KiB long username
 </name>
 <file name="%LOGDIR/input%TESTNUMBER">
 user = %repeat[65536 x a]%:fakepasswd
@@ -33,7 +32,6 @@ mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -K %LOGDIR/input%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 8 is CURLE_WEIRD_SERVER_REPLY

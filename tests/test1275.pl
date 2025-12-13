@@ -112,7 +112,6 @@ sub checkfile {
     close($fh);
 }
 
-
 for my $f (@m) {
     checkfile($f);
 }

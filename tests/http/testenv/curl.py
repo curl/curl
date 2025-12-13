@@ -36,7 +36,7 @@ import re
 import shutil
 import subprocess
 from statistics import mean, fmean
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from typing import List, Optional, Dict, Union, Any
 from urllib.parse import urlparse
 
@@ -493,6 +493,87 @@ class ExecResult:
                         f'status #{idx} remote_ip: expected {remote_ip}, '\
                         f'got {x["remote_ip"]}\n{self.dump_stat(x)}'
 
+    def check_stat_positive(self, s, idx, key):
+        assert key in s, f'stat #{idx} "{key}" missing: {s}'
+        assert s[key] > 0, f'stat #{idx} "{key}" not positive: {s}'
+
+    def check_stat_positive_or_0(self, s, idx, key):
+        assert key in s, f'stat #{idx} "{key}" missing: {s}'
+        assert s[key] >= 0, f'stat #{idx} "{key}" not positive: {s}'
+
+    def check_stat_zero(self, s, key):
+        assert key in s, f'stat "{key}" missing: {s}'
+        assert s[key] == 0, f'stat "{key}" not zero: {s}'
+
+    def check_stats_timelines(self):
+        for i in range(len(self._stats)):
+            self.check_stats_timeline(i)
+
+    def check_stats_timeline(self, idx):
+        # check timings reported on a transfer for consistency
+        s = self._stats[idx]
+
+        url = s['url_effective']
+        # connect time is sometimes reported as 0 by openssl-quic (sigh)
+        self.check_stat_positive_or_0(s, idx, 'time_connect')
+        # all stat keys which reporting timings
+        all_keys = {
+            'time_queue', 'time_namelookup',
+            'time_connect', 'time_appconnect',
+            'time_pretransfer', 'time_posttransfer',
+            'time_starttransfer', 'time_total',
+        }
+        # stat keys where we expect a positive value
+        ref_tl = []
+        somewhere_keys = []
+        exact_match = True
+        # redirects mess up the queue time, only count without
+        if s['time_redirect'] == 0:
+            ref_tl += ['time_queue']
+        else:
+            exact_match = False
+        # connect events?
+        if url.startswith('ftp'):
+            # ftp is messy with connect events for its DATA connection
+            exact_match = False
+        elif s['num_connects'] > 0:
+            ref_tl += ['time_namelookup', 'time_connect']
+            if url.startswith('https:'):
+                ref_tl += ['time_appconnect']
+        # what kind of transfer was it?
+        if s['size_upload'] == 0 and s['size_download'] > 0:
+            # this is a download
+            dl_tl = ['time_pretransfer']
+            if s['size_request'] > 0:
+                dl_tl = ['time_posttransfer'] + dl_tl
+            ref_tl += dl_tl
+            # the first byte of the response may arrive before we
+            # track the other times when the client is slow (CI).
+            somewhere_keys = ['time_starttransfer']
+        elif s['size_upload'] > 0 and s['size_download'] == 0:
+            # this is an upload
+            ul_tl = ['time_pretransfer', 'time_posttransfer']
+            ref_tl += ul_tl
+        else:
+            # could be a 0-length upload or 0-length download, not sure
+            exact_match = False
+        # always there at the end
+        ref_tl += ['time_total']
+
+        # assert all events in reference timeline are > 0
+        for key in ref_tl:
+            self.check_stat_positive(s, idx, key)
+        if exact_match:
+            # assert all events not in reference timeline are 0
+            for key in [key for key in all_keys if key not in ref_tl and key not in somewhere_keys]:
+                self.check_stat_zero(s, key)
+        # calculate the timeline that did happen
+        seen_tl = sorted(ref_tl, key=lambda ts: s[ts])
+        assert seen_tl == ref_tl, f'{[f"{ts}: {s[ts]}" for ts in seen_tl]}'
+        for key in somewhere_keys:
+            self.check_stat_positive(s, idx, key)
+            assert s[key] <= s['time_total']
+
     def dump_logs(self):
         lines = ['>>--stdout ----------------------------------------------\n']
         lines.extend(self._stdout)
@@ -835,6 +916,65 @@ class CurlClient:
                                with_tcpdump=with_tcpdump,
                                extra_args=extra_args)
 
+    def ssh_download(self, urls: List[str],
+                     with_stats: bool = True,
+                     with_profile: bool = False,
+                     with_tcpdump: bool = False,
+                     no_save: bool = False,
+                     extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        if no_save:
+            extra_args.extend([
+                '--out-null',
+            ])
+        else:
+            extra_args.extend([
+                '-o', 'download_#1.data',
+            ])
+        # remove any existing ones
+        for i in range(100):
+            self._rmf(self.download_file(i))
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
+
+    def ssh_upload(self, urls: List[str],
+                   fupload: Optional[Any] = None,
+                   updata: Optional[str] = None,
+                   with_stats: bool = True,
+                   with_profile: bool = False,
+                   with_tcpdump: bool = False,
+                   extra_args: Optional[List[str]] = None):
+        if extra_args is None:
+            extra_args = []
+        if fupload is not None:
+            extra_args.extend([
+                '--upload-file', fupload
+            ])
+        elif updata is not None:
+            extra_args.extend([
+                '--upload-file', '-'
+            ])
+        else:
+            raise Exception('need either file or data to upload')
+        if with_stats:
+            extra_args.extend([
+                '-w', '%{json}\\n'
+            ])
+        return self._raw(urls, options=extra_args,
+                         intext=updata,
+                         with_stats=with_stats,
+                         with_headers=False,
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
+
     def response_file(self, idx: int):
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
@@ -987,7 +1127,8 @@ class CurlClient:
                 pass
             elif insecure:
                 args.append('--insecure')
-            elif active_options and "--cacert" in active_options:
+            elif active_options and ("--cacert" in active_options or \
+                    "--capath" in active_options):
                 pass
             elif u.hostname:
                 args.extend(["--cacert", self.env.ca.cert_file])
@@ -1129,3 +1270,12 @@ class CurlClient:
             rc = p.returncode
             if rc != 0:
                 raise Exception(f'{fg_gen_flame} returned error {rc}')
+
+    def mk_altsvc_file(self, name, src_alpn, src_host, src_port,
+                       dest_alpn, dest_host, dest_port):
+        fpath = os.path.join(self.run_dir, f'{name}.altsvc')
+        ts = datetime.now(timezone.utc) + timedelta(hours=1)
+        ts = ts.strftime('%Y%m%d %H:%M:%S')
+        with open(fpath, 'w') as fd:
+            fd.write(f'{src_alpn} {src_host} {src_port} {dest_alpn} {dest_host} {dest_port} "{ts}" 1 0\n')
+        return fpath

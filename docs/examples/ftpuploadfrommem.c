@@ -27,9 +27,10 @@
  */
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
-static const char data[]=
+static const char data[] =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
   "___ rhoncus odio id venenatis volutpat. Vestibulum dapibus "
   "bibendum ullamcorper. Maecenas finibus elit augue, vel "
@@ -48,7 +49,7 @@ struct WriteThis {
 static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *upload = (struct WriteThis *)userp;
-  size_t max = size*nmemb;
+  size_t max = size * nmemb;
 
   if(max < 1)
     return 0;
@@ -63,7 +64,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
     return copylen;
   }
 
-  return 0;                          /* no more data left to deliver */
+  return 0;  /* no more data left to deliver */
 }
 
 int main(void)

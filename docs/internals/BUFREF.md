@@ -54,10 +54,11 @@ specified as `NULL`: this is the case when the referenced buffer is static.
 
 if `buffer` is NULL, `length` must be zero.
 
-## `memdup`
+## `memdup0`
 
 ```c
-CURLcode Curl_bufref_memdup(struct bufref *br, const void *data, size_t length);
+CURLcode Curl_bufref_memdup0(struct bufref *br, const void *data,
+                             size_t length);
 ```
 
 Releases the previously referenced buffer, then duplicates the `length`-byte
@@ -72,7 +73,15 @@ Returns `CURLE_OK` if successful, else `CURLE_OUT_OF_MEMORY`.
 ## `ptr`
 
 ```c
-const unsigned char *Curl_bufref_ptr(const struct bufref *br);
+const char *Curl_bufref_ptr(const struct bufref *br);
+```
+
+Returns a `const char *` to the referenced buffer.
+
+## `uptr`
+
+```c
+const unsigned char *Curl_bufref_uptr(const struct bufref *br);
 ```
 
 Returns a `const unsigned char *` to the referenced buffer.
@@ -84,3 +93,12 @@ size_t Curl_bufref_len(const struct bufref *br);
 ```
 
 Returns the stored length of the referenced buffer.
+
+## `dup`
+
+```c
+char *Curl_bufref_dup(const struct bufref *br);
+```
+
+Returns a strdup() version of the buffer. Note that this assumes that the
+bufref is null terminated.

@@ -65,10 +65,10 @@ extern struct Curl_cftype Curl_cft_nghttp2;
 
 #define Curl_http2_may_switch(a) FALSE
 
-#define Curl_http2_request_upgrade(x,y) CURLE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_switch(a)            CURLE_UNSUPPORTED_PROTOCOL
-#define Curl_http2_upgrade(a,b,c,d,e)   CURLE_UNSUPPORTED_PROTOCOL
-#define Curl_h2_http_1_1_error(x) 0
+#define Curl_http2_request_upgrade(x, y)  CURLE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_switch(a)              CURLE_UNSUPPORTED_PROTOCOL
+#define Curl_http2_upgrade(a, b, c, d, e) CURLE_UNSUPPORTED_PROTOCOL
+#define Curl_h2_http_1_1_error(x)         0
 #endif
 
 #endif /* HEADER_CURL_HTTP2_H */

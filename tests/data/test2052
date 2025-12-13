@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,6 @@ CURLOPT_CONNECT_TO
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data nocheck="yes">
@@ -21,7 +21,6 @@ OK
 </data>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -32,14 +31,17 @@ http
 </name>
 
 <command>
-http://www.example.com:%HTTPPORT/%TESTNUMBER --resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n" --next --resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT http://www.example.com:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
+http://www.example.com:%HTTPPORT/%TESTNUMBER
+--resolve www.example.com:%HTTPPORT:%HOSTIP -w "%{num_connects}\n"
+--next
+--resolve -www.example.com:%HTTPPORT --connect-to ::%HOSTIP:%HTTPPORT
+http://www.example.com:%HTTPPORT/%TESTNUMBER -w "%{num_connects}\n"
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com:%HTTPPORT
 User-Agent: curl/%VERSION

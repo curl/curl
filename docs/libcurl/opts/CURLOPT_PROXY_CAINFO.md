@@ -72,7 +72,7 @@ int main(void)
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* using an HTTPS proxy */
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
     curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO, "/etc/certs/cabundle.pem");
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);

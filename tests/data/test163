@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -30,7 +31,7 @@ http
 HTTP multipart formpost with contents from a file
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=<%LOGDIR/field%TESTNUMBER" -F tool=curl
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=%LT%LOGDIR/field%TESTNUMBER" -F tool=curl
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/field%TESTNUMBER">
@@ -41,7 +42,7 @@ file
 
 newlinens?
 yes please
-        
+        %CR
 [tab][CR] too
 </file>
 </client>
@@ -52,16 +53,16 @@ yes please
 ^(Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.1
-Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
-Accept: */*
-Content-Length: 322
-Content-Type: multipart/form-data; boundary=----------------------------c2d1767eb6ac
-
-------------------------------c2d1767eb6ac
-Content-Disposition: form-data; name="name"
-
+POST /we/want/%TESTNUMBER HTTP/1.1%CR
+Host: %HOSTIP:%HTTPPORT%CR
+User-Agent: curl/%VERSION%CR
+Accept: */*%CR
+Content-Length: 322%CR
+Content-Type: multipart/form-data; boundary=----------------------------c2d1767eb6ac%CR
+%CR
+------------------------------c2d1767eb6ac%CR
+Content-Disposition: form-data; name="name"%CR
+%CR
 contents
 from
 a
@@ -69,14 +70,14 @@ file
 
 newlinens?
 yes please
-        
+        %CR
 [tab][CR] too
-
-------------------------------c2d1767eb6ac
-Content-Disposition: form-data; name="tool"
-
-curl
-------------------------------c2d1767eb6ac--
+%CR
+------------------------------c2d1767eb6ac%CR
+Content-Disposition: form-data; name="tool"%CR
+%CR
+curl%CR
+------------------------------c2d1767eb6ac--%CR
 </protocol>
 </verify>
 </testcase>

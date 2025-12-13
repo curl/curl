@@ -34,7 +34,7 @@ static size_t t1662_read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   struct t1662_WriteThis *pooh = (struct t1662_WriteThis *)userp;
   size_t len = strlen(testdata);
 
-  if(size*nmemb < len)
+  if(size * nmemb < len)
     return 0;
 
   if(pooh->sizeleft) {

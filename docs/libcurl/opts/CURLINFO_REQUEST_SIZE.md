@@ -16,7 +16,7 @@ Added-in: 7.4.1
 
 # NAME
 
-CURLINFO_REQUEST_SIZE - get size of sent request
+CURLINFO_REQUEST_SIZE - size of sent request
 
 # SYNOPSIS
 

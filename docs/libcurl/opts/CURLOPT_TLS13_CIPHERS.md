@@ -17,7 +17,7 @@ TLS-backend:
   - OpenSSL
   - wolfSSL
   - mbedTLS
-  - rustls
+  - Rustls
 Added-in: 7.61.0
 ---
 

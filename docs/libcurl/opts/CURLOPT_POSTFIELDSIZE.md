@@ -9,6 +9,8 @@ See-also:
   - CURLOPT_POSTFIELDSIZE_LARGE (3)
 Protocol:
   - HTTP
+  - MQTT
+  - RTSP
 Added-in: 7.2
 ---
 

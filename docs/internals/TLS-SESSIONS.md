@@ -68,7 +68,6 @@ peer keys for this reason.
 a previous ticket, curl might trust a server which no longer has a root
 certificate in the file.
 
-
 ## Session Cache Access
 
 #### Lookups

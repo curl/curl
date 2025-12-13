@@ -127,7 +127,7 @@ static CURLcode test_unit1979(const char *arg)
                                       testcases[i].normalize);
     fail_unless(msnprintf_result >= 0, "curl_msnprintf fails");
     fail_unless(!result && canonical_path_string &&
-                !strcmp(canonical_path_string, testcases[i].canonical_url),
+                  !strcmp(canonical_path_string, testcases[i].canonical_url),
                 buffer);
     curlx_dyn_free(&canonical_path);
   }

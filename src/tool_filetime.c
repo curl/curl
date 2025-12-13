@@ -47,12 +47,12 @@ int getfiletime(const char *filename, curl_off_t *stamp)
                      (FILE_SHARE_READ | FILE_SHARE_WRITE |
                       FILE_SHARE_DELETE),
                      NULL, OPEN_EXISTING, 0, NULL);
-  curlx_unicodefree(tchar_filename);
+  curlx_free(tchar_filename);
   if(hfile != INVALID_HANDLE_VALUE) {
     FILETIME ft;
     if(GetFileTime(hfile, NULL, NULL, &ft)) {
-      curl_off_t converted = (curl_off_t)ft.dwLowDateTime
-        | ((curl_off_t)ft.dwHighDateTime) << 32;
+      curl_off_t converted = (curl_off_t)ft.dwLowDateTime |
+        ((curl_off_t)ft.dwHighDateTime) << 32;
 
       if(converted < 116444736000000000)
         warnf("Failed to get filetime: underflow");
@@ -113,7 +113,7 @@ void setfiletime(curl_off_t filetime, const char *filename)
                      (FILE_SHARE_READ | FILE_SHARE_WRITE |
                       FILE_SHARE_DELETE),
                      NULL, OPEN_EXISTING, 0, NULL);
-  curlx_unicodefree(tchar_filename);
+  curlx_free(tchar_filename);
   if(hfile != INVALID_HANDLE_VALUE) {
     curl_off_t converted = ((curl_off_t)filetime * 10000000) +
       116444736000000000;

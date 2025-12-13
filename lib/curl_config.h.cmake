@@ -151,7 +151,7 @@
 /* disabled WebSocket */
 #cmakedefine CURL_DISABLE_WEBSOCKETS 1
 
-/* disables use of socketpair for curl_multi_poll */
+/* disables use of socketpair for curl_multi_poll() */
 #cmakedefine CURL_DISABLE_SOCKETPAIR 1
 
 /* disables TELNET */
@@ -159,6 +159,9 @@
 
 /* disables TFTP */
 #cmakedefine CURL_DISABLE_TFTP 1
+
+/* disables curl_easy_setopt()/curl_easy_getinfo() type checking */
+#cmakedefine CURL_DISABLE_TYPECHECK 1
 
 /* disables verbose strings */
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
@@ -727,6 +730,9 @@ ${SIZEOF_TIME_T_CODE}
 /* Define to 1 if you have the <uv.h> header file. */
 #cmakedefine HAVE_UV_H 1
 
+/* if libbacktrace is in use */
+#cmakedefine USE_BACKTRACE 1
+
 /* Define to 1 if you do not want the OpenSSL configuration to be loaded
    automatically */
 #cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
@@ -754,9 +760,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if Unix domain sockets are enabled  */
 #cmakedefine USE_UNIX_SOCKETS 1
-
-/* Define to 1 if you are building a Windows target with large file support. */
-#cmakedefine USE_WIN32_LARGE_FILES 1
 
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1

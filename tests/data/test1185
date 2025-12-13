@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,7 +6,6 @@ checksrc
 </keywords>
 </info>
 
-#
 # Client-side
 <client>
 <name>
@@ -20,7 +20,7 @@ checksrc
  * Violate each rule at least once.
  **/
 int hello; /*------------------------------------------------------------------*/
-int%tab%tab;
+int%TABtab;
 int trailing_space;
 int a = func ();
 int b = func( b);
@@ -65,6 +65,8 @@ void startfunc(int a, int b) {
  int foo = bar;
  int foo = bar;foo++;
  for(;;)  {
+    moo();
+  moo();
  }
 
  int a = sizeof int;
@@ -79,19 +81,18 @@ void startfunc(int a, int b) {
 
  // CPP comment ?
 
- /* comment doesn't end
+ /* comment does not end
 
 </file>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
 ./%LOGDIR/code1185.c:4:82: warning: Longer than 79 columns (LONGLINE)
  int hello; /*------------------------------------------------------------------*/
 ./%LOGDIR/code1185.c:5:4: error: Contains TAB character (TABS)
- int%tab%tab;
+ int%TABtab;
     ^
 ./%LOGDIR/code1185.c:7:13: warning:  func with space (SPACEBEFOREPAREN)
  int a = func ();
@@ -118,7 +119,7 @@ void startfunc(int a, int b) {
  } else {
  ^
 ./%LOGDIR/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
- if(a == 2){%spc%%spc%
+ if(a == 2){%SP%SP
            ^
 ./%LOGDIR/code1185.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
  func_return() ;
@@ -156,61 +157,64 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:49:10: warning: multiple spaces (MULTISPACE)
   for(;;)  {
           ^
-./%LOGDIR/code1185.c:50:2: warning: not indented 2 steps (uses 0) (INDENTATION)
-  }
-  ^
-./%LOGDIR/code1185.c:52:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
+./%LOGDIR/code1185.c:50:5: warning: not indented 2 steps (uses 3) (INDENTATION)
+     moo();
+     ^
+./%LOGDIR/code1185.c:52:3: warning: Suspicious close brace indentation (CLOSEBRACE)
+   moo();
+   ^
+./%LOGDIR/code1185.c:54:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
   int a = sizeof int;
                 ^
-./%LOGDIR/code1185.c:53:10: warning: use of magicbad is banned (BANNEDFUNC)
+./%LOGDIR/code1185.c:55:10: warning: use of magicbad is banned (BANNEDFUNC)
   int a = magicbad(buffer, alsobad(buffer), "%d", 99);
           ^
-./%LOGDIR/code1185.c:53:27: warning: use of alsobad is banned (BANNEDFUNC)
+./%LOGDIR/code1185.c:55:27: warning: use of alsobad is banned (BANNEDFUNC)
   int a = magicbad(buffer, alsobad(buffer), "%d", 99);
                            ^
-./%LOGDIR/code1185.c:54:21: warning: missing space before colon (NOSPACEC)
+./%LOGDIR/code1185.c:56:21: warning: missing space before colon (NOSPACEC)
   int moo = hej?wrong:a>b;
                      ^
-./%LOGDIR/code1185.c:54:22: warning: missing space after colon (NOSPACEC)
+./%LOGDIR/code1185.c:56:22: warning: missing space after colon (NOSPACEC)
   int moo = hej?wrong:a>b;
                       ^
-./%LOGDIR/code1185.c:54:15: warning: missing space before question mark (NOSPACEQ)
+./%LOGDIR/code1185.c:56:15: warning: missing space before question mark (NOSPACEQ)
   int moo = hej?wrong:a>b;
                ^
-./%LOGDIR/code1185.c:54:16: warning: missing space after question mark (NOSPACEQ)
+./%LOGDIR/code1185.c:56:16: warning: missing space after question mark (NOSPACEQ)
   int moo = hej?wrong:a>b;
                 ^
-./%LOGDIR/code1185.c:54:23: warning: missing space before less or greater than (NOSPACETHAN)
+./%LOGDIR/code1185.c:56:23: warning: missing space before less or greater than (NOSPACETHAN)
   int moo = hej?wrong:a>b;
                        ^
-./%LOGDIR/code1185.c:54:23: warning: missing space after less or greater than (NOSPACETHAN)
+./%LOGDIR/code1185.c:56:23: warning: missing space after less or greater than (NOSPACETHAN)
   int moo = hej?wrong:a>b;
                        ^
-./%LOGDIR/code1185.c:55:23: warning: missing space before less or greater than (NOSPACETHAN)
+./%LOGDIR/code1185.c:57:23: warning: missing space before less or greater than (NOSPACETHAN)
   int moo2 = wrong2:(a)>(b);
                        ^
-./%LOGDIR/code1185.c:55:23: warning: missing space after less or greater than (NOSPACETHAN)
+./%LOGDIR/code1185.c:57:23: warning: missing space after less or greater than (NOSPACETHAN)
   int moo2 = wrong2:(a)>(b);
                        ^
-./%LOGDIR/code1185.c:57:7: warning: conditional block on the same line (ONELINECONDITION)
+./%LOGDIR/code1185.c:59:7: warning: conditional block on the same line (ONELINECONDITION)
   if(a) b++;
        ^
-./%LOGDIR/code1185.c:59:5: warning: use of sprintf is banned (BANNEDFUNC)
+./%LOGDIR/code1185.c:61:5: warning: use of sprintf is banned (BANNEDFUNC)
   if(sprintf(buffer, "%s", moo)) {}
      ^
-./%LOGDIR/code1185.c:60:25: warning: use of alsobad is banned (BANNEDFUNC)
+./%LOGDIR/code1185.c:62:25: warning: use of alsobad is banned (BANNEDFUNC)
   *buffer_len = (ssize_t)alsobad((char *)buffer, NULL, 16);
                          ^
-./%LOGDIR/code1185.c:62:2: warning: // comment (CPPCOMMENTS)
+./%LOGDIR/code1185.c:64:2: warning: // comment (CPPCOMMENTS)
   // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
-%spc%
+%SP
  ^
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
-%spc%
+%SP
  ^
-checksrc: 0 errors and 41 warnings
+checksrc: 0 errors and 42 warnings
 </stdout>
 <errorcode>
 5

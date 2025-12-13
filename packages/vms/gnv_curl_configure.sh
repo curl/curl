@@ -1,6 +1,6 @@
 # File: gnv_curl_configure.sh
 #
-# Set up and run the configure script for Curl so that it can find the
+# Set up and run the configure script for curl so that it can find the
 # proper options for VMS.
 #
 # Copyright (C) John Malmberg

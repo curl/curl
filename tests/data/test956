@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ SMTP
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -26,7 +25,7 @@ LC_ALL=C.UTF-8
 <name>
 SMTP without SMTPUTF8 support - UTF-8 based recipient (local part only)
 </name>
-<stdin>
+<stdin crlf="yes">
 From: different
 To: another
 
@@ -37,7 +36,6 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt St%hex[%c3%b6]hex%dmottagaren@e
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 # 55 - CURLE_SEND_ERROR
@@ -46,8 +44,8 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt St%hex[%c3%b6]hex%dmottagaren@e
 </errorcode>
 <protocol crlf="yes">
 EHLO %TESTNUMBER
-MAIL FROM:<sender@example.com>
-RCPT TO:<St%hex[%c3%b6]hex%dmottagaren@example.com>
+MAIL FROM:%LTsender@example.com%GT
+RCPT TO:%LTSt%hex[%c3%b6]hex%dmottagaren@example.com%GT
 QUIT
 </protocol>
 </verify>

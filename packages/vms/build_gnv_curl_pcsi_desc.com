@@ -22,7 +22,7 @@ $!
 $! The PCSI system can really only handle ODS-2 format filenames and
 $! assumes that there is only one source directory.  It also assumes that
 $! all destination files with the same name come from the same source file.
-$! Fortunately CURL does not trip most of these issues, so those steps
+$! Fortunately curl does not trip most of these issues, so those steps
 $! above are marked N/A.
 $!
 $! A rename action section is needed to make sure that the files are

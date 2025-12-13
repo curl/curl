@@ -32,7 +32,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
 
 #else
 /* disabled */
-#define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
+#define Curl_rtsp_parseheader(x, y) CURLE_NOT_BUILT_IN
 
 #endif /* CURL_DISABLE_RTSP */
 

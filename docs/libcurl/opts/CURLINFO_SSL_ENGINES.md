@@ -17,7 +17,7 @@ Added-in: 7.12.3
 
 # NAME
 
-CURLINFO_SSL_ENGINES - get an slist of OpenSSL crypto-engines
+CURLINFO_SSL_ENGINES - an slist of OpenSSL crypto-engines
 
 # SYNOPSIS
 

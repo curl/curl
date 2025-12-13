@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,7 +8,6 @@ chunked Transfer-Encoding
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 <data>
@@ -19,10 +19,10 @@ Transfer-Encoding: chunked
 Content-Type: text/html
 Funny-head: yesyes
 
-10
-chunked data fun
-0
-
+10%CR
+chunked data fun%CR
+0%CR
+%CR
 </data>
 <datacheck nonewline="yes">
 HTTP/1.1 200 OK
@@ -37,7 +37,6 @@ chunked data fun
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -51,10 +50,9 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION

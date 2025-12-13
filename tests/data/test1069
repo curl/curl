@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -23,7 +24,7 @@ HTTP 1.0 PUT from stdin with no content length
 http://%HOSTIP:%HTTPPORT/bzz/%TESTNUMBER -T - -0
 </command>
 <stdin>
-this data can't be sent
+this data cannot be sent
 </stdin>
 </client>
 

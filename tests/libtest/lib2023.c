@@ -28,14 +28,12 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode send_request(CURL *curl, const char *url, int seq,
                              long auth_scheme, const char *userpwd)
 {
   CURLcode res;
   size_t len = strlen(url) + 4 + 1;
-  char *full_url = malloc(len);
+  char *full_url = curlx_malloc(len);
   if(!full_url) {
     curl_mfprintf(stderr, "Not enough memory for full url\n");
     return CURLE_OUT_OF_MEMORY;
@@ -54,7 +52,7 @@ static CURLcode send_request(CURL *curl, const char *url, int seq,
   res = curl_easy_perform(curl);
 
 test_cleanup:
-  free(full_url);
+  curlx_free(full_url);
   return res;
 }
 
@@ -92,7 +90,7 @@ static CURLcode test_lib2023(const char *URL)  /* libauthretry */
   long fallback_auth_scheme = parse_auth_name(libtest_arg3);
 
   if(main_auth_scheme == CURLAUTH_NONE ||
-      fallback_auth_scheme == CURLAUTH_NONE) {
+     fallback_auth_scheme == CURLAUTH_NONE) {
     curl_mfprintf(stderr, "auth schemes not found on commandline\n");
     return TEST_ERR_MAJOR_BAD;
   }

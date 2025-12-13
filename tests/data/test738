@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -5,12 +6,10 @@ IPFS
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -30,7 +29,6 @@ ipfs://bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u
 </command>
 </client>
 
-#
 # Verify error code with no gateway file (detection fails)
 <verify>
 <errorcode>

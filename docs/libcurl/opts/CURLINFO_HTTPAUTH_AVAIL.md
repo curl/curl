@@ -16,7 +16,7 @@ Added-in: 7.10.8
 
 # NAME
 
-CURLINFO_HTTPAUTH_AVAIL - get available HTTP authentication methods
+CURLINFO_HTTPAUTH_AVAIL - available HTTP authentication methods
 
 # SYNOPSIS
 

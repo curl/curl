@@ -29,7 +29,7 @@ use warnings;
 use Time::Local;
 
 if($#ARGV < 1) {
-    print "Usage: $0 prepare|postprocess dir [logfile]\n";
+    print "Usage: $0 prepare|postprocess directory [logfile]\n";
     exit 1;
 }
 
@@ -83,7 +83,6 @@ if($ARGV[0] eq "prepare") {
 }
 elsif($ARGV[0] eq "postprocess") {
     my $dirname = $ARGV[1];
-    my $logfile = $ARGV[2];
 
     # Clean up the test directory
     if($^O eq 'cygwin') {
@@ -97,6 +96,14 @@ elsif($ARGV[0] eq "postprocess") {
 
     rmdir $dirname || die "$!";
 
+    if($#ARGV >= 3) {  # Verify mtime if requested
+        my $checkfile = $ARGV[2];
+        my $expected_mtime = int($ARGV[3]);
+        my $mtime = (stat($checkfile))[9];
+        exit ($mtime != $expected_mtime);
+    }
+
+    my $logfile = $ARGV[2];
     if($logfile && -s $logfile) {
         # Process the directory file to remove all information that
         # could be inconsistent from one test run to the next (e.g.

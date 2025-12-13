@@ -71,10 +71,10 @@ struct pingpong {
                          read */
 };
 
-#define PINGPONG_SETUP(pp,s,e)                   \
-  do {                                           \
-    (pp)->statemachine = s;                      \
-    (pp)->endofresp = e;                         \
+#define PINGPONG_SETUP(pp, s, e) \
+  do {                           \
+    (pp)->statemachine = s;      \
+    (pp)->endofresp = e;         \
   } while(0)
 
 /*
@@ -93,7 +93,6 @@ void Curl_pp_init(struct pingpong *pp);
    triggered */
 timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting);
-
 
 /***********************************************************************
  *
@@ -147,7 +146,6 @@ CURLcode Curl_pp_disconnect(struct pingpong *pp);
 CURLcode Curl_pp_pollset(struct Curl_easy *data,
                          struct pingpong *pp,
                          struct easy_pollset *ps);
-
 
 /***********************************************************************
  *

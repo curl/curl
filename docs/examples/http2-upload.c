@@ -25,16 +25,19 @@
  * Multiplexed HTTP/2 uploads over a single connection
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for _snprintf(), fopen(), localtime(),
+                                    strerror() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
 #include <errno.h>
-#endif
 
 /* somewhat Unix-specific */
 #ifndef _MSC_VER
@@ -42,19 +45,6 @@
 #include <unistd.h>
 #endif
 
-#ifdef _WIN32
-#undef stat
-#define stat _stat
-#undef fstat
-#define fstat _fstat
-#define fileno _fileno
-#endif
-
-#if defined(_MSC_VER) && (_MSC_VER < 1900)
-#define snprintf _snprintf
-#endif
-
-/* curl stuff */
 #include <curl/curl.h>
 
 #ifndef CURLPIPE_MULTIPLEX
@@ -64,14 +54,26 @@
 #define CURLPIPE_MULTIPLEX 0L
 #endif
 
+#ifdef _WIN32
+#undef stat
+#define stat _stati64
+#undef fstat
+#define fstat _fstati64
+#define fileno _fileno
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif
+
 #ifdef _MSC_VER
-#define gettimeofday(a, b) my_gettimeofday((a), (b))
+#define gettimeofday(a, b) my_gettimeofday(a, b)
 static int my_gettimeofday(struct timeval *tp, void *tzp)
 {
   (void)tzp;
   if(tp) {
-    /* Offset between 1601-01-01 and 1970-01-01 in 100 nanosec units */
-    #define WIN32_FT_OFFSET (116444736000000000)
+/* Offset between 1601-01-01 and 1970-01-01 in 100 nanosec units */
+#define WIN32_FT_OFFSET (116444736000000000)
     union {
       CURL_TYPEOF_CURL_OFF_T ns100; /* time since 1 Jan 1601 in 100ns units */
       FILETIME ft;
@@ -92,7 +94,7 @@ struct input {
   int num;
 };
 
-static void dump(const char *text, int num, unsigned char *ptr,
+static void dump(const char *text, int num, const unsigned char *ptr,
                  size_t size, char nohex)
 {
   size_t i;
@@ -128,7 +130,7 @@ static void dump(const char *text, int num, unsigned char *ptr,
       }
       fprintf(stderr, "%c",
               (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
-      /* check again for 0D0A, to avoid an extra \n if it's at width */
+      /* check again for 0D0A, to avoid an extra \n if it is at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
         i += (c + 3 - width);
@@ -231,14 +233,9 @@ static int setup(struct input *t, int num, const char *upload)
     return 1;
   }
 
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(upload, &file_info) != 0) {
-#else
   if(fstat(fileno(t->in), &file_info) != 0) {
-#endif
-    fprintf(stderr, "error: could not stat file %s: %s\n",
-            upload, strerror(errno));
+    fprintf(stderr, "error: could not stat file %s: %s\n", upload,
+            strerror(errno));
     fclose(t->out);
     t->out = NULL;
     return 1;
@@ -305,7 +302,7 @@ int main(int argc, char **argv)
       num_transfers = 3;  /* a suitable low default */
 
     if(argc > 2)
-      /* if given a file name, upload this! */
+      /* if given a filename, upload this! */
       filename = argv[2];
   }
   else

@@ -7,7 +7,7 @@ set -eu
 
 cd "$(dirname "${0}")"/../..
 
-# shellcheck disable=SC2046
+git ls-files -z | xargs -0 -r \
 codespell \
   --skip '.github/scripts/pyspelling.words' \
   --skip '.github/scripts/typos.toml' \
@@ -16,4 +16,4 @@ codespell \
   --skip 'scripts/wcurl' \
   --ignore-regex '.*spellchecker:disable-line' \
   --ignore-words '.github/scripts/codespell-ignore.words' \
-  $(git ls-files)
+  --

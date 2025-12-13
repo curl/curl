@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,11 +9,10 @@ HTTP CONNECT
 HTTP proxy
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 pop3: sure hit me
 
@@ -27,7 +27,7 @@ To: fake@nowhere
 body
 
 --
-  yours sincerely
+  yours sincerely%CR
 </data>
 
 <datacheck>
@@ -37,11 +37,10 @@ To: fake@nowhere
 body
 
 --
-  yours sincerely
+  yours sincerely%CR
 </datacheck>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -60,7 +59,6 @@ pop3://pop.%TESTNUMBER:%POP3PORT/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -u user:se
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <protocol crlf="yes">
@@ -70,7 +68,7 @@ PASS secret
 RETR %TESTNUMBER
 QUIT
 </protocol>
-<proxy>
+<proxy crlf="headers">
 CONNECT pop.%TESTNUMBER:%POP3PORT HTTP/1.1
 Host: pop.%TESTNUMBER:%POP3PORT
 User-Agent: curl/%VERSION

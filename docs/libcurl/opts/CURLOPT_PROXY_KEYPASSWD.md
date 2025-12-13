@@ -61,7 +61,7 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/foo.bin");
-    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
+    curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy.example:443");
     curl_easy_setopt(curl, CURLOPT_PROXY_KEYPASSWD, "superman");
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);

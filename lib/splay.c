@@ -34,7 +34,7 @@
  *  zero          : when i is equal   to   j
  *  positive when : when i is larger  than j
  */
-#define compare(i,j) curlx_timediff_us(i,j)
+#define compare(i, j) curlx_timediff_us(i, j)
 
 /*
  * Splay using the key i (which may or may not be in the tree.) The starting
@@ -134,7 +134,6 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
     node->smaller = t->smaller;
     node->larger = t;
     t->smaller = NULL;
-
   }
   else {
     node->larger = t->larger;
@@ -156,7 +155,7 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
                                     struct Curl_tree *t,
                                     struct Curl_tree **removed)
 {
-  static const struct curltime tv_zero = {0, 0};
+  static const struct curltime tv_zero = { 0, 0 };
   struct Curl_tree *x;
 
   if(!t) {
@@ -196,7 +195,6 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
 
   return x;
 }
-
 
 /* Deletes the node we point out from the tree if it is there. Stores a
  * pointer to the new resulting tree in 'newroot'.

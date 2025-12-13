@@ -31,12 +31,12 @@ This environment variable disables use of the proxy even when specified with
 the --proxy option. That is
 
     NO_PROXY=direct.example.com curl -x http://proxy.example.com
-    http://direct.example.com
+    https://direct.example.com
 
 accesses the target URL directly, and
 
     NO_PROXY=direct.example.com curl -x http://proxy.example.com
-    http://somewhere.example.com
+    https://somewhere.example.com
 
 accesses the target URL through the proxy.
 

@@ -39,56 +39,58 @@ static CURLcode test_unit1397(const char *arg)
   };
 
   static const struct testcase tests[] = {
-    {"", "", FALSE},
-    {"a", "", FALSE},
-    {"", "b", FALSE},
-    {"a", "b", FALSE},
-    {"aa", "bb", FALSE},
-    {"\xff", "\xff", TRUE},
-    {"aa.aa.aa", "aa.aa.bb", FALSE},
-    {"aa.aa.aa", "aa.aa.aa", TRUE},
-    {"aa.aa.aa", "*.aa.bb", FALSE},
-    {"aa.aa.aa", "*.aa.aa", TRUE},
-    {"192.168.0.1", "192.168.0.1", TRUE},
-    {"192.168.0.1", "*.168.0.1", FALSE},
-    {"192.168.0.1", "*.0.1", FALSE},
-    {"h.ello", "*.ello", FALSE},
-    {"h.ello.", "*.ello", FALSE},
-    {"h.ello", "*.ello.", FALSE},
-    {"h.e.llo", "*.e.llo", TRUE},
-    {"h.e.llo", " *.e.llo", FALSE},
-    {" h.e.llo", "*.e.llo", TRUE},
-    {"h.e.llo.", "*.e.llo", TRUE},
-    {"*.e.llo.", "*.e.llo", TRUE},
-    {"************.e.llo.", "*.e.llo", TRUE},
-    {"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-     "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
-     "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
-     "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
-     "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
-     ".e.llo.", "*.e.llo", TRUE},
-    {"\xfe\xfe.e.llo.", "*.e.llo", TRUE},
-    {"h.e.llo.", "*.e.llo.", TRUE},
-    {"h.e.llo", "*.e.llo.", TRUE},
-    {".h.e.llo", "*.e.llo.", FALSE},
-    {"h.e.llo", "*.*.llo.", FALSE},
-    {"h.e.llo", "h.*.llo", FALSE},
-    {"h.e.llo", "h.e.*", FALSE},
-    {"hello", "*.ello", FALSE},
-    {"hello", "**llo", FALSE},
-    {"bar.foo.example.com", "*.example.com", FALSE},
-    {"foo.example.com", "*.example.com", TRUE},
-    {"baz.example.net", "b*z.example.net", FALSE},
-    {"foobaz.example.net", "*baz.example.net", FALSE},
-    {"xn--l8j.example.local", "x*.example.local", FALSE},
-    {"xn--l8j.example.net", "*.example.net", TRUE},
-    {"xn--l8j.example.net", "*j.example.net", FALSE},
-    {"xn--l8j.example.net", "xn--l8j.example.net", TRUE},
-    {"xn--l8j.example.net", "xn--l8j.*.net", FALSE},
-    {"xl8j.example.net", "*.example.net", TRUE},
-    {"fe80::3285:a9ff:fe46:b619", "*::3285:a9ff:fe46:b619", FALSE},
-    {"fe80::3285:a9ff:fe46:b619", "fe80::3285:a9ff:fe46:b619", TRUE},
-    {NULL, NULL, FALSE}
+    { ".hello.com", "*.hello.com", FALSE },
+    { "a.hello.com", "*.hello.com", TRUE },
+    { "", "", FALSE },
+    { "a", "", FALSE },
+    { "", "b", FALSE },
+    { "a", "b", FALSE },
+    { "aa", "bb", FALSE },
+    { "\xff", "\xff", TRUE },
+    { "aa.aa.aa", "aa.aa.bb", FALSE },
+    { "aa.aa.aa", "aa.aa.aa", TRUE },
+    { "aa.aa.aa", "*.aa.bb", FALSE },
+    { "aa.aa.aa", "*.aa.aa", TRUE },
+    { "192.168.0.1", "192.168.0.1", TRUE },
+    { "192.168.0.1", "*.168.0.1", FALSE },
+    { "192.168.0.1", "*.0.1", FALSE },
+    { "h.ello", "*.ello", FALSE },
+    { "h.ello.", "*.ello", FALSE },
+    { "h.ello", "*.ello.", FALSE },
+    { "h.e.llo", "*.e.llo", TRUE },
+    { "h.e.llo", " *.e.llo", FALSE },
+    { " h.e.llo", "*.e.llo", TRUE },
+    { "h.e.llo.", "*.e.llo", TRUE },
+    { "*.e.llo.", "*.e.llo", TRUE },
+    { "************.e.llo.", "*.e.llo", TRUE },
+    { "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+      "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"
+      "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+      "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"
+      ".e.llo.", "*.e.llo", TRUE },
+    { "\xfe\xfe.e.llo.", "*.e.llo", TRUE },
+    { "h.e.llo.", "*.e.llo.", TRUE },
+    { "h.e.llo", "*.e.llo.", TRUE },
+    { ".h.e.llo", "*.e.llo.", FALSE },
+    { "h.e.llo", "*.*.llo.", FALSE },
+    { "h.e.llo", "h.*.llo", FALSE },
+    { "h.e.llo", "h.e.*", FALSE },
+    { "hello", "*.ello", FALSE },
+    { "hello", "**llo", FALSE },
+    { "bar.foo.example.com", "*.example.com", FALSE },
+    { "foo.example.com", "*.example.com", TRUE },
+    { "baz.example.net", "b*z.example.net", FALSE },
+    { "foobaz.example.net", "*baz.example.net", FALSE },
+    { "xn--l8j.example.local", "x*.example.local", FALSE },
+    { "xn--l8j.example.net", "*.example.net", TRUE },
+    { "xn--l8j.example.net", "*j.example.net", FALSE },
+    { "xn--l8j.example.net", "xn--l8j.example.net", TRUE },
+    { "xn--l8j.example.net", "xn--l8j.*.net", FALSE },
+    { "xl8j.example.net", "*.example.net", TRUE },
+    { "fe80::3285:a9ff:fe46:b619", "*::3285:a9ff:fe46:b619", FALSE },
+    { "fe80::3285:a9ff:fe46:b619", "fe80::3285:a9ff:fe46:b619", TRUE },
+    { NULL, NULL, FALSE }
   };
 
   int i;
@@ -103,7 +105,7 @@ static CURLcode test_unit1397(const char *arg)
                     "did %sMATCH\n",
                     tests[i].host,
                     tests[i].pattern,
-                    tests[i].match ? "NOT ": "");
+                    tests[i].match ? "NOT " : "");
       unitfail++;
     }
   }

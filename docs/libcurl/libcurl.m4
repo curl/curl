@@ -86,7 +86,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
     AS_HELP_STRING([--with-libcurl=PREFIX],[look for the curl library in PREFIX/lib and headers in PREFIX/include]),
     [_libcurl_with=$withval],[_libcurl_with=ifelse([$1],,[yes],[$1])])
 
-  if test "$_libcurl_with" != "no"; then
+  if test "x$_libcurl_with" != "xno"; then
 
     AC_PROG_AWK
 
@@ -102,7 +102,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       AC_PATH_PROG([_libcurl_config],[curl-config],[],[$PATH])
     fi
 
-    if test x$_libcurl_config != "x"; then
+    if test -n "$_libcurl_config"; then
       AC_CACHE_CHECK([for the version of libcurl],
         [libcurl_cv_lib_curl_version],
         [libcurl_cv_lib_curl_version=`$_libcurl_config --version | $AWK '{print $[]2}'`])
@@ -110,11 +110,11 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       _libcurl_version=`echo $libcurl_cv_lib_curl_version | $_libcurl_version_parse`
       _libcurl_wanted=`echo ifelse([$2],,[0],[$2]) | $_libcurl_version_parse`
 
-      if test $_libcurl_wanted -gt 0; then
+      if test "$_libcurl_wanted" -gt 0; then
         AC_CACHE_CHECK([for libcurl >= version $2],
           [libcurl_cv_lib_version_ok],
           [
-          if test $_libcurl_version -ge $_libcurl_wanted; then
+          if test "$_libcurl_version" -ge "$_libcurl_wanted"; then
             libcurl_cv_lib_version_ok=yes
           else
             libcurl_cv_lib_version_ok=no
@@ -122,11 +122,11 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           ])
       fi
 
-      if test $_libcurl_wanted -eq 0 || test x$libcurl_cv_lib_version_ok = xyes; then
-        if test x"$LIBCURL_CPPFLAGS" = "x"; then
+      if test "$_libcurl_wanted" -eq 0 || test "$libcurl_cv_lib_version_ok" = "yes"; then
+        if test -z "$LIBCURL_CPPFLAGS"; then
           LIBCURL_CPPFLAGS=`$_libcurl_config --cflags`
         fi
-        if test x"$LIBCURL" = "x"; then
+        if test -z "$LIBCURL"; then
           LIBCURL=`$_libcurl_config --libs`
 
           # This is so silly, but Apple actually has a bug in their
@@ -143,7 +143,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         _libcurl_features=`$_libcurl_config --feature`
 
         # Is it modern enough to have --protocols? (7.12.4)
-        if test $_libcurl_version -ge 461828; then
+        if test "$_libcurl_version" -ge 461828; then
           _libcurl_protocols=`$_libcurl_config --protocols`
         fi
       else
@@ -153,7 +153,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
       unset _libcurl_wanted
     fi
 
-    if test $_libcurl_try_link = yes; then
+    if test "$_libcurl_try_link" = "yes"; then
 
       # we did not find curl-config, so let's see if the user-supplied
       # link line (or failing that, "-lcurl") is enough.
@@ -187,7 +187,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
         unset _libcurl_save_libs
         ])
 
-      if test $libcurl_cv_lib_curl_usable = yes; then
+      if test "$libcurl_cv_lib_curl_usable" = "yes"; then
 
         # Does curl_free() exist in this version of libcurl?
         # If not, fake it with free()
@@ -217,25 +217,25 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
           eval AS_TR_SH(libcurl_feature_$_libcurl_feature)=yes
         done
 
-        if test "x$_libcurl_protocols" = "x"; then
+        if test -z "$_libcurl_protocols"; then
 
           # We do not have --protocols, so just assume that all
           # protocols are available
           _libcurl_protocols="HTTP FTP FILE TELNET LDAP DICT TFTP"
 
-          if test x$libcurl_feature_SSL = xyes; then
+          if test "$libcurl_feature_SSL" = "yes"; then
             _libcurl_protocols="$_libcurl_protocols HTTPS"
 
             # FTPS was not standards-compliant until version
             # 7.11.0 (0x070b00 == 461568)
-            if test $_libcurl_version -ge 461568; then
+            if test "$_libcurl_version" -ge 461568; then
               _libcurl_protocols="$_libcurl_protocols FTPS"
             fi
           fi
 
           # RTSP, IMAP, POP3 and SMTP were added in
           # 7.20.0 (0x071400 == 463872)
-          if test $_libcurl_version -ge 463872; then
+          if test "$_libcurl_version" -ge 463872; then
             _libcurl_protocols="$_libcurl_protocols RTSP IMAP POP3 SMTP"
           fi
         fi
@@ -261,7 +261,7 @@ AC_DEFUN([LIBCURL_CHECK_CONFIG],
     unset _libcurl_ldflags
   fi
 
-  if test x$_libcurl_with = xno || test x$libcurl_cv_lib_curl_usable != xyes; then
+  if test "x$_libcurl_with" = "xno" || test "$libcurl_cv_lib_curl_usable" != "yes"; then
     # This is the IF-NO path
     ifelse([$4],,:,[$4])
   else

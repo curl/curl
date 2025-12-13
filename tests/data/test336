@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -32,7 +33,7 @@ REPLY SIZE 500 no such command
 ftp
 </server>
 <name>
-FTP range download when SIZE doesn't work
+FTP range download when SIZE does not work
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/%TESTNUMBER --range 3-6

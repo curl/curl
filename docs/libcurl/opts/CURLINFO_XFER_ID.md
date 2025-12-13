@@ -15,7 +15,7 @@ Added-in: 8.2.0
 
 # NAME
 
-CURLINFO_XFER_ID - get the ID of a transfer
+CURLINFO_XFER_ID - ID of the transfer
 
 # SYNOPSIS
 

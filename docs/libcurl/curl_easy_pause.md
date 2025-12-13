@@ -109,7 +109,6 @@ int main(void)
   if(curl) {
     /* pause a transfer in both directions */
     curl_easy_pause(curl, CURLPAUSE_RECV | CURLPAUSE_SEND);
-
   }
 }
 ~~~

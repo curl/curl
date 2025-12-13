@@ -15,7 +15,7 @@ Added-in: 7.55.0
 
 # NAME
 
-CURLINFO_CONTENT_LENGTH_DOWNLOAD_T - get content-length of download
+CURLINFO_CONTENT_LENGTH_DOWNLOAD_T - content-length of download
 
 # SYNOPSIS
 

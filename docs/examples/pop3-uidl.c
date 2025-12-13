@@ -21,13 +21,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * List the contents of a POP3 mailbox by unique ID
  * </DESC>
  */
-
 #include <stdio.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example using libcurl's POP3 capabilities to list the

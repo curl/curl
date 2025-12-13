@@ -31,7 +31,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 #define DNS_TIMEOUT 1L
 

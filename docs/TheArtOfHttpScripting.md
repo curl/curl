@@ -57,7 +57,7 @@ SPDX-License-Identifier: curl
  offer even more details as they show **everything** curl sends and
  receives. Use it like this:
 
-    curl --trace-ascii debugdump.txt http://www.example.com/
+    curl --trace-ascii debugdump.txt https://www.example.com/
 
 ## See the Timing
 
@@ -67,7 +67,7 @@ SPDX-License-Identifier: curl
  [`--trace-time`](https://curl.se/docs/manpage.html#--trace-time) option is
  what you need. It prepends the time to each trace output line:
 
-    curl --trace-ascii d.txt --trace-time http://example.com/
+    curl --trace-ascii d.txt --trace-time https://example.com/
 
 ## See which Transfer
 
@@ -78,7 +78,7 @@ SPDX-License-Identifier: curl
  you need. It prepends the transfer and connection identifier to each trace
  output line:
 
-    curl --trace-ascii d.txt --trace-ids http://example.com/
+    curl --trace-ascii d.txt --trace-ids https://example.com/
 
 ## See the Response
 
@@ -91,7 +91,7 @@ SPDX-License-Identifier: curl
 
  The Uniform Resource Locator format is how you specify the address of a
  particular resource on the Internet. You know these, you have seen URLs like
- https://curl.se or https://example.com a million times. RFC 3986 is the
+ https://curl.se/ or https://example.com/ a million times. RFC 3986 is the
  canonical spec. The formal name is not URL, it is **URI**.
 
 ## Host
@@ -104,7 +104,7 @@ SPDX-License-Identifier: curl
  IP address for a hostname than what would otherwise be used, by using curl's
  [`--resolve`](https://curl.se/docs/manpage.html#--resolve) option:
 
-    curl --resolve www.example.org:80:127.0.0.1 http://www.example.org/
+    curl --resolve www.example.org:80:127.0.0.1 https://www.example.org/
 
 ## Port number
 
@@ -115,14 +115,14 @@ SPDX-License-Identifier: curl
  number immediately following the hostname. Like when doing HTTP to port
  1234:
 
-    curl http://www.example.org:1234/
+    curl https://www.example.org:1234/
 
  The port number you specify in the URL is the number that the server uses to
  offer its services. Sometimes you may use a proxy, and then you may
  need to specify that proxy's port number separately from what curl needs to
  connect to the server. Like when using an HTTP proxy on port 4321:
 
-    curl --proxy http://proxy.example.org:4321 http://remote.example.org/
+    curl --proxy http://proxy.example.org:4321 https://remote.example.org/
 
 ## Username and password
 
@@ -133,11 +133,11 @@ SPDX-License-Identifier: curl
  You can opt to either insert the user and password in the URL or you can
  provide them separately:
 
-    curl http://user:password@example.org/
+    curl https://user:password@example.org/
 
  or
 
-    curl -u user:password http://example.org/
+    curl -u user:password https://example.org/
 
  You need to pay attention that this kind of HTTP authentication is not what
  is usually done and requested by user-oriented websites these days. They tend
@@ -158,7 +158,7 @@ SPDX-License-Identifier: curl
  issues a GET request to the server and receives the document it asked for.
  If you issue the command line
 
-    curl https://curl.se
+    curl https://curl.se/
 
  you get a webpage returned in your terminal window. The entire HTML document
  this URL identifies.
@@ -188,7 +188,7 @@ SPDX-License-Identifier: curl
 
  Example, send two GET requests:
 
-    curl http://url1.example.com http://url2.example.com
+    curl https://url1.example.com https://url2.example.com
 
  If you use [`--data`](https://curl.se/docs/manpage.html#-d) to POST to
  the URL, using multiple URLs means that you send that same POST to all the
@@ -196,8 +196,7 @@ SPDX-License-Identifier: curl
 
  Example, send two POSTs:
 
-    curl --data name=curl http://url1.example.com http://url2.example.com
-
+    curl --data name=curl https://url1.example.com https://url2.example.com
 
 ## Multiple HTTP methods in a single command line
 
@@ -214,11 +213,11 @@ SPDX-License-Identifier: curl
  Perhaps this is best shown with a few examples. To send first a HEAD and then
  a GET:
 
-    curl -I http://example.com --next http://example.com
+    curl -I https://example.com --next https://example.com
 
  To first send a POST and then a GET:
 
-    curl -d score=10 http://example.com/post.cgi --next http://example.com/results.html
+    curl -d score=10 https://example.com/post.cgi --next https://example.com/results.html
 
 # HTML forms
 
@@ -261,7 +260,7 @@ SPDX-License-Identifier: curl
  To make curl do the GET form post for you, just enter the expected created
  URL:
 
-    curl "http://www.example.com/when/junk.cgi?birthyear=1905&press=OK"
+    curl "https://www.example.com/when/junk.cgi?birthyear=1905&press=OK"
 
 ## POST
 
@@ -287,7 +286,7 @@ SPDX-License-Identifier: curl
  And to use curl to post this form with the same data filled in as before, we
  could do it like:
 
-    curl --data "birthyear=1905&press=%20OK%20" http://www.example.com/when/junk.cgi
+    curl --data "birthyear=1905&press=%20OK%20" https://www.example.com/when/junk.cgi
 
  This kind of POST uses the Content-Type `application/x-www-form-urlencoded`
  and is the most widely used POST kind.
@@ -299,7 +298,7 @@ SPDX-License-Identifier: curl
 
  Recent curl versions can in fact url-encode POST data for you, like this:
 
-    curl --data-urlencode "name=I am Daniel" http://www.example.com
+    curl --data-urlencode "name=I am Daniel" https://www.example.com
 
  If you repeat `--data` several times on the command line, curl concatenates
  all the given data pieces - and put a `&` symbol between each data segment.
@@ -371,7 +370,7 @@ SPDX-License-Identifier: curl
 
  Put a file to an HTTP server with curl:
 
-    curl --upload-file uploadfile http://www.example.com/receive.cgi
+    curl --upload-file uploadfile https://www.example.com/receive.cgi
 
 # HTTP Authentication
 
@@ -386,7 +385,7 @@ SPDX-License-Identifier: curl
 
  To tell curl to use a user and password for authentication:
 
-    curl --user name:password http://www.example.com
+    curl --user name:password https://www.example.com
 
 ## Other Authentication
 
@@ -440,7 +439,7 @@ SPDX-License-Identifier: curl
 
  Use curl to set the referer field with:
 
-    curl --referer http://www.example.come http://www.example.com
+    curl --referer https://www.example.come https://www.example.com
 
 ## User Agent
 
@@ -481,7 +480,7 @@ SPDX-License-Identifier: curl
 
  To tell curl to follow a Location:
 
-    curl --location http://www.example.com
+    curl --location https://www.example.com
 
  If you use curl to POST to a site that immediately redirects you to another
  page, you can safely use [`--location`](https://curl.se/docs/manpage.html#-L)
@@ -519,14 +518,14 @@ SPDX-License-Identifier: curl
  The simplest way to send a few cookies to the server when getting a page with
  curl is to add them on the command line like:
 
-    curl --cookie "name=Daniel" http://www.example.com
+    curl --cookie "name=Daniel" https://www.example.com
 
  Cookies are sent as common HTTP headers. This is practical as it allows curl
  to record cookies simply by recording headers. Record cookies with curl by
  using the [`--dump-header`](https://curl.se/docs/manpage.html#-D) (`-D`)
  option like:
 
-    curl --dump-header headers_and_cookies http://www.example.com
+    curl --dump-header headers_and_cookies https://www.example.com
 
  (Take note that the
  [`--cookie-jar`](https://curl.se/docs/manpage.html#-c) option described
@@ -538,7 +537,7 @@ SPDX-License-Identifier: curl
  believing you had a previous connection). To use previously stored cookies,
  you run curl like:
 
-    curl --cookie stored_cookies_in_file http://www.example.com
+    curl --cookie stored_cookies_in_file https://www.example.com
 
  curl's "cookie engine" gets enabled when you use the
  [`--cookie`](https://curl.se/docs/manpage.html#-b) option. If you only
@@ -547,7 +546,7 @@ SPDX-License-Identifier: curl
  page and follow a location (and thus possibly send back cookies it received),
  you can invoke it like:
 
-    curl --cookie nada --location http://www.example.com
+    curl --cookie nada --location https://www.example.com
 
  curl has the ability to read and write cookie files that use the same file
  format that Netscape and Mozilla once used. It is a convenient way to share
@@ -557,7 +556,7 @@ SPDX-License-Identifier: curl
  cookie file at the end of an operation:
 
     curl --cookie cookies.txt --cookie-jar newcookies.txt \
-      http://www.example.com
+      https://www.example.com
 
 # HTTPS
 
@@ -620,12 +619,12 @@ SPDX-License-Identifier: curl
  You can delete a default header by providing one without content. Like you
  can ruin the request by chopping off the `Host:` header:
 
-    curl --header "Host:" http://www.example.com
+    curl --header "Host:" https://www.example.com
 
  You can add headers the same way. Your server may want a `Destination:`
  header, and you can add it:
 
-    curl --header "Destination: http://nowhere" http://example.com
+    curl --header "Destination: nowhere" https://example.com
 
 ## More on changed methods
 
@@ -638,7 +637,7 @@ SPDX-License-Identifier: curl
  thinks it sends a POST. You can change the normal GET to a POST method by
  simply adding `-X POST` in a command line like:
 
-    curl -X POST http://example.org/
+    curl -X POST https://example.org/
 
  curl however still acts as if it sent a GET so it does not send any request
  body etc.

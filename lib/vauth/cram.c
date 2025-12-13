@@ -29,16 +29,11 @@
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include <curl/curl.h>
-#include "../urldata.h"
 
 #include "vauth.h"
 #include "../curl_hmac.h"
 #include "../curl_md5.h"
 #include "../curlx/warnless.h"
-
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
 
 
 /*
@@ -67,14 +62,14 @@ CURLcode Curl_auth_create_cram_md5_message(const struct bufref *chlg,
 
   /* Compute the digest using the password as the key */
   ctxt = Curl_HMAC_init(&Curl_HMAC_MD5,
-                        (const unsigned char *) passwdp,
+                        (const unsigned char *)passwdp,
                         curlx_uztoui(strlen(passwdp)));
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
   /* Update the digest with the given challenge */
   if(Curl_bufref_len(chlg))
-    Curl_HMAC_update(ctxt, Curl_bufref_ptr(chlg),
+    Curl_HMAC_update(ctxt, Curl_bufref_uptr(chlg),
                      curlx_uztoui(Curl_bufref_len(chlg)));
 
   /* Finalise the digest */

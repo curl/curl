@@ -46,20 +46,17 @@
 #include "os400sys.h"
 
 #ifndef SIZE_MAX
-#define SIZE_MAX        ((size_t) ~0)   /* Is unsigned on OS/400. */
+#define SIZE_MAX ((size_t)~0)   /* Is unsigned on OS/400. */
 #endif
 
+#define ASCII_CCSID         819     /* Use ISO-8859-1 as ASCII. */
+#define NOCONV_CCSID        65535   /* No conversion. */
+#define ICONV_ID_SIZE       32 /* Size of iconv_open() code identifier. */
+#define ICONV_OPEN_ERROR(t) ((t).return_value == -1)
 
-#define ASCII_CCSID     819     /* Use ISO-8859-1 as ASCII. */
-#define NOCONV_CCSID    65535   /* No conversion. */
-#define ICONV_ID_SIZE   32      /* Size of iconv_open() code identifier. */
-#define ICONV_OPEN_ERROR(t)     ((t).return_value == -1)
+#define ALLOC_GRANULE 8 /* Alloc. granule for curl_formadd_ccsid(). */
 
-#define ALLOC_GRANULE   8       /* Alloc. granule for curl_formadd_ccsid(). */
-
-
-static void
-makeOS400IconvCode(char buf[ICONV_ID_SIZE], unsigned int ccsid)
+static void makeOS400IconvCode(char buf[ICONV_ID_SIZE], unsigned int ccsid)
 {
   /**
   *** Convert a CCSID to the corresponding IBM iconv_open() character
@@ -78,10 +75,8 @@ makeOS400IconvCode(char buf[ICONV_ID_SIZE], unsigned int ccsid)
   curl_msprintf(buf, "IBMCCSID%05u0000000", ccsid);
 }
 
-
-static iconv_t
-iconv_open_CCSID(unsigned int ccsidout, unsigned int ccsidin,
-                 unsigned int cstr)
+static iconv_t iconv_open_CCSID(unsigned int ccsidout, unsigned int ccsidin,
+                                unsigned int cstr)
 {
   char fromcode[ICONV_ID_SIZE];
   char tocode[ICONV_ID_SIZE];
@@ -95,18 +90,16 @@ iconv_open_CCSID(unsigned int ccsidout, unsigned int ccsidin,
 
   makeOS400IconvCode(fromcode, ccsidin);
   makeOS400IconvCode(tocode, ccsidout);
-  memset(tocode + 13, 0, sizeof(tocode) - 13);   /* Dest. code id format. */
+  memset(tocode + 13, 0, sizeof(tocode) - 13); /* Dest. code id format. */
 
   if(cstr)
-    fromcode[18] = '1';                         /* Set null-terminator flag. */
+    fromcode[18] = '1'; /* Set null-terminator flag. */
 
   return iconv_open(tocode, fromcode);
 }
 
-
-static int
-convert(char *d, size_t dlen, int dccsid,
-        const char *s, int slen, int sccsid)
+static int convert(char *d, size_t dlen, int dccsid, const char *s, int slen,
+                   int sccsid)
 {
   int i;
   iconv_t cd;
@@ -134,23 +127,23 @@ convert(char *d, size_t dlen, int dccsid,
       memcpy(d, s, i);
 
     return i;
-    }
+  }
 
   if(slen < 0) {
     lslen = 0;
     cd = iconv_open_CCSID(dccsid, sccsid, 1);
-    }
+  }
   else {
-    lslen = (size_t) slen;
+    lslen = (size_t)slen;
     cd = iconv_open_CCSID(dccsid, sccsid, 0);
-    }
+  }
 
   if(ICONV_OPEN_ERROR(cd))
     return -1;
 
   i = dlen;
 
-  if((int) iconv(cd, (char * *) &s, &lslen, &d, &dlen) < 0)
+  if((int)iconv(cd, (char **)&s, &lslen, &d, &dlen) < 0)
     i = -1;
   else
     i -= dlen;
@@ -159,8 +152,8 @@ convert(char *d, size_t dlen, int dccsid,
   return i;
 }
 
-
-static char *dynconvert(int dccsid, const char *s, int slen, int sccsid)
+static char *dynconvert(int dccsid, const char *s, int slen, int sccsid,
+                        int *olen)
 {
   char *d;
   char *cp;
@@ -170,19 +163,19 @@ static char *dynconvert(int dccsid, const char *s, int slen, int sccsid)
 
   /* Like convert, but the destination is allocated and returned. */
 
-  dlen = (size_t) (slen < 0 ? strlen(s) : slen) + 1;
-  dlen *= MAX_CONV_EXPANSION;           /* Allow some expansion. */
+  dlen = (size_t)(slen < 0 ? strlen(s) : slen) + 1;
+  dlen *= MAX_CONV_EXPANSION; /* Allow some expansion. */
   d = malloc(dlen);
 
   if(!d)
-    return (char *) NULL;
+    return (char *)NULL;
 
   l = convert(d, dlen, dccsid, s, slen, sccsid);
 
   if(l < 0) {
     free(d);
-    return (char *) NULL;
-    }
+    return (char *)NULL;
+  }
 
   if(slen < 0) {
     /* Need to null-terminate even when source length is given.
@@ -193,35 +186,36 @@ static char *dynconvert(int dccsid, const char *s, int slen, int sccsid)
 
     if(l2 < 0) {
       free(d);
-      return (char *) NULL;
-      }
-
-    l += l2;
+      return (char *)NULL;
     }
 
-  if((size_t) l < dlen) {
-    cp = realloc(d, l);         /* Shorten to minimum needed. */
+    l += l2;
+  }
+
+  if((size_t)l < dlen) {
+    cp = realloc(d, l); /* Shorten to minimum needed. */
 
     if(cp)
       d = cp;
-    }
+  }
+  if(olen)
+    *olen = l;
 
   return d;
 }
 
-
-static struct curl_slist *
-slist_convert(int dccsid, struct curl_slist *from, int sccsid)
+static struct curl_slist *slist_convert(int dccsid, struct curl_slist *from,
+                                        int sccsid)
 {
-  struct curl_slist *to = (struct curl_slist *) NULL;
+  struct curl_slist *to = (struct curl_slist *)NULL;
 
   for(; from; from = from->next) {
     struct curl_slist *nl;
-    char *cp = dynconvert(dccsid, from->data, -1, sccsid);
+    char *cp = dynconvert(dccsid, from->data, -1, sccsid, NULL);
 
     if(!cp) {
       curl_slist_free_all(to);
-      return (struct curl_slist *) NULL;
+      return (struct curl_slist *)NULL;
     }
     nl = Curl_slist_append_nodup(to, cp);
     if(!nl) {
@@ -234,15 +228,14 @@ slist_convert(int dccsid, struct curl_slist *from, int sccsid)
   return to;
 }
 
-
-static char *
-keyed_string(localkey_t key, const char *ascii, unsigned int ccsid)
+static char *keyed_string(localkey_t key, const char *ascii,
+                          unsigned int ccsid)
 {
   int i;
   char *ebcdic;
 
   if(!ascii)
-    return (char *) NULL;
+    return (char *)NULL;
 
   i = MAX_CONV_EXPANSION * (strlen(ascii) + 1);
 
@@ -251,40 +244,32 @@ keyed_string(localkey_t key, const char *ascii, unsigned int ccsid)
     return ebcdic;
 
   if(convert(ebcdic, i, ccsid, ascii, -1, ASCII_CCSID) < 0)
-    return (char *) NULL;
+    return (char *)NULL;
 
   return ebcdic;
 }
 
-
-const char *
-curl_to_ccsid(const char *s, unsigned int ccsid)
+const char *curl_to_ccsid(const char *s, unsigned int ccsid)
 {
   if(s)
-    s = dynconvert(ccsid, s, -1, ASCII_CCSID);
+    s = dynconvert(ccsid, s, -1, ASCII_CCSID, NULL);
   return s;
 }
 
-
-const char *
-curl_from_ccsid(const char *s, unsigned int ccsid)
+const char *curl_from_ccsid(const char *s, unsigned int ccsid)
 {
   if(s)
-    s = dynconvert(ASCII_CCSID, s, -1, ccsid);
+    s = dynconvert(ASCII_CCSID, s, -1, ccsid, NULL);
   return s;
 }
 
-
-char *
-curl_version_ccsid(unsigned int ccsid)
+char *curl_version_ccsid(unsigned int ccsid)
 {
   return keyed_string(LK_CURL_VERSION, curl_version(), ccsid);
 }
 
-
-char *
-curl_easy_escape_ccsid(CURL *handle, const char *string, int length,
-                       unsigned int sccsid, unsigned int dccsid)
+char *curl_easy_escape_ccsid(CURL *handle, const char *string, int length,
+                             unsigned int sccsid, unsigned int dccsid)
 {
   char *s;
   char *d;
@@ -292,30 +277,28 @@ curl_easy_escape_ccsid(CURL *handle, const char *string, int length,
   if(!string) {
     /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
-    return (char *) NULL;
-    }
+    return (char *)NULL;
+  }
 
-  s = dynconvert(ASCII_CCSID, string, length ? length : -1, sccsid);
+  s = dynconvert(ASCII_CCSID, string, length ? length : -1, sccsid, NULL);
 
   if(!s)
-    return (char *) NULL;
+    return (char *)NULL;
 
   d = curl_easy_escape(handle, s, 0);
   free(s);
 
   if(!d)
-    return (char *) NULL;
+    return (char *)NULL;
 
-  s = dynconvert(dccsid, d, -1, ASCII_CCSID);
+  s = dynconvert(dccsid, d, -1, ASCII_CCSID, NULL);
   free(d);
   return s;
 }
 
-
-char *
-curl_easy_unescape_ccsid(CURL *handle, const char *string, int length,
-                         int *outlength,
-                         unsigned int sccsid, unsigned int dccsid)
+char *curl_easy_unescape_ccsid(CURL *handle, const char *string, int length,
+                               int *outlength, unsigned int sccsid,
+                               unsigned int dccsid)
 {
   char *s;
   char *d;
@@ -323,21 +306,21 @@ curl_easy_unescape_ccsid(CURL *handle, const char *string, int length,
   if(!string) {
     /* !checksrc! disable ERRNOVAR 1 */
     errno = EINVAL;
-    return (char *) NULL;
-    }
+    return (char *)NULL;
+  }
 
-  s = dynconvert(ASCII_CCSID, string, length ? length : -1, sccsid);
+  s = dynconvert(ASCII_CCSID, string, length ? length : -1, sccsid, NULL);
 
   if(!s)
-    return (char *) NULL;
+    return (char *)NULL;
 
   d = curl_easy_unescape(handle, s, 0, outlength);
   free(s);
 
   if(!d)
-    return (char *) NULL;
+    return (char *)NULL;
 
-  s = dynconvert(dccsid, d, -1, ASCII_CCSID);
+  s = dynconvert(dccsid, d, -1, ASCII_CCSID, NULL);
   free(d);
 
   if(s && outlength)
@@ -346,31 +329,29 @@ curl_easy_unescape_ccsid(CURL *handle, const char *string, int length,
   return s;
 }
 
-
-struct curl_slist *
-curl_slist_append_ccsid(struct curl_slist *list,
-                        const char *data, unsigned int ccsid)
+struct curl_slist *curl_slist_append_ccsid(struct curl_slist *list,
+                                           const char *data,
+                                           unsigned int ccsid)
 {
   char *s;
 
-  s = (char *) NULL;
+  s = (char *)NULL;
 
   if(!data)
     return curl_slist_append(list, data);
 
-  s = dynconvert(ASCII_CCSID, data, -1, ccsid);
+  s = dynconvert(ASCII_CCSID, data, -1, ccsid, NULL);
 
   if(!s)
-    return (struct curl_slist *) NULL;
+    return (struct curl_slist *)NULL;
 
   list = curl_slist_append(list, s);
   free(s);
   return list;
 }
 
-
-time_t
-curl_getdate_ccsid(const char *p, const time_t *unused, unsigned int ccsid)
+time_t curl_getdate_ccsid(const char *p, const time_t *unused,
+                          unsigned int ccsid)
 {
   char *s;
   time_t t;
@@ -378,20 +359,18 @@ curl_getdate_ccsid(const char *p, const time_t *unused, unsigned int ccsid)
   if(!p)
     return curl_getdate(p, unused);
 
-  s = dynconvert(ASCII_CCSID, p, -1, ccsid);
+  s = dynconvert(ASCII_CCSID, p, -1, ccsid, NULL);
 
   if(!s)
-    return (time_t) -1;
+    return (time_t)-1;
 
   t = curl_getdate(s, unused);
   free(s);
   return t;
 }
 
-
-static int
-convert_version_info_string(const char **stringp,
-                            char **bufp, int *left, unsigned int ccsid)
+static int convert_version_info_string(const char **stringp, char **bufp,
+                                       int *left, unsigned int ccsid)
 {
   /* Helper for curl_version_info_ccsid(): convert a string if defined.
      Result is stored in the `*left'-byte buffer at `*bufp'.
@@ -407,14 +386,13 @@ convert_version_info_string(const char **stringp,
     *stringp = *bufp;
     *bufp += l;
     *left -= l;
-    }
+  }
 
   return 0;
 }
 
-
-curl_version_info_data *
-curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
+curl_version_info_data *curl_version_info_ccsid(CURLversion stamp,
+                                                unsigned int ccsid)
 {
   curl_version_info_data *p;
   char *cp;
@@ -454,7 +432,7 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
   /* If caller has been compiled with a newer version, error. */
 
   if(stamp > CURLVERSION_NOW)
-    return (curl_version_info_data *) NULL;
+    return (curl_version_info_data *)NULL;
 
   p = curl_version_info(stamp);
 
@@ -471,10 +449,10 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
       n += strlen(p->protocols[nproto++]);
 
     n += nproto++;
-    }
+  }
 
   for(i = 0; i < sizeof(charfields) / sizeof(charfields[0]); i++) {
-    cpp = (const char **) ((char *) p + charfields[i]);
+    cpp = (const char **)((char *)p + charfields[i]);
     if(*cpp)
       n += strlen(*cpp) + 1;
   }
@@ -487,70 +465,60 @@ curl_version_info_ccsid(CURLversion stamp, unsigned int ccsid)
     n += nproto * sizeof(const char *);
 
   cp = Curl_thread_buffer(LK_VERSION_INFO_DATA, n);
-  id = (curl_version_info_data *) Curl_thread_buffer(LK_VERSION_INFO,
-                                                     sizeof(*id));
+  id = (curl_version_info_data *)Curl_thread_buffer(LK_VERSION_INFO,
+                                                    sizeof(*id));
 
   if(!id || !cp)
-    return (curl_version_info_data *) NULL;
+    return (curl_version_info_data *)NULL;
 
   /* Copy data and convert strings. */
 
-  memcpy((char *) id, (char *) p, sizeof(*p));
+  memcpy((char *)id, (char *)p, sizeof(*p));
 
   if(id->protocols) {
     i = nproto * sizeof(id->protocols[0]);
 
-    id->protocols = (const char * const *) cp;
-    memcpy(cp, (char *) p->protocols, i);
+    id->protocols = (const char * const *)cp;
+    memcpy(cp, (char *)p->protocols, i);
     cp += i;
     n -= i;
 
     for(i = 0; id->protocols[i]; i++)
-      if(convert_version_info_string(((const char * *) id->protocols) + i,
-                                      &cp, &n, ccsid))
-        return (curl_version_info_data *) NULL;
+      if(convert_version_info_string(((const char **)id->protocols) + i,
+                                     &cp, &n, ccsid))
+        return (curl_version_info_data *)NULL;
   }
 
   for(i = 0; i < sizeof(charfields) / sizeof(charfields[0]); i++) {
-    cpp = (const char **) ((char *) p + charfields[i]);
+    cpp = (const char **)((char *)p + charfields[i]);
     if(*cpp && convert_version_info_string(cpp, &cp, &n, ccsid))
-      return (curl_version_info_data *) NULL;
+      return (curl_version_info_data *)NULL;
   }
 
   return id;
 }
 
-
-const char *
-curl_easy_strerror_ccsid(CURLcode error, unsigned int ccsid)
+const char *curl_easy_strerror_ccsid(CURLcode error, unsigned int ccsid)
 {
   return keyed_string(LK_EASY_STRERROR, curl_easy_strerror(error), ccsid);
 }
 
-
-const char *
-curl_share_strerror_ccsid(CURLSHcode error, unsigned int ccsid)
+const char *curl_share_strerror_ccsid(CURLSHcode error, unsigned int ccsid)
 {
   return keyed_string(LK_SHARE_STRERROR, curl_share_strerror(error), ccsid);
 }
 
-
-const char *
-curl_multi_strerror_ccsid(CURLMcode error, unsigned int ccsid)
+const char *curl_multi_strerror_ccsid(CURLMcode error, unsigned int ccsid)
 {
   return keyed_string(LK_MULTI_STRERROR, curl_multi_strerror(error), ccsid);
 }
 
-
-const char *
-curl_url_strerror_ccsid(CURLUcode error, unsigned int ccsid)
+const char *curl_url_strerror_ccsid(CURLUcode error, unsigned int ccsid)
 {
   return keyed_string(LK_URL_STRERROR, curl_url_strerror(error), ccsid);
 }
 
-
-void
-curl_certinfo_free_all(struct curl_certinfo *info)
+void curl_certinfo_free_all(struct curl_certinfo *info)
 {
   /* Free all memory used by certificate info. */
   if(info) {
@@ -559,15 +527,13 @@ curl_certinfo_free_all(struct curl_certinfo *info)
 
       for(i = 0; i < info->num_of_certs; i++)
         curl_slist_free_all(info->certinfo[i]);
-      free((char *) info->certinfo);
+      free((char *)info->certinfo);
     }
-    free((char *) info);
+    free((char *)info);
   }
 }
 
-
-CURLcode
-curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
+CURLcode curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
 {
   va_list arg;
   void *paramp;
@@ -577,7 +543,7 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
   /* WARNING: unlike curl_easy_getinfo(), the strings returned by this
      procedure have to be free'ed. */
 
-  data = (struct Curl_easy *) curl;
+  data = (struct Curl_easy *)curl;
   va_start(arg, info);
   paramp = va_arg(arg, void *);
   ret = Curl_getinfo(data, info, paramp);
@@ -589,14 +555,14 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
     struct curl_certinfo *cipf;
     struct curl_certinfo *cipt;
 
-    switch((int) info & CURLINFO_TYPEMASK) {
+    switch((int)info & CURLINFO_TYPEMASK) {
 
     case CURLINFO_STRING:
       ccsid = va_arg(arg, unsigned int);
-      cpp = (char * *) paramp;
+      cpp = (char **)paramp;
 
       if(*cpp) {
-        *cpp = dynconvert(ccsid, *cpp, -1, ASCII_CCSID);
+        *cpp = dynconvert(ccsid, *cpp, -1, ASCII_CCSID, NULL);
 
         if(!*cpp)
           ret = CURLE_OUT_OF_MEMORY;
@@ -608,15 +574,15 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
       ccsid = va_arg(arg, unsigned int);
       switch(info) {
       case CURLINFO_CERTINFO:
-        cipf = *(struct curl_certinfo * *) paramp;
+        cipf = *(struct curl_certinfo **)paramp;
         if(cipf) {
-          cipt = (struct curl_certinfo *) malloc(sizeof(*cipt));
+          cipt = (struct curl_certinfo *)malloc(sizeof(*cipt));
           if(!cipt)
             ret = CURLE_OUT_OF_MEMORY;
           else {
-            cipt->certinfo = (struct curl_slist **)
-              calloc(cipf->num_of_certs +
-                     1, sizeof(struct curl_slist *));
+            cipt->certinfo =
+              (struct curl_slist **)calloc(cipf->num_of_certs + 1,
+                                           sizeof(struct curl_slist *));
             if(!cipt->certinfo)
               ret = CURLE_OUT_OF_MEMORY;
             else {
@@ -626,20 +592,20 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
               for(i = 0; i < cipf->num_of_certs; i++)
                 if(cipf->certinfo[i])
                   if(!(cipt->certinfo[i] = slist_convert(ccsid,
-                                                          cipf->certinfo[i],
-                                                          ASCII_CCSID))) {
+                                                         cipf->certinfo[i],
+                                                         ASCII_CCSID))) {
                     ret = CURLE_OUT_OF_MEMORY;
                     break;
                   }
-              }
             }
+          }
 
           if(ret != CURLE_OK) {
             curl_certinfo_free_all(cipt);
-            cipt = (struct curl_certinfo *) NULL;
+            cipt = (struct curl_certinfo *)NULL;
           }
 
-          *(struct curl_certinfo * *) paramp = cipt;
+          *(struct curl_certinfo **)paramp = cipt;
         }
 
         break;
@@ -650,7 +616,7 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
         break;
 
       default:
-        slp = (struct curl_slist **) paramp;
+        slp = (struct curl_slist **)paramp;
         if(*slp) {
           *slp = slist_convert(ccsid, *slp, ASCII_CCSID);
           if(!*slp)
@@ -665,9 +631,7 @@ curl_easy_getinfo_ccsid(CURL *curl, CURLINFO info, ...)
   return ret;
 }
 
-
-static int
-Curl_is_formadd_string(CURLformoption option)
+static int Curl_is_formadd_string(CURLformoption option)
 {
   switch(option) {
 
@@ -684,23 +648,20 @@ Curl_is_formadd_string(CURLformoption option)
   return 0;
 }
 
-
-static void
-Curl_formadd_release_local(struct curl_forms *forms, int nargs, int skip)
+static void Curl_formadd_release_local(struct curl_forms *forms, int nargs,
+                                       int skip)
 {
   while(nargs--)
     if(nargs != skip)
       if(Curl_is_formadd_string(forms[nargs].option))
         if(forms[nargs].value)
-          free((char *) forms[nargs].value);
+          free((char *)forms[nargs].value);
 
-  free((char *) forms);
+  free((char *)forms);
 }
 
-
-static int
-Curl_formadd_convert(struct curl_forms *forms,
-                     int formx, int lengthx, unsigned int ccsid)
+static int Curl_formadd_convert(struct curl_forms *forms, int formx,
+                                int lengthx, unsigned int ccsid)
 {
   int l;
   char *cp;
@@ -710,7 +671,7 @@ Curl_formadd_convert(struct curl_forms *forms,
     return 0;
 
   if(lengthx >= 0)
-    l = (int) forms[lengthx].value;
+    l = (int)forms[lengthx].value;
   else
     l = strlen(forms[formx].value) + 1;
 
@@ -719,15 +680,15 @@ Curl_formadd_convert(struct curl_forms *forms,
   if(!cp)
     return -1;
 
-  l = convert(cp, MAX_CONV_EXPANSION * l, ASCII_CCSID,
-              forms[formx].value, l, ccsid);
+  l = convert(cp, MAX_CONV_EXPANSION * l, ASCII_CCSID, forms[formx].value, l,
+              ccsid);
 
   if(l < 0) {
     free(cp);
     return -1;
-    }
+  }
 
-  cp2 = realloc(cp, l);         /* Shorten buffer to the string size. */
+  cp2 = realloc(cp, l); /* Shorten buffer to the string size. */
 
   if(cp2)
     cp = cp2;
@@ -735,15 +696,13 @@ Curl_formadd_convert(struct curl_forms *forms,
   forms[formx].value = cp;
 
   if(lengthx >= 0)
-    forms[lengthx].value = (char *) l;  /* Update length after conversion. */
+    forms[lengthx].value = (char *)l; /* Update length after conversion. */
 
   return l;
 }
 
-
-CURLFORMcode
-curl_formadd_ccsid(struct curl_httppost **httppost,
-                   struct curl_httppost **last_post, ...)
+CURLFORMcode curl_formadd_ccsid(struct curl_httppost **httppost,
+                                struct curl_httppost **last_post, ...)
 {
   va_list arg;
   CURLformoption option;
@@ -794,7 +753,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
   lengthx = -1;
   namex = -1;
   namelengthx = -1;
-  forms = (struct curl_forms *) NULL;
+  forms = (struct curl_forms *)NULL;
   va_start(arg, last_post);
 
   for(;;) {
@@ -807,10 +766,10 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!tforms) {
         result = CURL_FORMADD_MEMORY;
         break;
-        }
+      }
 
       lforms = tforms;
-      }
+    }
 
     /* Get next option. */
 
@@ -820,7 +779,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       option = forms->option;
       value = forms->value;
       forms++;
-      }
+    }
     else {
       /* Get option from arguments. */
 
@@ -828,27 +787,27 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
 
       if(option == CURLFORM_END)
         break;
-      }
+    }
 
     /* Dispatch by option. */
 
     switch(option) {
 
     case CURLFORM_END:
-      forms = (struct curl_forms *) NULL;       /* Leave array mode. */
+      forms = (struct curl_forms *)NULL; /* Leave array mode. */
       continue;
 
     case CURLFORM_ARRAY:
       if(!forms) {
         forms = va_arg(arg, struct curl_forms *);
         continue;
-        }
+      }
 
       result = CURL_FORMADD_ILLEGAL_ARRAY;
       break;
 
     case CURLFORM_COPYNAME:
-      option = CURLFORM_PTRNAME;                /* Static for now. */
+      option = CURLFORM_PTRNAME; /* Static for now. */
 
     case CURLFORM_PTRNAME:
       if(namex >= 0)
@@ -858,12 +817,12 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
 
       if(!forms) {
         value = va_arg(arg, char *);
-        nameccsid = (unsigned int) va_arg(arg, long);
-        }
+        nameccsid = (unsigned int)va_arg(arg, long);
+      }
       else {
-        nameccsid = (unsigned int) forms->value;
+        nameccsid = (unsigned int)forms->value;
         forms++;
-        }
+      }
 
       break;
 
@@ -875,19 +834,19 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
 
       if(!forms) {
         value = va_arg(arg, char *);
-        contentccsid = (unsigned int) va_arg(arg, long);
-        }
+        contentccsid = (unsigned int)va_arg(arg, long);
+      }
       else {
-        contentccsid = (unsigned int) forms->value;
+        contentccsid = (unsigned int)forms->value;
         forms++;
-        }
+      }
 
       break;
 
     case CURLFORM_PTRCONTENTS:
     case CURLFORM_BUFFERPTR:
       if(!forms)
-        value = va_arg(arg, char *);            /* No conversion. */
+        value = va_arg(arg, char *); /* No conversion. */
 
       break;
 
@@ -895,7 +854,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       lengthx = nargs;
 
       if(!forms)
-        value = (char *) va_arg(arg, long);
+        value = (char *)va_arg(arg, long);
 
       break;
 
@@ -903,7 +862,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       lengthx = nargs;
 
       if(!forms)
-        value = (char *) va_arg(arg, curl_off_t);
+        value = (char *)va_arg(arg, curl_off_t);
 
       break;
 
@@ -911,25 +870,25 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       namelengthx = nargs;
 
       if(!forms)
-        value = (char *) va_arg(arg, long);
+        value = (char *)va_arg(arg, long);
 
       break;
 
     case CURLFORM_BUFFERLENGTH:
       if(!forms)
-        value = (char *) va_arg(arg, long);
+        value = (char *)va_arg(arg, long);
 
       break;
 
     case CURLFORM_CONTENTHEADER:
       if(!forms)
-        value = (char *) va_arg(arg, struct curl_slist *);
+        value = (char *)va_arg(arg, struct curl_slist *);
 
       break;
 
     case CURLFORM_STREAM:
       if(!forms)
-        value = (char *) va_arg(arg, void *);
+        value = (char *)va_arg(arg, void *);
 
       break;
 
@@ -939,7 +898,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(Curl_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0) {
         result = CURL_FORMADD_MEMORY;
         break;
-        }
+      }
 
       contentx = -1;
       lengthx = -1;
@@ -951,16 +910,16 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(!Curl_is_formadd_string(option)) {
         result = CURL_FORMADD_UNKNOWN_OPTION;
         break;
-        }
+      }
 
       if(!forms) {
         value = va_arg(arg, char *);
-        ccsid = (unsigned int) va_arg(arg, long);
-        }
+        ccsid = (unsigned int)va_arg(arg, long);
+      }
       else {
-        ccsid = (unsigned int) forms->value;
+        ccsid = (unsigned int)forms->value;
         forms++;
-        }
+      }
 
       /* Do the conversion. */
 
@@ -969,17 +928,17 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
       if(Curl_formadd_convert(lforms, nargs, -1, ccsid) < 0) {
         result = CURL_FORMADD_MEMORY;
         break;
-        }
+      }
 
       value = lforms[nargs].value;
-      }
+    }
 
     if(result != CURL_FORMADD_OK)
       break;
 
     lforms[nargs].value = value;
     lforms[nargs++].option = option;
-    }
+  }
 
   va_end(arg);
 
@@ -989,15 +948,15 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
     if(Curl_formadd_convert(lforms, namex, namelengthx, nameccsid) < 0)
       result = CURL_FORMADD_MEMORY;
     else
-      lforms[namex].option = CURLFORM_COPYNAME;         /* Force copy. */
-    }
+      lforms[namex].option = CURLFORM_COPYNAME; /* Force copy. */
+  }
 
   if(result == CURL_FORMADD_OK) {
     if(Curl_formadd_convert(lforms, contentx, lengthx, contentccsid) < 0)
       result = CURL_FORMADD_MEMORY;
     else
       contentx = -1;
-    }
+  }
 
   /* Do the formadd with our converted parameters. */
 
@@ -1005,7 +964,7 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
     lforms[nargs].option = CURLFORM_END;
     result = curl_formadd(httppost, last_post,
                           CURLFORM_ARRAY, lforms, CURLFORM_END);
-    }
+  }
 
   /* Terminate. */
 
@@ -1013,60 +972,54 @@ curl_formadd_ccsid(struct curl_httppost **httppost,
   return result;
 }
 
-
 struct cfcdata {
   curl_formget_callback append;
   void *                arg;
   unsigned int          ccsid;
 };
 
-
-static size_t
-Curl_formget_callback_ccsid(void *arg, const char *buf, size_t len)
+static size_t Curl_formget_callback_ccsid(void *arg, const char *buf,
+                                          size_t len)
 {
   struct cfcdata *p;
   char *b;
   int l;
   size_t ret;
 
-  p = (struct cfcdata *) arg;
+  p = (struct cfcdata *)arg;
 
-  if((long) len <= 0)
+  if((long)len <= 0)
     return (*p->append)(p->arg, buf, len);
 
   b = malloc(MAX_CONV_EXPANSION * len);
 
   if(!b)
-    return (size_t) -1;
+    return (size_t)-1;
 
   l = convert(b, MAX_CONV_EXPANSION * len, p->ccsid, buf, len, ASCII_CCSID);
 
   if(l < 0) {
     free(b);
-    return (size_t) -1;
-    }
+    return (size_t)-1;
+  }
 
   ret = (*p->append)(p->arg, b, l);
   free(b);
   return ret == l ? len : -1;
 }
 
-
-int
-curl_formget_ccsid(struct curl_httppost *form, void *arg,
-                   curl_formget_callback append, unsigned int ccsid)
+int curl_formget_ccsid(struct curl_httppost *form, void *arg,
+                       curl_formget_callback append, unsigned int ccsid)
 {
   struct cfcdata lcfc;
 
   lcfc.append = append;
   lcfc.arg = arg;
   lcfc.ccsid = ccsid;
-  return curl_formget(form, (void *) &lcfc, Curl_formget_callback_ccsid);
+  return curl_formget(form, (void *)&lcfc, Curl_formget_callback_ccsid);
 }
 
-
-CURLcode
-curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
+CURLcode curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
 {
   CURLcode result;
   va_list arg;
@@ -1180,7 +1133,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
     ccsid = va_arg(arg, unsigned int);
 
     if(s) {
-      s = dynconvert(ASCII_CCSID, s, -1, ccsid);
+      s = dynconvert(ASCII_CCSID, s, -1, ccsid, NULL);
 
       if(!s) {
         result = CURLE_OUT_OF_MEMORY;
@@ -1208,7 +1161,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
 
     if(pfsize == -1) {
       /* Data is null-terminated. */
-      s = dynconvert(ASCII_CCSID, s, -1, ccsid);
+      s = dynconvert(ASCII_CCSID, s, -1, ccsid, NULL);
 
       if(!s) {
         result = CURLE_OUT_OF_MEMORY;
@@ -1244,13 +1197,13 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
         break;
       }
 
-      data->set.postfieldsize = pfsize;         /* Replace data size. */
+      data->set.postfieldsize = pfsize; /* Replace data size. */
       s = cp;
       cp = NULL;
     }
 
     result = curl_easy_setopt(easy, CURLOPT_POSTFIELDS, s);
-    data->set.str[STRING_COPYPOSTFIELDS] = s;   /* Give to library. */
+    data->set.str[STRING_COPYPOSTFIELDS] = s; /* Give to library. */
     break;
 
   default:
@@ -1262,7 +1215,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
 
       if(bp && bp->data && bp->len &&
          ccsid != NOCONV_CCSID && ccsid != ASCII_CCSID) {
-        pfsize = (curl_off_t) bp->len * MAX_CONV_EXPANSION;
+        pfsize = (curl_off_t)bp->len * MAX_CONV_EXPANSION;
 
         if(pfsize > SIZE_MAX)
           pfsize = SIZE_MAX;
@@ -1286,11 +1239,11 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
         blob.flags = bp->flags | CURL_BLOB_COPY;
         bp = &blob;
       }
-      result = curl_easy_setopt(easy, tag, &blob);
+      result = curl_easy_setopt(easy, tag, bp);
       break;
     }
     FALLTHROUGH();
-  case CURLOPT_ERRORBUFFER:                     /* This is an output buffer. */
+  case CURLOPT_ERRORBUFFER: /* This is an output buffer. */
     result = Curl_vsetopt(easy, tag, arg);
     break;
   }
@@ -1300,70 +1253,62 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   return result;
 }
 
-
 /* ILE/RPG helper functions. */
 
-char *
-curl_form_long_value(long value)
+char *curl_form_long_value(long value)
 {
   /* ILE/RPG cannot cast an integer to a pointer. This procedure does it. */
 
-  return (char *) value;
+  return (char *)value;
 }
 
-
-CURLcode
-curl_easy_setopt_RPGnum_(CURL *easy, CURLoption tag, curl_off_t arg)
+CURLcode curl_easy_setopt_RPGnum_(CURL *easy, CURLoption tag, curl_off_t arg)
 {
   /* ILE/RPG procedure overloading cannot discriminate between different
      size and/or signedness of format arguments. This provides a generic
      wrapper that adapts size to the given tag expectation.
      This procedure is not intended to be explicitly called from user code. */
   if(tag / 10000 != CURLOPTTYPE_OFF_T)
-    return curl_easy_setopt(easy, tag, (long) arg);
+    return curl_easy_setopt(easy, tag, (long)arg);
   return curl_easy_setopt(easy, tag, arg);
 }
 
-
-CURLcode
-curl_multi_setopt_RPGnum_(CURLM *multi, CURLMoption tag, curl_off_t arg)
+CURLcode curl_multi_setopt_RPGnum_(CURLM *multi, CURLMoption tag,
+                                   curl_off_t arg)
 {
   /* Likewise, for multi handle. */
   if(tag / 10000 != CURLOPTTYPE_OFF_T)
-    return curl_multi_setopt(multi, tag, (long) arg);
+    return curl_multi_setopt(multi, tag, (long)arg);
   return curl_multi_setopt(multi, tag, arg);
 }
 
-
-char *
-curl_pushheader_bynum_cssid(struct curl_pushheaders *h,
-                            size_t num, unsigned int ccsid)
+char *curl_pushheader_bynum_cssid(struct curl_pushheaders *h, size_t num,
+                                  unsigned int ccsid)
 {
-  char *d = (char *) NULL;
+  char *d = (char *)NULL;
   char *s = curl_pushheader_bynum(h, num);
 
   if(s)
-    d = dynconvert(ccsid, s, -1, ASCII_CCSID);
+    d = dynconvert(ccsid, s, -1, ASCII_CCSID, NULL);
 
   return d;
 }
 
-
-char *
-curl_pushheader_byname_ccsid(struct curl_pushheaders *h, const char *header,
-                             unsigned int ccsidin, unsigned int ccsidout)
+char *curl_pushheader_byname_ccsid(struct curl_pushheaders *h,
+                                   const char *header, unsigned int ccsidin,
+                                   unsigned int ccsidout)
 {
-  char *d = (char *) NULL;
+  char *d = (char *)NULL;
 
   if(header) {
-    header = dynconvert(ASCII_CCSID, header, -1, ccsidin);
+    header = dynconvert(ASCII_CCSID, header, -1, ccsidin, NULL);
 
     if(header) {
       char *s = curl_pushheader_byname(h, header);
-      free((char *) header);
+      free((char *)header);
 
       if(s)
-        d = dynconvert(ccsidout, s, -1, ASCII_CCSID);
+        d = dynconvert(ccsidout, s, -1, ASCII_CCSID, NULL);
     }
   }
 
@@ -1374,12 +1319,12 @@ static CURLcode
 mime_string_call(curl_mimepart *part, const char *string, unsigned int ccsid,
                  CURLcode (*mimefunc)(curl_mimepart *part, const char *string))
 {
-  char *s = (char *) NULL;
+  char *s = (char *)NULL;
   CURLcode result;
 
   if(!string)
     return mimefunc(part, string);
-  s = dynconvert(ASCII_CCSID, string, -1, ccsid);
+  s = dynconvert(ASCII_CCSID, string, -1, ccsid, NULL);
   if(!s)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1388,61 +1333,56 @@ mime_string_call(curl_mimepart *part, const char *string, unsigned int ccsid,
   return result;
 }
 
-CURLcode
-curl_mime_name_ccsid(curl_mimepart *part, const char *name, unsigned int ccsid)
+CURLcode curl_mime_name_ccsid(curl_mimepart *part, const char *name,
+                              unsigned int ccsid)
 {
   return mime_string_call(part, name, ccsid, curl_mime_name);
 }
 
-CURLcode
-curl_mime_filename_ccsid(curl_mimepart *part,
-                         const char *filename, unsigned int ccsid)
+CURLcode curl_mime_filename_ccsid(curl_mimepart *part, const char *filename,
+                                  unsigned int ccsid)
 {
   return mime_string_call(part, filename, ccsid, curl_mime_filename);
 }
 
-CURLcode
-curl_mime_type_ccsid(curl_mimepart *part,
-                     const char *mimetype, unsigned int ccsid)
+CURLcode curl_mime_type_ccsid(curl_mimepart *part, const char *mimetype,
+                              unsigned int ccsid)
 {
   return mime_string_call(part, mimetype, ccsid, curl_mime_type);
 }
 
-CURLcode
-curl_mime_encoder_ccsid(curl_mimepart *part,
-                       const char *encoding, unsigned int ccsid)
+CURLcode curl_mime_encoder_ccsid(curl_mimepart *part, const char *encoding,
+                                 unsigned int ccsid)
 {
   return mime_string_call(part, encoding, ccsid, curl_mime_encoder);
 }
 
-CURLcode
-curl_mime_filedata_ccsid(curl_mimepart *part,
-                         const char *filename, unsigned int ccsid)
+CURLcode curl_mime_filedata_ccsid(curl_mimepart *part, const char *filename,
+                                  unsigned int ccsid)
 {
   return mime_string_call(part, filename, ccsid, curl_mime_filedata);
 }
 
-CURLcode
-curl_mime_data_ccsid(curl_mimepart *part,
-                     const char *data, size_t datasize, unsigned int ccsid)
+CURLcode curl_mime_data_ccsid(curl_mimepart *part, const char *data,
+                              size_t datasize, unsigned int ccsid)
 {
-  char *s = (char *) NULL;
+  char *s = (char *)NULL;
   CURLcode result;
+  int osize;
 
   if(!data)
     return curl_mime_data(part, data, datasize);
-  s = dynconvert(ASCII_CCSID, data, datasize, ccsid);
+  s = dynconvert(ASCII_CCSID, data, datasize, ccsid, &osize);
   if(!s)
     return CURLE_OUT_OF_MEMORY;
 
-  result = curl_mime_data(part, s, datasize);
+  result = curl_mime_data(part, s, osize);
   free(s);
   return result;
 }
 
-CURLUcode
-curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
-                   unsigned int flags, unsigned int ccsid)
+CURLUcode curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
+                             unsigned int flags, unsigned int ccsid)
 {
   char *s = (char *)NULL;
   CURLUcode result;
@@ -1454,7 +1394,7 @@ curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
   result = curl_url_get(handle, what, &s, flags);
   if(result == CURLUE_OK) {
     if(s) {
-      *part = dynconvert(ccsid, s, -1, ASCII_CCSID);
+      *part = dynconvert(ccsid, s, -1, ASCII_CCSID, NULL);
       if(!*part)
         result = CURLUE_OUT_OF_MEMORY;
     }
@@ -1464,15 +1404,14 @@ curl_url_get_ccsid(CURLU *handle, CURLUPart what, char **part,
   return result;
 }
 
-CURLUcode
-curl_url_set_ccsid(CURLU *handle, CURLUPart what, const char *part,
-                   unsigned int flags, unsigned int ccsid)
+CURLUcode curl_url_set_ccsid(CURLU *handle, CURLUPart what, const char *part,
+                             unsigned int flags, unsigned int ccsid)
 {
   char *s = (char *)NULL;
   CURLUcode result;
 
   if(part) {
-    s = dynconvert(ASCII_CCSID, part, -1, ccsid);
+    s = dynconvert(ASCII_CCSID, part, -1, ccsid, NULL);
     if(!s)
       return CURLUE_OUT_OF_MEMORY;
   }
@@ -1488,7 +1427,7 @@ curl_easy_option_by_name_ccsid(const char *name, unsigned int ccsid)
   const struct curl_easyoption *option = NULL;
 
   if(name) {
-    char *s = dynconvert(ASCII_CCSID, name, -1, ccsid);
+    char *s = dynconvert(ASCII_CCSID, name, -1, ccsid, NULL);
 
     if(s) {
       option = curl_easy_option_by_name(s);
@@ -1507,21 +1446,20 @@ curl_easy_option_get_name_ccsid(const struct curl_easyoption *option,
   char *name = NULL;
 
   if(option && option->name)
-    name = dynconvert(ccsid, option->name, -1, ASCII_CCSID);
+    name = dynconvert(ccsid, option->name, -1, ASCII_CCSID, NULL);
 
-  return (const char *) name;
+  return (const char *)name;
 }
 
 /* Header API CCSID support. */
-CURLHcode
-curl_easy_header_ccsid(CURL *easy, const char *name, size_t index,
-                       unsigned int origin, int request,
-                       struct curl_header **hout, unsigned int ccsid)
+CURLHcode curl_easy_header_ccsid(CURL *easy, const char *name, size_t index,
+                                 unsigned int origin, int request,
+                                 struct curl_header **hout, unsigned int ccsid)
 {
   CURLHcode result = CURLHE_BAD_ARGUMENT;
 
   if(name) {
-    char *s = dynconvert(ASCII_CCSID, name, -1, ccsid);
+    char *s = dynconvert(ASCII_CCSID, name, -1, ccsid, NULL);
 
     result = CURLHE_OUT_OF_MEMORY;
     if(s) {

@@ -37,6 +37,7 @@ permissions: {}
 
 env:
   CURL_CI: github
+  CURL_TEST_MIN: 1750
 
 jobs:
   netbsd:
@@ -47,11 +48,11 @@ jobs:
       matrix:
         arch: ['x86_64']
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -92,11 +93,11 @@ jobs:
       matrix:
         arch: ['x86_64']
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
       - name: 'cmake'
-        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
@@ -142,11 +143,11 @@ jobs:
           - { build: 'cmake'    , arch: 'arm64' , compiler: 'clang' }
       fail-fast: false
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
       - name: '${{ matrix.build }}'
-        uses: cross-platform-actions/action@e8a7b572196ff79ded1979dc2bb9ee67d1ddb252 # v0.29.0
+        uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
           CC: '${{ matrix.compiler }}'
           MATRIX_ARCH: '${{ matrix.arch }}'
@@ -261,7 +262,7 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
 
@@ -310,7 +311,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file '{}' \;
+        run: find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file -- '{}' \;
 
       - name: 'build tests'
         run: |

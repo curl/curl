@@ -28,7 +28,6 @@
 #include "easy.h"
 #include "multi.h"
 
-
 CURL_EXTERN char *curl_version_ccsid(unsigned int ccsid);
 CURL_EXTERN char *curl_easy_escape_ccsid(CURL *handle,
                                          const char *string, int length,

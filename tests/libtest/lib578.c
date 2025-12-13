@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
 static char t578_testdata[] = "this is a short string.\n";
 

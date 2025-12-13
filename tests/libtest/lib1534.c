@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 /* Test CURLINFO_FILETIME */
 
 static CURLcode test_lib1534(const char *URL)
@@ -38,7 +36,7 @@ static CURLcode test_lib1534(const char *URL)
   easy_init(curl);
 
   /* Test that a filetime is properly initialized on curl_easy_init.
-  */
+   */
 
   res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
   if(res) {
@@ -67,7 +65,7 @@ static CURLcode test_lib1534(const char *URL)
   }
 
   /* Test that a filetime is properly set after receiving an HTTP resource.
-  */
+   */
 
   res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
   if(res) {
@@ -85,7 +83,7 @@ static CURLcode test_lib1534(const char *URL)
   }
 
   /* Test that a filetime is properly initialized on curl_easy_duphandle.
-  */
+   */
 
   dupe = curl_easy_duphandle(curl);
   if(!dupe) {
@@ -111,7 +109,7 @@ static CURLcode test_lib1534(const char *URL)
   }
 
   /* Test that a filetime is properly initialized on curl_easy_reset.
-  */
+   */
 
   curl_easy_reset(curl);
 

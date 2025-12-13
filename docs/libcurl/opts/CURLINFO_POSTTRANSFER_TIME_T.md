@@ -16,7 +16,7 @@ Added-in: 8.10.0
 
 # NAME
 
-CURLINFO_POSTTRANSFER_TIME_T - get the time until the last byte is sent
+CURLINFO_POSTTRANSFER_TIME_T - time to last byte sent
 
 # SYNOPSIS
 

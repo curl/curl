@@ -223,8 +223,7 @@ mails to your friends. We speak plain text mails.
 ### Quoting
 
 Quote as little as possible. Just enough to provide the context you cannot
-eave out. A lengthy description can be found
-[here](https://www.netmeister.org/news/learn2quote.html).
+leave out.
 
 ### Digest
 

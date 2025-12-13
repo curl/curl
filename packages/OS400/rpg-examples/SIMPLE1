@@ -1,4 +1,4 @@
-      * Curl simple URL request
+      * curl simple URL request
       *
      h DFTACTGRP(*NO) ACTGRP(*NEW)
      h OPTION(*NOSHOWCPY)

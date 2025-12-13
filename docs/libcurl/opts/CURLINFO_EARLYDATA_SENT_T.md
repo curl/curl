@@ -16,7 +16,7 @@ Added-in: 8.11.0
 
 # NAME
 
-CURLINFO_EARLYDATA_SENT_T - get the number of bytes sent as TLS early data
+CURLINFO_EARLYDATA_SENT_T - number of bytes sent as TLS early data
 
 # SYNOPSIS
 

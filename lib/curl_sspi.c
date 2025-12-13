@@ -33,10 +33,6 @@
 #include "system_win32.h"
 #include "curlx/warnless.h"
 
-/* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
-
 /* Pointer to SSPI dispatch table */
 PSecurityFunctionTable Curl_pSecFn = NULL;
 
@@ -62,11 +58,7 @@ CURLcode Curl_sspi_global_init(void)
   /* If security interface is not yet initialized try to do this */
   if(!Curl_pSecFn) {
     /* Get pointer to Security Service Provider Interface dispatch table */
-#ifdef __MINGW32CE__
-    Curl_pSecFn = InitSecurityInterfaceW();
-#else
     Curl_pSecFn = InitSecurityInterface();
-#endif
     if(!Curl_pSecFn)
       return CURLE_FAILED_INIT;
   }
@@ -138,43 +130,54 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   }
 
   /* Setup the identity's user and length */
-  dup_user.tchar_ptr = Curl_tcsdup(user.tchar_ptr);
+  dup_user.tchar_ptr = curlx_tcsdup(user.tchar_ptr);
   if(!dup_user.tchar_ptr) {
-    curlx_unicodefree(useranddomain.tchar_ptr);
+    curlx_free(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
-  identity->User = dup_user.tbyte_ptr;
-  identity->UserLength = curlx_uztoul(_tcslen(dup_user.tchar_ptr));
-  dup_user.tchar_ptr = NULL;
 
   /* Setup the identity's domain and length */
-  dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
+  dup_domain.tchar_ptr = curlx_malloc(sizeof(TCHAR) * (domlen + 1));
   if(!dup_domain.tchar_ptr) {
-    curlx_unicodefree(useranddomain.tchar_ptr);
+    curlx_free(dup_user.tchar_ptr);
+    curlx_free(useranddomain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
-  _tcsncpy(dup_domain.tchar_ptr, domain.tchar_ptr, domlen);
-  *(dup_domain.tchar_ptr + domlen) = TEXT('\0');
-  identity->Domain = dup_domain.tbyte_ptr;
-  identity->DomainLength = curlx_uztoul(domlen);
-  dup_domain.tchar_ptr = NULL;
+  if(_tcsncpy_s(dup_domain.tchar_ptr, domlen + 1, domain.tchar_ptr, domlen)) {
+    curlx_free(dup_user.tchar_ptr);
+    curlx_free(dup_domain.tchar_ptr);
+    curlx_free(useranddomain.tchar_ptr);
+    return CURLE_OUT_OF_MEMORY;
+  }
 
-  curlx_unicodefree(useranddomain.tchar_ptr);
+  curlx_free(useranddomain.tchar_ptr);
 
   /* Setup the identity's password and length */
   passwd.tchar_ptr = curlx_convert_UTF8_to_tchar(passwdp);
-  if(!passwd.tchar_ptr)
+  if(!passwd.tchar_ptr) {
+    curlx_free(dup_user.tchar_ptr);
+    curlx_free(dup_domain.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
-  dup_passwd.tchar_ptr = Curl_tcsdup(passwd.tchar_ptr);
+  }
+  dup_passwd.tchar_ptr = curlx_tcsdup(passwd.tchar_ptr);
   if(!dup_passwd.tchar_ptr) {
-    curlx_unicodefree(passwd.tchar_ptr);
+    curlx_free(dup_user.tchar_ptr);
+    curlx_free(dup_domain.tchar_ptr);
+    curlx_free(passwd.tchar_ptr);
     return CURLE_OUT_OF_MEMORY;
   }
   identity->Password = dup_passwd.tbyte_ptr;
   identity->PasswordLength = curlx_uztoul(_tcslen(dup_passwd.tchar_ptr));
   dup_passwd.tchar_ptr = NULL;
 
-  curlx_unicodefree(passwd.tchar_ptr);
+  curlx_free(passwd.tchar_ptr);
+
+  identity->User = dup_user.tbyte_ptr;
+  identity->UserLength = curlx_uztoul(_tcslen(dup_user.tchar_ptr));
+  dup_user.tchar_ptr = NULL;
+  identity->Domain = dup_domain.tbyte_ptr;
+  identity->DomainLength = curlx_uztoul(domlen);
+  dup_domain.tchar_ptr = NULL;
 
   /* Setup the identity's flags */
   identity->Flags = (unsigned long)

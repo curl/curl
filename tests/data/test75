@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -7,12 +8,10 @@ globbing
 FAILURE
 </keywords>
 </info>
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -21,12 +20,11 @@ http
 <name>
 HTTP, urlglob retrieval with bad range
 </name>
- <command option="no-output">
+<command option="no-output">
 "http://a-site-never-accessed.example.org/[2-1]" -o "%LOGDIR/weee#1.dump" --stderr -
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

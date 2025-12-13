@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Send email with IMAP
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to send mail using libcurl's IMAP
@@ -37,9 +36,9 @@
  * Note that this example requires libcurl 7.30.0 or above.
  */
 
-#define FROM    "<sender@example.org>"
-#define TO      "<addressee@example.net>"
-#define CC      "<info@example.org>"
+#define FROM "<sender@example.org>"
+#define TO   "<addressee@example.net>"
+#define CC   "<info@example.org>"
 
 static const char *payload_text =
   "Date: Mon, 29 Nov 2010 21:54:29 +1100\r\n"
@@ -65,7 +64,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *userp)
   const char *data;
   size_t room = size * nmemb;
 
-  if((size == 0) || (nmemb == 0) || ((size*nmemb) < 1)) {
+  if((size == 0) || (nmemb == 0) || ((size * nmemb) < 1)) {
     return 0;
   }
 

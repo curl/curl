@@ -70,7 +70,7 @@ fi
 # As a precaution, remove all *.dist files that may be lying around, to reduce
 # the risk of old leftovers getting shipped.
 echo "removing all old *.dist files"
-find . -name "*.dist" -exec rm {} \;
+find . -name "*.dist" -exec rm -- {} \;
 
 numeric="$(printf "%02x%02x%02x\n" "$major" "$minor" "$patch")"
 
@@ -184,7 +184,7 @@ retar() {
   mkdir "$tempdir"
   cd "$tempdir"
   gzip -dc "../$targz" | tar -xf -
-  find curl-* -depth -exec touch -c -t "$filestamp" '{}' +
+  find curl-* -depth -exec touch -c -t "$filestamp" -- '{}' +
   tar --create --format=ustar --owner=0 --group=0 --numeric-owner --sort=name curl-* | gzip --best --no-name > out.tar.gz
   mv out.tar.gz ../
   cd ..

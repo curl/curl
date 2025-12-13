@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* curl stuff */
 #include <curl/curl.h>
 
 struct Memory {
@@ -115,7 +114,6 @@ static int server_push_callback(CURL *parent,
   (*transfers)++; /* one more */
   return CURL_PUSH_OK;
 }
-
 
 /*
  * Download a file over HTTP/2, take care of server push.

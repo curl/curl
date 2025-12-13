@@ -23,12 +23,10 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static CURLcode test_lib1506(const char *URL)
 {
   CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES] = {0};
+  CURL *curl[NUM_HANDLES] = { 0 };
   int running;
   CURLM *multi = NULL;
   size_t i;

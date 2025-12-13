@@ -28,14 +28,14 @@
 #include <curl/curl.h>
 
 /* Destructor for a single table entry */
-typedef void Curl_uint_tbl_entry_dtor(unsigned int key, void *entry);
+typedef void Curl_uint32_tbl_entry_dtor(uint32_t key, void *entry);
 
-struct uint_tbl {
+struct uint32_tbl {
   void **rows;  /* array of void* holding entries */
-  Curl_uint_tbl_entry_dtor *entry_dtor;
-  unsigned int nrows;  /* length of `rows` array */
-  unsigned int nentries; /* entries in table */
-  unsigned int last_key_added; /* UINT_MAX or last key added */
+  Curl_uint32_tbl_entry_dtor *entry_dtor;
+  uint32_t nrows;  /* length of `rows` array */
+  uint32_t nentries; /* entries in table */
+  uint32_t last_key_added; /* UINT_MAX or last key added */
 #ifdef DEBUGBUILD
   int init;
 #endif
@@ -44,42 +44,42 @@ struct uint_tbl {
 /* Initialize the table with 0 capacity.
  * The optional `entry_dtor` is called when a table entry is removed,
  * Passing NULL means no action is taken on removal. */
-void Curl_uint_tbl_init(struct uint_tbl *tbl,
-                        Curl_uint_tbl_entry_dtor *entry_dtor);
+void Curl_uint32_tbl_init(struct uint32_tbl *tbl,
+                          Curl_uint32_tbl_entry_dtor *entry_dtor);
 
 /* Resize the table to change capacity `nmax`. When `nmax` is reduced,
  * all present entries with key equal or larger to `nmax` are removed. */
-CURLcode Curl_uint_tbl_resize(struct uint_tbl *tbl, unsigned int nmax);
+CURLcode Curl_uint32_tbl_resize(struct uint32_tbl *tbl, uint32_t nmax);
 
 /* Destroy the table, freeing all entries. */
-void Curl_uint_tbl_destroy(struct uint_tbl *tbl);
+void Curl_uint32_tbl_destroy(struct uint32_tbl *tbl);
 
 /* Get the table capacity. */
-unsigned int Curl_uint_tbl_capacity(struct uint_tbl *tbl);
+uint32_t Curl_uint32_tbl_capacity(struct uint32_tbl *tbl);
 
 /* Get the number of entries in the table. */
-unsigned int Curl_uint_tbl_count(struct uint_tbl *tbl);
+uint32_t Curl_uint32_tbl_count(struct uint32_tbl *tbl);
 
 /* Get the entry for key or NULL if not present */
-void *Curl_uint_tbl_get(struct uint_tbl *tbl, unsigned int key);
+void *Curl_uint32_tbl_get(struct uint32_tbl *tbl, uint32_t key);
 
 /* Add a new entry to the table and assign it a free key.
  * Returns FALSE if the table is full.
  *
  * Keys are assigned in a round-robin manner.
  * No matter the capacity, UINT_MAX is never assigned. */
-bool Curl_uint_tbl_add(struct uint_tbl *tbl, void *entry, unsigned int *pkey);
+bool Curl_uint32_tbl_add(struct uint32_tbl *tbl, void *entry, uint32_t *pkey);
 
 /* Remove the entry with `key`. */
-void Curl_uint_tbl_remove(struct uint_tbl *tbl, unsigned int key);
+void Curl_uint32_tbl_remove(struct uint32_tbl *tbl, uint32_t key);
 
 /* Return TRUE if the table contains an tryn with that keys. */
-bool Curl_uint_tbl_contains(struct uint_tbl *tbl, unsigned int key);
+bool Curl_uint32_tbl_contains(struct uint32_tbl *tbl, uint32_t key);
 
 /* Get the first entry in the table (with the smallest `key`).
  * Returns FALSE if the table is empty. */
-bool Curl_uint_tbl_first(struct uint_tbl *tbl,
-                         unsigned int *pkey, void **pentry);
+bool Curl_uint32_tbl_first(struct uint32_tbl *tbl,
+                           uint32_t *pkey, void **pentry);
 
 /* Get the next key in the table, following `last_key` in natural order.
  * Put another way, this is the smallest key greater than `last_key` in
@@ -92,7 +92,7 @@ bool Curl_uint_tbl_first(struct uint_tbl *tbl,
  * - added keys lower than 'last_key' will not show up.
  * - removed keys lower or equal to 'last_key' will not show up.
  * - removed keys higher than 'last_key' will not be visited. */
-bool Curl_uint_tbl_next(struct uint_tbl *tbl, unsigned int last_key,
-                        unsigned int *pkey, void **pentry);
+bool Curl_uint32_tbl_next(struct uint32_tbl *tbl, uint32_t last_key,
+                          uint32_t *pkey, void **pentry);
 
 #endif /* HEADER_CURL_UINT_TABLE_H */

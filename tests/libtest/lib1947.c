@@ -23,14 +23,12 @@
  ***************************************************************************/
 #include "first.h"
 
-#include "memdebug.h"
-
 static size_t t1947_write_cb(char *data, size_t n, size_t l, void *userp)
 {
   /* ignore the data */
   (void)data;
   (void)userp;
-  return n*l;
+  return n * l;
 }
 
 static CURLcode test_lib1947(const char *URL)
@@ -58,8 +56,8 @@ static CURLcode test_lib1947(const char *URL)
 
   /* count the number of requests by reading the first header of each
      request. */
-  origins = (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|
-             CURLH_1XX|CURLH_PSEUDO);
+  origins = CURLH_HEADER | CURLH_TRAILER | CURLH_CONNECT | CURLH_1XX |
+            CURLH_PSEUDO;
   do {
     h = curl_easy_nextheader(curl, origins, count, NULL);
     if(h)

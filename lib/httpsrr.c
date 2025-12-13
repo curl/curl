@@ -33,11 +33,7 @@
 #include "sendf.h"
 #include "strdup.h"
 
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
-
-static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
+static CURLcode httpsrr_decode_alpn(const uint8_t *cp, size_t len,
                                     unsigned char *alpns)
 {
   /*
@@ -49,7 +45,7 @@ static CURLcode httpsrr_decode_alpn(const char *cp, size_t len,
   int idnum = 0;
 
   while(len > 0) {
-    size_t tlen = (size_t) *cp++;
+    size_t tlen = *cp++;
     enum alpnid id;
     len--;
     if(tlen > len)
@@ -84,7 +80,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
     CURL_TRC_DNS(data, "HTTPS RR MANDATORY left to implement");
     break;
   case HTTPS_RR_CODE_ALPN: /* str_list */
-    result = httpsrr_decode_alpn((const char *)val, vlen, hi->alpns);
+    result = httpsrr_decode_alpn(val, vlen, hi->alpns);
     CURL_TRC_DNS(data, "HTTPS RR ALPN: %u %u %u %u",
                  hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
     break;
@@ -97,7 +93,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
   case HTTPS_RR_CODE_IPV4: /* addr4 list */
     if(!vlen || (vlen & 3)) /* the size must be 4-byte aligned */
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    free(hi->ipv4hints);
+    curlx_free(hi->ipv4hints);
     hi->ipv4hints = Curl_memdup(val, vlen);
     if(!hi->ipv4hints)
       return CURLE_OUT_OF_MEMORY;
@@ -107,7 +103,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
   case HTTPS_RR_CODE_ECH:
     if(!vlen)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    free(hi->echconfiglist);
+    curlx_free(hi->echconfiglist);
     hi->echconfiglist = Curl_memdup(val, vlen);
     if(!hi->echconfiglist)
       return CURLE_OUT_OF_MEMORY;
@@ -117,7 +113,7 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
   case HTTPS_RR_CODE_IPV6: /* addr6 list */
     if(!vlen || (vlen & 15)) /* the size must be 16-byte aligned */
       return CURLE_BAD_FUNCTION_ARGUMENT;
-    free(hi->ipv6hints);
+    curlx_free(hi->ipv6hints);
     hi->ipv6hints = Curl_memdup(val, vlen);
     if(!hi->ipv6hints)
       return CURLE_OUT_OF_MEMORY;
@@ -152,8 +148,8 @@ void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
   Curl_safefree(rrinfo->echconfiglist);
   Curl_safefree(rrinfo->ipv4hints);
   Curl_safefree(rrinfo->ipv6hints);
+  Curl_safefree(rrinfo->rrname);
 }
-
 
 #ifdef USE_ARES
 
@@ -166,7 +162,7 @@ static CURLcode httpsrr_opt(struct Curl_easy *data,
   unsigned short code;
   size_t len = 0;
 
-  code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
+  code = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
   return Curl_httpsrr_set(data, hinfo, code, val, len);
 }
 
@@ -188,8 +184,8 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
        is in ServiceMode */
     target = ares_dns_rr_get_str(rr, ARES_RR_HTTPS_TARGET);
     if(target && target[0]) {
-      free(hinfo->target);
-      hinfo->target = strdup(target);
+      curlx_free(hinfo->target);
+      hinfo->target = curlx_strdup(target);
       if(!hinfo->target) {
         result = CURLE_OUT_OF_MEMORY;
         goto out;
@@ -206,6 +202,7 @@ CURLcode Curl_httpsrr_from_ares(struct Curl_easy *data,
     }
   }
 out:
+  Curl_safefree(hinfo->rrname);
   return result;
 }
 

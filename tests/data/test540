@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -16,7 +17,7 @@ connection-monitor
 </servercmd>
 
 # this is returned first since we get no proxy-auth
-<data>
+<data crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 33
@@ -25,7 +26,7 @@ And you should ignore this data.
 </data>
 
 # then this is returned when we get proxy-auth
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 OK
 Content-Length: 21
 Server: no
@@ -33,7 +34,7 @@ Server: no
 Nice proxy auth sir!
 </data1000>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 33
@@ -80,7 +81,7 @@ http://test.remote.example.com/path/%TESTNUMBER http://%HOSTIP:%HTTPPORT silly:p
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol crlf="headers">
 GET http://test.remote.example.com/path/%TESTNUMBER HTTP/1.1
 Host: custom.set.host.name
 Accept: */*

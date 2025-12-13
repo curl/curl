@@ -31,7 +31,7 @@ import os
 import shutil
 import pytest
 
-from testenv import Env, CurlClient, VsFTPD
+from testenv import Env, CurlClient, VsFTPD, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -85,6 +85,7 @@ class TestVsFTPD:
         r.check_stats(count=1, http_status=226)
         lines = open(os.path.join(curl.run_dir, 'download_#1.data')).readlines()
         assert len(lines) == 4, f'list: {lines}'
+        r.check_stats_timelines()
 
     # download 1 file, no SSL
     @pytest.mark.parametrize("docname", [
@@ -98,6 +99,7 @@ class TestVsFTPD:
         r = curl.ftp_ssl_get(urls=[url], with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -111,6 +113,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects == count + 1, 'should reuse the control conn'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'data-1k', 'data-1m', 'data-10m'
@@ -126,6 +129,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_downloads(curl, srcfile, count)
         assert r.total_connects > count + 1, 'should have used several control conns'
+        r.check_stats_timelines()
 
     @pytest.mark.parametrize("docname", [
         'upload-1k', 'upload-100k', 'upload-1m'
@@ -140,6 +144,7 @@ class TestVsFTPD:
         r = curl.ftp_ssl_upload(urls=[url], fupload=f'{srcfile}', with_stats=True)
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpds, docname=docname)
+        r.check_stats_timelines()
 
     def _rmf(self, path):
         if os.path.exists(path):
@@ -254,6 +259,17 @@ class TestVsFTPD:
         r = curl.ftp_ssl_get(urls=[url], with_stats=True)
         r.check_exit_code(78)
         r.check_stats(count=1, exitcode=78)
+
+    def test_31_12_upload_eprt(self, env: Env, vsftpds: VsFTPD):
+        docname = 'test_31_12'
+        client = LocalClient(name='cli_ftp_upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
+        r = client.run(args=['-r', f'{env.ftp_domain}:{vsftpds.port}:127.0.0.1', url])
+        r.check_exit_code(0)
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
+        assert os.path.exists(dstfile), f'{r.dump_logs()}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):

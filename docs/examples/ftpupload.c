@@ -21,39 +21,41 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <string.h>
-
-#include <curl/curl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#ifdef UNDER_CE
-#define strerror(e) "?"
-#else
-#include <errno.h>
-#endif
-#ifdef _WIN32
-#include <io.h>
-#undef stat
-#define stat _stat
-#undef fstat
-#define fstat _fstat
-#define fileno _fileno
-#else
-#include <unistd.h>
-#endif
-
 /* <DESC>
  * Performs an FTP upload and renames the file just after a successful
  * transfer.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen(), strerror() */
+#endif
+#endif
 
-#define LOCAL_FILE      "/tmp/uploadthis.txt"
-#define UPLOAD_FILE_AS  "while-uploading.txt"
-#define REMOTE_URL      "ftp://example.com/"  UPLOAD_FILE_AS
-#define RENAME_FILE_TO  "renamed-and-fine.txt"
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include <curl/curl.h>
+
+#ifdef _WIN32
+#include <io.h>
+#undef stat
+#define stat _stati64
+#undef fstat
+#define fstat _fstati64
+#define fileno _fileno
+#else
+#include <unistd.h>
+#endif
+
+#define LOCAL_FILE     "/tmp/uploadthis.txt"
+#define UPLOAD_FILE_AS "while-uploading.txt"
+#define REMOTE_URL     "ftp://example.com/" UPLOAD_FILE_AS
+#define RENAME_FILE_TO "renamed-and-fine.txt"
 
 /* NOTE: if you want this example to work on Windows with libcurl as a DLL,
    you MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
@@ -90,17 +92,12 @@ int main(void)
   /* get a FILE * of the file */
   hd_src = fopen(LOCAL_FILE, "rb");
   if(!hd_src) {
-    printf("Couldn't open '%s': %s\n", LOCAL_FILE, strerror(errno));
+    printf("Could not open '%s': %s\n", LOCAL_FILE, strerror(errno));
     return 2;
   }
 
   /* to get the file size */
-#ifdef UNDER_CE
-  /* !checksrc! disable BANNEDFUNC 1 */
-  if(stat(LOCAL_FILE, &file_info) != 0) {
-#else
   if(fstat(fileno(hd_src), &file_info) != 0) {
-#endif
     fclose(hd_src);
     return 1; /* cannot continue */
   }

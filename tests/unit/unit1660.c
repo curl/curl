@@ -52,65 +52,64 @@ static CURLcode test_unit1660(const char *arg)
 
   struct testit {
     const char *host;
-    const char *chost; /* if non-NULL, use to lookup with */
-    const char *hdr; /* if NULL, just do the lookup */
-    const CURLcode result; /* parse result */
+    const char *chost;  /* if non-NULL, use to lookup with */
+    const char *hdr;    /* if NULL, just do the lookup */
+    const CURLcode res; /* parse result */
   };
 
   static const struct testit headers[] = {
-  /* two entries read from disk cache, verify first */
-  { "-", "readfrom.example", NULL, CURLE_OK},
-  { "-", "old.example", NULL, CURLE_OK},
-  /* delete the remaining one read from disk */
-  { "readfrom.example", NULL, "max-age=\"0\"", CURLE_OK},
+    /* two entries read from disk cache, verify first */
+    { "-", "readfrom.example", NULL, CURLE_OK },
+    { "-", "old.example", NULL, CURLE_OK },
+    /* delete the remaining one read from disk */
+    { "readfrom.example", NULL, "max-age=\"0\"", CURLE_OK },
 
-  { "example.com", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
-  { "example.com", NULL, "max-age=\"21536000\"\r\n", CURLE_OK },
-  { "example.com", NULL, "max-age=\"21536000\"; \r\n", CURLE_OK },
-  { "example.com", NULL, "max-age=\"21536000\"; includeSubDomains\r\n",
-    CURLE_OK },
-  { "example.org", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
-  { "this.example", NULL, "max=\"31536\";", CURLE_BAD_FUNCTION_ARGUMENT },
-  { "this.example", NULL, "max-age=\"31536", CURLE_BAD_FUNCTION_ARGUMENT },
-  { "this.example", NULL, "max-age=31536\"", CURLE_OK },
-  /* max-age=0 removes the entry */
-  { "this.example", NULL, "max-age=0", CURLE_OK },
-  { "another.example", NULL, "includeSubDomains; ",
-    CURLE_BAD_FUNCTION_ARGUMENT },
+    { "example.com", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
+    { "example.com", NULL, "max-age=\"21536000\"\r\n", CURLE_OK },
+    { "example.com", NULL, "max-age=\"21536000\"; \r\n", CURLE_OK },
+    { "example.com", NULL, "max-age=\"21536000\"; includeSubDomains\r\n",
+      CURLE_OK },
+    { "example.org", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
+    { "this.example", NULL, "max=\"31536\";", CURLE_BAD_FUNCTION_ARGUMENT },
+    { "this.example", NULL, "max-age=\"31536", CURLE_BAD_FUNCTION_ARGUMENT },
+    { "this.example", NULL, "max-age=31536\"", CURLE_OK },
+    /* max-age=0 removes the entry */
+    { "this.example", NULL, "max-age=0", CURLE_OK },
+    { "another.example", NULL, "includeSubDomains; ",
+      CURLE_BAD_FUNCTION_ARGUMENT },
 
-  /* Two max-age is illegal */
-  { "example.com", NULL,
-    "max-age=\"21536000\"; includeSubDomains; max-age=\"3\";",
-    CURLE_BAD_FUNCTION_ARGUMENT },
-  /* Two includeSubDomains is illegal */
-  { "2.example.com", NULL,
-    "max-age=\"21536000\"; includeSubDomains; includeSubDomains;",
-    CURLE_BAD_FUNCTION_ARGUMENT },
-  /* use an unknown directive "include" that should be ignored */
-  { "3.example.com", NULL, "max-age=\"21536000\"; include; includeSubDomains;",
-    CURLE_OK },
-  /* remove the "3.example.com" one, should still match the example.com */
-  { "3.example.com", NULL, "max-age=\"0\"; includeSubDomains;",
-    CURLE_OK },
-  { "-", "foo.example.com", NULL, CURLE_OK},
-  { "-", "foo.xample.com", NULL, CURLE_OK},
+    /* Two max-age is illegal */
+    { "example.com", NULL,
+      "max-age=\"21536000\"; includeSubDomains; max-age=\"3\";",
+      CURLE_BAD_FUNCTION_ARGUMENT },
+    /* Two includeSubDomains is illegal */
+    { "2.example.com", NULL,
+      "max-age=\"21536000\"; includeSubDomains; includeSubDomains;",
+      CURLE_BAD_FUNCTION_ARGUMENT },
+    /* use an unknown directive "include" that should be ignored */
+    { "3.example.com", NULL,
+      "max-age=\"21536000\"; include; includeSubDomains;", CURLE_OK },
+    /* remove the "3.example.com" one, should still match the example.com */
+    { "3.example.com", NULL, "max-age=\"0\"; includeSubDomains;", CURLE_OK },
+    { "-", "foo.example.com", NULL, CURLE_OK },
+    { "-", "foo.xample.com", NULL, CURLE_OK },
 
-  /* should not match */
-  { "example.net", "forexample.net", "max-age=\"31536000\"\r\n", CURLE_OK },
+    /* should not match */
+    { "example.net", "forexample.net", "max-age=\"31536000\"\r\n", CURLE_OK },
 
-  /* should not match either, since forexample.net is not in the example.net
-     domain */
-  { "example.net", "forexample.net",
-    "max-age=\"31536000\"; includeSubDomains\r\n", CURLE_OK },
-  /* remove example.net again */
-  { "example.net", NULL, "max-age=\"0\"; includeSubDomains\r\n", CURLE_OK },
+    /* should not match either, since forexample.net is not in the example.net
+       domain */
+    { "example.net", "forexample.net",
+      "max-age=\"31536000\"; includeSubDomains\r\n", CURLE_OK },
+    /* remove example.net again */
+    { "example.net", NULL, "max-age=\"0\"; includeSubDomains\r\n", CURLE_OK },
 
-  /* make this live for 7 seconds */
-  { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
-  { NULL, NULL, NULL, CURLE_OK }
+    /* make this live for 7 seconds */
+    { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
+    { NULL, NULL, NULL, CURLE_OK }
   };
 
-  CURLcode result;
+  CURLcode res;
   struct stsentry *e;
   struct hsts *h = Curl_hsts_init();
   int i;
@@ -130,18 +129,18 @@ static CURLcode test_unit1660(const char *arg)
 
   Curl_hsts_loadfile(easy, h, arg);
 
-  for(i = 0; headers[i].host ; i++) {
+  for(i = 0; headers[i].host; i++) {
     if(headers[i].hdr) {
-      result = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
+      res = Curl_hsts_parse(h, headers[i].host, headers[i].hdr);
 
-      if(result != headers[i].result) {
+      if(res != headers[i].res) {
         curl_mfprintf(stderr, "Curl_hsts_parse(%s) failed: %d\n",
-                      headers[i].hdr, result);
+                      headers[i].hdr, res);
         unitfail++;
         continue;
       }
-      else if(result) {
-        curl_mprintf("Input %u: error %d\n", i, (int) result);
+      else if(res) {
+        curl_mprintf("Input %u: error %d\n", i, (int)res);
         continue;
       }
     }

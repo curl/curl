@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-
 /* OS/400 netdb.h does not define NI_MAXHOST. */
 #define NI_MAXHOST      1025
 
@@ -37,15 +36,13 @@ typedef unsigned long   u_int32_t;
 /* OS/400 has no idea of a tty! */
 #define isatty(fd)      0
 
-
 /* Workaround bug in IBM QADRT runtime library:
  * function puts() does not output the implicit trailing newline.
  */
 
 #include <stdio.h>      /* Be sure it is loaded. */
 #undef puts
-#define puts(s) (fputs((s), stdout) == EOF? EOF: putchar('\n'))
-
+#define puts(s) (fputs((s), stdout) == EOF ? EOF : putchar('\n'))
 
 /* System API wrapper prototypes & definitions to support ASCII parameters. */
 
@@ -79,14 +76,12 @@ extern OM_uint32 Curl_gss_import_name_a(OM_uint32 * minor_status,
                                         gss_name_t * out_name);
 #define gss_import_name         Curl_gss_import_name_a
 
-
 extern OM_uint32 Curl_gss_display_status_a(OM_uint32 * minor_status,
                                            OM_uint32 status_value,
                                            int status_type, gss_OID mech_type,
                                            gss_msg_ctx_t * message_context,
                                            gss_buffer_t status_string);
 #define gss_display_status      Curl_gss_display_status_a
-
 
 extern OM_uint32 Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
                                              gss_cred_id_t cred_handle,
@@ -104,12 +99,10 @@ extern OM_uint32 Curl_gss_init_sec_context_a(OM_uint32 * minor_status,
                                              OM_uint32 * time_rec);
 #define gss_init_sec_context    Curl_gss_init_sec_context_a
 
-
-extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
-                                               gss_ctx_id_t * context_handle,
+extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 *minor_status,
+                                               gss_ctx_id_t *context_handle,
                                                gss_buffer_t output_token);
 #define gss_delete_sec_context  Curl_gss_delete_sec_context_a
-
 
 /* LDAP wrappers. */
 

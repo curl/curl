@@ -29,13 +29,11 @@
 
 #include "first.h"
 
-#include "memdebug.h"
-
 static const char t1527_testdata[] = "Hello Cloud!\n";
 
 static size_t t1527_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
+  size_t amount = nmemb * size; /* Total bytes curl wants */
   if(amount < strlen(t1527_testdata)) {
     return strlen(t1527_testdata);
   }

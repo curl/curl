@@ -109,6 +109,8 @@ class TestUnix:
                                  '--unix-socket', uds_faker.path,
                                ])
         r.check_response(count=1, http_status=200)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'
 
     # download https: via Unix socket
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
@@ -120,6 +122,8 @@ class TestUnix:
                                  '--unix-socket', uds_faker.path,
                                ])
         r.check_response(exitcode=35, http_status=None)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'
 
     # download HTTP/3 via Unix socket
     @pytest.mark.skipif(condition=not Env.have_h3(), reason='h3 not supported')
@@ -132,3 +136,5 @@ class TestUnix:
                                  '--unix-socket', uds_faker.path,
                                ])
         r.check_response(exitcode=96, http_status=None)
+        assert r.stats[0]['remote_port'] == -1, f'{r.dump_logs()}'
+        assert r.stats[0]['local_port'] == -1, f'{r.dump_logs()}'

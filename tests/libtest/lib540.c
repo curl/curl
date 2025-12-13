@@ -27,12 +27,10 @@
  * argv1 = URL
  * argv2 = proxy
  * argv3 = proxyuser:password
- * argv4 = host name to use for the custom Host: header
+ * argv4 = hostname to use for the custom Host: header
  */
 
 #include "first.h"
-
-#include "memdebug.h"
 
 static CURL *t540_curl[2];
 
@@ -140,8 +138,8 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
 #else
         itimeout = (int)L;
 #endif
-        T.tv_sec = itimeout/1000;
-        T.tv_usec = (itimeout%1000)*1000;
+        T.tv_sec = itimeout / 1000;
+        T.tv_usec = (itimeout % 1000) * 1000;
       }
       else {
         T.tv_sec = 5;

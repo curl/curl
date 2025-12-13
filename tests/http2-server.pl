@@ -102,7 +102,7 @@ while(@ARGV) {
         }
     }
     elsif($ARGV[0]) {
-        print STDERR "\nWarning: http2-server.pl unknown parameter: $ARGV[0]\n";
+        print STDERR "\nWarning: http2-server.pl unknown parameter: '$ARGV[0]'\n";
     }
     shift @ARGV;
 }

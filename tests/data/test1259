@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ HTTP GET
 
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.0 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Content-Type: text/html
@@ -33,7 +34,7 @@ HTTP URL with semicolon in password
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic %b64[user:pass]b64%O3dvcmQ=

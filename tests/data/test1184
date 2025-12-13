@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,16 +9,15 @@ proxytunnel
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
-<connect>
+<connect crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 
 </connect>
 
-<data nocheck="yes">
+<data crlf="headers" nocheck="yes">
 HTTP/1.1 302 OK
 Location: http://%HOSTIP.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER0002
 Date: Tue, 09 Nov 2010 14:49:00 GMT
@@ -30,7 +30,7 @@ Connection: close
 contents
 </data>
 
-<data2 nocheck="yes">
+<data2 crlf="headers" nocheck="yes">
 HTTP/1.1 200 OK
 Content-Length: 7
 
@@ -38,7 +38,6 @@ second
 </data2>
 </reply>
 
-#
 # Client-side
 <client>
 <server>
@@ -56,10 +55,9 @@ proxy
 </features>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
-<proxy>
+<proxy crlf="headers">
 CONNECT %HOSTIP.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -71,7 +69,7 @@ User-Agent: curl/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP.%TESTNUMBER:%HTTPPORT
 Accept: */*
@@ -83,7 +81,7 @@ Accept: */*
 User-Agent: %TESTNUMBER-agent
 
 </protocol>
-<stdout>
+<stdout crlf="headers">
 HTTP/1.1 200 Mighty fine indeed
 Server: test tunnel 2000
 

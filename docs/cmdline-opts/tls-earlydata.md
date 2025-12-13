@@ -21,7 +21,7 @@ Enable the use of TLSv1.3 early data, also known as '0RTT' where possible.
 This has security implications for the requests sent that way.
 
 This option can be used when curl is built to use GnuTLS, wolfSSL, quictls and
-OpenSSL as a TLS provider (but not BoringSSL, AWS-LC, or rustls).
+OpenSSL as a TLS provider (but not BoringSSL, AWS-LC, or Rustls).
 
 If a server supports this TLSv1.3 feature, and to what extent, is announced
 as part of the TLS "session" sent back to curl. Until curl has seen such

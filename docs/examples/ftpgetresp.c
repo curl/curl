@@ -21,22 +21,28 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include <stdio.h>
-
-#include <curl/curl.h>
-
 /* <DESC>
  * Similar to ftpget.c but also stores the received response-lines
  * in a separate file using our own callback!
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
+#include <stdio.h>
+
+#include <curl/curl.h>
+
 static size_t write_response(void *ptr, size_t size, size_t nmemb, void *data)
 {
   FILE *writehere = (FILE *)data;
   return fwrite(ptr, size, nmemb, writehere);
 }
 
-#define FTPBODY "ftp-list"
+#define FTPBODY    "ftp-list"
 #define FTPHEADERS "ftp-responses"
 
 int main(void)
@@ -84,7 +90,7 @@ int main(void)
     curl_easy_cleanup(curl);
   }
 
-  fclose(ftpfile); /* close the local file */
+  fclose(ftpfile);  /* close the local file */
   fclose(respfile); /* close the response file */
 
   curl_global_cleanup();

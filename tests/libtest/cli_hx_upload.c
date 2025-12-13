@@ -24,7 +24,6 @@
 #include "first.h"
 
 #include "testtrace.h"
-#include "memdebug.h"
 
 static int verbose_u = 1;
 
@@ -73,7 +72,7 @@ static size_t my_write_u_cb(char *buf, size_t nitems, size_t buflen,
                 "pause_at=%" CURL_FORMAT_CURL_OFF_T "\n",
                 t->idx, blen, t->recv_size, t->pause_at);
   if(!t->out) {
-    curl_msnprintf(t->filename, sizeof(t->filename)-1, "download_%zu.data",
+    curl_msnprintf(t->filename, sizeof(t->filename) - 1, "download_%zu.data",
                    t->idx);
     t->out = curlx_fopen(t->filename, "wb");
     if(!t->out)
@@ -208,7 +207,7 @@ static void usage_hx_upload(const char *msg)
     curl_mfprintf(stderr, "%s\n", msg);
   curl_mfprintf(stderr,
     "usage: [options] url\n"
-    "  upload to a url with following options:\n"
+    "  upload to a URL with following options:\n"
     "  -a         abort paused transfer\n"
     "  -e         use TLS earlydata\n"
     "  -m number  max parallel uploads\n"
@@ -246,12 +245,14 @@ static CURLcode test_cli_hx_upload(const char *URL)
   struct curl_slist *host = NULL;
   const char *resolve = NULL;
   int ch;
-  CURLcode result = CURLE_OK;
+  CURLcode res = CURLE_OK;
 
   (void)URL;
 
   while((ch = cgetopt(test_argc, test_argv, "aefhlm:n:A:F:M:P:r:RS:V:"))
         != -1) {
+    const char *opt = coptarg;
+    curl_off_t num;
     switch(ch) {
     case 'h':
       usage_hx_upload(NULL);
@@ -269,22 +270,27 @@ static CURLcode test_cli_hx_upload(const char *URL)
       announce_length = 1;
       break;
     case 'm':
-      max_parallel = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        max_parallel = (size_t)num;
       break;
     case 'n':
-      transfer_count_u = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        transfer_count_u = (size_t)num;
       break;
     case 'A':
-      abort_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        abort_offset = (size_t)num;
       break;
     case 'F':
-      fail_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        fail_offset = (size_t)num;
       break;
     case 'M':
       method = coptarg;
       break;
     case 'P':
-      pause_offset = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        pause_offset = (size_t)num;
       break;
     case 'r':
       resolve = coptarg;
@@ -293,7 +299,8 @@ static CURLcode test_cli_hx_upload(const char *URL)
       reuse_easy = 1;
       break;
     case 'S':
-      send_total = (size_t)atol(coptarg);
+      if(!curlx_str_number(&opt, &num, LONG_MAX))
+        send_total = (size_t)num;
       break;
     case 'V': {
       if(!strcmp("http/1.1", coptarg))
@@ -340,7 +347,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
   share = curl_share_init();
   if(!share) {
     curl_mfprintf(stderr, "error allocating share\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -350,10 +357,10 @@ static CURLcode test_cli_hx_upload(const char *URL)
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-  transfer_u = calloc(transfer_count_u, sizeof(*transfer_u));
+  transfer_u = curlx_calloc(transfer_count_u, sizeof(*transfer_u));
   if(!transfer_u) {
     curl_mfprintf(stderr, "error allocating transfer structs\n");
-    result = (CURLcode)1;
+    res = (CURLcode)1;
     goto cleanup;
   }
 
@@ -372,7 +379,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
     CURL *curl = curl_easy_init();
     if(!curl) {
       curl_mfprintf(stderr, "failed to init easy handle\n");
-      result = (CURLcode)1;
+      res = (CURLcode)1;
       goto cleanup;
     }
     for(i = 0; i < transfer_count_u; ++i) {
@@ -382,7 +389,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(setup_hx_upload(t->curl, url, t, http_version, host, share,
                          use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-        result = (CURLcode)1;
+        res = (CURLcode)1;
         goto cleanup;
       }
 
@@ -405,7 +412,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
       if(!t->curl || setup_hx_upload(t->curl, url, t, http_version, host,
                                      share, use_earlydata, announce_length)) {
         curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-        result = (CURLcode)1;
+        res = (CURLcode)1;
         goto cleanup;
       }
       curl_multi_add_handle(multi, t->curl);
@@ -455,7 +462,6 @@ static CURLcode test_cli_hx_upload(const char *URL)
           }
         }
 
-
         /* nothing happening, maintenance */
         if(abort_paused) {
           /* abort paused transfers */
@@ -492,7 +498,7 @@ static CURLcode test_cli_hx_upload(const char *URL)
                                              host, share, use_earlydata,
                                              announce_length)) {
                 curl_mfprintf(stderr, "[t-%zu] FAILED setup\n", i);
-                result = (CURLcode)1;
+                res = (CURLcode)1;
                 goto cleanup;
               }
               curl_multi_add_handle(multi, t->curl);
@@ -531,12 +537,12 @@ cleanup:
         curl_mime_free(t->mime);
       }
     }
-    free(transfer_u);
+    curlx_free(transfer_u);
   }
 
   curl_share_cleanup(share);
   curl_slist_free_all(host);
   curl_global_cleanup();
 
-  return result;
+  return res;
 }

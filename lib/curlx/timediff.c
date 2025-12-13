@@ -84,5 +84,5 @@ struct timeval *curlx_mstotv(struct timeval *tv, timediff_t ms)
  */
 timediff_t curlx_tvtoms(struct timeval *tv)
 {
-  return (tv->tv_sec*1000) + (timediff_t)(tv->tv_usec/1000);
+  return (tv->tv_sec * 1000) + (timediff_t)(tv->tv_usec / 1000);
 }

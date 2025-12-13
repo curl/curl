@@ -120,7 +120,7 @@ struct ctl {
 
 size_t read_callback(char *buffer, size_t size, size_t nitems, void *arg)
 {
-  struct ctl *p = (struct ctl *) arg;
+  struct ctl *p = (struct ctl *)arg;
   curl_off_t sz = p->size - p->position;
 
   nitems *= size;

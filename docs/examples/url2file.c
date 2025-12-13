@@ -25,6 +25,12 @@
  * Download a given URL into a local file named page.out.
  * </DESC>
  */
+#ifdef _MSC_VER
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#endif
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 

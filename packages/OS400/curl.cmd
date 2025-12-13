@@ -29,4 +29,4 @@
 
              PARM       KWD(CMDARGS) TYPE(*CHAR) LEN(5000) VARY(*YES *INT2)   +
                           CASE(*MIXED) EXPR(*YES) MIN(1)                      +
-                          PROMPT('Curl command arguments')
+                          PROMPT('curl command arguments')

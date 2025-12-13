@@ -16,7 +16,7 @@ Added-in: 7.20.0
 
 # NAME
 
-CURLINFO_RTSP_CLIENT_CSEQ - get the next RTSP client CSeq
+CURLINFO_RTSP_CLIENT_CSEQ - next RTSP client CSeq
 
 # SYNOPSIS
 

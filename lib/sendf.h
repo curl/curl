@@ -42,15 +42,19 @@
  * BODY, INFO and HEADER should not be mixed, as this would lead to
  * confusion on how to interpret/format/convert the data.
  */
-#define CLIENTWRITE_BODY    (1<<0) /* non-meta information, BODY */
-#define CLIENTWRITE_INFO    (1<<1) /* meta information, not a HEADER */
-#define CLIENTWRITE_HEADER  (1<<2) /* meta information, HEADER */
-#define CLIENTWRITE_STATUS  (1<<3) /* a special status HEADER */
-#define CLIENTWRITE_CONNECT (1<<4) /* a CONNECT related HEADER */
-#define CLIENTWRITE_1XX     (1<<5) /* a 1xx response related HEADER */
-#define CLIENTWRITE_TRAILER (1<<6) /* a trailer HEADER */
-#define CLIENTWRITE_EOS     (1<<7) /* End Of transfer download Stream */
-#define CLIENTWRITE_0LEN    (1<<8) /* write even 0-length buffers */
+#define CLIENTWRITE_BODY    (1 << 0) /* non-meta information, BODY */
+#define CLIENTWRITE_INFO    (1 << 1) /* meta information, not a HEADER */
+#define CLIENTWRITE_HEADER  (1 << 2) /* meta information, HEADER */
+#define CLIENTWRITE_STATUS  (1 << 3) /* a special status HEADER */
+#define CLIENTWRITE_CONNECT (1 << 4) /* a CONNECT related HEADER */
+#define CLIENTWRITE_1XX     (1 << 5) /* a 1xx response related HEADER */
+#define CLIENTWRITE_TRAILER (1 << 6) /* a trailer HEADER */
+#define CLIENTWRITE_EOS     (1 << 7) /* End Of transfer download Stream */
+#define CLIENTWRITE_0LEN    (1 << 8) /* write even 0-length buffers */
+
+/* Forward declarations */
+struct Curl_creader;
+struct Curl_cwriter;
 
 /**
  * Write `len` bytes at `prt` to the client. `type` indicates what
@@ -201,7 +205,6 @@ CURLcode Curl_cwriter_def_write(struct Curl_easy *data,
                                 const char *buf, size_t nbytes);
 void Curl_cwriter_def_close(struct Curl_easy *data,
                             struct Curl_cwriter *writer);
-
 
 typedef enum {
   CURL_CRCNTRL_REWIND,
@@ -402,7 +405,6 @@ void Curl_creader_done(struct Curl_easy *data, int premature);
  */
 struct Curl_creader *Curl_creader_get_by_type(struct Curl_easy *data,
                                               const struct Curl_crtype *crt);
-
 
 /**
  * Set the client reader to provide 0 bytes, immediate EOS.

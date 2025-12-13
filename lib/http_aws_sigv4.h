@@ -33,8 +33,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data);
 
 #ifdef UNITTESTS
 UNITTEST CURLcode canon_path(const char *q, size_t len,
-    struct dynbuf *new_path,
-    bool normalize);
+                             struct dynbuf *new_path, bool normalize);
 UNITTEST CURLcode canon_query(const char *query, struct dynbuf *dq);
 #endif
 

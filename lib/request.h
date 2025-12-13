@@ -48,7 +48,6 @@ enum upgrade101 {
   UPGR101_RECEIVED            /* 101 response received */
 };
 
-
 /*
  * Request specific data in the easy handle (Curl_easy). Previously,
  * these members were on the connectdata struct but since a conn struct may
@@ -130,6 +129,7 @@ struct SingleRequest {
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(shutdown);     /* request end will shutdown connection */
   BIT(shutdown_err_ignore); /* errors in shutdown will not fail request */
+  BIT(reader_started); /* client reads have started */
 };
 
 /**

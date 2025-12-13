@@ -442,26 +442,26 @@ static CURLcode test_unit3205(const char *arg)
     const char *str;
   };
   static const struct test_str_entry test_str_list[] = {
-    { 0x1301, "TLS_AES_128_GCM_SHA256"},
-    { 0x1302, "TLS_AES_256_GCM_SHA384"},
-    { 0x1303, "TLS_CHACHA20_POLY1305_SHA256"},
-    { 0xC02B, "ECDHE-ECDSA-AES128-GCM-SHA256"},
-    { 0xC02F, "ECDHE-RSA-AES128-GCM-SHA256"},
-    { 0xC02C, "ECDHE-ECDSA-AES256-GCM-SHA384"},
-    { 0xC030, "ECDHE-RSA-AES256-GCM-SHA384"},
-    { 0xCCA9, "ECDHE-ECDSA-CHACHA20-POLY1305"},
-    { 0xCCA8, "ECDHE-RSA-CHACHA20-POLY1305"},
+    { 0x1301, "TLS_AES_128_GCM_SHA256" },
+    { 0x1302, "TLS_AES_256_GCM_SHA384" },
+    { 0x1303, "TLS_CHACHA20_POLY1305_SHA256" },
+    { 0xC02B, "ECDHE-ECDSA-AES128-GCM-SHA256" },
+    { 0xC02F, "ECDHE-RSA-AES128-GCM-SHA256" },
+    { 0xC02C, "ECDHE-ECDSA-AES256-GCM-SHA384" },
+    { 0xC030, "ECDHE-RSA-AES256-GCM-SHA384" },
+    { 0xCCA9, "ECDHE-ECDSA-CHACHA20-POLY1305" },
+    { 0xCCA8, "ECDHE-RSA-CHACHA20-POLY1305" },
 #ifdef USE_MBEDTLS
-    { 0x009E, "DHE-RSA-AES128-GCM-SHA256"},
-    { 0x009F, "DHE-RSA-AES256-GCM-SHA384"},
+    { 0x009E, "DHE-RSA-AES128-GCM-SHA256" },
+    { 0x009F, "DHE-RSA-AES256-GCM-SHA384" },
 #else
-    { 0x0000, "DHE-RSA-AES128-GCM-SHA256"},
-    { 0x0000, "DHE-RSA-AES256-GCM-SHA384"},
+    { 0x0000, "DHE-RSA-AES128-GCM-SHA256" },
+    { 0x0000, "DHE-RSA-AES256-GCM-SHA384" },
 #endif
 #ifdef USE_MBEDTLS
-    { 0xCCAA, "DHE-RSA-CHACHA20-POLY1305"},
+    { 0xCCAA, "DHE-RSA-CHACHA20-POLY1305" },
 #else
-    { 0x0000, "DHE-RSA-CHACHA20-POLY1305"},
+    { 0x0000, "DHE-RSA-CHACHA20-POLY1305" },
 #endif
 #ifdef USE_MBEDTLS
     { 0xC023, "ECDHE-ECDSA-AES128-SHA256" },
@@ -561,9 +561,9 @@ static CURLcode test_unit3205(const char *arg)
     /* suites matched by EDH alias will return the DHE name */
     if(test->id >= 0x0011 && test->id < 0x0017) {
       if(expect && memcmp(expect, "EDH-", 4) == 0)
-        expect = (char *) memcpy(strcpy(alt, expect), "DHE-", 4);
+        expect = (char *)memcpy(strcpy(alt, expect), "DHE-", 4);
       if(expect && memcmp(expect + 4, "EDH-", 4) == 0)
-        expect = (char *) memcpy(strcpy(alt, expect) + 4, "DHE-", 4) - 4;
+        expect = (char *)memcpy(strcpy(alt, expect) + 4, "DHE-", 4) - 4;
     }
 
     if(expect && strcmp(buf, expect) != 0) {

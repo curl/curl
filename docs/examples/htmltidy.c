@@ -28,14 +28,15 @@
 /*
  * LibTidy => https://www.html-tidy.org/
  */
-
 #include <stdio.h>
+
 #include <tidy/tidy.h>
 #include <tidy/tidybuffio.h>
+
 #include <curl/curl.h>
 
 /* curl write callback, to fill tidy's input buffer...  */
-uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
+static uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 {
   uint r;
   r = size * nmemb;
@@ -44,17 +45,17 @@ uint write_cb(char *in, uint size, uint nmemb, TidyBuffer *out)
 }
 
 /* Traverse the document tree */
-void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
+static void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
 {
   TidyNode child;
-  for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
+  for(child = tidyGetChild(tnod); child; child = tidyGetNext(child)) {
     ctmbstr name = tidyNodeGetName(child);
     if(name) {
-      /* if it has a name, then it's an HTML tag ... */
+      /* if it has a name, then it is an HTML tag ... */
       TidyAttr attr;
       printf("%*.*s%s ", indent, indent, "<", name);
       /* walk the attribute list */
-      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
+      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr)) {
         printf("%s", tidyAttrName(attr));
         tidyAttrValue(attr) ? printf("=\"%s\" ",
                                      tidyAttrValue(attr)) : printf(" ");
@@ -62,7 +63,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       printf(">\n");
     }
     else {
-      /* if it does not have a name, then it's probably text, cdata, etc... */
+      /* if it does not have a name, then it is probably text, cdata, etc... */
       TidyBuffer buf;
       tidyBufInit(&buf);
       tidyNodeGetText(doc, child, &buf);
@@ -73,14 +74,13 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
   }
 }
 
-
 int main(int argc, char **argv)
 {
   CURL *curl;
   char curl_errbuf[CURL_ERROR_SIZE];
   TidyDoc tdoc;
-  TidyBuffer docbuf = {0};
-  TidyBuffer tidy_errbuf = {0};
+  TidyBuffer docbuf = { 0 };
+  TidyBuffer tidy_errbuf = { 0 };
   CURLcode res;
 
   if(argc != 2) {

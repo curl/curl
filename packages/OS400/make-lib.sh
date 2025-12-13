@@ -79,7 +79,7 @@ fi
 if [ -n "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${STATBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${STATBNDDIR})"
-        CMD="${CMD} TEXT('LibCurl API static binding directory')"
+        CMD="${CMD} TEXT('libcurl API static binding directory')"
         CLcommand "${CMD}"
 
         for MODULE in ${MODULES}
@@ -173,7 +173,7 @@ fi
 if [ -n "${LINK}" ]
 then    rm -rf "${LIBIFSNAME}/${DYNBNDDIR}.BNDDIR"
         CMD="CRTBNDDIR BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
-        CMD="${CMD} TEXT('LibCurl API dynamic binding directory')"
+        CMD="${CMD} TEXT('libcurl API dynamic binding directory')"
         CLcommand "${CMD}"
         CMD="ADDBNDDIRE BNDDIR(${TARGETLIB}/${DYNBNDDIR})"
         CMD="${CMD} OBJ((*LIBL/${SRVPGM} *SRVPGM))"

@@ -35,23 +35,15 @@
 
 #define DEBUG_ME 0
 
-#include "../urldata.h"
+#include "vauth.h"
 #include "../sendf.h"
 #include "../curl_ntlm_core.h"
 #include "../curl_gethostname.h"
-#include "../curlx/multibyte.h"
 #include "../curlx/warnless.h"
 #include "../rand.h"
 #include "../vtls/vtls.h"
 #include "../strdup.h"
-
-#include "vauth.h"
 #include "../curl_endian.h"
-
-/* The last #include files should be: */
-#include "../curl_memory.h"
-#include "../memdebug.h"
-
 
 /* NTLM buffer fixed size, large enough for long user + host + domain */
 #define NTLM_BUFSIZE 1024
@@ -162,7 +154,7 @@
 #define NTLMSSP_SIGNATURE "\x4e\x54\x4c\x4d\x53\x53\x50"
 
 #if DEBUG_ME
-# define DEBUG_OUT(x) x
+#define DEBUG_OUT(x) x
 static void ntlm_print_flags(FILE *handle, unsigned long flags)
 {
   if(flags & NTLMFLAG_NEGOTIATE_UNICODE)
@@ -240,7 +232,7 @@ static void ntlm_print_hex(FILE *handle, const char *buf, size_t len)
     curl_mfprintf(stderr, "%02.2x", (unsigned int)*p++);
 }
 #else
-# define DEBUG_OUT(x) Curl_nop_stmt
+#define DEBUG_OUT(x) Curl_nop_stmt
 #endif
 
 /*
@@ -263,7 +255,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
 {
   unsigned short target_info_len = 0;
   unsigned int target_info_offset = 0;
-  const unsigned char *type2 = Curl_bufref_ptr(type2ref);
+  const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
@@ -282,7 +274,7 @@ static CURLcode ntlm_decode_type2_target(struct Curl_easy *data,
         return CURLE_BAD_CONTENT_ENCODING;
       }
 
-      free(ntlm->target_info); /* replace any previous data */
+      curlx_free(ntlm->target_info); /* replace any previous data */
       ntlm->target_info = Curl_memdup(&type2[target_info_offset],
                                       target_info_len);
       if(!ntlm->target_info)
@@ -363,7 +355,7 @@ CURLcode Curl_auth_decode_ntlm_type2_message(struct Curl_easy *data,
   */
 
   CURLcode result = CURLE_OK;
-  const unsigned char *type2 = Curl_bufref_ptr(type2ref);
+  const unsigned char *type2 = Curl_bufref_uptr(type2ref);
   size_t type2len = Curl_bufref_len(type2ref);
 
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
@@ -839,10 +831,10 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   size += hostlen;
 
   /* Return the binary blob. */
-  result = Curl_bufref_memdup(out, ntlmbuf, size);
+  result = Curl_bufref_memdup0(out, ntlmbuf, size);
 
 error:
-  free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */
+  curlx_free(ntlmv2resp);  /* Free the dynamic buffer allocated for NTLMv2 */
 
   Curl_auth_cleanup_ntlm(ntlm);
 

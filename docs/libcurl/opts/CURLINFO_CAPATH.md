@@ -20,7 +20,7 @@ Added-in: 7.84.0
 
 # NAME
 
-CURLINFO_CAPATH - get the default built-in CA path string
+CURLINFO_CAPATH - default built-in CA path string
 
 # SYNOPSIS
 

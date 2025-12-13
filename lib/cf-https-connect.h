@@ -44,6 +44,5 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              struct connectdata *conn,
                              int sockindex);
 
-
 #endif /* !CURL_DISABLE_HTTP */
 #endif /* HEADER_CURL_CF_HTTP_H */

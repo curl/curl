@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -9,12 +10,10 @@ non-existing host
 </keywords>
 </info>
 
-#
 # Server-side
 <reply>
 </reply>
 
-#
 # Client-side
 <client>
 <features>
@@ -28,7 +27,6 @@ http://%HOSTIP:%NOLISTENPORT/%TESTNUMBER --interface non-existing-host.haxx.se.
 </command>
 </client>
 
-#
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>

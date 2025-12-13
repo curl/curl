@@ -21,14 +21,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* <DESC>
  * Expand an SMTP email mailing list
  * </DESC>
  */
-
 #include <stdio.h>
 #include <string.h>
+
 #include <curl/curl.h>
 
 /* This is a simple example showing how to expand an email mailing list.

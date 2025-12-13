@@ -39,6 +39,7 @@ log = logging.getLogger(__name__)
 class TestGoAway:
 
     # download files sequentially with delay, reload server for GOAWAY
+    @pytest.mark.skipif(condition=not Env.have_h2_curl(), reason="curl without h2")
     def test_03_01_h2_goaway(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         count = 3

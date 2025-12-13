@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="US-ASCII"?>
 <testcase>
 <info>
 <keywords>
@@ -8,7 +9,7 @@ HTTP Digest auth
 </info>
 # Server-side
 <reply>
-<data>
+<data crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Digest realm="testrealm", algorithm=MD5, algorithm=MD5, nonce=1, nonce=2
@@ -20,7 +21,7 @@ This is not the real page
 
 # This is supposed to be returned when the server gets a
 # Authorization: Digest line passed-in from the client
-<data1000>
+<data1000 crlf="headers">
 HTTP/1.1 200 OK swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Content-Type: text/html; charset=iso-8859-1
@@ -29,7 +30,7 @@ Content-Length: 23
 This IS the real page!
 </data1000>
 
-<datacheck>
+<datacheck crlf="headers">
 HTTP/1.1 401 Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 WWW-Authenticate: Digest realm="testrealm", algorithm=MD5, algorithm=MD5, nonce=1, nonce=2
@@ -66,7 +67,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol crlf="yes">
+<protocol crlf="headers">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
