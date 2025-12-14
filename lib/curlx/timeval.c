@@ -30,15 +30,6 @@
 #include "version_win32.h"
 #include "../system_win32.h"
 
-#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 3)
-#include <sec_api/time_s.h>  /* for _gmtime32_s(), _gmtime64_s() */
-#ifdef _USE_32BIT_TIME_T
-#define gmtime_s _gmtime32_s
-#else
-#define gmtime_s _gmtime64_s
-#endif
-#endif
-
 LARGE_INTEGER Curl_freq;
 bool Curl_isVistaOrGreater;
 
@@ -267,6 +258,15 @@ timediff_t curlx_timediff_us(struct curltime newer, struct curltime older)
     return TIMEDIFF_T_MIN;
   return diff * 1000000 + newer.tv_usec - older.tv_usec;
 }
+
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 3)
+#include <sec_api/time_s.h>  /* for _gmtime32_s(), _gmtime64_s() */
+#ifdef _USE_32BIT_TIME_T
+#define gmtime_s _gmtime32_s
+#else
+#define gmtime_s _gmtime64_s
+#endif
+#endif
 
 /*
  * curlx_gmtime() is a gmtime() replacement for portability. Do not use
