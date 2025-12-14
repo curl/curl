@@ -2134,7 +2134,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GMTIME_R], [
       ]],[[
         time_t tm = 1170352587;
         struct tm result;
-        if(gmtime_r(&tm, &result) != 0)
+        if(gmtime_r(&tm, &result) == 0)
           return 1;
         (void)result;
       ]])
