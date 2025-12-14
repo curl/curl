@@ -31,8 +31,12 @@
 #include "../system_win32.h"
 
 #if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR <= 3)
-#warning TRACE-1
-#include <sec_api/time_s.h>  /* for gmtime_s() */
+#include <sec_api/time_s.h>  /* for _gmtime32_s(), _gmtime64_s() */
+#ifdef _USE_32BIT_TIME_T
+#define gmtime_s _gmtime32_s
+#else
+#define gmtime_s _gmtime64_s
+#endif
 #endif
 
 LARGE_INTEGER Curl_freq;
