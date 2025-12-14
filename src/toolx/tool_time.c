@@ -44,7 +44,7 @@ CURLcode toolx_localtime(time_t intime, struct tm *store)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_LOCALTIME_R)
   const struct tm *tm;
-  tm = (struct tm *)localtime_r(&intime, store); /* thread-safe */
+  tm = localtime_r(&intime, store); /* thread-safe */
   if(!tm)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #else
