@@ -39,7 +39,7 @@
  */
 CURLcode toolx_localtime(time_t intime, struct tm *store)
 {
-#if _WIN32
+#ifdef _WIN32
   if(localtime_s(store, &intime)) /* thread-safe */
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_LOCALTIME_R)
