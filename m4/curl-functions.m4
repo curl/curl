@@ -2254,13 +2254,9 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
       ]],[[
         time_t clock = 1170352587;
         struct tm result;
-        struct tm *tmp;
-        tmp = localtime_r(&clock, &result);
-        (void)result;
-        if(tmp)
-          return 0;
-        else
+        if(localtime_r(&clock, &result) != 0)
           return 1;
+        (void)result;
       ]])
     ],[
       AC_MSG_RESULT([yes])
@@ -2281,8 +2277,8 @@ AC_DEFUN([CURL_CHECK_FUNC_LOCALTIME_R], [
         $curl_includes_time
       ]],[[
         time_t clock = 1170352587;
+        struct tm *tmp = 0;
         struct tm result;
-        struct tm *tmp;
         tmp = localtime_r(&clock, &result);
         (void)result;
         if(tmp)
