@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_time.h"
 
-#if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR <= 3)
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR <= 3)
 #include <sec_api/time_s.h>  /* for _localtime32_s(), _localtime64_s() */
 #ifdef _USE_32BIT_TIME_T
 #define localtime_s _localtime32_s
