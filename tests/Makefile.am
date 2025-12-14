@@ -129,7 +129,7 @@ TEST_E = -a -w -e
 TEST_NF = -a -w -p ~flaky ~timing-dependent
 
 # special target for CI use
-TEST_CI = -a -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo
+TEST_CI = -a -w -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo
 
 PYTEST = pytest
 endif

@@ -126,7 +126,7 @@ curl_add_runtests(test-am        "-a -w -am")
 curl_add_runtests(test-full      "-a -w -p -r")
 # ~flaky means that it ignores results of tests using the flaky keyword
 curl_add_runtests(test-nonflaky  "-a -w -p ~flaky ~timing-dependent")
-curl_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo")
+curl_add_runtests(test-ci        "-a -w -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo")
 curl_add_runtests(test-torture   "-a -w -t -j20")
 curl_add_runtests(test-event     "-a -w -e")
 
