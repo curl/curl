@@ -27,7 +27,7 @@
  */
 #ifdef _MSC_VER
 #ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS  /* for fopen() */
+#define _CRT_SECURE_NO_WARNINGS  /* for ctime(), fopen() */
 #endif
 #endif
 
