@@ -703,6 +703,17 @@ follow suite.
 
 # Command line tool
 
+## multi-threading
+
+When asked to do transfers in parallel, the curl tool could be extended to use
+a number of independent worker threads. This would allow faster transfers in
+situations where curl becomes CPU bound.
+
+Ideally, curl would (with permission) fire up new threads on demand when it
+deems that it might be helpful. Perhaps, if it has more transfers to add and
+the existing transfers make the CPU busy enough and there are more cores
+available.
+
 ## sync
 
 `curl --sync http://example.com/feed[1-100].rss` or
