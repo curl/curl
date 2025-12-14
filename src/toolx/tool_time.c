@@ -39,8 +39,7 @@
  */
 CURLcode toolx_localtime(time_t intime, struct tm *store)
 {
-#if defined(_WIN32) && \
-  (!defined(__MINGW64_VERSION_MAJOR) || (__MINGW64_VERSION_MAJOR >= 4))
+#if _WIN32
   if(localtime_s(store, &intime)) /* thread-safe */
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_LOCALTIME_R)
