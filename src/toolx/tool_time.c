@@ -23,6 +23,15 @@
  ***************************************************************************/
 #include "tool_time.h"
 
+#if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR <= 3)
+#include <sec_api/time_s.h>  /* for _localtime32_s(), _localtime64_s() */
+#ifdef _USE_32BIT_TIME_T
+#define localtime_s _localtime32_s
+#else
+#define localtime_s _localtime64_s
+#endif
+#endif
+
 /*
  * toolx_localtime() is a localtime() replacement for portability. Do not use
  * the localtime_s(), localtime_r() or localtime() functions anywhere else but
