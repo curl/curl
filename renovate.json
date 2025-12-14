@@ -13,7 +13,8 @@
       "commitMessagePrefix": "GHA: ",
       "labels": [
         "CI"
-      ]
+      ],
+      "enabled": false
     },
     {
       "matchUpdateTypes": [
