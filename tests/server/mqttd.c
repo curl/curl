@@ -822,11 +822,6 @@ static int test_mqttd(int argc, char *argv[])
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/mqtt-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
   CURLX_SET_BINMODE(stdin);
   CURLX_SET_BINMODE(stdout);
   CURLX_SET_BINMODE(stderr);

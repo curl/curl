@@ -2159,11 +2159,6 @@ static int test_sws(int argc, char *argv[])
            logdir, SERVERLOGS_LOCKDIR, protocol_type,
            is_proxy ? "-proxy" : "", socket_type);
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
   install_signal_handlers(false);
 
   req = calloc(1, sizeof(*req));

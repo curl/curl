@@ -647,11 +647,6 @@ static int test_tftpd(int argc, char **argv)
   snprintf(loglockfile, sizeof(loglockfile), "%s/%s/tftp-%s.lock",
            logdir, SERVERLOGS_LOCKDIR, ipv_inuse);
 
-#ifdef _WIN32
-  if(win32_init())
-    return 2;
-#endif
-
   install_signal_handlers(true);
 
 #ifdef USE_IPV6
