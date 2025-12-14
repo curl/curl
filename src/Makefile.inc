@@ -68,8 +68,7 @@ TOOLX_CFILES = \
   toolx/tool_time.c
 
 TOOLX_HFILES = \
-  toolx/tool_time.h \
-  toolx/toolx.h
+  toolx/tool_time.h
 
 CURL_CFILES = \
   config2setopts.c \

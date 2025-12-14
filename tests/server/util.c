@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "first.h"
 
-#include <toolx/toolx.h>
+#include <toolx/tool_time.h>
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>

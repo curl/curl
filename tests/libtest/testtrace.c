@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "testtrace.h"
 
-#include <toolx/toolx.h>
+#include <toolx/tool_time.h>
 
 struct libtest_trace_cfg debug_config;
 
