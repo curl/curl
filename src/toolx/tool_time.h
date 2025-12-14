@@ -25,8 +25,6 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "tool_time.h"
-
 CURLcode toolx_localtime(time_t intime, struct tm *store);
 
 #endif /* HEADER_TOOLX_TOOL_TIME_H */
