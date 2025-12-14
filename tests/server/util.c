@@ -136,6 +136,60 @@ void logmsg(const char *msg, ...)
   }
 }
 
+#ifdef _WIN32
+/* use instead of perror() on generic Windows */
+static void win32_perror(const char *msg)
+{
+  char buf[512];
+  int err = SOCKERRNO;
+  curlx_winapi_strerror(err, buf, sizeof(buf));
+  if(msg)
+    fprintf(stderr, "%s: ", msg);
+  fprintf(stderr, "%s\n", buf);
+}
+
+static void win32_cleanup(void)
+{
+#ifdef USE_WINSOCK
+  WSACleanup();
+#endif
+
+  /* flush buffers of all streams regardless of their mode */
+  _flushall();
+}
+
+int win32_init(void)
+{
+  curlx_now_init();
+#ifdef USE_WINSOCK
+  {
+    WORD wVersionRequested;
+    WSADATA wsaData;
+    int err;
+
+    wVersionRequested = MAKEWORD(2, 2);
+    err = WSAStartup(wVersionRequested, &wsaData);
+
+    if(err) {
+      win32_perror("Winsock init failed");
+      logmsg("Error initialising Winsock -- aborting");
+      return 1;
+    }
+
+    if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
+       HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested)) {
+      WSACleanup();
+      win32_perror("Winsock init failed");
+      logmsg("No suitable winsock.dll found -- aborting");
+      return 1;
+    }
+  }
+#endif /* USE_WINSOCK */
+  atexit(win32_cleanup);
+  return 0;
+}
+#endif /* _WIN32 */
+
 /* fopens the test case file */
 FILE *test2fopen(long testno, const char *logdir2)
 {
@@ -420,18 +474,6 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
-
-/* use instead of perror() on generic Windows */
-static void win32_perror(const char *msg)
-{
-  char buf[512];
-  int err = SOCKERRNO;
-  curlx_winapi_strerror(err, buf, sizeof(buf));
-  if(msg)
-    fprintf(stderr, "%s: ", msg);
-  fprintf(stderr, "%s\n", buf);
-}
-
 /* Window message queue loop for hidden main window, details see above.
  */
 static DWORD WINAPI main_window_loop(void *lpParameter)
