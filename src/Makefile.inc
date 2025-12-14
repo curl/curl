@@ -64,6 +64,13 @@ CURLX_HFILES = \
   ../lib/curlx/warnless.h \
   ../lib/curlx/winapi.h
 
+TOOLX_CFILES = \
+  toolx/tool_time.c
+
+TOOLX_HFILES = \
+  toolx/tool_time.h \
+  toolx/toolx.h
+
 CURL_CFILES = \
   config2setopts.c \
   slist_wc.c \
@@ -108,7 +115,7 @@ CURL_CFILES = \
   tool_writeout_json.c \
   tool_xattr.c \
   var.c \
-  toolx/tool_time.c
+  $(TOOLX_CFILES)
 
 CURL_HFILES = \
   config2setopts.h \
@@ -156,6 +163,6 @@ CURL_HFILES = \
   tool_writeout_json.h \
   tool_xattr.h \
   var.h \
-  toolx/tool_time.h
+  $(TOOLX_HFILES)
 
 CURL_RCFILES = curl.rc
