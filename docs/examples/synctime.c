@@ -101,7 +101,7 @@ int main(void)
 #endif
 
 #define MAX_STRING  256
-#define MAX_STRING1 MAX_STRING + 1
+#define MAX_STRING1 (MAX_STRING + 1)
 
 #define SYNCTIME_UA "synctime/1.0"
 
@@ -117,10 +117,12 @@ static const char DefaultTimeServer[3][MAX_STRING1] = {
 };
 
 static const char *DayStr[] = {
-  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
 static const char *MthStr[] = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
 
 static int ShowAllHeader;
 static int AutoSyncTime;
