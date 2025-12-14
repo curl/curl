@@ -43,7 +43,9 @@ static const char *hms_for_sec(time_t tv_sec)
 
   if(tv_sec != cached_tv_sec) {
     struct tm now;
-    toolx_localtime(tv_sec, &now);
+    CURLcode result = toolx_localtime(tv_sec, &now);
+    if(result)
+      memset(&now, 0, sizeof(now));
     curl_msnprintf(hms_buf, sizeof(hms_buf), "%02d:%02d:%02d",
                    now.tm_hour, now.tm_min, now.tm_sec);
     cached_tv_sec = tv_sec;

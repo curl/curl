@@ -95,6 +95,7 @@ int libtest_debug_cb(CURL *curl, curl_infotype type,
   timestr = &timebuf[0];
 
   if(trace_cfg->tracetime) {
+    CURLcode result;
     struct tm now;
     struct curltime tv;
     time_t secs;
@@ -104,7 +105,9 @@ int libtest_debug_cb(CURL *curl, curl_infotype type,
       known_offset = 1;
     }
     secs = epoch_offset + tv.tv_sec;
-    toolx_localtime(secs, &now);
+    result = toolx_localtime(secs, &now);
+    if(result)
+      memset(&now, 0, sizeof(now));
     curl_msnprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
                    now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
   }

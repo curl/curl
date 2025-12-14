@@ -85,6 +85,7 @@ void logmsg(const char *msg, ...)
   char buffer[2048 + 1];
   FILE *logfp;
   struct curltime tv;
+  CURLcode result;
   time_t sec;
   struct tm now;
   char timebuf[50];
@@ -102,7 +103,9 @@ void logmsg(const char *msg, ...)
     known_offset = 1;
   }
   sec = epoch_offset + tv.tv_sec;
-  toolx_localtime(sec, &now);
+  result = toolx_localtime(sec, &now);
+  if(result)
+    memset(&now, 0, sizeof(now));
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
            now.tm_hour, now.tm_min, now.tm_sec, (long)tv.tv_usec);
