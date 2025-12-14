@@ -53,8 +53,10 @@ CURLcode toolx_localtime(time_t intime, struct tm *store)
   tm = localtime(&intime); /* not thread-safe */
   if(tm)
     *store = *tm; /* copy the pointed struct to the local copy */
-  else
+  else {
+    memset(store, 0, sizeof(struct tm));
     return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
 #endif
 
   return CURLE_OK;
