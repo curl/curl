@@ -371,7 +371,7 @@ jobs:
           MATRIX_INSTALL: '${{ matrix.install }}'
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS="-j8 ${TFLAGS} -v -d"
           if [ "${MATRIX_SYS}" != 'msys' ]; then
             TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
             if [[ "${MATRIX_INSTALL}" = *'libssh2-wincng'* ]]; then
@@ -949,7 +949,7 @@ jobs:
         env:
           TFLAGS: '${{ matrix.tflags }}'
         run: |
-          TFLAGS="-j8 ${TFLAGS}"
+          TFLAGS="-j8 ${TFLAGS} -v -d"
           TFLAGS+=' !498'  # 'Reject too large HTTP response headers on endless redirects' HTTP, HTTP GET (runtests detecting result code 2009 instead of 56 returned by curl)
           if [[ "${MATRIX_INSTALL_MSYS2}" = *'libssh2-wincng'* || \
                 "${MATRIX_INSTALL_VCPKG}" = *'libssh2[core,zlib]'* ]]; then
