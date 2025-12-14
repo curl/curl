@@ -118,18 +118,18 @@ TEST_COMMON += !documentation
 endif
 
 TEST = srcdir=$(srcdir) @PERL@ $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
-TEST_Q = -a -w -s
-TEST_AM = -a -w -am
-TEST_F = -a -w -p -r
-TEST_T = -a -w -t -j20
-TEST_E = -a -w -e
+TEST_Q = -a -s
+TEST_AM = -a -am
+TEST_F = -a -p -r
+TEST_T = -a -t -j20
+TEST_E = -a -e
 
 # ~<keyword> means that it runs all tests matching the keyword, but ignores
 # their results (since these ones are likely to fail for no good reason)
-TEST_NF = -a -w -p ~flaky ~timing-dependent
+TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special target for CI use
-TEST_CI = -a -w -p ~flaky ~timing-dependent -r --retry=5 -j20 --buildinfo
+TEST_CI = $(TEST_NF) -r --retry=5 -j20 --buildinfo
 
 PYTEST = pytest
 endif
