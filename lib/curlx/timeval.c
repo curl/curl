@@ -279,7 +279,7 @@ CURLcode curlx_gmtime(time_t intime, struct tm *store)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #elif defined(HAVE_GMTIME_R)
   const struct tm *tm;
-  tm = (struct tm *)gmtime_r(&intime, store); /* thread-safe */
+  tm = gmtime_r(&intime, store); /* thread-safe */
   if(!tm)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 #else
