@@ -39,7 +39,7 @@ The strategy of handling transfer's time is now:
 * Set `data->progress.now` at the start of API calls (e.g. `curl_multi_perform()`, etc.).
 * Set `data->progress.now` when recorded events happen (for precision).
 * Set `data->progress.now` on multi state changes.
-* Set `data->progress.now` in `pingpong` timeout handling, since pingpong is old and not always non-blocking.
+* Set `data->progress.now` in `pingpong` timeout handling, since `pingpong` is old and not always non-blocking.
 
 In addition to *setting* `data->progress.now` this timestamp can be *advanced* using 2 new methods:
 
