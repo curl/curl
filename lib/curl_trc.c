@@ -314,12 +314,11 @@ void Curl_trc_easy_timers(struct Curl_easy *data)
   if(CURL_TRC_TIMER_is_verbose(data)) {
     struct Curl_llist_node *e = Curl_llist_head(&data->state.timeoutlist);
     if(e) {
-      struct curltime now = curlx_now();
       while(e) {
         struct time_node *n = Curl_node_elem(e);
         e = Curl_node_next(e);
         CURL_TRC_TIMER(data, n->eid, "expires in %" FMT_TIMEDIFF_T "ns",
-                       curlx_timediff_us(n->time, now));
+                       curlx_timediff_us(n->time, data->progress.now));
       }
     }
   }

@@ -208,6 +208,7 @@ void Curl_cpool_destroy(struct cpool *cpool)
                cpool->share ? "[SHARE] " : "", cpool->num_conn);
     /* Move all connections to the shutdown list */
     sigpipe_init(&pipe_st);
+    Curl_pgrs_now_set(cpool->idata);
     CPOOL_LOCK(cpool, cpool->idata);
     conn = cpool_get_first(cpool);
     while(conn) {
@@ -275,23 +276,22 @@ static struct cpool_bundle *cpool_add_bundle(struct cpool *cpool,
 }
 
 static struct connectdata *
-cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle)
+cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle,
+                             struct curltime *pnow)
 {
   struct Curl_llist_node *curr;
   timediff_t highscore = -1;
   timediff_t score;
-  struct curltime now;
   struct connectdata *oldest_idle = NULL;
   struct connectdata *conn;
 
-  now = curlx_now();
   curr = Curl_llist_head(&bundle->conns);
   while(curr) {
     conn = Curl_node_elem(curr);
 
     if(!CONN_INUSE(conn)) {
       /* Set higher score for the age passed since the connection was used */
-      score = curlx_timediff_ms(now, conn->lastused);
+      score = curlx_timediff_ms(*pnow, conn->lastused);
 
       if(score > highscore) {
         highscore = score;
@@ -303,18 +303,17 @@ cpool_bundle_get_oldest_idle(struct cpool_bundle *bundle)
   return oldest_idle;
 }
 
-static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
+static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool,
+                                                 struct curltime *pnow)
 {
   struct Curl_hash_iterator iter;
   struct Curl_llist_node *curr;
   struct Curl_hash_element *he;
   struct connectdata *oldest_idle = NULL;
   struct cpool_bundle *bundle;
-  struct curltime now;
   timediff_t highscore = -1;
   timediff_t score;
 
-  now = curlx_now();
   Curl_hash_start_iterate(&cpool->dest2bundle, &iter);
 
   for(he = Curl_hash_next_element(&iter); he;
@@ -328,7 +327,7 @@ static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool)
       if(CONN_INUSE(conn) || conn->bits.close || conn->connect_only)
         continue;
       /* Set higher score for the age passed since the connection was used */
-      score = curlx_timediff_ms(now, conn->lastused);
+      score = curlx_timediff_ms(*pnow, conn->lastused);
       if(score > highscore) {
         highscore = score;
         oldest_idle = conn;
@@ -359,6 +358,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   if(!dest_limit && !total_limit)
     return CPOOL_LIMIT_OK;
 
+  Curl_pgrs_now_update(cpool->idata, data);
   CPOOL_LOCK(cpool, cpool->idata);
   if(dest_limit) {
     size_t live;
@@ -378,7 +378,8 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         struct connectdata *oldest_idle = NULL;
         /* The bundle is full. Extract the oldest connection that may
          * be removed now, if there is one. */
-        oldest_idle = cpool_bundle_get_oldest_idle(bundle);
+        oldest_idle = cpool_bundle_get_oldest_idle(bundle,
+                                                   &data->progress.now);
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
@@ -409,7 +410,8 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
           break;
       }
       else {
-        struct connectdata *oldest_idle = cpool_get_oldest_idle(cpool);
+        struct connectdata *oldest_idle =
+          cpool_get_oldest_idle(cpool, &data->progress.now);
         if(!oldest_idle)
           break;
         /* disconnect the old conn and continue */
@@ -429,6 +431,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
 out:
   CPOOL_UNLOCK(cpool, cpool->idata);
+  Curl_pgrs_now_update(data, cpool->idata);
   return result;
 }
 
@@ -538,7 +541,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
     maxconnects = data->multi->maxconnects;
   }
 
-  conn->lastused = curlx_now(); /* it was used up until now */
+  conn->lastused = data->progress.now; /* it was used up until now */
   if(cpool && maxconnects) {
     /* may be called form a callback already under lock */
     bool do_lock = !CPOOL_IS_LOCKED(cpool);
@@ -548,7 +551,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
       infof(data, "Connection pool is full, closing the oldest of %zu/%u",
             cpool->num_conn, maxconnects);
 
-      oldest_idle = cpool_get_oldest_idle(cpool);
+      oldest_idle = cpool_get_oldest_idle(cpool, &data->progress.now);
       kept = (oldest_idle != conn);
       if(oldest_idle) {
         Curl_conn_terminate(data, oldest_idle, FALSE);
@@ -635,6 +638,7 @@ static void cpool_discard_conn(struct cpool *cpool,
    * If we do a shutdown for an aborted transfer, the server might think
    * it was successful otherwise (for example an ftps: upload). This is
    * not what we want. */
+  Curl_pgrs_now_update(cpool->idata, data);
   if(aborted)
     done = TRUE;
   if(!done) {
@@ -700,16 +704,12 @@ void Curl_conn_terminate(struct Curl_easy *data,
     CPOOL_UNLOCK(cpool, data);
 }
 
-struct cpool_reaper_ctx {
-  struct curltime now;
-};
-
 static int cpool_reap_dead_cb(struct Curl_easy *data,
                               struct connectdata *conn, void *param)
 {
-  struct cpool_reaper_ctx *rctx = param;
+  (void)param;
   if((!CONN_INUSE(conn) && conn->bits.no_reuse) ||
-     Curl_conn_seems_dead(conn, data, &rctx->now)) {
+     Curl_conn_seems_dead(conn, data)) {
     /* stop the iteration here, pass back the connection that was pruned */
     Curl_conn_terminate(data, conn, FALSE);
     return 1;
@@ -727,20 +727,18 @@ static int cpool_reap_dead_cb(struct Curl_easy *data,
 void Curl_cpool_prune_dead(struct Curl_easy *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  struct cpool_reaper_ctx rctx;
   timediff_t elapsed;
 
   if(!cpool)
     return;
 
-  rctx.now = curlx_now();
   CPOOL_LOCK(cpool, data);
-  elapsed = curlx_timediff_ms(rctx.now, cpool->last_cleanup);
+  elapsed = curlx_timediff_ms(data->progress.now, cpool->last_cleanup);
 
   if(elapsed >= 1000L) {
-    while(cpool_foreach(data, cpool, &rctx, cpool_reap_dead_cb))
+    while(cpool_foreach(data, cpool, NULL, cpool_reap_dead_cb))
       ;
-    cpool->last_cleanup = rctx.now;
+    cpool->last_cleanup = data->progress.now;
   }
   CPOOL_UNLOCK(cpool, data);
 }
@@ -754,16 +752,15 @@ static int conn_upkeep(struct Curl_easy *data,
   return 0; /* continue iteration */
 }
 
-CURLcode Curl_cpool_upkeep(void *data)
+CURLcode Curl_cpool_upkeep(struct Curl_easy *data)
 {
   struct cpool *cpool = cpool_get_instance(data);
-  struct curltime now = curlx_now();
 
   if(!cpool)
     return CURLE_OK;
 
   CPOOL_LOCK(cpool, data);
-  cpool_foreach(data, cpool, &now, conn_upkeep);
+  cpool_foreach(data, cpool, &data->progress.now, conn_upkeep);
   CPOOL_UNLOCK(cpool, data);
   return CURLE_OK;
 }

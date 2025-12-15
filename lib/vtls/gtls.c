@@ -411,7 +411,7 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
   }
 
   shared->refcount = 1;
-  shared->time = curlx_now();
+  shared->time = data->progress.now;
   *pcreds = shared;
   return CURLE_OK;
 }
@@ -562,8 +562,7 @@ static bool gtls_shared_creds_expired(const struct Curl_easy *data,
                                       const struct gtls_shared_creds *sc)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  struct curltime now = curlx_now();
-  timediff_t elapsed_ms = curlx_timediff_ms(now, sc->time);
+  timediff_t elapsed_ms = curlx_timediff_ms(data->progress.now, sc->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)

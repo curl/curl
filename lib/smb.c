@@ -1146,7 +1146,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
                          sizeof(struct smb_header) + 5);
     data->req.bytecount += len;
     data->req.offset += len;
-    Curl_pgrsSetUploadCounter(data, data->req.bytecount);
+    Curl_pgrs_upload_inc(data, len);
     if(data->req.bytecount >= data->req.size)
       next_state = SMB_CLOSE;
     else

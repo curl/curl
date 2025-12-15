@@ -3219,8 +3219,7 @@ static bool ossl_cached_x509_store_expired(const struct Curl_easy *data,
   if(cfg->ca_cache_timeout < 0)
     return FALSE;
   else {
-    struct curltime now = curlx_now();
-    timediff_t elapsed_ms = curlx_timediff_ms(now, mb->time);
+    timediff_t elapsed_ms = curlx_timediff_ms(data->progress.now, mb->time);
     timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
     return elapsed_ms >= timeout_ms;
@@ -3305,7 +3304,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
       curlx_free(share->CAfile);
     }
 
-    share->time = curlx_now();
+    share->time = data->progress.now;
     share->store = store;
     share->store_is_empty = is_empty;
     share->CAfile = CAfile;

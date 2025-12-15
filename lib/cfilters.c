@@ -169,7 +169,6 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
-  struct curltime now;
 
   DEBUGASSERT(data->conn);
 
@@ -187,14 +186,13 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   }
 
   *done = FALSE;
-  now = curlx_now();
   if(!Curl_shutdown_started(data, sockindex)) {
     CURL_TRC_M(data, "shutdown start on%s connection",
                sockindex ? " secondary" : "");
-    Curl_shutdown_start(data, sockindex, 0, &now);
+    Curl_shutdown_start(data, sockindex, 0);
   }
   else {
-    timeout_ms = Curl_shutdown_timeleft(data->conn, sockindex, &now);
+    timeout_ms = Curl_shutdown_timeleft(data, data->conn, sockindex);
     if(timeout_ms < 0) {
       /* info message, since this might be regarded as acceptable */
       infof(data, "shutdown timeout");
@@ -504,7 +502,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
        * socket and ip related information. */
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(cf, data);
-      data->conn->keepalive = curlx_now();
+      data->conn->keepalive = data->progress.now;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       result = cf_verboseconnect(data, cf);
 #endif
@@ -520,7 +518,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       goto out;
     else {
       /* check allowed time left */
-      const timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
+      const timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
       curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
       int rc;
 

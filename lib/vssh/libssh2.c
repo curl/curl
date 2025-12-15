@@ -3121,13 +3121,13 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
                                     bool disconnect)
 {
   CURLcode result = CURLE_OK;
-  struct curltime dis = curlx_now();
+  struct curltime start = data->progress.now;
 
   while((sshc->state != SSH_STOP) && !result) {
     bool block;
     timediff_t left_ms = 1000;
-    struct curltime now = curlx_now();
 
+    Curl_pgrs_now_set(data); /* timeout disconnect */
     result = ssh_statemachine(data, sshc, sshp, &block);
     if(result)
       break;
@@ -3137,13 +3137,13 @@ static CURLcode ssh_block_statemach(struct Curl_easy *data,
       if(result)
         break;
 
-      left_ms = Curl_timeleft_ms(data, NULL, FALSE);
+      left_ms = Curl_timeleft_ms(data, FALSE);
       if(left_ms < 0) {
         failf(data, "Operation timed out");
         return CURLE_OPERATION_TIMEDOUT;
       }
     }
-    else if(curlx_timediff_ms(now, dis) > 1000) {
+    else if(curlx_timediff_ms(data->progress.now, start) > 1000) {
       /* disconnect timeout */
       failf(data, "Disconnect timed out");
       result = CURLE_OK;

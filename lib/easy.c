@@ -996,6 +996,7 @@ CURL *curl_easy_duphandle(CURL *d)
   if(dupset(outcurl, data))
     goto fail;
 
+  Curl_pgrs_now_set(outcurl); /* start of API call */
   outcurl->progress.hide     = data->progress.hide;
   outcurl->progress.callback = data->progress.callback;
 
@@ -1155,6 +1156,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
   if(Curl_is_in_callback(data))
     recursive = TRUE;
 
+  Curl_pgrs_now_set(data); /* start of API call */
   recv_paused = Curl_xfer_recv_is_paused(data);
   recv_paused_new = (action & CURLPAUSE_RECV);
   send_paused = Curl_xfer_send_is_paused(data);
@@ -1179,7 +1181,7 @@ CURLcode curl_easy_pause(CURL *d, int action)
       Curl_multi_mark_dirty(data); /* make it run */
       /* On changes, tell application to update its timers. */
       if(changed) {
-        if(Curl_update_timer(data->multi) && !result)
+        if(Curl_update_timer(data->multi, &data->progress.now) && !result)
           result = CURLE_ABORTED_BY_CALLBACK;
       }
     }

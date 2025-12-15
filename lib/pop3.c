@@ -1297,7 +1297,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   Curl_sasl_init(&pop3c->sasl, data, &saslpop3);
 
   /* Initialise the pingpong layer */
-  Curl_pp_init(pp);
+  Curl_pp_init(pp, &data->progress.now);
 
   /* Parse the URL options */
   result = pop3_parse_url_options(conn);

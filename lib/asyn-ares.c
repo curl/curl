@@ -311,7 +311,7 @@ CURLcode Curl_async_is_resolved(struct Curl_easy *data,
      /* This is only set to non-zero if the timer was started. */
      (ares->happy_eyeballs_dns_time.tv_sec ||
       ares->happy_eyeballs_dns_time.tv_usec) &&
-     (curlx_timediff_ms(curlx_now(), ares->happy_eyeballs_dns_time) >=
+     (curlx_timediff_ms(data->progress.now, ares->happy_eyeballs_dns_time) >=
       HAPPY_EYEBALLS_DNS_TIMEOUT)) {
     /* Remember that the EXPIRE_HAPPY_EYEBALLS_DNS timer is no longer
        running. */
@@ -390,12 +390,11 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   struct async_ares_ctx *ares = &data->state.async.ares;
   CURLcode result = CURLE_OK;
   timediff_t timeout_ms;
-  struct curltime now = curlx_now();
 
   DEBUGASSERT(entry);
   *entry = NULL; /* clear on entry */
 
-  timeout_ms = Curl_timeleft_ms(data, &now, TRUE);
+  timeout_ms = Curl_timeleft_ms(data, TRUE);
   if(timeout_ms < 0) {
     /* already expired! */
     connclose(data->conn, "Timed out before name resolve started");
@@ -439,15 +438,15 @@ CURLcode Curl_async_await(struct Curl_easy *data,
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else {
-      struct curltime now2 = curlx_now();
-      timediff_t elapsed_ms = curlx_timediff_ms(now2, now); /* spent time */
+      struct curltime now = curlx_now(); /* update in loop */
+      timediff_t elapsed_ms = curlx_timediff_ms(now, data->progress.now);
       if(elapsed_ms <= 0)
         timeout_ms -= 1; /* always deduct at least 1 */
       else if(elapsed_ms > timeout_ms)
         timeout_ms = -1;
       else
         timeout_ms -= elapsed_ms;
-      now = now2; /* for next loop */
+      Curl_pgrs_now_at_least(data, &now);
     }
     if(timeout_ms < 0)
       result = CURLE_OPERATION_TIMEDOUT;
@@ -583,7 +582,7 @@ static void async_ares_hostbyname_cb(void *user_data,
        timeout to prevent it. After all, we do not even know where in the
        c-ares retry cycle each request is.
     */
-    ares->happy_eyeballs_dns_time = curlx_now();
+    ares->happy_eyeballs_dns_time = data->progress.now;
     Curl_expire(data, HAPPY_EYEBALLS_DNS_TIMEOUT, EXPIRE_HAPPY_EYEBALLS_DNS);
   }
 }

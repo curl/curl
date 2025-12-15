@@ -253,7 +253,6 @@ static void dnscache_unlock(struct Curl_easy *data,
 void Curl_dnscache_prune(struct Curl_easy *data)
 {
   struct Curl_dnscache *dnscache = dnscache_get(data);
-  struct curltime now;
   /* the timeout may be set -1 (forever) */
   timediff_t timeout_ms = data->set.dns_cache_timeout_ms;
 
@@ -263,11 +262,10 @@ void Curl_dnscache_prune(struct Curl_easy *data)
 
   dnscache_lock(data, dnscache);
 
-  now = curlx_now();
-
   do {
     /* Remove outdated and unused entries from the hostcache */
-    timediff_t oldest_ms = dnscache_prune(&dnscache->entries, timeout_ms, now);
+    timediff_t oldest_ms =
+      dnscache_prune(&dnscache->entries, timeout_ms, data->progress.now);
 
     if(Curl_hash_count(&dnscache->entries) > MAX_DNS_CACHE_SIZE)
       /* prune the ones over half this age */
@@ -333,7 +331,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
     /* See whether the returned entry is stale. Done before we release lock */
     struct dnscache_prune_data user;
 
-    user.now = curlx_now();
+    user.now = data->progress.now;
     user.max_age_ms = data->set.dns_cache_timeout_ms;
     user.oldest_ms = 0;
 
@@ -522,7 +520,7 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
     dns->timestamp.tv_usec = 0; /* an entry that never goes stale */
   }
   else {
-    dns->timestamp = curlx_now();
+    dns->timestamp = data->progress.now;
   }
   dns->hostport = port;
   if(hostlen)
@@ -1138,7 +1136,7 @@ clean_up:
      the time we spent until now! */
   if(prev_alarm) {
     /* there was an alarm() set before us, now put it back */
-    timediff_t elapsed_secs = curlx_timediff_ms(curlx_now(),
+    timediff_t elapsed_secs = curlx_timediff_ms(data->progress.now,
                                                 data->conn->created) / 1000;
 
     /* the alarm period is counted in even number of seconds */

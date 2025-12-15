@@ -141,6 +141,25 @@ UNITTEST CURLcode pgrs_speedcheck(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+void Curl_pgrs_now_set(struct Curl_easy *data)
+{
+  data->progress.now = curlx_now();
+}
+
+void Curl_pgrs_now_at_least(struct Curl_easy *data, struct curltime *pts)
+{
+  if((pts->tv_sec > data->progress.now.tv_sec) ||
+     ((pts->tv_sec == data->progress.now.tv_sec) &&
+      (pts->tv_usec > data->progress.now.tv_usec))) {
+    data->progress.now = *pts;
+  }
+}
+
+void Curl_pgrs_now_update(struct Curl_easy *data, struct Curl_easy *other)
+{
+  Curl_pgrs_now_at_least(data, &other->progress.now);
+}
+
 /*
 
    New proposed interface, 9th of February 2000:
@@ -174,7 +193,7 @@ int Curl_pgrsDone(struct Curl_easy *data)
 void Curl_pgrsReset(struct Curl_easy *data)
 {
   Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
+  data->progress.dl.cur_size = 0;
   Curl_pgrsSetUploadSize(data, -1);
   Curl_pgrsSetDownloadSize(data, -1);
   data->progress.speeder_c = 0; /* reset speed records */
@@ -288,19 +307,17 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
  *
  * @unittest: 1399
  */
-struct curltime Curl_pgrsTime(struct Curl_easy *data, timerid timer)
+void Curl_pgrsTime(struct Curl_easy *data, timerid timer)
 {
-  struct curltime now = curlx_now();
-
-  Curl_pgrsTimeWas(data, timer, now);
-  return now;
+  Curl_pgrs_now_set(data); /* update on real progress */
+  Curl_pgrsTimeWas(data, timer, data->progress.now);
 }
 
 void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   struct Progress *p = &data->progress;
   p->speeder_c = 0; /* reset the progress meter display */
-  p->start = curlx_now();
+  p->start = data->progress.now;
   p->is_t_startransfer_set = FALSE;
   p->dl.cur_size = 0;
   p->ul.cur_size = 0;
@@ -309,12 +326,20 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   p->ul_size_known = FALSE;
 }
 
-/*
- * Set the number of downloaded bytes so far.
- */
-void Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
+void Curl_pgrs_download_inc(struct Curl_easy *data, size_t delta)
 {
-  data->progress.dl.cur_size = size;
+  if(delta) {
+    data->progress.dl.cur_size += delta;
+    Curl_rlimit_drain(&data->progress.dl.rlimit, delta, &data->progress.now);
+  }
+}
+
+void Curl_pgrs_upload_inc(struct Curl_easy *data, size_t delta)
+{
+  if(delta) {
+    data->progress.ul.cur_size += delta;
+    Curl_rlimit_drain(&data->progress.ul.rlimit, delta, &data->progress.now);
+  }
 }
 
 /*
@@ -618,18 +643,16 @@ static CURLcode pgrs_update(struct Curl_easy *data, struct curltime *pnow)
 
 CURLcode Curl_pgrsUpdate(struct Curl_easy *data)
 {
-  struct curltime now = curlx_now(); /* what time is it */
-  return pgrs_update(data, &now);
+  return pgrs_update(data, &data->progress.now);
 }
 
 CURLcode Curl_pgrsCheck(struct Curl_easy *data)
 {
-  struct curltime now = curlx_now();
   CURLcode result;
 
-  result = pgrs_update(data, &now);
+  result = pgrs_update(data, &data->progress.now);
   if(!result && !data->req.done)
-    result = pgrs_speedcheck(data, &now);
+    result = pgrs_speedcheck(data, &data->progress.now);
   return result;
 }
 
@@ -638,6 +661,5 @@ CURLcode Curl_pgrsCheck(struct Curl_easy *data)
  */
 void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
 {
-  struct curltime now = curlx_now(); /* what time is it */
-  (void)progress_calc(data, &now);
+  (void)progress_calc(data, &data->progress.now);
 }

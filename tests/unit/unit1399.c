@@ -78,6 +78,7 @@ static CURLcode test_unit1399(const char *arg)
   struct Curl_easy data;
   struct curltime now = curlx_now();
 
+  data.progress.now = now;
   data.progress.t_nslookup = 0;
   data.progress.t_connect = 0;
   data.progress.t_appconnect = 0;

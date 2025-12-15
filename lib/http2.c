@@ -37,6 +37,7 @@
 #include "select.h"
 #include "curlx/base64.h"
 #include "multiif.h"
+#include "progress.h"
 #include "url.h"
 #include "urlapi-int.h"
 #include "cfilters.h"
@@ -305,7 +306,8 @@ static void h2_stream_hash_free(unsigned int id, void *stream)
 static int32_t cf_h2_get_desired_local_win(struct Curl_cfilter *cf,
                                            struct Curl_easy *data)
 {
-  curl_off_t avail = Curl_rlimit_avail(&data->progress.dl.rlimit, curlx_now());
+  curl_off_t avail =
+    Curl_rlimit_avail(&data->progress.dl.rlimit, &data->progress.now);
 
   (void)cf;
   if(avail < CURL_OFF_T_MAX) { /* limit in place */
@@ -1422,7 +1424,7 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   struct Curl_cfilter *cf = userp;
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
-  struct Curl_easy *data_s;
+  struct Curl_easy *data_s, *calling = CF_DATA_CURRENT(cf);
   (void)flags;
 
   DEBUGASSERT(stream_id); /* should never be a zero stream ID here */
@@ -1443,6 +1445,8 @@ static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
   stream = H2_STREAM_CTX(ctx, data_s);
   if(!stream)
     return NGHTTP2_ERR_CALLBACK_FAILURE;
+  if(calling)
+    Curl_pgrs_now_update(data_s, calling);
 
   h2_xfer_write_resp(cf, data_s, stream, (const char *)mem, len, FALSE);
 

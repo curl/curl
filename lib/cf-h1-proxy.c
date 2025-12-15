@@ -528,7 +528,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
   do {
 
-    if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
+    if(Curl_timeleft_ms(data, TRUE) < 0) {
       failf(data, "Proxy CONNECT aborted due to timeout");
       result = CURLE_OPERATION_TIMEDOUT;
       goto out;

@@ -353,7 +353,6 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
   CURLcode result = CURLE_OK;
   struct cf_ip_attempt *a = NULL, **panchor;
   bool do_more;
-  struct curltime now;
   timediff_t next_expire_ms;
   int i, inconclusive, ongoing;
 
@@ -361,7 +360,6 @@ static CURLcode cf_ip_ballers_run(struct cf_ip_ballers *bs,
     return CURLE_OK;
 
 evaluate:
-  now = curlx_now();
   ongoing = inconclusive = 0;
 
   /* check if a running baller connects now */
@@ -398,7 +396,7 @@ evaluate:
   /* no attempt connected yet, start another one? */
   if(!ongoing) {
     if(!bs->started.tv_sec && !bs->started.tv_usec)
-      bs->started = now;
+      bs->started = data->progress.now;
     do_more = TRUE;
   }
   else {
@@ -408,8 +406,8 @@ evaluate:
       more_possible = cf_ai_iter_has_more(&bs->ipv6_iter);
 #endif
     do_more = more_possible &&
-              (curlx_timediff_ms(now, bs->last_attempt_started) >=
-               bs->attempt_delay_ms);
+      (curlx_timediff_ms(data->progress.now, bs->last_attempt_started) >=
+       bs->attempt_delay_ms);
     if(do_more)
       CURL_TRC_CF(data, cf, "happy eyeballs timeout expired, "
                   "start next attempt");
@@ -447,7 +445,7 @@ evaluate:
       while(*panchor)
         panchor = &((*panchor)->next);
       *panchor = a;
-      bs->last_attempt_started = now;
+      bs->last_attempt_started = data->progress.now;
       bs->last_attempt_ai_family = ai_family;
       /* and run everything again */
       goto evaluate;
@@ -455,7 +453,8 @@ evaluate:
     else if(inconclusive) {
       /* tried all addresses, no success but some where inconclusive.
        * Let's restart the inconclusive ones. */
-      timediff_t since_ms = curlx_timediff_ms(now, bs->last_attempt_started);
+      timediff_t since_ms =
+        curlx_timediff_ms(data->progress.now, bs->last_attempt_started);
       timediff_t delay_ms = bs->attempt_delay_ms - since_ms;
       if(delay_ms <= 0) {
         CURL_TRC_CF(data, cf, "all attempts inconclusive, restarting one");
@@ -468,7 +467,7 @@ evaluate:
           CURL_TRC_CF(data, cf, "restarted baller %d -> %d", i, result);
           if(result) /* serious failure */
             goto out;
-          bs->last_attempt_started = now;
+          bs->last_attempt_started = data->progress.now;
           goto evaluate;
         }
         DEBUGASSERT(0); /* should not come here */
@@ -500,10 +499,10 @@ out:
     bool more_possible;
 
     /* when do we need to be called again? */
-    next_expire_ms = Curl_timeleft_ms(data, &now, TRUE);
+    next_expire_ms = Curl_timeleft_ms(data, TRUE);
     if(next_expire_ms <= 0) {
       failf(data, "Connection timeout after %" FMT_OFF_T " ms",
-            curlx_timediff_ms(now, data->progress.t_startsingle));
+        curlx_timediff_ms(data->progress.now, data->progress.t_startsingle));
       return CURLE_OPERATION_TIMEDOUT;
     }
 
@@ -514,7 +513,8 @@ out:
 #endif
     if(more_possible) {
       timediff_t expire_ms, elapsed_ms;
-      elapsed_ms = curlx_timediff_ms(now, bs->last_attempt_started);
+      elapsed_ms =
+        curlx_timediff_ms(data->progress.now, bs->last_attempt_started);
       expire_ms = CURLMAX(bs->attempt_delay_ms - elapsed_ms, 0);
       next_expire_ms = CURLMIN(next_expire_ms, expire_ms);
       if(next_expire_ms <= 0) {
@@ -675,7 +675,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
           proxy_name ? "via " : "",
           proxy_name ? proxy_name : "",
           proxy_name ? " " : "",
-          curlx_timediff_ms(curlx_now(), data->progress.t_startsingle),
+          curlx_timediff_ms(data->progress.now, data->progress.t_startsingle),
           curl_easy_strerror(result));
   }
 
@@ -700,14 +700,14 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   if(!dns)
     return CURLE_FAILED_INIT;
 
-  if(Curl_timeleft_ms(data, NULL, TRUE) < 0) {
+  if(Curl_timeleft_ms(data, TRUE) < 0) {
     /* a precaution, no need to continue if time already is up */
     failf(data, "Connection time-out");
     return CURLE_OPERATION_TIMEDOUT;
   }
 
   CURL_TRC_CF(data, cf, "init ip ballers for transport %u", ctx->transport);
-  ctx->started = curlx_now();
+  ctx->started = data->progress.now;
   return cf_ip_ballers_init(&ctx->ballers, cf->conn->ip_version,
                             dns->addr, ctx->cf_create, ctx->transport,
                             data->set.happy_eyeballs_timeout);

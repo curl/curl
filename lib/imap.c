@@ -1995,7 +1995,7 @@ static CURLcode imap_setup_connection(struct Curl_easy *data,
   Curl_sasl_init(&imapc->sasl, data, &saslimap);
 
   curlx_dyn_init(&imapc->dyn, DYN_IMAP_CMD);
-  Curl_pp_init(pp);
+  Curl_pp_init(pp, &data->progress.now);
 
   if(Curl_conn_meta_set(conn, CURL_META_IMAP_CONN, imapc, imap_conn_dtor))
     return CURLE_OUT_OF_MEMORY;

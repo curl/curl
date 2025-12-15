@@ -109,18 +109,15 @@ enum alpnid Curl_str2alpnid(const struct Curl_str *cstr)
  * infinite time left). If the value is negative, the timeout time has already
  * elapsed.
  * @param data the transfer to check on
- * @param nowp timestamp to use for calculation, NULL to use curlx_now()
  * @param duringconnect TRUE iff connect timeout is also taken into account.
  * @unittest: 1303
  */
 timediff_t Curl_timeleft_ms(struct Curl_easy *data,
-                            struct curltime *nowp,
                             bool duringconnect)
 {
   timediff_t timeleft_ms = 0;
   timediff_t ctimeleft_ms = 0;
   timediff_t ctimeout_ms;
-  struct curltime now;
 
   /* The duration of a connect and the total transfer are calculated from two
      different time-stamps. It can end up with the total timeout being reached
@@ -130,14 +127,9 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
   if((!data->set.timeout || data->set.connect_only) && !duringconnect)
     return 0; /* no timeout in place or checked, return "no limit" */
 
-  if(!nowp) {
-    now = curlx_now();
-    nowp = &now;
-  }
-
   if(data->set.timeout) {
     timeleft_ms = data->set.timeout -
-      curlx_timediff_ms(*nowp, data->progress.t_startop);
+      curlx_timediff_ms(data->progress.now, data->progress.t_startop);
     if(!timeleft_ms)
       timeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   }
@@ -147,7 +139,7 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
   ctimeout_ms = (data->set.connecttimeout > 0) ?
     data->set.connecttimeout : DEFAULT_CONNECT_TIMEOUT;
   ctimeleft_ms = ctimeout_ms -
-    curlx_timediff_ms(*nowp, data->progress.t_startsingle);
+    curlx_timediff_ms(data->progress.now, data->progress.t_startsingle);
   if(!ctimeleft_ms)
     ctimeleft_ms = -1; /* 0 is "no limit", fake 1 ms expiry */
   if(!timeleft_ms)
@@ -158,61 +150,47 @@ timediff_t Curl_timeleft_ms(struct Curl_easy *data,
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
-                         int timeout_ms, struct curltime *nowp)
+                         int timeout_ms)
 {
-  struct curltime now;
   struct connectdata *conn = data->conn;
 
   DEBUGASSERT(conn);
-  if(!nowp) {
-    now = curlx_now();
-    nowp = &now;
-  }
-  conn->shutdown.start[sockindex] = *nowp;
+  conn->shutdown.start[sockindex] = data->progress.now;
   conn->shutdown.timeout_ms = (timeout_ms > 0) ?
     (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
   /* Set a timer, unless we operate on the admin handle */
   if(data->mid)
-    Curl_expire_ex(data, nowp, conn->shutdown.timeout_ms,
-                   EXPIRE_SHUTDOWN);
+    Curl_expire_ex(data, conn->shutdown.timeout_ms, EXPIRE_SHUTDOWN);
 }
 
-timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
-                                  struct curltime *nowp)
+timediff_t Curl_shutdown_timeleft(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  int sockindex)
 {
-  struct curltime now;
   timediff_t left_ms;
 
   if(!conn->shutdown.start[sockindex].tv_sec ||
      (conn->shutdown.timeout_ms <= 0))
     return 0; /* not started or no limits */
 
-  if(!nowp) {
-    now = curlx_now();
-    nowp = &now;
-  }
   left_ms = conn->shutdown.timeout_ms -
-            curlx_timediff_ms(*nowp, conn->shutdown.start[sockindex]);
+            curlx_timediff_ms(data->progress.now,
+                              conn->shutdown.start[sockindex]);
   return left_ms ? left_ms : -1;
 }
 
-timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
-                                       struct curltime *nowp)
+timediff_t Curl_conn_shutdown_timeleft(struct Curl_easy *data,
+                                       struct connectdata *conn)
 {
   timediff_t left_ms = 0, ms;
-  struct curltime now;
   int i;
 
   for(i = 0; conn->shutdown.timeout_ms && (i < 2); ++i) {
     if(!conn->shutdown.start[i].tv_sec)
       continue;
-    if(!nowp) {
-      now = curlx_now();
-      nowp = &now;
-    }
-    ms = Curl_shutdown_timeleft(conn, i, nowp);
+    ms = Curl_shutdown_timeleft(data, conn, i);
     if(ms && (!left_ms || ms < left_ms))
       left_ms = ms;
   }

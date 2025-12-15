@@ -54,10 +54,15 @@ struct cf_quic_ctx {
 #define H3_STREAM_CTX(ctx, data)                                        \
   (data ? Curl_uint32_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
-CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
+CURLcode vquic_ctx_init(struct Curl_easy *data,
+                        struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);
 
-void vquic_ctx_update_time(struct cf_quic_ctx *qctx);
+void vquic_ctx_set_time(struct Curl_easy *data,
+                        struct cf_quic_ctx *qctx);
+
+void vquic_ctx_update_time(struct Curl_easy *data,
+                           struct cf_quic_ctx *qctx);
 
 void vquic_push_blocked_pkt(struct Curl_cfilter *cf,
                             struct cf_quic_ctx *qctx,
