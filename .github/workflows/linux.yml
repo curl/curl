@@ -58,7 +58,7 @@ env:
   OPENLDAP_VERSION: 2.6.10
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   NGHTTP2_VERSION: 1.68.0
-  # renovate: datasource=github-tags depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
+  # renovate: datasource=github-releases depName=pizlonator/fil-c versioning=semver-coerced registryUrl=https://github.com
   FIL_C_VERSION: 0.676
 
 jobs:
