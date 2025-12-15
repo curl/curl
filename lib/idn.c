@@ -168,13 +168,25 @@ static char *idn_curlx_convert_wchar_to_UTF8(const wchar_t *str_w, int chars)
   int bytes = WideCharToMultiByte(CP_UTF8, 0, str_w, chars, NULL, 0,
                                   NULL, NULL);
   if(bytes > 0) {
-    str_utf8 = curlx_malloc(bytes);
+    str_utf8 = curlx_malloc(bytes + 1);
     if(str_utf8) {
-      if(WideCharToMultiByte(CP_UTF8, 0, str_w, chars, str_utf8, bytes,
-                             NULL, NULL) == 0) {
+      int len =
+        WideCharToMultiByte(CP_UTF8, 0, str_w, chars, str_utf8, bytes,
+                            NULL, NULL);
+      if(!len) {
         curlx_free(str_utf8);
         return NULL;
       }
+      /* The WideCharToMultiByte() documentation says:
+
+         If this parameter [cchWideChar, the 'chars' argument above] is set to
+         a positive integer, the function processes exactly the specified
+         number of characters. If the provided size does not include a
+         terminating null character, the resulting character string is not
+         null-terminated, and the returned length does not include this
+         character.
+      */
+      str_utf8[len] = 0;
     }
   }
   return str_utf8;
