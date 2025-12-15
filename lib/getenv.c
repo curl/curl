@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-static char *GetEnv(const char *variable)
+char *curl_getenv(const char *variable)
 {
 #if defined(CURL_WINDOWS_UWP) || \
   defined(__ORBIS__) || defined(__PROSPERO__) /* PlayStation 4 and 5 */
@@ -69,9 +69,4 @@ static char *GetEnv(const char *variable)
   char *env = getenv(variable);
   return (env && env[0]) ? curlx_strdup(env) : NULL;
 #endif
-}
-
-char *curl_getenv(const char *v)
-{
-  return GetEnv(v);
 }
