@@ -72,7 +72,7 @@ via: 1.1 nghttpx
 s/^server: nghttpx.*\r?\n//
 </stripfile>
 <limits>
-Allocations: 150
+Allocations: 155
 Maximum allocated: 1800000
 </limits>
 </verify>

@@ -149,7 +149,7 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   struct Curl_cfilter *save = cf->next;
 
   cf->next = NULL;
-  b->started = curlx_now();
+  b->started = data->progress.now;
   switch(b->alpn_id) {
   case ALPN_h3:
     transport = TRNSPRT_QUIC;
@@ -212,11 +212,11 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   if(reply_ms >= 0)
     CURL_TRC_CF(data, cf, "connect+handshake %s: %dms, 1st data: %dms",
                 winner->name,
-                (int)curlx_timediff_ms(curlx_now(),
+                (int)curlx_timediff_ms(data->progress.now,
                                        winner->started), reply_ms);
   else
     CURL_TRC_CF(data, cf, "deferred handshake %s: %dms",
-                winner->name, (int)curlx_timediff_ms(curlx_now(),
+                winner->name, (int)curlx_timediff_ms(data->progress.now,
                                                      winner->started));
 
   /* install the winning filter below this one. */
@@ -293,7 +293,6 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
                               bool *done)
 {
   struct cf_hc_ctx *ctx = cf->ctx;
-  struct curltime now;
   CURLcode result = CURLE_OK;
   size_t i, failed_ballers;
 
@@ -303,14 +302,13 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  now = curlx_now();
   switch(ctx->state) {
   case CF_HC_INIT:
     DEBUGASSERT(!cf->next);
     for(i = 0; i < ctx->baller_count; i++)
       DEBUGASSERT(!ctx->ballers[i].cf);
     CURL_TRC_CF(data, cf, "connect, init");
-    ctx->started = now;
+    ctx->started = data->progress.now;
     cf_hc_baller_init(&ctx->ballers[0], cf, data, ctx->ballers[0].transport);
     if(ctx->baller_count > 1) {
       Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
@@ -329,7 +327,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
       }
     }
 
-    if(time_to_start_next(cf, data, 1, now)) {
+    if(time_to_start_next(cf, data, 1, data->progress.now)) {
       cf_hc_baller_init(&ctx->ballers[1], cf, data, ctx->ballers[1].transport);
     }
 

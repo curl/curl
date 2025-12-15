@@ -232,8 +232,6 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
   struct Curl_llist_node *e = Curl_llist_head(&cshutdn->list);
   struct Curl_llist_node *enext;
   struct connectdata *conn;
-  struct curltime *nowp = NULL;
-  struct curltime now;
   timediff_t next_expire_ms = 0, ms;
   bool done;
 
@@ -253,11 +251,7 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
     else {
       /* idata has one timer list, but maybe more than one connection.
        * Set EXPIRE_SHUTDOWN to the smallest time left for all. */
-      if(!nowp) {
-        now = curlx_now();
-        nowp = &now;
-      }
-      ms = Curl_conn_shutdown_timeleft(conn, nowp);
+      ms = Curl_conn_shutdown_timeleft(data, conn);
       if(ms && ms < next_expire_ms)
         next_expire_ms = ms;
     }
@@ -265,14 +259,14 @@ static void cshutdn_perform(struct cshutdn *cshutdn,
   }
 
   if(next_expire_ms)
-    Curl_expire_ex(data, nowp, next_expire_ms, EXPIRE_SHUTDOWN);
+    Curl_expire_ex(data, next_expire_ms, EXPIRE_SHUTDOWN);
 }
 
 static void cshutdn_terminate_all(struct cshutdn *cshutdn,
                                   struct Curl_easy *data,
                                   int timeout_ms)
 {
-  struct curltime started = curlx_now();
+  struct curltime started = data->progress.now;
   struct Curl_llist_node *e;
   SIGPIPE_VARIABLE(pipe_st);
 
@@ -295,7 +289,8 @@ static void cshutdn_terminate_all(struct cshutdn *cshutdn,
     }
 
     /* wait for activity, timeout or "nothing" */
-    spent_ms = curlx_timediff_ms(curlx_now(), started);
+    Curl_pgrs_now_set(data); /* update in loop */
+    spent_ms = curlx_timediff_ms(data->progress.now, started);
     if(spent_ms >= (timediff_t)timeout_ms) {
       CURL_TRC_M(data, "[SHUTDOWN] shutdown finished, %s",
                  (timeout_ms > 0) ? "timeout" : "best effort done");

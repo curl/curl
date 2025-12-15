@@ -41,6 +41,7 @@
 #include "curl_osslq.h"
 #include "curl_quiche.h"
 #include "../multiif.h"
+#include "../progress.h"
 #include "../rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
@@ -75,7 +76,8 @@ void Curl_quic_ver(char *p, size_t len)
 #endif
 }
 
-CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
+CURLcode vquic_ctx_init(struct Curl_easy *data,
+                        struct cf_quic_ctx *qctx)
 {
   Curl_bufq_init2(&qctx->sendbuf, NW_CHUNK_SIZE, NW_SEND_CHUNKS,
                   BUFQ_OPT_SOFT_LIMIT);
@@ -94,7 +96,7 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
     }
   }
 #endif
-  vquic_ctx_update_time(qctx);
+  vquic_ctx_set_time(data, qctx);
 
   return CURLE_OK;
 }
@@ -104,9 +106,17 @@ void vquic_ctx_free(struct cf_quic_ctx *qctx)
   Curl_bufq_free(&qctx->sendbuf);
 }
 
-void vquic_ctx_update_time(struct cf_quic_ctx *qctx)
+void vquic_ctx_set_time(struct Curl_easy *data,
+                        struct cf_quic_ctx *qctx)
 {
-  qctx->last_op = curlx_now();
+  qctx->last_op = data->progress.now;
+}
+
+void vquic_ctx_update_time(struct Curl_easy *data,
+                           struct cf_quic_ctx *qctx)
+{
+  Curl_pgrs_now_set(data);
+  qctx->last_op = data->progress.now;
 }
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,

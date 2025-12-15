@@ -514,6 +514,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #endif
   Curl_netrc_init(&data->state.netrc);
   Curl_init_userdefined(data);
+  Curl_pgrs_now_set(data); /* on easy handle create */
 
   *curl = data;
   return CURLE_OK;
@@ -664,21 +665,15 @@ static bool conn_maxage(struct Curl_easy *data,
  * Return TRUE iff the given connection is considered dead.
  */
 bool Curl_conn_seems_dead(struct connectdata *conn,
-                          struct Curl_easy *data,
-                          struct curltime *pnow)
+                          struct Curl_easy *data)
 {
   DEBUGASSERT(!data->conn);
   if(!CONN_INUSE(conn)) {
     /* The check for a dead socket makes sense only if the connection is not in
        use */
     bool dead;
-    struct curltime now;
-    if(!pnow) {
-      now = curlx_now();
-      pnow = &now;
-    }
 
-    if(conn_maxage(data, conn, *pnow)) {
+    if(conn_maxage(data, conn, data->progress.now)) {
       /* avoid check if already too old */
       dead = TRUE;
     }
@@ -1241,7 +1236,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(!url_match_multiplex_limits(conn, m))
     return FALSE;
 
-  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data, NULL)) {
+  if(!CONN_INUSE(conn) && Curl_conn_seems_dead(conn, m->data)) {
     /* remove and disconnect. */
     Curl_conn_terminate(m->data, conn, FALSE);
     return FALSE;
@@ -1346,7 +1341,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->remote_port = -1; /* unknown at this point */
 
   /* Store creation time to help future close decision making */
-  conn->created = curlx_now();
+  conn->created = data->progress.now;
 
   /* Store current time to give a baseline to keepalive connection times. */
   conn->keepalive = conn->created;
@@ -3208,7 +3203,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
 {
   struct hostname *ehost;
   int eport;
-  timediff_t timeout_ms = Curl_timeleft_ms(data, NULL, TRUE);
+  timediff_t timeout_ms = Curl_timeleft_ms(data, TRUE);
   const char *peertype = "host";
   CURLcode result;
 
@@ -3266,7 +3261,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
   else if(result == CURLE_OPERATION_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
           FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
-          curlx_timediff_ms(curlx_now(), data->progress.t_startsingle));
+          curlx_timediff_ms(data->progress.now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
   else if(result) {

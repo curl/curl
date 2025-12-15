@@ -802,6 +802,7 @@ struct pgrs_dir {
 };
 
 struct Progress {
+  struct curltime now; /* current time of processing */
   time_t lastshow; /* time() of the last displayed progress meter or NULL to
                       force redraw at next call */
   struct pgrs_dir ul;

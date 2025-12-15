@@ -1161,7 +1161,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  result = vquic_ctx_init(&ctx->q);
+  result = vquic_ctx_init(data, &ctx->q);
   if(result)
     goto out;
 
@@ -1748,7 +1748,6 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
   struct cf_osslq_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   struct cf_call_data save;
-  struct curltime now;
   int err;
 
   if(cf->connected) {
@@ -1764,11 +1763,10 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
   }
 
   *done = FALSE;
-  now = curlx_now();
   CF_DATA_SAVE(save, cf, data);
 
   if(!ctx->tls.ossl.ssl) {
-    ctx->started_at = now;
+    ctx->started_at = data->progress.now;
     result = cf_osslq_ctx_start(cf, data);
     if(result)
       goto out;
@@ -1778,7 +1776,7 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     int readable = SOCKET_READABLE(ctx->q.sockfd, 0);
     if(readable > 0 && (readable & CURL_CSELECT_IN)) {
       ctx->got_first_byte = TRUE;
-      ctx->first_byte_at = curlx_now();
+      ctx->first_byte_at = data->progress.now;
     }
   }
 
@@ -1799,14 +1797,14 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
       /* if not recorded yet, take the timestamp before we called
        * SSL_do_handshake() as the time we received the first packet. */
       ctx->got_first_byte = TRUE;
-      ctx->first_byte_at = now;
+      ctx->first_byte_at = data->progress.now;
     }
     /* Record the handshake complete with a new time stamp. */
-    now = curlx_now();
-    ctx->handshake_at = now;
-    ctx->q.last_io = now;
+    Curl_pgrs_now_set(data);
+    ctx->handshake_at = data->progress.now;
+    ctx->q.last_io = data->progress.now;
     CURL_TRC_CF(data, cf, "handshake complete after %" FMT_TIMEDIFF_T "ms",
-                curlx_timediff_ms(now, ctx->started_at));
+                curlx_timediff_ms(data->progress.now, ctx->started_at));
     result = cf_osslq_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
@@ -1818,17 +1816,17 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     int detail = SSL_get_error(ctx->tls.ossl.ssl, err);
     switch(detail) {
     case SSL_ERROR_WANT_READ:
-      ctx->q.last_io = now;
+      ctx->q.last_io = data->progress.now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_RECV");
       goto out;
     case SSL_ERROR_WANT_WRITE:
-      ctx->q.last_io = now;
+      ctx->q.last_io = data->progress.now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_SEND");
       result = CURLE_OK;
       goto out;
 #ifdef SSL_ERROR_WANT_ASYNC
     case SSL_ERROR_WANT_ASYNC:
-      ctx->q.last_io = now;
+      ctx->q.last_io = data->progress.now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_ASYNC");
       result = CURLE_OK;
       goto out;
@@ -2242,7 +2240,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
       goto out;
     }
     CURL_TRC_CF(data, cf, "negotiated idle timeout: %" PRIu64 "ms", idle_ms);
-    idletime = curlx_timediff_ms(curlx_now(), ctx->q.last_io);
+    idletime = curlx_timediff_ms(data->progress.now, ctx->q.last_io);
     if(idle_ms && idletime > 0 && (uint64_t)idletime > idle_ms)
       goto out;
   }

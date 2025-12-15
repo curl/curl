@@ -1325,11 +1325,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   timediff_t interval_ms;
   struct pollfd pfd[2];
   int poll_cnt;
-  curl_off_t total_dl = 0;
-  curl_off_t total_ul = 0;
   ssize_t snread;
 #endif
-  struct curltime now;
   bool keepon = TRUE;
   char buffer[4 * 1024];
   struct TELNET *tn;
@@ -1511,8 +1508,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     } /* switch */
 
     if(data->set.timeout) {
-      now = curlx_now();
-      if(curlx_timediff_ms(now, conn->created) >= data->set.timeout) {
+      Curl_pgrs_now_set(data);
+      if(curlx_timediff_ms(data->progress.now, conn->created) >=
+         data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;
@@ -1581,8 +1579,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           break;
         }
 
-        total_dl += nread;
-        Curl_pgrsSetDownloadCounter(data, total_dl);
+        Curl_pgrs_download_inc(data, nread);
         result = telrcv(data, tn, (unsigned char *)buffer, nread);
         if(result) {
           keepon = FALSE;
@@ -1622,8 +1619,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
           keepon = FALSE;
           break;
         }
-        total_ul += snread;
-        Curl_pgrsSetUploadCounter(data, total_ul);
+        Curl_pgrs_upload_inc(data, (size_t)snread);
       }
       else if(snread < 0)
         keepon = FALSE;
@@ -1632,8 +1628,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     } /* poll switch statement */
 
     if(data->set.timeout) {
-      now = curlx_now();
-      if(curlx_timediff_ms(now, conn->created) >= data->set.timeout) {
+      Curl_pgrs_now_set(data);
+      if(curlx_timediff_ms(data->progress.now, conn->created) >=
+         data->set.timeout) {
         failf(data, "Time-out");
         result = CURLE_OPERATION_TIMEDOUT;
         keepon = FALSE;

@@ -315,7 +315,6 @@ static CURLcode file_upload(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *xfer_ulbuf;
   size_t xfer_ulblen;
-  curl_off_t bytecount = 0;
   struct_stat file_stat;
   const char *sendbuf;
   bool eos = FALSE;
@@ -405,9 +404,7 @@ static CURLcode file_upload(struct Curl_easy *data,
       result = CURLE_SEND_ERROR;
       break;
     }
-    bytecount += nwritten;
-
-    Curl_pgrsSetUploadCounter(data, bytecount);
+    Curl_pgrs_upload_inc(data, nwritten);
 
     result = Curl_pgrsCheck(data);
   }
