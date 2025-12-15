@@ -499,7 +499,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     msg.msg_controllen = sizeof(msg_ctrl);
 
     while((rc = recvmsg(qctx->sockfd, &msg, 0)) == -1 &&
-          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
+          (SOCKERRNO == SOCKEINTR))
       ;
     if(!curlx_sztouz(rc, &nread)) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
