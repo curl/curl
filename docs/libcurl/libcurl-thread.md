@@ -61,6 +61,13 @@ does this cleanup automatically and there is no leak (added in libcurl 8.8.0).
 Please review the OpenSSL documentation for a full list of circumstances:
 https://docs.openssl.org/3.0/man3/OPENSSL_init_crypto/#notes
 
+## mbedTLS
+
+mbedTLS can be used safely in a multi-threaded environment provided that mbedTLS is
+compiled with MBEDTLS_THREADING_C enabled.
+
+https://mbed-tls.readthedocs.io/en/latest/kb/development/thread-safety-and-multi-threading
+
 # Signals
 
 Signals are used for timing out name resolves (during DNS lookup) - when built
