@@ -417,7 +417,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     }
 
     while((mcount = recvmmsg(qctx->sockfd, mmsg, n, 0, NULL)) == -1 &&
-          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
+          (SOCKERRNO == SOCKEINTR))
       ;
     if(mcount == -1) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
@@ -563,7 +563,7 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
     while((rv = recvfrom(qctx->sockfd, (char *)buf, bufsize, 0,
                          (struct sockaddr *)&remote_addr,
                          &remote_addrlen)) == -1 &&
-          (SOCKERRNO == SOCKEINTR || SOCKERRNO == SOCKEMSGSIZE))
+          (SOCKERRNO == SOCKEINTR))
       ;
     if(!curlx_sztouz(rv, &nread)) {
       if(SOCKERRNO == EAGAIN || SOCKERRNO == SOCKEWOULDBLOCK) {
