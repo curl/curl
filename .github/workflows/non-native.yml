@@ -37,6 +37,7 @@ permissions: {}
 
 env:
   CURL_CI: github
+  CURL_TEST_MIN: 1750
 
 jobs:
   netbsd:
@@ -53,7 +54,6 @@ jobs:
       - name: 'cmake'
         uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
-          CURL_TEST_MIN: 1750
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
           environment_variables: CURL_CI CURL_TEST_MIN MATRIX_ARCH
@@ -99,7 +99,6 @@ jobs:
       - name: 'cmake'
         uses: cross-platform-actions/action@46e8d7fb25520a8d6c64fd2b7a1192611da98eda # v0.30.0
         env:
-          CURL_TEST_MIN: 1750
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
           environment_variables: CURL_CI CURL_TEST_MIN MATRIX_ARCH
