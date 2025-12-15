@@ -56,7 +56,7 @@ jobs:
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
-          environment_variables: MATRIX_ARCH
+          environment_variables: CURL_CI CURL_TEST_MIN MATRIX_ARCH
           operating_system: 'netbsd'
           version: '10.1'
           architecture: ${{ matrix.arch }}
@@ -101,7 +101,7 @@ jobs:
         env:
           MATRIX_ARCH: '${{ matrix.arch }}'
         with:
-          environment_variables: MATRIX_ARCH
+          environment_variables: CURL_CI CURL_TEST_MIN MATRIX_ARCH
           operating_system: 'openbsd'
           version: '7.7'
           architecture: ${{ matrix.arch }}
@@ -155,7 +155,7 @@ jobs:
           MATRIX_DESC: '${{ matrix.desc }}'
           MATRIX_OPTIONS: '${{ matrix.options }}'
         with:
-          environment_variables: CC MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
+          environment_variables: CC CURL_CI CURL_TEST_MIN MATRIX_ARCH MATRIX_BUILD MATRIX_DESC MATRIX_OPTIONS
           operating_system: 'freebsd'
           version: '14.3'
           architecture: ${{ matrix.arch }}
