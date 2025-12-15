@@ -98,7 +98,7 @@ Display test results in automake style output (`PASS/FAIL: [number] [name]`).
 
 ## `--buildinfo`
 
-Dump `buildinfo.txt`.
+Dump `buildinfo.txt`, and the minimum number of tests to run.
 
 ## `-c \<curl\>`
 

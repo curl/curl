@@ -2534,7 +2534,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
-  --buildinfo dump buildinfo.txt
+  --buildinfo dump `buildinfo.txt`, and the minimum number of tests to run
   -c path  use this curl executable
   -d       display server debug info
   -e, --test-event  event-based execution
