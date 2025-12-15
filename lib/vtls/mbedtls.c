@@ -495,7 +495,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
 #ifdef MBEDTLS_PEM_PARSE_C
-  const char* const ssl_cert_type = ssl_config->cert_type;
+  const char * const ssl_cert_type = ssl_config->cert_type;
 #endif
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
   const char *hostname = connssl->peer.hostname;
@@ -653,7 +653,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "mbedTLS: error reading SSL cert blob %s - mbedTLS: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading SSL cert blob %s: (-0x%04X) %s",
             ssl_config->key, -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
