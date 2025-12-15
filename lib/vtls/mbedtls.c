@@ -526,13 +526,13 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
                                    ca_info_blob->data,
                                    ca_info_blob->len);
     }
-    else /* they say it's PEM and it's not null-terminated */
+    else /* they say it is PEM and it is not null-terminated */
     {
       /* Unfortunately, mbedtls_x509_crt_parse() requires the data to
          be null-terminated if the data is PEM encoded (even when
          provided the exact length). The function accepts PEM or DER
-         formats, but we can't assume if the user passed in a PEM
-         format cert that it's null-terminated. */
+         formats, but we cannot assume if the user passed in a PEM
+         format cert that it is null-terminated. */
       unsigned char *newblob = Curl_memdup0(ca_info_blob->data,
                                             ca_info_blob->len);
       if(!newblob)
@@ -543,8 +543,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
       curlx_free(newblob);
     }
 #else
-    /* DER encoded certs don't need to be null terminated
-    because it's a binary format. So if we're not compiling
+    /* DER encoded certs do not need to be null terminated
+    because it is a binary format. So if we are not compiling
     with PEM_PARSE we can avoid the extra memory copies
     altogether. */
     ret = mbedtls_x509_crt_parse_der(&backend->cacert,
@@ -626,13 +626,13 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
                                    ssl_cert_blob->data,
                                    ssl_cert_blob->len);
     }
-    else /* they say it's PEM and it's not null-terminated */
+    else /* they say it is PEM and it is not null-terminated */
     {
       /* Unfortunately, mbedtls_x509_crt_parse() requires the data to
          be null-terminated if the data is PEM encoded (even when
          provided the exact length). The function accepts PEM or DER
-         formats, but we can't assume if the user passed in a PEM
-         format cert that it's null-terminated. */
+         formats, but we cannot assume if the user passed in a PEM
+         format cert that it is null-terminated. */
       unsigned char *newblob = Curl_memdup0(ssl_cert_blob->data,
                                             ssl_cert_blob->len);
       if(!newblob)
@@ -642,8 +642,8 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
       curlx_free(newblob);
     }
 #else
-    /* DER encoded certs don't need to be null terminated
-    because it's a binary format. So if we're not compiling
+    /* DER encoded certs do not need to be null terminated
+    because it is a binary format. So if we are not compiling
     with PEM_PARSE we can avoid the extra memory copies
     altogether. */
     ret = mbedtls_x509_crt_parse_der(&backend->clicert,
