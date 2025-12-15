@@ -281,7 +281,7 @@ static CURLcode build_message(struct SASL *sasl, struct bufref *msg)
 bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
 {
   /* Have credentials been provided? */
-  if(data->state.aptr.user)
+  if(data->conn->user[0])
     return TRUE;
 
   /* EXTERNAL can authenticate without a username and/or password */
@@ -294,7 +294,6 @@ bool Curl_sasl_can_authenticate(struct SASL *sasl, struct Curl_easy *data)
 struct sasl_ctx {
   struct SASL *sasl;
   struct connectdata *conn;
-  const char *user;
   unsigned short enabledmechs;
   const char *mech;
   saslstate state1;
@@ -320,8 +319,7 @@ static bool sasl_choose_external(struct Curl_easy *data, struct sasl_ctx *sctx)
 #ifdef USE_KERBEROS5
 static bool sasl_choose_krb5(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(sctx->user &&
-     (sctx->enabledmechs & SASL_MECH_GSSAPI) &&
+  if((sctx->enabledmechs & SASL_MECH_GSSAPI) &&
      Curl_auth_is_gssapi_supported() &&
      Curl_auth_user_contains_domain(sctx->conn->user)) {
     const char *service = data->set.str[STRING_SERVICE_NAME] ?
@@ -355,8 +353,8 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
   struct gsasldata *gsasl;
   struct bufref nullmsg;
 
-  if(sctx->user && (sctx->enabledmechs &
-                    (SASL_MECH_SCRAM_SHA_256 | SASL_MECH_SCRAM_SHA_1))) {
+  if((sctx->enabledmechs &
+      (SASL_MECH_SCRAM_SHA_256 | SASL_MECH_SCRAM_SHA_1))) {
     gsasl = Curl_auth_gsasl_get(sctx->conn);
     if(!gsasl) {
       sctx->result = CURLE_OUT_OF_MEMORY;
@@ -396,10 +394,8 @@ static bool sasl_choose_gsasl(struct Curl_easy *data, struct sasl_ctx *sctx)
 static bool sasl_choose_digest(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
   (void)data;
-  if(!sctx->user)
-    return FALSE;
-  else if((sctx->enabledmechs & SASL_MECH_DIGEST_MD5) &&
-          Curl_auth_is_digest_supported()) {
+  if((sctx->enabledmechs & SASL_MECH_DIGEST_MD5) &&
+     Curl_auth_is_digest_supported()) {
     sctx->mech = SASL_MECH_STRING_DIGEST_MD5;
     sctx->state1 = SASL_DIGESTMD5;
     sctx->sasl->authused = SASL_MECH_DIGEST_MD5;
@@ -418,10 +414,8 @@ static bool sasl_choose_digest(struct Curl_easy *data, struct sasl_ctx *sctx)
 #ifdef USE_NTLM
 static bool sasl_choose_ntlm(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(!sctx->user)
-    return FALSE;
-  else if((sctx->enabledmechs & SASL_MECH_NTLM) &&
-          Curl_auth_is_ntlm_supported()) {
+  if((sctx->enabledmechs & SASL_MECH_NTLM) &&
+     Curl_auth_is_ntlm_supported()) {
     const char *service = data->set.str[STRING_SERVICE_NAME] ?
       data->set.str[STRING_SERVICE_NAME] :
       sctx->sasl->params->service;
@@ -456,8 +450,7 @@ static bool sasl_choose_oauth(struct Curl_easy *data, struct sasl_ctx *sctx)
     (!data->state.this_is_a_follow || data->set.allow_auth_to_other_hosts) ?
     data->set.str[STRING_BEARER] : NULL;
 
-  if(sctx->user && oauth_bearer &&
-     (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
+  if(oauth_bearer && (sctx->enabledmechs & SASL_MECH_OAUTHBEARER)) {
     const char *hostname;
     int port;
     Curl_conn_get_current_host(data, FIRSTSOCKET, &hostname, &port);
@@ -483,8 +476,7 @@ static bool sasl_choose_oauth2(struct Curl_easy *data, struct sasl_ctx *sctx)
     (!data->state.this_is_a_follow || data->set.allow_auth_to_other_hosts) ?
     data->set.str[STRING_BEARER] : NULL;
 
-  if(sctx->user && oauth_bearer &&
-     (sctx->enabledmechs & SASL_MECH_XOAUTH2)) {
+  if(oauth_bearer && (sctx->enabledmechs & SASL_MECH_XOAUTH2)) {
     sctx->mech = SASL_MECH_STRING_XOAUTH2;
     sctx->state1 = SASL_OAUTH2;
     sctx->sasl->authused = SASL_MECH_XOAUTH2;
@@ -500,7 +492,7 @@ static bool sasl_choose_oauth2(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_plain(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(sctx->user && (sctx->enabledmechs & SASL_MECH_PLAIN)) {
+  if(sctx->enabledmechs & SASL_MECH_PLAIN) {
     sctx->mech = SASL_MECH_STRING_PLAIN;
     sctx->state1 = SASL_PLAIN;
     sctx->sasl->authused = SASL_MECH_PLAIN;
@@ -517,7 +509,7 @@ static bool sasl_choose_plain(struct Curl_easy *data, struct sasl_ctx *sctx)
 
 static bool sasl_choose_login(struct Curl_easy *data, struct sasl_ctx *sctx)
 {
-  if(sctx->user && (sctx->enabledmechs & SASL_MECH_LOGIN)) {
+  if(sctx->enabledmechs & SASL_MECH_LOGIN) {
     sctx->mech = SASL_MECH_STRING_LOGIN;
     sctx->state1 = SASL_LOGIN;
     sctx->state2 = SASL_LOGIN_PASSWD;
@@ -547,7 +539,6 @@ CURLcode Curl_sasl_start(struct SASL *sasl, struct Curl_easy *data,
   memset(&sctx, 0, sizeof(sctx));
   sctx.sasl = sasl;
   sctx.conn = data->conn;
-  sctx.user = data->state.aptr.user;
   Curl_bufref_init(&sctx.resp);
   sctx.enabledmechs = sasl->authmechs & sasl->prefmech;
   sctx.state1 = SASL_STOP;
@@ -876,7 +867,7 @@ static void sasl_unchosen(struct Curl_easy *data, unsigned short mech,
   else {
     if(param_missing)
       infof(data, "SASL: %s is missing %s", mname, param_missing);
-    if(!data->state.aptr.user)
+    if(!data->conn->user[0])
       infof(data, "SASL: %s is missing username", mname);
   }
 }
