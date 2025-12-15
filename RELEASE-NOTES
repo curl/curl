@@ -141,6 +141,7 @@ This release includes the following bugfixes:
  o http: replace atoi use in Curl_http_follow with curlx_str_number [65]
  o http: return OOM errors from hsts properly [262]
  o http: the :authority header should never contain user+password [147]
+ o http: unfold response headers earlier [277]
  o idn: avoid allocations and wcslen on Windows [247]
  o idn: fix memory leak in `win32_ascii_to_idn()` [173]
  o idn: use curlx allocators on Windows [165]
@@ -178,6 +179,7 @@ This release includes the following bugfixes:
  o mbedtls: sync format across log messages [213]
  o mbedtls_threadlock: avoid calloc, use array [244]
  o mdlinkcheck: ignore IP numbers, allow '@' in raw URLs
+ o mdlinkcheck: only look for markdown links in markdown files [311]
  o memdebug: add mutex for thread safety [184]
  o memdebug: fix realloc logging [286]
  o mk-ca-bundle.md: the file format docs URL is permaredirected [188]
@@ -206,6 +208,7 @@ This release includes the following bugfixes:
  o progress: show fewer digits [78]
  o projects/README.md: Markdown fixes [148]
  o pytest fixes and improvements [159]
+ o pytest: add tests using sshd [303]
  o pytest: disable two H3 earlydata tests for all platforms (was: macOS) [116]
  o pytest: fix and improve reliability [251]
  o pytest: improve stragglers [252]
@@ -217,14 +220,17 @@ This release includes the following bugfixes:
  o rtmp: precaution for a potential integer truncation [54]
  o rtmp: stop redefining `setsockopt` system symbol on Windows [211]
  o runner.pm: run memanalyzer as a Perl module [260]
+ o runtests: add options to set minimum number of tests, use them [302]
  o runtests: detect bad libssh differently for test 1459 [11]
  o runtests: drop Python 2 support remains [45]
  o runtests: enable torture testing with threaded resolver [176]
+ o runtests: improve XML prolog check, enable `-w` permanently, fix two tests [231]
  o runtests: make memanalyzer a Perl module (for 1.1-2x speed-up per test run) [238]
  o rustls: fix a potential memory issue [81]
  o rustls: minor adjustment of sizeof() [38]
  o rustls: simplify init err path [219]
  o rustls: verify that verifier_builder is not NULL [220]
+ o schannel: cap the maximum allowed size for loading cert [274]
  o schannel: fix memory leak of cert_store_path on four error paths [23]
  o schannel: replace atoi() with curlx_str_number() [119]
  o schannel_verify: fix a memory leak of cert_context [152]
@@ -242,6 +248,7 @@ This release includes the following bugfixes:
  o ssh: tracing and better pollset handling [230]
  o sspi: fix memory leaks on error paths in `Curl_create_sspi_identity()` [237]
  o sws: fix binding to unix socket on Windows [214]
+ o synctime: tidy up, make it work on all platforms [269]
  o telnet: replace atoi for BINARY handling with curlx_str_number [66]
  o TEST-SUITE.md: correct the man page's path [136]
  o test07_22: fix flakiness [95]
@@ -251,11 +258,14 @@ This release includes the following bugfixes:
  o test318: tweak the name a little
  o test3207: enable memdebug for this test again [249]
  o test363: delete stray character (typo) from a section tag [52]
+ o test568: fix codespell, catch it next time early in CI [299]
+ o test568: remove what looks like an email and a URL [304]
  o test787: fix possible typo `&` -> `%` in curl option [241]
  o tests/data: move `--libcurl` output to external data files [34]
  o tests/data: replace hard-coded test numbers with `%TESTNUMBER` [33]
  o tests/data: support using native newlines on disk, drop `.gitattributes` [91]
  o tests/server: do not fall back to original data file in `test2fopen()` [32]
+ o tests/server: fix initialization on Windows Vista+ [216]
  o tests/server: replace `atoi()` and `atol()` with `curlx_str_number()` [110]
  o tests: add `%AMP` macro, use it in two tests [245]
  o tests: allow 2500-2503 to use ~2MB malloc [31]
@@ -284,6 +294,7 @@ This release includes the following bugfixes:
  o tool_paramhlp: refuse --proto remove all protocols [10]
  o tool_urlglob: acknowledge OOM in peek_ipv6 [175]
  o tool_urlglob: clean up used memory on errors better [44]
+ o tool_urlglob: support globs as long as config line lengths [282]
  o tool_writeout: bail out proper on OOM [104]
  o url: fix return code for OOM in parse_proxy() [193]
  o url: if curl_url_get() fails due to OOM, error out properly [205]
@@ -331,16 +342,16 @@ advice from friends like these:
   anonymous237 on hackerone, BANADDA, boingball, Brad King, bttrfl on github,
   Christian Schmitz, Dan Fandrich, Daniel McCarney, Daniel Stenberg,
   Denis Goleshchikhin, Deniz Parlak, dependabot[bot], Fabian Keil,
-  Fd929c2CE5fA on github, ffath-vo on github, Georg Schulz-Allgaier,
-  Gisle Vanem, Greg Hudson, Harry Sintonen, Jiyong Yang, Juliusz Sosinowicz,
-  Kai Pastor, Leonardo Taccari, letshack9707 on hackerone, Marc Aldorasi,
-  Marcel Raad, Max Faxälv, nait-furry, ncaklovic on github, Nick Korepanov,
-  Omdahake on github, Patrick Monnerat, pelioro on hackerone, Ray Satiro,
-  renovate[bot], Robert W. Van Kirk, Samuel Henrique, st751228051 on github,
-  Stanislav Fort, Stefan Eissing, Sunny, Theo Buehler, Thomas Klausner,
-  Viktor Szakats, Wesley Moore, Xiaoke Wang, Yedaya Katsman, Yuhao Jiang,
-  yushicheng7788 on github
-  (52 contributors)
+  Fd929c2CE5fA on github, ffath-vo on github, Gabriel Marin,
+  Georg Schulz-Allgaier, Gisle Vanem, Greg Hudson, Harry Sintonen, Jiyong Yang,
+  Juliusz Sosinowicz, Kai Pastor, Leonardo Taccari, letshack9707 on hackerone,
+  Marc Aldorasi, Marcel Raad, Max Faxälv, nait-furry, ncaklovic on github,
+  Nick Korepanov, Omdahake on github, Patrick Monnerat, pelioro on hackerone,
+  Ray Satiro, renovate[bot], Robert W. Van Kirk, Samuel Henrique,
+  st751228051 on github, Stanislav Fort, Stefan Eissing, Sunny, Theo Buehler,
+  Thomas Klausner, Viktor Szakats, Wesley Moore, Xiaoke Wang, Yedaya Katsman,
+  Yuhao Jiang, yushicheng7788 on github
+  (53 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -559,6 +570,7 @@ References to bug reports and discussions on issues:
  [213] = https://curl.se/bug/?i=19842
  [214] = https://curl.se/bug/?i=19812
  [215] = https://curl.se/bug/?i=19764
+ [216] = https://curl.se/bug/?i=18009
  [217] = https://curl.se/bug/?i=19763
  [219] = https://curl.se/bug/?i=19759
  [220] = https://curl.se/bug/?i=19756
@@ -570,6 +582,7 @@ References to bug reports and discussions on issues:
  [228] = https://curl.se/bug/?i=19836
  [229] = https://curl.se/bug/?i=19872
  [230] = https://curl.se/bug/?i=19745
+ [231] = https://curl.se/bug/?i=19970
  [232] = https://curl.se/bug/?i=19746
  [233] = https://curl.se/bug/?i=19853
  [234] = https://curl.se/bug/?i=19870
@@ -607,11 +620,15 @@ References to bug reports and discussions on issues:
  [266] = https://curl.se/bug/?i=19857
  [267] = https://curl.se/bug/?i=19858
  [268] = https://curl.se/bug/?i=19753
+ [269] = https://curl.se/bug/?i=19965
+ [274] = https://curl.se/bug/?i=19964
  [275] = https://curl.se/bug/?i=18189
  [276] = https://curl.se/bug/?i=19922
+ [277] = https://curl.se/bug/?i=19949
  [278] = https://curl.se/bug/?i=19920
  [279] = https://curl.se/bug/?i=19918
  [280] = https://curl.se/bug/?i=19770
+ [282] = https://curl.se/bug/?i=19960
  [283] = https://curl.se/bug/?i=19915
  [285] = https://curl.se/bug/?i=19911
  [286] = https://curl.se/bug/?i=19900
@@ -622,8 +639,13 @@ References to bug reports and discussions on issues:
  [295] = https://curl.se/bug/?i=19899
  [297] = https://curl.se/bug/?i=19894
  [298] = https://curl.se/bug/?i=19740
+ [299] = https://curl.se/bug/?i=19945
  [301] = https://curl.se/bug/?i=19896
+ [302] = https://curl.se/bug/?i=19942
+ [303] = https://curl.se/bug/?i=19934
+ [304] = https://curl.se/bug/?i=19944
  [305] = https://curl.se/bug/?i=19891
  [307] = https://curl.se/bug/?i=19875
  [308] = https://curl.se/bug/?i=19887
  [309] = https://curl.se/bug/?i=19886
+ [311] = https://curl.se/bug/?i=19938
