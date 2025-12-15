@@ -885,6 +885,9 @@ sub checksystemfeatures {
     if(system("diff $TESTDIR/DISABLED $TESTDIR/DISABLED 2>$dev_null") != 0) {
         logmsg "* diff: missing\n";
     }
+    if($mintotal) {
+        logmsg "* Min tests: $mintotal\n";
+    }
 }
 
 #######################################################################
@@ -2711,6 +2714,10 @@ if(!$jobs) {
     setlogfunc(\&logmsg);
 }
 
+if(!$mintotal && $ENV{"CURL_TEST_MIN"}) {
+    $mintotal = $ENV{"CURL_TEST_MIN"};
+}
+
 #######################################################################
 # Output curl version and host info being tested
 #
@@ -3332,9 +3339,6 @@ else {
     }
 }
 
-if(!$mintotal && $ENV{"CURL_TEST_MIN"}) {
-    $mintotal = $ENV{"CURL_TEST_MIN"};
-}
 if($mintotal) {
     if($total < $mintotal) {
         logmsg "TESTFAIL: number of tests run was below the minimum of: $mintotal\n";
