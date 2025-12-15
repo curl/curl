@@ -185,7 +185,7 @@ static CURLcode win32_idn_to_ascii(const char *in, char **out)
   wchar_t in_w[IDN_MAX_LENGTH];
   int in_w_len;
   *out = NULL;
-  /* Returned in_w_len includes the NUL-terminator, which then gets
+  /* Returned in_w_len includes the null-terminator, which then gets
      preserved across the calls that follow, ending up terminating
      the buffer returned to the caller. */
   in_w_len = MultiByteToWideChar(CP_UTF8, 0, in, -1, in_w, IDN_MAX_LENGTH);
@@ -211,7 +211,7 @@ static CURLcode win32_ascii_to_idn(const char *in, char **out)
   wchar_t in_w[IDN_MAX_LENGTH];
   int in_w_len;
   *out = NULL;
-  /* Returned in_w_len includes the NUL-terminator, which then gets
+  /* Returned in_w_len includes the null-terminator, which then gets
      preserved across the calls that follow, ending up terminating
      the buffer returned to the caller. */
   in_w_len = MultiByteToWideChar(CP_UTF8, 0, in, -1, in_w, IDN_MAX_LENGTH);
