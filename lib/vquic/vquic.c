@@ -441,12 +441,14 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
     ++calls;
     for(i = 0; i < mcount; ++i) {
+      /* A zero-length UDP packet is no QUIC packet. Ignore. */
+      if(!mmsg[i].msg_len)
+        continue;
       total_nread += mmsg[i].msg_len;
 
       gso_size = vquic_msghdr_get_udp_gro(&mmsg[i].msg_hdr);
-      if(gso_size == 0) {
+      if(gso_size == 0)
         gso_size = mmsg[i].msg_len;
-      }
 
       result = recv_cb(bufs[i], mmsg[i].msg_len, gso_size,
                        mmsg[i].msg_hdr.msg_name,
@@ -523,10 +525,13 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
     total_nread += nread;
     ++calls;
 
+    /* A 0-length UDP packet is no QUIC packet */
+    if(!nread)
+      continue;
+
     gso_size = vquic_msghdr_get_udp_gro(&msg);
-    if(gso_size == 0) {
+    if(gso_size == 0)
       gso_size = nread;
-    }
 
     result = recv_cb(buf, nread, gso_size,
                      msg.msg_name, msg.msg_namelen, 0, userp);
@@ -587,6 +592,11 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
 
     ++pkts;
     ++calls;
+
+    /* A 0-length UDP packet is no QUIC packet */
+    if(!nread)
+      continue;
+
     total_nread += nread;
     result = recv_cb(buf, nread, nread, &remote_addr, remote_addrlen,
                      0, userp);
