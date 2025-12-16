@@ -1013,6 +1013,7 @@ Curl_cookie_add(struct Curl_easy *data,
   co = Curl_memdup(&comem, sizeof(comem));
   if(!co) {
     co = &comem;
+    result = CURLE_OUT_OF_MEMORY;
     goto fail; /* bail out if we are this low on memory */
   }
 
