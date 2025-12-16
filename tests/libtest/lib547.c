@@ -64,7 +64,7 @@ static curlioerr t547_ioctl_callback(CURL *curl, int cmd, void *clientp)
 
 static CURLcode test_lib547(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   int counter = 0;
 
@@ -104,12 +104,12 @@ static CURLcode test_lib547(const char *URL)
   test_setopt(curl, CURLOPT_PROXYAUTH,
               CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

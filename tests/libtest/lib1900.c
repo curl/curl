@@ -25,7 +25,7 @@
 
 static CURLcode test_lib1900(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl1 = NULL;
   CURL *curl2 = NULL;
 
@@ -47,5 +47,5 @@ test_cleanup:
   curl_easy_cleanup(curl1);
   curl_easy_cleanup(curl2);
   curl_global_cleanup();
-  return res;
+  return result;
 }

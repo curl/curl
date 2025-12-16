@@ -75,7 +75,7 @@ static int t1591_trailers_callback(struct curl_slist **list, void *userdata)
 static CURLcode test_lib1591(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   /* http and proxy header list */
   struct curl_slist *hhl = NULL;
 
@@ -104,7 +104,7 @@ static CURLcode test_lib1591(const char *URL)
   test_setopt(curl, CURLOPT_TRAILERFUNCTION, t1591_trailers_callback);
   test_setopt(curl, CURLOPT_TRAILERDATA, NULL);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -114,5 +114,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

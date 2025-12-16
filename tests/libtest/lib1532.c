@@ -29,7 +29,7 @@ static CURLcode test_lib1532(const char *URL)
 {
   CURL *curl;
   long httpcode;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -37,36 +37,36 @@ static CURLcode test_lib1532(const char *URL)
 
   easy_setopt(curl, CURLOPT_URL, URL);
 
-  res = curl_easy_perform(curl);
-  if(res) {
+  result = curl_easy_perform(curl);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
 
-  res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpcode);
-  if(res) {
+  result = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpcode);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(httpcode != 200) {
     curl_mfprintf(stderr, "%s:%d unexpected response code %ld\n",
                   __FILE__, __LINE__, httpcode);
-    res = CURLE_HTTP_RETURNED_ERROR;
+    result = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
 
   /* Test for a regression of github bug 1017 (response code does not reset) */
   curl_easy_reset(curl);
 
-  res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpcode);
-  if(res) {
+  result = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpcode);
+  if(result) {
     curl_mfprintf(stderr,
                   "%s:%d curl_easy_getinfo() failed with code %d (%s)\n",
-                  __FILE__, __LINE__, res, curl_easy_strerror(res));
+                  __FILE__, __LINE__, result, curl_easy_strerror(result));
     goto test_cleanup;
   }
   if(httpcode) {
@@ -74,12 +74,12 @@ static CURLcode test_lib1532(const char *URL)
                   "%s:%d curl_easy_reset failed to zero the response code\n"
                   "possible regression of github bug 1017\n",
                   __FILE__, __LINE__);
-    res = CURLE_HTTP_RETURNED_ERROR;
+    result = CURLE_HTTP_RETURNED_ERROR;
     goto test_cleanup;
   }
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

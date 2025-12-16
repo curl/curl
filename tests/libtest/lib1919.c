@@ -25,7 +25,7 @@
 
 static CURLcode test_lib1919(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl;
   int i;
 
@@ -40,13 +40,13 @@ static CURLcode test_lib1919(const char *URL)
 
   for(i = 0; i < 2; i++) {
     /* the second request needs to do connection reuse */
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
   }
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

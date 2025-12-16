@@ -26,7 +26,7 @@
 static CURLcode test_lib1938(const char *URL)
 {
   CURL *curl;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL;
   unsigned char data[] = { 0x70, 0x6f, 0x73, 0x74, 0, 0x44, 0x61, 0x74, 0x61 };
@@ -58,7 +58,7 @@ static CURLcode test_lib1938(const char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS, data);
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)sizeof(data));
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -67,5 +67,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

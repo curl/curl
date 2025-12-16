@@ -285,7 +285,7 @@ static CURLcode test_ws_data_m1_echo(const char *url,
                                      size_t plen_max)
 {
   CURLM *multi = NULL;
-  CURLcode r = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct test_ws_m1_ctx m1_ctx;
   size_t i, len;
 
@@ -295,7 +295,7 @@ static CURLcode test_ws_data_m1_echo(const char *url,
   m1_ctx.send_buf = curlx_calloc(1, plen_max + 1);
   m1_ctx.recv_buf = curlx_calloc(1, plen_max + 1);
   if(!m1_ctx.send_buf || !m1_ctx.recv_buf) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
   for(i = 0; i < plen_max; ++i) {
@@ -304,13 +304,13 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 
   multi = curl_multi_init();
   if(!multi) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
   m1_ctx.curl = curl_easy_init();
   if(!m1_ctx.curl) {
-    r = CURLE_OUT_OF_MEMORY;
+    result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
 
@@ -347,18 +347,18 @@ static CURLcode test_ws_data_m1_echo(const char *url,
 
     while(1) {
       int still_running; /* keep number of running handles */
-      CURLMcode mc = curl_multi_perform(multi, &still_running);
+      CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
       if(!still_running || (m1_ctx.frames_written >= m1_ctx.nframes)) {
         /* got the full echo back or failed */
         break;
       }
 
-      if(!mc && still_running) {
-        mc = curl_multi_poll(multi, NULL, 0, 1, NULL);
+      if(!mresult && still_running) {
+        mresult = curl_multi_poll(multi, NULL, 0, 1, NULL);
       }
-      if(mc) {
-        r = CURLE_RECV_ERROR;
+      if(mresult) {
+        result = CURLE_RECV_ERROR;
         goto out;
       }
     }
@@ -369,13 +369,13 @@ static CURLcode test_ws_data_m1_echo(const char *url,
     if(m1_ctx.frames_read < m1_ctx.nframes) {
       curl_mfprintf(stderr, "m1_echo, sent only %d/%d frames\n",
                     m1_ctx.frames_read, m1_ctx.nframes);
-      r = CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
       goto out;
     }
     if(m1_ctx.frames_written < m1_ctx.frames_read) {
       curl_mfprintf(stderr, "m1_echo, received only %d/%d frames\n",
                     m1_ctx.frames_written, m1_ctx.frames_read);
-      r = CURLE_RECV_ERROR;
+      result = CURLE_RECV_ERROR;
       goto out;
     }
   }
@@ -388,7 +388,7 @@ out:
   }
   curlx_free(m1_ctx.send_buf);
   curlx_free(m1_ctx.recv_buf);
-  return r;
+  return result;
 }
 
 static void test_ws_data_usage(const char *msg)
@@ -407,7 +407,7 @@ static void test_ws_data_usage(const char *msg)
 static CURLcode test_cli_ws_data(const char *URL)
 {
 #ifndef CURL_DISABLE_WEBSOCKETS
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   const char *url;
   size_t plen_min = 0, plen_max = 0, count = 1;
   int ch, model = 2;
@@ -468,13 +468,13 @@ static CURLcode test_cli_ws_data(const char *URL)
   }
 
   if(model == 1)
-    res = test_ws_data_m1_echo(url, plen_min, plen_max);
+    result = test_ws_data_m1_echo(url, plen_min, plen_max);
   else
-    res = test_ws_data_m2_echo(url, count, plen_min, plen_max);
+    result = test_ws_data_m2_echo(url, count, plen_min, plen_max);
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 
 #else /* !CURL_DISABLE_WEBSOCKETS */
   (void)URL;

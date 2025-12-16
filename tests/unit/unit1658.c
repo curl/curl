@@ -502,7 +502,7 @@ static CURLcode test_unit1658(const char *arg)
     }
   };
 
-  CURLcode res = CURLE_OUT_OF_MEMORY;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
   CURL *easy;
 
   easy = curl_easy_init();
@@ -516,10 +516,10 @@ static CURLcode test_unit1658(const char *arg)
 
       curl_mprintf("test %u: %s\n", i, t[i].name);
 
-      res = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
+      result = doh_resp_decode_httpsrr(easy, t[i].dns, t[i].len, &hrr);
 
       /* create an output */
-      rrresults(hrr, res);
+      rrresults(hrr, result);
 
       /* is the output the expected? */
       if(strcmp(rrbuffer, t[i].expect)) {

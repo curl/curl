@@ -45,7 +45,7 @@ static size_t t1526_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 static CURLcode test_lib1526(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   /* http and proxy header list */
   struct curl_slist *hhl = NULL, *phl = NULL, *tmp = NULL;
 
@@ -87,7 +87,7 @@ static CURLcode test_lib1526(const char *URL)
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1526_testdata));
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -99,5 +99,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

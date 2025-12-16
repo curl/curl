@@ -25,7 +25,7 @@
 
 static CURLcode test_lib694(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   long usedauth = 0;
   int count = 0;
@@ -51,12 +51,12 @@ static CURLcode test_lib694(const char *URL)
 
   do {
 
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
 
-    res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &usedauth);
-    if(res)
+    result = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &usedauth);
+    if(result)
       goto test_cleanup;
     if(CURLAUTH_NTLM != usedauth) {
       curl_mprintf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
@@ -64,12 +64,12 @@ static CURLcode test_lib694(const char *URL)
 
     /* set a new URL for the second, so that we do not restart NTLM */
     test_setopt(curl, CURLOPT_URL, libtest_arg2);
-  } while(!res && ++count < 2);
+  } while(!result && ++count < 2);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

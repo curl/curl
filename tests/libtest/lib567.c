@@ -28,7 +28,7 @@
  */
 static CURLcode test_lib567(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   struct curl_slist *custom_headers = NULL;
 
@@ -57,7 +57,7 @@ static CURLcode test_lib567(const char *URL)
   custom_headers = curl_slist_append(custom_headers, "Test-Number: 567");
   test_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -66,5 +66,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

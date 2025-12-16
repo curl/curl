@@ -33,7 +33,7 @@ static CURLcode test_lib1531(const char *URL)
   int still_running; /* keep number of running handles */
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   start_test_timing();
 
@@ -61,7 +61,7 @@ static CURLcode test_lib1531(const char *URL)
   do {
     struct timeval timeout;
     int rc; /* select() return code */
-    CURLMcode mc; /* curl_multi_fdset() return code */
+    CURLMcode mresult; /* curl_multi_fdset() return code */
 
     fd_set fdread;
     fd_set fdwrite;
@@ -88,10 +88,10 @@ static CURLcode test_lib1531(const char *URL)
     }
 
     /* get file descriptors from the transfers */
-    mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+    mresult = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    if(mc != CURLM_OK) {
-      curl_mfprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      curl_mfprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mresult);
       break;
     }
 
@@ -142,5 +142,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

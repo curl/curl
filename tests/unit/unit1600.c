@@ -28,7 +28,7 @@
 
 static CURLcode t1600_setup(CURL **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -36,7 +36,7 @@ static CURLcode t1600_setup(CURL **easy)
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  return res;
+  return result;
 }
 
 static void t1600_stop(CURL *easy)

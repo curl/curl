@@ -72,7 +72,7 @@ static int sockopt_cb(void *clientp,
 static CURLcode test_lib1960(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   int status;
   curl_socket_t client_fd = CURL_SOCKET_BAD;
   struct sockaddr_in serv_addr;
@@ -82,11 +82,11 @@ static CURLcode test_lib1960(const char *URL)
     return CURLE_OK; /* no output makes it not skipped */
 
   if(curlx_str_number(&libtest_arg3, &port, 0xffff))
-    return res;
+    return result;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    return res;
+    return result;
   }
 
   /*
@@ -132,7 +132,7 @@ static CURLcode test_lib1960(const char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_URL, URL);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_easy_cleanup(curl);
@@ -140,7 +140,7 @@ test_cleanup:
     sclose(client_fd);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }
 #else
 static CURLcode test_lib1960(const char *URL)

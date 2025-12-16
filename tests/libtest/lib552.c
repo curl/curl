@@ -69,7 +69,7 @@ static curlioerr ioctl_callback(CURL *curl, int cmd, void *clientp)
 static CURLcode test_lib552(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t i;
   static const char fill[] = "test data";
 
@@ -109,11 +109,11 @@ static CURLcode test_lib552(const char *URL)
      might work too, not NTLM */
   test_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

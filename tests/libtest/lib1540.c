@@ -83,7 +83,7 @@ static size_t t1540_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib1540(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct t1540_transfer_status st;
 
   start_test_timing();
@@ -111,12 +111,12 @@ static CURLcode test_lib1540(const char *URL)
   easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
   easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res; /* return the final return code */
+  return result; /* return the final return code */
 }

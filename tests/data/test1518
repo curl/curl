@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 
 </strippart>
 <stdout>
-res 0
+result 0
 status 302
 redirects 0
 effectiveurl http://%HOSTIP:%HTTPPORT/%TESTNUMBER

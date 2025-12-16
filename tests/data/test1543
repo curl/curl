@@ -61,7 +61,7 @@ Accept: */*
 
 </protocol>
 <stdout>
-res 0
+result 0
 status 200
 redirects 1
 effectiveurl http://%HOSTIP:%HTTPPORT/%20/with/%20space/%TESTNUMBER0002

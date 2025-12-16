@@ -251,13 +251,13 @@ static CURLMcode socket_action(CURLM *multi, curl_socket_t s, int evBitmask,
                                const char *info)
 {
   int numhandles = 0;
-  CURLMcode result = curl_multi_socket_action(multi, s, evBitmask,
+  CURLMcode mresult = curl_multi_socket_action(multi, s, evBitmask,
                                               &numhandles);
-  if(result != CURLM_OK) {
+  if(mresult != CURLM_OK) {
     curl_mfprintf(stderr, "%s curl error on %s (%i) %s\n",
-                  t530_tag(), info, result, curl_multi_strerror(result));
+                  t530_tag(), info, mresult, curl_multi_strerror(mresult));
   }
-  return result;
+  return mresult;
 }
 
 /**
@@ -268,20 +268,20 @@ static CURLMcode t530_checkFdSet(CURLM *multi, struct t530_Sockets *sockets,
                                  const char *name)
 {
   int i;
-  CURLMcode result = CURLM_OK;
+  CURLMcode mresult = CURLM_OK;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      result = socket_action(multi, sockets->sockets[i], evBitmask, name);
-      if(result)
+      mresult = socket_action(multi, sockets->sockets[i], evBitmask, name);
+      if(mresult)
         break;
     }
   }
-  return result;
+  return mresult;
 }
 
 static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   CURLM *multi = NULL;
   struct t530_ReadWriteSockets sockets = { { NULL, 0, 0 }, { NULL, 0, 0 } };
@@ -298,8 +298,8 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   start_test_timing();
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res != CURLE_OK)
-    return res;
+  if(result != CURLE_OK)
+    return result;
 
   easy_init(curl);
 
@@ -320,7 +320,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
   multi_add_handle(multi, curl);
 
   if(socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
@@ -351,12 +351,12 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
     /* Check the sockets for reading / writing */
     if(t530_checkFdSet(multi, &sockets.read, &readSet, CURL_CSELECT_IN,
                        "read")) {
-      res = TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
     if(t530_checkFdSet(multi, &sockets.write, &writeSet, CURL_CSELECT_OUT,
                        "write")) {
-      res = TEST_ERR_MAJOR_BAD;
+      result = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
 
@@ -364,7 +364,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
        t530_getMicroSecondTimeout(&timeout) == 0) {
       /* curl's timer has elapsed. */
       if(socket_action(multi, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
-        res = TEST_ERR_BAD_TIMEOUT;
+        result = TEST_ERR_BAD_TIMEOUT;
         goto test_cleanup;
       }
     }
@@ -374,7 +374,7 @@ static CURLcode testone(const char *URL, int timer_fail_at, int socket_fail_at)
 
   if(!success) {
     t530_msg("Error getting file.");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
   }
 
 test_cleanup:
@@ -391,7 +391,7 @@ test_cleanup:
   curlx_free(sockets.write.sockets);
   t530_msg("done");
 
-  return res;
+  return result;
 }
 
 static CURLcode test_lib530(const char *URL)

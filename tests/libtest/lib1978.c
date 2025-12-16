@@ -26,7 +26,7 @@
 static CURLcode test_lib1978(const char *URL)
 {
   CURL *curl;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL;
 
@@ -90,7 +90,7 @@ static CURLcode test_lib1978(const char *URL)
   }
   test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -99,5 +99,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

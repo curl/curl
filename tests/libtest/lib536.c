@@ -33,7 +33,7 @@ static void proxystat(CURL *curl)
 
 static CURLcode test_lib536(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl;
   struct curl_slist *host = NULL;
 
@@ -62,12 +62,12 @@ static CURLcode test_lib536(const char *URL)
   test_setopt(curl, CURLOPT_NOPROXY, "goingdirect.com");
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
-  if(!res) {
+  result = curl_easy_perform(curl);
+  if(!result) {
     proxystat(curl);
     test_setopt(curl, CURLOPT_URL, url_without_proxy);
-    res = curl_easy_perform(curl);
-    if(!res)
+    result = curl_easy_perform(curl);
+    if(!result)
       proxystat(curl);
   }
 
@@ -77,5 +77,5 @@ test_cleanup:
   curl_slist_free_all(host);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

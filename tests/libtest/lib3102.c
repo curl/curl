@@ -90,7 +90,7 @@ static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
 static CURLcode test_lib3102(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
@@ -117,16 +117,16 @@ static CURLcode test_lib3102(const char *URL)
   test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
   test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
-  if(!res || res == CURLE_GOT_NOTHING) {
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
+  if(!result || result == CURLE_GOT_NOTHING) {
     struct curl_certinfo *cert_info = NULL;
     /* Get the certificate information */
-    res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &cert_info);
-    if(!res) {
+    result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &cert_info);
+    if(!result) {
       /* Check to see if the certificate chain is ordered correctly */
       if(!is_chain_in_order(cert_info))
-        res = TEST_ERR_FAILURE;
+        result = TEST_ERR_FAILURE;
     }
   }
 
@@ -136,5 +136,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -29,7 +29,7 @@ static CURLcode test_lib1557(const char *URL)
   CURL *curl1 = NULL;
   CURL *curl2 = NULL;
   int running_handles = 0;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
 
@@ -56,5 +56,5 @@ test_cleanup:
   curl_easy_cleanup(curl2);
   curl_multi_cleanup(multi);
   curl_global_cleanup();
-  return res;
+  return result;
 }
