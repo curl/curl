@@ -1148,8 +1148,10 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #endif
 
 #if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
-   /* Replicating logic present in afunix.h.
-      Offered by mingw-w64 v10+. MS SDK 10.17763/~VS2017+. */
+/* Offered by mingw-w64 v10+. MS SDK 10.17763/~VS2017+. */
+#if defined(__MINGW32__) && (__MINGW64_VERSION_MAJOR >= 10)
+#  include <afunix.h>
+#else /* Replicating logic present in afunix.h */
 #  ifndef UNIX_PATH_MAX
 #  define UNIX_PATH_MAX 108
    /* !checksrc! disable TYPEDEFSTRUCT 1 */
@@ -1158,6 +1160,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
      char sun_path[UNIX_PATH_MAX];
    } SOCKADDR_UN, *PSOCKADDR_UN;
 #  endif
+#endif
 #endif
 
 #ifdef USE_OPENSSL
