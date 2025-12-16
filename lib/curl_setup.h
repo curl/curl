@@ -1157,7 +1157,6 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
        CURL_SA_FAMILY_T sun_family;
        char sun_path[UNIX_PATH_MAX];
      } SOCKADDR_UN, *PSOCKADDR_UN;
-#    define WIN32_SOCKADDR_UN
 #  endif
 #endif
 
