@@ -97,18 +97,18 @@ int main(void)
   curl_multi_add_handle(multi, easy);
 
   do {
-    CURLMcode mc;
+    CURLMcode mresult;
     int numfds;
 
-    mc = curl_multi_perform(multi, &still_running);
+    mresult = curl_multi_perform(multi, &still_running);
 
-    if(mc == CURLM_OK) {
+    if(mresult == CURLM_OK) {
       /* wait for activity, timeout or "nothing" */
-      mc = curl_multi_wait(multi, NULL, 0, 1000, &numfds);
+      mresult = curl_multi_wait(multi, NULL, 0, 1000, &numfds);
     }
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      fprintf(stderr, "curl_multi failed, code %d.\n", mresult);
       break;
     }
 

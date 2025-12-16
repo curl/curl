@@ -149,12 +149,12 @@ int main(void)
     int still_running; /* keep number of running handles */
     int rc;
 
-    CURLMcode mcode = curl_multi_perform(multi, &still_running);
-    if(mcode)
+    CURLMcode mresult = curl_multi_perform(multi, &still_running);
+    if(mresult)
       break;
 
-    mcode = curl_multi_wait(multi, NULL, 0, 1000, &rc);
-    if(mcode)
+    mresult = curl_multi_wait(multi, NULL, 0, 1000, &rc);
+    if(mresult)
       break;
 
     /*

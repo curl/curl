@@ -74,13 +74,13 @@ int main(void)
       curl_multi_add_handle(multi, curl[i]);
 
     while(still_running) {
-      CURLMcode mc = curl_multi_perform(multi, &still_running);
+      CURLMcode mresult = curl_multi_perform(multi, &still_running);
 
       if(still_running)
         /* wait for activity, timeout or "nothing" */
-        mc = curl_multi_poll(multi, NULL, 0, 1000, NULL);
+        mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
-      if(mc)
+      if(mresult)
         break;
     }
 

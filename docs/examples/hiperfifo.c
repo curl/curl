@@ -196,14 +196,14 @@ static void check_multi_info(struct GlobalInfo *g)
 static void event_cb(int fd, short kind, void *userp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)userp;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   int action =
     ((kind & EV_READ) ? CURL_CSELECT_IN : 0) |
     ((kind & EV_WRITE) ? CURL_CSELECT_OUT : 0);
 
-  rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+  mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
+  mcode_or_die("event_cb: curl_multi_socket_action", mresult);
 
   check_multi_info(g);
   if(g->still_running <= 0) {
@@ -218,13 +218,13 @@ static void event_cb(int fd, short kind, void *userp)
 static void timer_cb(int fd, short kind, void *userp)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)userp;
-  CURLMcode rc;
+  CURLMcode mresult;
   (void)fd;
   (void)kind;
 
-  rc = curl_multi_socket_action(g->multi,
+  mresult = curl_multi_socket_action(g->multi,
                                   CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
 }
 
@@ -319,7 +319,7 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
 static void new_conn(const char *url, struct GlobalInfo *g)
 {
   struct ConnInfo *conn;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   conn = calloc(1, sizeof(*conn));
   conn->error[0] = '\0';
@@ -343,8 +343,8 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   curl_easy_setopt(conn->curl, CURLOPT_FOLLOWLOCATION, 1L);
   fprintf(MSG_OUT, "Adding easy %p to multi %p (%s)\n",
           conn->curl, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->curl);
-  mcode_or_die("new_conn: curl_multi_add_handle", rc);
+  mresult = curl_multi_add_handle(g->multi, conn->curl);
+  mcode_or_die("new_conn: curl_multi_add_handle", mresult);
 
   /* note that the add_handle() sets a time-out to trigger soon so that
      the necessary socket_action() gets called */
