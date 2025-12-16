@@ -46,12 +46,12 @@
 #include <mbedtls/x509.h>
 #include <mbedtls/psa_util.h>
 
-#if MBEDTLS_VERSION_NUMBER < 0x04000000 && defined(MBEDTLS_CTR_DRBG_C)
-#define CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000 && !defined(MBEDTLS_CTR_DRBG_C)
+#error "MBEDTLS_CTR_DRBG_C is required for mbedTLS 3.x and older."
 #endif
 
 #include <mbedtls/error.h>
-#ifdef CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
 #include <mbedtls/entropy.h>
 #include <mbedtls/ctr_drbg.h>
 #endif
@@ -99,7 +99,7 @@ struct mbed_ssl_backend_data {
 
 /** A context for random number generation (RNG).
  */
-#ifdef CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
 struct rng_context_t {
   mbedtls_entropy_context entropy;
   mbedtls_ctr_drbg_context drbg;
@@ -519,7 +519,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
     /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
-    if((ssl_cert_type && strcmp(ssl_cert_type, "DER") == 0)
+    if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER"))
        || ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0'
       ) {
       ret = mbedtls_x509_crt_parse(&backend->cacert,
@@ -619,7 +619,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
     /* if DER or a null-terminated PEM just process using
     * mbedtls_x509_crt_parse().
     * */
-    if((ssl_cert_type && strcmp(ssl_cert_type, "DER") == 0)
+    if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER"))
        || ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0'
       ) {
       ret = mbedtls_x509_crt_parse(&backend->clicert,
@@ -653,7 +653,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
 
     if(ret) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "mbedTLS: error reading SSL cert blob %s: (-0x%04X) %s",
+      failf(data, "mbedTLS: error reading client cert data %s: (-0x%04X) %s",
             ssl_config->key, -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
@@ -808,7 +808,7 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   if(ret != CURLE_OK)
     return ret;
 
-#ifdef CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &rng.drbg);
 #endif
@@ -1437,7 +1437,7 @@ static CURLcode mbedtls_connect(struct Curl_cfilter *cf,
  */
 static int mbedtls_init(void)
 {
-#ifdef CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
   int ret = 0;
 #endif
   psa_status_t status;
@@ -1446,7 +1446,7 @@ static int mbedtls_init(void)
   if(status != PSA_SUCCESS)
     return 0;
 
-#ifdef CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
   mbedtls_ctr_drbg_init(&rng.drbg);
   mbedtls_entropy_init(&rng.entropy);
 
@@ -1474,7 +1474,7 @@ static void mbedtls_cleanup(void)
 {
   mbedtls_psa_crypto_free();
 
-#ifdef CURL_MBEDTLS_DRBG
+#if MBEDTLS_VERSION_NUMBER < 0x04000000
   mbedtls_ctr_drbg_free(&rng.drbg);
   mbedtls_entropy_free(&rng.entropy);
 #endif
