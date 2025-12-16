@@ -29,9 +29,9 @@
 
 static CURLcode t1607_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 static CURLcode test_unit1607(const char *arg)

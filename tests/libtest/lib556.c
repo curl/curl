@@ -25,7 +25,7 @@
 
 static CURLcode test_lib556(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   int transfers = 0;
 
@@ -47,9 +47,9 @@ static CURLcode test_lib556(const char *URL)
 
 again:
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
-  if(!res) {
+  if(!result) {
     /* we are connected, now get an HTTP document the raw way */
     char request[64];
     const char *sbuf = request;
@@ -64,8 +64,8 @@ again:
       char buf[1024];
 
       if(sblen) {
-        res = curl_easy_send(curl, sbuf, sblen, &nwritten);
-        if(res && res != CURLE_AGAIN)
+        result = curl_easy_send(curl, sbuf, sblen, &nwritten);
+        if(result && result != CURLE_AGAIN)
           break;
         if(nwritten > 0) {
           sbuf += nwritten;
@@ -74,7 +74,7 @@ again:
       }
 
       /* busy-read like crazy */
-      res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
+      result = curl_easy_recv(curl, buf, sizeof(buf), &nread);
 
       if(nread) {
         /* send received stuff to stdout */
@@ -82,21 +82,21 @@ again:
           char errbuf[STRERROR_LEN];
           curl_mfprintf(stderr, "write() failed: errno %d (%s)\n",
                         errno, curlx_strerror(errno, errbuf, sizeof(errbuf)));
-          res = TEST_ERR_FAILURE;
+          result = TEST_ERR_FAILURE;
           break;
         }
       }
 
-    } while((res == CURLE_OK && nread) || (res == CURLE_AGAIN));
+    } while((result == CURLE_OK && nread) || (result == CURLE_AGAIN));
 
-    if(res && res != CURLE_AGAIN)
-      res = TEST_ERR_FAILURE;
+    if(result && result != CURLE_AGAIN)
+      result = TEST_ERR_FAILURE;
   }
 
   if(testnum == 696) {
     ++transfers;
     /* perform the transfer a second time */
-    if(!res && transfers == 1)
+    if(!result && transfers == 1)
       goto again;
   }
 
@@ -105,5 +105,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

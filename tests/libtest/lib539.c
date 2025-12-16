@@ -25,7 +25,7 @@
 
 static CURLcode test_lib539(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   char *newURL = NULL;
   struct curl_slist *slist = NULL;
@@ -49,8 +49,8 @@ static CURLcode test_lib539(const char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_SINGLECWD);
 
-  res = curl_easy_perform(curl);
-  if(res == CURLE_OK) {
+  result = curl_easy_perform(curl);
+  if(result == CURLE_OK) {
     /*
      * Change the FTP_FILEMETHOD option to use full paths rather than a CWD
      * command. Use an innocuous QUOTE command, after which curl will CWD to
@@ -71,7 +71,7 @@ static CURLcode test_lib539(const char *URL)
     test_setopt(curl, CURLOPT_FTP_FILEMETHOD, CURLFTPMETHOD_NOCWD);
     test_setopt(curl, CURLOPT_QUOTE, slist);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 test_cleanup:
 
@@ -80,5 +80,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

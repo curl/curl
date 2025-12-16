@@ -27,7 +27,7 @@ struct t1485_transfer_status {
   CURL *curl;
   curl_off_t out_len;
   size_t hd_line;
-  CURLcode res;
+  CURLcode result;
   int http_status;
 };
 
@@ -37,7 +37,7 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
   struct t1485_transfer_status *st = (struct t1485_transfer_status *)userp;
   const char *hd = ptr;
   size_t len = size * nmemb;
-  CURLcode res;
+  CURLcode result;
 
   (void)fwrite(ptr, size, nmemb, stdout);
   ++st->hd_line;
@@ -45,22 +45,22 @@ static size_t t1485_header_callback(char *ptr, size_t size, size_t nmemb,
     curl_off_t clen;
     long httpcode = 0;
     /* end of a response */
-    res = curl_easy_getinfo(st->curl, CURLINFO_RESPONSE_CODE, &httpcode);
+    result = curl_easy_getinfo(st->curl, CURLINFO_RESPONSE_CODE, &httpcode);
     curl_mfprintf(stderr, "header_callback, get status: %ld, %d\n",
-                  httpcode, res);
+                  httpcode, result);
     if(httpcode < 100 || httpcode >= 1000) {
       curl_mfprintf(stderr, "header_callback, invalid status: %ld, %d\n",
-                    httpcode, res);
+                    httpcode, result);
       return CURLE_WRITE_ERROR;
     }
     st->http_status = (int)httpcode;
     if(st->http_status >= 200 && st->http_status < 300) {
-      res = curl_easy_getinfo(st->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+      result = curl_easy_getinfo(st->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                               &clen);
       curl_mfprintf(stderr, "header_callback, info Content-Length: "
-                    "%" CURL_FORMAT_CURL_OFF_T ", %d\n", clen, res);
-      if(res) {
-        st->res = res;
+                    "%" CURL_FORMAT_CURL_OFF_T ", %d\n", clen, result);
+      if(result) {
+        st->result = result;
         return CURLE_WRITE_ERROR;
       }
       if(clen < 0) {
@@ -86,7 +86,7 @@ static size_t t1485_write_cb(char *ptr, size_t size, size_t nmemb, void *userp)
 static CURLcode test_lib1485(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct t1485_transfer_status st;
 
   start_test_timing();
@@ -106,12 +106,12 @@ static CURLcode test_lib1485(const char *URL)
 
   easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res; /* return the final return code */
+  return result; /* return the final return code */
 }

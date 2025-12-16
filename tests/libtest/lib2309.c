@@ -36,7 +36,7 @@ static CURLcode test_lib2309(const char *URL)
 {
   CURL *curl;
   CURL *curldupe;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
@@ -50,8 +50,8 @@ static CURLcode test_lib2309(const char *URL)
 
     curldupe = curl_easy_duphandle(curl);
     if(curldupe) {
-      res = curl_easy_perform(curldupe);
-      curl_mprintf("Returned %d, should be %d.\n", res, CURLE_WRITE_ERROR);
+      result = curl_easy_perform(curldupe);
+      curl_mprintf("Returned %d, should be %d.\n", result, CURLE_WRITE_ERROR);
       fflush(stdout);
       curl_easy_cleanup(curldupe);
     }

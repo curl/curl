@@ -25,23 +25,23 @@
 
 static CURLcode test_lib521(const char *URL)
 {
-  CURLcode res = TEST_ERR_MAJOR_BAD;
+  CURLcode result = TEST_ERR_MAJOR_BAD;
   CURL *curl;
   curl_off_t port;
 
   if(curlx_str_number(&libtest_arg2, &port, 0xffff))
-    return res;
+    return result;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     curl_mfprintf(stderr, "curl_global_init() failed\n");
-    return res;
+    return result;
   }
 
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
     curl_global_cleanup();
-    return res;
+    return result;
   }
 
   test_setopt(curl, CURLOPT_URL, URL);
@@ -49,12 +49,12 @@ static CURLcode test_lib521(const char *URL)
   test_setopt(curl, CURLOPT_USERPWD, "xxx:yyy");
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -45,7 +45,7 @@ static size_t t1527_read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 static CURLcode test_lib1527(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   /* http header list */
   struct curl_slist *hhl = NULL, *tmp = NULL;
 
@@ -85,7 +85,7 @@ static CURLcode test_lib1527(const char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(t1527_testdata));
   test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_UNIFIED);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -95,5 +95,5 @@ test_cleanup:
 
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -27,7 +27,7 @@
 
 static CURLcode test_lib564(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURL *curl = NULL;
   int running;
   CURLM *multi = NULL;
@@ -90,5 +90,5 @@ test_cleanup:
   curl_multi_cleanup(multi);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

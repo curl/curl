@@ -27,7 +27,7 @@
 
 static CURLcode test_lib1549(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -46,14 +46,14 @@ static CURLcode test_lib1549(const char *URL)
   test_setopt(curl, CURLOPT_HEADER, 1L);
   test_setopt(curl, CURLOPT_COOKIEFILE, "");
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
-  if(!res) {
+  if(!result) {
     /* extract all known cookies */
     struct curl_slist *cookies = NULL;
     int num = 0;
-    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-    if(!res && cookies) {
+    result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+    if(!result && cookies) {
       /* a linked list of cookies in cookie file format */
       struct curl_slist *each = cookies;
       while(each) {
@@ -71,5 +71,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

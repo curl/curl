@@ -54,7 +54,7 @@ static int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
 
 static CURLcode t1652_setup(struct Curl_easy **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -64,7 +64,7 @@ static CURLcode t1652_setup(struct Curl_easy **easy)
   }
   curl_easy_setopt(*easy, CURLOPT_DEBUGFUNCTION, debugf_cb);
   curl_easy_setopt(*easy, CURLOPT_VERBOSE, 1L);
-  return res;
+  return result;
 }
 
 static void t1652_stop(struct Curl_easy *easy)

@@ -56,7 +56,7 @@ static void t1554_test_unlock(CURL *curl, curl_lock_data data, void *useptr)
 /* test function */
 static CURLcode test_lib1554(const char *URL)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   CURLSH *share = NULL;
   int i;
 
@@ -83,16 +83,16 @@ static CURLcode test_lib1554(const char *URL)
       /* use the share object */
       curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
-      /* Perform the request, res will get the return code */
-      res = curl_easy_perform(curl);
+      /* Perform the request, result will get the return code */
+      result = curl_easy_perform(curl);
 
       /* always cleanup */
       curl_easy_cleanup(curl);
 
       /* Check for errors */
-      if(res != CURLE_OK) {
+      if(result != CURLE_OK) {
         curl_mfprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
+                      curl_easy_strerror(result));
         goto test_cleanup;
       }
     }
@@ -102,5 +102,5 @@ test_cleanup:
   curl_share_cleanup(share);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

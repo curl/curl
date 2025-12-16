@@ -37,45 +37,45 @@ static CURL *t540_curl[2];
 static CURLcode init(int num, CURLM *multi, const char *url,
                      const char *userpwd, struct curl_slist *headers)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   const char *proxy = libtest_arg2;
 
   res_easy_init(t540_curl[num]);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_easy_setopt(t540_curl[num], CURLOPT_URL, url);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_easy_setopt(t540_curl[num], CURLOPT_PROXY, proxy);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_easy_setopt(t540_curl[num], CURLOPT_PROXYUSERPWD, userpwd);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_easy_setopt(t540_curl[num], CURLOPT_PROXYAUTH, CURLAUTH_ANY);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_easy_setopt(t540_curl[num], CURLOPT_VERBOSE, 1L);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_easy_setopt(t540_curl[num], CURLOPT_HEADER, 1L);
-  if(res)
+  if(result)
     goto init_failed;
 
   /* custom Host: */
   res_easy_setopt(t540_curl[num], CURLOPT_HTTPHEADER, headers);
-  if(res)
+  if(result)
     goto init_failed;
 
   res_multi_add_handle(multi, t540_curl[num]);
-  if(res)
+  if(result)
     goto init_failed;
 
   return CURLE_OK; /* success */
@@ -85,7 +85,7 @@ init_failed:
   curl_easy_cleanup(t540_curl[num]);
   t540_curl[num] = NULL;
 
-  return res; /* failure */
+  return result; /* failure */
 }
 
 static CURLcode loop(int num, CURLM *multi, const char *url,
@@ -96,23 +96,23 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
   int Q, U = -1;
   fd_set R, W, E;
   struct timeval T;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
-  res = init(num, multi, url, userpwd, headers);
-  if(res)
-    return res;
+  result = init(num, multi, url, userpwd, headers);
+  if(result)
+    return result;
 
   while(U) {
 
     int M = -99;
 
     res_multi_perform(multi, &U);
-    if(res)
-      return res;
+    if(result)
+      return result;
 
     res_test_timedout();
-    if(res)
-      return res;
+    if(result)
+      return result;
 
     if(U) {
       FD_ZERO(&R);
@@ -120,14 +120,14 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
       FD_ZERO(&E);
 
       res_multi_fdset(multi, &R, &W, &E, &M);
-      if(res)
-        return res;
+      if(result)
+        return result;
 
       /* At this point, M is guaranteed to be greater or equal than -1. */
 
       res_multi_timeout(multi, &L);
-      if(res)
-        return res;
+      if(result)
+        return result;
 
       /* At this point, L is guaranteed to be greater or equal than -1. */
 
@@ -147,8 +147,8 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
       }
 
       res_select_test(M + 1, &R, &W, &E, &T);
-      if(res)
-        return res;
+      if(result)
+        return result;
     }
 
     while(1) {
@@ -174,8 +174,8 @@ static CURLcode loop(int num, CURLM *multi, const char *url,
     }
 
     res_test_timedout();
-    if(res)
-      return res;
+    if(result)
+      return result;
   }
 
   return CURLE_OK;
@@ -186,7 +186,7 @@ static CURLcode test_lib540(const char *URL)
   CURLM *multi = NULL;
   struct curl_slist *headers = NULL;
   char buffer[246]; /* naively fixed-size */
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   size_t i;
 
   const char *proxyuserpws = libtest_arg3;
@@ -211,25 +211,25 @@ static CURLcode test_lib540(const char *URL)
   }
 
   res_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  if(result) {
     curl_slist_free_all(headers);
-    return res;
+    return result;
   }
 
   res_multi_init(multi);
-  if(res) {
+  if(result) {
     curl_global_cleanup();
     curl_slist_free_all(headers);
-    return res;
+    return result;
   }
 
-  res = loop(0, multi, URL, proxyuserpws, headers);
-  if(res)
+  result = loop(0, multi, URL, proxyuserpws, headers);
+  if(result)
     goto test_cleanup;
 
   curl_mfprintf(stderr, "lib540: now we do the request again\n");
 
-  res = loop(1, multi, URL, proxyuserpws, headers);
+  result = loop(1, multi, URL, proxyuserpws, headers);
 
 test_cleanup:
 
@@ -245,5 +245,5 @@ test_cleanup:
 
   curl_slist_free_all(headers);
 
-  return res;
+  return result;
 }

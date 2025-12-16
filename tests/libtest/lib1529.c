@@ -26,7 +26,7 @@
 static CURLcode test_lib1529(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  CURLcode result = CURLE_FAILED_INIT;
   char bURL[512];
   curl_msnprintf(bURL, sizeof(bURL),
                  "%s HTTP/1.1\r\nGET http://1529.com/1529", URL);
@@ -49,12 +49,12 @@ static CURLcode test_lib1529(const char *URL)
   test_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
   test_setopt(curl, CURLOPT_HEADER, 1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -25,7 +25,7 @@
 
 static CURLcode test_lib501(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   (void)URL;
@@ -47,12 +47,12 @@ static CURLcode test_lib501(const char *URL)
   /* just verify that setting this to -1 is fine */
   test_setopt(curl, CURLOPT_MAXREDIRS, -1L);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

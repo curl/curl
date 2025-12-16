@@ -49,7 +49,7 @@ static CURLcode test_lib1522(const char *URL)
   static char g_Data[40 * 1024]; /* POST 40KB */
 
   CURLcode code = TEST_ERR_MAJOR_BAD;
-  CURLcode res;
+  CURLcode result;
   struct curl_slist *pHeaderList = NULL;
   CURL *curl = curl_easy_init();
   memset(g_Data, 'A', sizeof(g_Data)); /* send As! */

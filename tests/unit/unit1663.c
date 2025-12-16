@@ -34,9 +34,9 @@
 
 static CURLcode t1663_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   global_init(CURL_GLOBAL_ALL);
-  return res;
+  return result;
 }
 
 static void t1663_parse(const char *input_data,

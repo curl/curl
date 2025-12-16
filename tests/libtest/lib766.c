@@ -41,7 +41,7 @@ static int sockopt_766(void *clientp,
 static CURLcode test_lib766(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   start_test_timing();
 
@@ -53,12 +53,12 @@ static CURLcode test_lib766(const char *URL)
   easy_setopt(curl, CURLOPT_FTPPORT, "-");
   easy_setopt(curl, CURLOPT_SOCKOPTFUNCTION, sockopt_766);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

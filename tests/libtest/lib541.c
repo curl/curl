@@ -30,7 +30,7 @@
 static CURLcode test_lib541(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
@@ -94,13 +94,13 @@ static CURLcode test_lib541(const char *URL)
   test_setopt(curl, CURLOPT_READDATA, hd_src);
 
   /* Now run off and do what you have been told! */
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -110,5 +110,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

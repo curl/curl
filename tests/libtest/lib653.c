@@ -26,7 +26,7 @@
 static CURLcode test_lib653(const char *URL)
 {
   CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   curl_mimepart *field = NULL;
   curl_mime *mime = NULL;
 
@@ -44,17 +44,17 @@ static CURLcode test_lib653(const char *URL)
   easy_setopt(curl, CURLOPT_MIMEPOST, mime);
   easy_setopt(curl, CURLOPT_NOPROGRESS, 1L);
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* Alter form and resubmit. */
   curl_mime_data(field, "long value for length change", CURL_ZERO_TERMINATED);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
   curl_mime_free(mime);
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res; /* return the final return code */
+  return result; /* return the final return code */
 }

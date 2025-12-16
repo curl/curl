@@ -55,7 +55,7 @@ static CURLcode test_lib1517(const char *URL)
     "this is what we post to the silly web server\n";
 
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   struct t1517_WriteThis pooh;
 
@@ -98,8 +98,8 @@ static CURLcode test_lib1517(const char *URL)
   /* detect HTTP error codes >= 400 */
   /* test_setopt(curl, CURLOPT_FAILONERROR, 1L); */
 
-  /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  /* Perform the request, result will get the return code */
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -107,5 +107,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

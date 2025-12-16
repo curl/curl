@@ -33,7 +33,7 @@ static int new_fnmatch(void *ptr, const char *pattern, const char *string)
 
 static CURLcode test_lib574(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -53,19 +53,19 @@ static CURLcode test_lib574(const char *URL)
   test_setopt(curl, CURLOPT_FNMATCH_FUNCTION, new_fnmatch);
   test_setopt(curl, CURLOPT_TIMEOUT_MS, (long)TEST_HANG_TIMEOUT);
 
-  res = curl_easy_perform(curl);
-  if(res) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", res);
+  result = curl_easy_perform(curl);
+  if(result) {
+    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", result);
     goto test_cleanup;
   }
-  res = curl_easy_perform(curl);
-  if(res) {
-    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", res);
+  result = curl_easy_perform(curl);
+  if(result) {
+    curl_mfprintf(stderr, "curl_easy_perform() failed %d\n", result);
     goto test_cleanup;
   }
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

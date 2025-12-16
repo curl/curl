@@ -30,7 +30,7 @@
  */
 static CURLcode test_lib568(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   int sdp;
   FILE *sdpf = NULL;
@@ -58,7 +58,7 @@ static CURLcode test_lib568(const char *URL)
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -68,7 +68,7 @@ static CURLcode test_lib568(const char *URL)
   sdp = curlx_open(libtest_arg2, O_RDONLY);
   if(sdp == -1) {
     curl_mfprintf(stderr, "cannot open %s\n", libtest_arg2);
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   fstat(sdp, &file_info);
@@ -77,7 +77,7 @@ static CURLcode test_lib568(const char *URL)
   sdpf = curlx_fopen(libtest_arg2, "rb");
   if(!sdpf) {
     curl_mfprintf(stderr, "cannot fopen %s\n", libtest_arg2);
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_ANNOUNCE);
@@ -88,8 +88,8 @@ static CURLcode test_lib568(const char *URL)
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Do the ANNOUNCE */
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   test_setopt(curl, CURLOPT_UPLOAD, 0L);
@@ -99,7 +99,7 @@ static CURLcode test_lib568(const char *URL)
   /* Make sure we can do a normal request now */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -107,15 +107,15 @@ static CURLcode test_lib568(const char *URL)
   stream_uri = NULL;
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_DESCRIBE);
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   /* Now do a POST style one */
 
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -125,7 +125,7 @@ static CURLcode test_lib568(const char *URL)
   custom_headers = curl_slist_append(custom_headers,
                                      "Content-Type: posty goodness");
   if(!custom_headers) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSPHEADER, custom_headers);
@@ -133,8 +133,8 @@ static CURLcode test_lib568(const char *URL)
   test_setopt(curl, CURLOPT_POSTFIELDS,
               "postyfield=postystuff&project=curl\n");
 
-  res = curl_easy_perform(curl);
-  if(res)
+  result = curl_easy_perform(curl);
+  if(result)
     goto test_cleanup;
 
   test_setopt(curl, CURLOPT_POSTFIELDS, NULL);
@@ -145,7 +145,7 @@ static CURLcode test_lib568(const char *URL)
   /* Make sure we can do a normal request now */
   stream_uri = tutil_suburl(URL, request++);
   if(!stream_uri) {
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
   test_setopt(curl, CURLOPT_RTSP_STREAM_URI, stream_uri);
@@ -153,7 +153,7 @@ static CURLcode test_lib568(const char *URL)
   stream_uri = NULL;
 
   test_setopt(curl, CURLOPT_RTSP_REQUEST, CURL_RTSPREQ_OPTIONS);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -168,5 +168,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

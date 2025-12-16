@@ -30,7 +30,7 @@
 
 static CURLcode test_lib549(const char *URL)
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
@@ -54,12 +54,12 @@ static CURLcode test_lib549(const char *URL)
     test_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
   }
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

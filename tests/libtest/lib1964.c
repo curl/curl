@@ -26,7 +26,7 @@
 static CURLcode test_lib1964(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct curl_slist *connect_to = NULL;
   struct curl_slist *list = NULL, *tmp;
 
@@ -39,7 +39,7 @@ static CURLcode test_lib1964(const char *URL)
   if(libtest_arg2) {
     connect_to = curl_slist_append(connect_to, libtest_arg2);
     if(!connect_to) {
-      res = CURLE_FAILED_INIT;
+      result = CURLE_FAILED_INIT;
       goto test_cleanup;
     }
   }
@@ -47,13 +47,13 @@ static CURLcode test_lib1964(const char *URL)
   list = curl_slist_append(list, "Content-Type: application/json");
   tmp = curl_slist_append(list, "X-Xxx-Date: 19700101T000000Z");
   if(!list || !tmp) {
-    res = CURLE_FAILED_INIT;
+    result = CURLE_FAILED_INIT;
     goto test_cleanup;
   }
   list = tmp;
   easy_setopt(curl, CURLOPT_HTTPHEADER, list);
 
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -62,5 +62,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

@@ -47,7 +47,7 @@ static size_t t1945_write_cb(char *data, size_t n, size_t l, void *userp)
 static CURLcode test_lib1945(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_DEFAULT);
 
@@ -63,14 +63,14 @@ static CURLcode test_lib1945(const char *URL)
     curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
   }
-  res = curl_easy_perform(curl);
-  if(res) {
-    curl_mprintf("badness: %d\n", res);
+  result = curl_easy_perform(curl);
+  if(result) {
+    curl_mprintf("badness: %d\n", result);
   }
   t1945_showem(curl, CURLH_CONNECT | CURLH_HEADER | CURLH_TRAILER | CURLH_1XX);
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

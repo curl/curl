@@ -35,7 +35,7 @@ static CURLcode test_unit2604(const char *arg)
     const char *expect; /* the returned content */
     const char *next;   /* what cp points to after the call */
     const char *home;
-    CURLcode res;
+    CURLcode result;
   };
 
 #if defined(CURL_GNUC_DIAG) || defined(__clang__)
@@ -85,14 +85,14 @@ static CURLcode test_unit2604(const char *arg)
   for(i = 0; list[i].home; i++) {
     char *path;
     const char *cp = i == 0 ? cp0 : list[i].cp;
-    CURLcode res = Curl_get_pathname(&cp, &path, list[i].home);
+    CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
     curl_mprintf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
-                 list[i].cp, list[i].home, list[i].res);
-    if(res != list[i].res) {
-      curl_mprintf("... returned %d\n", res);
+                 list[i].cp, list[i].home, list[i].result);
+    if(result != list[i].result) {
+      curl_mprintf("... returned %d\n", result);
       unitfail++;
     }
-    if(!res) {
+    if(!result) {
       if(cp && strcmp(cp, list[i].next)) {
         curl_mprintf("... cp points to '%s', not '%s' as expected \n",
                      cp, list[i].next);

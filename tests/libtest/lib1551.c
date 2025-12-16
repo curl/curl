@@ -28,7 +28,7 @@
 static CURLcode test_lib1551(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
@@ -36,16 +36,16 @@ static CURLcode test_lib1551(const char *URL)
     curl_easy_setopt(curl, CURLOPT_URL, URL);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    res = curl_easy_perform(curl);
-    if(res)
+    result = curl_easy_perform(curl);
+    if(result)
       goto test_cleanup;
 
     curl_mfprintf(stderr, "****************************** Do it again\n");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 
 test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return res;
+  return result;
 }

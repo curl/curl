@@ -33,7 +33,7 @@
 static CURLcode test_lib505(const char *URL)
 {
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   char errbuf[STRERROR_LEN];
   FILE *hd_src;
   int hd;
@@ -130,7 +130,7 @@ static CURLcode test_lib505(const char *URL)
   test_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
 
   /* Now run off and do what you have been told! */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
 test_cleanup:
 
@@ -143,5 +143,5 @@ test_cleanup:
   curl_easy_cleanup(curl);
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

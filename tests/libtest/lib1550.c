@@ -28,7 +28,7 @@
 static CURLcode test_lib1550(const char *URL)
 {
   CURLM *multi;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   static const char * const bl_servers[] =
      { "Microsoft-IIS/6.0", "nginx/0.8.54", NULL };
   static const char * const bl_sites[] =

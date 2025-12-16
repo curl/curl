@@ -28,7 +28,7 @@
 
 static CURLcode t1606_setup(struct Curl_easy **easy)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
   *easy = curl_easy_init();
@@ -36,7 +36,7 @@ static CURLcode t1606_setup(struct Curl_easy **easy)
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
-  return res;
+  return result;
 }
 
 static void t1606_stop(struct Curl_easy *easy)
@@ -53,7 +53,7 @@ static int runawhile(struct Curl_easy *easy,
 {
   int counter = 1;
   struct curltime now = { 1, 0 };
-  CURLcode res;
+  CURLcode result;
   int finaltime;
 
   curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
@@ -63,8 +63,8 @@ static int runawhile(struct Curl_easy *easy,
   do {
     /* fake the current transfer speed */
     easy->progress.current_speed = speed;
-    res = pgrs_speedcheck(easy, &now);
-    if(res)
+    result = pgrs_speedcheck(easy, &now);
+    if(result)
       break;
     /* step the time */
     now.tv_sec = ++counter;

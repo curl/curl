@@ -34,14 +34,14 @@ static CURLcode test_lib543(const char *URL)
   };
 
   CURL *curl;
-  CURLcode res = CURLE_OK;
+  CURLcode result = CURLE_OK;
   (void)URL;
 
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(!curl) {
     curl_mfprintf(stderr, "curl_easy_init() failed\n");
-    res = TEST_ERR_MAJOR_BAD;
+    result = TEST_ERR_MAJOR_BAD;
   }
   else {
     int asize = (int)sizeof(a);
@@ -67,5 +67,5 @@ static CURLcode test_lib543(const char *URL)
   }
   curl_global_cleanup();
 
-  return res;
+  return result;
 }

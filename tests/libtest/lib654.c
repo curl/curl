@@ -66,7 +66,7 @@ static CURLcode test_lib654(const char *URL)
   curl_mime *mime = NULL;
   curl_mimepart *part;
   struct curl_slist *hdrs = NULL;
-  CURLcode res = TEST_ERR_FAILURE;
+  CURLcode result = TEST_ERR_FAILURE;
   struct t654_WriteThis pooh;
 
   /*
@@ -117,7 +117,7 @@ static CURLcode test_lib654(const char *URL)
   curl2 = curl_easy_duphandle(curl);
   if(!curl2) {
     curl_mfprintf(stderr, "curl_easy_duphandle() failed\n");
-    res = TEST_ERR_FAILURE;
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -127,16 +127,16 @@ static CURLcode test_lib654(const char *URL)
   mime = NULL;  /* Already cleaned up. */
 
   /* Perform on the first handle: should not send any data. */
-  res = curl_easy_perform(curl);
-  if(res != CURLE_OK) {
+  result = curl_easy_perform(curl);
+  if(result != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_perform(original) failed\n");
     goto test_cleanup;
   }
 
   /* Perform on the second handle: if the bound mime structure has not been
      duplicated properly, it should cause a valgrind error. */
-  res = curl_easy_perform(curl2);
-  if(res != CURLE_OK) {
+  result = curl_easy_perform(curl2);
+  if(result != CURLE_OK) {
     curl_mfprintf(stderr, "curl_easy_perform(duplicated) failed\n");
     goto test_cleanup;
   }
@@ -150,7 +150,7 @@ static CURLcode test_lib654(const char *URL)
   if(pooh.freecount != 2) {
     curl_mfprintf(stderr, "free_callback() called %d times instead of 2\n",
                   pooh.freecount);
-    res = TEST_ERR_FAILURE;
+    result = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
@@ -159,5 +159,5 @@ test_cleanup:
   curl_easy_cleanup(curl2);
   curl_mime_free(mime);
   curl_global_cleanup();
-  return res;
+  return result;
 }
