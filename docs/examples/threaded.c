@@ -59,10 +59,10 @@ struct targ {
 static void *pull_one_url(void *p)
 {
   CURL *curl;
-  struct targ *targ = p;
 
   curl = curl_easy_init();
   if(curl) {
+    struct targ *targ = p;
     curl_easy_setopt(curl, CURLOPT_URL, targ->url);
     (void)curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
