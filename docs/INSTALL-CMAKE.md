@@ -409,8 +409,10 @@ Details via CMake
 - `BROTLI_INCLUDE_DIR`:                     Absolute path to brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Absolute path to `brotlicommon` library.
 - `BROTLIDEC_LIBRARY`:                      Absolute path to `brotlidec` library.
+- `BROTLI_USE_STATIC_LIBS`:                 Configure for static brotli libraries.
 - `CARES_INCLUDE_DIR`:                      Absolute path to c-ares include directory.
 - `CARES_LIBRARY`:                          Absolute path to `cares` library.
+- `CARES_USE_STATIC_LIBS`:                  Configure for static c-ares libraries.
 - `DL_LIBRARY`:                             Absolute path to `dl` library. (for Rustls)
 - `GNUTLS_INCLUDE_DIR`:                     Absolute path to GnuTLS include directory.
 - `GNUTLS_LIBRARY`:                         Absolute path to `gnutls` library.
@@ -430,8 +432,10 @@ Details via CMake
 - `LIBRTMP_LIBRARY`:                        Absolute path to `librtmp` library.
 - `LIBSSH_INCLUDE_DIR`:                     Absolute path to libssh include directory.
 - `LIBSSH_LIBRARY`:                         Absolute path to `libssh` library.
+- `LIBSSH_USE_STATIC_LIBS`:                 Configure for static libssh libraries.
 - `LIBSSH2_INCLUDE_DIR`:                    Absolute path to libssh2 include directory.
 - `LIBSSH2_LIBRARY`:                        Absolute path to `libssh2` library.
+- `LIBSSH2_USE_STATIC_LIBS`:                Configure for static libssh2 libraries.
 - `LIBUV_INCLUDE_DIR`:                      Absolute path to libuv include directory.
 - `LIBUV_LIBRARY`:                          Absolute path to `libuv` library.
 - `MATH_LIBRARY`:                           Absolute path to `m` library. (for Rustls, wolfSSL)
@@ -439,10 +443,13 @@ Details via CMake
 - `MBEDTLS_LIBRARY`:                        Absolute path to `mbedtls` library.
 - `MBEDX509_LIBRARY`:                       Absolute path to `mbedx509` library.
 - `MBEDCRYPTO_LIBRARY`:                     Absolute path to `mbedcrypto` library.
+- `MBEDTLS_USE_STATIC_LIBS`:                Configure for static mbedTLS libraries.
 - `NGHTTP2_INCLUDE_DIR`:                    Absolute path to nghttp2 include directory.
 - `NGHTTP2_LIBRARY`:                        Absolute path to `nghttp2` library.
+- `NGHTTP2_USE_STATIC_LIBS`:                Configure for static nghttp2 libraries.
 - `NGHTTP3_INCLUDE_DIR`:                    Absolute path to nghttp3 include directory.
 - `NGHTTP3_LIBRARY`:                        Absolute path to `nghttp3` library.
+- `NGHTTP3_USE_STATIC_LIBS`:                Configure for static nghttp3 libraries.
 - `NGTCP2_INCLUDE_DIR`:                     Absolute path to ngtcp2 include directory.
 - `NGTCP2_LIBRARY`:                         Absolute path to `ngtcp2` library.
 - `NGTCP2_CRYPTO_BORINGSSL_LIBRARY`:        Absolute path to `ngtcp2_crypto_boringssl` library. (also for AWS-LC)
@@ -451,6 +458,7 @@ Details via CMake
 - `NGTCP2_CRYPTO_OSSL_LIBRARY`:             Absolute path to `ngtcp2_crypto_ossl` library.
 - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:          Absolute path to `ngtcp2_crypto_quictls` library. (also for LibreSSL with ngtcp2 <1.15.0)
 - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:          Absolute path to `ngtcp2_crypto_wolfssl` library.
+- `NGTCP2_USE_STATIC_LIBS`:                 Configure for static ngtcp2 libraries.
 - `NETTLE_INCLUDE_DIR`:                     Absolute path to nettle include directory.
 - `NETTLE_LIBRARY`:                         Absolute path to `nettle` library.
 - `PTHREAD_LIBRARY`:                        Absolute path to `pthread` library. (for Rustls)
@@ -463,6 +471,7 @@ Details via CMake
 - `WOLFSSL_LIBRARY`:                        Absolute path to `wolfssl` library.
 - `ZSTD_INCLUDE_DIR`:                       Absolute path to zstd include directory.
 - `ZSTD_LIBRARY`:                           Absolute path to `zstd` library.
+- `ZSTD_USE_STATIC_LIBS`:                   Configure for static zstd libraries.
 
 Examples:
 

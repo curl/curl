@@ -25,16 +25,17 @@
 #
 # Input variables:
 #
-# - `MBEDTLS_INCLUDE_DIR`:  Absolute path to mbedTLS include directory.
-# - `MBEDTLS_LIBRARY`:      Absolute path to `mbedtls` library.
-# - `MBEDX509_LIBRARY`:     Absolute path to `mbedx509` library.
-# - `MBEDCRYPTO_LIBRARY`:   Absolute path to `mbedcrypto` library.
+# - `MBEDTLS_INCLUDE_DIR`:      Absolute path to mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:          Absolute path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:         Absolute path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:       Absolute path to `mbedcrypto` library.
+# - `MBEDTLS_USE_STATIC_LIBS`:  Configure for static mbedTLS libraries.
 #
 # Defines:
 #
-# - `MBEDTLS_FOUND`:        System has mbedTLS.
-# - `MBEDTLS_VERSION`:      Version of mbedTLS.
-# - `CURL::mbedtls`:        mbedTLS library target.
+# - `MBEDTLS_FOUND`:            System has mbedTLS.
+# - `MBEDTLS_VERSION`:          Version of mbedTLS.
+# - `CURL::mbedtls`:            mbedTLS library target.
 
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")
@@ -57,14 +58,26 @@ if(_mbedtls_FOUND)
   set(MbedTLS_FOUND TRUE)
   set(MBEDTLS_FOUND TRUE)
   set(MBEDTLS_VERSION ${_mbedtls_mbedtls_VERSION})
+  if(MBEDTLS_USE_STATIC_LIBS)
+    set(_mbedtls_CFLAGS       "${_mbedtls_STATIC_CFLAGS}")
+    set(_mbedtls_INCLUDE_DIRS "${_mbedtls_STATIC_INCLUDE_DIRS}")
+    set(_mbedtls_LIBRARY_DIRS "${_mbedtls_STATIC_LIBRARY_DIRS}")
+    set(_mbedtls_LIBRARIES    "${_mbedtls_STATIC_LIBRARIES}")
+  endif()
   message(STATUS "Found MbedTLS (via pkg-config): ${_mbedtls_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
   set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h")
-  find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls")
-  find_library(MBEDX509_LIBRARY NAMES "mbedx509" "libmbedx509")
-  find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto")
+  if(MBEDTLS_USE_STATIC_LIBS)
+    find_library(MBEDTLS_LIBRARY NAMES "mbedtls_static" "libmbedtls_static" "mbedtls" "libmbedtls")
+    find_library(MBEDX509_LIBRARY NAMES "mbedx509_static" "libmbedx509_static" "mbedx509" "libmbedx509")
+    find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto_static" "libmbedcrypto_static" "mbedcrypto" "libmbedcrypto")
+  else()
+    find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls")
+    find_library(MBEDX509_LIBRARY NAMES "mbedx509" "libmbedx509")
+    find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto")
+  endif()
 
   unset(MBEDTLS_VERSION CACHE)
   if(MBEDTLS_INCLUDE_DIR AND EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
