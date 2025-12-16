@@ -1176,6 +1176,7 @@ CURLWS_PING                     7.86.0
 CURLWS_PONG                     7.86.0
 CURLWS_RAW_MODE                 7.86.0
 CURLWS_TEXT                     7.86.0
+CURLWS_UPGRD_REFUSED_OK         8.19.0
 LIBCURL_COPYRIGHT               7.18.0
 LIBCURL_TIMESTAMP               7.16.2
 LIBCURL_VERSION                 7.1.1
