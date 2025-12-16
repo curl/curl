@@ -151,14 +151,26 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
   }
   else {
 #ifdef USE_WINSOCK
-/* Offered by mingw-w64 v12+. MS SDK ~10+/~VS2017+. */
-#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
     /* Windows 10, version 1709 (10.0.16299) and later versions can use
        setsockopt() TCP_KEEP*. Older versions return with failure. */
     if(curlx_verify_windows_version(10, 0, 16299, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
       CURL_TRC_CF(data, cf, "Set TCP_KEEP* on fd=%" FMT_SOCKET_T, sockfd);
       optval = curlx_sltosi(data->set.tcp_keepidle);
+/* Offered by mingw-w64 v12+. MS SDK 6.0A+. */
+#ifndef TCP_KEEPALIVE
+#define TCP_KEEPALIVE 3
+#endif
+/* Offered by mingw-w64 v12+. MS SDK ~10+/~VS2017+. */
+#ifndef TCP_KEEPCNT
+#define TCP_KEEPCNT 16
+#endif
+#ifndef TCP_KEEPIDLE
+#define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+#ifndef TCP_KEEPINTVL
+#define TCP_KEEPINTVL 17
+#endif
       if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
                     (const char *)&optval, sizeof(optval)) < 0) {
         CURL_TRC_CF(data, cf, "Failed to set TCP_KEEPIDLE on fd "
@@ -178,7 +190,6 @@ static void tcpkeepalive(struct Curl_cfilter *cf,
       }
     }
     else
-#endif /* TCP_KEEPIDLE && TCP_KEEPINTVL && TCP_KEEPCNT */
     {
 /* Offered by mingw-w64 and MS SDK. Latter only when targeting Win7+. */
 #ifndef SIO_KEEPALIVE_VALS
