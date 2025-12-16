@@ -240,7 +240,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #ifdef USE_IPV6
   struct sockaddr_in6 *si6 = NULL;
 #endif
-#if (defined(HAVE_SYS_UN_H) || defined(_WIN32)) && defined(USE_UNIX_SOCKETS)
+#ifdef USE_UNIX_SOCKETS
   struct sockaddr_un *su = NULL;
 #else
   (void)salen;
@@ -263,7 +263,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
     }
     break;
 #endif
-#if (defined(HAVE_SYS_UN_H) || defined(_WIN32)) && defined(USE_UNIX_SOCKETS)
+#ifdef USE_UNIX_SOCKETS
   case AF_UNIX:
     if(salen > (curl_socklen_t)sizeof(CURL_SA_FAMILY_T)) {
       su = (struct sockaddr_un *)sa;
