@@ -25,8 +25,18 @@
  * A multi-threaded program using pthreads to fetch several files at once
  * </DESC>
  */
+/* A multi-threaded example that uses pthreads and fetches 4 remote files at
+ * once over HTTPS.
+ *
+ * Recent versions of OpenSSL and GnuTLS are thread-safe by design, assuming
+ * support for the underlying OS threading API is built-in. Older revisions
+ * of this example demonstrated locking callbacks for the SSL library, which
+ * are no longer necessary. An older revision with callbacks can be found at
+ * https://github.com/curl/curl/blob/curl-7_88_1/docs/examples/threaded-ssl.c
+ */
 
 /* Requires: HAVE_PTHREAD_H */
+/* Also requires TLS support to run */
 
 #include <stdio.h>
 
@@ -36,15 +46,7 @@
 
 #define NUMT 4
 
-/*
-  List of URLs to fetch.
-
-  If you intend to use an SSL-based protocol here you might need to setup TLS
-  library mutex callbacks as described here:
-
-  https://curl.se/libcurl/c/threadsafe.html
-
-*/
+/* List of URLs to fetch. */
 static const char * const urls[] = {
   "https://curl.se/",
   "ftp://example.com/",
@@ -64,6 +66,10 @@ static void *pull_one_url(void *p)
   if(curl) {
     struct targ *targ = p;
     curl_easy_setopt(curl, CURLOPT_URL, targ->url);
+    /* this example does not verify the server's certificate, which means we
+       might be downloading stuff from an impostor */
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     (void)curl_easy_perform(curl); /* ignores error */
     curl_easy_cleanup(curl);
   }
