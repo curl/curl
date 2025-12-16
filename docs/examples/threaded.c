@@ -45,7 +45,7 @@
   https://curl.se/libcurl/c/threadsafe.html
 
 */
-static const char * const urls[NUMT] = {
+static const char * const urls[] = {
   "https://curl.se/",
   "ftp://example.com/",
   "https://example.net/",

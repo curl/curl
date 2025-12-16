@@ -47,12 +47,12 @@
 
 #define NUMT 4
 
-/* List of URLs to fetch.*/
+/* List of URLs to fetch. */
 static const char * const urls[] = {
   "https://www.example.com/",
   "https://www2.example.com/",
   "https://www3.example.com/",
-  "https://www4.example.com/",
+  "https://www4.example.com/"
 };
 
 static void *pull_one_url(void *pindex)
@@ -74,13 +74,11 @@ static void *pull_one_url(void *pindex)
   return NULL;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURLcode res;
   pthread_t tid[NUMT];
   int i;
-  (void)argc;
-  (void)argv;
 
   /* Must initialize libcurl before any threads are started */
   res = curl_global_init(CURL_GLOBAL_ALL);
