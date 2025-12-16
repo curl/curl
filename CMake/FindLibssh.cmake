@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `LIBSSH_INCLUDE_DIR`:  Absolute path to libssh include directory.
-# - `LIBSSH_LIBRARY`:      Absolute path to `libssh` library.
+# - `LIBSSH_INCLUDE_DIR`:      Absolute path to libssh include directory.
+# - `LIBSSH_LIBRARY`:          Absolute path to `libssh` library.
+# - `LIBSSH_USE_STATIC_LIBS`:  To configure for static `libssh` library.
 #
 # Defines:
 #
-# - `LIBSSH_FOUND`:        System has libssh.
-# - `LIBSSH_VERSION`:      Version of libssh.
-# - `CURL::libssh`:        libssh library target.
+# - `LIBSSH_FOUND`:            System has libssh.
+# - `LIBSSH_VERSION`:          Version of libssh.
+# - `CURL::libssh`:            libssh library target.
 
 set(_libssh_pc_requires "libssh")
 
@@ -105,6 +106,7 @@ if(LIBSSH_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_libssh_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_libssh_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_libssh_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_libssh_LIBRARIES}")
+      INTERFACE_LINK_LIBRARIES "${_libssh_LIBRARIES}"
+      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:LIBSSH_USE_STATIC_LIBS>:LIBSSH_STATIC>")
   endif()
 endif()

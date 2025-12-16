@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `NGHTTP3_INCLUDE_DIR`:  Absolute path to nghttp3 include directory.
-# - `NGHTTP3_LIBRARY`:      Absolute path to `nghttp3` library.
+# - `NGHTTP3_INCLUDE_DIR`:      Absolute path to nghttp3 include directory.
+# - `NGHTTP3_LIBRARY`:          Absolute path to `nghttp3` library.
+# - `NGHTTP3_USE_STATIC_LIBS`:  To configure for static `nghttp3` library.
 #
 # Defines:
 #
-# - `NGHTTP3_FOUND`:        System has nghttp3.
-# - `NGHTTP3_VERSION`:      Version of nghttp3.
-# - `CURL::nghttp3`:        nghttp3 library target.
+# - `NGHTTP3_FOUND`:            System has nghttp3.
+# - `NGHTTP3_VERSION`:          Version of nghttp3.
+# - `CURL::nghttp3`:            nghttp3 library target.
 
 set(_nghttp3_pc_requires "libnghttp3")
 
@@ -90,6 +91,7 @@ if(NGHTTP3_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_nghttp3_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_nghttp3_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_nghttp3_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_nghttp3_LIBRARIES}")
+      INTERFACE_LINK_LIBRARIES "${_nghttp3_LIBRARIES}"
+      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:NGHTTP3_USE_STATIC_LIBS>:NGHTTP3_STATICLIB>")
   endif()
 endif()

@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `NGHTTP2_INCLUDE_DIR`:  Absolute path to nghttp2 include directory.
-# - `NGHTTP2_LIBRARY`:      Absolute path to `nghttp2` library.
+# - `NGHTTP2_INCLUDE_DIR`:      Absolute path to nghttp2 include directory.
+# - `NGHTTP2_LIBRARY`:          Absolute path to `nghttp2` library.
+# - `NGHTTP2_USE_STATIC_LIBS`:  To configure for static `nghttp2` library.
 #
 # Defines:
 #
-# - `NGHTTP2_FOUND`:        System has nghttp2.
-# - `NGHTTP2_VERSION`:      Version of nghttp2.
-# - `CURL::nghttp2`:        nghttp2 library target.
+# - `NGHTTP2_FOUND`:            System has nghttp2.
+# - `NGHTTP2_VERSION`:          Version of nghttp2.
+# - `CURL::nghttp2`:            nghttp2 library target.
 
 set(_nghttp2_pc_requires "libnghttp2")
 
@@ -90,6 +91,7 @@ if(NGHTTP2_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_nghttp2_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_nghttp2_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_nghttp2_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_nghttp2_LIBRARIES}")
+      INTERFACE_LINK_LIBRARIES "${_nghttp2_LIBRARIES}"
+      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:NGHTTP2_USE_STATIC_LIBS>:NGHTTP2_STATICLIB>")
   endif()
 endif()

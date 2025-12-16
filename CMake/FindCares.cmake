@@ -25,14 +25,15 @@
 #
 # Input variables:
 #
-# - `CARES_INCLUDE_DIR`:  Absolute path to c-ares include directory.
-# - `CARES_LIBRARY`:      Absolute path to `cares` library.
+# - `CARES_INCLUDE_DIR`:      Absolute path to c-ares include directory.
+# - `CARES_LIBRARY`:          Absolute path to `cares` library.
+# - `CARES_USE_STATIC_LIBS`:  To configure for static `cares` library.
 #
 # Defines:
 #
-# - `CARES_FOUND`:        System has c-ares.
-# - `CARES_VERSION`:      Version of c-ares.
-# - `CURL::cares`:        c-ares library target.
+# - `CARES_FOUND`:            System has c-ares.
+# - `CARES_VERSION`:          Version of c-ares.
+# - `CURL::cares`:            c-ares library target.
 
 set(_cares_pc_requires "libcares")
 
@@ -105,6 +106,7 @@ if(CARES_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_cares_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_cares_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_cares_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_cares_LIBRARIES}")
+      INTERFACE_LINK_LIBRARIES "${_cares_LIBRARIES}"
+      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:CARES_USE_STATIC_LIBS>:CARES_STATICLIB>")
   endif()
 endif()

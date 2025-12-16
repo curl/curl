@@ -43,6 +43,7 @@
 # - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Absolute path to `ngtcp2_crypto_ossl` library.
 # - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Absolute path to `ngtcp2_crypto_quictls` library.
 # - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Absolute path to `ngtcp2_crypto_wolfssl` library.
+# - `NGTCP2_USE_STATIC_LIBS`:           To configure for static ngtcp2 libraries.
 #
 # Defines:
 #
@@ -148,6 +149,7 @@ if(NGTCP2_FOUND)
       INTERFACE_COMPILE_OPTIONS "${_ngtcp2_CFLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${_ngtcp2_INCLUDE_DIRS}"
       INTERFACE_LINK_DIRECTORIES "${_ngtcp2_LIBRARY_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${_ngtcp2_LIBRARIES}")
+      INTERFACE_LINK_LIBRARIES "${_ngtcp2_LIBRARIES}"
+      INTERFACE_COMPILE_DEFINITIONS "$<$<BOOL:NGTCP2_USE_STATIC_LIBS>:NGTCP2_STATICLIB>")
   endif()
 endif()
