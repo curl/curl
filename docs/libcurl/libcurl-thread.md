@@ -17,7 +17,7 @@ libcurl-thread - libcurl thread safety
 
 # Multi-threading with libcurl
 
-libcurl is thread safe but has no internal thread synchronization. You may have
+libcurl is thread-safe but has no internal thread synchronization. You may have
 to provide your own locking should you meet any of the thread safety exceptions
 below.
 
@@ -84,10 +84,10 @@ the former signal handler while another thread should still ignore it.
 # Name resolving
 
 The **gethostbyname** or **getaddrinfo** and other name resolving system
-calls used by libcurl are provided by your operating system and must be thread
-safe. It is important that libcurl can find and use thread safe versions of
-these and other system calls, as otherwise it cannot function fully thread
-safe. Some operating systems are known to have faulty thread
+calls used by libcurl are provided by your operating system and must be
+thread-safe. It is important that libcurl can find and use thread-safe versions
+of these and other system calls, as otherwise it cannot function fully
+thread-safe. Some operating systems are known to have faulty thread
 implementations. We have previously received problem reports on *BSD (at least
 in the past, they may be working fine these days). Some operating systems that
 are known to have solid and working thread support are Linux, Solaris and
@@ -110,7 +110,7 @@ libcurl(3) section **GLOBAL CONSTANTS**.
 # Memory functions
 
 These functions, provided either by your operating system or your own
-replacements, must be thread safe. You can use curl_global_init_mem(3)
+replacements, must be thread-safe. You can use curl_global_init_mem(3)
 to set your own replacement memory functions.
 
 # Non-safe functions
