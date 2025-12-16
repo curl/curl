@@ -52,7 +52,7 @@ struct memdebug {
  * For advanced analysis, record a log file and write perl scripts to analyze
  * them!
  *
- * Do not use these with multithreaded test programs!
+ * Do not use these with multi-threaded test programs!
  */
 
 FILE *curl_dbg_logfile = NULL;

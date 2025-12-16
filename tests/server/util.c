@@ -407,7 +407,7 @@ static void exit_signal_handler(int signum)
  * SIGINT is not supported for any Win32 application. When a CTRL+C
  * interrupt occurs, Win32 operating systems generate a new thread
  * to specifically handle that interrupt. This can cause a single-thread
- * application, such as one in UNIX, to become multithreaded and cause
+ * application, such as one in UNIX, to become multi-threaded and cause
  * unexpected behavior.
  * [...]
  * The SIGKILL and SIGTERM signals are not generated under Windows.

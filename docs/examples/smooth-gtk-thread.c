@@ -22,8 +22,8 @@
  *
  ***************************************************************************/
 /* <DESC>
- * A multi threaded application that uses a progress bar to show
- * status.  It uses Gtk+ to make a smooth pulse.
+ * A multi-threaded application that uses a progress bar to show
+ * status. It uses Gtk+ to make a smooth pulse.
  * </DESC>
  */
 /*
