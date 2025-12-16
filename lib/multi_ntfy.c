@@ -199,9 +199,9 @@ CURLMcode Curl_mntfy_dispatch_all(struct Curl_multi *multi)
   multi->in_ntfy_callback = FALSE;
 
   if(multi->ntfy.failure) {
-    CURLMcode result = multi->ntfy.failure;
+    CURLMcode mresult = multi->ntfy.failure;
     multi->ntfy.failure = CURLM_OK; /* reset, once delivered */
-    return result;
+    return mresult;
   }
   return CURLM_OK;
 }
