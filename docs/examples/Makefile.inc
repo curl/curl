@@ -148,7 +148,6 @@ COMPLICATED_MAY_BUILD = \
   multi-uv.c \
   sessioninfo.c \
   threaded.c \
-  threaded-ssl.c \
   usercertinmem.c
 
 # These examples require external dependencies that may not be commonly
