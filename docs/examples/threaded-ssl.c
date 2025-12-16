@@ -55,14 +55,18 @@ static const char * const urls[] = {
   "https://www4.example.com/"
 };
 
-static void *pull_one_url(void *pindex)
+struct targ {
+  const char *url;
+};
+
+static void *pull_one_url(void *p)
 {
   CURL *curl;
 
   curl = curl_easy_init();
   if(curl) {
-    int i = *(int *)pindex;
-    curl_easy_setopt(curl, CURLOPT_URL, urls[i]);
+    struct targ *targ = p;
+    curl_easy_setopt(curl, CURLOPT_URL, targ->url);
     /* this example does not verify the server's certificate, which means we
        might be downloading stuff from an impostor */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -74,10 +78,17 @@ static void *pull_one_url(void *pindex)
   return NULL;
 }
 
+/*
+   int pthread_create(pthread_t *new_thread_ID,
+                      const pthread_attr_t *attr,
+                      void * (*start_func)(void *), void *arg);
+*/
+
 int main(void)
 {
   CURLcode res;
   pthread_t tid[NUMT];
+  struct targ targs[NUMT];
   int i;
 
   /* Must initialize libcurl before any threads are started */
@@ -86,10 +97,12 @@ int main(void)
     return (int)res;
 
   for(i = 0; i < NUMT; i++) {
-    int error = pthread_create(&tid[i],
-                               NULL, /* default attributes please */
-                               pull_one_url,
-                               (void *)&i);
+    int error;
+    targs[i].url = urls[i];
+    error = pthread_create(&tid[i],
+                           NULL, /* default attributes please */
+                           pull_one_url,
+                           (void *)&targs[i]);
     if(error)
       fprintf(stderr, "Could not run thread number %d, errno %d\n", i, error);
     else

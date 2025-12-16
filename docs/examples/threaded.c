@@ -73,8 +73,8 @@ static void *pull_one_url(void *p)
 
 /*
    int pthread_create(pthread_t *new_thread_ID,
-   const pthread_attr_t *attr,
-   void * (*start_func)(void *), void *arg);
+                      const pthread_attr_t *attr,
+                      void * (*start_func)(void *), void *arg);
 */
 
 int main(void)
