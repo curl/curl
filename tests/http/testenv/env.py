@@ -215,110 +215,92 @@ class EnvConfig:
         self._nghttpx_version = None
         self.nghttpx_with_h3 = False
         if self.nghttpx is not None:
-            try:
-                self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
-                self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
-            except RuntimeError:
-                # not a working nghttpx
-                log.exception('checking nghttpx version')
-                self.nghttpx = None
+            self._nghttpx_version = NghttpxUtil.version(self.nghttpx)
+            self.nghttpx_with_h3 = NghttpxUtil.version_with_h3(self._nghttpx_version)
 
         self.caddy = self.config['caddy']['caddy']
         self._caddy_version = None
         if len(self.caddy.strip()) == 0:
             self.caddy = None
         if self.caddy is not None:
-            try:
-                p = subprocess.run(args=[self.caddy, 'version'],
-                                   capture_output=True, text=True)
-                if p.returncode != 0:
-                    # not a working caddy
-                    self.caddy = None
-                m = re.match(r'v?(\d+\.\d+\.\d+).*', p.stdout)
-                if m:
-                    self._caddy_version = m.group(1)
-                else:
-                    raise RuntimeError(f'Unable to determine cadd version from: {p.stdout}')
-            # TODO: specify specific exceptions here
-            except:  # noqa: E722
+            p = subprocess.run(args=[self.caddy, 'version'],
+                               capture_output=True, text=True)
+            if p.returncode != 0:
+                # not a working caddy
                 self.caddy = None
+            m = re.match(r'v?(\d+\.\d+\.\d+).*', p.stdout)
+            if m:
+                self._caddy_version = m.group(1)
+            else:
+                raise RuntimeError(f'Unable to determine cadd version from: {p.stdout}')
 
         self.vsftpd = self.config['vsftpd']['vsftpd']
         if self.vsftpd == '':
             self.vsftpd = None
         self._vsftpd_version = None
         if self.vsftpd is not None:
-            try:
-                with tempfile.TemporaryFile('w+') as tmp:
-                    p = subprocess.run(args=[self.vsftpd, '-v'],
-                                       capture_output=True, text=True, stdin=tmp)
-                    if p.returncode != 0:
-                        # not a working vsftpd
-                        self.vsftpd = None
-                    if p.stderr:
-                        ver_text = p.stderr
-                    else:
-                        # Oddly, some versions of vsftpd write to stdin (!)
-                        # instead of stderr, which is odd but works. If there
-                        # is nothing on stderr, read the file on stdin and use
-                        # any data there instead.
-                        tmp.seek(0)
-                        ver_text = tmp.read()
-                m = re.match(r'vsftpd: version (\d+\.\d+\.\d+)', ver_text)
-                if m:
-                    self._vsftpd_version = m.group(1)
-                elif len(p.stderr) == 0:
-                    # vsftp does not use stdout or stderr for printing its version... -.-
-                    self._vsftpd_version = 'unknown'
+            with tempfile.TemporaryFile('w+') as tmp:
+                p = subprocess.run(args=[self.vsftpd, '-v'],
+                                   capture_output=True, text=True, stdin=tmp)
+                if p.returncode != 0:
+                    # not a working vsftpd
+                    self.vsftpd = None
+                if p.stderr:
+                    ver_text = p.stderr
                 else:
-                    raise Exception(f'Unable to determine VsFTPD version from: {p.stderr}')
-            except Exception:
-                self.vsftpd = None
+                    # Oddly, some versions of vsftpd write to stdin (!)
+                    # instead of stderr, which is odd but works. If there
+                    # is nothing on stderr, read the file on stdin and use
+                    # any data there instead.
+                    tmp.seek(0)
+                    ver_text = tmp.read()
+            m = re.match(r'vsftpd: version (\d+\.\d+\.\d+)', ver_text)
+            if m:
+                self._vsftpd_version = m.group(1)
+            elif len(p.stderr) == 0:
+                # vsftp does not use stdout or stderr for printing its version... -.-
+                self._vsftpd_version = 'unknown'
+            else:
+                raise Exception(f'Unable to determine VsFTPD version from: {p.stderr}')
 
         self.danted = self.config['danted']['danted']
         if self.danted == '':
             self.danted = None
         self._danted_version = None
         if self.danted is not None:
-            try:
-                p = subprocess.run(args=[self.danted, '-v'],
-                                   capture_output=True, text=True)
-                assert p.returncode == 0
-                if p.returncode != 0:
-                    # not a working vsftpd
-                    self.danted = None
-                m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
-                if not m:
-                    m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
-                if m:
-                    self._danted_version = m.group(1)
-                else:
-                    self.danted = None
-                    raise Exception(f'Unable to determine danted version from: {p.stderr}')
-            except Exception:
+            p = subprocess.run(args=[self.danted, '-v'],
+                               capture_output=True, text=True)
+            assert p.returncode == 0
+            if p.returncode != 0:
+                # not a working vsftpd
                 self.danted = None
+            m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stdout)
+            if not m:
+                m = re.match(r'^Dante v(\d+\.\d+\.\d+).*', p.stderr)
+            if m:
+                self._danted_version = m.group(1)
+            else:
+                self.danted = None
+                raise Exception(f'Unable to determine danted version from: {p.stderr}')
 
         self.sshd = self.config['sshd']['sshd']
         if self.sshd == '':
             self.sshd = None
         self._sshd_version = None
         if self.sshd is not None:
-            try:
-                p = subprocess.run(args=[self.sshd, '-V'],
-                                   capture_output=True, text=True)
-                assert p.returncode == 0
-                if p.returncode != 0:
-                    self.sshd = None
-                else:
-                    m = re.match(r'^OpenSSH_(\d+\.\d+.*),.*', p.stderr)
-                    assert m, f'version: {p.stderr}'
-                    if m:
-                        self._sshd_version = m.group(1)
-                    else:
-                        self.sshd = None
-                        raise Exception(f'Unable to determine sshd version from: {p.stderr}')
-            except Exception:
+            p = subprocess.run(args=[self.sshd, '-V'],
+                               capture_output=True, text=True)
+            assert p.returncode == 0
+            if p.returncode != 0:
                 self.sshd = None
+            else:
+                m = re.match(r'^OpenSSH_(\d+\.\d+.*),.*', p.stderr)
+                assert m, f'version: {p.stderr}'
+                if m:
+                    self._sshd_version = m.group(1)
+                else:
+                    self.sshd = None
+                    raise Exception(f'Unable to determine sshd version from: {p.stderr}')
 
         if self.sshd:
             self.sftpd = self.config['sshd']['sftpd']
