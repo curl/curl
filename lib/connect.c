@@ -244,6 +244,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
   struct sockaddr_un *su = NULL;
 #else
   (void)salen;
+#warning "connect.c: !USE_UNIX_SOCKETS"
 #endif
 
   switch(sa->sa_family) {
