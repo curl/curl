@@ -189,7 +189,7 @@ static void check_multi_info(struct GlobalInfo *g)
 static void event_cb(EV_P_ struct ev_io *w, int revents)
 {
   struct GlobalInfo *g;
-  CURLMcode rc;
+  CURLMcode mresult;
   int action;
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
@@ -197,8 +197,8 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
 
   action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
            ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
-  rc = curl_multi_socket_action(g->multi, w->fd, action, &g->still_running);
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+  mresult = curl_multi_socket_action(g->multi, w->fd, action, &g->still_running);
+  mcode_or_die("event_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
   if(g->still_running <= 0) {
     fprintf(MSG_OUT, "last transfer done, kill timeout\n");
@@ -210,15 +210,15 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
 static void timer_cb(EV_P_ struct ev_timer *w, int revents)
 {
   struct GlobalInfo *g;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   printf("%s  w %p revents %i\n", __PRETTY_FUNCTION__, (void *)w, revents);
 
   g = (struct GlobalInfo *)w->data;
 
-  rc = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
+  mresult = curl_multi_socket_action(g->multi, CURL_SOCKET_TIMEOUT, 0,
                                 &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
 }
 
@@ -321,7 +321,7 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
 static void new_conn(const char *url, struct GlobalInfo *g)
 {
   struct ConnInfo *conn;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   conn = calloc(1, sizeof(*conn));
   conn->error[0] = '\0';
@@ -347,8 +347,8 @@ static void new_conn(const char *url, struct GlobalInfo *g)
 
   fprintf(MSG_OUT, "Adding easy %p to multi %p (%s)\n",
           conn->curl, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->curl);
-  mcode_or_die("new_conn: curl_multi_add_handle", rc);
+  mresult = curl_multi_add_handle(g->multi, conn->curl);
+  mcode_or_die("new_conn: curl_multi_add_handle", mresult);
 
   /* note that add_handle() sets a timeout to trigger soon so that the
      necessary socket_action() gets called */

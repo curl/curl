@@ -156,11 +156,11 @@ static void check_multi_info(struct GlobalInfo *g)
 static gboolean timer_cb(gpointer data)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)data;
-  CURLMcode rc;
+  CURLMcode mresult;
 
-  rc = curl_multi_socket_action(g->multi,
+  mresult = curl_multi_socket_action(g->multi,
                                 CURL_SOCKET_TIMEOUT, 0, &g->still_running);
-  mcode_or_die("timer_cb: curl_multi_socket_action", rc);
+  mcode_or_die("timer_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
   return FALSE;
 }
@@ -191,15 +191,15 @@ static int update_timeout_cb(CURLM *multi, long timeout_ms, void *userp)
 static gboolean event_cb(GIOChannel *ch, GIOCondition condition, gpointer data)
 {
   struct GlobalInfo *g = (struct GlobalInfo *)data;
-  CURLMcode rc;
+  CURLMcode mresult;
   int fd = g_io_channel_unix_get_fd(ch);
 
   int action =
     ((condition & G_IO_IN) ? CURL_CSELECT_IN : 0) |
     ((condition & G_IO_OUT) ? CURL_CSELECT_OUT : 0);
 
-  rc = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
-  mcode_or_die("event_cb: curl_multi_socket_action", rc);
+  mresult = curl_multi_socket_action(g->multi, fd, action, &g->still_running);
+  mcode_or_die("event_cb: curl_multi_socket_action", mresult);
 
   check_multi_info(g);
   if(g->still_running) {
@@ -309,7 +309,7 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
 static void new_conn(const char *url, struct GlobalInfo *g)
 {
   struct ConnInfo *conn;
-  CURLMcode rc;
+  CURLMcode mresult;
 
   conn = g_malloc0(sizeof(*conn));
   conn->error[0] = '\0';
@@ -335,8 +335,8 @@ static void new_conn(const char *url, struct GlobalInfo *g)
   curl_easy_setopt(conn->curl, CURLOPT_LOW_SPEED_TIME, 30L);
 
   MSG_OUT("Adding easy %p to multi %p (%s)\n", conn->curl, g->multi, url);
-  rc = curl_multi_add_handle(g->multi, conn->curl);
-  mcode_or_die("new_conn: curl_multi_add_handle", rc);
+  mresult = curl_multi_add_handle(g->multi, conn->curl);
+  mcode_or_die("new_conn: curl_multi_add_handle", mresult);
 
   /* note that add_handle() sets a timeout to trigger soon so that the
      necessary socket_action() gets called */

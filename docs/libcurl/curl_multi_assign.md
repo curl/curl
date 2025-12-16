@@ -60,9 +60,9 @@ int main(void)
   curl_socket_t fd = 0; /* file descriptor to associate our data with */
 
   /* make our struct pointer associated with socket fd */
-  CURLMcode mc = curl_multi_assign(multi, fd, &private);
-  if(mc)
-    printf("error: %s\n", curl_multi_strerror(mc));
+  CURLMcode mresult = curl_multi_assign(multi, fd, &private);
+  if(mresult)
+    printf("error: %s\n", curl_multi_strerror(mresult));
 }
 ~~~
 

@@ -108,12 +108,12 @@ int main(void)
   curl_multi_add_handle(multi_handle, easy_handle);
 
   do {
-    CURLMcode mc;
+    CURLMcode mresult;
     int numfds;
 
-    mc = curl_multi_perform(multi_handle, &still_running);
+    mresult = curl_multi_perform(multi_handle, &still_running);
 
-    if(mc == CURLM_OK) {
+    if(mresult == CURLM_OK) {
       struct curl_waitfd myown;
       myown.fd = myfd;
       myown.events = CURL_WAIT_POLLIN; /* wait for input */
@@ -121,7 +121,7 @@ int main(void)
 
       /* wait for activity on curl's descriptors or on our own,
          or timeout */
-      mc = curl_multi_poll(multi_handle, &myown, 1, 1000, &numfds);
+      mresult = curl_multi_poll(multi_handle, &myown, 1, 1000, &numfds);
 
       if(myown.revents) {
         /* did our descriptor receive an event? */
@@ -129,8 +129,8 @@ int main(void)
       }
     }
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      fprintf(stderr, "curl_multi failed, code %d.\n", mresult);
       break;
     }
 

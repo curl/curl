@@ -86,7 +86,7 @@ int main(void)
 
       struct timeval timeout;
       int rc;       /* select() return code */
-      CURLMcode mc; /* curl_multi_fdset() return code */
+      CURLMcode mresult; /* curl_multi_fdset() return code */
 
       fd_set fdread;
       fd_set fdwrite;
@@ -121,10 +121,10 @@ int main(void)
       }
 
       /* get file descriptors from the transfers */
-      mc = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
+      mresult = curl_multi_fdset(multi, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-      if(mc != CURLM_OK) {
-        fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mc);
+      if(mresult != CURLM_OK) {
+        fprintf(stderr, "curl_multi_fdset() failed, code %d.\n", mresult);
         break;
       }
 

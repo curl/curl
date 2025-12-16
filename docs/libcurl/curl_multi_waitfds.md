@@ -62,7 +62,7 @@ than or equal to the number of descriptors.
 
 int main(void)
 {
-  CURLMcode mc;
+  CURLMcode mresult;
   struct curl_waitfd *ufds;
 
   CURLM *multi = curl_multi_init();
@@ -73,10 +73,10 @@ int main(void)
     /* get the count of file descriptors from the transfers */
     unsigned int fd_count = 0;
 
-    mc = curl_multi_waitfds(multi, NULL, 0, &fd_count);
+    mresult = curl_multi_waitfds(multi, NULL, 0, &fd_count);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mresult);
       break;
     }
 
@@ -87,10 +87,10 @@ int main(void)
     ufds = malloc(fd_count * sizeof(struct curl_waitfd));
 
     /* get wait descriptors from the transfers and put them into array. */
-    mc = curl_multi_waitfds(multi, ufds, fd_count, &fd_count);
+    mresult = curl_multi_waitfds(multi, ufds, fd_count, &fd_count);
 
-    if(mc != CURLM_OK) {
-      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
+    if(mresult != CURLM_OK) {
+      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mresult);
       free(ufds);
       break;
     }
@@ -98,7 +98,7 @@ int main(void)
     /* Do polling on descriptors in ufds */
 
     free(ufds);
-  } while(!mc);
+  } while(!mresult);
 }
 ~~~
 
