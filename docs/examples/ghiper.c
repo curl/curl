@@ -138,12 +138,12 @@ static void check_multi_info(struct GlobalInfo *g)
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
       CURL *curl = msg->easy_handle;
-      CURLcode res = msg->data.result;
+      CURLcode result = msg->data.result;
       char *eff_url;
       struct ConnInfo *conn;
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
-      MSG_OUT("DONE: %s => (%d) %s\n", eff_url, res, conn->error);
+      MSG_OUT("DONE: %s => (%d) %s\n", eff_url, result, conn->error);
       curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
       curl_easy_cleanup(curl);
@@ -433,9 +433,9 @@ int main(void)
   int fd;
   GIOChannel *ch;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   fd = init_fifo();
   if(fd == CURL_SOCKET_BAD) {

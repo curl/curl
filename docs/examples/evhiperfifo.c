@@ -173,10 +173,10 @@ static void check_multi_info(struct GlobalInfo *g)
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
       CURL *curl = msg->easy_handle;
-      CURLcode res = msg->data.result;
+      CURLcode result = msg->data.result;
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
-      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, res, conn->error);
+      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
       curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
       curl_easy_cleanup(curl);
@@ -197,7 +197,8 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
 
   action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
            ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
-  mresult = curl_multi_socket_action(g->multi, w->fd, action, &g->still_running);
+  mresult = curl_multi_socket_action(g->multi, w->fd, action,
+                                     &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", mresult);
   check_multi_info(g);
   if(g->still_running <= 0) {
@@ -411,14 +412,14 @@ static int init_fifo(struct GlobalInfo *g)
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   struct GlobalInfo g;
   (void)argc;
   (void)argv;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   memset(&g, 0, sizeof(g));
   g.loop = ev_default_loop(0);

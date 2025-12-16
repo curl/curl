@@ -34,9 +34,9 @@ int main(void)
   struct curl_slist *host;
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /*
     Each single string should be written using the format
@@ -62,7 +62,7 @@ int main(void)
     /* Letting the wrong hostname in the certificate be okay, the transfer
        goes through but (most likely) causes a 404 or similar because it sends
        an unknown name in the Host: header field */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -72,5 +72,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

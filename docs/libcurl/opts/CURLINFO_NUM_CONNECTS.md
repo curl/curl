@@ -42,14 +42,14 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK) {
       long connects;
-      res = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connects);
-      if(!res)
+      result = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connects);
+      if(!result)
         printf("It needed %ld connects\n", connects);
     }
     curl_easy_cleanup(curl);

@@ -215,7 +215,7 @@ static int server_push_callback(CURL *parent,
  */
 int main(int argc, char *argv[])
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   CURLM *multi;
   int transfers = 1; /* we start with one */
@@ -224,9 +224,9 @@ int main(int argc, char *argv[])
   if(argc == 2)
     url = argv[1];
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* init a multi stack */
   multi = curl_multi_init();

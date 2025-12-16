@@ -38,9 +38,9 @@ int main(void)
   CURL *curl;
   CURL *curl2;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   curl2 = curl_easy_init();

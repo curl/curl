@@ -46,19 +46,19 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* enable the cookie engine */
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       /* extract all known cookies */
       struct curl_slist *cookies = NULL;
-      res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-      if(!res && cookies) {
+      result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+      if(!result && cookies) {
         /* a linked list of cookies in cookie file format */
         struct curl_slist *each = cookies;
         while(each) {

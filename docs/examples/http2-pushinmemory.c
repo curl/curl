@@ -125,9 +125,9 @@ int main(void)
   int transfers = 1; /* we start with one */
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* init a multi stack */
   multi = curl_multi_init();

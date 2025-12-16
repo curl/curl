@@ -33,9 +33,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -47,7 +47,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_LOCALPORTRANGE, 10L);
     curl_easy_setopt(curl, CURLOPT_URL, "https://curl.se/");
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
@@ -55,5 +55,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

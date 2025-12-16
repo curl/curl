@@ -55,12 +55,12 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode ret;
+    CURLcode result;
     curl_off_t ridiculous = (curl_off_t)1 << 48;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* refuse to download if larger than ridiculous */
     curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE, ridiculous);
-    ret = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
   }
 }
 ~~~

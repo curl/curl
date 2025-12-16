@@ -33,9 +33,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -43,12 +43,12 @@ int main(void)
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);

@@ -48,16 +48,16 @@
 int main(int argc, char *argv[])
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
   struct curl_slist *headerlist = NULL;
   static const char buf[] = "Expect:";
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in the file upload field */
@@ -96,12 +96,12 @@ int main(int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
     )
 
-    /* Perform the request, res gets the return code */
-    res = curl_easy_perform(curl);
+    /* Perform the request, result gets the return code */
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* always cleanup */
     curl_easy_cleanup(curl);

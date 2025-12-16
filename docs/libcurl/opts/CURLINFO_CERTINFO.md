@@ -60,7 +60,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
 
     /* connect to any HTTPS site, trusted or not */
@@ -69,14 +69,14 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       int i;
       struct curl_certinfo *ci;
-      res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
+      result = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
 
-      if(!res) {
+      if(!result) {
         printf("%d certs!\n", ci->num_of_certs);
 
         for(i = 0; i < ci->num_of_certs; i++) {

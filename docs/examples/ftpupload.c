@@ -80,7 +80,7 @@ static size_t read_cb(char *ptr, size_t size, size_t nmemb, void *stream)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   FILE *hd_src;
   struct stat file_info;
   curl_off_t fsize;
@@ -106,10 +106,10 @@ int main(void)
   printf("Local file size: %" CURL_FORMAT_CURL_OFF_T " bytes.\n", fsize);
 
   /* In Windows, this inits the Winsock stuff */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result) {
     fclose(hd_src);
-    return (int)res;
+    return (int)result;
   }
 
   /* get a curl handle */
@@ -141,11 +141,11 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, fsize);
 
     /* Now run off and do what you have been told! */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     /* Check for errors */
-    if(res != CURLE_OK)
+    if(result != CURLE_OK)
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
 
     /* clean up the FTP commands list */
     curl_slist_free_all(headerlist);
@@ -156,5 +156,5 @@ int main(void)
   fclose(hd_src); /* close the local file */
 
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

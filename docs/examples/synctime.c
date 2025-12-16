@@ -189,7 +189,7 @@ static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
                                     const char *OutFileName, int HttpGetBody)
 {
   FILE *outfile;
-  CURLcode res;
+  CURLcode result;
 
   outfile = NULL;
   if(HttpGetBody == HTTP_COMMAND_HEAD)
@@ -200,10 +200,10 @@ static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, URL_Str);
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
   if(outfile)
     fclose(outfile);
-  return res; /* CURLE_OK */
+  return result; /* CURLE_OK */
 }
 
 static void showUsage(void)
@@ -228,7 +228,7 @@ static void showUsage(void)
 
 int main(int argc, char *argv[])
 {
-  CURLcode res;
+  CURLcode result;
   CURL *curl;
   struct conf conf;
   int RetValue;
@@ -274,9 +274,9 @@ int main(int argc, char *argv[])
              "https://www.ntp.org/");
 
   /* Init CURL before usage */
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {

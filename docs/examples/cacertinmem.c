@@ -119,9 +119,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -147,8 +147,8 @@ int main(void)
     /* first try: retrieve page without ca certificates -> should fail
      * unless libcurl was built --with-ca-fallback enabled at build-time
      */
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK)
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK)
       printf("*** transfer succeeded ***\n");
     else
       printf("*** transfer failed ***\n");
@@ -168,8 +168,8 @@ int main(void)
      * "modifications" to the SSL CONTEXT just before link init
      */
     curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, sslctx_function);
-    res = curl_easy_perform(curl);
-    if(res == CURLE_OK)
+    result = curl_easy_perform(curl);
+    if(result == CURLE_OK)
       printf("*** transfer succeeded ***\n");
     else
       printf("*** transfer failed ***\n");
@@ -177,5 +177,5 @@ int main(void)
     curl_easy_cleanup(curl);
   }
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

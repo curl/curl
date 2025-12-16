@@ -118,9 +118,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* Initialize a libcurl handle. */
   curl = curl_easy_init();
@@ -146,13 +146,13 @@ int main(void)
     printf("Depth   Characters   Closing Tag\n");
 
     /* Perform the request and any follow-up parsing. */
-    res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
+    result = curl_easy_perform(curl);
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
     }
     else if(state.ok) {
-      /* Expat requires one final call to finalize parsing. */
+      /* Expat requiresult one final call to finalize parsing. */
       if(XML_Parse(parser, NULL, 0, 1) == 0) {
         enum XML_Error error_code = XML_GetErrorCode(parser);
         fprintf(stderr, "Finalizing parsing failed with error code %d (%s).\n",
@@ -173,5 +173,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }
