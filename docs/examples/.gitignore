@@ -123,7 +123,6 @@ smtp-vrfy
 sslbackend
 synctime
 threaded
-threaded-ssl
 unixsocket
 url2file
 urlapi
