@@ -22,8 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Show the required mutex callback setups for GnuTLS and OpenSSL when using
- * libcurl multi-threaded.
+ * A multi-threaded program using pthreads to fetch several files at once
  * </DESC>
  */
 /* A multi-threaded example that uses pthreads and fetches 4 remote files at
