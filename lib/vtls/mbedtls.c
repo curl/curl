@@ -47,7 +47,7 @@
 #include <mbedtls/psa_util.h>
 
 #if MBEDTLS_VERSION_NUMBER < 0x04000000 && !defined(MBEDTLS_CTR_DRBG_C)
-#error "MBEDTLS_CTR_DRBG_C is required for mbedTLS 3.x and older."
+#error "MBEDTLS_CTR_DRBG_C is required for mbedTLS 3.x."
 #endif
 
 #include <mbedtls/error.h>
@@ -194,7 +194,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
    * unsupported option values. */
 
   mbedtls_ssl_protocol_version ver_min =
-#if defined(MBEDTLS_SSL_PROTO_TLS1_2)
+#ifdef MBEDTLS_SSL_PROTO_TLS1_2
     MBEDTLS_SSL_VERSION_TLS1_2
 #else
     MBEDTLS_SSL_VERSION_TLS1_3
@@ -517,17 +517,16 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   if(ca_info_blob && verifypeer) {
 #ifdef MBEDTLS_PEM_PARSE_C
     /* if DER or a null-terminated PEM just process using
-    * mbedtls_x509_crt_parse().
-    * */
-    if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER"))
-       || ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0'
-      ) {
+       mbedtls_x509_crt_parse(). */
+    if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER")) ||
+       ((char *)(ca_info_blob->data))[ca_info_blob->len - 1] == '\0') {
+
       ret = mbedtls_x509_crt_parse(&backend->cacert,
                                    ca_info_blob->data,
                                    ca_info_blob->len);
     }
-    else /* they say it is PEM and it is not null-terminated */
-    {
+    else { /* they say it is PEM and it is not null-terminated */
+
       /* Unfortunately, mbedtls_x509_crt_parse() requires the data to
          be null-terminated if the data is PEM encoded (even when
          provided the exact length). The function accepts PEM or DER
@@ -617,17 +616,16 @@ static CURLcode mbed_connect_step1(struct Curl_cfilter *cf,
   if(ssl_cert_blob) {
 #ifdef MBEDTLS_PEM_PARSE_C
     /* if DER or a null-terminated PEM just process using
-    * mbedtls_x509_crt_parse().
-    * */
-    if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER"))
-       || ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0'
-      ) {
+       mbedtls_x509_crt_parse(). */
+    if((ssl_cert_type && curl_strequal(ssl_cert_type, "DER")) ||
+       ((char *)(ssl_cert_blob->data))[ssl_cert_blob->len - 1] == '\0') {
+
       ret = mbedtls_x509_crt_parse(&backend->clicert,
                                    ssl_cert_blob->data,
                                    ssl_cert_blob->len);
     }
-    else /* they say it is PEM and it is not null-terminated */
-    {
+    else { /* they say it is PEM and it is not null-terminated */
+
       /* Unfortunately, mbedtls_x509_crt_parse() requires the data to
          be null-terminated if the data is PEM encoded (even when
          provided the exact length). The function accepts PEM or DER
@@ -1451,11 +1449,11 @@ static int mbedtls_init(void)
   mbedtls_entropy_init(&rng.entropy);
 
   ret = mbedtls_ctr_drbg_seed(&rng.drbg, mbedtls_entropy_func, &rng.entropy,
-    NULL, 0);
+                              NULL, 0);
 
   if(ret) {
     failf(NULL, " failed\n  ! mbedtls_ctr_drbg_seed returned -0x%x\n",
-      (unsigned int)-ret);
+          (unsigned int)-ret);
     return 0;
   }
 
