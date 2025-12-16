@@ -947,7 +947,7 @@ static int push_promise(struct Curl_cfilter *cf,
     struct h2_stream_ctx *stream;
     struct h2_stream_ctx *newstream;
     struct curl_pushheaders heads;
-    CURLMcode rc;
+    CURLMcode mresult;
     CURLcode result;
     /* clone the parent */
     struct Curl_easy *newhandle = h2_duphandle(cf, data);
@@ -999,8 +999,8 @@ static int push_promise(struct Curl_cfilter *cf,
     /* approved, add to the multi handle for processing. This
      * assigns newhandle->mid. For the new `mid` we assign the
      * h2_stream instance and remember the stream_id already known. */
-    rc = Curl_multi_add_perform(data->multi, newhandle, cf->conn);
-    if(rc) {
+    mresult = Curl_multi_add_perform(data->multi, newhandle, cf->conn);
+    if(mresult) {
       infof(data, "failed to add handle to multi");
       discard_newhandle(cf, newhandle);
       rv = CURL_PUSH_DENY;
