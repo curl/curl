@@ -162,7 +162,7 @@
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
-/* behavior or generated code characteristics must be done here,   */
+/* behavior or generated code characteristics must be done here,    */
 /* as appropriate, before any system header file is included. It is */
 /* also possible to have them defined in the config file included   */
 /* before this point. As a result of all this we frown inclusion of */
