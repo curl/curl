@@ -122,8 +122,8 @@ smtp-tls
 smtp-vrfy
 sslbackend
 synctime
+threaded
 threaded-ssl
-threads
 unixsocket
 url2file
 urlapi

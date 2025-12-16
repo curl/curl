@@ -107,6 +107,8 @@ int main(void)
     pthread_join(tid[i], NULL);
     fprintf(stderr, "Thread %d terminated\n", i);
   }
+
   curl_global_cleanup();
+
   return 0;
 }
