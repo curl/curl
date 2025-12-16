@@ -703,7 +703,7 @@ follow suite.
 
 # Command line tool
 
-## multi-threading
+## multithreading
 
 When asked to do transfers in parallel, the curl tool could be extended to use
 a number of independent worker threads. This would allow faster transfers in
