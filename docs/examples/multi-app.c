@@ -46,9 +46,9 @@ int main(void)
 
   int i;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* Allocate one curl handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)

@@ -189,7 +189,7 @@ static int setup(struct transfer *t, int num)
  */
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   struct transfer *trans;
   CURLM *multi = NULL;
   int i;
@@ -205,9 +205,9 @@ int main(int argc, char **argv)
   else
     num_transfers = 3; /* a suitable low default */
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   trans = calloc(num_transfers, sizeof(*trans));
   if(!trans) {

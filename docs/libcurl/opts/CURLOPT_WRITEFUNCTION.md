@@ -107,7 +107,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 int main(void)
 {
   struct memory chunk = { 0 };
-  CURLcode res;
+  CURLcode result;
   CURL *curl = curl_easy_init();
   if(curl) {
     /* send all data to this function  */
@@ -117,7 +117,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
 
     /* send a request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* remember to free the buffer */
     free(chunk.response);

@@ -55,7 +55,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     struct curl_slist *list;
-    CURLcode res;
+    CURLcode result;
 
     /* Adding one valid and one invalid email address */
     list = curl_slist_append(NULL, "person@example.com");
@@ -64,7 +64,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "smtp://example.com/");
     curl_easy_setopt(curl, CURLOPT_MAIL_RCPT_ALLOWFAILS, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_slist_free_all(list);
     curl_easy_cleanup(curl);
   }

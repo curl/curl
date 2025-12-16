@@ -102,7 +102,7 @@ int main(void)
 {
   CURL *easy;
   struct read_ctx rctx;
-  CURLcode res;
+  CURLcode result;
 
   easy = curl_easy_init();
   if(!easy)
@@ -118,12 +118,12 @@ int main(void)
   curl_easy_setopt(easy, CURLOPT_READDATA, &rctx);
   curl_easy_setopt(easy, CURLOPT_UPLOAD, 1L);
 
-  /* Perform the request, res gets the return code */
-  res = curl_easy_perform(easy);
+  /* Perform the request, result gets the return code */
+  result = curl_easy_perform(easy);
   /* Check for errors */
-  if(res != CURLE_OK)
+  if(result != CURLE_OK)
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
 
   /* always cleanup */
   curl_easy_cleanup(easy);

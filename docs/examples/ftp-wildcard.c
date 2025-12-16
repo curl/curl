@@ -106,9 +106,9 @@ int main(int argc, char **argv)
   struct callback_data data = { 0 };
 
   /* global initialization */
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* initialization of easy handle */
   curl = curl_easy_init();
@@ -142,9 +142,9 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com/test/*");
 
   /* and start transfer! */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
   curl_easy_cleanup(curl);
   curl_global_cleanup();
-  return (int)res;
+  return (int)result;
 }

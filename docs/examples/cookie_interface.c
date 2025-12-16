@@ -44,16 +44,16 @@
 
 static int print_cookies(CURL *curl)
 {
-  CURLcode res;
+  CURLcode result;
   struct curl_slist *cookies;
   struct curl_slist *nc;
   int i;
 
   printf("Cookies, curl knows:\n");
-  res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-  if(res != CURLE_OK) {
+  result = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl curl_easy_getinfo failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
     return 1;
   }
   nc = cookies;
@@ -74,11 +74,11 @@ static int print_cookies(CURL *curl)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -87,9 +87,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://www.example.com/");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_COOKIEFILE, ""); /* start cookie engine */
-    res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
-      fprintf(stderr, "curl perform failed: %s\n", curl_easy_strerror(res));
+    result = curl_easy_perform(curl);
+    if(result != CURLE_OK) {
+      fprintf(stderr, "curl perform failed: %s\n", curl_easy_strerror(result));
       return 1;
     }
 
@@ -107,10 +107,10 @@ int main(void)
              ".example.com", "TRUE", "/", "FALSE",
              difftime(time(NULL) + 31337, (time_t)0),
              "PREF", "hello example, I like you!");
-    res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
-    if(res != CURLE_OK) {
+    result = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl curl_easy_setopt failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
       return 1;
     }
 
@@ -122,18 +122,18 @@ int main(void)
     snprintf(nline, sizeof(nline),
       "Set-Cookie: OLD_PREF=3d141414bf4209321; "
       "expires=Sun, 17-Jan-2038 19:14:07 GMT; path=/; domain=.example.com");
-    res = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
-    if(res != CURLE_OK) {
+    result = curl_easy_setopt(curl, CURLOPT_COOKIELIST, nline);
+    if(result != CURLE_OK) {
       fprintf(stderr, "curl curl_easy_setopt failed: %s\n",
-              curl_easy_strerror(res));
+              curl_easy_strerror(result));
       return 1;
     }
 
     print_cookies(curl);
 
-    res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
-      fprintf(stderr, "curl perform failed: %s\n", curl_easy_strerror(res));
+    result = curl_easy_perform(curl);
+    if(result != CURLE_OK) {
+      fprintf(stderr, "curl perform failed: %s\n", curl_easy_strerror(result));
       return 1;
     }
 

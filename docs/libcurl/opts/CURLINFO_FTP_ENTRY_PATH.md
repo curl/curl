@@ -45,16 +45,16 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://example.com");
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       /* extract the entry path */
       char *ep = NULL;
-      res = curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &ep);
-      if(!res && ep) {
+      result = curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &ep);
+      if(!result && ep) {
         printf("Entry path was: %s\n", ep);
       }
     }

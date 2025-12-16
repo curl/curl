@@ -73,7 +73,7 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     struct curl_blob blob;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     /* using an HTTPS proxy */
@@ -82,7 +82,7 @@ int main(void)
     blob.len = filesize;
     blob.flags = CURL_BLOB_COPY;
     curl_easy_setopt(curl, CURLOPT_PROXY_ISSUERCERT_BLOB, &blob);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

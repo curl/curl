@@ -44,16 +44,16 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       double speed;
-      res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &speed);
-      if(!res) {
+      result = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &speed);
+      if(!result) {
         printf("Download speed %.0f bytes/sec\n", speed);
       }
     }

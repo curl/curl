@@ -41,16 +41,16 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* Perform the request */
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(!res) {
+    if(!result) {
       curl_off_t ul;
-      res = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &ul);
-      if(!res) {
+      result = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD_T, &ul);
+      if(!result) {
         printf("Uploaded %" CURL_FORMAT_CURL_OFF_T " bytes\n", ul);
       }
     }

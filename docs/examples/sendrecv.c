@@ -83,9 +83,9 @@ int main(void)
   const char *request = "GET / HTTP/1.0\r\nHost: example.com\r\n\r\n";
   size_t request_len = strlen(request);
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   /* A general note of caution here: if you are using curl_easy_recv() or
      curl_easy_send() to implement HTTP or _any_ other protocol libcurl
@@ -103,18 +103,18 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     /* Do not do the transfer - only connect to host */
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(res != CURLE_OK) {
-      printf("Error: %s\n", curl_easy_strerror(res));
+    if(result != CURLE_OK) {
+      printf("Error: %s\n", curl_easy_strerror(result));
       return 1;
     }
 
     /* Extract the socket from the curl handle - we need it for waiting. */
-    res = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
+    result = curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sockfd);
 
-    if(res != CURLE_OK) {
-      printf("Error: %s\n", curl_easy_strerror(res));
+    if(result != CURLE_OK) {
+      printf("Error: %s\n", curl_easy_strerror(result));
       return 1;
     }
 
@@ -127,18 +127,18 @@ int main(void)
       size_t nsent;
       do {
         nsent = 0;
-        res = curl_easy_send(curl, request + nsent_total,
+        result = curl_easy_send(curl, request + nsent_total,
                              request_len - nsent_total, &nsent);
         nsent_total += nsent;
 
-        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
+        if(result == CURLE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
           printf("Error: timeout.\n");
           return 1;
         }
-      } while(res == CURLE_AGAIN);
+      } while(result == CURLE_AGAIN);
 
-      if(res != CURLE_OK) {
-        printf("Error: %s\n", curl_easy_strerror(res));
+      if(result != CURLE_OK) {
+        printf("Error: %s\n", curl_easy_strerror(result));
         return 1;
       }
 
@@ -154,16 +154,16 @@ int main(void)
       size_t nread;
       do {
         nread = 0;
-        res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
+        result = curl_easy_recv(curl, buf, sizeof(buf), &nread);
 
-        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 1, 60000L)) {
+        if(result == CURLE_AGAIN && !wait_on_socket(sockfd, 1, 60000L)) {
           printf("Error: timeout.\n");
           return 1;
         }
-      } while(res == CURLE_AGAIN);
+      } while(result == CURLE_AGAIN);
 
-      if(res != CURLE_OK) {
-        printf("Error: %s\n", curl_easy_strerror(res));
+      if(result != CURLE_OK) {
+        printf("Error: %s\n", curl_easy_strerror(result));
         break;
       }
 

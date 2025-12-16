@@ -55,15 +55,15 @@ static size_t write_cb(void *buffer, size_t size, size_t nmemb, void *stream)
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct FtpFile ftpfile = {
     "curl.tar.gz", /* name to store the file as if successful */
     NULL
   };
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -80,14 +80,14 @@ int main(void)
     /* Switch on full protocol/debug output */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    if(CURLE_OK != res) {
+    if(CURLE_OK != result) {
       /* we failed */
-      fprintf(stderr, "curl told us %d\n", res);
+      fprintf(stderr, "curl told us %d\n", result);
     }
   }
 
@@ -96,5 +96,5 @@ int main(void)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

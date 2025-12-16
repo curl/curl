@@ -47,13 +47,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     double start;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-    res = curl_easy_perform(curl);
-    if(CURLE_OK == res) {
-      res = curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME, &start);
-      if(CURLE_OK == res) {
+    result = curl_easy_perform(curl);
+    if(CURLE_OK == result) {
+      result = curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME, &start);
+      if(CURLE_OK == result) {
         printf("Time: %.1f", start);
       }
     }

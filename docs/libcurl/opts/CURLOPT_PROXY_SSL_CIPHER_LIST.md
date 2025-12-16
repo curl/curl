@@ -75,13 +75,13 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
     curl_easy_setopt(curl, CURLOPT_PROXY, "https://localhost");
     curl_easy_setopt(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
                      "ECDHE-ECDSA-CHACHA20-POLY1305:"
                      "ECDHE-RSA-CHACHA20-POLY1305");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
 }

@@ -33,9 +33,9 @@ int main(void)
 {
   curl_version_info_data *ver;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   ver = curl_version_info(CURLVERSION_NOW);
   if(ver->features & CURL_VERSION_HTTP2)

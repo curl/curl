@@ -81,16 +81,16 @@ int main(int argc, char **argv)
   TidyDoc tdoc;
   TidyBuffer docbuf = { 0 };
   TidyBuffer tidy_errbuf = { 0 };
-  CURLcode res;
+  CURLcode result;
 
   if(argc != 2) {
     printf("usage: %s <url>\n", argv[0]);
     return 1;
   }
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   tdoc = tidyCreate();
   tidyOptSetBool(tdoc, TidyForceOutput, yes); /* try harder */
@@ -107,14 +107,14 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
 
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &docbuf);
-    res = curl_easy_perform(curl);
-    if(!res) {
-      res = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
-      if(res >= 0) {
-        res = tidyCleanAndRepair(tdoc); /* fix any problems */
-        if(res >= 0) {
-          res = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
-          if(res >= 0) {
+    result = curl_easy_perform(curl);
+    if(!result) {
+      result = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
+      if(result >= 0) {
+        result = tidyCleanAndRepair(tdoc); /* fix any problems */
+        if(result >= 0) {
+          result = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
+          if(result >= 0) {
             dumpNode(tdoc, tidyGetRoot(tdoc), 0); /* walk the tree */
             fprintf(stderr, "%s\n", tidy_errbuf.bp); /* show errors */
           }
@@ -134,5 +134,5 @@ int main(int argc, char **argv)
 
   curl_global_cleanup();
 
-  return (int)res;
+  return (int)result;
 }

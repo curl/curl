@@ -178,10 +178,10 @@ static void check_multi_info(struct GlobalInfo *g)
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
       CURL *curl = msg->easy_handle;
-      CURLcode res = msg->data.result;
+      CURLcode result = msg->data.result;
       curl_easy_getinfo(curl, CURLINFO_PRIVATE, &conn);
       curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &eff_url);
-      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, res, conn->error);
+      fprintf(MSG_OUT, "DONE: %s => (%d) %s\n", eff_url, result, conn->error);
       curl_multi_remove_handle(g->multi, curl);
       free(conn->url);
       curl_easy_cleanup(curl);
@@ -421,14 +421,14 @@ static void clean_fifo(struct GlobalInfo *g)
 
 int main(int argc, char **argv)
 {
-  CURLcode res;
+  CURLcode result;
   struct GlobalInfo g;
   (void)argc;
   (void)argv;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   memset(&g, 0, sizeof(g));
   g.evbase = event_base_new();

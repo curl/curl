@@ -56,11 +56,11 @@ int main(void)
 {
   CURL *curl = curl_easy_init();
   if(curl) {
-    CURLcode res;
+    CURLcode result;
     CURL *nother;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     nother = curl_easy_duphandle(curl);
-    res = curl_easy_perform(nother);
+    result = curl_easy_perform(nother);
     curl_easy_cleanup(nother);
     curl_easy_cleanup(curl);
   }

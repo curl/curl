@@ -293,17 +293,17 @@ static curl_socket_t opensocket(void *clientp,
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
   struct connection_filter *filter;
 
   filter = (struct connection_filter *)calloc(1, sizeof(*filter));
   if(!filter)
     return 1;
 
-  res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res) {
+  result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result) {
     free(filter);
-    return (int)res;
+    return (int)result;
   }
 
   curl = curl_easy_init();
@@ -336,12 +336,12 @@ int main(void)
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
   /* Perform the request */
-  res = curl_easy_perform(curl);
+  result = curl_easy_perform(curl);
 
   /* Check for errors */
-  if(res != CURLE_OK) {
+  if(result != CURLE_OK) {
     fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+            curl_easy_strerror(result));
   }
 
   /* Clean up */

@@ -38,9 +38,9 @@ int main(void)
 {
   CURL *curl;
 
-  CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
-  if(res)
-    return (int)res;
+  CURLcode result = curl_global_init(CURL_GLOBAL_ALL);
+  if(result)
+    return (int)result;
 
   curl = curl_easy_init();
   if(curl) {
@@ -66,7 +66,8 @@ int main(void)
           mresult = curl_multi_poll(multi, NULL, 0, 1000, NULL);
 
         if(mresult) {
-          fprintf(stderr, "curl_multi_poll() failed, code %d.\n", (int)mresult);
+          fprintf(stderr, "curl_multi_poll() failed, code %d.\n",
+                  (int)mresult);
           break;
         }
 

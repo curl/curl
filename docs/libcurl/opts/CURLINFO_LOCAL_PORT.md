@@ -46,18 +46,18 @@ is returned.
 int main(void)
 {
   CURL *curl;
-  CURLcode res;
+  CURLcode result;
 
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    res = curl_easy_perform(curl);
+    result = curl_easy_perform(curl);
 
-    if(CURLE_OK == res) {
+    if(CURLE_OK == result) {
       long port;
-      res = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &port);
+      result = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &port);
 
-      if(CURLE_OK == res) {
+      if(CURLE_OK == result) {
         printf("We used local port: %ld\n", port);
       }
     }
