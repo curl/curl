@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+<testcase>
+<info>
+<keywords>
+WebSockets
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data crlf="headers" nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 11
+
+no upgrade
+</data>
+</reply>
+
+# Client-side
+<client>
+# require Debug for the forced CURL_ENTROPY
+<features>
+Debug
+ws
+</features>
+<setenv>
+CURL_ENTROPY=12345678
+</setenv>
+<server>
+http
+</server>
+<features>
+verbose-strings
+</features>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+Refused WebSocket upgrade returns CURLE_WS_UPGRADE_REFUSED and connection reused
+</name>
+<command>
+- %HOSTIP %HTTPPORT
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="headers">
+GET /path/ws/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
+Connection: Upgrade
+
+GET /path/http/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+<strip>
+^Host:.*
+</strip>
+### We don't want to see this:
+# * closing connection #0
+<file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
+* WebSocket upgrade refused with HTTP 200
+* Connection #0 to host %HOSTIP:%HTTPPORT left intact
+* Refused WebSocket upgrade: 200
+Request 1 (WS refused) completed. CURLcode: 102 (WebSocket upgrade was refused by server). HTTP Code: 200.
+* Reusing existing http: connection with host 127.0.0.1
+* Connection #0 to host %HOSTIP:%HTTPPORT left intact
+Request 2 (HTTP OK) completed. HTTP Code: 200.
+</file>
+<stripfile>
+$_ = '' if(($_ !~ /left intact/) and ($_ !~ /closing connection/) and ($_ !~ /WebSocket upgrade/) and ($_ !~ /Reusing existing/) and ($_ !~ /shutting down/) and ($_ !~ /^Request \d/))
+</stripfile>
+</verify>
+</testcase>

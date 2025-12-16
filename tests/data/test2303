@@ -11,7 +11,7 @@ WebSockets
 HTTP/1.1 200 Oblivious
 Server: test-server/fake
 Something: else
-Content-Length:  6
+Content-Length: 5
 
 hello
 </data>
@@ -53,9 +53,9 @@ Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 Connection: Upgrade
 
 </protocol>
-# 22 == CURLE_HTTP_RETURNED_ERROR
+# 102 == CURLE_WS_UPGRADE_REFUSED
 <errorcode>
-22
+102
 </errorcode>
 <limits>
 Maximum allocated: 1300000
