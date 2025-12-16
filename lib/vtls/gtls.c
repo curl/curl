@@ -149,7 +149,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
  * gtls_init()
  *
  * Global GnuTLS init, called from Curl_ssl_init(). This calls functions that
- * are not thread-safe (It is thread safe since GnuTLS 3.3.0) and thus this
+ * are not thread-safe (It is thread-safe since GnuTLS 3.3.0) and thus this
  * function itself is not thread-safe and must only be called from within
  * curl_global_init() to keep the thread situation under control!
  *

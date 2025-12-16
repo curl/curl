@@ -1265,7 +1265,7 @@ dnl true, and usage has not been previously disallowed
 dnl with shell variable curl_disallow_getaddrinfo, then
 dnl HAVE_GETADDRINFO will be defined. Additionally when
 dnl HAVE_GETADDRINFO gets defined this will also attempt
-dnl to find out if getaddrinfo happens to be threadsafe,
+dnl to find out if getaddrinfo happens to be thread-safe,
 dnl defining HAVE_GETADDRINFO_THREADSAFE when true.
 
 AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
@@ -1414,7 +1414,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   fi
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
-    AC_MSG_CHECKING([if getaddrinfo is threadsafe])
+    AC_MSG_CHECKING([if getaddrinfo is thread-safe])
     if test "$curl_cv_apple" = "yes"; then
       dnl Darwin 6.0 and macOS 10.2.X and newer
       tst_tsafe_getaddrinfo="yes"
@@ -1479,7 +1479,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
     if test "$tst_tsafe_getaddrinfo" = "yes"; then
       AC_DEFINE_UNQUOTED(HAVE_GETADDRINFO_THREADSAFE, 1,
-        [Define to 1 if the getaddrinfo function is threadsafe.])
+        [Define to 1 if the getaddrinfo function is thread-safe.])
       curl_cv_func_getaddrinfo_threadsafe="yes"
     else
       curl_cv_func_getaddrinfo_threadsafe="no"

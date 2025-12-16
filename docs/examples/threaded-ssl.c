@@ -29,7 +29,7 @@
 /* A multi-threaded example that uses pthreads and fetches 4 remote files at
  * once over HTTPS.
  *
- * Recent versions of OpenSSL and GnuTLS are thread safe by design, assuming
+ * Recent versions of OpenSSL and GnuTLS are thread-safe by design, assuming
  * support for the underlying OS threading API is built-in. Older revisions
  * of this example demonstrated locking callbacks for the SSL library, which
  * are no longer necessary. An older revision with callbacks can be found at
@@ -40,7 +40,9 @@
 /* Also requires TLS support to run */
 
 #include <stdio.h>
+
 #include <pthread.h>
+
 #include <curl/curl.h>
 
 #define NUMT 4

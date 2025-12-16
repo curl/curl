@@ -107,7 +107,7 @@ This release includes the following bugfixes:
  o example: fix formatting nits [232]
  o examples/crawler: fix variable [92]
  o examples/multi-uv: fix invalid req->data access [177]
- o examples/multithread: fix race condition [101]
+ o examples/threaded: fix race condition [101]
  o examples: fix minor typo [203]
  o examples: make functions/data static where missing [139]
  o examples: tidy-up headers and includes [138]
