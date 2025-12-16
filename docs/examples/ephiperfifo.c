@@ -451,15 +451,13 @@ void sigint_handler(int signo)
   g_should_exit_ = 1;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
   CURLcode result;
   struct GlobalInfo g;
   struct itimerspec its;
   struct epoll_event ev;
   struct epoll_event events[10];
-  (void)argc;
-  (void)argv;
 
   result = curl_global_init(CURL_GLOBAL_ALL);
   if(result)
