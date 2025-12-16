@@ -188,11 +188,6 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
                              struct mbed_ssl_backend_data *backend,
                              struct ssl_primary_config *conn_config)
 {
-  /* TLS 1.0 and TLS 1.1 were dropped with mbedTLS 3.0.0 (2021). So, since
-   * then, and before the introduction of TLS 1.3 in 3.6.0 (2024), this
-   * function basically always sets TLS 1.2 as min/max, unless given
-   * unsupported option values. */
-
   mbedtls_ssl_protocol_version ver_min =
 #ifdef MBEDTLS_SSL_PROTO_TLS1_2
     MBEDTLS_SSL_VERSION_TLS1_2
