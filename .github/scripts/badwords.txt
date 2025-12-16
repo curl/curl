@@ -12,7 +12,7 @@ wild-card:wildcard
 wild card:wildcard
 \bthread ?safe[^."t]:thread-safe
 \bthread ?unsafe[^."t]:thread-unsafe
-multi ?thread[^i]:multi-thread
+multi ?thread:multi-thread
 \bit's:it is
 aren't:are not
 can't:cannot
