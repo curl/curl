@@ -28,8 +28,8 @@ set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
 set(_curl_definitions "")
 
-if(ENABLE_CURL_MANUAL AND (PERL_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.c"))
-  if(PERL_FOUND)
+if(ENABLE_CURL_MANUAL AND (Perl_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.c"))
+  if(Perl_FOUND)
     add_custom_command(OUTPUT "tool_hugehelp.c"
       COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
       COMMAND ${CMAKE_COMMAND} -E echo "/* !checksrc! disable COPYRIGHT all */" >> "tool_hugehelp.c"
@@ -55,7 +55,7 @@ if(ENABLE_CURL_MANUAL AND (PERL_FOUND OR EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/too
 endif()
 
 if(CURL_CA_EMBED_SET)
-  if(PERL_FOUND)
+  if(Perl_FOUND)
     add_custom_command(OUTPUT "tool_ca_embed.c"
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
         < "${CURL_CA_EMBED}" > "tool_ca_embed.c"
