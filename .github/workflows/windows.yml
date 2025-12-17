@@ -246,7 +246,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
             mingw-w64-${{ matrix.env }}-diffutils
             mingw-w64-${{ matrix.env }}-libpsl
-            ${{ contains(matrix.name, 'pytest') && 'mingw-w64-python-pip' || '' }}
+            ${{ contains(matrix.name, 'pytest') && 'mingw-w64-${{ matrix.env }}-python-pip' || '' }}
             ${{ matrix.install }}
 
       - name: 'prepare test prereqs'
