@@ -282,7 +282,7 @@ jobs:
             fi
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            source ~/venv/bin/activate
+            [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
             for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
