@@ -110,7 +110,13 @@ else()
     else()
       get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
     endif()
-    find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} HINTS ${_ngtcp2_library_dir})
+    if(NGTCP2_USE_STATIC_LIBS)
+      find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower}_static
+        HINTS ${_ngtcp2_library_dir})
+    else()
+      find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} ${_crypto_library_lower}_static
+        HINTS ${_ngtcp2_library_dir})
+    endif()
 
     if(${_crypto_library_upper}_LIBRARY)
       set(NGTCP2_${_ngtcp2_crypto_backend}_FOUND TRUE)
