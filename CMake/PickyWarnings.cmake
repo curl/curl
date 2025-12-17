@@ -75,9 +75,15 @@ if(PICKY_COMPILER)
       set(_picky_enable "-W")
     endif()
 
-    list(APPEND _picky_enable
-      -Wall -pedantic
-    )
+    list(APPEND _picky_enable "-Wall")
+
+    if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 3.2) OR
+       (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2) OR
+       CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 4.8)
+      list(APPEND _picky_enable "-Wpedantic")  # clang  3.2  gcc  4.8  appleclang  4.2
+    else()
+      list(APPEND _picky_enable "-pedantic")
+    endif()
 
     # ----------------------------------
     # Add new options here, if in doubt:
