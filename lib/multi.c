@@ -2853,7 +2853,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
-  multi = m;
+
   return multi_perform(multi, &now, running_handles);
 }
 
