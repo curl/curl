@@ -46,6 +46,12 @@ add_subdirectory(tunit)
 add_subdirectory(unit)
 add_subdirectory(certs)
 
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
+  set(_python_runner "${Python_EXECUTABLE}" "-m")
+else()
+  set(_python_runner "")
+endif()
+
 # Add a runtests target with customized flags
 function(curl_add_runtests _targetname _test_flags)
   if(NOT BUILD_LIBCURL_DOCS)
@@ -92,7 +98,7 @@ function(curl_add_pytests _targetname _test_flags)
   endif()
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
   add_custom_target(${_targetname}
-    COMMAND pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"
+    COMMAND ${_python_runner} pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"
     DEPENDS "${_depends}"
     VERBATIM USES_TERMINAL
   )
@@ -130,5 +136,7 @@ curl_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r --retry=5 -j
 curl_add_runtests(test-torture   "-a -t -j20")
 curl_add_runtests(test-event     "-a -e")
 
-curl_add_pytests(curl-pytest      "-n auto")
-curl_add_pytests(curl-pytest-ci   "-n auto -v")
+if(Python_EXECUTABLE OR CMAKE_VERSION VERSION_LESS 3.12)
+  curl_add_pytests(curl-pytest     "-n auto")
+  curl_add_pytests(curl-pytest-ci  "-n auto -v")
+endif()
