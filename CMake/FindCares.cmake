@@ -50,7 +50,7 @@ if(_cares_FOUND)
   message(STATUS "Found Cares (via pkg-config): ${_cares_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
 else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
-  find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
+  find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares" "cares_static")
 
   unset(CARES_VERSION CACHE)
   if(CARES_INCLUDE_DIR AND EXISTS "${CARES_INCLUDE_DIR}/ares_version.h")

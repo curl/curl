@@ -52,8 +52,8 @@ if(_brotli_FOUND)
   message(STATUS "Found Brotli (via pkg-config): ${_brotli_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()
   find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
-  find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
-  find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
+  find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon" "brotlicommon-static")
+  find_library(BROTLIDEC_LIBRARY NAMES "brotlidec" "brotlidec-static")
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Brotli

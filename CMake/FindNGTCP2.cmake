@@ -87,7 +87,7 @@ if(_ngtcp2_FOUND)
   message(STATUS "Found NGTCP2 (via pkg-config): ${_ngtcp2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()
   find_path(NGTCP2_INCLUDE_DIR NAMES "ngtcp2/ngtcp2.h")
-  find_library(NGTCP2_LIBRARY NAMES "ngtcp2")
+  find_library(NGTCP2_LIBRARY NAMES "ngtcp2" "ngtcp2_static")
 
   unset(NGTCP2_VERSION CACHE)
   if(NGTCP2_INCLUDE_DIR AND EXISTS "${NGTCP2_INCLUDE_DIR}/ngtcp2/version.h")
@@ -105,7 +105,8 @@ else()
     else()
       get_filename_component(_ngtcp2_library_dir "${NGTCP2_LIBRARY}" DIRECTORY)
     endif()
-    find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} HINTS ${_ngtcp2_library_dir})
+    find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} ${_crypto_library_lower}_static
+      HINTS ${_ngtcp2_library_dir})
 
     if(${_crypto_library_upper}_LIBRARY)
       set(NGTCP2_${_ngtcp2_crypto_backend}_FOUND TRUE)

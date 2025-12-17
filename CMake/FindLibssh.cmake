@@ -50,7 +50,7 @@ if(_libssh_FOUND)
   message(STATUS "Found Libssh (via pkg-config): ${_libssh_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
-  find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
+  find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh" "ssh_static" "libssh_static")
 
   unset(LIBSSH_VERSION CACHE)
   if(LIBSSH_INCLUDE_DIR AND EXISTS "${LIBSSH_INCLUDE_DIR}/libssh/libssh_version.h")

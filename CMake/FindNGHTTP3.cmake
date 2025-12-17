@@ -49,7 +49,7 @@ if(_nghttp3_FOUND)
   message(STATUS "Found NGHTTP3 (via pkg-config): ${_nghttp3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
 else()
   find_path(NGHTTP3_INCLUDE_DIR NAMES "nghttp3/nghttp3.h")
-  find_library(NGHTTP3_LIBRARY NAMES "nghttp3")
+  find_library(NGHTTP3_LIBRARY NAMES "nghttp3" "nghttp3_static")
 
   unset(NGHTTP3_VERSION CACHE)
   if(NGHTTP3_INCLUDE_DIR AND EXISTS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h")
