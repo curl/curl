@@ -50,7 +50,7 @@ if(_libssh2_FOUND AND _libssh2_INCLUDE_DIRS)
   message(STATUS "Found Libssh2 (via pkg-config): ${_libssh2_INCLUDE_DIRS} (found version \"${LIBSSH2_VERSION}\")")
 else()
   find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h")
-  find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2" "ssh2_static" "libssh2_static")
+  find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2" "ssh2_static")
 
   unset(LIBSSH2_VERSION CACHE)
   if(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")

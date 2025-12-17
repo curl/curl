@@ -62,9 +62,9 @@ else()
   set(_mbedtls_pc_requires "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h")
-  find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls" "mbedtls_static" "libmbedtls_static")
-  find_library(MBEDX509_LIBRARY NAMES "mbedx509" "libmbedx509" "mbedx509_static" "libmbedx509_static")
-  find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto" "mbedcrypto_static" "libmbedcrypto_static")
+  find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls" "mbedtls_static")
+  find_library(MBEDX509_LIBRARY NAMES "mbedx509" "libmbedx509" "mbedx509_static")
+  find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto" "mbedcrypto_static")
 
   unset(MBEDTLS_VERSION CACHE)
   if(MBEDTLS_INCLUDE_DIR AND EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
