@@ -249,10 +249,6 @@ jobs:
             ${{ contains(matrix.name, 'pytest') && format('mingw-w64-{0}-python-pip mingw-w64-{0}-python-pytest mingw-w64-{0}-python-pytest-xdist', matrix.env) || '' }}
             ${{ matrix.install }}
 
-      - name: 'prepare test prereqs'
-        if: ${{ contains(matrix.name, 'pytest') }}
-        run: python3 -m venv ~/venv
-
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
@@ -282,7 +278,6 @@ jobs:
             fi
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
             for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
@@ -368,7 +363,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.name, 'pytest') }}
-        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary filelock websockets
+        run: python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary filelock websockets
 
       - name: 'run pytest'
         if: ${{ contains(matrix.name, 'pytest') }}
@@ -376,7 +371,6 @@ jobs:
           PYTEST_ADDOPTS: '--color=yes'
           PYTEST_XDIST_AUTO_NUM_WORKERS: 4
         run: |
-          source ~/venv/bin/activate
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
             cmake --build bld --verbose --target curl-pytest-ci
           else
