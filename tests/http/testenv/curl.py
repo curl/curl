@@ -31,7 +31,6 @@ import sys
 import time
 from threading import Thread
 
-import psutil
 import re
 import shutil
 import subprocess
@@ -77,19 +76,7 @@ class RunProfile:
         return self._stats
 
     def sample(self):
-        elapsed = datetime.now() - self._started_at
-        try:
-            if self._psu is None:
-                self._psu = psutil.Process(pid=self._pid)
-            mem = self._psu.memory_info()
-            self._samples.append({
-                'time': elapsed,
-                'cpu': self._psu.cpu_percent(),
-                'vsz': mem.vms,
-                'rss': mem.rss,
-            })
-        except psutil.NoSuchProcess:
-            pass
+        return
 
     def finish(self):
         self._duration = datetime.now() - self._started_at
