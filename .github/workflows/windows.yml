@@ -366,6 +366,23 @@ jobs:
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
           fi
 
+      - name: 'install pytest prereqs'
+        if: ${{ contains(matrix.name, 'pytest') }}
+        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary cryptography filelock psutil pytest pytest-xdist websockets
+
+      - name: 'run pytest'
+        if: ${{ contains(matrix.name, 'pytest') }}
+        env:
+          PYTEST_ADDOPTS: '--color=yes'
+          PYTEST_XDIST_AUTO_NUM_WORKERS: 4
+        run: |
+          source ~/venv/bin/activate
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-pytest-ci
+          else
+            make -C bld V=1 pytest-ci
+          fi
+
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
@@ -400,23 +417,6 @@ jobs:
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
-          fi
-
-      - name: 'install pytest prereqs'
-        if: ${{ contains(matrix.name, 'pytest') }}
-        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary cryptography filelock psutil pytest pytest-xdist websockets
-
-      - name: 'run pytest'
-        if: ${{ contains(matrix.name, 'pytest') }}
-        env:
-          PYTEST_ADDOPTS: '--color=yes'
-          PYTEST_XDIST_AUTO_NUM_WORKERS: 4
-        run: |
-          source ~/venv/bin/activate
-          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
-            cmake --build bld --verbose --target curl-pytest-ci
-          else
-            make -C bld V=1 pytest-ci
           fi
 
       - name: 'build examples'
