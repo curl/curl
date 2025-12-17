@@ -46,11 +46,11 @@ add_subdirectory(tunit)
 add_subdirectory(unit)
 add_subdirectory(certs)
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
-  set(_python_runner "${Python_EXECUTABLE}" "-m")
-else()
+#if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
+#  set(_python_runner "${Python_EXECUTABLE}" "-m")
+#else()
   set(_python_runner "")
-endif()
+#endif()
 
 # Add a runtests target with customized flags
 function(curl_add_runtests _targetname _test_flags)
