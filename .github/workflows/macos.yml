@@ -381,6 +381,10 @@ jobs:
             brew unlink openssl
           fi
 
+      - name: 'prepare test prereqs'
+        if: ${{ (!contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun')) || contains(matrix.build.install_steps, 'pytest') }}
+        run: python3 -m venv ~/venv
+
       - name: 'toolchain versions'
         run: |
           [[ "${MATRIX_COMPILER}" = 'llvm'* ]] && CC="$(brew --prefix "${MATRIX_COMPILER}")/bin/clang"
@@ -420,6 +424,7 @@ jobs:
           fi
 
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            [ -f ~/venv/bin/activate ] && source ~/venv/bin/activate
             for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               options=''
               [ -n "${MATRIX_MACOS_VERSION_MIN}" ] && options+=" -DCMAKE_OSX_DEPLOYMENT_TARGET=${MATRIX_MACOS_VERSION_MIN}"
@@ -495,9 +500,7 @@ jobs:
 
       - name: 'install test prereqs'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
-        run: |
-          python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
+        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ !contains(matrix.build.install_steps, 'skipall') && !contains(matrix.build.install_steps, 'skiprun') }}
@@ -526,9 +529,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
-        run: |
-          [ -d ~/venv ] || python3 -m venv ~/venv
-          ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: ${{ contains(matrix.build.install_steps, 'pytest') }}
