@@ -212,7 +212,7 @@ jobs:
           #          read its configuration from, making it vulnerable to attacks on
           #          Windows. Do not use this component till there is a fix for these.
           # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-          - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: ''          , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON   -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON', install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh', type: 'Debug', name: 'gnutls libssh' }
+          - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: ''          , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_GNUTLS=ON   -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON', install: 'mingw-w64-clang-x86_64-gnutls mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh', type: 'Debug', name: 'gnutls libssh pytest' }
           - { build: 'cmake'    , sys: 'clangarm64', env: 'clang-aarch64', tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', install: 'mingw-w64-clang-aarch64-libssh2', type: 'Release', name: 'schannel R TrackMemory', image: 'windows-11-arm' }
           - { build: 'cmake'    , sys: 'clang64'   , env: 'clang-x86_64' , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF -DUSE_NGTCP2=ON', install: 'mingw-w64-clang-x86_64-openssl mingw-w64-clang-x86_64-nghttp3 mingw-w64-clang-x86_64-ngtcp2 mingw-w64-clang-x86_64-libssh2', type: 'Release', name: 'openssl', chkprefill: '_chkprefill' }
           - { build: 'cmake'    , sys: 'ucrt64'    , env: 'ucrt-x86_64'  , tflags: 'skiprun'   , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_OPENSSL=ON', install: 'mingw-w64-ucrt-x86_64-openssl mingw-w64-ucrt-x86_64-libssh2', type: 'Release', test: 'uwp', name: 'schannel' }
@@ -246,7 +246,12 @@ jobs:
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
             mingw-w64-${{ matrix.env }}-diffutils
             mingw-w64-${{ matrix.env }}-libpsl
+            ${{ contains(matrix.name, 'pytest') && 'mingw-w64-python-pip' || '' }}
             ${{ matrix.install }}
+
+      - name: 'prepare test prereqs'
+        if: ${{ contains(matrix.name, 'pytest') }}
+        run: python3 -m venv ~/venv
 
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -277,6 +282,7 @@ jobs:
             fi
           fi
           if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            source ~/venv/bin/activate
             for _chkprefill in '' ${MATRIX_CHKPREFILL}; do
               if [[ "${MATRIX_ENV}" = 'clang'* ]]; then
                 options='-DCMAKE_C_COMPILER=clang'
@@ -394,6 +400,23 @@ jobs:
           else
             PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld V=1 test-ci
+          fi
+
+      - name: 'install pytest prereqs'
+        if: ${{ contains(matrix.name, 'pytest') }}
+        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary -r tests/http/requirements.txt
+
+      - name: 'run pytest'
+        if: ${{ contains(matrix.name, 'pytest') }}
+        env:
+          PYTEST_ADDOPTS: '--color=yes'
+          PYTEST_XDIST_AUTO_NUM_WORKERS: 4
+        run: |
+          source ~/venv/bin/activate
+          if [ "${MATRIX_BUILD}" = 'cmake' ]; then
+            cmake --build bld --verbose --target curl-pytest-ci
+          else
+            make -C bld V=1 pytest-ci
           fi
 
       - name: 'build examples'
