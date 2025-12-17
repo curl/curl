@@ -3196,6 +3196,7 @@ struct ossl_x509_share {
   X509_STORE *store;    /* cached X509 store or NULL if none */
   struct curltime time; /* when the cached store was created */
   BIT(store_is_empty);  /* no certs/paths/blobs are in the store */
+  BIT(no_partialchain); /* keep partial chain state */
 };
 
 static void oss_x509_share_free(void *key, size_t key_len, void *p)
@@ -3227,12 +3228,17 @@ static bool ossl_cached_x509_store_expired(const struct Curl_easy *data,
 }
 
 static bool ossl_cached_x509_store_different(struct Curl_cfilter *cf,
+                                             const struct Curl_easy *data,
                                              const struct ossl_x509_share *mb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config =
+    Curl_ssl_cf_get_config(cf, CURL_UNCONST(data));
+  bool diff = mb->no_partialchain != ssl_config->no_partialchain;
+  if(diff)
+    return diff;
   if(!mb->CAfile || !conn_config->CAfile)
     return mb->CAfile != conn_config->CAfile;
-
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
@@ -3251,7 +3257,7 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
                                  sizeof(MPROTO_OSSL_X509_KEY) - 1) : NULL;
   if(share && share->store &&
      !ossl_cached_x509_store_expired(data, share) &&
-     !ossl_cached_x509_store_different(cf, share)) {
+     !ossl_cached_x509_store_different(cf, data, share)) {
     store = share->store;
     *pempty = share->store_is_empty;
   }
@@ -3290,6 +3296,8 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
 
   if(X509_STORE_up_ref(store)) {
     char *CAfile = NULL;
+    struct ssl_config_data *ssl_config =
+      Curl_ssl_cf_get_config(cf, CURL_UNCONST(data));
 
     if(conn_config->CAfile) {
       CAfile = curlx_strdup(conn_config->CAfile);
@@ -3308,6 +3316,7 @@ static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
     share->store = store;
     share->store_is_empty = is_empty;
     share->CAfile = CAfile;
+    share->no_partialchain = ssl_config->no_partialchain;
   }
 }
 
