@@ -363,7 +363,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.name, 'pytest') }}
-        run: python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary filelock websockets
+        run: python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary cryptography filelock websockets
 
       - name: 'run pytest'
         if: ${{ contains(matrix.name, 'pytest') }}
