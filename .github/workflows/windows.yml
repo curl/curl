@@ -246,7 +246,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
             mingw-w64-${{ matrix.env }}-diffutils
             mingw-w64-${{ matrix.env }}-libpsl
-            ${{ contains(matrix.name, 'pytest') && format('mingw-w64-{0}-python-pip', matrix.env) || '' }}
+            ${{ contains(matrix.name, 'pytest') && format('mingw-w64-{0}-python-pip', matrix.env) format('mingw-w64-{0}-python-pytest', matrix.env) format('mingw-w64-{0}-python-pytest-dist', matrix.env) || '' }}
             ${{ matrix.install }}
 
       - name: 'prepare test prereqs'
@@ -368,7 +368,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         if: ${{ contains(matrix.name, 'pytest') }}
-        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary cryptography filelock psutil pytest pytest-xdist websockets
+        run: ~/venv/bin/pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary filelock psutil websockets
 
       - name: 'run pytest'
         if: ${{ contains(matrix.name, 'pytest') }}
