@@ -449,7 +449,7 @@
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
-#  if ! defined __LP64
+#  ifndef __LP64
 #    include <floss.h> /* FLOSS is only used for 32-bit builds. */
 #  endif
 #endif
