@@ -89,9 +89,6 @@ void curlx_pnow(struct curltime *pnow)
   ** in any case the time starting point does not change once that the
   ** system has started up.
   */
-#ifdef HAVE_GETTIMEOFDAY
-  struct timeval now;
-#endif
   struct timespec tsnow;
 
   /*
@@ -135,6 +132,7 @@ void curlx_pnow(struct curltime *pnow)
   */
 #ifdef HAVE_GETTIMEOFDAY
   else {
+    struct timeval now;
     (void)gettimeofday(&now, NULL);
     pnow->tv_sec = now.tv_sec;
     pnow->tv_usec = (int)now.tv_usec;
