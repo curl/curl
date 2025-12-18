@@ -1325,7 +1325,7 @@ endif()
 #
 # CA handling
 #
-option(CURL_CA_NATIVE_BY_DEFAULT "Use native CA store by default in the curl tool" OFF)
+option(CURL_CA_NATIVE_BY_DEFAULT "Use native CA store by default" OFF)
 if(CURL_CA_NATIVE_BY_DEFAULT)
   set(_curl_disable_ca_search_default ON)
 else()
