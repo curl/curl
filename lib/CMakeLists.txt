@@ -346,3 +346,12 @@ if(CURL_ENABLE_EXPORT_TARGET)
     NAMESPACE ${PROJECT_NAME}::
   )
 endif()
+
+if(PERL_EXECUTABLE)
+  add_custom_target(curl-optiontable
+    COMMENT "Generating lib/easyoptions.c" VERBATIM USES_TERMINAL
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/optiontable.pl" < "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
+      > "${PROJECT_SOURCE_DIR}/lib/easyoptions.c"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/optiontable.pl" "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
+  )
+endif()
