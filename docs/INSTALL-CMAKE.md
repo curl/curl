@@ -285,7 +285,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
 - `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
 - `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
-- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF`
+- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF` (turns to `ON`, when `CURL_CA_NATIVE_BY_DEFAULT=ON`)
 - `CURL_DISABLE_COOKIES`:                   Disable cookies support. Default: `OFF`
 - `CURL_DISABLE_DICT`:                      Disable DICT. Default: `OFF`
 - `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
