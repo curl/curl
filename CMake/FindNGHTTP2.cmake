@@ -27,7 +27,7 @@
 #
 # - `NGHTTP2_INCLUDE_DIR`:      Absolute path to nghttp2 include directory.
 # - `NGHTTP2_LIBRARY`:          Absolute path to `nghttp2` library.
-# - `NGHTTP2_USE_STATIC_LIBS`:  To configure for static `nghttp2` library.
+# - `NGHTTP2_USE_STATIC_LIBS`:  Configure for static `nghttp2` library.
 #
 # Defines:
 #

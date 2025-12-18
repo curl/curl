@@ -43,7 +43,7 @@
 # - `NGTCP2_CRYPTO_OSSL_LIBRARY`:       Absolute path to `ngtcp2_crypto_ossl` library.
 # - `NGTCP2_CRYPTO_QUICTLS_LIBRARY`:    Absolute path to `ngtcp2_crypto_quictls` library.
 # - `NGTCP2_CRYPTO_WOLFSSL_LIBRARY`:    Absolute path to `ngtcp2_crypto_wolfssl` library.
-# - `NGTCP2_USE_STATIC_LIBS`:           To configure for static ngtcp2 libraries.
+# - `NGTCP2_USE_STATIC_LIBS`:           Configure for static ngtcp2 libraries.
 #
 # Defines:
 #

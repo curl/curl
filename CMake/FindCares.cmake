@@ -27,7 +27,7 @@
 #
 # - `CARES_INCLUDE_DIR`:      Absolute path to c-ares include directory.
 # - `CARES_LIBRARY`:          Absolute path to `cares` library.
-# - `CARES_USE_STATIC_LIBS`:  To configure for static `cares` library.
+# - `CARES_USE_STATIC_LIBS`:  Configure for static `cares` library.
 #
 # Defines:
 #
