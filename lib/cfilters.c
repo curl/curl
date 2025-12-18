@@ -31,7 +31,6 @@
 #include "url.h"
 #include "sendf.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "multiif.h"
 #include "progress.h"
 #include "select.h"
 #include "curlx/warnless.h"

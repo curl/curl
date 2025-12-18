@@ -40,7 +40,6 @@
 #include "connect.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
-#include "multiif.h"
 #include "vauth/vauth.h"
 #include "curlx/strparse.h"
 

@@ -56,7 +56,6 @@
 #include "progress.h"
 #include "connect.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "multiif.h"
 #include "url.h"
 #include "strcase.h"
 #include "select.h"

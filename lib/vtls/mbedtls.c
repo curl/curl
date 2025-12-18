@@ -68,7 +68,6 @@
 #include "x509asn1.h"
 #include "../connect.h" /* for the connect timeout */
 #include "../select.h"
-#include "../multiif.h"
 #include "mbedtls_threadlock.h"
 #include "../strdup.h"
 #include "../curl_sha256.h"

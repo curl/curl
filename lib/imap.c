@@ -71,7 +71,6 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "select.h"
-#include "multiif.h"
 #include "url.h"
 #include "bufref.h"
 #include "curl_sasl.h"

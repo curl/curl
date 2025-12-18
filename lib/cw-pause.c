@@ -30,7 +30,6 @@
 #include "bufq.h"
 #include "cfilters.h"
 #include "headers.h"
-#include "multiif.h"
 #include "sendf.h"
 #include "cw-pause.h"
 

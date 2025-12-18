@@ -47,7 +47,6 @@
 #include "../urldata.h"
 #include "../curl_trc.h"
 #include "../cfilters.h"
-#include "../multiif.h"
 #include "../vtls/keylog.h"
 #include "../vtls/vtls.h"
 #include "../vtls/vtls_scache.h"

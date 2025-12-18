@@ -31,7 +31,6 @@
 #include "cfilters.h"
 #include "cf-haproxy.h"
 #include "curl_trc.h"
-#include "multiif.h"
 #include "select.h"
 
 

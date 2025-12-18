@@ -41,7 +41,6 @@
 #include "connect.h"
 #include "curlx/timeval.h"
 #include "socks.h"
-#include "multiif.h" /* for getsock macros */
 #include "curlx/inet_pton.h"
 #include "url.h"
 

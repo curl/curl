@@ -66,7 +66,6 @@
 #include "../select.h"
 #include "../strdup.h"
 #include "x509asn1.h"
-#include "../multiif.h"
 
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
