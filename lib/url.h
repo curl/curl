@@ -90,8 +90,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
  * Perform upkeep operations on the connection.
  */
 CURLcode Curl_conn_upkeep(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          struct curltime *now);
+                          struct connectdata *conn);
 
 /**
  * Always eval all arguments, return the first result != CURLE_OK.

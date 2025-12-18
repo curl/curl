@@ -412,7 +412,7 @@ CURLcode Curl_gtls_shared_creds_create(struct Curl_easy *data,
   }
 
   shared->refcount = 1;
-  shared->time = data->progress.now;
+  shared->time = *Curl_pgrs_now(data);
   *pcreds = shared;
   return CURLE_OK;
 }
@@ -559,11 +559,11 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
 /* key to use at `multi->proto_hash` */
 #define MPROTO_GTLS_X509_KEY   "tls:gtls:x509:share"
 
-static bool gtls_shared_creds_expired(const struct Curl_easy *data,
+static bool gtls_shared_creds_expired(struct Curl_easy *data,
                                       const struct gtls_shared_creds *sc)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
-  timediff_t elapsed_ms = curlx_timediff_ms(data->progress.now, sc->time);
+  timediff_t elapsed_ms = curlx_ptimediff_ms(Curl_pgrs_now(data), &sc->time);
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)

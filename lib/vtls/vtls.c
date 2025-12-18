@@ -1371,8 +1371,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     if(connssl->state == ssl_connection_complete) {
-      Curl_pgrs_now_set(data);
-      connssl->handshake_done = data->progress.now;
+      connssl->handshake_done = *Curl_pgrs_now(data);
     }
     /* Connection can be deferred when sending early data */
     DEBUGASSERT(connssl->state == ssl_connection_complete ||

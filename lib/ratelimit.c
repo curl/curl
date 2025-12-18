@@ -25,6 +25,7 @@
 #include "curl_setup.h"
 
 #include "curlx/timeval.h"
+#include "progress.h"
 #include "ratelimit.h"
 
 
@@ -35,7 +36,7 @@
 void Curl_rlimit_init(struct Curl_rlimit *r,
                       curl_off_t rate_per_s,
                       curl_off_t burst_per_s,
-                      struct curltime *pts)
+                      const struct curltime *pts)
 {
   curl_off_t rate_steps;
 
@@ -62,7 +63,7 @@ void Curl_rlimit_init(struct Curl_rlimit *r,
   r->blocked = FALSE;
 }
 
-void Curl_rlimit_start(struct Curl_rlimit *r, struct curltime *pts)
+void Curl_rlimit_start(struct Curl_rlimit *r, const struct curltime *pts)
 {
   r->tokens = r->rate_per_step;
   r->spare_us = 0;
@@ -80,7 +81,7 @@ bool Curl_rlimit_is_blocked(struct Curl_rlimit *r)
 }
 
 static void ratelimit_update(struct Curl_rlimit *r,
-                             struct curltime *pts)
+                             const struct curltime *pts)
 {
   timediff_t elapsed_us, elapsed_steps;
   curl_off_t token_gain;
@@ -89,7 +90,7 @@ static void ratelimit_update(struct Curl_rlimit *r,
   if((r->ts.tv_sec == pts->tv_sec) && (r->ts.tv_usec == pts->tv_usec))
     return;
 
-  elapsed_us = curlx_timediff_us(*pts, r->ts);
+  elapsed_us = curlx_ptimediff_us(pts, &r->ts);
   if(elapsed_us < 0) { /* not going back in time */
     DEBUGASSERT(0);
     return;
@@ -120,7 +121,7 @@ static void ratelimit_update(struct Curl_rlimit *r,
 }
 
 curl_off_t Curl_rlimit_avail(struct Curl_rlimit *r,
-                             struct curltime *pts)
+                             const struct curltime *pts)
 {
   if(r->blocked)
     return 0;
@@ -134,7 +135,7 @@ curl_off_t Curl_rlimit_avail(struct Curl_rlimit *r,
 
 void Curl_rlimit_drain(struct Curl_rlimit *r,
                        size_t tokens,
-                       struct curltime *pts)
+                       const struct curltime *pts)
 {
   if(r->blocked || !r->rate_per_step)
     return;
@@ -157,7 +158,7 @@ void Curl_rlimit_drain(struct Curl_rlimit *r,
 }
 
 timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
-                               struct curltime *pts)
+                               const struct curltime *pts)
 {
   timediff_t wait_us, elapsed_us;
 
@@ -172,7 +173,7 @@ timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
   wait_us = (1 + (-r->tokens / r->rate_per_step)) * r->step_us;
   wait_us -= r->spare_us;
 
-  elapsed_us = curlx_timediff_us(*pts, r->ts);
+  elapsed_us = curlx_ptimediff_us(pts, &r->ts);
   if(elapsed_us >= wait_us)
     return 0;
   wait_us -= elapsed_us;
@@ -181,7 +182,7 @@ timediff_t Curl_rlimit_wait_ms(struct Curl_rlimit *r,
 
 void Curl_rlimit_block(struct Curl_rlimit *r,
                        bool activate,
-                       struct curltime *pts)
+                       const struct curltime *pts)
 {
   if(!activate == !r->blocked)
     return;
