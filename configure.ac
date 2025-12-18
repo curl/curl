@@ -5320,10 +5320,12 @@ if test "$OPENSSL_ENABLED" = "1" || test -n "$SSL_ENABLED"; then
   fi
 fi
 
-if test "$APPLE_SECTRUST_ENABLED" = "1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
-elif test "$ca_native_opt" = "1"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES NativeCA"
+if test -n "$SSL_ENABLED"; then
+  if test "$APPLE_SECTRUST_ENABLED" = "1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES AppleSecTrust"
+  elif test "$ca_native_opt" = "1"; then
+    SUPPORT_FEATURES="$SUPPORT_FEATURES NativeCA"
+  fi
 fi
 
 if test "$want_httpsrr" != "no"; then
