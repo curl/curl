@@ -27,7 +27,7 @@
 #
 # - `LIBSSH_INCLUDE_DIR`:      Absolute path to libssh include directory.
 # - `LIBSSH_LIBRARY`:          Absolute path to `libssh` library.
-# - `LIBSSH_USE_STATIC_LIBS`:  Configure for static `libssh` library.
+# - `LIBSSH_USE_STATIC_LIBS`:  Configure for static libssh libraries.
 #
 # Defines:
 #
