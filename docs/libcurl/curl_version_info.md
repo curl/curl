@@ -290,8 +290,8 @@ curl_global_sslset(3).
 
 *features* mask bit: non-existent
 
-libcurl was built to enable native CA store by default, to verify server
-certificates (Added in 8.19.0).
+libcurl was built to enable native CA store, to verify server certificates
+(Added in 8.19.0).
 
 ## `NTLM`
 

@@ -260,7 +260,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_CA_BUNDLE`:                         Absolute path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_EMBED`:                          Absolute path to the CA bundle to embed in the curl tool. Default: (disabled)
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of OpenSSL. Default: `OFF`
-- `CURL_CA_NATIVE_BY_DEFAULT`:              Use native CA store by default. Default: `OFF`
+- `CURL_CA_NATIVE`:                         Use native CA store. Default: `OFF`
                                             Supported by GnuTLS, OpenSSL (including forks) on Windows, wolfSSL.
 - `CURL_CA_PATH`:                           Absolute path to a directory containing CA certificates stored individually. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
@@ -285,7 +285,7 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
 - `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
 - `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
-- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF` (turns to `ON`, when `CURL_CA_NATIVE_BY_DEFAULT=ON`)
+- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF` (turns to `ON`, when `CURL_CA_NATIVE=ON`)
 - `CURL_DISABLE_COOKIES`:                   Disable cookies support. Default: `OFF`
 - `CURL_DISABLE_DICT`:                      Disable DICT. Default: `OFF`
 - `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`

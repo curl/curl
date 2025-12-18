@@ -515,7 +515,7 @@ static const struct feat features_table[] = {
 #endif
 #ifdef USE_APPLE_SECTRUST
   FEATURE("AppleSecTrust", NULL,              0),
-#elif defined(CURL_CA_NATIVE_BY_DEFAULT)
+#elif defined(CURL_CA_NATIVE)
   FEATURE("NativeCA",    NULL,              0),
 #endif
 #ifdef USE_SPNEGO
