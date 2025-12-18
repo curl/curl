@@ -65,7 +65,6 @@
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
 #include "curlx/inet_ntop.h"
-#include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"

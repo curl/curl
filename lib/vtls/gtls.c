@@ -42,7 +42,6 @@
 
 #include "../urldata.h"
 #include "../sendf.h"
-#include "../curlx/inet_pton.h"
 #include "keylog.h"
 #include "gtls.h"
 #include "vtls.h"
