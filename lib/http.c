@@ -4296,11 +4296,14 @@ static void unfold_header(struct Curl_easy *data)
 {
   size_t len = curlx_dyn_len(&data->state.headerb);
   char *hd = curlx_dyn_ptr(&data->state.headerb);
-  if(len && (hd[len -1] == '\n'))
+  if(len && (hd[len - 1] == '\n'))
     len--;
-  if(len && (hd[len -1] == '\r'))
+  if(len && (hd[len - 1] == '\r'))
+    len--;
+  while(len && (ISBLANK(hd[len - 1]))) /* strip off trailing whitespace */
     len--;
   curlx_dyn_setlen(&data->state.headerb, len);
+  data->state.leading_unfold = TRUE;
 }
 
 /*
@@ -4379,14 +4382,41 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
       goto out; /* read more and try again */
     }
 
-    /* decrease the size of the remaining (supposed) header line */
+    /* the size of the remaining (supposed) header line */
     consumed = (end_ptr - buf) + 1;
-    result = curlx_dyn_addn(&data->state.headerb, buf, consumed);
-    if(result)
-      return result;
-    blen -= consumed;
-    buf += consumed;
-    *pconsumed += consumed;
+
+    {
+      /* preserve the whole original header piece size */
+      size_t header_piece = consumed;
+
+      if(data->state.leading_unfold) {
+        /* immediately after an unfold, keep only a single whitespace */
+        const size_t iblen = blen;
+        while(consumed && ISBLANK(buf[0])) {
+          consumed--;
+          buf++;
+          blen--;
+        }
+        if(consumed) {
+          if(iblen > blen) {
+            /* take one step back */
+            consumed++;
+            buf--;
+            blen++;
+          }
+          data->state.leading_unfold = FALSE; /* done now */
+        }
+      }
+
+      if(consumed) {
+        result = curlx_dyn_addn(&data->state.headerb, buf, consumed);
+        if(result)
+          return result;
+        blen -= consumed;
+        buf += consumed;
+      }
+      *pconsumed += header_piece;
+    }
 
     /****
      * We now have a FULL header line in 'headerb'.
