@@ -32,7 +32,6 @@
 #include "sendf.h"
 #include "cfilters.h"
 #include "connect.h"
-#include "progress.h"
 #include "gopher.h"
 #include "select.h"
 #include "vtls/vtls.h"

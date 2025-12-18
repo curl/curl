@@ -33,7 +33,6 @@
 #include "http.h"
 #include "url.h"
 #include "select.h"
-#include "progress.h"
 #include "cfilters.h"
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"

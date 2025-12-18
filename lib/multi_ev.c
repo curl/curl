@@ -33,7 +33,6 @@
 #include "multiif.h"
 #include "curlx/timeval.h"
 #include "multi_ev.h"
-#include "progress.h"
 #include "select.h"
 #include "uint-bset.h"
 #include "uint-spbset.h"

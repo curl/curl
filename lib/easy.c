@@ -54,7 +54,6 @@
 #include "getinfo.h"
 #include "hostip.h"
 #include "strdup.h"
-#include "progress.h"
 #include "easyif.h"
 #include "multiif.h"
 #include "select.h"
