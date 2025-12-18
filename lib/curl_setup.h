@@ -783,7 +783,7 @@
  * Definition of our NOP statement Object-like macro
  */
 #ifndef Curl_nop_stmt
-#define Curl_nop_stmt do { } while(0)
+#define Curl_nop_stmt do {} while(0)
 #endif
 
 /*

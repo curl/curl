@@ -73,7 +73,7 @@ extern FILE *tool_stderr;
 #endif
 
 #ifndef tool_nop_stmt
-#define tool_nop_stmt do { } while(0)
+#define tool_nop_stmt do {} while(0)
 #endif
 
 #ifdef _WIN32
