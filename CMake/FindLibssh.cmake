@@ -54,7 +54,7 @@ else()
   if(LIBSSH_USE_STATIC_LIBS)
     find_library(LIBSSH_LIBRARY NAMES "ssh_static" "libssh_static" "ssh" "libssh")
   else()
-    find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh" "ssh_static" "libssh_static")
+    find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
   endif()
 
   unset(LIBSSH_VERSION CACHE)

@@ -53,7 +53,7 @@ else()
   if(NGHTTP2_USE_STATIC_LIBS)
     find_library(NGHTTP3_LIBRARY NAMES "nghttp3_static" "nghttp3")
   else()
-    find_library(NGHTTP3_LIBRARY NAMES "nghttp3" "nghttp3_static")
+    find_library(NGHTTP3_LIBRARY NAMES "nghttp3")
   endif()
 
   unset(NGHTTP3_VERSION CACHE)

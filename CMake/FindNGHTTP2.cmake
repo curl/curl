@@ -53,7 +53,7 @@ else()
   if(NGHTTP2_USE_STATIC_LIBS)
     find_library(NGHTTP2_LIBRARY NAMES "nghttp2_static" "nghttp2")
   else()
-    find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
+    find_library(NGHTTP2_LIBRARY NAMES "nghttp2")
   endif()
 
   unset(NGHTTP2_VERSION CACHE)

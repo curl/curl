@@ -54,7 +54,7 @@ else()
   if(CARES_USE_STATIC_LIBS)
     find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares_static" "cares")
   else()
-    find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares" "cares_static")
+    find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
   endif()
 
   unset(CARES_VERSION CACHE)

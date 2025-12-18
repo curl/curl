@@ -91,7 +91,7 @@ else()
   if(NGTCP2_USE_STATIC_LIBS)
     find_library(NGTCP2_LIBRARY NAMES "ngtcp2_static" "ngtcp2")
   else()
-    find_library(NGTCP2_LIBRARY NAMES "ngtcp2" "ngtcp2_static")
+    find_library(NGTCP2_LIBRARY NAMES "ngtcp2")
   endif()
 
   unset(NGTCP2_VERSION CACHE)
@@ -114,7 +114,7 @@ else()
       find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower}_static ${_crypto_library_lower}
         HINTS ${_ngtcp2_library_dir})
     else()
-      find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower} ${_crypto_library_lower}_static
+      find_library(${_crypto_library_upper}_LIBRARY NAMES ${_crypto_library_lower}
         HINTS ${_ngtcp2_library_dir})
     endif()
 
