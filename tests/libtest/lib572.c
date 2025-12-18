@@ -32,6 +32,7 @@ static CURLcode test_lib572(const char *URL)
 {
   CURLcode result;
   CURL *curl;
+  char errbuf[STRERROR_LEN];
   int params;
   FILE *paramsf = NULL;
   struct_stat file_info;
